@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navy:         #1b3c5a;
+  --navy-dark:    #112535;
+  --navy-deep:    #0d1c27;
+  --red:          #ef0e30;
+  --red-dark:     #c50a26;
+  --teal:         #68a2b9;
+  --teal-light:   #a8cdd9;
+  --off-white:    #faf9f7;
+  --muted:        #7a8a96;
+  --border:       rgba(27,60,90,0.12);
+  --border-light: rgba(255,255,255,0.06);
+  --gold:         #c9a84c;
+}
+
+* { box-sizing: border-box; }
+html, body { overflow-x: hidden; }
