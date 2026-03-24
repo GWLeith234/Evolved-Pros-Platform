@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { sendEventReminderEmail } from '@/lib/resend/emails/event-reminder'
+import { notifyEventReminder } from '@/lib/notifications/create'
 import type { EventType } from '@/lib/events/types'
 
 export async function GET(request: Request) {
@@ -36,9 +37,20 @@ export async function GET(request: Request) {
       .select('user_id, users(email, display_name, full_name)')
       .eq('event_id', event.id)
 
+    const regCount = (regs ?? []).length
+
     for (const reg of regs ?? []) {
       const u = reg.users as { email: string; display_name: string | null; full_name: string | null } | null
       if (!u?.email) continue
+
+      // In-app notification
+      void notifyEventReminder({
+        userId:            reg.user_id,
+        eventTitle:        event.title,
+        eventId:           event.id,
+        startsAt:          new Date(event.starts_at),
+        registrationCount: regCount,
+      })
 
       try {
         await sendEventReminderEmail({

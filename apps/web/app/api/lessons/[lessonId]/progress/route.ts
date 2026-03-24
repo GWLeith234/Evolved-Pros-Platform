@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { notifyCourseUnlock } from '@/lib/notifications/create'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,10 +29,10 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid watchTimeSeconds' }, { status: 400 })
   }
 
-  // Verify lesson exists and fetch course id
+  // Verify lesson exists and fetch course id + title
   const { data: lesson } = await supabase
     .from('lessons')
-    .select('id, course_id, is_published')
+    .select('id, course_id, title, is_published')
     .eq('id', params.lessonId)
     .single()
 
@@ -116,14 +117,21 @@ export async function POST(
             .eq('id', user.id)
         )
 
-      // Notify
-      await supabase.from('notifications').insert({
-        user_id: user.id,
-        type: 'course_unlock',
-        title: 'Course Complete! 🎓',
-        body: 'You\'ve completed all lessons. +100 bonus points awarded.',
-        action_url: `/academy/${lesson.course_id}`,
-      })
+      // Notify via factory
+      {
+        const { data: course } = await supabase
+          .from('courses')
+          .select('slug, pillar_number')
+          .eq('id', lesson.course_id)
+          .single()
+
+        void notifyCourseUnlock({
+          userId:        user.id,
+          lessonTitle:   lesson.title,
+          courseSlug:    course?.slug ?? lesson.course_id,
+          pillarNumber:  course?.pillar_number ?? 0,
+        })
+      }
     }
   }
 

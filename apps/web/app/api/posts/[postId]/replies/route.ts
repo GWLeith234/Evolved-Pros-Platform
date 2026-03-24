@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import type { Reply } from '@/lib/community/types'
+import { notifyReply } from '@/lib/notifications/create'
 
 function toReply(row: {
   id: string
@@ -61,10 +62,10 @@ export async function POST(
   if (replyBody.length < 1) return NextResponse.json({ error: 'Reply cannot be empty' }, { status: 422 })
   if (replyBody.length > 2000) return NextResponse.json({ error: 'Reply exceeds 2000 characters' }, { status: 422 })
 
-  // Verify post exists and get author
+  // Verify post exists and get author + channel
   const { data: post } = await supabase
     .from('posts')
-    .select('author_id, reply_count')
+    .select('author_id, reply_count, channels(slug)')
     .eq('id', params.postId)
     .single()
 
@@ -97,21 +98,23 @@ export async function POST(
       .eq('id', user.id)
   }
 
-  // Notify post author (if different user)
-  if (post.author_id !== user.id) {
+  // Notify post author via factory (handles self-reply guard internally)
+  {
     const { data: replierProfile } = await supabase
       .from('users')
       .select('display_name, full_name')
       .eq('id', user.id)
       .single()
     const replierName = replierProfile?.display_name ?? replierProfile?.full_name ?? 'Someone'
+    const channelSlug = (post.channels as { slug: string } | null)?.slug ?? 'general'
 
-    await supabase.from('notifications').insert({
-      user_id: post.author_id,
-      type: 'community_reply',
-      title: 'New reply',
-      body: `${replierName} replied to your post.`,
-      action_url: `/community`,
+    void notifyReply({
+      postAuthorId:    post.author_id,
+      replyAuthorId:   user.id,
+      replyAuthorName: replierName,
+      channelSlug,
+      postId:          params.postId,
+      replySnippet:    replyBody,
     })
   }
 

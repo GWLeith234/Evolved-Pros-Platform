@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { NotifBell } from '@/components/notifications/NotifBell'
 
 interface TopNavProps {
   profile: {
@@ -34,7 +34,6 @@ function getInitials(name: string | null | undefined): string {
 
 export function TopNav({ profile, unreadCount = 0 }: TopNavProps) {
   const pathname = usePathname()
-  const [drawerOpen, setDrawerOpen] = useState(false)
 
   const displayName = profile.display_name ?? profile.full_name ?? ''
 
@@ -89,36 +88,7 @@ export function TopNav({ profile, unreadCount = 0 }: TopNavProps) {
         {/* Right actions */}
         <div className="flex items-center gap-2">
           {/* Notification bell */}
-          <button
-            onClick={() => setDrawerOpen(v => !v)}
-            className="relative w-8 h-8 flex items-center justify-center rounded transition-colors"
-            style={{
-              backgroundColor: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}
-            aria-label="Notifications"
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ color: 'rgba(255,255,255,0.5)' }}
-            >
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-            </svg>
-            {unreadCount > 0 && (
-              <span
-                className="absolute top-0.5 right-0.5 w-[7px] h-[7px] rounded-full"
-                style={{ backgroundColor: '#ef0e30' }}
-              />
-            )}
-          </button>
+          <NotifBell initialUnreadCount={unreadCount} userId={profile.id} />
 
           {/* Avatar */}
           <Link
@@ -142,46 +112,6 @@ export function TopNav({ profile, unreadCount = 0 }: TopNavProps) {
         </div>
       </header>
 
-      {/* Notification drawer */}
-      <div
-        className="fixed top-14 right-0 bottom-0 z-30 w-[360px] flex flex-col transition-transform duration-[250ms] ease-out"
-        style={{
-          backgroundColor: '#112535',
-          borderLeft: '1px solid rgba(255,255,255,0.06)',
-          transform: drawerOpen ? 'translateX(0)' : 'translateX(100%)',
-        }}
-      >
-        <div
-          className="flex items-center justify-between px-5 py-4"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
-        >
-          <span className="font-condensed font-semibold uppercase tracking-wide text-sm text-white">
-            Notifications
-          </span>
-          <button
-            onClick={() => setDrawerOpen(false)}
-            className="text-[rgba(255,255,255,0.4)] hover:text-white transition-colors"
-            aria-label="Close notifications"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <div className="flex-1 flex items-center justify-center">
-          <p className="font-condensed text-xs uppercase tracking-widest text-[rgba(255,255,255,0.25)]">
-            Notifications coming in Sprint 6
-          </p>
-        </div>
-      </div>
-
-      {/* Drawer backdrop */}
-      {drawerOpen && (
-        <div
-          className="fixed inset-0 z-20 top-14"
-          onClick={() => setDrawerOpen(false)}
-        />
-      )}
     </>
   )
 }

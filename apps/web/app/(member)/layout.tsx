@@ -20,9 +20,15 @@ export default async function MemberLayout({ children }: { children: React.React
     redirect('/membership-expired')
   }
 
+  const { count: unreadCount } = await supabase
+    .from('notifications')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('is_read', false)
+
   return (
     <div className="flex flex-col min-h-screen">
-      <TopNav profile={profile} />
+      <TopNav profile={profile} unreadCount={unreadCount ?? 0} />
       <div className="flex flex-1 min-h-0">
         <Sidebar profile={profile} />
         <main className="flex-1 bg-[#faf9f7] overflow-y-auto">

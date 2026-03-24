@@ -26,6 +26,13 @@ export interface Database {
           tier_expires_at: string | null
           onboarded_at: string | null
           points: number
+          notification_preferences: {
+            community_reply: 'immediate' | 'digest' | 'off'
+            community_mention: 'immediate' | 'digest' | 'off'
+            event_reminder: 'immediate' | 'off'
+            course_unlock: 'immediate' | 'off'
+            system_billing: 'immediate'
+          }
           created_at: string
           updated_at: string
         }
@@ -64,6 +71,13 @@ export interface Database {
           tier_expires_at?: string | null
           onboarded_at?: string | null
           points?: number
+          notification_preferences?: {
+            community_reply?: 'immediate' | 'digest' | 'off'
+            community_mention?: 'immediate' | 'digest' | 'off'
+            event_reminder?: 'immediate' | 'off'
+            course_unlock?: 'immediate' | 'off'
+            system_billing?: 'immediate'
+          }
           created_at?: string
           updated_at?: string
         }

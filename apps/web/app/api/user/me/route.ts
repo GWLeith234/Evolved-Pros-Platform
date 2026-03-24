@@ -42,7 +42,7 @@ export async function PATCH(request: Request) {
   }
 
   // Strip non-allowed fields
-  const update: Record<string, string> = {}
+  const update: Record<string, unknown> = {}
   for (const key of ALLOWED_PATCH_FIELDS) {
     if (key in body && key !== 'avatar_url') {
       const val = body[key]
@@ -61,6 +61,11 @@ export async function PATCH(request: Request) {
   // avatar_url allowed only from internal upload flow (validated separately)
   if ('avatar_url' in body && typeof body.avatar_url === 'string') {
     update.avatar_url = body.avatar_url
+  }
+
+  // notification_preferences: JSONB object, validated shallowly
+  if ('notification_preferences' in body && typeof body.notification_preferences === 'object' && body.notification_preferences !== null && !Array.isArray(body.notification_preferences)) {
+    update.notification_preferences = body.notification_preferences
   }
 
   if (Object.keys(update).length === 0) {
