@@ -408,6 +408,32 @@ export interface Database {
           created_at?: string
         }
       }
+      mux_webhooks: {
+        Row: {
+          id: string
+          event_type: string
+          asset_id: string | null
+          playback_id: string | null
+          payload: Json
+          processed_at: string
+        }
+        Insert: {
+          id?: string
+          event_type: string
+          asset_id?: string | null
+          playback_id?: string | null
+          payload: Json
+          processed_at?: string
+        }
+        Update: {
+          id?: string
+          event_type?: string
+          asset_id?: string | null
+          playback_id?: string | null
+          payload?: Json
+          processed_at?: string
+        }
+      }
       vendasta_webhooks: {
         Row: {
           id: string
@@ -495,6 +521,9 @@ export type NotificationUpdate     = Database['public']['Tables']['notifications
 
 export type PostBookmarkRow        = Database['public']['Tables']['post_bookmarks']['Row']
 export type PostBookmarkInsert     = Database['public']['Tables']['post_bookmarks']['Insert']
+
+export type MuxWebhookRow          = Database['public']['Tables']['mux_webhooks']['Row']
+export type MuxWebhookInsert       = Database['public']['Tables']['mux_webhooks']['Insert']
 
 export type VendastaWebhookRow     = Database['public']['Tables']['vendasta_webhooks']['Row']
 export type VendastaWebhookInsert  = Database['public']['Tables']['vendasta_webhooks']['Insert']

@@ -4,6 +4,7 @@ import Link from 'next/link'
 
 const NAV_ITEMS = [
   { href: '/admin/events', label: 'Events' },
+  { href: '/admin/courses', label: 'Courses' },
 ]
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
