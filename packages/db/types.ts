@@ -391,6 +391,23 @@ export interface Database {
           created_at?: string
         }
       }
+      post_bookmarks: {
+        Row: {
+          post_id: string
+          user_id: string
+          created_at: string
+        }
+        Insert: {
+          post_id: string
+          user_id: string
+          created_at?: string
+        }
+        Update: {
+          post_id?: string
+          user_id?: string
+          created_at?: string
+        }
+      }
       vendasta_webhooks: {
         Row: {
           id: string
@@ -475,6 +492,9 @@ export type LessonProgressUpdate   = Database['public']['Tables']['lesson_progre
 export type NotificationRow        = Database['public']['Tables']['notifications']['Row']
 export type NotificationInsert     = Database['public']['Tables']['notifications']['Insert']
 export type NotificationUpdate     = Database['public']['Tables']['notifications']['Update']
+
+export type PostBookmarkRow        = Database['public']['Tables']['post_bookmarks']['Row']
+export type PostBookmarkInsert     = Database['public']['Tables']['post_bookmarks']['Insert']
 
 export type VendastaWebhookRow     = Database['public']['Tables']['vendasta_webhooks']['Row']
 export type VendastaWebhookInsert  = Database['public']['Tables']['vendasta_webhooks']['Insert']
