@@ -483,6 +483,26 @@ export interface Database {
           error_message?: string | null
         }
       }
+      pipeline_stage_overrides: {
+        Row: {
+          user_id:    string
+          stage:      'awareness' | 'engaged' | 'upgrade_ready' | 'closed'
+          note:       string | null
+          updated_at: string
+        }
+        Insert: {
+          user_id:    string
+          stage:      'awareness' | 'engaged' | 'upgrade_ready' | 'closed'
+          note?:      string | null
+          updated_at?: string
+        }
+        Update: {
+          user_id?:   string
+          stage?:     'awareness' | 'engaged' | 'upgrade_ready' | 'closed'
+          note?:      string | null
+          updated_at?: string
+        }
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -542,3 +562,7 @@ export type MuxWebhookInsert       = Database['public']['Tables']['mux_webhooks'
 export type VendastaWebhookRow     = Database['public']['Tables']['vendasta_webhooks']['Row']
 export type VendastaWebhookInsert  = Database['public']['Tables']['vendasta_webhooks']['Insert']
 export type VendastaWebhookUpdate  = Database['public']['Tables']['vendasta_webhooks']['Update']
+
+export type PipelineStageOverrideRow    = Database['public']['Tables']['pipeline_stage_overrides']['Row']
+export type PipelineStageOverrideInsert = Database['public']['Tables']['pipeline_stage_overrides']['Insert']
+export type PipelineStageOverrideUpdate = Database['public']['Tables']['pipeline_stage_overrides']['Update']
