@@ -2,11 +2,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Sign In — Evolved Pros',
-}
 
 export default function LoginPage() {
   const router = useRouter()

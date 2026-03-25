@@ -6,7 +6,9 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+// postgrest-js v2 requires `type` (not `interface`), `Relationships` per table,
+// and top-level `CompositeTypes`.
+export type Database = {
   public: {
     Tables: {
       users: {
@@ -26,6 +28,7 @@ export interface Database {
           tier_expires_at: string | null
           onboarded_at: string | null
           points: number
+          push_token: string | null
           notification_preferences: {
             community_reply: 'immediate' | 'digest' | 'off'
             community_mention: 'immediate' | 'digest' | 'off'
@@ -52,6 +55,7 @@ export interface Database {
           tier_expires_at?: string | null
           onboarded_at?: string | null
           points?: number
+          push_token?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -71,6 +75,7 @@ export interface Database {
           tier_expires_at?: string | null
           onboarded_at?: string | null
           points?: number
+          push_token?: string | null
           notification_preferences?: {
             community_reply?: 'immediate' | 'digest' | 'off'
             community_mention?: 'immediate' | 'digest' | 'off'
@@ -81,6 +86,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       channels: {
         Row: {
@@ -113,6 +119,7 @@ export interface Database {
           sort_order?: number
           created_at?: string
         }
+        Relationships: []
       }
       posts: {
         Row: {
@@ -151,6 +158,22 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'posts_author_id_fkey'
+            columns: ['author_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'posts_channel_id_fkey'
+            columns: ['channel_id']
+            isOneToOne: false
+            referencedRelation: 'channels'
+            referencedColumns: ['id']
+          }
+        ]
       }
       replies: {
         Row: {
@@ -174,6 +197,15 @@ export interface Database {
           body?: string
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'replies_post_id_fkey'
+            columns: ['post_id']
+            isOneToOne: false
+            referencedRelation: 'posts'
+            referencedColumns: ['id']
+          }
+        ]
       }
       post_likes: {
         Row: {
@@ -191,6 +223,25 @@ export interface Database {
           user_id?: string
           created_at?: string
         }
+        Relationships: []
+      }
+      post_bookmarks: {
+        Row: {
+          post_id: string
+          user_id: string
+          created_at: string
+        }
+        Insert: {
+          post_id: string
+          user_id: string
+          created_at?: string
+        }
+        Update: {
+          post_id?: string
+          user_id?: string
+          created_at?: string
+        }
+        Relationships: []
       }
       events: {
         Row: {
@@ -204,6 +255,7 @@ export interface Database {
           recording_url: string | null
           required_tier: 'community' | 'pro' | null
           registration_count: number
+          duration_minutes: number | null
           is_published: boolean
           created_at: string
         }
@@ -218,6 +270,7 @@ export interface Database {
           recording_url?: string | null
           required_tier?: 'community' | 'pro' | null
           registration_count?: number
+          duration_minutes?: number | null
           is_published?: boolean
           created_at?: string
         }
@@ -232,9 +285,11 @@ export interface Database {
           recording_url?: string | null
           required_tier?: 'community' | 'pro' | null
           registration_count?: number
+          duration_minutes?: number | null
           is_published?: boolean
           created_at?: string
         }
+        Relationships: []
       }
       event_registrations: {
         Row: {
@@ -252,6 +307,7 @@ export interface Database {
           user_id?: string
           registered_at?: string
         }
+        Relationships: []
       }
       courses: {
         Row: {
@@ -287,6 +343,7 @@ export interface Database {
           sort_order?: number
           created_at?: string
         }
+        Relationships: []
       }
       lessons: {
         Row: {
@@ -328,6 +385,15 @@ export interface Database {
           is_published?: boolean
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'lessons_course_id_fkey'
+            columns: ['course_id']
+            isOneToOne: false
+            referencedRelation: 'courses'
+            referencedColumns: ['id']
+          }
+        ]
       }
       lesson_progress: {
         Row: {
@@ -354,6 +420,7 @@ export interface Database {
           notes?: string | null
           updated_at?: string
         }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -404,23 +471,7 @@ export interface Database {
           is_read?: boolean
           created_at?: string
         }
-      }
-      post_bookmarks: {
-        Row: {
-          post_id: string
-          user_id: string
-          created_at: string
-        }
-        Insert: {
-          post_id: string
-          user_id: string
-          created_at?: string
-        }
-        Update: {
-          post_id?: string
-          user_id?: string
-          created_at?: string
-        }
+        Relationships: []
       }
       mux_webhooks: {
         Row: {
@@ -447,6 +498,7 @@ export interface Database {
           payload?: Json
           processed_at?: string
         }
+        Relationships: []
       }
       vendasta_webhooks: {
         Row: {
@@ -482,35 +534,47 @@ export interface Database {
           status?: 'success' | 'error'
           error_message?: string | null
         }
+        Relationships: []
       }
       pipeline_stage_overrides: {
         Row: {
-          user_id:    string
-          stage:      'awareness' | 'engaged' | 'upgrade_ready' | 'closed'
-          note:       string | null
+          user_id: string
+          stage: 'awareness' | 'engaged' | 'upgrade_ready' | 'closed'
+          note: string | null
           updated_at: string
         }
         Insert: {
-          user_id:    string
-          stage:      'awareness' | 'engaged' | 'upgrade_ready' | 'closed'
-          note?:      string | null
+          user_id: string
+          stage: 'awareness' | 'engaged' | 'upgrade_ready' | 'closed'
+          note?: string | null
           updated_at?: string
         }
         Update: {
-          user_id?:   string
-          stage?:     'awareness' | 'engaged' | 'upgrade_ready' | 'closed'
-          note?:      string | null
+          user_id?: string
+          stage?: 'awareness' | 'engaged' | 'upgrade_ready' | 'closed'
+          note?: string | null
           updated_at?: string
         }
+        Relationships: []
       }
     }
-    Views: Record<string, never>
-    Functions: Record<string, never>
-    Enums: Record<string, never>
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
 }
 
-// Convenience row types
+// ── Convenience row types ───────────────────────────────────────────────────
+
 export type UserRow                = Database['public']['Tables']['users']['Row']
 export type UserInsert             = Database['public']['Tables']['users']['Insert']
 export type UserUpdate             = Database['public']['Tables']['users']['Update']

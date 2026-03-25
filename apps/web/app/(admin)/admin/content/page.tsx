@@ -12,9 +12,13 @@ export default async function AdminContentPage() {
     supabase.from('lessons').select('course_id, is_published'),
   ])
 
-  const courses = coursesResult.data ?? []
-  const events  = eventsResult.data ?? []
-  const lessons = lessonsResult.data ?? []
+  type CourseRow = { id: string; title: string; pillar_number: number; is_published: boolean; required_tier: string | null }
+  type EventRow  = { id: string; title: string; event_type: string | null; starts_at: string; is_published: boolean }
+  type LessonRow = { course_id: string; is_published: boolean }
+
+  const courses = (coursesResult.data ?? []) as CourseRow[]
+  const events  = (eventsResult.data  ?? []) as EventRow[]
+  const lessons = (lessonsResult.data ?? []) as LessonRow[]
 
   const lessonsByCourse = lessons.reduce<Record<string, { total: number; published: number }>>((acc, l) => {
     if (!acc[l.course_id]) acc[l.course_id] = { total: 0, published: 0 }

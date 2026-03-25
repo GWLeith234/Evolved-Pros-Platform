@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { getVendastaCrmUrl } from '@/lib/admin/helpers'
-import type { EngagementLevel } from '@/lib/admin/helpers'
+import { getVendastaCrmUrl } from '@/lib/admin/utils'
+import type { EngagementLevel } from '@/lib/admin/utils'
 
 export interface MemberRow {
   id: string

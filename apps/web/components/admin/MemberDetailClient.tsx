@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getVendastaCrmUrl } from '@/lib/admin/helpers'
+import { getVendastaCrmUrl } from '@/lib/admin/utils'
 
 interface Post {
   id: string

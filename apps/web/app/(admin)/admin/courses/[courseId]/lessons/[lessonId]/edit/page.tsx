@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { LessonForm } from '../../../../LessonForm'
+import { LessonForm } from '../../../LessonForm'
 
 interface Props {
   params: { courseId: string; lessonId: string }
@@ -10,19 +10,22 @@ interface Props {
 export default async function EditLessonPage({ params }: Props) {
   const supabase = createClient()
 
-  const [{ data: course }, { data: lesson }] = await Promise.all([
-    supabase
-      .from('courses')
-      .select('id, title')
-      .eq('id', params.courseId)
-      .single(),
-    supabase
-      .from('lessons')
+  type CourseData = { id: string; title: string }
+  type LessonData = {
+    id: string; title: string; slug: string; description: string | null
+    duration_seconds: number | null; sort_order: number; is_published: boolean
+    mux_playback_id: string | null
+  }
+
+  const [{ data: courseRaw }, { data: lessonRaw }] = await Promise.all([
+    supabase.from('courses').select('id, title').eq('id', params.courseId).single(),
+    supabase.from('lessons')
       .select('id, title, slug, description, duration_seconds, sort_order, is_published, mux_playback_id')
-      .eq('id', params.lessonId)
-      .eq('course_id', params.courseId)
-      .single(),
+      .eq('id', params.lessonId).eq('course_id', params.courseId).single(),
   ])
+
+  const course = courseRaw as CourseData | null
+  const lesson = lessonRaw as LessonData | null
 
   if (!course || !lesson) notFound()
 
