@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { AcademySidebar } from '@/components/academy/AcademySidebar'
 import { LessonListPanel } from '@/components/academy/LessonList'
-import { MuxPlayer } from '@/components/academy/MuxPlayer'
+import { DynamicMuxPlayer } from '@/components/academy/DynamicMuxPlayer'
 import { LessonContent } from '@/components/academy/LessonContent'
 import { CompletionCertificate } from '@/components/academy/CompletionCertificate'
 import { generateMuxToken } from '@/lib/mux/client'
@@ -114,7 +114,7 @@ export default async function LessonPage({ params }: Props) {
             </div>
           ) : (
             <>
-              <MuxPlayer
+              <DynamicMuxPlayer
                 playbackId={lessonRow.mux_playback_id ?? ''}
                 token={muxToken}
                 initialProgress={progress?.watch_time_seconds ?? 0}

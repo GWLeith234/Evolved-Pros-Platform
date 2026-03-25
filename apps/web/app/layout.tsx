@@ -22,8 +22,20 @@ const barlow = Barlow({
 })
 
 export const metadata: Metadata = {
-  title: 'Evolved Pros',
-  description: 'The architecture. Not the inspiration.',
+  title:       'Evolved Pros — The Platform for High Performers',
+  description: 'Community, academy, and accountability for professionals who operate at the highest level.',
+  openGraph: {
+    title:       'Evolved Pros',
+    description: 'The platform for high performers.',
+    url:         'https://platform.evolvedpros.com',
+    siteName:    'Evolved Pros',
+    type:        'website',
+  },
+  twitter: {
+    card:        'summary_large_image',
+    title:       'Evolved Pros',
+    description: 'The platform for high performers.',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
