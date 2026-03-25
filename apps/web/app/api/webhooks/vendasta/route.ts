@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createHmac, timingSafeEqual } from 'crypto'
 import { adminClient } from '@/lib/supabase/admin'
 import { VENDASTA_PRODUCTS, getTierExpiry } from '@/lib/vendasta/products'
