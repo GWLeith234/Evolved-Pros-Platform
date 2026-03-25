@@ -18,7 +18,7 @@ export default async function EditLessonPage({ params }: Props) {
       .single(),
     supabase
       .from('lessons')
-      .select('id, title, slug, description, duration_seconds, sort_order, is_published')
+      .select('id, title, slug, description, duration_seconds, sort_order, is_published, mux_playback_id')
       .eq('id', params.lessonId)
       .eq('course_id', params.courseId)
       .single(),
@@ -40,6 +40,7 @@ export default async function EditLessonPage({ params }: Props) {
       <LessonForm
         courseId={params.courseId}
         lessonId={params.lessonId}
+        existingPlaybackId={lesson.mux_playback_id}
         initialValues={{
           title: lesson.title,
           description: lesson.description ?? '',

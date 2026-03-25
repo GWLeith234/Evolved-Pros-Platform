@@ -2,9 +2,10 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { AcademySidebar } from '@/components/academy/AcademySidebar'
 import { LessonListPanel } from '@/components/academy/LessonList'
-import { VideoPlaceholder } from '@/components/academy/VideoPlaceholder'
+import { MuxPlayer } from '@/components/academy/MuxPlayer'
 import { LessonContent } from '@/components/academy/LessonContent'
 import { CompletionCertificate } from '@/components/academy/CompletionCertificate'
+import { generateMuxToken } from '@/lib/mux/client'
 import {
   fetchCourseBySlug,
   fetchLessonBySlug,
@@ -44,6 +45,10 @@ export default async function LessonPage({ params }: Props) {
     fetchLessonProgress(supabase, user.id, lessonRow.id),
     fetchLessonNotes(supabase, user.id, lessonRow.id),
   ])
+
+  const muxToken = lessonRow.mux_playback_id
+    ? await generateMuxToken(lessonRow.mux_playback_id)
+    : null
 
   const totalLessons = allCourses.reduce((s, c) => s + c.totalLessons, 0)
   const completedLessons = allCourses.reduce((s, c) => s + c.completedLessons, 0)
@@ -109,7 +114,18 @@ export default async function LessonPage({ params }: Props) {
             </div>
           ) : (
             <>
-              <VideoPlaceholder lessonTitle={lessonRow.title} />
+              <MuxPlayer
+                playbackId={lessonRow.mux_playback_id ?? ''}
+                token={muxToken}
+                initialProgress={progress?.watch_time_seconds ?? 0}
+                lessonId={lessonRow.id}
+                lessonNumber={currentIdx + 1}
+                totalLessons={lessons.length}
+                courseTitle={`Pillar ${course.pillar_number} — ${course.title}`}
+                onComplete={() => {
+                  // Handled server-side via progress API
+                }}
+              />
               <LessonContent
                 lesson={currentLessonWP}
                 courseSlug={params.pillarSlug}

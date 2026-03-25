@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { MuxUploader } from '@/components/admin/MuxUploader'
 
 interface LessonFormValues {
   title: string
@@ -16,6 +17,7 @@ interface LessonFormProps {
   courseId: string
   lessonId?: string
   initialValues?: Partial<LessonFormValues>
+  existingPlaybackId?: string | null
 }
 
 const DEFAULT_VALUES: LessonFormValues = {
@@ -31,11 +33,12 @@ function slugify(str: string) {
   return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
-export function LessonForm({ courseId, lessonId, initialValues }: LessonFormProps) {
+export function LessonForm({ courseId, lessonId, initialValues, existingPlaybackId }: LessonFormProps) {
   const router = useRouter()
   const [values, setValues] = useState<LessonFormValues>({ ...DEFAULT_VALUES, ...initialValues })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [playbackId, setPlaybackId] = useState<string | null>(existingPlaybackId ?? null)
 
   function set<K extends keyof LessonFormValues>(key: K, value: LessonFormValues[K]) {
     setValues(prev => ({
@@ -44,6 +47,23 @@ export function LessonForm({ courseId, lessonId, initialValues }: LessonFormProp
       // Auto-generate slug from title if slug hasn't been manually set
       ...(key === 'title' && !lessonId ? { slug: slugify(value as string) } : {}),
     }))
+  }
+
+  async function handleUploadComplete(uploadId: string) {
+    if (!lessonId) return
+    try {
+      const res = await fetch(`/api/admin/lessons/${lessonId}`, {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ muxUploadId: uploadId }),
+      })
+      const data = await res.json() as { lesson?: { mux_playback_id?: string } }
+      if (data.lesson?.mux_playback_id) {
+        setPlaybackId(data.lesson.mux_playback_id)
+      }
+    } catch {
+      // Non-fatal — Mux webhook will update playback ID once processing completes
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -184,17 +204,27 @@ export function LessonForm({ courseId, lessonId, initialValues }: LessonFormProp
         </div>
       </div>
 
-      {/* Video note */}
-      <div
-        className="rounded px-4 py-3"
-        style={{ backgroundColor: 'rgba(104,162,185,0.06)', border: '1px solid rgba(104,162,185,0.2)' }}
-      >
-        <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#68a2b9] mb-0.5">
-          Video Upload
-        </p>
-        <p className="font-condensed text-[11px] text-[#7a8a96]">
-          Video upload via Mux is available once MUX_TOKEN_ID and MUX_TOKEN_SECRET are configured in your environment.
-        </p>
+      {/* Video upload — only available on existing lessons */}
+      <div>
+        <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
+          Video
+        </label>
+        {lessonId ? (
+          <MuxUploader
+            lessonId={lessonId}
+            existingPlaybackId={playbackId}
+            onUploadComplete={handleUploadComplete}
+          />
+        ) : (
+          <div
+            className="rounded px-4 py-3"
+            style={{ backgroundColor: 'rgba(104,162,185,0.06)', border: '1px solid rgba(104,162,185,0.2)' }}
+          >
+            <p className="font-condensed text-[11px] text-[#7a8a96]">
+              Save the lesson first, then you can upload a video.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Published */}
