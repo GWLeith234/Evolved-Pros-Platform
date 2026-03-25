@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "Evolved Pros",
+    "slug": "evolved-pros",
+    "version": "1.0.0",
+    "scheme": "evolvedpros",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#112535"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.evolvedpros.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#112535"
+      },
+      "package": "com.evolvedpros.app"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#1b3c5a"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
