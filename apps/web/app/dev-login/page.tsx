@@ -8,48 +8,46 @@ export default function DevLoginPage() {
 }
 
 function DevLoginForm() {
-  const [email, setEmail] = useState('geoleith@gmail.com')
-  const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
-  const [msg, setMsg] = useState('')
+  const [status, setStatus] = useState<'idle' | 'loading'>('idle')
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function handleLogin() {
     setStatus('loading')
-    const res = await fetch('/api/dev-login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    })
+    const res = await fetch('/api/dev-login', { method: 'POST' })
     const data = await res.json() as { url?: string; error?: string }
     if (data.url) {
-      setStatus('done')
       window.location.href = data.url
     } else {
-      setStatus('error')
-      setMsg(data.error ?? 'Unknown error')
+      setStatus('idle')
+      alert(data.error ?? 'Login failed')
     }
   }
 
   return (
     <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: '#112535' }}>
-      <form onSubmit={handleSubmit} style={{ background: 'white', padding: 40, borderRadius: 8, width: 340 }}>
-        <h2 style={{ margin: '0 0 20px', fontFamily: 'sans-serif' }}>Dev Login</h2>
-        <input
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-          style={{ display: 'block', width: '100%', padding: '10px 12px', marginBottom: 16, fontSize: 14, boxSizing: 'border-box', border: '1px solid #ccc', borderRadius: 4 }}
-        />
-        {msg && <p style={{ color: 'red', fontSize: 13, marginBottom: 12 }}>{msg}</p>}
+      <div style={{ background: 'white', padding: 40, borderRadius: 8, width: 320, textAlign: 'center' }}>
+        <p style={{ fontFamily: 'monospace', fontSize: 11, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#ef0e30', margin: '0 0 8px' }}>
+          Dev Only
+        </p>
+        <h2 style={{ margin: '0 0 24px', fontFamily: 'Georgia, serif', fontSize: 22, color: '#112535' }}>
+          Dev Login
+        </h2>
+        <p style={{ fontSize: 13, color: '#7a8a96', margin: '0 0 24px', fontFamily: 'sans-serif' }}>
+          Logs in as <strong>dev@evolvedpros.com</strong><br />with admin + pro access.
+        </p>
         <button
-          type="submit"
-          disabled={status === 'loading' || status === 'done'}
-          style={{ width: '100%', padding: '10px 0', background: '#1b3c5a', color: 'white', border: 'none', borderRadius: 4, fontSize: 14, cursor: 'pointer' }}
+          onClick={handleLogin}
+          disabled={status === 'loading'}
+          style={{
+            width: '100%', padding: '12px 0',
+            background: status === 'loading' ? '#7a8a96' : '#1b3c5a',
+            color: 'white', border: 'none', borderRadius: 4,
+            fontSize: 14, fontWeight: 600, cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+            fontFamily: 'sans-serif',
+          }}
         >
-          {status === 'loading' ? 'Generating…' : status === 'done' ? 'Redirecting…' : 'Login →'}
+          {status === 'loading' ? 'Logging in…' : 'Log in as Admin →'}
         </button>
-      </form>
+      </div>
     </div>
   )
 }
