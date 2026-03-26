@@ -6,6 +6,7 @@ const ADMIN_ROUTES  = ['/admin']
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+
   const isPublic = PUBLIC_ROUTES.some(r => pathname.startsWith(r))
   if (isPublic) return NextResponse.next()
 
@@ -29,17 +30,24 @@ export async function middleware(request: NextRequest) {
 
   let response = NextResponse.next({ request })
 
+  // @supabase/ssr v0.3.x uses get/set/remove (not getAll/setAll)
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll:    () => request.cookies.getAll(),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+        get(name: string) {
+          return request.cookies.get(name)?.value
+        },
+        set(name: string, value: string, options: Record<string, unknown>) {
+          request.cookies.set({ name, value, ...options } as Parameters<typeof request.cookies.set>[0])
           response = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options))
+          response.cookies.set({ name, value, ...options } as Parameters<typeof response.cookies.set>[0])
+        },
+        remove(name: string, options: Record<string, unknown>) {
+          request.cookies.set({ name, value: '', ...options } as Parameters<typeof request.cookies.set>[0])
+          response = NextResponse.next({ request })
+          response.cookies.set({ name, value: '', ...options } as Parameters<typeof response.cookies.set>[0])
         },
       },
     }
