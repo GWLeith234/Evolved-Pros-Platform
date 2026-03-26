@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const PUBLIC_ROUTES = [
@@ -85,7 +86,12 @@ export async function middleware(request: NextRequest) {
 
   // Admin route guard
   if (ADMIN_ROUTES.some(r => pathname.startsWith(r))) {
-    const { data: profile } = await supabase
+    const adminClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+    const { data: profile } = await adminClient
       .from('users')
       .select('role')
       .eq('id', user.id)
