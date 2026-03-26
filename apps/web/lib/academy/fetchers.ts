@@ -11,15 +11,21 @@ type SB = SupabaseClient<Database>
 export async function fetchCoursesWithProgress(
   supabase: SB,
   userId: string,
+  userTier?: 'community' | 'pro' | null,
 ): Promise<CourseWithProgress[]> {
-  const [{ data: courses }, { data: profile }] = await Promise.all([
+  const tierPromise = userTier === undefined
+    ? supabase.from('users').select('tier').eq('id', userId).single()
+    : Promise.resolve({ data: { tier: userTier } })
+
+  const [{ data: courses }, { data: tierData }] = await Promise.all([
     supabase
       .from('courses')
       .select('id, pillar_number, slug, title, description, required_tier, is_published, sort_order')
       .eq('is_published', true)
       .order('sort_order'),
-    supabase.from('users').select('tier').eq('id', userId).single(),
+    tierPromise,
   ])
+  const profile = tierData
 
   if (!courses?.length) return []
 

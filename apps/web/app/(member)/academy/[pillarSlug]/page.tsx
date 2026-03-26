@@ -23,11 +23,11 @@ export default async function CourseDetailPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [course, profile, allCourses] = await Promise.all([
+  const [course, profile] = await Promise.all([
     fetchCourseBySlug(supabase, params.pillarSlug),
     fetchUserProfile(supabase, user.id),
-    fetchCoursesWithProgress(supabase, user.id),
   ])
+  const allCourses = await fetchCoursesWithProgress(supabase, user.id, profile?.tier)
 
   if (!course) notFound()
 

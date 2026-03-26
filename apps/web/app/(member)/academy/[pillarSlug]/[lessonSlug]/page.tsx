@@ -28,12 +28,12 @@ export default async function LessonPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [course, lessonRow, profile, allCourses] = await Promise.all([
+  const [course, lessonRow, profile] = await Promise.all([
     fetchCourseBySlug(supabase, params.pillarSlug),
     fetchLessonBySlug(supabase, params.pillarSlug, params.lessonSlug),
     fetchUserProfile(supabase, user.id),
-    fetchCoursesWithProgress(supabase, user.id),
   ])
+  const allCourses = await fetchCoursesWithProgress(supabase, user.id, profile?.tier)
 
   if (!course || !lessonRow) notFound()
   if (!hasTierAccess(profile?.tier, course.required_tier as 'community' | 'pro')) {

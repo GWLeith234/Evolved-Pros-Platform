@@ -17,7 +17,7 @@ export default async function EventsPage() {
     supabase
       .from('events')
       .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published')
-      .eq('is_published', true)
+      .neq('is_published', false)
       .order('starts_at', { ascending: true })
       .limit(100),
     supabase

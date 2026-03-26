@@ -8,7 +8,9 @@ const TIER_RANK: Record<string, number> = {
 export function hasTierAccess(userTier: Tier, requiredTier: Tier): boolean {
   if (!requiredTier) return true
   if (!userTier) return false
-  return (TIER_RANK[userTier] ?? 0) >= (TIER_RANK[requiredTier] ?? 0)
+  const ut = userTier.toLowerCase()
+  const rt = requiredTier.toLowerCase()
+  return (TIER_RANK[ut] ?? 0) >= (TIER_RANK[rt] ?? 0)
 }
 
 export function isActiveMember(tierStatus: string | null | undefined): boolean {

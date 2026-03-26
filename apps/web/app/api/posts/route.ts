@@ -143,19 +143,13 @@ export async function POST(request: Request) {
 
   if (error || !post) return NextResponse.json({ error: 'Failed to create post' }, { status: 500 })
 
-  // Award 10 points to author
-  await supabase.rpc('increment_points', { user_id: user.id, amount: 10 }).catch(() => {
-    // Fallback if RPC not available
-    supabase
-      .from('users')
-      .select('points')
-      .eq('id', user.id)
-      .single()
-      .then(({ data }) => {
-        if (data) {
-          supabase.from('users').update({ points: data.points + 10 }).eq('id', user.id)
-        }
-      })
+  // Award 10 points to author — fire-and-forget, do not block response
+  supabase.rpc('increment_points', { user_id: user.id, amount: 10 }).then(({ error }) => {
+    if (error) {
+      console.warn('[posts] increment_points RPC failed:', error.message, '— skipping points award')
+    }
+  }).catch(err => {
+    console.warn('[posts] increment_points threw:', err)
   })
 
   const result: Post = toPost(

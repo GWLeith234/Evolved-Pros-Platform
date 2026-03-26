@@ -15,10 +15,8 @@ export default async function AcademyPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [courses, profile] = await Promise.all([
-    fetchCoursesWithProgress(supabase, user.id),
-    fetchUserProfile(supabase, user.id),
-  ])
+  const profile = await fetchUserProfile(supabase, user.id)
+  const courses = await fetchCoursesWithProgress(supabase, user.id, profile?.tier)
 
   const totalLessons = courses.reduce((s, c) => s + c.totalLessons, 0)
   const completedLessons = courses.reduce((s, c) => s + c.completedLessons, 0)
