@@ -60,7 +60,7 @@ export async function GET(request: Request) {
     console.log('[auth/callback] exchanging PKCE code...')
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     console.log('[auth/callback] exchangeCodeForSession error:', error?.message ?? 'none')
-    if (!error) return buildRedirect(await resolveNext(supabase, baseUrl, next))
+    if (!error) return buildRedirect(resolveNext(baseUrl, next))
   }
 
   // Magic-link / OTP token hash
@@ -68,7 +68,7 @@ export async function GET(request: Request) {
     console.log('[auth/callback] verifying OTP token_hash...')
     const { error } = await supabase.auth.verifyOtp({ token_hash, type })
     console.log('[auth/callback] verifyOtp error:', error?.message ?? 'none')
-    if (!error) return buildRedirect(await resolveNext(supabase, baseUrl, next))
+    if (!error) return buildRedirect(resolveNext(baseUrl, next))
   }
 
   // Post-password-login: browser already stored session cookies via document.cookie.
@@ -85,30 +85,13 @@ export async function GET(request: Request) {
       refresh_token: session.refresh_token,
     })
     console.log('[auth/callback] setSession — user:', setData?.user?.id ?? 'null', '| error:', setErr?.message ?? 'none')
-    if (!setErr) return buildRedirect(await resolveNext(supabase, baseUrl, next))
+    if (!setErr) return buildRedirect(resolveNext(baseUrl, next))
   }
 
   console.error('[auth/callback] no valid code, token_hash, or session — redirecting to login')
   return buildRedirect(new URL('/login?error=auth_failed', baseUrl))
 }
 
-async function resolveNext(
-  supabase: ReturnType<typeof createServerClient<Database>>,
-  baseUrl: string,
-  next: string,
-): Promise<URL> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user) {
-    // Only send to /onboard if the user has no profile row at all (brand new)
-    const { data: profile } = await supabase
-      .from('users')
-      .select('id')
-      .eq('id', user.id)
-      .maybeSingle()
-    console.log('[auth/callback] resolveNext — user:', user.id, '| profile:', profile ? 'exists' : 'none')
-    if (!profile) {
-      return new URL('/onboard', baseUrl)
-    }
-  }
+function resolveNext(baseUrl: string, next: string): URL {
   return new URL(next, baseUrl)
 }
