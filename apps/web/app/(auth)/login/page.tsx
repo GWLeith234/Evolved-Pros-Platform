@@ -27,8 +27,9 @@ export default function LoginPage() {
       setError(err.message)
       return
     }
-    // Session cookie is set by the time signInWithPassword resolves
-    window.location.href = '/home'
+    // Route through /auth/callback so the server writes proper Set-Cookie
+    // headers before we land on /home — otherwise middleware can't see the session
+    window.location.href = '/auth/callback?next=/home'
   }
 
   async function handleMagicLink(e: React.FormEvent) {
