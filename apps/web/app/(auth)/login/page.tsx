@@ -1,10 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [tab, setTab] = useState<'password' | 'magic'>('password')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -16,12 +14,11 @@ export default function LoginPage() {
     const supabase = createClient()
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        router.refresh()
-        router.push('/home')
+        window.location.href = '/home'
       }
     })
     return () => { subscription.unsubscribe() }
-  }, [router])
+  }, [])
 
   async function handlePassword(e: React.FormEvent) {
     e.preventDefault()
