@@ -13,7 +13,13 @@ export async function GET(request: Request) {
   const type       = searchParams.get('type') as EmailOtpType | null
   const next       = searchParams.get('next') ?? '/home'
 
-  console.log('[auth/callback] url:', request.url)
+  // Use forwarded headers to get the real public URL (request.url is the
+  // internal Railway address, e.g. http://localhost:8080/...)
+  const host    = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'web-production-db912.up.railway.app'
+  const proto   = request.headers.get('x-forwarded-proto') || 'https'
+  const baseUrl = `${proto}://${host}`
+
+  console.log('[auth/callback] url:', request.url, '| baseUrl:', baseUrl)
   console.log('[auth/callback] code:', code, '| token_hash:', token_hash, '| next:', next)
 
   const cookieStore = cookies()
@@ -40,7 +46,7 @@ export async function GET(request: Request) {
   // Build redirect using the request URL as base so Railway's public domain
   // is preserved — avoids localhost:8080 appearing in the Location header
   function buildRedirect(destination: string | URL) {
-    const url = destination instanceof URL ? destination : new URL(destination, request.url)
+    const url = destination instanceof URL ? destination : new URL(destination, baseUrl)
     const res = NextResponse.redirect(url)
     cookiesToSet.forEach(({ name, value, options }) =>
       res.cookies.set(name, value, options as Parameters<typeof res.cookies.set>[2])
@@ -54,7 +60,7 @@ export async function GET(request: Request) {
     console.log('[auth/callback] exchanging PKCE code...')
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     console.log('[auth/callback] exchangeCodeForSession error:', error?.message ?? 'none')
-    if (!error) return buildRedirect(await resolveNext(supabase, request, next))
+    if (!error) return buildRedirect(await resolveNext(supabase, baseUrl, next))
   }
 
   // Magic-link / OTP token hash
@@ -62,7 +68,7 @@ export async function GET(request: Request) {
     console.log('[auth/callback] verifying OTP token_hash...')
     const { error } = await supabase.auth.verifyOtp({ token_hash, type })
     console.log('[auth/callback] verifyOtp error:', error?.message ?? 'none')
-    if (!error) return buildRedirect(await resolveNext(supabase, request, next))
+    if (!error) return buildRedirect(await resolveNext(supabase, baseUrl, next))
   }
 
   // Post-password-login: browser already stored session cookies via document.cookie.
@@ -79,16 +85,16 @@ export async function GET(request: Request) {
       refresh_token: session.refresh_token,
     })
     console.log('[auth/callback] setSession — user:', setData?.user?.id ?? 'null', '| error:', setErr?.message ?? 'none')
-    if (!setErr) return buildRedirect(await resolveNext(supabase, request, next))
+    if (!setErr) return buildRedirect(await resolveNext(supabase, baseUrl, next))
   }
 
   console.error('[auth/callback] no valid code, token_hash, or session — redirecting to login')
-  return buildRedirect(new URL('/login?error=auth_failed', request.url))
+  return buildRedirect(new URL('/login?error=auth_failed', baseUrl))
 }
 
 async function resolveNext(
   supabase: ReturnType<typeof createServerClient<Database>>,
-  request: Request,
+  baseUrl: string,
   next: string,
 ): Promise<URL> {
   const { data: { user } } = await supabase.auth.getUser()
@@ -101,8 +107,8 @@ async function resolveNext(
       .maybeSingle()
     console.log('[auth/callback] resolveNext — user:', user.id, '| profile:', profile ? 'exists' : 'none')
     if (!profile) {
-      return new URL('/onboard', request.url)
+      return new URL('/onboard', baseUrl)
     }
   }
-  return new URL(next, request.url)
+  return new URL(next, baseUrl)
 }
