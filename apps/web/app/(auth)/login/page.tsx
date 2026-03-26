@@ -12,16 +12,14 @@ export default function LoginPage() {
 
   async function handlePassword(e: React.FormEvent) {
     e.preventDefault()
-    console.log('form submitted', email, password)
     if (!email.trim() || !password.trim()) return
     setLoading(true)
     setError(null)
     const supabase = createClient()
-    const { data, error: err } = await supabase.auth.signInWithPassword({
+    const { error: err } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password,
     })
-    console.log('[login] signInWithPassword data:', data, 'error:', err)
     setLoading(false)
     if (err) {
       setError(err.message)

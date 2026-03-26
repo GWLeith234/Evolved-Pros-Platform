@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
+import { Suspense } from 'react'
 import { TopNav } from '@/components/layout/TopNav'
 import { Sidebar } from '@/components/layout/Sidebar'
 
@@ -18,7 +19,9 @@ export default async function MemberLayout({ children }: { children: React.React
         <div className="flex flex-col min-h-screen">
           <TopNav profile={profile} unreadCount={0} />
           <div className="flex flex-1 min-h-0">
+            <Suspense fallback={<div className="w-[220px] flex-shrink-0" style={{ backgroundColor: '#112535' }} />}>
             <Sidebar profile={profile} />
+          </Suspense>
             <main className="flex-1 bg-[#faf9f7] overflow-y-auto">{children}</main>
           </div>
         </div>
@@ -67,7 +70,9 @@ export default async function MemberLayout({ children }: { children: React.React
     <div className="flex flex-col min-h-screen">
       <TopNav profile={profile} unreadCount={unreadCount ?? 0} logoUrl={logoUrl} membersCanToggleTheme={membersCanToggleTheme} />
       <div className="flex flex-1 min-h-0">
-        <Sidebar profile={profile} />
+        <Suspense fallback={<div className="w-[220px] flex-shrink-0" style={{ backgroundColor: '#112535' }} />}>
+            <Sidebar profile={profile} />
+          </Suspense>
         <main className="flex-1 bg-[#faf9f7] overflow-y-auto">
           {children}
         </main>

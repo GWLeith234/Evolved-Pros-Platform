@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -304,6 +304,9 @@ function SidebarAdUnit() {
 
 export function Sidebar({ profile, unreadPosts = 0, upcomingEvents = 0 }: SidebarProps) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const search = searchParams.toString()
+  const fullPath = search ? `${pathname}?${search}` : pathname
 
   const navigateItems: NavItem[] = [
     { label: 'Overview',  href: '/home',      match: /^\/home$/, icon: <HomeIcon /> },
@@ -342,7 +345,7 @@ export function Sidebar({ profile, unreadPosts = 0, upcomingEvents = 0 }: Sideba
             <SidebarNavItem
               key={item.href}
               item={item}
-              active={item.match.test(pathname + (typeof window !== 'undefined' ? window.location.search : ''))}
+              active={item.match.test(fullPath)}
             />
           ))}
         </SidebarSection>
