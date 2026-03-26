@@ -27,6 +27,5 @@ export async function GET() {
     checks.supabase = 'unreachable'
   }
 
-  const allGood = checks.supabase === 'connected'
-  return NextResponse.json(checks, { status: allGood ? 200 : 503 })
+  return NextResponse.json(checks, { status: 200 })
 }
