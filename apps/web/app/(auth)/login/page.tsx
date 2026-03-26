@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
@@ -9,16 +9,6 @@ export default function LoginPage() {
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const supabase = createClient()
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        setTimeout(() => { window.location.href = '/home' }, 500)
-      }
-    })
-    return () => { subscription.unsubscribe() }
-  }, [])
 
   async function handlePassword(e: React.FormEvent) {
     e.preventDefault()
@@ -30,8 +20,13 @@ export default function LoginPage() {
       email: email.trim().toLowerCase(),
       password,
     })
-    setLoading(false)
-    if (err) setError(err.message)
+    if (err) {
+      setLoading(false)
+      setError(err.message)
+      return
+    }
+    // Session cookie is set by the time signInWithPassword resolves
+    window.location.href = '/home'
   }
 
   async function handleMagicLink(e: React.FormEvent) {
