@@ -1,16 +1,25 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const PUBLIC_ROUTES = ['/login', '/auth/callback', '/api/webhooks/vendasta', '/api/health', '/dev-login', '/api/dev-login']
-const ADMIN_ROUTES  = ['/admin']
+const PUBLIC_ROUTES = [
+  '/login',
+  '/auth/callback',
+  '/api/webhooks/vendasta',
+  '/api/health',
+  '/dev-login',
+  '/api/dev-login',
+]
+const ADMIN_ROUTES = ['/admin']
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  const isPublic = PUBLIC_ROUTES.some(r => pathname.startsWith(r))
-  if (isPublic) return NextResponse.next()
+  // Allow public routes through immediately
+  if (PUBLIC_ROUTES.some(r => pathname.startsWith(r))) {
+    return NextResponse.next()
+  }
 
-  // Dev bypass: if a dev_session cookie is present, skip Supabase entirely
+  // Dev bypass: skip Supabase auth when dev_session cookie is present
   if (process.env.NODE_ENV === 'development') {
     const devSession = request.cookies.get('dev_session')?.value
     if (devSession) {
@@ -28,37 +37,48 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  let response = NextResponse.next({ request })
+  // Official Supabase SSR pattern: refresh session and protect routes
+  let supabaseResponse = NextResponse.next({ request })
 
-  // @supabase/ssr v0.3.x uses get/set/remove (not getAll/setAll)
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
+        getAll() {
+          return request.cookies.getAll()
         },
-        set(name: string, value: string, options: Record<string, unknown>) {
-          request.cookies.set({ name, value, ...options } as Parameters<typeof request.cookies.set>[0])
-          response = NextResponse.next({ request })
-          response.cookies.set({ name, value, ...options } as Parameters<typeof response.cookies.set>[0])
-        },
-        remove(name: string, options: Record<string, unknown>) {
-          request.cookies.set({ name, value: '', ...options } as Parameters<typeof request.cookies.set>[0])
-          response = NextResponse.next({ request })
-          response.cookies.set({ name, value: '', ...options } as Parameters<typeof response.cookies.set>[0])
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            request.cookies.set(name, value, options)
+          )
+          supabaseResponse = NextResponse.next({ request })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
         },
       },
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  // IMPORTANT: do not add logic between createServerClient and getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  console.log('[middleware]', pathname, 'user:', user?.id ?? 'none', 'cookies:', request.cookies.getAll().map(c => c.name).join(', '))
+  console.log(
+    '[middleware]',
+    pathname,
+    '| user:',
+    user?.id ?? 'none',
+    '| cookies:',
+    request.cookies.getAll().map(c => c.name).join(', ')
+  )
 
   if (!user) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
   }
 
   // Admin route guard
@@ -73,7 +93,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return response
+  return supabaseResponse
 }
 
 export const config = {
