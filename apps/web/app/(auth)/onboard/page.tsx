@@ -49,6 +49,7 @@ export default function OnboardPage() {
       .from('users')
       .upsert({
         id:           user.id,
+        email:        user.email,
         display_name: displayName.trim(),
         role_title:   roleTitle.trim() || null,
         location:     location.trim() || null,
