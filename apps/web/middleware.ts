@@ -74,6 +74,8 @@ export async function middleware(request: NextRequest) {
     '| cookies:',
     request.cookies.getAll().map(c => c.name).join(', ')
   )
+  const authCookie = request.cookies.getAll().find(c => c.name.includes('auth-token') || c.name.includes('supabase'))
+  if (authCookie) console.log('[middleware] auth cookie found:', authCookie.name, '=', authCookie.value.slice(0, 40) + '...')
 
   if (!user) {
     const url = request.nextUrl.clone()
