@@ -173,6 +173,7 @@ export default async function MemberHomePage() {
     <div className="p-6 space-y-5">
       <WelcomeBanner
         displayName={displayName}
+        tier={profile.tier}
         unreadPostCount={unreadCount}
         upcomingEventCount={upcomingEventCount}
       />

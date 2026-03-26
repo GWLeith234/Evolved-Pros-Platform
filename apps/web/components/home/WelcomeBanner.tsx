@@ -3,9 +3,11 @@
 import Link from 'next/link'
 import { useMemo } from 'react'
 import { Button } from '@evolved-pros/ui'
+import { MemberBadge } from '@/components/ui/MemberBadge'
 
 interface WelcomeBannerProps {
   displayName: string
+  tier?: string | null
   unreadPostCount: number
   upcomingEventCount: number
 }
@@ -28,7 +30,7 @@ function getWeekLabel(): string {
   return `Week of ${monthName} ${day}, ${year} — Q${quarter} · Week ${weekNum}`
 }
 
-export function WelcomeBanner({ displayName, unreadPostCount, upcomingEventCount }: WelcomeBannerProps) {
+export function WelcomeBanner({ displayName, tier, unreadPostCount, upcomingEventCount }: WelcomeBannerProps) {
   const greeting = useMemo(() => getGreeting(), [])
   const weekLabel = useMemo(() => getWeekLabel(), [])
 
@@ -61,10 +63,11 @@ export function WelcomeBanner({ displayName, unreadPostCount, upcomingEventCount
 
         {/* Title */}
         <h1
-          className="font-display font-bold text-white mb-2 leading-tight"
+          className="font-display font-bold text-white mb-2 leading-tight flex items-center gap-3 flex-wrap"
           style={{ fontSize: '20px' }}
         >
           {greeting}, {displayName}.
+          {tier && <MemberBadge tier={tier} size="md" />}
         </h1>
 
         {/* Subtitle */}

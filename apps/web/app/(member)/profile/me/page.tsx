@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { ProfileHeader } from '@/components/profile/ProfileHeader'
+import { ProfileBannerWrapper } from '@/components/profile/ProfileBannerWrapper'
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm'
 import { Card, CardBody, CardHeader } from '@evolved-pros/ui'
 
@@ -16,7 +16,7 @@ export default async function MyProfilePage({
   const [profileResult, postCountResult, lessonsResult, progressResult, coursesResult] = await Promise.all([
     supabase
       .from('users')
-      .select('id, display_name, full_name, avatar_url, bio, role_title, location, tier, points, created_at')
+      .select('id, display_name, full_name, avatar_url, banner_url, bio, role_title, location, tier, points, created_at')
       .eq('id', user.id)
       .single(),
     supabase
@@ -69,7 +69,7 @@ export default async function MyProfilePage({
 
   return (
     <div className="p-6 space-y-5">
-      <ProfileHeader user={headerUser} />
+      <ProfileBannerWrapper user={headerUser} isOwn={true} />
 
       {/* Tab bar */}
       <div className="flex gap-1 border-b border-[rgba(27,60,90,0.12)]">

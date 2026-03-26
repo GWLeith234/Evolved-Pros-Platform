@@ -1,6 +1,8 @@
 // cache-bust: 2026-03-25
 import type { Metadata } from 'next'
 import { Playfair_Display, Barlow_Condensed, Barlow } from 'next/font/google'
+import { createClient } from '@/lib/supabase/server'
+import { ThemeInit } from '@/components/ThemeInit'
 import './globals.css'
 
 const playfair = Playfair_Display({
@@ -39,7 +41,20 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  let defaultTheme = 'dark'
+  try {
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('platform_settings')
+      .select('value')
+      .eq('key', 'default_theme')
+      .single()
+    if (data?.value) defaultTheme = data.value
+  } catch {
+    // platform_settings may not exist yet — use default
+  }
+
   return (
     <html
       lang="en"
@@ -49,6 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className="bg-navy-deep text-navy antialiased"
         style={{ fontFamily: 'var(--font-body)' }}
       >
+        <ThemeInit defaultTheme={defaultTheme} />
         {children}
       </body>
     </html>

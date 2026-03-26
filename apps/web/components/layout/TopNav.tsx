@@ -15,6 +15,8 @@ interface TopNavProps {
     tier: string | null
   }
   unreadCount?: number
+  logoUrl?: string | null
+  membersCanToggleTheme?: boolean
 }
 
 const NAV_TABS = [
@@ -34,10 +36,38 @@ function getInitials(name: string | null | undefined): string {
     .toUpperCase()
 }
 
-export function TopNav({ profile, unreadCount = 0 }: TopNavProps) {
+function SunIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="5"/>
+      <line x1="12" y1="1" x2="12" y2="3"/>
+      <line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1" y1="12" x2="3" y2="12"/>
+      <line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+  )
+}
+
+function MoonIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+  )
+}
+
+type NextEvent = { id: string; title: string; starts_at: string } | null
+
+export function TopNav({ profile, unreadCount = 0, logoUrl, membersCanToggleTheme = true }: TopNavProps) {
   const pathname = usePathname()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const [nextEvent, setNextEvent] = useState<NextEvent>(null)
+  const [isDark, setIsDark] = useState(true)
 
   const displayName = profile.display_name ?? profile.full_name ?? ''
 
@@ -51,6 +81,38 @@ export function TopNav({ profile, unreadCount = 0 }: TopNavProps) {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  // Initialize theme from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('ep_theme')
+    if (stored) {
+      setIsDark(stored === 'dark')
+      document.documentElement.setAttribute('data-theme', stored)
+    }
+  }, [])
+
+  // Fetch next upcoming event
+  useEffect(() => {
+    const supabase = createClient()
+    supabase
+      .from('events')
+      .select('id, title, starts_at')
+      .eq('is_published', true)
+      .gt('starts_at', new Date().toISOString())
+      .order('starts_at', { ascending: true })
+      .limit(1)
+      .single()
+      .then(({ data }) => {
+        if (data) setNextEvent(data)
+      })
+  }, [])
+
+  function handleThemeToggle() {
+    const newTheme = isDark ? 'light' : 'dark'
+    setIsDark(!isDark)
+    localStorage.setItem('ep_theme', newTheme)
+    document.documentElement.setAttribute('data-theme', newTheme)
+  }
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -68,11 +130,15 @@ export function TopNav({ profile, unreadCount = 0 }: TopNavProps) {
         }}
       >
         {/* Logo */}
-        <Link
-          href="/home"
-          className="font-condensed font-bold text-white tracking-[0.14em] text-base select-none"
-        >
-          EVOLVED<span className="text-[#ef0e30]">·</span>PROS
+        <Link href="/home" className="flex items-center flex-shrink-0">
+          {logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoUrl} alt="Evolved Pros" style={{ height: '36px', width: 'auto' }} />
+          ) : (
+            <span className="font-condensed font-bold text-white tracking-[0.14em] text-base select-none">
+              EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS
+            </span>
+          )}
         </Link>
 
         {/* Nav tabs */}
@@ -108,6 +174,51 @@ export function TopNav({ profile, unreadCount = 0 }: TopNavProps) {
 
         {/* Right actions */}
         <div className="flex items-center gap-2">
+          {/* Next event card */}
+          {nextEvent && (
+            <a
+              href={`/events`}
+              style={{
+                background: 'rgba(255,255,255,0.08)',
+                border: '0.5px solid rgba(255,255,255,0.15)',
+                borderRadius: '6px',
+                padding: '6px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                maxWidth: '240px',
+                textDecoration: 'none',
+                flexShrink: 0,
+              }}
+              className="hidden lg:flex"
+            >
+              <span style={{ background: '#ef0e30', borderRadius: '4px', padding: '2px 6px', color: 'white', fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>
+                NEXT EVENT
+              </span>
+              <span style={{ color: 'white', fontSize: '12px', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {nextEvent.title}
+              </span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+            </a>
+          )}
+
+          {/* Theme toggle */}
+          {membersCanToggleTheme && (
+            <button
+              type="button"
+              onClick={handleThemeToggle}
+              className="w-8 h-8 flex items-center justify-center rounded flex-shrink-0 transition-colors"
+              style={{ color: 'rgba(255,255,255,0.5)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.9)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.5)')}
+              title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {isDark ? <SunIcon /> : <MoonIcon />}
+            </button>
+          )}
+
           {/* Notification bell */}
           <NotifBell initialUnreadCount={unreadCount} userId={profile.id} />
 
@@ -125,6 +236,7 @@ export function TopNav({ profile, unreadCount = 0 }: TopNavProps) {
                   src={profile.avatar_url}
                   alt={displayName}
                   className="w-8 h-8 rounded object-cover"
+                  style={{ border: '2px solid rgba(255,255,255,0.2)', borderRadius: '50%' }}
                 />
               ) : (
                 <span className="font-condensed font-bold text-white text-xs">
@@ -185,7 +297,6 @@ export function TopNav({ profile, unreadCount = 0 }: TopNavProps) {
           </div>
         </div>
       </header>
-
     </>
   )
 }

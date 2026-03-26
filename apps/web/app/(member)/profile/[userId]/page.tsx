@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
-import { ProfileHeader } from '@/components/profile/ProfileHeader'
+import { ProfileBannerWrapper } from '@/components/profile/ProfileBannerWrapper'
 import { Card, CardBody, CardHeader } from '@evolved-pros/ui'
 
 export default async function PublicProfilePage({
@@ -18,7 +18,7 @@ export default async function PublicProfilePage({
   const [profileResult, postCountResult, lessonsResult, progressResult, coursesResult] = await Promise.all([
     supabase
       .from('users')
-      .select('id, display_name, full_name, avatar_url, bio, role_title, location, tier, points, created_at')
+      .select('id, display_name, full_name, avatar_url, banner_url, bio, role_title, location, tier, points, created_at')
       .eq('id', params.userId)
       .single(),
     supabase
@@ -64,7 +64,7 @@ export default async function PublicProfilePage({
 
   return (
     <div className="p-6 space-y-5">
-      <ProfileHeader user={{ ...profile, postCount }} />
+      <ProfileBannerWrapper user={{ ...profile, postCount }} isOwn={false} />
 
       {/* Tab bar — read-only: only Overview and Progress */}
       <div className="flex gap-1 border-b border-[rgba(27,60,90,0.12)]">

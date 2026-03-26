@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState, useEffect, useRef } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 interface SidebarProps {
   profile: {
@@ -20,6 +22,14 @@ interface NavItem {
   badge?: number
   badgeColor?: string
   icon: React.ReactNode
+}
+
+type SidebarAd = {
+  id: string
+  image_url: string | null
+  headline: string | null
+  cta_text: string | null
+  link_url: string | null
 }
 
 function HomeIcon() {
@@ -151,6 +161,147 @@ function SidebarSection({ title, children }: { title: string; children: React.Re
   )
 }
 
+function SidebarAdUnit() {
+  const [ads, setAds] = useState<SidebarAd[]>([])
+  const [currentIdx, setCurrentIdx] = useState(0)
+  const [intervalMs, setIntervalMs] = useState(10000)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    const supabase = createClient()
+    Promise.all([
+      supabase
+        .from('platform_ads')
+        .select('id, image_url, headline, cta_text, link_url')
+        .eq('placement', 'sidebar')
+        .eq('is_active', true)
+        .order('sort_order'),
+      supabase
+        .from('platform_settings')
+        .select('value')
+        .eq('key', 'ad_sidebar_interval')
+        .single(),
+    ]).then(([adsResult, intervalResult]) => {
+      if (adsResult.data?.length) setAds(adsResult.data)
+      const secs = parseInt(intervalResult.data?.value ?? '10', 10)
+      setIntervalMs((isNaN(secs) ? 10 : secs) * 1000)
+    })
+  }, [])
+
+  useEffect(() => {
+    if (ads.length <= 1) return
+    timerRef.current = setInterval(() => {
+      setCurrentIdx(i => (i + 1) % ads.length)
+    }, intervalMs)
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+  }, [ads.length, intervalMs])
+
+  if (!ads.length) return null
+
+  const ad = ads[currentIdx]
+  if (!ad) return null
+
+  function handleDotClick(idx: number) {
+    if (timerRef.current) clearInterval(timerRef.current)
+    setCurrentIdx(idx)
+    timerRef.current = setInterval(() => {
+      setCurrentIdx(i => (i + 1) % ads.length)
+    }, intervalMs)
+  }
+
+  return (
+    <div className="px-5 pb-4">
+      <a
+        href={ad.link_url ?? '#'}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: 'block',
+          width: '176px',
+          margin: '0 auto',
+          border: '0.5px solid rgba(255,255,255,0.15)',
+          borderRadius: '6px',
+          overflow: 'hidden',
+          position: 'relative',
+          cursor: 'pointer',
+          textDecoration: 'none',
+        }}
+      >
+        {/* Image */}
+        {ad.image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={ad.image_url}
+            alt={ad.headline ?? 'Ad'}
+            style={{ width: '100%', height: '160px', objectFit: 'cover', display: 'block' }}
+          />
+        ) : (
+          <div style={{ width: '100%', height: '160px', backgroundColor: 'rgba(255,255,255,0.06)' }} />
+        )}
+
+        {/* AD badge */}
+        <span style={{
+          position: 'absolute',
+          top: '8px',
+          right: '8px',
+          background: '#ef0e30',
+          color: 'white',
+          fontSize: '9px',
+          fontWeight: 700,
+          borderRadius: '3px',
+          padding: '2px 5px',
+          letterSpacing: '0.05em',
+        }}>
+          AD
+        </span>
+
+        {/* Bottom bar */}
+        <div style={{
+          background: 'rgba(0,0,0,0.65)',
+          padding: '6px 10px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          <span style={{
+            color: 'white',
+            fontSize: '11px',
+            fontWeight: 600,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            maxWidth: '110px',
+          }}>
+            {ad.headline ?? ''}
+          </span>
+          {/* Dot indicators */}
+          {ads.length > 1 && (
+            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+              {ads.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={e => { e.preventDefault(); handleDotClick(i) }}
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    backgroundColor: i === currentIdx ? '#ef0e30' : 'rgba(255,255,255,0.25)',
+                    border: 'none',
+                    padding: 0,
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </a>
+    </div>
+  )
+}
+
 export function Sidebar({ profile, unreadPosts = 0, upcomingEvents = 0 }: SidebarProps) {
   const pathname = usePathname()
 
@@ -169,45 +320,50 @@ export function Sidebar({ profile, unreadPosts = 0, upcomingEvents = 0 }: Sideba
 
   return (
     <aside
-      className="w-[220px] flex-shrink-0 flex flex-col pt-5 pb-4"
+      className="w-[220px] flex-shrink-0 flex flex-col pt-5"
       style={{
         backgroundColor: '#112535',
         borderRight: '1px solid rgba(255,255,255,0.06)',
       }}
     >
-      <SidebarSection title="Navigate">
-        {navigateItems.map(item => (
-          <SidebarNavItem
-            key={item.href}
-            item={item}
-            active={item.match.test(pathname)}
-          />
-        ))}
-      </SidebarSection>
-
-      <SidebarSection title="My Space">
-        {mySpaceItems.map(item => (
-          <SidebarNavItem
-            key={item.href}
-            item={item}
-            active={item.match.test(pathname + (typeof window !== 'undefined' ? window.location.search : ''))}
-          />
-        ))}
-      </SidebarSection>
-
-      {profile.role === 'admin' && (
-        <SidebarSection title="Admin">
-          <SidebarNavItem
-            item={{
-              label: 'Admin Panel',
-              href: '/admin',
-              match: /^\/admin/,
-              icon: <SettingsIcon />,
-            }}
-            active={/^\/admin/.test(pathname)}
-          />
+      <div className="flex-1">
+        <SidebarSection title="Navigate">
+          {navigateItems.map(item => (
+            <SidebarNavItem
+              key={item.href}
+              item={item}
+              active={item.match.test(pathname)}
+            />
+          ))}
         </SidebarSection>
-      )}
+
+        <SidebarSection title="My Space">
+          {mySpaceItems.map(item => (
+            <SidebarNavItem
+              key={item.href}
+              item={item}
+              active={item.match.test(pathname + (typeof window !== 'undefined' ? window.location.search : ''))}
+            />
+          ))}
+        </SidebarSection>
+
+        {profile.role === 'admin' && (
+          <SidebarSection title="Admin">
+            <SidebarNavItem
+              item={{
+                label: 'Admin Panel',
+                href: '/admin',
+                match: /^\/admin/,
+                icon: <SettingsIcon />,
+              }}
+              active={/^\/admin/.test(pathname)}
+            />
+          </SidebarSection>
+        )}
+      </div>
+
+      {/* Rotating ad unit at bottom */}
+      <SidebarAdUnit />
     </aside>
   )
 }

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getAvatarColor } from '@/lib/community/types'
+import { MemberBadge } from '@/components/ui/MemberBadge'
 import type { LeaderboardEntry, MemberSummary } from '@/lib/community/types'
 
 interface LeaderboardRailProps {
@@ -77,8 +78,6 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
 
 function ActiveMemberRow({ member }: { member: MemberSummary }) {
   const avatarBg = getAvatarColor(member.id)
-  const tierColor = member.tier === 'pro' ? '#c9a84c' : '#68a2b9'
-  const tierBorder = member.tier === 'pro' ? 'rgba(201,168,76,0.3)' : 'rgba(104,162,185,0.3)'
 
   return (
     <Link href={`/profile/${member.id}`} className="flex items-center gap-2.5 py-2 group">
@@ -103,18 +102,7 @@ function ActiveMemberRow({ member }: { member: MemberSummary }) {
           <span className="font-body text-[13px] font-medium text-[#1b3c5a] group-hover:text-[#68a2b9] transition-colors truncate">
             {member.displayName}
           </span>
-          {member.tier && (
-            <span
-              className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5 flex-shrink-0"
-              style={{
-                color: tierColor,
-                border: `1px solid ${tierBorder}`,
-                backgroundColor: `${tierColor}10`,
-              }}
-            >
-              {member.tier === 'pro' ? 'Pro' : 'Community'}
-            </span>
-          )}
+          {member.tier && <MemberBadge tier={member.tier} size="sm" />}
         </div>
         {member.roleTitle && (
           <p className="font-condensed text-[10px] text-[#7a8a96] truncate">{member.roleTitle}</p>

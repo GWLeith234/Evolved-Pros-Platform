@@ -42,15 +42,30 @@ export default async function MemberLayout({ children }: { children: React.React
     redirect('/membership-expired')
   }
 
-  const { count: unreadCount } = await supabase
-    .from('notifications')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .eq('is_read', false)
+  const [{ count: unreadCount }, { data: logoSetting }, { data: themeSetting }] = await Promise.all([
+    supabase
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('is_read', false),
+    supabase
+      .from('platform_settings')
+      .select('value')
+      .eq('key', 'logo_dark_url')
+      .single(),
+    supabase
+      .from('platform_settings')
+      .select('value')
+      .eq('key', 'members_can_toggle_theme')
+      .single(),
+  ])
+
+  const logoUrl = logoSetting?.value || null
+  const membersCanToggleTheme = themeSetting?.value !== 'false'
 
   return (
     <div className="flex flex-col min-h-screen">
-      <TopNav profile={profile} unreadCount={unreadCount ?? 0} />
+      <TopNav profile={profile} unreadCount={unreadCount ?? 0} logoUrl={logoUrl} membersCanToggleTheme={membersCanToggleTheme} />
       <div className="flex flex-1 min-h-0">
         <Sidebar profile={profile} />
         <main className="flex-1 bg-[#faf9f7] overflow-y-auto">

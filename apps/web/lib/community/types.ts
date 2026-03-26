@@ -12,6 +12,7 @@ export type PostAuthor = {
   id: string
   displayName: string
   avatarUrl: string | null
+  tier?: string | null
 }
 
 export type Post = {

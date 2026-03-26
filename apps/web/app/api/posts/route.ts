@@ -14,7 +14,7 @@ function toPost(
     like_count: number
     reply_count: number
     created_at: string
-    users: { id: string; display_name: string | null; full_name: string | null; avatar_url: string | null } | null
+    users: { id: string; display_name: string | null; full_name: string | null; avatar_url: string | null; tier: string | null } | null
   },
   likedIds: Set<string>,
   bookmarkedIds: Set<string>
@@ -32,6 +32,7 @@ function toPost(
       id: row.users?.id ?? '',
       displayName: row.users?.display_name ?? row.users?.full_name ?? 'Member',
       avatarUrl: row.users?.avatar_url ?? null,
+      tier: row.users?.tier ?? null,
     },
     isLiked: likedIds.has(row.id),
     isBookmarked: bookmarkedIds.has(row.id),
@@ -59,7 +60,7 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from('posts')
-    .select('id, channel_id, body, pillar_tag, is_pinned, like_count, reply_count, created_at, users(id, display_name, full_name, avatar_url)')
+    .select('id, channel_id, body, pillar_tag, is_pinned, like_count, reply_count, created_at, users(id, display_name, full_name, avatar_url, tier)')
     .eq('channel_id', channel.id)
     .eq('is_pinned', false)
     .order('created_at', { ascending: false })
@@ -138,7 +139,7 @@ export async function POST(request: Request) {
       body: postBody,
       pillar_tag: validatedTag as 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | null,
     })
-    .select('id, channel_id, body, pillar_tag, is_pinned, like_count, reply_count, created_at, users(id, display_name, full_name, avatar_url)')
+    .select('id, channel_id, body, pillar_tag, is_pinned, like_count, reply_count, created_at, users(id, display_name, full_name, avatar_url, tier)')
     .single()
 
   if (error || !post) return NextResponse.json({ error: 'Failed to create post' }, { status: 500 })

@@ -50,12 +50,12 @@ export default async function SettingsPage() {
         <div className="px-6 py-6">
           <ProfileEditForm
             userId={user.id}
-            initialData={{
-              display_name: profile?.display_name ?? '',
-              full_name: profile?.full_name ?? '',
-              bio: profile?.bio ?? '',
-              role_title: profile?.role_title ?? '',
-              location: profile?.location ?? '',
+            profile={{
+              display_name: profile?.display_name ?? null,
+              full_name: profile?.full_name ?? null,
+              bio: profile?.bio ?? null,
+              role_title: profile?.role_title ?? null,
+              location: profile?.location ?? null,
               avatar_url: profile?.avatar_url ?? null,
             }}
           />

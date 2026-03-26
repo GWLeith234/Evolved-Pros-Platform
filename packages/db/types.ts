@@ -23,10 +23,11 @@ export type Database = {
           role_title: string | null
           location: string | null
           role: 'member' | 'admin'
-          tier: 'community' | 'pro' | null
+          tier: 'community' | 'vip' | 'pro' | null
           tier_status: 'active' | 'trial' | 'cancelled' | 'expired' | null
           tier_expires_at: string | null
           onboarded_at: string | null
+          banner_url: string | null
           points: number
           push_token: string | null
           notification_preferences: {
@@ -50,10 +51,11 @@ export type Database = {
           role_title?: string | null
           location?: string | null
           role?: 'member' | 'admin'
-          tier?: 'community' | 'pro' | null
+          tier?: 'community' | 'vip' | 'pro' | null
           tier_status?: 'active' | 'trial' | 'cancelled' | 'expired' | null
           tier_expires_at?: string | null
           onboarded_at?: string | null
+          banner_url?: string | null
           points?: number
           push_token?: string | null
           created_at?: string
@@ -70,10 +72,11 @@ export type Database = {
           role_title?: string | null
           location?: string | null
           role?: 'member' | 'admin'
-          tier?: 'community' | 'pro' | null
+          tier?: 'community' | 'vip' | 'pro' | null
           tier_status?: 'active' | 'trial' | 'cancelled' | 'expired' | null
           tier_expires_at?: string | null
           onboarded_at?: string | null
+          banner_url?: string | null
           points?: number
           push_token?: string | null
           notification_preferences?: {
@@ -563,6 +566,79 @@ export type Database = {
     }
     Functions: {
       [_ in never]: never
+    }
+      platform_settings: {
+        Row: { key: string; value: string | null; updated_at: string }
+        Insert: { key: string; value?: string | null; updated_at?: string }
+        Update: { key?: string; value?: string | null; updated_at?: string }
+        Relationships: []
+      }
+      platform_ads: {
+        Row: {
+          id: string
+          placement: 'sidebar' | 'topnav'
+          image_url: string | null
+          headline: string | null
+          cta_text: string | null
+          link_url: string | null
+          sort_order: number
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          placement: 'sidebar' | 'topnav'
+          image_url?: string | null
+          headline?: string | null
+          cta_text?: string | null
+          link_url?: string | null
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          placement?: 'sidebar' | 'topnav'
+          image_url?: string | null
+          headline?: string | null
+          cta_text?: string | null
+          link_url?: string | null
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      profile_banners: {
+        Row: {
+          id: string
+          pillar: number | null
+          title: string | null
+          image_url: string
+          sort_order: number
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          pillar?: number | null
+          title?: string | null
+          image_url: string
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          pillar?: number | null
+          title?: string | null
+          image_url?: string
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Enums: {
       [_ in never]: never
