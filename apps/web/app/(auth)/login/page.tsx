@@ -16,12 +16,13 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
     const supabase = createClient()
-    const { error: err } = await supabase.auth.signInWithPassword({
+    const { data, error: err } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password,
     })
+    console.log('[login] signInWithPassword data:', data, 'error:', err)
+    setLoading(false)
     if (err) {
-      setLoading(false)
       setError(err.message)
       return
     }
