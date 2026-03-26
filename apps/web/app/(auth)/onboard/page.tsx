@@ -1,10 +1,8 @@
 'use client'
 import { useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function OnboardPage() {
-  const router = useRouter()
   const [displayName, setDisplayName] = useState('')
   const [roleTitle, setRoleTitle]     = useState('')
   const [location, setLocation]       = useState('')
@@ -46,17 +44,19 @@ export default function OnboardPage() {
       }
     }
 
+    // upsert so new users without a public.users row yet get one created
     const { error: updateError } = await supabase
       .from('users')
-      .update({
+      .upsert({
+        id:           user.id,
         display_name: displayName.trim(),
         role_title:   roleTitle.trim() || null,
         location:     location.trim() || null,
         ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
         onboarded_at: new Date().toISOString(),
       })
-      .eq('id', user.id)
 
+    console.log('[onboard] upsert result — error:', updateError?.message ?? 'none', '| user:', user.id)
     setLoading(false)
 
     if (updateError) {
@@ -64,7 +64,9 @@ export default function OnboardPage() {
       return
     }
 
-    router.push('/home')
+    // Route through /auth/callback so the server refreshes Set-Cookie headers
+    // before hitting /home — same reason as the login page redirect
+    window.location.href = '/auth/callback?next=/home'
   }
 
   return (
