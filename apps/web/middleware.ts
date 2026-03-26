@@ -47,6 +47,8 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
+  console.log('[middleware]', pathname, 'user:', user?.id ?? 'none', 'cookies:', request.cookies.getAll().map(c => c.name).join(', '))
+
   if (!user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }

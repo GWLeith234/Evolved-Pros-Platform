@@ -14,7 +14,7 @@ export default function LoginPage() {
     const supabase = createClient()
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        window.location.href = '/home'
+        setTimeout(() => { window.location.href = '/home' }, 500)
       }
     })
     return () => { subscription.unsubscribe() }
