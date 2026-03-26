@@ -12,6 +12,7 @@ export default function LoginPage() {
 
   async function handlePassword(e: React.FormEvent) {
     e.preventDefault()
+    console.log('form submitted', email, password)
     if (!email.trim() || !password.trim()) return
     setLoading(true)
     setError(null)
@@ -122,6 +123,7 @@ export default function LoginPage() {
                       EMAIL ADDRESS
                     </label>
                     <input
+                      id="email"
                       type="email"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
@@ -134,6 +136,7 @@ export default function LoginPage() {
                       PASSWORD
                     </label>
                     <input
+                      id="password"
                       type="password"
                       value={password}
                       onChange={e => setPassword(e.target.value)}
