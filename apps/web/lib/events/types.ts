@@ -45,7 +45,7 @@ export function formatDuration(startsAt: string, endsAt: string | null): string 
   if (mins < 60) return `${mins}m`
   const hrs = Math.floor(mins / 60)
   const rem = mins % 60
-  return rem > 0 ? `${hrs}h ${rem}m` : `${hrs}h`
+  return rem > 0 ? `${hrs} hr ${rem} min` : `${hrs} hr`
 }
 
 export function generateICS(event: EventItem): string {

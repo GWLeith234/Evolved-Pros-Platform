@@ -17,6 +17,22 @@
   --gold:         #c9a84c;
 }
 
+[data-theme='dark'] {
+  --page-bg:    #0d1c27;
+  --card-bg:    #112535;
+  --card-border: rgba(255,255,255,0.06);
+  --text-primary: rgba(255,255,255,0.9);
+  --text-muted:   rgba(255,255,255,0.4);
+}
+
+[data-theme='light'] {
+  --page-bg:    #faf9f7;
+  --card-bg:    #ffffff;
+  --card-border: rgba(27,60,90,0.12);
+  --text-primary: #1b3c5a;
+  --text-muted:   #7a8a96;
+}
+
 * { box-sizing: border-box; }
 html, body { overflow-x: hidden; }
 

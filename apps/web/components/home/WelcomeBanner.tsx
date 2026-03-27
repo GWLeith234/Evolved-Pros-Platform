@@ -75,11 +75,17 @@ export function WelcomeBanner({ displayName, tier, unreadPostCount, upcomingEven
           className="font-body text-[13px] mb-5"
           style={{ color: 'rgba(255,255,255,0.45)' }}
         >
-          You have{' '}
-          <span className="text-white font-medium">{unreadPostCount}</span> unread{' '}
-          {unreadPostCount === 1 ? 'post' : 'posts'} and{' '}
-          <span className="text-white font-medium">{upcomingEventCount}</span> upcoming{' '}
-          {upcomingEventCount === 1 ? 'event' : 'events'} this week.
+          {unreadPostCount === 0 && upcomingEventCount === 0 ? (
+            "You're all caught up this week!"
+          ) : (
+            <>
+              You have{' '}
+              <span className="text-white font-medium">{unreadPostCount}</span> unread{' '}
+              {unreadPostCount === 1 ? 'post' : 'posts'} and{' '}
+              <span className="text-white font-medium">{upcomingEventCount}</span> upcoming{' '}
+              {upcomingEventCount === 1 ? 'event' : 'events'} this week.
+            </>
+          )}
         </p>
 
         {/* CTA row */}
@@ -98,7 +104,7 @@ export function WelcomeBanner({ displayName, tier, unreadPostCount, upcomingEven
                 color: 'rgba(255,255,255,0.7)',
               }}
             >
-              Continue Academy
+              Continue Learning →
             </button>
           </Link>
         </div>

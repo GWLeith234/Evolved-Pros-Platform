@@ -102,7 +102,7 @@ export function NotifDrawer({ open, onClose, userId: _userId, onRead }: NotifDra
           ) : notifications.length === 0 ? (
             <div className="flex items-center justify-center h-32">
               <p className="font-condensed text-[11px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                All caught up.
+                You're all caught up!
               </p>
             </div>
           ) : (
@@ -118,21 +118,23 @@ export function NotifDrawer({ open, onClose, userId: _userId, onRead }: NotifDra
         </div>
 
         {/* Footer */}
-        <div
-          className="px-5 py-3 flex-shrink-0"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
-        >
-          <Link
-            href="/notifications"
-            onClick={onClose}
-            className="font-condensed font-semibold uppercase tracking-wide text-[11px] transition-colors"
-            style={{ color: 'rgba(255,255,255,0.45)' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'white' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)' }}
+        {notifications.length > 0 && (
+          <div
+            className="px-5 py-3 flex-shrink-0"
+            style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
           >
-            View All →
-          </Link>
-        </div>
+            <Link
+              href="/notifications"
+              onClick={onClose}
+              className="font-condensed font-semibold uppercase tracking-wide text-[11px] transition-colors"
+              style={{ color: 'rgba(255,255,255,0.45)' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'white' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)' }}
+            >
+              View All →
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Backdrop */}

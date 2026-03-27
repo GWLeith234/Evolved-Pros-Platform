@@ -354,12 +354,21 @@ export function Sidebar({ profile, unreadPosts = 0, upcomingEvents = 0 }: Sideba
           <SidebarSection title="Admin">
             <SidebarNavItem
               item={{
-                label: 'Admin Panel',
+                label: 'Dashboard',
                 href: '/admin',
-                match: /^\/admin/,
+                match: /^\/admin$/,
+                icon: <BarChartIcon />,
+              }}
+              active={/^\/admin$/.test(pathname)}
+            />
+            <SidebarNavItem
+              item={{
+                label: 'Branding',
+                href: '/admin/branding',
+                match: /^\/admin\/branding/,
                 icon: <SettingsIcon />,
               }}
-              active={/^\/admin/.test(pathname)}
+              active={/^\/admin\/branding/.test(pathname)}
             />
           </SidebarSection>
         )}

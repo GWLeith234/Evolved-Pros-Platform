@@ -125,7 +125,7 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, i
           </div>
         </Link>
         <p className="font-condensed font-medium text-[11px] text-[#7a8a96]">
-          {time} · {duration} · {typeLabel}
+          {time} · {duration}
           {event.registrationCount > 0 && ` · ${event.registrationCount} registered`}
         </p>
       </div>

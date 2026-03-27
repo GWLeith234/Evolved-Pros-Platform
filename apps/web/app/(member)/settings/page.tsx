@@ -31,7 +31,7 @@ export default async function SettingsPage() {
           Settings
         </h1>
         <p className="font-body text-[14px] mt-1" style={{ color: '#7a8a96' }}>
-          Update your profile information and preferences.
+          Update your profile information.
         </p>
       </div>
 

@@ -166,7 +166,7 @@ export default async function MemberHomePage() {
     fetchUnreadCount(supabase, user.id),
   ])
 
-  const displayName = profile.display_name ?? profile.full_name ?? 'Member'
+  const displayName = profile.display_name ?? (profile.full_name ? profile.full_name.split(' ')[0] : null) ?? 'Member'
   const upcomingEventCount = events.filter(e => !e.isRegistered).length
 
   return (

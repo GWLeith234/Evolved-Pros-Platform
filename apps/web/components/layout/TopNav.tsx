@@ -270,16 +270,6 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, membersCanToggleThem
                 >
                   My Profile
                 </Link>
-                <Link
-                  href="/settings"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-body transition-colors"
-                  style={{ color: '#1b3c5a' }}
-                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.04)')}
-                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
-                >
-                  Settings
-                </Link>
                 <div style={{ borderTop: '1px solid rgba(27,60,90,0.08)' }}>
                   <button
                     type="button"
