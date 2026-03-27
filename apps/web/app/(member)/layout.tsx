@@ -5,6 +5,7 @@ import { Suspense } from 'react'
 import { TopNav } from '@/components/layout/TopNav'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { BottomTabBar } from '@/components/layout/BottomTabBar'
+import { NextEventBanner } from '@/components/layout/NextEventBanner'
 
 export default async function MemberLayout({ children }: { children: React.ReactNode }) {
   // Dev bypass: skip Supabase when a dev_session cookie is present
@@ -19,6 +20,7 @@ export default async function MemberLayout({ children }: { children: React.React
       return (
         <div className="flex flex-col min-h-screen">
           <TopNav profile={profile} unreadCount={0} />
+          <NextEventBanner />
           <div className="flex flex-1 min-h-0">
             <Suspense fallback={<div className="w-[220px] flex-shrink-0 hidden md:flex" style={{ backgroundColor: '#112535' }} />}>
             <Sidebar profile={profile} />
@@ -71,6 +73,7 @@ export default async function MemberLayout({ children }: { children: React.React
   return (
     <div className="flex flex-col min-h-screen">
       <TopNav profile={profile} unreadCount={unreadCount ?? 0} logoUrl={logoUrl} membersCanToggleTheme={membersCanToggleTheme} />
+      <NextEventBanner />
       <div className="flex flex-1 min-h-0">
         <Suspense fallback={<div className="w-[220px] flex-shrink-0 hidden md:flex" style={{ backgroundColor: '#112535' }} />}>
             <Sidebar profile={profile} />
