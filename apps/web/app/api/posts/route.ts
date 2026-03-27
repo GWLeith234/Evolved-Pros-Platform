@@ -142,7 +142,10 @@ export async function POST(request: Request) {
     .select('id, channel_id, body, pillar_tag, is_pinned, like_count, reply_count, created_at, users(id, display_name, full_name, avatar_url, tier)')
     .single()
 
-  if (error || !post) return NextResponse.json({ error: 'Failed to create post' }, { status: 500 })
+  if (error || !post) {
+    console.error('[posts] insert failed — error:', JSON.stringify(error), '| post is null:', post === null)
+    return NextResponse.json({ error: 'Failed to create post' }, { status: 500 })
+  }
 
   // Award 10 points to author — fire-and-forget, do not block response
   supabase.rpc('increment_points', { user_id: user.id, amount: 10 }).then(({ error }) => {
