@@ -16,6 +16,13 @@ interface ProfileBannerWrapperProps {
     points: number
     created_at: string
     postCount: number
+    company?: string | null
+    linkedin_url?: string | null
+    website_url?: string | null
+    twitter_handle?: string | null
+    current_pillar?: string | null
+    goal_90day?: string | null
+    goal_visible?: boolean
   }
   isOwn: boolean
 }

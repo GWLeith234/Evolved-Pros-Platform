@@ -16,7 +16,7 @@ export async function GET(
   const [userResult, postsResult, progressResult, webhooksResult] = await Promise.all([
     supabase
       .from('users')
-      .select('id, email, full_name, display_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, vendasta_contact_id, points, created_at, updated_at')
+      .select('id, email, full_name, display_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, vendasta_contact_id, points, created_at, updated_at, company, linkedin_url, website_url, twitter_handle, phone, phone_visible, current_pillar, goal_90day, goal_visible')
       .eq('id', params.userId)
       .single(),
     supabase
@@ -61,6 +61,15 @@ export async function GET(
     points:            user.points,
     joinedAt:          user.created_at,
     lastActive:        user.updated_at,
+    company:           user.company,
+    linkedinUrl:       user.linkedin_url,
+    websiteUrl:        user.website_url,
+    twitterHandle:     user.twitter_handle,
+    phone:             user.phone,
+    phoneVisible:      user.phone_visible,
+    currentPillar:     user.current_pillar,
+    goal90day:         user.goal_90day,
+    goalVisible:       user.goal_visible,
     mrr:               getTierMrr(user.tier, user.tier_status),
     engagementLevel:   getEngagementLevel(postsLast30, lessonsLast30),
     engagementScore:   getEngagementScore(postsLast30, lessonsLast30),

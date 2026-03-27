@@ -5,6 +5,15 @@ import { PointsHistory } from '@/components/profile/PointsHistory'
 import { SendMessageButton } from '@/components/profile/SendMessageButton'
 import { Card, CardBody } from '@evolved-pros/ui'
 
+const PILLAR_LABELS: Record<string, string> = {
+  p1: 'Foundation',
+  p2: 'Identity',
+  p3: 'Mental Toughness',
+  p4: 'Strategy',
+  p5: 'Accountability',
+  p6: 'Execution',
+}
+
 export default async function PublicProfilePage({
   params,
   searchParams,
@@ -22,7 +31,7 @@ export default async function PublicProfilePage({
   const [profileResult, postCountResult, lessonsResult, progressResult, coursesResult] = await Promise.all([
     supabase
       .from('users')
-      .select('id, display_name, full_name, avatar_url, banner_url, bio, role_title, location, tier, points, created_at')
+      .select('id, display_name, full_name, avatar_url, banner_url, bio, role_title, location, tier, points, created_at, company, linkedin_url, website_url, twitter_handle, current_pillar, goal_90day, goal_visible')
       .eq('id', params.userId)
       .single(),
     supabase
@@ -78,7 +87,20 @@ export default async function PublicProfilePage({
 
   return (
     <div className="p-6 space-y-5">
-      <ProfileBannerWrapper user={{ ...profile, postCount }} isOwn={false} />
+      <ProfileBannerWrapper
+        user={{
+          ...profile,
+          postCount,
+          company: profile.company ?? null,
+          linkedin_url: profile.linkedin_url ?? null,
+          website_url: profile.website_url ?? null,
+          twitter_handle: profile.twitter_handle ?? null,
+          current_pillar: profile.current_pillar ?? null,
+          goal_90day: profile.goal_90day ?? null,
+          goal_visible: profile.goal_visible ?? true,
+        }}
+        isOwn={false}
+      />
 
       {/* Send Message button */}
       <div className="flex justify-end">
@@ -110,6 +132,20 @@ export default async function PublicProfilePage({
             <Card>
               <CardBody>
                 <p className="font-body text-sm text-[#1b3c5a] leading-relaxed">{profile.bio}</p>
+              </CardBody>
+            </Card>
+          )}
+
+          {/* 90-Day Goal */}
+          {profile.goal_visible && profile.goal_90day && (
+            <Card>
+              <CardBody>
+                <p className="font-condensed font-bold uppercase tracking-widest text-[9px] text-[#7a8a96] mb-2">
+                  90-Day Focus
+                </p>
+                <p className="font-body text-sm italic leading-relaxed" style={{ color: 'rgba(17,37,53,0.8)' }}>
+                  {profile.goal_90day}
+                </p>
               </CardBody>
             </Card>
           )}
