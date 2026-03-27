@@ -224,7 +224,7 @@ export function CommunityFeed({
                 key={post.id}
                 post={post}
                 currentUserId={currentUser.id}
-                currentUser={{ id: currentUser.id, displayName: currentUser.displayName }}
+                currentUser={{ id: currentUser.id, displayName: currentUser.displayName, avatarUrl: currentUser.avatarUrl }}
                 onLike={handleLike}
                 onBookmark={handleBookmark}
               />

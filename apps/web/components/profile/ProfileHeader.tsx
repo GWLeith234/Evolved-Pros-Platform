@@ -83,7 +83,7 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
         <div className="flex items-start gap-5 mb-5">
           {/* Avatar */}
           <div
-            className="w-16 h-16 rounded flex-shrink-0 flex items-center justify-center overflow-hidden"
+            className="w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
             style={{ backgroundColor: '#ef0e30', marginTop: '-48px', border: '3px solid #112535' }}
           >
             {user.avatar_url ? (
@@ -91,7 +91,7 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
               <img
                 src={user.avatar_url}
                 alt={displayName}
-                className="w-16 h-16 object-cover"
+                className="w-16 h-16 rounded-full object-cover"
               />
             ) : (
               <span className="font-condensed font-bold text-white text-xl">

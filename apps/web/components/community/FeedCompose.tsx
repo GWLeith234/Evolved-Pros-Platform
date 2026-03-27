@@ -85,7 +85,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
       <div className="flex gap-3">
         {/* Avatar */}
         <div
-          className="w-9 h-9 rounded flex-shrink-0 flex items-center justify-center"
+          className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
           style={{ backgroundColor: currentUser.avatarUrl ? undefined : avatarBg }}
         >
           {currentUser.avatarUrl ? (
@@ -93,7 +93,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
             <img
               src={currentUser.avatarUrl}
               alt={currentUser.displayName ?? ''}
-              className="w-9 h-9 rounded object-cover"
+              className="w-9 h-9 rounded-full object-cover"
             />
           ) : (
             <span className="font-condensed font-bold text-white text-xs">

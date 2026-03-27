@@ -10,7 +10,7 @@ import type { Post, Reply, PillarTag } from '@/lib/community/types'
 interface PostCardProps {
   post: Post & { replies?: Reply[] }
   currentUserId: string
-  currentUser: { id: string; displayName: string | null }
+  currentUser: { id: string; displayName: string | null; avatarUrl: string | null }
   onLike: (postId: string) => void
   onBookmark: (postId: string) => void
 }
@@ -110,7 +110,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onBookmark 
       <div className="flex items-start gap-3 mb-3">
         {/* Avatar */}
         <div
-          className="w-9 h-9 rounded flex-shrink-0 flex items-center justify-center"
+          className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
           style={{ backgroundColor: avatarBg }}
         >
           {post.author.avatarUrl ? (
@@ -118,7 +118,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onBookmark 
             <img
               src={post.author.avatarUrl}
               alt={post.author.displayName}
-              className="w-9 h-9 rounded object-cover"
+              className="w-9 h-9 rounded-full object-cover"
             />
           ) : (
             <span className="font-condensed font-bold text-white text-xs">
@@ -213,7 +213,7 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onBookmark 
               postId={post.id}
               replies={replies}
               totalReplies={post.replyCount}
-              currentUser={currentUser}
+              currentUser={{ id: currentUser.id, displayName: currentUser.displayName, avatarUrl: currentUser.avatarUrl }}
               onReplySubmit={handleReplySubmit}
             />
           )}

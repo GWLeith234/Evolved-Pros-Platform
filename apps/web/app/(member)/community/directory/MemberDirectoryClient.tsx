@@ -163,7 +163,7 @@ export function MemberDirectoryClient() {
                     {/* Avatar + badge row */}
                     <div className="flex items-start justify-between mb-3">
                       <div
-                        className="w-14 h-14 rounded flex-shrink-0 flex items-center justify-center overflow-hidden"
+                        className="w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
                         style={{ backgroundColor: avatarBg }}
                       >
                         {member.avatarUrl ? (
@@ -171,7 +171,7 @@ export function MemberDirectoryClient() {
                           <img
                             src={member.avatarUrl}
                             alt={member.displayName}
-                            className="w-14 h-14 object-cover"
+                            className="w-14 h-14 rounded-full object-cover"
                           />
                         ) : (
                           <span className="font-condensed font-bold text-white text-lg">

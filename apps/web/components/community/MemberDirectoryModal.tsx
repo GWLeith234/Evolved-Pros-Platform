@@ -152,12 +152,12 @@ export function MemberDirectoryModal({ onClose }: MemberDirectoryModalProps) {
                 >
                   {/* Avatar */}
                   <div
-                    className="w-11 h-11 rounded flex-shrink-0 flex items-center justify-center overflow-hidden"
+                    className="w-11 h-11 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
                     style={{ backgroundColor: avatarBg }}
                   >
                     {member.avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={member.avatarUrl} alt={member.displayName} className="w-11 h-11 object-cover" />
+                      <img src={member.avatarUrl} alt={member.displayName} className="w-11 h-11 rounded-full object-cover" />
                     ) : (
                       <span className="font-condensed font-bold text-white text-sm">
                         {getInitials(member.displayName)}

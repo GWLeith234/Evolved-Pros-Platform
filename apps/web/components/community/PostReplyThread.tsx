@@ -11,6 +11,7 @@ interface PostReplyThreadProps {
   currentUser: {
     id: string
     displayName: string | null
+    avatarUrl: string | null
   }
   onReplySubmit: (body: string) => Promise<void>
 }
@@ -35,12 +36,12 @@ function ReplyItem({ reply }: { reply: Reply }) {
   return (
     <div className="flex gap-2.5">
       <div
-        className="w-7 h-7 rounded flex-shrink-0 flex items-center justify-center"
+        className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
         style={{ backgroundColor: avatarBg }}
       >
         {reply.author.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={reply.author.avatarUrl} alt={reply.author.displayName} className="w-7 h-7 rounded object-cover" />
+          <img src={reply.author.avatarUrl} alt={reply.author.displayName} className="w-7 h-7 rounded-full object-cover" />
         ) : (
           <span className="font-condensed font-bold text-white" style={{ fontSize: '9px' }}>
             {getInitials(reply.author.displayName)}
@@ -113,12 +114,17 @@ export function PostReplyThread({
       {/* Compose reply */}
       <div className="flex gap-2 pt-1">
         <div
-          className="w-7 h-7 rounded flex-shrink-0 flex items-center justify-center"
+          className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
           style={{ backgroundColor: getAvatarColor(currentUser.id) }}
         >
-          <span className="font-condensed font-bold text-white" style={{ fontSize: '9px' }}>
-            {getInitials(currentUser.displayName)}
-          </span>
+          {currentUser.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={currentUser.avatarUrl} alt={currentUser.displayName ?? ''} className="w-7 h-7 rounded-full object-cover" />
+          ) : (
+            <span className="font-condensed font-bold text-white" style={{ fontSize: '9px' }}>
+              {getInitials(currentUser.displayName)}
+            </span>
+          )}
         </div>
         <div className="flex-1">
           <textarea

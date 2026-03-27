@@ -56,12 +56,12 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
 
       {/* Avatar */}
       <div
-        className="w-7 h-7 rounded flex-shrink-0 flex items-center justify-center overflow-hidden"
+        className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
         style={{ backgroundColor: avatarBg }}
       >
         {entry.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={entry.avatarUrl} alt={entry.displayName} className="w-7 h-7 object-cover" />
+          <img src={entry.avatarUrl} alt={entry.displayName} className="w-7 h-7 rounded-full object-cover" />
         ) : (
           <span style={{ fontSize: '9px' }} className="font-condensed font-bold text-white">
             {getInitials(entry.displayName)}
@@ -95,12 +95,12 @@ function ActiveMemberRow({ member }: { member: MemberSummary }) {
     <Link href={`/profile/${member.id}`} className="flex items-center gap-2.5 py-2 group">
       {/* Avatar */}
       <div
-        className="w-8 h-8 rounded flex-shrink-0 flex items-center justify-center overflow-hidden"
+        className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
         style={{ backgroundColor: avatarBg }}
       >
         {member.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={member.avatarUrl} alt={member.displayName} className="w-8 h-8 object-cover" />
+          <img src={member.avatarUrl} alt={member.displayName} className="w-8 h-8 rounded-full object-cover" />
         ) : (
           <span className="text-[10px] font-condensed font-bold text-white">
             {getInitials(member.displayName)}

@@ -150,12 +150,12 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <div
-                          className="w-7 h-7 rounded flex-shrink-0 flex items-center justify-center text-white font-condensed font-bold text-[10px]"
+                          className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-white font-condensed font-bold text-[10px]"
                           style={{ backgroundColor: '#1b3c5a' }}
                         >
                           {m.avatarUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={m.avatarUrl} alt={name} className="w-7 h-7 rounded object-cover" />
+                            <img src={m.avatarUrl} alt={name} className="w-7 h-7 rounded-full object-cover" />
                           ) : getInitials(name)}
                         </div>
                         <div>
