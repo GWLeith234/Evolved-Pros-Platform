@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { PostReplyThread } from './PostReplyThread'
 import { getAvatarColor, PILLAR_LABELS } from '@/lib/community/types'
 import { MemberBadge } from '@/components/ui/MemberBadge'
+import { Tooltip } from '@/components/ui/Tooltip'
 import type { Post, Reply, PillarTag } from '@/lib/community/types'
 
 interface PostCardProps {
@@ -131,7 +132,15 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onBookmark 
             <span className="font-body font-semibold text-[14px] text-[#1b3c5a]">
               {post.author.displayName}
             </span>
-            {post.author.tier && <MemberBadge tier={post.author.tier} size="sm" />}
+            {post.author.tier && (
+              post.author.tier === 'pro' ? (
+                <Tooltip content="Pro members have access to all 6 pillars and exclusive events.">
+                  <MemberBadge tier={post.author.tier} size="sm" />
+                </Tooltip>
+              ) : (
+                <MemberBadge tier={post.author.tier} size="sm" />
+              )
+            )}
             {pillarLabel && (
               <span
                 className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"

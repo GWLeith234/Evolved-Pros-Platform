@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Input, Textarea, Button } from '@evolved-pros/ui'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 type ProfileFields = {
   display_name: string | null
@@ -197,20 +198,24 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
 
       {/* Fields */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Input
-          label="Display Name"
-          value={fields.display_name}
-          onChange={e => handleChange('display_name', e.target.value)}
-          maxLength={50}
-          placeholder="How you appear to others"
-        />
-        <Input
-          label="Full Name"
-          value={fields.full_name}
-          onChange={e => handleChange('full_name', e.target.value)}
-          maxLength={100}
-          placeholder="Your full name"
-        />
+        <Tooltip content="Shown on your posts, leaderboard, and community profile." className="block">
+          <Input
+            label="Display Name"
+            value={fields.display_name}
+            onChange={e => handleChange('display_name', e.target.value)}
+            maxLength={50}
+            placeholder="How you appear to others"
+          />
+        </Tooltip>
+        <Tooltip content="Your full name. Only visible to administrators." className="block">
+          <Input
+            label="Full Name"
+            value={fields.full_name}
+            onChange={e => handleChange('full_name', e.target.value)}
+            maxLength={100}
+            placeholder="Your full name"
+          />
+        </Tooltip>
         <Input
           label="Role / Title"
           value={fields.role_title}

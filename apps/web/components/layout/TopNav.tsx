@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { NotifBell } from '@/components/notifications/NotifBell'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 interface TopNavProps {
   profile: {
@@ -176,6 +177,7 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, membersCanToggleThem
         <div className="flex items-center gap-2">
           {/* Next event card */}
           {nextEvent && (
+            <Tooltip content="Your next upcoming event. Click to view details.">
             <a
               href={`/events`}
               style={{
@@ -202,6 +204,7 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, membersCanToggleThem
                 <polygon points="5 3 19 12 5 21 5 3"/>
               </svg>
             </a>
+            </Tooltip>
           )}
 
           {/* Theme toggle */}

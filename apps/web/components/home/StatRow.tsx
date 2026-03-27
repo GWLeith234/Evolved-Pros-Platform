@@ -1,4 +1,5 @@
 import { StatCard } from '@evolved-pros/ui'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 interface DashboardStats {
   communityMemberCount: number
@@ -25,26 +26,32 @@ export function StatRow({ stats }: StatRowProps) {
         deltaType="up"
         accent="red"
       />
-      <StatCard
-        value={`${stats.pillarsUnlocked} / ${stats.pillarsTotal}`}
-        label="Pillars Unlocked"
-        delta={locked > 0 ? `${locked} remaining` : 'All unlocked'}
-        deltaType={locked > 0 ? 'neutral' : 'up'}
-        accent="teal"
-      />
-      <StatCard
-        value={`${stats.academyProgressPct}%`}
-        label="Academy Progress"
-        delta={stats.academyProgressPct > 0 ? `${stats.academyProgressPct}% complete` : 'Not started'}
-        deltaType={stats.academyProgressPct > 0 ? 'up' : 'neutral'}
-        accent="navy"
-      />
-      <StatCard
-        value={`#${stats.leaderboardRank}`}
-        label="Leaderboard Rank"
-        deltaType="neutral"
-        accent="gold"
-      />
+      <Tooltip content="Pillars are the 6 core course tracks in the Evolved Architecture. Your tier determines how many you can access.">
+        <StatCard
+          value={`${stats.pillarsUnlocked} / ${stats.pillarsTotal}`}
+          label="Pillars Unlocked"
+          delta={locked > 0 ? `${locked} remaining` : 'All unlocked'}
+          deltaType={locked > 0 ? 'neutral' : 'up'}
+          accent="teal"
+        />
+      </Tooltip>
+      <Tooltip content="Tracks your completion across all Academy lessons. Complete lessons to increase your percentage.">
+        <StatCard
+          value={`${stats.academyProgressPct}%`}
+          label="Academy Progress"
+          delta={stats.academyProgressPct > 0 ? `${stats.academyProgressPct}% complete` : 'Not started'}
+          deltaType={stats.academyProgressPct > 0 ? 'up' : 'neutral'}
+          accent="navy"
+        />
+      </Tooltip>
+      <Tooltip content="Your weekly rank based on points from posts, replies, and engagement. Resets every Monday.">
+        <StatCard
+          value={`#${stats.leaderboardRank}`}
+          label="Leaderboard Rank"
+          deltaType="neutral"
+          accent="gold"
+        />
+      </Tooltip>
     </div>
   )
 }

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { formatEventDate, formatDuration, EVENT_TYPE_LABELS, EVENT_TYPE_STYLES } from '@/lib/events/types'
 import type { EventItem } from '@/lib/events/types'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 interface EventCardProps {
   event: EventItem
@@ -57,12 +58,14 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, i
 
     if (!hasAccess) {
       return (
-        <span
-          className="font-condensed font-semibold uppercase tracking-wide text-xs rounded px-4 py-2 flex-shrink-0"
-          style={{ color: '#7a8a96', border: '1px solid rgba(27,60,90,0.15)', backgroundColor: 'transparent' }}
-        >
-          Pro Required
-        </span>
+        <Tooltip content="This event requires a Pro membership. Upgrade in Settings to access it.">
+          <span
+            className="font-condensed font-semibold uppercase tracking-wide text-xs rounded px-4 py-2 flex-shrink-0"
+            style={{ color: '#7a8a96', border: '1px solid rgba(27,60,90,0.15)', backgroundColor: 'transparent' }}
+          >
+            Pro Required
+          </span>
+        </Tooltip>
       )
     }
 

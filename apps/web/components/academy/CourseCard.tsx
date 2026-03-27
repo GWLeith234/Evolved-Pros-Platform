@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { PILLAR_GRADIENTS } from '@/lib/academy/types'
 import type { CourseWithProgress } from '@/lib/academy/types'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 const PILLAR_DESCRIPTIONS: Record<number, string> = {
   1: 'Build your core operating system',
@@ -78,12 +79,14 @@ export function CourseCard({ course, isLocked }: CourseCardProps) {
 
         {/* Lock icon */}
         {isLocked && (
-          <div
-            className="absolute top-2 right-2 w-[22px] h-[22px] rounded flex items-center justify-center"
-            style={{ backgroundColor: 'rgba(0,0,0,0.4)', color: 'rgba(255,255,255,0.7)' }}
-          >
-            <LockIcon />
-          </div>
+          <Tooltip content="Upgrade to Pro to unlock these pillars.">
+            <div
+              className="absolute top-2 right-2 w-[22px] h-[22px] rounded flex items-center justify-center"
+              style={{ backgroundColor: 'rgba(0,0,0,0.4)', color: 'rgba(255,255,255,0.7)' }}
+            >
+              <LockIcon />
+            </div>
+          </Tooltip>
         )}
 
         {/* Progress bar on thumbnail bottom edge */}
