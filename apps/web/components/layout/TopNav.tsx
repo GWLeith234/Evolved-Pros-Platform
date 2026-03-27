@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { NotifBell } from '@/components/notifications/NotifBell'
 import { Tooltip } from '@/components/ui/Tooltip'
+import { AskGeorgeDrawer } from '@/components/layout/AskGeorgeDrawer'
 
 interface TopNavProps {
   profile: {
@@ -69,6 +70,7 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, membersCanToggleThem
   const dropdownRef = useRef<HTMLDivElement>(null)
   const [nextEvent, setNextEvent] = useState<NextEvent>(null)
   const [isDark, setIsDark] = useState(true)
+  const [georgeOpen, setGeorgeOpen] = useState(false)
 
   const displayName = profile.display_name ?? profile.full_name ?? ''
 
@@ -125,6 +127,7 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, membersCanToggleThem
 
   return (
     <>
+      <AskGeorgeDrawer isOpen={georgeOpen} onClose={() => setGeorgeOpen(false)} />
       <header
         className="sticky top-0 z-40 flex items-center justify-between px-6 h-14 flex-shrink-0"
         style={{
@@ -223,6 +226,23 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, membersCanToggleThem
               {isDark ? <SunIcon /> : <MoonIcon />}
             </button>
           )}
+
+          {/* Ask George */}
+          <Tooltip content="Ask George">
+            <button
+              type="button"
+              onClick={() => setGeorgeOpen(o => !o)}
+              className="w-8 h-8 flex items-center justify-center rounded flex-shrink-0 transition-colors"
+              style={{ color: georgeOpen ? '#68a2b9' : 'rgba(255,255,255,0.5)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#68a2b9')}
+              onMouseLeave={e => (e.currentTarget.style.color = georgeOpen ? '#68a2b9' : 'rgba(255,255,255,0.5)')}
+              aria-label="Ask George AI"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </button>
+          </Tooltip>
 
           {/* Notification bell */}
           <NotifBell initialUnreadCount={unreadCount} userId={profile.id} />
