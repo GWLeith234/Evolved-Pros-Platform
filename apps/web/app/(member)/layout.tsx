@@ -49,7 +49,7 @@ export default async function MemberLayout({ children }: { children: React.React
     redirect('/membership-expired')
   }
 
-  const [{ count: unreadCount }, { data: logoSetting }, { data: themeSetting }] = await Promise.all([
+  const [{ count: unreadCount }, { data: logoSetting }, { data: logoLightSetting }, { data: themeSetting }] = await Promise.all([
     supabase
       .from('notifications')
       .select('id', { count: 'exact', head: true })
@@ -63,16 +63,22 @@ export default async function MemberLayout({ children }: { children: React.React
     supabase
       .from('platform_settings')
       .select('value')
+      .eq('key', 'logo_nav_light_url')
+      .single(),
+    supabase
+      .from('platform_settings')
+      .select('value')
       .eq('key', 'members_can_toggle_theme')
       .single(),
   ])
 
   const logoUrl = logoSetting?.value || null
+  const logoLightUrl = logoLightSetting?.value || null
   const membersCanToggleTheme = themeSetting?.value !== 'false'
 
   return (
     <div className="flex flex-col min-h-screen">
-      <TopNav profile={profile} unreadCount={unreadCount ?? 0} logoUrl={logoUrl} membersCanToggleTheme={membersCanToggleTheme} />
+      <TopNav profile={profile} unreadCount={unreadCount ?? 0} logoUrl={logoUrl} logoLightUrl={logoLightUrl} membersCanToggleTheme={membersCanToggleTheme} />
       <NextEventBanner />
       <div className="flex flex-1 min-h-0">
         <Suspense fallback={<div className="w-[220px] flex-shrink-0 hidden md:flex" style={{ backgroundColor: '#112535' }} />}>

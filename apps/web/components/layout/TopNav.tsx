@@ -18,6 +18,7 @@ interface TopNavProps {
   }
   unreadCount?: number
   logoUrl?: string | null
+  logoLightUrl?: string | null
   membersCanToggleTheme?: boolean
 }
 
@@ -64,7 +65,7 @@ function MoonIcon() {
 
 type NextEvent = { id: string; title: string; starts_at: string } | null
 
-export function TopNav({ profile, unreadCount = 0, logoUrl, membersCanToggleTheme = true }: TopNavProps) {
+export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, membersCanToggleTheme = true }: TopNavProps) {
   const pathname = usePathname()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -135,11 +136,15 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, membersCanToggleThem
           borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}
       >
-        {/* Logo */}
+        {/* Logo — swaps between dark/light variant when theme toggles */}
         <Link href="/home" className="flex items-center flex-shrink-0">
-          {logoUrl ? (
+          {(isDark ? logoUrl : (logoLightUrl ?? logoUrl)) ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt="Evolved Pros" style={{ height: '36px', width: 'auto' }} />
+            <img
+              src={isDark ? logoUrl! : (logoLightUrl ?? logoUrl)!}
+              alt="Evolved Pros"
+              style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
+            />
           ) : (
             <span className="font-condensed font-bold text-white tracking-[0.14em] text-base select-none">
               EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 interface MoreDrawerProps {
@@ -66,8 +67,16 @@ function LogOutIcon() {
 
 const linkClass = "w-full flex items-center gap-3 py-4 px-6 font-condensed font-semibold text-sm transition-colors"
 
+const LOGO_CIRCLE_DARK  = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_circle_dark.png'
+const LOGO_CIRCLE_LIGHT = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_circle_light.png'
+
 export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
   const router = useRouter()
+  const [isDark, setIsDark] = useState(true)
+
+  useEffect(() => {
+    setIsDark(!document.documentElement.classList.contains('light-mode'))
+  }, [open])
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -93,15 +102,17 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
-        {/* Handle bar */}
-        <div className="flex justify-center pt-3 pb-1">
+        {/* Handle bar + logo */}
+        <div className="flex flex-col items-center pt-3 pb-2 gap-2">
           <div
             className="rounded-full"
-            style={{
-              width: '32px',
-              height: '4px',
-              backgroundColor: 'rgba(255,255,255,0.2)',
-            }}
+            style={{ width: '32px', height: '4px', backgroundColor: 'rgba(255,255,255,0.2)' }}
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={isDark ? LOGO_CIRCLE_DARK : LOGO_CIRCLE_LIGHT}
+            alt="Evolved Pros"
+            style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'contain' }}
           />
         </div>
 

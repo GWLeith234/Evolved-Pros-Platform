@@ -24,9 +24,15 @@ const barlow = Barlow({
   weight: ['300', '400', '500', '600'],
 })
 
+const LOGO_CIRCLE_DARK = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_circle_dark.png'
+
 export const metadata: Metadata = {
   title:       'Evolved Pros — The Platform for High Performers',
   description: 'Community, academy, and accountability for professionals who operate at the highest level.',
+  icons: {
+    icon:  LOGO_CIRCLE_DARK,
+    apple: LOGO_CIRCLE_DARK,
+  },
   openGraph: {
     title:       'Evolved Pros',
     description: 'The platform for high performers.',

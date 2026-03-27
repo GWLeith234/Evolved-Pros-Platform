@@ -57,13 +57,13 @@ export default function LoginPage() {
       <div className="w-full max-w-[400px] bg-white rounded-lg overflow-hidden shadow-2xl">
         <div className="h-1 bg-[#ef0e30]" />
         <div className="px-8 py-10">
-          <div className="mb-8 text-center">
-            <p
-              className="text-[#1b3c5a] tracking-[0.18em] text-lg font-bold"
-              style={{ fontFamily: '"Barlow Condensed", sans-serif' }}
-            >
-              EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS
-            </p>
+          <div className="mb-8 flex justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_stacked_dark.png"
+              alt="Evolved Pros"
+              style={{ height: '64px', width: 'auto', objectFit: 'contain' }}
+            />
           </div>
 
           {sent ? (

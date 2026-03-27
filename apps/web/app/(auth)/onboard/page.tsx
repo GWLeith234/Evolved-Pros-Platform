@@ -80,13 +80,13 @@ export default function OnboardPage() {
 
         <div className="px-8 py-10">
           {/* Logo */}
-          <div className="mb-2 text-center">
-            <p
-              className="text-[#1b3c5a] tracking-[0.18em] text-base font-bold"
-              style={{ fontFamily: '"Barlow Condensed", sans-serif' }}
-            >
-              EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS
-            </p>
+          <div className="mb-2 flex justify-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_stacked_dark.png"
+              alt="Evolved Pros"
+              style={{ height: '64px', width: 'auto', objectFit: 'contain' }}
+            />
           </div>
 
           {/* Progress */}
