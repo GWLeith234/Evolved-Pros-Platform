@@ -1,12 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { ProfileBannerWrapper } from '@/components/profile/ProfileBannerWrapper'
-import { Card, CardBody, CardHeader } from '@evolved-pros/ui'
+import { PointsHistory } from '@/components/profile/PointsHistory'
+import { Card, CardBody } from '@evolved-pros/ui'
 
 export default async function PublicProfilePage({
   params,
+  searchParams,
 }: {
   params: { userId: string }
+  searchParams: { tab?: string }
 }) {
   const supabase = createClient()
   const { data: { user: currentUser } } = await supabase.auth.getUser()
@@ -62,84 +65,100 @@ export default async function PublicProfilePage({
     .order('created_at', { ascending: false })
     .limit(5)
 
+  const tab = searchParams.tab ?? 'overview'
+
+  const TABS = [
+    { key: 'overview', label: 'Overview' },
+    { key: 'progress', label: 'Progress' },
+    { key: 'points', label: 'Points' },
+  ]
+
+  const base = `/profile/${params.userId}`
+
   return (
     <div className="p-6 space-y-5">
       <ProfileBannerWrapper user={{ ...profile, postCount }} isOwn={false} />
 
-      {/* Tab bar — read-only: only Overview and Progress */}
+      {/* Tab bar */}
       <div className="flex gap-1 border-b border-[rgba(27,60,90,0.12)]">
-        {['Overview', 'Progress'].map(label => (
-          <span
-            key={label}
-            className="px-4 py-2.5 font-condensed font-semibold uppercase tracking-wide text-xs border-b-2 -mb-px"
+        {TABS.map(t => (
+          <a
+            key={t.key}
+            href={t.key === 'overview' ? base : `${base}?tab=${t.key}`}
+            className="px-4 py-2.5 font-condensed font-semibold uppercase tracking-wide text-xs border-b-2 -mb-px transition-colors"
             style={{
-              color: label === 'Overview' ? '#68a2b9' : '#7a8a96',
-              borderColor: label === 'Overview' ? '#68a2b9' : 'transparent',
+              color: tab === t.key ? '#68a2b9' : '#7a8a96',
+              borderColor: tab === t.key ? '#68a2b9' : 'transparent',
             }}
           >
-            {label}
-          </span>
+            {t.label}
+          </a>
         ))}
       </div>
 
-      {/* Bio */}
-      {profile.bio && (
-        <Card>
-          <CardBody>
-            <p className="font-body text-sm text-[#1b3c5a] leading-relaxed">{profile.bio}</p>
-          </CardBody>
-        </Card>
+      {/* Overview tab */}
+      {tab === 'overview' && (
+        <div className="space-y-5">
+          {/* Bio */}
+          {profile.bio && (
+            <Card>
+              <CardBody>
+                <p className="font-body text-sm text-[#1b3c5a] leading-relaxed">{profile.bio}</p>
+              </CardBody>
+            </Card>
+          )}
+
+          {/* Recent posts */}
+          <div>
+            <h2 className="font-condensed font-bold uppercase tracking-widest text-xs text-[#7a8a96] mb-3">
+              Recent Posts
+            </h2>
+            {!posts || posts.length === 0 ? (
+              <Card>
+                <CardBody>
+                  <p className="font-condensed text-xs uppercase tracking-widest text-[#7a8a96] text-center py-4">
+                    No posts yet
+                  </p>
+                </CardBody>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {posts.map(post => {
+                  const channel = post.channels as { name: string; slug: string } | null
+                  return (
+                    <Card key={post.id}>
+                      <CardBody>
+                        {channel && (
+                          <p className="font-condensed text-[10px] font-bold uppercase tracking-widest text-[#68a2b9] mb-1">
+                            #{channel.name}
+                          </p>
+                        )}
+                        <p className="font-body text-sm text-[#1b3c5a] leading-relaxed mb-2">
+                          {post.body}
+                        </p>
+                        <div className="flex items-center gap-4">
+                          <span className="font-condensed text-[10px] text-[#7a8a96]">
+                            {new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </span>
+                          <span className="font-condensed text-[10px] text-[#7a8a96]">♥ {post.like_count}</span>
+                          <span className="font-condensed text-[10px] text-[#7a8a96]">↩ {post.reply_count}</span>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
-      {/* Recent posts */}
-      <div>
-        <h2 className="font-condensed font-bold uppercase tracking-widest text-xs text-[#7a8a96] mb-3">
-          Recent Posts
-        </h2>
-        {!posts || posts.length === 0 ? (
-          <Card>
-            <CardBody>
-              <p className="font-condensed text-xs uppercase tracking-widest text-[#7a8a96] text-center py-4">
-                No posts yet
-              </p>
-            </CardBody>
-          </Card>
-        ) : (
-          <div className="space-y-3">
-            {posts.map(post => {
-              const channel = post.channels as { name: string; slug: string } | null
-              return (
-                <Card key={post.id}>
-                  <CardBody>
-                    {channel && (
-                      <p className="font-condensed text-[10px] font-bold uppercase tracking-widest text-[#68a2b9] mb-1">
-                        #{channel.name}
-                      </p>
-                    )}
-                    <p className="font-body text-sm text-[#1b3c5a] leading-relaxed mb-2">
-                      {post.body}
-                    </p>
-                    <div className="flex items-center gap-4">
-                      <span className="font-condensed text-[10px] text-[#7a8a96]">
-                        {new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </span>
-                      <span className="font-condensed text-[10px] text-[#7a8a96]">♥ {post.like_count}</span>
-                      <span className="font-condensed text-[10px] text-[#7a8a96]">↩ {post.reply_count}</span>
-                    </div>
-                  </CardBody>
-                </Card>
-              )
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Course progress (read-only) */}
-      <div>
-        <h2 className="font-condensed font-bold uppercase tracking-widest text-xs text-[#7a8a96] mb-3">
-          Academy Progress
-        </h2>
+      {/* Progress tab */}
+      {tab === 'progress' && (
         <div className="space-y-3">
+          <h2 className="font-condensed font-bold uppercase tracking-widest text-xs text-[#7a8a96] mb-3">
+            Academy Progress
+          </h2>
           {courseProgress.map(c => {
             const isDone = c.pct === 100
             const fillColor = isDone ? '#22c55e' : '#68a2b9'
@@ -169,7 +188,17 @@ export default async function PublicProfilePage({
             )
           })}
         </div>
-      </div>
+      )}
+
+      {/* Points tab */}
+      {tab === 'points' && (
+        <div className="space-y-3">
+          <h2 className="font-condensed font-bold uppercase tracking-widest text-xs text-[#7a8a96] mb-3">
+            Points Activity
+          </h2>
+          <PointsHistory userId={params.userId} supabase={supabase} />
+        </div>
+      )}
     </div>
   )
 }

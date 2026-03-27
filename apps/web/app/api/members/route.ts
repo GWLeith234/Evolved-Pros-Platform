@@ -16,7 +16,7 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from('users')
-    .select('id, display_name, full_name, avatar_url, role_title, location, tier, points')
+    .select('id, display_name, full_name, avatar_url, role_title, location, tier, points, created_at')
     .eq('tier_status', 'active')
     .order('points', { ascending: false })
     .limit(limit + 1)
@@ -49,6 +49,7 @@ export async function GET(request: Request) {
     location: u.location,
     tier: u.tier,
     points: u.points,
+    created_at: u.created_at,
   }))
 
   return NextResponse.json({ members, hasMore })

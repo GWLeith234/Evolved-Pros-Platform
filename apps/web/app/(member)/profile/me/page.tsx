@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ProfileBannerWrapper } from '@/components/profile/ProfileBannerWrapper'
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm'
+import { PointsHistory } from '@/components/profile/PointsHistory'
 import { Card, CardBody, CardHeader } from '@evolved-pros/ui'
 
 export default async function MyProfilePage({
@@ -64,6 +65,7 @@ export default async function MyProfilePage({
   const TABS = [
     { key: 'overview', label: 'Overview' },
     { key: 'progress', label: 'Progress' },
+    { key: 'points', label: 'Points' },
     { key: 'edit', label: 'Edit Profile' },
   ]
 
@@ -123,6 +125,15 @@ export default async function MyProfilePage({
               </Card>
             )
           })}
+        </div>
+      )}
+
+      {tab === 'points' && (
+        <div className="space-y-3">
+          <h2 className="font-condensed font-bold uppercase tracking-widest text-xs text-[#7a8a96] mb-3">
+            Points Activity
+          </h2>
+          <PointsHistory userId={user.id} supabase={supabase} />
         </div>
       )}
 

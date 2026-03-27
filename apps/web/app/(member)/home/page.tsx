@@ -5,11 +5,12 @@ import { StatRow } from '@/components/home/StatRow'
 import { ActivityFeed } from '@/components/home/ActivityFeed'
 import { UpcomingEventsWidget } from '@/components/home/UpcomingEventsWidget'
 import { AcademyProgressWidget } from '@/components/home/AcademyProgressWidget'
+import { ProfileCompletePrompt } from '@/components/home/ProfileCompletePrompt'
 
 async function fetchCurrentUser(supabase: ReturnType<typeof createClient>, userId: string) {
   const { data } = await supabase
     .from('users')
-    .select('id, display_name, full_name, tier, points')
+    .select('id, display_name, full_name, tier, points, avatar_url, bio, role_title')
     .eq('id', userId)
     .single()
   return data
@@ -176,6 +177,12 @@ export default async function MemberHomePage() {
         tier={profile.tier}
         unreadPostCount={unreadCount}
         upcomingEventCount={upcomingEventCount}
+      />
+
+      <ProfileCompletePrompt
+        hasAvatar={Boolean(profile.avatar_url)}
+        hasBio={Boolean(profile.bio)}
+        hasTitle={Boolean(profile.role_title)}
       />
 
       <StatRow stats={stats} />
