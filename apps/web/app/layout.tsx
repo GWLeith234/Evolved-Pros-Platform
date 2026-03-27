@@ -60,11 +60,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       lang="en"
       className={`${playfair.variable} ${barlowCondensed.variable} ${barlow.variable}`}
     >
+      <head>
+        <ThemeInit defaultTheme={defaultTheme} />
+      </head>
       <body
         className="bg-navy-deep text-navy antialiased"
         style={{ fontFamily: 'var(--font-body)' }}
       >
-        <ThemeInit defaultTheme={defaultTheme} />
         {children}
       </body>
     </html>

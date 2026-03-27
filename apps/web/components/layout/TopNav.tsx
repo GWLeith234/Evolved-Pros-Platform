@@ -83,13 +83,10 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, membersCanToggleThem
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Initialize theme from localStorage
+  // Sync toggle state with whatever the inline script already applied
   useEffect(() => {
-    const stored = localStorage.getItem('ep_theme')
-    if (stored) {
-      setIsDark(stored === 'dark')
-      document.documentElement.setAttribute('data-theme', stored)
-    }
+    const isLight = document.documentElement.classList.contains('light-mode')
+    setIsDark(!isLight)
   }, [])
 
   // Fetch next upcoming event
@@ -109,10 +106,15 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, membersCanToggleThem
   }, [])
 
   function handleThemeToggle() {
-    const newTheme = isDark ? 'light' : 'dark'
+    const goLight = isDark
     setIsDark(!isDark)
-    localStorage.setItem('ep_theme', newTheme)
-    document.documentElement.setAttribute('data-theme', newTheme)
+    if (goLight) {
+      document.documentElement.classList.add('light-mode')
+      localStorage.setItem('ep_theme', 'light')
+    } else {
+      document.documentElement.classList.remove('light-mode')
+      localStorage.setItem('ep_theme', 'dark')
+    }
   }
 
   async function handleSignOut() {
