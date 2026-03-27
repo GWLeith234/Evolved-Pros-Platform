@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { getVendastaCrmUrl } from '@/lib/admin/utils'
 import type { EngagementLevel } from '@/lib/admin/utils'
+import { AdminEditProfileModal } from './AdminEditProfileModal'
 
 export interface MemberRow {
   id: string
@@ -53,9 +54,11 @@ function getInitials(name: string | null | undefined): string {
 export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }) {
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<Filter>('All')
+  const [members, setMembers] = useState<MemberRow[]>(initialMembers)
+  const [editingMember, setEditingMember] = useState<MemberRow | null>(null)
 
   const filtered = useMemo(() => {
-    let list = initialMembers
+    let list = members
     const q = search.trim().toLowerCase()
     if (q) {
       list = list.filter(m =>
@@ -69,7 +72,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
     if (filter === 'Trial')      list = list.filter(m => m.tierStatus === 'trial')
     if (filter === 'Cancelled')  list = list.filter(m => m.tierStatus === 'cancelled' || m.tierStatus === 'expired')
     return list
-  }, [initialMembers, search, filter])
+  }, [members, search, filter])
 
   return (
     <div>
@@ -241,17 +244,25 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                     </td>
 
                     {/* Actions */}
-                    <td className="px-4 py-3 text-right">
-                      <Link
-                        href={`/admin/members/${m.id}`}
-                        className="font-condensed font-semibold uppercase tracking-wide text-[10px] px-3 py-1.5 rounded transition-all"
-                        style={{
-                          color: '#1b3c5a',
-                          border: '1px solid rgba(27,60,90,0.25)',
-                        }}
-                      >
-                        View →
-                      </Link>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setEditingMember(m)}
+                          className="font-condensed font-semibold uppercase tracking-wide text-[10px] px-3 py-1.5 rounded transition-all"
+                          style={{ color: '#68a2b9', border: '1px solid rgba(104,162,185,0.3)' }}
+                          onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(104,162,185,0.06)')}
+                          onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                        >
+                          Edit
+                        </button>
+                        <Link
+                          href={`/admin/members/${m.id}`}
+                          className="font-condensed font-semibold uppercase tracking-wide text-[10px] px-3 py-1.5 rounded transition-all"
+                          style={{ color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.25)' }}
+                        >
+                          View →
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 )
@@ -260,6 +271,19 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
           </tbody>
         </table>
       </div>
+
+      {editingMember && (
+        <AdminEditProfileModal
+          member={editingMember}
+          onClose={() => setEditingMember(null)}
+          onSaved={updated => {
+            setMembers(prev => prev.map(m =>
+              m.id === editingMember.id ? { ...m, ...updated } : m,
+            ))
+            setEditingMember(null)
+          }}
+        />
+      )}
     </div>
   )
 }
