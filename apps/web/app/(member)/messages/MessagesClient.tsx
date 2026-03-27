@@ -108,6 +108,7 @@ export function MessagesClient({
 
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [mobileView, setMobileView] = useState<'list' | 'thread'>('list')
   const [newMessageOpen, setNewMessageOpen] = useState(false)
   const [memberSearch, setMemberSearch] = useState('')
   const [memberResults, setMemberResults] = useState<Member[]>([])
@@ -197,6 +198,7 @@ export function MessagesClient({
 
   function handleSelectConversation(id: string) {
     setSelectedId(id)
+    setMobileView('thread')
     router.replace(`/messages?c=${id}`)
     // Mark as read in local state immediately
     setConversations(prev =>
@@ -210,9 +212,8 @@ export function MessagesClient({
     <div className="flex h-full" style={{ backgroundColor: '#0d1e2c' }}>
       {/* Left pane */}
       <div
-        className="flex flex-col flex-shrink-0"
+        className={`flex-col flex-shrink-0 w-full md:w-72 ${mobileView === 'thread' ? 'hidden md:flex' : 'flex'}`}
         style={{
-          width: '288px',
           backgroundColor: '#112535',
           borderRight: '1px solid rgba(255,255,255,0.06)',
         }}
@@ -309,7 +310,7 @@ export function MessagesClient({
       </div>
 
       {/* Right pane */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className={`flex-1 flex-col min-w-0 ${mobileView === 'list' ? 'hidden md:flex' : 'flex'}`}>
         {!selectedId && (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
@@ -334,6 +335,18 @@ export function MessagesClient({
                 className="flex items-center gap-3 px-4 py-3 flex-shrink-0"
                 style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
               >
+                {/* Back button — mobile only */}
+                <button
+                  type="button"
+                  className="md:hidden flex items-center gap-1 font-condensed font-semibold text-[12px] uppercase tracking-wide flex-shrink-0"
+                  style={{ color: '#68a2b9' }}
+                  onClick={() => { setMobileView('list'); setSelectedId(null); router.replace('/messages') }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                  Back
+                </button>
                 <Avatar url={selectedConv.otherParticipant.avatarUrl} name={selectedConv.otherParticipant.displayName} size={32} />
                 <span
                   className="font-condensed font-bold text-[14px]"
@@ -359,7 +372,7 @@ export function MessagesClient({
           onClick={() => { setNewMessageOpen(false); setMemberSearch(''); setMemberResults([]) }}
         >
           <div
-            className="w-full max-w-md rounded-xl overflow-hidden"
+            className="w-full max-w-md mx-4 rounded-xl overflow-hidden"
             style={{ backgroundColor: '#112535', border: '1px solid rgba(255,255,255,0.1)' }}
             onClick={e => e.stopPropagation()}
           >
