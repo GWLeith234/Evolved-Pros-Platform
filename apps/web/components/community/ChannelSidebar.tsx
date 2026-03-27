@@ -151,12 +151,25 @@ export function ChannelSidebar({ channels, currentSlug, unreadCounts }: ChannelS
         </button>
 
         <button
-          className="flex items-center gap-2.5 px-4 py-[9px] transition-all duration-150 w-full text-left"
+          disabled
+          className="flex items-center gap-2.5 px-4 py-[9px] w-full text-left cursor-default"
           style={{ color: 'rgba(255,255,255,0.3)' }}
         >
           <span style={{ opacity: 0.4 }}><MessageIcon /></span>
-          <span className="font-condensed font-semibold text-[12px] tracking-wide opacity-40">
+          <span className="font-condensed font-semibold text-[12px] tracking-wide opacity-40 flex-1">
             Direct Messages
+          </span>
+          <span
+            className="font-condensed font-bold uppercase text-[8px] tracking-wide flex-shrink-0"
+            style={{
+              color: 'rgba(255,255,255,0.3)',
+              backgroundColor: 'rgba(255,255,255,0.07)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: '3px',
+              padding: '1px 5px',
+            }}
+          >
+            Soon
           </span>
         </button>
       </aside>

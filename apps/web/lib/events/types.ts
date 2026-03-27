@@ -33,7 +33,7 @@ export function formatEventDate(iso: string) {
   return {
     day:   d.getDate(),
     month: d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
-    time:  d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+    time:  d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }),
     full:  d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }),
   }
 }

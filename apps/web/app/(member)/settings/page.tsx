@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 export const dynamic = 'force-dynamic'
 
@@ -77,9 +78,11 @@ export default async function SettingsPage() {
         <div className="px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px]" style={{ color: '#7a8a96' }}>
-                Current Plan
-              </p>
+              <Tooltip content="Community: Pillars 1–4, community feed, events. Pro: All 6 pillars, exclusive events, priority support.">
+                <p className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] cursor-help" style={{ color: '#7a8a96' }}>
+                  Current Plan
+                </p>
+              </Tooltip>
               <p className="font-body text-[15px] font-semibold mt-0.5 capitalize" style={{ color: '#1b3c5a' }}>
                 {profile?.tier ?? 'Community'}
               </p>

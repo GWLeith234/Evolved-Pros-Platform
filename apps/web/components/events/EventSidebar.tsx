@@ -1,6 +1,7 @@
 'use client'
 
 import type { EventType } from '@/lib/events/types'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 interface EventSidebarProps {
   activeView: 'upcoming' | 'registrations' | 'recordings'
@@ -87,14 +88,25 @@ export function EventSidebar({
     >
       <SectionLabel>View</SectionLabel>
       {VIEW_ITEMS.map(item => (
-        <SidebarBtn
-          key={item.key}
-          active={activeView === item.key}
-          onClick={() => onViewChange(item.key)}
-          badge={item.key === 'registrations' ? registrationCount : undefined}
-        >
-          {item.label}
-        </SidebarBtn>
+        item.key === 'recordings' ? (
+          <Tooltip key={item.key} content="Past events that were recorded will appear here to watch on demand." className="block">
+            <SidebarBtn
+              active={activeView === item.key}
+              onClick={() => onViewChange(item.key)}
+            >
+              {item.label}
+            </SidebarBtn>
+          </Tooltip>
+        ) : (
+          <SidebarBtn
+            key={item.key}
+            active={activeView === item.key}
+            onClick={() => onViewChange(item.key)}
+            badge={item.key === 'registrations' ? registrationCount : undefined}
+          >
+            {item.label}
+          </SidebarBtn>
+        )
       ))}
 
       <SectionLabel>Filter by Type</SectionLabel>

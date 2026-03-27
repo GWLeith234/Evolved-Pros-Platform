@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getAvatarColor } from '@/lib/community/types'
 import { MemberBadge } from '@/components/ui/MemberBadge'
+import { Tooltip } from '@/components/ui/Tooltip'
 import type { LeaderboardEntry, MemberSummary } from '@/lib/community/types'
 
 interface LeaderboardRailProps {
@@ -13,15 +14,26 @@ function getInitials(name: string): string {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 }
 
-function RailSection({ eyebrow, children }: { eyebrow: string; children: React.ReactNode }) {
+function RailSection({ eyebrow, children, tooltip }: { eyebrow: string; children: React.ReactNode; tooltip?: string }) {
   return (
     <div>
-      <p
-        className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-3"
-        style={{ color: '#ef0e30' }}
-      >
-        {eyebrow}
-      </p>
+      {tooltip ? (
+        <Tooltip content={tooltip}>
+          <p
+            className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-3 cursor-help"
+            style={{ color: '#ef0e30' }}
+          >
+            {eyebrow}
+          </p>
+        </Tooltip>
+      ) : (
+        <p
+          className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-3"
+          style={{ color: '#ef0e30' }}
+        >
+          {eyebrow}
+        </p>
+      )}
       {children}
     </div>
   )
@@ -129,7 +141,7 @@ export function LeaderboardRail({ leaderboard, activeMembers, currentUserId }: L
         padding: '20px',
       }}
     >
-      <RailSection eyebrow="Leaderboard — This Week">
+      <RailSection eyebrow="Leaderboard — This Week" tooltip="Earn points by posting, replying, and getting likes. Top contributors recognized each week.">
         <div className="space-y-0.5">
           {displayEntries.length === 0 ? (
             <p className="font-condensed text-xs text-[#7a8a96]">No data yet</p>

@@ -1,4 +1,5 @@
 import { MemberBadge } from '@/components/ui/MemberBadge'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 type ProfileHeaderUser = {
   id: string
@@ -52,25 +53,27 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
           />
         )}
         {isOwn && onChangeBanner && (
-          <button
-            type="button"
-            onClick={onChangeBanner}
-            style={{
-              position: 'absolute',
-              bottom: '12px',
-              right: '12px',
-              background: 'rgba(0,0,0,0.6)',
-              color: 'white',
-              border: '0.5px solid rgba(255,255,255,0.3)',
-              borderRadius: '6px',
-              padding: '6px 12px',
-              fontSize: '12px',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            Change Banner
-          </button>
+          <Tooltip content="Your profile banner is the header image at the top of your profile. Choose a preset or upload your own.">
+            <button
+              type="button"
+              onClick={onChangeBanner}
+              style={{
+                position: 'absolute',
+                bottom: '12px',
+                right: '12px',
+                background: 'rgba(0,0,0,0.6)',
+                color: 'white',
+                border: '0.5px solid rgba(255,255,255,0.3)',
+                borderRadius: '6px',
+                padding: '6px 12px',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Change Banner
+            </button>
+          </Tooltip>
         )}
       </div>
 
@@ -125,25 +128,32 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
           style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}
         >
           {[
-            { label: 'Posts', value: user.postCount },
-            { label: 'Points', value: user.points },
-            { label: 'Joined', value: formatJoinDate(user.created_at) },
-          ].map(stat => (
-            <div key={stat.label}>
-              <p
-                className="font-display font-bold text-white leading-none"
-                style={{ fontSize: typeof stat.value === 'number' ? '20px' : '14px' }}
-              >
-                {stat.value}
-              </p>
-              <p
-                className="font-condensed font-semibold uppercase tracking-widest text-[9px] mt-0.5"
-                style={{ color: 'rgba(255,255,255,0.4)' }}
-              >
-                {stat.label}
-              </p>
-            </div>
-          ))}
+            { label: 'Posts', value: user.postCount, tooltip: undefined },
+            { label: 'Points', value: user.points, tooltip: 'Points are earned through community engagement — posting, replying, and receiving likes.' },
+            { label: 'Joined', value: formatJoinDate(user.created_at), tooltip: undefined },
+          ].map(({ label, value, tooltip }) => {
+            const inner = (
+              <div>
+                <p
+                  className="font-display font-bold text-white leading-none"
+                  style={{ fontSize: typeof value === 'number' ? '20px' : '14px' }}
+                >
+                  {value}
+                </p>
+                <p
+                  className="font-condensed font-semibold uppercase tracking-widest text-[9px] mt-0.5"
+                  style={{ color: 'rgba(255,255,255,0.4)' }}
+                >
+                  {label}
+                </p>
+              </div>
+            )
+            return tooltip ? (
+              <Tooltip key={label} content={tooltip}>{inner}</Tooltip>
+            ) : (
+              <div key={label}>{inner}</div>
+            )
+          })}
         </div>
       </div>
     </div>

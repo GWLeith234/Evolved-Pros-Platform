@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { CourseWithProgress } from '@/lib/academy/types'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 const SIDEBAR_SHORT_NAMES: Record<number, string> = {
   1: 'Foundation',
@@ -62,8 +63,9 @@ export function AcademySidebar({ courses, userTier, overallPct }: AcademySidebar
       })}
 
       {/* My Progress section */}
+      <Tooltip content="Your overall Academy progress across all pillars and lessons you have access to." className="block mx-4 mt-auto">
       <div
-        className="mt-auto mx-4 pt-4"
+        className="pt-4"
         style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
       >
         <p
@@ -95,6 +97,7 @@ export function AcademySidebar({ courses, userTier, overallPct }: AcademySidebar
           />
         </div>
       </div>
+      </Tooltip>
     </aside>
   )
 }
