@@ -116,7 +116,7 @@ export function ActivityFeed({ notifications, completions }: ActivityFeedProps) 
       <CardBody className="!px-0 !py-0">
         {items.length === 0 ? (
           <div className="px-6 py-8 text-center">
-            <p className="font-condensed text-xs uppercase tracking-widest text-[#7a8a96]">
+            <p className="font-condensed text-xs tracking-widest text-[#7a8a96]">
               No recent activity
             </p>
           </div>

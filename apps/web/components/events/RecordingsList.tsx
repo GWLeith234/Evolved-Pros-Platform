@@ -27,7 +27,7 @@ export function RecordingsList({ events }: RecordingsListProps) {
 
       {recordings.length === 0 ? (
         <div className="px-6 py-12 text-center">
-          <p className="font-condensed text-xs uppercase tracking-widest text-[#7a8a96]">
+          <p className="font-condensed text-xs tracking-widest text-[#7a8a96]">
             No recordings available yet.
           </p>
         </div>

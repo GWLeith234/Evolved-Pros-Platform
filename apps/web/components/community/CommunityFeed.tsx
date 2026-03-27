@@ -214,8 +214,8 @@ export function CommunityFeed({
           {/* Posts */}
           {posts.length === 0 ? (
             <div className="py-16 text-center">
-              <p className="font-condensed text-xs uppercase tracking-widest text-[#7a8a96]">
-                No posts yet — be the first.
+              <p className="font-condensed text-xs tracking-widest text-[#7a8a96]">
+                No posts yet — be the first to share.
               </p>
             </div>
           ) : (
@@ -245,7 +245,7 @@ export function CommunityFeed({
           )}
 
           {!hasMore && posts.length > 0 && (
-            <p className="text-center font-condensed text-[10px] uppercase tracking-widest text-[#7a8a96] py-4">
+            <p className="text-center font-condensed text-[10px] tracking-widest text-[#7a8a96] py-4">
               You've reached the beginning
             </p>
           )}

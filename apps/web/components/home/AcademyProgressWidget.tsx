@@ -20,7 +20,7 @@ export function AcademyProgressWidget({ courses }: AcademyProgressWidgetProps) {
       <CardHeader title="Your Academy" />
       <CardBody className="!px-6 !py-4 space-y-4">
         {courses.length === 0 ? (
-          <p className="font-condensed text-xs uppercase tracking-widest text-[#7a8a96] text-center py-4">
+          <p className="font-condensed text-xs tracking-widest text-[#7a8a96] text-center py-4">
             No courses started yet
           </p>
         ) : (

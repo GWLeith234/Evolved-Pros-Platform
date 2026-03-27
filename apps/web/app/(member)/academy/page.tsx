@@ -45,7 +45,7 @@ export default async function AcademyPage() {
             The Academy
           </h1>
           <p className="font-body text-[14px] mt-1" style={{ color: '#7a8a96' }}>
-            6 Pillar Course Tracks — Your complete professional transformation framework.
+            A 6-pillar professional development framework designed to transform how you work, think, and lead.
           </p>
         </div>
 

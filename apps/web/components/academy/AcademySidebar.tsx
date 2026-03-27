@@ -4,6 +4,15 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { CourseWithProgress } from '@/lib/academy/types'
 
+const SIDEBAR_SHORT_NAMES: Record<number, string> = {
+  1: 'Foundation',
+  2: 'Identity',
+  3: 'Mental Tough.',
+  4: 'Strategy',
+  5: 'Accountability',
+  6: 'Execution',
+}
+
 interface AcademySidebarProps {
   courses: CourseWithProgress[]
   userTier: string | null
@@ -43,7 +52,7 @@ export function AcademySidebar({ courses, userTier, overallPct }: AcademySidebar
           <NavItem
             key={course.id}
             href={locked ? '#' : `/academy/${course.slug}`}
-            label={`0${course.pillarNumber} — ${course.title}`}
+            label={`0${course.pillarNumber} — ${SIDEBAR_SHORT_NAMES[course.pillarNumber] ?? course.title}`}
             active={active}
             locked={locked}
             userTier={userTier}

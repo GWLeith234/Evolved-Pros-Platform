@@ -133,7 +133,7 @@ export function MemberDirectoryModal({ onClose }: MemberDirectoryModalProps) {
               </svg>
             </div>
           ) : members.length === 0 ? (
-            <p className="text-center py-8 font-condensed text-xs uppercase tracking-widest text-[#7a8a96]">
+            <p className="text-center py-8 font-condensed text-xs tracking-widest text-[#7a8a96]">
               No members found
             </p>
           ) : (

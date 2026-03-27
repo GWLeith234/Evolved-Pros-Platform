@@ -15,12 +15,12 @@ interface FeedComposeProps {
 }
 
 const PILLAR_TAGS: { tag: PillarTag; label: string }[] = [
-  { tag: 'p1', label: 'P1' },
-  { tag: 'p2', label: 'P2' },
-  { tag: 'p3', label: 'P3' },
-  { tag: 'p4', label: 'P4' },
-  { tag: 'p5', label: 'P5' },
-  { tag: 'p6', label: 'P6' },
+  { tag: 'p1', label: 'P1 · Foundation' },
+  { tag: 'p2', label: 'P2 · Identity' },
+  { tag: 'p3', label: 'P3 · Mental Toughness' },
+  { tag: 'p4', label: 'P4 · Strategy' },
+  { tag: 'p5', label: 'P5 · Accountability' },
+  { tag: 'p6', label: 'P6 · Execution' },
 ]
 
 function getInitials(name: string | null | undefined): string {
@@ -106,7 +106,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
         <textarea
           value={body}
           onChange={e => { setBody(e.target.value); if (error) setError('') }}
-          placeholder="Post what you're working on — principle or proof only. No tips."
+          placeholder="Share what you're working on or applying..."
           className="flex-1 resize-none rounded border font-body text-[14px] text-[#1b3c5a] placeholder:text-[#7a8a96] focus:outline-none transition-colors duration-150 px-3 py-2"
           style={{
             minHeight: '72px',
@@ -123,8 +123,8 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
       )}
 
       {/* Bottom row: pillar tags + post button */}
-      <div className="flex items-center justify-between mt-3 ml-12">
-        <div className="flex items-center gap-1.5 flex-wrap">
+      <div className="mt-3 ml-12">
+        <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
           {PILLAR_TAGS.map(({ tag, label }) => {
             const active = selectedTag === tag
             return (
@@ -132,10 +132,10 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
                 key={tag}
                 type="button"
                 onClick={() => setSelectedTag(active ? null : tag)}
-                className="font-condensed font-semibold uppercase transition-all duration-150 rounded"
+                className="font-condensed font-semibold transition-all duration-150 rounded"
                 style={{
                   fontSize: '10px',
-                  padding: '5px 10px',
+                  padding: '4px 9px',
                   color: active ? '#68a2b9' : '#7a8a96',
                   borderWidth: '1px',
                   borderStyle: 'solid',
@@ -148,6 +148,8 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
             )
           })}
         </div>
+        <p className="font-condensed text-[10px] text-[#7a8a96] mb-2">(Optional) Tag your post to a pillar</p>
+        <div className="flex justify-end">
 
         <button
           onClick={handleSubmit}
@@ -160,6 +162,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
         >
           {loading ? '...' : 'Post →'}
         </button>
+        </div>
       </div>
     </div>
   )

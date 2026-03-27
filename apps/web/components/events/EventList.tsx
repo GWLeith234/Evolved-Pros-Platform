@@ -70,7 +70,7 @@ export function EventList({ events, registeredEventIds, userTier, view = 'upcomi
 
       {filtered.length === 0 ? (
         <div className="px-6 py-12 text-center">
-          <p className="font-condensed text-xs uppercase tracking-widest text-[#7a8a96]">
+          <p className="font-condensed text-xs tracking-widest text-[#7a8a96]">
             {view === 'registrations'
               ? 'No registered events yet.'
               : view === 'recordings'

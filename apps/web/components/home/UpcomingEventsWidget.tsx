@@ -117,7 +117,7 @@ export function UpcomingEventsWidget({ events, userId }: UpcomingEventsWidgetPro
       <CardBody className="!px-6 !py-0">
         {events.length === 0 ? (
           <div className="py-8 text-center">
-            <p className="font-condensed text-xs uppercase tracking-widest text-[#7a8a96]">
+            <p className="font-condensed text-xs tracking-widest text-[#7a8a96]">
               No upcoming events
             </p>
           </div>

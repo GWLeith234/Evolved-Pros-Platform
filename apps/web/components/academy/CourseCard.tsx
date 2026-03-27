@@ -4,6 +4,15 @@ import { useRouter } from 'next/navigation'
 import { PILLAR_GRADIENTS } from '@/lib/academy/types'
 import type { CourseWithProgress } from '@/lib/academy/types'
 
+const PILLAR_DESCRIPTIONS: Record<number, string> = {
+  1: 'Build your core operating system',
+  2: 'Define who you are and what you stand for',
+  3: 'Develop resilience under pressure',
+  4: 'Plan with clarity and precision',
+  5: 'Stay accountable to your goals',
+  6: 'Execute consistently at the highest level',
+}
+
 interface CourseCardProps {
   course: CourseWithProgress
   isLocked: boolean
@@ -96,15 +105,21 @@ export function CourseCard({ course, isLocked }: CourseCardProps) {
 
       {/* Info */}
       <div className="px-4 py-3.5">
-        <p className="font-condensed font-bold uppercase text-[14px] text-[#112535] mb-2 leading-tight">
+        <p className="font-condensed font-bold uppercase text-[14px] text-[#112535] mb-1 leading-tight">
           {course.title}
+        </p>
+        <p className="font-body text-[12px] text-[#7a8a96] mb-2 leading-tight">
+          {PILLAR_DESCRIPTIONS[course.pillarNumber] ?? ''}
         </p>
 
         {/* Meta row */}
         <div className="flex items-center gap-2 mb-3">
           <span className="font-condensed text-[11px] text-[#7a8a96] flex items-center gap-1">
-            <VideoIcon />
-            {course.totalLessons} lessons
+            {course.totalLessons > 0 ? (
+              <><VideoIcon />{course.totalLessons} lessons</>
+            ) : (
+              'Lessons coming soon'
+            )}
           </span>
         </div>
 
@@ -117,7 +132,7 @@ export function CourseCard({ course, isLocked }: CourseCardProps) {
             Pro Plan Required
           </span>
         ) : course.totalLessons === 0 ? (
-          <p className="font-condensed text-[11px] text-[#7a8a96]">No lessons yet</p>
+          <p className="font-condensed text-[11px] text-[#7a8a96]">Lessons coming soon</p>
         ) : notStarted ? (
           <p className="font-condensed text-[11px] text-[#7a8a96]">Not started</p>
         ) : (
