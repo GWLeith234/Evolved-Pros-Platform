@@ -183,6 +183,7 @@ export default async function MemberHomePage() {
         hasAvatar={Boolean(profile.avatar_url)}
         hasBio={Boolean(profile.bio)}
         hasTitle={Boolean(profile.role_title)}
+        hasName={Boolean(profile.display_name || profile.full_name)}
       />
 
       <StatRow stats={stats} />

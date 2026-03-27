@@ -9,9 +9,10 @@ interface ProfileCompletePromptProps {
   hasAvatar: boolean
   hasBio: boolean
   hasTitle: boolean
+  hasName: boolean
 }
 
-export function ProfileCompletePrompt({ hasAvatar, hasBio, hasTitle }: ProfileCompletePromptProps) {
+export function ProfileCompletePrompt({ hasAvatar, hasBio, hasTitle, hasName }: ProfileCompletePromptProps) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -21,8 +22,11 @@ export function ProfileCompletePrompt({ hasAvatar, hasBio, hasTitle }: ProfileCo
     if (!dismissed) setVisible(true)
   }, [])
 
-  const profileComplete = hasAvatar && hasBio && hasTitle
-  if (profileComplete || !visible) return null
+  // Only show if the user is missing all three key identity signals:
+  // no avatar, no bio, AND no name+title. Having a name and title means
+  // the profile is recognizable enough — don't nag them.
+  const shouldShow = !hasAvatar && !hasBio && !(hasName && hasTitle)
+  if (!shouldShow || !visible) return null
 
   const missing: string[] = []
   if (!hasAvatar) missing.push('a profile photo')
