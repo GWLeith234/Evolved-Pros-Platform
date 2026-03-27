@@ -131,6 +131,20 @@ export async function notifyLike(params: {
   })
 }
 
+export async function notifyNewDm(params: {
+  recipientId: string
+  senderName: string
+  conversationId: string
+}) {
+  await createNotification({
+    userId:    params.recipientId,
+    type:      'system_general',
+    title:     'New direct message',
+    body:      `**${params.senderName}** sent you a direct message`,
+    actionUrl: `/messages?c=${params.conversationId}`,
+  })
+}
+
 export async function notifyNewMember(params: {
   adminUserIds: string[]
   newMemberName: string

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { DmUnreadBadge } from '@/components/dm/DmUnreadBadge'
 
 interface SidebarProps {
   profile: {
@@ -93,6 +94,14 @@ function SettingsIcon() {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="3" />
       <path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M20 12h2M2 12h2M12 20v2M12 2v2" />
+    </svg>
+  )
+}
+
+function MessageSquareIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   )
 }
@@ -341,7 +350,52 @@ export function Sidebar({ profile, unreadPosts = 0, upcomingEvents = 0 }: Sideba
         </SidebarSection>
 
         <SidebarSection title="My Space">
-          {mySpaceItems.map(item => (
+          {mySpaceItems.slice(0, 1).map(item => (
+            <SidebarNavItem
+              key={item.href}
+              item={item}
+              active={item.match.test(fullPath)}
+            />
+          ))}
+          {/* Direct Messages — live unread badge */}
+          {(() => {
+            const dmActive = /^\/messages/.test(pathname)
+            return (
+              <Link
+                href="/messages"
+                className="relative w-full flex items-center gap-3 py-[9px] px-5 transition-all duration-150 text-left"
+                style={{
+                  color: dmActive ? '#68a2b9' : 'rgba(255,255,255,0.5)',
+                  backgroundColor: dmActive ? 'rgba(255,255,255,0.06)' : 'transparent',
+                  borderLeft: dmActive ? '2px solid #68a2b9' : '2px solid transparent',
+                  paddingLeft: dmActive ? '18px' : '20px',
+                }}
+                onMouseEnter={e => {
+                  if (!dmActive) {
+                    const el = e.currentTarget as HTMLElement
+                    el.style.backgroundColor = 'rgba(255,255,255,0.04)'
+                    el.style.color = 'rgba(255,255,255,0.8)'
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!dmActive) {
+                    const el = e.currentTarget as HTMLElement
+                    el.style.backgroundColor = 'transparent'
+                    el.style.color = 'rgba(255,255,255,0.5)'
+                  }
+                }}
+              >
+                <span className="flex-shrink-0 w-[14px] h-[14px] flex items-center justify-center">
+                  <MessageSquareIcon />
+                </span>
+                <span className="font-condensed font-semibold uppercase tracking-[0.12em] text-[13px] flex-1 truncate">
+                  Direct Messages
+                </span>
+                <DmUnreadBadge />
+              </Link>
+            )
+          })()}
+          {mySpaceItems.slice(1).map(item => (
             <SidebarNavItem
               key={item.href}
               item={item}

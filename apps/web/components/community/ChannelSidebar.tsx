@@ -33,14 +33,6 @@ function UsersIcon() {
   )
 }
 
-function MessageIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
-  )
-}
-
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <p
@@ -150,28 +142,6 @@ export function ChannelSidebar({ channels, currentSlug, unreadCounts }: ChannelS
           <span className="font-condensed font-semibold text-[12px] tracking-wide">Directory</span>
         </button>
 
-        <button
-          disabled
-          className="flex items-center gap-2.5 px-4 py-[9px] w-full text-left cursor-default"
-          style={{ color: 'rgba(255,255,255,0.55)' }}
-        >
-          <span style={{ opacity: 0.6 }}><MessageIcon /></span>
-          <span className="font-condensed font-semibold text-[12px] tracking-wide flex-1" style={{ opacity: 0.65 }}>
-            Direct Messages
-          </span>
-          <span
-            className="font-condensed font-bold uppercase text-[9px] tracking-wide flex-shrink-0"
-            style={{
-              color: '#68a2b9',
-              backgroundColor: 'rgba(104,162,185,0.12)',
-              border: '1px solid rgba(104,162,185,0.35)',
-              borderRadius: '3px',
-              padding: '1px 5px',
-            }}
-          >
-            Soon
-          </span>
-        </button>
       </aside>
 
       {directoryOpen && (

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { ProfileBannerWrapper } from '@/components/profile/ProfileBannerWrapper'
 import { PointsHistory } from '@/components/profile/PointsHistory'
+import { SendMessageButton } from '@/components/profile/SendMessageButton'
 import { Card, CardBody } from '@evolved-pros/ui'
 
 export default async function PublicProfilePage({
@@ -78,6 +79,11 @@ export default async function PublicProfilePage({
   return (
     <div className="p-6 space-y-5">
       <ProfileBannerWrapper user={{ ...profile, postCount }} isOwn={false} />
+
+      {/* Send Message button */}
+      <div className="flex justify-end">
+        <SendMessageButton recipientId={params.userId} />
+      </div>
 
       {/* Tab bar */}
       <div className="flex gap-1 border-b border-[rgba(27,60,90,0.12)]">
