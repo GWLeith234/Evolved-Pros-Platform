@@ -4,6 +4,7 @@ import { createHmac, timingSafeEqual } from 'crypto'
 import { adminClient } from '@/lib/supabase/admin'
 import { VENDASTA_PRODUCTS, getTierExpiry } from '@/lib/vendasta/products'
 import { sendWelcomeEmail } from '@/lib/resend/emails/welcome'
+import { notifyNewMember } from '@/lib/notifications/create'
 
 function verifySignature(body: string, signature: string, secret: string): boolean {
   const expected = createHmac('sha256', secret).update(body).digest('hex')
@@ -97,6 +98,20 @@ async function handleWebhookEvent({
       })
       if (isNewUser) {
         await sendWelcomeEmail({ email, fullName, tier: product.tier })
+
+        // Notify admins of new member join
+        const { data: admins } = await adminClient
+          .from('users')
+          .select('id')
+          .eq('role', 'admin')
+        const adminIds = (admins ?? []).map((a: { id: string }) => a.id)
+        if (adminIds.length > 0) {
+          void notifyNewMember({
+            adminUserIds:  adminIds,
+            newMemberName: fullName,
+            newMemberTier: product.tier,
+          })
+        }
       }
       break
     }

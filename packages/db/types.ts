@@ -36,6 +36,11 @@ export type Database = {
             event_reminder: 'immediate' | 'off'
             course_unlock: 'immediate' | 'off'
             system_billing: 'immediate'
+            new_replies?: boolean
+            new_likes?: boolean
+            new_members?: boolean
+            event_reminders?: boolean
+            weekly_digest?: boolean
           }
           created_at: string
           updated_at: string
@@ -85,6 +90,11 @@ export type Database = {
             event_reminder?: 'immediate' | 'off'
             course_unlock?: 'immediate' | 'off'
             system_billing?: 'immediate'
+            new_replies?: boolean
+            new_likes?: boolean
+            new_members?: boolean
+            event_reminders?: boolean
+            weekly_digest?: boolean
           }
           created_at?: string
           updated_at?: string

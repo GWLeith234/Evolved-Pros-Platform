@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm'
 import { Tooltip } from '@/components/ui/Tooltip'
+import { NotificationPrefsForm } from '@/components/notifications/NotificationPrefsForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,9 +13,17 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from('users')
-    .select('id, display_name, full_name, avatar_url, bio, role_title, location, tier')
+    .select('id, display_name, full_name, avatar_url, bio, role_title, location, tier, notification_preferences')
     .eq('id', user.id)
     .single()
+
+  const notifPrefs = {
+    new_replies:     (profile?.notification_preferences as Record<string, unknown> | null)?.new_replies !== false,
+    new_likes:       (profile?.notification_preferences as Record<string, unknown> | null)?.new_likes !== false,
+    new_members:     (profile?.notification_preferences as Record<string, unknown> | null)?.new_members === true,
+    event_reminders: (profile?.notification_preferences as Record<string, unknown> | null)?.event_reminders !== false,
+    weekly_digest:   (profile?.notification_preferences as Record<string, unknown> | null)?.weekly_digest !== false,
+  }
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
@@ -97,6 +106,26 @@ export default async function SettingsPage() {
               </a>
             )}
           </div>
+        </div>
+      </div>
+
+      <div
+        className="bg-white rounded-lg overflow-hidden mt-6"
+        style={{ border: '1px solid rgba(27,60,90,0.1)', boxShadow: '0 1px 3px rgba(27,60,90,0.06)' }}
+      >
+        <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}>
+          <h2
+            className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]"
+            style={{ color: '#1b3c5a' }}
+          >
+            Notifications
+          </h2>
+          <p className="font-body text-[12px] mt-1" style={{ color: '#7a8a96' }}>
+            Choose which in-app notifications you receive.
+          </p>
+        </div>
+        <div className="px-6 py-6">
+          <NotificationPrefsForm initialPrefs={notifPrefs} />
         </div>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { NotifItem } from './NotifItem'
 import type { NotifItemData } from './NotifItem'
+import { createClient } from '@/lib/supabase/client'
 
 interface NotifDrawerProps {
   open: boolean
@@ -22,10 +23,11 @@ function SkeletonRow() {
   )
 }
 
-export function NotifDrawer({ open, onClose, userId: _userId, onRead }: NotifDrawerProps) {
+export function NotifDrawer({ open, onClose, userId, onRead }: NotifDrawerProps) {
   const [notifications, setNotifications] = useState<NotifItemData[]>([])
   const [loading, setLoading] = useState(false)
   const [fetched, setFetched] = useState(false)
+  const [markingAll, setMarkingAll] = useState(false)
 
   const fetchNotifications = useCallback(async () => {
     setLoading(true)
@@ -46,18 +48,32 @@ export function NotifDrawer({ open, onClose, userId: _userId, onRead }: NotifDra
     }
   }, [open, fetched, fetchNotifications])
 
-  function handleRead() {
-    onRead()
-    setNotifications(prev =>
-      prev.map((n, idx) => idx === 0 ? { ...n, isRead: true } : n)
-    )
-  }
-
   function handleItemRead(id: string) {
     onRead()
     setNotifications(prev =>
       prev.map(n => n.id === id ? { ...n, isRead: true } : n)
     )
+  }
+
+  async function handleMarkAllRead() {
+    const unreadCount = notifications.filter(n => !n.isRead).length
+    if (unreadCount === 0) return
+    setMarkingAll(true)
+    try {
+      const supabase = createClient()
+      await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('user_id', userId)
+        .eq('is_read', false)
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
+      // Notify parent to reset unread count to 0
+      for (let i = 0; i < unreadCount; i++) onRead()
+    } catch {
+      // non-critical
+    } finally {
+      setMarkingAll(false)
+    }
   }
 
   return (
@@ -81,18 +97,33 @@ export function NotifDrawer({ open, onClose, userId: _userId, onRead }: NotifDra
           <span className="font-condensed font-bold uppercase tracking-wide text-[14px] text-white">
             Notifications
           </span>
-          <button
-            onClick={onClose}
-            className="transition-colors"
-            style={{ color: 'rgba(255,255,255,0.4)' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'white' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)' }}
-            aria-label="Close notifications"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-3">
+            {notifications.some(n => !n.isRead) && (
+              <button
+                onClick={() => { void handleMarkAllRead() }}
+                disabled={markingAll}
+                className="font-condensed font-semibold uppercase tracking-wide text-[10px] transition-colors"
+                style={{ color: 'rgba(255,255,255,0.4)', opacity: markingAll ? 0.5 : 1 }}
+                onMouseEnter={e => { if (!markingAll) (e.currentTarget as HTMLElement).style.color = '#68a2b9' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)' }}
+                aria-label="Mark all as read"
+              >
+                {markingAll ? 'Marking...' : 'Mark all read'}
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="transition-colors"
+              style={{ color: 'rgba(255,255,255,0.4)' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'white' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)' }}
+              aria-label="Close notifications"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Content */}

@@ -111,3 +111,40 @@ export async function notifyBilling(params: {
     actionUrl: undefined,
   })
 }
+
+export async function notifyLike(params: {
+  postAuthorId: string
+  likerUserId: string
+  likerName: string
+  channelSlug: string
+  postId: string
+}) {
+  // Never notify on self-like
+  if (params.postAuthorId === params.likerUserId) return
+
+  await createNotification({
+    userId:    params.postAuthorId,
+    type:      'community_reply',
+    title:     'Someone liked your post',
+    body:      `**${params.likerName}** liked your post in **#${params.channelSlug}**`,
+    actionUrl: `/community/${params.channelSlug}?post=${params.postId}`,
+  })
+}
+
+export async function notifyNewMember(params: {
+  adminUserIds: string[]
+  newMemberName: string
+  newMemberTier: string
+}) {
+  await Promise.all(
+    params.adminUserIds.map(adminId =>
+      createNotification({
+        userId:    adminId,
+        type:      'system_general',
+        title:     'New member joined',
+        body:      `**${params.newMemberName}** joined as a **${params.newMemberTier}** member.`,
+        actionUrl: `/admin/members`,
+      })
+    )
+  )
+}
