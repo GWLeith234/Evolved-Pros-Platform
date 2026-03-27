@@ -197,7 +197,7 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, membersCanToggleThem
                 textDecoration: 'none',
                 flexShrink: 0,
               }}
-              className="hidden lg:flex"
+              className="hidden md:flex"
             >
               <span style={{ background: '#ef0e30', borderRadius: '4px', padding: '2px 6px', color: 'white', fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>
                 NEXT EVENT
