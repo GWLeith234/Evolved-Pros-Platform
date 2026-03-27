@@ -8,11 +8,22 @@ type Ad = {
   placement: string
   image_url: string | null
   headline: string | null
+  tool_name: string | null
+  endorsement_quote: string | null
+  special_offer: string | null
   cta_text: string | null
   link_url: string | null
   sort_order: number
   is_active: boolean
 }
+
+const PLACEMENT_OPTIONS = [
+  { value: 'sidebar',   label: 'Sidebar' },
+  { value: 'academy',   label: 'Academy' },
+  { value: 'community', label: 'Community Feed' },
+  { value: 'events',    label: 'Events' },
+  { value: 'all',       label: 'All Placements' },
+]
 
 type Banner = {
   id: string
@@ -273,10 +284,10 @@ function ColorsTab({ settings }: { settings: Record<string, string> }) {
 // ── Ads Tab ───────────────────────────────────────────────────────────────────
 
 function AdsTab({ initialAds, settings }: { initialAds: Ad[]; settings: Record<string, string> }) {
-  const [ads, setAds] = useState(initialAds.filter(a => a.placement === 'sidebar'))
+  const [ads, setAds] = useState(initialAds)
   const [interval, setInterval] = useState(settings['ad_sidebar_interval'] ?? '10')
   const [showAddForm, setShowAddForm] = useState(false)
-  const [newAd, setNewAd] = useState({ image_url: '', headline: '', cta_text: '', link_url: '' })
+  const [newAd, setNewAd] = useState({ placement: 'sidebar', image_url: '', headline: '', tool_name: '', endorsement_quote: '', special_offer: '', cta_text: '', link_url: '' })
   const [uploading, setUploading] = useState(false)
   const [savingInterval, setSavingInterval] = useState(false)
 
@@ -321,9 +332,12 @@ function AdsTab({ initialAds, settings }: { initialAds: Ad[]; settings: Record<s
     const { data } = await supabase
       .from('platform_ads')
       .insert({
-        placement: 'sidebar',
+        placement: newAd.placement || 'sidebar',
         image_url: newAd.image_url || null,
         headline: newAd.headline || null,
+        tool_name: newAd.tool_name || null,
+        endorsement_quote: newAd.endorsement_quote || null,
+        special_offer: newAd.special_offer || null,
         cta_text: newAd.cta_text || null,
         link_url: newAd.link_url || null,
         sort_order: ads.length,
@@ -333,14 +347,14 @@ function AdsTab({ initialAds, settings }: { initialAds: Ad[]; settings: Record<s
       .single()
     if (data) {
       setAds(prev => [...prev, data])
-      setNewAd({ image_url: '', headline: '', cta_text: '', link_url: '' })
+      setNewAd({ placement: 'sidebar', image_url: '', headline: '', tool_name: '', endorsement_quote: '', special_offer: '', cta_text: '', link_url: '' })
       setShowAddForm(false)
     }
   }
 
   return (
     <>
-      <SectionCard title="Sidebar Ads">
+      <SectionCard title="Sponsored Ads">
         {/* Rotation interval */}
         <div className="flex items-center gap-3 mb-5">
           <label className="font-condensed font-semibold uppercase text-[11px] tracking-wide" style={{ color: '#7a8a96' }}>
@@ -385,8 +399,11 @@ function AdsTab({ initialAds, settings }: { initialAds: Ad[]; settings: Record<s
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-body text-[13px] font-medium truncate" style={{ color: '#1b3c5a' }}>{ad.headline ?? '(No headline)'}</p>
-                  <p className="font-condensed text-[11px] truncate" style={{ color: '#7a8a96' }}>{ad.link_url ?? ''}</p>
+                  <p className="font-body text-[13px] font-medium truncate" style={{ color: '#1b3c5a' }}>{ad.tool_name ?? ad.headline ?? '(No headline)'}</p>
+                  <p className="font-condensed text-[11px] truncate" style={{ color: '#7a8a96' }}>
+                    {PLACEMENT_OPTIONS.find(o => o.value === ad.placement)?.label ?? ad.placement}
+                    {ad.link_url ? ` · ${ad.link_url}` : ''}
+                  </p>
                 </div>
                 {/* Active toggle */}
                 <button
@@ -431,6 +448,21 @@ function AdsTab({ initialAds, settings }: { initialAds: Ad[]; settings: Record<s
           <div className="rounded p-4 space-y-3" style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: '#fafafa' }}>
             <div>
               <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>
+                Placement
+              </label>
+              <select
+                value={newAd.placement}
+                onChange={e => setNewAd(p => ({ ...p, placement: e.target.value }))}
+                className="border rounded px-3 py-1.5 font-condensed text-[13px] w-full"
+                style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+              >
+                {PLACEMENT_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>
                 Image {uploading ? '(Uploading…)' : ''}
               </label>
               <label className="cursor-pointer inline-flex items-center gap-2 rounded px-3 py-1.5 font-condensed text-[12px]" style={{ border: '1px solid rgba(27,60,90,0.2)', color: '#1b3c5a' }}>
@@ -444,6 +476,19 @@ function AdsTab({ initialAds, settings }: { initialAds: Ad[]; settings: Record<s
             </div>
             <div>
               <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>
+                Tool / Sponsor Name
+              </label>
+              <input
+                type="text"
+                value={newAd.tool_name}
+                onChange={e => setNewAd(p => ({ ...p, tool_name: e.target.value }))}
+                placeholder="e.g. HubSpot"
+                className="border rounded px-3 py-1.5 font-body text-[13px] w-full"
+                style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+              />
+            </div>
+            <div>
+              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>
                 Headline ({newAd.headline.length}/40)
               </label>
               <input
@@ -451,6 +496,32 @@ function AdsTab({ initialAds, settings }: { initialAds: Ad[]; settings: Record<s
                 value={newAd.headline}
                 onChange={e => setNewAd(p => ({ ...p, headline: e.target.value.slice(0, 40) }))}
                 placeholder="Ad headline"
+                className="border rounded px-3 py-1.5 font-body text-[13px] w-full"
+                style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+              />
+            </div>
+            <div>
+              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>
+                George&apos;s Endorsement Quote (optional)
+              </label>
+              <textarea
+                value={newAd.endorsement_quote}
+                onChange={e => setNewAd(p => ({ ...p, endorsement_quote: e.target.value }))}
+                placeholder="Why I use and recommend this tool..."
+                rows={3}
+                className="border rounded px-3 py-1.5 font-body text-[13px] w-full resize-none"
+                style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+              />
+            </div>
+            <div>
+              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>
+                Special Offer Text (optional)
+              </label>
+              <input
+                type="text"
+                value={newAd.special_offer}
+                onChange={e => setNewAd(p => ({ ...p, special_offer: e.target.value }))}
+                placeholder="e.g. 20% off for Evolved Pros members"
                 className="border rounded px-3 py-1.5 font-body text-[13px] w-full"
                 style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
               />

@@ -1,10 +1,13 @@
 'use client'
 
+import React from 'react'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { FeedCompose } from './FeedCompose'
 import { PostCard } from './PostCard'
 import { PinnedPost } from './PinnedPost'
+import { SponsorCard } from '@/components/ads/SponsorCard'
+import { useSponsorAd } from '@/hooks/useSponsorAd'
 import type { Post, Reply } from '@/lib/community/types'
 
 interface CommunityFeedProps {
@@ -36,6 +39,8 @@ export function CommunityFeed({
   const [loadingMore, setLoadingMore] = useState(false)
   const [queuedPosts, setQueuedPosts] = useState<Post[]>([])
   const [newPostCount, setNewPostCount] = useState(0)
+
+  const communityAd = useSponsorAd('community')
 
   const sentinelRef = useRef<HTMLDivElement>(null)
 
@@ -219,15 +224,19 @@ export function CommunityFeed({
               </p>
             </div>
           ) : (
-            posts.map(post => (
-              <PostCard
-                key={post.id}
-                post={post}
-                currentUserId={currentUser.id}
-                currentUser={{ id: currentUser.id, displayName: currentUser.displayName, avatarUrl: currentUser.avatarUrl }}
-                onLike={handleLike}
-                onBookmark={handleBookmark}
-              />
+            posts.map((post, i) => (
+              <React.Fragment key={post.id}>
+                <PostCard
+                  post={post}
+                  currentUserId={currentUser.id}
+                  currentUser={{ id: currentUser.id, displayName: currentUser.displayName, avatarUrl: currentUser.avatarUrl }}
+                  onLike={handleLike}
+                  onBookmark={handleBookmark}
+                />
+                {(i + 1) % 8 === 0 && communityAd && (
+                  <SponsorCard ad={communityAd} variant="community" />
+                )}
+              </React.Fragment>
             ))
           )}
 

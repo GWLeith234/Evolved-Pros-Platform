@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { EventCard } from './EventCard'
+import { SponsorCard } from '@/components/ads/SponsorCard'
+import { useSponsorAd } from '@/hooks/useSponsorAd'
 import type { EventItem, EventType } from '@/lib/events/types'
 
 interface EventListProps {
@@ -14,6 +16,7 @@ interface EventListProps {
 
 export function EventList({ events, registeredEventIds, userTier, view = 'upcoming', typeFilter }: EventListProps) {
   const [registeredIds, setRegisteredIds] = useState(new Set(registeredEventIds))
+  const eventsAd = useSponsorAd('events')
 
   const now = new Date()
 
@@ -81,15 +84,21 @@ export function EventList({ events, registeredEventIds, userTier, view = 'upcomi
       ) : (
         <div className="px-6">
           {filtered.map((event, i) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              isRegistered={registeredIds.has(event.id)}
-              hasAccess={event.hasAccess}
-              isLast={i === filtered.length - 1}
-              onRegister={handleRegister}
-              onUnregister={handleUnregister}
-            />
+            <React.Fragment key={event.id}>
+              <EventCard
+                event={event}
+                isRegistered={registeredIds.has(event.id)}
+                hasAccess={event.hasAccess}
+                isLast={i === filtered.length - 1 && !(i === 0 && eventsAd)}
+                onRegister={handleRegister}
+                onUnregister={handleUnregister}
+              />
+              {i === 0 && eventsAd && (
+                <div className="py-3">
+                  <SponsorCard ad={eventsAd} variant="events" />
+                </div>
+              )}
+            </React.Fragment>
           ))}
         </div>
       )}
