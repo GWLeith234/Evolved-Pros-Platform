@@ -6,7 +6,7 @@
 -- Public read — anyone can view branding assets (logos, banners)
 CREATE POLICY "Branding read public"
   ON storage.objects FOR SELECT
-  USING (bucket_id = 'branding');
+  USING (bucket_id = 'Branding');
 
 -- Authenticated users can upload to their own banner folder only
 -- Path format: banners/{userId}/{filename}
@@ -14,7 +14,7 @@ CREATE POLICY "Branding read public"
 CREATE POLICY "Banner upload by owner"
   ON storage.objects FOR INSERT
   WITH CHECK (
-    bucket_id = 'branding'
+    bucket_id = 'Branding'
     AND auth.role() = 'authenticated'
     AND (
       -- User banner path: banners/{userId}/...
@@ -27,7 +27,7 @@ CREATE POLICY "Banner upload by owner"
 CREATE POLICY "Banner update by owner"
   ON storage.objects FOR UPDATE
   USING (
-    bucket_id = 'branding'
+    bucket_id = 'Branding'
     AND auth.role() = 'authenticated'
     AND (storage.foldername(name))[1] = 'banners'
     AND (storage.foldername(name))[2] = auth.uid()::text
@@ -37,7 +37,7 @@ CREATE POLICY "Banner update by owner"
 CREATE POLICY "Branding admin upload"
   ON storage.objects FOR INSERT
   WITH CHECK (
-    bucket_id = 'branding'
+    bucket_id = 'Branding'
     AND EXISTS (
       SELECT 1 FROM public.users
       WHERE id = auth.uid() AND role = 'admin'
@@ -47,7 +47,7 @@ CREATE POLICY "Branding admin upload"
 CREATE POLICY "Branding admin update"
   ON storage.objects FOR UPDATE
   USING (
-    bucket_id = 'branding'
+    bucket_id = 'Branding'
     AND EXISTS (
       SELECT 1 FROM public.users
       WHERE id = auth.uid() AND role = 'admin'

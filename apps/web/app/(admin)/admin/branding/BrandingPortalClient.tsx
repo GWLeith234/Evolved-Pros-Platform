@@ -103,9 +103,9 @@ function IdentityTab({ settings }: { settings: Record<string, string> }) {
   async function uploadLogo(file: File, key: string, setter: (url: string) => void) {
     const supabase = createClient()
     const path = `logos/${key}_${Date.now()}.${file.name.split('.').pop()}`
-    const { error } = await supabase.storage.from('branding').upload(path, file, { upsert: true, contentType: file.type })
+    const { error } = await supabase.storage.from('Branding').upload(path, file, { upsert: true, contentType: file.type })
     if (error) throw error
-    const { data } = supabase.storage.from('branding').getPublicUrl(path)
+    const { data } = supabase.storage.from('Branding').getPublicUrl(path)
     setter(data.publicUrl)
     // save immediately
     await supabase.from('platform_settings').upsert({ key, value: data.publicUrl, updated_at: new Date().toISOString() })

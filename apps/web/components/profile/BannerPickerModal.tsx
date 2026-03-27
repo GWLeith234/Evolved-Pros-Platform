@@ -45,10 +45,10 @@ export function BannerPickerModal({ userId, currentBannerUrl, onSave, onClose }:
       const supabase = createClient()
       const path = `banners/${userId}/${Date.now()}.jpg`
       const { error } = await supabase.storage
-        .from('branding')
+        .from('Branding')
         .upload(path, file, { upsert: true, contentType: file.type })
       if (error) throw error
-      const { data } = supabase.storage.from('branding').getPublicUrl(path)
+      const { data } = supabase.storage.from('Branding').getPublicUrl(path)
       setSelected(data.publicUrl)
     } finally {
       setUploading(false)
