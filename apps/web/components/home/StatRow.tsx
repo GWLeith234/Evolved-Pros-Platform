@@ -23,14 +23,14 @@ export function StatRow({ stats }: StatRowProps) {
         value={stats.communityMemberCount}
         label="Community Members"
         delta={`+${stats.newMembersThisWeek} this week`}
-        deltaType="up"
+        deltaType="neutral"
         accent="red"
       />
       <Tooltip content="Pillars are the 6 core course tracks in the Evolved Architecture. Your tier determines how many you can access.">
         <StatCard
           value={`${stats.pillarsUnlocked} / ${stats.pillarsTotal}`}
           label="Pillars Unlocked"
-          delta={locked > 0 ? `${locked} remaining` : 'All unlocked'}
+          delta={locked > 0 ? `${locked} more to unlock` : 'All unlocked'}
           deltaType={locked > 0 ? 'neutral' : 'up'}
           accent="teal"
         />
@@ -39,7 +39,7 @@ export function StatRow({ stats }: StatRowProps) {
         <StatCard
           value={`${stats.academyProgressPct}%`}
           label="Academy Progress"
-          delta={stats.academyProgressPct > 0 ? `${stats.academyProgressPct}% complete` : 'Not started'}
+          delta={stats.academyProgressPct > 0 ? `${stats.academyProgressPct}% complete` : 'Start your first lesson →'}
           deltaType={stats.academyProgressPct > 0 ? 'up' : 'neutral'}
           accent="navy"
         />

@@ -26,7 +26,7 @@ const deltaBadgeStyles: Record<DeltaType, string> = {
 
 const deltaIcons: Record<DeltaType, string> = {
   up:      '↑',
-  neutral: '—',
+  neutral: '',
 }
 
 export function StatCard({
