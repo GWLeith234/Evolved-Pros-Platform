@@ -60,7 +60,7 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from('posts')
-    .select('id, channel_id, body, pillar_tag, is_pinned, like_count, reply_count, created_at, users(id, display_name, full_name, avatar_url, tier)')
+    .select('id, channel_id, body, pillar_tag, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
     .eq('channel_id', channel.id)
     .eq('is_pinned', false)
     .order('created_at', { ascending: false })
@@ -139,7 +139,7 @@ export async function POST(request: Request) {
       body: postBody,
       pillar_tag: validatedTag as 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | null,
     })
-    .select('id, channel_id, body, pillar_tag, is_pinned, like_count, reply_count, created_at, users(id, display_name, full_name, avatar_url, tier)')
+    .select('id, channel_id, body, pillar_tag, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
     .single()
 
   if (error || !post) {
