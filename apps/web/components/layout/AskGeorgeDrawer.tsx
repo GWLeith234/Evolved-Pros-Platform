@@ -14,14 +14,12 @@ interface AskGeorgeDrawerProps {
 export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
   const scriptInjected = useRef(false)
 
-  // Inject the Vendasta widget script once the drawer first opens
   useEffect(() => {
     if (!isOpen || scriptInjected.current) return
     if (document.querySelector(`script[src="${SCRIPT_SRC}"]`)) {
       scriptInjected.current = true
       return
     }
-
     const script = document.createElement('script')
     script.src = SCRIPT_SRC
     script.defer = true
@@ -32,7 +30,6 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
     scriptInjected.current = true
   }, [isOpen])
 
-  // Close on Escape key
   useEffect(() => {
     if (!isOpen) return
     function onKeyDown(e: KeyboardEvent) {
@@ -44,21 +41,30 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
 
   return (
     <>
-      {/* Mobile backdrop */}
+      {/* Backdrop — mobile only, full screen, behind drawer */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40 md:hidden"
-          style={{ backgroundColor: 'rgba(13,28,39,0.5)', backdropFilter: 'blur(2px)' }}
+          style={{ backgroundColor: 'rgba(13,28,39,0.7)' }}
           onClick={onClose}
           aria-hidden="true"
         />
       )}
 
-      {/* Drawer */}
+      {/*
+        Drawer sizing:
+          Mobile (<md):  full 100vw, starts below TopNav (top-14 = 56px), fills remaining height
+          Desktop (md+): 400px wide, anchored top-0, full 100vh
+      */}
       <div
-        className="fixed top-0 right-0 h-full z-50 flex flex-col"
+        className={[
+          'fixed right-0 z-50 flex flex-col',
+          // Mobile: full width, below the 56px nav
+          'w-full top-14 h-[calc(100vh-56px)]',
+          // Desktop: 400px, full height
+          'md:w-[400px] md:top-0 md:h-screen',
+        ].join(' ')}
         style={{
-          width: 'min(400px, 100vw)',
           backgroundColor: '#112535',
           borderLeft: '1px solid rgba(255,255,255,0.08)',
           boxShadow: '-8px 0 32px rgba(13,28,39,0.4)',
@@ -69,10 +75,13 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
         aria-label="Ask George AI assistant"
         aria-hidden={!isOpen}
       >
-        {/* Header */}
+        {/* Header — pinned #112535, matches platform nav */}
         <div
           className="flex items-center justify-between px-5 py-4 flex-shrink-0"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}
+          style={{
+            backgroundColor: '#112535',
+            borderBottom: '1px solid rgba(255,255,255,0.07)',
+          }}
         >
           <div className="flex items-center gap-2.5">
             <span className="font-condensed font-bold text-white text-[18px] tracking-[0.06em]">
@@ -103,8 +112,10 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
           </button>
         </div>
 
-        {/* Widget container — Vendasta mounts into this div */}
-        <div id={TARGET_ID} className="flex-1 min-h-0 w-full" />
+        {/* Widget body — white bg, flush against header, no border-radius gap */}
+        <div className="flex-1 min-h-0 w-full" style={{ backgroundColor: '#ffffff', borderRadius: 0 }}>
+          <div id={TARGET_ID} className="w-full h-full" />
+        </div>
       </div>
     </>
   )
