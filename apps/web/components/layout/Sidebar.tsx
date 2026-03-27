@@ -332,7 +332,7 @@ export function Sidebar({ profile, unreadPosts = 0, upcomingEvents = 0 }: Sideba
 
   return (
     <aside
-      className="w-[220px] flex-shrink-0 flex flex-col pt-5"
+      className="w-[220px] flex-shrink-0 hidden md:flex flex-col pt-5"
       style={{
         backgroundColor: '#112535',
         borderRight: '1px solid rgba(255,255,255,0.06)',
