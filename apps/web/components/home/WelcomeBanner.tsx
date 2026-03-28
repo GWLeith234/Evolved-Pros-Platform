@@ -1,8 +1,13 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useMemo } from 'react'
-import { GreetingText } from '@/components/home/GreetingText'
+
+const GreetingText = dynamic(
+  () => import('@/components/home/GreetingText').then(m => m.GreetingText),
+  { ssr: false }
+)
 
 const BASE = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/'
 
