@@ -10,7 +10,7 @@ export function CourseGrid({ courses, userTier }: CourseGridProps) {
   return (
     <div className="grid grid-cols-3 gap-4">
       {courses.map(course => {
-        const isLocked = course.requiredTier === 'pro' && userTier !== 'pro'
+        const isLocked = !course.hasAccess
         return (
           <CourseCard key={course.id} course={course} isLocked={isLocked} />
         )

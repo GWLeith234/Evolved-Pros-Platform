@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { NotificationPrefsForm } from '@/components/notifications/NotificationPrefsForm'
+import { hasTierAccess } from '@/lib/tier'
 
 export const dynamic = 'force-dynamic'
 
@@ -105,7 +106,7 @@ export default async function SettingsPage() {
                 {profile?.tier ?? 'Community'}
               </p>
             </div>
-            {profile?.tier !== 'pro' && (
+            {!hasTierAccess(profile?.tier, 'pro') && (
               <a
                 href="/membership-upgrade"
                 className="font-condensed font-bold uppercase tracking-wider text-[11px] rounded px-4 py-2 transition-all"

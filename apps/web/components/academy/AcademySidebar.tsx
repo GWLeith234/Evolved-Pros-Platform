@@ -47,7 +47,7 @@ export function AcademySidebar({ courses, userTier, overallPct }: AcademySidebar
 
       {/* One per pillar */}
       {courses.map(course => {
-        const locked = course.requiredTier === 'pro' && userTier !== 'pro'
+        const locked = !course.hasAccess
         const active = pathname.startsWith(`/academy/${course.slug}`)
         return (
           <NavItem

@@ -8,6 +8,7 @@ import {
   fetchCoursesWithProgress,
   fetchUserProfile,
 } from '@/lib/academy/fetchers'
+import { hasTierAccess } from '@/lib/tier'
 
 export const dynamic = 'force-dynamic'
 
@@ -62,7 +63,7 @@ export default async function AcademyPage() {
 
         <div className="px-4 md:px-8 py-6">
           <CourseGrid courses={courses} userTier={profile?.tier ?? null} />
-          {profile?.tier !== 'pro' && <UpgradePrompt />}
+          {!hasTierAccess(profile?.tier, 'pro') && <UpgradePrompt />}
         </div>
       </main>
     </div>
