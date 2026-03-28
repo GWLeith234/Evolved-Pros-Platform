@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Input, Textarea, Button } from '@evolved-pros/ui'
 import { Tooltip } from '@/components/ui/Tooltip'
+import { BannerPickerModal } from '@/components/profile/BannerPickerModal'
 
 const PILLAR_LABELS: Record<string, string> = {
   p1: 'Foundation',
@@ -21,6 +22,7 @@ type ProfileFields = {
   role_title: string | null
   location: string | null
   avatar_url: string | null
+  banner_url: string | null
   company: string | null
   linkedin_url: string | null
   website_url: string | null
@@ -36,6 +38,20 @@ interface ProfileEditFormProps {
   userId: string
   profile: ProfileFields
   onSaved?: (updated: ProfileFields) => void
+}
+
+function InfoIcon() {
+  return (
+    <svg
+      width="12" height="12" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+      style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '4px', opacity: 0.5, cursor: 'help', flexShrink: 0 }}
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
+    </svg>
+  )
 }
 
 function resizeImage(file: File, maxSize: number): Promise<Blob> {
@@ -90,7 +106,9 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
   const [goal90day, setGoal90day] = useState(profile.goal_90day ?? '')
   const [goalVisible, setGoalVisible] = useState(profile.goal_visible ?? true)
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
+  const [bannerUrl, setBannerUrl] = useState(profile.banner_url ?? '')
   const [avatarLoading, setAvatarLoading] = useState(false)
+  const [bannerModalOpen, setBannerModalOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -115,26 +133,39 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
     try {
       const resized = await resizeImage(file, 400)
       const supabase = createClient()
-      const path = `${userId}/${userId}.jpg`
+      // Upload to the 'Branding' bucket under the avatars/ path
+      const path = `avatars/${userId}.jpg`
       const { error: uploadError } = await supabase.storage
-        .from('avatars')
+        .from('Branding')
         .upload(path, resized, { upsert: true, contentType: 'image/jpeg' })
       if (uploadError) throw uploadError
 
-      const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+      const { data } = supabase.storage.from('Branding').getPublicUrl(path)
       const newUrl = `${data.publicUrl}?t=${Date.now()}`
       setAvatarUrl(newUrl)
 
+      // Persist to public.users
       await fetch('/api/user/me', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ avatar_url: newUrl }),
       })
+
+      // Propagate to auth.users metadata so it shows in nav immediately
+      await supabase.auth.updateUser({ data: { avatar_url: newUrl } })
+
+      showToast('success', 'Profile photo updated.')
     } catch {
       showToast('error', 'Avatar upload failed. Please try again.')
     } finally {
       setAvatarLoading(false)
     }
+  }
+
+  function handleBannerSaved(url: string) {
+    setBannerUrl(url)
+    setBannerModalOpen(false)
+    showToast('success', 'Banner updated.')
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -194,11 +225,16 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
         </div>
       )}
 
-      {/* Avatar */}
+      {/* ── Profile Photo ─────────────────────────────────────────── */}
       <div>
-        <label className="block font-condensed font-semibold uppercase tracking-wide text-xs text-[#1b3c5a] mb-2">
-          Profile Photo
-        </label>
+        <div className="flex items-center mb-2">
+          <label className="font-condensed font-semibold uppercase tracking-wide text-xs text-[#1b3c5a]">
+            Profile Photo
+          </label>
+          <Tooltip content="Square image recommended · JPEG, PNG or WebP · Max 400×400px · File size under 2MB · Your photo appears on your posts, profile, and in the member directory">
+            <InfoIcon />
+          </Tooltip>
+        </div>
         <div className="flex items-center gap-4">
           <button
             type="button"
@@ -235,7 +271,54 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
         />
       </div>
 
-      {/* Fields */}
+      {/* ── Profile Banner ────────────────────────────────────────── */}
+      <div>
+        <div className="flex items-center mb-2">
+          <label className="font-condensed font-semibold uppercase tracking-wide text-xs text-[#1b3c5a]">
+            Profile Banner
+          </label>
+          <Tooltip content="Landscape image · Minimum 1200×300px · JPEG or PNG · File size under 5MB · Your banner appears at the top of your public profile page">
+            <InfoIcon />
+          </Tooltip>
+        </div>
+
+        {/* Current banner preview strip */}
+        <div
+          className="w-full rounded overflow-hidden mb-2"
+          style={{
+            height: '72px',
+            backgroundColor: '#1b3c5a',
+            backgroundImage: bannerUrl ? `url(${bannerUrl})` : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+
+        <button
+          type="button"
+          onClick={() => setBannerModalOpen(true)}
+          className="font-condensed font-bold uppercase tracking-wide text-[11px] px-4 py-2 rounded transition-colors"
+          style={{
+            border: '1px solid rgba(27,60,90,0.2)',
+            color: '#1b3c5a',
+            backgroundColor: 'transparent',
+          }}
+        >
+          Change Banner
+        </button>
+      </div>
+
+      {/* Banner picker modal */}
+      {bannerModalOpen && (
+        <BannerPickerModal
+          userId={userId}
+          currentBannerUrl={bannerUrl || null}
+          onSave={handleBannerSaved}
+          onClose={() => setBannerModalOpen(false)}
+        />
+      )}
+
+      {/* ── Fields ───────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Tooltip content="Shown on your posts, leaderboard, and community profile." className="block">
           <Input

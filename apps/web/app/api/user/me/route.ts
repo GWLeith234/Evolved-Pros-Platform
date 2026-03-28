@@ -81,9 +81,12 @@ export async function PATCH(request: Request) {
     }
   }
 
-  // avatar_url allowed only from internal upload flow (validated separately)
+  // avatar_url and banner_url allowed only from internal upload flow (validated separately)
   if ('avatar_url' in body && typeof body.avatar_url === 'string') {
     update.avatar_url = body.avatar_url
+  }
+  if ('banner_url' in body && (typeof body.banner_url === 'string' || body.banner_url === null)) {
+    update.banner_url = body.banner_url
   }
 
   // Boolean fields
