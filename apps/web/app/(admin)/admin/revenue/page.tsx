@@ -22,7 +22,7 @@ export default async function AdminRevenuePage() {
 
   const memberList = membersResult.data ?? []
   const proCount       = memberList.filter(m => m.tier === 'pro'       && m.tier_status === 'active').length
-  const communityCount = memberList.filter(m => m.tier === 'community' && m.tier_status === 'active').length
+  const communityCount = memberList.filter(m => m.tier === 'vip' && m.tier_status === 'active').length
   const currentMrr     = memberList.reduce((sum, m) => sum + getTierMrr(m.tier, m.tier_status), 0)
 
   // Build 6-month bars

@@ -19,7 +19,7 @@ export async function PATCH(
   }
 
   const { tier, tierStatus } = body
-  const validTiers    = ['community', 'pro', null]
+  const validTiers    = ['vip', 'pro', null]
   const validStatuses = ['active', 'trial', 'cancelled', 'expired']
 
   if (tier !== undefined && !validTiers.includes(tier as string | null)) {

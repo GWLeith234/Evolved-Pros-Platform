@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   const { email, fullName, tier } = await request.json() as {
     email: string
     fullName: string
-    tier: 'community' | 'pro'
+    tier: 'vip' | 'pro'
   }
 
   if (!email || !fullName || !tier) {

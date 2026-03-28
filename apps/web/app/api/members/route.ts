@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     )
   }
 
-  if (tier === 'pro' || tier === 'community') {
+  if (tier === 'pro' || tier === 'vip') {
     query = query.eq('tier', tier)
   }
 

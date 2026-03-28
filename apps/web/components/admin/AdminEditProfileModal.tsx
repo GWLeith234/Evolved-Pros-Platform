@@ -41,7 +41,7 @@ const labelStyle: React.CSSProperties = {
 export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
   const [displayName, setDisplayName] = useState(member.displayName ?? '')
   const [fullName,    setFullName]    = useState(member.fullName ?? '')
-  const [tier,        setTier]        = useState(member.tier ?? 'community')
+  const [tier,        setTier]        = useState(member.tier ?? 'vip')
   const [tierStatus,  setTierStatus]  = useState(member.tierStatus ?? 'active')
   const [avatarUrl,   setAvatarUrl]   = useState(member.avatarUrl ?? '')
   const [bannerUrl,   setBannerUrl]   = useState('')
@@ -290,7 +290,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
               <div>
                 <label style={labelStyle}>Tier</label>
                 <div className="flex gap-2">
-                  {(['community', 'pro'] as const).map(t => (
+                  {(['vip', 'pro'] as const).map(t => (
                     <button
                       key={t} type="button" onClick={() => setTier(t)}
                       className="flex-1 py-2 rounded font-condensed font-bold uppercase tracking-[0.1em] text-[10px] transition-all"
@@ -300,7 +300,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                         color: tier === t ? (t === 'pro' ? '#a07c1e' : '#1b3c5a') : '#7a8a96',
                       }}
                     >
-                      {t === 'pro' ? 'Pro' : 'Comm.'}
+                      {t === 'pro' ? 'Professional' : 'VIP'}
                     </button>
                   ))}
                 </div>

@@ -76,7 +76,7 @@ const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
 export function MemberDetailClient({ member }: { member: MemberDetail }) {
   const router = useRouter()
   const [tab, setTab] = useState<Tab>('overview')
-  const [tier, setTier]             = useState(member.tier ?? 'community')
+  const [tier, setTier]             = useState(member.tier ?? 'vip')
   const [tierStatus, setTierStatus] = useState(member.tierStatus ?? 'active')
   const [saving, setSaving]         = useState(false)
   const [saveMsg, setSaveMsg]       = useState('')
@@ -230,8 +230,8 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
               className="font-condensed text-[12px] rounded px-2.5 py-1.5 outline-none"
               style={{ border: '1px solid rgba(27,60,90,0.2)', color: '#112535', backgroundColor: 'white' }}
             >
-              <option value="community">Community</option>
-              <option value="pro">Pro</option>
+              <option value="vip">VIP</option>
+              <option value="pro">Professional</option>
             </select>
           </div>
 

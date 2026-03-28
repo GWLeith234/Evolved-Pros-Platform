@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { EventsContent } from '@/components/events/EventsContent'
-import { hasTierAccess } from '@/lib/tier'
+import { hasTierAccess, hasKeynoteAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
 
 export const dynamic = 'force-dynamic'
@@ -13,10 +13,10 @@ export default async function EventsPage() {
 
   // Fetch profile and all events in parallel
   const [{ data: profile }, { data: rows }, { data: regs }] = await Promise.all([
-    supabase.from('users').select('tier').eq('id', user.id).single(),
+    supabase.from('users').select('tier, keynote_access').eq('id', user.id).single(),
     supabase
       .from('events')
-      .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published')
+      .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published, event_type_keynote')
       .neq('is_published', false)
       .order('starts_at', { ascending: true })
       .limit(100),
@@ -44,7 +44,9 @@ export default async function EventsPage() {
       requiredTier: e.required_tier as 'community' | 'pro' | null,
       registrationCount: e.registration_count,
       isRegistered,
-      hasAccess: hasTierAccess(profile?.tier, e.required_tier as 'community' | 'pro' | null),
+      hasAccess: e.event_type_keynote
+        ? hasKeynoteAccess({ keynote_access: profile?.keynote_access, tier: profile?.tier })
+        : hasTierAccess(profile?.tier, e.required_tier as 'vip' | 'pro' | null),
       isPublished: e.is_published,
     }
   })

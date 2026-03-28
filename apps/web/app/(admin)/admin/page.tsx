@@ -42,9 +42,10 @@ export default async function AdminDashboardPage() {
   const activeUsers    = users.filter(u => u.tier_status === 'active' || u.tier_status === 'trial')
   const cancelledUsers = users.filter(u => u.tier_status === 'cancelled' || u.tier_status === 'expired')
   const proUsers       = users.filter(u => u.tier === 'pro' && u.tier_status === 'active')
+  const vipUsers       = users.filter(u => u.tier === 'vip' && u.tier_status === 'active')
 
   const totalMembers  = activeUsers.length
-  const mrr           = proUsers.length * 79 + activeUsers.filter(u => u.tier === 'community').length * 39
+  const mrr           = proUsers.length * 79 + vipUsers.length * 39
   const proMembers    = proUsers.length
   const proLastMo     = proLastMonth.count ?? 0
   const totalEver     = activeUsers.length + cancelledUsers.length
@@ -62,7 +63,7 @@ export default async function AdminDashboardPage() {
     {
       label:    'MRR',
       value:    fmt(mrr, '$'),
-      delta:    `from ${proMembers} pro + ${activeUsers.filter(u => u.tier === 'community').length} community`,
+      delta:    `from ${proMembers} professional + ${vipUsers.length} vip`,
       deltaPos: true,
       color:    '#68a2b9',
       bg:       'rgba(104,162,185,0.08)',

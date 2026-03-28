@@ -89,15 +89,20 @@ async function handleWebhookEvent({
   switch (eventType) {
     case 'order.created':
     case 'order.renewed': {
+      // Keynote add-on: just flip the flag, do not change tier
+      if (product.keynote_access) {
+        await grantKeynoteAccess({ vendastaContactId, email, fullName })
+        break
+      }
       const tierExpiresAt = getTierExpiry(product)
       const isNewUser = await upsertUser({
         vendastaContactId, email, fullName,
-        tier:        product.tier,
-        tierStatus:  'active',
+        tier:         product.tier!,
+        tierStatus:   'active',
         tierExpiresAt,
       })
       if (isNewUser) {
-        await sendWelcomeEmail({ email, fullName, tier: product.tier })
+        await sendWelcomeEmail({ email, fullName, tier: product.tier! })
 
         // Notify admins of new member join
         const { data: admins } = await adminClient
@@ -109,7 +114,7 @@ async function handleWebhookEvent({
           void notifyNewMember({
             adminUserIds:  adminIds,
             newMemberName: fullName,
-            newMemberTier: product.tier,
+            newMemberTier: product.tier!,
           })
         }
       }
@@ -117,11 +122,15 @@ async function handleWebhookEvent({
     }
 
     case 'order.upgraded': {
+      if (product.keynote_access) {
+        await grantKeynoteAccess({ vendastaContactId, email, fullName })
+        break
+      }
       const tierExpiresAt = getTierExpiry(product)
       await upsertUser({
         vendastaContactId, email, fullName,
-        tier:        product.tier,
-        tierStatus:  'active',
+        tier:         product.tier!,
+        tierStatus:   'active',
         tierExpiresAt,
       })
       break
@@ -140,13 +149,56 @@ async function handleWebhookEvent({
   }
 }
 
+async function grantKeynoteAccess({
+  vendastaContactId, email, fullName,
+}: {
+  vendastaContactId: string
+  email:             string
+  fullName:          string
+}): Promise<void> {
+  const { data: existing } = await adminClient
+    .from('users')
+    .select('id')
+    .eq('vendasta_contact_id', vendastaContactId)
+    .maybeSingle()
+
+  if (existing) {
+    await adminClient.from('users').update({ keynote_access: true }).eq('id', existing.id)
+    return
+  }
+
+  // New user purchasing keynote directly — create auth user with vip tier
+  const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
+    email,
+    email_confirm: true,
+  })
+  if (authError) throw new Error(`Auth user creation failed: ${authError.message}`)
+
+  await adminClient.from('users').insert({
+    id:                  authUser.user.id,
+    vendasta_contact_id: vendastaContactId,
+    email,
+    full_name:           fullName,
+    tier:                'vip',
+    tier_status:         'active',
+    keynote_access:      true,
+    tier_expires_at:     new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+  })
+
+  await adminClient.auth.admin.generateLink({
+    type:    'magiclink',
+    email,
+    options: { redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/onboard` },
+  })
+}
+
 async function upsertUser({
   vendastaContactId, email, fullName, tier, tierStatus, tierExpiresAt,
 }: {
   vendastaContactId: string
   email:             string
   fullName:          string
-  tier:              'community' | 'pro'
+  tier:              'vip' | 'pro'
   tierStatus:        string
   tierExpiresAt:     Date
 }): Promise<boolean> {

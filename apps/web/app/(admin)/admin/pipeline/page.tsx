@@ -84,10 +84,10 @@ export default async function AdminPipelinePage() {
       estimatedValue = stage === 'upgrade_ready' || stage === 'closed' ? 79 * 12 : 39 * 12
     } else if (recentProIds.has(m.id)) {
       stage = 'closed'; stageNote = 'Upgraded to Pro'; estimatedValue = 79 * 12
-    } else if (pillar4Users.has(m.id) && m.tier === 'community') {
+    } else if (pillar4Users.has(m.id) && m.tier === 'vip') {
       stage = 'upgrade_ready'; stageNote = 'Hit P4 · ready for Pro'; estimatedValue = 79 * 12
-    } else if (m.tier === 'community' && (engLvl === 'Med' || engLvl === 'High')) {
-      stage = 'engaged'; stageNote = 'Community · Active'; estimatedValue = 39 * 12
+    } else if (m.tier === 'vip' && (engLvl === 'Med' || engLvl === 'High')) {
+      stage = 'engaged'; stageNote = 'VIP · Active'; estimatedValue = 39 * 12
     } else {
       stage = 'awareness'; stageNote = 'Low activity'; estimatedValue = 0
     }

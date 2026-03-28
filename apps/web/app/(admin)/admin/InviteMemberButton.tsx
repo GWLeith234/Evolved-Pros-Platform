@@ -2,21 +2,21 @@
 
 import { useState } from 'react'
 
-type Tier = 'community' | 'pro'
+type Tier = 'vip' | 'pro'
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
 export function InviteMemberButton() {
   const [open, setOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [fullName, setFullName] = useState('')
-  const [tier, setTier] = useState<Tier>('community')
+  const [tier, setTier] = useState<Tier>('vip')
   const [status, setStatus] = useState<Status>('idle')
   const [errorMsg, setErrorMsg] = useState('')
 
   function reset() {
     setEmail('')
     setFullName('')
-    setTier('community')
+    setTier('vip')
     setStatus('idle')
     setErrorMsg('')
   }
@@ -197,7 +197,7 @@ export function InviteMemberButton() {
                   <div>
                     <label style={labelStyle}>Tier</label>
                     <div className="grid grid-cols-2 gap-2">
-                      {(['community', 'pro'] as const).map(t => (
+                      {(['vip', 'pro'] as const).map(t => (
                         <button
                           key={t}
                           type="button"
@@ -209,7 +209,7 @@ export function InviteMemberButton() {
                             color: tier === t ? (t === 'pro' ? '#c9a84c' : '#1b3c5a') : '#7a8a96',
                           }}
                         >
-                          {t === 'pro' ? 'Pro' : 'Community'}
+                          {t === 'pro' ? 'Professional' : 'VIP'}
                         </button>
                       ))}
                     </div>

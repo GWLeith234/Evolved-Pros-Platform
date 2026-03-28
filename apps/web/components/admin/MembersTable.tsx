@@ -26,7 +26,7 @@ export interface MemberRow {
 
 const TIER_COLORS: Record<string, { bg: string; color: string; border: string }> = {
   pro:       { bg: 'rgba(201,168,76,0.1)',  color: '#a07c1e', border: 'rgba(201,168,76,0.3)' },
-  community: { bg: 'rgba(27,60,90,0.06)',   color: '#1b3c5a', border: 'rgba(27,60,90,0.18)' },
+  vip:       { bg: 'rgba(27,60,90,0.06)',   color: '#1b3c5a', border: 'rgba(27,60,90,0.18)' },
 }
 const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
   active:    { bg: 'rgba(34,197,94,0.08)',  color: '#15803d' },
@@ -40,7 +40,7 @@ const ENG_COLORS: Record<EngagementLevel, { bar: string; text: string }> = {
   Low:  { bar: '#cbd5e1', text: '#7a8a96' },
 }
 
-const FILTERS = ['All', 'Pro', 'Community', 'Trial', 'Cancelled'] as const
+const FILTERS = ['All', 'Pro', 'VIP', 'Trial', 'Cancelled'] as const
 type Filter = typeof FILTERS[number]
 
 function fmtDate(iso: string): string {
@@ -67,8 +67,8 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
         m.email.toLowerCase().includes(q),
       )
     }
-    if (filter === 'Pro')        list = list.filter(m => m.tier === 'pro')
-    if (filter === 'Community')  list = list.filter(m => m.tier === 'community')
+    if (filter === 'Pro')  list = list.filter(m => m.tier === 'pro')
+    if (filter === 'VIP')  list = list.filter(m => m.tier === 'vip')
     if (filter === 'Trial')      list = list.filter(m => m.tierStatus === 'trial')
     if (filter === 'Cancelled')  list = list.filter(m => m.tierStatus === 'cancelled' || m.tierStatus === 'expired')
     return list
@@ -139,7 +139,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
             ) : (
               filtered.map((m, i) => {
                 const name = m.displayName ?? m.fullName ?? m.email
-                const tierStyle = TIER_COLORS[m.tier ?? ''] ?? TIER_COLORS.community
+                const tierStyle = TIER_COLORS[m.tier ?? ''] ?? TIER_COLORS.vip
                 const statusStyle = STATUS_COLORS[m.tierStatus ?? ''] ?? STATUS_COLORS.expired
                 const engStyle = ENG_COLORS[m.engagementLevel]
                 const engPct = Math.min(100, m.engagementScore * 10)

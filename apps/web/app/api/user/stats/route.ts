@@ -74,7 +74,7 @@ export async function GET() {
 
   // Pillars unlocked: courses the user can access based on tier
   const allCourses = coursesResult.data ?? []
-  const userTier = profile.tier ?? 'community'
+  const userTier = profile.tier ?? 'vip'
   const accessibleCourses = allCourses.filter(c => {
     if (userTier === 'pro') return true
     return c.required_tier === 'community'

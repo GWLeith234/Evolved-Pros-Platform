@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 export const dynamic = 'force-dynamic'
 
 type NotifType = 'system_general' | 'event_reminder' | 'course_unlock' | 'system_billing' | 'community_reply' | 'community_mention'
-type Audience = 'all' | 'community' | 'pro'
+type Audience = 'all' | 'vip' | 'pro'
 
 export async function POST(request: Request) {
   const check = await requireAdminApi()
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   if (typeof message !== 'string' || message.trim().length === 0 || message.length > 500) {
     return NextResponse.json({ error: 'Invalid message' }, { status: 422 })
   }
-  const validAudiences: Audience[] = ['all', 'community', 'pro']
+  const validAudiences: Audience[] = ['all', 'vip', 'pro']
   if (!validAudiences.includes(audience as Audience)) {
     return NextResponse.json({ error: 'Invalid audience' }, { status: 422 })
   }
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     .in('tier_status', ['active', 'trial'])
     .neq('role', 'admin')
 
-  if (audience === 'community') query = query.eq('tier', 'community')
+  if (audience === 'vip') query = query.eq('tier', 'vip')
   if (audience === 'pro')       query = query.eq('tier', 'pro')
 
   const { data: targetUsers } = await query

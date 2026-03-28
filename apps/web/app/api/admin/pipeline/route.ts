@@ -107,13 +107,13 @@ export async function GET() {
       stage          = 'closed'
       stageNote      = 'Upgraded to Pro'
       estimatedValue = 79 * 12
-    } else if (pillar4Users.has(m.id) && m.tier === 'community') {
+    } else if (pillar4Users.has(m.id) && m.tier === 'vip') {
       stage          = 'upgrade_ready'
       stageNote      = 'Hit P4 · ready for Pro'
       estimatedValue = 79 * 12
-    } else if (m.tier === 'community' && (engLevel === 'Med' || engLevel === 'High')) {
+    } else if (m.tier === 'vip' && (engLevel === 'Med' || engLevel === 'High')) {
       stage          = 'engaged'
-      stageNote      = 'Community · Active'
+      stageNote      = 'VIP · Active'
       estimatedValue = 39 * 12
     } else {
       stage          = 'awareness'

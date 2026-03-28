@@ -47,8 +47,10 @@ export default async function MemberLayout({ children }: { children: React.React
 
   // Normalize tier and role to lowercase so all downstream comparisons work
   // regardless of how values were stored (e.g. 'Pro' vs 'pro', 'Admin' vs 'admin')
-  profile.tier        = (profile.tier as string | null)?.toLowerCase() as typeof profile.tier ?? null
-  profile.role        = (profile.role as string)?.toLowerCase() ?? profile.role
+  // Also remap legacy 'community' to 'vip' for any rows not yet migrated
+  const rawTier = (profile.tier as string | null)?.toLowerCase()
+  profile.tier  = (rawTier === 'community' ? 'vip' : rawTier) as typeof profile.tier ?? null
+  profile.role  = (profile.role as string)?.toLowerCase() ?? profile.role
 
   if (profile.tier_status === 'cancelled' || profile.tier_status === 'expired') {
     redirect('/membership-expired')

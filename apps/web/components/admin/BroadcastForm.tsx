@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 
-type Audience = 'all' | 'community' | 'pro'
+type Audience = 'all' | 'vip' | 'pro'
 type NotifType = 'system_general' | 'event_reminder' | 'course_unlock' | 'system_billing'
 
 const AUDIENCE_OPTIONS: { value: Audience; label: string; desc: string }[] = [
   { value: 'all',       label: 'All Members',     desc: 'Every active + trial member' },
-  { value: 'community', label: 'Community Only',  desc: 'Community tier members' },
+  { value: 'vip',       label: 'VIP Only',         desc: 'VIP tier members' },
   { value: 'pro',       label: 'Pro Only',        desc: 'Pro tier members' },
 ]
 
