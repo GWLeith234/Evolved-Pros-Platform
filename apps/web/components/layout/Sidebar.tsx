@@ -189,7 +189,7 @@ function SidebarAdUnit() {
         .from('platform_settings')
         .select('value')
         .eq('key', 'ad_sidebar_interval')
-        .single(),
+        .maybeSingle(),
     ]).then(([adsResult, intervalResult]) => {
       if (adsResult.data?.length) setAds(adsResult.data)
       const secs = parseInt(intervalResult.data?.value ?? '10', 10)

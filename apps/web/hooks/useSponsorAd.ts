@@ -33,7 +33,7 @@ export function useSponsorAd(placement: 'academy' | 'community' | 'events') {
         .from('platform_settings')
         .select('value')
         .eq('key', 'ad_sidebar_interval')
-        .single(),
+        .maybeSingle(),
     ]).then(([adsResult, intervalResult]) => {
       const list = adsResult.data ?? []
       if (!list.length) return
