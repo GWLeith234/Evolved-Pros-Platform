@@ -15,6 +15,11 @@
   --border:       rgba(27,60,90,0.12);
   --border-light: rgba(255,255,255,0.06);
   --gold:         #c9a84c;
+
+  /* Surface variables — override in light mode below */
+  --page-bg:      #0d1c27;
+  --card-bg:      #ffffff;
+  --card-border:  rgba(27,60,90,0.12);
 }
 
 /* ─── Light mode ────────────────────────────────────────────────────────────
@@ -23,9 +28,16 @@
    Applied before first paint via inline <script> in root layout — no flash.
    ──────────────────────────────────────────────────────────────────────── */
 
+/* ─── Light mode surface variables ─────────────────────────────────────── */
+html.light-mode {
+  --page-bg:     #FAF7F2;
+  --card-bg:     #F5F1EA;
+  --card-border: #E8E2D9;
+}
+
 /* Page background + body text */
 html.light-mode body {
-  background-color: #faf9f7;
+  background-color: #FAF7F2;
   color: #1b3c5a;
 }
 
@@ -42,18 +54,28 @@ html.light-mode aside {
 
 /* Main content area */
 html.light-mode main {
-  background-color: #faf9f7 !important;
+  background-color: #FAF7F2 !important;
 }
 
-/* Cards / panels — dark bg-[#112535] → white */
+/* Tailwind bg-white → card ivory */
+html.light-mode .bg-white {
+  background-color: #F5F1EA !important;
+}
+
+/* Cards / panels — dark bg-[#112535] → card ivory */
 html.light-mode .bg-\[\#112535\] {
-  background-color: #ffffff !important;
-  border-color: rgba(27,60,90,0.12) !important;
+  background-color: #F5F1EA !important;
+  border-color: #E8E2D9 !important;
 }
 
-/* Deeper panel bg-[#0d1c27] → off-white */
+/* Deeper panel bg-[#0d1c27] → slightly warmer */
 html.light-mode .bg-\[\#0d1c27\] {
-  background-color: #f0f4f7 !important;
+  background-color: #EDE8DF !important;
+}
+
+/* Hardcoded off-white bg-[#faf9f7] → ivory */
+html.light-mode .bg-\[\#faf9f7\] {
+  background-color: #FAF7F2 !important;
 }
 
 /* Tailwind text-white inside card panels → body text color */
@@ -72,7 +94,7 @@ html.light-mode main .text-white\/70 {
 /* Borders inside main */
 html.light-mode main .border-white\/10,
 html.light-mode main .border-white\/\[0\.06\] {
-  border-color: rgba(27,60,90,0.12) !important;
+  border-color: #E8E2D9 !important;
 }
 
 * { box-sizing: border-box; }

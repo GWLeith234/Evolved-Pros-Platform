@@ -137,7 +137,7 @@ export function LeaderboardRail({ leaderboard, activeMembers, currentUserId }: L
       style={{
         width: '260px',
         borderLeft: '1px solid rgba(27,60,90,0.1)',
-        backgroundColor: 'white',
+        backgroundColor: 'var(--card-bg)',
         padding: '20px',
       }}
     >

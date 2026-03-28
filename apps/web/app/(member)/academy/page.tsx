@@ -38,7 +38,7 @@ export default async function AcademyPage() {
         {/* Page header */}
         <div
           className="px-4 md:px-8 py-6"
-          style={{ borderBottom: '1px solid rgba(27,60,90,0.08)', backgroundColor: 'white' }}
+          style={{ borderBottom: '1px solid rgba(27,60,90,0.08)', backgroundColor: 'var(--card-bg)' }}
         >
           <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-1" style={{ color: '#68a2b9' }}>
             The Evolved Architecture™

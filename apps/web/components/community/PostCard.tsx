@@ -100,7 +100,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
     <div
       className="rounded-lg transition-all duration-150"
       style={{
-        backgroundColor: 'white',
+        backgroundColor: 'var(--card-bg)',
         border: '1px solid rgba(27,60,90,0.12)',
         padding: '20px',
       }}

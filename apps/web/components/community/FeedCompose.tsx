@@ -76,8 +76,8 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
     <div
       className="rounded-lg"
       style={{
-        backgroundColor: 'white',
-        border: '1px solid rgba(27,60,90,0.12)',
+        backgroundColor: 'var(--card-bg)',
+        border: '1px solid var(--card-border)',
         padding: '16px',
       }}
     >
