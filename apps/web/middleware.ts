@@ -110,6 +110,22 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Onboarding gate: redirect new members to /onboard until they complete the flow.
+  // Skip API routes (would break fetch calls mid-flow) and /onboard itself (infinite loop).
+  if (!pathname.startsWith('/api/') && pathname !== '/onboard') {
+    const { data: onboardProfile } = await supabase
+      .from('users')
+      .select('onboarding_completed')
+      .eq('id', user.id)
+      .single()
+
+    if (!onboardProfile?.onboarding_completed) {
+      const host  = request.headers.get('x-forwarded-host') || request.headers.get('host')
+      const proto = request.headers.get('x-forwarded-proto') || 'https'
+      return NextResponse.redirect(`${proto}://${host}/onboard`)
+    }
+  }
+
   return supabaseResponse
 }
 
