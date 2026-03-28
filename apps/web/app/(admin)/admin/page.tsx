@@ -26,17 +26,26 @@ export default async function AdminDashboardPage() {
   const oneMonthAgo  = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
   const twoMonthsAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString()
 
-  const [allUsers, newThisWeek, recentWebhooks, proLastMonth] = await Promise.all([
-    supabase.from('users').select('id, tier, tier_status').neq('role', 'admin'),
-    supabase.from('users').select('id', { count: 'exact', head: true })
+  const [allUsers, newThisWeek, recentMembers, proLastMonth] = await Promise.all([
+    adminClient.from('users').select('id, tier, tier_status').neq('role', 'admin'),
+    adminClient.from('users').select('id', { count: 'exact', head: true })
       .neq('role', 'admin').gte('created_at', oneWeekAgo),
-    adminClient.from('vendasta_webhooks')
-      .select('id, event_type, vendasta_contact_id, product_sku, processed_at, status')
-      .order('processed_at', { ascending: false })
+    adminClient.from('users')
+      .select('id, full_name, display_name, email, tier, created_at')
+      .order('created_at', { ascending: false })
       .limit(5),
-    supabase.from('users').select('id', { count: 'exact', head: true })
+    adminClient.from('users').select('id', { count: 'exact', head: true })
       .eq('tier', 'pro').gte('created_at', twoMonthsAgo).lte('created_at', oneMonthAgo),
   ])
+
+  // vendasta_webhooks may not exist in all environments — fetch separately so it can't crash the page
+  const recentWebhooks = await adminClient
+    .from('vendasta_webhooks')
+    .select('id, event_type, vendasta_contact_id, product_sku, processed_at, status')
+    .order('processed_at', { ascending: false })
+    .limit(5)
+    .then(r => r)
+    .catch(() => ({ data: null, error: null }))
 
   const users = allUsers.data ?? []
   const activeUsers    = users.filter(u => u.tier_status === 'active' || u.tier_status === 'trial')
@@ -136,6 +145,53 @@ export default async function AdminDashboardPage() {
             <p className="font-condensed text-[11px] text-[#7a8a96]">{l.desc}</p>
           </Link>
         ))}
+      </div>
+
+      {/* Recent signups */}
+      <div className="rounded-lg overflow-hidden mb-6" style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.1)' }}>
+        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}>
+          <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[10px] text-[#1b3c5a]">Recent Signups</p>
+          <Link href="/admin/members" className="font-condensed text-[10px] text-[#68a2b9] hover:text-[#1b3c5a] transition-colors">
+            All members →
+          </Link>
+        </div>
+        {(recentMembers.data ?? []).length === 0 ? (
+          <div className="px-5 py-8 text-center">
+            <p className="font-condensed text-[12px] text-[#7a8a96]">No members yet.</p>
+          </div>
+        ) : (
+          <table className="w-full">
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.06)' }}>
+                {['Name', 'Email', 'Tier', 'Joined'].map(h => (
+                  <th key={h} className="px-5 py-2 text-left font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96]">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {(recentMembers.data ?? []).map((m, i, arr) => (
+                <tr key={m.id} style={{ borderBottom: i === arr.length - 1 ? 'none' : '1px solid rgba(27,60,90,0.06)' }}>
+                  <td className="px-5 py-3">
+                    <Link href={`/admin/members/${m.id}`} className="font-condensed text-[11px] text-[#1b3c5a] hover:text-[#ef0e30] transition-colors">
+                      {m.full_name ?? m.display_name ?? '—'}
+                    </Link>
+                  </td>
+                  <td className="px-5 py-3"><p className="font-condensed text-[11px] text-[#7a8a96]">{m.email ?? '—'}</p></td>
+                  <td className="px-5 py-3">
+                    {m.tier ? (
+                      <span className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded" style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.12)' }}>
+                        {m.tier}
+                      </span>
+                    ) : (
+                      <span className="font-condensed text-[11px] text-[#7a8a96]">—</span>
+                    )}
+                  </td>
+                  <td className="px-5 py-3"><p className="font-condensed text-[11px] text-[#7a8a96]">{fmtDate(m.created_at)}</p></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* Recent Vendasta webhooks */}

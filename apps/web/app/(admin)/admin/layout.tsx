@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { AdminTopNav } from '@/components/admin/AdminTopNav'
@@ -24,11 +25,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     }
   }
 
+  // Use SSR client only for auth; adminClient (service role) for profile read
+  // to bypass RLS which can hide the user row and cause a false non-admin redirect
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
+  const { data: profile } = await adminClient
     .from('users')
     .select('role, display_name, full_name')
     .eq('id', user.id)
