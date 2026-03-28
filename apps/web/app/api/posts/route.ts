@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import type { Post } from '@/lib/community/types'
 
@@ -58,7 +59,9 @@ export async function GET(request: Request) {
 
   if (!channel) return NextResponse.json({ error: 'Channel not found' }, { status: 404 })
 
-  let query = supabase
+  // Use adminClient so posts by null-tier / newly-onboarded users aren't dropped
+  // by RLS on the users join. Auth check (getUser) already done above.
+  let query = adminClient
     .from('posts')
     .select('id, channel_id, body, pillar_tag, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
     .eq('channel_id', channel.id)

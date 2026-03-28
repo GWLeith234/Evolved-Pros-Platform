@@ -5,8 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 
 interface Banner {
   id: string
-  pillar: number | null
-  title: string | null
+  label: string | null
+  pillar_tag: string | null
   image_url: string
 }
 
@@ -27,9 +27,7 @@ export function BannerPickerModal({ userId, currentBannerUrl, onSave, onClose }:
     const supabase = createClient()
     supabase
       .from('profile_banners')
-      .select('id, pillar, title, image_url')
-      .eq('is_active', true)
-      .order('sort_order')
+      .select('id, label, pillar_tag, image_url')
       .then(({ data }) => {
         if (data) setBanners(data)
       })
@@ -125,14 +123,14 @@ export function BannerPickerModal({ userId, currentBannerUrl, onSave, onClose }:
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={banner.image_url}
-                alt={banner.title ?? ''}
+                alt={banner.label ?? ''}
                 style={{ width: '100%', height: '90px', objectFit: 'cover', display: 'block' }}
               />
               <p
                 className="font-condensed font-semibold text-[12px] px-2 py-1.5"
                 style={{ color: '#7a8a96' }}
               >
-                {banner.title ?? `Pillar ${banner.pillar}`}
+                {banner.label ?? banner.pillar_tag ?? ''}
               </p>
             </button>
           ))}
