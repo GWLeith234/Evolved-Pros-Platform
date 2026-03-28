@@ -9,8 +9,11 @@ const PUBLIC_ROUTES = [
   '/api/health',
   '/dev-login',
   '/api/dev-login',
-  '/membership',
 ]
+
+// Routes that are publicly accessible but still need session refresh
+// so server components can read the user's auth state.
+const SESSION_OPTIONAL_ROUTES = ['/membership']
 const ADMIN_ROUTES = ['/admin']
 
 export async function middleware(request: NextRequest) {
@@ -80,6 +83,11 @@ export async function middleware(request: NextRequest) {
   if (authCookie) console.log('[middleware] auth cookie found:', authCookie.name, '=', authCookie.value.slice(0, 40) + '...')
 
   if (!user) {
+    // Session-optional routes (e.g. /membership): let them through without auth.
+    // Session was still refreshed above so server components can call getUser().
+    if (SESSION_OPTIONAL_ROUTES.some(r => pathname.startsWith(r))) {
+      return supabaseResponse
+    }
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
