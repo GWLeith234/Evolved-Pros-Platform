@@ -53,7 +53,7 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
   return (
     <div className="rounded-lg overflow-hidden" style={{ backgroundColor: '#112535' }}>
       {/* Banner */}
-      <div className="relative" style={{ height: '200px' }}>
+      <div className="relative" style={{ height: '200px', zIndex: 0 }}>
         {user.banner_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -102,7 +102,7 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
           {/* Avatar */}
           <div
             className="w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
-            style={{ backgroundColor: '#ef0e30', marginTop: '-48px', border: '3px solid #112535' }}
+            style={{ backgroundColor: '#ef0e30', marginTop: '-48px', border: '3px solid #112535', position: 'relative', zIndex: 10 }}
           >
             {user.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
