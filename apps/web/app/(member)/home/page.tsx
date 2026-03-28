@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
 import { StatRow } from '@/components/home/StatRow'
@@ -169,10 +170,12 @@ export default async function MemberHomePage() {
     fetchUpcomingEvents(supabase, user.id),
     fetchCourseProgress(supabase, user.id),
     fetchUnreadCount(supabase, user.id),
-    supabase.from('greeting_quotes').select('quote_text, source').order('day_number'),
+    // Use adminClient to bypass RLS — greeting_quotes is a public table but anon key may be blocked
+    adminClient.from('greeting_quotes').select('quote_text, source').order('day_number'),
   ])
 
   const quotes = quotesResult.data ?? []
+  console.log('[home] quotes fetch:', quotes.length, 'error:', quotesResult.error?.message)
   const quote = quotes.length ? quotes[dayOfYear % quotes.length] : null
 
   const displayName = (profile.full_name ? profile.full_name.split(' ')[0] : null) ?? profile.display_name ?? 'Member'

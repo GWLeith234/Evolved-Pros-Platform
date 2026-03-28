@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo } from 'react'
-import { MemberBadge } from '@/components/ui/MemberBadge'
+import { GreetingText } from '@/components/home/GreetingText'
 
 const BASE = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/'
 
@@ -20,23 +20,6 @@ function getTimePeriod(hour: number): TimePeriod {
   return 'evening'
 }
 
-function getGreeting(period: TimePeriod): string {
-  if (period === 'morning') return 'Good morning'
-  if (period === 'midday') return 'Good afternoon'
-  return 'Good evening'
-}
-
-function getWeekLabel(): string {
-  const now = new Date()
-  const startOfYear = new Date(now.getFullYear(), 0, 1)
-  const weekNum = Math.ceil(
-    ((now.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7
-  )
-  const quarter = Math.ceil((now.getMonth() + 1) / 3)
-  const monthName = now.toLocaleDateString('en-US', { month: 'long' })
-  return `Week of ${monthName} ${now.getDate()}, ${now.getFullYear()} — Q${quarter} · Week ${weekNum}`
-}
-
 interface WelcomeBannerProps {
   displayName: string
   tier?: string | null
@@ -47,9 +30,8 @@ interface WelcomeBannerProps {
 }
 
 export function WelcomeBanner({ displayName, tier, quote }: WelcomeBannerProps) {
-  const period    = useMemo(() => getTimePeriod(new Date().getHours()), [])
-  const greeting  = useMemo(() => getGreeting(period), [period])
-  const weekLabel = useMemo(() => getWeekLabel(), [])
+  // Period is used only for banner image selection — text rendering moved to GreetingText
+  const period = useMemo(() => getTimePeriod(new Date().getHours()), [])
 
   return (
     <div className="relative overflow-hidden rounded-lg h-[140px] md:h-[180px]">
@@ -73,26 +55,9 @@ export function WelcomeBanner({ displayName, tier, quote }: WelcomeBannerProps) 
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col justify-between px-6 py-4 md:px-7 md:py-5">
 
-        {/* Top: week label + greeting + quote */}
+        {/* Top: greeting (client-only to avoid timezone hydration errors) + quote */}
         <div>
-          {/* suppressHydrationWarning: weekLabel uses new Date() — server (UTC) vs client (local) differ */}
-          <p
-            suppressHydrationWarning
-            className="font-condensed font-bold uppercase tracking-[0.2em] mb-1"
-            style={{ fontSize: '9px', color: '#c9a84c' }}
-          >
-            {weekLabel}
-          </p>
-
-          {/* suppressHydrationWarning: greeting uses new Date().getHours() — same timezone mismatch */}
-          <h1
-            suppressHydrationWarning
-            className="font-display font-black text-white leading-tight flex items-center gap-3 flex-wrap"
-            style={{ fontSize: '22px' }}
-          >
-            {greeting}, {displayName}.
-            {tier && <MemberBadge tier={tier} size="md" />}
-          </h1>
+          <GreetingText firstName={displayName} tier={tier} />
 
           {quote && (
             <div className="mt-1 max-w-[520px]">
