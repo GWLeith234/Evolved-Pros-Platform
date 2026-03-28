@@ -23,7 +23,7 @@ function getTimePeriod(hour: number): TimePeriod {
 interface WelcomeBannerProps {
   displayName: string
   tier?: string | null
-  quote?: { quote: string; pillar: string | null } | null
+  quote?: { quote_text: string; source: string | null } | null
   // kept for backward-compat with home/page.tsx, not rendered in banner
   unreadPostCount?: number
   upcomingEventCount?: number
@@ -65,14 +65,14 @@ export function WelcomeBanner({ displayName, tier, quote }: WelcomeBannerProps) 
                 className="font-display italic leading-snug line-clamp-2 md:line-clamp-none"
                 style={{ fontSize: '13px', color: 'rgba(255,255,255,0.80)' }}
               >
-                &ldquo;{quote.quote}&rdquo;
+                &ldquo;{quote.quote_text}&rdquo;
               </p>
-              {quote.pillar && (
+              {quote.source && (
                 <p
                   className="font-condensed font-semibold mt-0.5"
                   style={{ fontSize: '11px', color: '#c9a84c' }}
                 >
-                  — Pillar {quote.pillar.replace('p', '')}
+                  — {quote.source}
                 </p>
               )}
             </div>

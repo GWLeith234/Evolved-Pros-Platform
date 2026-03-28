@@ -24,7 +24,7 @@ export function GreetingText({ firstName, tier }: GreetingTextProps) {
   }, [])
 
   // Renders nothing on server — avoids SSR/client timezone hydration mismatch entirely
-  if (!greeting) return null
+  if (greeting === null) return null
 
   return (
     <>

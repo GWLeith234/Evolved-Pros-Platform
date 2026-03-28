@@ -171,12 +171,12 @@ export default async function MemberHomePage() {
     fetchCourseProgress(supabase, user.id),
     fetchUnreadCount(supabase, user.id),
     // Use adminClient to bypass RLS — greeting_quotes is a public table but anon key may be blocked
-    adminClient.from('greeting_quotes').select('quote, pillar').order('created_at'),
+    adminClient.from('greeting_quotes').select('quote_text, source').order('day_number'),
   ])
 
   const quotes = quotesResult.data ?? []
-  console.log('[home] quotes fetch:', quotes.length, 'error:', quotesResult.error?.message)
-  const quote = quotes.length ? quotes[dayOfYear % quotes.length] : null
+  console.log('[home] quotes fetch:', quotes?.length, 'error:', quotesResult.error?.message)
+  const quote = quotes?.length ? quotes[dayOfYear % quotes.length] : null
 
   const displayName = (profile.full_name ? profile.full_name.split(' ')[0] : null) ?? profile.display_name ?? 'Member'
   const upcomingEventCount = events.filter(e => !e.isRegistered).length
