@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Tooltip } from '@/components/ui/Tooltip'
 
 interface MembershipPageClientProps {
@@ -165,6 +166,22 @@ export function MembershipPageClient({ userTier, keynoteAccess }: MembershipPage
       style={{ backgroundColor: '#0A0F18' }}
     >
       <div className="max-w-5xl mx-auto">
+        {/* Back navigation — shown to logged-in members */}
+        {userTier !== null && (
+          <div className="mb-6">
+            <Link
+              href="/home"
+              className="inline-flex items-center gap-1.5 font-condensed font-semibold uppercase tracking-[0.12em] text-[11px] transition-opacity hover:opacity-70"
+              style={{ color: 'rgba(255,255,255,0.45)' }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              Back to platform
+            </Link>
+          </div>
+        )}
+
         {/* Header */}
         <div className="text-center mb-10">
           <p className="font-condensed font-bold uppercase tracking-[0.22em] text-[10px] mb-2" style={{ color: '#68a2b9' }}>
