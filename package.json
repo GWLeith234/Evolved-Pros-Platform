@@ -5,9 +5,11 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
-    "type-check": "turbo run type-check"
+    "type-check": "turbo run type-check",
+    "test:webhook": "ts-node --project tsconfig.scripts.json scripts/test-vendasta-webhook.ts"
   },
   "devDependencies": {
+    "ts-node": "^10.9.2",
     "turbo": "^2.0.0",
     "typescript": "^5.4.0"
   },

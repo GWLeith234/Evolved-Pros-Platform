@@ -6,6 +6,10 @@ import { VENDASTA_PRODUCTS, getTierExpiry } from '@/lib/vendasta/products'
 import { sendWelcomeEmail } from '@/lib/resend/emails/welcome'
 import { notifyNewMember } from '@/lib/notifications/create'
 
+// ---------------------------------------------------------------------------
+// Signature verification
+// ---------------------------------------------------------------------------
+
 function verifySignature(body: string, signature: string, secret: string): boolean {
   const expected = createHmac('sha256', secret).update(body).digest('hex')
   try {
@@ -15,10 +19,60 @@ function verifySignature(body: string, signature: string, secret: string): boole
   }
 }
 
+// ---------------------------------------------------------------------------
+// Magic link delivery
+// VENDASTA_MAGIC_LINK_METHOD=response   → return in webhook response body (default)
+//                           =contact_field → PATCH Vendasta contact custom field
+// ---------------------------------------------------------------------------
+
+async function deliverMagicLink(
+  vendastaContactId: string,
+  magicLink: string,
+): Promise<void> {
+  const method = process.env.VENDASTA_MAGIC_LINK_METHOD ?? 'response'
+  if (method !== 'contact_field') return // Path A: link is already in the response body
+
+  // Path B: write to Vendasta contact custom field so the email template can use it
+  const apiKey = process.env.VENDASTA_API_KEY
+  if (!apiKey) {
+    console.warn('[Vendasta] VENDASTA_API_KEY not set — skipping contact_field delivery')
+    return
+  }
+
+  // NOTE: Confirm exact endpoint + field name with Brent Yates before enabling.
+  // Vendasta Partner API docs: https://developers.vendasta.com
+  const url = `https://api-gateway.vendasta.com/api/v1/contacts/${vendastaContactId}`
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      custom_fields: { platform_magic_link: magicLink },
+    }),
+  })
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    console.error(`[Vendasta] Failed to write magic link to contact ${vendastaContactId}: ${res.status} ${text}`)
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Main POST handler
+// ---------------------------------------------------------------------------
+
 export async function POST(request: Request) {
-  const rawBody  = await request.text()
-  const sig      = request.headers.get('x-vendasta-signature') ?? ''
-  const secret   = process.env.VENDASTA_WEBHOOK_SECRET!
+  const rawBody = await request.text()
+  const sig     = request.headers.get('x-vendasta-signature') ?? ''
+  const secret  = process.env.VENDASTA_WEBHOOK_SECRET
+
+  // If secret is not configured, fail loudly (never silently skip verification)
+  if (!secret) {
+    console.error('[Vendasta] VENDASTA_WEBHOOK_SECRET is not set')
+    return Response.json({ error: 'Server misconfiguration' }, { status: 500 })
+  }
 
   if (!verifySignature(rawBody, sig, secret)) {
     return Response.json({ error: 'Invalid signature' }, { status: 401 })
@@ -39,30 +93,40 @@ export async function POST(request: Request) {
     contact_email: email,
     contact_name:  fullName,
   } = payload as {
-    event_type: string
-    order_id: string
-    contact_id: string
-    product_sku: string
+    event_type:    string
+    order_id:      string
+    contact_id:    string
+    product_sku:   string
     contact_email: string
-    contact_name: string
+    contact_name:  string
   }
 
   const logBase = { event_type, vendasta_order_id, vendasta_contact_id, product_sku, payload }
 
   try {
-    await handleWebhookEvent({
-      eventType:          event_type,
-      vendastaContactId:  vendasta_contact_id,
+    const { magicLink } = await handleWebhookEvent({
+      eventType:         event_type,
+      vendastaContactId: vendasta_contact_id,
       email,
       fullName,
-      productSku:         product_sku,
+      productSku:        product_sku,
     })
+
+    // Deliver magic link via Path B if configured (Path A: already in response)
+    if (magicLink) {
+      await deliverMagicLink(vendasta_contact_id, magicLink)
+    }
 
     await adminClient.from('vendasta_webhooks').insert({
       ...logBase, status: 'success',
     })
 
-    return Response.json({ ok: true })
+    // Return magic link in body for Path A (Vendasta email template uses {{magic_link}})
+    const responseBody: Record<string, unknown> = { ok: true }
+    if (magicLink && (process.env.VENDASTA_MAGIC_LINK_METHOD ?? 'response') === 'response') {
+      responseBody.magic_link = magicLink
+    }
+    return Response.json(responseBody)
 
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
@@ -74,6 +138,10 @@ export async function POST(request: Request) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Event dispatch
+// ---------------------------------------------------------------------------
+
 async function handleWebhookEvent({
   eventType, vendastaContactId, email, fullName, productSku,
 }: {
@@ -82,29 +150,30 @@ async function handleWebhookEvent({
   email:             string
   fullName:          string
   productSku:        string
-}) {
+}): Promise<{ magicLink?: string }> {
   const product = VENDASTA_PRODUCTS[productSku]
   if (!product) throw new Error(`Unknown product SKU: ${productSku}`)
 
   switch (eventType) {
     case 'order.created':
     case 'order.renewed': {
-      // Keynote add-on: just flip the flag, do not change tier
+      // Keynote add-on: flip the flag, do not change tier
       if (product.keynote_access) {
-        await grantKeynoteAccess({ vendastaContactId, email, fullName })
-        break
+        const magicLink = await grantKeynoteAccess({ vendastaContactId, email, fullName })
+        return { magicLink }
       }
+
       const tierExpiresAt = getTierExpiry(product)
-      const isNewUser = await upsertUser({
+      const { isNewUser, magicLink } = await upsertUser({
         vendastaContactId, email, fullName,
         tier:         product.tier!,
         tierStatus:   'active',
         tierExpiresAt,
       })
+
       if (isNewUser) {
         await sendWelcomeEmail({ email, fullName, tier: product.tier! })
 
-        // Notify admins of new member join
         const { data: admins } = await adminClient
           .from('users')
           .select('id')
@@ -118,13 +187,14 @@ async function handleWebhookEvent({
           })
         }
       }
-      break
+
+      return { magicLink }
     }
 
     case 'order.upgraded': {
       if (product.keynote_access) {
-        await grantKeynoteAccess({ vendastaContactId, email, fullName })
-        break
+        const magicLink = await grantKeynoteAccess({ vendastaContactId, email, fullName })
+        return { magicLink }
       }
       const tierExpiresAt = getTierExpiry(product)
       await upsertUser({
@@ -133,7 +203,7 @@ async function handleWebhookEvent({
         tierStatus:   'active',
         tierExpiresAt,
       })
-      break
+      return {}
     }
 
     case 'order.cancelled': {
@@ -141,13 +211,18 @@ async function handleWebhookEvent({
         .from('users')
         .update({ tier_status: 'cancelled' })
         .eq('vendasta_contact_id', vendastaContactId)
-      break
+      return {}
     }
 
     default:
       console.log(`[Vendasta] Unhandled event: ${eventType}`)
+      return {}
   }
 }
+
+// ---------------------------------------------------------------------------
+// grantKeynoteAccess — returns magic link for new users only
+// ---------------------------------------------------------------------------
 
 async function grantKeynoteAccess({
   vendastaContactId, email, fullName,
@@ -155,7 +230,7 @@ async function grantKeynoteAccess({
   vendastaContactId: string
   email:             string
   fullName:          string
-}): Promise<void> {
+}): Promise<string | undefined> {
   const { data: existing } = await adminClient
     .from('users')
     .select('id')
@@ -164,7 +239,7 @@ async function grantKeynoteAccess({
 
   if (existing) {
     await adminClient.from('users').update({ keynote_access: true }).eq('id', existing.id)
-    return
+    return undefined // Existing user — no magic link needed
   }
 
   // New user purchasing keynote directly — create auth user with vip tier
@@ -185,12 +260,12 @@ async function grantKeynoteAccess({
     tier_expires_at:     new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
   })
 
-  await adminClient.auth.admin.generateLink({
-    type:    'magiclink',
-    email,
-    options: { redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/onboard` },
-  })
+  return generateMagicLink(email)
 }
+
+// ---------------------------------------------------------------------------
+// upsertUser — creates or updates a user, returns magic link for new users
+// ---------------------------------------------------------------------------
 
 async function upsertUser({
   vendastaContactId, email, fullName, tier, tierStatus, tierExpiresAt,
@@ -201,7 +276,7 @@ async function upsertUser({
   tier:              'vip' | 'pro'
   tierStatus:        string
   tierExpiresAt:     Date
-}): Promise<boolean> {
+}): Promise<{ isNewUser: boolean; magicLink?: string }> {
   const { data: existing } = await adminClient
     .from('users')
     .select('id')
@@ -211,12 +286,12 @@ async function upsertUser({
   if (existing) {
     await adminClient.from('users').update({
       tier,
-      tier_status:    tierStatus,
+      tier_status:     tierStatus,
       tier_expires_at: tierExpiresAt.toISOString(),
-      full_name:      fullName,
-      updated_at:     new Date().toISOString(),
+      full_name:       fullName,
+      updated_at:      new Date().toISOString(),
     }).eq('id', existing.id)
-    return false
+    return { isNewUser: false }
   }
 
   // New user — create Supabase Auth user
@@ -236,12 +311,24 @@ async function upsertUser({
     tier_expires_at:     tierExpiresAt.toISOString(),
   })
 
-  // Send magic link for first-time access
-  await adminClient.auth.admin.generateLink({
+  const magicLink = await generateMagicLink(email)
+  return { isNewUser: true, magicLink }
+}
+
+// ---------------------------------------------------------------------------
+// generateMagicLink — returns the action_link URL string
+// ---------------------------------------------------------------------------
+
+async function generateMagicLink(email: string): Promise<string | undefined> {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
+  const { data, error } = await adminClient.auth.admin.generateLink({
     type:    'magiclink',
     email,
-    options: { redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/onboard` },
+    options: { redirectTo: `${appUrl}/auth/callback?next=/onboard` },
   })
-
-  return true
+  if (error) {
+    console.error('[Vendasta] Magic link generation failed:', error.message)
+    return undefined
+  }
+  return data.properties?.action_link ?? undefined
 }
