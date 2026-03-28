@@ -38,18 +38,22 @@ export async function fetchPosts(
     .eq('slug', channelSlug)
     .single()
 
+  console.log('[community] fetchPosts called — slug:', channelSlug, 'channel:', channel?.id ?? 'NOT FOUND')
+
   if (!channel) return { posts: [], nextCursor: null, hasMore: false }
 
   // Use adminClient so posts from null-tier / newly-onboarded users aren't
   // dropped by RLS on the INNER join with users. Auth (getUser) is verified
   // by the caller; likes/bookmarks below stay on the user-scoped SSR client.
-  const { data: rows } = await adminClient
+  const { data: rows, error: postsError } = await adminClient
     .from('posts')
     .select('id, channel_id, body, pillar_tag, is_pinned, like_count, reply_count, created_at, users(id, display_name, full_name, avatar_url)')
     .eq('channel_id', channel.id)
     .eq('is_pinned', false)
     .order('created_at', { ascending: false })
     .limit(limit + 1)
+
+  console.log('[community] fetchPosts result — rows:', rows?.length ?? 0, 'error:', postsError?.message ?? 'none')
 
   const allRows = rows ?? []
   const hasMore = allRows.length > limit
