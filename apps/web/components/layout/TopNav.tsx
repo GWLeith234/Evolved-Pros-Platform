@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { NotifBell } from '@/components/notifications/NotifBell'
@@ -21,13 +20,6 @@ interface TopNavProps {
   logoLightUrl?: string | null
   membersCanToggleTheme?: boolean
 }
-
-const NAV_TABS = [
-  { label: 'Home',      href: '/home',      match: /^\/home$/ },
-  { label: 'Community', href: '/community', match: /^\/community/ },
-  { label: 'Events',    href: '/events',    match: /^\/events/ },
-  { label: 'Academy',   href: '/academy',   match: /^\/academy/ },
-]
 
 function getInitials(name: string | null | undefined): string {
   if (!name) return '?'
@@ -66,7 +58,6 @@ function MoonIcon() {
 type NextEvent = { id: string; title: string; starts_at: string } | null
 
 export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, membersCanToggleTheme = true }: TopNavProps) {
-  const pathname = usePathname()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const [nextEvent, setNextEvent] = useState<NextEvent>(null)
@@ -151,37 +142,6 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
             </span>
           )}
         </Link>
-
-        {/* Nav tabs */}
-        <nav className="hidden md:flex items-end h-full gap-1">
-          {NAV_TABS.map(tab => {
-            const isActive = tab.match.test(pathname)
-            return (
-              <Link
-                key={tab.href}
-                href={tab.href}
-                className="relative h-full flex items-center px-4 font-condensed font-semibold uppercase tracking-[0.12em] text-[11px] transition-colors duration-150"
-                style={{
-                  color: isActive ? '#a8cdd9' : 'rgba(255,255,255,0.45)',
-                }}
-                onMouseEnter={e => {
-                  if (!isActive) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.8)'
-                }}
-                onMouseLeave={e => {
-                  if (!isActive) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)'
-                }}
-              >
-                {tab.label}
-                {isActive && (
-                  <span
-                    className="absolute bottom-0 left-0 right-0 h-0.5"
-                    style={{ backgroundColor: '#68a2b9' }}
-                  />
-                )}
-              </Link>
-            )
-          })}
-        </nav>
 
         {/* Right actions */}
         <div className="flex items-center gap-2">
