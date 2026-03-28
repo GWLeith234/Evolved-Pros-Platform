@@ -13,20 +13,12 @@ const BANNER_URLS = {
   evening: `${BASE}banner-evening.jpg`,
 }
 
-const PILLAR_LABELS: Record<string, string> = {
-  p1: 'Foundation',
-  p2: 'Identity',
-  p3: 'Mental Toughness',
-  p4: 'Strategy',
-  p5: 'Accountability',
-  p6: 'Execution',
-}
 
 type TimePeriod = 'morning' | 'midday' | 'evening'
 
 function getTimePeriod(hour: number): TimePeriod {
-  if (hour >= 5 && hour < 11) return 'morning'
-  if (hour >= 11 && hour < 17) return 'midday'
+  if (hour >= 5 && hour < 12) return 'morning'
+  if (hour >= 12 && hour < 18) return 'midday'
   return 'evening'
 }
 
@@ -54,7 +46,7 @@ function getDayOfYear(): number {
   )
 }
 
-type Quote = { quote: string; pillar: string | null }
+type Quote = { quote_text: string; source: string | null }
 
 interface WelcomeBannerProps {
   displayName: string
@@ -76,14 +68,14 @@ export function WelcomeBanner({ displayName, tier }: WelcomeBannerProps) {
     const supabase = createClient()
     supabase
       .from('greeting_quotes')
-      .select('quote, pillar')
-      .in('time_of_day', [period, 'any'])
+      .select('quote_text, source')
+      .order('day_number')
       .then(({ data }) => {
         if (data && data.length > 0) {
           setQuote(data[dayOfYear % data.length])
         }
       })
-  }, [period, dayOfYear])
+  }, [dayOfYear])
 
   return (
     <div className="relative overflow-hidden rounded-lg h-[140px] md:h-[180px]">
@@ -96,11 +88,11 @@ export function WelcomeBanner({ displayName, tier }: WelcomeBannerProps) {
         className="absolute inset-0 w-full h-full object-cover"
       />
 
-      {/* Gradient overlay for text readability */}
+      {/* Gradient overlay — bottom 60% for text readability */}
       <div
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(to bottom, rgba(10,15,24,0.55) 0%, rgba(10,15,24,0.20) 40%, rgba(10,15,24,0.45) 100%)',
+          background: 'linear-gradient(to top, rgba(10,15,24,0.85) 0%, rgba(10,15,24,0.50) 40%, rgba(10,15,24,0.10) 100%)',
         }}
       />
 
@@ -128,16 +120,16 @@ export function WelcomeBanner({ displayName, tier }: WelcomeBannerProps) {
             <div className="mt-1 max-w-[520px]">
               <p
                 className="font-display italic leading-snug line-clamp-2 md:line-clamp-none"
-                style={{ fontSize: '13px', color: 'rgba(255,255,255,0.75)' }}
+                style={{ fontSize: '13px', color: 'rgba(255,255,255,0.80)' }}
               >
-                &ldquo;{quote.quote}&rdquo;
+                &ldquo;{quote.quote_text}&rdquo;
               </p>
-              {quote.pillar && PILLAR_LABELS[quote.pillar] && (
+              {quote.source && (
                 <p
-                  className="font-condensed font-bold uppercase tracking-[0.15em] mt-0.5"
-                  style={{ fontSize: '9px', color: 'rgba(201,168,76,0.6)' }}
+                  className="font-condensed font-semibold mt-0.5"
+                  style={{ fontSize: '11px', color: '#c9a84c' }}
                 >
-                  EVOLVED · Pillar {quote.pillar.slice(1)}: {PILLAR_LABELS[quote.pillar]}
+                  — {quote.source}
                 </p>
               )}
             </div>
