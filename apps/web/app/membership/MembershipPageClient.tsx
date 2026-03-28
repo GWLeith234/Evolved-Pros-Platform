@@ -8,7 +8,9 @@ interface MembershipPageClientProps {
   keynoteAccess: boolean
 }
 
-const CHECKOUT_BASE = process.env.NEXT_PUBLIC_VENDASTA_CHECKOUT_URL ?? ''
+const CHECKOUT_BASE       = process.env.NEXT_PUBLIC_VENDASTA_CHECKOUT_URL ?? ''
+const KEYNOTE_INQUIRY_URL = process.env.NEXT_PUBLIC_VENDASTA_KEYNOTE_INQUIRY_URL
+  ?? 'mailto:geoleith@gmail.com?subject=Keynote%20Inquiry%20-%20Evolved%20Pros'
 
 function CheckIcon() {
   return (
@@ -26,14 +28,39 @@ function StarIcon() {
   )
 }
 
+// ---------------------------------------------------------------------------
+// CtaButton — checkout CTA for VIP / Professional cards
+// isCurrent: renders a plain "Current Plan" disabled button (no tooltip)
+// ---------------------------------------------------------------------------
+
 interface CtaButtonProps {
   sku: string
-  label?: string
   accent: string
   featured?: boolean
+  isCurrent?: boolean
+  label?: string
 }
 
-function CtaButton({ sku, label = 'Get Started', accent, featured = false }: CtaButtonProps) {
+function CtaButton({ sku, accent, featured = false, isCurrent = false, label }: CtaButtonProps) {
+  if (isCurrent) {
+    return (
+      <button
+        type="button"
+        disabled
+        className="w-full py-3 rounded font-condensed font-bold uppercase tracking-[0.12em] text-[12px]"
+        style={{
+          backgroundColor: 'transparent',
+          color: accent,
+          border: `1.5px solid ${accent}`,
+          opacity: 0.45,
+          cursor: 'default',
+        }}
+      >
+        Current Plan
+      </button>
+    )
+  }
+
   const checkoutUrl = CHECKOUT_BASE ? `${CHECKOUT_BASE}?sku=${sku}` : ''
 
   if (checkoutUrl) {
@@ -43,7 +70,7 @@ function CtaButton({ sku, label = 'Get Started', accent, featured = false }: Cta
         className="block w-full py-3 rounded font-condensed font-bold uppercase tracking-[0.12em] text-[12px] text-center transition-opacity hover:opacity-90"
         style={{ backgroundColor: accent, color: 'white' }}
       >
-        {label}
+        {label ?? 'Get Started'}
       </a>
     )
   }
@@ -65,6 +92,43 @@ function CtaButton({ sku, label = 'Get Started', accent, featured = false }: Cta
         Coming Soon
       </button>
     </Tooltip>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// KeynoteCta — always live; shows inquiry link or "Active" badge
+// ---------------------------------------------------------------------------
+
+function KeynoteCta({ hasAccess }: { hasAccess: boolean }) {
+  if (hasAccess) {
+    return (
+      <button
+        type="button"
+        disabled
+        className="w-full py-3 rounded font-condensed font-bold uppercase tracking-[0.12em] text-[12px]"
+        style={{
+          backgroundColor: 'transparent',
+          color: '#A78BFA',
+          border: '1.5px solid #A78BFA',
+          opacity: 0.45,
+          cursor: 'default',
+        }}
+      >
+        Active
+      </button>
+    )
+  }
+
+  return (
+    <a
+      href={KEYNOTE_INQUIRY_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block w-full py-3 rounded font-condensed font-bold uppercase tracking-[0.12em] text-[12px] text-center transition-opacity hover:opacity-90"
+      style={{ backgroundColor: '#A78BFA', color: 'white' }}
+    >
+      Inquire about availability →
+    </a>
   )
 }
 
@@ -209,7 +273,8 @@ export function MembershipPageClient({ userTier, keynoteAccess }: MembershipPage
             <CtaButton
               sku={isAnnual ? 'EP-VIP-Y' : 'EP-VIP-M'}
               accent="#C9A84C"
-              label={userTier === 'vip' ? 'Current Plan' : 'Get VIP'}
+              label="Get VIP"
+              isCurrent={userTier === 'vip'}
             />
           </div>
 
@@ -224,7 +289,7 @@ export function MembershipPageClient({ userTier, keynoteAccess }: MembershipPage
               boxShadow: '0 8px 32px rgba(201,48,42,0.18)',
             }}
           >
-            {/* Recommended badge */}
+            {/* Recommended / current plan badge */}
             <div
               className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-1.5 font-condensed font-black uppercase tracking-[0.14em] text-[9px] px-3 py-1 rounded-full"
               style={{ backgroundColor: '#C9302A', color: 'white' }}
@@ -285,7 +350,8 @@ export function MembershipPageClient({ userTier, keynoteAccess }: MembershipPage
               sku={isAnnual ? 'EP-PRO-Y' : 'EP-PRO-M'}
               accent="#C9302A"
               featured
-              label={userTier === 'pro' ? 'Current Plan' : 'Get Professional'}
+              label="Get Professional"
+              isCurrent={userTier === 'pro'}
             />
           </div>
 
@@ -324,12 +390,12 @@ export function MembershipPageClient({ userTier, keynoteAccess }: MembershipPage
 
             <div className="mb-4">
               <div className="flex items-end gap-1.5">
-                <span className="font-display font-black" style={{ fontSize: '36px', lineHeight: 1, color: 'rgba(255,255,255,0.35)' }}>
-                  TBD
+                <span className="font-display font-black text-white" style={{ fontSize: '36px', lineHeight: 1 }}>
+                  From $7,500
                 </span>
               </div>
-              <p className="font-condensed text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                Pricing announced at launch
+              <p className="font-condensed text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                USD + travel &amp; accommodations
               </p>
             </div>
 
@@ -346,11 +412,7 @@ export function MembershipPageClient({ userTier, keynoteAccess }: MembershipPage
               ))}
             </ul>
 
-            <CtaButton
-              sku="EP-KEY"
-              accent="#A78BFA"
-              label={keynoteAccess ? 'Active' : 'Get Keynote Access'}
-            />
+            <KeynoteCta hasAccess={keynoteAccess} />
           </div>
         </div>
 

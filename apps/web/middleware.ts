@@ -9,6 +9,7 @@ const PUBLIC_ROUTES = [
   '/api/health',
   '/dev-login',
   '/api/dev-login',
+  '/membership',
 ]
 const ADMIN_ROUTES = ['/admin']
 
