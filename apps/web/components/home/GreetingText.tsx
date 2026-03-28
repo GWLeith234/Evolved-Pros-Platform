@@ -9,8 +9,8 @@ interface GreetingTextProps {
 }
 
 export function GreetingText({ firstName, tier }: GreetingTextProps) {
-  const [greeting, setGreeting] = useState('')
-  const [weekLabel, setWeekLabel] = useState('')
+  const [greeting, setGreeting] = useState<string | null>(null)
+  const [weekLabel, setWeekLabel] = useState<string | null>(null)
 
   useEffect(() => {
     const now = new Date()
