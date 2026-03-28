@@ -62,15 +62,13 @@ export default function MembershipExpiredPage() {
 
         {/* CTAs */}
         <div className="space-y-3">
-          <a
-            href={checkoutUrl}
-            className="block w-full py-3 rounded font-condensed font-semibold uppercase tracking-wide text-sm text-white transition-colors"
+          <Link
+            href="/membership"
+            className="block w-full py-3 rounded font-condensed font-semibold uppercase tracking-wide text-sm text-white text-center transition-colors"
             style={{ backgroundColor: '#ef0e30' }}
-            onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#c50a26')}
-            onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#ef0e30')}
           >
-            Renew Membership →
-          </a>
+            View Membership Plans →
+          </Link>
           <Link
             href="mailto:support@evolvedpros.com"
             className="block w-full py-3 rounded font-condensed font-semibold uppercase tracking-wide text-sm transition-colors"

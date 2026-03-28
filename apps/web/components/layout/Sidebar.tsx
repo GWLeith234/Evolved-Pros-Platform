@@ -98,6 +98,15 @@ function SettingsIcon() {
   )
 }
 
+function CreditCardIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+      <line x1="1" y1="10" x2="23" y2="10" />
+    </svg>
+  )
+}
+
 function MessageSquareIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -325,9 +334,10 @@ export function Sidebar({ profile, unreadPosts = 0, upcomingEvents = 0 }: Sideba
   ]
 
   const mySpaceItems: NavItem[] = [
-    { label: 'My Profile', href: '/profile/me',           match: /^\/profile\/me$/, icon: <UserIcon /> },
-    { label: 'Progress',   href: '/profile/me?tab=progress', match: /^\/profile\/me\?tab=progress/, icon: <BarChartIcon /> },
-    { label: 'Settings',   href: '/settings',              match: /^\/settings/, icon: <SettingsIcon /> },
+    { label: 'My Profile',  href: '/profile/me',              match: /^\/profile\/me$/, icon: <UserIcon /> },
+    { label: 'Progress',    href: '/profile/me?tab=progress', match: /^\/profile\/me\?tab=progress/, icon: <BarChartIcon /> },
+    { label: 'Membership',  href: '/membership',              match: /^\/membership/, icon: <CreditCardIcon /> },
+    { label: 'Settings',    href: '/settings',                match: /^\/settings/, icon: <SettingsIcon /> },
   ]
 
   return (
