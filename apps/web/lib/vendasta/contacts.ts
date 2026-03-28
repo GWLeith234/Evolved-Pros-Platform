@@ -27,14 +27,21 @@ async function patchContact(
     return
   }
   const url = `${API_BASE}/contacts/${contactId}`
-  const res = await fetch(url, {
-    method: 'PATCH',
-    headers: {
-      Authorization:  `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  })
+  let res: Response
+  try {
+    res = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        Authorization:  `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error(`[Vendasta] Network error in patchContact: ${message}`)
+    return
+  }
   if (!res.ok) {
     const text = await res.text().catch(() => '')
     console.error(`[Vendasta Contacts] PATCH ${url} → ${res.status}: ${text}`)
