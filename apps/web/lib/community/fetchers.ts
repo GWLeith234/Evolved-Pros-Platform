@@ -47,7 +47,7 @@ export async function fetchPosts(
   // by the caller; likes/bookmarks below stay on the user-scoped SSR client.
   const { data: rows, error: postsError } = await adminClient
     .from('posts')
-    .select('id, channel_id, body, pillar_tag, is_pinned, like_count, reply_count, created_at, users(id, display_name, full_name, avatar_url)')
+    .select('id, channel_id, body, pillar_tag, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url)')
     .eq('channel_id', channel.id)
     .eq('is_pinned', false)
     .order('created_at', { ascending: false })
@@ -111,7 +111,7 @@ export async function fetchPinnedPost(
 
   const { data } = await adminClient
     .from('posts')
-    .select('body, users(display_name, full_name)')
+    .select('body, users!posts_author_id_fkey(display_name, full_name)')
     .eq('channel_id', channel.id)
     .eq('is_pinned', true)
     .order('created_at', { ascending: false })
