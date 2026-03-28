@@ -217,7 +217,7 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
             <button
               type="button"
               onClick={() => setDropdownOpen(o => !o)}
-              className="w-8 h-8 flex items-center justify-center rounded flex-shrink-0 focus:outline-none"
+              className="w-8 h-8 flex items-center justify-center rounded-full flex-shrink-0 focus:outline-none"
               style={{ backgroundColor: '#ef0e30' }}
             >
               {profile.avatar_url ? (
