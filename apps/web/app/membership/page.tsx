@@ -5,22 +5,21 @@ import { MembershipPageClient } from './MembershipPageClient'
 export const dynamic = 'force-dynamic'
 
 export default async function MembershipPage() {
-  // Use the cookie-based SSR client only for auth — it reads the session cookie.
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  console.log('[membership] auth user:', user?.id, 'auth error:', authError?.message)
 
   let userTier: string | null = null
   let keynoteAccess = false
 
   if (user) {
-    // Use the service-role adminClient for the DB query so RLS is bypassed.
-    // The SSR anon client can be unreliable for DB reads on public routes
-    // (session cookie propagation differs from (member) layout routes).
-    const { data: profile } = await adminClient
+    console.log('[membership] user.id:', user.id)
+    const { data: profile, error: profileError } = await adminClient
       .from('users')
       .select('tier, keynote_access')
       .eq('id', user.id)
       .single()
+    console.log('[membership] profile:', JSON.stringify(profile), 'error:', profileError?.message)
 
     if (profile) {
       userTier = profile.tier?.toLowerCase() ?? null
