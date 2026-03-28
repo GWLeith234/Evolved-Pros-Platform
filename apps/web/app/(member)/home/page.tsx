@@ -186,6 +186,7 @@ export default async function MemberHomePage() {
       <WelcomeBanner
         displayName={displayName}
         tier={profile.tier}
+        avatarUrl={profile.avatar_url}
         quote={quote}
         unreadPostCount={unreadCount}
         upcomingEventCount={upcomingEventCount}
