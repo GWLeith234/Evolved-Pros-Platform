@@ -19,13 +19,15 @@ export function StatRow({ stats }: StatRowProps) {
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      <StatCard
-        value={stats.communityMemberCount}
-        label="Community Members"
-        delta={`+${stats.newMembersThisWeek} this week`}
-        deltaType="neutral"
-        accent="red"
-      />
+      <Tooltip content="Total active members in the Evolved Pros community.">
+        <StatCard
+          value={stats.communityMemberCount}
+          label="Community Members"
+          delta={`+${stats.newMembersThisWeek} this week`}
+          deltaType="neutral"
+          accent="red"
+        />
+      </Tooltip>
       <Tooltip content="Pillars are the 6 core course tracks in the Evolved Architecture. Your tier determines how many you can access.">
         <StatCard
           value={`${stats.pillarsUnlocked} / ${stats.pillarsTotal}`}

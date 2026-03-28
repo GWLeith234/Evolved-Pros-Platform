@@ -118,10 +118,8 @@ export function CourseCard({ course, isLocked }: CourseCardProps) {
         {/* Meta row */}
         <div className="flex items-center gap-2 mb-3">
           <span className="font-condensed text-[11px] text-[#7a8a96] flex items-center gap-1">
-            {course.totalLessons > 0 ? (
+            {course.totalLessons > 0 && (
               <><VideoIcon />{course.totalLessons} lessons</>
-            ) : (
-              'Lessons coming soon'
             )}
           </span>
         </div>

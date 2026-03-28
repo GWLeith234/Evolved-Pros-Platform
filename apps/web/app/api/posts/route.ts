@@ -30,7 +30,7 @@ function toPost(
     createdAt: row.created_at,
     author: {
       id: row.users?.id ?? '',
-      displayName: row.users?.display_name ?? row.users?.full_name ?? 'Member',
+      displayName: row.users?.full_name ?? row.users?.display_name ?? 'Member',
       avatarUrl: row.users?.avatar_url ?? null,
       tier: row.users?.tier ?? null,
     },

@@ -125,7 +125,7 @@ function NavItem({
 
   const content = (
     <span className="flex items-center justify-between gap-2 py-[9px] px-5 w-full" style={baseStyle}>
-      <span className="font-condensed font-semibold uppercase tracking-[0.12em] text-[12px] truncate">
+      <span className="font-condensed font-semibold uppercase tracking-[0.12em] text-[12px] truncate min-w-0">
         {label}
       </span>
       {locked && (

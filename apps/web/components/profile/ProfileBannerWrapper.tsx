@@ -16,6 +16,7 @@ interface ProfileBannerWrapperProps {
     points: number
     created_at: string
     postCount: number
+    location?: string | null
     company?: string | null
     linkedin_url?: string | null
     website_url?: string | null

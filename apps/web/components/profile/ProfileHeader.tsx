@@ -25,6 +25,7 @@ type ProfileHeaderUser = {
   linkedin_url?: string | null
   website_url?: string | null
   twitter_handle?: string | null
+  location?: string | null
   current_pillar?: string | null
   goal_90day?: string | null
   goal_visible?: boolean
@@ -142,6 +143,14 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
                 style={{ color: 'rgba(255,255,255,0.5)' }}
               >
                 {user.company}
+              </p>
+            )}
+            {user.location && (
+              <p
+                className="font-body text-[12px] mt-0.5"
+                style={{ color: 'rgba(255,255,255,0.4)' }}
+              >
+                📍 {user.location}
               </p>
             )}
 
