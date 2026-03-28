@@ -55,12 +55,9 @@ function MoonIcon() {
   )
 }
 
-type NextEvent = { id: string; title: string; starts_at: string } | null
-
 export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, membersCanToggleTheme = true }: TopNavProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const [nextEvent, setNextEvent] = useState<NextEvent>(null)
   const [isDark, setIsDark] = useState(true)
   const [georgeOpen, setGeorgeOpen] = useState(false)
 
@@ -81,22 +78,6 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
   useEffect(() => {
     const isLight = document.documentElement.classList.contains('light-mode')
     setIsDark(!isLight)
-  }, [])
-
-  // Fetch next upcoming event
-  useEffect(() => {
-    const supabase = createClient()
-    supabase
-      .from('events')
-      .select('id, title, starts_at')
-      .eq('is_published', true)
-      .gt('starts_at', new Date().toISOString())
-      .order('starts_at', { ascending: true })
-      .limit(1)
-      .single()
-      .then(({ data }) => {
-        if (data) setNextEvent(data)
-      })
   }, [])
 
   function handleThemeToggle() {
@@ -145,37 +126,38 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
 
         {/* Right actions */}
         <div className="flex items-center gap-2">
-          {/* Next event card */}
-          {nextEvent && (
-            <Tooltip content="Your next upcoming event. Click to view details.">
-            <a
-              href={`/events`}
-              style={{
-                background: 'rgba(255,255,255,0.08)',
-                border: '0.5px solid rgba(255,255,255,0.15)',
-                borderRadius: '6px',
-                padding: '6px 12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                maxWidth: '240px',
-                textDecoration: 'none',
-                flexShrink: 0,
-              }}
-              className="hidden md:flex"
-            >
-              <span style={{ background: '#ef0e30', borderRadius: '4px', padding: '2px 6px', color: 'white', fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>
-                NEXT EVENT
+          {/* Episode promo card */}
+          <a
+            href="/events"
+            className="hidden md:flex"
+            style={{
+              background: '#112535',
+              border: '1px solid #1b3c5a',
+              borderRadius: '6px',
+              padding: '5px 10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              textDecoration: 'none',
+              flexShrink: 0,
+              transition: 'border-color 0.15s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.borderColor = '#ef0e30')}
+            onMouseLeave={e => (e.currentTarget.style.borderColor = '#1b3c5a')}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+              <span style={{ color: '#ef0e30', fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+                Next Episode
               </span>
-              <span style={{ color: 'white', fontSize: '12px', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {nextEvent.title}
+              <span style={{ color: 'white', fontSize: '12px', fontWeight: 500, whiteSpace: 'nowrap' }}>
+                Dennis Yu
               </span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-                <polygon points="5 3 19 12 5 21 5 3"/>
-              </svg>
-            </a>
-            </Tooltip>
-          )}
+              <span style={{ color: '#68a2b9', fontSize: '10px', whiteSpace: 'nowrap' }}>
+                Wed · April 20
+              </span>
+            </div>
+            <span style={{ color: '#ef0e30', fontSize: '12px', marginLeft: '2px' }}>▶</span>
+          </a>
 
           {/* Theme toggle */}
           {membersCanToggleTheme && (
