@@ -11,7 +11,10 @@ export default async function MembershipPage() {
   let keynoteAccess = false
 
   if (user) {
-    const { data: profile } = await supabase
+    // Try fetching tier + keynote_access together. If keynote_access column
+    // doesn't exist yet in this environment (migration 024 not yet applied),
+    // fall back to fetching tier only so the badge still renders correctly.
+    const { data: profile, error } = await supabase
       .from('users')
       .select('tier, keynote_access')
       .eq('id', user.id)
@@ -19,9 +22,19 @@ export default async function MembershipPage() {
 
     if (profile) {
       userTier = profile.tier?.toLowerCase() ?? null
-      // remap legacy 'community' just in case
       if (userTier === 'community') userTier = 'vip'
       keynoteAccess = profile.keynote_access === true
+    } else if (error) {
+      // Fallback: fetch tier only (keynote_access column may not exist yet)
+      const { data: tierOnly } = await supabase
+        .from('users')
+        .select('tier')
+        .eq('id', user.id)
+        .single()
+      if (tierOnly) {
+        userTier = tierOnly.tier?.toLowerCase() ?? null
+        if (userTier === 'community') userTier = 'vip'
+      }
     }
   }
 
