@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { useMemo } from 'react'
+import { useState, useEffect } from 'react'
 
 const GreetingText = dynamic(
   () => import('@/components/home/GreetingText').then(m => m.GreetingText),
@@ -35,15 +35,16 @@ interface WelcomeBannerProps {
 }
 
 export function WelcomeBanner({ displayName, tier, quote }: WelcomeBannerProps) {
-  // Period is used only for banner image selection — text rendering moved to GreetingText
-  const period = useMemo(() => getTimePeriod(new Date().getHours()), [])
+  // null on server → 'morning' fallback → no SSR/client src diff → no #425 errors
+  const [period, setPeriod] = useState<TimePeriod | null>(null)
+  useEffect(() => { setPeriod(getTimePeriod(new Date().getHours())) }, [])
 
   return (
     <div className="relative overflow-hidden rounded-lg h-[140px] md:h-[180px]">
       {/* Background image */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={BANNER_URLS[period]}
+        src={BANNER_URLS[period ?? 'morning']}
         alt=""
         aria-hidden="true"
         className="absolute inset-0 w-full h-full object-cover"
