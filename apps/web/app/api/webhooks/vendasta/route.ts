@@ -5,6 +5,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { VENDASTA_PRODUCTS, getTierExpiry } from '@/lib/vendasta/products'
 import { sendWelcomeEmail } from '@/lib/resend/emails/welcome'
 import { notifyNewMember } from '@/lib/notifications/create'
+import { updateContact, removeContactTag } from '@/lib/vendasta/contacts'
 
 // ---------------------------------------------------------------------------
 // Signature verification
@@ -160,6 +161,12 @@ async function handleWebhookEvent({
       // Keynote add-on: flip the flag, do not change tier
       if (product.keynote_access) {
         const magicLink = await grantKeynoteAccess({ vendastaContactId, email, fullName })
+        if (eventType === 'order.created' && magicLink) {
+          void updateContact(vendastaContactId, {
+            tags:   ['keynote-purchaser'],
+            fields: { magic_link: magicLink },
+          })
+        }
         return { magicLink }
       }
 
@@ -188,6 +195,34 @@ async function handleWebhookEvent({
         }
       }
 
+      if (eventType === 'order.created') {
+        // Tag depends on SKU: book purchaser vs tier-based member tag
+        const memberTag =
+          productSku === 'EP-BOOK'      ? 'book-purchaser'
+          : product.tier === 'pro'      ? 'professional-member'
+          : /* vip */                     'vip-member'
+        const tierLabel = product.tier === 'pro' ? 'Professional' : 'VIP'
+        const appUrl      = process.env.NEXT_PUBLIC_APP_URL ?? ''
+        const checkoutBase = process.env.NEXT_PUBLIC_VENDASTA_CHECKOUT_URL ?? ''
+        const contactFields: Record<string, string> = {
+          tier:         tierLabel,
+          tier_expiry:  tierExpiresAt.toISOString(),
+          platform_url: appUrl,
+        }
+        if (magicLink) contactFields.magic_link = magicLink
+        if (checkoutBase) {
+          contactFields.vip_checkout_url  = `${checkoutBase}?sku=EP-VIP-M`
+          contactFields.book_checkout_url = `${checkoutBase}?sku=EP-BOOK`
+        }
+        void updateContact(vendastaContactId, { tags: [memberTag], fields: contactFields })
+      } else {
+        // order.renewed — refresh expiry, clear reminder tag
+        void updateContact(vendastaContactId, {
+          fields: { tier_expiry: tierExpiresAt.toISOString() },
+        })
+        void removeContactTag(vendastaContactId, 'renewal-reminder-due')
+      }
+
       return { magicLink }
     }
 
@@ -203,6 +238,10 @@ async function handleWebhookEvent({
         tierStatus:   'active',
         tierExpiresAt,
       })
+      void updateContact(vendastaContactId, {
+        tags:   ['upgraded-to-professional'],
+        fields: { tier: 'Professional' },
+      })
       return {}
     }
 
@@ -211,6 +250,7 @@ async function handleWebhookEvent({
         .from('users')
         .update({ tier_status: 'cancelled' })
         .eq('vendasta_contact_id', vendastaContactId)
+      void updateContact(vendastaContactId, { tags: ['cancelled'] })
       return {}
     }
 
