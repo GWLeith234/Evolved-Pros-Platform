@@ -7,6 +7,7 @@ import { Tooltip } from '@/components/ui/Tooltip'
 interface MembershipPageClientProps {
   userTier: string | null
   keynoteAccess: boolean
+  isLoggedIn: boolean
 }
 
 const CHECKOUT_BASE       = process.env.NEXT_PUBLIC_VENDASTA_CHECKOUT_URL ?? ''
@@ -156,7 +157,7 @@ const KEYNOTE_FEATURES = [
   'Exclusive speaker access',
 ]
 
-export function MembershipPageClient({ userTier, keynoteAccess }: MembershipPageClientProps) {
+export function MembershipPageClient({ userTier, keynoteAccess, isLoggedIn }: MembershipPageClientProps) {
   const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly')
   const isAnnual = billing === 'annual'
 
@@ -167,7 +168,7 @@ export function MembershipPageClient({ userTier, keynoteAccess }: MembershipPage
     >
       <div className="max-w-5xl mx-auto">
         {/* Back navigation — shown to logged-in members */}
-        {userTier !== null && (
+        {isLoggedIn && (
           <div className="mb-6">
             <Link
               href="/home"

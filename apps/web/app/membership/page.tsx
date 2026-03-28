@@ -26,6 +26,10 @@ export default async function MembershipPage() {
   }
 
   return (
-    <MembershipPageClient userTier={userTier} keynoteAccess={keynoteAccess} />
+    <MembershipPageClient
+      userTier={userTier}
+      keynoteAccess={keynoteAccess}
+      isLoggedIn={!!user}
+    />
   )
 }
