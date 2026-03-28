@@ -28,6 +28,7 @@ export function BannerPickerModal({ userId, currentBannerUrl, onSave, onClose }:
     supabase
       .from('profile_banners')
       .select('id, label, pillar_tag, image_url')
+      .order('pillar_tag')
       .then(({ data }) => {
         if (data) setBanners(data)
       })
