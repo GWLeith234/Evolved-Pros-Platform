@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
+import { adminClient } from '@/lib/supabase/admin'
 import type { Channel, Post, LeaderboardEntry, MemberSummary } from './types'
 
 type SB = SupabaseClient<Database>
@@ -39,7 +40,10 @@ export async function fetchPosts(
 
   if (!channel) return { posts: [], nextCursor: null, hasMore: false }
 
-  const { data: rows } = await supabase
+  // Use adminClient so posts from null-tier / newly-onboarded users aren't
+  // dropped by RLS on the INNER join with users. Auth (getUser) is verified
+  // by the caller; likes/bookmarks below stay on the user-scoped SSR client.
+  const { data: rows } = await adminClient
     .from('posts')
     .select('id, channel_id, body, pillar_tag, is_pinned, like_count, reply_count, created_at, users(id, display_name, full_name, avatar_url)')
     .eq('channel_id', channel.id)
@@ -101,7 +105,7 @@ export async function fetchPinnedPost(
 
   if (!channel) return null
 
-  const { data } = await supabase
+  const { data } = await adminClient
     .from('posts')
     .select('body, users(display_name, full_name)')
     .eq('channel_id', channel.id)
