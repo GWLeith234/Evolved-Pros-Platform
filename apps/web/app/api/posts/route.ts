@@ -17,9 +17,14 @@ function toPost(
     created_at: string
     users: { id: string; display_name: string | null; full_name: string | null; avatar_url: string | null; tier: string | null } | null
   },
-  likedIds: Set<string>,
+  myReactionMap: Map<string, string>,
+  reactionCountsByPost: Map<string, Map<string, number>>,
   bookmarkedIds: Set<string>
 ): Post {
+  const reactionMap = reactionCountsByPost.get(row.id)
+  const reactions = reactionMap
+    ? Array.from(reactionMap.entries()).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count)
+    : []
   return {
     id: row.id,
     channelId: row.channel_id,
@@ -35,7 +40,9 @@ function toPost(
       avatarUrl: row.users?.avatar_url ?? null,
       tier: row.users?.tier ?? null,
     },
-    isLiked: likedIds.has(row.id),
+    isLiked: myReactionMap.has(row.id),
+    myReaction: myReactionMap.get(row.id) ?? null,
+    reactions,
     isBookmarked: bookmarkedIds.has(row.id),
   }
 }
@@ -84,28 +91,34 @@ export async function GET(request: Request) {
 
   // Fetch liked + bookmarked post IDs for current user in this set
   const postIds = page.map(p => p.id)
-  const [likesResult, bookmarksResult] = await Promise.all([
+  type LikeRow = { post_id: string; reaction_type: string | null }
+  const [userLikesResult, bookmarksResult, allLikesResult] = await Promise.all([
     postIds.length > 0
-      ? supabase
-          .from('post_likes')
-          .select('post_id')
-          .eq('user_id', user.id)
-          .in('post_id', postIds)
-      : Promise.resolve({ data: [] }),
+      ? supabase.from('post_likes').select('post_id, reaction_type').eq('user_id', user.id).in('post_id', postIds) as Promise<{ data: LikeRow[] | null }>
+      : Promise.resolve({ data: [] as LikeRow[] }),
     postIds.length > 0
-      ? supabase
-          .from('post_bookmarks')
-          .select('post_id')
-          .eq('user_id', user.id)
-          .in('post_id', postIds)
-      : Promise.resolve({ data: [] }),
+      ? supabase.from('post_bookmarks').select('post_id').eq('user_id', user.id).in('post_id', postIds)
+      : Promise.resolve({ data: [] as { post_id: string }[] }),
+    postIds.length > 0
+      ? adminClient.from('post_likes').select('post_id, reaction_type').in('post_id', postIds) as Promise<{ data: LikeRow[] | null }>
+      : Promise.resolve({ data: [] as LikeRow[] }),
   ])
 
-  const likedIds = new Set((likesResult.data ?? []).map(l => l.post_id))
+  const myReactionMap = new Map<string, string>(
+    (userLikesResult.data ?? []).map(l => [l.post_id, l.reaction_type ?? 'thumbs_up'])
+  )
   const bookmarkedIds = new Set((bookmarksResult.data ?? []).map(b => b.post_id))
 
+  const reactionCountsByPost = new Map<string, Map<string, number>>()
+  for (const like of allLikesResult.data ?? []) {
+    const type = like.reaction_type ?? 'thumbs_up'
+    if (!reactionCountsByPost.has(like.post_id)) reactionCountsByPost.set(like.post_id, new Map())
+    const m = reactionCountsByPost.get(like.post_id)!
+    m.set(type, (m.get(type) ?? 0) + 1)
+  }
+
   const posts = page.map(row =>
-    toPost(row as Parameters<typeof toPost>[0], likedIds, bookmarkedIds)
+    toPost(row as Parameters<typeof toPost>[0], myReactionMap, reactionCountsByPost, bookmarkedIds)
   )
 
   return NextResponse.json({ posts, nextCursor, hasMore })
@@ -161,7 +174,8 @@ export async function POST(request: Request) {
 
   const result: Post = toPost(
     post as Parameters<typeof toPost>[0],
-    new Set<string>(),
+    new Map<string, string>(),
+    new Map<string, Map<string, number>>(),
     new Set<string>()
   )
 

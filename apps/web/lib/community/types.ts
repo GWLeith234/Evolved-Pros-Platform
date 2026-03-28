@@ -8,6 +8,11 @@ export type Channel = {
   unreadCount: number
 }
 
+export type Reaction = {
+  type: string
+  count: number
+}
+
 export type PostAuthor = {
   id: string
   displayName: string
@@ -26,6 +31,8 @@ export type Post = {
   createdAt: string
   author: PostAuthor
   isLiked: boolean
+  myReaction: string | null
+  reactions: Reaction[]
   isBookmarked: boolean
 }
 

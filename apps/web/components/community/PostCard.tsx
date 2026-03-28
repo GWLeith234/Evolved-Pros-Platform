@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { PostReplyThread } from './PostReplyThread'
+import { ReactionPicker } from './ReactionPicker'
 import { getAvatarColor, PILLAR_LABELS } from '@/lib/community/types'
 import { MemberBadge } from '@/components/ui/MemberBadge'
 import { Tooltip } from '@/components/ui/Tooltip'
@@ -11,7 +12,7 @@ interface PostCardProps {
   post: Post & { replies?: Reply[] }
   currentUserId: string
   currentUser: { id: string; displayName: string | null; avatarUrl: string | null }
-  onLike: (postId: string) => void
+  onReact: (postId: string, reactionType: string) => void
   onBookmark: (postId: string) => void
 }
 
@@ -51,7 +52,7 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
   )
 }
 
-export function PostCard({ post, currentUserId, currentUser, onLike, onBookmark }: PostCardProps) {
+export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark }: PostCardProps) {
   const [showReplies, setShowReplies] = useState(false)
   const [replies, setReplies] = useState<Reply[]>(post.replies ?? [])
   const [loadingReplies, setLoadingReplies] = useState(false)
@@ -182,14 +183,12 @@ export function PostCard({ post, currentUserId, currentUser, onLike, onBookmark 
           Reply ({post.replyCount + (replies.length > (post.replies?.length ?? 0) ? replies.length - (post.replies?.length ?? 0) : 0)})
         </button>
 
-        <button
-          onClick={() => onLike(post.id)}
-          className={actionBtnClass}
-          style={{ color: post.isLiked ? '#ef0e30' : undefined }}
-        >
-          <HeartIcon filled={post.isLiked} />
-          {post.likeCount}
-        </button>
+        <ReactionPicker
+          postId={post.id}
+          reactions={post.reactions}
+          myReaction={post.myReaction}
+          onReact={onReact}
+        />
 
         <button
           onClick={() => onBookmark(post.id)}

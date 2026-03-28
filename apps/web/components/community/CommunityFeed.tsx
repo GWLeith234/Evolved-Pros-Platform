@@ -147,31 +147,63 @@ export function CommunityFeed({
     setNewPostCount(0)
   }
 
-  function handleLike(postId: string) {
-    // Optimistic update
+  function handleReact(postId: string, reactionType: string) {
+    // Capture original post state for revert
+    let original: Post | null = null
+
     setPosts(prev => prev.map(p => {
       if (p.id !== postId) return p
-      const willLike = !p.isLiked
-      return { ...p, isLiked: willLike, likeCount: willLike ? p.likeCount + 1 : Math.max(0, p.likeCount - 1) }
+      original = p
+      // Build optimistic reaction counts
+      const toggleOff = p.myReaction === reactionType
+      const reactionMap = new Map(p.reactions.map(r => [r.type, r.count]))
+      if (p.myReaction && !toggleOff) {
+        const c = reactionMap.get(p.myReaction) ?? 0
+        c <= 1 ? reactionMap.delete(p.myReaction) : reactionMap.set(p.myReaction, c - 1)
+      }
+      if (toggleOff) {
+        const c = reactionMap.get(reactionType) ?? 0
+        c <= 1 ? reactionMap.delete(reactionType) : reactionMap.set(reactionType, c - 1)
+      } else {
+        reactionMap.set(reactionType, (reactionMap.get(reactionType) ?? 0) + 1)
+      }
+      const reactions = Array.from(reactionMap.entries())
+        .map(([type, count]) => ({ type, count }))
+        .sort((a, b) => b.count - a.count)
+      return {
+        ...p,
+        myReaction: toggleOff ? null : reactionType,
+        isLiked: !toggleOff,
+        likeCount: reactions.reduce((s, r) => s + r.count, 0),
+        reactions,
+      }
     }))
 
-    fetch(`/api/posts/${postId}/like`, { method: 'POST' })
-      .then(res => {
-        if (!res.ok) {
-          // Revert on failure
-          setPosts(prev => prev.map(p => {
-            if (p.id !== postId) return p
-            const revert = !p.isLiked
-            return { ...p, isLiked: revert, likeCount: revert ? p.likeCount + 1 : Math.max(0, p.likeCount - 1) }
+    fetch(`/api/posts/${postId}/like`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reaction_type: reactionType }),
+    })
+      .then(async res => {
+        if (res.ok) {
+          const data = await res.json()
+          setPosts(prev => prev.map(p => p.id !== postId ? p : {
+            ...p,
+            isLiked: data.liked,
+            likeCount: data.likeCount,
+            myReaction: data.myReaction,
+            reactions: data.reactions,
           }))
+        } else if (original) {
+          const snap = original
+          setPosts(prev => prev.map(p => p.id !== postId ? p : snap))
         }
       })
       .catch(() => {
-        setPosts(prev => prev.map(p => {
-          if (p.id !== postId) return p
-          const revert = !p.isLiked
-          return { ...p, isLiked: revert, likeCount: revert ? p.likeCount + 1 : Math.max(0, p.likeCount - 1) }
-        }))
+        if (original) {
+          const snap = original
+          setPosts(prev => prev.map(p => p.id !== postId ? p : snap))
+        }
       })
   }
 
@@ -230,7 +262,7 @@ export function CommunityFeed({
                   post={post}
                   currentUserId={currentUser.id}
                   currentUser={{ id: currentUser.id, displayName: currentUser.displayName, avatarUrl: currentUser.avatarUrl }}
-                  onLike={handleLike}
+                  onReact={handleReact}
                   onBookmark={handleBookmark}
                 />
                 {(i + 1) % 8 === 0 && communityAd && (

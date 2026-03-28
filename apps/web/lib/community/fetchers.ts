@@ -61,20 +61,40 @@ export async function fetchPosts(
   const nextCursor = hasMore && page.length > 0 ? page[page.length - 1].created_at : null
 
   const postIds = page.map(r => r.id)
-  const [likesRes, bookmarksRes] = await Promise.all([
+  type LikeRow = { post_id: string; reaction_type: string | null }
+  const [userLikesRes, bookmarksRes, allLikesRes] = await Promise.all([
     postIds.length > 0
-      ? supabase.from('post_likes').select('post_id').eq('user_id', userId).in('post_id', postIds)
-      : Promise.resolve({ data: [] as { post_id: string }[] }),
+      ? supabase.from('post_likes').select('post_id, reaction_type').eq('user_id', userId).in('post_id', postIds) as Promise<{ data: LikeRow[] | null }>
+      : Promise.resolve({ data: [] as LikeRow[] }),
     postIds.length > 0
       ? supabase.from('post_bookmarks').select('post_id').eq('user_id', userId).in('post_id', postIds)
       : Promise.resolve({ data: [] as { post_id: string }[] }),
+    postIds.length > 0
+      ? adminClient.from('post_likes').select('post_id, reaction_type').in('post_id', postIds) as Promise<{ data: LikeRow[] | null }>
+      : Promise.resolve({ data: [] as LikeRow[] }),
   ])
 
-  const likedIds = new Set((likesRes.data ?? []).map(l => l.post_id))
+  const myReactionMap = new Map<string, string>(
+    (userLikesRes.data ?? []).map(l => [l.post_id, l.reaction_type ?? 'thumbs_up'])
+  )
+  const likedIds = new Set(myReactionMap.keys())
   const bookmarkedIds = new Set((bookmarksRes.data ?? []).map(b => b.post_id))
+
+  // Group all reaction counts by post
+  const reactionCountsByPost = new Map<string, Map<string, number>>()
+  for (const like of allLikesRes.data ?? []) {
+    const type = like.reaction_type ?? 'thumbs_up'
+    if (!reactionCountsByPost.has(like.post_id)) reactionCountsByPost.set(like.post_id, new Map())
+    const m = reactionCountsByPost.get(like.post_id)!
+    m.set(type, (m.get(type) ?? 0) + 1)
+  }
 
   const posts = page.map(row => {
     const author = row.users as { id: string; display_name: string | null; full_name: string | null; avatar_url: string | null } | null
+    const reactionMap = reactionCountsByPost.get(row.id)
+    const reactions = reactionMap
+      ? Array.from(reactionMap.entries()).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count)
+      : []
     return {
       id: row.id,
       channelId: row.channel_id,
@@ -90,6 +110,8 @@ export async function fetchPosts(
         avatarUrl: author?.avatar_url ?? null,
       },
       isLiked: likedIds.has(row.id),
+      myReaction: myReactionMap.get(row.id) ?? null,
+      reactions,
       isBookmarked: bookmarkedIds.has(row.id),
     } satisfies Post
   })
