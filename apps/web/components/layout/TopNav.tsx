@@ -265,8 +265,7 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
                 <img
                   src={profile.avatar_url}
                   alt={displayName}
-                  className="w-8 h-8 rounded object-cover"
-                  style={{ border: '2px solid rgba(255,255,255,0.2)', borderRadius: '50%' }}
+                  className="w-8 h-8 rounded-full object-cover"
                 />
               ) : (
                 <span className="font-condensed font-bold text-white text-xs">
