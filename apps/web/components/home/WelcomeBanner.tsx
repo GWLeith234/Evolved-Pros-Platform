@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect, useMemo } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useMemo } from 'react'
 import { MemberBadge } from '@/components/ui/MemberBadge'
 
 const BASE = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/'
@@ -12,7 +11,6 @@ const BANNER_URLS = {
   midday:  `${BASE}banner-midday.jpg`,
   evening: `${BASE}banner-evening.jpg`,
 }
-
 
 type TimePeriod = 'morning' | 'midday' | 'evening'
 
@@ -39,43 +37,19 @@ function getWeekLabel(): string {
   return `Week of ${monthName} ${now.getDate()}, ${now.getFullYear()} — Q${quarter} · Week ${weekNum}`
 }
 
-function getDayOfYear(): number {
-  const now = new Date()
-  return Math.floor(
-    (now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000
-  )
-}
-
-type Quote = { quote_text: string; source: string | null }
-
 interface WelcomeBannerProps {
   displayName: string
   tier?: string | null
+  quote?: { quote_text: string; source: string | null } | null
   // kept for backward-compat with home/page.tsx, not rendered in banner
   unreadPostCount?: number
   upcomingEventCount?: number
 }
 
-export function WelcomeBanner({ displayName, tier }: WelcomeBannerProps) {
+export function WelcomeBanner({ displayName, tier, quote }: WelcomeBannerProps) {
   const period    = useMemo(() => getTimePeriod(new Date().getHours()), [])
   const greeting  = useMemo(() => getGreeting(period), [period])
   const weekLabel = useMemo(() => getWeekLabel(), [])
-  const dayOfYear = useMemo(() => getDayOfYear(), [])
-
-  const [quote, setQuote] = useState<Quote | null>(null)
-
-  useEffect(() => {
-    const supabase = createClient()
-    supabase
-      .from('greeting_quotes')
-      .select('quote_text, source')
-      .order('day_number')
-      .then(({ data }) => {
-        if (data && data.length > 0) {
-          setQuote(data[dayOfYear % data.length])
-        }
-      })
-  }, [dayOfYear])
 
   return (
     <div className="relative overflow-hidden rounded-lg h-[140px] md:h-[180px]">
@@ -101,14 +75,18 @@ export function WelcomeBanner({ displayName, tier }: WelcomeBannerProps) {
 
         {/* Top: week label + greeting + quote */}
         <div>
+          {/* suppressHydrationWarning: weekLabel uses new Date() — server (UTC) vs client (local) differ */}
           <p
+            suppressHydrationWarning
             className="font-condensed font-bold uppercase tracking-[0.2em] mb-1"
             style={{ fontSize: '9px', color: '#c9a84c' }}
           >
             {weekLabel}
           </p>
 
+          {/* suppressHydrationWarning: greeting uses new Date().getHours() — same timezone mismatch */}
           <h1
+            suppressHydrationWarning
             className="font-display font-black text-white leading-tight flex items-center gap-3 flex-wrap"
             style={{ fontSize: '22px' }}
           >

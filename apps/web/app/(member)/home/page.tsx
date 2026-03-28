@@ -159,13 +159,21 @@ export default async function MemberHomePage() {
   const profile = await fetchCurrentUser(supabase, user.id)
   if (!profile) redirect('/login')
 
-  const [stats, activity, events, courseProgress, unreadCount] = await Promise.all([
+  const dayOfYear = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
+  )
+
+  const [stats, activity, events, courseProgress, unreadCount, quotesResult] = await Promise.all([
     fetchDashboardStats(supabase, user.id, profile.tier, profile.points),
     fetchRecentActivity(supabase, user.id),
     fetchUpcomingEvents(supabase, user.id),
     fetchCourseProgress(supabase, user.id),
     fetchUnreadCount(supabase, user.id),
+    supabase.from('greeting_quotes').select('quote_text, source').order('day_number'),
   ])
+
+  const quotes = quotesResult.data ?? []
+  const quote = quotes.length ? quotes[dayOfYear % quotes.length] : null
 
   const displayName = (profile.full_name ? profile.full_name.split(' ')[0] : null) ?? profile.display_name ?? 'Member'
   const upcomingEventCount = events.filter(e => !e.isRegistered).length
@@ -175,6 +183,7 @@ export default async function MemberHomePage() {
       <WelcomeBanner
         displayName={displayName}
         tier={profile.tier}
+        quote={quote}
         unreadPostCount={unreadCount}
         upcomingEventCount={upcomingEventCount}
       />
