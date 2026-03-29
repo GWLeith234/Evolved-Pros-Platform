@@ -60,7 +60,7 @@ export default function LoginPage() {
           <div className="mb-8 flex justify-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_stacked_dark.png"
+              src="https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_nav_light.png"
               alt="Evolved Pros"
               style={{ height: '64px', width: 'auto', objectFit: 'contain' }}
             />

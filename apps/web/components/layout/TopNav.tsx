@@ -7,6 +7,10 @@ import { NotifBell } from '@/components/notifications/NotifBell'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { AskGeorgeDrawer } from '@/components/layout/AskGeorgeDrawer'
 
+const BASE = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding'
+const FALLBACK_LOGO_DARK  = `${BASE}/logo_nav_dark.png`
+const FALLBACK_LOGO_LIGHT = `${BASE}/logo_nav_light.png`
+
 interface TopNavProps {
   profile: {
     id: string
@@ -115,18 +119,12 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
       >
         {/* Logo — swaps between dark/light variant when theme toggles */}
         <Link href="/home" className="flex items-center flex-shrink-0">
-          {(isDark ? logoUrl : (logoLightUrl ?? logoUrl)) ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={isDark ? logoUrl! : (logoLightUrl ?? logoUrl)!}
-              alt="Evolved Pros"
-              style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
-            />
-          ) : (
-            <span className="font-condensed font-bold text-white tracking-[0.14em] text-base select-none">
-              EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS
-            </span>
-          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={isDark ? (logoUrl ?? FALLBACK_LOGO_DARK) : (logoLightUrl ?? logoUrl ?? FALLBACK_LOGO_LIGHT)}
+            alt="Evolved Pros"
+            style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
+          />
         </Link>
 
         {/* Right actions */}

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-const LOGO = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_stacked_dark.png'
+const LOGO = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_nav_light.png'
 
 const PILLARS = [
   { id: 'p1', label: 'Foundation',       color: '#FFA538' },
