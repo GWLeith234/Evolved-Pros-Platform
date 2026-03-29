@@ -22,7 +22,7 @@ export default async function AcademyPage() {
     fetchUserProfile(supabase, user.id),
     adminClient
       .from('platform_ads')
-      .select('id, image_url, click_url, headline, sponsor_name')
+      .select('id, image_url, click_url, link_url, headline, sponsor_name')
       .eq('zone', 'C')
       .eq('is_active', true)
       .limit(1),

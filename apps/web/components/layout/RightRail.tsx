@@ -7,6 +7,7 @@ interface Ad {
   id: string
   image_url: string | null
   click_url: string | null
+  link_url: string | null
   headline: string | null
   sponsor_name: string | null
 }
@@ -20,7 +21,7 @@ export function RightRail() {
     const supabase = createClient()
     supabase
       .from('platform_ads')
-      .select('id, image_url, click_url, headline, sponsor_name')
+      .select('id, image_url, click_url, link_url, headline, sponsor_name')
       .eq('zone', 'A')
       .eq('is_active', true)
       .then(({ data }) => {
@@ -57,7 +58,7 @@ export function RightRail() {
         Advertisement
       </p>
       <a
-        href={ad.click_url ?? '#'}
+        href={ad.click_url || ad.link_url || '#'}
         target="_blank"
         rel="noopener noreferrer"
         className="block group rounded-lg overflow-hidden transition-all duration-200 hover:opacity-90"

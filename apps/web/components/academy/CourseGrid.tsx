@@ -5,6 +5,7 @@ interface LeaderboardAd {
   id: string
   image_url: string | null
   click_url: string | null
+  link_url: string | null
   headline: string | null
   sponsor_name: string | null
 }
@@ -32,7 +33,7 @@ export function CourseGrid({ courses, userTier, leaderboardAd }: CourseGridProps
       {/* Zone C — 728×90 leaderboard between rows */}
       {leaderboardAd && (
         <a
-          href={leaderboardAd.click_url ?? '#'}
+          href={leaderboardAd.click_url || leaderboardAd.link_url || '#'}
           target="_blank"
           rel="noopener noreferrer"
           className="block rounded-lg overflow-hidden transition-opacity hover:opacity-90"
