@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { AcademySidebar } from '@/components/academy/AcademySidebar'
 import { AcademyMobileProgress } from '@/components/academy/AcademyMobileProgress'
@@ -17,8 +18,18 @@ export default async function AcademyPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const profile = await fetchUserProfile(supabase, user.id)
+  const [profile, leaderboardAdsResult] = await Promise.all([
+    fetchUserProfile(supabase, user.id),
+    adminClient
+      .from('platform_ads')
+      .select('id, image_url, click_url, headline, sponsor_name')
+      .eq('zone', 'C')
+      .eq('is_active', true)
+      .limit(1),
+  ])
+
   const courses = await fetchCoursesWithProgress(supabase, user.id, profile?.tier)
+  const leaderboardAd = leaderboardAdsResult.data?.[0] ?? null
 
   const totalLessons = courses.reduce((s, c) => s + c.totalLessons, 0)
   const completedLessons = courses.reduce((s, c) => s + c.completedLessons, 0)
@@ -62,7 +73,7 @@ export default async function AcademyPage() {
         />
 
         <div className="px-4 md:px-8 py-6">
-          <CourseGrid courses={courses} userTier={profile?.tier ?? null} />
+          <CourseGrid courses={courses} userTier={profile?.tier ?? null} leaderboardAd={leaderboardAd} />
           {!hasTierAccess(profile?.tier, 'pro') && <UpgradePrompt />}
         </div>
       </main>

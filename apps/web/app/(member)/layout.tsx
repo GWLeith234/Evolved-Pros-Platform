@@ -6,6 +6,7 @@ import { TopNav } from '@/components/layout/TopNav'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { BottomTabBar } from '@/components/layout/BottomTabBar'
 import { NextEventBanner } from '@/components/layout/NextEventBanner'
+import { RightRail } from '@/components/layout/RightRail'
 
 export default async function MemberLayout({ children }: { children: React.ReactNode }) {
   // Dev bypass: skip Supabase when a dev_session cookie is present
@@ -26,6 +27,7 @@ export default async function MemberLayout({ children }: { children: React.React
             <Sidebar profile={profile} />
           </Suspense>
             <main className="flex-1 bg-[#faf9f7] overflow-y-auto pb-16 md:pb-0">{children}</main>
+            <RightRail />
           </div>
           <BottomTabBar role={profile.role} unreadCount={0} dmUnreadCount={0} />
         </div>
@@ -94,6 +96,7 @@ export default async function MemberLayout({ children }: { children: React.React
         <main className="flex-1 bg-[#faf9f7] overflow-y-auto pb-16 md:pb-0">
           {children}
         </main>
+        <RightRail />
       </div>
       <BottomTabBar role={profile.role} unreadCount={unreadCount ?? 0} dmUnreadCount={0} />
     </div>
