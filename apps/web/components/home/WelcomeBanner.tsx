@@ -31,10 +31,14 @@ interface WelcomeBannerProps {
 export function WelcomeBanner({ displayName, tier, avatarUrl, quote }: WelcomeBannerProps) {
   const [period, setPeriod] = useState<TimePeriod | null>(null)
   const [weekLabel, setWeekLabel] = useState<string | null>(null)
+  const [greeting, setGreeting] = useState<string | null>(null)
 
   useEffect(() => {
     const now = new Date()
-    setPeriod(getTimePeriod(now.getHours()))
+    const hour = now.getHours()
+    setPeriod(getTimePeriod(hour))
+    const g = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
+    setGreeting(g)
     const quarter = Math.ceil((now.getMonth() + 1) / 3)
     setWeekLabel(
       `Week of ${now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} — Q${quarter}`
@@ -45,13 +49,14 @@ export function WelcomeBanner({ displayName, tier, avatarUrl, quote }: WelcomeBa
 
   return (
     <div className="relative overflow-hidden rounded-lg" style={{ minHeight: '220px' }}>
-      {/* Background image */}
+      {/* Background image — suppress hydration: src differs server(morning) vs client(actual period) */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={BANNER_URLS[period ?? 'morning']}
         alt=""
         aria-hidden="true"
         className="absolute inset-0 w-full h-full object-cover"
+        suppressHydrationWarning
       />
 
       {/* Gradient overlay */}
@@ -114,7 +119,12 @@ export function WelcomeBanner({ displayName, tier, avatarUrl, quote }: WelcomeBa
 
           {/* Name + quote */}
           <div className="flex-1 flex flex-col pt-1">
-            <h1 className="text-3xl font-bold text-white leading-tight">{displayName}</h1>
+            {/* Greeting — null on server, fills in after useEffect — zero hydration diff */}
+            {greeting && (
+              <h1 className="text-3xl font-bold text-white leading-tight">
+                {greeting}, {displayName}.
+              </h1>
+            )}
             {quote && (
               <div className="mt-2 max-w-[480px]">
                 <p
