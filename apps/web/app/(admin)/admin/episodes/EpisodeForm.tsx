@@ -82,6 +82,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [toast, setToast] = useState('')
 
   // Transcript generation state
   const [audioUrl, setAudioUrl] = useState('')
@@ -177,11 +178,17 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
         throw new Error(data.error ?? 'Save failed')
       }
 
-      router.push('/admin/episodes')
-      router.refresh()
+      if (episodeId) {
+        // Edit flow: brief toast then redirect
+        setToast('Episode saved')
+        setTimeout(() => router.push('/admin/episodes'), 1200)
+      } else {
+        // Create flow: redirect immediately — button stays disabled through navigation
+        router.push('/admin/episodes')
+      }
+      // Do NOT setSaving(false) on success — keeps button disabled until page navigates away
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong')
-    } finally {
       setSaving(false)
     }
   }
@@ -490,6 +497,11 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
           )}
         </div>
         <div className="flex items-center gap-3">
+          {toast && (
+            <span className="font-condensed text-[12px]" style={{ color: '#22c55e' }}>
+              {toast}
+            </span>
+          )}
           <a
             href="/admin/episodes"
             className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a] transition-colors"
