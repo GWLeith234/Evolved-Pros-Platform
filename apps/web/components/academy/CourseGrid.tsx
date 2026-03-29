@@ -32,13 +32,20 @@ export function CourseGrid({ courses, userTier, leaderboardAd }: CourseGridProps
 
       {/* Zone C — 728×90 leaderboard between rows */}
       {leaderboardAd && (
-        <a
-          href={leaderboardAd.click_url || leaderboardAd.link_url || '#'}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block rounded-lg overflow-hidden transition-opacity hover:opacity-90"
-          style={{ border: '1px solid rgba(27,60,90,0.08)' }}
-        >
+        <div>
+          <p
+            className="font-condensed font-bold uppercase tracking-[0.2em] text-[9px] mb-2"
+            style={{ color: 'rgba(27,60,90,0.3)' }}
+          >
+            Advertisement
+          </p>
+          <a
+            href={leaderboardAd.click_url || leaderboardAd.link_url || '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block rounded-lg overflow-hidden transition-opacity hover:opacity-90"
+            style={{ border: '1px solid rgba(27,60,90,0.08)' }}
+          >
           {leaderboardAd.image_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -63,7 +70,8 @@ export function CourseGrid({ courses, userTier, leaderboardAd }: CourseGridProps
               </span>
             </div>
           )}
-        </a>
+          </a>
+        </div>
       )}
 
       {/* Row 2 */}

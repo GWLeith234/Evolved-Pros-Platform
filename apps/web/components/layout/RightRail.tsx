@@ -124,8 +124,9 @@ export function RightRail() {
                 borderRadius: '50%',
                 backgroundColor: i === idx ? '#1b3c5a' : 'rgba(27,60,90,0.2)',
                 border: 'none',
-                padding: 0,
+                padding: '9px',
                 cursor: 'pointer',
+                backgroundClip: 'content-box',
               }}
             />
           ))}

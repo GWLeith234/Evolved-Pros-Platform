@@ -46,6 +46,7 @@ export async function POST(request: Request) {
     .insert({
       zone,
       ad_type: adType,
+      title: typeof body.headline === 'string' ? body.headline.trim() || 'Ad' : 'Ad',
       sponsor_name: typeof body.sponsor_name === 'string' ? body.sponsor_name.trim() || null : null,
       image_url: typeof body.image_url === 'string' ? body.image_url.trim() || null : null,
       click_url: typeof body.click_url === 'string' ? body.click_url.trim() || null : null,
