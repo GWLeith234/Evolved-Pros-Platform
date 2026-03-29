@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { useState, useEffect } from 'react'
 
 const BASE = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/'
@@ -19,6 +20,16 @@ function getTimePeriod(hour: number): TimePeriod {
   return 'evening'
 }
 
+// Client-only — never SSR'd, so no server/client time mismatch
+const GreetingHeading = dynamic(
+  () => import('./GreetingHeading').then(m => ({ default: m.GreetingHeading })),
+  { ssr: false }
+)
+const WeekLabel = dynamic(
+  () => import('./WeekLabel').then(m => ({ default: m.WeekLabel })),
+  { ssr: false }
+)
+
 interface WelcomeBannerProps {
   displayName: string
   tier?: string | null
@@ -30,26 +41,16 @@ interface WelcomeBannerProps {
 
 export function WelcomeBanner({ displayName, tier, avatarUrl, quote }: WelcomeBannerProps) {
   const [period, setPeriod] = useState<TimePeriod | null>(null)
-  const [weekLabel, setWeekLabel] = useState<string | null>(null)
-  const [greeting, setGreeting] = useState<string | null>(null)
 
   useEffect(() => {
-    const now = new Date()
-    const hour = now.getHours()
-    setPeriod(getTimePeriod(hour))
-    const g = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
-    setGreeting(g)
-    const quarter = Math.ceil((now.getMonth() + 1) / 3)
-    setWeekLabel(
-      `Week of ${now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} — Q${quarter}`
-    )
+    setPeriod(getTimePeriod(new Date().getHours()))
   }, [])
 
   const tierLabel = tier ? tier.toUpperCase() : null
 
   return (
-    <div className="relative overflow-hidden rounded-lg" style={{ minHeight: '220px' }} suppressHydrationWarning>
-      {/* Background image — suppress hydration: src differs server(morning) vs client(actual period) */}
+    <div className="relative overflow-hidden rounded-lg" style={{ minHeight: '220px' }}>
+      {/* Background image — suppressHydrationWarning covers the src attribute change only */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={BANNER_URLS[period ?? 'morning']}
@@ -118,13 +119,9 @@ export function WelcomeBanner({ displayName, tier, avatarUrl, quote }: WelcomeBa
           </div>
 
           {/* Name + quote */}
-          <div className="flex-1 flex flex-col pt-1" suppressHydrationWarning>
-            {/* Greeting — null on server, fills in after useEffect — suppressHydrationWarning catches child-count diff */}
-            {greeting && (
-              <h1 className="text-3xl font-bold text-white leading-tight" suppressHydrationWarning>
-                {greeting}, {displayName}.
-              </h1>
-            )}
+          <div className="flex-1 flex flex-col pt-1">
+            {/* GreetingHeading is client-only (ssr:false) — never in server HTML, no tree mismatch */}
+            <GreetingHeading displayName={displayName} />
             {quote && (
               <div className="mt-2 max-w-[480px]">
                 <p
@@ -147,17 +144,9 @@ export function WelcomeBanner({ displayName, tier, avatarUrl, quote }: WelcomeBa
         </div>
 
         {/* Bottom row: week label left + CTA buttons right */}
-        <div className="flex items-center justify-between mt-auto pt-4" suppressHydrationWarning>
-          {weekLabel ? (
-            <p
-              className="font-condensed font-bold uppercase tracking-widest"
-              style={{ fontSize: '9px', color: '#c9a84c' }}
-            >
-              {weekLabel}
-            </p>
-          ) : (
-            <span />
-          )}
+        <div className="flex items-center justify-between mt-auto pt-4">
+          {/* WeekLabel is client-only (ssr:false) — renders null on server, appears after mount */}
+          <WeekLabel />
 
           <div className="flex items-center gap-3">
             <Link href="/community">
