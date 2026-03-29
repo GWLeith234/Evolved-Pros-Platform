@@ -40,7 +40,7 @@ export function CourseGrid({ courses, userTier, leaderboardAd }: CourseGridProps
             Advertisement
           </p>
           <a
-            href={leaderboardAd.click_url || leaderboardAd.link_url || '#'}
+            href={[leaderboardAd.click_url, leaderboardAd.link_url].find(u => u && u !== '#') ?? '#'}
             target="_blank"
             rel="noopener noreferrer"
             className="block rounded-lg overflow-hidden transition-opacity hover:opacity-90"

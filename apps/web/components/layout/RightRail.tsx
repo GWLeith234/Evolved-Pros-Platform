@@ -42,6 +42,54 @@ export function RightRail() {
   const ad = ads[idx]
   if (!ad) return null
 
+  // Filter out '#', empty strings, and null — only use real URLs
+  const adHref = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
+
+  const adInner = (
+    <>
+      {/* 300×250 image slot */}
+      {ad.image_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={ad.image_url}
+          alt={ad.sponsor_name ?? ad.headline ?? 'Ad'}
+          style={{ width: '250px', height: '208px', objectFit: 'cover', display: 'block' }}
+        />
+      ) : (
+        <div
+          style={{ width: '250px', height: '208px', backgroundColor: 'rgba(27,60,90,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <span className="font-condensed text-[11px]" style={{ color: 'rgba(27,60,90,0.25)' }}>
+            {ad.sponsor_name ?? 'Ad'}
+          </span>
+        </div>
+      )}
+
+      {/* Bottom bar */}
+      {(ad.headline || ad.sponsor_name) && (
+        <div
+          className="px-3 py-2 flex items-center justify-between"
+          style={{ backgroundColor: '#f5f7f9', borderTop: '1px solid rgba(27,60,90,0.08)' }}
+        >
+          <span className="font-condensed text-[11px] font-semibold truncate" style={{ color: '#1b3c5a', maxWidth: '180px' }}>
+            {ad.headline ?? ad.sponsor_name}
+          </span>
+          <span
+            className="font-condensed font-bold text-[8px] uppercase tracking-wider rounded flex-shrink-0 ml-2 px-1.5 py-0.5"
+            style={{ backgroundColor: '#ef0e30', color: 'white' }}
+          >
+            AD
+          </span>
+        </div>
+      )}
+    </>
+  )
+
+  const adCardStyle: React.CSSProperties = {
+    border: '1px solid rgba(27,60,90,0.1)',
+    width: '250px',
+  }
+
   return (
     <aside
       className="hidden xl:flex flex-col flex-shrink-0 py-6 px-4"
@@ -57,52 +105,21 @@ export function RightRail() {
       >
         Advertisement
       </p>
-      <a
-        href={ad.click_url || ad.link_url || '#'}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block group rounded-lg overflow-hidden transition-all duration-200 hover:opacity-90"
-        style={{
-          border: '1px solid rgba(27,60,90,0.1)',
-          width: '250px',
-        }}
-      >
-        {/* 300×250 image slot */}
-        {ad.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={ad.image_url}
-            alt={ad.sponsor_name ?? ad.headline ?? 'Ad'}
-            style={{ width: '250px', height: '208px', objectFit: 'cover', display: 'block' }}
-          />
-        ) : (
-          <div
-            style={{ width: '250px', height: '208px', backgroundColor: 'rgba(27,60,90,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >
-            <span className="font-condensed text-[11px]" style={{ color: 'rgba(27,60,90,0.25)' }}>
-              {ad.sponsor_name ?? 'Ad'}
-            </span>
-          </div>
-        )}
-
-        {/* Bottom bar */}
-        {(ad.headline || ad.sponsor_name) && (
-          <div
-            className="px-3 py-2 flex items-center justify-between"
-            style={{ backgroundColor: '#f5f7f9', borderTop: '1px solid rgba(27,60,90,0.08)' }}
-          >
-            <span className="font-condensed text-[11px] font-semibold truncate" style={{ color: '#1b3c5a', maxWidth: '180px' }}>
-              {ad.headline ?? ad.sponsor_name}
-            </span>
-            <span
-              className="font-condensed font-bold text-[8px] uppercase tracking-wider rounded flex-shrink-0 ml-2 px-1.5 py-0.5"
-              style={{ backgroundColor: '#ef0e30', color: 'white' }}
-            >
-              AD
-            </span>
-          </div>
-        )}
-      </a>
+      {adHref ? (
+        <a
+          href={adHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block group rounded-lg overflow-hidden transition-all duration-200 hover:opacity-90"
+          style={adCardStyle}
+        >
+          {adInner}
+        </a>
+      ) : (
+        <div className="rounded-lg overflow-hidden" style={adCardStyle}>
+          {adInner}
+        </div>
+      )}
 
       {/* Dot indicators for multiple ads */}
       {ads.length > 1 && (
