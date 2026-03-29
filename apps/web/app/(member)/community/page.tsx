@@ -15,8 +15,6 @@ export default async function CommunityPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  console.log('[community] page rendering — user:', user.id)
-
   const [profile, channels, postsResult, pinnedPost, leaderboard, activeMembers] = await Promise.all([
     fetchCurrentUserProfile(supabase, user.id),
     fetchChannels(supabase),
@@ -25,8 +23,6 @@ export default async function CommunityPage() {
     fetchLeaderboard(supabase, user.id),
     fetchActiveMembers(supabase),
   ])
-
-  console.log('[community] postsResult — count:', postsResult.posts.length, 'hasMore:', postsResult.hasMore)
 
   const generalChannel = channels.find(c => c.slug === 'general')
   if (!generalChannel) redirect('/home')

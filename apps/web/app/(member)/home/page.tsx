@@ -175,7 +175,6 @@ export default async function MemberHomePage() {
   ])
 
   const quotes = quotesResult.data ?? []
-  console.log('[home] quotes fetch:', quotes?.length, 'error:', quotesResult.error?.message)
   const quote = quotes?.length ? quotes[dayOfYear % quotes.length] : null
 
   const displayName = (profile.full_name ? profile.full_name.split(' ')[0] : null) ?? profile.display_name ?? 'Member'

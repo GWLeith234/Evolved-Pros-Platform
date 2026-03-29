@@ -61,7 +61,6 @@ export function OnboardingFlow() {
       .limit(1)
       .single()
       .then(({ data, error }) => {
-        console.log('[onboard] general channel fetch:', data?.id, 'error:', error?.message)
         if (data) setGeneralChannelId(data.id)
       })
   }, [])
@@ -97,13 +96,11 @@ export function OnboardingFlow() {
   async function handleIntroPost() {
     const trimmed = introText.trim()
     if (trimmed.length < 10 || !generalChannelId) {
-      console.log('[onboard] skipping post — length:', trimmed.length, 'channelId:', generalChannelId)
       setStep(4)
       return
     }
     setPosting(true)
     setPostError(null)
-    console.log('[onboard] posting intro to channel:', generalChannelId)
     const res = await fetch('/api/posts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -114,7 +111,6 @@ export function OnboardingFlow() {
       }),
     })
     const resData = await res.json().catch(() => ({}))
-    console.log('[onboard] post result:', res.status, resData?.error ?? 'ok')
     if (!res.ok) {
       setPostError(resData.error ?? 'Post failed — you can introduce yourself in the community later.')
     }

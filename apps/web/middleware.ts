@@ -71,17 +71,6 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  console.log(
-    '[middleware]',
-    pathname,
-    '| user:',
-    user?.id ?? 'none',
-    '| cookies:',
-    request.cookies.getAll().map(c => c.name).join(', ')
-  )
-  const authCookie = request.cookies.getAll().find(c => c.name.includes('auth-token') || c.name.includes('supabase'))
-  if (authCookie) console.log('[middleware] auth cookie found:', authCookie.name, '=', authCookie.value.slice(0, 40) + '...')
-
   if (!user) {
     // Session-optional routes (e.g. /membership): let them through without auth.
     // Session was still refreshed above so server components can call getUser().
