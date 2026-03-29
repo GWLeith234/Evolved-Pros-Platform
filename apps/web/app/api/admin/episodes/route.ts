@@ -67,6 +67,7 @@ export async function POST(request: Request) {
       youtube_url: typeof body.youtube_url === 'string' ? body.youtube_url.trim() || null : null,
       thumbnail_url: typeof body.thumbnail_url === 'string' ? body.thumbnail_url.trim() || null : null,
       duration_seconds: typeof body.duration_seconds === 'number' ? body.duration_seconds : null,
+      transcript: typeof body.transcript === 'string' ? body.transcript.trim() || null : null,
       is_published: isPublished,
       published_at: publishedAt,
     })

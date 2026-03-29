@@ -16,6 +16,7 @@ interface EpisodeFormValues {
   youtubeUrl: string
   thumbnailUrl: string
   durationSeconds: string
+  transcript: string
   isPublished: boolean
 }
 
@@ -37,6 +38,7 @@ const DEFAULT_VALUES: EpisodeFormValues = {
   youtubeUrl: '',
   thumbnailUrl: '',
   durationSeconds: '',
+  transcript: '',
   isPublished: false,
 }
 
@@ -81,6 +83,12 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Transcript generation state
+  const [audioUrl, setAudioUrl] = useState('')
+  const [transcribing, setTranscribing] = useState(false)
+  const [transcribeError, setTranscribeError] = useState<string | null>(null)
+  const [transcribeSuccess, setTranscribeSuccess] = useState(false)
+
   function set<K extends keyof EpisodeFormValues>(key: K, value: EpisodeFormValues[K]) {
     setValues(prev => ({ ...prev, [key]: value }))
   }
@@ -89,9 +97,41 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
     setValues(prev => ({
       ...prev,
       title,
-      // Auto-fill slug only if user hasn't manually edited it
       slug: prev.slug === slugify(prev.title) || prev.slug === '' ? slugify(title) : prev.slug,
     }))
+  }
+
+  async function handleGenerateTranscript() {
+    if (!episodeId) {
+      setTranscribeError('Save the episode first before generating a transcript.')
+      return
+    }
+    if (!audioUrl.trim()) {
+      setTranscribeError('Enter an audio URL to generate a transcript.')
+      return
+    }
+
+    setTranscribing(true)
+    setTranscribeError(null)
+    setTranscribeSuccess(false)
+
+    try {
+      const res = await fetch('/api/admin/transcribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ episodeId, audioUrl: audioUrl.trim() }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Transcription failed')
+
+      set('transcript', data.transcript ?? '')
+      setTranscribeSuccess(true)
+    } catch (e) {
+      setTranscribeError(e instanceof Error ? e.message : 'Something went wrong')
+    } finally {
+      setTranscribing(false)
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -112,6 +152,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
       youtube_url: values.youtubeUrl.trim() || null,
       thumbnail_url: values.thumbnailUrl.trim() || null,
       duration_seconds: values.durationSeconds ? parseInt(values.durationSeconds, 10) : null,
+      transcript: values.transcript.trim() || null,
       is_published: values.isPublished,
     }
 
@@ -332,6 +373,87 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
             />
           </LabelledInput>
         </div>
+      </div>
+
+      {/* Transcript */}
+      <div
+        className="rounded-lg p-5 space-y-4"
+        style={{ backgroundColor: '#f5f7f9', border: '1px solid rgba(27,60,90,0.1)' }}
+      >
+        <div>
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-0.5">
+            Transcript
+          </p>
+          <p className="font-condensed text-[10px] text-[#7a8a96]">
+            Paste a transcript manually, or generate one from an audio file using Whisper.
+          </p>
+        </div>
+
+        {/* Audio URL + Generate button */}
+        <div>
+          <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
+            Audio URL (MP3 / M4A)
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="url"
+              value={audioUrl}
+              onChange={e => { setAudioUrl(e.target.value); setTranscribeError(null); setTranscribeSuccess(false) }}
+              className={`flex-1 rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none transition-all`}
+              style={inputStyle}
+              placeholder="https://... direct link to audio file"
+              disabled={transcribing}
+            />
+            <button
+              type="button"
+              onClick={handleGenerateTranscript}
+              disabled={transcribing || !audioUrl.trim()}
+              className="flex-shrink-0 font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2.5 transition-all whitespace-nowrap"
+              style={{
+                backgroundColor: transcribing ? 'rgba(27,60,90,0.4)' : '#1b3c5a',
+                color: 'white',
+                opacity: !audioUrl.trim() ? 0.4 : 1,
+                cursor: transcribing || !audioUrl.trim() ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {transcribing ? 'Generating…' : 'Generate Transcript'}
+            </button>
+          </div>
+
+          {/* Status messages */}
+          {transcribing && (
+            <div className="flex items-center gap-2 mt-2">
+              <svg className="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#68a2b9" strokeWidth="2.5">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+              </svg>
+              <span className="font-condensed text-[11px]" style={{ color: '#68a2b9' }}>
+                Processing audio with Whisper — this may take 1–3 minutes for long episodes…
+              </span>
+            </div>
+          )}
+          {transcribeSuccess && !transcribing && (
+            <p className="font-condensed text-[11px] mt-2" style={{ color: '#4caf50' }}>
+              ✓ Transcript generated and saved successfully.
+            </p>
+          )}
+          {transcribeError && (
+            <p className="font-condensed text-[11px] mt-2" style={{ color: '#ef0e30' }}>
+              {transcribeError}
+            </p>
+          )}
+        </div>
+
+        {/* Transcript textarea */}
+        <LabelledInput label="Transcript Text" hint="Auto-populated after generation, or paste manually.">
+          <textarea
+            value={values.transcript}
+            onChange={e => set('transcript', e.target.value)}
+            rows={10}
+            className={`${inputClass} resize-y`}
+            style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '12px', lineHeight: '1.6' }}
+            placeholder="Transcript will appear here after generation…"
+          />
+        </LabelledInput>
       </div>
 
       {/* Published toggle */}

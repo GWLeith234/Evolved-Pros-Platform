@@ -44,7 +44,7 @@ export async function PATCH(
     'title', 'slug', 'episode_number', 'season', 'description',
     'guest_name', 'guest_title', 'guest_company',
     'mux_playback_id', 'youtube_url', 'thumbnail_url',
-    'duration_seconds', 'is_published',
+    'duration_seconds', 'is_published', 'transcript',
   ] as const
 
   const update: Record<string, unknown> = {}

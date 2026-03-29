@@ -32,6 +32,7 @@ export default async function EditEpisodePage({ params }: Props) {
     youtubeUrl: ep.youtube_url ?? '',
     thumbnailUrl: ep.thumbnail_url ?? '',
     durationSeconds: ep.duration_seconds != null ? String(ep.duration_seconds) : '',
+    transcript: ep.transcript ?? '',
     isPublished: ep.is_published ?? false,
   }
 
