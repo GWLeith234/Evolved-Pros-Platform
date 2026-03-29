@@ -38,8 +38,6 @@ export async function fetchPosts(
     .eq('slug', channelSlug)
     .single()
 
-  console.log('[community] fetchPosts called — slug:', channelSlug, 'channel:', channel?.id ?? 'NOT FOUND')
-
   if (!channel) return { posts: [], nextCursor: null, hasMore: false }
 
   // Use adminClient so posts from null-tier / newly-onboarded users aren't
@@ -52,8 +50,6 @@ export async function fetchPosts(
     .eq('is_pinned', false)
     .order('created_at', { ascending: false })
     .limit(limit + 1)
-
-  console.log('[community] fetchPosts result — rows:', rows?.length ?? 0, 'error:', postsError?.message ?? 'none')
 
   const allRows = rows ?? []
   const hasMore = allRows.length > limit

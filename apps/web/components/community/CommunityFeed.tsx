@@ -86,6 +86,8 @@ export function CommunityFeed({
               avatarUrl: null,
             },
             isLiked: false,
+            myReaction: null,
+            reactions: [],
             isBookmarked: false,
           }
 
