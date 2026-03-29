@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { EventCard } from './EventCard'
 import { SponsorCard } from '@/components/ads/SponsorCard'
 import { useSponsorAd } from '@/hooks/useSponsorAd'
@@ -18,10 +18,12 @@ export function EventList({ events, registeredEventIds, userTier, view = 'upcomi
   const [registeredIds, setRegisteredIds] = useState(new Set(registeredEventIds))
   const eventsAd = useSponsorAd('events')
 
-  const now = new Date()
+  // Defer now to useEffect — avoids server/client new Date() mismatch (hydration error #425)
+  const [now, setNow] = useState<Date | null>(null)
+  useEffect(() => { setNow(new Date()) }, [])
 
   const filtered = events.filter(e => {
-    const isPast = new Date(e.startsAt) < now
+    const isPast = now !== null && new Date(e.startsAt) < now
     if (view === 'upcoming' && isPast) return false
     if (view === 'registrations' && !registeredIds.has(e.id)) return false
     if (view === 'recordings' && !e.recordingUrl) return false

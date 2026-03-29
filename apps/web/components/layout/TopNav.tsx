@@ -59,10 +59,9 @@ function MoonIcon() {
   )
 }
 
-// Next episode date — noon local time avoids off-by-one from UTC rollover
-const NEXT_EPISODE_DATE = new Date('2026-04-20T12:00:00')
-const NEXT_EPISODE_DAY   = NEXT_EPISODE_DATE.toLocaleDateString('en-US', { weekday: 'short' })
-const NEXT_EPISODE_MONTH_DAY = NEXT_EPISODE_DATE.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
+// Hardcoded strings avoid server/client toLocaleDateString() ICU mismatch (hydration error #425)
+const NEXT_EPISODE_DAY        = 'Sun'
+const NEXT_EPISODE_MONTH_DAY  = 'April 20'
 
 export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, membersCanToggleTheme = true }: TopNavProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false)

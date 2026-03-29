@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { EventItem } from '@/lib/events/types'
 
 interface CalendarStripProps {
@@ -12,8 +12,16 @@ const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December']
 
 export function CalendarStrip({ events, onDayClick }: CalendarStripProps) {
-  const today = new Date()
-  const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1))
+  // Defer today to useEffect — avoids server/client new Date() mismatch (hydration error #425)
+  const [today, setToday] = useState<Date | null>(null)
+  const [viewDate, setViewDate] = useState(() => {
+    const d = new Date()
+    return new Date(d.getFullYear(), d.getMonth(), 1)
+  })
+
+  useEffect(() => {
+    setToday(new Date())
+  }, [])
 
   // Event days set for the displayed month
   const eventDays = useMemo(() => {
@@ -47,7 +55,7 @@ export function CalendarStrip({ events, onDayClick }: CalendarStripProps) {
     setViewDate(new Date(year, month + 1, 1))
   }
 
-  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month
+  const isCurrentMonth = today !== null && today.getFullYear() === year && today.getMonth() === month
 
   return (
     <div
@@ -92,7 +100,7 @@ export function CalendarStrip({ events, onDayClick }: CalendarStripProps) {
         <div className="grid grid-cols-7 gap-y-0.5">
           {cells.map((day, i) => {
             if (day === null) return <div key={`empty-${i}`} />
-            const isToday = isCurrentMonth && day === today.getDate()
+            const isToday = isCurrentMonth && today !== null && day === today.getDate()
             const hasEvent = eventDays.has(day)
             const clickable = hasEvent && onDayClick
 
