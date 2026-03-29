@@ -119,5 +119,32 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: [
+    // Known app routes that require auth checking.
+    // Anything not listed here falls through to Next.js naturally,
+    // so unknown URLs render not-found.tsx instead of redirecting to /login.
+    '/home',
+    '/home/:path*',
+    '/community',
+    '/community/:path*',
+    '/events',
+    '/events/:path*',
+    '/academy',
+    '/academy/:path*',
+    '/podcast',
+    '/podcast/:path*',
+    '/profile/:path*',
+    '/messages',
+    '/messages/:path*',
+    '/settings',
+    '/settings/:path*',
+    '/notifications',
+    '/notifications/:path*',
+    '/membership',
+    '/onboard',
+    '/admin',
+    '/admin/:path*',
+    '/api/posts/:path*',
+    '/api/admin/:path*',
+  ],
 }
