@@ -8,6 +8,11 @@ interface EpisodePlayerProps {
   title: string
 }
 
+// Known test/placeholder video IDs that should never be shown to members
+const BLOCKED_VIDEO_IDS = new Set([
+  'dQw4w9WgXcQ', // Rick Astley — Never Gonna Give You Up (common test placeholder)
+])
+
 function youtubeEmbedUrl(url: string): string | null {
   try {
     const parsed = new URL(url)
@@ -15,12 +20,13 @@ function youtubeEmbedUrl(url: string): string | null {
     const id =
       parsed.searchParams.get('v') ??
       (parsed.hostname === 'youtu.be' ? parsed.pathname.slice(1) : null)
-    if (!id) return null
+    if (!id || BLOCKED_VIDEO_IDS.has(id)) return null
     return `https://www.youtube-nocookie.com/embed/${id}`
   } catch {
     return null
   }
 }
+
 
 export function EpisodePlayer({ muxPlaybackId, youtubeUrl, title }: EpisodePlayerProps) {
   if (muxPlaybackId) {

@@ -7,6 +7,22 @@ import { TranscriptSection } from '@/components/podcast/TranscriptSection'
 
 export const dynamic = 'force-dynamic'
 
+interface Props {
+  params: { slug: string }
+}
+
+export async function generateMetadata({ params }: Props) {
+  const { data } = await adminClient
+    .from('episodes')
+    .select('title')
+    .eq('slug', params.slug)
+    .eq('is_published', true)
+    .single()
+  return {
+    title: data?.title ? `${data.title} — Evolved Pros Podcast` : 'Evolved Pros Podcast',
+  }
+}
+
 interface Episode {
   id: string
   episode_number: number | null
@@ -23,10 +39,6 @@ interface Episode {
   duration_seconds: number | null
   published_at: string | null
   transcript?: string | null
-}
-
-interface Props {
-  params: { slug: string }
 }
 
 function formatDate(iso: string | null): string {

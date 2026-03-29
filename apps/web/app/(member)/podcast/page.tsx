@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
+export const metadata = { title: 'Podcast — Evolved Pros' }
 
 interface Episode {
   id: string
@@ -77,8 +78,8 @@ function FeaturedEpisode({ ep }: { ep: Episode }) {
         </div>
       )}
 
-      {/* Content */}
-      <div className="relative z-10 p-8 md:p-10 flex flex-col justify-between h-full" style={{ minHeight: '320px' }}>
+      {/* Content — min-h instead of h-full to avoid overflow-hidden clipping CTA on mobile */}
+      <div className="relative z-10 p-8 md:p-10 flex flex-col" style={{ minHeight: '320px' }}>
         {/* Top: eyebrow */}
         <div className="flex items-center gap-3 mb-6">
           <span
@@ -285,8 +286,8 @@ export default async function PodcastPage() {
             {/* Featured episode */}
             {featured && <FeaturedEpisode ep={featured} />}
 
-            {/* Episode grid */}
-            {rest.length > 0 && (
+            {/* Episode grid or coming-soon state */}
+            {rest.length > 0 ? (
               <div>
                 <p
                   className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] mb-4"
@@ -299,6 +300,30 @@ export default async function PodcastPage() {
                     <EpisodeCard key={ep.id} ep={ep} />
                   ))}
                 </div>
+              </div>
+            ) : (
+              <div
+                className="rounded-xl px-8 py-12 text-center"
+                style={{ border: '1px dashed rgba(255,255,255,0.08)', backgroundColor: 'rgba(255,255,255,0.02)' }}
+              >
+                <div
+                  className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
+                  style={{ backgroundColor: 'rgba(239,14,48,0.1)', border: '1px solid rgba(239,14,48,0.2)' }}
+                >
+                  <PlayIcon />
+                </div>
+                <p
+                  className="font-condensed font-bold uppercase tracking-[0.2em] text-[11px] mb-1"
+                  style={{ color: 'rgba(255,255,255,0.4)' }}
+                >
+                  More episodes coming soon
+                </p>
+                <p
+                  className="font-body text-[13px]"
+                  style={{ color: 'rgba(255,255,255,0.2)' }}
+                >
+                  New conversations drop regularly — check back soon.
+                </p>
               </div>
             )}
           </>
