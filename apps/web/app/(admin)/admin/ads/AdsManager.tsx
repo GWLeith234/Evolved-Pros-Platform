@@ -142,8 +142,11 @@ function AdForm({
           body: JSON.stringify(payload),
         }
       )
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({})) as { error?: string }
+        throw new Error(errData.error ?? 'Save failed')
+      }
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Save failed')
       onSaved(data)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong')

@@ -521,7 +521,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
           )}
         </div>
         <div className="flex items-center gap-3">
-          <
+          <a
             href="/admin/episodes"
             className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a] transition-colors"
           >
