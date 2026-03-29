@@ -148,6 +148,10 @@ export function CommunityFeed({
   }
 
   function handleReact(postId: string, reactionType: string) {
+    // Read toggle state from current posts array BEFORE optimistic update
+    const currentPost = posts.find(p => p.id === postId)
+    const isToggleOff = currentPost?.myReaction === reactionType
+
     // Capture original post state for revert
     let original: Post | null = null
 
@@ -182,17 +186,24 @@ export function CommunityFeed({
     fetch(`/api/posts/${postId}/like`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reaction_type: reactionType }),
+      // Pass explicit remove flag so the API can bypass unreliable existing-row lookup
+      body: JSON.stringify({ reaction_type: reactionType, remove: isToggleOff }),
     })
       .then(async res => {
         if (res.ok) {
           const data = await res.json()
-          setPosts(prev => prev.map(p => p.id !== postId ? p : {
-            ...p,
-            isLiked: data.liked,
-            likeCount: data.likeCount,
-            myReaction: data.myReaction,
-            reactions: data.reactions,
+          setPosts(prev => prev.map(p => {
+            if (p.id !== postId) return p
+            return {
+              ...p,
+              isLiked: data.liked,
+              likeCount: data.likeCount,
+              myReaction: data.myReaction,
+              // Only replace optimistic reactions if the API returned real data;
+              // an empty array means the server-side aggregate query failed silently —
+              // keep the optimistic state so chips don't vanish.
+              reactions: data.reactions.length > 0 ? data.reactions : p.reactions,
+            }
           }))
         } else if (original) {
           const snap = original

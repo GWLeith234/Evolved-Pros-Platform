@@ -16,13 +16,15 @@ export async function POST(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Read reaction_type from body; fall back to 'thumbs_up'
+  // Read reaction_type and optional remove flag from body
   let reactionType: ReactionType = 'thumbs_up'
+  let explicitRemove = false
   try {
     const body = await request.json()
     if (typeof body.reaction_type === 'string' && VALID_REACTIONS.includes(body.reaction_type as ReactionType)) {
       reactionType = body.reaction_type as ReactionType
     }
+    if (body.remove === true) explicitRemove = true
   } catch { /* no body — use default */ }
 
   const { data: post } = await supabase
@@ -44,7 +46,14 @@ export async function POST(
   let myReaction: string | null = reactionType
   let newLikeCount = post.like_count
 
-  if (existing) {
+  // explicitRemove=true means the frontend detected the user is un-reacting
+  // (same emoji clicked twice). Bypass the existing-row lookup entirely.
+  if (explicitRemove) {
+    await supabase.from('post_likes').delete().eq('post_id', params.postId).eq('user_id', user.id)
+    newLikeCount = Math.max(0, post.like_count - 1)
+    liked = false
+    myReaction = null
+  } else if (existing) {
     const sameType = existing.reaction_type === reactionType
     if (sameType) {
       // Toggle off — remove reaction
