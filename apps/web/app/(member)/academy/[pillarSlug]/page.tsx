@@ -62,7 +62,12 @@ export default async function CourseDetailPage({ params }: Props) {
       />
       <div className="flex flex-1 overflow-hidden">
         <LessonListPanel
-          course={course}
+          course={{
+            pillarNumber: course.pillar_number,
+            slug: course.slug,
+            title: course.title,
+            description: course.description,
+          }}
           lessons={lessons}
           currentLessonId={currentLesson?.id ?? null}
           progressPct={progressPct}
