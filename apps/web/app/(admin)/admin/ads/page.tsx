@@ -18,9 +18,7 @@ export default async function AdminAdsPage() {
     <div className="px-8 py-6">
       <div className="mb-6">
         <h1 className="font-display font-black text-[28px] text-[#112535]">Ads</h1>
-        <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
-          {ads.length} total · {ads.filter(a => a.is_active).length} active · 4 IAB zones
-        </p>
+        {/* Count is rendered inside AdsManager so it stays live after create/delete */}
       </div>
 
       <AdsManager initialAds={ads} />

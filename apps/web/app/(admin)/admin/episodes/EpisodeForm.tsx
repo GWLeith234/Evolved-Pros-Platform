@@ -213,6 +213,30 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+      {/* Fixed-position save toast — unmissable, auto-dismissed with the redirect */}
+      {toast && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '24px',
+            right: '24px',
+            zIndex: 9999,
+            backgroundColor: '#22c55e',
+            color: 'white',
+            padding: '12px 20px',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: 600,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.18)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+        >
+          ✓ {toast}
+        </div>
+      )}
+
       {error && (
         <div
           className="rounded px-4 py-3 font-condensed text-[12px]"
@@ -497,12 +521,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
           )}
         </div>
         <div className="flex items-center gap-3">
-          {toast && (
-            <span className="font-condensed text-[12px]" style={{ color: '#22c55e' }}>
-              {toast}
-            </span>
-          )}
-          <a
+          <
             href="/admin/episodes"
             className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a] transition-colors"
           >

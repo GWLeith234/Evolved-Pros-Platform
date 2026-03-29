@@ -529,9 +529,14 @@ export function AdsManager({ initialAds }: { initialAds: Ad[] }) {
   const [activeZone, setActiveZone] = useState<Zone>('A')
 
   const zones: Zone[] = ['A', 'B', 'C', 'D']
+  const activeCount = ads.filter(a => a.is_active).length
 
   return (
     <div>
+      {/* Reactive count — updates immediately after any create/delete */}
+      <p className="font-condensed text-[12px] text-[#7a8a96] mb-6">
+        {ads.length} total · {activeCount} active · 4 IAB zones
+      </p>
       {/* Zone tabs */}
       <div
         className="flex gap-0 mb-6 rounded-lg overflow-hidden"

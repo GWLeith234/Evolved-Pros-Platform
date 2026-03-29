@@ -74,6 +74,8 @@ export function ReactionPicker({ postId, reactions, myReaction, onReact }: React
               backgroundColor: isMine ? 'rgba(239,14,48,0.08)' : 'rgba(27,60,90,0.06)',
               border: `1px solid ${isMine ? 'rgba(239,14,48,0.30)' : 'rgba(27,60,90,0.10)'}`,
               color: isMine ? '#ef0e30' : '#7a8a96',
+              flexShrink: 0,
+              minWidth: 'fit-content',
             }}
             title={def?.label}
           >
