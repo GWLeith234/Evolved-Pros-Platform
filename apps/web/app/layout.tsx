@@ -65,6 +65,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html
       lang="en"
       className={`${playfair.variable} ${barlowCondensed.variable} ${barlow.variable}`}
+      suppressHydrationWarning
     >
       <head>
         <ThemeInit defaultTheme={defaultTheme} />
