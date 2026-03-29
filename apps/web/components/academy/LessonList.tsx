@@ -27,7 +27,7 @@ export function LessonListPanel({
       {/* Header */}
       <div className="px-7 pt-7 pb-5 flex-shrink-0">
         <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-2" style={{ color: '#68a2b9' }}>
-          Pillar 0{course.pillarNumber} — The Evolved Architecture™
+          Pillar {String(course.pillarNumber).padStart(2, '0')} — The Evolved Architecture™
         </p>
         <h2
           className="font-display font-black leading-tight mb-2"
