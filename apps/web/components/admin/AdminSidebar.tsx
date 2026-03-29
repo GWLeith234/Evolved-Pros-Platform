@@ -82,6 +82,7 @@ export function AdminSidebar() {
         title="Content"
         items={[
           { label: 'Courses',   href: '/admin/courses',   match: /^\/admin\/courses/ },
+          { label: 'Episodes',  href: '/admin/episodes',  match: /^\/admin\/episodes/ },
           { label: 'Events',    href: '/admin/events',    match: /^\/admin\/events/ },
           { label: 'Branding',  href: '/admin/branding',  match: /^\/admin\/branding/ },
         ]}
