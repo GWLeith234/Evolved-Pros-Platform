@@ -84,6 +84,7 @@ export function AdminSidebar() {
           { label: 'Courses',   href: '/admin/courses',   match: /^\/admin\/courses/ },
           { label: 'Episodes',  href: '/admin/episodes',  match: /^\/admin\/episodes/ },
           { label: 'Events',    href: '/admin/events',    match: /^\/admin\/events/ },
+          { label: 'Ads',       href: '/admin/ads',       match: /^\/admin\/ads/ },
           { label: 'Branding',  href: '/admin/branding',  match: /^\/admin\/branding/ },
         ]}
       />
