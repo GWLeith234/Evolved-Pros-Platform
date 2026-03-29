@@ -84,7 +84,7 @@ export default async function EpisodePage({ params }: Props) {
 
   const episodeLabel = [
     ep.episode_number != null ? `EP. ${ep.episode_number}` : null,
-    ep.season != null && ep.season > 1 ? `S${ep.season}` : null,
+    ep.season != null ? `S${ep.season}` : null,
   ]
     .filter(Boolean)
     .join(' · ')
@@ -187,7 +187,7 @@ export default async function EpisodePage({ params }: Props) {
                     style={{ backgroundColor: guestAvatarColor(ep.guest_name) }}
                   >
                     <span
-                      className="font-display font-black text-white"
+                      className="font-display font-black !text-white"
                       style={{ fontSize: '18px' }}
                     >
                       {getInitials(ep.guest_name)}
