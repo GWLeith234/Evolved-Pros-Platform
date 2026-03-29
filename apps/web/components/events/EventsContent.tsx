@@ -49,7 +49,7 @@ export function EventsContent({ events, registeredEventIds, userTier, registrati
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col" style={{ backgroundColor: '#faf9f7' }}>
+      <div className="flex-1 flex flex-col min-w-0" style={{ backgroundColor: '#faf9f7' }}>
         {/* Mobile filter row — hidden on desktop */}
         <div
           className="md:hidden flex-shrink-0 overflow-x-auto"

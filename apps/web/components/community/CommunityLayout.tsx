@@ -49,8 +49,8 @@ export function CommunityLayout({
 
   return (
     <div className="flex flex-1 min-h-0" style={{ height: '100%' }}>
-      {/* Channel sidebar — hidden on mobile */}
-      <div className="hidden md:flex flex-col flex-shrink-0" style={{ width: '200px' }}>
+      {/* Channel sidebar — hidden below lg to give feed adequate width */}
+      <div className="hidden lg:flex flex-col flex-shrink-0" style={{ width: '200px' }}>
         <ChannelSidebar
           channels={channels}
           currentSlug={currentChannelSlug}
@@ -102,8 +102,8 @@ export function CommunityLayout({
         </div>
       </div>
 
-      {/* Right rail — hidden on mobile */}
-      <div className="hidden md:flex flex-col flex-shrink-0 overflow-y-auto" style={{ width: '260px' }}>
+      {/* Right rail — hidden below lg to give feed adequate width */}
+      <div className="hidden lg:flex flex-col flex-shrink-0 overflow-y-auto" style={{ width: '260px' }}>
         <LeaderboardRail
           leaderboard={leaderboard}
           activeMembers={activeMembers}
