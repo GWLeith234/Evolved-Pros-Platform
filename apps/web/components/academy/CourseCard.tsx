@@ -51,10 +51,20 @@ export function CourseCard({ course, isLocked }: CourseCardProps) {
         cursor: isLocked ? 'default' : 'pointer',
       }}
       onMouseEnter={e => {
-        if (!isLocked) (e.currentTarget as HTMLElement).style.borderColor = 'rgba(104,162,185,0.5)'
+        if (!isLocked) {
+          const el = e.currentTarget as HTMLElement
+          el.style.borderColor = 'rgba(104,162,185,0.5)'
+          el.style.transform = 'scale(1.02)'
+          el.style.boxShadow = '0 8px 24px rgba(0,0,0,0.28)'
+        }
       }}
       onMouseLeave={e => {
-        if (!isLocked) (e.currentTarget as HTMLElement).style.borderColor = 'rgba(27,60,90,0.10)'
+        if (!isLocked) {
+          const el = e.currentTarget as HTMLElement
+          el.style.borderColor = 'rgba(27,60,90,0.10)'
+          el.style.transform = 'scale(1)'
+          el.style.boxShadow = 'none'
+        }
       }}
     >
       {/* Background pillar photo */}

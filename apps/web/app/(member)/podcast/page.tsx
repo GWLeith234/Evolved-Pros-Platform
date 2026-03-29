@@ -55,10 +55,10 @@ function FeaturedEpisode({ ep }: { ep: Episode }) {
   return (
     <Link
       href={`/podcast/${ep.slug}`}
-      className="group block rounded-xl overflow-hidden relative"
+      className="group block rounded-xl overflow-hidden relative border transition-all duration-200 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:border-white/20"
       style={{
         backgroundColor: '#112535',
-        border: '1px solid rgba(255,255,255,0.08)',
+        borderColor: 'rgba(255,255,255,0.08)',
         minHeight: '320px',
       }}
     >
@@ -128,7 +128,7 @@ function FeaturedEpisode({ ep }: { ep: Episode }) {
         {/* Bottom: CTA */}
         <div className="mt-8">
           <span
-            className="inline-flex items-center gap-2 font-condensed font-bold uppercase tracking-[0.14em] text-[12px] rounded px-5 py-2.5 transition-all duration-150 group-hover:opacity-90"
+            className="inline-flex items-center gap-2 font-condensed font-bold uppercase tracking-[0.14em] text-[12px] rounded px-5 py-2.5 transition-colors duration-150 group-hover:bg-[#cc0a28]"
             style={{ backgroundColor: '#ef0e30', color: 'white' }}
           >
             <PlayIcon />
