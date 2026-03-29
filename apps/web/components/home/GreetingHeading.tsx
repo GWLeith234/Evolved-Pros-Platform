@@ -2,18 +2,22 @@
 
 import { useState, useEffect } from 'react'
 
-interface GreetingHeadingProps {
+interface Props {
   displayName: string
 }
 
-export function GreetingHeading({ displayName }: GreetingHeadingProps) {
-  const [greeting, setGreeting] = useState<string>('')
+export default function GreetingHeading({ displayName }: Props) {
+  const [greeting, setGreeting] = useState<string | null>(null)
 
   useEffect(() => {
     const hour = new Date().getHours()
-    setGreeting(hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening')
+    if (hour < 12) setGreeting('Good morning')
+    else if (hour < 17) setGreeting('Good afternoon')
+    else setGreeting('Good evening')
   }, [])
 
+  // Returns null both on the server (never rendered — ssr:false) and
+  // on the client before the useEffect fires. No tree mismatch possible.
   if (!greeting) return null
 
   return (

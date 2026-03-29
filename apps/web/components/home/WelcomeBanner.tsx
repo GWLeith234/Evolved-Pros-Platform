@@ -20,15 +20,10 @@ function getTimePeriod(hour: number): TimePeriod {
   return 'evening'
 }
 
-// Client-only — never SSR'd, so no server/client time mismatch
-const GreetingHeading = dynamic(
-  () => import('./GreetingHeading').then(m => ({ default: m.GreetingHeading })),
-  { ssr: false }
-)
-const WeekLabel = dynamic(
-  () => import('./WeekLabel').then(m => ({ default: m.WeekLabel })),
-  { ssr: false }
-)
+// ssr:false — these components are NEVER in the server-rendered HTML.
+// Default exports used so dynamic() needs no .then() transform.
+const GreetingHeading = dynamic(() => import('./GreetingHeading'), { ssr: false })
+const WeekLabel = dynamic(() => import('./WeekLabel'), { ssr: false })
 
 interface WelcomeBannerProps {
   displayName: string

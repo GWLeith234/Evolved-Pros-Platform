@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 
-export function WeekLabel() {
-  const [label, setLabel] = useState<string>('')
+export default function WeekLabel() {
+  const [label, setLabel] = useState<string | null>(null)
 
   useEffect(() => {
     const now = new Date()
