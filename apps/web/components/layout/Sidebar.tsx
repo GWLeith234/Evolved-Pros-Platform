@@ -31,6 +31,7 @@ type SidebarAd = {
   headline: string | null
   cta_text: string | null
   link_url: string | null
+  click_url: string | null
 }
 
 function HomeIcon() {
@@ -201,7 +202,7 @@ function SidebarAdUnit() {
     Promise.all([
       supabase
         .from('platform_ads')
-        .select('id, image_url, headline, cta_text, link_url')
+        .select('id, image_url, headline, cta_text, link_url, click_url')
         .eq('placement', 'sidebar')
         .eq('is_active', true)
         .order('sort_order'),
@@ -230,6 +231,8 @@ function SidebarAdUnit() {
   const ad = ads[currentIdx]
   if (!ad) return null
 
+  const adHref = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
+
   function handleDotClick(idx: number) {
     if (timerRef.current) clearInterval(timerRef.current)
     setCurrentIdx(idx)
@@ -238,95 +241,104 @@ function SidebarAdUnit() {
     }, intervalMs)
   }
 
+  const cardStyle: React.CSSProperties = {
+    display: 'block',
+    width: '176px',
+    margin: '0 auto',
+    border: '0.5px solid rgba(255,255,255,0.15)',
+    borderRadius: '6px',
+    overflow: 'hidden',
+    position: 'relative',
+    textDecoration: 'none',
+  }
+
+  const adInner = (
+    <>
+      {/* Image */}
+      {ad.image_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={ad.image_url}
+          alt={ad.headline ?? 'Ad'}
+          style={{ width: '100%', height: '160px', objectFit: 'cover', display: 'block' }}
+        />
+      ) : (
+        <div style={{ width: '100%', height: '160px', backgroundColor: 'rgba(255,255,255,0.06)' }} />
+      )}
+
+      {/* AD badge */}
+      <span style={{
+        position: 'absolute',
+        top: '8px',
+        right: '8px',
+        background: '#ef0e30',
+        color: 'white',
+        fontSize: '9px',
+        fontWeight: 700,
+        borderRadius: '3px',
+        padding: '2px 5px',
+        letterSpacing: '0.05em',
+      }}>
+        AD
+      </span>
+
+      {/* Bottom bar */}
+      <div style={{
+        background: 'rgba(0,0,0,0.65)',
+        padding: '6px 10px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}>
+        <span style={{
+          color: 'white',
+          fontSize: '11px',
+          fontWeight: 600,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          maxWidth: '110px',
+        }}>
+          {ad.headline ?? ''}
+        </span>
+        {/* Dot indicators */}
+        {ads.length > 1 && (
+          <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+            {ads.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={e => { e.preventDefault(); handleDotClick(i) }}
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  backgroundColor: i === currentIdx ? '#ef0e30' : 'rgba(255,255,255,0.25)',
+                  border: 'none',
+                  padding: '9px',
+                  backgroundClip: 'content-box',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  )
+
   return (
     <div className="px-5 pb-4">
-      <a
-        href={ad.link_url ?? '#'}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          display: 'block',
-          width: '176px',
-          margin: '0 auto',
-          border: '0.5px solid rgba(255,255,255,0.15)',
-          borderRadius: '6px',
-          overflow: 'hidden',
-          position: 'relative',
-          cursor: 'pointer',
-          textDecoration: 'none',
-        }}
-      >
-        {/* Image */}
-        {ad.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={ad.image_url}
-            alt={ad.headline ?? 'Ad'}
-            style={{ width: '100%', height: '160px', objectFit: 'cover', display: 'block' }}
-          />
-        ) : (
-          <div style={{ width: '100%', height: '160px', backgroundColor: 'rgba(255,255,255,0.06)' }} />
-        )}
-
-        {/* AD badge */}
-        <span style={{
-          position: 'absolute',
-          top: '8px',
-          right: '8px',
-          background: '#ef0e30',
-          color: 'white',
-          fontSize: '9px',
-          fontWeight: 700,
-          borderRadius: '3px',
-          padding: '2px 5px',
-          letterSpacing: '0.05em',
-        }}>
-          AD
-        </span>
-
-        {/* Bottom bar */}
-        <div style={{
-          background: 'rgba(0,0,0,0.65)',
-          padding: '6px 10px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}>
-          <span style={{
-            color: 'white',
-            fontSize: '11px',
-            fontWeight: 600,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            maxWidth: '110px',
-          }}>
-            {ad.headline ?? ''}
-          </span>
-          {/* Dot indicators */}
-          {ads.length > 1 && (
-            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-              {ads.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={e => { e.preventDefault(); handleDotClick(i) }}
-                  style={{
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '50%',
-                    backgroundColor: i === currentIdx ? '#ef0e30' : 'rgba(255,255,255,0.25)',
-                    border: 'none',
-                    padding: 0,
-                    cursor: 'pointer',
-                    flexShrink: 0,
-                  }}
-                />
-              ))}
-            </div>
-          )}
+      {adHref ? (
+        <a href={adHref} target="_blank" rel="noopener noreferrer" style={{ ...cardStyle, cursor: 'pointer' }}>
+          {adInner}
+        </a>
+      ) : (
+        <div style={cardStyle}>
+          {adInner}
         </div>
-      </a>
+      )}
     </div>
   )
 }
