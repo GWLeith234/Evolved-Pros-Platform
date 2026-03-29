@@ -48,7 +48,7 @@ export function WelcomeBanner({ displayName, tier, avatarUrl, quote }: WelcomeBa
   const tierLabel = tier ? tier.toUpperCase() : null
 
   return (
-    <div className="relative overflow-hidden rounded-lg" style={{ minHeight: '220px' }}>
+    <div className="relative overflow-hidden rounded-lg" style={{ minHeight: '220px' }} suppressHydrationWarning>
       {/* Background image — suppress hydration: src differs server(morning) vs client(actual period) */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -118,10 +118,10 @@ export function WelcomeBanner({ displayName, tier, avatarUrl, quote }: WelcomeBa
           </div>
 
           {/* Name + quote */}
-          <div className="flex-1 flex flex-col pt-1">
-            {/* Greeting — null on server, fills in after useEffect — zero hydration diff */}
+          <div className="flex-1 flex flex-col pt-1" suppressHydrationWarning>
+            {/* Greeting — null on server, fills in after useEffect — suppressHydrationWarning catches child-count diff */}
             {greeting && (
-              <h1 className="text-3xl font-bold text-white leading-tight">
+              <h1 className="text-3xl font-bold text-white leading-tight" suppressHydrationWarning>
                 {greeting}, {displayName}.
               </h1>
             )}
@@ -147,7 +147,7 @@ export function WelcomeBanner({ displayName, tier, avatarUrl, quote }: WelcomeBa
         </div>
 
         {/* Bottom row: week label left + CTA buttons right */}
-        <div className="flex items-center justify-between mt-auto pt-4">
+        <div className="flex items-center justify-between mt-auto pt-4" suppressHydrationWarning>
           {weekLabel ? (
             <p
               className="font-condensed font-bold uppercase tracking-widest"
