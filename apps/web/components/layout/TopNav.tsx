@@ -60,7 +60,7 @@ function MoonIcon() {
 }
 
 // Hardcoded strings avoid server/client toLocaleDateString() ICU mismatch (hydration error #425)
-const NEXT_EPISODE_DAY        = 'Sun'
+const NEXT_EPISODE_DAY        = 'Mon'
 const NEXT_EPISODE_MONTH_DAY  = 'April 20'
 
 export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, membersCanToggleTheme = true }: TopNavProps) {
