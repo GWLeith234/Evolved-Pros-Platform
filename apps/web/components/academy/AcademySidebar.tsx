@@ -4,15 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { CourseWithProgress } from '@/lib/academy/types'
 import { Tooltip } from '@/components/ui/Tooltip'
-
-const SIDEBAR_SHORT_NAMES: Record<number, string> = {
-  1: 'Foundation',
-  2: 'Identity',
-  3: 'Mental Tough.',
-  4: 'Strategy',
-  5: 'Accountability',
-  6: 'Execution',
-}
+import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
 interface AcademySidebarProps {
   courses: CourseWithProgress[]
@@ -53,7 +45,7 @@ export function AcademySidebar({ courses, userTier, overallPct }: AcademySidebar
           <NavItem
             key={course.id}
             href={locked ? '#' : `/academy/${course.slug}`}
-            label={`0${course.pillarNumber} — ${SIDEBAR_SHORT_NAMES[course.pillarNumber] ?? course.title}`}
+            label={PILLAR_CONFIG[course.pillarNumber]?.label ?? course.title}
             active={active}
             locked={locked}
             userTier={userTier}

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,10 +59,10 @@ export default async function AdminCoursesPage() {
               >
                 <td className="px-5 py-3">
                   <span
-                    className="font-condensed font-bold text-[13px]"
-                    style={{ color: '#68a2b9' }}
+                    className="font-condensed font-bold text-[11px] uppercase tracking-wide"
+                    style={{ color: PILLAR_CONFIG[course.pillar_number]?.color ?? '#68a2b9' }}
                   >
-                    P{course.pillar_number}
+                    {PILLAR_CONFIG[course.pillar_number]?.label ?? `P${course.pillar_number}`}
                   </span>
                 </td>
                 <td className="px-5 py-3">

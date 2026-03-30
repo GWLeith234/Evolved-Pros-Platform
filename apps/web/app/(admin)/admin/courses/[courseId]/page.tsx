@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { AdminLessonsTable } from './AdminLessonsTable'
+import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,8 +42,11 @@ export default async function AdminCourseDetailPage({ params }: Props) {
         </div>
         <div className="flex items-start justify-between">
           <div>
-            <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] text-[#68a2b9] mb-0.5">
-              Pillar {course.pillar_number}
+            <p
+              className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-0.5"
+              style={{ color: PILLAR_CONFIG[course.pillar_number]?.color ?? '#68a2b9' }}
+            >
+              {PILLAR_CONFIG[course.pillar_number]?.label ?? `Pillar ${course.pillar_number}`}
             </p>
             <h1 className="font-display font-black text-[28px] text-[#112535]">{course.title}</h1>
             <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">

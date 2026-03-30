@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import type { CourseWithProgress } from '@/lib/academy/types'
 import { Tooltip } from '@/components/ui/Tooltip'
+import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
 const PILLAR_IMAGES: Record<number, string> = {
   1: 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/pillar-1-foundation.jpg',
@@ -109,9 +110,9 @@ export function CourseCard({ course, isLocked }: CourseCardProps) {
         {/* Pillar label */}
         <p
           className="font-condensed font-bold uppercase tracking-[0.12em] text-[9px] mb-1"
-          style={{ color: '#68a2b9' }}
+          style={{ color: PILLAR_CONFIG[course.pillarNumber]?.color ?? '#68a2b9' }}
         >
-          Pillar {course.pillarNumber}
+          {PILLAR_CONFIG[course.pillarNumber]?.label ?? course.title}
         </p>
 
         {/* Course title */}
