@@ -112,9 +112,11 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
           </button>
         </div>
 
-        {/* Widget body — white bg, flush against header, no border-radius gap */}
-        <div className="flex-1 min-h-0 w-full" style={{ backgroundColor: '#ffffff', borderRadius: 0 }}>
-          <div id={TARGET_ID} className="w-full h-full" />
+        {/* Widget body — position:relative so the target div can use absolute inset-0.
+            This bypasses flex height inheritance, which third-party SDK iframes/web-components
+            often ignore when computing their own height. */}
+        <div className="flex-1 min-h-0 w-full relative overflow-hidden" style={{ backgroundColor: '#ffffff' }}>
+          <div id={TARGET_ID} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
         </div>
       </div>
     </>
