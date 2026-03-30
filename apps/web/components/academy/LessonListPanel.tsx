@@ -64,8 +64,14 @@ export function LessonListPanel({ course, lessons, currentLessonId, progressPct 
         />
         <Link
           href="/academy"
-          className="absolute top-4 left-5 flex items-center gap-1.5 font-condensed font-semibold text-[11px] uppercase tracking-wide transition-colors"
-          style={{ color: 'rgba(255,255,255,0.55)' }}
+          className="absolute top-4 left-5 flex items-center gap-1.5 font-condensed font-semibold text-[11px] uppercase tracking-wide transition-opacity hover:opacity-100"
+          style={{
+            color: 'rgba(255,255,255,0.9)',
+            backgroundColor: 'rgba(0,0,0,0.42)',
+            borderRadius: 9999,
+            padding: '6px 12px',
+            opacity: 0.85,
+          }}
         >
           ← Academy
         </Link>
