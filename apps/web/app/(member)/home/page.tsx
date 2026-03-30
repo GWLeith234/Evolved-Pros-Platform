@@ -7,6 +7,7 @@ import { ActivityFeed } from '@/components/home/ActivityFeed'
 import { UpcomingEventsWidget } from '@/components/home/UpcomingEventsWidget'
 import { AcademyProgressWidget } from '@/components/home/AcademyProgressWidget'
 import { ProfileCompletePrompt } from '@/components/home/ProfileCompletePrompt'
+import { BadgeRow } from '@/components/home/BadgeRow'
 
 async function fetchCurrentUser(supabase: ReturnType<typeof createClient>, userId: string) {
   const { data } = await supabase
@@ -164,7 +165,7 @@ export default async function MemberHomePage() {
     (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
   )
 
-  const [stats, activity, events, courseProgress, unreadCount, quotesResult] = await Promise.all([
+  const [stats, activity, events, courseProgress, unreadCount, quotesResult, badgeData] = await Promise.all([
     fetchDashboardStats(supabase, user.id, profile.tier, profile.points),
     fetchRecentActivity(supabase, user.id),
     fetchUpcomingEvents(supabase, user.id),
@@ -172,10 +173,12 @@ export default async function MemberHomePage() {
     fetchUnreadCount(supabase, user.id),
     // Use adminClient to bypass RLS — greeting_quotes is a public table but anon key may be blocked
     adminClient.from('greeting_quotes').select('quote_text, source').order('day_number'),
+    supabase.from('member_badges').select('pillar_number').eq('user_id', user.id),
   ])
 
   const quotes = quotesResult.data ?? []
   const quote = quotes?.length ? quotes[dayOfYear % quotes.length] : null
+  const earnedBadges = badgeData.data?.map(b => b.pillar_number) ?? []
 
   const displayName = (profile.full_name ? profile.full_name.split(' ')[0] : null) ?? profile.display_name ?? 'Member'
   const upcomingEventCount = events.filter(e => !e.isRegistered).length
@@ -199,6 +202,8 @@ export default async function MemberHomePage() {
       />
 
       <StatRow stats={stats} />
+
+      <BadgeRow earnedBadges={earnedBadges} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[7fr_5fr] gap-5">
         <ActivityFeed
