@@ -10,9 +10,10 @@ interface LessonListWithAdsProps {
   lessons: LessonWithProgress[]
   currentLessonId: string | null
   courseSlug: string
+  accentColor: string
 }
 
-export function LessonListWithAds({ lessons, currentLessonId, courseSlug }: LessonListWithAdsProps) {
+export function LessonListWithAds({ lessons, currentLessonId, courseSlug, accentColor }: LessonListWithAdsProps) {
   const adData = useSponsorAd('academy')
 
   if (lessons.length === 0) {
@@ -32,6 +33,7 @@ export function LessonListWithAds({ lessons, currentLessonId, courseSlug }: Less
             index={i}
             isActive={lesson.id === currentLessonId}
             courseSlug={courseSlug}
+            accentColor={accentColor}
           />
           {i === 0 && adData && (
             <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>

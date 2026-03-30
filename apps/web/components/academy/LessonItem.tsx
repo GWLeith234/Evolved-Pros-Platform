@@ -9,6 +9,7 @@ interface LessonItemProps {
   index: number
   isActive: boolean
   courseSlug: string
+  accentColor: string
 }
 
 function CheckIcon() {
@@ -36,7 +37,7 @@ function LockIcon() {
   )
 }
 
-export function LessonItem({ lesson, index, isActive, courseSlug }: LessonItemProps) {
+export function LessonItem({ lesson, index, isActive, courseSlug, accentColor }: LessonItemProps) {
   const isCompleted = !!lesson.completedAt
   const duration = formatDurationSeconds(lesson.durationSeconds)
 
@@ -62,8 +63,8 @@ export function LessonItem({ lesson, index, isActive, courseSlug }: LessonItemPr
       className="flex items-center gap-3 px-5 py-3.5 transition-colors"
       style={{
         borderBottom: '1px solid rgba(27,60,90,0.06)',
-        backgroundColor: isActive ? 'rgba(104,162,185,0.07)' : 'transparent',
-        borderLeft: isActive ? '2px solid #68a2b9' : '2px solid transparent',
+        backgroundColor: isActive ? `${accentColor}12` : 'transparent',
+        borderLeft: isActive ? `2px solid ${accentColor}` : '2px solid transparent',
         paddingLeft: isActive ? '18px' : '20px',
         cursor: lesson.isLocked ? 'default' : 'pointer',
       }}
