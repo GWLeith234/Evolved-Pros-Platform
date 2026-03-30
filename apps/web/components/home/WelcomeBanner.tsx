@@ -143,26 +143,34 @@ export function WelcomeBanner({ displayName, tier, avatarUrl, quote }: WelcomeBa
           {/* WeekLabel is client-only (ssr:false) — renders null on server, appears after mount */}
           <WeekLabel />
 
-          <div className="flex items-center gap-3">
-            <Link href="/community">
-              <button
-                className="inline-flex items-center justify-center rounded font-condensed font-bold uppercase tracking-wider transition-all text-xs px-4 py-2"
-                style={{ backgroundColor: '#ef0e30', color: 'white' }}
-              >
-                Community →
-              </button>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/community"
+              className="inline-flex items-center justify-center font-condensed font-semibold uppercase tracking-wide transition-colors"
+              style={{
+                fontSize: '11px',
+                padding: '4px 14px',
+                borderRadius: '9999px',
+                border: '1px solid rgba(255,255,255,0.25)',
+                color: 'rgba(255,255,255,0.75)',
+                backgroundColor: 'transparent',
+              }}
+            >
+              Community
             </Link>
-            <Link href="/academy">
-              <button
-                className="inline-flex items-center justify-center rounded font-condensed font-semibold uppercase tracking-wide transition-all text-xs px-4 py-2"
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.10)',
-                  border: '1px solid rgba(255,255,255,0.20)',
-                  color: 'rgba(255,255,255,0.80)',
-                }}
-              >
-                Continue Learning →
-              </button>
+            <Link
+              href="/academy"
+              className="inline-flex items-center justify-center font-condensed font-semibold uppercase tracking-wide transition-colors"
+              style={{
+                fontSize: '11px',
+                padding: '4px 14px',
+                borderRadius: '9999px',
+                border: '1px solid rgba(104,162,185,0.4)',
+                color: '#68a2b9',
+                backgroundColor: 'transparent',
+              }}
+            >
+              Learning
             </Link>
           </div>
         </div>
