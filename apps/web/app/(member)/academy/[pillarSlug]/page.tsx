@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { AcademySidebar } from '@/components/academy/AcademySidebar'
-import { LessonListPanel } from '@/components/academy/LessonList'
+import { LessonListPanel } from '@/components/academy/LessonListPanel'
 import { VideoPlaceholder } from '@/components/academy/VideoPlaceholder'
 import { CompletionCertificate } from '@/components/academy/CompletionCertificate'
 import {
@@ -60,7 +60,7 @@ export default async function CourseDetailPage({ params }: Props) {
         userTier={profile?.tier ?? null}
         overallPct={overallPct}
       />
-      <div className="flex flex-1 overflow-hidden">
+      <main className="flex-1 overflow-y-auto">
         <LessonListPanel
           course={{
             pillarNumber: course.pillar_number,
@@ -72,7 +72,8 @@ export default async function CourseDetailPage({ params }: Props) {
           currentLessonId={currentLesson?.id ?? null}
           progressPct={progressPct}
         />
-        <main className="flex-1 overflow-y-auto" style={{ backgroundColor: '#faf9f7' }}>
+        {/* Video / completion section */}
+        <div style={{ backgroundColor: '#faf9f7' }}>
           {isAllComplete ? (
             <div className="p-8">
               <CompletionCertificate
@@ -102,14 +103,14 @@ export default async function CourseDetailPage({ params }: Props) {
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex items-center justify-center p-12">
               <p className="font-condensed text-[13px]" style={{ color: '#7a8a96' }}>
                 No lessons available yet.
               </p>
             </div>
           )}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   )
 }
