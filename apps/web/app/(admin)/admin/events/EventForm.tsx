@@ -11,6 +11,7 @@ interface EventFormValues {
   endsAt: string
   zoomUrl: string
   recordingUrl: string
+  imageUrl: string
   requiredTier: 'community' | 'pro' | ''
   isPublished: boolean
 }
@@ -28,6 +29,7 @@ const DEFAULT_VALUES: EventFormValues = {
   endsAt: '',
   zoomUrl: '',
   recordingUrl: '',
+  imageUrl: '',
   requiredTier: '',
   isPublished: false,
 }
@@ -66,6 +68,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
       ends_at: values.endsAt ? new Date(values.endsAt).toISOString() : null,
       zoom_url: values.zoomUrl.trim() || null,
       recording_url: values.recordingUrl.trim() || null,
+      image_url: values.imageUrl.trim() || null,
       required_tier: values.requiredTier || null,
       is_published: values.isPublished,
     }
@@ -243,6 +246,22 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
           style={{ border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }}
           placeholder="https://..."
         />
+      </div>
+
+      {/* Cover Image URL */}
+      <div>
+        <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
+          Cover Image URL
+        </label>
+        <input
+          type="url"
+          value={values.imageUrl}
+          onChange={e => set('imageUrl', e.target.value)}
+          className="w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none"
+          style={{ border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }}
+          placeholder="https://... (shown as banner on event card)"
+        />
+        <p className="font-condensed text-[10px] text-[#7a8a96] mt-1">Paste a direct image URL. Leave blank to use a colour gradient fallback.</p>
       </div>
 
       {/* Required tier */}

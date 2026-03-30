@@ -9,6 +9,7 @@ export type EventItem = {
   endsAt: string | null
   zoomUrl: string | null      // only present when user is registered
   recordingUrl: string | null
+  imageUrl: string | null
   requiredTier: 'community' | 'pro' | null
   registrationCount: number
   isRegistered: boolean

@@ -60,21 +60,13 @@ export function EventList({ events, registeredEventIds, userTier, view = 'upcomi
     : 'Upcoming Events'
 
   return (
-    <div
-      className="rounded-lg overflow-hidden"
-      style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.12)' }}
-    >
-      <div
-        className="px-6 py-3"
-        style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}
-      >
-        <h2 className="font-condensed font-bold uppercase tracking-wide text-[13px] text-[#1b3c5a]">
-          {sectionLabel}
-        </h2>
-      </div>
+    <div>
+      <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] mb-4" style={{ color: '#7a8a96' }}>
+        {sectionLabel}
+      </p>
 
       {filtered.length === 0 ? (
-        <div className="px-6 py-12 text-center">
+        <div className="py-12 text-center">
           <p className="font-condensed text-xs tracking-widest text-[#7a8a96]">
             {view === 'registrations'
               ? 'No registered events yet.'
@@ -84,19 +76,21 @@ export function EventList({ events, registeredEventIds, userTier, view = 'upcomi
           </p>
         </div>
       ) : (
-        <div className="px-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filtered.map((event, i) => (
             <React.Fragment key={event.id}>
               <EventCard
                 event={event}
                 isRegistered={registeredIds.has(event.id)}
                 hasAccess={event.hasAccess}
-                isLast={i === filtered.length - 1 && !(i === 0 && eventsAd)}
                 onRegister={handleRegister}
                 onUnregister={handleUnregister}
               />
               {i === 0 && eventsAd && (
-                <div className="py-3">
+                <div
+                  className="rounded-xl overflow-hidden flex items-center justify-center"
+                  style={{ backgroundColor: '#112535', border: '1px solid rgba(255,255,255,0.08)', padding: '16px' }}
+                >
                   <SponsorCard ad={eventsAd} variant="events" />
                 </div>
               )}

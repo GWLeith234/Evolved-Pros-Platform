@@ -13,7 +13,7 @@ export default async function EditEventPage({ params }: Props) {
 
   const { data: row } = await supabase
     .from('events')
-    .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, is_published')
+    .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, image_url, required_tier, is_published')
     .eq('id', params.eventId)
     .single()
 
@@ -40,6 +40,7 @@ export default async function EditEventPage({ params }: Props) {
           endsAt: row.ends_at ?? '',
           zoomUrl: row.zoom_url ?? '',
           recordingUrl: row.recording_url ?? '',
+          imageUrl: row.image_url ?? '',
           requiredTier: (row.required_tier as 'community' | 'pro' | '') ?? '',
           isPublished: row.is_published,
         }}
