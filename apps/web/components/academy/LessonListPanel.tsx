@@ -51,7 +51,7 @@ export function LessonListPanel({ course, lessons, currentLessonId, progressPct 
   return (
     <div style={{ backgroundColor: '#0a0f18' }}>
       {/* Hero banner */}
-      <div ref={heroRef} className="relative w-full overflow-hidden" style={{ height: '200px' }}>
+      <div ref={heroRef} className="relative w-full overflow-hidden aspect-[16/7]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={bannerUrl}
