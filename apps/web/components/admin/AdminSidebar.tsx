@@ -81,6 +81,7 @@ export function AdminSidebar() {
       <SidebarSection
         title="Content"
         items={[
+          { label: 'Academy',   href: '/admin/academy',   match: /^\/admin\/academy/ },
           { label: 'Courses',   href: '/admin/courses',   match: /^\/admin\/courses/ },
           { label: 'Episodes',  href: '/admin/episodes',  match: /^\/admin\/episodes/ },
           { label: 'Events',    href: '/admin/events',    match: /^\/admin\/events/ },
