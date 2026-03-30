@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { NotifBell } from '@/components/notifications/NotifBell'
 import { Tooltip } from '@/components/ui/Tooltip'
@@ -59,11 +60,19 @@ function MoonIcon() {
   )
 }
 
-// Hardcoded strings avoid server/client toLocaleDateString() ICU mismatch (hydration error #425)
-const NEXT_EPISODE_DAY        = 'Mon'
-const NEXT_EPISODE_MONTH_DAY  = 'April 20'
+const NEXT_EPISODE_DAY       = 'Mon'
+const NEXT_EPISODE_MONTH_DAY = 'April 20'
+
+const NAV_ITEMS = [
+  { label: 'Home',      href: '/home' },
+  { label: 'Community', href: '/community' },
+  { label: 'Events',    href: '/events' },
+  { label: 'Academy',   href: '/academy' },
+  { label: 'Podcast',   href: '/podcast' },
+]
 
 export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, membersCanToggleTheme = true }: TopNavProps) {
+  const pathname = usePathname()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const [isDark, setIsDark] = useState(true)
@@ -110,7 +119,7 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
     <>
       <AskGeorgeDrawer isOpen={georgeOpen} onClose={() => setGeorgeOpen(false)} />
       <header
-        className="sticky top-0 z-40 flex items-center justify-between px-6 h-14 flex-shrink-0"
+        className="sticky top-0 z-40 flex items-center justify-between px-6 h-14 flex-shrink-0 relative"
         style={{
           backgroundColor: '#112535',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
@@ -125,6 +134,23 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
             style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
           />
         </Link>
+
+        {/* Primary nav links — desktop */}
+        <nav className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+          {NAV_ITEMS.map(item => {
+            const active = pathname.startsWith(item.href)
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="font-condensed uppercase tracking-[0.1em] text-[12px] px-3 py-1.5 rounded transition-colors"
+                style={{ color: active ? '#C9A84C' : 'rgba(255,255,255,0.45)', fontWeight: active ? 600 : 500 }}
+              >
+                {item.label}
+              </Link>
+            )
+          })}
+        </nav>
 
         {/* Right actions */}
         <div className="flex items-center gap-2">
