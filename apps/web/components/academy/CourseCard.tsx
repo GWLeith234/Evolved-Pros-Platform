@@ -5,14 +5,7 @@ import type { CourseWithProgress } from '@/lib/academy/types'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
-const PILLAR_IMAGES: Record<number, string> = {
-  1: 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/pillar-1-foundation.jpg',
-  2: 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/pillar-2-identity.jpg',
-  3: 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/pillar-3-mental-toughness.jpg',
-  4: 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/pillar-4-strategy.jpg',
-  5: 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/pillar-5-accountability.jpg',
-  6: 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/pillar-6-execution.jpg',
-}
+const STORAGE = process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/Branding/'
 
 interface CourseCardProps {
   course: CourseWithProgress
@@ -31,7 +24,7 @@ function LockIcon() {
 export function CourseCard({ course, isLocked }: CourseCardProps) {
   const router = useRouter()
   const isComplete = course.progressPct === 100
-  const imageUrl = PILLAR_IMAGES[course.pillarNumber]
+  const imageUrl = STORAGE + (PILLAR_CONFIG[course.pillarNumber]?.image ?? '')
 
   function handleClick() {
     if (isLocked) return

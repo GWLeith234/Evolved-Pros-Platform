@@ -7,19 +7,10 @@ export const dynamic = 'force-dynamic'
 export default async function AdminAcademyPage() {
   const supabase = createClient()
 
-  const { data: courses } = await supabase
-    .from('courses')
-    .select('id, pillar_number, slug, title, required_tier, is_published')
-    .order('pillar_number')
-
-  // Lesson counts (total + published) per course
-  const courseIds = (courses ?? []).map(c => c.id)
-  const { data: lessons } = courseIds.length > 0
-    ? await supabase
-        .from('lessons')
-        .select('course_id, is_published')
-        .in('course_id', courseIds)
-    : { data: [] }
+  const [{ data: courses }, { data: lessons }] = await Promise.all([
+    supabase.from('courses').select('id, pillar_number, slug, title, required_tier, is_published').order('pillar_number'),
+    supabase.from('lessons').select('course_id, is_published'),
+  ])
 
   const totalMap = new Map<string, number>()
   const pubMap = new Map<string, number>()

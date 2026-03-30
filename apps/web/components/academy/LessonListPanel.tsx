@@ -45,7 +45,7 @@ export function LessonListPanel({ course, lessons, currentLessonId, progressPct 
     return () => observer.disconnect()
   }, [])
 
-  const midIdx = lessons.length > 2 ? Math.floor(lessons.length * 0.6) : -1
+  const midIdx = lessons.length > 2 ? Math.floor(lessons.length * 0.6) : undefined
   const colorRgb = hexToRgb(config.color)
 
   return (
@@ -161,7 +161,7 @@ export function LessonListPanel({ course, lessons, currentLessonId, progressPct 
           currentLessonId={currentLessonId}
           courseSlug={course.slug}
           accentColor={config.color}
-          midQuoteIdx={midIdx >= 0 ? midIdx : undefined}
+          midQuoteIdx={midIdx}
           quoteText={`"${config.label} is the bedrock of everything that follows."`}
           bannerUrl={bannerUrl}
         />

@@ -41,8 +41,6 @@ const BADGE_ICONS: Record<number, React.ReactNode> = {
   ),
 }
 
-const PILLAR_NAMES = ['FOUNDATION', 'IDENTITY', 'MENTAL TOUGHNESS', 'STRATEGY', 'ACCOUNTABILITY', 'EXECUTION']
-
 export function BadgeRow({ earnedBadges }: BadgeRowProps) {
   const earned = new Set(earnedBadges)
 
@@ -85,7 +83,7 @@ export function BadgeRow({ earnedBadges }: BadgeRowProps) {
                   maxWidth: '44px',
                 }}
               >
-                {PILLAR_NAMES[pillar - 1]}
+                {config.label.toUpperCase()}
               </p>
             </div>
           )
