@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardHeader, CardBody } from '@evolved-pros/ui'
 
@@ -38,6 +38,10 @@ function formatDuration(starts: string, ends: string | null): string {
 function EventItem({ event, userId }: { event: EventRow; userId: string }) {
   const [registered, setRegistered] = useState(event.isRegistered)
   const [loading, setLoading] = useState(false)
+  // Defer toLocaleTimeString to client-only — timeZoneName: 'short' produces different output
+  // on server (UTC → "12:00 PM UTC") vs browser (local tz → "8:00 AM EDT") — hydration error #425
+  const [durationStr, setDurationStr] = useState('')
+  useEffect(() => { setDurationStr(formatDuration(event.starts_at, event.ends_at)) }, [event.starts_at, event.ends_at])
 
   const date = new Date(event.starts_at)
   const day = date.getDate()
@@ -79,7 +83,7 @@ function EventItem({ event, userId }: { event: EventRow; userId: string }) {
           {event.title}
         </p>
         <p className="font-condensed text-[11px] font-medium text-[#7a8a96]">
-          {formatDuration(event.starts_at, event.ends_at)} · {platform}
+          {durationStr} · {platform}
         </p>
       </div>
 

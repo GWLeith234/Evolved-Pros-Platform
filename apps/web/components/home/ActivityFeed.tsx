@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
 import { Card, CardHeader, CardBody } from '@evolved-pros/ui'
 
 type NotificationRow = {
@@ -43,6 +44,13 @@ function timeAgo(dateStr: string): string {
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
   return `${Math.floor(diff / 86400)}d ago`
+}
+
+// Defers Date.now() to client-only — avoids server/client mismatch (hydration error #425)
+function ClientTimeAgo({ dateStr }: { dateStr: string }) {
+  const [ago, setAgo] = useState('')
+  useEffect(() => { setAgo(timeAgo(dateStr)) }, [dateStr])
+  return <>{ago}</>
 }
 
 const DOT_COLORS: Record<string, string> = {
@@ -145,7 +153,7 @@ export function ActivityFeed({ notifications, completions }: ActivityFeedProps) 
 
                 {/* Time */}
                 <span className="font-condensed text-[10px] text-[#7a8a96] flex-shrink-0 mt-0.5">
-                  {timeAgo(item.time)}
+                  <ClientTimeAgo dateStr={item.time} />
                 </span>
               </li>
             ))}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { getAvatarColor } from '@/lib/community/types'
 import type { Reply } from '@/lib/community/types'
 
@@ -33,6 +33,9 @@ function getInitials(name: string | null | undefined): string {
 
 function ReplyItem({ reply }: { reply: Reply }) {
   const avatarBg = getAvatarColor(reply.author.id)
+  // Defers Date.now() to client-only — avoids server/client mismatch (hydration error #425)
+  const [ago, setAgo] = useState('')
+  useEffect(() => { setAgo(timeAgo(reply.createdAt)) }, [reply.createdAt])
   return (
     <div className="flex gap-2.5">
       <div
@@ -54,7 +57,7 @@ function ReplyItem({ reply }: { reply: Reply }) {
             {reply.author.displayName}
           </span>
           <span className="font-condensed text-[10px] text-[#7a8a96]">
-            {timeAgo(reply.createdAt)}
+            {ago}
           </span>
         </div>
         <p className="text-[13px] text-[#3a4a56] leading-relaxed mt-0.5">{reply.body}</p>

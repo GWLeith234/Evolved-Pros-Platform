@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PostReplyThread } from './PostReplyThread'
 import { ReactionPicker } from './ReactionPicker'
 import { getAvatarColor, PILLAR_LABELS } from '@/lib/community/types'
@@ -22,6 +22,13 @@ function timeAgo(dateStr: string): string {
   if (diff < 3600) return `${Math.floor(diff / 60)}h ago`
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
   return `${Math.floor(diff / 86400)}d ago`
+}
+
+// Defers Date.now() to client-only — avoids server/client mismatch (hydration error #425)
+function ClientTimeAgo({ dateStr }: { dateStr: string }) {
+  const [ago, setAgo] = useState('')
+  useEffect(() => { setAgo(timeAgo(dateStr)) }, [dateStr])
+  return <>{ago}</>
 }
 
 function getInitials(name: string): string {
@@ -156,7 +163,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
             )}
           </div>
           <p className="font-condensed font-semibold uppercase text-[10px] text-[#7a8a96] mt-0.5">
-            {timeAgo(post.createdAt)}
+            <ClientTimeAgo dateStr={post.createdAt} />
           </p>
         </div>
       </div>
