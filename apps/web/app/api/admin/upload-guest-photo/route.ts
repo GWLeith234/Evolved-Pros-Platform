@@ -33,18 +33,23 @@ export async function POST(request: Request) {
   const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
   const path = `episodes/guest-${idSegment}-${timestamp}.${ext}`
 
-  const arrayBuffer = await file.arrayBuffer()
-  const buffer = Buffer.from(arrayBuffer)
+  try {
+    const arrayBuffer = await file.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
 
-  const { error: uploadError } = await adminClient.storage
-    .from('Branding')
-    .upload(path, buffer, { contentType: file.type || 'image/jpeg', upsert: true })
+    const { error: uploadError } = await adminClient.storage
+      .from('Branding')
+      .upload(path, buffer, { contentType: file.type || 'image/jpeg', upsert: true })
 
-  if (uploadError) {
-    return NextResponse.json({ error: `Storage upload failed: ${uploadError.message}` }, { status: 500 })
+    if (uploadError) {
+      return NextResponse.json({ error: `Storage upload failed: ${uploadError.message}` }, { status: 500 })
+    }
+
+    const { data: { publicUrl } } = adminClient.storage.from('Branding').getPublicUrl(path)
+
+    return NextResponse.json({ url: publicUrl })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Upload failed'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
-
-  const { data: { publicUrl } } = adminClient.storage.from('Branding').getPublicUrl(path)
-
-  return NextResponse.json({ url: publicUrl })
 }
