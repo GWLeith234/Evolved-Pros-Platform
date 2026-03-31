@@ -5,8 +5,9 @@ import { adminClient } from '@/lib/supabase/admin'
 import { Resend } from 'resend'
 import { MagicLinkEmail } from '@/lib/resend/emails/MagicLink'
 
-// Always use the verified sandbox sender — evolvedpros.com is not yet verified in Resend
-const FROM_ADDRESS = 'Evolved Pros <onboarding@resend.dev>'
+// Use RESEND_FROM_EMAIL env var (set to hello@evolvedpros.com once domain is verified in Resend)
+// Falls back to sandbox sender so invites never silently break if env var is missing
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL ?? 'Evolved Pros <onboarding@resend.dev>'
 
 export async function POST(request: Request) {
   // Verify the caller is an admin
