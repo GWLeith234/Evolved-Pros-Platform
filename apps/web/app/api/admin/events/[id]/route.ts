@@ -22,7 +22,7 @@ export async function PATCH(
   let body: Record<string, unknown>
   try { body = await request.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
 
-  const allowed = ['title', 'description', 'event_type', 'starts_at', 'ends_at', 'zoom_url', 'recording_url', 'image_url', 'required_tier', 'is_published'] as const
+  const allowed = ['title', 'description', 'event_type', 'starts_at', 'ends_at', 'zoom_url', 'recording_url', 'image_url', 'required_tier', 'tier_access', 'is_published', 'is_draft'] as const
   const update: Record<string, unknown> = {}
   for (const key of allowed) {
     if (key in body) update[key] = body[key]

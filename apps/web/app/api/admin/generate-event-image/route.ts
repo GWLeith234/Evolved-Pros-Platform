@@ -39,7 +39,7 @@ Generate a DALL-E 3 prompt for a 16:9 cinematic event banner image. Keep it unde
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-6',
       max_tokens: 300,
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
@@ -87,13 +87,21 @@ export async function POST(request: Request) {
       openai.images.generate({ model: 'dall-e-3', prompt: dallePrompt, n: 1, size: '1792x1024', quality: 'standard' }),
     ])
 
+    results.forEach((r, i) => {
+      if (r.status === 'rejected') {
+        console.error(`[generate-event-image] DALL-E call ${i + 1} failed:`, r.reason)
+      }
+    })
+
     const images: string[] = results
       .filter((r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof openai.images.generate>>> => r.status === 'fulfilled')
       .map(r => r.value.data?.[0]?.url ?? '')
       .filter(Boolean)
 
     if (images.length === 0) {
-      return NextResponse.json({ error: 'Image generation failed — no results returned' }, { status: 500 })
+      const firstRejection = results.find(r => r.status === 'rejected') as PromiseRejectedResult | undefined
+      const reason = firstRejection?.reason instanceof Error ? firstRejection.reason.message : 'All image generation calls failed'
+      return NextResponse.json({ error: reason }, { status: 500 })
     }
 
     return NextResponse.json({ images, prompt: dallePrompt })
