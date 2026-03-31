@@ -24,6 +24,7 @@ interface ProfileBannerWrapperProps {
     current_pillar?: string | null
     goal_90day?: string | null
     goal_visible?: boolean
+    pioneer_driver_type?: string | null
   }
   isOwn: boolean
 }

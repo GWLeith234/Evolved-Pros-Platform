@@ -24,7 +24,7 @@ export default async function MyProfilePage({
   ] = await Promise.all([
     supabase
       .from('users')
-      .select('id, display_name, full_name, avatar_url, banner_url, bio, role_title, location, tier, points, created_at, company, linkedin_url, website_url, twitter_handle, phone, phone_visible, current_pillar, goal_90day, goal_visible')
+      .select('id, display_name, full_name, avatar_url, banner_url, bio, role_title, location, tier, points, created_at, company, linkedin_url, website_url, twitter_handle, phone, phone_visible, current_pillar, goal_90day, goal_visible, pioneer_driver_type')
       .eq('id', user.id)
       .single(),
     supabase.from('posts').select('id', { count: 'exact', head: true }).eq('author_id', user.id),
@@ -147,7 +147,7 @@ export default async function MyProfilePage({
     ? (rawTab as Tab)
     : 'overview'
 
-  const headerUser = { ...profile, postCount }
+  const headerUser = { ...profile, postCount, pioneer_driver_type: profile.pioneer_driver_type ?? null }
 
   return (
     <div className="p-6 space-y-5">

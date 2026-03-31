@@ -29,6 +29,7 @@ type ProfileHeaderUser = {
   current_pillar?: string | null
   goal_90day?: string | null
   goal_visible?: boolean
+  pioneer_driver_type?: string | null
 }
 
 interface ProfileHeaderProps {
@@ -161,6 +162,18 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
                 style={{ backgroundColor: 'rgba(104,162,185,0.15)', color: '#68a2b9' }}
               >
                 {user.current_pillar.toUpperCase()} · {PILLAR_LABELS[user.current_pillar]}
+              </span>
+            </div>
+          )}
+
+          {/* Pioneer-Driver type badge */}
+          {user.pioneer_driver_type && (
+            <div>
+              <span
+                className="inline-block font-condensed font-bold uppercase tracking-wide text-[10px] px-2.5 py-1 rounded"
+                style={{ border: '1px solid #C9A84C', color: '#C9A84C', backgroundColor: 'rgba(201,168,76,0.08)' }}
+              >
+                {user.pioneer_driver_type} TYPE
               </span>
             </div>
           )}
