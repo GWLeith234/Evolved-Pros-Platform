@@ -1,13 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { CommunityLayout } from '@/components/community/CommunityLayout'
+import { UnifiedCommunityPage } from '@/components/community/UnifiedCommunityPage'
 import {
   fetchChannels,
-  fetchPosts,
-  fetchPinnedPost,
+  fetchAllPosts,
+  fetchPinnedAnnouncement,
   fetchLeaderboard,
   fetchActiveMembers,
   fetchCurrentUserProfile,
+  fetchCommunityAds,
+  fetchLatestPodcastEpisode,
 } from '@/lib/community/fetchers'
 
 export default async function CommunityPage() {
@@ -15,35 +17,39 @@ export default async function CommunityPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [profile, channels, postsResult, pinnedPost, leaderboard, activeMembers] = await Promise.all([
+  const [profile, channels, postsResult, pinnedPost, leaderboard, activeMembers, ads, episode] = await Promise.all([
     fetchCurrentUserProfile(supabase, user.id),
     fetchChannels(supabase),
-    fetchPosts(supabase, { channelSlug: 'general', userId: user.id }),
-    fetchPinnedPost(supabase, 'general'),
+    fetchAllPosts(supabase, { userId: user.id }),
+    fetchPinnedAnnouncement(supabase),
     fetchLeaderboard(supabase, user.id),
     fetchActiveMembers(supabase),
+    fetchCommunityAds(),
+    fetchLatestPodcastEpisode(),
   ])
 
   const generalChannel = channels.find(c => c.slug === 'general')
   if (!generalChannel) redirect('/home')
 
+  const isAdmin = profile?.role === 'admin'
+
   return (
-    <CommunityLayout
-      channels={channels}
-      currentChannelSlug="general"
-      currentChannelId={generalChannel.id}
+    <UnifiedCommunityPage
       posts={postsResult.posts}
       nextCursor={postsResult.nextCursor}
       hasMore={postsResult.hasMore}
       pinnedPost={pinnedPost}
       leaderboard={leaderboard}
       activeMembers={activeMembers}
+      ads={ads}
+      episode={episode}
       currentUser={{
         id: user.id,
         displayName: profile?.display_name ?? profile?.full_name ?? null,
         avatarUrl: profile?.avatar_url ?? null,
+        isAdmin,
       }}
-      unreadCounts={{}}
+      defaultChannelId={generalChannel.id}
     />
   )
 }

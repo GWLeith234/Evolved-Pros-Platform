@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { PostReplyThread } from './PostReplyThread'
 import { ReactionPicker } from './ReactionPicker'
 import { getAvatarColor, PILLAR_LABELS } from '@/lib/community/types'
+import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { MemberBadge } from '@/components/ui/MemberBadge'
 import { Tooltip } from '@/components/ui/Tooltip'
 import type { Post, Reply, PillarTag } from '@/lib/community/types'
@@ -97,22 +98,44 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
     // Note: parent should also update replyCount via onReply callback
   }
 
-  const pillarLabel = post.pillarTag
-    ? `Pillar ${post.pillarTag[1]} — ${PILLAR_LABELS[post.pillarTag]}`
-    : null
+  const pillarNum = post.pillarTag ? parseInt(post.pillarTag[1]) : null
+  const pillarConf = pillarNum ? PILLAR_CONFIG[pillarNum] : null
+  const pillarLabel = pillarConf ? pillarConf.label : null
+
+  const isWin = post.postType === 'win'
+  const isQuestion = post.postType === 'question'
+  const isAnnounce = post.postType === 'announce'
 
   const actionBtnClass = 'flex items-center gap-1.5 font-condensed font-semibold uppercase text-[11px] tracking-wide text-[#7a8a96] hover:text-[#ef0e30] transition-colors duration-150'
+
+  const cardStyle: React.CSSProperties = isWin
+    ? {
+        background: 'linear-gradient(135deg, #faf7f0, #fff8e6)',
+        border: '1px solid rgba(201,168,76,0.25)',
+        padding: '20px',
+      }
+    : isAnnounce
+    ? {
+        backgroundColor: '#112535',
+        border: '1px solid rgba(255,255,255,0.08)',
+        padding: '20px',
+      }
+    : {
+        backgroundColor: 'var(--card-bg)',
+        border: '1px solid rgba(27,60,90,0.12)',
+        padding: '20px',
+      }
 
   return (
     <div
       className="rounded-lg transition-all duration-150"
-      style={{
-        backgroundColor: 'var(--card-bg)',
-        border: '1px solid rgba(27,60,90,0.12)',
-        padding: '20px',
+      style={cardStyle}
+      onMouseEnter={e => {
+        if (!isWin && !isAnnounce) e.currentTarget.style.borderColor = '#a8cdd9'
       }}
-      onMouseEnter={e => (e.currentTarget.style.borderColor = '#a8cdd9')}
-      onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(27,60,90,0.12)')}
+      onMouseLeave={e => {
+        if (!isWin && !isAnnounce) e.currentTarget.style.borderColor = 'rgba(27,60,90,0.12)'
+      }}
     >
       {/* Header */}
       <div className="flex items-start gap-3 mb-3">
@@ -137,7 +160,10 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-body font-semibold text-[14px] text-[#1b3c5a]">
+            <span
+              className="font-body font-semibold text-[14px]"
+              style={{ color: isAnnounce ? 'white' : '#1b3c5a' }}
+            >
               {post.author.displayName}
             </span>
             {post.author.tier && (
@@ -149,20 +175,49 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
                 <MemberBadge tier={post.author.tier} size="sm" />
               )
             )}
-            {pillarLabel && (
+            {/* Post type badges */}
+            {isWin && (
+              <span
+                className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
+                style={{ backgroundColor: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.25)', color: '#C9A84C' }}
+              >
+                🏆 Win
+              </span>
+            )}
+            {isQuestion && (
+              <span
+                className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
+                style={{ backgroundColor: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60A5FA' }}
+              >
+                ❓ Question
+              </span>
+            )}
+            {isAnnounce && (
+              <span
+                className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
+                style={{ backgroundColor: 'rgba(239,14,48,0.15)', border: '1px solid rgba(239,14,48,0.25)', color: '#ef0e30' }}
+              >
+                📣 Announcement
+              </span>
+            )}
+            {/* Pillar badge */}
+            {pillarLabel && pillarConf && (
               <span
                 className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
                 style={{
-                  backgroundColor: 'rgba(104,162,185,0.08)',
-                  border: '1px solid rgba(104,162,185,0.18)',
-                  color: '#68a2b9',
+                  backgroundColor: `${pillarConf.color}18`,
+                  border: `1px solid ${pillarConf.color}40`,
+                  color: pillarConf.color,
                 }}
               >
                 {pillarLabel}
               </span>
             )}
           </div>
-          <p className="font-condensed font-semibold uppercase text-[10px] text-[#7a8a96] mt-0.5">
+          <p
+            className="font-condensed font-semibold uppercase text-[10px] mt-0.5"
+            style={{ color: isAnnounce ? 'rgba(255,255,255,0.4)' : '#7a8a96' }}
+          >
             <ClientTimeAgo dateStr={post.createdAt} />
           </p>
         </div>
@@ -171,7 +226,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
       {/* Body */}
       <p
         className="font-body text-[14px] leading-[1.72] mb-4"
-        style={{ color: '#3a4a56' }}
+        style={{ color: isAnnounce ? 'rgba(255,255,255,0.75)' : '#3a4a56' }}
       >
         {post.body}
       </p>

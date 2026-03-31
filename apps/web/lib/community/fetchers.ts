@@ -1,14 +1,14 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
 import { adminClient } from '@/lib/supabase/admin'
-import type { Channel, Post, LeaderboardEntry, MemberSummary } from './types'
+import type { Channel, Post, LeaderboardEntry, MemberSummary, CommunityAd, EpisodeSummary } from './types'
 
 type SB = SupabaseClient<Database>
 
 export async function fetchCurrentUserProfile(supabase: SB, userId: string) {
   const { data } = await supabase
     .from('users')
-    .select('display_name, full_name, avatar_url, tier, points')
+    .select('display_name, full_name, avatar_url, tier, points, role')
     .eq('id', userId)
     .single()
   return data
@@ -28,36 +28,30 @@ export async function fetchChannels(supabase: SB): Promise<Channel[]> {
   }))
 }
 
-export async function fetchPosts(
+type PostRow = {
+  id: string
+  channel_id: string
+  body: string
+  pillar_tag: string | null
+  post_type: string | null
+  is_pinned: boolean
+  like_count: number
+  reply_count: number
+  created_at: string
+  users: { id: string; display_name: string | null; full_name: string | null; avatar_url: string | null; tier?: string | null } | null
+}
+
+type LikeRow = { post_id: string; reaction_type: string | null }
+
+async function hydratePostMeta(
   supabase: SB,
-  { channelSlug, userId, limit = 20 }: { channelSlug: string; userId: string; limit?: number }
-): Promise<{ posts: Post[]; nextCursor: string | null; hasMore: boolean }> {
-  const { data: channel } = await supabase
-    .from('channels')
-    .select('id')
-    .eq('slug', channelSlug)
-    .single()
-
-  if (!channel) return { posts: [], nextCursor: null, hasMore: false }
-
-  // Use adminClient so posts from null-tier / newly-onboarded users aren't
-  // dropped by RLS on the INNER join with users. Auth (getUser) is verified
-  // by the caller; likes/bookmarks below stay on the user-scoped SSR client.
-  const { data: rows, error: postsError } = await adminClient
-    .from('posts')
-    .select('id, channel_id, body, pillar_tag, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url)')
-    .eq('channel_id', channel.id)
-    .eq('is_pinned', false)
-    .order('created_at', { ascending: false })
-    .limit(limit + 1)
-
-  const allRows = rows ?? []
-  const hasMore = allRows.length > limit
-  const page = allRows.slice(0, limit)
-  const nextCursor = hasMore && page.length > 0 ? page[page.length - 1].created_at : null
-
+  userId: string,
+  rows: PostRow[],
+  limit: number
+) {
+  const page = rows.slice(0, limit)
   const postIds = page.map(r => r.id)
-  type LikeRow = { post_id: string; reaction_type: string | null }
+
   const [userLikesRes, bookmarksRes, allLikesRes] = await Promise.all([
     postIds.length > 0
       ? supabase.from('post_likes').select('post_id, reaction_type').eq('user_id', userId).in('post_id', postIds) as Promise<{ data: LikeRow[] | null }>
@@ -73,10 +67,8 @@ export async function fetchPosts(
   const myReactionMap = new Map<string, string>(
     (userLikesRes.data ?? []).map(l => [l.post_id, l.reaction_type ?? 'thumbs_up'])
   )
-  const likedIds = new Set(myReactionMap.keys())
   const bookmarkedIds = new Set((bookmarksRes.data ?? []).map(b => b.post_id))
 
-  // Group all reaction counts by post
   const reactionCountsByPost = new Map<string, Map<string, number>>()
   for (const like of allLikesRes.data ?? []) {
     const type = like.reaction_type ?? 'thumbs_up'
@@ -85,8 +77,8 @@ export async function fetchPosts(
     m.set(type, (m.get(type) ?? 0) + 1)
   }
 
-  const posts = page.map(row => {
-    const author = row.users as { id: string; display_name: string | null; full_name: string | null; avatar_url: string | null } | null
+  return page.map(row => {
+    const author = row.users
     const reactionMap = reactionCountsByPost.get(row.id)
     const reactions = reactionMap
       ? Array.from(reactionMap.entries()).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count)
@@ -96,6 +88,7 @@ export async function fetchPosts(
       channelId: row.channel_id,
       body: row.body,
       pillarTag: row.pillar_tag as Post['pillarTag'],
+      postType: (row.post_type ?? 'update') as Post['postType'],
       isPinned: row.is_pinned,
       likeCount: row.like_count,
       replyCount: row.reply_count,
@@ -105,14 +98,88 @@ export async function fetchPosts(
         displayName: author?.display_name ?? author?.full_name ?? 'Member',
         avatarUrl: author?.avatar_url ?? null,
       },
-      isLiked: likedIds.has(row.id),
+      isLiked: myReactionMap.has(row.id),
       myReaction: myReactionMap.get(row.id) ?? null,
       reactions,
       isBookmarked: bookmarkedIds.has(row.id),
     } satisfies Post
   })
+}
+
+export async function fetchPosts(
+  supabase: SB,
+  { channelSlug, userId, limit = 20 }: { channelSlug: string; userId: string; limit?: number }
+): Promise<{ posts: Post[]; nextCursor: string | null; hasMore: boolean }> {
+  const { data: channel } = await supabase
+    .from('channels')
+    .select('id')
+    .eq('slug', channelSlug)
+    .single()
+
+  if (!channel) return { posts: [], nextCursor: null, hasMore: false }
+
+  const { data: rows } = await adminClient
+    .from('posts')
+    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url)')
+    .eq('channel_id', channel.id)
+    .eq('is_pinned', false)
+    .order('created_at', { ascending: false })
+    .limit(limit + 1)
+
+  const allRows = (rows ?? []) as PostRow[]
+  const hasMore = allRows.length > limit
+  const nextCursor = hasMore && allRows.length > 0 ? allRows[limit - 1].created_at : null
+
+  const posts = await hydratePostMeta(supabase, userId, allRows, limit)
 
   return { posts, nextCursor, hasMore }
+}
+
+export async function fetchAllPosts(
+  supabase: SB,
+  { userId, limit = 20, cursor }: { userId: string; limit?: number; cursor?: string | null }
+): Promise<{ posts: Post[]; nextCursor: string | null; hasMore: boolean }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let query: any = adminClient
+    .from('posts')
+    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url)')
+    .eq('is_pinned', false)
+    .order('created_at', { ascending: false })
+    .limit(limit + 1)
+
+  if (cursor) {
+    query = query.lt('created_at', cursor)
+  }
+
+  const { data: rows } = await query
+
+  const allRows = (rows ?? []) as PostRow[]
+  const hasMore = allRows.length > limit
+  const nextCursor = hasMore && allRows.length > 0 ? allRows[limit - 1].created_at : null
+
+  const posts = await hydratePostMeta(supabase, userId, allRows, limit)
+
+  return { posts, nextCursor, hasMore }
+}
+
+export async function fetchPinnedAnnouncement(
+  supabase: SB
+): Promise<{ label: string; body: string } | null> {
+  // Try new post_type='announce' first, then fall back to is_pinned=true (legacy)
+  const { data } = await adminClient
+    .from('posts')
+    .select('body, post_type, users!posts_author_id_fkey(display_name, full_name)')
+    .eq('is_pinned', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (!data) return null
+
+  const author = data.users as { display_name: string | null; full_name: string | null } | null
+  const authorName = author?.display_name ?? author?.full_name ?? 'George'
+
+  return { label: `Pinned · From ${authorName}`, body: data.body }
 }
 
 export async function fetchPinnedPost(
@@ -160,7 +227,6 @@ export async function fetchLeaderboard(supabase: SB, currentUserId: string): Pro
     isCurrentUser: u.id === currentUserId,
   }))
 
-  // If current user isn't in top 10, fetch their rank
   const inList = entries.some(e => e.isCurrentUser)
   if (!inList) {
     const { data: currentUser } = await supabase
@@ -206,4 +272,27 @@ export async function fetchActiveMembers(supabase: SB, limit = 5): Promise<Membe
     tier: u.tier,
     points: u.points,
   }))
+}
+
+export async function fetchCommunityAds(): Promise<CommunityAd[]> {
+  const { data } = await adminClient
+    .from('platform_ads')
+    .select('id, image_url, headline, tool_name, cta_text, link_url, click_url, sponsor_name')
+    .eq('is_active', true)
+    .order('sort_order')
+    .limit(2)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data ?? []) as any[]
+}
+
+export async function fetchLatestPodcastEpisode(): Promise<EpisodeSummary | null> {
+  const { data } = await adminClient
+    .from('episodes')
+    .select('id, episode_number, title, slug, guest_name, guest_title, guest_company, guest_image_url, thumbnail_url, duration_seconds, published_at')
+    .eq('is_published', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data as any) ?? null
 }

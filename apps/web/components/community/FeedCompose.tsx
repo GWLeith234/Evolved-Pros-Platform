@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { getAvatarColor } from '@/lib/community/types'
-import type { Post, PillarTag } from '@/lib/community/types'
+import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import type { Post, PillarTag, PostType } from '@/lib/community/types'
 
 interface FeedComposeProps {
   channelId: string
@@ -10,18 +11,23 @@ interface FeedComposeProps {
     id: string
     displayName: string | null
     avatarUrl: string | null
+    isAdmin?: boolean
   }
   onPostCreated: (post: Post) => void
 }
 
-const PILLAR_TAGS: { tag: PillarTag; label: string }[] = [
-  { tag: 'p1', label: 'P1 · Foundation' },
-  { tag: 'p2', label: 'P2 · Identity' },
-  { tag: 'p3', label: 'P3 · Mental Toughness' },
-  { tag: 'p4', label: 'P4 · Strategy' },
-  { tag: 'p5', label: 'P5 · Accountability' },
-  { tag: 'p6', label: 'P6 · Execution' },
+const POST_TABS: { type: PostType; icon: string; label: string; placeholder: string; adminOnly?: boolean }[] = [
+  { type: 'update',   icon: '✏️', label: 'Update',   placeholder: "Share what you're working on or applying..." },
+  { type: 'question', icon: '❓', label: 'Question',  placeholder: 'Ask the community something...' },
+  { type: 'win',      icon: '🏆', label: 'Win',       placeholder: 'Share a win — closed a deal, hit a target, had a breakthrough...' },
+  { type: 'announce', icon: '📣', label: 'Announce',  placeholder: 'Post an announcement to the community...', adminOnly: true },
 ]
+
+const PILLAR_TAGS = Object.entries(PILLAR_CONFIG).map(([num, config]) => ({
+  tag: `p${num}` as PillarTag,
+  label: config.label,
+  color: config.color,
+}))
 
 function getInitials(name: string | null | undefined): string {
   if (!name) return '?'
@@ -31,10 +37,14 @@ function getInitials(name: string | null | undefined): string {
 export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedComposeProps) {
   const [body, setBody] = useState('')
   const [selectedTag, setSelectedTag] = useState<PillarTag | null>(null)
+  const [activePostType, setActivePostType] = useState<PostType>('update')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const avatarBg = getAvatarColor(currentUser.id)
+  const activePlaceholder = POST_TABS.find(t => t.type === activePostType)?.placeholder ?? "What's on your mind?"
+
+  const visibleTabs = POST_TABS.filter(t => !t.adminOnly || currentUser.isAdmin)
 
   async function handleSubmit() {
     const trimmed = body.trim()
@@ -53,6 +63,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
           channelId,
           body: trimmed,
           pillarTag: selectedTag,
+          postType: activePostType,
         }),
       })
 
@@ -65,6 +76,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
       onPostCreated(post)
       setBody('')
       setSelectedTag(null)
+      setActivePostType('update')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to post.')
     } finally {
@@ -81,9 +93,31 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
         padding: '16px',
       }}
     >
+      {/* Post type tabs */}
+      <div className="flex gap-1 mb-3">
+        {visibleTabs.map(tab => {
+          const active = activePostType === tab.type
+          return (
+            <button
+              key={tab.type}
+              type="button"
+              onClick={() => setActivePostType(tab.type)}
+              className="flex items-center gap-1.5 font-condensed font-semibold text-[11px] uppercase tracking-[0.1em] rounded px-3 py-1.5 transition-all"
+              style={{
+                backgroundColor: active ? '#1b3c5a' : 'transparent',
+                color: active ? 'white' : '#7a8a96',
+                border: `1px solid ${active ? '#1b3c5a' : 'rgba(27,60,90,0.15)'}`,
+              }}
+            >
+              <span>{tab.icon}</span>
+              {tab.label}
+            </button>
+          )
+        })}
+      </div>
+
       {/* Top row: avatar + textarea */}
       <div className="flex gap-3">
-        {/* Avatar */}
         <div
           className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
           style={{ backgroundColor: currentUser.avatarUrl ? undefined : avatarBg }}
@@ -102,11 +136,10 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
           )}
         </div>
 
-        {/* Textarea */}
         <textarea
           value={body}
           onChange={e => { setBody(e.target.value); if (error) setError('') }}
-          placeholder="Share what you're working on or applying..."
+          placeholder={activePlaceholder}
           className="flex-1 resize-none rounded border font-body text-[14px] text-[#1b3c5a] placeholder:text-[#7a8a96] focus:outline-none transition-colors duration-150 px-3 py-2"
           style={{
             minHeight: '72px',
@@ -117,7 +150,6 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
         />
       </div>
 
-      {/* Error */}
       {error && (
         <p className="mt-2 ml-12 text-xs font-body text-[#ef0e30]">{error}</p>
       )}
@@ -125,7 +157,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
       {/* Bottom row: pillar tags + post button */}
       <div className="mt-3 ml-12">
         <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
-          {PILLAR_TAGS.map(({ tag, label }) => {
+          {PILLAR_TAGS.map(({ tag, label, color }) => {
             const active = selectedTag === tag
             return (
               <button
@@ -136,11 +168,11 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
                 style={{
                   fontSize: '10px',
                   padding: '4px 9px',
-                  color: active ? '#68a2b9' : '#7a8a96',
+                  color: active ? color : '#7a8a96',
                   borderWidth: '1px',
                   borderStyle: 'solid',
-                  borderColor: active ? '#68a2b9' : 'rgba(27,60,90,0.18)',
-                  backgroundColor: active ? 'rgba(104,162,185,0.1)' : 'transparent',
+                  borderColor: active ? color : 'rgba(27,60,90,0.18)',
+                  backgroundColor: active ? `${color}18` : 'transparent',
                 }}
               >
                 {label}
@@ -150,18 +182,17 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
         </div>
         <p className="font-condensed text-[10px] text-[#7a8a96] mb-2">(Optional) Tag your post to a pillar</p>
         <div className="flex justify-end">
-
-        <button
-          onClick={handleSubmit}
-          disabled={loading || body.trim().length < 10}
-          className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2 text-white transition-all"
-          style={{
-            backgroundColor: loading || body.trim().length < 10 ? 'rgba(239,14,48,0.4)' : '#ef0e30',
-            cursor: loading || body.trim().length < 10 ? 'not-allowed' : 'pointer',
-          }}
-        >
-          {loading ? '...' : 'Post →'}
-        </button>
+          <button
+            onClick={handleSubmit}
+            disabled={loading || body.trim().length < 10}
+            className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2 text-white transition-all"
+            style={{
+              backgroundColor: loading || body.trim().length < 10 ? 'rgba(239,14,48,0.4)' : '#ef0e30',
+              cursor: loading || body.trim().length < 10 ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {loading ? '...' : 'Post →'}
+          </button>
         </div>
       </div>
     </div>

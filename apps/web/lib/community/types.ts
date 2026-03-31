@@ -1,5 +1,7 @@
 export type PillarTag = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6'
 
+export type PostType = 'update' | 'question' | 'win' | 'announce'
+
 export type Channel = {
   id: string
   slug: string
@@ -25,6 +27,7 @@ export type Post = {
   channelId: string
   body: string
   pillarTag: PillarTag | null
+  postType: PostType
   isPinned: boolean
   likeCount: number
   replyCount: number
@@ -61,6 +64,31 @@ export type MemberSummary = {
   location: string | null
   tier: 'community' | 'pro' | null
   points: number
+}
+
+export type CommunityAd = {
+  id: string
+  image_url: string | null
+  headline: string | null
+  tool_name: string | null
+  cta_text: string | null
+  link_url: string | null
+  click_url: string | null
+  sponsor_name: string | null
+}
+
+export type EpisodeSummary = {
+  id: string
+  episode_number: number | null
+  title: string
+  slug: string
+  guest_name: string | null
+  guest_title: string | null
+  guest_company: string | null
+  guest_image_url: string | null
+  thumbnail_url: string | null
+  duration_seconds: number | null
+  published_at: string | null
 }
 
 export const PILLAR_LABELS: Record<PillarTag, string> = {
