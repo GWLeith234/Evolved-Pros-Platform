@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { EventImageGenerator } from '@/components/admin/EventImageGenerator'
 
 interface EventFormValues {
   title: string
@@ -13,12 +14,13 @@ interface EventFormValues {
   recordingUrl: string
   imageUrl: string
   requiredTier: 'community' | 'pro' | ''
+  tierAccess: 'all' | 'vip' | 'pro'
   isPublished: boolean
 }
 
 interface EventFormProps {
   initialValues?: Partial<EventFormValues>
-  eventId?: string   // if set, we're editing
+  eventId?: string
 }
 
 const DEFAULT_VALUES: EventFormValues = {
@@ -31,12 +33,12 @@ const DEFAULT_VALUES: EventFormValues = {
   recordingUrl: '',
   imageUrl: '',
   requiredTier: '',
+  tierAccess: 'all',
   isPublished: false,
 }
 
 function toDatetimeLocal(iso: string): string {
   if (!iso) return ''
-  // Trim seconds/ms for datetime-local input
   return iso.slice(0, 16)
 }
 
@@ -55,8 +57,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
     setValues(prev => ({ ...prev, [key]: value }))
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  async function save(asDraft: boolean) {
     setSaving(true)
     setError(null)
 
@@ -70,7 +71,8 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
       recording_url: values.recordingUrl.trim() || null,
       image_url: values.imageUrl.trim() || null,
       required_tier: values.requiredTier || null,
-      is_published: values.isPublished,
+      tier_access: values.tierAccess,
+      is_published: !asDraft,
     }
 
     try {
@@ -121,8 +123,12 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
     }
   }
 
+  const inputStyle = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }
+  const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5'
+  const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none transition-all'
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+    <div className="space-y-6 max-w-2xl">
       {error && (
         <div
           className="rounded px-4 py-3 font-condensed text-[12px]"
@@ -134,48 +140,41 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
 
       {/* Title */}
       <div>
-        <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
-          Title *
-        </label>
+        <label className={labelClass}>Title *</label>
         <input
           type="text"
           value={values.title}
           onChange={e => set('title', e.target.value)}
-          required
           maxLength={200}
-          className="w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none transition-all"
-          style={{ border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }}
+          className={inputClass}
+          style={inputStyle}
           placeholder="Event title"
         />
       </div>
 
       {/* Description */}
       <div>
-        <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
-          Description
-        </label>
+        <label className={labelClass}>Description</label>
         <textarea
           value={values.description}
           onChange={e => set('description', e.target.value)}
           rows={4}
-          className="w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none transition-all resize-none"
-          style={{ border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }}
+          className={`${inputClass} resize-none`}
+          style={inputStyle}
           placeholder="What is this event about?"
         />
       </div>
 
       {/* Event type */}
       <div>
-        <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
-          Event Type *
-        </label>
+        <label className={labelClass}>Event Type *</label>
         <div className="flex gap-2">
           {(['live', 'virtual', 'inperson'] as const).map(type => (
             <button
               key={type}
               type="button"
               onClick={() => set('eventType', type)}
-              className="font-condensed font-semibold uppercase text-[11px] rounded px-4 py-2 transition-all capitalize"
+              className="font-condensed font-semibold uppercase text-[11px] rounded px-4 py-2 transition-all"
               style={{
                 backgroundColor: values.eventType === type ? '#1b3c5a' : 'transparent',
                 color: values.eventType === type ? 'white' : '#1b3c5a',
@@ -191,43 +190,36 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
       {/* Dates */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
-            Start Date & Time *
-          </label>
+          <label className={labelClass}>Start Date & Time *</label>
           <input
             type="datetime-local"
             value={values.startsAt}
             onChange={e => set('startsAt', e.target.value)}
-            required
-            className="w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none"
-            style={{ border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }}
+            className={inputClass}
+            style={inputStyle}
           />
         </div>
         <div>
-          <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
-            End Date & Time
-          </label>
+          <label className={labelClass}>End Date & Time</label>
           <input
             type="datetime-local"
             value={values.endsAt}
             onChange={e => set('endsAt', e.target.value)}
-            className="w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none"
-            style={{ border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }}
+            className={inputClass}
+            style={inputStyle}
           />
         </div>
       </div>
 
       {/* Zoom URL */}
       <div>
-        <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
-          Zoom / Meeting URL
-        </label>
+        <label className={labelClass}>Zoom / Meeting URL</label>
         <input
           type="url"
           value={values.zoomUrl}
           onChange={e => set('zoomUrl', e.target.value)}
-          className="w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none"
-          style={{ border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }}
+          className={inputClass}
+          style={inputStyle}
           placeholder="https://zoom.us/j/..."
         />
         <p className="font-condensed text-[10px] text-[#7a8a96] mt-1">Only shown to registered members</p>
@@ -235,40 +227,59 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
 
       {/* Recording URL */}
       <div>
-        <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
-          Recording URL
-        </label>
+        <label className={labelClass}>Recording URL</label>
         <input
           type="url"
           value={values.recordingUrl}
           onChange={e => set('recordingUrl', e.target.value)}
-          className="w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none"
-          style={{ border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }}
+          className={inputClass}
+          style={inputStyle}
           placeholder="https://..."
         />
       </div>
 
-      {/* Cover Image URL */}
+      {/* Cover Image + AI Generator */}
       <div>
-        <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
-          Cover Image URL
-        </label>
+        <label className={labelClass}>Cover Image URL</label>
         <input
           type="url"
           value={values.imageUrl}
           onChange={e => set('imageUrl', e.target.value)}
-          className="w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none"
-          style={{ border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }}
-          placeholder="https://... (shown as banner on event card)"
+          className={`${inputClass} mb-3`}
+          style={inputStyle}
+          placeholder="https://... or generate below"
         />
-        <p className="font-condensed text-[10px] text-[#7a8a96] mt-1">Paste a direct image URL. Leave blank to use a colour gradient fallback.</p>
+        <EventImageGenerator
+          eventTitle={values.title}
+          onSelect={url => set('imageUrl', url)}
+        />
       </div>
 
-      {/* Required tier */}
+      {/* Tier Access */}
       <div>
-        <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
-          Required Tier
-        </label>
+        <label className={labelClass}>Tier Access</label>
+        <div className="flex gap-2">
+          {([['all', 'All Members'], ['vip', 'VIP Only'], ['pro', 'Pro Only']] as const).map(([val, label]) => (
+            <button
+              key={val}
+              type="button"
+              onClick={() => set('tierAccess', val)}
+              className="font-condensed font-semibold uppercase text-[11px] rounded px-4 py-2 transition-all"
+              style={{
+                backgroundColor: values.tierAccess === val ? '#1b3c5a' : 'transparent',
+                color: values.tierAccess === val ? 'white' : '#1b3c5a',
+                border: '1px solid rgba(27,60,90,0.2)',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Required Tier (legacy) */}
+      <div>
+        <label className={labelClass}>Required Tier (legacy)</label>
         <div className="flex gap-2">
           {([['', 'Any Tier'], ['community', 'Community'], ['pro', 'Pro']] as const).map(([val, label]) => (
             <button
@@ -288,26 +299,11 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
         </div>
       </div>
 
-      {/* Published */}
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={() => set('isPublished', !values.isPublished)}
-          className="relative w-10 h-5 rounded-full transition-colors flex-shrink-0"
-          style={{ backgroundColor: values.isPublished ? '#68a2b9' : 'rgba(27,60,90,0.15)' }}
-        >
-          <span
-            className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform"
-            style={{ transform: values.isPublished ? 'translateX(22px)' : 'translateX(2px)' }}
-          />
-        </button>
-        <span className="font-condensed font-semibold text-[12px] text-[#1b3c5a]">
-          {values.isPublished ? 'Published (visible to members)' : 'Draft (hidden from members)'}
-        </span>
-      </div>
-
-      {/* Actions */}
-      <div className="flex items-center justify-between pt-2" style={{ borderTop: '1px solid rgba(27,60,90,0.08)' }}>
+      {/* Actions footer */}
+      <div
+        className="flex items-center justify-between pt-4"
+        style={{ borderTop: '1px solid rgba(27,60,90,0.08)' }}
+      >
         <div>
           {eventId && (
             <button
@@ -321,6 +317,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
             </button>
           )}
         </div>
+
         <div className="flex items-center gap-3">
           <a
             href="/admin/events"
@@ -328,16 +325,39 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
           >
             Cancel
           </a>
+
+          {/* Save Draft */}
           <button
-            type="submit"
-            disabled={saving}
-            className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-6 py-2.5 transition-all"
-            style={{ backgroundColor: '#1b3c5a', color: 'white', opacity: saving ? 0.7 : 1 }}
+            type="button"
+            onClick={() => save(true)}
+            disabled={saving || !values.title.trim() || !values.startsAt}
+            className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-5 py-2.5 transition-all"
+            style={{
+              backgroundColor: 'transparent',
+              color: '#1b3c5a',
+              border: '1px solid rgba(27,60,90,0.25)',
+              opacity: saving || !values.title.trim() || !values.startsAt ? 0.5 : 1,
+            }}
           >
-            {saving ? 'Saving...' : eventId ? 'Save Changes' : 'Create Event'}
+            {saving ? 'Saving…' : 'Save Draft'}
+          </button>
+
+          {/* Publish */}
+          <button
+            type="button"
+            onClick={() => save(false)}
+            disabled={saving || !values.title.trim() || !values.startsAt}
+            className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-6 py-2.5 transition-all"
+            style={{
+              backgroundColor: '#ef0e30',
+              color: 'white',
+              opacity: saving || !values.title.trim() || !values.startsAt ? 0.5 : 1,
+            }}
+          >
+            {saving ? 'Saving…' : eventId ? 'Publish Changes' : 'Publish Event'}
           </button>
         </div>
       </div>
-    </form>
+    </div>
   )
 }

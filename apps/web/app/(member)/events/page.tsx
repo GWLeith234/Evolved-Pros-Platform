@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { EventsContent } from '@/components/events/EventsContent'
+import { EventsPageClient } from '@/components/events/EventsPageClient'
 import { hasTierAccess, hasKeynoteAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
 
@@ -55,11 +55,10 @@ export default async function EventsPage() {
   const registeredEventIds: string[] = Array.from(registeredSet)
 
   return (
-    <EventsContent
+    <EventsPageClient
       events={events}
       registeredEventIds={registeredEventIds}
       userTier={profile?.tier ?? null}
-      registrationCount={registeredEventIds.length}
     />
   )
 }
