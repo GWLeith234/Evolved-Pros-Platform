@@ -28,6 +28,7 @@ export default async function EditEpisodePage({ params }: Props) {
     guestName: ep.guest_name ?? '',
     guestTitle: ep.guest_title ?? '',
     guestCompany: ep.guest_company ?? '',
+    guestImageUrl: ep.guest_image_url ?? '',
     muxPlaybackId: ep.mux_playback_id ?? '',
     youtubeUrl: ep.youtube_url ?? '',
     thumbnailUrl: ep.thumbnail_url ?? '',

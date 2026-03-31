@@ -12,6 +12,7 @@ interface EpisodeFormValues {
   guestName: string
   guestTitle: string
   guestCompany: string
+  guestImageUrl: string
   muxPlaybackId: string
   youtubeUrl: string
   thumbnailUrl: string
@@ -34,6 +35,7 @@ const DEFAULT_VALUES: EpisodeFormValues = {
   guestName: '',
   guestTitle: '',
   guestCompany: '',
+  guestImageUrl: '',
   muxPlaybackId: '',
   youtubeUrl: '',
   thumbnailUrl: '',
@@ -84,6 +86,10 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
   const [error, setError] = useState<string | null>(null)
   const [toast, setToast] = useState('')
 
+  // Guest photo upload state
+  const [photoUploading, setPhotoUploading] = useState(false)
+  const [photoError, setPhotoError] = useState<string | null>(null)
+
   // Transcript generation state
   const [audioUrl, setAudioUrl] = useState('')
   const [transcribing, setTranscribing] = useState(false)
@@ -100,6 +106,24 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
       title,
       slug: prev.slug === slugify(prev.title) || prev.slug === '' ? slugify(title) : prev.slug,
     }))
+  }
+
+  async function handlePhotoUpload(file: File) {
+    setPhotoUploading(true)
+    setPhotoError(null)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      if (episodeId) formData.append('episodeId', episodeId)
+      const res = await fetch('/api/admin/upload-guest-photo', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Upload failed')
+      set('guestImageUrl', data.url)
+    } catch (e) {
+      setPhotoError(e instanceof Error ? e.message : 'Upload failed')
+    } finally {
+      setPhotoUploading(false)
+    }
   }
 
   async function handleGenerateTranscript() {
@@ -149,6 +173,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
       guest_name: values.guestName.trim() || null,
       guest_title: values.guestTitle.trim() || null,
       guest_company: values.guestCompany.trim() || null,
+      guest_image_url: values.guestImageUrl.trim() || null,
       mux_playback_id: values.muxPlaybackId.trim() || null,
       youtube_url: values.youtubeUrl.trim() || null,
       thumbnail_url: values.thumbnailUrl.trim() || null,
@@ -352,6 +377,84 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
               />
             </LabelledInput>
           </div>
+
+          {/* Guest Photo upload */}
+          <LabelledInput
+            label="Guest Photo"
+            hint="Recommended: square crop, min 400×400px. Displays as bleed on episode cards."
+          >
+            <div
+              className="rounded-lg p-4"
+              style={{ backgroundColor: '#f5f7f9', border: '1px solid rgba(27,60,90,0.1)' }}
+            >
+              {/* Preview */}
+              {values.guestImageUrl && (
+                <div className="flex items-start gap-4 mb-3">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={values.guestImageUrl}
+                    alt="Guest photo"
+                    className="w-20 h-20 rounded-lg object-cover object-top flex-shrink-0"
+                    style={{ border: '1px solid rgba(27,60,90,0.15)' }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-condensed text-[10px] text-[#7a8a96] mb-2 truncate">{values.guestImageUrl}</p>
+                    <label
+                      className="font-condensed font-bold uppercase tracking-wide text-[10px] rounded px-3 py-1.5 cursor-pointer transition-all inline-block"
+                      style={{ backgroundColor: 'transparent', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.2)' }}
+                    >
+                      Replace
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={photoUploading}
+                        onChange={e => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f) }}
+                      />
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Upload zone (when no photo yet) */}
+              {!values.guestImageUrl && (
+                <label
+                  className="flex flex-col items-center justify-center gap-2 rounded-lg cursor-pointer transition-all"
+                  style={{
+                    border: '2px dashed rgba(27,60,90,0.2)',
+                    padding: '24px 16px',
+                    backgroundColor: photoUploading ? 'rgba(27,60,90,0.03)' : 'white',
+                  }}
+                >
+                  {photoUploading ? (
+                    <span className="font-condensed text-[12px]" style={{ color: '#7a8a96' }}>Uploading…</span>
+                  ) : (
+                    <>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(27,60,90,0.3)" strokeWidth="1.5">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                      </svg>
+                      <span className="font-condensed font-semibold text-[11px]" style={{ color: '#7a8a96' }}>
+                        Click to upload guest photo
+                      </span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={photoUploading}
+                    onChange={e => { const f = e.target.files?.[0]; if (f) handlePhotoUpload(f) }}
+                  />
+                </label>
+              )}
+
+              {photoError && (
+                <p className="font-condensed text-[11px] mt-2" style={{ color: '#ef0e30' }}>{photoError}</p>
+              )}
+            </div>
+          </LabelledInput>
         </div>
       </div>
 

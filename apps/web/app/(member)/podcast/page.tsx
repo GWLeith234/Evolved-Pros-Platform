@@ -16,6 +16,7 @@ interface Episode {
   guest_name: string | null
   guest_title: string | null
   guest_company: string | null
+  guest_image_url: string | null
   mux_playback_id: string | null
   youtube_url: string | null
   thumbnail_url: string | null
@@ -36,9 +37,9 @@ function formatDate(iso: string | null): string {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-function PlayIcon() {
+function PlayIcon({ size = 20 }: { size?: number }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
       <polygon points="5 3 19 12 5 21 5 3" />
     </svg>
   )
@@ -55,33 +56,45 @@ function FeaturedEpisode({ ep }: { ep: Episode }) {
   return (
     <Link
       href={`/podcast/${ep.slug}`}
-      className="group block rounded-xl overflow-hidden relative border transition-all duration-200 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)] hover:border-white/20"
-      style={{
-        backgroundColor: '#112535',
-        borderColor: 'rgba(255,255,255,0.08)',
-        minHeight: '320px',
-      }}
+      className="group block rounded-xl overflow-hidden relative transition-all duration-200 hover:shadow-[0_8px_32px_rgba(0,0,0,0.45)]"
+      style={{ backgroundColor: '#0d1e2c', minHeight: '220px' }}
     >
-      {/* Background thumbnail */}
-      {ep.thumbnail_url && (
-        <div className="absolute inset-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+      {/* Guest photo zone — right 52% */}
+      <div
+        className="absolute right-0 top-0 bottom-0"
+        style={{ width: '52%', zIndex: 0 }}
+      >
+        {ep.guest_image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={ep.thumbnail_url}
-            alt={ep.title}
-            className="w-full h-full object-cover opacity-30 group-hover:opacity-40 transition-opacity duration-300"
+            src={ep.guest_image_url}
+            alt={ep.guest_name ?? ''}
+            className="w-full h-full object-cover object-top"
           />
+        ) : (
           <div
-            className="absolute inset-0"
-            style={{ background: 'linear-gradient(to right, rgba(13,28,39,0.97) 40%, rgba(13,28,39,0.6) 100%)' }}
+            className="w-full h-full"
+            style={{ background: 'linear-gradient(160deg, #1a3040 0%, #0d1e2c 100%)' }}
           />
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Content — min-h instead of h-full to avoid overflow-hidden clipping CTA on mobile */}
-      <div className="relative z-10 p-8 md:p-10 flex flex-col" style={{ minHeight: '320px' }}>
-        {/* Top: eyebrow */}
-        <div className="flex items-center gap-3 mb-6">
+      {/* Gradient fade overlay */}
+      <div
+        className="absolute inset-0"
+        style={{
+          zIndex: 1,
+          background: 'linear-gradient(to right, #0d1e2c 0%, #0d1e2c 35%, rgba(13,30,44,0.85) 52%, rgba(13,30,44,0.25) 72%, rgba(13,30,44,0) 100%)',
+        }}
+      />
+
+      {/* Content */}
+      <div
+        className="relative flex flex-col"
+        style={{ zIndex: 2, maxWidth: '58%', padding: '28px 32px', minHeight: '220px' }}
+      >
+        {/* Eyebrow */}
+        <div className="flex items-center gap-3 mb-5">
           <span
             className="font-condensed font-bold uppercase tracking-[0.22em] text-[9px] rounded px-2 py-0.5"
             style={{ backgroundColor: 'rgba(239,14,48,0.15)', color: '#ef0e30', border: '1px solid rgba(239,14,48,0.25)' }}
@@ -95,7 +108,7 @@ function FeaturedEpisode({ ep }: { ep: Episode }) {
           )}
         </div>
 
-        {/* Middle: main content */}
+        {/* Main content */}
         <div className="flex-1">
           {ep.episode_number != null && (
             <p
@@ -107,17 +120,28 @@ function FeaturedEpisode({ ep }: { ep: Episode }) {
           )}
           <h2
             className="font-display font-black leading-tight mb-3"
-            style={{ fontSize: 'clamp(22px, 3vw, 32px)', color: 'white', maxWidth: '560px' }}
+            style={{ fontSize: 'clamp(22px, 3vw, 32px)', color: 'white' }}
           >
             {ep.title}
           </h2>
+
+          {/* Guest line */}
           {ep.guest_name && (
-            <p className="font-condensed font-semibold uppercase tracking-[0.14em] text-[12px] mb-4" style={{ color: '#68a2b9' }}>
-              {ep.guest_name}
-              {ep.guest_title && <span style={{ color: 'rgba(255,255,255,0.35)' }}> · {ep.guest_title}</span>}
-              {ep.guest_company && <span style={{ color: 'rgba(255,255,255,0.35)' }}>{ep.guest_title ? '' : ' · '}{ep.guest_company}</span>}
+            <p className="font-condensed font-semibold uppercase tracking-[0.14em] text-[12px] mb-4">
+              <span style={{ color: 'white', fontWeight: 700 }}>{ep.guest_name}</span>
+              {(ep.guest_title || ep.guest_company) && (
+                <>
+                  <span style={{ color: 'rgba(255,255,255,0.3)' }}> | </span>
+                  <span style={{ color: '#C9A84C' }}>
+                    {ep.guest_title}
+                    {ep.guest_title && ep.guest_company && ' · '}
+                    {ep.guest_company}
+                  </span>
+                </>
+              )}
             </p>
           )}
+
           {desc && (
             <p className="font-body text-[14px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)', maxWidth: '500px' }}>
               {desc}
@@ -125,7 +149,7 @@ function FeaturedEpisode({ ep }: { ep: Episode }) {
           )}
         </div>
 
-        {/* Bottom: CTA */}
+        {/* CTA */}
         <div className="mt-8">
           <span
             className="inline-flex items-center gap-2 font-condensed font-bold uppercase tracking-[0.14em] text-[12px] rounded px-5 py-2.5 transition-colors duration-150 group-hover:bg-[#cc0a28]"
@@ -136,6 +160,25 @@ function FeaturedEpisode({ ep }: { ep: Episode }) {
           </span>
         </div>
       </div>
+
+      {/* Guest name tag — bottom right */}
+      {ep.guest_name && (
+        <div className="absolute" style={{ bottom: '16px', right: '20px', zIndex: 3 }}>
+          <p
+            className="font-condensed font-bold text-[13px] leading-tight"
+            style={{ color: 'rgba(255,255,255,0.9)' }}
+          >
+            {ep.guest_name}
+          </p>
+          {(ep.guest_title || ep.guest_company) && (
+            <p className="font-condensed font-semibold text-[11px]" style={{ color: '#C9A84C' }}>
+              {ep.guest_title}
+              {ep.guest_title && ep.guest_company && ' | '}
+              {ep.guest_company}
+            </p>
+          )}
+        </div>
+      )}
     </Link>
   )
 }
@@ -147,86 +190,103 @@ function EpisodeCard({ ep }: { ep: Episode }) {
   return (
     <Link
       href={`/podcast/${ep.slug}`}
-      className="group block rounded-lg overflow-hidden transition-all duration-150"
+      className="group block rounded-[10px] overflow-hidden relative transition-all duration-150 hover:shadow-[0_4px_20px_rgba(0,0,0,0.35)]"
       style={{
-        backgroundColor: '#112535',
-        border: '1px solid rgba(255,255,255,0.07)',
+        backgroundColor: '#0d1e2c',
+        border: '1px solid rgba(255,255,255,0.05)',
+        height: '110px',
       }}
-      onMouseEnter={undefined}
     >
-      {/* Thumbnail — 16:9 */}
-      <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-        {ep.thumbnail_url ? (
+      {/* Guest photo zone — right 35% */}
+      <div
+        className="absolute right-0 top-0 bottom-0"
+        style={{ width: '35%', zIndex: 0 }}
+      >
+        {ep.guest_image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={ep.thumbnail_url}
-            alt={ep.title}
-            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-200 group-hover:opacity-85"
+            src={ep.guest_image_url}
+            alt={ep.guest_name ?? ''}
+            className="w-full h-full object-cover object-top"
           />
         ) : (
           <div
-            className="absolute inset-0 flex items-center justify-center"
-            style={{ backgroundColor: '#1b3c5a' }}
-          >
-            <span className="font-display font-black text-[40px]" style={{ color: 'rgba(255,255,255,0.08)' }}>
-              {ep.episode_number ?? '?'}
-            </span>
-          </div>
+            className="w-full h-full"
+            style={{ background: 'linear-gradient(160deg, #1a3040 0%, #0d1e2c 100%)' }}
+          />
         )}
-
-        {/* Episode number badge — top left */}
-        {ep.episode_number != null && (
-          <span
-            className="absolute top-2 left-2 font-display font-black text-[13px] leading-none px-1.5 py-0.5 rounded"
-            style={{ color: '#C9A84C', backgroundColor: 'rgba(13,28,39,0.8)' }}
-          >
-            #{ep.episode_number}
-          </span>
-        )}
-
-        {/* Duration badge — bottom right */}
-        {duration && (
-          <span
-            className="absolute bottom-2 right-2 font-condensed font-bold text-[10px] px-1.5 py-0.5 rounded"
-            style={{ color: 'white', backgroundColor: 'rgba(0,0,0,0.65)' }}
-          >
-            {duration}
-          </span>
-        )}
-
-        {/* Play overlay on hover */}
-        <div
-          className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          style={{ backgroundColor: 'rgba(0,0,0,0.35)' }}
-        >
-          <div
-            className="w-12 h-12 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: '#ef0e30' }}
-          >
-            <PlayIcon />
-          </div>
-        </div>
       </div>
 
-      {/* Info */}
-      <div className="p-4">
+      {/* Gradient fade overlay */}
+      <div
+        className="absolute inset-0"
+        style={{
+          zIndex: 1,
+          background: 'linear-gradient(to right, #0d1e2c 0%, #0d1e2c 50%, rgba(13,30,44,0.8) 65%, rgba(13,30,44,0.15) 85%, rgba(13,30,44,0) 100%)',
+        }}
+      />
+
+      {/* Content */}
+      <div
+        className="relative"
+        style={{ zIndex: 2, maxWidth: '68%', padding: '16px 20px', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+      >
+        {ep.episode_number != null && (
+          <p
+            className="font-display font-black text-[13px] leading-none mb-1"
+            style={{ color: '#C9A84C' }}
+          >
+            #{ep.episode_number}
+          </p>
+        )}
         <h3
-          className="font-body font-semibold text-[14px] leading-snug mb-1 line-clamp-2"
+          className="font-body font-semibold text-[13px] leading-snug line-clamp-2 mb-1"
           style={{ color: 'white' }}
         >
           {ep.title}
         </h3>
+
+        {/* Guest line */}
         {ep.guest_name && (
-          <p className="font-condensed font-semibold uppercase tracking-[0.1em] text-[10px] mb-1.5" style={{ color: '#68a2b9' }}>
-            {ep.guest_name}
-            {ep.guest_company && <span style={{ color: 'rgba(255,255,255,0.3)' }}> · {ep.guest_company}</span>}
+          <p className="font-condensed font-semibold uppercase tracking-[0.1em] text-[10px]">
+            <span style={{ color: 'rgba(255,255,255,0.7)' }}>{ep.guest_name}</span>
+            {(ep.guest_title || ep.guest_company) && (
+              <>
+                <span style={{ color: 'rgba(255,255,255,0.25)' }}> · </span>
+                <span style={{ color: '#C9A84C' }}>
+                  {ep.guest_title}
+                  {ep.guest_title && ep.guest_company && ' · '}
+                  {ep.guest_company}
+                </span>
+              </>
+            )}
           </p>
         )}
-        {date && (
+
+        {!ep.guest_name && date && (
           <p className="font-condensed text-[10px]" style={{ color: 'rgba(255,255,255,0.3)' }}>
             {date}
           </p>
         )}
+
+        {duration && (
+          <p className="font-condensed text-[10px] mt-1" style={{ color: 'rgba(255,255,255,0.25)' }}>
+            {duration}
+          </p>
+        )}
+      </div>
+
+      {/* Play button — vertically centered, right side */}
+      <div
+        className="absolute flex items-center justify-center"
+        style={{ right: '16px', top: '50%', transform: 'translateY(-50%)', zIndex: 3 }}
+      >
+        <div
+          className="w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-150 group-hover:bg-[rgba(239,14,48,0.3)]"
+          style={{ backgroundColor: 'rgba(239,14,48,0.15)', border: '1px solid rgba(239,14,48,0.3)' }}
+        >
+          <PlayIcon size={10} />
+        </div>
       </div>
     </Link>
   )
@@ -286,7 +346,7 @@ export default async function PodcastPage() {
             {/* Featured episode */}
             {featured && <FeaturedEpisode ep={featured} />}
 
-            {/* Episode grid or coming-soon state */}
+            {/* Episode list or coming-soon state */}
             {rest.length > 0 ? (
               <div>
                 <p
@@ -295,7 +355,7 @@ export default async function PodcastPage() {
                 >
                   All Episodes
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {rest.map(ep => (
                     <EpisodeCard key={ep.id} ep={ep} />
                   ))}
