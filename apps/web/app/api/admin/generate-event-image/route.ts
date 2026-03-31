@@ -77,8 +77,9 @@ export async function POST(request: Request) {
   try {
     // Step 1: Generate DALL-E prompt via Anthropic
     const dallePrompt = await generateDallePrompt(title, mood)
+    console.log('[generate-event-image] prompt:', dallePrompt.slice(0, 120))
 
-    // Step 2: 3 parallel DALL-E 3 calls
+    // Step 2: 3 parallel DALL-E 3 calls (each n:1 — DALL-E 3 requires n=1 per call)
     const openai = new OpenAI({ apiKey: OPENAI_API_KEY })
 
     const results = await Promise.allSettled([
@@ -89,14 +90,27 @@ export async function POST(request: Request) {
 
     results.forEach((r, i) => {
       if (r.status === 'rejected') {
-        console.error(`[generate-event-image] DALL-E call ${i + 1} failed:`, r.reason)
+        const err = r.reason
+        console.error(`[generate-event-image] DALL-E call ${i + 1} failed — status: ${err?.status} message: ${err?.message}`, err?.error ?? '')
       }
     })
 
-    const images: string[] = results
+    let images: string[] = results
       .filter((r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof openai.images.generate>>> => r.status === 'fulfilled')
       .map(r => r.value.data?.[0]?.url ?? '')
       .filter(Boolean)
+
+    // Fallback: if all parallel calls failed, try a single sequential call
+    if (images.length === 0) {
+      console.log('[generate-event-image] all parallel calls failed, attempting sequential fallback')
+      try {
+        const fallback = await openai.images.generate({ model: 'dall-e-3', prompt: dallePrompt, n: 1, size: '1024x1024', quality: 'standard' })
+        const url = fallback.data?.[0]?.url
+        if (url) images = [url]
+      } catch (fallbackErr) {
+        console.error('[generate-event-image] fallback call failed:', fallbackErr)
+      }
+    }
 
     if (images.length === 0) {
       const firstRejection = results.find(r => r.status === 'rejected') as PromiseRejectedResult | undefined

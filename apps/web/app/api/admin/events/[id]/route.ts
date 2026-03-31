@@ -22,7 +22,8 @@ export async function PATCH(
   let body: Record<string, unknown>
   try { body = await request.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
 
-  const allowed = ['title', 'description', 'event_type', 'starts_at', 'ends_at', 'zoom_url', 'recording_url', 'image_url', 'required_tier', 'tier_access', 'is_published', 'is_draft'] as const
+  // required_tier excluded — tier_access is the new standard
+  const allowed = ['title', 'description', 'event_type', 'starts_at', 'ends_at', 'zoom_url', 'recording_url', 'image_url', 'tier_access', 'is_published', 'is_draft'] as const
   const update: Record<string, unknown> = {}
   for (const key of allowed) {
     if (key in body) update[key] = body[key]
@@ -39,7 +40,10 @@ export async function PATCH(
     .select()
     .single()
 
-  if (error || !data) return NextResponse.json({ error: 'Update failed' }, { status: 500 })
+  if (error || !data) {
+    console.error('[PATCH /api/admin/events/[id]]', error)
+    return NextResponse.json({ error: error?.message ?? 'Update failed' }, { status: 500 })
+  }
   return NextResponse.json(data)
 }
 
@@ -52,6 +56,9 @@ export async function DELETE(
   if (authError) return authError
 
   const { error } = await supabase.from('events').delete().eq('id', params.id)
-  if (error) return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
+  if (error) {
+    console.error('[DELETE /api/admin/events/[id]]', error)
+    return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
+  }
   return new NextResponse(null, { status: 204 })
 }
