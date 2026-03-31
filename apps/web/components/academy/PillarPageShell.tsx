@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
@@ -9,10 +10,70 @@ import {
   fetchLessonsWithProgress,
 } from '@/lib/academy/fetchers'
 import { PillarModuleAccordion } from '@/components/academy/PillarModuleAccordion'
+import { ReflectionPrompt } from '@/components/academy/ReflectionPrompt'
+import { PillarAudit } from '@/components/academy/PillarAudit'
 
 interface Props {
   pillarNumber?: number
   pillarSlug?: string
+  showReflection?: boolean
+  showAudit?: boolean
+  /** Optional slot rendered below module list */
+  children?: ReactNode
+}
+
+const PILLAR_REFLECTION_PROMPTS: Record<number, string> = {
+  1: 'What is one foundational belief or habit that has shaped your professional identity? How will you actively strengthen it going forward?',
+  2: 'Describe the professional identity you are intentionally building. What three words define the person you are becoming?',
+  3: 'Recall a high-pressure situation where your mental resolve was tested. What did you learn about your mindset, and how will you apply it?',
+  4: 'What is one area where your strategy has been reactive rather than proactive? What will you change?',
+  5: 'Who holds you accountable in your professional life? How has that relationship shaped your growth?',
+  6: 'Identify one goal where you\'ve struggled to execute consistently. What specific system will you build to close that gap?',
+}
+
+const PILLAR_AUDIT_QUESTIONS: Record<number, { id: string; text: string }[]> = {
+  1: [
+    { id: 'p1q1', text: 'I can clearly articulate my core professional values.' },
+    { id: 'p1q2', text: 'My daily habits align with my long-term goals.' },
+    { id: 'p1q3', text: 'I have a clear personal mission that guides my decisions.' },
+    { id: 'p1q4', text: 'I regularly evaluate and adjust my foundational principles.' },
+    { id: 'p1q5', text: 'I know my non-negotiables and hold to them under pressure.' },
+  ],
+  2: [
+    { id: 'p2q1', text: 'I have a clearly defined professional identity I act from.' },
+    { id: 'p2q2', text: 'I consistently present myself with confidence and intention.' },
+    { id: 'p2q3', text: 'My personal brand is aligned with my goals and values.' },
+    { id: 'p2q4', text: 'I actively curate how others perceive me professionally.' },
+    { id: 'p2q5', text: 'I know the difference between who I am and who I\'m becoming.' },
+  ],
+  3: [
+    { id: 'p3q1', text: 'I perform at a high level even under significant pressure.' },
+    { id: 'p3q2', text: 'I recover quickly from setbacks without prolonged negativity.' },
+    { id: 'p3q3', text: 'I have techniques to manage anxiety and self-doubt.' },
+    { id: 'p3q4', text: 'I choose my response rather than react to circumstances.' },
+    { id: 'p3q5', text: 'I consistently do hard things even when I don\'t feel like it.' },
+  ],
+  4: [
+    { id: 'p4q1', text: 'I think strategically before committing to action.' },
+    { id: 'p4q2', text: 'I can identify leverage points that create outsized results.' },
+    { id: 'p4q3', text: 'I regularly review my strategy against real-world outcomes.' },
+    { id: 'p4q4', text: 'I prioritize based on impact, not urgency.' },
+    { id: 'p4q5', text: 'I have a clear 90-day plan I am actively working.' },
+  ],
+  5: [
+    { id: 'p5q1', text: 'I have systems in place that keep me on track without willpower.' },
+    { id: 'p5q2', text: 'I meet my commitments to others reliably and consistently.' },
+    { id: 'p5q3', text: 'I have an accountability partner or structure I actively use.' },
+    { id: 'p5q4', text: 'I track my progress toward key goals on a regular cadence.' },
+    { id: 'p5q5', text: 'I hold myself accountable even when no one is watching.' },
+  ],
+  6: [
+    { id: 'p6q1', text: 'I consistently follow through on my plans and commitments.' },
+    { id: 'p6q2', text: 'I can go from decision to action quickly with minimal friction.' },
+    { id: 'p6q3', text: 'I measure my outputs, not just my inputs and efforts.' },
+    { id: 'p6q4', text: 'I eliminate distractions that interrupt deep execution.' },
+    { id: 'p6q5', text: 'I finish what I start and close loops reliably.' },
+  ],
 }
 
 const PILLAR_TAGLINES: Record<number, string> = {
@@ -33,7 +94,7 @@ const PILLAR_QUOTES: Record<number, string> = {
   6: 'Vision is common. Execution is rare. Be rare.',
 }
 
-export async function PillarPageShell({ pillarNumber, pillarSlug }: Props) {
+export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection, showAudit, children }: Props) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -253,6 +314,30 @@ export async function PillarPageShell({ pillarNumber, pillarSlug }: Props) {
           <p style={{ color: 'rgba(250,249,247,0.3)', fontFamily: '"Barlow Condensed", sans-serif', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             Lessons coming soon
           </p>
+        </section>
+      )}
+
+      {/* ── REFLECTION / AUDIT / CHILDREN SLOT ─────────────── */}
+      {!isCourseLocked && (showReflection || showAudit || children) && (
+        <section style={{ backgroundColor: '#0A0F18', padding: '0 clamp(24px, 8vw, 96px) 56px' }}>
+          <div style={{ maxWidth: '820px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {showReflection && (
+              <ReflectionPrompt
+                pillarId={String(pNum)}
+                courseId={(course as Record<string, unknown>).id as string}
+                promptText={PILLAR_REFLECTION_PROMPTS[pNum] ?? 'What stood out to you from this pillar?'}
+              />
+            )}
+            {showAudit && (
+              <PillarAudit
+                pillarId={String(pNum)}
+                courseId={(course as Record<string, unknown>).id as string}
+                questions={PILLAR_AUDIT_QUESTIONS[pNum] ?? []}
+                pillarColor={config.color}
+              />
+            )}
+            {children}
+          </div>
         </section>
       )}
 
