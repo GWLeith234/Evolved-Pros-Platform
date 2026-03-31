@@ -208,13 +208,14 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
               type="button"
               onClick={() => setGeorgeOpen(o => !o)}
               className="w-8 h-8 flex items-center justify-center rounded flex-shrink-0 transition-colors"
-              style={{ color: georgeOpen ? '#68a2b9' : 'rgba(255,255,255,0.5)' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#68a2b9')}
-              onMouseLeave={e => (e.currentTarget.style.color = georgeOpen ? '#68a2b9' : 'rgba(255,255,255,0.5)')}
+              style={{ color: georgeOpen ? '#A78BFA' : 'rgba(167,139,250,0.55)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#A78BFA')}
+              onMouseLeave={e => (e.currentTarget.style.color = georgeOpen ? '#A78BFA' : 'rgba(167,139,250,0.55)')}
               aria-label="Ask George AI"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l1.09 3.26L16.5 4l-2.18 2.5L16.5 9l-3.41-.74L12 11.5l-1.09-2.24L7.5 9l2.18-2.5L7.5 4l3.41.74L12 2z" />
+                <path d="M19 14l.6 1.8L21.5 15l-1.2 1.38L21.5 18l-1.9-.41L19 19.5l-.6-1.91L16.5 18l1.2-1.38L16.5 15l1.9.41L19 14z" />
               </svg>
             </button>
           </Tooltip>
