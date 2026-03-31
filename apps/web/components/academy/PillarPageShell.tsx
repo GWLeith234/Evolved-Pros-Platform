@@ -119,7 +119,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
   const config = PILLAR_CONFIG[pNum]
   if (!config) notFound()
 
-  const isCourseLocked = (course as Record<string, unknown>).is_locked === true
+  const isCourseLocked = !!(course as Record<string, unknown>).is_locked
 
   const lessons = isCourseLocked
     ? []
@@ -246,46 +246,85 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
       </section>
 
       {/* ── LOCK STATE ─────────────────────────────────────────── */}
-      {isCourseLocked && (
-        <section style={{ backgroundColor: '#111926', padding: '72px clamp(24px, 8vw, 96px)' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '16px', maxWidth: '440px', margin: '0 auto' }}>
-            <div
-              style={{
-                width: '56px', height: '56px', borderRadius: '50%',
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
+      {isCourseLocked && (() => {
+        const prevPillarNum = pNum - 1
+        const prevConfig = PILLAR_CONFIG[prevPillarNum]
+        const prevSlugMap: Record<number, string> = {
+          2: '/academy/foundation',
+          3: '/academy/identity',
+          4: '/academy/mental-toughness',
+          5: '/academy/strategic-approach',
+          6: '/academy/accountability',
+        }
+        const prevHref = prevSlugMap[pNum] ?? '/academy'
+        const prevLabel = prevConfig?.label ?? 'Previous Pillar'
+        const GOLD = '#C9A84C'
+        return (
+          <section style={{ backgroundColor: '#111926', padding: '80px clamp(24px, 8vw, 96px)' }}>
+            <div style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
+              gap: '20px', maxWidth: '460px', margin: '0 auto',
+            }}>
+              {/* Gold lock icon */}
+              <div style={{
+                width: '72px', height: '72px', borderRadius: '50%',
+                backgroundColor: 'rgba(201,168,76,0.1)',
+                border: `2px solid ${GOLD}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(250,249,247,0.4)" strokeWidth="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
+              }}>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+              </div>
+
+              {/* Heading */}
+              <h2 style={{
+                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900,
+                fontSize: 'clamp(24px, 4vw, 32px)', textTransform: 'uppercase',
+                color: '#faf9f7', margin: 0, letterSpacing: '0.04em',
+              }}>
+                This Pillar is Locked
+              </h2>
+
+              {/* Subtext */}
+              <p style={{ color: 'rgba(250,249,247,0.45)', fontSize: '15px', lineHeight: 1.65, margin: 0 }}>
+                Complete <strong style={{ color: 'rgba(250,249,247,0.75)', fontWeight: 600 }}>{prevLabel}</strong> to unlock {config.label}.
+                Pillars unlock in sequence as you complete each capstone.
+              </p>
+
+              {/* CTA */}
+              <a
+                href={prevHref}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  border: `1px solid ${GOLD}`,
+                  color: GOLD,
+                  fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                  fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase',
+                  padding: '12px 28px', borderRadius: '4px', textDecoration: 'none',
+                  marginTop: '4px',
+                  transition: 'background 0.2s',
+                }}
+              >
+                Go to {prevLabel} →
+              </a>
+
+              {/* Back link */}
+              <a
+                href="/academy"
+                style={{
+                  color: 'rgba(250,249,247,0.25)', fontFamily: '"Barlow Condensed", sans-serif',
+                  fontWeight: 700, fontSize: '11px', letterSpacing: '0.15em',
+                  textTransform: 'uppercase', textDecoration: 'none',
+                }}
+              >
+                ← All Pillars
+              </a>
             </div>
-            <h2
-              style={{
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '22px',
-                textTransform: 'uppercase', color: 'rgba(250,249,247,0.7)', margin: 0,
-              }}
-            >
-              Complete the previous pillar to unlock
-            </h2>
-            <p style={{ color: 'rgba(250,249,247,0.35)', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>
-              Work through the pillars in sequence. Finishing each one unlocks the next.
-            </p>
-            <a
-              href="/academy"
-              style={{
-                color: config.color, fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-                fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase', textDecoration: 'none',
-                marginTop: '8px',
-              }}
-            >
-              ← Back to Academy
-            </a>
-          </div>
-        </section>
-      )}
+          </section>
+        )
+      })()}
 
       {/* ── MODULE LIST ────────────────────────────────────────── */}
       {!isCourseLocked && moduleGroups.length > 0 && (
