@@ -2,6 +2,11 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { Resend } from 'resend'
+import { MagicLinkEmail } from '@/lib/resend/emails/MagicLink'
+
+// Always use the verified sandbox sender — evolvedpros.com is not yet verified in Resend
+const FROM_ADDRESS = 'Evolved Pros <onboarding@resend.dev>'
 
 export async function POST(request: Request) {
   // Verify the caller is an admin
@@ -40,17 +45,38 @@ export async function POST(request: Request) {
     return Response.json({ error: 'A member with this email already exists.' }, { status: 409 })
   }
 
-  // Send invite via Supabase Auth — generates a signup link, no password needed
-  const { data: invited, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(
-    email.toLowerCase().trim(),
-    {
+  // Generate invite link without triggering Supabase's SMTP (bypasses unverified domain issue)
+  const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
+    type: 'invite',
+    email: email.toLowerCase().trim(),
+    options: {
       redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/onboard`,
       data: { full_name: fullName },
-    }
-  )
+    },
+  })
 
-  if (inviteError) {
-    return Response.json({ error: inviteError.message }, { status: 500 })
+  if (linkError || !linkData) {
+    console.error('[POST /api/admin/invite] generateLink error:', linkError)
+    return Response.json({ error: linkError?.message ?? 'Failed to generate invite link' }, { status: 500 })
+  }
+
+  const inviteUrl = linkData.properties?.action_link
+  if (!inviteUrl) {
+    return Response.json({ error: 'No invite link returned from auth service' }, { status: 500 })
+  }
+
+  // Send invite email via Resend using verified sandbox sender
+  const resend = new Resend(process.env.RESEND_API_KEY)
+  const { error: emailError } = await resend.emails.send({
+    from: FROM_ADDRESS,
+    to: email.toLowerCase().trim(),
+    subject: "You've been invited to Evolved Pros",
+    react: MagicLinkEmail({ magicLink: inviteUrl }),
+  })
+
+  if (emailError) {
+    console.error('[POST /api/admin/invite] Resend error:', emailError)
+    return Response.json({ error: `Failed to send invite email: ${emailError.message}` }, { status: 500 })
   }
 
   // Upsert the user row with tier
@@ -58,7 +84,7 @@ export async function POST(request: Request) {
   tierExpiresAt.setMonth(tierExpiresAt.getMonth() + 1)
 
   await adminClient.from('users').upsert({
-    id:              invited.user.id,
+    id:              linkData.user.id,
     email:           email.toLowerCase().trim(),
     full_name:       fullName,
     tier,
@@ -66,5 +92,5 @@ export async function POST(request: Request) {
     tier_expires_at: tierExpiresAt.toISOString(),
   }, { onConflict: 'id' })
 
-  return Response.json({ ok: true, userId: invited.user.id })
+  return Response.json({ ok: true, userId: linkData.user.id })
 }
