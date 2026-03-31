@@ -112,7 +112,7 @@ export async function fetchLessonsWithProgress(
 
   const { data: lessons } = await supabase
     .from('lessons')
-    .select('id, course_id, slug, title, description, mux_playback_id, duration_seconds, sort_order, is_published')
+    .select('id, course_id, slug, title, description, mux_playback_id, duration_seconds, sort_order, is_published, module_number')
     .eq('course_id', course.id)
     .eq('is_published', true)
     .order('sort_order')
@@ -144,8 +144,22 @@ export async function fetchLessonsWithProgress(
       completedAt: prog?.completed_at ?? null,
       watchTimeSeconds: prog?.watch_time_seconds ?? 0,
       isLocked,
+      moduleNumber: (lesson as Record<string, unknown>).module_number as number | null ?? null,
     }
   })
+}
+
+export async function fetchCourseByPillarNumber(
+  supabase: SB,
+  pillarNumber: number,
+) {
+  const { data } = await supabase
+    .from('courses')
+    .select('*')
+    .eq('pillar_number', pillarNumber)
+    .eq('is_published', true)
+    .maybeSingle()
+  return data ?? null
 }
 
 export async function fetchLessonBySlug(

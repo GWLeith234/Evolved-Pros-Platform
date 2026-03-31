@@ -27,6 +27,7 @@ export type LessonWithProgress = {
   completedAt: string | null
   watchTimeSeconds: number
   isLocked: boolean
+  moduleNumber: number | null
 }
 
 export type LessonNotes = {
