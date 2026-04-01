@@ -215,6 +215,31 @@ export async function fetchLessonNotes(
   return data?.notes ?? null
 }
 
+export interface WIGRow {
+  id: string
+  user_id: string
+  course_id: string
+  domain: string
+  content: Record<string, unknown>
+  status: string | null
+  updated_at: string
+  created_at: string
+}
+
+export async function fetchWIGByDomain(
+  supabase: SB,
+  userId: string,
+  domain: string,
+): Promise<WIGRow | null> {
+  const { data } = await supabase
+    .from('strategic_plans')
+    .select('id, user_id, course_id, domain, content, status, updated_at, created_at')
+    .eq('user_id', userId)
+    .eq('domain', domain)
+    .maybeSingle()
+  return (data as WIGRow | null) ?? null
+}
+
 export async function fetchUserProfile(
   supabase: SB,
   userId: string,
