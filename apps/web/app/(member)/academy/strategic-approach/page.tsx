@@ -7,6 +7,7 @@ import { PillarPageShell } from '@/components/academy/PillarPageShell'
 import { LiveSessionCard } from '@/components/academy/LiveSessionCard'
 import { HierarchySort } from '@/components/academy/HierarchySort'
 import { WIGWizard } from '@/components/academy/WIGWizard'
+import { NotToDoTool } from '@/components/academy/NotToDoTool'
 import { ScenarioMCQ } from '@/components/academy/ScenarioMCQ'
 import { PeerDiscussion } from '@/components/academy/PeerDiscussion'
 import { Capstone } from '@/components/academy/Capstone'
@@ -22,131 +23,131 @@ const P4_DOMAIN_ITEMS = [
 const P4_MCQ_QUESTIONS: ComponentProps<typeof ScenarioMCQ>['questions'] = [
   {
     id: 'p4-m1-q1',
-    scenario: 'You have 6 priorities marked as "urgent" for the week. You…',
+    scenario: 'You have 12 priorities this quarter. Your manager wants all of them treated as #1. You…',
     options: [
       {
-        id: 'a', text: 'Work longer hours to get through all of them',
+        id: 'a', text: 'Work on all 12 equally',
         isCorrect: false,
-        explanation: 'Adding hours without adding strategy just creates more noise. If everything is urgent, nothing is — you need a framework to identify what truly moves the needle.',
+        explanation: 'Strategy is the art of saying no. One WIG executed beats twelve half-finished goals.',
       },
       {
-        id: 'b', text: 'Identify your single Wildly Important Goal and ruthlessly protect it',
+        id: 'b', text: 'Identify the one WIG that drives everything else and protect it',
         isCorrect: true,
-        explanation: 'Strategic discipline means choosing what NOT to do as much as choosing what to do. Protecting your WIG from the whirlwind of daily urgency is the core skill of strategic execution.',
+        explanation: 'Strategy is the art of saying no. One WIG executed beats twelve half-finished goals.',
       },
       {
-        id: 'c', text: 'Delegate everything else and only do what you enjoy',
+        id: 'c', text: 'Ask your manager to rank them',
         isCorrect: false,
-        explanation: 'Delegation is valuable but it isn\'t a strategy on its own. Without clear priorities, you\'re delegating the wrong things or still spreading yourself across too many goals.',
+        explanation: 'Abdicating the prioritisation decision misses the point — you need to own your WIG. Waiting for someone else to decide is a reactive posture.',
       },
       {
-        id: 'd', text: 'Address the most visible priority first to manage perception',
+        id: 'd', text: 'Delegate 8 and keep 4',
         isCorrect: false,
-        explanation: 'Managing optics instead of outcomes is a reactive posture. Visible priorities aren\'t always the most impactful ones.',
+        explanation: 'Four competing priorities still dilutes focus. The WIG framework exists precisely because even four goals are too many to execute with full force.',
       },
     ],
   },
   {
     id: 'p4-m1-q2',
-    scenario: 'Your Q1 results are behind target. You review your activity and realise you\'ve been extremely busy. You…',
+    scenario: 'Your lag measure (revenue) is behind. You focus all energy on it directly. Your coach says…',
     options: [
       {
-        id: 'a', text: 'Increase total activity volume across all areas',
+        id: 'a', text: 'Good — attack the lag directly',
         isCorrect: false,
-        explanation: 'More activity in the wrong direction accelerates the problem. Busyness without strategic alignment is a common trap.',
+        explanation: 'Lag measures are history. Lead measures are where your leverage lives.',
       },
       {
-        id: 'b', text: 'Analyse which lead measures are actually correlated with your lag results',
+        id: 'b', text: 'Wrong — only lead measures are within your control',
         isCorrect: true,
-        explanation: 'Lead measures predict lag results. When lag results are off, the answer is to examine whether you\'re executing on the right lead measures — not to simply do more.',
+        explanation: 'Lag measures are history. Lead measures are where your leverage lives.',
       },
       {
-        id: 'c', text: 'Adjust your targets to be more realistic',
+        id: 'c', text: 'Add more lag measures to track',
         isCorrect: false,
-        explanation: 'Lowering targets before examining strategy is premature. Most people underperform their targets due to execution gaps, not target problems.',
+        explanation: 'More lag metrics doesn\'t create more control. You can only influence lag outcomes by executing lead measures consistently.',
       },
       {
-        id: 'd', text: 'Wait for Q2 and reset with a fresh mindset',
+        id: 'd', text: 'Change your WIG entirely',
         isCorrect: false,
-        explanation: 'Waiting without changing the underlying approach guarantees the same outcome next quarter. Analysis and adjustment must happen now.',
+        explanation: 'Changing the goal before fixing the lead measure execution is premature. Diagnose the lag first, then decide.',
       },
     ],
   },
   {
     id: 'p4-m1-q3',
-    scenario: 'You\'re offered a significant new opportunity that isn\'t aligned with your WIG. You…',
+    scenario: 'A great opportunity appears — a new product line, a new market. But it\'s outside your WIG. You…',
     options: [
       {
-        id: 'a', text: 'Take it — opportunities don\'t wait',
+        id: 'a', text: 'Pursue it — great opportunities are rare',
         isCorrect: false,
-        explanation: 'Taking every opportunity dilutes your capacity for the one thing that matters most. Strategic discipline requires saying no to good things to protect great ones.',
+        explanation: 'Every yes is a no to your WIG. Protect your focus like it\'s your most valuable asset.',
       },
       {
-        id: 'b', text: 'Evaluate it against your WIG criteria and decline if it diverts focus',
+        id: 'b', text: 'Add it to your Q2 plan',
+        isCorrect: false,
+        explanation: 'Deferring instead of deciding isn\'t strategic — it\'s avoidance. If it genuinely replaces your WIG, update it. If not, decline now.',
+      },
+      {
+        id: 'c', text: 'Say no and stay focused on your WIG',
         isCorrect: true,
-        explanation: 'The discipline to say no to misaligned opportunities is what separates strategic performers from perpetually distracted ones. Every yes to something outside your WIG is a no to your WIG.',
+        explanation: 'Every yes is a no to your WIG. Protect your focus like it\'s your most valuable asset.',
       },
       {
-        id: 'c', text: 'Pursue it alongside your WIG to keep options open',
+        id: 'd', text: 'Do both in parallel',
         isCorrect: false,
-        explanation: 'Pursuing both typically means delivering on neither. Divided focus is one of the most common causes of underperformance in high-potential professionals.',
-      },
-      {
-        id: 'd', text: 'Ask your manager to decide for you',
-        isCorrect: false,
-        explanation: 'Outsourcing strategic decisions reflects a reactive orientation. You need to own your WIG and defend it proactively.',
+        explanation: 'Divided focus is one of the most common causes of underperformance in high-potential professionals. Parallel pursuit typically means full delivery on neither.',
       },
     ],
   },
   {
     id: 'p4-m1-q4',
-    scenario: 'You set a 90-day goal but haven\'t made any measurable progress after 30 days. You…',
+    scenario: 'You haven\'t reviewed your strategic plan in 3 weeks. This week you…',
     options: [
       {
-        id: 'a', text: 'Extend the timeline to reduce pressure',
-        isCorrect: false,
-        explanation: 'Extending timelines without identifying the root cause doesn\'t solve the problem — it delays it. The real question is why progress stalled.',
-      },
-      {
-        id: 'b', text: 'Run a structured review: identify what lead measures you\'ve neglected and course-correct',
+        id: 'a', text: 'Review it on Sunday night before the week starts',
         isCorrect: true,
-        explanation: 'A 30-day review point is exactly when structured diagnosis matters. Identifying gaps in lead measure execution — not the goal itself — is how you course-correct before it\'s too late.',
+        explanation: 'Weekly review is the operating system of strategic execution. Without it, plans become wishes.',
       },
       {
-        id: 'c', text: 'Keep going and trust the process — results take time',
+        id: 'b', text: 'Review it when things slow down',
         isCorrect: false,
-        explanation: 'Blind persistence without adaptation isn\'t trust — it\'s hope. Strategic performers check in regularly and adjust based on evidence.',
+        explanation: 'Things rarely slow down. Waiting for bandwidth to review your plan means the plan never gets reviewed — and never gets executed.',
       },
       {
-        id: 'd', text: 'Abandon the goal and set a more achievable one',
+        id: 'c', text: 'Send it to your manager for accountability',
         isCorrect: false,
-        explanation: 'Abandoning a goal at 30 days eliminates any chance of success and creates a habit of quitting. Review first, then decide.',
+        explanation: 'External accountability helps but it doesn\'t replace internal ownership. You need to review your own plan first.',
+      },
+      {
+        id: 'd', text: 'Update it with new targets to stay motivated',
+        isCorrect: false,
+        explanation: 'Constantly updating targets avoids the harder work of executing on the original ones. Review first — then adjust if the evidence warrants it.',
       },
     ],
   },
   {
     id: 'p4-m1-q5',
-    scenario: 'Your team asks you to join 4 new committees that will consume 6 hours per week. You…',
+    scenario: 'Your lead measure is 20 discovery calls per week. You\'re at 12. You…',
     options: [
       {
-        id: 'a', text: 'Join all — visibility is important for career growth',
+        id: 'a', text: 'Lower the target to 15',
         isCorrect: false,
-        explanation: 'Six hours per week on misaligned committees is 24+ hours per month diverted from your WIG. Visibility that costs you strategic progress is a net loss.',
+        explanation: 'Lead measures expose the real constraint. Diagnose the gap before changing the target.',
       },
       {
-        id: 'b', text: 'Decline all — you don\'t have time for extra commitments',
-        isCorrect: false,
-        explanation: 'Blanket refusal isn\'t strategic either. One committee that aligns directly with your WIG might be worth it — the answer requires evaluation, not automatic rejection.',
-      },
-      {
-        id: 'c', text: 'Evaluate each against your WIG and only commit to those that directly advance it',
+        id: 'b', text: 'Identify the specific behaviour blocking calls 13–20',
         isCorrect: true,
-        explanation: 'Strategic resource allocation means every commitment — including time — must be run through the WIG filter. This is how elite performers protect execution capacity.',
+        explanation: 'Lead measures expose the real constraint. Diagnose the gap before changing the target.',
       },
       {
-        id: 'd', text: 'Agree provisionally and see if they become a problem',
+        id: 'c', text: 'Focus on call quality instead of quantity',
         isCorrect: false,
-        explanation: 'Provisional agreement without a clear WIG filter leads to scope creep. You need to make an intentional decision upfront, not react once you\'re already overcommitted.',
+        explanation: 'Switching metrics when you\'re underperforming on one is a common avoidance move. Address the quantity gap first — quality can be refined once volume is consistent.',
+      },
+      {
+        id: 'd', text: 'Add a second lead measure to compensate',
+        isCorrect: false,
+        explanation: 'Adding measures doesn\'t fix underperformance on the existing one. Identify and remove the blocking behaviour first.',
       },
     ],
   },
@@ -173,6 +174,7 @@ export default async function Page() {
         saveKey="p4-domain-hierarchy"
       />
       {p4Course && <WIGWizard courseId={p4Course.id} />}
+      {p4Course && <NotToDoTool courseId={p4Course.id} />}
       {p4Course && (
         <ScenarioMCQ
           courseId={p4Course.id}
