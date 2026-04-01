@@ -372,12 +372,6 @@ function SavedCard({ wig, onEdit, color }: { wig: SavedWIG; onEdit: () => void; 
   )
 }
 
-function formatDate(iso: string): string {
-  if (!iso) return ''
-  const d = new Date(iso + 'T00:00:00')
-  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-}
-
 const backBtnStyle: React.CSSProperties = {
   background: 'none', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer',
   fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
