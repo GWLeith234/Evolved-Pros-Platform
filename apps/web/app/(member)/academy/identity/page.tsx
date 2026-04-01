@@ -8,6 +8,7 @@ import { LiveSessionCard } from '@/components/academy/LiveSessionCard'
 import { PioneerDriverAssessment } from '@/components/academy/PioneerDriverAssessment'
 import { HonestLedger } from '@/components/academy/HonestLedger'
 import { ScenarioMCQ } from '@/components/academy/ScenarioMCQ'
+import { Capstone } from '@/components/academy/Capstone'
 import type { ComponentProps } from 'react'
 
 const P2_MODULE1_QUESTIONS: ComponentProps<typeof ScenarioMCQ>['questions'] = [
@@ -148,10 +149,11 @@ export default async function Page() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [, p2Course] = await Promise.all([
+  const [profile, p2Course] = await Promise.all([
     fetchUserProfile(supabase, user.id),
     fetchCourseByPillarNumber(supabase, 2),
   ])
+  const memberName = profile?.full_name ?? profile?.display_name ?? null
 
   return (
     <PillarPageShell pillarNumber={2} showReflection showAudit>
@@ -165,6 +167,13 @@ export default async function Page() {
           courseId={p2Course.id}
           moduleNumber={1}
           questions={P2_MODULE1_QUESTIONS}
+        />
+      )}
+      {p2Course && (
+        <Capstone
+          courseId={p2Course.id}
+          pillarNumber={2}
+          memberName={memberName}
         />
       )}
     </PillarPageShell>

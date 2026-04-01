@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { adminClient } from '@/lib/supabase/admin'
 
 type AssessmentType = 'PIONEER' | 'DRIVER' | 'CONNECTOR' | 'ARCHITECT'
 const VALID_TYPES: AssessmentType[] = ['PIONEER', 'DRIVER', 'CONNECTOR', 'ARCHITECT']
@@ -47,9 +47,7 @@ export async function POST(request: Request) {
   }
 
   // Use admin client to bypass RLS for both insert and user update
-  const admin = createAdminClient()
-
-  const { data: assessment, error: insertError } = await admin
+  const { data: assessment, error: insertError } = await adminClient
     .from('assessments')
     .insert({
       user_id: user.id,
@@ -66,7 +64,7 @@ export async function POST(request: Request) {
   }
 
   // Update pioneer_driver_type on user profile
-  const { error: updateError } = await admin
+  const { error: updateError } = await adminClient
     .from('users')
     .update({ pioneer_driver_type: typeResult })
     .eq('id', user.id)

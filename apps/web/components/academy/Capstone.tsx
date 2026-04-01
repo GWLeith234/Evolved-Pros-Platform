@@ -16,7 +16,7 @@ interface CapstoneResult {
 
 const CAPSTONE_PROMPTS: Record<number, string> = {
   1: 'Describe the foundational habits, beliefs, and systems you will commit to as a professional. How has your understanding of a strong foundation changed, and what concrete steps will you take in the next 30 days to reinforce it?',
-  2: 'Articulate your professional identity — who you are, what you stand for, and how you present yourself to the world. What specific actions will you take to close the gap between who you are today and the professional you are becoming?',
+  2: 'Reflect on your sales identity. Who are you as a sales professional — your strengths, your blind spots, and the identity you are committed to building? How does your Pioneer-Driver type show up in your daily selling behaviour, and what one identity shift will you commit to making from this point forward?',
   3: 'Reflect on a significant mental challenge you have faced or anticipate facing. How have the principles in this pillar equipped you to respond with greater resilience, and what daily practices will you adopt to strengthen your mindset?',
   4: 'Outline your professional strategy for the next 90 days. How does the content in this pillar reshape your approach to planning, prioritization, and decision-making?',
   5: 'Describe your personal accountability system. Who are your accountability partners, what are your non-negotiable commitments, and how will you measure progress over the next quarter?',
@@ -35,7 +35,10 @@ const NEXT_PILLAR_LABELS: Record<number, string> = {
 export function Capstone({ courseId, pillarNumber, memberName }: Props) {
   const config = PILLAR_CONFIG[pillarNumber]
   const color = config?.color ?? '#C9A84C'
-  const image = config?.image ? `/images/${config.image}` : null
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+  const image = config?.image
+    ? `${supabaseUrl}/storage/v1/object/public/Branding/${config.image}`
+    : null
   const label = config?.label ?? 'Pillar'
 
   const [content, setContent] = useState('')
