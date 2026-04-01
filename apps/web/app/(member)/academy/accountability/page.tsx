@@ -10,7 +10,17 @@ import { PartnerCheckin } from '@/components/academy/PartnerCheckin'
 import { ScenarioMCQ } from '@/components/academy/ScenarioMCQ'
 import { PeerDiscussion } from '@/components/academy/PeerDiscussion'
 import { Capstone } from '@/components/academy/Capstone'
+import { ConceptMatch } from '@/components/academy/ConceptMatch'
 import type { ComponentProps } from 'react'
+
+const P5_CONCEPT_PAIRS: ComponentProps<typeof ConceptMatch>['pairs'] = [
+  { id: 'wig',        term: 'WIG',                       definition: 'A Wildly Important Goal — the one goal that matters most above all others' },
+  { id: 'lag',        term: 'Lag measure',               definition: 'An outcome you can track but can\'t directly control — the result' },
+  { id: 'lead',       term: 'Lead measure',              definition: 'A predictive, influenceable behaviour that drives the lag measure' },
+  { id: 'scoreboard', term: 'Scoreboard',                definition: 'A visible weekly display of WIG, lag, and lead measure progress' },
+  { id: 'cadence',    term: 'Cadence of accountability', definition: 'A brief weekly meeting where team members report on commitments' },
+  { id: 'partner',    term: 'Accountability partner',    definition: 'A peer who holds you to your weekly commitments and you theirs' },
+]
 
 const P5_MCQ_QUESTIONS: ComponentProps<typeof ScenarioMCQ>['questions'] = [
   {
@@ -173,6 +183,13 @@ export default async function Page() {
         <PartnerCheckin
           courseId={p5Course.id}
           currentUserId={user.id}
+        />
+      )}
+      {p5Course && (
+        <ConceptMatch
+          courseId={p5Course.id}
+          pairs={P5_CONCEPT_PAIRS}
+          title="Accountability Concepts"
         />
       )}
       {p5Course && (
