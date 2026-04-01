@@ -47,11 +47,9 @@ const PILLAR_AUDIT_QUESTIONS: Record<number, { id: string; text: string }[]> = {
     { id: 'p2q5', text: 'I know the difference between who I am and who I\'m becoming.' },
   ],
   3: [
-    { id: 'p3q1', text: 'I perform at a high level even under significant pressure.' },
-    { id: 'p3q2', text: 'I recover quickly from setbacks without prolonged negativity.' },
-    { id: 'p3q3', text: 'I have techniques to manage anxiety and self-doubt.' },
-    { id: 'p3q4', text: 'I choose my response rather than react to circumstances.' },
-    { id: 'p3q5', text: 'I consistently do hard things even when I don\'t feel like it.' },
+    { id: 'p3-1', text: 'How consistently do you show up with full energy regardless of results?' },
+    { id: 'p3-2', text: 'How well do you separate your identity from your performance?' },
+    { id: 'p3-3', text: 'How quickly do you bounce back after a significant loss?' },
   ],
   4: [
     { id: 'p4q1', text: 'I think strategically before committing to action.' },
