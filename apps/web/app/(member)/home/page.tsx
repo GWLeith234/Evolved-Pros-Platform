@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import { CommitmentTracker } from '@/components/academy/CommitmentTracker'
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
 import { StatRow } from '@/components/home/StatRow'
 import { ActivityFeed } from '@/components/home/ActivityFeed'
@@ -153,6 +154,15 @@ async function fetchUnreadCount(supabase: ReturnType<typeof createClient>, userI
   return count ?? 0
 }
 
+function getCurrentMonday(): string {
+  const now = new Date()
+  const day = now.getDay()
+  const diff = day === 0 ? -6 : 1 - day
+  const monday = new Date(now)
+  monday.setDate(now.getDate() + diff)
+  return monday.toISOString().split('T')[0]
+}
+
 export default async function MemberHomePage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -213,6 +223,8 @@ export default async function MemberHomePage() {
         <div className="space-y-5">
           <UpcomingEventsWidget events={events} userId={user.id} />
           <AcademyProgressWidget courses={courseProgress} />
+          {/* CommitmentTracker widget — weekly commitments from the Academy */}
+          <CommitmentTracker weekStart={getCurrentMonday()} />
         </div>
       </div>
     </div>

@@ -6,9 +6,28 @@ import { fetchUserProfile, fetchCourseByPillarNumber } from '@/lib/academy/fetch
 import { PillarPageShell } from '@/components/academy/PillarPageShell'
 import { LiveSessionCard } from '@/components/academy/LiveSessionCard'
 import { MentalToughnessDiagnostic } from '@/components/academy/MentalToughnessDiagnostic'
+import { CommitmentTracker } from '@/components/academy/CommitmentTracker'
+import { HierarchySort } from '@/components/academy/HierarchySort'
 import { ScenarioMCQ } from '@/components/academy/ScenarioMCQ'
 import { Capstone } from '@/components/academy/Capstone'
 import type { ComponentProps } from 'react'
+
+function getCurrentMonday(): string {
+  const now = new Date()
+  const day = now.getDay() // 0=Sun … 6=Sat
+  const diff = day === 0 ? -6 : 1 - day
+  const monday = new Date(now)
+  monday.setDate(now.getDate() + diff)
+  return monday.toISOString().split('T')[0]
+}
+
+const P3_COMFORT_ZONE_ITEMS = [
+  { id: 'fear-rejection',  label: 'Fear of rejection',          description: 'Avoiding calls or conversations to escape no' },
+  { id: 'need-approval',  label: 'Need for approval',          description: "Letting the client's mood dictate your confidence" },
+  { id: 'comfort-routine',label: 'Comfort routine',            description: 'Doing easy tasks instead of high-value activity' },
+  { id: 'comparison',     label: 'Comparing yourself to others',description: 'Measuring your worth against leaderboard rankings' },
+  { id: 'past-losses',    label: 'Dwelling on past losses',     description: "Letting yesterday's missed deal affect today's energy" },
+]
 
 const P3_MCQ_QUESTIONS: ComponentProps<typeof ScenarioMCQ>['questions'] = [
   {
@@ -154,11 +173,21 @@ export default async function Page() {
   ])
 
   const memberName = profile?.full_name ?? profile?.display_name ?? null
+  const currentMonday = getCurrentMonday()
 
   return (
     <PillarPageShell pillarNumber={3} showReflection showAudit>
       <LiveSessionCard pillarId="mental-toughness" pillarNumber={3} />
       {p3Course && <MentalToughnessDiagnostic courseId={p3Course.id} />}
+      {p3Course && (
+        <CommitmentTracker courseId={p3Course.id} weekStart={currentMonday} />
+      )}
+      <HierarchySort
+        title="What&apos;s keeping you in your comfort zone?"
+        items={P3_COMFORT_ZONE_ITEMS}
+        onSortComplete={() => {}}
+        saveKey="p3-comfort-zone-sort"
+      />
       {p3Course && (
         <ScenarioMCQ
           courseId={p3Course.id}
