@@ -6,6 +6,7 @@ import { fetchUserProfile, fetchCourseByPillarNumber, fetchWIGByDomain } from '@
 import { PillarPageShell } from '@/components/academy/PillarPageShell'
 import { LiveSessionCard } from '@/components/academy/LiveSessionCard'
 import { Scoreboard } from '@/components/academy/Scoreboard'
+import { PartnerCheckin } from '@/components/academy/PartnerCheckin'
 import { ScenarioMCQ } from '@/components/academy/ScenarioMCQ'
 import { PeerDiscussion } from '@/components/academy/PeerDiscussion'
 import { Capstone } from '@/components/academy/Capstone'
@@ -166,6 +167,12 @@ export default async function Page() {
         <Scoreboard
           courseId={p5Course.id}
           initialWigStatement={wigStatement}
+        />
+      )}
+      {p5Course && (
+        <PartnerCheckin
+          courseId={p5Course.id}
+          currentUserId={user.id}
         />
       )}
       {p5Course && (
