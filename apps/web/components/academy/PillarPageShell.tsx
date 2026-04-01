@@ -57,11 +57,9 @@ const PILLAR_AUDIT_QUESTIONS: Record<number, { id: string; text: string }[]> = {
     { id: 'p4-3', text: 'How consistently do you execute your weekly strategic priorities?' },
   ],
   5: [
-    { id: 'p5q1', text: 'I have systems in place that keep me on track without willpower.' },
-    { id: 'p5q2', text: 'I meet my commitments to others reliably and consistently.' },
-    { id: 'p5q3', text: 'I have an accountability partner or structure I actively use.' },
-    { id: 'p5q4', text: 'I track my progress toward key goals on a regular cadence.' },
-    { id: 'p5q5', text: 'I hold myself accountable even when no one is watching.' },
+    { id: 'p5-1', text: 'How clearly defined are your lead measures right now?' },
+    { id: 'p5-2', text: 'How consistently do you track and update your scoreboard each week?' },
+    { id: 'p5-3', text: 'How accountable do you hold yourself to your weekly commitments?' },
   ],
   6: [
     { id: 'p6q1', text: 'I consistently follow through on my plans and commitments.' },

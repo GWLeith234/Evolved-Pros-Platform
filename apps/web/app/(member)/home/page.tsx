@@ -175,7 +175,7 @@ export default async function MemberHomePage() {
     (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
   )
 
-  const [stats, activity, events, courseProgress, unreadCount, quotesResult, badgeData] = await Promise.all([
+  const [stats, activity, events, courseProgress, unreadCount, quotesResult, badgeData, scoreboardResult] = await Promise.all([
     fetchDashboardStats(supabase, user.id, profile.tier, profile.points),
     fetchRecentActivity(supabase, user.id),
     fetchUpcomingEvents(supabase, user.id),
@@ -184,11 +184,26 @@ export default async function MemberHomePage() {
     // Use adminClient to bypass RLS — greeting_quotes is a public table but anon key may be blocked
     adminClient.from('greeting_quotes').select('quote_text, source').order('day_number'),
     supabase.from('member_badges').select('pillar_number').eq('user_id', user.id),
+    supabase
+      .from('scoreboards')
+      .select('id, wig_statement, lead_1_label, lead_1_weekly_target, lead_2_label, lead_2_weekly_target')
+      .eq('user_id', user.id)
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ])
 
   const quotes = quotesResult.data ?? []
   const quote = quotes?.length ? quotes[dayOfYear % quotes.length] : null
   const earnedBadges = badgeData.data?.map(b => b.pillar_number) ?? []
+  const activeScoreboard = scoreboardResult.data as {
+    id: string
+    wig_statement: string
+    lead_1_label: string
+    lead_1_weekly_target: number
+    lead_2_label: string
+    lead_2_weekly_target: number
+  } | null
 
   const displayName = (profile.full_name ? profile.full_name.split(' ')[0] : null) ?? profile.display_name ?? 'Member'
   const upcomingEventCount = events.filter(e => !e.isRegistered).length
@@ -225,6 +240,56 @@ export default async function MemberHomePage() {
           <AcademyProgressWidget courses={courseProgress} />
           {/* CommitmentTracker widget — weekly commitments from the Academy */}
           <CommitmentTracker weekStart={getCurrentMonday()} />
+          {/* Scoreboard widget */}
+          {activeScoreboard ? (
+            <div style={{ backgroundColor: '#111926', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '8px', overflow: 'hidden' }}>
+              <div style={{ height: '2px', backgroundColor: '#C9A84C' }} />
+              <div style={{ padding: '16px 18px' }}>
+                <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C9A84C', margin: '0 0 8px' }}>
+                  Scoreboard
+                </p>
+                <p style={{ color: '#faf9f7', fontSize: '13px', fontWeight: 600, lineHeight: 1.45, margin: '0 0 12px', fontStyle: 'italic' }}>
+                  &ldquo;{activeScoreboard.wig_statement.length > 90
+                    ? activeScoreboard.wig_statement.slice(0, 90) + '…'
+                    : activeScoreboard.wig_statement}&rdquo;
+                </p>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {[
+                    { label: activeScoreboard.lead_1_label, target: activeScoreboard.lead_1_weekly_target },
+                    { label: activeScoreboard.lead_2_label, target: activeScoreboard.lead_2_weekly_target },
+                  ].filter(m => m.label).map((m, i) => (
+                    <div key={i} style={{ flex: 1, backgroundColor: '#0A0F18', border: '1px solid rgba(201,168,76,0.15)', borderRadius: '4px', padding: '8px 10px' }}>
+                      <p style={{ color: 'rgba(250,249,247,0.35)', fontSize: '10px', margin: '0 0 2px', lineHeight: 1.3 }}>{m.label}</p>
+                      <p style={{ color: '#C9A84C', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '13px', margin: 0 }}>
+                        target: {m.target}/wk
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                <a
+                  href="/academy/accountability"
+                  style={{ display: 'inline-block', marginTop: '12px', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.6)', textDecoration: 'none' }}
+                >
+                  Update scoreboard →
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div style={{ backgroundColor: '#111926', border: '1px solid rgba(201,168,76,0.15)', borderRadius: '8px', padding: '16px 18px' }}>
+              <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.5)', margin: '0 0 6px' }}>
+                Scoreboard
+              </p>
+              <p style={{ color: 'rgba(250,249,247,0.4)', fontSize: '13px', margin: '0 0 10px', lineHeight: 1.5 }}>
+                Track your WIG and lead measures weekly.
+              </p>
+              <a
+                href="/academy/accountability"
+                style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#C9A84C', textDecoration: 'none' }}
+              >
+                Set up your Scoreboard →
+              </a>
+            </div>
+          )}
         </div>
       </div>
     </div>

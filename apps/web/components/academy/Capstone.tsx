@@ -19,7 +19,7 @@ const CAPSTONE_PROMPTS: Record<number, string> = {
   2: 'Reflect on your sales identity. Who are you as a sales professional — your strengths, your blind spots, and the identity you are committed to building? How does your Pioneer-Driver type show up in your daily selling behaviour, and what one identity shift will you commit to making from this point forward?',
   3: 'Describe a moment when your mental toughness was truly tested in sales. What did you do, what did you learn, and what specific commitment are you making to strengthen your resilience in the area where you scored lowest in your diagnostic?',
   4: 'Define your Wildly Important Goal in full. What is your current state, your target state, and your deadline? What are the 2-3 lead measures that will drive your lag result? What will you say NO to in order to protect your focus on this goal?',
-  5: 'Describe your personal accountability system. Who are your accountability partners, what are your non-negotiable commitments, and how will you measure progress over the next quarter?',
+  5: 'Describe your current Scoreboard. What is your WIG, your lag measure, and your two lead measures? What have you learned from tracking your numbers weekly, and what one accountability commitment are you making to ensure you execute your lead measures every week without exception?',
   6: 'Define what elite execution looks like for you. What systems, habits, and environments will you put in place to ensure you consistently follow through on your most important work?',
 }
 
