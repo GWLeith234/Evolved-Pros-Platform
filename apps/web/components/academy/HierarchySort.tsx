@@ -14,7 +14,7 @@ interface Item {
 interface Props {
   title: string
   items: Item[]
-  onSortComplete: (sortedIds: string[]) => void
+  onSortComplete?: (sortedIds: string[]) => void
   saveKey?: string
 }
 
@@ -86,7 +86,7 @@ export function HierarchySort({ title, items: initialItems, onSortComplete, save
     setOverIndex(null)
     setIsDirty(true)
     setSaved(false)
-    onSortComplete(reordered.map(i => i.id))
+    onSortComplete?.(reordered.map(i => i.id))
   }
 
   function handleDragEnd() {

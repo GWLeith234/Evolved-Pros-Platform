@@ -18,7 +18,7 @@ const CAPSTONE_PROMPTS: Record<number, string> = {
   1: 'Describe the foundational habits, beliefs, and systems you will commit to as a professional. How has your understanding of a strong foundation changed, and what concrete steps will you take in the next 30 days to reinforce it?',
   2: 'Reflect on your sales identity. Who are you as a sales professional — your strengths, your blind spots, and the identity you are committed to building? How does your Pioneer-Driver type show up in your daily selling behaviour, and what one identity shift will you commit to making from this point forward?',
   3: 'Describe a moment when your mental toughness was truly tested in sales. What did you do, what did you learn, and what specific commitment are you making to strengthen your resilience in the area where you scored lowest in your diagnostic?',
-  4: 'Outline your professional strategy for the next 90 days. How does the content in this pillar reshape your approach to planning, prioritization, and decision-making?',
+  4: 'Define your Wildly Important Goal in full. What is your current state, your target state, and your deadline? What are the 2-3 lead measures that will drive your lag result? What will you say NO to in order to protect your focus on this goal?',
   5: 'Describe your personal accountability system. Who are your accountability partners, what are your non-negotiable commitments, and how will you measure progress over the next quarter?',
   6: 'Define what elite execution looks like for you. What systems, habits, and environments will you put in place to ensure you consistently follow through on your most important work?',
 }

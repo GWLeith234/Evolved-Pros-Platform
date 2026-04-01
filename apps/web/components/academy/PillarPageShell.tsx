@@ -52,11 +52,9 @@ const PILLAR_AUDIT_QUESTIONS: Record<number, { id: string; text: string }[]> = {
     { id: 'p3-3', text: 'How quickly do you bounce back after a significant loss?' },
   ],
   4: [
-    { id: 'p4q1', text: 'I think strategically before committing to action.' },
-    { id: 'p4q2', text: 'I can identify leverage points that create outsized results.' },
-    { id: 'p4q3', text: 'I regularly review my strategy against real-world outcomes.' },
-    { id: 'p4q4', text: 'I prioritize based on impact, not urgency.' },
-    { id: 'p4q5', text: 'I have a clear 90-day plan I am actively working.' },
+    { id: 'p4-1', text: 'How clearly defined is your Wildly Important Goal right now?' },
+    { id: 'p4-2', text: 'How well do you distinguish lead measures from lag measures?' },
+    { id: 'p4-3', text: 'How consistently do you execute your weekly strategic priorities?' },
   ],
   5: [
     { id: 'p5q1', text: 'I have systems in place that keep me on track without willpower.' },
