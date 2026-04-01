@@ -179,28 +179,27 @@ export default async function Page() {
   return (
     <PillarPageShell pillarNumber={3} showReflection showAudit>
       <LiveSessionCard pillarId="mental-toughness" pillarNumber={3} />
-      {p3Course && <MentalToughnessDiagnostic courseId={p3Course.id} />}
       {p3Course && (
         <CommitmentTracker courseId={p3Course.id} weekStart={currentMonday} />
+      )}
+      <HierarchySort
+        title="What's keeping you in your comfort zone?"
+        items={P3_COMFORT_ZONE_ITEMS}
+        saveKey="p3-comfort-zone-sort"
+      />
+      {p3Course && <MentalToughnessDiagnostic courseId={p3Course.id} />}
+      {p3Course && (
+        <ScenarioMCQ
+          courseId={p3Course.id}
+          moduleNumber={1}
+          questions={P3_MCQ_QUESTIONS}
+        />
       )}
       {p3Course && (
         <PeerDiscussion
           courseId={p3Course.id}
           moduleNumber={1}
           title="Mental Toughness — Group Discussion"
-        />
-      )}
-      <HierarchySort
-        title="What&apos;s keeping you in your comfort zone?"
-        items={P3_COMFORT_ZONE_ITEMS}
-        onSortComplete={() => {}}
-        saveKey="p3-comfort-zone-sort"
-      />
-      {p3Course && (
-        <ScenarioMCQ
-          courseId={p3Course.id}
-          moduleNumber={1}
-          questions={P3_MCQ_QUESTIONS}
         />
       )}
       {p3Course && (
