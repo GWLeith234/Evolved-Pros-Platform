@@ -8,6 +8,7 @@ import { LiveSessionCard } from '@/components/academy/LiveSessionCard'
 import { MentalToughnessDiagnostic } from '@/components/academy/MentalToughnessDiagnostic'
 import { CommitmentTracker } from '@/components/academy/CommitmentTracker'
 import { HierarchySort } from '@/components/academy/HierarchySort'
+import { PeerDiscussion } from '@/components/academy/PeerDiscussion'
 import { ScenarioMCQ } from '@/components/academy/ScenarioMCQ'
 import { Capstone } from '@/components/academy/Capstone'
 import type { ComponentProps } from 'react'
@@ -181,6 +182,13 @@ export default async function Page() {
       {p3Course && <MentalToughnessDiagnostic courseId={p3Course.id} />}
       {p3Course && (
         <CommitmentTracker courseId={p3Course.id} weekStart={currentMonday} />
+      )}
+      {p3Course && (
+        <PeerDiscussion
+          courseId={p3Course.id}
+          moduleNumber={1}
+          title="Mental Toughness — Group Discussion"
+        />
       )}
       <HierarchySort
         title="What&apos;s keeping you in your comfort zone?"

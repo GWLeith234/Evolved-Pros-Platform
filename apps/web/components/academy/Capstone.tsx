@@ -26,7 +26,7 @@ const CAPSTONE_PROMPTS: Record<number, string> = {
 const NEXT_PILLAR_LABELS: Record<number, string> = {
   1: 'Begin Identity',
   2: 'Begin Mental Toughness',
-  3: 'Begin Strategy',
+  3: 'Begin Strategic Approach',
   4: 'Begin Accountability',
   5: 'Begin Execution',
   6: 'View Dashboard',
