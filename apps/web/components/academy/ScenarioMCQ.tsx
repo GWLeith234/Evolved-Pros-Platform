@@ -33,6 +33,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
   const [complete, setComplete] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   const question = questions[currentIdx]
   const answer = answers[currentIdx]
@@ -63,8 +64,9 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
   async function handleSubmit(score: number) {
     if (submitting || submitted) return
     setSubmitting(true)
+    setSaveError(null)
     try {
-      await fetch('/api/checkin-results', {
+      const res = await fetch('/api/checkin-results', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -80,7 +82,14 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
           })),
         }),
       })
-      setSubmitted(true)
+      if (res.ok) {
+        setSubmitted(true)
+      } else {
+        const json = await res.json().catch(() => ({})) as { error?: string }
+        setSaveError(json.error ?? 'Failed to save result')
+      }
+    } catch {
+      setSaveError('Network error — please try again')
     } finally {
       setSubmitting(false)
     }
@@ -186,6 +195,14 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
               >
                 {submitting ? 'Saving…' : 'Save Result'}
               </button>
+            )}
+            {saveError && !submitted && (
+              <span style={{
+                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: RED_ERR,
+              }}>
+                {saveError}
+              </span>
             )}
             {submitted && (
               <span style={{
