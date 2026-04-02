@@ -37,9 +37,6 @@ function getInitials(name: string | null | undefined): string {
 }
 
 
-const NEXT_EPISODE_DAY       = 'Mon'
-const NEXT_EPISODE_MONTH_DAY = 'April 20'
-
 const NAV_ITEMS = [
   { label: 'Home',      href: '/home' },
   { label: 'Community', href: '/community' },
@@ -107,39 +104,6 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
 
         {/* Right actions */}
         <div className="flex items-center gap-2">
-          {/* Episode promo card */}
-          <a
-            href="/events"
-            className="hidden md:flex"
-            style={{
-              background: '#112535',
-              border: '1px solid #1b3c5a',
-              borderRadius: '6px',
-              padding: '5px 10px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              textDecoration: 'none',
-              flexShrink: 0,
-              transition: 'border-color 0.15s',
-            }}
-            onMouseEnter={e => (e.currentTarget.style.borderColor = '#ef0e30')}
-            onMouseLeave={e => (e.currentTarget.style.borderColor = '#1b3c5a')}
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-              <span style={{ color: '#ef0e30', fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
-                Next Episode
-              </span>
-              <span style={{ color: 'white', fontSize: '12px', fontWeight: 500, whiteSpace: 'nowrap' }}>
-                Dennis Yu
-              </span>
-              <span style={{ color: '#68a2b9', fontSize: '10px', whiteSpace: 'nowrap' }}>
-                {NEXT_EPISODE_DAY} · {NEXT_EPISODE_MONTH_DAY}
-              </span>
-            </div>
-            <span style={{ color: '#ef0e30', fontSize: '12px', marginLeft: '2px' }}>▶</span>
-          </a>
-
           {/* Ask George */}
           <Tooltip content="Ask George">
             <button

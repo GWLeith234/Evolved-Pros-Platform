@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { TopNav } from '@/components/layout/TopNav'
 import { BottomTabBar } from '@/components/layout/BottomTabBar'
 import { NextEventBanner } from '@/components/layout/NextEventBanner'
+import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
 import { RightRail } from '@/components/layout/RightRail'
 
 export default async function MemberLayout({ children }: { children: React.ReactNode }) {
@@ -19,6 +20,7 @@ export default async function MemberLayout({ children }: { children: React.React
       return (
         <div className="flex flex-col min-h-screen">
           <TopNav profile={profile} unreadCount={0} />
+          <EpisodeBanner />
           <NextEventBanner />
           <div className="flex flex-1 min-h-0">
             <main className="flex-1 bg-[#faf9f7] overflow-y-auto pb-16 md:pb-0">{children}</main>
@@ -83,6 +85,7 @@ export default async function MemberLayout({ children }: { children: React.React
   return (
     <div className="flex flex-col min-h-screen">
       <TopNav profile={profile} unreadCount={unreadCount ?? 0} logoUrl={logoUrl} logoLightUrl={logoLightUrl} membersCanToggleTheme={membersCanToggleTheme} />
+      <EpisodeBanner />
       <NextEventBanner />
       <div className="flex flex-1 min-h-0">
         <main className="flex-1 bg-[#faf9f7] overflow-y-auto pb-16 md:pb-0">
