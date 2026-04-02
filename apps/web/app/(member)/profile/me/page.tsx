@@ -32,6 +32,7 @@ export default async function MyProfilePage({
     overviewPostsResult,
     eventRegsResult,
     adResult,
+    alumniBadgeResult,
   ] = await Promise.all([
     supabase
       .from('users')
@@ -57,6 +58,13 @@ export default async function MyProfilePage({
       .order('created_at', { ascending: false })
       .limit(10),
     adPromise,
+    // Alumni badge (pillar_number = 0)
+    adminClient
+      .from('member_badges')
+      .select('pillar_number, awarded_at')
+      .eq('user_id', user.id)
+      .eq('pillar_number', 0)
+      .maybeSingle(),
   ])
 
   if (!profileResult.data) redirect('/login')
@@ -64,6 +72,10 @@ export default async function MyProfilePage({
   const postCount = postCountResult.count ?? 0
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const profileAd = (adResult.data as any) ?? null
+  const alumniBadge = alumniBadgeResult.data as { pillar_number: number; awarded_at: string | null } | null
+  const alumniAwardedAt = alumniBadge?.awarded_at
+    ? new Date(alumniBadge.awarded_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    : null
 
   // Build course progress for Progress tab
   const lessonsByCourse: Record<string, { id: string; sort_order: number; title: string }[]> = {}
@@ -166,6 +178,30 @@ export default async function MyProfilePage({
   return (
     <div className="p-6 space-y-5" style={{ backgroundColor: '#0A0F18', minHeight: '100%' }}>
       <ProfileBannerWrapper user={headerUser} isOwn={true} />
+
+      {alumniBadge && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', backgroundColor: '#111926', border: '2px solid rgba(201,168,76,0.35)', borderRadius: '10px', padding: '16px 20px' }}>
+          <div style={{ width: '52px', height: '52px', borderRadius: '50%', border: '2px solid #C9A84C', backgroundColor: 'rgba(201,168,76,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: '22px' }}>★</span>
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: '18px', color: '#C9A84C', margin: '0 0 2px', letterSpacing: '0.06em' }}>
+              EVOLVED
+            </p>
+            <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.25em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', margin: '0 0 2px' }}>
+              ALUMNI
+            </p>
+            {alumniAwardedAt && (
+              <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '11px', color: 'rgba(255,255,255,0.25)', margin: 0 }}>
+                Awarded {alumniAwardedAt}
+              </p>
+            )}
+          </div>
+          <a href="/academy/completion" style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', textDecoration: 'none', flexShrink: 0 }}>
+            View →
+          </a>
+        </div>
+      )}
 
       {profileAd && <ProfileAdUnit ad={profileAd} />}
 

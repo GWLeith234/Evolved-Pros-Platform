@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { sendProgramCompletionEmail } from '@/lib/resend/emails/program-completion'
 
 export async function POST(request: Request) {
   const supabase = createClient()
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: insertError?.message ?? 'Failed to submit capstone' }, { status: 500 })
   }
 
-  // Resolve current course's pillar_number, then unlock the next pillar sequentially
+  // Resolve current course's pillar_number
   const { data: currentCourse, error: courseError } = await adminClient
     .from('courses')
     .select('pillar_number')
@@ -47,14 +48,57 @@ export async function POST(request: Request) {
 
   if (courseError) {
     console.error('[POST /api/capstones] course lookup error:', courseError)
-    // Capstone was saved — don't fail the whole request, just skip the unlock
     return NextResponse.json({ capstone, nextCourseSlug: null })
   }
 
-  const nextPillarNumber = ((currentCourse as Record<string, unknown>)?.pillar_number as number ?? 0) + 1
+  const currentPillar = ((currentCourse as Record<string, unknown>)?.pillar_number as number) ?? 0
+  const nextPillarNumber = currentPillar + 1
+
+  // ── P6 completion: alumni badge + program_completed_at + email ──────────────
+  if (currentPillar === 6) {
+    const now = new Date().toISOString()
+
+    // Fetch user profile for email
+    const { data: profile } = await adminClient
+      .from('users')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .select('email, display_name, full_name, program_completed_at' as any)
+      .eq('id', user.id)
+      .single()
+
+    const profileData = profile as { email?: string; display_name?: string; full_name?: string; program_completed_at?: string | null } | null
+
+    // Only run completion logic once (idempotent)
+    if (!profileData?.program_completed_at) {
+      await Promise.all([
+        // Mark program as complete
+        adminClient
+          .from('users')
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .update({ program_completed_at: now } as any)
+          .eq('id', user.id),
+        // Award alumni badge (pillar_number = 0)
+        adminClient
+          .from('member_badges')
+          .upsert(
+            { user_id: user.id, pillar_number: 0, pillar_name: 'EVOLVED Alumni', score: 100 },
+            { onConflict: 'user_id,pillar_number' }
+          ),
+      ])
+
+      // Send completion email (fire-and-forget)
+      const displayName = profileData?.display_name ?? profileData?.full_name ?? 'Member'
+      const completionDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+      if (profileData?.email) {
+        sendProgramCompletionEmail({ email: profileData.email, displayName, completionDate }).catch(console.error)
+      }
+    }
+
+    return NextResponse.json({ capstone, nextCourseSlug: 'completion' }, { status: 201 })
+  }
+  // ────────────────────────────────────────────────────────────────────────────
 
   if (nextPillarNumber < 1 || nextPillarNumber > 6) {
-    // Last pillar — no next course to unlock
     return NextResponse.json({ capstone, nextCourseSlug: null })
   }
 
