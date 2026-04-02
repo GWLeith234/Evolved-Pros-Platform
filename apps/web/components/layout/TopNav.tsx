@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { useState, useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -125,15 +124,39 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
         }}
       >
         {/* Logo */}
-        <Link href="/home" className="flex items-center flex-shrink-0">
-          <Image
-            src="/logo_nav_dark.png"
-            alt="Evolved Pros"
-            width={313}
-            height={43}
-            priority
-            style={{ display: 'block', height: '36px', width: 'auto' }}
-          />
+        <Link href="/home" className="flex items-center flex-shrink-0" style={{ textDecoration: 'none' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '7px', height: '36px' }}>
+            <span style={{
+              fontFamily: '"Barlow Condensed", sans-serif',
+              fontWeight: 900,
+              fontSize: '21px',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              color: '#ffffff',
+              lineHeight: 1,
+            }}>EVOLVED</span>
+            {/* Red mic circle */}
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+              <circle cx="14" cy="14" r="14" fill="#C0272D"/>
+              {/* Mic body */}
+              <rect x="11" y="6" width="6" height="10" rx="3" fill="white"/>
+              {/* Mic stand arc */}
+              <path d="M8 14c0 3.314 2.686 6 6 6s6-2.686 6-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+              {/* Mic stem */}
+              <line x1="14" y1="20" x2="14" y2="23" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+              {/* Base */}
+              <line x1="11" y1="23" x2="17" y2="23" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            <span style={{
+              fontFamily: '"Barlow Condensed", sans-serif',
+              fontWeight: 900,
+              fontSize: '21px',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              color: '#ffffff',
+              lineHeight: 1,
+            }}>PROS</span>
+          </div>
         </Link>
 
         {/* Primary nav links — desktop */}

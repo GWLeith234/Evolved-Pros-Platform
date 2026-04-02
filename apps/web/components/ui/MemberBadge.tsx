@@ -20,25 +20,27 @@ const BADGE_CONFIG = {
     ),
   },
   vip: {
-    background: 'rgba(10,191,163,0.08)',
-    border: '1px solid rgba(10,191,163,0.4)',
-    color: '#0ABFA3',
+    background: '#0ABFA3',
+    border: '1px solid rgba(0,0,0,0.1)',
+    color: '#ffffff',
     borderRadius: '20px',
+    boxShadow: '0 2px 8px rgba(10,191,163,0.35)',
     label: 'VIP MEMBER',
     icon: (size: number) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="white" stroke="none">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
       </svg>
     ),
   },
   pro: {
-    background: 'rgba(201,168,76,0.08)',
-    border: '1px solid rgba(201,168,76,0.4)',
-    color: '#C9A84C',
+    background: '#C9A84C',
+    border: '1px solid rgba(0,0,0,0.1)',
+    color: '#ffffff',
     borderRadius: '20px',
+    boxShadow: '0 2px 8px rgba(201,168,76,0.35)',
     label: 'PROFESSIONAL',
     icon: (size: number) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="#C9A84C" stroke="none">
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="white" stroke="none">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
       </svg>
     ),
@@ -71,6 +73,8 @@ export function MemberBadge({ tier, size = 'md' }: MemberBadgeProps) {
         color: config.color,
         lineHeight: 1.4,
         flexShrink: 0,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...((config as any).boxShadow ? { boxShadow: (config as any).boxShadow } : {}),
       }}
     >
       <span style={{ color: config.color, display: 'flex', alignItems: 'center', fontSize: '9px' }}>
