@@ -5,7 +5,6 @@ import type { CourseWithProgress } from '@/lib/academy/types'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
-const STORAGE = process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/Branding/'
 
 interface CourseCardProps {
   course: CourseWithProgress
@@ -24,7 +23,7 @@ function LockIcon() {
 export function CourseCard({ course, isLocked }: CourseCardProps) {
   const router = useRouter()
   const isComplete = course.progressPct === 100
-  const imageUrl = STORAGE + (PILLAR_CONFIG[course.pillarNumber]?.image ?? '')
+  const imageUrl = PILLAR_CONFIG[course.pillarNumber]?.image ?? ''
 
   function handleClick() {
     if (isLocked) return

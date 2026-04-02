@@ -156,7 +156,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
         <div
           style={{
             position: 'absolute', inset: 0,
-            backgroundImage: `url(/images/${config.image})`,
+            backgroundImage: `url(${config.image})`,
             backgroundSize: 'cover', backgroundPosition: 'center',
             backgroundColor: '#1b3c5a',
           }}
@@ -377,7 +377,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
         <div
           style={{
             position: 'absolute', inset: 0,
-            backgroundImage: `url(/images/${config.image})`,
+            backgroundImage: `url(${config.image})`,
             backgroundSize: 'cover', backgroundPosition: 'center 40%',
             backgroundColor: '#1b3c5a',
           }}

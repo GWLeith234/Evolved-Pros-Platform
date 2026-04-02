@@ -35,10 +35,7 @@ const NEXT_PILLAR_LABELS: Record<number, string> = {
 export function Capstone({ courseId, pillarNumber, memberName }: Props) {
   const config = PILLAR_CONFIG[pillarNumber]
   const color = config?.color ?? '#C9A84C'
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
-  const image = config?.image
-    ? `${supabaseUrl}/storage/v1/object/public/Branding/${config.image}`
-    : null
+  const image = config?.image ?? null
   const label = config?.label ?? 'Pillar'
 
   const [content, setContent] = useState('')

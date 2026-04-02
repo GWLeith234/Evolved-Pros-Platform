@@ -6,7 +6,6 @@ import { LessonListWithAds } from './LessonListWithAds'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import type { LessonWithProgress } from '@/lib/academy/types'
 
-const STORAGE = process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/Branding/'
 
 interface LessonListPanelProps {
   course: {
@@ -30,7 +29,7 @@ function hexToRgb(hex: string): string {
 export function LessonListPanel({ course, lessons, currentLessonId, progressPct }: LessonListPanelProps) {
   const pillarNum = course.pillarNumber ?? 1
   const config = PILLAR_CONFIG[pillarNum] ?? PILLAR_CONFIG[1]
-  const bannerUrl = STORAGE + config.image
+  const bannerUrl = config.image
   const heroRef = useRef<HTMLDivElement>(null)
   const [stickyVisible, setStickyVisible] = useState(false)
 
