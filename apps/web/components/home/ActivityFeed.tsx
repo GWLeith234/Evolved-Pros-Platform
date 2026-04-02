@@ -25,9 +25,16 @@ type CompletionRow = {
   } | null
 }
 
+type PostRow = {
+  id: string
+  body: string
+  created_at: string
+}
+
 interface ActivityFeedProps {
   notifications: NotificationRow[]
   completions: CompletionRow[]
+  posts?: PostRow[]
 }
 
 type FeedItem = {
@@ -64,8 +71,22 @@ const DOT_COLORS: Record<string, string> = {
   system_general: '#68a2b9',
 }
 
-function buildItems(notifications: NotificationRow[], completions: CompletionRow[]): FeedItem[] {
+function buildItems(notifications: NotificationRow[], completions: CompletionRow[], posts: PostRow[]): FeedItem[] {
   const items: FeedItem[] = []
+
+  for (const p of posts) {
+    const preview = p.body.length > 65 ? p.body.slice(0, 65).trimEnd() + '…' : p.body
+    items.push({
+      id: `post-${p.id}`,
+      dotColor: '#0ABFA3',
+      richParts: [
+        { label: 'You posted: ', bold: false },
+        { label: `"${preview}"`, bold: true },
+      ],
+      time: p.created_at,
+      actionUrl: '/community',
+    })
+  }
 
   for (const n of notifications) {
     items.push({
@@ -103,8 +124,8 @@ function buildItems(notifications: NotificationRow[], completions: CompletionRow
   return items.slice(0, 5)
 }
 
-export function ActivityFeed({ notifications, completions }: ActivityFeedProps) {
-  const items = buildItems(notifications, completions)
+export function ActivityFeed({ notifications, completions, posts = [] }: ActivityFeedProps) {
+  const items = buildItems(notifications, completions, posts)
 
   return (
     <Card>

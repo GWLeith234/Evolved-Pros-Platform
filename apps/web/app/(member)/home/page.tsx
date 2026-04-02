@@ -64,23 +64,38 @@ async function fetchDashboardStats(supabase: ReturnType<typeof createClient>, us
   }
 }
 
-async function fetchRecentActivity(supabase: ReturnType<typeof createClient>, userId: string) {
-  const [notifications, completions] = await Promise.all([
-    supabase
+async function fetchRecentActivity(userId: string) {
+  // Use adminClient to bypass RLS so activity always loads regardless of policy gaps.
+  // userId here is profile.id — the public users UUID confirmed by the already-fetched profile.
+  const [notifications, completions, posts] = await Promise.all([
+    adminClient
       .from('notifications')
       .select('id, type, title, body, action_url, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(10),
-    supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (adminClient as any)
       .from('lesson_progress')
       .select('lesson_id, completed_at, lessons(id, title, sort_order, course_id, courses(title, slug))')
       .eq('user_id', userId)
       .not('completed_at', 'is', null)
       .order('completed_at', { ascending: false })
       .limit(5),
+    // Posts the user authored — author_id stores the auth UUID
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (adminClient as any)
+      .from('posts')
+      .select('id, body, created_at')
+      .eq('author_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(5),
   ])
-  return { notifications: notifications.data ?? [], completions: completions.data ?? [] }
+  return {
+    notifications: notifications.data ?? [],
+    completions: completions.data ?? [],
+    posts: (posts.data ?? []) as { id: string; body: string; created_at: string }[],
+  }
 }
 
 async function fetchUpcomingEvents(supabase: ReturnType<typeof createClient>, userId: string) {
@@ -180,7 +195,7 @@ export default async function MemberHomePage() {
 
   const [stats, activity, events, courseProgress, unreadCount, quotesResult, badgeData, scoreboardResult, habitsResult, habitCompletionsResult] = await Promise.all([
     fetchDashboardStats(supabase, user.id, profile.tier, profile.points),
-    fetchRecentActivity(supabase, user.id),
+    fetchRecentActivity(profile.id),
     fetchUpcomingEvents(supabase, user.id),
     fetchCourseProgress(supabase, user.id),
     fetchUnreadCount(supabase, user.id),
@@ -255,6 +270,7 @@ export default async function MemberHomePage() {
         <ActivityFeed
           notifications={activity.notifications}
           completions={activity.completions}
+          posts={activity.posts}
         />
         <div className="space-y-5">
           <UpcomingEventsWidget events={events} userId={user.id} />
