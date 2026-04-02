@@ -43,6 +43,13 @@ export function WelcomeBanner({ displayName, tier, avatarUrl, quote }: WelcomeBa
 
   const tierLabel = tier ? tier.toUpperCase() : null
 
+  // Professional = gold, VIP = teal, Community = blue, fallback = red
+  const tierBg =
+    tier?.toLowerCase() === 'pro'       ? '#C9A84C' :
+    tier?.toLowerCase() === 'vip'       ? '#0ABFA3' :
+    tier?.toLowerCase() === 'community' ? '#68a2b9' :
+    '#ef0e30'
+
   return (
     <div className="relative overflow-hidden rounded-lg" style={{ minHeight: '220px' }}>
       {/* Background image — suppressHydrationWarning covers the src attribute change only */}
@@ -97,7 +104,7 @@ export function WelcomeBanner({ displayName, tier, avatarUrl, quote }: WelcomeBa
                   bottom: '4px',
                   left: '4px',
                   transform: 'translate(-25%, 25%)',
-                  background: '#ef0e30',
+                  background: tierBg,
                   color: 'white',
                   fontSize: '10px',
                   letterSpacing: '0.08em',
