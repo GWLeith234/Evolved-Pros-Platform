@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const TEAL = '#0ABFA3'
 
@@ -260,6 +260,24 @@ function CadenceCard({ type, title, description, saved, courseId, onSaved }: Car
 export function ReviewCadences({ courseId, initialCadences = [] }: Props) {
   const [cadences, setCadences] = useState<CadenceRow[]>(initialCadences)
 
+  // Pre-load saved cadences on mount (handles hard-refresh when initialCadences is empty)
+  useEffect(() => {
+    if (initialCadences.length > 0) return // server already provided data
+    const loadCadences = async () => {
+      try {
+        const res = await fetch(`/api/review-cadences?course_id=${courseId}`)
+        if (!res.ok) return
+        const data = await res.json() as { cadences?: CadenceRow[] }
+        if (data.cadences && data.cadences.length > 0) {
+          setCadences(data.cadences)
+        }
+      } catch {
+        // silently ignore — user can still save fresh cadences
+      }
+    }
+    loadCadences()
+  }, [courseId, initialCadences.length])
+
   function getSaved(type: CadenceType): CadenceRow | null {
     return cadences.find(c => c.cadence_type === type) ?? null
   }
@@ -296,7 +314,7 @@ export function ReviewCadences({ courseId, initialCadences = [] }: Props) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {CARDS.map(card => (
           <CadenceCard
-            key={card.type}
+            key={getSaved(card.type)?.id ?? card.type}
             type={card.type}
             title={card.title}
             description={card.description}
