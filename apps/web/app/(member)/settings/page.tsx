@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { NotificationPrefsForm } from '@/components/notifications/NotificationPrefsForm'
+import { ProfileAdUnit } from '@/components/profile/ProfileAdUnit'
 import { hasTierAccess } from '@/lib/tier'
 
 export const dynamic = 'force-dynamic'
@@ -12,11 +14,22 @@ export default async function SettingsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('id, display_name, full_name, avatar_url, banner_url, bio, role_title, location, tier, notification_preferences, company, linkedin_url, website_url, twitter_handle, phone, phone_visible, current_pillar, goal_90day, goal_visible')
-    .eq('id', user.id)
-    .single()
+  const [{ data: profile }, { data: adData }] = await Promise.all([
+    supabase
+      .from('users')
+      .select('id, display_name, full_name, avatar_url, banner_url, bio, role_title, location, tier, notification_preferences, company, linkedin_url, website_url, twitter_handle, phone, phone_visible, current_pillar, goal_90day, goal_visible')
+      .eq('id', user.id)
+      .single(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (adminClient.from('platform_ads' as any) as any)
+      .select('id, image_url, headline, tool_name, cta_text, link_url, click_url, sponsor_name')
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle(),
+  ])
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const settingsAd = (adData as any) ?? null
 
   const notifPrefs = {
     new_replies:     (profile?.notification_preferences as Record<string, unknown> | null)?.new_replies !== false,
@@ -139,6 +152,12 @@ export default async function SettingsPage() {
           <NotificationPrefsForm initialPrefs={notifPrefs} />
         </div>
       </div>
+
+      {settingsAd && (
+        <div className="mt-6">
+          <ProfileAdUnit ad={settingsAd} />
+        </div>
+      )}
     </div>
   )
 }
