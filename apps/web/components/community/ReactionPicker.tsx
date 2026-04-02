@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom'
 import type { Reaction } from '@/lib/community/types'
 
 export const REACTIONS = [
-  { type: 'heart',        emoji: '❤️', label: 'Love' },
+  { type: 'heart',        emoji: '💛', label: 'Love' },
   { type: 'thumbs_up',   emoji: '👍', label: 'Thumbs Up' },
   { type: 'clap',        emoji: '👏', label: 'Clap' },
   { type: 'thumbs_down', emoji: '👎', label: 'Thumbs Down' },
