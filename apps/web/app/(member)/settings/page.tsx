@@ -5,6 +5,7 @@ import { ProfileEditForm } from '@/components/profile/ProfileEditForm'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { NotificationPrefsForm } from '@/components/notifications/NotificationPrefsForm'
 import { ProfileAdUnit } from '@/components/profile/ProfileAdUnit'
+import { ThemeSelector } from '@/components/settings/ThemeSelector'
 import { hasTierAccess } from '@/lib/tier'
 
 export const dynamic = 'force-dynamic'
@@ -15,9 +16,10 @@ export default async function SettingsPage() {
   if (!user) redirect('/login')
 
   const [{ data: profile }, { data: adData }] = await Promise.all([
-    supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any)
       .from('users')
-      .select('id, display_name, full_name, avatar_url, banner_url, bio, role_title, location, tier, notification_preferences, company, linkedin_url, website_url, twitter_handle, phone, phone_visible, current_pillar, goal_90day, goal_visible')
+      .select('id, display_name, full_name, avatar_url, banner_url, bio, role_title, location, tier, notification_preferences, company, linkedin_url, website_url, twitter_handle, phone, phone_visible, current_pillar, goal_90day, goal_visible, theme')
       .eq('id', user.id)
       .single(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -150,6 +152,27 @@ export default async function SettingsPage() {
         </div>
         <div className="px-6 py-6">
           <NotificationPrefsForm initialPrefs={notifPrefs} />
+        </div>
+      </div>
+
+      <div
+        className="rounded-lg overflow-hidden mt-6"
+        style={{ backgroundColor: '#0d1520', border: '1px solid rgba(255,255,255,0.08)' }}
+      >
+        <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <h2
+            className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]"
+            style={{ color: '#FFFFFF' }}
+          >
+            Appearance
+          </h2>
+          <p className="font-body text-[12px] mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            Choose your preferred colour scheme.
+          </p>
+        </div>
+        <div className="px-6 py-6">
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <ThemeSelector initialTheme={(profile as any)?.theme ?? 'dark'} />
         </div>
       </div>
 

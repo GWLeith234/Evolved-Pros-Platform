@@ -106,24 +106,37 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
   const isQuestion = post.postType === 'question'
   const isAnnounce = post.postType === 'announce'
 
+  // Accent colour: pillar → pillar colour, else postType colour, else general teal
+  const accentColor = pillarConf?.color
+    ?? (isWin ? '#C9A84C' : isAnnounce ? '#ef0e30' : isQuestion ? '#60A5FA' : '#68a2b9')
+
   const actionBtnClass = 'flex items-center gap-1.5 font-condensed font-semibold uppercase text-[11px] tracking-wide text-[#7a8a96] hover:text-[#ef0e30] transition-colors duration-150'
 
   const cardStyle: React.CSSProperties = isWin
     ? {
         background: 'linear-gradient(135deg, #faf7f0, #fff8e6)',
-        border: '1px solid rgba(201,168,76,0.25)',
-        padding: '20px',
+        borderTop: '1px solid rgba(201,168,76,0.25)',
+        borderRight: '1px solid rgba(201,168,76,0.25)',
+        borderBottom: '1px solid rgba(201,168,76,0.25)',
+        borderLeft: `3px solid ${accentColor}`,
+        padding: '20px 20px 20px 17px',
       }
     : isAnnounce
     ? {
         backgroundColor: '#112535',
-        border: '1px solid rgba(255,255,255,0.08)',
-        padding: '20px',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+        borderRight: '1px solid rgba(255,255,255,0.08)',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
+        borderLeft: `3px solid ${accentColor}`,
+        padding: '20px 20px 20px 17px',
       }
     : {
         backgroundColor: 'var(--card-bg)',
-        border: '1px solid rgba(27,60,90,0.12)',
-        padding: '20px',
+        borderTop: '1px solid rgba(27,60,90,0.12)',
+        borderRight: '1px solid rgba(27,60,90,0.12)',
+        borderBottom: '1px solid rgba(27,60,90,0.12)',
+        borderLeft: `3px solid ${accentColor}`,
+        padding: '20px 20px 20px 17px',
       }
 
   return (
@@ -131,10 +144,18 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
       className="rounded-lg transition-all duration-150"
       style={cardStyle}
       onMouseEnter={e => {
-        if (!isWin && !isAnnounce) e.currentTarget.style.borderColor = '#a8cdd9'
+        if (!isWin && !isAnnounce) {
+          e.currentTarget.style.borderTopColor = '#a8cdd9'
+          e.currentTarget.style.borderRightColor = '#a8cdd9'
+          e.currentTarget.style.borderBottomColor = '#a8cdd9'
+        }
       }}
       onMouseLeave={e => {
-        if (!isWin && !isAnnounce) e.currentTarget.style.borderColor = 'rgba(27,60,90,0.12)'
+        if (!isWin && !isAnnounce) {
+          e.currentTarget.style.borderTopColor = 'rgba(27,60,90,0.12)'
+          e.currentTarget.style.borderRightColor = 'rgba(27,60,90,0.12)'
+          e.currentTarget.style.borderBottomColor = 'rgba(27,60,90,0.12)'
+        }
       }}
     >
       {/* Header */}

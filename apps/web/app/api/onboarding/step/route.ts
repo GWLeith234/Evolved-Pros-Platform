@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 export async function PATCH(req: Request) {
@@ -13,7 +14,7 @@ export async function PATCH(req: Request) {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await supabase.from('users').update({ onboarding_step: step } as any).eq('id', user.id)
+  const { error } = await (adminClient as any).from('users').update({ onboarding_step: step }).eq('email', user.email)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   return NextResponse.json({ ok: true })

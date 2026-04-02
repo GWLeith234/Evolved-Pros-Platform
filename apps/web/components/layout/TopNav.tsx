@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
+// useEffect kept for click-outside handler
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { NotifBell } from '@/components/notifications/NotifBell'
@@ -22,7 +23,7 @@ interface TopNavProps {
   unreadCount?: number
   logoUrl?: string | null
   logoLightUrl?: string | null
-  membersCanToggleTheme?: boolean
+  membersCanToggleTheme?: boolean  // kept for backwards-compat; no longer used
 }
 
 function getInitials(name: string | null | undefined): string {
@@ -35,29 +36,6 @@ function getInitials(name: string | null | undefined): string {
     .toUpperCase()
 }
 
-function SunIcon() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="5"/>
-      <line x1="12" y1="1" x2="12" y2="3"/>
-      <line x1="12" y1="21" x2="12" y2="23"/>
-      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-      <line x1="1" y1="12" x2="3" y2="12"/>
-      <line x1="21" y1="12" x2="23" y2="12"/>
-      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-    </svg>
-  )
-}
-
-function MoonIcon() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-    </svg>
-  )
-}
 
 const NEXT_EPISODE_DAY       = 'Mon'
 const NEXT_EPISODE_MONTH_DAY = 'April 20'
@@ -70,11 +48,10 @@ const NAV_ITEMS = [
   { label: 'Podcast',   href: '/podcast' },
 ]
 
-export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, membersCanToggleTheme = true }: TopNavProps) {
+export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, membersCanToggleTheme: _membersCanToggleTheme }: TopNavProps) {
   const pathname = usePathname()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const [isDark, setIsDark] = useState(true)
   const [georgeOpen, setGeorgeOpen] = useState(false)
 
   const displayName = profile.display_name ?? profile.full_name ?? ''
@@ -89,24 +66,6 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
-
-  // Sync toggle state with whatever the inline script already applied
-  useEffect(() => {
-    const isLight = document.documentElement.classList.contains('light-mode')
-    setIsDark(!isLight)
-  }, [])
-
-  function handleThemeToggle() {
-    const goLight = isDark
-    setIsDark(!isDark)
-    if (goLight) {
-      document.documentElement.classList.add('light-mode')
-      localStorage.setItem('ep_theme', 'light')
-    } else {
-      document.documentElement.classList.remove('light-mode')
-      localStorage.setItem('ep_theme', 'dark')
-    }
-  }
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -180,21 +139,6 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
             </div>
             <span style={{ color: '#ef0e30', fontSize: '12px', marginLeft: '2px' }}>▶</span>
           </a>
-
-          {/* Theme toggle */}
-          {membersCanToggleTheme && (
-            <button
-              type="button"
-              onClick={handleThemeToggle}
-              className="w-8 h-8 flex items-center justify-center rounded flex-shrink-0 transition-colors"
-              style={{ color: 'rgba(255,255,255,0.5)' }}
-              onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.9)')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.5)')}
-              title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {isDark ? <SunIcon /> : <MoonIcon />}
-            </button>
-          )}
 
           {/* Ask George */}
           <Tooltip content="Ask George">

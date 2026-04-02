@@ -25,11 +25,12 @@ export async function PATCH(req: Request) {
   }
 
   // Use adminClient to bypass RLS on the users table
+  // Use email lookup because auth UUID may differ from public users UUID
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (adminClient as any)
     .from('users')
     .update(update)
-    .eq('id', user.id)
+    .eq('email', user.email)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })

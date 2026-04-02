@@ -103,10 +103,16 @@ export async function middleware(request: NextRequest) {
   // Only applies to member-facing routes — skip admin, API, and /onboarding itself.
   const isMemberRoute = !pathname.startsWith('/api/') && !pathname.startsWith('/admin') && !pathname.startsWith('/onboarding')
   if (isMemberRoute) {
-    const { data: onboardProfile } = await supabase
+    // Use email (not id) because auth UUID may differ from public.users UUID
+    const onboardingAdminClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+    const { data: onboardProfile } = await onboardingAdminClient
       .from('users')
       .select('onboarding_completed')
-      .eq('id', user.id)
+      .eq('email', user.email!)
       .single()
 
     if (!onboardProfile?.onboarding_completed) {
@@ -148,5 +154,6 @@ export const config = {
     '/api/posts/:path*',
     '/api/admin/:path*',
     '/api/onboarding/:path*',
+    '/api/settings/:path*',
   ],
 }
