@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { LogoMark } from '@/components/ui/LogoMark'
 
 export default function LoginPage() {
   const [tab, setTab] = useState<'password' | 'magic'>('password')
@@ -58,12 +59,7 @@ export default function LoginPage() {
         <div className="h-1 bg-[#ef0e30]" />
         <div className="px-8 py-10">
           <div className="mb-8 flex justify-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_nav_light.png"
-              alt="Evolved Pros"
-              style={{ height: '64px', width: 'auto', objectFit: 'contain' }}
-            />
+            <LogoMark variant="dark" height={56} />
           </div>
 
           {sent ? (
