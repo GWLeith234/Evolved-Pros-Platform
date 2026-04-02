@@ -103,40 +103,45 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
       <div style={{ padding: '0 28px 28px' }}>
         {/* Avatar + Identity */}
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '20px', marginBottom: '20px' }}>
-          {/* Avatar — overlaps banner bottom edge */}
-          <div
-            style={{
-              width: '120px', height: '120px', borderRadius: '50%',
-              flexShrink: 0, overflow: 'hidden',
-              marginTop: '-64px', position: 'relative', zIndex: 10,
-              border: `3px solid ${tc}`,
-              boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
-              backgroundColor: '#ef0e30',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            {user.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={user.avatar_url}
-                alt={displayName}
-                style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '50%' }}
-              />
-            ) : (
-              <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, color: 'white', fontSize: '34px' }}>
-                {getInitials(displayName)}
-              </span>
-            )}
+          {/* Avatar — overlaps banner bottom edge, tier badge overlays bottom-left corner */}
+          <div style={{ position: 'relative', display: 'inline-block', flexShrink: 0 }}>
+            <div
+              style={{
+                width: '120px', height: '120px', borderRadius: '50%',
+                overflow: 'hidden',
+                marginTop: '-64px', position: 'relative', zIndex: 10,
+                border: `3px solid ${tc}`,
+                boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+                backgroundColor: '#ef0e30',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              {user.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.avatar_url}
+                  alt={displayName}
+                  style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '50%' }}
+                />
+              ) : (
+                <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, color: 'white', fontSize: '34px' }}>
+                  {getInitials(displayName)}
+                </span>
+              )}
+            </div>
+            {/* Tier badge — bottom-left corner of avatar */}
+            <div style={{ position: 'absolute', bottom: '4px', left: '4px', transform: 'translate(-25%, 25%)', zIndex: 20 }}>
+              <MemberBadge tier={user.tier} size="md" />
+            </div>
           </div>
 
           {/* Identity */}
           <div style={{ paddingBottom: '4px', flex: 1, minWidth: 0 }}>
-            {/* Row 1: name + tier badge */}
+            {/* Row 1: name only */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
               <h1 style={{ fontSize: '28px', fontWeight: 900, color: 'white', lineHeight: 1.05, fontFamily: '"Arial Black", Arial, sans-serif', margin: 0 }}>
                 {displayName}
               </h1>
-              <MemberBadge tier={user.tier} size="md" />
             </div>
             {/* Row 2: role · location · pillar */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>

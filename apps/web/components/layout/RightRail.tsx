@@ -92,7 +92,7 @@ export function RightRail() {
 
   return (
     <aside
-      className="hidden xl:flex flex-col flex-shrink-0 py-6 px-4"
+      className="hidden"
       style={{
         width: '280px',
         borderLeft: '1px solid rgba(27,60,90,0.08)',
