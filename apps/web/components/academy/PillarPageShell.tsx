@@ -62,11 +62,9 @@ const PILLAR_AUDIT_QUESTIONS: Record<number, { id: string; text: string }[]> = {
     { id: 'p5-3', text: 'How accountable do you hold yourself to your weekly commitments?' },
   ],
   6: [
-    { id: 'p6q1', text: 'I consistently follow through on my plans and commitments.' },
-    { id: 'p6q2', text: 'I can go from decision to action quickly with minimal friction.' },
-    { id: 'p6q3', text: 'I measure my outputs, not just my inputs and efforts.' },
-    { id: 'p6q4', text: 'I eliminate distractions that interrupt deep execution.' },
-    { id: 'p6q5', text: 'I finish what I start and close loops reliably.' },
+    { id: 'p6-1', text: 'How consistent is your daily execution right now — honestly?' },
+    { id: 'p6-2', text: 'How clearly defined is your daily habit stack and when each habit fires?' },
+    { id: 'p6-3', text: 'How well do you review your own performance each week and adjust?' },
   ],
 }
 

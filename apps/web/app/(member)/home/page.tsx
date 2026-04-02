@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { CommitmentTracker } from '@/components/academy/CommitmentTracker'
+import { HabitWidget } from '@/components/home/HabitWidget'
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
 import { StatRow } from '@/components/home/StatRow'
 import { ActivityFeed } from '@/components/home/ActivityFeed'
@@ -175,7 +176,9 @@ export default async function MemberHomePage() {
     (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
   )
 
-  const [stats, activity, events, courseProgress, unreadCount, quotesResult, badgeData, scoreboardResult] = await Promise.all([
+  const today = new Date().toISOString().split('T')[0]
+
+  const [stats, activity, events, courseProgress, unreadCount, quotesResult, badgeData, scoreboardResult, habitsResult, habitCompletionsResult] = await Promise.all([
     fetchDashboardStats(supabase, user.id, profile.tier, profile.points),
     fetchRecentActivity(supabase, user.id),
     fetchUpcomingEvents(supabase, user.id),
@@ -191,6 +194,21 @@ export default async function MemberHomePage() {
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
+    // Habit stack
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any)
+      .from('habit_stacks')
+      .select('id, name, time_of_day, sort_order')
+      .eq('user_id', user.id)
+      .order('sort_order')
+      .limit(7),
+    // Today's habit completions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any)
+      .from('habit_completions')
+      .select('habit_id')
+      .eq('user_id', user.id)
+      .eq('completed_date', today),
   ])
 
   const quotes = quotesResult.data ?? []
@@ -204,6 +222,9 @@ export default async function MemberHomePage() {
     lead_2_label: string
     lead_2_weekly_target: number
   } | null
+
+  const homeHabits = (habitsResult.data ?? []) as { id: string; name: string; time_of_day: string }[]
+  const homeCompletedIds = ((habitCompletionsResult.data ?? []) as { habit_id: string }[]).map(c => c.habit_id)
 
   const displayName = (profile.full_name ? profile.full_name.split(' ')[0] : null) ?? profile.display_name ?? 'Member'
   const upcomingEventCount = events.filter(e => !e.isRegistered).length
@@ -238,6 +259,8 @@ export default async function MemberHomePage() {
         <div className="space-y-5">
           <UpcomingEventsWidget events={events} userId={user.id} />
           <AcademyProgressWidget courses={courseProgress} />
+          {/* Habit stack widget */}
+          <HabitWidget initialHabits={homeHabits} initialCompletions={homeCompletedIds} />
           {/* CommitmentTracker widget — weekly commitments from the Academy */}
           <CommitmentTracker weekStart={getCurrentMonday()} />
           {/* Scoreboard widget */}

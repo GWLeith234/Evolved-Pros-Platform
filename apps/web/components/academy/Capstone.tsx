@@ -20,7 +20,7 @@ const CAPSTONE_PROMPTS: Record<number, string> = {
   3: 'Describe a moment when your mental toughness was truly tested in sales. What did you do, what did you learn, and what specific commitment are you making to strengthen your resilience in the area where you scored lowest in your diagnostic?',
   4: 'Define your Wildly Important Goal in full. What is your current state, your target state, and your deadline? What are the 2-3 lead measures that will drive your lag result? What will you say NO to in order to protect your focus on this goal?',
   5: 'Describe your current Scoreboard. What is your WIG, your lag measure, and your two lead measures? What have you learned from tracking your numbers weekly, and what one accountability commitment are you making to ensure you execute your lead measures every week without exception?',
-  6: 'Define what elite execution looks like for you. What systems, habits, and environments will you put in place to ensure you consistently follow through on your most important work?',
+  6: 'Describe your personal execution system. What are your 3–7 non-negotiable daily habits, when do they fire, and how do you review your performance each week? What does your life look like in 3 years if you execute this stack without exception every single day?',
 }
 
 const NEXT_PILLAR_LABELS: Record<number, string> = {
@@ -29,7 +29,7 @@ const NEXT_PILLAR_LABELS: Record<number, string> = {
   3: 'Begin Strategic Approach',
   4: 'Begin Accountability',
   5: 'Begin Execution',
-  6: 'View Dashboard',
+  6: 'Complete the Program',
 }
 
 export function Capstone({ courseId, pillarNumber, memberName }: Props) {
