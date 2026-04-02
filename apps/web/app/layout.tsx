@@ -1,6 +1,6 @@
 // cache-bust: 2026-03-25
 import type { Metadata } from 'next'
-import { Playfair_Display, Barlow_Condensed, Barlow, Montserrat } from 'next/font/google'
+import { Playfair_Display, Barlow_Condensed, Barlow, Bebas_Neue } from 'next/font/google'
 import { createClient } from '@/lib/supabase/server'
 import { ThemeInit } from '@/components/ThemeInit'
 import './globals.css'
@@ -24,10 +24,10 @@ const barlow = Barlow({
   weight: ['300', '400', '500', '600'],
 })
 
-const montserrat = Montserrat({
+const bebasNeue = Bebas_Neue({
   subsets: ['latin'],
   variable: '--font-logo',
-  weight: ['800'],
+  weight: ['400'],
 })
 
 const LOGO_CIRCLE_DARK = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_circle_dark.png'
@@ -70,7 +70,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${barlowCondensed.variable} ${barlow.variable} ${montserrat.variable}`}
+      className={`${playfair.variable} ${barlowCondensed.variable} ${barlow.variable} ${bebasNeue.variable}`}
       suppressHydrationWarning
     >
       <head>
