@@ -51,12 +51,12 @@ export default async function SettingsPage() {
           Account
         </p>
         <h1
-          className="font-display font-black leading-tight"
-          style={{ fontSize: '28px', color: '#FFFFFF' }}
+          className="font-display font-black leading-tight text-white"
+          style={{ fontSize: '28px' }}
         >
           Settings
         </h1>
-        <p className="font-body text-[14px] mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+        <p className="font-body text-[14px] mt-1 text-white/50">
           Update your profile information.
         </p>
       </div>

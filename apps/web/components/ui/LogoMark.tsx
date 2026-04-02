@@ -1,6 +1,6 @@
-import { Bebas_Neue } from 'next/font/google'
-
-const bebasNeue = Bebas_Neue({ weight: '400', subsets: ['latin'] })
+// Font loaded via --font-logo CSS variable in app/layout.tsx (Bebas_Neue weight 400)
+// Using var(--font-logo) here avoids next/font/google in a component that is
+// consumed by Client Components (TopNav), which can cause hydration mismatches.
 
 const ICON_URL =
   'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/ep_podcast_icon_transparent.png'
@@ -17,12 +17,11 @@ export function LogoMark({ variant = 'light', height = 36 }: LogoMarkProps) {
   const fontSize  = Math.round(height * 0.88)
 
   const letterStyle: React.CSSProperties = {
+    fontFamily: 'var(--font-logo), "Bebas Neue", sans-serif',
     fontSize,
     letterSpacing: '0.05em',
     color: textColor,
     lineHeight: 1,
-    // Bebas Neue trailing letter-spacing on last char shifts the icon slightly —
-    // pull the span right-edge back flush with the glyph.
     display: 'inline-block',
   }
 
@@ -37,9 +36,7 @@ export function LogoMark({ variant = 'light', height = 36 }: LogoMarkProps) {
       }}
     >
       {/* "EVOLVED PR" */}
-      <span className={bebasNeue.className} style={letterStyle}>
-        EVOLVED PR
-      </span>
+      <span style={letterStyle}>EVOLVED PR</span>
 
       {/* Icon replaces the O in PROS — plain img so overflow:hidden clips reliably */}
       <div
@@ -62,9 +59,7 @@ export function LogoMark({ variant = 'light', height = 36 }: LogoMarkProps) {
       </div>
 
       {/* "S" */}
-      <span className={bebasNeue.className} style={letterStyle}>
-        S
-      </span>
+      <span style={letterStyle}>S</span>
     </div>
   )
 }
