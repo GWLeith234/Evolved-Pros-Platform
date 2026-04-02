@@ -7,6 +7,8 @@ import { PillarPageShell } from '@/components/academy/PillarPageShell'
 import { LiveSessionCard } from '@/components/academy/LiveSessionCard'
 import { CompoundCalculator } from '@/components/academy/CompoundCalculator'
 import { HabitStackBuilder } from '@/components/academy/HabitStackBuilder'
+import { ReviewCadences } from '@/components/academy/ReviewCadences'
+import { HabitHistoryChart } from '@/components/academy/HabitHistoryChart'
 import { ScenarioMCQ } from '@/components/academy/ScenarioMCQ'
 import { PeerDiscussion } from '@/components/academy/PeerDiscussion'
 import { Capstone } from '@/components/academy/Capstone'
@@ -155,9 +157,9 @@ export default async function Page() {
     fetchCourseByPillarNumber(supabase, 6),
   ])
 
-  // Fetch habits + today's completions server-side for SSR
+  // Fetch habits, today's completions, and review cadences server-side
   const today = new Date().toISOString().split('T')[0]
-  const [habitsRes, completionsRes] = p6Course ? await Promise.all([
+  const [habitsRes, completionsRes, cadencesRes] = p6Course ? await Promise.all([
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any)
       .from('habit_stacks')
@@ -171,11 +173,18 @@ export default async function Page() {
       .select('habit_id')
       .eq('user_id', user.id)
       .eq('completed_date', today),
-  ]) : [{ data: [] }, { data: [] }]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any)
+      .from('review_cadences')
+      .select('id, cadence_type, schedule_json, focus_area')
+      .eq('user_id', user.id)
+      .eq('course_id', p6Course.id),
+  ]) : [{ data: [] }, { data: [] }, { data: [] }]
 
   const memberName = profile?.full_name ?? profile?.display_name ?? null
   const initialHabits = (habitsRes.data ?? []) as { id: string; name: string; time_of_day: string; sort_order: number; course_id: string | null; created_at: string }[]
   const initialCompletions = ((completionsRes.data ?? []) as { habit_id: string }[]).map(c => c.habit_id)
+  const initialCadences = (cadencesRes.data ?? []) as { id: string; cadence_type: 'weekly' | 'monthly' | 'quarterly'; schedule_json: Record<string, string>; focus_area: string | null }[]
 
   return (
     <PillarPageShell pillarNumber={6} showReflection showAudit>
@@ -186,6 +195,15 @@ export default async function Page() {
           courseId={p6Course.id}
           initialHabits={initialHabits}
           initialCompletions={initialCompletions}
+        />
+      )}
+      {p6Course && (
+        <HabitHistoryChart userId={user.id} />
+      )}
+      {p6Course && (
+        <ReviewCadences
+          courseId={p6Course.id}
+          initialCadences={initialCadences}
         />
       )}
       {p6Course && (
