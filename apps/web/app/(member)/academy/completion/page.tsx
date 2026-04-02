@@ -19,29 +19,45 @@ export default async function CompletionPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [profileRes, badgesRes] = await Promise.all([
+  const [profileRes, alumniRes, capstoneCoursesRes] = await Promise.all([
     supabase
       .from('users')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .select('display_name, full_name, program_completed_at' as any)
       .eq('id', user.id)
       .single(),
+    // Alumni badge only (pillar_number = 7)
     adminClient
       .from('member_badges')
-      .select('pillar_number, awarded_at')
-      .eq('user_id', user.id),
+      .select('awarded_at')
+      .eq('user_id', user.id)
+      .eq('pillar_number', 7)
+      .maybeSingle(),
+    // Submitted capstones joined to courses to get pillar_number
+    // Uses user.id from auth — same UUID used when inserting capstones
+    adminClient
+      .from('capstones')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .select('course_id, courses(pillar_number)' as any)
+      .eq('user_id', user.id)
+      .eq('status', 'submitted'),
   ])
 
   const profile = profileRes.data as { display_name: string | null; full_name: string | null; program_completed_at: string | null } | null
-  const badges = (badgesRes.data ?? []) as { pillar_number: number; awarded_at: string | null }[]
+  const alumniRow = alumniRes.data as { awarded_at: string | null } | null
 
   const displayName = profile?.display_name ?? profile?.full_name ?? 'Member'
   const completedAt = profile?.program_completed_at
     ? new Date(profile.program_completed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
 
-  const earnedPillarNumbers = new Set(badges.map(b => b.pillar_number))
-  const alumniRow = badges.find(b => b.pillar_number === 7)
+  // Derive completed pillar numbers from submitted capstones
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const capstoneRows = (capstoneCoursesRes.data ?? []) as { courses: { pillar_number: number } | null }[]
+  const earnedPillarNumbers = new Set(
+    capstoneRows.map(r => r.courses?.pillar_number).filter((n): n is number => n != null)
+  )
+
   const alumniAwardedAt = alumniRow?.awarded_at
     ? new Date(alumniRow.awarded_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : completedAt
