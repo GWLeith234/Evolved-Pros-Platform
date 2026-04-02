@@ -99,9 +99,10 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Onboarding gate: redirect new members to /onboard until they complete the flow.
-  // Skip API routes (would break fetch calls mid-flow) and /onboard itself (infinite loop).
-  if (!pathname.startsWith('/api/') && pathname !== '/onboard') {
+  // Onboarding gate: redirect new members to /onboarding until they complete the flow.
+  // Only applies to member-facing routes — skip admin, API, and /onboarding itself.
+  const isMemberRoute = !pathname.startsWith('/api/') && !pathname.startsWith('/admin') && !pathname.startsWith('/onboarding')
+  if (isMemberRoute) {
     const { data: onboardProfile } = await supabase
       .from('users')
       .select('onboarding_completed')
@@ -109,9 +110,7 @@ export async function middleware(request: NextRequest) {
       .single()
 
     if (!onboardProfile?.onboarding_completed) {
-      const host  = request.headers.get('x-forwarded-host') || request.headers.get('host')
-      const proto = request.headers.get('x-forwarded-proto') || 'https'
-      return NextResponse.redirect(`${proto}://${host}/onboard`)
+      return NextResponse.redirect(new URL('/onboarding', request.url))
     }
   }
 
@@ -142,9 +141,12 @@ export const config = {
     '/notifications/:path*',
     '/membership',
     '/onboard',
+    '/onboarding',
+    '/onboarding/:path*',
     '/admin',
     '/admin/:path*',
     '/api/posts/:path*',
     '/api/admin/:path*',
+    '/api/onboarding/:path*',
   ],
 }
