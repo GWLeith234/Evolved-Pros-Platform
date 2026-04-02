@@ -63,28 +63,6 @@ export function WelcomeBanner({ displayName, tier, avatarUrl, quote }: WelcomeBa
         }}
       />
 
-      {/* Professional badge — absolute top-right */}
-      {tierLabel && (
-        <div className="absolute top-3 right-3 z-20">
-          <span
-            className="font-condensed font-bold uppercase tracking-wide"
-            style={{
-              background: '#ef0e30',
-              color: 'white',
-              fontSize: '10px',
-              letterSpacing: '0.08em',
-              padding: '3px 8px',
-              borderRadius: '4px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            ★ {tierLabel}
-          </span>
-        </div>
-      )}
-
       {/* Content */}
       <div
         className="relative z-10 flex flex-col justify-between px-6 py-5 md:px-7 md:py-6"
@@ -92,8 +70,8 @@ export function WelcomeBanner({ displayName, tier, avatarUrl, quote }: WelcomeBa
       >
         {/* Main content row: avatar + name/quote */}
         <div className="flex items-start gap-6">
-          {/* Avatar — 128px hero */}
-          <div className="flex-shrink-0">
+          {/* Avatar — 128px hero with tier badge on bottom-left corner */}
+          <div className="flex-shrink-0 relative">
             {avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -110,6 +88,30 @@ export function WelcomeBanner({ displayName, tier, avatarUrl, quote }: WelcomeBa
                   {displayName[0]?.toUpperCase() ?? '?'}
                 </span>
               </div>
+            )}
+            {tierLabel && (
+              <span
+                className="font-condensed font-bold uppercase tracking-wide"
+                style={{
+                  position: 'absolute',
+                  bottom: '4px',
+                  left: '4px',
+                  transform: 'translate(-25%, 25%)',
+                  background: '#ef0e30',
+                  color: 'white',
+                  fontSize: '10px',
+                  letterSpacing: '0.08em',
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  whiteSpace: 'nowrap',
+                  zIndex: 20,
+                }}
+              >
+                ★ {tierLabel}
+              </span>
             )}
           </div>
 

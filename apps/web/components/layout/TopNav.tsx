@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState, useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -126,17 +127,16 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
           borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}
       >
-        {/* Logo — inline SVG brand mark */}
+        {/* Logo */}
         <Link href="/home" className="flex items-center flex-shrink-0">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 36" height="36" aria-label="Evolved Pros" style={{ display: 'block' }}>
-            <text x="0" y="26" fontFamily="'Barlow Condensed', sans-serif" fontWeight="700" fontSize="28" fill="white" letterSpacing="1">EVOLVED</text>
-            <text x="88" y="26" fontFamily="'Barlow Condensed', sans-serif" fontWeight="700" fontSize="28" fill="white" letterSpacing="1">PR</text>
-            <circle cx="124" cy="18" r="10" fill="#ef0e30"/>
-            <line x1="124" y1="12" x2="124" y2="24" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-            <line x1="118" y1="18" x2="130" y2="18" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-            <line x1="119" y1="21.5" x2="129" y2="21.5" stroke="white" strokeWidth="1.2" strokeLinecap="round"/>
-            <text x="137" y="26" fontFamily="'Barlow Condensed', sans-serif" fontWeight="700" fontSize="28" fill="white" letterSpacing="1">S</text>
-          </svg>
+          <Image
+            src="https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_nav_dark.png"
+            alt="Evolved Pros"
+            width={160}
+            height={36}
+            priority
+            style={{ display: 'block', height: '36px', width: 'auto' }}
+          />
         </Link>
 
         {/* Primary nav links — desktop */}
