@@ -8,7 +8,7 @@ type SB = SupabaseClient<Database>
 export async function fetchCurrentUserProfile(supabase: SB, userId: string) {
   const { data } = await supabase
     .from('users')
-    .select('display_name, full_name, avatar_url, tier, points, role')
+    .select('display_name, full_name, avatar_url, tier, points, role, current_pillar')
     .eq('id', userId)
     .single()
   return data

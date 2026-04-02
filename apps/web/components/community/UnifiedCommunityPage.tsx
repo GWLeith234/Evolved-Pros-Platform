@@ -4,9 +4,11 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { FeedCompose } from './FeedCompose'
 import { PostCard } from './PostCard'
-import { LeaderboardRail } from './LeaderboardRail'
+import { DashboardStrip } from './DashboardStrip'
+import { FeedAdUnit } from './FeedAdUnit'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
-import type { Post, LeaderboardEntry, MemberSummary, CommunityAd, EpisodeSummary } from '@/lib/community/types'
+import type { Post, CommunityAd } from '@/lib/community/types'
+import type { DashboardStripProps } from './DashboardStrip'
 
 type Filter = 'all' | 'win' | 'question' | PillarFilter
 type PillarFilter = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6'
@@ -22,10 +24,7 @@ interface UnifiedCommunityPageProps {
   nextCursor: string | null
   hasMore: boolean
   pinnedPost: { label: string; body: string } | null
-  leaderboard: LeaderboardEntry[]
-  activeMembers: MemberSummary[]
   ads: CommunityAd[]
-  episode: EpisodeSummary | null
   currentUser: {
     id: string
     displayName: string | null
@@ -34,6 +33,8 @@ interface UnifiedCommunityPageProps {
     isAdmin: boolean
   }
   defaultChannelId: string
+  // Dashboard strip data
+  dashboardProps: Omit<DashboardStripProps, never>
 }
 
 export function UnifiedCommunityPage({
@@ -41,12 +42,10 @@ export function UnifiedCommunityPage({
   nextCursor: initialCursor,
   hasMore: initialHasMore,
   pinnedPost,
-  leaderboard,
-  activeMembers,
   ads,
-  episode,
   currentUser,
   defaultChannelId,
+  dashboardProps,
 }: UnifiedCommunityPageProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts)
   const [cursor, setCursor] = useState<string | null>(initialCursor)
@@ -206,10 +205,13 @@ export function UnifiedCommunityPage({
   })
 
   return (
-    <div className="flex flex-1 min-h-0" style={{ height: '100%' }}>
-      {/* Main feed */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto" style={{ backgroundColor: '#faf9f7' }}>
-        <div className="p-4 max-w-3xl mx-auto w-full space-y-3">
+    <div className="flex flex-col flex-1 min-h-0" style={{ height: '100%' }}>
+      {/* Dashboard strip */}
+      <DashboardStrip {...dashboardProps} />
+
+      {/* Feed — full-width, centered, scrollable */}
+      <div className="flex-1 overflow-y-auto" style={{ backgroundColor: '#0A0F18' }}>
+        <div className="w-full mx-auto p-4 space-y-3" style={{ maxWidth: '680px' }}>
 
           {/* Pinned announcement */}
           {pinnedPost && (
@@ -237,7 +239,6 @@ export function UnifiedCommunityPage({
 
           {/* Filter pill bar */}
           <div className="flex items-center gap-1.5 flex-wrap">
-            {/* Static filters */}
             {[
               { id: 'all' as Filter, label: 'All', color: null },
               { id: 'win' as Filter, label: '🏆 Wins', color: '#C9A84C' },
@@ -251,17 +252,15 @@ export function UnifiedCommunityPage({
                   onClick={() => setActiveFilter(f.id)}
                   className="font-condensed font-semibold uppercase tracking-[0.1em] text-[10px] rounded-full px-3 py-1 transition-all"
                   style={{
-                    backgroundColor: active ? (f.color ?? '#1b3c5a') : 'transparent',
-                    color: active ? 'white' : '#7a8a96',
-                    border: `1px solid ${active ? (f.color ?? '#1b3c5a') : 'rgba(27,60,90,0.15)'}`,
+                    backgroundColor: active ? (f.color ?? '#68a2b9') : 'transparent',
+                    color: active ? 'white' : 'rgba(255,255,255,0.4)',
+                    border: `1px solid ${active ? (f.color ?? '#68a2b9') : 'rgba(255,255,255,0.12)'}`,
                   }}
                 >
                   {f.label}
                 </button>
               )
             })}
-
-            {/* Pillar filters */}
             {PILLAR_FILTERS.map(f => {
               const active = activeFilter === f.id
               return (
@@ -272,8 +271,8 @@ export function UnifiedCommunityPage({
                   className="font-condensed font-semibold uppercase tracking-[0.1em] text-[10px] rounded-full px-3 py-1 transition-all"
                   style={{
                     backgroundColor: active ? f.color : 'transparent',
-                    color: active ? 'white' : '#7a8a96',
-                    border: `1px solid ${active ? f.color : 'rgba(27,60,90,0.15)'}`,
+                    color: active ? 'white' : 'rgba(255,255,255,0.4)',
+                    border: `1px solid ${active ? f.color : 'rgba(255,255,255,0.12)'}`,
                   }}
                 >
                   {f.label}
@@ -300,31 +299,38 @@ export function UnifiedCommunityPage({
             </button>
           )}
 
-          {/* Posts */}
+          {/* Posts + in-feed ads */}
           {filtered.length === 0 ? (
             <div className="py-16 text-center">
-              <p className="font-condensed text-xs tracking-widest text-[#7a8a96]">
+              <p className="font-condensed text-xs tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>
                 {activeFilter === 'all' ? 'No posts yet — be the first to share.' : 'No posts in this category yet.'}
               </p>
             </div>
           ) : (
-            filtered.map(post => (
-              <PostCard
-                key={post.id}
-                post={post}
-                currentUserId={currentUser.id}
-                currentUser={{ id: currentUser.id, displayName: currentUser.displayName, avatarUrl: currentUser.avatarUrl }}
-                onReact={handleReact}
-                onBookmark={handleBookmark}
-              />
-            ))
+            <>
+              {filtered.map((post, index) => (
+                <React.Fragment key={post.id}>
+                  <PostCard
+                    post={post}
+                    currentUserId={currentUser.id}
+                    currentUser={{ id: currentUser.id, displayName: currentUser.displayName, avatarUrl: currentUser.avatarUrl }}
+                    onReact={handleReact}
+                    onBookmark={handleBookmark}
+                  />
+                  {/* Inject ad after every 3rd post */}
+                  {(index + 1) % 3 === 0 && ads.length > 0 && (
+                    <FeedAdUnit ad={ads[Math.floor(index / 3) % ads.length]} />
+                  )}
+                </React.Fragment>
+              ))}
+            </>
           )}
 
           <div ref={sentinelRef} className="h-4" />
 
           {loadingMore && (
             <div className="flex justify-center py-4">
-              <svg className="animate-spin h-5 w-5 text-[#7a8a96]" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin h-5 w-5" style={{ color: 'rgba(255,255,255,0.3)' }} fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
@@ -332,23 +338,11 @@ export function UnifiedCommunityPage({
           )}
 
           {!hasMore && posts.length > 0 && (
-            <p className="text-center font-condensed text-[10px] tracking-widest text-[#7a8a96] py-4">
+            <p className="text-center font-condensed text-[10px] tracking-widest py-4" style={{ color: 'rgba(255,255,255,0.2)' }}>
               You&apos;ve reached the beginning
             </p>
           )}
         </div>
-      </div>
-
-      {/* Right rail */}
-      <div className="hidden lg:flex flex-col flex-shrink-0 overflow-y-auto" style={{ width: '260px' }}>
-        <LeaderboardRail
-          leaderboard={leaderboard}
-          activeMembers={activeMembers}
-          currentUserId={currentUser.id}
-          currentUserTier={currentUser.tier}
-          ads={ads}
-          episode={episode}
-        />
       </div>
     </div>
   )
