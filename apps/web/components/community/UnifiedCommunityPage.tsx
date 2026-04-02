@@ -205,7 +205,7 @@ export function UnifiedCommunityPage({
   })
 
   return (
-    <div className="flex flex-col flex-1 min-h-0" style={{ height: '100%' }}>
+    <div className="flex flex-col flex-1 min-h-0 overflow-x-hidden" style={{ height: '100%' }}>
       {/* Dashboard strip */}
       <DashboardStrip {...dashboardProps} />
 

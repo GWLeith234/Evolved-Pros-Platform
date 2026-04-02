@@ -101,7 +101,7 @@ export function DashboardStrip({ pillarProgress, episode, scoreboard, nextEvent,
         backgroundColor: '#111926',
         borderBottom: '1px solid rgba(255,255,255,0.08)',
         padding: '10px 16px',
-        overflowX: 'auto',
+        overflowX: 'hidden',
         overflowY: 'hidden',
         msOverflowStyle: 'none',
       }}
