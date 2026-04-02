@@ -37,23 +37,23 @@ export default async function SettingsPage() {
         </p>
         <h1
           className="font-display font-black leading-tight"
-          style={{ fontSize: '28px', color: '#112535' }}
+          style={{ fontSize: '28px', color: '#FFFFFF' }}
         >
           Settings
         </h1>
-        <p className="font-body text-[14px] mt-1" style={{ color: '#7a8a96' }}>
+        <p className="font-body text-[14px] mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
           Update your profile information.
         </p>
       </div>
 
       <div
-        className="bg-white rounded-lg overflow-hidden"
-        style={{ border: '1px solid rgba(27,60,90,0.1)', boxShadow: '0 1px 3px rgba(27,60,90,0.06)' }}
+        className="rounded-lg overflow-hidden"
+        style={{ backgroundColor: '#0d1520', border: '1px solid rgba(255,255,255,0.08)' }}
       >
-        <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}>
+        <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <h2
             className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]"
-            style={{ color: '#1b3c5a' }}
+            style={{ color: '#FFFFFF' }}
           >
             Profile
           </h2>
@@ -84,13 +84,13 @@ export default async function SettingsPage() {
       </div>
 
       <div
-        className="bg-white rounded-lg overflow-hidden mt-6"
-        style={{ border: '1px solid rgba(27,60,90,0.1)', boxShadow: '0 1px 3px rgba(27,60,90,0.06)' }}
+        className="rounded-lg overflow-hidden mt-6"
+        style={{ backgroundColor: '#0d1520', border: '1px solid rgba(255,255,255,0.08)' }}
       >
-        <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}>
+        <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <h2
             className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]"
-            style={{ color: '#1b3c5a' }}
+            style={{ color: '#FFFFFF' }}
           >
             Membership
           </h2>
@@ -99,11 +99,11 @@ export default async function SettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <Tooltip content="VIP: Pillars 1–4, community feed, events. Professional: All 6 pillars, exclusive events, priority support.">
-                <p className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] cursor-help" style={{ color: '#7a8a96' }}>
+                <p className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] cursor-help" style={{ color: 'rgba(255,255,255,0.5)' }}>
                   Current Plan
                 </p>
               </Tooltip>
-              <p className="font-body text-[15px] font-semibold mt-0.5" style={{ color: '#1b3c5a' }}>
+              <p className="font-body text-[15px] font-semibold mt-0.5" style={{ color: '#FFFFFF' }}>
                 {profile?.tier === 'pro' ? 'Professional' : 'VIP'}
               </p>
             </div>
@@ -121,17 +121,17 @@ export default async function SettingsPage() {
       </div>
 
       <div
-        className="bg-white rounded-lg overflow-hidden mt-6"
-        style={{ border: '1px solid rgba(27,60,90,0.1)', boxShadow: '0 1px 3px rgba(27,60,90,0.06)' }}
+        className="rounded-lg overflow-hidden mt-6"
+        style={{ backgroundColor: '#0d1520', border: '1px solid rgba(255,255,255,0.08)' }}
       >
-        <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}>
+        <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <h2
             className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]"
-            style={{ color: '#1b3c5a' }}
+            style={{ color: '#FFFFFF' }}
           >
             Notifications
           </h2>
-          <p className="font-body text-[12px] mt-1" style={{ color: '#7a8a96' }}>
+          <p className="font-body text-[12px] mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
             Choose which in-app notifications you receive.
           </p>
         </div>

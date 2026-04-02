@@ -125,14 +125,17 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
           borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}
       >
-        {/* Logo — swaps between dark/light variant when theme toggles */}
+        {/* Logo — inline SVG brand mark */}
         <Link href="/home" className="flex items-center flex-shrink-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={isDark ? (logoUrl ?? FALLBACK_LOGO_DARK) : (logoLightUrl ?? logoUrl ?? FALLBACK_LOGO_LIGHT)}
-            alt="Evolved Pros"
-            style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
-          />
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 36" height="36" aria-label="Evolved Pros" style={{ display: 'block' }}>
+            <text x="0" y="26" fontFamily="'Barlow Condensed', sans-serif" fontWeight="700" fontSize="28" fill="white" letterSpacing="1">EVOLVED</text>
+            <text x="88" y="26" fontFamily="'Barlow Condensed', sans-serif" fontWeight="700" fontSize="28" fill="white" letterSpacing="1">PR</text>
+            <circle cx="124" cy="18" r="10" fill="#ef0e30"/>
+            <line x1="124" y1="12" x2="124" y2="24" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+            <line x1="118" y1="18" x2="130" y2="18" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+            <line x1="119" y1="21.5" x2="129" y2="21.5" stroke="white" strokeWidth="1.2" strokeLinecap="round"/>
+            <text x="137" y="26" fontFamily="'Barlow Condensed', sans-serif" fontWeight="700" fontSize="28" fill="white" letterSpacing="1">S</text>
+          </svg>
         </Link>
 
         {/* Primary nav links — desktop */}
@@ -213,9 +216,12 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
               onMouseLeave={e => (e.currentTarget.style.color = georgeOpen ? '#A78BFA' : 'rgba(167,139,250,0.55)')}
               aria-label="Ask George AI"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2l1.09 3.26L16.5 4l-2.18 2.5L16.5 9l-3.41-.74L12 11.5l-1.09-2.24L7.5 9l2.18-2.5L7.5 4l3.41.74L12 2z" />
-                <path d="M19 14l.6 1.8L21.5 15l-1.2 1.38L21.5 18l-1.9-.41L19 19.5l-.6-1.91L16.5 18l1.2-1.38L16.5 15l1.9.41L19 14z" />
+              <svg width="20" height="20" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <text x="1" y="20" fontFamily="'Barlow Condensed', sans-serif" fontWeight="700" fontSize="17" fill="currentColor" letterSpacing="0.5">AI</text>
+                <line x1="23" y1="3" x2="23" y2="9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                <line x1="20" y1="6" x2="26" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                <line x1="21" y1="4" x2="25" y2="8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                <line x1="25" y1="4" x2="21" y2="8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
               </svg>
             </button>
           </Tooltip>

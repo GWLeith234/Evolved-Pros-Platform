@@ -11,17 +11,20 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 }
 
 const baseInput =
-  'w-full px-3 py-2.5 rounded border border-[rgba(27,60,90,0.2)] bg-white text-[#1b3c5a] text-sm ' +
-  'placeholder:text-[#7a8a96] ' +
-  'focus:outline-none focus:border-[#68a2b9] focus:ring-2 focus:ring-[#68a2b9]/20 ' +
+  'w-full px-3 py-2.5 rounded border border-[rgba(255,255,255,0.12)] bg-[#0d1520] text-white text-sm ' +
+  'placeholder:text-[rgba(255,255,255,0.25)] ' +
+  'focus:outline-none focus:border-[rgba(255,255,255,0.3)] focus:ring-1 focus:ring-[rgba(255,255,255,0.08)] ' +
   'transition-colors duration-150 ' +
   'font-body'
+
+const labelClass = 'block font-condensed font-medium uppercase text-[11px] mb-1'
+const labelStyle = { color: 'rgba(255,255,255,0.5)', letterSpacing: '0.06em' }
 
 export function Input({ label, error, className = '', ...props }: InputProps) {
   return (
     <div className="w-full">
       {label && (
-        <label className="block font-condensed font-semibold uppercase tracking-wide text-xs text-[#7a8a96] mb-1">
+        <label className={labelClass} style={labelStyle}>
           {label}
         </label>
       )}
@@ -40,7 +43,7 @@ export function Textarea({ label, error, className = '', ...props }: TextareaPro
   return (
     <div className="w-full">
       {label && (
-        <label className="block font-condensed font-semibold uppercase tracking-wide text-xs text-[#7a8a96] mb-1">
+        <label className={labelClass} style={labelStyle}>
           {label}
         </label>
       )}
