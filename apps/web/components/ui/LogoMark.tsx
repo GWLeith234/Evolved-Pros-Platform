@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import { Bebas_Neue } from 'next/font/google'
 
 const bebasNeue = Bebas_Neue({ weight: '400', subsets: ['latin'] })
@@ -42,7 +41,7 @@ export function LogoMark({ variant = 'light', height = 36 }: LogoMarkProps) {
         EVOLVED PR
       </span>
 
-      {/* Icon replaces the O in PROS */}
+      {/* Icon replaces the O in PROS — plain img so overflow:hidden clips reliably */}
       <div
         style={{
           width: fontSize,
@@ -52,12 +51,12 @@ export function LogoMark({ variant = 'light', height = 36 }: LogoMarkProps) {
           flexShrink: 0,
         }}
       >
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={ICON_URL}
           alt=""
           width={fontSize}
           height={fontSize}
-          priority
           style={{ display: 'block', width: fontSize, height: fontSize }}
         />
       </div>
