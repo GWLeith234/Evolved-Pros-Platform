@@ -4,86 +4,21 @@ import { useState } from 'react'
 import { OnboardingWelcome } from './OnboardingWelcome'
 import { OnboardingProfile } from './OnboardingProfile'
 import { OnboardingPillar } from './OnboardingPillar'
+import { OnboardingPost } from './OnboardingPost'
+import { OnboardingComplete } from './OnboardingComplete'
 
 interface Props {
   initialStep: number
   userId: string
+  displayName: string
+  company: string
 }
 
 const TOTAL_STEPS = 5
 
-const STEP_LABELS: Record<number, string> = {
-  1: 'Welcome',
-  2: 'Your Profile',
-  3: 'Your Focus',
-  4: 'Say Hello',
-  5: 'You\'re Set',
-}
 
-function StepPlaceholder({ stepNumber, label, onContinue }: { stepNumber: number; label: string; onContinue: () => void }) {
-  return (
-    <div style={{ textAlign: 'center' }}>
-      <p
-        style={{
-          fontFamily: '"Barlow Condensed", sans-serif',
-          fontWeight: 700,
-          fontSize: '10px',
-          letterSpacing: '0.22em',
-          textTransform: 'uppercase',
-          color: '#C9A84C',
-          margin: '0 0 12px',
-        }}
-      >
-        Step {stepNumber} — {label}
-      </p>
-      <h2
-        style={{
-          fontFamily: '"Barlow Condensed", sans-serif',
-          fontWeight: 900,
-          fontSize: '28px',
-          color: '#faf9f7',
-          margin: '0 0 12px',
-        }}
-      >
-        Coming soon
-      </h2>
-      <p
-        style={{
-          fontFamily: 'Barlow, sans-serif',
-          fontSize: '14px',
-          color: 'rgba(250,249,247,0.45)',
-          margin: '0 0 36px',
-        }}
-      >
-        This step will be fully built in the next sprint.
-      </p>
-      <button
-        type="button"
-        onClick={onContinue}
-        style={{
-          width: '100%',
-          padding: '14px 24px',
-          backgroundColor: '#C9A84C',
-          color: '#0A0F18',
-          fontFamily: '"Barlow Condensed", sans-serif',
-          fontWeight: 900,
-          fontSize: '14px',
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-          border: 'none',
-          borderRadius: '6px',
-          cursor: 'pointer',
-        }}
-      >
-        Continue →
-      </button>
-    </div>
-  )
-}
-
-export function OnboardingFlow({ initialStep, userId }: Props) {
+export function OnboardingFlow({ initialStep, userId, displayName, company }: Props) {
   const [currentStep, setCurrentStep] = useState(Math.max(1, Math.min(initialStep, TOTAL_STEPS)))
-  const [completing, setCompleting] = useState(false)
 
   async function saveStep(step: number) {
     await fetch('/api/onboarding/step', {
@@ -95,18 +30,9 @@ export function OnboardingFlow({ initialStep, userId }: Props) {
 
   async function advance() {
     const next = currentStep + 1
-    if (next > TOTAL_STEPS) {
-      await completeOnboarding()
-      return
-    }
+    if (next > TOTAL_STEPS) return // step 5 handles its own completion
     await saveStep(next)
     setCurrentStep(next)
-  }
-
-  async function completeOnboarding() {
-    setCompleting(true)
-    await fetch('/api/onboarding/complete', { method: 'PATCH' })
-    window.location.href = '/home'
   }
 
   return (
@@ -165,44 +91,8 @@ export function OnboardingFlow({ initialStep, userId }: Props) {
         {currentStep === 1 && <OnboardingWelcome onContinue={advance} />}
         {currentStep === 2 && <OnboardingProfile userId={userId} onContinue={advance} />}
         {currentStep === 3 && <OnboardingPillar onContinue={advance} />}
-        {currentStep === 4 && (
-          <StepPlaceholder stepNumber={4} label={STEP_LABELS[4]} onContinue={advance} />
-        )}
-        {currentStep === 5 && (
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#0ABFA3', margin: '0 0 12px' }}>
-              All Done
-            </p>
-            <h2 style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900, fontSize: '32px', color: '#faf9f7', margin: '0 0 12px' }}>
-              You&apos;re all set.
-            </h2>
-            <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '14px', color: 'rgba(250,249,247,0.45)', margin: '0 0 36px' }}>
-              Your journey starts now.
-            </p>
-            <button
-              type="button"
-              onClick={completeOnboarding}
-              disabled={completing}
-              style={{
-                width: '100%',
-                padding: '16px 24px',
-                backgroundColor: '#0ABFA3',
-                color: '#0A0F18',
-                fontFamily: '"Barlow Condensed", sans-serif',
-                fontWeight: 900,
-                fontSize: '15px',
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: completing ? 'not-allowed' : 'pointer',
-                opacity: completing ? 0.6 : 1,
-              }}
-            >
-              {completing ? 'Loading…' : 'Enter Evolved Pros →'}
-            </button>
-          </div>
-        )}
+        {currentStep === 4 && <OnboardingPost displayName={displayName} company={company} onContinue={advance} />}
+        {currentStep === 5 && <OnboardingComplete displayName={displayName} />}
       </div>
 
       {/* Skip link (not on last step) */}
