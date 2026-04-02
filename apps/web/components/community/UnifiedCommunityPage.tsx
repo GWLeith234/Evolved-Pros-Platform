@@ -30,6 +30,7 @@ interface UnifiedCommunityPageProps {
     id: string
     displayName: string | null
     avatarUrl: string | null
+    tier?: string | null
     isAdmin: boolean
   }
   defaultChannelId: string
@@ -344,6 +345,7 @@ export function UnifiedCommunityPage({
           leaderboard={leaderboard}
           activeMembers={activeMembers}
           currentUserId={currentUser.id}
+          currentUserTier={currentUser.tier}
           ads={ads}
           episode={episode}
         />

@@ -5,10 +5,10 @@ interface MemberBadgeProps {
 
 const BADGE_CONFIG = {
   community: {
-    background: '#1b3c5a',
-    border: '1.5px solid #68a2b9',
+    background: 'rgba(104,162,185,0.08)',
+    border: '1px solid rgba(104,162,185,0.4)',
     color: '#68a2b9',
-    borderRadius: undefined as string | undefined,
+    borderRadius: '20px',
     label: 'COMMUNITY',
     icon: (size: number) => (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -20,13 +20,13 @@ const BADGE_CONFIG = {
     ),
   },
   vip: {
-    background: '#2a1f0a',
-    border: '1.5px solid #BA7517',
-    color: '#EF9F27',
-    borderRadius: undefined as string | undefined,
+    background: 'rgba(10,191,163,0.08)',
+    border: '1px solid rgba(10,191,163,0.4)',
+    color: '#0ABFA3',
+    borderRadius: '20px',
     label: 'VIP MEMBER',
     icon: (size: number) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none">
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
       </svg>
     ),
@@ -55,8 +55,6 @@ export function MemberBadge({ tier, size = 'md' }: MemberBadgeProps) {
   const isSm = size === 'sm'
   const iconSize = isSm ? 9 : 11
 
-  const isPro = key === 'pro'
-
   return (
     <span
       style={{
@@ -65,18 +63,18 @@ export function MemberBadge({ tier, size = 'md' }: MemberBadgeProps) {
         gap: isSm ? '3px' : '5px',
         background: config.background,
         border: config.border,
-        borderRadius: config.borderRadius ?? (isSm ? '3px' : '4px'),
-        padding: isPro ? '2px 10px' : (isSm ? '1px 5px' : '2px 8px'),
+        borderRadius: config.borderRadius ?? '20px',
+        padding: isSm ? '1px 8px' : '2px 10px',
         fontSize: isSm ? '9px' : '10px',
-        fontWeight: isPro ? 600 : 700,
-        letterSpacing: isPro ? '0.05em' : '0.1em',
+        fontWeight: 600,
+        letterSpacing: '0.05em',
         color: config.color,
         lineHeight: 1.4,
         flexShrink: 0,
       }}
     >
-      <span style={{ color: config.color, display: 'flex', alignItems: 'center', fontSize: isPro ? '9px' : undefined }}>
-        {config.icon(isPro ? 9 : iconSize)}
+      <span style={{ color: config.color, display: 'flex', alignItems: 'center', fontSize: '9px' }}>
+        {config.icon(9)}
       </span>
       {config.label}
     </span>

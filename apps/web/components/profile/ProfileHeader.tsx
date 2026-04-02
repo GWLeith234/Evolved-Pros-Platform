@@ -1,5 +1,6 @@
 import { MemberBadge } from '@/components/ui/MemberBadge'
 import { Tooltip } from '@/components/ui/Tooltip'
+import { tierColor, tierColorRgba } from '@/lib/tier-color'
 
 const PILLAR_LABELS: Record<string, string> = {
   p1: 'Foundation',
@@ -44,50 +45,52 @@ function getInitials(name: string | null | undefined): string {
 }
 
 function formatJoinDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 }
 
 export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHeaderProps) {
   const displayName = user.display_name ?? user.full_name ?? 'Member'
-  const hasSocialLinks = user.linkedin_url || user.website_url || user.twitter_handle
+  const tc = tierColor(user.tier)
+  const hasSocialLinks = !!(user.linkedin_url || user.website_url || user.twitter_handle)
+
+  const statCards: { label: string; value: string; tooltip?: string }[] = [
+    { label: 'Posts', value: String(user.postCount) },
+    { label: 'Points', value: user.points.toLocaleString(), tooltip: 'Points are earned through community engagement — posting, replying, and receiving likes.' },
+    { label: 'Joined', value: formatJoinDate(user.created_at) },
+    ...(user.company ? [{ label: 'Company', value: user.company }] : []),
+  ]
 
   return (
-    <div className="rounded-lg overflow-hidden" style={{ backgroundColor: '#112535' }}>
+    <div style={{ backgroundColor: '#111926', borderRadius: '10px', overflow: 'hidden' }}>
       {/* Banner */}
-      <div className="relative" style={{ height: '200px', zIndex: 0 }}>
+      <div style={{ position: 'relative', height: '180px' }}>
         {user.banner_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={user.banner_url}
             alt="Profile banner"
-            style={{ width: '100%', height: '200px', objectFit: 'cover', display: 'block' }}
+            style={{ width: '100%', height: '180px', objectFit: 'cover', display: 'block' }}
           />
         ) : (
-          <div
-            style={{
-              width: '100%',
-              height: '200px',
-              background: 'linear-gradient(135deg, #112535 0%, #1b3c5a 100%)',
-            }}
-          />
+          <div style={{ width: '100%', height: '180px', background: 'linear-gradient(135deg, #112535 0%, #1b3c5a 100%)' }} />
         )}
+        {/* Gradient fade to page bg */}
+        <div
+          style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(to bottom, transparent 30%, #0A0F18 100%)',
+          }}
+        />
         {isOwn && onChangeBanner && (
           <Tooltip content="Your profile banner is the header image at the top of your profile. Choose a preset or upload your own.">
             <button
               type="button"
               onClick={onChangeBanner}
               style={{
-                position: 'absolute',
-                bottom: '12px',
-                right: '12px',
-                background: 'rgba(0,0,0,0.6)',
-                color: 'white',
-                border: '0.5px solid rgba(255,255,255,0.3)',
-                borderRadius: '6px',
-                padding: '6px 12px',
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer',
+                position: 'absolute', bottom: '12px', right: '12px', zIndex: 10,
+                background: 'rgba(0,0,0,0.6)', color: 'white',
+                border: '0.5px solid rgba(255,255,255,0.3)', borderRadius: '6px',
+                padding: '6px 12px', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
               }}
             >
               Change Banner
@@ -98,175 +101,169 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
 
       {/* Profile info */}
       <div style={{ padding: '0 28px 28px' }}>
-        {/* Top row: avatar (overlapping banner) + name + tier badge + role title */}
-        <div className="flex items-end gap-4 mb-3">
-          {/* Avatar — pulled up to overlap banner bottom edge */}
+        {/* Avatar + Identity */}
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '20px', marginBottom: '20px' }}>
+          {/* Avatar — overlaps banner bottom edge */}
           <div
-            className="w-24 h-24 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
-            style={{ backgroundColor: '#ef0e30', marginTop: '-48px', border: '3px solid #112535', position: 'relative', zIndex: 10 }}
+            style={{
+              width: '120px', height: '120px', borderRadius: '50%',
+              flexShrink: 0, overflow: 'hidden',
+              marginTop: '-64px', position: 'relative', zIndex: 10,
+              border: `3px solid ${tc}`,
+              boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+              backgroundColor: '#ef0e30',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
           >
             {user.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={user.avatar_url}
                 alt={displayName}
-                className="w-24 h-24 rounded-full object-cover"
+                style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '50%' }}
               />
             ) : (
-              <span className="font-condensed font-bold text-white text-2xl">
+              <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, color: 'white', fontSize: '34px' }}>
                 {getInitials(displayName)}
               </span>
             )}
           </div>
 
-          {/* Name + tier badge + role title — aligned to avatar bottom */}
-          <div className="pb-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-1">
-              <h1
-                className="font-display font-bold text-white leading-tight"
-                style={{ fontSize: '22px' }}
-              >
+          {/* Identity */}
+          <div style={{ paddingBottom: '4px', flex: 1, minWidth: 0 }}>
+            {/* Row 1: name + tier badge */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
+              <h1 style={{ fontSize: '28px', fontWeight: 900, color: 'white', lineHeight: 1.05, fontFamily: '"Arial Black", Arial, sans-serif', margin: 0 }}>
                 {displayName}
               </h1>
               <MemberBadge tier={user.tier} size="md" />
             </div>
-            {user.role_title && (
-              <p
-                className="font-condensed font-semibold uppercase tracking-wide text-[11px]"
-                style={{ color: '#68a2b9' }}
-              >
-                {user.role_title}
-              </p>
-            )}
+            {/* Row 2: role · location · pillar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              {user.role_title && (
+                <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.45)' }}>
+                  {user.role_title}
+                </span>
+              )}
+              {user.location && (
+                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>📍 {user.location}</span>
+              )}
+              {user.current_pillar && PILLAR_LABELS[user.current_pillar] && (
+                <span style={{
+                  borderRadius: '4px', padding: '2px 8px',
+                  fontSize: '9px', fontWeight: 600, fontFamily: '"Barlow Condensed", sans-serif',
+                  textTransform: 'uppercase', letterSpacing: '0.08em',
+                  color: '#C9A84C', border: '1px solid rgba(201,168,76,0.25)', background: 'rgba(201,168,76,0.06)',
+                }}>
+                  {user.current_pillar.toUpperCase()} · {PILLAR_LABELS[user.current_pillar]}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Secondary info: company, location, pillar badge, social links */}
-        <div className="space-y-2 mb-5">
-          {user.company && (
-            <p className="font-body text-[13px]" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              {user.company}
-            </p>
-          )}
-          {user.location && (
-            <p className="font-body text-[13px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              📍 {user.location}
-            </p>
-          )}
-
-          {/* Current Pillar badge */}
-          {user.current_pillar && PILLAR_LABELS[user.current_pillar] && (
-            <div>
-              <span
-                className="inline-block font-condensed font-bold uppercase tracking-wide text-[10px] px-2.5 py-1 rounded"
-                style={{ backgroundColor: 'rgba(104,162,185,0.15)', color: '#68a2b9' }}
+        {/* Stat cards row */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: hasSocialLinks || user.pioneer_driver_type ? '16px' : '0' }}>
+          {statCards.map(({ label, value, tooltip }) => {
+            const card = (
+              <div
+                key={label}
+                style={{
+                  background: tierColorRgba(user.tier, 0.08),
+                  border: `1px solid ${tierColorRgba(user.tier, 0.2)}`,
+                  borderRadius: '8px',
+                  padding: '8px 14px',
+                }}
               >
-                {user.current_pillar.toUpperCase()} · {PILLAR_LABELS[user.current_pillar]}
-              </span>
-            </div>
-          )}
-
-          {/* Pioneer-Driver type badge */}
-          {user.pioneer_driver_type && (
-            <div>
-              <span
-                className="inline-block font-condensed font-bold uppercase tracking-wide text-[10px] px-2.5 py-1 rounded"
-                style={{ border: '1px solid #C9A84C', color: '#C9A84C', backgroundColor: 'rgba(201,168,76,0.08)' }}
-              >
-                {user.pioneer_driver_type} TYPE
-              </span>
-            </div>
-          )}
-
-          {/* Social links row */}
-          {hasSocialLinks && (
-            <div className="flex items-center gap-3">
-              {user.linkedin_url && (
-                <a
-                  href={user.linkedin_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="LinkedIn"
-                  style={{ color: 'rgba(255,255,255,0.45)', transition: 'color 0.15s' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = '#68a2b9')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
-                    <rect x="2" y="9" width="4" height="12"/>
-                    <circle cx="4" cy="4" r="2"/>
-                  </svg>
-                </a>
-              )}
-              {user.website_url && (
-                <a
-                  href={user.website_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Website"
-                  style={{ color: 'rgba(255,255,255,0.45)', transition: 'color 0.15s' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = '#68a2b9')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="2" y1="12" x2="22" y2="12"/>
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                  </svg>
-                </a>
-              )}
-              {user.twitter_handle && (
-                <a
-                  href={`https://twitter.com/${user.twitter_handle}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={`@${user.twitter_handle} on X`}
-                  style={{ color: 'rgba(255,255,255,0.45)', transition: 'color 0.15s' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = '#68a2b9')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                  </svg>
-                </a>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Stats row */}
-        <div
-          className="flex items-center gap-8 pt-4"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}
-        >
-          {[
-            { label: 'Posts', value: user.postCount, tooltip: undefined },
-            { label: 'Points', value: user.points, tooltip: 'Points are earned through community engagement — posting, replying, and receiving likes.' },
-            { label: 'Joined', value: formatJoinDate(user.created_at), tooltip: undefined },
-          ].map(({ label, value, tooltip }) => {
-            const inner = (
-              <div>
-                <p
-                  className="font-display font-bold text-white leading-none"
-                  style={{ fontSize: typeof value === 'number' ? '20px' : '14px' }}
-                >
+                <p style={{
+                  fontSize: '18px', fontWeight: 900, color: 'white', lineHeight: 1,
+                  fontFamily: '"Arial Black", Arial, sans-serif', margin: '0 0 3px',
+                }}>
                   {value}
                 </p>
-                <p
-                  className="font-condensed font-semibold uppercase tracking-widest text-[9px] mt-0.5"
-                  style={{ color: 'rgba(255,255,255,0.4)' }}
-                >
+                <p style={{
+                  fontSize: '8px', fontWeight: 600, textTransform: 'uppercase',
+                  letterSpacing: '0.08em', color: tc,
+                  fontFamily: '"Barlow Condensed", sans-serif', margin: 0,
+                }}>
                   {label}
                 </p>
               </div>
             )
             return tooltip ? (
-              <Tooltip key={label} content={tooltip}>{inner}</Tooltip>
-            ) : (
-              <div key={label}>{inner}</div>
-            )
+              <Tooltip key={label} content={tooltip}>{card}</Tooltip>
+            ) : card
           })}
         </div>
+
+        {/* Pioneer-Driver type badge */}
+        {user.pioneer_driver_type && (
+          <div style={{ marginBottom: hasSocialLinks ? '12px' : '0' }}>
+            <span style={{
+              border: '1px solid #C9A84C', color: '#C9A84C', backgroundColor: 'rgba(201,168,76,0.08)',
+              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              textTransform: 'uppercase', letterSpacing: '0.08em',
+              fontSize: '10px', padding: '2px 8px', borderRadius: '4px', display: 'inline-block',
+            }}>
+              {user.pioneer_driver_type} TYPE
+            </span>
+          </div>
+        )}
+
+        {/* Social links */}
+        {hasSocialLinks && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {user.linkedin_url && (
+              <a
+                href={user.linkedin_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="LinkedIn"
+                style={{ color: 'rgba(255,255,255,0.45)', transition: 'color 0.15s' }}
+                onMouseEnter={e => (e.currentTarget.style.color = tc)}
+                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                  <rect x="2" y="9" width="4" height="12"/>
+                  <circle cx="4" cy="4" r="2"/>
+                </svg>
+              </a>
+            )}
+            {user.website_url && (
+              <a
+                href={user.website_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Website"
+                style={{ color: 'rgba(255,255,255,0.45)', transition: 'color 0.15s' }}
+                onMouseEnter={e => (e.currentTarget.style.color = tc)}
+                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="2" y1="12" x2="22" y2="12"/>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+              </a>
+            )}
+            {user.twitter_handle && (
+              <a
+                href={`https://twitter.com/${user.twitter_handle}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={`@${user.twitter_handle} on X`}
+                style={{ color: 'rgba(255,255,255,0.45)', transition: 'color 0.15s' }}
+                onMouseEnter={e => (e.currentTarget.style.color = tc)}
+                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </a>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

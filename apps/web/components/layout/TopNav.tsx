@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import { NotifBell } from '@/components/notifications/NotifBell'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { AskGeorgeDrawer } from '@/components/layout/AskGeorgeDrawer'
+import { tierColorRgba } from '@/lib/tier-color'
 
 const BASE = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding'
 const FALLBACK_LOGO_DARK  = `${BASE}/logo_nav_dark.png`
@@ -235,7 +236,7 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
               type="button"
               onClick={() => setDropdownOpen(o => !o)}
               className="w-8 h-8 flex items-center justify-center rounded-full flex-shrink-0 focus:outline-none"
-              style={{ backgroundColor: '#ef0e30' }}
+              style={{ backgroundColor: '#ef0e30', boxShadow: `0 0 0 2px ${tierColorRgba(profile.tier, 0.4)}` }}
             >
               {profile.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element

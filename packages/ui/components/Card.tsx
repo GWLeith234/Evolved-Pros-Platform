@@ -20,7 +20,8 @@ interface CardBodyProps {
 export function Card({ children, className = '' }: CardProps) {
   return (
     <div
-      className={`bg-white border border-[rgba(27,60,90,0.12)] rounded-lg overflow-hidden ${className}`}
+      className={`rounded-lg overflow-hidden ${className}`}
+      style={{ backgroundColor: '#111926', border: '1px solid rgba(255,255,255,0.07)' }}
     >
       {children}
     </div>
@@ -29,14 +30,14 @@ export function Card({ children, className = '' }: CardProps) {
 
 export function CardHeader({ title, eyebrow, action, className = '' }: CardHeaderProps) {
   return (
-    <div className={`flex items-start justify-between px-6 py-4 border-b border-[rgba(27,60,90,0.08)] ${className}`}>
+    <div className={`flex items-start justify-between px-6 py-4 ${className}`} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
       <div>
         {eyebrow && (
           <p className="text-[#ef0e30] font-condensed font-semibold uppercase tracking-widest text-xs mb-1">
             {eyebrow}
           </p>
         )}
-        <h3 className="font-condensed font-semibold text-[#1b3c5a] text-base uppercase tracking-wide">
+        <h3 className="font-condensed font-semibold text-white text-base uppercase tracking-wide">
           {title}
         </h3>
       </div>

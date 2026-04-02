@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { ProfileBannerWrapper } from '@/components/profile/ProfileBannerWrapper'
 import { ProfileTabs } from '@/components/profile/ProfileTabs'
+import { ProfileAdUnit } from '@/components/profile/ProfileAdUnit'
 import type { OverviewPost, CourseProgressItem, PointsEntry, ProfileForEdit } from '@/components/profile/ProfileTabs'
 
 export default async function MyProfilePage({
@@ -13,6 +15,14 @@ export default async function MyProfilePage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const adPromise = adminClient
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .from('platform_ads' as any)
+    .select('id, image_url, headline, tool_name, cta_text, link_url, click_url, sponsor_name')
+    .eq('is_active', true)
+    .limit(1)
+    .maybeSingle()
+
   const [
     profileResult,
     postCountResult,
@@ -21,6 +31,7 @@ export default async function MyProfilePage({
     coursesResult,
     overviewPostsResult,
     eventRegsResult,
+    adResult,
   ] = await Promise.all([
     supabase
       .from('users')
@@ -45,11 +56,14 @@ export default async function MyProfilePage({
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(10),
+    adPromise,
   ])
 
   if (!profileResult.data) redirect('/login')
   const profile = profileResult.data
   const postCount = postCountResult.count ?? 0
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const profileAd = (adResult.data as any) ?? null
 
   // Build course progress for Progress tab
   const lessonsByCourse: Record<string, { id: string; sort_order: number; title: string }[]> = {}
@@ -150,8 +164,10 @@ export default async function MyProfilePage({
   const headerUser = { ...profile, postCount, pioneer_driver_type: profile.pioneer_driver_type ?? null }
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-6 space-y-5" style={{ backgroundColor: '#0A0F18', minHeight: '100%' }}>
       <ProfileBannerWrapper user={headerUser} isOwn={true} />
+
+      {profileAd && <ProfileAdUnit ad={profileAd} />}
 
       <ProfileTabs
         userId={user.id}

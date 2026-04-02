@@ -2,12 +2,14 @@ import Link from 'next/link'
 import { getAvatarColor } from '@/lib/community/types'
 import { MemberBadge } from '@/components/ui/MemberBadge'
 import { Tooltip } from '@/components/ui/Tooltip'
+import { tierColor } from '@/lib/tier-color'
 import type { LeaderboardEntry, MemberSummary, CommunityAd, EpisodeSummary } from '@/lib/community/types'
 
 interface LeaderboardRailProps {
   leaderboard: LeaderboardEntry[]
   activeMembers: MemberSummary[]
   currentUserId: string
+  currentUserTier?: string | null
   ads?: CommunityAd[]
   episode?: EpisodeSummary | null
 }
@@ -51,10 +53,11 @@ function RailSection({ eyebrow, children, tooltip }: { eyebrow: string; children
   )
 }
 
-function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
+function LeaderboardRow({ entry, currentUserTier }: { entry: LeaderboardEntry; currentUserTier?: string | null }) {
   const avatarBg = getAvatarColor(entry.userId)
   const isTop3 = entry.rank <= 3
-  const rankColor = isTop3 ? '#c9a84c' : 'rgba(27,60,90,0.2)'
+  const tc = entry.isCurrentUser ? tierColor(currentUserTier) : null
+  const rankColor = entry.isCurrentUser ? (tc ?? '#c9a84c') : isTop3 ? '#c9a84c' : 'rgba(255,255,255,0.15)'
 
   return (
     <div className="flex items-center gap-2.5 py-2">
@@ -70,10 +73,10 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] leading-tight truncate" style={{ color: '#1b3c5a', fontWeight: entry.isCurrentUser ? 700 : 500 }}>
+        <p className="text-[13px] leading-tight truncate" style={{ color: tc && entry.isCurrentUser ? tc : 'rgba(255,255,255,0.75)', fontWeight: entry.isCurrentUser ? 700 : 500 }}>
           {entry.displayName}{entry.isCurrentUser ? ' (You)' : ''}
         </p>
-        <p className="font-condensed font-bold text-[12px]" style={{ color: '#112535' }}>
+        <p className="font-condensed font-bold text-[12px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
           {entry.points.toLocaleString()} pts
         </p>
       </div>
@@ -238,7 +241,7 @@ function PodcastCard({ episode }: { episode: EpisodeSummary }) {
   )
 }
 
-export function LeaderboardRail({ leaderboard, activeMembers, currentUserId, ads = [], episode = null }: LeaderboardRailProps) {
+export function LeaderboardRail({ leaderboard, activeMembers, currentUserId, currentUserTier, ads = [], episode = null }: LeaderboardRailProps) {
   const top4 = leaderboard.slice(0, 4)
   const currentInTop4 = top4.some(e => e.isCurrentUser)
   const currentEntry = !currentInTop4 ? leaderboard.find(e => e.isCurrentUser) : null
@@ -264,7 +267,7 @@ export function LeaderboardRail({ leaderboard, activeMembers, currentUserId, ads
             <p className="font-condensed text-xs text-[#7a8a96]">No data yet</p>
           ) : (
             displayEntries.map(entry => (
-              <LeaderboardRow key={entry.userId} entry={entry} />
+              <LeaderboardRow key={entry.userId} entry={entry} currentUserTier={currentUserTier} />
             ))
           )}
         </div>

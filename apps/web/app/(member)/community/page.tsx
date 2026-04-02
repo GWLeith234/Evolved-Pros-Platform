@@ -47,6 +47,7 @@ export default async function CommunityPage() {
         id: user.id,
         displayName: profile?.display_name ?? profile?.full_name ?? null,
         avatarUrl: profile?.avatar_url ?? null,
+        tier: profile?.tier ?? null,
         isAdmin,
       }}
       defaultChannelId={generalChannel.id}
