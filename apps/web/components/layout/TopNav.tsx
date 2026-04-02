@@ -10,9 +10,6 @@ import { Tooltip } from '@/components/ui/Tooltip'
 import { AskGeorgeDrawer } from '@/components/layout/AskGeorgeDrawer'
 import { tierColorRgba } from '@/lib/tier-color'
 
-const BASE = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding'
-const FALLBACK_LOGO_DARK  = `${BASE}/logo_nav_dark.png`
-const FALLBACK_LOGO_LIGHT = `${BASE}/logo_nav_light.png`
 
 interface TopNavProps {
   profile: {
@@ -130,10 +127,10 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
         {/* Logo */}
         <Link href="/home" className="flex items-center flex-shrink-0">
           <Image
-            src="https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_nav_dark.png"
+            src="/logo_nav_dark.png"
             alt="Evolved Pros"
-            width={160}
-            height={36}
+            width={313}
+            height={43}
             priority
             style={{ display: 'block', height: '36px', width: 'auto' }}
           />
