@@ -37,7 +37,7 @@ export default async function CommunityPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any)
       .from('scoreboards')
-      .select('wig_statement, lead1_label, lead1_target')
+      .select('wig_statement, lead1_label, lead1_target, lead1_count')
       .eq('user_id', user.id)
       .eq('is_active', true)
       .limit(1)
@@ -91,6 +91,7 @@ export default async function CommunityPage() {
     wigStatement: scoreboardData.wig_statement ?? null,
     lead1Label: scoreboardData.lead1_label ?? null,
     lead1Target: scoreboardData.lead1_target ?? null,
+    lead1Count: scoreboardData.lead1_count ?? null,
   } : null
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

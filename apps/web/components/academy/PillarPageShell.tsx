@@ -12,6 +12,8 @@ import {
 import { PillarModuleAccordion } from '@/components/academy/PillarModuleAccordion'
 import { ReflectionPrompt } from '@/components/academy/ReflectionPrompt'
 import { PillarAudit } from '@/components/academy/PillarAudit'
+import { adminClient } from '@/lib/supabase/admin'
+import { ProfileAdUnit } from '@/components/profile/ProfileAdUnit'
 
 interface Props {
   pillarNumber?: number
@@ -146,6 +148,15 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
   const courseSlug = (course as Record<string, unknown>).slug as string
   const tagline = PILLAR_TAGLINES[pNum] ?? ''
   const quote = PILLAR_QUOTES[pNum] ?? ''
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: pillarAdData } = await (adminClient.from('platform_ads' as any) as any)
+    .select('id, image_url, headline, tool_name, cta_text, link_url, click_url, sponsor_name')
+    .eq('is_active', true)
+    .limit(1)
+    .maybeSingle()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pillarAd = (pillarAdData as any) ?? null
 
   return (
     <main style={{ backgroundColor: '#0A0F18', minHeight: '100vh', color: '#faf9f7' }}>
@@ -394,6 +405,11 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
           >
             &ldquo;{quote}&rdquo;
           </p>
+          {pillarAd && (
+            <div style={{ marginTop: '32px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
+              <ProfileAdUnit ad={pillarAd} />
+            </div>
+          )}
           <p
             style={{
               color: 'rgba(250,249,247,0.3)', fontSize: '11px',

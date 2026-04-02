@@ -21,11 +21,15 @@ function formatDuration(seconds: number | null): string {
 export interface DashboardStripProps {
   pillarProgress: { pillar: string; label: string; pct: number } | null
   episode: { title: string; guestName: string | null; durationSeconds: number | null } | null
-  scoreboard: { wigStatement: string | null; lead1Label: string | null; lead1Target: number | null } | null
+  scoreboard: { wigStatement: string | null; lead1Label: string | null; lead1Target: number | null; lead1Count?: number | null } | null
   nextEvent: { title: string; startsAt: string } | null
   userRank: number | null
   nextRankEntry: { displayName: string; points: number } | null
   userPoints: number
+}
+
+function daysUntil(iso: string): number {
+  return Math.ceil((new Date(iso).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
 }
 
 function ProgressBar({ pct, color }: { pct: number; color: string }) {
@@ -145,38 +149,84 @@ export function DashboardStrip({ pillarProgress, episode, scoreboard, nextEvent,
         )}
 
         {/* Card 3 — Scoreboard */}
-        <Link
-          href="/academy/accountability"
-          style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #1e1a08, #160f00)', border: '1px solid rgba(201,168,76,.3)' }}
-        >
-          <p style={{ ...LABEL_STYLE, color: GOLD }}>📊 Scoreboard</p>
-          {scoreboard?.wigStatement ? (
-            <>
-              <p style={HEADLINE_STYLE}>{scoreboard.lead1Label ?? 'Lead measure'}</p>
-              <p style={SUB_STYLE}>Target: {scoreboard.lead1Target ?? '—'}/wk</p>
-              <p style={{ ...CTA_STYLE, color: GOLD }}>Log calls →</p>
-            </>
-          ) : (
-            <>
-              <p style={HEADLINE_STYLE}>Track your WIG</p>
-              <p style={SUB_STYLE}>No scoreboard set up yet</p>
-              <p style={{ ...CTA_STYLE, color: GOLD }}>Set up Scoreboard →</p>
-            </>
-          )}
-        </Link>
+        {(() => {
+          const TEAL = '#0ABFA3'
+          if (!scoreboard?.wigStatement) {
+            return (
+              <Link href="/academy/accountability" style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #1e1a08, #160f00)', border: '1px solid rgba(201,168,76,.3)' }}>
+                <p style={{ ...LABEL_STYLE, color: GOLD }}>📊 Scoreboard</p>
+                <p style={HEADLINE_STYLE}>Track your WIG</p>
+                <p style={SUB_STYLE}>No scoreboard set up yet</p>
+                <p style={{ ...CTA_STYLE, color: GOLD }}>Set up Scoreboard →</p>
+              </Link>
+            )
+          }
+          const label = scoreboard.lead1Label ?? 'Lead measure'
+          const target = scoreboard.lead1Target ?? 0
+          const count = scoreboard.lead1Count ?? null
+          const short = count !== null && target > 0 ? target - count : null
+          const onTrack = short !== null && short <= 0
+          const barColor = onTrack ? TEAL : GOLD
+          const barPct = count !== null && target > 0 ? Math.min(Math.round((count / target) * 100), 100) : 0
+          const borderCol = onTrack ? 'rgba(10,191,163,.3)' : 'rgba(201,168,76,.3)'
+          return (
+            <Link href="/academy/accountability" style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #1e1a08, #160f00)', border: `1px solid ${borderCol}` }}>
+              <p style={{ ...LABEL_STYLE, color: onTrack ? TEAL : GOLD }}>📊 Scoreboard</p>
+              {onTrack ? (
+                <>
+                  <p style={HEADLINE_STYLE}>Lead measure hit ✓</p>
+                  <p style={SUB_STYLE}>{count}/{target} {label} · On track</p>
+                  <ProgressBar pct={100} color={TEAL} />
+                  <p style={{ ...CTA_STYLE, color: TEAL }}>View scoreboard →</p>
+                </>
+              ) : short !== null ? (
+                <>
+                  <p style={HEADLINE_STYLE}>{short} {label} short</p>
+                  <p style={SUB_STYLE}>{count}/{target} {label} · WIG at risk</p>
+                  <ProgressBar pct={barPct} color={barColor} />
+                  <p style={{ ...CTA_STYLE, color: GOLD }}>Log now →</p>
+                </>
+              ) : (
+                <>
+                  <p style={HEADLINE_STYLE}>{label}</p>
+                  <p style={SUB_STYLE}>Target: {target}/wk</p>
+                  <p style={{ ...CTA_STYLE, color: GOLD }}>Log now →</p>
+                </>
+              )}
+            </Link>
+          )
+        })()}
 
         {/* Card 4 — Events (conditional) */}
-        {nextEvent && (
-          <Link
-            href="/events"
-            style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #200a0a, #180606)', border: '1px solid rgba(201,48,42,.3)' }}
-          >
-            <p style={{ ...LABEL_STYLE, color: RED }}>📅 Upcoming</p>
-            <p style={HEADLINE_STYLE}>{nextEvent.title}</p>
-            <p style={SUB_STYLE}>{formatEventDate(nextEvent.startsAt)}</p>
-            <p style={{ ...CTA_STYLE, color: RED }}>Register now →</p>
-          </Link>
-        )}
+        {nextEvent && (() => {
+          const days = daysUntil(nextEvent.startsAt)
+          let evtLabel: string
+          let evtCta: string
+          if (days <= 0) {
+            evtLabel = '🔴 Today'
+            evtCta = 'Register now →'
+          } else if (days === 1) {
+            evtLabel = '🔴 Tomorrow'
+            evtCta = 'Register now →'
+          } else if (days <= 3) {
+            evtLabel = `🔴 ${days} days away`
+            evtCta = 'Register now →'
+          } else if (days <= 7) {
+            evtLabel = '📅 This week'
+            evtCta = 'Register →'
+          } else {
+            evtLabel = '📅 Upcoming'
+            evtCta = 'View →'
+          }
+          return (
+            <Link href="/events" style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #200a0a, #180606)', border: '1px solid rgba(201,48,42,.3)' }}>
+              <p style={{ ...LABEL_STYLE, color: RED }}>{evtLabel}</p>
+              <p style={HEADLINE_STYLE}>{nextEvent.title}</p>
+              <p style={SUB_STYLE}>{formatEventDate(nextEvent.startsAt)}</p>
+              <p style={{ ...CTA_STYLE, color: RED }}>{evtCta}</p>
+            </Link>
+          )
+        })()}
 
         {/* Card 5 — Leaderboard */}
         <Link
