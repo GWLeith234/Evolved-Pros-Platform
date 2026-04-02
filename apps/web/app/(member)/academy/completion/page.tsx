@@ -41,7 +41,7 @@ export default async function CompletionPage() {
     : new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
 
   const earnedPillarNumbers = new Set(badges.map(b => b.pillar_number))
-  const alumniRow = badges.find(b => b.pillar_number === 0)
+  const alumniRow = badges.find(b => b.pillar_number === 7)
   const alumniAwardedAt = alumniRow?.awarded_at
     ? new Date(alumniRow.awarded_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : completedAt

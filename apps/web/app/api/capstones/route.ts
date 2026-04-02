@@ -81,7 +81,7 @@ export async function POST(request: Request) {
         adminClient
           .from('member_badges')
           .upsert(
-            { user_id: user.id, pillar_number: 0, badge_name: 'EVOLVED Alumni', awarded_at: now },
+            { user_id: user.id, pillar_number: 7, badge_name: 'EVOLVED Alumni', awarded_at: now },
             { onConflict: 'user_id,pillar_number' }
           ),
       ])

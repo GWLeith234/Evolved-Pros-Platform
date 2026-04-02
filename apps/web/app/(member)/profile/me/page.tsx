@@ -58,12 +58,12 @@ export default async function MyProfilePage({
       .order('created_at', { ascending: false })
       .limit(10),
     adPromise,
-    // Alumni badge (pillar_number = 0)
+    // Alumni badge (pillar_number = 7)
     adminClient
       .from('member_badges')
       .select('pillar_number, awarded_at')
       .eq('user_id', user.id)
-      .eq('pillar_number', 0)
+      .eq('pillar_number', 7)
       .maybeSingle(),
   ])
 
