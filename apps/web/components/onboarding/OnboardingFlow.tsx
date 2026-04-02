@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { OnboardingWelcome } from './OnboardingWelcome'
+import { OnboardingProfile } from './OnboardingProfile'
+import { OnboardingPillar } from './OnboardingPillar'
 
 interface Props {
   initialStep: number
@@ -161,12 +163,8 @@ export function OnboardingFlow({ initialStep, userId }: Props) {
         }}
       >
         {currentStep === 1 && <OnboardingWelcome onContinue={advance} />}
-        {currentStep === 2 && (
-          <StepPlaceholder stepNumber={2} label={STEP_LABELS[2]} onContinue={advance} />
-        )}
-        {currentStep === 3 && (
-          <StepPlaceholder stepNumber={3} label={STEP_LABELS[3]} onContinue={advance} />
-        )}
+        {currentStep === 2 && <OnboardingProfile userId={userId} onContinue={advance} />}
+        {currentStep === 3 && <OnboardingPillar onContinue={advance} />}
         {currentStep === 4 && (
           <StepPlaceholder stepNumber={4} label={STEP_LABELS[4]} onContinue={advance} />
         )}
