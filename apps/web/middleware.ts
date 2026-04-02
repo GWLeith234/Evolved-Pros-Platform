@@ -82,6 +82,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Onboarding routes: authenticated user is allowed through unconditionally.
+  // The page itself decides whether to render or redirect to /home.
+  // This guard must come before the onboarding-gate check below.
+  if (pathname.startsWith('/onboarding')) {
+    return supabaseResponse
+  }
+
   // Admin route guard
   if (ADMIN_ROUTES.some(r => pathname.startsWith(r))) {
     const adminClient = createClient(

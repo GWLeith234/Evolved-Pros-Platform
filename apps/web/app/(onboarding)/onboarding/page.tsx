@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow'
 
@@ -9,11 +10,12 @@ export default async function OnboardingPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
+  // Use adminClient + email to avoid auth UUID ≠ public users UUID mismatch.
+  // If profile is null (DB error / missing row), render step 1 — never redirect to /home.
+  const { data: profile } = await (adminClient as any)
     .from('users')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .select('onboarding_completed, onboarding_step, display_name, full_name, company' as any)
-    .eq('id', user.id)
+    .select('onboarding_completed, onboarding_step, display_name, full_name, company')
+    .eq('email', user.email!)
     .single()
 
   const p = profile as {
@@ -24,7 +26,8 @@ export default async function OnboardingPage() {
     company: string | null
   } | null
 
-  if (p?.onboarding_completed) redirect('/home')
+  // Only redirect when explicitly true — null/undefined means show onboarding
+  if (p?.onboarding_completed === true) redirect('/home')
 
   const initialStep  = p?.onboarding_step ?? 1
   const displayName  = p?.display_name ?? p?.full_name ?? ''
