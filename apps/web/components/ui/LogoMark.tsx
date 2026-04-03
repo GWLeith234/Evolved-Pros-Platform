@@ -41,20 +41,22 @@ export function LogoMark({ variant = 'light', height = 36 }: LogoMarkProps) {
       {/* Icon replaces the O in PROS — plain img so overflow:hidden clips reliably */}
       <div
         style={{
-          width: fontSize,
-          height: fontSize,
+          width: Math.round(fontSize * 1.25),
+          height: Math.round(fontSize * 1.25),
           borderRadius: '50%',
           overflow: 'hidden',
           flexShrink: 0,
+          marginLeft: -2,
+          marginRight: -2,
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={ICON_URL}
           alt=""
-          width={fontSize}
-          height={fontSize}
-          style={{ display: 'block', width: fontSize, height: fontSize }}
+          width={Math.round(fontSize * 1.25)}
+          height={Math.round(fontSize * 1.25)}
+          style={{ display: 'block', width: Math.round(fontSize * 1.25), height: Math.round(fontSize * 1.25) }}
         />
       </div>
 
