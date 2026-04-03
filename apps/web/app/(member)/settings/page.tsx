@@ -51,12 +51,12 @@ export default async function SettingsPage() {
           Account
         </p>
         <h1
-          className="font-display font-black leading-tight text-white"
-          style={{ fontSize: '28px' }}
+          className="font-display font-black leading-tight"
+          style={{ fontSize: '28px', color: 'var(--text-primary)' }}
         >
           Settings
         </h1>
-        <p className="font-body text-[14px] mt-1 text-white/50">
+        <p className="font-body text-[14px] mt-1" style={{ color: 'var(--text-secondary)' }}>
           Update your profile information.
         </p>
       </div>
@@ -68,7 +68,7 @@ export default async function SettingsPage() {
         <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
           <h2
             className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]"
-            style={{ color: '#FFFFFF' }}
+            style={{ color: 'var(--text-primary)' }}
           >
             Profile
           </h2>
@@ -105,7 +105,7 @@ export default async function SettingsPage() {
         <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
           <h2
             className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]"
-            style={{ color: '#FFFFFF' }}
+            style={{ color: 'var(--text-primary)' }}
           >
             Membership
           </h2>
@@ -142,7 +142,7 @@ export default async function SettingsPage() {
         <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
           <h2
             className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]"
-            style={{ color: '#FFFFFF' }}
+            style={{ color: 'var(--text-primary)' }}
           >
             Notifications
           </h2>
@@ -162,7 +162,7 @@ export default async function SettingsPage() {
         <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
           <h2
             className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]"
-            style={{ color: '#FFFFFF' }}
+            style={{ color: 'var(--text-primary)' }}
           >
             Appearance
           </h2>

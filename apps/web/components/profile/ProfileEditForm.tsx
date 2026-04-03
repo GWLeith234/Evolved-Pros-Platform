@@ -229,7 +229,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
       {/* ── Profile Photo ─────────────────────────────────────────── */}
       <div>
         <div className="flex items-center mb-2">
-          <label className="font-condensed font-medium uppercase text-[11px]" style={{ color: 'rgba(255,255,255,0.5)', letterSpacing: '0.06em' }}>
+          <label className="font-condensed font-medium uppercase text-[11px]" style={{ color: 'var(--text-secondary)', letterSpacing: '0.06em' }}>
             Profile Photo
           </label>
           <Tooltip content="Square image recommended · JPEG, PNG or WebP · Max 400×400px · File size under 2MB · Your photo appears on your posts, profile, and in the member directory">
@@ -259,8 +259,8 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
             )}
           </button>
           <div>
-            <p className="font-body text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>Click to upload a new photo</p>
-            <p className="font-body text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>JPEG, PNG or WebP · max 400×400</p>
+            <p className="font-body text-sm" style={{ color: 'var(--text-secondary)' }}>Click to upload a new photo</p>
+            <p className="font-body text-xs mt-0.5" style={{ color: 'var(--text-tertiary)' }}>JPEG, PNG or WebP · max 400×400</p>
           </div>
         </div>
         <input
@@ -275,7 +275,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
       {/* ── Profile Banner ────────────────────────────────────────── */}
       <div>
         <div className="flex items-center mb-2">
-          <label className="font-condensed font-medium uppercase text-[11px]" style={{ color: 'rgba(255,255,255,0.5)', letterSpacing: '0.06em' }}>
+          <label className="font-condensed font-medium uppercase text-[11px]" style={{ color: 'var(--text-secondary)', letterSpacing: '0.06em' }}>
             Profile Banner
           </label>
           <Tooltip content="Landscape image · Minimum 1200×300px · JPEG or PNG · File size under 5MB · Your banner appears at the top of your public profile page">
@@ -300,8 +300,8 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
           onClick={() => setBannerModalOpen(true)}
           className="font-condensed font-bold uppercase tracking-wide text-[11px] px-4 py-2 rounded transition-colors"
           style={{
-            border: '1px solid rgba(255,255,255,0.12)',
-            color: 'rgba(255,255,255,0.7)',
+            border: '1px solid var(--border-color)',
+            color: 'var(--text-secondary)',
             backgroundColor: 'transparent',
           }}
         >
@@ -366,7 +366,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
 
       {/* Professional section */}
       <div>
-        <p className="font-condensed font-medium uppercase text-[9px] mb-4" style={{ color: 'rgba(255,255,255,0.5)', letterSpacing: '0.12em' }}>
+        <p className="font-condensed font-medium uppercase text-[9px] mb-4" style={{ color: 'var(--text-secondary)', letterSpacing: '0.12em' }}>
           Professional
         </p>
 
@@ -419,7 +419,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
                 onChange={e => setPhoneVisible(e.target.checked)}
                 className="w-4 h-4 rounded accent-[#1b3c5a] cursor-pointer"
               />
-              <span className="font-condensed text-[11px] uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              <span className="font-condensed text-[11px] uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>
                 Visible to members
               </span>
             </label>
@@ -427,7 +427,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
 
           {/* Current Pillar pill selector */}
           <div>
-            <label className="block font-condensed font-medium uppercase text-[11px] mb-2" style={{ color: 'rgba(255,255,255,0.5)', letterSpacing: '0.06em' }}>
+            <label className="block font-condensed font-medium uppercase text-[11px] mb-2" style={{ color: 'var(--text-secondary)', letterSpacing: '0.06em' }}>
               Current Pillar
             </label>
             <div className="flex flex-wrap gap-2">
@@ -440,9 +440,9 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
                     onClick={() => setCurrentPillar(isActive ? null : pillar)}
                     className="px-3 py-1.5 rounded font-condensed font-bold uppercase tracking-wide text-[10px] transition-all"
                     style={{
-                      backgroundColor: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-                      color: isActive ? '#ffffff' : 'rgba(255,255,255,0.4)',
-                      border: `1.5px solid ${isActive ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.12)'}`,
+                      backgroundColor: isActive ? 'var(--bg-elevated)' : 'transparent',
+                      color: isActive ? 'var(--text-primary)' : 'var(--text-tertiary)',
+                      border: `1.5px solid var(--border-color)`,
                     }}
                   >
                     {pillar.toUpperCase()} · {PILLAR_LABELS[pillar]}
@@ -469,7 +469,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
                 onChange={e => setGoalVisible(e.target.checked)}
                 className="w-4 h-4 rounded accent-[#1b3c5a] cursor-pointer"
               />
-              <span className="font-condensed text-[11px] uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              <span className="font-condensed text-[11px] uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>
                 Make this public
               </span>
             </label>
