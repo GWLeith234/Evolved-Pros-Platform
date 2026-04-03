@@ -37,8 +37,8 @@ export async function EpisodeBanner() {
 
   if (!episode) return null
 
-  const guestLine = [episode.guest_name, episode.guest_title].filter(Boolean).join(' · ')
-  const displayText = guestLine || episode.title
+  const displayText = episode.title
+  const guestLabel = episode.guest_name ?? null
   const dateLabel = episode.published_at ? formatPublishedAt(episode.published_at) : null
 
   const href = episode.youtube_url
@@ -78,6 +78,7 @@ export async function EpisodeBanner() {
           LATEST EPISODE
         </span>
 
+        {/* Episode title — primary */}
         <span
           style={{
             color: '#ffffff',
@@ -91,25 +92,21 @@ export async function EpisodeBanner() {
           {displayText}
         </span>
 
+        {/* Guest name */}
+        {guestLabel && (
+          <>
+            <span style={{ width: '3px', height: '3px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+              {guestLabel}
+            </span>
+          </>
+        )}
+
+        {/* Date */}
         {dateLabel && (
           <>
-            <span
-              style={{
-                width: '3px',
-                height: '3px',
-                borderRadius: '50%',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                flexShrink: 0,
-              }}
-            />
-            <span
-              style={{
-                color: 'rgba(255,255,255,0.35)',
-                fontSize: '11px',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-              }}
-            >
+            <span style={{ width: '3px', height: '3px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
+            <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>
               {dateLabel}
             </span>
           </>

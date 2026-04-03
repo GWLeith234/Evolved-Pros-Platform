@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(
@@ -14,9 +15,9 @@ export async function POST(
 
   const today = new Date().toISOString().split('T')[0]
 
-  // Verify the habit belongs to this user
+  // Verify the habit belongs to this user (adminClient bypasses RLS)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: habit } = await (supabase as any)
+  const { data: habit } = await (adminClient as any)
     .from('habit_stacks')
     .select('id')
     .eq('id', habitId)
@@ -25,15 +26,17 @@ export async function POST(
 
   if (!habit) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  // Upsert idempotent completion
+  // Plain insert — column is habit_stack_id (not habit_id).
+  // If already completed today the unique constraint fires (code 23505); treat as success.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
+  const { error } = await (adminClient as any)
     .from('habit_completions')
-    .upsert(
-      { habit_id: habitId, user_id: user.id, completed_on: today },
-      { onConflict: 'habit_id,completed_on' }
-    )
+    .insert({ habit_stack_id: habitId, user_id: user.id, completed_on: today })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error && error.code !== '23505') {
+    console.error('Habit complete error:', JSON.stringify(error))
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
   return NextResponse.json({ ok: true, completed_on: today })
 }
