@@ -139,7 +139,7 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
           <div style={{ paddingBottom: '4px', flex: 1, minWidth: 0 }}>
             {/* Row 1: name only */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
-              <h1 style={{ fontSize: '28px', fontWeight: 900, color: 'white', lineHeight: 1.05, fontFamily: '"Arial Black", Arial, sans-serif', margin: 0 }}>
+              <h1 style={{ fontSize: '28px', fontWeight: 700, color: 'white', lineHeight: 1.05, fontFamily: '"Barlow Condensed", sans-serif', margin: 0 }}>
                 {displayName}
               </h1>
             </div>

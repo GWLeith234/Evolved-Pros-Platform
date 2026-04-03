@@ -129,8 +129,8 @@ export function WelcomeBanner({ displayName, tier, avatarUrl, quote }: WelcomeBa
             {quote && (
               <div className="mt-2 max-w-[480px]">
                 <p
-                  className="font-display italic leading-snug line-clamp-2"
-                  style={{ fontSize: '13px', color: 'rgba(255,255,255,0.80)' }}
+                  className="leading-snug line-clamp-2"
+                  style={{ fontSize: '13px', color: 'rgba(255,255,255,0.80)', fontFamily: '"Playfair Display", Georgia, serif', fontStyle: 'italic' }}
                 >
                   &ldquo;{quote.quote_text}&rdquo;
                 </p>
