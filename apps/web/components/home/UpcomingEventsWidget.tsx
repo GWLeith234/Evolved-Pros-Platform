@@ -1,9 +1,9 @@
 'use client'
 
-import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardHeader, CardBody } from '@evolved-pros/ui'
+import { Button } from '@/components/ui/Button'
 
 type EventRow = {
   id: string
@@ -109,13 +109,9 @@ export function UpcomingEventsWidget({ events, userId }: UpcomingEventsWidgetPro
       <CardHeader
         title="Upcoming Events"
         action={
-          <Link
-            href="/events"
-            className="font-condensed font-semibold uppercase tracking-wide text-xs border rounded px-3 py-1.5 transition-colors"
-            style={{ color: '#1b3c5a', borderColor: 'rgba(27,60,90,0.2)' }}
-          >
-            All →
-          </Link>
+          <Button variant="tertiary" size="sm" href="/events">
+            All
+          </Button>
         }
       />
       <CardBody className="!px-6 !py-0">

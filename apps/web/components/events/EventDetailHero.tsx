@@ -211,8 +211,9 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
                 disabled={loading}
                 className="w-full font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-4 py-3 text-center transition-all"
                 style={{
-                  backgroundColor: registered ? '#68a2b9' : '#1b3c5a',
-                  color: 'white',
+                  backgroundColor: registered ? 'rgba(255,255,255,0.06)' : '#1b3c5a',
+                  color: registered ? 'rgba(255,255,255,0.5)' : 'white',
+                  border: registered ? '1px solid rgba(255,255,255,0.12)' : 'none',
                   opacity: loading ? 0.7 : 1,
                 }}
               >
