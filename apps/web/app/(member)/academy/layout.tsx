@@ -10,8 +10,15 @@ export default function AcademyLayout({ children }: { children: React.ReactNode 
     const html = document.documentElement
     const wasLight = html.classList.contains('light-mode')
     if (wasLight) html.classList.remove('light-mode')
+
+    // Override the shared <main> bg-[#faf9f7] directly — inline style wins over Tailwind
+    const main = document.querySelector('main') as HTMLElement | null
+    const prevMainBg = main?.style.backgroundColor ?? ''
+    if (main) main.style.backgroundColor = '#0A0F18'
+
     return () => {
       if (wasLight) html.classList.add('light-mode')
+      if (main) main.style.backgroundColor = prevMainBg
     }
   }, [])
 
