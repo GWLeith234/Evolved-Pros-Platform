@@ -209,20 +209,20 @@ export default async function MemberHomePage() {
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
-    // Habit stack
+    // Habit stack — adminClient bypasses RLS; profile.id is the public UUID
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
+    (adminClient as any)
       .from('habit_stacks')
       .select('id, name, time_of_day, sort_order')
-      .eq('user_id', user.id)
+      .eq('user_id', profile.id)
       .order('sort_order')
       .limit(7),
     // Today's habit completions
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
+    (adminClient as any)
       .from('habit_completions')
-      .select('habit_id')
-      .eq('user_id', user.id)
+      .select('habit_stack_id')
+      .eq('user_id', profile.id)
       .eq('completed_on', today),
   ])
 
@@ -239,7 +239,7 @@ export default async function MemberHomePage() {
   } | null
 
   const homeHabits = (habitsResult.data ?? []) as { id: string; name: string; time_of_day: string }[]
-  const homeCompletedIds = ((habitCompletionsResult.data ?? []) as { habit_id: string }[]).map(c => c.habit_id)
+  const homeCompletedIds = ((habitCompletionsResult.data ?? []) as { habit_stack_id: string }[]).map(c => c.habit_stack_id)
 
   const displayName = (profile.full_name ? profile.full_name.split(' ')[0] : null) ?? profile.display_name ?? 'Member'
   const upcomingEventCount = events.filter(e => !e.isRegistered).length

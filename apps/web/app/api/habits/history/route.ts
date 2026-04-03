@@ -1,10 +1,22 @@
-import { createClient } from '@/lib/supabase/server'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
-  const supabase = createClient()
+  const supabase = createRouteHandlerClient({ cookies })
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Get public UUID (auth UUID ≠ public users UUID)
+  const { data: profile } = await adminClient
+    .from('users')
+    .select('id')
+    .eq('email', user.email!)
+    .single()
+
+  if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+  const userId = profile.id
 
   const days = Math.min(90, Math.max(7, parseInt(req.nextUrl.searchParams.get('days') ?? '30', 10)))
 
@@ -17,17 +29,17 @@ export async function GET(req: NextRequest) {
 
   const [completionsRes, totalHabitsRes] = await Promise.all([
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
+    (adminClient as any)
       .from('habit_completions')
       .select('completed_on')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .gte('completed_on', startStr)
       .lte('completed_on', endStr),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
+    (adminClient as any)
       .from('habit_stacks')
       .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id),
+      .eq('user_id', userId),
   ])
 
   // Group completions by date

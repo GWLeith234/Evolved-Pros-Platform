@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { fetchUserProfile, fetchCourseByPillarNumber } from '@/lib/academy/fetchers'
 import { PillarPageShell } from '@/components/academy/PillarPageShell'
@@ -157,21 +158,30 @@ export default async function Page() {
     fetchCourseByPillarNumber(supabase, 6),
   ])
 
+  // Get public UUID (auth UUID ≠ public users UUID)
+  const { data: profileRow } = await adminClient
+    .from('users')
+    .select('id')
+    .eq('email', user.email!)
+    .single()
+
+  const userId = profileRow?.id ?? user.id
+
   // Fetch habits, today's completions, and review cadences server-side
   const today = new Date().toISOString().split('T')[0]
   const [habitsRes, completionsRes, cadencesRes] = p6Course ? await Promise.all([
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
+    (adminClient as any)
       .from('habit_stacks')
       .select('id, name, time_of_day, sort_order, course_id, created_at')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('course_id', p6Course.id)
       .order('sort_order'),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
+    (adminClient as any)
       .from('habit_completions')
-      .select('habit_id')
-      .eq('user_id', user.id)
+      .select('habit_stack_id')
+      .eq('user_id', userId)
       .eq('completed_on', today),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any)
@@ -183,7 +193,7 @@ export default async function Page() {
 
   const memberName = profile?.full_name ?? profile?.display_name ?? null
   const initialHabits = (habitsRes.data ?? []) as { id: string; name: string; time_of_day: string; sort_order: number; course_id: string | null; created_at: string }[]
-  const initialCompletions = ((completionsRes.data ?? []) as { habit_id: string }[]).map(c => c.habit_id)
+  const initialCompletions = ((completionsRes.data ?? []) as { habit_stack_id: string }[]).map(c => c.habit_stack_id)
   const initialCadences = (cadencesRes.data ?? []) as { id: string; cadence_type: 'weekly' | 'monthly' | 'quarterly'; schedule_json: Record<string, string>; focus_area: string | null }[]
 
   return (
