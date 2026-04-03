@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
       .from('habit_completions')
       .select('habit_id')
       .eq('user_id', user.id)
-      .eq('completed_date', today),
+      .eq('completed_on', today),
   ])
 
   const habits = (habitsRes.data ?? []) as { id: string; name: string; time_of_day: string; sort_order: number; course_id: string | null; created_at: string }[]

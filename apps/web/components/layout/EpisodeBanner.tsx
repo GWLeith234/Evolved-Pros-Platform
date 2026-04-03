@@ -4,19 +4,19 @@ import Link from 'next/link'
 type Episode = {
   id: string
   title: string
+  slug: string | null
   guest_name: string | null
-  air_date: string | null
-  episode_url: string | null
-  status: string | null
+  guest_title: string | null
+  published_at: string | null
+  youtube_url: string | null
+  mux_playback_id: string | null
 }
 
-function formatAirDate(dateStr: string): string {
-  // Parse as noon UTC to avoid day-shifting across timezones
-  const d = new Date(dateStr.includes('T') ? dateStr : `${dateStr}T12:00:00Z`)
-  const day   = d.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' })
-  const month = d.toLocaleDateString('en-US', { month: 'long',   timeZone: 'UTC' })
-  const date  = d.toLocaleDateString('en-US', { day: 'numeric',  timeZone: 'UTC' })
-  return `${day} · ${month} ${date}`
+function formatPublishedAt(dateStr: string): string {
+  const d = new Date(dateStr)
+  const month = d.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })
+  const date  = d.toLocaleDateString('en-US', { day: 'numeric', timeZone: 'UTC' })
+  return `${month} ${date}`
 }
 
 export async function EpisodeBanner() {
@@ -25,8 +25,9 @@ export async function EpisodeBanner() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data } = await (adminClient as any)
       .from('episodes')
-      .select('id, title, guest_name, air_date, episode_url, status')
-      .order('air_date', { ascending: false })
+      .select('id, title, slug, guest_name, guest_title, published_at, youtube_url, mux_playback_id')
+      .eq('is_published', true)
+      .order('published_at', { ascending: false })
       .limit(1)
       .single()
     episode = data ?? null
@@ -36,10 +37,13 @@ export async function EpisodeBanner() {
 
   if (!episode) return null
 
-  const displayText = episode.guest_name ?? episode.title
-  const airDateLabel = episode.air_date ? formatAirDate(episode.air_date) : null
-  const href = episode.episode_url ?? '/podcast'
-  const isLive = episode.status === 'live'
+  const guestLine = [episode.guest_name, episode.guest_title].filter(Boolean).join(' · ')
+  const displayText = guestLine || episode.title
+  const dateLabel = episode.published_at ? formatPublishedAt(episode.published_at) : null
+
+  const href = episode.youtube_url
+    ?? (episode.slug ? `/podcast/${episode.slug}` : '/podcast')
+  const ctaLabel = episode.youtube_url ? '▶ Watch on YouTube' : '▶ Watch now'
 
   return (
     <div
@@ -56,7 +60,7 @@ export async function EpisodeBanner() {
         flexShrink: 0,
       }}
     >
-      {/* Left: badge + guest + date */}
+      {/* Left: badge + guest/title + date */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
         <span
           style={{
@@ -71,7 +75,7 @@ export async function EpisodeBanner() {
             flexShrink: 0,
           }}
         >
-          {isLive ? 'LIVE NOW' : 'NEXT EPISODE'}
+          LATEST EPISODE
         </span>
 
         <span
@@ -87,7 +91,7 @@ export async function EpisodeBanner() {
           {displayText}
         </span>
 
-        {airDateLabel && (
+        {dateLabel && (
           <>
             <span
               style={{
@@ -106,7 +110,7 @@ export async function EpisodeBanner() {
                 flexShrink: 0,
               }}
             >
-              {airDateLabel}
+              {dateLabel}
             </span>
           </>
         )}
@@ -128,7 +132,7 @@ export async function EpisodeBanner() {
           whiteSpace: 'nowrap',
         }}
       >
-        ▶ {isLive ? 'Watch live' : 'Watch now'}
+        {ctaLabel}
       </Link>
     </div>
   )

@@ -19,10 +19,10 @@ export async function GET(req: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any)
       .from('habit_completions')
-      .select('completed_date')
+      .select('completed_on')
       .eq('user_id', user.id)
-      .gte('completed_date', startStr)
-      .lte('completed_date', endStr),
+      .gte('completed_on', startStr)
+      .lte('completed_on', endStr),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any)
       .from('habit_stacks')
@@ -32,8 +32,8 @@ export async function GET(req: NextRequest) {
 
   // Group completions by date
   const countByDate: Record<string, number> = {}
-  for (const row of (completionsRes.data ?? []) as { completed_date: string }[]) {
-    countByDate[row.completed_date] = (countByDate[row.completed_date] ?? 0) + 1
+  for (const row of (completionsRes.data ?? []) as { completed_on: string }[]) {
+    countByDate[row.completed_on] = (countByDate[row.completed_on] ?? 0) + 1
   }
 
   const totalHabits = totalHabitsRes.count ?? 0

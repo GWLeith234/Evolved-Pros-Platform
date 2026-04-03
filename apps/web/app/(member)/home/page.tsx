@@ -223,7 +223,7 @@ export default async function MemberHomePage() {
       .from('habit_completions')
       .select('habit_id')
       .eq('user_id', user.id)
-      .eq('completed_date', today),
+      .eq('completed_on', today),
   ])
 
   const quotes = quotesResult.data ?? []

@@ -30,10 +30,10 @@ export async function POST(
   const { error } = await (supabase as any)
     .from('habit_completions')
     .upsert(
-      { habit_id: habitId, user_id: user.id, completed_date: today },
-      { onConflict: 'habit_id,completed_date' }
+      { habit_id: habitId, user_id: user.id, completed_on: today },
+      { onConflict: 'habit_id,completed_on' }
     )
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ ok: true, completed_date: today })
+  return NextResponse.json({ ok: true, completed_on: today })
 }

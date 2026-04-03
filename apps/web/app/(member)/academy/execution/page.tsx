@@ -172,7 +172,7 @@ export default async function Page() {
       .from('habit_completions')
       .select('habit_id')
       .eq('user_id', user.id)
-      .eq('completed_date', today),
+      .eq('completed_on', today),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any)
       .from('review_cadences')
