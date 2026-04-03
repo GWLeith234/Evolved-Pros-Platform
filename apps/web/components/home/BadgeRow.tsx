@@ -47,7 +47,7 @@ export function BadgeRow({ earnedBadges }: BadgeRowProps) {
   return (
     <div
       className="rounded-lg px-6 py-5"
-      style={{ backgroundColor: 'var(--card-bg)', border: '1px solid rgba(27,60,90,0.1)' }}
+      style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
     >
       <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] text-[#7a8a96] mb-4">
         Pillar Badges

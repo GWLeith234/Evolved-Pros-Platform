@@ -18,10 +18,11 @@
 
   /* Surface variables — override in light mode below */
   --page-bg:      #0d1c27;
-  --card-bg:      #ffffff;
-  --card-border:  rgba(27,60,90,0.12);
+  --card-bg:      #111926;
+  --card-border:  rgba(255,255,255,0.07);
 
   /* DS1 semantic tokens */
+  --bg-page:       #0A0F18;
   --bg-surface:    #111926;
   --bg-elevated:   #0A0F18;
   --border-color:  rgba(255,255,255,0.07);
@@ -43,11 +44,12 @@ body {
 /* ─── Light mode surface variables ─────────────────────────────────────── */
 html.light-mode {
   --page-bg:     #FAF7F2;
-  --card-bg:     #F5F1EA;
+  --card-bg:     #ffffff;
   --card-border: #E8E2D9;
 
-  --bg-surface:    #F5F1EA;
-  --bg-elevated:   #EDE8DF;
+  --bg-page:       #F5F0E8;
+  --bg-surface:    #ffffff;
+  --bg-elevated:   #F0EBE3;
   --border-color:  #E8E2D9;
   --text-primary:  #1b3c5a;
   --text-secondary: #6B7A8D;
@@ -73,7 +75,7 @@ html.light-mode aside {
 
 /* Main content area */
 html.light-mode main {
-  background-color: #FAF7F2 !important;
+  background-color: #F5F0E8 !important;
 }
 
 /* Tailwind bg-white → card ivory */

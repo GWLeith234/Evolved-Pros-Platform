@@ -23,7 +23,7 @@ export default async function MemberLayout({ children }: { children: React.React
           <EpisodeBanner />
           <NextEventBanner />
           <div className="flex flex-1 min-h-0">
-            <main className="flex-1 bg-[#faf9f7] overflow-y-auto pb-16 md:pb-0">{children}</main>
+            <main className="flex-1 overflow-y-auto pb-16 md:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>{children}</main>
             <RightRail />
           </div>
           <BottomTabBar role={profile.role} unreadCount={0} dmUnreadCount={0} />
@@ -88,7 +88,7 @@ export default async function MemberLayout({ children }: { children: React.React
       <EpisodeBanner />
       <NextEventBanner />
       <div className="flex flex-1 min-h-0">
-        <main className="flex-1 bg-[#faf9f7] overflow-y-auto pb-16 md:pb-0">
+        <main className="flex-1 overflow-y-auto pb-16 md:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>
           {children}
         </main>
         <RightRail />

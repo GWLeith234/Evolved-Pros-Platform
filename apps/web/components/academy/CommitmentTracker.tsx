@@ -90,7 +90,7 @@ export function CommitmentTracker({ courseId, weekStart }: Props) {
   const hasSaved = savedCommitments.length > 0
 
   return (
-    <div style={{ backgroundColor: '#111926', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '8px', padding: '20px' }}>
+    <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '20px' }}>
       {/* Header */}
       <div style={{ marginBottom: '16px' }}>
         <p style={{
@@ -101,7 +101,7 @@ export function CommitmentTracker({ courseId, weekStart }: Props) {
           This Week&apos;s Commitments
         </p>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <p style={{ color: 'rgba(250,249,247,0.35)', fontSize: '12px', margin: 0 }}>
+          <p style={{ color: 'var(--text-tertiary)', fontSize: '12px', margin: 0 }}>
             {formatWeekRange(weekStart)}
           </p>
           {hasSaved && (
@@ -117,7 +117,7 @@ export function CommitmentTracker({ courseId, weekStart }: Props) {
       </div>
 
       {loading ? (
-        <p style={{ color: 'rgba(250,249,247,0.2)', fontSize: '12px', fontFamily: '"Barlow Condensed", sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+        <p style={{ color: 'var(--text-tertiary)', fontSize: '12px', fontFamily: '"Barlow Condensed", sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
           Loading…
         </p>
       ) : hasSaved ? (
@@ -152,7 +152,7 @@ export function CommitmentTracker({ courseId, weekStart }: Props) {
               {/* Text */}
               <span style={{
                 fontSize: '13px', lineHeight: 1.5,
-                color: c.is_completed ? 'rgba(250,249,247,0.3)' : 'rgba(250,249,247,0.8)',
+                color: c.is_completed ? 'var(--text-tertiary)' : 'var(--text-primary)',
                 textDecoration: c.is_completed ? 'line-through' : 'none',
                 transition: 'all 0.15s',
               }}>
@@ -169,7 +169,7 @@ export function CommitmentTracker({ courseId, weekStart }: Props) {
               background: 'none', border: 'none', cursor: 'pointer',
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
               fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase',
-              color: 'rgba(250,249,247,0.2)', padding: '8px 0 0', textAlign: 'left',
+              color: 'var(--text-tertiary)', padding: '8px 0 0', textAlign: 'left',
             }}
           >
             + Set new commitments
@@ -191,10 +191,10 @@ export function CommitmentTracker({ courseId, weekStart }: Props) {
               onKeyDown={e => { if (e.key === 'Enter' && i === inputs.length - 1) handleSave() }}
               placeholder={`Commitment ${i + 1}…`}
               style={{
-                backgroundColor: 'rgba(255,255,255,0.03)',
-                border: `1px solid ${val.trim() ? CRIMSON + '33' : 'rgba(255,255,255,0.08)'}`,
+                backgroundColor: 'var(--bg-elevated)',
+                border: `1px solid ${val.trim() ? CRIMSON + '55' : 'var(--border-color)'}`,
                 borderRadius: '4px', padding: '9px 12px',
-                color: '#faf9f7', fontSize: '13px', outline: 'none',
+                color: 'var(--text-primary)', fontSize: '13px', outline: 'none',
                 fontFamily: 'inherit', transition: 'border-color 0.2s',
               }}
             />

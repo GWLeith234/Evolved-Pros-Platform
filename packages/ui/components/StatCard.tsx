@@ -38,10 +38,13 @@ export function StatCard({
   className = '',
 }: StatCardProps) {
   return (
-    <div className={`bg-white border border-[rgba(27,60,90,0.12)] rounded-lg overflow-hidden ${className}`}>
+    <div
+      className={`rounded-lg overflow-hidden ${className}`}
+      style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+    >
       <div className="h-0.5" style={{ backgroundColor: accentColors[accent] }} />
       <div className="px-5 py-4">
-        <p className="font-display text-3xl font-black text-[#1b3c5a] leading-none">
+        <p className="font-display text-3xl font-black leading-none" style={{ color: 'var(--text-primary)' }}>
           {value}
         </p>
         <p className="font-condensed font-semibold uppercase tracking-widest text-xs text-[#7a8a96] mt-1">
