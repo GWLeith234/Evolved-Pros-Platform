@@ -26,8 +26,7 @@ export async function EpisodeBanner() {
     const { data } = await (adminClient as any)
       .from('episodes')
       .select('id, title, guest_name, air_date, episode_url, status')
-      .or('status.eq.upcoming,status.eq.live')
-      .order('air_date', { ascending: true })
+      .order('air_date', { ascending: false })
       .limit(1)
       .single()
     episode = data ?? null
