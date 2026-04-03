@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { EventImageGenerator } from '@/components/admin/EventImageGenerator'
 
 interface EventFormValues {
@@ -52,6 +53,37 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [uploadState, setUploadState] = useState<'idle' | 'uploading' | 'error'>('idle')
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  async function handleFileSelect(file: File) {
+    const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp']
+    if (!ACCEPTED.includes(file.type)) {
+      setUploadError('Please upload a JPEG, PNG, or WebP image')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError('Image must be under 5MB')
+      return
+    }
+    setUploadError(null)
+    setUploadState('uploading')
+    try {
+      const supabase = createClient()
+      const path = `events/${Date.now()}-${file.name}`
+      const { data: upload, error: uploadErr } = await supabase.storage
+        .from('Branding')
+        .upload(path, file, { contentType: file.type, upsert: true })
+      if (uploadErr || !upload) throw new Error(uploadErr?.message ?? 'Upload failed')
+      const { data: { publicUrl } } = supabase.storage.from('Branding').getPublicUrl(upload.path)
+      set('imageUrl', publicUrl)
+      setUploadState('idle')
+    } catch {
+      setUploadState('error')
+      setUploadError('Upload failed — try again')
+    }
+  }
 
   function set<K extends keyof EventFormValues>(key: K, value: EventFormValues[K]) {
     setValues(prev => ({ ...prev, [key]: value }))
@@ -238,17 +270,88 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
         />
       </div>
 
-      {/* Cover Image + AI Generator */}
+      {/* Cover Image Upload + AI Generator */}
       <div>
-        <label className={labelClass}>Cover Image URL</label>
+        <label className={labelClass}>Cover Image</label>
+
+        {/* Hidden file input */}
         <input
-          type="url"
-          value={values.imageUrl}
-          onChange={e => set('imageUrl', e.target.value)}
-          className={`${inputClass} mb-3`}
-          style={inputStyle}
-          placeholder="https://... or generate below"
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          style={{ display: 'none' }}
+          onChange={e => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]) }}
         />
+
+        {values.imageUrl ? (
+          /* Preview with Replace / Remove */
+          <div className="flex items-center gap-4 mb-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={values.imageUrl}
+              alt=""
+              style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 6, border: '1px solid rgba(27,60,90,0.15)', flexShrink: 0 }}
+            />
+            <div className="flex flex-col gap-1.5">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadState === 'uploading'}
+                className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2 transition-all"
+                style={{ border: '1px solid rgba(27,60,90,0.2)', color: '#1b3c5a', backgroundColor: 'transparent' }}
+              >
+                {uploadState === 'uploading' ? 'Uploading…' : 'Replace'}
+              </button>
+              <button
+                type="button"
+                onClick={() => { set('imageUrl', ''); setUploadError(null) }}
+                className="font-condensed text-[10px] text-left"
+                style={{ color: '#ef0e30', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* Drop zone */
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploadState === 'uploading'}
+            className="w-full mb-3 transition-colors"
+            style={{
+              border: '2px dashed rgba(27,60,90,0.2)',
+              borderRadius: 8,
+              padding: '32px 20px',
+              backgroundColor: 'transparent',
+              cursor: uploadState === 'uploading' ? 'default' : 'pointer',
+              textAlign: 'center',
+            }}
+          >
+            {uploadState === 'uploading' ? (
+              <p className="font-condensed font-semibold text-[13px]" style={{ color: '#7a8a96' }}>Uploading…</p>
+            ) : (
+              <>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(122,138,150,0.6)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 8px' }}>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <p className="font-condensed font-semibold text-[13px] mb-1" style={{ color: '#7a8a96' }}>
+                  Click to upload or drag &amp; drop
+                </p>
+                <p className="font-condensed text-[11px]" style={{ color: 'rgba(122,138,150,0.55)' }}>
+                  JPEG, PNG, WebP · max 5 MB
+                </p>
+              </>
+            )}
+          </button>
+        )}
+
+        {uploadError && (
+          <p className="font-condensed text-[11px] mb-3" style={{ color: '#ef0e30' }}>{uploadError}</p>
+        )}
+
         <EventImageGenerator
           eventTitle={values.title}
           onSelect={url => set('imageUrl', url)}
