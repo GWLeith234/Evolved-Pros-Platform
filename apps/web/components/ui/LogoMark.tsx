@@ -25,10 +25,6 @@ export function LogoMark({ variant = 'light', height = 36 }: LogoMarkProps) {
     display: 'inline-block',
   }
 
-  // Slightly tighter tracking on "EVOLVED PR" so the gap before the icon
-  // visually matches the inter-letter gap within the word.
-  const prStyle: React.CSSProperties = { ...letterStyle, letterSpacing: '0.02em' }
-
   return (
     <div
       style={{
@@ -40,25 +36,27 @@ export function LogoMark({ variant = 'light', height = 36 }: LogoMarkProps) {
       }}
     >
       {/* "EVOLVED PR" */}
-      <span style={prStyle}>EVOLVED PR</span>
+      <span style={letterStyle}>EVOLVED PR</span>
 
       {/* Icon replaces the O in PROS — plain img so overflow:hidden clips reliably */}
       <div
         style={{
-          width: Math.round(fontSize * 1.45),
-          height: Math.round(fontSize * 1.45),
+          width: Math.round(fontSize * 1.12),
+          height: Math.round(fontSize * 1.12),
           borderRadius: '50%',
           overflow: 'hidden',
           flexShrink: 0,
+          marginLeft: 1,
+          marginRight: 1,
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={ICON_URL}
           alt=""
-          width={Math.round(fontSize * 1.45)}
-          height={Math.round(fontSize * 1.45)}
-          style={{ display: 'block', width: Math.round(fontSize * 1.45), height: Math.round(fontSize * 1.45) }}
+          width={Math.round(fontSize * 1.12)}
+          height={Math.round(fontSize * 1.12)}
+          style={{ display: 'block', width: Math.round(fontSize * 1.12), height: Math.round(fontSize * 1.12) }}
         />
       </div>
 
