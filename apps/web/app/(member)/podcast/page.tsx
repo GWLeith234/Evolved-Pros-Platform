@@ -309,22 +309,22 @@ export default async function PodcastPage() {
 
   return (
     <main className="flex-1 overflow-y-auto" style={{ backgroundColor: '#0d1c27', minHeight: '100%' }}>
-      {/* Page header */}
+      {/* Page header — parchment */}
       <div
         className="px-4 md:px-8 py-6"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+        style={{ backgroundColor: '#F5F0E8', borderBottom: '1px solid rgba(27,42,74,0.1)' }}
       >
-        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] mb-1" style={{ color: '#ef0e30' }}>
-          Evolved Pros
+        <p className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] mb-1" style={{ color: '#C9302A' }}>
+          EVOLVED PROS
         </p>
         <h1
-          className="font-display font-black leading-tight"
-          style={{ fontSize: '32px', color: 'white' }}
+          className="font-display font-black leading-tight mb-1"
+          style={{ fontSize: '32px', color: '#1B2A4A' }}
         >
           The Podcast
         </h1>
-        <p className="font-body text-[14px] mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
-          Real conversations with professionals who are evolving how they work, think, and lead.
+        <p className="font-body text-[14px]" style={{ color: '#6B7A8D', maxWidth: '540px' }}>
+          Real conversations with professionals who are crushing it from the field, from the trenches, and in real life.
         </p>
       </div>
 

@@ -235,7 +235,7 @@ export function DashboardStrip({ pillarProgress, episode, scoreboard, nextEvent,
         >
           <p style={{ ...LABEL_STYLE, color: PURPLE }}>🏆 Leaderboard</p>
           <p style={HEADLINE_STYLE}>
-            {userRank ? `You&apos;re #${userRank}` : 'Earn points'}
+            {userRank ? `You're #${userRank}` : 'Earn points'}
           </p>
           <p style={SUB_STYLE}>
             {myPoints.toLocaleString()} pts

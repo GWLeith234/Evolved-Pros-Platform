@@ -209,6 +209,78 @@ export function UnifiedCommunityPage({
       {/* Dashboard strip */}
       <DashboardStrip {...dashboardProps} />
 
+      {/* Parchment header */}
+      <div
+        style={{ backgroundColor: '#F5F0E8', borderBottom: '1px solid rgba(27,42,74,0.1)', padding: '20px 24px 16px' }}
+      >
+        <p
+          className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] mb-1"
+          style={{ color: '#C9302A' }}
+        >
+          EVOLVED PROS
+        </p>
+        <h1
+          className="font-display font-black leading-tight mb-1"
+          style={{ fontSize: '28px', color: '#1B2A4A' }}
+        >
+          Community
+        </h1>
+        <p
+          className="font-body text-[14px] mb-4"
+          style={{ color: '#6B7A8D', maxWidth: '540px' }}
+        >
+          Connect with high-performing sales professionals. Share wins, ask questions, and build accountability.
+        </p>
+
+        {/* Filter pill bar */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {[
+            { id: 'all' as Filter, label: 'All', color: null },
+            { id: 'win' as Filter, label: '🏆 Wins', color: null },
+            { id: 'question' as Filter, label: '❓ Questions', color: null },
+          ].map(f => {
+            const active = activeFilter === f.id
+            return (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setActiveFilter(f.id)}
+                className="font-condensed font-semibold uppercase tracking-[0.1em] text-[10px] transition-all"
+                style={{
+                  padding: '5px 14px',
+                  borderRadius: '20px',
+                  backgroundColor: active ? '#1B2A4A' : '#ffffff',
+                  color: active ? '#ffffff' : '#1B2A4A',
+                  border: `1px solid ${active ? '#1B2A4A' : 'rgba(27,42,74,0.15)'}`,
+                }}
+              >
+                {f.label}
+              </button>
+            )
+          })}
+          {PILLAR_FILTERS.map(f => {
+            const active = activeFilter === f.id
+            return (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setActiveFilter(f.id)}
+                className="font-condensed font-semibold uppercase tracking-[0.1em] text-[10px] transition-all"
+                style={{
+                  padding: '5px 14px',
+                  borderRadius: '20px',
+                  backgroundColor: active ? '#1B2A4A' : '#ffffff',
+                  color: active ? '#ffffff' : '#1B2A4A',
+                  border: `1px solid ${active ? '#1B2A4A' : 'rgba(27,42,74,0.15)'}`,
+                }}
+              >
+                {f.label}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
       {/* Feed — full-width, centered, scrollable */}
       <div className="flex-1 overflow-y-auto" style={{ backgroundColor: '#0A0F18' }}>
         <div className="w-full mx-auto p-4 space-y-3" style={{ maxWidth: '680px' }}>
@@ -236,50 +308,6 @@ export function UnifiedCommunityPage({
               />
             </div>
           )}
-
-          {/* Filter pill bar */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {[
-              { id: 'all' as Filter, label: 'All', color: null },
-              { id: 'win' as Filter, label: '🏆 Wins', color: '#C9A84C' },
-              { id: 'question' as Filter, label: '❓ Questions', color: '#60A5FA' },
-            ].map(f => {
-              const active = activeFilter === f.id
-              return (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => setActiveFilter(f.id)}
-                  className="font-condensed font-semibold uppercase tracking-[0.1em] text-[10px] rounded-full px-3 py-1 transition-all"
-                  style={{
-                    backgroundColor: active ? (f.color ?? '#68a2b9') : 'transparent',
-                    color: active ? 'white' : 'rgba(255,255,255,0.4)',
-                    border: `1px solid ${active ? (f.color ?? '#68a2b9') : 'rgba(255,255,255,0.12)'}`,
-                  }}
-                >
-                  {f.label}
-                </button>
-              )
-            })}
-            {PILLAR_FILTERS.map(f => {
-              const active = activeFilter === f.id
-              return (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => setActiveFilter(f.id)}
-                  className="font-condensed font-semibold uppercase tracking-[0.1em] text-[10px] rounded-full px-3 py-1 transition-all"
-                  style={{
-                    backgroundColor: active ? f.color : 'transparent',
-                    color: active ? 'white' : 'rgba(255,255,255,0.4)',
-                    border: `1px solid ${active ? f.color : 'rgba(255,255,255,0.12)'}`,
-                  }}
-                >
-                  {f.label}
-                </button>
-              )
-            })}
-          </div>
 
           {/* Compose */}
           <FeedCompose
