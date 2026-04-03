@@ -25,13 +25,13 @@ export async function GET(req: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any)
       .from('habit_completions')
-      .select('habit_id')
+      .select('habit_stack_id')
       .eq('user_id', user.id)
       .eq('completed_on', today),
   ])
 
   const habits = (habitsRes.data ?? []) as { id: string; name: string; time_of_day: string; sort_order: number; course_id: string | null; created_at: string }[]
-  const completedIds = ((completionsRes.data ?? []) as { habit_id: string }[]).map(c => c.habit_id)
+  const completedIds = ((completionsRes.data ?? []) as { habit_stack_id: string }[]).map(c => c.habit_stack_id)
 
   return NextResponse.json({ habits, completedIds })
 }
