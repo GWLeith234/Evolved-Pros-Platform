@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Button } from '@/components/ui/Button'
 import { getAvatarColor } from '@/lib/community/types'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import type { Post, PillarTag, PostType } from '@/lib/community/types'
@@ -182,17 +183,15 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
         </div>
         <p className="font-condensed text-[10px] text-[#7a8a96] mb-2">(Optional) Tag your post to a pillar</p>
         <div className="flex justify-end">
-          <button
+          <Button
+            variant="primary"
+            size="md"
             onClick={handleSubmit}
-            disabled={loading || body.trim().length < 10}
-            className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2 text-white transition-all"
-            style={{
-              backgroundColor: loading || body.trim().length < 10 ? 'rgba(201,48,42,0.4)' : '#C9302A',
-              cursor: loading || body.trim().length < 10 ? 'not-allowed' : 'pointer',
-            }}
+            disabled={body.trim().length < 10}
+            loading={loading}
           >
-            {loading ? '...' : 'Post →'}
-          </button>
+            Post →
+          </Button>
         </div>
       </div>
     </div>

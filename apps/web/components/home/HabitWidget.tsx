@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { useState } from 'react'
+import { Button } from '@/components/ui/Button'
 
 const TEAL = '#0ABFA3'
 
@@ -47,12 +47,9 @@ export function HabitWidget({ initialHabits, initialCompletions }: Props) {
         <p style={{ color: 'var(--text-tertiary)', fontSize: '13px', margin: '0 0 10px', lineHeight: 1.5 }}>
           Build your daily execution habits.
         </p>
-        <Link
-          href="/academy/execution"
-          style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: TEAL, textDecoration: 'none' }}
-        >
-          Build your habit stack →
-        </Link>
+        <Button variant="tertiary" size="sm" href="/academy/execution">
+          Build your habit stack
+        </Button>
       </div>
     )
   }
@@ -113,12 +110,9 @@ export function HabitWidget({ initialHabits, initialCompletions }: Props) {
           </p>
         )}
 
-        <Link
-          href="/academy/execution"
-          style={{ display: 'block', marginTop: '10px', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', textDecoration: 'none' }}
-        >
-          Manage stack →
-        </Link>
+        <Button variant="tertiary" size="sm" href="/academy/execution">
+          Manage stack
+        </Button>
       </div>
     </div>
   )

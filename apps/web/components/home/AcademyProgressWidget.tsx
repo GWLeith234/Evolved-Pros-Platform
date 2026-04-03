@@ -1,5 +1,5 @@
-import Link from 'next/link'
-import { Card, CardHeader, CardBody, Button } from '@evolved-pros/ui'
+import { Card, CardHeader, CardBody } from '@evolved-pros/ui'
+import { Button } from '@/components/ui/Button'
 
 type CourseProgress = {
   id: string
@@ -58,11 +58,9 @@ export function AcademyProgressWidget({ courses }: AcademyProgressWidgetProps) {
         )}
 
         <div className="pt-2">
-          <Link href="/academy" className="block">
-            <Button variant="primary" size="sm" className="w-full">
-              Continue Learning →
-            </Button>
-          </Link>
+          <Button variant="primary" size="lg" href="/academy" fullWidth>
+            Continue Learning →
+          </Button>
         </div>
       </CardBody>
     </Card>

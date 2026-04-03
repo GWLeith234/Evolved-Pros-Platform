@@ -2,7 +2,8 @@
 
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Input, Textarea, Button } from '@evolved-pros/ui'
+import { Input, Textarea } from '@evolved-pros/ui'
+import { Button } from '@/components/ui/Button'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { BannerPickerModal } from '@/components/profile/BannerPickerModal'
 

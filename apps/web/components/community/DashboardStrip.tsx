@@ -6,6 +6,7 @@ const BLUE   = '#60A5FA'
 const PURPLE = '#A78BFA'
 const GOLD   = '#C9A84C'
 const RED    = '#ef0e30'
+const CTA    = '#0ABFA3'
 
 function formatEventDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
@@ -130,7 +131,7 @@ export function DashboardStrip({ pillarProgress, episode, scoreboard, nextEvent,
           ) : (
             <p style={SUB_STYLE}>Begin your first pillar</p>
           )}
-          <p style={{ ...CTA_STYLE, color: BLUE }}>Resume →</p>
+          <p style={{ ...CTA_STYLE, color: CTA }}>Resume →</p>
         </Link>
 
         {/* Card 2 — Podcast */}
@@ -144,7 +145,7 @@ export function DashboardStrip({ pillarProgress, episode, scoreboard, nextEvent,
             <p style={SUB_STYLE}>
               {[episode.guestName, formatDuration(episode.durationSeconds)].filter(Boolean).join(' · ')}
             </p>
-            <p style={{ ...CTA_STYLE, color: PURPLE }}>▶ Watch now →</p>
+            <p style={{ ...CTA_STYLE, color: CTA }}>▶ Watch now →</p>
           </Link>
         )}
 
@@ -157,7 +158,7 @@ export function DashboardStrip({ pillarProgress, episode, scoreboard, nextEvent,
                 <p style={{ ...LABEL_STYLE, color: GOLD }}>📊 Scoreboard</p>
                 <p style={HEADLINE_STYLE}>Track your WIG</p>
                 <p style={SUB_STYLE}>No scoreboard set up yet</p>
-                <p style={{ ...CTA_STYLE, color: GOLD }}>Set up Scoreboard →</p>
+                <p style={{ ...CTA_STYLE, color: CTA }}>Set up Scoreboard →</p>
               </Link>
             )
           }
@@ -177,20 +178,20 @@ export function DashboardStrip({ pillarProgress, episode, scoreboard, nextEvent,
                   <p style={HEADLINE_STYLE}>Lead measure hit ✓</p>
                   <p style={SUB_STYLE}>{count}/{target} {label} · On track</p>
                   <ProgressBar pct={100} color={TEAL} />
-                  <p style={{ ...CTA_STYLE, color: TEAL }}>View scoreboard →</p>
+                  <p style={{ ...CTA_STYLE, color: CTA }}>View scoreboard →</p>
                 </>
               ) : short !== null ? (
                 <>
                   <p style={HEADLINE_STYLE}>{short} {label} short</p>
                   <p style={SUB_STYLE}>{count}/{target} {label} · WIG at risk</p>
                   <ProgressBar pct={barPct} color={barColor} />
-                  <p style={{ ...CTA_STYLE, color: GOLD }}>Log now →</p>
+                  <p style={{ ...CTA_STYLE, color: CTA }}>Log now →</p>
                 </>
               ) : (
                 <>
                   <p style={HEADLINE_STYLE}>{label}</p>
                   <p style={SUB_STYLE}>Target: {target}/wk</p>
-                  <p style={{ ...CTA_STYLE, color: GOLD }}>Log now →</p>
+                  <p style={{ ...CTA_STYLE, color: CTA }}>Log now →</p>
                 </>
               )}
             </Link>
@@ -223,7 +224,7 @@ export function DashboardStrip({ pillarProgress, episode, scoreboard, nextEvent,
               <p style={{ ...LABEL_STYLE, color: RED }}>{evtLabel}</p>
               <p style={HEADLINE_STYLE}>{nextEvent.title}</p>
               <p style={SUB_STYLE}>{formatEventDate(nextEvent.startsAt)}</p>
-              <p style={{ ...CTA_STYLE, color: RED }}>{evtCta}</p>
+              <p style={{ ...CTA_STYLE, color: CTA }}>{evtCta}</p>
             </Link>
           )
         })()}
@@ -242,7 +243,7 @@ export function DashboardStrip({ pillarProgress, episode, scoreboard, nextEvent,
             {ahead && ` · ${ahead.displayName} is ${(ahead.points - myPoints).toLocaleString()} ahead`}
             {behind && !ahead && ` · ${behind.displayName} is ${(myPoints - behind.points).toLocaleString()} behind`}
           </p>
-          <p style={{ ...CTA_STYLE, color: PURPLE }}>
+          <p style={{ ...CTA_STYLE, color: CTA }}>
             {ahead ? 'Close the gap →' : 'Stay ahead →'}
           </p>
         </Link>

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Card, CardHeader, CardBody } from '@evolved-pros/ui'
+import { Button } from '@/components/ui/Button'
 
 type NotificationRow = {
   id: string
@@ -154,13 +155,9 @@ export function ActivityFeed({ notifications, completions, posts = [] }: Activit
       <CardHeader
         title="Recent Activity"
         action={
-          <Link
-            href="/community"
-            className="font-condensed font-semibold uppercase tracking-wide text-xs border rounded px-3 py-1.5 transition-colors"
-            style={{ color: '#1b3c5a', borderColor: 'rgba(27,60,90,0.2)' }}
-          >
-            See All →
-          </Link>
+          <Button variant="tertiary" size="sm" href="/community">
+            See All
+          </Button>
         }
       />
       <CardBody className="!px-0 !py-0">

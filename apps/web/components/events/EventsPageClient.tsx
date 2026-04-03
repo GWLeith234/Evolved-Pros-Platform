@@ -1,5 +1,6 @@
 'use client'
 
+import { Button } from '@/components/ui/Button'
 import { useState } from 'react'
 import Link from 'next/link'
 import type { EventItem } from '@/lib/events/types'
@@ -158,20 +159,14 @@ function EventGridCard({ event, isRegistered, onRegister, onUnregister }: CardPr
           <TierBadge requiredTier={event.requiredTier} />
 
           {event.hasAccess && !isPast && (
-            <button
-              type="button"
+            <Button
+              variant={isRegistered ? 'ghost' : 'primary'}
+              size="sm"
               onClick={handleAction}
-              disabled={loading}
-              className="font-condensed font-bold uppercase tracking-[0.1em] text-[10px] rounded-full px-3 py-1 transition-all"
-              style={{
-                backgroundColor: isRegistered ? 'rgba(27,60,90,0.08)' : '#ef0e30',
-                color: isRegistered ? '#1b3c5a' : 'white',
-                border: isRegistered ? '1px solid rgba(27,60,90,0.15)' : '1px solid transparent',
-                opacity: loading ? 0.6 : 1,
-              }}
+              loading={loading}
             >
-              {loading ? '...' : isRegistered ? '✓ Registered' : 'Register'}
-            </button>
+              {isRegistered ? '✓ Registered' : 'Register'}
+            </Button>
           )}
 
           {isPast && event.recordingUrl && (
