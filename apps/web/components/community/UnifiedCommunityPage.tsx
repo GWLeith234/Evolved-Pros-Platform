@@ -307,7 +307,7 @@ export function UnifiedCommunityPage({
               </p>
             </div>
           ) : (
-            <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', background: '#0A0F18' }}>
               {filtered.map((post, index) => (
                 <React.Fragment key={post.id}>
                   <PostCard
@@ -323,7 +323,7 @@ export function UnifiedCommunityPage({
                   )}
                 </React.Fragment>
               ))}
-            </>
+            </div>
           )}
 
           <div ref={sentinelRef} className="h-4" />

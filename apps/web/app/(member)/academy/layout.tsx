@@ -15,5 +15,9 @@ export default function AcademyLayout({ children }: { children: React.ReactNode 
     }
   }, [])
 
-  return <>{children}</>
+  return (
+    <div data-theme="dark" style={{ backgroundColor: '#0A0F18', minHeight: '100%', color: '#ffffff' }}>
+      {children}
+    </div>
+  )
 }

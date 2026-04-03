@@ -64,6 +64,16 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
   const [showReplies, setShowReplies] = useState(false)
   const [replies, setReplies] = useState<Reply[]>(post.replies ?? [])
   const [loadingReplies, setLoadingReplies] = useState(false)
+  const [isDark, setIsDark] = useState(true)
+
+  useEffect(() => {
+    setIsDark(!document.documentElement.classList.contains('light-mode'))
+    const observer = new MutationObserver(() => {
+      setIsDark(!document.documentElement.classList.contains('light-mode'))
+    })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
 
   const avatarBg = getAvatarColor(post.author.id)
 
@@ -131,10 +141,12 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
         padding: '20px 20px 20px 17px',
       }
     : {
-        backgroundColor: 'var(--card-bg)',
-        borderTop: '1px solid rgba(27,60,90,0.12)',
-        borderRight: '1px solid rgba(27,60,90,0.12)',
-        borderBottom: '1px solid rgba(27,60,90,0.12)',
+        backgroundColor: isDark
+          ? (pillarConf ? `${pillarConf.color}12` : '#0d1520')
+          : '#ffffff',
+        borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(27,60,90,0.12)'}`,
+        borderRight: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(27,60,90,0.12)'}`,
+        borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(27,60,90,0.12)'}`,
         borderLeft: `3px solid ${accentColor}`,
         padding: '20px 20px 20px 17px',
       }
@@ -145,16 +157,16 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
       style={cardStyle}
       onMouseEnter={e => {
         if (!isWin && !isAnnounce) {
-          e.currentTarget.style.borderTopColor = '#a8cdd9'
-          e.currentTarget.style.borderRightColor = '#a8cdd9'
-          e.currentTarget.style.borderBottomColor = '#a8cdd9'
+          e.currentTarget.style.borderTopColor = isDark ? 'rgba(255,255,255,0.15)' : '#a8cdd9'
+          e.currentTarget.style.borderRightColor = isDark ? 'rgba(255,255,255,0.15)' : '#a8cdd9'
+          e.currentTarget.style.borderBottomColor = isDark ? 'rgba(255,255,255,0.15)' : '#a8cdd9'
         }
       }}
       onMouseLeave={e => {
         if (!isWin && !isAnnounce) {
-          e.currentTarget.style.borderTopColor = 'rgba(27,60,90,0.12)'
-          e.currentTarget.style.borderRightColor = 'rgba(27,60,90,0.12)'
-          e.currentTarget.style.borderBottomColor = 'rgba(27,60,90,0.12)'
+          e.currentTarget.style.borderTopColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(27,60,90,0.12)'
+          e.currentTarget.style.borderRightColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(27,60,90,0.12)'
+          e.currentTarget.style.borderBottomColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(27,60,90,0.12)'
         }
       }}
     >
@@ -183,7 +195,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
           <div className="flex items-center gap-2 flex-wrap">
             <span
               className="font-body font-semibold text-[14px]"
-              style={{ color: isAnnounce ? 'white' : '#1b3c5a' }}
+              style={{ color: isAnnounce ? 'white' : isDark ? 'rgba(255,255,255,0.9)' : '#1b3c5a' }}
             >
               {post.author.displayName}
             </span>
@@ -247,7 +259,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
       {/* Body */}
       <p
         className="font-body text-[14px] leading-[1.72] mb-4"
-        style={{ color: isAnnounce ? 'rgba(255,255,255,0.75)' : '#3a4a56' }}
+        style={{ color: isAnnounce ? 'rgba(255,255,255,0.75)' : isDark ? 'rgba(255,255,255,0.75)' : '#3a4a56' }}
       >
         {post.body}
       </p>
