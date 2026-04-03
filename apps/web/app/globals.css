@@ -104,3 +104,17 @@ html, body { overflow-x: hidden; }
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* ─── Academy always dark ──────────────────────────────────────────────────
+   :has() selects <main> when it contains [data-academy-page], beating the
+   html.light-mode .bg-[#faf9f7] !important rule above.
+   ───────────────────────────────────────────────────────────────────────── */
+html.light-mode main:has([data-academy-page]) {
+  background-color: #0A0F18 !important;
+}
+
+[data-academy-page] {
+  background-color: #0A0F18 !important;
+  color: #ffffff !important;
+  min-height: 100%;
+}
