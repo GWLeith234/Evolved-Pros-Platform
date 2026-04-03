@@ -281,13 +281,13 @@ export default async function MemberHomePage() {
           <CommitmentTracker weekStart={getCurrentMonday()} />
           {/* Scoreboard widget */}
           {activeScoreboard ? (
-            <div style={{ backgroundColor: '#111926', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '8px', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '8px', overflow: 'hidden' }}>
               <div style={{ height: '2px', backgroundColor: '#C9A84C' }} />
               <div style={{ padding: '16px 18px' }}>
                 <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C9A84C', margin: '0 0 8px' }}>
                   Scoreboard
                 </p>
-                <p style={{ color: '#faf9f7', fontSize: '13px', fontWeight: 600, lineHeight: 1.45, margin: '0 0 12px', fontStyle: 'italic' }}>
+                <p style={{ color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600, lineHeight: 1.45, margin: '0 0 12px', fontStyle: 'italic' }}>
                   &ldquo;{activeScoreboard.wig_statement.length > 90
                     ? activeScoreboard.wig_statement.slice(0, 90) + '…'
                     : activeScoreboard.wig_statement}&rdquo;
@@ -297,8 +297,8 @@ export default async function MemberHomePage() {
                     { label: activeScoreboard.lead_1_label, target: activeScoreboard.lead_1_weekly_target },
                     { label: activeScoreboard.lead_2_label, target: activeScoreboard.lead_2_weekly_target },
                   ].filter(m => m.label).map((m, i) => (
-                    <div key={i} style={{ flex: 1, backgroundColor: '#0A0F18', border: '1px solid rgba(201,168,76,0.15)', borderRadius: '4px', padding: '8px 10px' }}>
-                      <p style={{ color: 'rgba(250,249,247,0.35)', fontSize: '10px', margin: '0 0 2px', lineHeight: 1.3 }}>{m.label}</p>
+                    <div key={i} style={{ flex: 1, backgroundColor: 'var(--bg-elevated)', border: '1px solid rgba(201,168,76,0.15)', borderRadius: '4px', padding: '8px 10px' }}>
+                      <p style={{ color: 'var(--text-tertiary)', fontSize: '10px', margin: '0 0 2px', lineHeight: 1.3 }}>{m.label}</p>
                       <p style={{ color: '#C9A84C', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '13px', margin: 0 }}>
                         target: {m.target}/wk
                       </p>
@@ -314,11 +314,11 @@ export default async function MemberHomePage() {
               </div>
             </div>
           ) : (
-            <div style={{ backgroundColor: '#111926', border: '1px solid rgba(201,168,76,0.15)', borderRadius: '8px', padding: '16px 18px' }}>
+            <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid rgba(201,168,76,0.15)', borderRadius: '8px', padding: '16px 18px' }}>
               <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.5)', margin: '0 0 6px' }}>
                 Scoreboard
               </p>
-              <p style={{ color: 'rgba(250,249,247,0.4)', fontSize: '13px', margin: '0 0 10px', lineHeight: 1.5 }}>
+              <p style={{ color: 'var(--text-tertiary)', fontSize: '13px', margin: '0 0 10px', lineHeight: 1.5 }}>
                 Track your WIG and lead measures weekly.
               </p>
               <a

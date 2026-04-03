@@ -63,9 +63,9 @@ export default async function SettingsPage() {
 
       <div
         className="rounded-lg overflow-hidden"
-        style={{ backgroundColor: '#0d1520', border: '1px solid rgba(255,255,255,0.08)' }}
+        style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
       >
-        <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
           <h2
             className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]"
             style={{ color: '#FFFFFF' }}
@@ -100,9 +100,9 @@ export default async function SettingsPage() {
 
       <div
         className="rounded-lg overflow-hidden mt-6"
-        style={{ backgroundColor: '#0d1520', border: '1px solid rgba(255,255,255,0.08)' }}
+        style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
       >
-        <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
           <h2
             className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]"
             style={{ color: '#FFFFFF' }}
@@ -114,7 +114,7 @@ export default async function SettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <Tooltip content="VIP: Pillars 1–4, community feed, events. Professional: All 6 pillars, exclusive events, priority support.">
-                <p className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] cursor-help" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                <p className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] cursor-help" style={{ color: 'var(--text-secondary)' }}>
                   Current Plan
                 </p>
               </Tooltip>
@@ -137,16 +137,16 @@ export default async function SettingsPage() {
 
       <div
         className="rounded-lg overflow-hidden mt-6"
-        style={{ backgroundColor: '#0d1520', border: '1px solid rgba(255,255,255,0.08)' }}
+        style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
       >
-        <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
           <h2
             className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]"
             style={{ color: '#FFFFFF' }}
           >
             Notifications
           </h2>
-          <p className="font-body text-[12px] mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+          <p className="font-body text-[12px] mt-1" style={{ color: 'var(--text-secondary)' }}>
             Choose which in-app notifications you receive.
           </p>
         </div>
@@ -157,16 +157,16 @@ export default async function SettingsPage() {
 
       <div
         className="rounded-lg overflow-hidden mt-6"
-        style={{ backgroundColor: '#0d1520', border: '1px solid rgba(255,255,255,0.08)' }}
+        style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
       >
-        <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
           <h2
             className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]"
             style={{ color: '#FFFFFF' }}
           >
             Appearance
           </h2>
-          <p className="font-body text-[12px] mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+          <p className="font-body text-[12px] mt-1" style={{ color: 'var(--text-secondary)' }}>
             Choose your preferred colour scheme.
           </p>
         </div>

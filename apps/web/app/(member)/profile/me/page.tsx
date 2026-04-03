@@ -180,7 +180,7 @@ export default async function MyProfilePage({
       <ProfileBannerWrapper user={headerUser} isOwn={true} />
 
       {alumniBadge && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', backgroundColor: '#111926', border: '2px solid rgba(201,168,76,0.35)', borderRadius: '10px', padding: '16px 20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', backgroundColor: 'var(--bg-surface)', border: '2px solid rgba(201,168,76,0.35)', borderRadius: '10px', padding: '16px 20px' }}>
           <div style={{ width: '52px', height: '52px', borderRadius: '50%', border: '2px solid #C9A84C', backgroundColor: 'rgba(201,168,76,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <span style={{ fontSize: '22px' }}>★</span>
           </div>

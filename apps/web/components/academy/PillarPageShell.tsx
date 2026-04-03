@@ -263,7 +263,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
         const prevLabel = prevConfig?.label ?? 'Previous Pillar'
         const GOLD = '#C9A84C'
         return (
-          <section style={{ backgroundColor: '#111926', padding: '80px clamp(24px, 8vw, 96px)' }}>
+          <section style={{ backgroundColor: 'var(--bg-surface)', padding: '80px clamp(24px, 8vw, 96px)' }}>
             <div style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
               gap: '20px', maxWidth: '460px', margin: '0 auto',
@@ -352,7 +352,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
       )}
 
       {!isCourseLocked && lessons.length === 0 && (
-        <section style={{ backgroundColor: '#111926', padding: '56px clamp(24px, 8vw, 96px)', textAlign: 'center' }}>
+        <section style={{ backgroundColor: 'var(--bg-surface)', padding: '56px clamp(24px, 8vw, 96px)', textAlign: 'center' }}>
           <p style={{ color: 'rgba(250,249,247,0.3)', fontFamily: '"Barlow Condensed", sans-serif', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             Lessons coming soon
           </p>
@@ -426,7 +426,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
       {isAllComplete && (
         <section
           style={{
-            backgroundColor: '#111926', padding: '72px clamp(24px, 8vw, 96px)',
+            backgroundColor: 'var(--bg-surface)', padding: '72px clamp(24px, 8vw, 96px)',
             textAlign: 'center',
             borderTop: `1px solid ${config.color}22`,
           }}

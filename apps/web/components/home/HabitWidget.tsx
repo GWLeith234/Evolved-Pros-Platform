@@ -40,11 +40,11 @@ export function HabitWidget({ initialHabits, initialCompletions }: Props) {
 
   if (total === 0) {
     return (
-      <div style={{ backgroundColor: '#111926', border: `1px solid ${TEAL}22`, borderRadius: '8px', padding: '16px 18px' }}>
+      <div style={{ backgroundColor: 'var(--bg-surface)', border: `1px solid ${TEAL}22`, borderRadius: '8px', padding: '16px 18px' }}>
         <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: `${TEAL}88`, margin: '0 0 6px' }}>
           Habit Stack
         </p>
-        <p style={{ color: 'rgba(250,249,247,0.4)', fontSize: '13px', margin: '0 0 10px', lineHeight: 1.5 }}>
+        <p style={{ color: 'var(--text-tertiary)', fontSize: '13px', margin: '0 0 10px', lineHeight: 1.5 }}>
           Build your daily execution habits.
         </p>
         <Link
@@ -58,7 +58,7 @@ export function HabitWidget({ initialHabits, initialCompletions }: Props) {
   }
 
   return (
-    <div style={{ backgroundColor: '#111926', border: `1px solid ${TEAL}22`, borderRadius: '8px', overflow: 'hidden' }}>
+    <div style={{ backgroundColor: 'var(--bg-surface)', border: `1px solid ${TEAL}22`, borderRadius: '8px', overflow: 'hidden' }}>
       {/* Teal progress bar at top */}
       <div style={{ height: '2px', backgroundColor: 'rgba(255,255,255,0.05)' }}>
         <div style={{ height: '2px', width: `${pct}%`, backgroundColor: TEAL, transition: 'width 0.3s' }} />
@@ -70,7 +70,7 @@ export function HabitWidget({ initialHabits, initialCompletions }: Props) {
           <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: TEAL, margin: 0 }}>
             Habit Stack
           </p>
-          <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', color: allDone ? TEAL : 'rgba(255,255,255,0.4)' }}>
+          <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', color: allDone ? TEAL : 'var(--text-tertiary)' }}>
             {completed}/{total}
           </span>
         </div>
@@ -99,7 +99,7 @@ export function HabitWidget({ initialHabits, initialCompletions }: Props) {
                 <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', color: TIME_COLORS[h.time_of_day as TimeOfDay] ?? 'rgba(255,255,255,0.3)', backgroundColor: `${TIME_COLORS[h.time_of_day as TimeOfDay] ?? '#fff'}14`, padding: '1px 5px', borderRadius: '10px', flexShrink: 0 }}>
                   {h.time_of_day}
                 </span>
-                <span style={{ color: done ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.75)', fontSize: '12px', textDecoration: done ? 'line-through' : 'none', transition: 'all 0.15s', flex: 1 }}>
+                <span style={{ color: done ? 'var(--text-tertiary)' : 'var(--text-primary)', fontSize: '12px', textDecoration: done ? 'line-through' : 'none', transition: 'all 0.15s', flex: 1 }}>
                   {h.name}
                 </span>
               </button>

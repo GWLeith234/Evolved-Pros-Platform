@@ -20,6 +20,18 @@
   --page-bg:      #0d1c27;
   --card-bg:      #ffffff;
   --card-border:  rgba(27,60,90,0.12);
+
+  /* DS1 semantic tokens */
+  --bg-surface:    #111926;
+  --bg-elevated:   #0A0F18;
+  --border-color:  rgba(255,255,255,0.07);
+  --text-primary:  #ffffff;
+  --text-secondary: rgba(255,255,255,0.6);
+  --text-tertiary: rgba(255,255,255,0.35);
+}
+
+body {
+  background-color: #0A0F18;
 }
 
 /* ─── Light mode ────────────────────────────────────────────────────────────
@@ -33,11 +45,18 @@ html.light-mode {
   --page-bg:     #FAF7F2;
   --card-bg:     #F5F1EA;
   --card-border: #E8E2D9;
+
+  --bg-surface:    #F5F1EA;
+  --bg-elevated:   #EDE8DF;
+  --border-color:  #E8E2D9;
+  --text-primary:  #1b3c5a;
+  --text-secondary: #6B7A8D;
+  --text-tertiary: rgba(107,122,141,0.5);
 }
 
 /* Page background + body text */
 html.light-mode body {
-  background-color: #FAF7F2;
+  background-color: #F5F0E8;
   color: #1b3c5a;
 }
 
