@@ -24,22 +24,22 @@ export default async function AcademyPage() {
   const overallPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
 
   return (
-    <main className="overflow-y-auto w-full" style={{ backgroundColor: '#faf9f7', minHeight: '100%' }}>
+    <div className="overflow-y-auto w-full" style={{ backgroundColor: '#0A0F18', minHeight: '100%' }}>
       {/* Page header */}
       <div
         className="px-4 md:px-8 py-6"
-        style={{ borderBottom: '1px solid rgba(27,60,90,0.08)', backgroundColor: 'var(--card-bg)' }}
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
       >
-        <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-1" style={{ color: '#68a2b9' }}>
+        <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-1" style={{ color: '#0ABFA3' }}>
           The Evolved Architecture™
         </p>
         <h1
           className="font-display font-black leading-tight"
-          style={{ fontSize: '32px', color: '#112535' }}
+          style={{ fontSize: '32px', color: '#ffffff' }}
         >
           The Academy
         </h1>
-        <p className="font-body text-[14px] mt-1" style={{ color: '#7a8a96' }}>
+        <p className="font-body text-[14px] mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
           A 6-pillar professional development framework designed to transform how you work, think, and lead.
         </p>
       </div>
@@ -55,6 +55,6 @@ export default async function AcademyPage() {
         <CourseGrid courses={courses} userTier={profile?.tier ?? null} />
         {!hasTierAccess(profile?.tier, 'pro') && <UpgradePrompt />}
       </div>
-    </main>
+    </div>
   )
 }
