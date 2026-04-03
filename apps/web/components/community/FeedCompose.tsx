@@ -187,7 +187,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
             disabled={loading || body.trim().length < 10}
             className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2 text-white transition-all"
             style={{
-              backgroundColor: loading || body.trim().length < 10 ? 'rgba(239,14,48,0.4)' : '#ef0e30',
+              backgroundColor: loading || body.trim().length < 10 ? 'rgba(201,48,42,0.4)' : '#C9302A',
               cursor: loading || body.trim().length < 10 ? 'not-allowed' : 'pointer',
             }}
           >

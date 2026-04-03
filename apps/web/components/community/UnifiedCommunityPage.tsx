@@ -283,7 +283,7 @@ export function UnifiedCommunityPage({
 
       {/* Feed — full-width, centered, scrollable */}
       <div className="flex-1 overflow-y-auto" style={{ backgroundColor: '#0A0F18' }}>
-        <div className="w-full mx-auto p-4 space-y-3" style={{ maxWidth: '680px' }}>
+        <div className="w-full mx-auto px-6 py-4 space-y-3">
 
           {/* Pinned announcement */}
           {pinnedPost && (
