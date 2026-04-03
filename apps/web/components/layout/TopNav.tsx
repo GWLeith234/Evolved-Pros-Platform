@@ -76,7 +76,7 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
       <header
         className="sticky top-0 z-40 flex items-center justify-between px-6 h-14 flex-shrink-0 relative"
         style={{
-          backgroundColor: '#112535',
+          backgroundColor: '#0D1B2A',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}
       >
