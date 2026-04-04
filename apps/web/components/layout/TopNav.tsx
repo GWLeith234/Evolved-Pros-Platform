@@ -38,11 +38,12 @@ function getInitials(name: string | null | undefined): string {
 
 
 const NAV_ITEMS = [
-  { label: 'Home',      href: '/home' },
-  { label: 'Community', href: '/community' },
-  { label: 'Events',    href: '/events' },
-  { label: 'Academy',   href: '/academy' },
-  { label: 'Podcast',   href: '/podcast' },
+  { label: 'Home',            href: '/home' },
+  { label: 'Community',       href: '/community' },
+  { label: 'Events',          href: '/events' },
+  { label: 'Academy',         href: '/academy' },
+  { label: 'Compound Board',  href: '/habits' },
+  { label: 'Podcast',         href: '/podcast' },
 ]
 
 export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, membersCanToggleTheme: _membersCanToggleTheme }: TopNavProps) {

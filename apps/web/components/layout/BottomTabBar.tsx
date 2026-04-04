@@ -92,7 +92,7 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
   const pathname = usePathname()
   const [moreOpen, setMoreOpen] = useState(false)
 
-  const isMoreActive = /^\/(messages|profile|settings|admin)/.test(pathname)
+  const isMoreActive = /^\/(messages|profile|settings|admin|habits)/.test(pathname)
 
   return (
     <>
