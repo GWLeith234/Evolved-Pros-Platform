@@ -9,6 +9,9 @@ import { HabitCard } from './HabitCard'
 import { PillarHealth } from './PillarHealth'
 import { HabitEditorModal } from './HabitEditorModal'
 import { ParticleBurst } from './ParticleBurst'
+import { CelebrationOverlay } from './CelebrationOverlay'
+import { ReturnBar } from './ReturnBar'
+import { NudgeCard } from './NudgeCard'
 
 interface CompoundBoardClientProps {
   userId: string
@@ -20,14 +23,25 @@ interface BurstState {
   y: number
 }
 
+interface StreakData {
+  currentStreak: number
+  longestStreak: number
+  lastCompletedDate: string | null
+}
+
 export function CompoundBoardClient({ userId: _userId }: CompoundBoardClientProps) {
-  const [habits, setHabits]                   = useState<Habit[]>([])
-  const [completedIds, setCompletedIds]       = useState<Set<string>>(new Set())
-  const [loading, setLoading]                 = useState(true)
-  const [editingHabit, setEditingHabit]       = useState<Habit | null | undefined>(undefined) // undefined = closed
-  const [burst, setBurst]                     = useState<BurstState>({ active: false, x: 0, y: 0 })
+  const [habits, setHabits]             = useState<Habit[]>([])
+  const [completedIds, setCompletedIds] = useState<Set<string>>(new Set())
+  const [loading, setLoading]           = useState(true)
+  const [editingHabit, setEditingHabit] = useState<Habit | null | undefined>(undefined)
+  const [burst, setBurst]               = useState<BurstState>({ active: false, x: 0, y: 0 })
+  const [streak, setStreak]             = useState<StreakData>({ currentStreak: 0, longestStreak: 0, lastCompletedDate: null })
+  const [showCelebration, setShowCelebration] = useState(false)
+  const [showReturnBar, setShowReturnBar]     = useState(false)
+  const celebrationFiredRef = useRef(false)
   const dragSourceId = useRef<string | null>(null)
 
+  // ── Fetch habits ─────────────────────────────────────────────────────────
   const fetchHabits = useCallback(async () => {
     try {
       const res = await fetch('/api/habits')
@@ -40,9 +54,45 @@ export function CompoundBoardClient({ userId: _userId }: CompoundBoardClientProp
     }
   }, [])
 
+  // ── Fetch streak ─────────────────────────────────────────────────────────
+  useEffect(() => {
+    fetch('/api/habits/streak')
+      .then(r => r.ok ? r.json() : null)
+      .then((d: StreakData | null) => {
+        if (!d) return
+        setStreak(d)
+
+        // Show ReturnBar if last completed date is not yesterday
+        if (d.lastCompletedDate) {
+          const yesterday = new Date()
+          yesterday.setDate(yesterday.getDate() - 1)
+          const yesterdayStr = yesterday.toISOString().split('T')[0]
+          if (d.lastCompletedDate < yesterdayStr) {
+            setShowReturnBar(true)
+          }
+        }
+      })
+      .catch(() => {/* non-critical */})
+  }, [])
+
   useEffect(() => { fetchHabits() }, [fetchHabits])
 
-  // ── Toggle completion ────────────────────────────────────────────────────
+  // ── Celebration trigger ───────────────────────────────────────────────────
+  const activeHabits = habits.filter(h => h.is_active)
+  const completedActiveCount = [...completedIds].filter(id => activeHabits.some(h => h.id === id)).length
+
+  useEffect(() => {
+    if (
+      activeHabits.length > 0 &&
+      completedActiveCount === activeHabits.length &&
+      !celebrationFiredRef.current
+    ) {
+      celebrationFiredRef.current = true
+      setShowCelebration(true)
+    }
+  }, [completedActiveCount, activeHabits.length])
+
+  // ── Toggle completion ─────────────────────────────────────────────────────
   const handleToggle = useCallback(async (id: string, originX: number, originY: number) => {
     const wasCompleted = completedIds.has(id)
 
@@ -52,10 +102,8 @@ export function CompoundBoardClient({ userId: _userId }: CompoundBoardClientProp
       return next
     })
 
-    // Particle burst only on completing (not un-completing)
     if (!wasCompleted) {
       setBurst({ active: false, x: originX, y: originY })
-      // Kick active on next tick so re-completing works
       requestAnimationFrame(() => setBurst({ active: true, x: originX, y: originY }))
     }
 
@@ -77,7 +125,7 @@ export function CompoundBoardClient({ userId: _userId }: CompoundBoardClientProp
     }
   }, [completedIds])
 
-  // ── Drag reorder ─────────────────────────────────────────────────────────
+  // ── Drag reorder ──────────────────────────────────────────────────────────
   const handleDragStart = useCallback((_e: React.DragEvent, id: string) => {
     dragSourceId.current = id
   }, [])
@@ -98,7 +146,6 @@ export function CompoundBoardClient({ userId: _userId }: CompoundBoardClientProp
       if (fromIdx === -1 || toIdx === -1) return prev
       const [moved] = next.splice(fromIdx, 1)
       next.splice(toIdx, 0, moved)
-      // Persist reorder in background
       fetch('/api/habits/reorder', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -106,11 +153,10 @@ export function CompoundBoardClient({ userId: _userId }: CompoundBoardClientProp
       }).catch(() => {/* non-critical */})
       return next
     })
-
     dragSourceId.current = null
   }, [])
 
-  // ── Editor modal ─────────────────────────────────────────────────────────
+  // ── Editor modal ──────────────────────────────────────────────────────────
   const handleSave = useCallback((saved: Habit) => {
     setHabits(prev => {
       const idx = prev.findIndex(h => h.id === saved.id)
@@ -120,8 +166,6 @@ export function CompoundBoardClient({ userId: _userId }: CompoundBoardClientProp
       return next
     })
   }, [])
-
-  const activeHabits = habits.filter(h => h.is_active)
 
   if (loading) {
     return (
@@ -136,10 +180,16 @@ export function CompoundBoardClient({ userId: _userId }: CompoundBoardClientProp
 
   return (
     <>
-      <div className="p-6 space-y-5 max-w-2xl mx-auto">
+      <div className="p-6 space-y-4 max-w-2xl mx-auto">
+        {/* Return bar — missed yesterday */}
+        {showReturnBar && (
+          <ReturnBar onDismiss={() => setShowReturnBar(false)} />
+        )}
+
         <CompoundHero
-          completedCount={[...completedIds].filter(id => activeHabits.some(h => h.id === id)).length}
+          completedCount={completedActiveCount}
           totalCount={activeHabits.length}
+          currentStreak={streak.currentStreak}
         />
 
         <WeekBar />
@@ -169,7 +219,10 @@ export function CompoundBoardClient({ userId: _userId }: CompoundBoardClientProp
           </div>
         ) : (
           <>
-            {/* Habit list header */}
+            {/* Nudge card */}
+            <NudgeCard habits={activeHabits} completedIds={completedIds} />
+
+            {/* Habit list */}
             <div className="flex items-center justify-between">
               <p
                 className="font-condensed font-bold uppercase tracking-[0.18em]"
@@ -208,10 +261,16 @@ export function CompoundBoardClient({ userId: _userId }: CompoundBoardClientProp
         )}
       </div>
 
-      {/* Particle burst layer */}
+      {/* Overlays */}
       <ParticleBurst active={burst.active} originX={burst.x} originY={burst.y} />
 
-      {/* Editor modal — editingHabit undefined = closed, null = new, Habit = edit */}
+      {showCelebration && (
+        <CelebrationOverlay
+          streak={streak.currentStreak}
+          onDismiss={() => setShowCelebration(false)}
+        />
+      )}
+
       {editingHabit !== undefined && (
         <HabitEditorModal
           habit={editingHabit}
