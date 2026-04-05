@@ -64,18 +64,23 @@ function FeaturedEpisode({ ep }: { ep: Episode }) {
         className="absolute right-0 top-0 bottom-0"
         style={{ width: '52%', zIndex: 0 }}
       >
-        {ep.guest_image_url ? (
+        {(ep.guest_image_url || ep.thumbnail_url) ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={ep.guest_image_url}
-            alt={ep.guest_name ?? ''}
+            src={ep.guest_image_url ?? ep.thumbnail_url!}
+            alt={ep.guest_name ?? ep.title}
             className="w-full h-full object-cover object-top"
           />
         ) : (
-          <div
-            className="w-full h-full"
-            style={{ background: 'linear-gradient(160deg, #1a3040 0%, #0d1e2c 100%)' }}
-          />
+          <div className="w-full h-full bg-[#111926] flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-[#C9302A]/20 border border-[#C9302A]/30 flex items-center justify-center">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <rect x="9" y="2" width="6" height="12" rx="3" fill="#C9302A"/>
+                <path d="M5 11C5 15.418 8.134 19 12 19C15.866 19 19 15.418 19 11" stroke="#C9302A" strokeWidth="1.5" fill="none"/>
+                <line x1="12" y1="19" x2="12" y2="22" stroke="#C9302A" strokeWidth="1.5"/>
+              </svg>
+            </div>
+          </div>
         )}
       </div>
 
@@ -119,8 +124,8 @@ function FeaturedEpisode({ ep }: { ep: Episode }) {
             </p>
           )}
           <h2
-            className="font-display font-black leading-tight mb-3"
-            style={{ fontSize: 'clamp(22px, 3vw, 32px)', color: 'white' }}
+            className="font-display font-black leading-tight text-2xl md:text-4xl mb-3"
+            style={{ color: 'white' }}
           >
             {ep.title}
           </h2>
@@ -152,7 +157,7 @@ function FeaturedEpisode({ ep }: { ep: Episode }) {
         {/* CTA */}
         <div className="mt-8">
           <span
-            className="inline-flex items-center gap-2 font-condensed font-bold uppercase tracking-[0.14em] text-[12px] rounded px-5 py-2.5 transition-colors duration-150 group-hover:bg-[#cc0a28]"
+            className="inline-flex items-center gap-2 font-condensed font-bold uppercase tracking-[0.14em] text-[12px] rounded px-5 py-2.5 transition-all duration-150 group-hover:bg-[#cc0a28] hover:brightness-110 hover:scale-[1.02] cursor-pointer"
             style={{ backgroundColor: '#ef0e30', color: 'white' }}
           >
             <PlayIcon />
@@ -202,18 +207,23 @@ function EpisodeCard({ ep }: { ep: Episode }) {
         className="absolute right-0 top-0 bottom-0"
         style={{ width: '35%', zIndex: 0 }}
       >
-        {ep.guest_image_url ? (
+        {(ep.guest_image_url || ep.thumbnail_url) ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={ep.guest_image_url}
-            alt={ep.guest_name ?? ''}
+            src={ep.guest_image_url ?? ep.thumbnail_url!}
+            alt={ep.guest_name ?? ep.title}
             className="w-full h-full object-cover object-top"
           />
         ) : (
-          <div
-            className="w-full h-full"
-            style={{ background: 'linear-gradient(160deg, #1a3040 0%, #0d1e2c 100%)' }}
-          />
+          <div className="w-full h-full bg-[#111926] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-[#C9302A]/20 border border-[#C9302A]/30 flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <rect x="9" y="2" width="6" height="12" rx="3" fill="#C9302A"/>
+                <path d="M5 11C5 15.418 8.134 19 12 19C15.866 19 19 15.418 19 11" stroke="#C9302A" strokeWidth="1.5" fill="none"/>
+                <line x1="12" y1="19" x2="12" y2="22" stroke="#C9302A" strokeWidth="1.5"/>
+              </svg>
+            </div>
+          </div>
         )}
       </div>
 

@@ -95,14 +95,8 @@ export async function EpisodeBanner() {
 
         {/* Episode title — primary */}
         <span
-          style={{
-            color: '#ffffff',
-            fontSize: '12px',
-            fontWeight: 500,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
+          className="truncate max-w-[160px] sm:max-w-xs md:max-w-none text-sm"
+          style={{ color: '#ffffff', fontWeight: 500 }}
         >
           {displayText}
         </span>
@@ -131,6 +125,7 @@ export async function EpisodeBanner() {
       {/* Right: CTA button */}
       <Link
         href={href}
+        {...(sanitizedYtUrl ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         style={{
           backgroundColor: 'rgba(201,48,42,0.15)',
           border: '1px solid rgba(201,48,42,0.3)',
