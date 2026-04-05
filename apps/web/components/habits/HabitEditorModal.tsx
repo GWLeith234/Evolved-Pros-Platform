@@ -164,9 +164,9 @@ export function HabitEditorModal({ habit, onClose, onSave }: HabitEditorModalPro
                   onClick={() => setFrequency(f)}
                   className="flex-1 py-2 rounded font-condensed font-semibold text-[11px] uppercase tracking-[0.08em] transition-all border"
                   style={{
-                    backgroundColor: frequency === f ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.04)',
-                    borderColor:     frequency === f ? 'rgba(201,168,76,0.4)'  : 'rgba(255,255,255,0.1)',
-                    color:           frequency === f ? '#C9A84C'               : 'rgba(255,255,255,0.4)',
+                    backgroundColor: frequency === f ? '#C9A84C'               : 'rgba(255,255,255,0.04)',
+                    borderColor:     frequency === f ? 'transparent'            : 'rgba(255,255,255,0.1)',
+                    color:           frequency === f ? '#0A0F18'                : 'rgba(255,255,255,0.4)',
                   }}
                 >
                   {f === 'daily' ? 'Every Day' : 'Weekdays Only'}

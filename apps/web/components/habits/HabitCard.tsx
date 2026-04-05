@@ -108,7 +108,7 @@ export function HabitCard({
           className="font-condensed font-semibold leading-tight"
           style={{
             fontSize: '14px',
-            color: completed ? 'var(--text-tertiary)' : 'var(--text-primary)',
+            color: completed ? 'rgba(255,255,255,0.60)' : 'var(--text-primary)',
             textDecoration: completed ? 'line-through' : 'none',
             transition: 'color 300ms ease',
           }}
