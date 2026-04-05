@@ -1,18 +1,41 @@
 export const dynamic = 'force-dynamic'
 
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+
+async function getAuthUser() {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll() },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options))
+          } catch {}
+        },
+      },
+    }
+  )
+  const { data: { user } } = await supabase.auth.getUser()
+  return user
+}
 
 export async function POST(
   request: Request,
   { params }: { params: { id: string } },
 ) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   // Verify ownership
-  const { data: scoreboard } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: scoreboard } = await (adminClient as any)
     .from('scoreboards')
     .select('id')
     .eq('id', params.id)
@@ -30,7 +53,8 @@ export async function POST(
     ? body.update_date
     : new Date().toISOString().split('T')[0]
 
-  const { data, error } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (adminClient as any)
     .from('scoreboard_updates')
     .upsert(
       {
