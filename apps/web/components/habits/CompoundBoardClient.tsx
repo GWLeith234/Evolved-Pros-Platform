@@ -15,6 +15,7 @@ import { NudgeCard } from './NudgeCard'
 
 interface CompoundBoardClientProps {
   userId: string
+  activePillar?: string  // undefined or 'All' = show all pillars
 }
 
 interface BurstState {
@@ -29,7 +30,7 @@ interface StreakData {
   lastCompletedDate: string | null
 }
 
-export function CompoundBoardClient({ userId: _userId }: CompoundBoardClientProps) {
+export function CompoundBoardClient({ userId: _userId, activePillar }: CompoundBoardClientProps) {
   const [habits, setHabits]             = useState<Habit[]>([])
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set())
   const [loading, setLoading]           = useState(true)
@@ -78,7 +79,9 @@ export function CompoundBoardClient({ userId: _userId }: CompoundBoardClientProp
   useEffect(() => { fetchHabits() }, [fetchHabits])
 
   // ── Celebration trigger ───────────────────────────────────────────────────
-  const activeHabits = habits.filter(h => h.is_active)
+  const activeHabits = habits
+    .filter(h => h.is_active)
+    .filter(h => !activePillar || h.pillar === activePillar)
   const completedActiveCount = [...completedIds].filter(id => activeHabits.some(h => h.id === id)).length
 
   useEffect(() => {

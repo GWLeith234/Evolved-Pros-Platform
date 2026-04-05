@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { hasTierAccess } from '@/lib/tier'
 import { CompoundBoardLocked } from '@/components/habits/CompoundBoardLocked'
-import { CompoundBoardClient } from '@/components/habits/CompoundBoardClient'
+import { HabitsPageShell } from '@/components/habits/HabitsPageShell'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,28 +25,5 @@ export default async function HabitsPage() {
     return <CompoundBoardLocked />
   }
 
-  return (
-    <div>
-      {/* Page header */}
-      <div
-        className="px-6 pt-6 pb-4"
-        style={{ borderBottom: '1px solid var(--border-color)' }}
-      >
-        <p
-          className="font-condensed font-bold uppercase tracking-[0.22em]"
-          style={{ fontSize: '9px', color: '#C9A84C', marginBottom: '4px' }}
-        >
-          Daily Practice
-        </p>
-        <h1
-          className="font-condensed font-bold uppercase tracking-[0.08em]"
-          style={{ fontSize: '24px', color: 'var(--text-primary)' }}
-        >
-          Compound Board
-        </h1>
-      </div>
-
-      <CompoundBoardClient userId={profile.id} />
-    </div>
-  )
+  return <HabitsPageShell userId={profile.id} />
 }
