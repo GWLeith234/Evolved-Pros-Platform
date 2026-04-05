@@ -19,7 +19,7 @@ export function CompoundBoardLocked() {
         className="font-condensed font-bold uppercase tracking-[0.12em] mb-3"
         style={{ fontSize: '28px', color: '#C9A84C' }}
       >
-        Compound Board
+        Discipline
       </h1>
 
       <p

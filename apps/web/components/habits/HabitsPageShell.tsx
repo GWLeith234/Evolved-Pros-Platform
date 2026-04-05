@@ -32,7 +32,7 @@ export function HabitsPageShell({ userId }: HabitsPageShellProps) {
           className="font-display font-black leading-tight mb-1"
           style={{ fontSize: '28px', color: '#1B2A4A' }}
         >
-          Compound Board
+          Discipline
         </h1>
 
         <p

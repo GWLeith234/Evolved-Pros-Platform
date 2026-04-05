@@ -42,7 +42,7 @@ const NAV_ITEMS = [
   { label: 'Community',       href: '/community' },
   { label: 'Events',          href: '/events' },
   { label: 'Academy',         href: '/academy' },
-  { label: 'Compound Board',  href: '/habits' },
+  { label: 'Discipline',       href: '/habits' },
   { label: 'Podcast',         href: '/podcast' },
 ]
 
@@ -94,7 +94,7 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
               <Link
                 key={item.href}
                 href={item.href}
-                className="font-condensed uppercase tracking-[0.1em] text-[12px] px-3 py-1.5 rounded transition-colors"
+                className="font-condensed uppercase tracking-[0.03em] text-[12px] px-3 py-1.5 rounded transition-colors"
                 style={{ color: active ? '#C9A84C' : 'rgba(255,255,255,0.45)', fontWeight: active ? 600 : 500 }}
               >
                 {item.label}

@@ -181,7 +181,7 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
           style={{ color: 'rgba(255,255,255,0.85)' }}
         >
           <ZapIcon />
-          Compound Board
+          Discipline
         </Link>
 
         {role === 'admin' && (
