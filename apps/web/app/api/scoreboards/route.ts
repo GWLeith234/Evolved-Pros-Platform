@@ -44,7 +44,7 @@ export async function GET(request: Request) {
 
   if (error) {
     console.error('[GET /api/scoreboards]', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
   }
 
   if (!scoreboard) return NextResponse.json({ scoreboard: null, updates: [] })
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
 
   if (error || !data) {
     console.error('[POST /api/scoreboards]', error)
-    return NextResponse.json({ error: error?.message ?? 'Failed to create scoreboard' }, { status: 500 })
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
   }
 
   return NextResponse.json({ scoreboard: data }, { status: 201 })

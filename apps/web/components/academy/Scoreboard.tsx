@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useToast } from '@/lib/toast'
 
 const GOLD = '#C9A84C'
 const TEAL = '#0ABFA3'
@@ -60,6 +61,7 @@ const EMPTY_SETUP: SetupForm = {
 }
 
 export function Scoreboard({ courseId, initialWigStatement }: Props) {
+  const { showToast } = useToast()
   const [scoreboard, setScoreboard] = useState<ScoreboardRow | null>(null)
   const [updates, setUpdates]       = useState<ScoreboardUpdate[]>([])
   const [loading, setLoading]       = useState(true)
@@ -142,13 +144,17 @@ export function Scoreboard({ courseId, initialWigStatement }: Props) {
       const json = await res.json() as { scoreboard?: ScoreboardRow; error?: string }
       if (!res.ok) { setCreateError(json.error ?? 'Failed to save'); return }
       if (json.scoreboard) {
+        const isNew = !scoreboard
         setScoreboard(json.scoreboard)
-        if (!scoreboard) {
+        if (isNew) {
           // Fresh creation — reset weekly form to scoreboard's baseline
           setWeeklyLag(String(json.scoreboard.lag_current))
           setLead1Count(0)
           setLead2Count(0)
           setUpdates([])
+          showToast('Scoreboard created ✓', 'success')
+        } else {
+          showToast('Scoreboard saved ✓', 'success')
         }
         setMode('view')
       }
