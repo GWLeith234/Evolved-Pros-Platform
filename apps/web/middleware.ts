@@ -19,6 +19,16 @@ const ADMIN_ROUTES = ['/admin']
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // RSC prefetch requests must not be redirected — Next.js cannot parse a
+  // redirect response as RSC data and reports it as a 503. Let these through;
+  // the server component itself enforces auth for its own rendered output.
+  if (
+    request.headers.get('RSC') === '1' ||
+    request.headers.get('Next-Router-Prefetch') === '1'
+  ) {
+    return NextResponse.next()
+  }
+
   // Allow public routes through immediately
   if (PUBLIC_ROUTES.some(r => pathname.startsWith(r))) {
     return NextResponse.next()
