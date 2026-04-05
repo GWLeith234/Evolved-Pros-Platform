@@ -12,6 +12,7 @@ import { ParticleBurst } from './ParticleBurst'
 import { CelebrationOverlay } from './CelebrationOverlay'
 import { ReturnBar } from './ReturnBar'
 import { NudgeCard } from './NudgeCard'
+import { useToast } from '@/lib/toast'
 
 interface CompoundBoardClientProps {
   userId: string
@@ -31,6 +32,7 @@ interface StreakData {
 }
 
 export function CompoundBoardClient({ userId: _userId, activePillar }: CompoundBoardClientProps) {
+  const { showToast } = useToast()
   const [habits, setHabits]             = useState<Habit[]>([])
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set())
   const [loading, setLoading]           = useState(true)
@@ -118,6 +120,9 @@ export function CompoundBoardClient({ userId: _userId, activePillar }: CompoundB
           next.has(id) ? next.delete(id) : next.add(id)
           return next
         })
+        showToast('Something went wrong. Please try again.', 'error')
+      } else if (!wasCompleted) {
+        showToast('Habit completed ✓', 'success')
       }
     } catch {
       setCompletedIds(prev => {
@@ -125,8 +130,9 @@ export function CompoundBoardClient({ userId: _userId, activePillar }: CompoundB
         next.has(id) ? next.delete(id) : next.add(id)
         return next
       })
+      showToast('Something went wrong. Please try again.', 'error')
     }
-  }, [completedIds])
+  }, [completedIds, showToast])
 
   // ── Drag reorder ──────────────────────────────────────────────────────────
   const handleDragStart = useCallback((_e: React.DragEvent, id: string) => {

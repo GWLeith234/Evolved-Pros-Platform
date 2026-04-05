@@ -6,6 +6,7 @@ import { BottomTabBar } from '@/components/layout/BottomTabBar'
 import { NextEventBanner } from '@/components/layout/NextEventBanner'
 import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
 import { RightRail } from '@/components/layout/RightRail'
+import { ToastProvider } from '@/lib/toast'
 
 export default async function MemberLayout({ children }: { children: React.ReactNode }) {
   // Dev bypass: skip Supabase when a dev_session cookie is present
@@ -18,16 +19,18 @@ export default async function MemberLayout({ children }: { children: React.React
         tier: string; tier_status: string; role: string; points: number
       }
       return (
-        <div className="flex flex-col min-h-screen">
-          <TopNav profile={profile} unreadCount={0} />
-          <EpisodeBanner />
-          <NextEventBanner />
-          <div className="flex flex-1 min-h-0">
-            <main className="flex-1 overflow-y-auto pb-16 md:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>{children}</main>
-            <RightRail />
+        <ToastProvider>
+          <div className="flex flex-col min-h-screen">
+            <TopNav profile={profile} unreadCount={0} />
+            <EpisodeBanner />
+            <NextEventBanner />
+            <div className="flex flex-1 min-h-0">
+              <main className="flex-1 overflow-y-auto pb-16 md:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>{children}</main>
+              <RightRail />
+            </div>
+            <BottomTabBar role={profile.role} unreadCount={0} dmUnreadCount={0} />
           </div>
-          <BottomTabBar role={profile.role} unreadCount={0} dmUnreadCount={0} />
-        </div>
+        </ToastProvider>
       )
     }
   }
@@ -83,17 +86,19 @@ export default async function MemberLayout({ children }: { children: React.React
   const membersCanToggleTheme = themeSetting?.value !== 'false'
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <TopNav profile={profile} unreadCount={unreadCount ?? 0} logoUrl={logoUrl} logoLightUrl={logoLightUrl} membersCanToggleTheme={membersCanToggleTheme} />
-      <EpisodeBanner />
-      <NextEventBanner />
-      <div className="flex flex-1 min-h-0">
-        <main className="flex-1 overflow-y-auto pb-16 md:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>
-          {children}
-        </main>
-        <RightRail />
+    <ToastProvider>
+      <div className="flex flex-col min-h-screen">
+        <TopNav profile={profile} unreadCount={unreadCount ?? 0} logoUrl={logoUrl} logoLightUrl={logoLightUrl} membersCanToggleTheme={membersCanToggleTheme} />
+        <EpisodeBanner />
+        <NextEventBanner />
+        <div className="flex flex-1 min-h-0">
+          <main className="flex-1 overflow-y-auto pb-16 md:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>
+            {children}
+          </main>
+          <RightRail />
+        </div>
+        <BottomTabBar role={profile.role} unreadCount={unreadCount ?? 0} dmUnreadCount={0} />
       </div>
-      <BottomTabBar role={profile.role} unreadCount={unreadCount ?? 0} dmUnreadCount={0} />
-    </div>
+    </ToastProvider>
   )
 }

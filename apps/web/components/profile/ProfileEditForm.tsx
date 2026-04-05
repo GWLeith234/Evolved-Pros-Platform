@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useToast } from '@/lib/toast'
 import { Input, Textarea } from '@evolved-pros/ui'
 import { Button } from '@/components/ui/Button'
 import { Tooltip } from '@/components/ui/Tooltip'
@@ -90,6 +91,7 @@ function resizeImage(file: File, maxSize: number): Promise<Blob> {
 }
 
 export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormProps) {
+  const { showToast: globalToast } = useToast()
   const [fields, setFields] = useState({
     display_name: profile.display_name ?? '',
     full_name: profile.full_name ?? '',
@@ -111,12 +113,10 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
   const [avatarLoading, setAvatarLoading] = useState(false)
   const [bannerModalOpen, setBannerModalOpen] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   function showToast(type: 'success' | 'error', message: string) {
-    setToast({ type, message })
-    setTimeout(() => setToast(null), 3500)
+    globalToast(message, type)
   }
 
   function handleChange(field: string, value: string) {
@@ -212,20 +212,6 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Toast */}
-      {toast && (
-        <div
-          className="px-4 py-3 rounded font-body text-sm"
-          style={{
-            backgroundColor: toast.type === 'success' ? '#f0fdf4' : '#fff5f5',
-            color: toast.type === 'success' ? '#166534' : '#991b1b',
-            border: `1px solid ${toast.type === 'success' ? '#bbf7d0' : '#fecaca'}`,
-          }}
-        >
-          {toast.message}
-        </div>
-      )}
-
       {/* ── Profile Photo ─────────────────────────────────────────── */}
       <div>
         <div className="flex items-center mb-2">

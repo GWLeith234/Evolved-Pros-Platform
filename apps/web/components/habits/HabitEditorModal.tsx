@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import type { Habit } from '@/types/habits'
 import { PILLAR_COLORS } from '@/types/habits'
+import { useToast } from '@/lib/toast'
 
 const PILLARS = Object.keys(PILLAR_COLORS)
 
@@ -16,6 +17,7 @@ interface HabitEditorModalProps {
 }
 
 export function HabitEditorModal({ habit, onClose, onSave }: HabitEditorModalProps) {
+  const { showToast } = useToast()
   const [title, setTitle]             = useState(habit?.title ?? '')
   const [pillar, setPillar]           = useState(habit?.pillar ?? '')
   const [description, setDescription] = useState(habit?.description ?? '')
@@ -65,6 +67,7 @@ export function HabitEditorModal({ habit, onClose, onSave }: HabitEditorModalPro
         frequency,
         is_active: isActive,
       })
+      showToast(isNew ? 'Habit added ✓' : 'Habit saved ✓', 'success')
       onClose()
     } catch {
       setError('Network error — please try again')
