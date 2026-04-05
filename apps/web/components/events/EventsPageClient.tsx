@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/Button'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import type { EventItem } from '@/lib/events/types'
 import { formatEventDate, EVENT_TYPE_LABELS, EVENT_TYPE_STYLES } from '@/lib/events/types'
@@ -59,7 +59,8 @@ function EventGridCard({ event, isRegistered, onRegister, onUnregister }: CardPr
   const { day, month, time } = formatEventDate(event.startsAt)
   const typeStyle = EVENT_TYPE_STYLES[event.eventType]
   const typeLabel = EVENT_TYPE_LABELS[event.eventType]
-  const isPast = new Date(event.startsAt) < new Date()
+  const [isPast, setIsPast] = useState(false)
+  useEffect(() => { setIsPast(new Date(event.startsAt) < new Date()) }, [event.startsAt])
   const [loading, setLoading] = useState(false)
 
   const TYPE_GRADIENT: Record<string, string> = {
@@ -196,11 +197,11 @@ interface EventsPageClientProps {
 export function EventsPageClient({ events, registeredEventIds }: EventsPageClientProps) {
   const [filter, setFilter] = useState<Filter>('all')
   const [registeredSet, setRegisteredSet] = useState(() => new Set(registeredEventIds))
-
-  const now = new Date()
+  const [now, setNow] = useState<Date | null>(null)
+  useEffect(() => { setNow(new Date()) }, [])
 
   const filtered = events.filter(ev => {
-    if (filter === 'upcoming')   return new Date(ev.startsAt) >= now
+    if (filter === 'upcoming')   return now ? new Date(ev.startsAt) >= now : true
     if (filter === 'live')       return ev.eventType === 'live'
     if (filter === 'virtual')    return ev.eventType === 'virtual'
     if (filter === 'inperson')   return ev.eventType === 'inperson'

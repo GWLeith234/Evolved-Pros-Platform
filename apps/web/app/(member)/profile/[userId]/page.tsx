@@ -1,7 +1,18 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 import { ProfileBannerWrapper } from '@/components/profile/ProfileBannerWrapper'
+
+export async function generateMetadata({ params }: { params: { userId: string } }): Promise<Metadata> {
+  const { data: profile } = await adminClient
+    .from('users')
+    .select('display_name, full_name')
+    .eq('id', params.userId)
+    .single()
+  const name = profile?.display_name ?? profile?.full_name ?? 'Profile'
+  return { title: `${name} — Evolved Pros` }
+}
 import { ProfileAdUnit } from '@/components/profile/ProfileAdUnit'
 import { PointsHistory } from '@/components/profile/PointsHistory'
 import { SendMessageButton } from '@/components/profile/SendMessageButton'

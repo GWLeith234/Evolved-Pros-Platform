@@ -1,7 +1,10 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm'
+
+export const metadata: Metadata = { title: 'Settings — Evolved Pros' }
 import { Tooltip } from '@/components/ui/Tooltip'
 import { NotificationPrefsForm } from '@/components/notifications/NotificationPrefsForm'
 import { ProfileAdUnit } from '@/components/profile/ProfileAdUnit'

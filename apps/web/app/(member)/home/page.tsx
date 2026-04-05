@@ -1,7 +1,10 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { CommitmentTracker } from '@/components/academy/CommitmentTracker'
+
+export const metadata: Metadata = { title: 'Home — Evolved Pros' }
 import { HabitWidget } from '@/components/home/HabitWidget'
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
 import { StatRow } from '@/components/home/StatRow'

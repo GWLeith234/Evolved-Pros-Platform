@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { formatEventDate, formatDuration, EVENT_TYPE_LABELS } from '@/lib/events/types'
 import type { EventItem } from '@/lib/events/types'
 import { Tooltip } from '@/components/ui/Tooltip'
@@ -30,10 +30,11 @@ interface EventCardProps {
 export function EventCard({ event, isRegistered: initialRegistered, hasAccess, onRegister, onUnregister }: EventCardProps) {
   const [registered, setRegistered] = useState(initialRegistered)
   const [loading, setLoading] = useState(false)
+  const [isPast, setIsPast] = useState(false)
+  useEffect(() => { setIsPast(new Date(event.startsAt) < new Date()) }, [event.startsAt])
 
   const { day, month, time } = formatEventDate(event.startsAt)
   const duration = formatDuration(event.startsAt, event.endsAt)
-  const isPast = new Date(event.startsAt) < new Date()
   const typeLabel = EVENT_TYPE_LABELS[event.eventType]
   const badgeBg = TYPE_BADGE_BG[event.eventType] ?? '#1b3c5a'
   const gradient = TYPE_GRADIENTS[event.eventType] ?? TYPE_GRADIENTS.inperson

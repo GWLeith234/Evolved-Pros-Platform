@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   formatEventDate, formatDuration, generateICS,
   EVENT_TYPE_LABELS, EVENT_TYPE_STYLES,
@@ -15,10 +15,11 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
   const [registered, setRegistered] = useState(event.isRegistered)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isPast, setIsPast] = useState(false)
+  useEffect(() => { setIsPast(new Date(event.startsAt) < new Date()) }, [event.startsAt])
 
   const { day, month, time, full } = formatEventDate(event.startsAt)
   const duration = formatDuration(event.startsAt, event.endsAt)
-  const isPast = new Date(event.startsAt) < new Date()
   const typeStyle = EVENT_TYPE_STYLES[event.eventType]
   const typeLabel = EVENT_TYPE_LABELS[event.eventType]
 

@@ -1,6 +1,9 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { AcademyMobileProgress } from '@/components/academy/AcademyMobileProgress'
+
+export const metadata: Metadata = { title: 'Academy — Evolved Pros' }
 import { CourseGrid } from '@/components/academy/CourseGrid'
 import { UpgradePrompt } from '@/components/academy/UpgradePrompt'
 import {

@@ -1,7 +1,10 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { InviteMemberButton } from './InviteMemberButton'
+
+export const metadata: Metadata = { title: 'Admin — Evolved Pros' }
 
 export const dynamic = 'force-dynamic'
 

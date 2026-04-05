@@ -1,7 +1,10 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { UnifiedCommunityPage } from '@/components/community/UnifiedCommunityPage'
+
+export const metadata: Metadata = { title: 'Community — Evolved Pros' }
 import {
   fetchChannels,
   fetchAllPosts,

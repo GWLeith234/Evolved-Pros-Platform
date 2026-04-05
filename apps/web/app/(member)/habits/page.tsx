@@ -1,6 +1,9 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { hasTierAccess } from '@/lib/tier'
+
+export const metadata: Metadata = { title: 'Discipline — Evolved Pros' }
 import { CompoundBoardLocked } from '@/components/habits/CompoundBoardLocked'
 import { HabitsPageShell } from '@/components/habits/HabitsPageShell'
 
