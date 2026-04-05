@@ -44,7 +44,7 @@ const FILTERS = ['All', 'Pro', 'VIP', 'Trial', 'Cancelled'] as const
 type Filter = typeof FILTERS[number]
 
 function fmtDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 function getInitials(name: string | null | undefined): string {
   if (!name) return '?'

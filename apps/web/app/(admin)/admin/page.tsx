@@ -100,7 +100,7 @@ export default async function AdminDashboardPage() {
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="font-display font-black text-[28px] text-[#112535]">Dashboard</h1>
-          <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
+          <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5" suppressHydrationWarning>
             Platform overview — {now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </div>

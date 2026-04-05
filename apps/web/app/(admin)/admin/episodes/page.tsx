@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import { EpisodeThumbnail } from './EpisodeThumbnail'
 
 export const dynamic = 'force-dynamic'
 
@@ -82,12 +83,7 @@ export default async function AdminEpisodesPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       {ep.thumbnail_url && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={ep.thumbnail_url}
-                          alt={ep.title}
-                          className="w-10 h-10 rounded object-cover flex-shrink-0"
-                        />
+                        <EpisodeThumbnail src={ep.thumbnail_url} alt={ep.title} />
                       )}
                       <div className="min-w-0">
                         <p className="font-body font-semibold text-[13px] text-[#1b3c5a] truncate max-w-[240px]">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { EVENT_TYPE_LABELS } from '@/lib/events/types'
 import type { EventType } from '@/lib/events/types'
@@ -29,7 +29,8 @@ function formatDate(iso: string) {
 export function AdminEventsTable({ events: initialEvents }: AdminEventsTableProps) {
   const [events, setEvents] = useState(initialEvents)
   const [toggling, setToggling] = useState<string | null>(null)
-  const now = new Date()
+  const [now, setNow] = useState<Date | null>(null)
+  useEffect(() => { setNow(new Date()) }, [])
 
   async function togglePublish(eventId: string, currentlyPublished: boolean) {
     setToggling(eventId)
@@ -67,7 +68,7 @@ export function AdminEventsTable({ events: initialEvents }: AdminEventsTableProp
             </tr>
           ) : (
             events.map((event, i) => {
-              const isPast = new Date(event.starts_at) < now
+              const isPast = now ? new Date(event.starts_at) < now : false
               const isToggling = toggling === event.id
               return (
                 <tr
