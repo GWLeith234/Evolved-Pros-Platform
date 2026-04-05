@@ -1,23 +1,32 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const supabase = createClient()
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll() },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options))
+          } catch {}
+        },
+      },
+    }
+  )
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: profile } = await adminClient
-    .from('users')
-    .select('id')
-    .eq('email', user.email!)
-    .single()
-
-  if (!profile) return NextResponse.json({ scores: [] })
-
-  const end = new Date()
+  const end   = new Date()
   const start = new Date()
-  start.setDate(start.getDate() - 29) // 30 days inclusive
+  start.setDate(start.getDate() - 29)
   const startStr = start.toISOString().split('T')[0]
   const endStr   = end.toISOString().split('T')[0]
 
@@ -25,12 +34,11 @@ export async function GET() {
   const { data } = await (adminClient as any)
     .from('daily_scores')
     .select('date, score, pct')
-    .eq('user_id', profile.id)
+    .eq('user_id', user.id)
     .gte('date', startStr)
     .lte('date', endStr)
     .order('date', { ascending: true })
 
-  // Fill gaps with zero so sparkline is always 30 points
   const byDate: Record<string, { score: number; pct: number }> = {}
   for (const row of (data ?? []) as { date: string; score: number; pct: number }[]) {
     byDate[row.date] = { score: row.score, pct: row.pct }

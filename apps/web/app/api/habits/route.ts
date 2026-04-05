@@ -1,75 +1,83 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET(request: Request) {
-  const supabase = createClient()
+async function getAuthUser() {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll() },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options))
+          } catch {}
+        },
+      },
+    }
+  )
   const { data: { user } } = await supabase.auth.getUser()
+  return user
+}
+
+export async function GET(request: Request) {
+  const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Get public user ID via email lookup (auth UUID ≠ public users UUID)
-  const { data: profile } = await adminClient
-    .from('users')
-    .select('id')
-    .eq('email', user.email!)
-    .single()
+  const userId = user.id
+  const today = new Date().toISOString().split('T')[0]
 
-  if (!profile) return NextResponse.json({ habits: [], completedIds: [] })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [habitsRes, completionsRes] = await Promise.all([
+    (adminClient as any)
+      .from('habit_stacks')
+      .select('id, name, time_of_day, sort_order, course_id, created_at')
+      .eq('user_id', userId)
+      .order('sort_order', { ascending: true }),
+    (adminClient as any)
+      .from('habit_completions')
+      .select('habit_stack_id')
+      .eq('user_id', userId)
+      .eq('completed_on', today),
+  ])
 
-  const userId = profile.id
-  const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
-
-  // Fetch habits (adminClient bypasses RLS)
-  const { data: habits } = await (adminClient as any)
-    .from('habit_stacks')
-    .select('id, name, time_of_day, sort_order, course_id, created_at')
-    .eq('user_id', userId)
-    .order('sort_order', { ascending: true })
-
-  // Fetch TODAY's completions — column is habit_stack_id
-  const { data: completions, error: compError } = await (adminClient as any)
-    .from('habit_completions')
-    .select('habit_stack_id')
-    .eq('user_id', userId)
-    .eq('completed_on', today)
-
-  console.log('Habit completions for today:', today, completions, compError)
-
-  // Apply course_id filter after fetch if requested
   const courseId = new URL(request.url).searchParams.get('course_id')
+  const habits = habitsRes.data ?? []
   const filteredHabits = courseId
-    ? (habits ?? []).filter((h: any) => h.course_id === courseId)
-    : (habits ?? [])
+    ? habits.filter((h: { course_id: string | null }) => h.course_id === courseId)
+    : habits
 
-  const completedIds = completions?.map((c: any) => c.habit_stack_id) ?? []
+  const completedIds = (completionsRes.data ?? []).map(
+    (c: { habit_stack_id: string }) => c.habit_stack_id
+  )
 
   return NextResponse.json({ habits: filteredHabits, completedIds })
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Get public UUID
-  const { data: profile } = await adminClient
-    .from('users')
-    .select('id')
-    .eq('email', user.email!)
-    .single()
+  const userId = user.id
+  const body = await req.json() as {
+    name?: string
+    time_of_day?: string
+    frequency?: string
+    course_id?: string | null
+  }
 
-  if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-
-  const userId = profile.id
-  const body = await req.json() as { name?: string; time_of_day?: string; frequency?: string; course_id?: string | null }
   const name = typeof body.name === 'string' ? body.name.trim() : ''
-  // Accept both 'time_of_day' (legacy) and 'frequency' (modal) field names
+  if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+
+  // Accept 'frequency' from modal (daily/weekdays) mapped to time_of_day
   const time_of_day = body.time_of_day ?? (body.frequency === 'weekdays' ? 'PM' : 'AM')
   const course_id = body.course_id ?? null
 
-  if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 })
-
-  // Count existing habits for this user (max 7)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { count } = await (adminClient as any)
     .from('habit_stacks')
     .select('id', { count: 'exact', head: true })
@@ -79,6 +87,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Maximum 7 habits allowed' }, { status: 400 })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (adminClient as any)
     .from('habit_stacks')
     .insert({ user_id: userId, course_id, name, time_of_day, sort_order: count ?? 0 })
@@ -90,23 +99,14 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Get public UUID
-  const { data: profile } = await adminClient
-    .from('users')
-    .select('id')
-    .eq('email', user.email!)
-    .single()
-
-  if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-
-  const userId = profile.id
+  const userId = user.id
   const id = req.nextUrl.searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (adminClient as any)
     .from('habit_stacks')
     .delete()

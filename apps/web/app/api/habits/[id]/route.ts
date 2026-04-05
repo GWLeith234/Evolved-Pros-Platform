@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -6,38 +7,39 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createClient()
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll() },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options))
+          } catch {}
+        },
+      },
+    }
+  )
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: profile } = await adminClient
-    .from('users')
-    .select('id')
-    .eq('email', user.email!)
-    .single()
-
-  if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-
-  const userId = profile.id
+  const userId  = user.id
   const habitId = params.id
   if (!habitId) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
   const body = await req.json() as {
     name?: string
-    pillar?: string
-    description?: string
     frequency?: string
     time_of_day?: string
-    is_active?: boolean
   }
 
-  // Build update payload — only include columns that exist in habit_stacks.
-  // pillar, description, is_active are optional extended columns; skip if they
-  // cause a Postgres column error (table may not have them yet).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updates: Record<string, any> = {}
-  if (body.name !== undefined) updates.name = String(body.name).trim()
-  // Accept 'frequency' from modal (daily/weekdays) mapped to time_of_day
+  if (body.name !== undefined)        updates.name        = String(body.name).trim()
   if (body.time_of_day !== undefined) updates.time_of_day = body.time_of_day
   if (body.frequency !== undefined)   updates.time_of_day = body.frequency === 'weekdays' ? 'PM' : 'AM'
 
