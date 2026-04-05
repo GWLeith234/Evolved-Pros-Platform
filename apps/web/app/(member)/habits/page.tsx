@@ -26,7 +26,7 @@ export default async function HabitsPage() {
   }
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-page)', minHeight: '100vh' }}>
+    <div>
       {/* Page header */}
       <div
         className="px-6 pt-6 pb-4"

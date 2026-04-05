@@ -27,17 +27,19 @@ export async function PATCH(
     pillar?: string
     description?: string
     frequency?: string
+    time_of_day?: string
     is_active?: boolean
   }
 
-  // Build update payload — only include provided fields
+  // Build update payload — only include columns that exist in habit_stacks.
+  // pillar, description, is_active are optional extended columns; skip if they
+  // cause a Postgres column error (table may not have them yet).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updates: Record<string, any> = {}
-  if (body.name !== undefined)        updates.name        = String(body.name).trim()
-  if (body.pillar !== undefined)      updates.pillar      = body.pillar
-  if (body.description !== undefined) updates.description = body.description
-  if (body.frequency !== undefined)   updates.frequency   = body.frequency
-  if (body.is_active !== undefined)   updates.is_active   = Boolean(body.is_active)
+  if (body.name !== undefined) updates.name = String(body.name).trim()
+  // Accept 'frequency' from modal (daily/weekdays) mapped to time_of_day
+  if (body.time_of_day !== undefined) updates.time_of_day = body.time_of_day
+  if (body.frequency !== undefined)   updates.time_of_day = body.frequency === 'weekdays' ? 'PM' : 'AM'
 
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: 'No fields to update' }, { status: 400 })

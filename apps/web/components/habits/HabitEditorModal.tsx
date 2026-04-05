@@ -6,6 +6,9 @@ import { PILLAR_COLORS } from '@/types/habits'
 
 const PILLARS = Object.keys(PILLAR_COLORS)
 
+const labelClass = 'block font-condensed text-xs uppercase tracking-widest text-white/50 mb-1.5'
+const inputClass = 'w-full px-3 py-2.5 rounded font-body text-sm outline-none transition-colors bg-[#0A0F18] border border-white/10 text-white placeholder:text-white/25'
+
 interface HabitEditorModalProps {
   habit: Habit | null
   onClose: () => void
@@ -13,13 +16,13 @@ interface HabitEditorModalProps {
 }
 
 export function HabitEditorModal({ habit, onClose, onSave }: HabitEditorModalProps) {
-  const [title, setTitle]           = useState(habit?.title ?? '')
-  const [pillar, setPillar]         = useState(habit?.pillar ?? '')
+  const [title, setTitle]             = useState(habit?.title ?? '')
+  const [pillar, setPillar]           = useState(habit?.pillar ?? '')
   const [description, setDescription] = useState(habit?.description ?? '')
-  const [frequency, setFrequency]   = useState(habit?.frequency ?? 'daily')
-  const [isActive, setIsActive]     = useState(habit?.is_active ?? true)
-  const [saving, setSaving]         = useState(false)
-  const [error, setError]           = useState<string | null>(null)
+  const [frequency, setFrequency]     = useState(habit?.frequency ?? 'daily')
+  const [isActive, setIsActive]       = useState(habit?.is_active ?? true)
+  const [saving, setSaving]           = useState(false)
+  const [error, setError]             = useState<string | null>(null)
   const titleRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -38,13 +41,13 @@ export function HabitEditorModal({ habit, onClose, onSave }: HabitEditorModalPro
 
     try {
       const isNew = !habit?.id
-      const url   = isNew ? '/api/habits' : `/api/habits/${habit!.id}`
+      const url    = isNew ? '/api/habits' : `/api/habits/${habit!.id}`
       const method = isNew ? 'POST' : 'PATCH'
 
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: title.trim(), pillar, description, frequency, is_active: isActive }),
+        body: JSON.stringify({ name: title.trim(), frequency }),
       })
 
       if (!res.ok) {
@@ -55,12 +58,12 @@ export function HabitEditorModal({ habit, onClose, onSave }: HabitEditorModalPro
 
       const data = await res.json() as { habit: { id: string; name: string } }
       onSave({
-        id:          data.habit.id,
-        title:       data.habit.name,
+        id:        data.habit.id,
+        title:     data.habit.name,
         pillar,
         description,
         frequency,
-        is_active:   isActive,
+        is_active: isActive,
       })
       onClose()
     } catch {
@@ -72,35 +75,23 @@ export function HabitEditorModal({ habit, onClose, onSave }: HabitEditorModalPro
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-xl overflow-hidden"
-        style={{
-          backgroundColor: '#111926',
-          border: '1px solid rgba(255,255,255,0.1)',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
-        }}
+        className="w-full max-w-md rounded-xl overflow-hidden bg-[#111926] border border-white/10"
+        style={{ boxShadow: '0 24px 80px rgba(0,0,0,0.5)' }}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div
-          className="flex items-center justify-between px-5 py-4"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}
-        >
-          <p
-            className="font-condensed font-bold uppercase tracking-[0.12em]"
-            style={{ fontSize: '13px', color: '#C9A84C' }}
-          >
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
+          <p className="font-condensed font-bold text-[13px] uppercase tracking-[0.12em] text-[#C9A84C]">
             {habit?.id ? 'Edit Habit' : 'New Habit'}
           </p>
           <button
             type="button"
             onClick={onClose}
-            className="w-7 h-7 flex items-center justify-center rounded transition-opacity hover:opacity-70"
-            style={{ color: 'rgba(255,255,255,0.4)' }}
+            className="w-7 h-7 flex items-center justify-center rounded text-white/40 hover:text-white/70 transition-colors"
             aria-label="Close"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -114,42 +105,29 @@ export function HabitEditorModal({ habit, onClose, onSave }: HabitEditorModalPro
         <div className="px-5 py-5 flex flex-col gap-4">
           {/* Title */}
           <div>
-            <label className="block font-condensed uppercase tracking-[0.1em] mb-1.5" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)' }}>
-              Habit Title *
-            </label>
+            <label className={labelClass}>Habit Title *</label>
             <input
               ref={titleRef}
               type="text"
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="e.g. Morning walk"
-              className="w-full px-3 py-2.5 rounded font-body text-sm outline-none transition-colors"
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                color: 'var(--text-primary)',
-              }}
+              className={inputClass}
               onFocus={e => (e.currentTarget.style.borderColor = 'rgba(201,168,76,0.5)')}
-              onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)')}
+              onBlur={e => (e.currentTarget.style.borderColor = '')}
             />
           </div>
 
           {/* Pillar */}
           <div>
-            <label className="block font-condensed uppercase tracking-[0.1em] mb-1.5" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)' }}>
-              Pillar
-            </label>
+            <label className={labelClass}>Pillar</label>
             <select
               value={pillar}
               onChange={e => setPillar(e.target.value)}
-              className="w-full px-3 py-2.5 rounded font-body text-sm outline-none transition-colors appearance-none"
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                color: pillar ? PILLAR_COLORS[pillar] ?? 'var(--text-primary)' : 'rgba(255,255,255,0.3)',
-              }}
+              className={`${inputClass} appearance-none`}
+              style={{ color: pillar ? PILLAR_COLORS[pillar] ?? undefined : undefined }}
             >
-              <option value="">— No pillar —</option>
+              <option value="" style={{ color: 'rgba(255,255,255,0.3)', backgroundColor: '#111926' }}>— No pillar —</option>
               {PILLARS.map(p => (
                 <option key={p} value={p} style={{ color: PILLAR_COLORS[p], backgroundColor: '#111926' }}>
                   {p}
@@ -160,42 +138,32 @@ export function HabitEditorModal({ habit, onClose, onSave }: HabitEditorModalPro
 
           {/* Description */}
           <div>
-            <label className="block font-condensed uppercase tracking-[0.1em] mb-1.5" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)' }}>
-              Description
-            </label>
+            <label className={labelClass}>Description</label>
             <textarea
               value={description}
               onChange={e => setDescription(e.target.value)}
               rows={3}
               placeholder="Why does this habit matter?"
-              className="w-full px-3 py-2.5 rounded font-body text-sm outline-none transition-colors resize-none"
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                color: 'var(--text-primary)',
-              }}
+              className={`${inputClass} resize-none`}
               onFocus={e => (e.currentTarget.style.borderColor = 'rgba(201,168,76,0.5)')}
-              onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)')}
+              onBlur={e => (e.currentTarget.style.borderColor = '')}
             />
           </div>
 
           {/* Frequency */}
           <div>
-            <label className="block font-condensed uppercase tracking-[0.1em] mb-1.5" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)' }}>
-              Frequency
-            </label>
+            <label className={labelClass}>Frequency</label>
             <div className="flex gap-2">
               {(['daily', 'weekdays'] as const).map(f => (
                 <button
                   key={f}
                   type="button"
                   onClick={() => setFrequency(f)}
-                  className="flex-1 py-2 rounded font-condensed font-semibold uppercase tracking-[0.08em] transition-all"
+                  className="flex-1 py-2 rounded font-condensed font-semibold text-[11px] uppercase tracking-[0.08em] transition-all border"
                   style={{
-                    fontSize: '11px',
                     backgroundColor: frequency === f ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.04)',
-                    border: `1px solid ${frequency === f ? 'rgba(201,168,76,0.4)' : 'rgba(255,255,255,0.1)'}`,
-                    color: frequency === f ? '#C9A84C' : 'rgba(255,255,255,0.4)',
+                    borderColor:     frequency === f ? 'rgba(201,168,76,0.4)'  : 'rgba(255,255,255,0.1)',
+                    color:           frequency === f ? '#C9A84C'               : 'rgba(255,255,255,0.4)',
                   }}
                 >
                   {f === 'daily' ? 'Every Day' : 'Weekdays Only'}
@@ -203,7 +171,7 @@ export function HabitEditorModal({ habit, onClose, onSave }: HabitEditorModalPro
               ))}
             </div>
             {frequency === 'weekdays' && (
-              <p className="mt-1.5 font-body" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)' }}>
+              <p className="mt-1.5 font-body text-[11px] text-white/30">
                 Skip weekends — Sat &amp; Sun
               </p>
             )}
@@ -211,9 +179,7 @@ export function HabitEditorModal({ habit, onClose, onSave }: HabitEditorModalPro
 
           {/* Active toggle */}
           <div className="flex items-center justify-between">
-            <span className="font-condensed uppercase tracking-[0.1em]" style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)' }}>
-              Active
-            </span>
+            <span className={labelClass} style={{ marginBottom: 0 }}>Active</span>
             <button
               type="button"
               onClick={() => setIsActive(a => !a)}
@@ -230,20 +196,16 @@ export function HabitEditorModal({ habit, onClose, onSave }: HabitEditorModalPro
           </div>
 
           {error && (
-            <p className="font-body text-sm" style={{ color: '#F87171' }}>{error}</p>
+            <p className="font-body text-sm text-[#F87171]">{error}</p>
           )}
         </div>
 
         {/* Footer */}
-        <div
-          className="flex items-center justify-end gap-3 px-5 py-4"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}
-        >
+        <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-white/[0.07]">
           <button
             type="button"
             onClick={onClose}
-            className="font-condensed font-bold uppercase tracking-[0.1em] px-4 py-2 rounded transition-opacity hover:opacity-70"
-            style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}
+            className="font-condensed font-bold text-[11px] uppercase tracking-[0.1em] px-4 py-2 rounded text-white/40 hover:text-white/70 transition-colors"
           >
             Cancel
           </button>
@@ -251,8 +213,7 @@ export function HabitEditorModal({ habit, onClose, onSave }: HabitEditorModalPro
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="font-condensed font-bold uppercase tracking-[0.1em] px-5 py-2 rounded transition-opacity hover:opacity-90 disabled:opacity-50"
-            style={{ fontSize: '11px', backgroundColor: '#C9302A', color: '#ffffff' }}
+            className="font-condensed font-bold text-[11px] uppercase tracking-[0.1em] px-5 py-2 rounded bg-[#C9302A] text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {saving ? 'Saving…' : 'Save Habit'}
           </button>

@@ -61,9 +61,10 @@ export async function POST(req: NextRequest) {
   if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
 
   const userId = profile.id
-  const body = await req.json() as { name?: string; time_of_day?: string; course_id?: string | null }
+  const body = await req.json() as { name?: string; time_of_day?: string; frequency?: string; course_id?: string | null }
   const name = typeof body.name === 'string' ? body.name.trim() : ''
-  const time_of_day = body.time_of_day ?? 'AM'
+  // Accept both 'time_of_day' (legacy) and 'frequency' (modal) field names
+  const time_of_day = body.time_of_day ?? (body.frequency === 'weekdays' ? 'PM' : 'AM')
   const course_id = body.course_id ?? null
 
   if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 })
