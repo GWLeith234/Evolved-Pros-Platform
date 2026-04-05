@@ -115,12 +115,14 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
   const isWin = post.postType === 'win'
   const isQuestion = post.postType === 'question'
   const isAnnounce = post.postType === 'announce'
+  // Win cards always have a light parchment background — always need dark text
+  const isLightCard = isWin
 
   // Accent colour: pillar → pillar colour, else postType colour, else general teal
   const accentColor = pillarConf?.color
     ?? (isWin ? '#C9A84C' : isAnnounce ? '#ef0e30' : isQuestion ? '#60A5FA' : '#68a2b9')
 
-  const actionBtnClass = 'flex items-center gap-1.5 font-condensed font-semibold uppercase text-[11px] tracking-wide text-[#7a8a96] hover:text-[#ef0e30] transition-colors duration-150'
+  const actionBtnClass = `flex items-center gap-1.5 font-condensed font-semibold uppercase text-[11px] tracking-wide hover:text-[#ef0e30] transition-colors duration-150 ${isLightCard || !isDark ? 'text-[#1b3c5a]/70' : 'text-[#7a8a96]'}`
 
   const cardStyle: React.CSSProperties = isWin
     ? {
@@ -195,7 +197,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
           <div className="flex items-center gap-2 flex-wrap">
             <span
               className="font-body font-semibold text-[14px]"
-              style={{ color: isAnnounce ? 'white' : isDark ? 'rgba(255,255,255,0.9)' : '#1b3c5a' }}
+              style={{ color: isAnnounce ? 'white' : (isLightCard || !isDark) ? '#1b3c5a' : 'rgba(255,255,255,0.9)' }}
             >
               {post.author.displayName}
             </span>
@@ -249,7 +251,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
           </div>
           <p
             className="font-condensed font-semibold uppercase text-[10px] mt-0.5"
-            style={{ color: isAnnounce ? 'rgba(255,255,255,0.4)' : '#7a8a96' }}
+            style={{ color: isAnnounce ? 'rgba(255,255,255,0.4)' : (isLightCard || !isDark) ? 'rgba(27,60,90,0.5)' : '#7a8a96' }}
           >
             <ClientTimeAgo dateStr={post.createdAt} />
           </p>
@@ -259,7 +261,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
       {/* Body */}
       <p
         className="font-body text-[14px] leading-[1.72] mb-4"
-        style={{ color: isAnnounce ? 'rgba(255,255,255,0.75)' : isDark ? 'rgba(255,255,255,0.75)' : '#3a4a56' }}
+        style={{ color: isAnnounce ? 'rgba(255,255,255,0.75)' : (isLightCard || !isDark) ? '#3a4a56' : 'rgba(255,255,255,0.75)' }}
       >
         {post.body}
       </p>
