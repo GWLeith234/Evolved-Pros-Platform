@@ -17,6 +17,7 @@ type ProfileHeaderUser = {
   full_name: string | null
   avatar_url: string | null
   banner_url?: string | null
+  bio?: string | null
   role_title: string | null
   tier: string | null
   points: number
@@ -31,6 +32,12 @@ type ProfileHeaderUser = {
   goal_90day?: string | null
   goal_visible?: boolean
   pioneer_driver_type?: string | null
+}
+
+function normalizeUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  return `https://${url}`
 }
 
 interface ProfileHeaderProps {
@@ -82,20 +89,21 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
           }}
         />
         {isOwn && onChangeBanner && (
-          <Tooltip content="Your profile banner is the header image at the top of your profile. Choose a preset or upload your own.">
-            <button
-              type="button"
-              onClick={onChangeBanner}
-              style={{
-                position: 'absolute', bottom: '12px', right: '12px', zIndex: 10,
-                background: 'rgba(0,0,0,0.6)', color: 'white',
-                border: '0.5px solid rgba(255,255,255,0.3)', borderRadius: '6px',
-                padding: '6px 12px', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
-              }}
-            >
-              Change Banner
-            </button>
-          </Tooltip>
+          <div style={{ position: 'absolute', bottom: '12px', right: '12px', zIndex: 10 }}>
+            <Tooltip content="Your profile banner is the header image at the top of your profile. Choose a preset or upload your own.">
+              <button
+                type="button"
+                onClick={onChangeBanner}
+                style={{
+                  background: 'rgba(0,0,0,0.6)', color: 'white',
+                  border: '0.5px solid rgba(255,255,255,0.3)', borderRadius: '6px',
+                  padding: '6px 12px', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                }}
+              >
+                Change Banner
+              </button>
+            </Tooltip>
+          </div>
         )}
       </div>
 
@@ -201,6 +209,16 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
           })}
         </div>
 
+        {/* Bio */}
+        {user.bio && (
+          <p style={{
+            fontSize: '13px', color: 'rgba(255,255,255,0.65)', lineHeight: 1.6,
+            marginBottom: '12px', maxWidth: '560px',
+          }}>
+            {user.bio}
+          </p>
+        )}
+
         {/* Pioneer-Driver type badge */}
         {user.pioneer_driver_type && (
           <div style={{ marginBottom: hasSocialLinks ? '12px' : '0' }}>
@@ -237,7 +255,7 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
             )}
             {user.website_url && (
               <a
-                href={user.website_url}
+                href={normalizeUrl(user.website_url) ?? '#'}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Website"

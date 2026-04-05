@@ -59,9 +59,9 @@ export function ThemeSelector({ initialTheme }: Props) {
             style={{
               padding: '7px 18px',
               borderRadius: '6px',
-              border: active ? '1px solid #C9A84C' : '1px solid rgba(255,255,255,0.12)',
+              border: active ? '1px solid #C9A84C' : '1px solid var(--border-color, rgba(27,60,90,0.15))',
               backgroundColor: active ? 'rgba(201,168,76,0.1)' : 'transparent',
-              color: active ? '#C9A84C' : 'rgba(255,255,255,0.45)',
+              color: active ? '#C9A84C' : 'var(--text-secondary, rgba(27,60,90,0.55))',
               fontFamily: '"Barlow Condensed", sans-serif',
               fontWeight: 700,
               fontSize: '12px',

@@ -11,6 +11,7 @@ interface ProfileBannerWrapperProps {
     full_name: string | null
     avatar_url: string | null
     banner_url: string | null
+    bio?: string | null
     role_title: string | null
     tier: string | null
     points: number
