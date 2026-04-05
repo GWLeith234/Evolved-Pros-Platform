@@ -15,6 +15,7 @@ interface PostCardProps {
   currentUser: { id: string; displayName: string | null; avatarUrl: string | null }
   onReact: (postId: string, reactionType: string) => void
   onBookmark: (postId: string) => void
+  activeFilter?: string
 }
 
 function timeAgo(dateStr: string): string {
@@ -60,11 +61,15 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
   )
 }
 
-export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark }: PostCardProps) {
+export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark, activeFilter }: PostCardProps) {
   const [showReplies, setShowReplies] = useState(false)
   const [replies, setReplies] = useState<Reply[]>(post.replies ?? [])
   const [loadingReplies, setLoadingReplies] = useState(false)
   const [isDark, setIsDark] = useState(true)
+
+  useEffect(() => {
+    setShowReplies(false)
+  }, [activeFilter])
 
   useEffect(() => {
     setIsDark(!document.documentElement.classList.contains('light-mode'))

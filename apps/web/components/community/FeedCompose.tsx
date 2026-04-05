@@ -42,6 +42,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const hasContent = body.trim().length > 0
   const avatarBg = getAvatarColor(currentUser.id)
   const activePlaceholder = POST_TABS.find(t => t.type === activePostType)?.placeholder ?? "What's on your mind?"
 
@@ -187,8 +188,9 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
             variant="primary"
             size="md"
             onClick={handleSubmit}
-            disabled={body.trim().length < 10}
+            disabled={!hasContent}
             loading={loading}
+            className={!hasContent ? 'pointer-events-none' : ''}
           >
             Post →
           </Button>

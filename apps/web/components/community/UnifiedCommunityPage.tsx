@@ -344,6 +344,7 @@ export function UnifiedCommunityPage({
                     currentUser={{ id: currentUser.id, displayName: currentUser.displayName, avatarUrl: currentUser.avatarUrl }}
                     onReact={handleReact}
                     onBookmark={handleBookmark}
+                    activeFilter={activeFilter}
                   />
                   {/* Inject ad after every 3rd post */}
                   {(index + 1) % 3 === 0 && ads.length > 0 && (
