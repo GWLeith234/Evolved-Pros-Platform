@@ -1,6 +1,21 @@
 import { adminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 
+const YOUTUBE_CHANNEL = 'https://www.youtube.com/@EvolvedPros'
+const BLOCKED_YT_IDS = new Set(['dQw4w9WgXcQ'])
+
+function sanitizeYoutubeUrl(url: string | null): string | null {
+  if (!url) return null
+  try {
+    const parsed = new URL(url)
+    const id = parsed.searchParams.get('v') ?? (parsed.hostname === 'youtu.be' ? parsed.pathname.slice(1) : null)
+    if (id && BLOCKED_YT_IDS.has(id)) return YOUTUBE_CHANNEL
+    return url
+  } catch {
+    return url
+  }
+}
+
 type Episode = {
   id: string
   title: string
@@ -41,9 +56,9 @@ export async function EpisodeBanner() {
   const guestLabel = episode.guest_name ?? null
   const dateLabel = episode.published_at ? formatPublishedAt(episode.published_at) : null
 
-  const href = episode.youtube_url
-    ?? (episode.slug ? `/podcast/${episode.slug}` : '/podcast')
-  const ctaLabel = episode.youtube_url ? '▶ Watch on YouTube' : '▶ Watch now'
+  const sanitizedYtUrl = sanitizeYoutubeUrl(episode.youtube_url)
+  const href = sanitizedYtUrl ?? (episode.slug ? `/podcast/${episode.slug}` : '/podcast')
+  const ctaLabel = sanitizedYtUrl ? '▶ Watch on YouTube' : '▶ Watch now'
 
   return (
     <div

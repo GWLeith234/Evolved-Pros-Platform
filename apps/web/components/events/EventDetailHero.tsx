@@ -53,6 +53,19 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
     URL.revokeObjectURL(url)
   }
 
+  function addToGoogleCalendar() {
+    const fmt = (iso: string) => new Date(iso).toISOString().replace(/[-:]|\.\d{3}/g, '')
+    const endIso = event.endsAt ?? new Date(new Date(event.startsAt).getTime() + 3600_000).toISOString()
+    const url = [
+      'https://calendar.google.com/calendar/render?action=TEMPLATE',
+      `text=${encodeURIComponent(event.title)}`,
+      `dates=${fmt(event.startsAt)}/${fmt(endIso)}`,
+      `details=${encodeURIComponent(event.description ?? '')}`,
+      `location=${encodeURIComponent(event.zoomUrl ?? 'Virtual')}`,
+    ].join('&')
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
   return (
     <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.12)' }}>
       {/* Header */}
@@ -225,7 +238,7 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
             {/* Add to Calendar */}
             {!isPast && (
               <button
-                onClick={downloadICS}
+                onClick={addToGoogleCalendar}
                 className="w-full font-condensed font-semibold uppercase tracking-wide text-[11px] rounded px-4 py-2.5 transition-all text-center"
                 style={{ color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'transparent' }}
               >
