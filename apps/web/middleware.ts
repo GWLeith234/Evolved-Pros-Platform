@@ -10,6 +10,7 @@ const PUBLIC_ROUTES = [
   '/dev-login',
   '/api/dev-login',
   '/pricing',
+  '/media',
 ]
 
 // Routes that are publicly accessible but still need session refresh
