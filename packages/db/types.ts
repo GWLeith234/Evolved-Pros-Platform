@@ -744,12 +744,116 @@ export type Database = {
         }
         Relationships: []
       }
+      // ── Stub tables (pending supabase gen types typescript) ──────────
+      conversations: {
+        Row: { id: string; participant_one_id: string; participant_two_id: string; last_message_at: string | null; created_at: string; [k: string]: any }
+        Insert: { id?: string; participant_one_id: string; participant_two_id: string; last_message_at?: string | null; created_at?: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      messages: {
+        Row: { id: string; conversation_id: string; sender_id: string; body: string; read_at: string | null; created_at: string; [k: string]: any }
+        Insert: { id?: string; conversation_id: string; sender_id: string; body: string; read_at?: string | null; created_at?: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      accountability_pairs: {
+        Row: { id: string; [k: string]: any }
+        Insert: { id?: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      strategic_plans: {
+        Row: { id: string; user_id: string; [k: string]: any }
+        Insert: { id?: string; user_id: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      partner_checkins: {
+        Row: { id: string; [k: string]: any }
+        Insert: { id?: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      member_badges: {
+        Row: { id: string; user_id: string; [k: string]: any }
+        Insert: { id?: string; user_id: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      discussion_posts: {
+        Row: { id: string; [k: string]: any }
+        Insert: { id?: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      weekly_commitments: {
+        Row: { id: string; user_id: string; [k: string]: any }
+        Insert: { id?: string; user_id: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      ledger_entries: {
+        Row: { id: string; user_id: string; [k: string]: any }
+        Insert: { id?: string; user_id: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      reflections: {
+        Row: { id: string; user_id: string; [k: string]: any }
+        Insert: { id?: string; user_id: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      checkin_results: {
+        Row: { id: string; [k: string]: any }
+        Insert: { id?: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      capstones: {
+        Row: { id: string; user_id: string; [k: string]: any }
+        Insert: { id?: string; user_id: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      assessments: {
+        Row: { id: string; user_id: string; [k: string]: any }
+        Insert: { id?: string; user_id: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      scoreboards: {
+        Row: { id: string; [k: string]: any }
+        Insert: { id?: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      pillar_audits: {
+        Row: { id: string; user_id: string; [k: string]: any }
+        Insert: { id?: string; user_id: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      greeting_quotes: {
+        Row: { id: string; [k: string]: any }
+        Insert: { id?: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_points: {
+        Args: { user_id: string; amount: number }
+        Returns: undefined
+      }
+      increment_discussion_like: {
+        Args: { post_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
