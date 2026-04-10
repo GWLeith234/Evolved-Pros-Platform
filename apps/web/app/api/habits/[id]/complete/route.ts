@@ -54,10 +54,13 @@ export async function POST(
     .from('habit_completions')
     .insert({ habit_stack_id: habitId, user_id: userId, completed_on: today })
 
-  if (error && error.code !== '23505') {
+  if (error) {
+    if (error.code === '23505') {
+      return NextResponse.json({ ok: true, completed_on: today, alreadyCompletedToday: true })
+    }
     console.error('Habit complete error:', JSON.stringify(error))
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ ok: true, completed_on: today })
+  return NextResponse.json({ ok: true, completed_on: today, alreadyCompletedToday: false })
 }
