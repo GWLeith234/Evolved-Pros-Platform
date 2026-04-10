@@ -39,6 +39,8 @@ export function CommunityFeed({
   const [loadingMore, setLoadingMore] = useState(false)
   const [queuedPosts, setQueuedPosts] = useState<Post[]>([])
   const [newPostCount, setNewPostCount] = useState(0)
+  const [loadError, setLoadError] = useState(false)
+  const errorCountRef = useRef(0)
 
   const communityAd = useSponsorAd('community')
 
@@ -100,15 +102,15 @@ export function CommunityFeed({
     return () => { supabase.removeChannel(channel) }
   }, [channelId, currentUser.id])
 
-  // Infinite scroll
+  // Infinite scroll with error handling + backoff
   const loadMore = useCallback(async () => {
-    if (!hasMore || loadingMore || !cursor) return
+    if (!hasMore || loadingMore || !cursor || loadError) return
     setLoadingMore(true)
     try {
       const res = await fetch(
         `/api/posts?channelSlug=${channelSlug}&cursor=${encodeURIComponent(cursor)}&limit=20`
       )
-      if (!res.ok) return
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json() as { posts: Post[]; nextCursor: string | null; hasMore: boolean }
       setPosts(prev => {
         const existingIds = new Set(prev.map(p => p.id))
@@ -117,15 +119,27 @@ export function CommunityFeed({
       })
       setCursor(data.nextCursor)
       setHasMore(data.hasMore)
+      errorCountRef.current = 0
+    } catch {
+      errorCountRef.current += 1
+      if (errorCountRef.current >= 3) {
+        setLoadError(true)
+      }
     } finally {
       setLoadingMore(false)
     }
-  }, [channelSlug, cursor, hasMore, loadingMore])
+  }, [channelSlug, cursor, hasMore, loadingMore, loadError])
+
+  const retryLoad = useCallback(() => {
+    errorCountRef.current = 0
+    setLoadError(false)
+    loadMore()
+  }, [loadMore])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+        if (entries[0].isIntersecting && hasMore && !loadingMore && !loadError) {
           loadMore()
         }
       },
@@ -133,7 +147,7 @@ export function CommunityFeed({
     )
     if (sentinelRef.current) observer.observe(sentinelRef.current)
     return () => observer.disconnect()
-  }, [hasMore, loadingMore, loadMore])
+  }, [hasMore, loadingMore, loadMore, loadError])
 
   function handlePostCreated(post: Post) {
     setPosts(prev => [post, ...prev])
@@ -295,6 +309,23 @@ export function CommunityFeed({
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
+            </div>
+          )}
+
+          {/* Error state with retry */}
+          {loadError && (
+            <div className="flex flex-col items-center gap-2 py-6">
+              <p className="font-condensed text-[12px] text-[#7a8a96]">
+                Failed to load more posts
+              </p>
+              <button
+                type="button"
+                onClick={retryLoad}
+                className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] px-4 py-2 rounded transition-all"
+                style={{ backgroundColor: 'rgba(27,60,90,0.08)', color: '#1b3c5a' }}
+              >
+                Retry
+              </button>
             </div>
           )}
 
