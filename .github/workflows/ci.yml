@@ -15,14 +15,20 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '20', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
-      # type-check is non-blocking: types.ts needs `supabase gen types typescript`
-      # against the live DB. next.config.mjs already sets ignoreBuildErrors: true.
-      - run: pnpm type-check || echo "::warning::type-check has pre-existing errors — run supabase gen types typescript to fix"
-      - run: pnpm lint
-      # Build may fail on GitHub runners if next/font/google can't reach
-      # fonts.googleapis.com (timeout / rate limit). The production build
-      # on Railway always succeeds — keep this non-blocking for now.
-      - run: pnpm build
+
+      # type-check: non-blocking until types.ts is regenerated from the live DB
+      - name: Type check
+        run: pnpm type-check
+        continue-on-error: true
+
+      # lint: blocking — this is the real quality gate
+      - name: Lint
+        run: pnpm lint
+
+      # build: non-blocking — next/font/google may fail to fetch fonts on
+      # GitHub runners. The production build on Railway always succeeds.
+      - name: Build
+        run: pnpm build
         continue-on-error: true
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
