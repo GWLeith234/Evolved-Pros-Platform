@@ -364,7 +364,7 @@ async function generateMagicLink(email: string): Promise<string | undefined> {
   const { data, error } = await adminClient.auth.admin.generateLink({
     type:    'magiclink',
     email,
-    options: { redirectTo: `${appUrl}/auth/callback?next=/onboard` },
+    options: { redirectTo: `${appUrl}/auth/callback?next=/onboarding` },
   })
   if (error) {
     console.error('[Vendasta] Magic link generation failed:', error.message)

@@ -23,7 +23,7 @@ export type Database = {
           role_title: string | null
           location: string | null
           role: 'member' | 'admin'
-          tier: 'community' | 'vip' | 'pro' | null
+          tier: 'vip' | 'pro' | null
           tier_status: 'active' | 'trial' | 'cancelled' | 'expired' | null
           tier_expires_at: string | null
           onboarded_at: string | null
@@ -570,13 +570,69 @@ export type Database = {
         }
         Relationships: []
       }
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      [_ in never]: never
-    }
+      episodes: {
+        Row: {
+          id: string
+          episode_number: number | null
+          season: number
+          title: string
+          slug: string
+          description: string | null
+          guest_name: string | null
+          guest_title: string | null
+          guest_company: string | null
+          mux_playback_id: string | null
+          youtube_url: string | null
+          thumbnail_url: string | null
+          duration_seconds: number | null
+          transcript: string | null
+          is_published: boolean
+          published_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          episode_number?: number | null
+          season?: number
+          title: string
+          slug: string
+          description?: string | null
+          guest_name?: string | null
+          guest_title?: string | null
+          guest_company?: string | null
+          mux_playback_id?: string | null
+          youtube_url?: string | null
+          thumbnail_url?: string | null
+          duration_seconds?: number | null
+          transcript?: string | null
+          is_published?: boolean
+          published_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          episode_number?: number | null
+          season?: number
+          title?: string
+          slug?: string
+          description?: string | null
+          guest_name?: string | null
+          guest_title?: string | null
+          guest_company?: string | null
+          mux_playback_id?: string | null
+          youtube_url?: string | null
+          thumbnail_url?: string | null
+          duration_seconds?: number | null
+          transcript?: string | null
+          is_published?: boolean
+          published_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       platform_settings: {
         Row: { key: string; value: string | null; updated_at: string }
         Insert: { key: string; value?: string | null; updated_at?: string }
@@ -608,7 +664,7 @@ export type Database = {
         }
         Update: {
           id?: string
-          placement?: 'sidebar' | 'topnav'
+          placement: 'sidebar' | 'topnav'
           image_url?: string | null
           headline?: string | null
           cta_text?: string | null
@@ -649,6 +705,12 @@ export type Database = {
         }
         Relationships: []
       }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

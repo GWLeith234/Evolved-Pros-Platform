@@ -41,7 +41,7 @@ export default async function MemberLayout({ children }: { children: React.React
 
   const { data: profile } = await supabase
     .from('users')
-    .select('id, display_name, full_name, avatar_url, tier, tier_status, role, points')
+    .select('id, display_name, full_name, avatar_url, tier, tier_status, tier_expires_at, role, points')
     .eq('id', user.id)
     .single()
 
@@ -55,6 +55,11 @@ export default async function MemberLayout({ children }: { children: React.React
   profile.role  = (profile.role as string)?.toLowerCase() ?? profile.role
 
   if (profile.tier_status === 'cancelled' || profile.tier_status === 'expired') {
+    redirect('/membership-expired')
+  }
+
+  // Defense-in-depth: catch expired memberships even before the daily cron runs
+  if (profile.tier_expires_at && new Date(profile.tier_expires_at) < new Date()) {
     redirect('/membership-expired')
   }
 

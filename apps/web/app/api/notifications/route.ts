@@ -65,3 +65,54 @@ export async function GET(request: Request) {
 
   return NextResponse.json({ notifications, unreadCount: unreadCount ?? 0, nextCursor, hasMore })
 }
+
+/**
+ * POST — Admin sends a personal notification to a specific member.
+ * Used by the member detail page's "Send Notification" form.
+ */
+export async function POST(request: Request) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Verify the caller is an admin
+  const { data: profile } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  if (profile?.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  let body: Record<string, unknown>
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
+
+  const { user_id, title, body: notifBody, type } = body as {
+    user_id: string
+    title: string
+    body: string
+    type: string
+  }
+
+  if (!user_id || !title || !notifBody) {
+    return NextResponse.json({ error: 'user_id, title, and body are required' }, { status: 422 })
+  }
+
+  const { error } = await supabase.from('notifications').insert({
+    user_id,
+    type: (type as NotifType) ?? 'system_general',
+    title,
+    body: notifBody,
+  })
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ ok: true })
+}

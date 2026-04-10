@@ -35,7 +35,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ToastContext.Provider value={{ showToast }}>
-      {children}
+      {children as any}
       {/* Fixed toast stack — bottom-right, above everything */}
       <div
         className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"

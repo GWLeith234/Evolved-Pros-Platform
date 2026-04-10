@@ -54,7 +54,7 @@ export function DigestEmail({ displayName, notifications, date }: DigestEmailPro
   return (
     <Html>
       <Head />
-      <Preview>Your Evolved Pros digest — {notifications.length} update{notifications.length !== 1 ? 's' : ''} for {date}</Preview>
+      <Preview>{`Your Evolved Pros digest — ${notifications.length} update${notifications.length !== 1 ? 's' : ''} for ${date}`}</Preview>
       <Body style={bodyStyle}>
         <Section style={headerStyle}>
           <Text style={logoStyle}>EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS</Text>
