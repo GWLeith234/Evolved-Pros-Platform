@@ -1,8 +1,19 @@
 'use client'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 
 export default function MembershipExpiredPage() {
   const checkoutUrl = process.env.NEXT_PUBLIC_VENDASTA_CHECKOUT_URL ?? '#'
+  const reason = useSearchParams().get('reason')
+  const isCancelled = reason === 'cancelled'
+
+  const headline = isCancelled
+    ? 'Your membership was cancelled.'
+    : 'Your membership has expired.'
+
+  const subtext = isCancelled
+    ? 'If this was a mistake, contact support. Otherwise, you can rejoin anytime to regain access to the community, events, and academy.'
+    : 'Renew to regain access to the community, events, and academy.'
 
   return (
     <div
@@ -49,7 +60,7 @@ export default function MembershipExpiredPage() {
           className="font-display font-bold text-white mb-3"
           style={{ fontSize: '24px' }}
         >
-          Your membership has ended.
+          {headline}
         </h1>
 
         {/* Sub */}
@@ -57,7 +68,7 @@ export default function MembershipExpiredPage() {
           className="font-body text-sm mb-8 leading-relaxed"
           style={{ color: 'rgba(255,255,255,0.5)' }}
         >
-          Renew to regain access to the community, events, and academy.
+          {subtext}
         </p>
 
         {/* CTAs */}
@@ -67,7 +78,7 @@ export default function MembershipExpiredPage() {
             className="block w-full py-3 rounded font-condensed font-semibold uppercase tracking-wide text-sm text-white text-center transition-colors"
             style={{ backgroundColor: '#ef0e30' }}
           >
-            View Membership Plans →
+            {isCancelled ? 'Rejoin Evolved Pros →' : 'Renew Membership →'}
           </Link>
           <Link
             href="mailto:support@evolvedpros.com"

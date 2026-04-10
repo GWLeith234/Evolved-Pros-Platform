@@ -113,7 +113,10 @@ export function CompoundBoardClient({ userId: _userId, activePillar }: CompoundB
     }
 
     try {
-      const res = await fetch(`/api/habits/${id}/complete`, { method: 'POST' })
+      const res = await fetch(`/api/habits/${id}/complete`, {
+        method: 'POST',
+        headers: { 'x-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone },
+      })
       if (!res.ok) {
         setCompletedIds(prev => {
           const next = new Set(prev)

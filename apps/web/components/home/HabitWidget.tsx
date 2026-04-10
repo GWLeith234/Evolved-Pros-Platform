@@ -30,7 +30,10 @@ export function HabitWidget({ initialHabits, initialCompletions }: Props) {
   async function handleToggle(id: string) {
     if (completedIds.has(id)) return
     setCompletedIds(prev => new Set([...prev, id]))
-    await fetch(`/api/habits/${id}/complete`, { method: 'POST' })
+    await fetch(`/api/habits/${id}/complete`, {
+      method: 'POST',
+      headers: { 'x-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone },
+    })
   }
 
   const completed = initialHabits.filter(h => completedIds.has(h.id)).length

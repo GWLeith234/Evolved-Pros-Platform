@@ -19,6 +19,7 @@ interface TopNavProps {
     full_name: string | null
     avatar_url: string | null
     tier: string | null
+    tier_expires_at?: string | null
   }
   unreadCount?: number
   logoUrl?: string | null
@@ -52,6 +53,12 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
   const dropdownRef = useRef<HTMLDivElement>(null)
   const [georgeOpen, setGeorgeOpen] = useState(false)
 
+  // Renewal urgency calculation
+  const daysUntilExpiry = profile.tier_expires_at
+    ? Math.ceil((new Date(profile.tier_expires_at).getTime() - Date.now()) / (86_400_000))
+    : null
+  const showRenewalBanner = typeof daysUntilExpiry === 'number' && daysUntilExpiry > 0 && daysUntilExpiry <= 14
+
   const displayName = profile.display_name ?? profile.full_name ?? ''
 
   // Close dropdown when clicking outside
@@ -74,6 +81,31 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
   return (
     <>
       <AskGeorgeDrawer isOpen={georgeOpen} onClose={() => setGeorgeOpen(false)} />
+      {showRenewalBanner && (
+        <div
+          className="flex items-center justify-center gap-3 px-4 py-2 text-[12px] font-body"
+          style={{
+            backgroundColor: daysUntilExpiry! <= 7 ? 'rgba(239,14,48,0.08)' : 'rgba(201,168,76,0.1)',
+            color: daysUntilExpiry! <= 7 ? '#ef0e30' : '#8a6d1b',
+            borderBottom: '1px solid rgba(27,60,90,0.06)',
+          }}
+        >
+          <span>
+            Your membership renews in <strong>{daysUntilExpiry} day{daysUntilExpiry !== 1 ? 's' : ''}</strong>
+          </span>
+          <a
+            href="/membership"
+            className="font-condensed font-bold uppercase tracking-wide text-[10px] px-3 py-1 rounded"
+            style={{
+              backgroundColor: daysUntilExpiry! <= 7 ? '#ef0e30' : '#C9A84C',
+              color: '#fff',
+              textDecoration: 'none',
+            }}
+          >
+            Renew
+          </a>
+        </div>
+      )}
       <header
         className="sticky top-0 z-40 flex items-center justify-between px-6 h-14 flex-shrink-0 relative"
         style={{
@@ -165,6 +197,11 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
                   <p className="font-condensed font-bold text-[12px] truncate" style={{ color: '#1b3c5a' }}>
                     {displayName || 'My Account'}
                   </p>
+                  {profile.tier_expires_at && (
+                    <p className="font-body text-[10px] mt-0.5" style={{ color: '#7a8a96' }}>
+                      Renews {new Date(profile.tier_expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  )}
                 </div>
                 <Link
                   href="/profile/me"

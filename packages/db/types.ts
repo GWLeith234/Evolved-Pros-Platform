@@ -23,12 +23,24 @@ export type Database = {
           role_title: string | null
           location: string | null
           role: 'member' | 'admin'
-          tier: 'community' | 'vip' | 'pro' | null
+          tier: 'vip' | 'pro' | null
           tier_status: 'active' | 'trial' | 'cancelled' | 'expired' | null
           tier_expires_at: string | null
           onboarded_at: string | null
           banner_url: string | null
           points: number
+          company: string | null
+          linkedin_url: string | null
+          website_url: string | null
+          twitter_handle: string | null
+          phone: string | null
+          phone_visible: boolean
+          current_pillar: 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | null
+          goal_90day: string | null
+          goal_visible: boolean
+          onboarding_completed: boolean
+          onboarding_step: number
+          keynote_access: boolean
           push_token: string | null
           notification_preferences: {
             community_reply: 'immediate' | 'digest' | 'off'
@@ -56,12 +68,24 @@ export type Database = {
           role_title?: string | null
           location?: string | null
           role?: 'member' | 'admin'
-          tier?: 'community' | 'vip' | 'pro' | null
+          tier?: 'vip' | 'pro' | null
           tier_status?: 'active' | 'trial' | 'cancelled' | 'expired' | null
           tier_expires_at?: string | null
           onboarded_at?: string | null
           banner_url?: string | null
           points?: number
+          company?: string | null
+          linkedin_url?: string | null
+          website_url?: string | null
+          twitter_handle?: string | null
+          phone?: string | null
+          phone_visible?: boolean
+          current_pillar?: 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | null
+          goal_90day?: string | null
+          goal_visible?: boolean
+          onboarding_completed?: boolean
+          onboarding_step?: number
+          keynote_access?: boolean
           push_token?: string | null
           created_at?: string
           updated_at?: string
@@ -77,12 +101,24 @@ export type Database = {
           role_title?: string | null
           location?: string | null
           role?: 'member' | 'admin'
-          tier?: 'community' | 'vip' | 'pro' | null
+          tier?: 'vip' | 'pro' | null
           tier_status?: 'active' | 'trial' | 'cancelled' | 'expired' | null
           tier_expires_at?: string | null
           onboarded_at?: string | null
           banner_url?: string | null
           points?: number
+          company?: string | null
+          linkedin_url?: string | null
+          website_url?: string | null
+          twitter_handle?: string | null
+          phone?: string | null
+          phone_visible?: boolean
+          current_pillar?: 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | null
+          goal_90day?: string | null
+          goal_visible?: boolean
+          onboarding_completed?: boolean
+          onboarding_step?: number
+          keynote_access?: boolean
           push_token?: string | null
           notification_preferences?: {
             community_reply?: 'immediate' | 'digest' | 'off'
@@ -108,7 +144,7 @@ export type Database = {
           name: string
           description: string | null
           pillar_number: number | null
-          required_tier: 'community' | 'pro' | null
+          required_tier: 'vip' | 'pro' | null
           sort_order: number
           created_at: string
         }
@@ -118,7 +154,7 @@ export type Database = {
           name: string
           description?: string | null
           pillar_number?: number | null
-          required_tier?: 'community' | 'pro' | null
+          required_tier?: 'vip' | 'pro' | null
           sort_order?: number
           created_at?: string
         }
@@ -128,7 +164,7 @@ export type Database = {
           name?: string
           description?: string | null
           pillar_number?: number | null
-          required_tier?: 'community' | 'pro' | null
+          required_tier?: 'vip' | 'pro' | null
           sort_order?: number
           created_at?: string
         }
@@ -266,7 +302,7 @@ export type Database = {
           ends_at: string | null
           zoom_url: string | null
           recording_url: string | null
-          required_tier: 'community' | 'pro' | null
+          required_tier: 'vip' | 'pro' | null
           registration_count: number
           duration_minutes: number | null
           is_published: boolean
@@ -281,7 +317,7 @@ export type Database = {
           ends_at?: string | null
           zoom_url?: string | null
           recording_url?: string | null
-          required_tier?: 'community' | 'pro' | null
+          required_tier?: 'vip' | 'pro' | null
           registration_count?: number
           duration_minutes?: number | null
           is_published?: boolean
@@ -296,7 +332,7 @@ export type Database = {
           ends_at?: string | null
           zoom_url?: string | null
           recording_url?: string | null
-          required_tier?: 'community' | 'pro' | null
+          required_tier?: 'vip' | 'pro' | null
           registration_count?: number
           duration_minutes?: number | null
           is_published?: boolean
@@ -329,7 +365,7 @@ export type Database = {
           slug: string
           title: string
           description: string | null
-          required_tier: 'community' | 'pro'
+          required_tier: 'vip' | 'pro'
           is_published: boolean
           sort_order: number
           created_at: string
@@ -340,7 +376,7 @@ export type Database = {
           slug: string
           title: string
           description?: string | null
-          required_tier?: 'community' | 'pro'
+          required_tier?: 'vip' | 'pro'
           is_published?: boolean
           sort_order?: number
           created_at?: string
@@ -351,7 +387,7 @@ export type Database = {
           slug?: string
           title?: string
           description?: string | null
-          required_tier?: 'community' | 'pro'
+          required_tier?: 'vip' | 'pro'
           is_published?: boolean
           sort_order?: number
           created_at?: string
@@ -368,6 +404,7 @@ export type Database = {
           mux_asset_id: string | null
           mux_playback_id: string | null
           duration_seconds: number | null
+          content_blocks: Json | null
           sort_order: number
           is_published: boolean
           created_at: string
@@ -381,6 +418,7 @@ export type Database = {
           mux_asset_id?: string | null
           mux_playback_id?: string | null
           duration_seconds?: number | null
+          content_blocks?: Json | null
           sort_order?: number
           is_published?: boolean
           created_at?: string
@@ -394,6 +432,7 @@ export type Database = {
           mux_asset_id?: string | null
           mux_playback_id?: string | null
           duration_seconds?: number | null
+          content_blocks?: Json | null
           sort_order?: number
           is_published?: boolean
           created_at?: string
@@ -570,13 +609,69 @@ export type Database = {
         }
         Relationships: []
       }
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      [_ in never]: never
-    }
+      episodes: {
+        Row: {
+          id: string
+          episode_number: number | null
+          season: number
+          title: string
+          slug: string
+          description: string | null
+          guest_name: string | null
+          guest_title: string | null
+          guest_company: string | null
+          mux_playback_id: string | null
+          youtube_url: string | null
+          thumbnail_url: string | null
+          duration_seconds: number | null
+          transcript: string | null
+          is_published: boolean
+          published_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          episode_number?: number | null
+          season?: number
+          title: string
+          slug: string
+          description?: string | null
+          guest_name?: string | null
+          guest_title?: string | null
+          guest_company?: string | null
+          mux_playback_id?: string | null
+          youtube_url?: string | null
+          thumbnail_url?: string | null
+          duration_seconds?: number | null
+          transcript?: string | null
+          is_published?: boolean
+          published_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          episode_number?: number | null
+          season?: number
+          title?: string
+          slug?: string
+          description?: string | null
+          guest_name?: string | null
+          guest_title?: string | null
+          guest_company?: string | null
+          mux_playback_id?: string | null
+          youtube_url?: string | null
+          thumbnail_url?: string | null
+          duration_seconds?: number | null
+          transcript?: string | null
+          is_published?: boolean
+          published_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       platform_settings: {
         Row: { key: string; value: string | null; updated_at: string }
         Insert: { key: string; value?: string | null; updated_at?: string }
@@ -608,7 +703,7 @@ export type Database = {
         }
         Update: {
           id?: string
-          placement?: 'sidebar' | 'topnav'
+          placement: 'sidebar' | 'topnav'
           image_url?: string | null
           headline?: string | null
           cta_text?: string | null
@@ -648,6 +743,116 @@ export type Database = {
           created_at?: string
         }
         Relationships: []
+      }
+      // ── Stub tables (pending supabase gen types typescript) ──────────
+      conversations: {
+        Row: { id: string; participant_one_id: string; participant_two_id: string; last_message_at: string | null; created_at: string; [k: string]: any }
+        Insert: { id?: string; participant_one_id: string; participant_two_id: string; last_message_at?: string | null; created_at?: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      messages: {
+        Row: { id: string; conversation_id: string; sender_id: string; body: string; read_at: string | null; created_at: string; [k: string]: any }
+        Insert: { id?: string; conversation_id: string; sender_id: string; body: string; read_at?: string | null; created_at?: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      accountability_pairs: {
+        Row: { id: string; [k: string]: any }
+        Insert: { id?: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      strategic_plans: {
+        Row: { id: string; user_id: string; [k: string]: any }
+        Insert: { id?: string; user_id: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      partner_checkins: {
+        Row: { id: string; [k: string]: any }
+        Insert: { id?: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      member_badges: {
+        Row: { id: string; user_id: string; [k: string]: any }
+        Insert: { id?: string; user_id: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      discussion_posts: {
+        Row: { id: string; [k: string]: any }
+        Insert: { id?: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      weekly_commitments: {
+        Row: { id: string; user_id: string; [k: string]: any }
+        Insert: { id?: string; user_id: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      ledger_entries: {
+        Row: { id: string; user_id: string; [k: string]: any }
+        Insert: { id?: string; user_id: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      reflections: {
+        Row: { id: string; user_id: string; [k: string]: any }
+        Insert: { id?: string; user_id: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      checkin_results: {
+        Row: { id: string; [k: string]: any }
+        Insert: { id?: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      capstones: {
+        Row: { id: string; user_id: string; [k: string]: any }
+        Insert: { id?: string; user_id: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      assessments: {
+        Row: { id: string; user_id: string; [k: string]: any }
+        Insert: { id?: string; user_id: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      scoreboards: {
+        Row: { id: string; [k: string]: any }
+        Insert: { id?: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      pillar_audits: {
+        Row: { id: string; user_id: string; [k: string]: any }
+        Insert: { id?: string; user_id: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+      greeting_quotes: {
+        Row: { id: string; [k: string]: any }
+        Insert: { id?: string; [k: string]: any }
+        Update: { [k: string]: any }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      increment_points: {
+        Args: { user_id: string; amount: number }
+        Returns: undefined
+      }
+      increment_discussion_like: {
+        Args: { post_id: string }
+        Returns: undefined
       }
     }
     Enums: {

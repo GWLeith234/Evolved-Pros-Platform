@@ -17,6 +17,5 @@ export function ThemeInit({ defaultTheme }: { defaultTheme: string }) {
   } catch(e) {}
 })();
 `
-  // eslint-disable-next-line @next/next/no-before-interactive-script-component
   return <script dangerouslySetInnerHTML={{ __html: script }} />
 }
