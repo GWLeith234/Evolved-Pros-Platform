@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 type Audience = 'all' | 'vip' | 'pro'
 type NotifType = 'system_general' | 'event_reminder' | 'course_unlock' | 'system_billing'
@@ -33,6 +33,18 @@ export function BroadcastForm() {
   const [actionUrl, setActionUrl] = useState('')
   const [sending,   setSending]   = useState(false)
   const [result,    setResult]    = useState<{ sent?: number; error?: string } | null>(null)
+  const [audienceCount, setAudienceCount] = useState<number | null>(null)
+
+  // Fetch audience count when selection changes
+  useEffect(() => {
+    setAudienceCount(null)
+    fetch(`/api/admin/broadcast/count?audience=${audience}`)
+      .then(r => r.ok ? r.json() : null)
+      .then((d: { count?: number } | null) => {
+        if (d?.count !== undefined) setAudienceCount(d.count)
+      })
+      .catch(() => {})
+  }, [audience])
 
   async function handleSend() {
     if (!title.trim() || !message.trim()) return
@@ -84,7 +96,7 @@ export function BroadcastForm() {
             value={title}
             onChange={e => setTitle(e.target.value)}
             maxLength={100}
-            placeholder="Notification title…"
+            placeholder="Notification title\u2026"
             className="w-full font-condensed text-[13px] rounded px-3 py-2 outline-none transition-all"
             style={{ border: '1px solid rgba(27,60,90,0.18)', color: '#112535' }}
             onFocus={e => (e.currentTarget.style.borderColor = '#68a2b9')}
@@ -103,7 +115,7 @@ export function BroadcastForm() {
             onChange={e => setMessage(e.target.value)}
             maxLength={500}
             rows={4}
-            placeholder="Notification body — use **bold** for emphasis…"
+            placeholder="Notification body \u2014 use **bold** for emphasis\u2026"
             className="w-full font-condensed text-[13px] rounded px-3 py-2 outline-none transition-all resize-none"
             style={{ border: '1px solid rgba(27,60,90,0.18)', color: '#112535' }}
             onFocus={e => (e.currentTarget.style.borderColor = '#68a2b9')}
@@ -179,12 +191,12 @@ export function BroadcastForm() {
             className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] px-6 py-2.5 rounded transition-all disabled:opacity-40"
             style={{ backgroundColor: '#1b3c5a', color: 'white' }}
           >
-            {sending ? 'Sending…' : 'Send Broadcast'}
+            {sending ? 'Sending\u2026' : 'Send Broadcast'}
           </button>
 
           {result?.sent !== undefined && (
             <p className="font-condensed font-semibold text-[12px] text-[#15803d]">
-              ✓ Sent to {result.sent} members
+              \u2713 Sent to {result.sent} members
             </p>
           )}
           {result?.error && (
@@ -248,6 +260,9 @@ export function BroadcastForm() {
           </p>
           <p className="font-condensed text-[10px] text-[#7a8a96] mt-0.5">
             {AUDIENCE_OPTIONS.find(a => a.value === audience)?.desc}
+            {audienceCount !== null && (
+              <span className="font-semibold text-[#1b3c5a]"> \u2014 {audienceCount} member{audienceCount !== 1 ? 's' : ''}</span>
+            )}
           </p>
         </div>
       </div>
