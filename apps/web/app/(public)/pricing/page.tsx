@@ -122,11 +122,31 @@ function SymbolCell({ value }: { value: Symbol }) {
   return <span style={{ color: 'rgba(245,240,232,0.2)' }}>&ndash;</span>
 }
 
+// ── From= banner messages ──────────────────────────────────────────────────
+
+const FROM_MESSAGES: Record<string, { tier: string; feature: string }> = {
+  discipline: { tier: 'VIP', feature: 'the Discipline board' },
+  scoreboard: { tier: 'Professional', feature: 'Scoreboards' },
+  academy:    { tier: 'VIP', feature: 'the Academy' },
+}
+
 // ── Page ───────────────────────────────────────────────────────────────────
 
-export default function PricingPage() {
+export default function PricingPage({ searchParams }: { searchParams: { from?: string } }) {
+  const fromMsg = searchParams.from ? FROM_MESSAGES[searchParams.from] : null
+
   return (
     <div style={{ backgroundColor: '#0A0F18', minHeight: '100vh' }}>
+      {/* From= upgrade banner */}
+      {fromMsg && (
+        <div
+          className="flex items-center justify-center gap-2 px-4 py-3 text-[13px] font-body"
+          style={{ backgroundColor: 'rgba(201,168,76,0.1)', color: '#C9A84C', borderBottom: '1px solid rgba(201,168,76,0.15)' }}
+        >
+          You need <strong>{fromMsg.tier}</strong> to access {fromMsg.feature}.
+        </div>
+      )}
+
       {/* Header */}
       <header
         className="flex items-center justify-between px-6 py-4"

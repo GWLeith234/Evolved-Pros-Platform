@@ -37,14 +37,23 @@ function getInitials(name: string | null | undefined): string {
 }
 
 
-const NAV_ITEMS = [
+interface NavItem { label: string; href: string; minTier?: 'vip' | 'pro' }
+
+const NAV_ITEMS: NavItem[] = [
   { label: 'Home',            href: '/home' },
   { label: 'Community',       href: '/community' },
   { label: 'Events',          href: '/events' },
-  { label: 'Academy',         href: '/academy' },
-  { label: 'Discipline',       href: '/habits' },
+  { label: 'Academy',         href: '/academy',  minTier: 'vip' },
+  { label: 'Discipline',      href: '/habits',   minTier: 'vip' },
   { label: 'Podcast',         href: '/podcast' },
 ]
+
+const TIER_RANK: Record<string, number> = { community: 1, vip: 2, pro: 3 }
+
+function canAccess(userTier: string | null, minTier?: string): boolean {
+  if (!minTier) return true
+  return (TIER_RANK[userTier ?? ''] ?? 0) >= (TIER_RANK[minTier] ?? 0)
+}
 
 export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, membersCanToggleTheme: _membersCanToggleTheme }: TopNavProps) {
   const pathname = usePathname()
@@ -88,7 +97,7 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
 
         {/* Primary nav links — desktop */}
         <nav className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
-          {NAV_ITEMS.map(item => {
+          {NAV_ITEMS.filter(item => canAccess(profile.tier, item.minTier)).map(item => {
             const active = pathname.startsWith(item.href)
             return (
               <Link
@@ -101,6 +110,15 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
               </Link>
             )
           })}
+          {profile.tier !== 'pro' && (
+            <Link
+              href="/pricing"
+              className="font-condensed uppercase tracking-[0.03em] text-[12px] px-3 py-1.5 rounded transition-colors"
+              style={{ color: 'rgba(201,168,76,0.6)', fontWeight: 500 }}
+            >
+              Upgrade
+            </Link>
+          )}
         </nav>
 
         {/* Right actions */}

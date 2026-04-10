@@ -51,11 +51,12 @@ function TierBadge({ requiredTier }: { requiredTier: 'community' | 'pro' | null 
 interface CardProps {
   event: EventItem
   isRegistered: boolean
+  canRegister: boolean
   onRegister: (id: string) => void
   onUnregister: (id: string) => void
 }
 
-function EventGridCard({ event, isRegistered, onRegister, onUnregister }: CardProps) {
+function EventGridCard({ event, isRegistered, canRegister, onRegister, onUnregister }: CardProps) {
   const { day, month, time } = formatEventDate(event.startsAt)
   const typeStyle = EVENT_TYPE_STYLES[event.eventType]
   const typeLabel = EVENT_TYPE_LABELS[event.eventType]
@@ -159,7 +160,7 @@ function EventGridCard({ event, isRegistered, onRegister, onUnregister }: CardPr
         <div className="flex items-center justify-between">
           <TierBadge requiredTier={event.requiredTier} />
 
-          {event.hasAccess && !isPast && (
+          {event.hasAccess && !isPast && canRegister && (
             <Button
               variant={isRegistered ? 'ghost' : 'primary'}
               size="sm"
@@ -168,6 +169,15 @@ function EventGridCard({ event, isRegistered, onRegister, onUnregister }: CardPr
             >
               {isRegistered ? '✓ Registered' : 'Register'}
             </Button>
+          )}
+          {event.hasAccess && !isPast && !canRegister && (
+            <a
+              href="/pricing"
+              className="font-condensed font-bold uppercase tracking-[0.08em] text-[10px] transition-opacity hover:opacity-80"
+              style={{ color: '#C9A84C' }}
+            >
+              VIP members only
+            </a>
           )}
 
           {isPast && event.recordingUrl && (
@@ -192,9 +202,10 @@ interface EventsPageClientProps {
   events: EventItem[]
   registeredEventIds: string[]
   userTier: string | null
+  canRegister?: boolean
 }
 
-export function EventsPageClient({ events, registeredEventIds }: EventsPageClientProps) {
+export function EventsPageClient({ events, registeredEventIds, canRegister = true }: EventsPageClientProps) {
   const [filter, setFilter] = useState<Filter>('all')
   const [registeredSet, setRegisteredSet] = useState(() => new Set(registeredEventIds))
   const [now, setNow] = useState<Date | null>(null)
@@ -276,6 +287,7 @@ export function EventsPageClient({ events, registeredEventIds }: EventsPageClien
                 key={ev.id}
                 event={ev}
                 isRegistered={registeredSet.has(ev.id)}
+                canRegister={canRegister}
                 onRegister={register}
                 onUnregister={unregister}
               />

@@ -1,9 +1,9 @@
 type Tier = 'vip' | 'community' | 'pro' | null | undefined
 
 const TIER_RANK: Record<string, number> = {
-  community: 1, // backward-compat alias for vip
-  vip:       1,
-  pro:       2,
+  community: 1,
+  vip:       2,
+  pro:       3,
 }
 
 export function hasTierAccess(userTier: Tier, requiredTier: Tier): boolean {
