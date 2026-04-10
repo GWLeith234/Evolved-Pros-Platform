@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { logAdminAction } from '@/lib/admin/audit'
 import { adminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 
@@ -64,6 +65,12 @@ export async function POST(request: Request) {
 
   const { error } = await adminClient.from('notifications').insert(notifications)
   if (error) return NextResponse.json({ error: 'Failed to send notifications' }, { status: 500 })
+
+  logAdminAction({
+    adminId: check.userId,
+    action:  'broadcast',
+    details: { audience, type, title: title.trim(), recipientCount: targetUsers.length },
+  })
 
   return NextResponse.json({ sent: targetUsers.length })
 }
