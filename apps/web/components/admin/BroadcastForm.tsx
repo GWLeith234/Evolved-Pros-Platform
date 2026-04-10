@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 type Audience = 'all' | 'vip' | 'pro'
 type NotifType = 'system_general' | 'event_reminder' | 'course_unlock' | 'system_billing'
@@ -33,6 +33,18 @@ export function BroadcastForm() {
   const [actionUrl, setActionUrl] = useState('')
   const [sending,   setSending]   = useState(false)
   const [result,    setResult]    = useState<{ sent?: number; error?: string } | null>(null)
+  const [audienceCount, setAudienceCount] = useState<number | null>(null)
+
+  // Fetch audience count when selection changes
+  useEffect(() => {
+    setAudienceCount(null)
+    fetch(`/api/admin/broadcast/count?audience=${audience}`)
+      .then(r => r.ok ? r.json() : null)
+      .then((d: { count?: number } | null) => {
+        if (d?.count !== undefined) setAudienceCount(d.count)
+      })
+      .catch(() => {})
+  }, [audience])
 
   async function handleSend() {
     if (!title.trim() || !message.trim()) return
@@ -248,6 +260,9 @@ export function BroadcastForm() {
           </p>
           <p className="font-condensed text-[10px] text-[#7a8a96] mt-0.5">
             {AUDIENCE_OPTIONS.find(a => a.value === audience)?.desc}
+            {audienceCount !== null && (
+              <span className="font-semibold text-[#1b3c5a]"> — {audienceCount} member{audienceCount !== 1 ? 's' : ''}</span>
+            )}
           </p>
         </div>
       </div>

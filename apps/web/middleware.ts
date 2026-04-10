@@ -99,8 +99,12 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse
   }
 
-  // Admin route guard
-  if (ADMIN_ROUTES.some(r => pathname.startsWith(r))) {
+  // Single admin-client query for both role + onboarding checks.
+  // Previously this was two separate queries — consolidated to halve middleware latency.
+  const isAdminRoute  = ADMIN_ROUTES.some(r => pathname.startsWith(r))
+  const isMemberRoute = !pathname.startsWith('/api/') && !pathname.startsWith('/admin') && !pathname.startsWith('/onboarding')
+
+  if (isAdminRoute || isMemberRoute) {
     const adminClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -108,31 +112,17 @@ export async function middleware(request: NextRequest) {
     )
     const { data: profile } = await adminClient
       .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-    if (profile?.role !== 'admin') {
-      return NextResponse.redirect(new URL('/home', request.url))
-    }
-  }
-
-  // Onboarding gate: redirect new members to /onboarding until they complete the flow.
-  // Only applies to member-facing routes — skip admin, API, and /onboarding itself.
-  const isMemberRoute = !pathname.startsWith('/api/') && !pathname.startsWith('/admin') && !pathname.startsWith('/onboarding')
-  if (isMemberRoute) {
-    // Use email (not id) because auth UUID may differ from public.users UUID
-    const onboardingAdminClient = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    )
-    const { data: onboardProfile } = await onboardingAdminClient
-      .from('users')
-      .select('onboarding_completed')
+      .select('role, onboarding_completed')
       .eq('email', user.email!)
       .single()
 
-    if (!onboardProfile?.onboarding_completed) {
+    // Admin route guard
+    if (isAdminRoute && profile?.role !== 'admin') {
+      return NextResponse.redirect(new URL('/home', request.url))
+    }
+
+    // Onboarding gate: redirect new members to /onboarding until they complete the flow
+    if (isMemberRoute && !profile?.onboarding_completed) {
       return NextResponse.redirect(new URL('/onboarding', request.url))
     }
   }

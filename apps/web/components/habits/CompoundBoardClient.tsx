@@ -58,7 +58,7 @@ export function CompoundBoardClient({ userId: _userId, activePillar }: CompoundB
   }, [])
 
   // ── Fetch streak ─────────────────────────────────────────────────────────
-  useEffect(() => {
+  const refreshStreak = useCallback(() => {
     fetch('/api/habits/streak')
       .then(r => r.ok ? r.json() : null)
       .then((d: StreakData | null) => {
@@ -72,11 +72,15 @@ export function CompoundBoardClient({ userId: _userId, activePillar }: CompoundB
           const yesterdayStr = yesterday.toISOString().split('T')[0]
           if (d.lastCompletedDate < yesterdayStr) {
             setShowReturnBar(true)
+          } else {
+            setShowReturnBar(false)
           }
         }
       })
       .catch(() => {/* non-critical */})
   }, [])
+
+  useEffect(() => { refreshStreak() }, [refreshStreak])
 
   useEffect(() => { fetchHabits() }, [fetchHabits])
 
@@ -126,6 +130,7 @@ export function CompoundBoardClient({ userId: _userId, activePillar }: CompoundB
         showToast('Something went wrong. Please try again.', 'error')
       } else if (!wasCompleted) {
         showToast('Habit completed ✓', 'success')
+        refreshStreak()
       }
     } catch {
       setCompletedIds(prev => {
@@ -135,7 +140,7 @@ export function CompoundBoardClient({ userId: _userId, activePillar }: CompoundB
       })
       showToast('Something went wrong. Please try again.', 'error')
     }
-  }, [completedIds, showToast])
+  }, [completedIds, showToast, refreshStreak])
 
   // ── Drag reorder ──────────────────────────────────────────────────────────
   const handleDragStart = useCallback((_e: React.DragEvent, id: string) => {
