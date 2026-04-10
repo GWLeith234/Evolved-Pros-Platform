@@ -1,5 +1,6 @@
 [build]
 builder = "nixpacks"
+installCommand = "pnpm install --no-frozen-lockfile"
 
 [deploy]
 startCommand = "cd apps/web && pnpm start"
