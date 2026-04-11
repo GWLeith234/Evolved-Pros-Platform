@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { getPillarLabel, getPillarColor } from '@/lib/pillars'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -17,15 +18,6 @@ export interface PillarSection {
 }
 
 // ── Constants ──────────────────────────────────────────────────────────────
-
-export const PILLAR_META: Record<string, { label: string; color: string }> = {
-  foundation:         { label: 'Foundation',       color: '#FFA538' },
-  identity:           { label: 'Identity',         color: '#A78BFA' },
-  'mental-toughness': { label: 'Mental Toughness', color: '#F87171' },
-  strategy:           { label: 'Strategy',         color: '#60A5FA' },
-  accountability:     { label: 'Accountability',   color: '#C9A84C' },
-  execution:          { label: 'Execution',        color: '#0ABFA3' },
-}
 
 const PILLAR_PILLS = [
   { key: 'all', label: 'All' },
@@ -55,8 +47,8 @@ function timeAgo(iso: string | null): string {
   return `${days}d ago`
 }
 
-function pColor(p: string | null): string { return PILLAR_META[p ?? '']?.color ?? '#7a8a96' }
-function pLabel(p: string | null): string { return PILLAR_META[p ?? '']?.label ?? '' }
+function pColor(p: string | null): string { return getPillarColor(p) }
+function pLabel(p: string | null): string { return getPillarLabel(p) }
 
 function formatToday(): string {
   return new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })

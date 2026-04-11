@@ -3,7 +3,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { marked } from 'marked'
 import { adminClient } from '@/lib/supabase/admin'
-import { PILLAR_META } from '../../MediaPortalClient'
+import { getPillarLabel, getPillarColor } from '@/lib/pillars'
 
 export const revalidate = 3600
 export const dynamicParams = true
@@ -54,11 +54,11 @@ function formatDate(iso: string | null): string {
 }
 
 function pillarColor(pillar: string | null): string {
-  return PILLAR_META[pillar ?? '']?.color ?? '#7a8a96'
+  return getPillarColor(pillar)
 }
 
 function pillarLabel(pillar: string | null): string {
-  return PILLAR_META[pillar ?? '']?.label ?? ''
+  return getPillarLabel(pillar)
 }
 
 // ── Static params ───────────────────────────────────────────────────────────
