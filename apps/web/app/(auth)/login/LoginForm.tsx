@@ -246,7 +246,10 @@ export function LoginForm() {
           )}
         </div>
         <div className="px-8 py-4 border-t text-center" style={{ borderColor: 'rgba(27,60,90,0.08)', backgroundColor: 'rgba(27,60,90,0.02)' }}>
-          <p className="text-xs text-[#7a8a96]">Access is granted through your Evolved Pros membership.</p>
+          <p className="text-xs text-[#7a8a96]">
+            Access is granted through your Evolved Pros membership.{' '}
+            <a href="/pricing" className="underline hover:text-[#1b3c5a] transition-colors">View pricing</a>
+          </p>
         </div>
       </div>
     </div>

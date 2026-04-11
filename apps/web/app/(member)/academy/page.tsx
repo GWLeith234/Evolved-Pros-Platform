@@ -20,6 +20,12 @@ export default async function AcademyPage() {
   if (!user) redirect('/login')
 
   const profile = await fetchUserProfile(supabase, user.id)
+
+  // Community tier cannot access Academy at all
+  if (!hasTierAccess(profile?.tier, 'vip')) {
+    redirect('/pricing?from=academy')
+  }
+
   const courses = await fetchCoursesWithProgress(supabase, user.id, profile?.tier)
 
   const totalLessons = courses.reduce((s, c) => s + c.totalLessons, 0)

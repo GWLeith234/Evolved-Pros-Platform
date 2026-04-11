@@ -22,10 +22,8 @@ export default async function HabitsPage() {
 
   if (!profile) redirect('/login')
 
-  const hasAccess = hasTierAccess(profile.tier as 'pro' | 'vip' | 'community' | null, 'pro')
-
-  if (!hasAccess) {
-    return <CompoundBoardLocked />
+  if (!hasTierAccess(profile.tier as 'pro' | 'vip' | 'community' | null, 'vip')) {
+    redirect('/pricing?from=discipline')
   }
 
   return <HabitsPageShell userId={profile.id} />

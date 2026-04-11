@@ -33,6 +33,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
+  // If publishing for the first time, set published_at
   if (body.is_published === true && !body.published_at) {
     body.published_at = new Date().toISOString()
   }

@@ -57,11 +57,14 @@ export default async function EventsPage() {
 
   const registeredEventIds: string[] = Array.from(registeredSet)
 
+  const canRegister = hasTierAccess(profile?.tier, 'vip')
+
   return (
     <EventsPageClient
       events={events}
       registeredEventIds={registeredEventIds}
       userTier={profile?.tier ?? null}
+      canRegister={canRegister}
     />
   )
 }
