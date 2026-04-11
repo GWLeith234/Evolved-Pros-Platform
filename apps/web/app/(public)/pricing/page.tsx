@@ -17,6 +17,7 @@ interface Tier {
   badge: string
   badgeColor: string
   featured?: boolean
+  popular?: boolean
   keynote?: boolean
   features: Feature[]
   callout?: string
@@ -53,7 +54,7 @@ const TIERS: Tier[] = [
       { text: 'Event registration' },
       { text: 'Academy Pillars 1\u20133' },
       { text: 'Discipline board' },
-      { text: 'Scoreboard + WIG', locked: true },
+      { text: 'Scoreboard + WIG (your #1 goal)', locked: true },
       { text: 'Academy Pillars 4\u20136', locked: true },
     ],
     cta: 'Start VIP',
@@ -63,9 +64,10 @@ const TIERS: Tier[] = [
     name: 'Professional',
     price: '$249',
     period: '/month',
-    badge: 'Most Popular',
+    badge: 'Professional',
     badgeColor: '#C9302A',
     featured: true,
+    popular: true,
     features: [
       { text: 'Everything in VIP' },
       { text: 'Full 6-Pillar Academy' },
@@ -112,13 +114,13 @@ const COMPARISON: ComparisonRow[] = [
   { label: 'Academy Pillars 1\u20133', community: 'no',   vip: 'yes',  pro: 'yes' },
   { label: 'Full Academy (all 6)', community: 'no',   vip: 'half', pro: 'yes' },
   { label: 'Discipline board',     community: 'no',   vip: 'yes',  pro: 'yes' },
-  { label: 'Scoreboard + WIG',     community: 'no',   vip: 'no',   pro: 'yes' },
+  { label: 'Scoreboard + WIG (your #1 goal)',  community: 'no',   vip: 'no',   pro: 'yes' },
   { label: 'Bi-weekly mastermind', community: 'no',   vip: 'no',   pro: 'yes' },
 ]
 
 function SymbolCell({ value }: { value: Symbol }) {
   if (value === 'yes') return <span style={{ color: '#0ABFA3', fontWeight: 700 }}>&#10003;</span>
-  if (value === 'half') return <span style={{ color: '#C9A84C', fontWeight: 700 }}>&frac12;</span>
+  if (value === 'half') return <span style={{ color: '#C9A84C', fontWeight: 600, fontSize: 11 }}>3 of 6</span>
   return <span style={{ color: 'rgba(245,240,232,0.2)' }}>&ndash;</span>
 }
 
@@ -174,7 +176,7 @@ export default function PricingPage({ searchParams }: { searchParams: { from?: s
             Invest in your evolution.
           </h1>
           <p className="font-body text-sm max-w-lg mx-auto" style={{ color: 'rgba(245,240,232,0.5)' }}>
-            Every tier unlocks more of the EVOLVED system. Start free, upgrade when you are ready.
+            Every tier unlocks more of the EVOLVED system. Start free, upgrade when you're ready.
           </p>
         </div>
 
@@ -194,7 +196,7 @@ export default function PricingPage({ searchParams }: { searchParams: { from?: s
               }}
             >
               {/* Badge */}
-              <div className="mb-4">
+              <div className="mb-4 flex items-center gap-2">
                 <span
                   className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] px-2.5 py-1 rounded"
                   style={{
@@ -205,6 +207,11 @@ export default function PricingPage({ searchParams }: { searchParams: { from?: s
                 >
                   {tier.badge}
                 </span>
+                {tier.popular && (
+                  <span className="font-condensed font-bold uppercase tracking-[0.1em] text-[8px] px-2 py-0.5 rounded" style={{ backgroundColor: 'rgba(201,48,42,.1)', color: '#C9302A' }}>
+                    Most popular
+                  </span>
+                )}
               </div>
 
               {/* Price */}

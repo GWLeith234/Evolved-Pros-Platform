@@ -24,7 +24,7 @@ const PILLAR_PILLS = [
   { key: 'foundation', label: 'Foundation' },
   { key: 'identity', label: 'Identity' },
   { key: 'mental-toughness', label: 'Mental Toughness' },
-  { key: 'strategy', label: 'Strategy' },
+  { key: 'strategy', label: 'Strategic Approach' },
   { key: 'accountability', label: 'Accountability' },
   { key: 'execution', label: 'Execution' },
 ]

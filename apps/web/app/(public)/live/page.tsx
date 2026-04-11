@@ -23,7 +23,7 @@ const TALKS = [
 const STATS = [
   { value: '500+', label: 'stages worldwide' },
   { value: '4', label: 'signature talks' },
-  { value: '20yr', label: 'in the revenue game' },
+  { value: '20yr', label: 'in revenue leadership' },
 ]
 
 interface EventRow { id: string; title: string; starts_at: string; event_type: string; description: string | null }

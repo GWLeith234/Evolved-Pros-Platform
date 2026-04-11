@@ -222,6 +222,9 @@ export function LoginForm() {
                 </form>
               ) : (
                 <form onSubmit={handleMagicLink} className="space-y-4">
+                  <p className="text-[11px] mb-2" style={{ color: 'rgba(27,60,90,0.5)' }}>
+                    We&apos;ll email you a one-click login link. No password needed.
+                  </p>
                   <div>
                     <label className="block text-[#1b3c5a] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
                       EMAIL ADDRESS

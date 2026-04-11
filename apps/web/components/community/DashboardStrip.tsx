@@ -131,7 +131,7 @@ export function DashboardStrip({ pillarProgress, episode, scoreboard, nextEvent,
           ) : (
             <p style={SUB_STYLE}>Begin your first pillar</p>
           )}
-          <p style={{ ...CTA_STYLE, color: CTA }}>Resume →</p>
+          <p style={{ ...CTA_STYLE, color: CTA }}>{pillarProgress ? 'Resume →' : 'Start →'}</p>
         </Link>
 
         {/* Card 2 — Podcast */}
@@ -156,7 +156,7 @@ export function DashboardStrip({ pillarProgress, episode, scoreboard, nextEvent,
             return (
               <Link href="/academy/accountability" style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #1e1a08, #160f00)', border: '1px solid rgba(201,168,76,.3)' }}>
                 <p style={{ ...LABEL_STYLE, color: GOLD }}>📊 Scoreboard</p>
-                <p style={HEADLINE_STYLE}>Track your WIG</p>
+                <p style={HEADLINE_STYLE}>Track your WIG (your #1 goal)</p>
                 <p style={SUB_STYLE}>No scoreboard set up yet</p>
                 <p style={{ ...CTA_STYLE, color: CTA }}>Set up Scoreboard →</p>
               </Link>

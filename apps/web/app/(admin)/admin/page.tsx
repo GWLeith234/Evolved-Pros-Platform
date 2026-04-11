@@ -67,7 +67,7 @@ export default async function AdminDashboardPage() {
     {
       label:    'Total Members',
       value:    fmt(totalMembers),
-      delta:    `+${newThisWeek.count ?? 0} this week`,
+      delta:    (newThisWeek.count ?? 0) > 0 ? `+${newThisWeek.count} this week` : '',
       deltaPos: true,
       color:    '#ef0e30',
       bg:       'rgba(239,14,48,0.08)',
