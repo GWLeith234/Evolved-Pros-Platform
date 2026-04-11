@@ -1,9 +1,11 @@
 'use client'
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { LogoMark } from '@/components/ui/LogoMark'
 
 export function LoginForm() {
+  const isSignup = useSearchParams().get('mode') === 'signup'
   const [tab, setTab] = useState<'password' | 'magic'>('password')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -94,7 +96,7 @@ export function LoginForm() {
                 className="text-[#112535] text-3xl font-bold mb-6"
                 style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
               >
-                Welcome back.
+                {isSignup ? "Let's get started." : 'Welcome back.'}
               </h2>
 
               {/* Tabs */}

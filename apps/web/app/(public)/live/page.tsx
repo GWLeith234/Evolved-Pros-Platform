@@ -22,7 +22,7 @@ const TALKS = [
 
 const STATS = [
   { value: '500+', label: 'stages worldwide' },
-  { value: '6', label: 'signature talks' },
+  { value: '4', label: 'signature talks' },
   { value: '20yr', label: 'in the revenue game' },
 ]
 

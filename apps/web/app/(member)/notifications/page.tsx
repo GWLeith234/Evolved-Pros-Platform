@@ -1,5 +1,8 @@
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+
+export const metadata: Metadata = { title: 'Notifications — Evolved Pros' }
 import { NotificationsContent } from './NotificationsContent'
 import type { NotifItemData } from '@/components/notifications/NotifItem'
 import type { Database } from '@evolved-pros/db'
