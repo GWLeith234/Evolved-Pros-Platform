@@ -17,7 +17,7 @@ export const tiers = {
 } as const
 
 export const pillars = [
-  { number: 1, slug: 'p1-foundation',       name: 'Spiritual Foundation', tier: 'community' },
+  { number: 1, slug: 'p1-foundation',       name: 'Foundation',           tier: 'community' },
   { number: 2, slug: 'p2-identity',         name: 'Identity',             tier: 'community' },
   { number: 3, slug: 'p3-mental-toughness', name: 'Mental Toughness',     tier: 'community' },
   { number: 4, slug: 'p4-strategy',         name: 'Strategic Approach',   tier: 'community' },
