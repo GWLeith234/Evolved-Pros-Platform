@@ -1,9 +1,11 @@
 'use client'
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { LogoMark } from '@/components/ui/LogoMark'
 
 export function LoginForm() {
+  const isSignup = useSearchParams().get('mode') === 'signup'
   const [tab, setTab] = useState<'password' | 'magic'>('password')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -94,7 +96,7 @@ export function LoginForm() {
                 className="text-[#112535] text-3xl font-bold mb-6"
                 style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
               >
-                Welcome back.
+                {isSignup ? "Let's get started." : 'Welcome back.'}
               </h2>
 
               {/* Tabs */}
@@ -220,6 +222,9 @@ export function LoginForm() {
                 </form>
               ) : (
                 <form onSubmit={handleMagicLink} className="space-y-4">
+                  <p className="text-[11px] mb-2" style={{ color: 'rgba(27,60,90,0.5)' }}>
+                    We&apos;ll email you a one-click login link. No password needed.
+                  </p>
                   <div>
                     <label className="block text-[#1b3c5a] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
                       EMAIL ADDRESS

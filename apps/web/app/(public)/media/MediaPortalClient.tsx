@@ -24,7 +24,7 @@ const PILLAR_PILLS = [
   { key: 'foundation', label: 'Foundation' },
   { key: 'identity', label: 'Identity' },
   { key: 'mental-toughness', label: 'Mental Toughness' },
-  { key: 'strategy', label: 'Strategy' },
+  { key: 'strategy', label: 'Strategic Approach' },
   { key: 'accountability', label: 'Accountability' },
   { key: 'execution', label: 'Execution' },
 ]
@@ -109,11 +109,7 @@ export function MediaPortalClient({
 
       {/* ── SECTION 3: LEADERBOARD AD ZONE ── */}
       <div className="hidden md:flex items-center justify-center" style={{ backgroundColor: '#fff', borderTop: '0.5px solid rgba(10,15,24,.1)', borderBottom: '0.5px solid rgba(10,15,24,.1)', padding: '8px 24px', gap: 12 }}>
-        <span style={{ fontSize: 8, textTransform: 'uppercase', color: 'rgba(10,15,24,.3)', fontFamily: 'sans-serif' }}>Sponsored</span>
-        <div className="flex flex-col items-center justify-center" style={{ maxWidth: 728, width: '100%', height: 60, backgroundColor: '#EDE8DF', border: '1px dashed rgba(10,15,24,.18)', borderRadius: 4 }}>
-          <span style={{ fontSize: 10, color: 'rgba(10,15,24,.35)', fontFamily: 'sans-serif' }}>728 &times; 90 &mdash; Leaderboard &middot; Sponsor slot</span>
-          <span style={{ fontSize: 9, color: '#C9302A', fontFamily: 'sans-serif' }}>Conquer Local Podcast Sponsor</span>
-        </div>
+        <div style={{ maxWidth: 728, width: '100%', height: 60, backgroundColor: 'rgba(10,15,24,.02)', border: '0.5px solid rgba(10,15,24,.05)', borderRadius: 4 }} />
       </div>
 
       {/* ── SECTION 4: PILLAR SECTION NAV ── */}
@@ -185,9 +181,7 @@ export function MediaPortalClient({
               <div key={section.key}>
                 {/* Inline ad after 2nd section */}
                 {idx === 2 && activePillar === 'all' && (
-                  <div className="hidden md:flex items-center justify-center" style={{ height: 80, backgroundColor: '#EDE8DF', border: '1px dashed rgba(10,15,24,.18)', margin: '6px 0 20px' }}>
-                    <span style={{ fontSize: 10, color: 'rgba(10,15,24,.35)', fontFamily: 'sans-serif' }}>728 &times; 90 &mdash; Inline sponsor &middot; Between pillar sections</span>
-                  </div>
+                  <div className="hidden md:block" style={{ height: 80, backgroundColor: 'rgba(10,15,24,.02)', border: '0.5px solid rgba(10,15,24,.05)', borderRadius: 4, margin: '6px 0 20px' }} />
                 )}
 
                 {/* Section header */}
@@ -239,19 +233,14 @@ export function MediaPortalClient({
           <div className="hidden md:block" style={{ paddingLeft: 20 }}>
 
             {/* 300x250 Ad */}
-            <div className="flex flex-col items-center justify-center" style={{ height: 250, backgroundColor: '#EDE8DF', border: '1px dashed rgba(10,15,24,.18)', marginBottom: 14 }}>
-              <span style={{ fontSize: 10, color: 'rgba(10,15,24,.35)', fontFamily: 'sans-serif' }}>300 &times; 250 &middot; Sponsor slot</span>
-              <span style={{ fontSize: 9, color: '#C9302A', fontFamily: 'sans-serif', marginTop: 4 }}>Conquer Local Sponsor</span>
-            </div>
+            <div style={{ height: 250, backgroundColor: 'rgba(10,15,24,.02)', border: '0.5px solid rgba(10,15,24,.05)', borderRadius: 4, marginBottom: 14 }} />
 
             {/* Trending Now */}
+            {trending.length > 0 && (
             <div style={{ backgroundColor: '#fff', border: '0.5px solid rgba(10,15,24,.08)', marginBottom: 14 }}>
               <div style={{ padding: '9px 12px', borderBottom: '2px solid #0A0F18' }}>
                 <span style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', color: '#0A0F18', fontFamily: 'sans-serif' }}>Trending Now</span>
               </div>
-              {trending.length === 0 && (
-                <div style={{ padding: '12px', fontSize: 10, color: 'rgba(10,15,24,.4)', fontFamily: 'sans-serif' }}>No stories yet.</div>
-              )}
               {trending.map((s, i) => (
                 <Link key={s.id} href={`/media/${s.pillar}/${s.slug}`} className="flex items-start gap-2.5" style={{ padding: '9px 12px', borderBottom: '0.5px solid rgba(10,15,24,.07)', textDecoration: 'none' }}>
                   <span style={{ fontSize: 18, fontWeight: 500, color: 'rgba(10,15,24,.12)', fontFamily: 'sans-serif', lineHeight: 1, minWidth: 20 }}>{i + 1}</span>
@@ -262,31 +251,20 @@ export function MediaPortalClient({
                 </Link>
               ))}
             </div>
+            )}
 
-            {/* Podcast Sponsor */}
+            {/* Podcast Card */}
             <div style={{ backgroundColor: '#0A0F18', padding: 14, marginBottom: 14 }}>
-              <div style={{ fontSize: 8, textTransform: 'uppercase', color: 'rgba(245,240,232,.3)', fontFamily: 'sans-serif', marginBottom: 6 }}>Presented By</div>
+              <div style={{ fontSize: 8, textTransform: 'uppercase', color: 'rgba(245,240,232,.3)', fontFamily: 'sans-serif', marginBottom: 6 }}>From the Podcast</div>
               <div style={{ fontSize: 13, fontWeight: 500, color: '#C9A84C', fontFamily: 'sans-serif', marginBottom: 6 }}>Conquer Local Podcast</div>
-              <div style={{ fontSize: 10, color: 'rgba(245,240,232,.5)', lineHeight: 1.5, fontFamily: 'sans-serif', marginBottom: 10 }}>George Leith interviews the world&apos;s top sales and marketing minds. New episodes every week.</div>
+              <div style={{ fontSize: 10, color: 'rgba(245,240,232,.5)', lineHeight: 1.5, fontFamily: 'sans-serif', marginBottom: 10 }}>The Conquer Local podcast &mdash; new episodes weekly.</div>
               <Link href="/podcast" className="block text-center" style={{ padding: 7, backgroundColor: '#C9302A', color: '#fff', fontSize: 10, fontWeight: 500, fontFamily: 'sans-serif', textDecoration: 'none' }}>Listen now &rarr;</Link>
             </div>
 
             {/* 160x200 Ad */}
-            <div className="flex items-center justify-center" style={{ height: 200, backgroundColor: '#EDE8DF', border: '1px dashed rgba(10,15,24,.18)', marginBottom: 14 }}>
-              <span style={{ fontSize: 10, color: 'rgba(10,15,24,.35)', fontFamily: 'sans-serif' }}>160 &times; 200 &middot; Secondary sponsor</span>
-            </div>
+            <div style={{ height: 200, backgroundColor: 'rgba(10,15,24,.02)', border: '0.5px solid rgba(10,15,24,.05)', borderRadius: 4, marginBottom: 14 }} />
 
-            {/* Latest Podcast */}
-            <div style={{ backgroundColor: '#fff', border: '0.5px solid rgba(10,15,24,.08)' }}>
-              <div style={{ padding: '9px 12px', borderBottom: '2px solid #0A0F18' }}>
-                <span style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', color: '#0A0F18', fontFamily: 'sans-serif' }}>Latest Podcast</span>
-              </div>
-              <div style={{ padding: 12 }}>
-                <div style={{ fontSize: 8, textTransform: 'uppercase', color: '#C9A84C', fontWeight: 500, fontFamily: 'sans-serif', marginBottom: 4 }}>Conquer Local &middot; Latest</div>
-                <div style={{ fontSize: 12, fontWeight: 500, color: '#0A0F18', fontFamily: 'sans-serif', lineHeight: 1.35, marginBottom: 4 }}>Latest episode placeholder</div>
-                <div style={{ fontSize: 9, color: 'rgba(10,15,24,.4)', fontFamily: 'sans-serif' }}>Listen &middot; 45 min</div>
-              </div>
-            </div>
+            {/* Latest Podcast — hidden until real episode data is wired */}
           </div>
         </div>
       </div>
