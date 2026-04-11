@@ -20,7 +20,8 @@ export async function GET() {
   const memberList = members ?? []
 
   const proCount       = memberList.filter(m => m.tier === 'pro'       && m.tier_status === 'active').length
-  const communityCount = memberList.filter(m => m.tier === 'vip' && m.tier_status === 'active').length
+  const vipCount       = memberList.filter(m => m.tier === 'vip'       && m.tier_status === 'active').length
+  const communityCount = memberList.filter(m => m.tier === 'community' && m.tier_status === 'active').length
   const currentMrr     = memberList.reduce((sum, m) => sum + getTierMrr(m.tier, m.tier_status), 0)
 
   // Build 6-month MRR bars using webhook order history
@@ -57,9 +58,11 @@ export async function GET() {
   return NextResponse.json({
     currentMrr,
     proCount,
+    vipCount,
     communityCount,
-    proMrr:       proCount * 79,
-    communityMrr: communityCount * 39,
+    proMrr:       proCount * 249,
+    vipMrr:       vipCount * 79,
+    communityMrr: 0,
     churnThisMonth,
     months,
   })

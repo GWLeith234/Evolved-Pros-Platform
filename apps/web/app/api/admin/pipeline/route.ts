@@ -102,19 +102,19 @@ export async function GET() {
     if (overrides[m.id]) {
       stage      = overrides[m.id].stage
       stageNote  = overrides[m.id].note
-      estimatedValue = stage === 'upgrade_ready' || stage === 'closed' ? 79 * 12 : 39 * 12
+      estimatedValue = stage === 'upgrade_ready' || stage === 'closed' ? 249 * 12 : 79 * 12
     } else if (recentProIds.has(m.id)) {
       stage          = 'closed'
       stageNote      = 'Upgraded to Pro'
-      estimatedValue = 79 * 12
+      estimatedValue = 249 * 12
     } else if (pillar4Users.has(m.id) && m.tier === 'vip') {
       stage          = 'upgrade_ready'
       stageNote      = 'Hit P4 · ready for Pro'
-      estimatedValue = 79 * 12
+      estimatedValue = 249 * 12
     } else if (m.tier === 'vip' && (engLevel === 'Med' || engLevel === 'High')) {
       stage          = 'engaged'
       stageNote      = 'VIP · Active'
-      estimatedValue = 39 * 12
+      estimatedValue = 79 * 12
     } else {
       stage          = 'awareness'
       stageNote      = 'Low activity'

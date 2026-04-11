@@ -15,8 +15,9 @@ export function getEngagementScore(postsLast30: number, lessonsLast30: number): 
 
 export function getTierMrr(tier: string | null, tierStatus: string | null): number {
   if (!tierStatus || tierStatus === 'cancelled' || tierStatus === 'expired') return 0
-  if (tier === 'pro') return 79
-  if (tier === 'vip' || tier === 'community') return 39
+  if (tier === 'pro') return 249
+  if (tier === 'vip') return 79
+  if (tier === 'community') return 0 // free tier
   return 0
 }
 
