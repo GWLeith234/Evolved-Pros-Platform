@@ -8,14 +8,14 @@ const TEAL = '#0ABFA3'
 
 const LINKEDIN_POST = `I just completed The Evolved Architecture™ — a 6-pillar professional development framework by George Leith.
 
-Foundation → Identity → Mental Toughness → Strategic Approach → Accountability → Execution.
+Foundation → Identity → Mental Toughness → Strategy → Accountability → Execution.
 
 If you're in sales and want to build an unshakeable foundation for high performance, check out Evolved Pros.
 
 #EvolvedPros #SalesProfessional #PersonalDevelopment`
 
 const TWEET_TEXT = encodeURIComponent(
-  "I just completed The Evolved Architecture™ — all 6 pillars. Foundation → Identity → Mental Toughness → Strategic Approach → Accountability → Execution. #EvolvedPros #SalesProfessional"
+  "I just completed The Evolved Architecture™ — all 6 pillars. Foundation → Identity → Mental Toughness → Strategy → Accountability → Execution. #EvolvedPros #SalesProfessional"
 )
 
 interface PillarBadge {

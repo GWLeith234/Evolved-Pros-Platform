@@ -44,7 +44,7 @@ function completionEmailHtml({ displayName, completionDate }: { displayName: str
               ${displayName},
             </p>
             <p style="color:rgba(255,255,255,0.75);font-size:15px;line-height:1.7;margin:0 0 20px;">
-              You have completed all six pillars of The Evolved Architecture™ — Foundation, Identity, Mental Toughness, Strategic Approach, Accountability, and Execution.
+              You have completed all six pillars of The Evolved Architecture™ — Foundation, Identity, Mental Toughness, Strategy, Accountability, and Execution.
             </p>
             <p style="color:rgba(255,255,255,0.75);font-size:15px;line-height:1.7;margin:0 0 20px;">
               You are now part of a small group of sales professionals who have done the work.

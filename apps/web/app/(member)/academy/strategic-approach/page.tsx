@@ -186,7 +186,7 @@ export default async function Page() {
         <PeerDiscussion
           courseId={p4Course.id}
           moduleNumber={1}
-          title="Strategic Approach — Group Discussion"
+          title="Strategy — Group Discussion"
         />
       )}
       {p4Course && (

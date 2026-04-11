@@ -9,7 +9,7 @@ const PILLAR_BADGES = [
   { number: 1, label: 'Foundation',        color: '#FFA538' },
   { number: 2, label: 'Identity',           color: '#A78BFA' },
   { number: 3, label: 'Mental Toughness',   color: '#F87171' },
-  { number: 4, label: 'Strategic Approach', color: '#60A5FA' },
+  { number: 4, label: 'Strategy',           color: '#60A5FA' },
   { number: 5, label: 'Accountability',     color: '#C9A84C' },
   { number: 6, label: 'Execution',          color: '#0ABFA3' },
 ]

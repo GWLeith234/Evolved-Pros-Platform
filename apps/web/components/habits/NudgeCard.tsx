@@ -5,7 +5,7 @@ const PILLAR_COPY: Record<string, string> = {
   'Foundation':         'Your foundation is the bedrock everything else is built on — protect it today.',
   'Identity':           'The story you tell yourself shapes the man you become — reinforce it now.',
   'Mental Toughness':   'Discomfort is the price of growth — lean into the hard thing today.',
-  'Strategic Approach': 'One focused hour of strategy is worth ten of scattered effort — plan before you act.',
+  'Strategy':           'One focused hour of strategy is worth ten of scattered effort — plan before you act.',
   'Accountability':     'You can\'t improve what you don\'t measure — own today\'s numbers.',
   'Execution':          'Ideas are common; consistent execution is rare — close the gap today.',
 }
