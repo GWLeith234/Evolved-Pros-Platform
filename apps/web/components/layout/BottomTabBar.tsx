@@ -115,7 +115,7 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
               <Link
                 key={tab.href}
                 href={tab.href}
-                className="flex-1 flex flex-col items-center justify-center gap-0.5 relative"
+                className="flex-1 flex flex-col items-center justify-center gap-0.5 relative min-h-[44px]"
                 style={{ color: active ? '#68a2b9' : 'rgba(255,255,255,0.4)' }}
               >
                 <span className="relative">

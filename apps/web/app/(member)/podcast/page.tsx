@@ -195,7 +195,7 @@ function EpisodeCard({ ep }: { ep: Episode }) {
   return (
     <Link
       href={`/podcast/${ep.slug}`}
-      className="group block rounded-[10px] overflow-hidden relative transition-all duration-150 hover:shadow-[0_4px_20px_rgba(0,0,0,0.35)]"
+      className="group block rounded-[10px] overflow-hidden relative transition-all duration-150 hover:shadow-[0_4px_20px_rgba(0,0,0,0.35)] hover:border-[rgba(255,255,255,0.12)]"
       style={{
         backgroundColor: '#0d1e2c',
         border: '1px solid rgba(255,255,255,0.05)',
