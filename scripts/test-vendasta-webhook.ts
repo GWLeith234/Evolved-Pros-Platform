@@ -160,6 +160,7 @@ async function run() {
 
   // Verify tier matches SKU
   const expectedTierBySku: Record<string, string> = {
+    'EP-COMM-FREE': 'community',
     'EP-VIP-M':  'vip',
     'EP-VIP-Y':  'vip',
     'EP-COMM-M': 'vip',

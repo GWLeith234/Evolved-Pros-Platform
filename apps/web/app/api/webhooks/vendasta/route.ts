@@ -198,10 +198,14 @@ async function handleWebhookEvent({
       if (eventType === 'order.created') {
         // Tag depends on SKU: book purchaser vs tier-based member tag
         const memberTag =
-          productSku === 'EP-BOOK'      ? 'book-purchaser'
-          : product.tier === 'pro'      ? 'professional-member'
-          : /* vip */                     'vip-member'
-        const tierLabel = product.tier === 'pro' ? 'Professional' : 'VIP'
+          productSku === 'EP-BOOK'         ? 'book-purchaser'
+          : product.tier === 'pro'         ? 'professional-member'
+          : product.tier === 'community'   ? 'community-member'
+          : /* vip */                        'vip-member'
+        const tierLabel =
+          product.tier === 'pro'         ? 'Professional'
+          : product.tier === 'community' ? 'Community'
+          : 'VIP'
         const appUrl      = process.env.NEXT_PUBLIC_APP_URL ?? ''
         const checkoutBase = process.env.NEXT_PUBLIC_VENDASTA_CHECKOUT_URL ?? ''
         const contactFields: Record<string, string> = {
@@ -313,7 +317,7 @@ async function upsertUser({
   vendastaContactId: string
   email:             string
   fullName:          string
-  tier:              'vip' | 'pro'
+  tier:              'community' | 'vip' | 'pro'
   tierStatus:        string
   tierExpiresAt:     Date
 }): Promise<{ isNewUser: boolean; magicLink?: string }> {

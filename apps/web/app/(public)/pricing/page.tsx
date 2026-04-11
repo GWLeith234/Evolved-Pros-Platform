@@ -44,7 +44,7 @@ const TIERS: Tier[] = [
   },
   {
     name: 'VIP',
-    price: '$49',
+    price: '$79',
     period: '/month',
     badge: 'VIP',
     badgeColor: '#C9A84C',

@@ -1,20 +1,22 @@
-export type VendastaTier = 'vip' | 'pro'
+export type VendastaTier = 'community' | 'vip' | 'pro'
 
 interface ProductConfig {
   tier?:          VendastaTier
   keynote_access?: boolean
-  billingPeriod:  'monthly' | 'annual' | 'one_time'
+  billingPeriod:  'monthly' | 'annual' | 'one_time' | 'free'
   accessMonths?:  number
 }
 
 export const VENDASTA_PRODUCTS: Record<string, ProductConfig> = {
-  // VIP tier (formerly Community)
+  // Community tier (free, no expiry)
+  'EP-COMM-FREE': { tier: 'community', billingPeriod: 'free' },
+  // VIP tier — $79/month
   'EP-VIP-M':  { tier: 'vip', billingPeriod: 'monthly'  },
   'EP-VIP-Y':  { tier: 'vip', billingPeriod: 'annual'   },
   // Backward-compat aliases (existing customers keep working)
   'EP-COMM-M': { tier: 'vip', billingPeriod: 'monthly'  },
   'EP-COMM-Y': { tier: 'vip', billingPeriod: 'annual'   },
-  // Professional tier
+  // Professional tier — $249/month
   'EP-PRO-M':  { tier: 'pro', billingPeriod: 'monthly'  },
   'EP-PRO-Y':  { tier: 'pro', billingPeriod: 'annual'   },
   // Keynote add-on (does NOT change tier)
@@ -26,9 +28,10 @@ export const VENDASTA_PRODUCTS: Record<string, ProductConfig> = {
 
 export function getTierExpiry(config: ProductConfig): Date {
   const now = new Date()
-  if (config.billingPeriod === 'monthly')  return addMonths(now, 1)
-  if (config.billingPeriod === 'annual')   return addMonths(now, 12)
-  if (config.billingPeriod === 'one_time') return addMonths(now, config.accessMonths ?? 6)
+  if (config.billingPeriod === 'free')      return addMonths(now, 1200) // 100 years — no expiry
+  if (config.billingPeriod === 'monthly')   return addMonths(now, 1)
+  if (config.billingPeriod === 'annual')    return addMonths(now, 12)
+  if (config.billingPeriod === 'one_time')  return addMonths(now, config.accessMonths ?? 6)
   return addMonths(now, 1)
 }
 
