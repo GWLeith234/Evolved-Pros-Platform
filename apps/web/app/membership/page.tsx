@@ -19,7 +19,6 @@ const { data: profile, error: profileError } = await adminClient
       .single()
     if (profile) {
       userTier = profile.tier?.toLowerCase() ?? null
-      if (userTier === 'community') userTier = 'vip'
       keynoteAccess = profile.keynote_access === true
     }
   }
