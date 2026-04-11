@@ -221,7 +221,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
             ✓ Invite sent to {inviteEmail}. Waiting for them to accept.
           </p>
         ) : (
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <input
               type="email"
               value={inviteEmail}

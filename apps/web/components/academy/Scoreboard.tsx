@@ -233,11 +233,11 @@ export function Scoreboard({ courseId, initialWigStatement }: Props) {
         {/* Lag measure */}
         <div style={{ marginBottom: '20px' }}>
           <label style={fieldLabel}>Lag Measure</label>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 72px', gap: '8px' }}>
-            <input value={setupForm.lagLabel}   onChange={e => patchSetup({ lagLabel:   e.target.value })} placeholder="e.g. Revenue"  style={inputS} />
+          <div className="grid grid-cols-2 md:grid-cols-[2fr_1fr_1fr_72px] gap-2">
+            <input value={setupForm.lagLabel}   onChange={e => patchSetup({ lagLabel:   e.target.value })} placeholder="e.g. Revenue"  style={inputS} className="col-span-2 md:col-span-1" />
             <input value={setupForm.lagCurrent} onChange={e => patchSetup({ lagCurrent: e.target.value })} placeholder="Current" type="number" style={inputS} />
             <input value={setupForm.lagTarget}  onChange={e => patchSetup({ lagTarget:  e.target.value })} placeholder="Target"  type="number" style={inputS} />
-            <input value={setupForm.lagUnit}    onChange={e => patchSetup({ lagUnit:    e.target.value })} placeholder="$"       style={inputS} />
+            <input value={setupForm.lagUnit}    onChange={e => patchSetup({ lagUnit:    e.target.value })} placeholder="$"       style={inputS} className="col-span-2 md:col-span-1" />
           </div>
           <p style={{ color: 'rgba(250,249,247,0.22)', fontSize: '11px', margin: '5px 0 0' }}>
             Label · Current value · Target value · Unit ($, %, deals…)
