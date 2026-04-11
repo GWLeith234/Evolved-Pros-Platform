@@ -10,7 +10,7 @@ const PILLARS = [
   { number: 1, label: 'Foundation',       color: '#FFA538', description: 'Build the base everything else requires' },
   { number: 2, label: 'Identity',          color: '#A78BFA', description: 'Architect who you are on purpose' },
   { number: 3, label: 'Mental Toughness',  color: '#F87171', description: 'Build an unshakeable performance mindset' },
-  { number: 4, label: 'Strategic Approach',color: '#60A5FA', description: 'Develop a WIG and execute with discipline' },
+  { number: 4, label: 'Strategy',          color: '#60A5FA', description: 'Develop a WIG and execute with discipline' },
   { number: 5, label: 'Accountability',    color: '#C9A84C', description: 'Create systems that keep you on track' },
   { number: 6, label: 'Execution',         color: '#0ABFA3', description: 'Build daily habits that compound over time' },
 ]

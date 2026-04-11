@@ -49,7 +49,7 @@ export const PILLAR_NAMES: Record<number, string> = {
   1: 'Foundation',
   2: 'Identity',
   3: 'Mental Toughness',
-  4: 'Strategic Approach',
+  4: 'Strategy',
   5: 'Accountability',
   6: 'Execution',
 }

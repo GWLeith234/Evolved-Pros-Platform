@@ -32,7 +32,7 @@ export const PILLAR_COLORS: Record<string, string> = {
   'Foundation':          '#FFA538',
   'Identity':            '#A78BFA',
   'Mental Toughness':    '#F87171',
-  'Strategic Approach':  '#60A5FA',
+  'Strategy':            '#60A5FA',
   'Accountability':      '#C9A84C',
   'Execution':           '#0ABFA3',
 }

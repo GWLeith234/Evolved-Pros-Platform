@@ -13,7 +13,7 @@ export const PILLAR_CONFIG: Record<string, PillarInfo> = {
   'foundation':       { label: 'Foundation',       color: '#FFA538', slug: 'foundation' },
   'identity':         { label: 'Identity',         color: '#A78BFA', slug: 'identity' },
   'mental-toughness': { label: 'Mental Toughness', color: '#F87171', slug: 'mental-toughness' },
-  'strategy':         { label: 'Strategic Approach', color: '#60A5FA', slug: 'strategy' },
+  'strategy':         { label: 'Strategy',           color: '#60A5FA', slug: 'strategy' },
   'accountability':   { label: 'Accountability',   color: '#C9A84C', slug: 'accountability' },
   'execution':        { label: 'Execution',        color: '#0ABFA3', slug: 'execution' },
 }
