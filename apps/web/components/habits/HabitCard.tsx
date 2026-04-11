@@ -71,7 +71,10 @@ export function HabitCard({
       className="rounded-lg px-4 py-3 flex items-center gap-3"
       style={{
         backgroundColor: completed ? 'rgba(10,191,163,0.08)' : 'var(--bg-surface)',
-        border: `1px solid ${isDragOver ? 'rgba(201,168,76,0.4)' : completed ? `${color}40` : 'rgba(255,255,255,0.08)'}`,
+        borderLeft: `3px solid ${color}`,
+        borderTop: `1px solid ${isDragOver ? 'rgba(201,168,76,0.4)' : completed ? `${color}40` : 'rgba(255,255,255,0.08)'}`,
+        borderRight: `1px solid ${isDragOver ? 'rgba(201,168,76,0.4)' : completed ? `${color}40` : 'rgba(255,255,255,0.08)'}`,
+        borderBottom: `1px solid ${isDragOver ? 'rgba(201,168,76,0.4)' : completed ? `${color}40` : 'rgba(255,255,255,0.08)'}`,
         transition: 'background-color 400ms ease, border-color 200ms ease, opacity 200ms ease',
         opacity: completed ? 0.85 : 1,
         cursor: 'grab',
