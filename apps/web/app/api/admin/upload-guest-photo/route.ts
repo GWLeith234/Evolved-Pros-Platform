@@ -14,26 +14,26 @@ async function requireAdmin() {
 }
 
 export async function POST(request: Request) {
-  const auth = await requireAdmin()
-  if ('error' in auth) return auth.error
-
-  let formData: FormData
-  try { formData = await request.formData() } catch {
-    return NextResponse.json({ error: 'Invalid form data' }, { status: 400 })
-  }
-
-  const file = formData.get('file')
-  if (!(file instanceof File)) {
-    return NextResponse.json({ error: 'file is required' }, { status: 422 })
-  }
-
-  const episodeId = formData.get('episodeId')
-  const idSegment = typeof episodeId === 'string' && episodeId.trim() ? episodeId.trim() : 'new'
-  const timestamp = Date.now()
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-  const path = `episodes/guest-${idSegment}-${timestamp}.${ext}`
-
   try {
+    const auth = await requireAdmin()
+    if ('error' in auth) return auth.error
+
+    let formData: FormData
+    try { formData = await request.formData() } catch {
+      return NextResponse.json({ error: 'Invalid form data' }, { status: 400 })
+    }
+
+    const file = formData.get('file')
+    if (!(file instanceof File)) {
+      return NextResponse.json({ error: 'file is required' }, { status: 422 })
+    }
+
+    const episodeId = formData.get('episodeId')
+    const idSegment = typeof episodeId === 'string' && episodeId.trim() ? episodeId.trim() : 'new'
+    const timestamp = Date.now()
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const path = `episodes/guest-${idSegment}-${timestamp}.${ext}`
+
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
@@ -42,6 +42,7 @@ export async function POST(request: Request) {
       .upload(path, buffer, { contentType: file.type || 'image/jpeg', upsert: true })
 
     if (uploadError) {
+      console.error('[upload-guest-photo] Storage upload failed:', uploadError)
       return NextResponse.json({ error: `Storage upload failed: ${uploadError.message}` }, { status: 500 })
     }
 
@@ -50,6 +51,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ url: publicUrl })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Upload failed'
+    console.error('[upload-guest-photo] Unhandled error:', err)
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
