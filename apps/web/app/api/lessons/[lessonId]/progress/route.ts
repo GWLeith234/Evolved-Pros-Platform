@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { notifyCourseUnlock } from '@/lib/notifications/create'
+import { PILLAR_NAMES } from '@/lib/academy/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -131,6 +132,20 @@ export async function POST(
           courseSlug:    course?.slug ?? lesson.course_id,
           pillarNumber:  course?.pillar_number ?? 0,
         })
+
+        // Fire Vendasta CRM signal (fire-and-forget — never block the response)
+        const pNum = course?.pillar_number ?? 0
+        if (pNum >= 1 && pNum <= 6) {
+          fetch(`${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/api/vendasta/signal`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.id,
+              eventType: 'pillar_complete',
+              payload: { pillarNumber: pNum, pillarName: PILLAR_NAMES[pNum] ?? `Pillar ${pNum}` },
+            }),
+          }).catch(err => console.error('[Vendasta Signal] fire-and-forget failed:', err))
+        }
       }
     }
   }
