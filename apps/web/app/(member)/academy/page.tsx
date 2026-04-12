@@ -21,10 +21,7 @@ export default async function AcademyPage() {
 
   const profile = await fetchUserProfile(supabase, user.id)
 
-  // Community tier cannot access Academy at all
-  if (!hasTierAccess(profile?.tier, 'vip')) {
-    redirect('/pricing?from=academy')
-  }
+  // All tiers can view Academy — per-pillar lock UI handles gating
 
   const courses = await fetchCoursesWithProgress(supabase, user.id, profile?.tier)
 

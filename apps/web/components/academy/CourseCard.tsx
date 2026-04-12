@@ -114,16 +114,31 @@ export function CourseCard({ course, isLocked }: CourseCardProps) {
 
         {/* Progress / status */}
         {isLocked ? (
-          <span
-            className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
-            style={{
-              color: '#c9a84c',
-              backgroundColor: 'rgba(201,168,76,0.15)',
-              border: '1px solid rgba(201,168,76,0.30)',
-            }}
-          >
-            Pro Plan Required
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
+              style={{
+                color: '#c9a84c',
+                backgroundColor: 'rgba(201,168,76,0.15)',
+                border: '1px solid rgba(201,168,76,0.30)',
+              }}
+            >
+              Pro Required
+            </span>
+            <a
+              href="/pricing"
+              onClick={e => e.stopPropagation()}
+              className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5 no-underline transition-colors duration-150"
+              style={{
+                color: '#0A0F18',
+                backgroundColor: '#c9a84c',
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#d4b05c' }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = '#c9a84c' }}
+            >
+              Upgrade
+            </a>
+          </div>
         ) : course.totalLessons === 0 ? (
           <p className="font-condensed text-[11px]" style={{ color: 'rgba(255,255,255,0.50)' }}>
             Lessons coming soon
