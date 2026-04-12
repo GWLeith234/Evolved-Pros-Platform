@@ -1,23 +1,36 @@
+const LOGO = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_nav_light.png'
+
 interface Props {
+  displayName: string
   onContinue: () => void
 }
 
-export function OnboardingWelcome({ onContinue }: Props) {
+export function OnboardingWelcome({ displayName, onContinue }: Props) {
+  const firstName = displayName?.split(' ')[0] || ''
+
   return (
     <div style={{ textAlign: 'center' }}>
+      {/* Logo */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={LOGO}
+        alt="Evolved Pros"
+        style={{ height: 32, marginBottom: 28, opacity: 0.9 }}
+      />
+
       {/* Heading */}
       <h1
         style={{
           fontFamily: '"Barlow Condensed", sans-serif',
           fontWeight: 900,
-          fontSize: 'clamp(32px, 6vw, 48px)',
-          color: '#faf9f7',
-          lineHeight: 1.05,
+          fontSize: 'clamp(28px, 6vw, 42px)',
+          color: '#C9A84C',
+          lineHeight: 1.1,
           margin: '0 0 16px',
           letterSpacing: '-0.01em',
         }}
       >
-        Welcome to Evolved Pros.
+        Welcome to Evolved Pros{firstName ? `, ${firstName}` : ''}.
       </h1>
 
       {/* Subtext */}
@@ -33,7 +46,7 @@ export function OnboardingWelcome({ onContinue }: Props) {
           marginRight: 'auto',
         }}
       >
-        The platform for sales professionals who refuse to plateau.
+        You&apos;re now part of an elite community of sales professionals.
         Let&apos;s get you set up in 2 minutes.
       </p>
 
@@ -52,10 +65,10 @@ export function OnboardingWelcome({ onContinue }: Props) {
         }}
       >
         {[
-          { icon: '📚', text: '6-pillar academy — Foundation through Execution' },
-          { icon: '👥', text: 'Community of elite sales peers' },
-          { icon: '📊', text: 'Scoreboard & weekly accountability' },
-          { icon: '🎙', text: 'Conquer Local podcast' },
+          { icon: '\u{1F4DA}', text: '6-pillar academy \u2014 Foundation through Execution' },
+          { icon: '\u{1F465}', text: 'Community of elite sales peers' },
+          { icon: '\u{1F4CA}', text: 'Scoreboard & weekly accountability' },
+          { icon: '\u{1F399}\uFE0F', text: 'The Evolved Pros Podcast' },
         ].map(({ icon, text }) => (
           <div
             key={text}
@@ -83,8 +96,8 @@ export function OnboardingWelcome({ onContinue }: Props) {
         style={{
           width: '100%',
           padding: '16px 24px',
-          backgroundColor: '#C9A84C',
-          color: '#0A0F18',
+          backgroundColor: '#0ABFA3',
+          color: '#ffffff',
           fontFamily: '"Barlow Condensed", sans-serif',
           fontWeight: 900,
           fontSize: '15px',
@@ -98,7 +111,7 @@ export function OnboardingWelcome({ onContinue }: Props) {
         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.9' }}
         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1' }}
       >
-        LET&apos;S GO →
+        LET&apos;S GET STARTED &rarr;
       </button>
     </div>
   )

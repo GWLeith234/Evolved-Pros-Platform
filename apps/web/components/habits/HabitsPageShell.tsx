@@ -46,18 +46,20 @@ export function HabitsPageShell({ userId }: HabitsPageShellProps) {
         <div className="flex items-center gap-1.5 flex-wrap">
           {ALL_PILLS.map(pill => {
             const active = activePillar === pill
+            const c = PILLAR_COLORS[pill] ?? '#1B2A4A'
             return (
               <button
                 key={pill}
                 type="button"
                 onClick={() => setActivePillar(pill)}
-                className="font-condensed font-semibold uppercase tracking-[0.1em] text-[10px] transition-all"
+                className="font-condensed font-semibold uppercase tracking-[0.1em] text-[10px]"
                 style={{
-                  padding:         '5px 14px',
-                  borderRadius:    '20px',
-                  backgroundColor: active ? '#1B2A4A' : '#ffffff',
-                  color:           active ? '#ffffff' : '#1B2A4A',
-                  border:          `1px solid ${active ? '#1B2A4A' : 'rgba(27,42,74,0.15)'}`,
+                  padding: '5px 14px',
+                  borderRadius: '20px',
+                  backgroundColor: active ? `${c}20` : `${c}08`,
+                  color: active ? c : `${c}99`,
+                  border: `1px solid ${active ? c : `${c}30`}`,
+                  transition: 'all 0.15s ease',
                 }}
               >
                 {pill}

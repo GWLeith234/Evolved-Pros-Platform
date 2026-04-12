@@ -171,7 +171,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to create post' }, { status: 500 })
   }
 
-  supabase.rpc('increment_points', { user_id: user.id, amount: 10 }).then(({ error }) => {
+  void Promise.resolve(supabase.rpc('increment_points', { user_id: user.id, amount: 10 } as Record<string, unknown>)).then(({ error }) => {
     if (error) {
       console.warn('[posts] increment_points RPC failed:', error.message, '— skipping points award')
     }
