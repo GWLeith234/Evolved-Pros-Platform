@@ -38,5 +38,5 @@ export const PILLAR_COLORS: Record<string, string> = {
 }
 
 export function pillarColor(pillar: string): string {
-  return PILLAR_COLORS[pillar] ?? 'rgba(255,255,255,0.15)'
+  return PILLAR_COLORS[pillar] ?? 'rgba(255,255,255,0.30)'
 }
