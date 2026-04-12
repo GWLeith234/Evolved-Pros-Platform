@@ -46,6 +46,7 @@ export function HabitsPageShell({ userId }: HabitsPageShellProps) {
         <div className="flex items-center gap-1.5 flex-wrap">
           {ALL_PILLS.map(pill => {
             const active = activePillar === pill
+            const brandColor = PILLAR_COLORS[pill] ?? '#1B2A4A'
             return (
               <button
                 key={pill}
@@ -55,9 +56,9 @@ export function HabitsPageShell({ userId }: HabitsPageShellProps) {
                 style={{
                   padding:         '5px 14px',
                   borderRadius:    '20px',
-                  backgroundColor: active ? '#1B2A4A' : '#ffffff',
-                  color:           active ? '#ffffff' : '#1B2A4A',
-                  border:          `1px solid ${active ? '#1B2A4A' : 'rgba(27,42,74,0.15)'}`,
+                  backgroundColor: active ? brandColor : '#ffffff',
+                  color:           active ? '#ffffff' : brandColor,
+                  border:          `1px solid ${active ? brandColor : `${brandColor}30`}`,
                 }}
               >
                 {pill}

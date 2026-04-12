@@ -96,7 +96,7 @@ export function LoginForm() {
                 className="text-[#112535] text-3xl font-bold mb-6"
                 style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
               >
-                {isSignup ? "Let's get started." : 'Welcome back.'}
+                {isSignup ? 'Let\u2019s get started.' : 'Welcome back.'}
               </h2>
 
               {/* Tabs */}

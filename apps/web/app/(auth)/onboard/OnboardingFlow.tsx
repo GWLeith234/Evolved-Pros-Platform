@@ -378,7 +378,7 @@ export function OnboardingFlow() {
                 className={btnRed}
                 style={{ ...labelStyle, backgroundColor: '#ef0e30' }}
               >
-                {completing ? 'Loading…' : "Let's go →"}
+                {completing ? 'Loading\u2026' : 'Let\u2019s go \u2192'}
               </button>
             </div>
           )}
