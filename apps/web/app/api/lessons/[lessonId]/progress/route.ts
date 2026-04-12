@@ -68,21 +68,13 @@ export async function POST(
   // Award 50 points on completion (only once)
   if (completed && !alreadyCompleted) {
     pointsAwarded = 50
-    await supabase.rpc('increment_points', { user_id: user.id, amount: 50 } as Record<string, unknown>)
-      .catch(() => {
-        // Fallback if RPC not available
-        return supabase
-          .from('users')
-          .select('points')
-          .eq('id', user.id)
-          .single()
-          .then(({ data }) => {
-            return supabase
-              .from('users')
-              .update({ points: (data?.points ?? 0) + 50 })
-              .eq('id', user.id)
-          })
-      })
+    try {
+      await Promise.resolve(supabase.rpc('increment_points', { user_id: user.id, amount: 50 } as Record<string, unknown>))
+    } catch {
+      // Fallback if RPC not available
+      const { data } = await supabase.from('users').select('points').eq('id', user.id).single()
+      await supabase.from('users').update({ points: (data?.points ?? 0) + 50 }).eq('id', user.id)
+    }
 
     // Check course completion
     const { data: allLessons } = await supabase
