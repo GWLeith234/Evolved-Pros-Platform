@@ -10,11 +10,11 @@ import type { OverviewPost, CourseProgressItem, PointsEntry, ProfileForEdit } fr
 export async function generateMetadata(): Promise<Metadata> {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { title: 'My Profile | Evolved Pros' }
-  const { data: profile } = await supabase
+  if (!user?.email) return { title: 'My Profile | Evolved Pros' }
+  const { data: profile } = await adminClient
     .from('users')
     .select('full_name, display_name')
-    .eq('id', user.id)
+    .eq('email', user.email)
     .single()
   const name = profile?.full_name ?? profile?.display_name ?? 'My Profile'
   return { title: `${name} | Evolved Pros` }
