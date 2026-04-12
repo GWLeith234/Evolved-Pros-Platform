@@ -115,11 +115,17 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
       const formData = new FormData()
       formData.append('file', file)
       if (episodeId) formData.append('episodeId', episodeId)
-      const res = await fetch('/api/admin/upload-guest-photo', { method: 'POST', body: formData })
-      const text = await res.text()
+      const res = await fetch('/api/admin/upload-guest-photo', {
+        method: 'POST',
+        body: formData,
+        redirect: 'follow',
+      })
       let data: { url?: string; error?: string }
-      try { data = JSON.parse(text) } catch {
-        throw new Error(`Server returned non-JSON (status ${res.status})`)
+      try {
+        const text = await res.text()
+        data = JSON.parse(text)
+      } catch {
+        throw new Error(`Upload failed — server returned status ${res.status}. Try refreshing the page.`)
       }
       if (!res.ok) throw new Error(data.error ?? 'Upload failed')
       if (!data.url) throw new Error('No URL returned from upload')
