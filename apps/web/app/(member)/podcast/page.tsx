@@ -37,6 +37,11 @@ function formatDate(iso: string | null): string {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
+function getInitials(name: string | null): string {
+  if (!name) return 'EP'
+  return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+}
+
 function PlayIcon({ size = 20 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -72,13 +77,19 @@ function FeaturedEpisode({ ep }: { ep: Episode }) {
             className="w-full h-full object-cover object-top"
           />
         ) : (
-          <div className="w-full h-full bg-[#111926] flex items-center justify-center">
-            <div className="w-16 h-16 rounded-full bg-[#C9302A]/20 border border-[#C9302A]/30 flex items-center justify-center">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <rect x="9" y="2" width="6" height="12" rx="3" fill="#C9302A"/>
-                <path d="M5 11C5 15.418 8.134 19 12 19C15.866 19 19 15.418 19 11" stroke="#C9302A" strokeWidth="1.5" fill="none"/>
-                <line x1="12" y1="19" x2="12" y2="22" stroke="#C9302A" strokeWidth="1.5"/>
-              </svg>
+          <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#0D1B2A' }}>
+            <div
+              className="rounded-full flex items-center justify-center font-condensed font-bold"
+              style={{
+                width: 72, height: 72,
+                backgroundColor: 'rgba(201,168,76,0.2)',
+                border: '2px solid #C9A84C',
+                color: '#C9A84C',
+                fontSize: '24px',
+                letterSpacing: '0.05em',
+              }}
+            >
+              {getInitials(ep.guest_name)}
             </div>
           </div>
         )}
@@ -215,13 +226,19 @@ function EpisodeCard({ ep }: { ep: Episode }) {
             className="w-full h-full object-cover object-top"
           />
         ) : (
-          <div className="w-full h-full bg-[#111926] flex items-center justify-center">
-            <div className="w-10 h-10 rounded-full bg-[#C9302A]/20 border border-[#C9302A]/30 flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <rect x="9" y="2" width="6" height="12" rx="3" fill="#C9302A"/>
-                <path d="M5 11C5 15.418 8.134 19 12 19C15.866 19 19 15.418 19 11" stroke="#C9302A" strokeWidth="1.5" fill="none"/>
-                <line x1="12" y1="19" x2="12" y2="22" stroke="#C9302A" strokeWidth="1.5"/>
-              </svg>
+          <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#0D1B2A' }}>
+            <div
+              className="rounded-full flex items-center justify-center font-condensed font-bold"
+              style={{
+                width: 40, height: 40,
+                backgroundColor: 'rgba(201,168,76,0.2)',
+                border: '1.5px solid #C9A84C',
+                color: '#C9A84C',
+                fontSize: '13px',
+                letterSpacing: '0.05em',
+              }}
+            >
+              {getInitials(ep.guest_name)}
             </div>
           </div>
         )}
