@@ -4,7 +4,7 @@ export type CourseWithProgress = {
   slug: string
   title: string
   description: string | null
-  requiredTier: 'community' | 'pro'
+  requiredTier: 'community' | 'vip' | 'pro'
   isPublished: boolean
   sortOrder: number
   totalLessons: number

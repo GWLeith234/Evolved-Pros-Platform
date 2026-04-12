@@ -9,7 +9,7 @@ export function UpgradePrompt() {
           Pro Plan
         </p>
         <p className="font-body text-[14px] text-[#1b3c5a] leading-snug">
-          Pillars 5 &amp; 6 — Accountability and Execution — are unlocked with a Pro membership.
+          Pillars 4–6 — Strategy, Accountability, and Execution — are unlocked with a Pro membership.
         </p>
       </div>
       <a

@@ -49,6 +49,7 @@ export function AcademySidebar({ courses, userTier, overallPct }: AcademySidebar
             active={active}
             locked={locked}
             userTier={userTier}
+            requiredTier={course.requiredTier}
             progressPct={course.progressPct}
           />
         )
@@ -99,12 +100,14 @@ function NavItem({
   label,
   active,
   locked,
+  requiredTier,
 }: {
   href: string
   label: string
   active: boolean
   locked: boolean
   userTier: string | null
+  requiredTier?: string
   progressPct?: number
 }) {
   const baseStyle: React.CSSProperties = {
@@ -114,6 +117,8 @@ function NavItem({
     paddingLeft: active ? '18px' : '20px',
     cursor: locked ? 'default' : 'pointer',
   }
+
+  const badgeLabel = requiredTier === 'pro' ? 'Pro' : 'VIP'
 
   const content = (
     <span className="flex items-center justify-between gap-2 py-[9px] px-5 w-full" style={baseStyle}>
@@ -125,7 +130,7 @@ function NavItem({
           className="flex-shrink-0 font-condensed font-bold uppercase text-[8px] rounded px-1.5 py-0.5"
           style={{ color: '#ef0e30', backgroundColor: 'rgba(239,14,48,0.12)', border: '1px solid rgba(239,14,48,0.2)' }}
         >
-          Pro
+          {badgeLabel}
         </span>
       )}
     </span>

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { PILLAR_CONFIG, PILLAR_SLUGS } from '@/lib/pillars'
 import { MediaPortalClient } from './MediaPortalClient'
 import type { MediaStory, PillarSection } from './MediaPortalClient'
@@ -20,7 +21,29 @@ export default async function MediaPage() {
     .eq('is_published', true)
     .order('published_at', { ascending: false })
 
-  const stories = (allStories ?? []) as (MediaStory & { is_featured: boolean })[]
+  // Fetch comment counts per story (graceful no-op if story_comments table doesn't exist yet)
+  let countMap = new Map<string, number>()
+  try {
+    const storyIds = (allStories ?? []).map(s => s.id)
+    if (storyIds.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: commentCounts } = await (adminClient as any)
+        .from('story_comments')
+        .select('story_id')
+        .in('story_id', storyIds)
+
+      for (const row of (commentCounts ?? []) as { story_id: string }[]) {
+        countMap.set(row.story_id, (countMap.get(row.story_id) ?? 0) + 1)
+      }
+    }
+  } catch (err) {
+    console.warn('[Media] story_comments query failed (table may not exist yet):', err)
+  }
+
+  const stories = (allStories ?? []).map(s => ({
+    ...s,
+    commentCount: countMap.get(s.id) ?? 0,
+  })) as (MediaStory & { is_featured: boolean })[]
 
   const featured = stories.find(s => s.is_featured) ?? stories[0] ?? null
 

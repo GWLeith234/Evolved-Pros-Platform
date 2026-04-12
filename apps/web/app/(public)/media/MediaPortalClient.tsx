@@ -10,7 +10,7 @@ export interface MediaStory {
   id: string; title: string; slug: string; excerpt: string | null
   pillar: string | null; story_type: string; featured_image_url: string | null
   author: string | null; published_at: string | null; body: string | null
-  views: number
+  views: number; commentCount?: number
 }
 
 export interface PillarSection {
@@ -49,6 +49,10 @@ function timeAgo(iso: string | null): string {
 
 function pColor(p: string | null): string { return getPillarColor(p) }
 function pLabel(p: string | null): string { return getPillarLabel(p) }
+function commentLabel(n: number | undefined): string {
+  if (!n) return ''
+  return n === 1 ? '1 comment' : `${n} comments`
+}
 
 function formatToday(): string {
   return new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
@@ -159,7 +163,7 @@ export function MediaPortalClient({
                     <div style={{ fontSize: 9, textTransform: 'uppercase', color: pColor(featured.pillar), fontWeight: 500, fontFamily: 'sans-serif', marginBottom: 4 }}>{pLabel(featured.pillar)}</div>
                     <div style={{ fontFamily: 'Georgia, serif', fontSize: 17, fontWeight: 500, color: '#0A0F18', lineHeight: 1.3, marginBottom: 6 }}>{featured.title}</div>
                     {featured.excerpt && <div style={{ fontSize: 12, color: 'rgba(10,15,24,.6)', lineHeight: 1.6, fontFamily: 'sans-serif', marginBottom: 6 }}>{featured.excerpt}</div>}
-                    <div style={{ fontSize: 10, color: 'rgba(10,15,24,.4)', fontFamily: 'sans-serif' }}>{featured.author ?? 'George Leith'} &middot; {readTime(featured.body)} read &middot; {timeAgo(featured.published_at)}</div>
+                    <div style={{ fontSize: 10, color: 'rgba(10,15,24,.4)', fontFamily: 'sans-serif' }}>{featured.author ?? 'George Leith'} &middot; {readTime(featured.body)} read &middot; {timeAgo(featured.published_at)}{featured.commentCount ? ` · ${commentLabel(featured.commentCount)}` : ''}</div>
                   </div>
                 </Link>
                 {/* Side stories */}
@@ -170,7 +174,7 @@ export function MediaPortalClient({
                     </div>
                     <div style={{ fontSize: 8, textTransform: 'uppercase', color: pColor(s.pillar), fontWeight: 500, fontFamily: 'sans-serif', marginBottom: 3 }}>{pLabel(s.pillar)}</div>
                     <div style={{ fontSize: 12, fontWeight: 500, color: '#0A0F18', lineHeight: 1.35, fontFamily: 'sans-serif', marginBottom: 4 }}>{s.title}</div>
-                    <div style={{ fontSize: 9, color: 'rgba(10,15,24,.4)', fontFamily: 'sans-serif' }}>{s.author ?? 'George Leith'} &middot; {readTime(s.body)} read</div>
+                    <div style={{ fontSize: 9, color: 'rgba(10,15,24,.4)', fontFamily: 'sans-serif' }}>{s.author ?? 'George Leith'} &middot; {readTime(s.body)} read{s.commentCount ? ` · ${commentLabel(s.commentCount)}` : ''}</div>
                   </Link>
                 ))}
               </div>
@@ -200,7 +204,7 @@ export function MediaPortalClient({
                       <div style={{ padding: '9px 10px' }}>
                         <div style={{ fontSize: 8, textTransform: 'uppercase', color: section.color, fontWeight: 500, fontFamily: 'sans-serif', marginBottom: 3 }}>{section.label}</div>
                         <div style={{ fontSize: 13, fontWeight: 500, color: '#0A0F18', lineHeight: 1.35, fontFamily: 'sans-serif', marginBottom: 4 }}>{section.stories[0].title}</div>
-                        <div style={{ fontSize: 9, color: 'rgba(10,15,24,.4)', fontFamily: 'sans-serif' }}>{readTime(section.stories[0].body)} read &middot; {timeAgo(section.stories[0].published_at)}</div>
+                        <div style={{ fontSize: 9, color: 'rgba(10,15,24,.4)', fontFamily: 'sans-serif' }}>{readTime(section.stories[0].body)} read &middot; {timeAgo(section.stories[0].published_at)}{section.stories[0].commentCount ? ` · ${commentLabel(section.stories[0].commentCount)}` : ''}</div>
                       </div>
                     </Link>
                   )}
@@ -213,7 +217,7 @@ export function MediaPortalClient({
                         <div style={{ padding: '9px 10px' }}>
                           <div style={{ fontSize: 8, textTransform: 'uppercase', color: section.color, fontWeight: 500, fontFamily: 'sans-serif', marginBottom: 2 }}>{section.label}</div>
                           <div style={{ fontSize: 12, fontWeight: 500, color: '#0A0F18', lineHeight: 1.35, fontFamily: 'sans-serif', marginBottom: 3 }}>{s.title}</div>
-                          <div style={{ fontSize: 9, color: 'rgba(10,15,24,.4)', fontFamily: 'sans-serif' }}>{readTime(s.body)} read</div>
+                          <div style={{ fontSize: 9, color: 'rgba(10,15,24,.4)', fontFamily: 'sans-serif' }}>{readTime(s.body)} read{s.commentCount ? ` · ${commentLabel(s.commentCount)}` : ''}</div>
                         </div>
                       </Link>
                     ))}

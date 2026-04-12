@@ -11,7 +11,7 @@ type SB = SupabaseClient<Database>
 export async function fetchCoursesWithProgress(
   supabase: SB,
   userId: string,
-  userTier?: 'community' | 'pro' | null,
+  userTier?: 'community' | 'vip' | 'pro' | null,
 ): Promise<CourseWithProgress[]> {
   const tierPromise = userTier === undefined
     ? supabase.from('users').select('tier').eq('id', userId).single()
@@ -99,7 +99,7 @@ export async function fetchLessonsWithProgress(
   supabase: SB,
   pillarSlug: string,
   userId: string,
-  userTier: 'community' | 'pro' | null | undefined,
+  userTier: 'community' | 'vip' | 'pro' | null | undefined,
 ): Promise<LessonWithProgress[]> {
   // Get course
   const { data: course } = await supabase
@@ -127,7 +127,7 @@ export async function fetchLessonsWithProgress(
     .in('lesson_id', lessonIds)
 
   const progressMap = new Map((progress ?? []).map(p => [p.lesson_id, p]))
-  const isLocked = !hasTierAccess(userTier, course.required_tier as 'community' | 'pro')
+  const isLocked = !hasTierAccess(userTier, course.required_tier as 'community' | 'vip' | 'pro')
 
   return lessons.map(lesson => {
     const prog = progressMap.get(lesson.id)
