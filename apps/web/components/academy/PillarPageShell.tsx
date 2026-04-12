@@ -105,7 +105,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
   if (!course) notFound()
 
   // Tier access check — redirect to pricing if user lacks required tier
-  if (!hasTierAccess(profile?.tier, (course as Record<string, unknown>).required_tier as 'community' | 'pro')) {
+  if (!hasTierAccess(profile?.tier, (course as Record<string, unknown>).required_tier as 'community' | 'vip' | 'pro')) {
     redirect('/pricing')
   }
 

@@ -9,6 +9,7 @@ import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 interface CourseCardProps {
   course: CourseWithProgress
   isLocked: boolean
+  userTier: string | null
 }
 
 function LockIcon() {
@@ -20,10 +21,17 @@ function LockIcon() {
   )
 }
 
-export function CourseCard({ course, isLocked }: CourseCardProps) {
+export function CourseCard({ course, isLocked, userTier }: CourseCardProps) {
   const router = useRouter()
   const isComplete = course.progressPct === 100
   const imageUrl = PILLAR_CONFIG[course.pillarNumber]?.image ?? ''
+
+  // Determine the upgrade message based on what tier the user needs
+  const needsPro = course.requiredTier === 'pro'
+  const tierLabel = needsPro ? 'Pro' : 'VIP'
+  const tooltipText = needsPro
+    ? 'Upgrade to Pro to unlock this pillar.'
+    : 'Upgrade to VIP to unlock this pillar.'
 
   function handleClick() {
     if (isLocked) return
@@ -87,7 +95,7 @@ export function CourseCard({ course, isLocked }: CourseCardProps) {
 
       {/* Lock badge — top-right */}
       {isLocked && (
-        <Tooltip content="Upgrade to Pro to unlock these pillars.">
+        <Tooltip content={tooltipText}>
           <div
             className="absolute top-3 right-3 w-[24px] h-[24px] rounded flex items-center justify-center z-10"
             style={{ backgroundColor: 'rgba(0,0,0,0.55)', color: 'rgba(255,255,255,0.85)' }}
@@ -123,7 +131,7 @@ export function CourseCard({ course, isLocked }: CourseCardProps) {
                 border: '1px solid rgba(201,168,76,0.30)',
               }}
             >
-              Pro Required
+              {tierLabel} Required
             </span>
             <a
               href="/pricing"

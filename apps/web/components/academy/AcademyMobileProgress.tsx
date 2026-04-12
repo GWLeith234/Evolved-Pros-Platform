@@ -90,7 +90,8 @@ export function AcademyMobileProgress({ courses, userTier, overallPct }: Academy
 
           {/* Per-course progress */}
           {courses.map(course => {
-            const locked = course.requiredTier === 'pro' && userTier !== 'pro'
+            const locked = !course.hasAccess
+            const badgeLabel = course.requiredTier === 'pro' ? 'Pro' : 'VIP'
             const label = `0${course.pillarNumber} — ${SIDEBAR_SHORT_NAMES[course.pillarNumber] ?? course.title}`
             return (
               <div key={course.id} className="mb-2">
@@ -104,7 +105,7 @@ export function AcademyMobileProgress({ courses, userTier, overallPct }: Academy
                       className="font-condensed font-bold uppercase text-[8px] rounded px-1.5 py-0.5"
                       style={{ color: '#ef0e30', backgroundColor: 'rgba(239,14,48,0.12)', border: '1px solid rgba(239,14,48,0.2)' }}
                     >
-                      Pro
+                      {badgeLabel}
                     </span>
                   </div>
                 ) : (
