@@ -40,19 +40,26 @@ export async function POST(request: Request) {
   }
 
   // Look up user email from Supabase
-  const { data: profile } = await adminClient
-    .from('users')
-    .select('email')
-    .eq('id', userId)
-    .single()
+  let email: string | null = null
+  try {
+    const { data: profile } = await adminClient
+      .from('users')
+      .select('email')
+      .eq('id', userId)
+      .single()
+    email = profile?.email ?? null
+  } catch (err) {
+    console.error(`[Vendasta Signal] DB error looking up user ${userId}:`, err)
+    return NextResponse.json({ ok: false, reason: 'db error' }, { status: 200 })
+  }
 
-  if (!profile?.email) {
+  if (!email) {
     console.error(`[Vendasta Signal] No email found for user ${userId}`)
     return NextResponse.json({ ok: false, reason: 'no email' }, { status: 200 })
   }
 
   if (eventType === 'pillar_complete') {
-    await sendPillarCompleteSignal(token, profile.email, payload)
+    await sendPillarCompleteSignal(token, email, payload)
   } else {
     console.warn(`[Vendasta Signal] Unknown eventType: ${eventType}`)
   }

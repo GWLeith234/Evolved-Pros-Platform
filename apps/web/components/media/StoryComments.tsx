@@ -117,8 +117,11 @@ export function StoryComments({ storyId, pillarColor }: StoryCommentsProps) {
 
   return (
     <section
-      className="mt-10 pt-8"
-      style={{ borderTop: '1px solid rgba(10,15,24,0.08)' }}
+      className="mt-10 pt-8 pb-6 px-6 -mx-4 sm:-mx-6 rounded-lg"
+      style={{
+        backgroundColor: '#F7F4EF',
+        borderTop: '1px solid rgba(10,15,24,0.08)',
+      }}
     >
       <h2
         className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] mb-5"
