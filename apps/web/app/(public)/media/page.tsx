@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { PILLAR_CONFIG, PILLAR_SLUGS } from '@/lib/pillars'
 import { MediaPortalClient } from './MediaPortalClient'
 import type { MediaStory, PillarSection } from './MediaPortalClient'
@@ -20,7 +21,26 @@ export default async function MediaPage() {
     .eq('is_published', true)
     .order('published_at', { ascending: false })
 
-  const stories = (allStories ?? []) as (MediaStory & { is_featured: boolean })[]
+  // Fetch comment counts per story
+  const storyIds = (allStories ?? []).map(s => s.id)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: commentCounts } = storyIds.length > 0
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ? await (adminClient as any)
+        .from('story_comments')
+        .select('story_id')
+        .in('story_id', storyIds)
+    : { data: [] }
+
+  const countMap = new Map<string, number>()
+  for (const row of (commentCounts ?? []) as { story_id: string }[]) {
+    countMap.set(row.story_id, (countMap.get(row.story_id) ?? 0) + 1)
+  }
+
+  const stories = (allStories ?? []).map(s => ({
+    ...s,
+    commentCount: countMap.get(s.id) ?? 0,
+  })) as (MediaStory & { is_featured: boolean })[]
 
   const featured = stories.find(s => s.is_featured) ?? stories[0] ?? null
 

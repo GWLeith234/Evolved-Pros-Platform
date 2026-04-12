@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { marked } from 'marked'
 import { adminClient } from '@/lib/supabase/admin'
 import { getPillarLabel, getPillarColor } from '@/lib/pillars'
+import { StoryComments } from '@/components/media/StoryComments'
 
 export const revalidate = 3600
 export const dynamicParams = true
@@ -286,6 +287,9 @@ export default async function StoryPage({
             ))}
           </div>
         )}
+
+        {/* Comments */}
+        <StoryComments storyId={story.id} pillarColor={pColor} />
       </article>
 
       {/* Related stories */}
