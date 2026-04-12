@@ -1,4 +1,3 @@
-import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
@@ -6,19 +5,6 @@ import { ProfileBannerWrapper } from '@/components/profile/ProfileBannerWrapper'
 import { ProfileTabs } from '@/components/profile/ProfileTabs'
 import { ProfileAdUnit } from '@/components/profile/ProfileAdUnit'
 import type { OverviewPost, CourseProgressItem, PointsEntry, ProfileForEdit } from '@/components/profile/ProfileTabs'
-
-export async function generateMetadata(): Promise<Metadata> {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) return { title: 'My Profile | Evolved Pros' }
-  const { data: profile } = await adminClient
-    .from('users')
-    .select('full_name, display_name')
-    .eq('email', user.email)
-    .single()
-  const name = profile?.full_name ?? profile?.display_name ?? 'My Profile'
-  return { title: `${name} | Evolved Pros` }
-}
 
 export default async function MyProfilePage({
   searchParams,

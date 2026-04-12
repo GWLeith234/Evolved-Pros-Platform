@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm'
 import { Card, CardBody, CardHeader } from '@evolved-pros/ui'
 
@@ -74,6 +74,12 @@ export function ProfileTabs({
   profile,
 }: ProfileTabsProps) {
   const [activeTab, setActiveTab] = useState<Tab>(initialTab)
+
+  useEffect(() => {
+    const name = profile?.full_name || profile?.display_name || 'Profile'
+    document.title = `${name} | Evolved Pros`
+    return () => { document.title = 'Evolved Pros' }
+  }, [profile?.full_name, profile?.display_name])
 
   return (
     <>
