@@ -55,7 +55,7 @@ export function OnboardingWelcome({ onContinue }: Props) {
           { icon: '📚', text: '6-pillar academy — Foundation through Execution' },
           { icon: '👥', text: 'Community of elite sales peers' },
           { icon: '📊', text: 'Scoreboard & weekly accountability' },
-          { icon: '🎙', text: 'Conquer Local podcast' },
+          { icon: '🎙', text: 'The Evolved Pros Podcast' },
         ].map(({ icon, text }) => (
           <div
             key={text}

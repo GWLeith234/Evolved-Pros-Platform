@@ -260,8 +260,8 @@ export function MediaPortalClient({
             {/* Podcast Card */}
             <div style={{ backgroundColor: '#0A0F18', padding: 14, marginBottom: 14 }}>
               <div style={{ fontSize: 8, textTransform: 'uppercase', color: 'rgba(245,240,232,.3)', fontFamily: 'sans-serif', marginBottom: 6 }}>From the Podcast</div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: '#C9A84C', fontFamily: 'sans-serif', marginBottom: 6 }}>Conquer Local Podcast</div>
-              <div style={{ fontSize: 10, color: 'rgba(245,240,232,.5)', lineHeight: 1.5, fontFamily: 'sans-serif', marginBottom: 10 }}>The Conquer Local podcast &mdash; new episodes weekly.</div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: '#C9A84C', fontFamily: 'sans-serif', marginBottom: 6 }}>The Evolved Pros Podcast</div>
+              <div style={{ fontSize: 10, color: 'rgba(245,240,232,.5)', lineHeight: 1.5, fontFamily: 'sans-serif', marginBottom: 10 }}>The Evolved Pros Podcast &mdash; new episodes weekly.</div>
               <Link href="/podcast" className="block text-center" style={{ padding: 7, backgroundColor: '#C9302A', color: '#fff', fontSize: 10, fontWeight: 500, fontFamily: 'sans-serif', textDecoration: 'none' }}>Listen now &rarr;</Link>
             </div>
 

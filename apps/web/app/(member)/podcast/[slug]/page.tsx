@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props) {
     .eq('is_published', true)
     .single()
   return {
-    title: data?.title ? `${data.title} — Evolved Pros Podcast` : 'Evolved Pros Podcast',
+    title: data?.title ? `${data.title} — The Evolved Pros Podcast` : 'The Evolved Pros Podcast',
   }
 }
 
@@ -110,7 +110,7 @@ export default async function EpisodePage({ params }: Props) {
           className="inline-flex items-center gap-1.5 font-condensed font-semibold uppercase tracking-[0.14em] text-[11px] mb-6 transition-colors hover:opacity-80"
           style={{ color: 'rgba(255,255,255,0.4)' }}
         >
-          ← Back to Podcast
+          ← Back to The Evolved Pros Podcast
         </Link>
 
         {/* Video player */}

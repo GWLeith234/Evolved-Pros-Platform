@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
-export const metadata = { title: 'Podcast — Evolved Pros' }
+export const metadata = { title: 'The Evolved Pros Podcast | Evolved Pros' }
 
 interface Episode {
   id: string
@@ -348,7 +348,7 @@ export default async function PodcastPage() {
           className="font-display font-black leading-tight mb-1"
           style={{ fontSize: '32px', color: '#1B2A4A' }}
         >
-          The Podcast
+          The Evolved Pros Podcast
         </h1>
         <p className="font-body text-[14px]" style={{ color: '#6B7A8D', maxWidth: '540px' }}>
           Real conversations with professionals who are crushing it from the field, from the trenches, and in real life.
