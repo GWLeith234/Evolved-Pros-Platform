@@ -76,9 +76,10 @@ export function ProfileTabs({
   const [activeTab, setActiveTab] = useState<Tab>(initialTab)
 
   useEffect(() => {
-    const name = profile?.full_name || profile?.display_name || 'Profile'
+    const name = profile?.full_name || profile?.display_name
+    if (!name) return
     document.title = `${name} | Evolved Pros`
-    return () => { document.title = 'Evolved Pros' }
+    return () => { document.title = 'Evolved Pros \u2014 The Platform for High Performers' }
   }, [profile?.full_name, profile?.display_name])
 
   return (
