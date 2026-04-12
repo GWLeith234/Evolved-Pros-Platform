@@ -24,22 +24,27 @@ export async function POST(request: Request) {
     }
 
     const file = formData.get('file')
-    if (!(file instanceof File)) {
+    if (!file || typeof file === 'string') {
       return NextResponse.json({ error: 'file is required' }, { status: 422 })
     }
 
+    // file is a Blob (or File on Node 20+) from formData
+    const blob = file as Blob
     const episodeId = formData.get('episodeId')
     const idSegment = typeof episodeId === 'string' && episodeId.trim() ? episodeId.trim() : 'new'
     const timestamp = Date.now()
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const fileName = 'name' in blob && typeof (blob as { name: string }).name === 'string'
+      ? (blob as { name: string }).name
+      : 'photo.jpg'
+    const ext = fileName.split('.').pop()?.toLowerCase() || 'jpg'
     const path = `episodes/guest-${idSegment}-${timestamp}.${ext}`
 
-    const arrayBuffer = await file.arrayBuffer()
+    const arrayBuffer = await blob.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
     const { error: uploadError } = await adminClient.storage
       .from('Branding')
-      .upload(path, buffer, { contentType: file.type || 'image/jpeg', upsert: true })
+      .upload(path, buffer, { contentType: blob.type || 'image/jpeg', upsert: true })
 
     if (uploadError) {
       console.error('[upload-guest-photo] Storage upload failed:', uploadError)
