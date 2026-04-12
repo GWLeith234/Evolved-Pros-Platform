@@ -171,13 +171,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to create post' }, { status: 500 })
   }
 
-  void Promise.resolve(supabase.rpc('increment_points', { user_id: user.id, amount: 10 } as Record<string, unknown>)).then(({ error }) => {
-    if (error) {
-      console.warn('[posts] increment_points RPC failed:', error.message, '— skipping points award')
-    }
-  }).catch(err => {
-    console.warn('[posts] increment_points threw:', err)
-  })
+  // Award 10 points for posting (fire-and-forget — never block the response)
+  try {
+    const { error: rpcErr } = await supabase.rpc('increment_points', { user_id: user.id, amount: 10 } as Record<string, unknown>)
+    if (rpcErr) console.warn('[posts] increment_points failed:', rpcErr.message)
+  } catch (err) {
+    console.warn('[posts] increment_points exception:', err)
+  }
 
   const result: Post = toPost(
     post as Parameters<typeof toPost>[0],
