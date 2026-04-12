@@ -1,11 +1,19 @@
 'use client'
 
 import { useState } from 'react'
-import { PILLAR_COLORS } from '@/types/habits'
 import { CompoundBoardClient } from './CompoundBoardClient'
 
-const PILLARS = Object.keys(PILLAR_COLORS)
-const ALL_PILLS = ['All', ...PILLARS]
+// Inline color map — no import dependency, guaranteed correct at runtime
+const PILL_COLORS: Record<string, string> = {
+  'Foundation':       '#FFA538',
+  'Identity':         '#A78BFA',
+  'Mental Toughness': '#F87171',
+  'Strategy':         '#60A5FA',
+  'Accountability':   '#C9A84C',
+  'Execution':        '#0ABFA3',
+}
+
+const ALL_PILLS = ['All', ...Object.keys(PILL_COLORS)]
 
 interface HabitsPageShellProps {
   userId: string
@@ -46,7 +54,8 @@ export function HabitsPageShell({ userId }: HabitsPageShellProps) {
         <div className="flex items-center gap-1.5 flex-wrap">
           {ALL_PILLS.map(pill => {
             const active = activePillar === pill
-            const c = PILLAR_COLORS[pill] ?? '#1B2A4A'
+            const c = PILL_COLORS[pill] ?? '#1B2A4A'
+            if (typeof window !== 'undefined') console.log('[PILL]', { pill, color: PILL_COLORS[pill], resolved: c })
             return (
               <button
                 key={pill}
