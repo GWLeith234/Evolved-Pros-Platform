@@ -55,7 +55,6 @@ export function HabitsPageShell({ userId }: HabitsPageShellProps) {
           {ALL_PILLS.map(pill => {
             const active = activePillar === pill
             const c = PILL_COLORS[pill] ?? '#1B2A4A'
-            if (typeof window !== 'undefined') console.log('[PILL]', { pill, color: PILL_COLORS[pill], resolved: c })
             return (
               <button
                 key={pill}
