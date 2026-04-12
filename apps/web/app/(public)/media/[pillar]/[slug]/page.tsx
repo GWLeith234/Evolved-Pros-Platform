@@ -97,7 +97,7 @@ export async function generateMetadata(
       publishedTime: story.published_at ?? undefined,
       modifiedTime: story.updated_at ?? undefined,
       authors: [story.author ?? 'George Leith'],
-      tags: story.tags,
+      tags: story.tags ?? [],
       images: [{ url: image, width: 1200, height: 630, alt: story.title }],
     },
     twitter: {
@@ -125,7 +125,7 @@ export default async function StoryPage({
   }
 
   const minutes = readTime(story.body)
-  const html = story.body ? marked.parse(story.body) : ''
+  const html = story.body ? await marked.parse(story.body) : ''
 
   // Related stories: same pillar, exclude current
   const { data: related } = await adminClient
@@ -274,9 +274,9 @@ export default async function StoryPage({
         />
 
         {/* Tags */}
-        {story.tags.length > 0 && (
+        {(story.tags ?? []).length > 0 && (
           <div className="flex flex-wrap gap-2 mt-10 pt-6" style={{ borderTop: '1px solid rgba(10,15,24,0.06)' }}>
-            {story.tags.map(tag => (
+            {(story.tags ?? []).map(tag => (
               <span
                 key={tag}
                 className="font-condensed font-semibold uppercase tracking-[0.1em] text-[9px] px-2.5 py-1 rounded"
