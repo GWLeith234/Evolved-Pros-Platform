@@ -78,7 +78,7 @@ export async function POST(
 
     // Award 2 points to post author (not self-reacting)
     if (post.author_id !== user.id) {
-      supabase.rpc('increment_points', { user_id: post.author_id, amount: 2 }).catch(() => {})
+      void Promise.resolve(supabase.rpc('increment_points', { user_id: post.author_id, amount: 2 } as Record<string, unknown>)).catch(() => {})
     }
 
     // Notify author
