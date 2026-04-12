@@ -7,6 +7,7 @@ const PUBLIC_ROUTES = [
   '/auth/callback',
   '/api/webhooks/vendasta',
   '/api/health',
+  '/api/admin/upload-guest-photo',
   '/dev-login',
   '/api/dev-login',
   '/pricing',
