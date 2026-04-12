@@ -26,7 +26,7 @@ export async function GET() {
 
   // Fetch user profiles for other participants
   const uniqueIds = [...new Set(otherIds)]
-  let profileMap: Record<string, { id: string; display_name: string | null; full_name: string | null; avatar_url: string | null }> = {}
+  const profileMap: Record<string, { id: string; display_name: string | null; full_name: string | null; avatar_url: string | null }> = {}
 
   if (uniqueIds.length > 0) {
     const { data: profiles } = await supabase
@@ -41,7 +41,7 @@ export async function GET() {
 
   // Fetch last message body for each conversation
   const convIds = convRows.map(c => c.id)
-  let lastMsgMap: Record<string, { body: string; created_at: string }> = {}
+  const lastMsgMap: Record<string, { body: string; created_at: string }> = {}
 
   if (convIds.length > 0) {
     // Get last message per conversation
@@ -62,7 +62,7 @@ export async function GET() {
   }
 
   // Fetch unread counts per conversation for current user
-  let unreadMap: Record<string, number> = {}
+  const unreadMap: Record<string, number> = {}
   if (convIds.length > 0) {
     const { data: unreadRows } = await supabase
       .from('messages')

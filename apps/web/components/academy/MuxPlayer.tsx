@@ -1,6 +1,6 @@
 'use client'
 import MuxPlayerElement from '@mux/mux-player-react'
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 
 interface MuxPlayerProps {
   playbackId: string
@@ -12,6 +12,8 @@ interface MuxPlayerProps {
   courseTitle: string
   onComplete?: () => void
 }
+
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
 export function MuxPlayer({
   playbackId,
@@ -27,6 +29,7 @@ export function MuxPlayer({
   const saveTimerRef = useRef<NodeJS.Timeout>()
   const latestTimeRef = useRef(initialProgress)
   const hasCompletedRef = useRef(false)
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
 
   // Resume from saved position
   useEffect(() => {
@@ -37,13 +40,31 @@ export function MuxPlayer({
     return () => el.removeEventListener('loadedmetadata', setTime)
   }, [initialProgress])
 
-  const saveProgress = useCallback((currentTime: number, completed = false) => {
-    fetch(`/api/lessons/${lessonId}/progress`, {
-      method:    'POST',
-      headers:   { 'Content-Type': 'application/json' },
-      body:      JSON.stringify({ watchTimeSeconds: Math.floor(currentTime), completed }),
-      keepalive: true,
-    })
+  const saveProgress = useCallback(async (currentTime: number, completed = false) => {
+    setSaveStatus('saving')
+    let lastError: unknown
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const res = await fetch(`/api/lessons/${lessonId}/progress`, {
+          method:    'POST',
+          headers:   { 'Content-Type': 'application/json' },
+          body:      JSON.stringify({ watchTimeSeconds: Math.floor(currentTime), completed }),
+          keepalive: true,
+        })
+        if (res.ok) {
+          setSaveStatus('saved')
+          setTimeout(() => setSaveStatus('idle'), 2000)
+          return
+        }
+        lastError = new Error(`HTTP ${res.status}`)
+      } catch (err) {
+        lastError = err
+      }
+      // Exponential backoff: 1s, 2s, 4s
+      if (attempt < 2) await new Promise(r => setTimeout(r, 1000 * 2 ** attempt))
+    }
+    console.error('[MuxPlayer] Failed to save progress after 3 retries:', lastError)
+    setSaveStatus('error')
   }, [lessonId])
 
   // Debounced auto-save every 10 seconds
@@ -67,9 +88,16 @@ export function MuxPlayer({
     }
   }, [saveProgress, onComplete])
 
-  // Save on unmount
+  // Save on unmount / tab close
   useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        saveProgress(latestTimeRef.current)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
     return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
       clearTimeout(saveTimerRef.current)
       saveProgress(latestTimeRef.current)
     }
@@ -123,6 +151,23 @@ export function MuxPlayer({
       }}>
         Lesson {lessonNumber} of {totalLessons} · {courseTitle}
       </div>
+      {/* Save status indicator */}
+      {saveStatus !== 'idle' && (
+        <div style={{
+          position:      'absolute',
+          top:           12,
+          right:         16,
+          fontFamily:    'sans-serif',
+          fontSize:      10,
+          fontWeight:    600,
+          color:         saveStatus === 'error' ? '#ef0e30' : 'rgba(255,255,255,0.5)',
+          pointerEvents: 'none',
+        }}>
+          {saveStatus === 'saving' && 'Saving...'}
+          {saveStatus === 'saved' && 'Saved'}
+          {saveStatus === 'error' && 'Progress not saved — check connection'}
+        </div>
+      )}
     </div>
   )
 }

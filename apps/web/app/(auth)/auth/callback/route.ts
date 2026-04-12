@@ -11,7 +11,9 @@ export async function GET(request: Request) {
   const code       = searchParams.get('code')
   const token_hash = searchParams.get('token_hash')
   const type       = searchParams.get('type') as EmailOtpType | null
-  const next       = searchParams.get('next') ?? '/home'
+  const rawNext    = searchParams.get('next') ?? '/home'
+  // Sanitize: only allow relative paths — block protocol schemes (javascript:, data:, etc.)
+  const next       = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/home'
 
   // Use forwarded headers to get the real public URL (request.url is the
   // internal Railway address, e.g. http://localhost:8080/...)

@@ -126,7 +126,10 @@ export function HabitStackBuilder({ courseId, initialHabits, initialCompletions 
     const wasComplete = completedIds.has(id)
     if (wasComplete) return // can't un-complete (idempotent)
     setCompletedIds(prev => new Set([...prev, id]))
-    await fetch(`/api/habits/${id}/complete`, { method: 'POST' })
+    await fetch(`/api/habits/${id}/complete`, {
+      method: 'POST',
+      headers: { 'x-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone },
+    })
   }
 
   const completedCount = habits.filter(h => completedIds.has(h.id)).length

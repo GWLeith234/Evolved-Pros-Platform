@@ -31,7 +31,11 @@ export async function POST(
   const habitId = params.id
   if (!habitId) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
-  const today = new Date().toISOString().split('T')[0]
+  // Use the client-reported timezone (falls back to UTC if not sent).
+  // This prevents streak-breaking for members west of UTC who complete
+  // a habit late in their evening (which is already the next UTC day).
+  const tz = _req.headers.get('x-timezone') ?? 'UTC'
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: tz })
 
   // Verify the habit belongs to this user
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,10 +54,13 @@ export async function POST(
     .from('habit_completions')
     .insert({ habit_stack_id: habitId, user_id: userId, completed_on: today })
 
-  if (error && error.code !== '23505') {
+  if (error) {
+    if (error.code === '23505') {
+      return NextResponse.json({ ok: true, completed_on: today, alreadyCompletedToday: true })
+    }
     console.error('Habit complete error:', JSON.stringify(error))
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ ok: true, completed_on: today })
+  return NextResponse.json({ ok: true, completed_on: today, alreadyCompletedToday: false })
 }

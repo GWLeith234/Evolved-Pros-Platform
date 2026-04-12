@@ -6,7 +6,11 @@ export const metadata: Metadata = {
   description: 'Community, VIP, Professional, and Keynote tiers for high performers.',
 }
 
+<<<<<<< HEAD
+// ── Tier data ────────────────────────────────────────────────────────────────────
+=======
 // ── Tier data ──────────────────────────────────────────────────────────────
+>>>>>>> origin/claude/init-evolved-pros-platform-Q2oUw
 
 interface Feature { text: string; locked?: boolean }
 
@@ -45,7 +49,11 @@ const TIERS: Tier[] = [
   },
   {
     name: 'VIP',
+<<<<<<< HEAD
+    price: '$49',
+=======
     price: '$79',
+>>>>>>> origin/claude/init-evolved-pros-platform-Q2oUw
     period: '/month',
     badge: 'VIP',
     badgeColor: '#C9A84C',
@@ -96,7 +104,11 @@ const TIERS: Tier[] = [
   },
 ]
 
+<<<<<<< HEAD
+// ── Comparison table ─────────────────────────────────────────────────────────────
+=======
 // ── Comparison table ───────────────────────────────────────────────────────
+>>>>>>> origin/claude/init-evolved-pros-platform-Q2oUw
 
 type Symbol = 'yes' | 'half' | 'no'
 interface ComparisonRow {
@@ -124,6 +136,13 @@ function SymbolCell({ value }: { value: Symbol }) {
   return <span style={{ color: 'rgba(245,240,232,0.2)' }}>&ndash;</span>
 }
 
+<<<<<<< HEAD
+// ── Page ─────────────────────────────────────────────────────────────────────
+
+export default function PricingPage() {
+  return (
+    <div style={{ backgroundColor: '#0A0F18', minHeight: '100vh' }}>
+=======
 // ── From= banner messages ──────────────────────────────────────────────────
 
 const FROM_MESSAGES: Record<string, { tier: string; feature: string }> = {
@@ -149,6 +168,7 @@ export default function PricingPage({ searchParams }: { searchParams: { from?: s
         </div>
       )}
 
+>>>>>>> origin/claude/init-evolved-pros-platform-Q2oUw
       {/* Header */}
       <header
         className="flex items-center justify-between px-6 py-4"

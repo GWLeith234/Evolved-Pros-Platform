@@ -1,0 +1,68 @@
+name: Daily Cron Jobs
+
+on:
+  schedule:
+    # Expire lapsed memberships — run first, before reminders
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+    inputs:
+      job:
+        description: 'Which job to run (all, expire-tiers, renewal-reminders, event-reminders, daily-digest)'
+        required: false
+        default: 'all'
+
+env:
+  APP_URL: ${{ secrets.APP_URL }}
+  CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+jobs:
+  expire-tiers:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'expire-tiers'))
+    steps:
+      - name: Expire lapsed memberships
+        run: |
+          curl -sf -X GET "$APP_URL/api/cron/expire-tiers" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            | jq .
+
+  renewal-reminders:
+    runs-on: ubuntu-latest
+    needs: expire-tiers
+    if: >-
+      always() && (
+        github.event_name == 'schedule' ||
+        (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'renewal-reminders'))
+      )
+    steps:
+      - name: Tag contacts approaching expiry
+        run: |
+          curl -sf -X GET "$APP_URL/api/cron/renewal-reminders" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            | jq .
+
+  event-reminders:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'event-reminders'))
+    steps:
+      - name: Send event reminders
+        run: |
+          curl -sf -X GET "$APP_URL/api/cron/event-reminders" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            | jq .
+
+  daily-digest:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'daily-digest'))
+    steps:
+      - name: Send daily digest emails
+        run: |
+          curl -sf -X GET "$APP_URL/api/cron/daily-digest" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            | jq .

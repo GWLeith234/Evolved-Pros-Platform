@@ -112,18 +112,19 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
     setNotifSending(true)
     setNotifMsg('')
     try {
-      const res = await fetch('/api/admin/broadcast', {
+      // Send a personal notification to THIS member only (not a broadcast)
+      const res = await fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          user_id:  member.id,
           title:    notifTitle.trim(),
-          message:  notifBody.trim(),
-          audience: 'all',
+          body:     notifBody.trim(),
           type:     'system_general',
         }),
       })
       if (res.ok) {
-        setNotifMsg('Notification sent.')
+        setNotifMsg('Notification sent to this member.')
         setNotifTitle('')
         setNotifBody('')
       } else {
@@ -266,10 +267,17 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
             <span className="font-condensed text-[11px] text-[#15803d]">{saveMsg}</span>
           )}
 
-          {/* Suspend shortcut */}
+          {/* Suspend shortcut — requires confirmation to prevent accidental clicks */}
           {member.tierStatus !== 'cancelled' && (
             <button
-              onClick={() => { setTierStatus('cancelled'); void handleSaveTier() }}
+              onClick={() => {
+                const confirmed = window.confirm(
+                  `Are you sure you want to suspend ${member.displayName ?? member.fullName ?? member.email}? This will set their membership to cancelled.`
+                )
+                if (!confirmed) return
+                setTierStatus('cancelled')
+                void handleSaveTier()
+              }}
               className="font-condensed font-bold uppercase tracking-wide text-[11px] px-4 py-2 rounded transition-all ml-auto"
               style={{ color: '#ef0e30', border: '1px solid rgba(239,14,48,0.3)' }}
             >

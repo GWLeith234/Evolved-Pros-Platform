@@ -32,7 +32,7 @@ export default async function MessagesPage() {
   )
   const uniqueIds = [...new Set(otherIds)]
 
-  let profileMap: Record<string, { id: string; display_name: string | null; full_name: string | null; avatar_url: string | null }> = {}
+  const profileMap: Record<string, { id: string; display_name: string | null; full_name: string | null; avatar_url: string | null }> = {}
   if (uniqueIds.length > 0) {
     const { data: profiles } = await supabase
       .from('users')
@@ -45,7 +45,7 @@ export default async function MessagesPage() {
 
   // Get last messages
   const convIds = rows.map(c => c.id)
-  let lastMsgMap: Record<string, { body: string; created_at: string }> = {}
+  const lastMsgMap: Record<string, { body: string; created_at: string }> = {}
   if (convIds.length > 0) {
     const { data: lastMsgs } = await supabase
       .from('messages')
@@ -62,7 +62,7 @@ export default async function MessagesPage() {
   }
 
   // Get unread counts
-  let unreadMap: Record<string, number> = {}
+  const unreadMap: Record<string, number> = {}
   if (convIds.length > 0) {
     const { data: unreadRows } = await supabase
       .from('messages')
