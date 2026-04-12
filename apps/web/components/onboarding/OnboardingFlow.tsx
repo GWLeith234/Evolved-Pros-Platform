@@ -88,7 +88,7 @@ export function OnboardingFlow({ initialStep, userId, displayName, company }: Pr
           padding: '36px 32px',
         }}
       >
-        {currentStep === 1 && <OnboardingWelcome onContinue={advance} />}
+        {currentStep === 1 && <OnboardingWelcome displayName={displayName} onContinue={advance} />}
         {currentStep === 2 && <OnboardingProfile userId={userId} onContinue={advance} />}
         {currentStep === 3 && <OnboardingPillar onContinue={advance} />}
         {currentStep === 4 && <OnboardingPost displayName={displayName} company={company} onContinue={advance} />}
