@@ -18,8 +18,9 @@ export async function GET(request: Request) {
     .order('created_at', { ascending: true })
 
   if (error) {
-    console.error('[GET /api/media/comments]', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    // Graceful fallback if story_comments table doesn't exist yet (migration not run)
+    console.warn('[GET /api/media/comments]', error.message)
+    return NextResponse.json({ comments: [] })
   }
 
   const comments = (data ?? []) as {

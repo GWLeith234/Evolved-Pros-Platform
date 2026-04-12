@@ -21,20 +21,23 @@ export default async function MediaPage() {
     .eq('is_published', true)
     .order('published_at', { ascending: false })
 
-  // Fetch comment counts per story
-  const storyIds = (allStories ?? []).map(s => s.id)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: commentCounts } = storyIds.length > 0
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ? await (adminClient as any)
+  // Fetch comment counts per story (graceful no-op if story_comments table doesn't exist yet)
+  let countMap = new Map<string, number>()
+  try {
+    const storyIds = (allStories ?? []).map(s => s.id)
+    if (storyIds.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: commentCounts } = await (adminClient as any)
         .from('story_comments')
         .select('story_id')
         .in('story_id', storyIds)
-    : { data: [] }
 
-  const countMap = new Map<string, number>()
-  for (const row of (commentCounts ?? []) as { story_id: string }[]) {
-    countMap.set(row.story_id, (countMap.get(row.story_id) ?? 0) + 1)
+      for (const row of (commentCounts ?? []) as { story_id: string }[]) {
+        countMap.set(row.story_id, (countMap.get(row.story_id) ?? 0) + 1)
+      }
+    }
+  } catch (err) {
+    console.warn('[Media] story_comments query failed (table may not exist yet):', err)
   }
 
   const stories = (allStories ?? []).map(s => ({
