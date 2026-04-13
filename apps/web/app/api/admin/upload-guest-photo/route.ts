@@ -1,4 +1,15 @@
-console.log('[upload-guest-photo] MODULE LOADED')
+// Polyfill File for Node 18 — Supabase storage-js references File internally
+if (typeof globalThis.File === 'undefined') {
+  ;(globalThis as /* eslint-disable-line @typescript-eslint/no-explicit-any */ any).File = class File extends Blob {
+    name: string
+    lastModified: number
+    constructor(bits: BlobPart[], name: string, options?: FilePropertyBag) {
+      super(bits, options)
+      this.name = name
+      this.lastModified = options?.lastModified ?? Date.now()
+    }
+  }
+}
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
