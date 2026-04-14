@@ -70,10 +70,18 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
     <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.12)' }}>
       {/* Header */}
       <div
-        className="px-8 py-8"
-        style={{ backgroundColor: '#112535' }}
+        className="px-8 py-8 relative"
+        style={{
+          backgroundColor: '#112535',
+          backgroundImage: event.imageUrl ? `url(${event.imageUrl})` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
       >
-        <div className="flex items-start gap-6">
+        {event.imageUrl && (
+          <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.55)' }} />
+        )}
+        <div className="flex items-start gap-6 relative z-10">
           {/* Date block */}
           <div className="flex-shrink-0 w-16 text-center">
             <p

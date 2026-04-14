@@ -19,7 +19,7 @@ export default async function EventDetailPage({ params }: Props) {
     supabase.from('users').select('tier, role').eq('id', user.id).single(),
     supabase
       .from('events')
-      .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published')
+      .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, image_url, required_tier, registration_count, is_published')
       .eq('id', params.eventId)
       .single(),
     supabase
@@ -43,6 +43,7 @@ export default async function EventDetailPage({ params }: Props) {
     endsAt: row.ends_at,
     zoomUrl: isRegistered ? row.zoom_url : null,
     recordingUrl: row.recording_url,
+    imageUrl: row.image_url ?? null,
     requiredTier: row.required_tier as 'community' | 'pro' | null,
     registrationCount: row.registration_count,
     isRegistered,

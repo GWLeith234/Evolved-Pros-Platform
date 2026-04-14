@@ -8,6 +8,8 @@ const PUBLIC_ROUTES = [
   '/api/webhooks/vendasta',
   '/api/health',
   '/api/admin/upload-guest-photo',
+  '/api/admin/upload-event-image',
+  '/api/admin/upload-story-image',
   '/dev-login',
   '/api/dev-login',
   '/pricing',
