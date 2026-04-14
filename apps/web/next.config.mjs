@@ -8,7 +8,21 @@ const nextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: 'image.mux.com' },
+      { protocol: 'https', hostname: 'media.evolvedpros.com' },
     ],
+  },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/:path*',
+          has: [{ type: 'host', value: 'media.evolvedpros.com' }],
+          destination: '/media/:path*',
+        },
+      ],
+      afterFiles: [],
+      fallback: [],
+    }
   },
   async headers() {
     return [

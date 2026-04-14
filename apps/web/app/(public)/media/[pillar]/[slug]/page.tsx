@@ -69,7 +69,9 @@ export async function generateStaticParams() {
     .from('media_stories')
     .select('pillar, slug')
     .eq('is_published', true)
-  return (data ?? []).map(s => ({ pillar: s.pillar!, slug: s.slug }))
+  return (data ?? [])
+    .filter(s => s.pillar && s.slug)
+    .map(s => ({ pillar: String(s.pillar), slug: String(s.slug) }))
 }
 
 // ── Metadata ────────────────────────────────────────────────────────────────

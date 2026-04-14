@@ -23,6 +23,14 @@ const ADMIN_ROUTES = ['/admin']
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Media subdomain: skip all auth — entire site is public
+  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? ''
+  if (host.startsWith('media.')) {
+    const response = NextResponse.next()
+    response.headers.set('x-media-standalone', 'true')
+    return response
+  }
+
   // RSC prefetch requests must not be redirected — Next.js cannot parse a
   // redirect response as RSC data and reports it as a 503. Let these through;
   // the server component itself enforces auth for its own rendered output.
