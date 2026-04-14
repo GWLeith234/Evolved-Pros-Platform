@@ -30,13 +30,22 @@ export default async function AdminMediaPage() {
             Evolved Media
           </h1>
         </div>
-        <Link
-          href="/admin/media/new"
-          className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-5 py-2.5 rounded transition-opacity hover:opacity-90"
-          style={{ backgroundColor: '#1b3c5a', color: '#fff' }}
-        >
-          + New Story
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/media/ai"
+            className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-5 py-2.5 rounded transition-opacity hover:opacity-90"
+            style={{ backgroundColor: '#C9A84C', color: '#fff' }}
+          >
+            AI Engine
+          </Link>
+          <Link
+            href="/admin/media/new"
+            className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-5 py-2.5 rounded transition-opacity hover:opacity-90"
+            style={{ backgroundColor: '#1b3c5a', color: '#fff' }}
+          >
+            + New Story
+          </Link>
+        </div>
       </div>
 
       <MediaListClient initialStories={stories ?? []} pillarLabels={PILLAR_LABELS} />
