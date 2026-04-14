@@ -22,7 +22,7 @@ export default async function MediaPage() {
     .order('published_at', { ascending: false })
 
   // Fetch comment counts per story (graceful no-op if story_comments table doesn't exist yet)
-  let countMap = new Map<string, number>()
+  const countMap = new Map<string, number>()
   try {
     const storyIds = (allStories ?? []).map(s => s.id)
     if (storyIds.length > 0) {

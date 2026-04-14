@@ -98,12 +98,12 @@ const TIERS: Tier[] = [
 
 // ── Comparison table ─────────────────────────────────────────────────────────────
 
-type Symbol = 'yes' | 'half' | 'no'
+type TierSymbol = 'yes' | 'half' | 'no'
 interface ComparisonRow {
   label: string
-  community: Symbol
-  vip: Symbol
-  pro: Symbol
+  community: TierSymbol
+  vip: TierSymbol
+  pro: TierSymbol
 }
 
 const COMPARISON: ComparisonRow[] = [
@@ -118,7 +118,7 @@ const COMPARISON: ComparisonRow[] = [
   { label: 'Bi-weekly mastermind', community: 'no',   vip: 'no',   pro: 'yes' },
 ]
 
-function SymbolCell({ value }: { value: Symbol }) {
+function SymbolCell({ value }: { value: TierSymbol }) {
   if (value === 'yes') return <span style={{ color: '#0ABFA3', fontWeight: 700 }}>&#10003;</span>
   if (value === 'half') return <span style={{ color: '#C9A84C', fontWeight: 600, fontSize: 11 }}>3 of 6</span>
   return <span style={{ color: 'rgba(245,240,232,0.2)' }}>&ndash;</span>
