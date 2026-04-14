@@ -1,6 +1,7 @@
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { MediaStoryForm } from '../../MediaStoryForm'
+import { CrossPostPanel } from '@/components/admin/media/CrossPostPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,6 +42,15 @@ export default async function EditMediaStoryPage({ params }: { params: { id: str
           is_featured: story.is_featured ?? false,
         }}
       />
+
+      {story.is_published && (
+        <CrossPostPanel
+          title={story.title}
+          body={story.body ?? ''}
+          slug={story.slug}
+          pillar={story.pillar ?? ''}
+        />
+      )}
     </div>
   )
 }
