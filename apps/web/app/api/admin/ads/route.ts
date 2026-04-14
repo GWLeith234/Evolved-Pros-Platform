@@ -58,6 +58,7 @@ export async function POST(request: Request) {
         sort_order: typeof body.sort_order === 'number' ? body.sort_order : 0,
         // keep placement for backwards compatibility with sidebar ad query
         placement: zone === 'A' ? 'sidebar' : 'topnav',
+        placements: Array.isArray(body.placements) ? body.placements : ['platform'],
       })
       .select()
       .single()

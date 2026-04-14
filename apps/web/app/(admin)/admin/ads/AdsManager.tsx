@@ -29,6 +29,7 @@ interface AdFormValues {
   startDate: string
   endDate: string
   isActive: boolean
+  placements: string[]
 }
 
 const ZONE_LABELS: Record<Zone, string> = {
@@ -55,6 +56,7 @@ const DEFAULT_FORM: AdFormValues = {
   startDate: '',
   endDate: '',
   isActive: true,
+  placements: ['platform'],
 }
 
 function adStatus(ad: Ad): 'active' | 'scheduled' | 'expired' | 'inactive' {
@@ -131,6 +133,7 @@ function AdForm({
       start_date: values.startDate || null,
       end_date: values.endDate || null,
       is_active: values.isActive,
+      placements: values.placements,
     }
 
     try {
@@ -297,6 +300,32 @@ function AdForm({
         </span>
       </div>
 
+      {/* Placements */}
+      <div>
+        <label className={labelClass}>Placements</label>
+        <div className="flex items-center gap-4">
+          {(['platform', 'media'] as const).map(p => {
+            const checked = values.placements.includes(p)
+            return (
+              <label key={p} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => {
+                    const next = checked
+                      ? values.placements.filter(x => x !== p)
+                      : [...values.placements, p]
+                    set('placements', next.length ? next : ['platform'])
+                  }}
+                  className="accent-[#68a2b9]"
+                />
+                <span className="font-condensed font-semibold text-[12px] text-[#1b3c5a] capitalize">{p}</span>
+              </label>
+            )
+          })}
+        </div>
+      </div>
+
       {/* Actions */}
       <div className="flex items-center justify-end gap-3 pt-2" style={{ borderTop: '1px solid rgba(27,60,90,0.08)' }}>
         <button
@@ -420,6 +449,7 @@ function ZonePanel({
               startDate: editingAd.start_date ? editingAd.start_date.slice(0, 10) : '',
               endDate: editingAd.end_date ? editingAd.end_date.slice(0, 10) : '',
               isActive: editingAd.is_active,
+              placements: (editingAd as Record<string, unknown>).placements as string[] ?? ['platform'],
             }}
             onSaved={handleSaved}
             onCancel={() => setEditingId(null)}

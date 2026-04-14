@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { getPillarLabel, getPillarColor } from '@/lib/pillars'
+import { MediaAdZone } from '@/components/media/MediaAdZone'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -113,7 +114,7 @@ export function MediaPortalClient({
 
       {/* ── SECTION 3: LEADERBOARD AD ZONE ── */}
       <div className="hidden md:flex items-center justify-center" style={{ backgroundColor: '#fff', borderTop: '0.5px solid rgba(10,15,24,.1)', borderBottom: '0.5px solid rgba(10,15,24,.1)', padding: '8px 24px', gap: 12 }}>
-        <div style={{ maxWidth: 728, width: '100%', height: 60, backgroundColor: 'rgba(10,15,24,.06)', border: '0.5px solid rgba(10,15,24,.12)', borderRadius: 4 }} />
+        <div style={{ maxWidth: 728, width: '100%' }}><MediaAdZone zone="C" /></div>
       </div>
 
       {/* ── SECTION 4: PILLAR SECTION NAV ── */}
@@ -185,7 +186,7 @@ export function MediaPortalClient({
               <div key={section.key}>
                 {/* Inline ad after 2nd section */}
                 {idx === 2 && activePillar === 'all' && (
-                  <div className="hidden md:block" style={{ height: 80, backgroundColor: 'rgba(10,15,24,.06)', border: '0.5px solid rgba(10,15,24,.12)', borderRadius: 4, margin: '6px 0 20px' }} />
+                  <div className="hidden md:block" style={{ margin: '6px 0 20px' }}><MediaAdZone zone="A" /></div>
                 )}
 
                 {/* Section header */}
@@ -237,7 +238,7 @@ export function MediaPortalClient({
           <div className="hidden md:block" style={{ paddingLeft: 20 }}>
 
             {/* 300x250 Ad */}
-            <div style={{ height: 250, backgroundColor: 'rgba(10,15,24,.06)', border: '0.5px solid rgba(10,15,24,.12)', borderRadius: 4, marginBottom: 14 }} />
+            <MediaAdZone zone="B" />
 
             {/* Trending Now */}
             {trending.length > 0 && (
@@ -266,7 +267,7 @@ export function MediaPortalClient({
             </div>
 
             {/* 160x200 Ad */}
-            <div style={{ height: 200, backgroundColor: 'rgba(10,15,24,.06)', border: '0.5px solid rgba(10,15,24,.12)', borderRadius: 4, marginBottom: 14 }} />
+            <MediaAdZone zone="D" />
 
             {/* Latest Podcast — hidden until real episode data is wired */}
           </div>
