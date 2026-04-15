@@ -458,6 +458,15 @@ export function Sidebar({ profile, unreadPosts = 0, upcomingEvents = 0 }: Sideba
               }}
               active={/^\/admin\/branding/.test(pathname)}
             />
+            <SidebarNavItem
+              item={{
+                label: 'Scheduler',
+                href: '/admin/scheduler',
+                match: /^\/admin\/scheduler/,
+                icon: <CalendarIcon />,
+              }}
+              active={/^\/admin\/scheduler/.test(pathname)}
+            />
           </SidebarSection>
         )}
       </div>

@@ -11,6 +11,7 @@ const PUBLIC_ROUTES = [
   '/api/admin/upload-event-image',
   '/api/admin/upload-story-image',
   '/api/admin/images/',
+  '/api/cron/publish-posts',
   '/dev-login',
   '/api/dev-login',
   '/pricing',
