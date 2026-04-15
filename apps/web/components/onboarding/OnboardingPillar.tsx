@@ -3,7 +3,7 @@
 import { useState } from 'react'
 
 interface Props {
-  onContinue: () => void
+  onContinue: (color?: string) => void
 }
 
 const PILLARS = [
@@ -29,7 +29,8 @@ export function OnboardingPillar({ onContinue }: Props) {
       })
     }
     setSaving(false)
-    onContinue()
+    const pillar = PILLARS.find(p => p.number === selected)
+    onContinue(pillar?.color)
   }
 
   const selectedPillar = PILLARS.find(p => p.number === selected)
