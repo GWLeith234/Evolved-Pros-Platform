@@ -69,6 +69,20 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
   const [loadingReplies, setLoadingReplies] = useState(false)
   const [isDark, setIsDark] = useState(true)
 
+  // Use locally-tracked replies when present; otherwise fall back to server replyCount
+  const totalReplies = replies.length > 0 ? replies.length : (post.replyCount ?? 0)
+
+  if (isAdmin) {
+    // TEMP: diagnostic for PILL-FIX-2 — remove once pill confirmed rendering
+    console.log('[PostCard pill]', {
+      postId: post.id,
+      isAdmin,
+      replyCount: post.replyCount,
+      repliesLength: replies.length,
+      totalReplies,
+    })
+  }
+
   useEffect(() => {
     setShowReplies(false)
   }, [activeFilter])
@@ -256,7 +270,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
               </span>
             )}
             {/* Unanswered pill — admin only, hides as soon as a reply lands */}
-            {isAdmin && post.replyCount === 0 && replies.length === 0 && (
+            {isAdmin && totalReplies === 0 && (
               <span
                 style={{
                   fontSize: '9px',
