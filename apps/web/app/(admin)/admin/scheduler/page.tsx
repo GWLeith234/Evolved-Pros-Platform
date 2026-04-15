@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { PostQueue } from '@/components/scheduler/PostQueue'
 
 interface ScheduledPost {
@@ -15,19 +15,6 @@ export default function SchedulerPage() {
   const [posts, setPosts] = useState<ScheduledPost[]>([])
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => { loadPosts() }, [])
-
-  async function loadPosts() {
-    const res = await fetch('/api/admin/scheduler/approve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ postId: '__list__', action: 'approve' }),
-    }).catch(() => null)
-
-    // Direct Supabase query via a simple GET pattern
-    // For now, just fetch scheduled posts through the generate endpoint info
-  }
 
   async function handleGenerate() {
     setGenerating(true)

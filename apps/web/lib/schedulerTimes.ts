@@ -14,9 +14,9 @@ export const OPTIMAL_SLOTS: OptimalSlot[] = [
   { day: 'Tuesday',   dayIndex: 2, utcHour: 14, minute: 0, displayTime: '7:00 AM MST',  label: 'Peak engagement window', tier: 'peak' },
   { day: 'Wednesday', dayIndex: 3, utcHour: 19, minute: 0, displayTime: '12:00 PM MST', label: 'Midweek lunch window',   tier: 'peak' },
   { day: 'Thursday',  dayIndex: 4, utcHour: 14, minute: 0, displayTime: '7:00 AM MST',  label: 'Peak engagement window', tier: 'peak' },
-  { day: 'Friday',    dayIndex: 6, utcHour: 0,  minute: 0, displayTime: '5:00 PM MST',  label: 'End-of-week reflection', tier: 'good' },
+  { day: 'Friday',    dayIndex: 5, utcHour: 0,  minute: 0, displayTime: '5:00 PM MST',  label: 'End-of-week reflection', tier: 'good' },
   { day: 'Saturday',  dayIndex: 6, utcHour: 15, minute: 0, displayTime: '8:00 AM MST',  label: 'High-performer weekend', tier: 'good' },
-  { day: 'Sunday',    dayIndex: 1, utcHour: 2,  minute: 0, displayTime: '7:00 PM MST',  label: 'Sunday prep mindset',    tier: 'good' },
+  { day: 'Sunday',    dayIndex: 0, utcHour: 2,  minute: 0, displayTime: '7:00 PM MST',  label: 'Sunday prep mindset',    tier: 'good' },
 ]
 
 export const PILLAR_NAMES = [

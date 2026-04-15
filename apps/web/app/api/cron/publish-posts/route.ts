@@ -20,6 +20,5 @@ export async function GET() {
   }
 
   const count = (data ?? []).length
-  if (count > 0) console.log(`[cron/publish-posts] Published ${count} scheduled posts`)
   return NextResponse.json({ published: count })
 }
