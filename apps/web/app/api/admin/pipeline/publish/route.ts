@@ -7,9 +7,17 @@ import { adminClient } from '@/lib/supabase/admin'
 export async function POST(request: Request) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Use adminClient + email to avoid two-UUID problem
+  const { data: profile } = await adminClient
+    .from('users')
+    .select('id, role')
+    .eq('email', user.email)
+    .single()
+  if (!profile || profile.role !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   let body: Record<string, unknown>
   try { body = await request.json() } catch {
@@ -22,18 +30,22 @@ export async function POST(request: Request) {
 
   if (!type || !content) return NextResponse.json({ error: 'type and content required' }, { status: 422 })
 
-  // Get George's user ID
-  const { data: george } = await adminClient.from('users').select('id').eq('email', 'geoleith@gmail.com').single()
-  if (!george) return NextResponse.json({ error: 'Author not found' }, { status: 500 })
+  // Use the resolved profile.id as author_id
+  const authorId = profile.id
 
   // Get general channel
-  const { data: channel } = await supabase.from('channels').select('id').ilike('name', '%general%').limit(1).single()
+  const { data: channel } = await adminClient
+    .from('channels')
+    .select('id')
+    .ilike('name', '%general%')
+    .limit(1)
+    .maybeSingle()
 
   try {
     if (type === 'community') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await (adminClient as any).from('posts').insert({
-        author_id: george.id,
+        author_id: authorId,
         channel_id: channel?.id ?? null,
         body: typeof content.body === 'string' ? content.body : String(content),
         like_count: 0,
@@ -61,7 +73,7 @@ export async function POST(request: Request) {
     }
 
     if (type === 'social') {
-      return NextResponse.json({ ok: true, type: 'social', message: 'Copy to clipboard — no auto-posting' })
+      return NextResponse.json({ ok: true, type: 'social', message: 'Copy to clipboard' })
     }
 
     return NextResponse.json({ error: `Unknown type: ${type}` }, { status: 422 })
