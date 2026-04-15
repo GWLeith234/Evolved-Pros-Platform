@@ -12,6 +12,7 @@ import { ParticleBurst } from './ParticleBurst'
 import { CelebrationOverlay } from './CelebrationOverlay'
 import { ReturnBar } from './ReturnBar'
 import { NudgeCard } from './NudgeCard'
+import { StreakCelebration } from '@/components/ui/StreakCelebration'
 import { useToast } from '@/lib/toast'
 
 interface CompoundBoardClientProps {
@@ -282,6 +283,11 @@ export function CompoundBoardClient({ userId: _userId, activePillar }: CompoundB
           onDismiss={() => setShowCelebration(false)}
         />
       )}
+
+      <StreakCelebration
+        streak={streak.currentStreak}
+        onDismiss={() => {}}
+      />
 
       {editingHabit !== undefined && (
         <HabitEditorModal
