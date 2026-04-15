@@ -10,6 +10,7 @@ const PUBLIC_ROUTES = [
   '/api/admin/upload-guest-photo',
   '/api/admin/upload-event-image',
   '/api/admin/upload-story-image',
+  '/api/admin/images/',
   '/dev-login',
   '/api/dev-login',
   '/pricing',
