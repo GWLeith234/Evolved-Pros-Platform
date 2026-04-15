@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { ImagePicker } from '@/components/ui/ImagePicker'
 
 interface StoryData {
   id?: string
@@ -191,8 +192,15 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className={labelClass}>Featured Image URL</label>
-          <input type="text" value={imageUrl} onChange={e => setImageUrl(e.target.value)} className={inputClass} style={inputStyle} placeholder="https://..." />
+          <label className={labelClass}>Featured Image</label>
+          <ImagePicker
+            mode="full"
+            aspectRatio="16/9"
+            aiPrompt={title || 'professional sales strategy'}
+            bucket="Branding"
+            onSelect={url => setImageUrl(url)}
+            currentUrl={imageUrl || undefined}
+          />
         </div>
         <div>
           <label className={labelClass}>Author</label>
