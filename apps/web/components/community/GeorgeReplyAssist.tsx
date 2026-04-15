@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import type { Reply } from '@/lib/community/types'
 
 interface GeorgeReplyAssistProps {
   postId: string
   postBody: string
   authorName: string
   pillarTag?: string
-  onReplySent: () => void
+  onReplySent: (reply: Reply) => void
 }
 
 const GOLD = '#C9A84C'
@@ -42,20 +43,21 @@ export function GeorgeReplyAssist({ postId, postBody, authorName, pillarTag, onR
 
   async function handleSend(text: string) {
     setSending(true)
+    setError(null)
     try {
       const res = await fetch(`/api/posts/${postId}/replies`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ body: text }),
       })
+      const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        throw new Error(data.error ?? 'Send failed')
+        throw new Error((data as { error?: string }).error ?? 'Send failed')
       }
-      onReplySent()
       setMode('button')
       setReplies([])
       setSelectedIndex(null)
+      onReplySent(data as Reply)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Send failed')
     } finally {

@@ -330,7 +330,10 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
             postBody={post.body}
             authorName={post.author.displayName}
             pillarTag={post.pillarTag ?? undefined}
-            onReplySent={() => setShowReplies(true)}
+            onReplySent={reply => {
+              setReplies(prev => [...prev, reply])
+              setShowReplies(true)
+            }}
           />
         </div>
       )}
