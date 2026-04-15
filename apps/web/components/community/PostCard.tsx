@@ -8,6 +8,7 @@ import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { MemberBadge } from '@/components/ui/MemberBadge'
 import { Tooltip } from '@/components/ui/Tooltip'
 import type { Post, Reply, PillarTag } from '@/lib/community/types'
+import { GeorgeReplyAssist } from './GeorgeReplyAssist'
 
 interface PostCardProps {
   post: Post & { replies?: Reply[] }
@@ -16,6 +17,7 @@ interface PostCardProps {
   onReact: (postId: string, reactionType: string) => void
   onBookmark: (postId: string) => void
   activeFilter?: string
+  isAdmin?: boolean
 }
 
 function timeAgo(dateStr: string): string {
@@ -61,7 +63,7 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
   )
 }
 
-export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark, activeFilter }: PostCardProps) {
+export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark, activeFilter, isAdmin }: PostCardProps) {
   const [showReplies, setShowReplies] = useState(false)
   const [replies, setReplies] = useState<Reply[]>(post.replies ?? [])
   const [loadingReplies, setLoadingReplies] = useState(false)
@@ -318,6 +320,18 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
               onReplySubmit={handleReplySubmit}
             />
           )}
+        </div>
+      )}
+
+      {isAdmin && (
+        <div className="px-4 pb-3">
+          <GeorgeReplyAssist
+            postId={post.id}
+            postBody={post.body}
+            authorName={post.author.displayName}
+            pillarTag={post.pillarTag ?? undefined}
+            onReplySent={() => setShowReplies(true)}
+          />
         </div>
       )}
     </div>
