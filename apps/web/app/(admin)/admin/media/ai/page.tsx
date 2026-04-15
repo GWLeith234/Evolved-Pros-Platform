@@ -216,7 +216,7 @@ export default function ContentEnginePage() {
             />
           </div>
           <div className="flex gap-3">
-            <button type="button" onClick={() => setStep(1)} className="font-condensed font-semibold text-[11px] uppercase tracking-wide" style={{ color: '#7a8a96' }}>\u2190 Back</button>
+            <button type="button" onClick={() => setStep(1)} className="font-condensed font-semibold text-[11px] uppercase tracking-wide" style={{ color: '#7a8a96' }}>← Back</button>
             <button type="button" onClick={handleDraft} disabled={drafting} className={btnPrimary}
               style={{ backgroundColor: '#1b3c5a', color: '#fff', opacity: drafting ? 0.5 : 1 }}>
               {drafting ? 'Generating Draft...' : 'Generate Draft \u2192'}
@@ -248,7 +248,7 @@ export default function ContentEnginePage() {
             </div>
           )}
           <div className="flex gap-3">
-            <button type="button" onClick={() => setStep(2)} className="font-condensed font-semibold text-[11px] uppercase tracking-wide" style={{ color: '#7a8a96' }}>\u2190 Back</button>
+            <button type="button" onClick={() => setStep(2)} className="font-condensed font-semibold text-[11px] uppercase tracking-wide" style={{ color: '#7a8a96' }}>← Back</button>
             <button type="button" onClick={() => setStep(4)} className={btnPrimary} style={{ backgroundColor: '#1b3c5a', color: '#fff' }}>Review & Publish \u2192</button>
           </div>
         </div>
@@ -276,7 +276,7 @@ export default function ContentEnginePage() {
             </div>
           </div>
           <div className="flex gap-3">
-            <button type="button" onClick={() => setStep(3)} className="font-condensed font-semibold text-[11px] uppercase tracking-wide" style={{ color: '#7a8a96' }}>\u2190 Edit Draft</button>
+            <button type="button" onClick={() => setStep(3)} className="font-condensed font-semibold text-[11px] uppercase tracking-wide" style={{ color: '#7a8a96' }}>← Edit Draft</button>
             <button type="button" onClick={() => handlePublish('draft')} disabled={publishing} className={btnPrimary}
               style={{ backgroundColor: '#7a8a96', color: '#fff', opacity: publishing ? 0.5 : 1 }}>Save Draft</button>
             <button type="button" onClick={() => handlePublish('published')} disabled={publishing} className={btnPrimary}
