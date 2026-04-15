@@ -255,6 +255,25 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
                 {pillarLabel}
               </span>
             )}
+            {/* Unanswered pill — admin only, hides as soon as a reply lands */}
+            {isAdmin && post.replyCount === 0 && replies.length === 0 && (
+              <span
+                style={{
+                  fontSize: '9px',
+                  fontWeight: 500,
+                  padding: '2px 8px',
+                  borderRadius: '3px',
+                  background: 'rgba(201,168,76,0.12)',
+                  color: '#C9A84C',
+                  border: '1px solid rgba(201,168,76,0.25)',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Unanswered
+              </span>
+            )}
           </div>
           <p
             className="font-condensed font-semibold uppercase text-[10px] mt-0.5"
