@@ -157,6 +157,7 @@ export function Capstone({ courseId, pillarNumber, memberName }: Props) {
 
           {/* Member name + date */}
           <p
+            suppressHydrationWarning
             style={{
               fontSize: '15px', color: 'rgba(250,249,247,0.5)',
               margin: '0 0 40px', lineHeight: 1.6,

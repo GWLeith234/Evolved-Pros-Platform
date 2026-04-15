@@ -81,7 +81,7 @@ export function MediaPortalClient({
 
       {/* ── SECTION 1: TOP UTILITY BAR ── */}
       <div className="flex items-center justify-between px-6" style={{ backgroundColor: '#0A0F18', padding: '6px 24px' }}>
-        <span style={{ fontSize: 10, color: 'rgba(245,240,232,.4)', fontFamily: 'sans-serif' }}>
+        <span suppressHydrationWarning style={{ fontSize: 10, color: 'rgba(245,240,232,.4)', fontFamily: 'sans-serif' }}>
           {formatToday()} &middot; evolvedpros.com
         </span>
         <div className="flex items-center" style={{ gap: 14 }}>
@@ -107,7 +107,7 @@ export function MediaPortalClient({
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(10,15,24,.6)', fontFamily: 'sans-serif' }}>{formatDate()}</div>
+          <div suppressHydrationWarning style={{ fontSize: 12, fontWeight: 500, color: 'rgba(10,15,24,.6)', fontFamily: 'sans-serif' }}>{formatDate()}</div>
           <div style={{ fontSize: 10, color: 'rgba(10,15,24,.4)', fontFamily: 'sans-serif' }}>Powered by Evolved Pros</div>
         </div>
       </div>
@@ -164,7 +164,7 @@ export function MediaPortalClient({
                     <div style={{ fontSize: 9, textTransform: 'uppercase', color: pColor(featured.pillar), fontWeight: 500, fontFamily: 'sans-serif', marginBottom: 4 }}>{pLabel(featured.pillar)}</div>
                     <div style={{ fontFamily: 'Georgia, serif', fontSize: 17, fontWeight: 500, color: '#0A0F18', lineHeight: 1.3, marginBottom: 6 }}>{featured.title}</div>
                     {featured.excerpt && <div style={{ fontSize: 12, color: 'rgba(10,15,24,.6)', lineHeight: 1.6, fontFamily: 'sans-serif', marginBottom: 6 }}>{featured.excerpt}</div>}
-                    <div style={{ fontSize: 10, color: 'rgba(10,15,24,.4)', fontFamily: 'sans-serif' }}>{featured.author ?? 'George Leith'} &middot; {readTime(featured.body)} read &middot; {timeAgo(featured.published_at)}{featured.commentCount ? ` · ${commentLabel(featured.commentCount)}` : ''}</div>
+                    <div suppressHydrationWarning style={{ fontSize: 10, color: 'rgba(10,15,24,.4)', fontFamily: 'sans-serif' }}>{featured.author ?? 'George Leith'} &middot; {readTime(featured.body)} read &middot; {timeAgo(featured.published_at)}{featured.commentCount ? ` · ${commentLabel(featured.commentCount)}` : ''}</div>
                   </div>
                 </Link>
                 {/* Side stories */}
@@ -205,7 +205,7 @@ export function MediaPortalClient({
                       <div style={{ padding: '9px 10px' }}>
                         <div style={{ fontSize: 8, textTransform: 'uppercase', color: section.color, fontWeight: 500, fontFamily: 'sans-serif', marginBottom: 3 }}>{section.label}</div>
                         <div style={{ fontSize: 13, fontWeight: 500, color: '#0A0F18', lineHeight: 1.35, fontFamily: 'sans-serif', marginBottom: 4 }}>{section.stories[0].title}</div>
-                        <div style={{ fontSize: 9, color: 'rgba(10,15,24,.4)', fontFamily: 'sans-serif' }}>{readTime(section.stories[0].body)} read &middot; {timeAgo(section.stories[0].published_at)}{section.stories[0].commentCount ? ` · ${commentLabel(section.stories[0].commentCount)}` : ''}</div>
+                        <div suppressHydrationWarning style={{ fontSize: 9, color: 'rgba(10,15,24,.4)', fontFamily: 'sans-serif' }}>{readTime(section.stories[0].body)} read &middot; {timeAgo(section.stories[0].published_at)}{section.stories[0].commentCount ? ` · ${commentLabel(section.stories[0].commentCount)}` : ''}</div>
                       </div>
                     </Link>
                   )}
