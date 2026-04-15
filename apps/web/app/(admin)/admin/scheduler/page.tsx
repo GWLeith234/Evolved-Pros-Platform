@@ -53,14 +53,31 @@ export default function SchedulerPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Action failed')
-      setPosts(prev => prev.map(p => p.id === postId ? { ...p, ...data.post } : p))
+      if (action === 'reject') {
+        setPosts(prev => prev.filter(p => p.id !== postId))
+      } else {
+        setPosts(prev => prev.map(p => p.id === postId ? { ...p, status: 'approved', ...data.post } : p))
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Action failed')
     }
   }
 
+  async function handleApproveAll() {
+    const pendingIds = posts.filter(p => p.status === 'scheduled').map(p => p.id)
+    if (!pendingIds.length) return
+    await Promise.all(pendingIds.map(id =>
+      fetch('/api/admin/scheduler/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId: id, action: 'approve' }),
+      })
+    ))
+    setPosts(prev => prev.map(p => p.status === 'scheduled' ? { ...p, status: 'approved' } : p))
+  }
+
   const pending = posts.filter(p => p.status === 'scheduled')
-  const approved = posts.filter(p => p.status === 'published')
+  const approved = posts.filter(p => p.status === 'approved' || p.status === 'published')
 
   return (
     <div className="px-8 py-6 max-w-4xl">
@@ -75,10 +92,20 @@ export default function SchedulerPage() {
           </h1>
         </div>
         <div className="flex items-center gap-3">
-          {posts.length > 0 && (
-            <span className="font-condensed font-bold text-[11px] px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(201,168,76,0.1)', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.2)' }}>
-              {pending.length} queued
-            </span>
+          {pending.length > 0 && (
+            <>
+              <span className="font-condensed font-bold text-[11px] px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(201,168,76,0.1)', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.2)' }}>
+                {pending.length} queued
+              </span>
+              <button
+                type="button"
+                onClick={handleApproveAll}
+                className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] px-4 py-2 rounded transition-opacity hover:opacity-90"
+                style={{ backgroundColor: 'rgba(10,191,163,0.12)', color: '#0ABFA3', border: '1px solid rgba(10,191,163,0.2)' }}
+              >
+                Approve all pending
+              </button>
+            </>
           )}
           <button
             type="button"
