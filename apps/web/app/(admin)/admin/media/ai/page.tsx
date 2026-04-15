@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { PILLAR_CONFIG } from '@/lib/pillars'
+import { ImagePicker } from '@/components/ui/ImagePicker'
 
 const PILLARS = Object.entries(PILLAR_CONFIG).map(([key, val]) => ({
   key,
@@ -28,14 +29,6 @@ interface DraftData {
   metaDescription: string
 }
 
-interface UnsplashPhoto {
-  id: string
-  url: string
-  thumb: string
-  credit: string
-  link: string
-}
-
 export default function ContentEnginePage() {
   const router = useRouter()
   const [step, setStep] = useState(1)
@@ -48,8 +41,7 @@ export default function ContentEnginePage() {
   const [researching, setResearching] = useState(false)
   const [research, setResearch] = useState<ResearchData | null>(null)
   const [selectedAngle, setSelectedAngle] = useState(0)
-  const [photos, setPhotos] = useState<UnsplashPhoto[]>([])
-  const [selectedPhoto, setSelectedPhoto] = useState<UnsplashPhoto | null>(null)
+  const [heroImageUrl, setHeroImageUrl] = useState<string | null>(null)
 
   // Step 3
   const [drafting, setDrafting] = useState(false)
@@ -67,19 +59,14 @@ export default function ContentEnginePage() {
     setResearching(true)
     setError(null)
     try {
-      const [resRes, photoRes] = await Promise.all([
-        fetch('/api/admin/media/research', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ topic }),
-        }),
-        fetch(`/api/admin/unsplash?query=${encodeURIComponent(topic)}`),
-      ])
+      const resRes = await fetch('/api/admin/media/research', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic }),
+      })
       const resData = await resRes.json()
       if (!resRes.ok) throw new Error(resData.error ?? 'Research failed')
       setResearch(resData.research)
-      const photoData = await photoRes.json()
-      setPhotos(photoData.photos ?? [])
       setStep(2)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Research failed')
@@ -125,7 +112,7 @@ export default function ContentEnginePage() {
         body: JSON.stringify({
           title: editTitle, slug: editSlug, body: editBody, pillar: pillar || null,
           excerpt: editMeta, seo_description: editMeta, seo_title: editTitle,
-          featured_image_url: selectedPhoto?.url ?? null, story_type: 'original',
+          featured_image_url: heroImageUrl ?? null, story_type: 'original',
           author: 'George Leith', is_published: status === 'published', is_featured: false,
         }),
       })
@@ -217,21 +204,17 @@ export default function ContentEnginePage() {
               ))}
             </div>
           </div>
-          {photos.length > 0 && (
-            <div>
-              <p className={labelClass}>Featured Image</p>
-              <div className="grid grid-cols-3 gap-2">
-                {photos.map(p => (
-                  <button key={p.id} type="button" onClick={() => setSelectedPhoto(selectedPhoto?.id === p.id ? null : p)}
-                    className="rounded overflow-hidden transition-all" style={{ border: `3px solid ${selectedPhoto?.id === p.id ? '#68a2b9' : 'transparent'}` }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.thumb} alt={p.credit} className="w-full h-24 object-cover" />
-                    <p className="font-condensed text-[8px] px-1 py-0.5 truncate" style={{ color: '#7a8a96' }}>{p.credit}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          <div>
+            <p className={labelClass}>Featured Image</p>
+            <ImagePicker
+              mode="full"
+              aspectRatio="16/9"
+              aiPrompt={research.summary?.slice(0, 200) || topic}
+              bucket="Branding"
+              onSelect={url => setHeroImageUrl(url)}
+              currentUrl={heroImageUrl ?? undefined}
+            />
+          </div>
           <div className="flex gap-3">
             <button type="button" onClick={() => setStep(1)} className="font-condensed font-semibold text-[11px] uppercase tracking-wide" style={{ color: '#7a8a96' }}>\u2190 Back</button>
             <button type="button" onClick={handleDraft} disabled={drafting} className={btnPrimary}
@@ -257,12 +240,11 @@ export default function ContentEnginePage() {
             <textarea value={editBody} onChange={e => setEditBody(e.target.value)} rows={20}
               className={`${inputClass} resize-y`} style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '12px', lineHeight: '1.6' }} />
           </div>
-          {selectedPhoto && (
+          {heroImageUrl && (
             <div>
               <label className={labelClass}>Featured Image</label>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={selectedPhoto.url} alt="" className="w-full rounded max-h-60 object-cover" />
-              <p className="font-condensed text-[9px] mt-1" style={{ color: '#7a8a96' }}>Photo by {selectedPhoto.credit} on Unsplash</p>
+              <img src={heroImageUrl} alt="" className="w-full rounded max-h-60 object-cover" />
             </div>
           )}
           <div className="flex gap-3">
@@ -276,9 +258,9 @@ export default function ContentEnginePage() {
       {step === 4 && (
         <div className="space-y-6">
           <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.1)' }}>
-            {selectedPhoto && (
+            {heroImageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={selectedPhoto.url} alt="" className="w-full h-48 object-cover" />
+              <img src={heroImageUrl} alt="" className="w-full h-48 object-cover" />
             )}
             <div className="p-5">
               {pillar && (
