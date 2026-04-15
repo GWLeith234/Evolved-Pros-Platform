@@ -345,6 +345,7 @@ export function UnifiedCommunityPage({
                     onReact={handleReact}
                     onBookmark={handleBookmark}
                     activeFilter={activeFilter}
+                    isAdmin={currentUser.isAdmin}
                   />
                   {/* Inject ad after every 3rd post */}
                   {(index + 1) % 3 === 0 && ads.length > 0 && (
