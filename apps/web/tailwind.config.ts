@@ -20,6 +20,7 @@ const config: Config = {
         display:   ['"Playfair Display"', 'Georgia', 'serif'],
         condensed: ['"Barlow Condensed"', 'sans-serif'],
         body:      ['Barlow', 'sans-serif'],
+        serif:     ['Merriweather', 'Georgia', 'serif'],
       },
     },
   },

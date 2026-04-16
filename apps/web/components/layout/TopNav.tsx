@@ -38,7 +38,7 @@ function getInitials(name: string | null | undefined): string {
 }
 
 
-interface NavItem { label: string; href: string; minTier?: 'vip' | 'pro' }
+interface NavItem { label: string; href: string; minTier?: 'vip' | 'pro'; highlight?: boolean }
 
 const NAV_ITEMS: NavItem[] = [
   { label: 'Home',            href: '/home' },
@@ -47,6 +47,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Academy',         href: '/academy',  minTier: 'vip' },
   { label: 'Discipline',      href: '/habits',   minTier: 'vip' },
   { label: 'Podcast',         href: '/podcast' },
+  { label: 'Media',           href: '/media', highlight: true },
 ]
 
 const TIER_RANK: Record<string, number> = { community: 1, vip: 2, pro: 3 }
@@ -136,9 +137,13 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
                 key={item.href}
                 href={item.href}
                 className="font-condensed uppercase tracking-[0.03em] text-[12px] px-3 py-1.5 rounded transition-colors"
-                style={{ color: active ? '#C9A84C' : 'rgba(255,255,255,0.45)', fontWeight: active ? 600 : 500 }}
+                style={{
+                  color: item.highlight ? '#C9A84C' : active ? '#ffffff' : 'rgba(255,255,255,0.45)',
+                  fontWeight: item.highlight || active ? 600 : 500,
+                  borderBottom: item.highlight && active ? '2px solid #C9A84C' : '2px solid transparent',
+                }}
               >
-                {item.label}
+                {item.label}{item.highlight ? ' ↗' : ''}
               </Link>
             )
           })}

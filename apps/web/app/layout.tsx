@@ -1,6 +1,6 @@
 // cache-bust: 2026-03-25
 import type { Metadata } from 'next'
-import { Playfair_Display, Barlow_Condensed, Barlow, Bebas_Neue } from 'next/font/google'
+import { Playfair_Display, Barlow_Condensed, Barlow, Bebas_Neue, Merriweather } from 'next/font/google'
 import { createClient } from '@/lib/supabase/server'
 import { ThemeInit } from '@/components/ThemeInit'
 import './globals.css'
@@ -15,7 +15,7 @@ const playfair = Playfair_Display({
 const barlowCondensed = Barlow_Condensed({
   subsets: ['latin'],
   variable: '--font-condensed',
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '500', '600', '700', '800', '900'],
 })
 
 const barlow = Barlow({
@@ -28,6 +28,13 @@ const bebasNeue = Bebas_Neue({
   subsets: ['latin'],
   variable: '--font-logo',
   weight: ['400'],
+})
+
+const merriweather = Merriweather({
+  subsets: ['latin'],
+  variable: '--font-serif',
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
 })
 
 const LOGO_CIRCLE_DARK = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_circle_dark.png'
@@ -70,7 +77,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${barlowCondensed.variable} ${barlow.variable} ${bebasNeue.variable}`}
+      className={`${playfair.variable} ${barlowCondensed.variable} ${barlow.variable} ${bebasNeue.variable} ${merriweather.variable}`}
       suppressHydrationWarning
     >
       <head>
