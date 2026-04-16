@@ -29,7 +29,7 @@ export default async function MediaPage() {
 
   // Look up author avatars from users table by full_name
   const authorNames = [...new Set(stories.map(s => s.author).filter(Boolean) as string[])]
-  let authorAvatars: Record<string, string> = {}
+  const authorAvatars: Record<string, string> = {}
   if (authorNames.length > 0) {
     try {
       const { data: profiles } = await supabase
