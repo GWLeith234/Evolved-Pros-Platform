@@ -32,16 +32,6 @@ export interface Episode {
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
-const PILLAR_PILLS = [
-  { key: 'all', label: 'All' },
-  { key: 'foundation', label: 'Foundation' },
-  { key: 'identity', label: 'Identity' },
-  { key: 'mental-toughness', label: 'Mental' },
-  { key: 'strategy', label: 'Strategy' },
-  { key: 'accountability', label: 'Accountability' },
-  { key: 'execution', label: 'Execution' },
-]
-
 const PILLAR_TEXT_COLORS: Record<string, string> = {
   foundation: '#CC7700',
   identity: '#534AB7',
@@ -207,46 +197,10 @@ export function MediaPortalClient({
   episodes: Episode[]
   authorAvatars?: Record<string, string>
 }) {
-  const [activePillar, setActivePillar] = useState('all')
-
-  // Filter grid by pillar when a specific one is selected
-  const allGridStories = activePillar === 'all' ? grid : grid.filter(s => s.pillar === activePillar)
-  const showHero = activePillar === 'all' && featured
-
   return (
     <>
-      {/* ── Pillar filter nav ── */}
-      <nav style={{ backgroundColor: '#2B3A5A', padding: '0 24px', overflowX: 'auto' }}>
-        <div style={{ display: 'flex', gap: 0 }}>
-          {PILLAR_PILLS.map(p => (
-            <button
-              key={p.key}
-              type="button"
-              onClick={() => setActivePillar(p.key)}
-              style={{
-                padding: '10px 14px',
-                fontSize: 12,
-                fontFamily: 'var(--font-condensed)',
-                fontWeight: 700,
-                border: 'none',
-                cursor: 'pointer',
-                backgroundColor: 'transparent',
-                whiteSpace: 'nowrap',
-                color: activePillar === p.key ? '#F5F0E8' : 'rgba(245,240,232,0.5)',
-                borderBottom: activePillar === p.key ? '2px solid #C9A84C' : '2px solid transparent',
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em',
-                transition: 'color 0.15s',
-              }}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
-      </nav>
-
       {/* ── Section 1: Hero + Sidebar ── */}
-      {showHero && (
+      {featured && (
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 24px 0' }}>
           <div
             style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 16 }}
@@ -410,7 +364,7 @@ export function MediaPortalClient({
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 40, height: 2, backgroundColor: '#2B3A5A', flexShrink: 0 }} />
           <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 13, color: '#2B3A5A', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
-            {activePillar === 'all' ? 'More from Evolved Media' : getPillarLabel(activePillar)}
+            More from Evolved Media
           </span>
           <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(43,58,90,0.15)' }} />
         </div>
@@ -418,11 +372,11 @@ export function MediaPortalClient({
 
       {/* ── Section 3: Article grid ── */}
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '16px 24px 40px' }}>
-        {allGridStories.length > 0 ? (
+        {grid.length > 0 ? (
           <>
             {/* First row */}
             <div className="media-article-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 14 }}>
-              {allGridStories.slice(0, 3).map(s => (
+              {grid.slice(0, 3).map(s => (
                 <ArticleCard key={s.id} story={s} />
               ))}
             </div>
@@ -435,9 +389,9 @@ export function MediaPortalClient({
             </div>
 
             {/* Second row */}
-            {allGridStories.length > 3 && (
+            {grid.length > 3 && (
               <div className="media-article-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
-                {allGridStories.slice(3, 6).map(s => (
+                {grid.slice(3, 6).map(s => (
                   <ArticleCard key={s.id} story={s} />
                 ))}
               </div>
