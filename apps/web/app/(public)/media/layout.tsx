@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { TopNav } from '@/components/layout/TopNav'
+import { MediaFooter } from '@/components/media/MediaFooter'
 import Link from 'next/link'
 
 export default async function MediaLayout({ children }: { children: React.ReactNode }) {
@@ -122,7 +123,7 @@ export default async function MediaLayout({ children }: { children: React.ReactN
 
       {children}
 
-      {/* TODO: Footer — MEDIA-3 */}
+      <MediaFooter />
     </div>
   )
 }
