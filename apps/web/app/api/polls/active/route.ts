@@ -16,6 +16,8 @@ export async function GET(request: Request) {
     .limit(1)
     .maybeSingle()
 
+  console.log('[polls/active] context:', context, 'poll:', poll?.id ?? 'none', 'error:', error?.message ?? 'none')
+
   if (error) {
     console.error('[polls/active] error:', JSON.stringify(error))
     return NextResponse.json({ poll: null })

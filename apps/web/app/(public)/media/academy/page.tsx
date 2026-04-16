@@ -97,7 +97,8 @@ export default async function MediaAcademyPage() {
 
   const coursePillar = featured?.courses?.pillar_number ?? null
   const courseTitle = featured?.courses?.title ?? 'Course'
-  const previewText = featured?.description ? stripMarkdown(featured.description).slice(0, 400) : ''
+  const rawPreview = featured?.description ? stripMarkdown(featured.description).slice(0, 400) : ''
+  const previewText = rawPreview || (featured ? `This lesson covers key concepts in the ${pillarName(coursePillar)} pillar of the EVOLVED Architecture\u2122.` : '')
 
   return (
     <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 24px 0' }}>

@@ -52,6 +52,14 @@ export default async function LivePage() {
       {/* ── SECTION 1: HERO ── */}
       <section style={{ padding: '40px 24px' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <div style={{ position: 'relative', width: '100%', aspectRatio: '21/9', borderRadius: 4, overflow: 'hidden', marginBottom: 24, backgroundColor: '#1a2540' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/george-speaking-hero.jpeg"
+              alt="George Leith speaking on stage"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
+            />
+          </div>
           <div className="flex items-center gap-2">
             <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#C9302A' }} />
             <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: '.12em', textTransform: 'uppercase', color: '#C9302A', fontFamily: 'sans-serif' }}>Evolved Pros Live</span>
