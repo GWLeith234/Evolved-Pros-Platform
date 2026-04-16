@@ -21,6 +21,7 @@ const POST_TABS: { type: PostType; icon: string; label: string; placeholder: str
   { type: 'update',   icon: '✏️', label: 'Update',   placeholder: "Share what you're working on or applying..." },
   { type: 'question', icon: '❓', label: 'Question',  placeholder: 'Ask the community something...' },
   { type: 'win',      icon: '🏆', label: 'Win',       placeholder: 'Share a win — closed a deal, hit a target, had a breakthrough...' },
+  { type: 'poll',     icon: '📊', label: 'Poll',      placeholder: 'Ask a poll question...' },
   { type: 'announce', icon: '📣', label: 'Announce',  placeholder: 'Post an announcement to the community...', adminOnly: true },
 ]
 
@@ -41,8 +42,11 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
   const [activePostType, setActivePostType] = useState<PostType>('update')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [pollOptions, setPollOptions] = useState<string[]>(['', ''])
+  const [pollClosesAt, setPollClosesAt] = useState('')
 
-  const hasContent = body.trim().length > 0
+  const isPoll = activePostType === 'poll'
+  const hasContent = isPoll ? body.trim().length > 0 && pollOptions.filter(o => o.trim()).length >= 2 : body.trim().length > 0
   const avatarBg = getAvatarColor(currentUser.id)
   const activePlaceholder = POST_TABS.find(t => t.type === activePostType)?.placeholder ?? "What's on your mind?"
 
@@ -58,6 +62,34 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
     setLoading(true)
 
     try {
+      let pollId: string | null = null
+
+      // If poll, create poll first
+      if (isPoll) {
+        const validOptions = pollOptions.filter(o => o.trim()).map(o => o.trim())
+        if (validOptions.length < 2) {
+          setError('At least 2 poll options required.')
+          setLoading(false)
+          return
+        }
+        const pollRes = await fetch('/api/polls', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question: trimmed,
+            options: validOptions,
+            context: 'community',
+            closes_at: pollClosesAt || null,
+          }),
+        })
+        if (!pollRes.ok) {
+          const d = await pollRes.json()
+          throw new Error(d.error ?? 'Failed to create poll')
+        }
+        const pollData = await pollRes.json()
+        pollId = pollData.poll?.id ?? null
+      }
+
       const res = await fetch('/api/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -66,6 +98,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
           body: trimmed,
           pillarTag: selectedTag,
           postType: activePostType,
+          ...(pollId ? { pollId } : {}),
         }),
       })
 
@@ -79,6 +112,8 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
       setBody('')
       setSelectedTag(null)
       setActivePostType('update')
+      setPollOptions(['', ''])
+      setPollClosesAt('')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to post.')
     } finally {
@@ -151,6 +186,64 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
           onBlur={e => (e.currentTarget.style.borderColor = 'rgba(27,60,90,0.18)')}
         />
       </div>
+
+      {/* Poll builder */}
+      {isPoll && (
+        <div className="mt-3 ml-12 space-y-2">
+          <p className="font-condensed font-semibold text-[10px] uppercase tracking-[0.1em]" style={{ color: '#7a8a96' }}>
+            Poll options (2–6)
+          </p>
+          {pollOptions.map((opt, i) => (
+            <div key={i} className="flex gap-2">
+              <input
+                type="text"
+                value={opt}
+                onChange={e => {
+                  const next = [...pollOptions]
+                  next[i] = e.target.value
+                  setPollOptions(next)
+                }}
+                placeholder={`Option ${i + 1}`}
+                maxLength={100}
+                className="flex-1 rounded border font-body text-[13px] text-[#1b3c5a] placeholder:text-[#7a8a96] focus:outline-none px-3 py-1.5"
+                style={{ borderColor: 'rgba(27,60,90,0.18)' }}
+              />
+              {pollOptions.length > 2 && (
+                <button
+                  type="button"
+                  onClick={() => setPollOptions(prev => prev.filter((_, j) => j !== i))}
+                  className="font-condensed text-[10px] px-2"
+                  style={{ color: '#ef0e30' }}
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          ))}
+          {pollOptions.length < 6 && (
+            <button
+              type="button"
+              onClick={() => setPollOptions(prev => [...prev, ''])}
+              className="font-condensed font-semibold text-[10px] uppercase tracking-[0.1em]"
+              style={{ color: '#68a2b9' }}
+            >
+              + Add option
+            </button>
+          )}
+          <div>
+            <label className="font-condensed text-[10px] uppercase tracking-[0.08em]" style={{ color: '#7a8a96' }}>
+              Close date (optional)
+            </label>
+            <input
+              type="date"
+              value={pollClosesAt}
+              onChange={e => setPollClosesAt(e.target.value)}
+              className="block mt-1 rounded border font-body text-[12px] text-[#1b3c5a] focus:outline-none px-3 py-1.5"
+              style={{ borderColor: 'rgba(27,60,90,0.18)' }}
+            />
+          </div>
+        </div>
+      )}
 
       {error && (
         <p className="mt-2 ml-12 text-xs font-body text-[#ef0e30]">{error}</p>

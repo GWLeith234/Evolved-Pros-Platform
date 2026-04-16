@@ -1,6 +1,6 @@
 export type PillarTag = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6'
 
-export type PostType = 'update' | 'question' | 'win' | 'announce'
+export type PostType = 'update' | 'question' | 'win' | 'announce' | 'poll'
 
 export type Channel = {
   id: string
@@ -37,6 +37,7 @@ export type Post = {
   myReaction: string | null
   reactions: Reaction[]
   isBookmarked: boolean
+  pollId?: string | null
 }
 
 export type Reply = {

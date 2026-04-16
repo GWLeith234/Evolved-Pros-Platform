@@ -132,7 +132,7 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  let body: { channelId?: unknown; body?: unknown; pillarTag?: unknown; postType?: unknown }
+  let body: { channelId?: unknown; body?: unknown; pillarTag?: unknown; postType?: unknown; pollId?: unknown }
   try {
     body = await request.json()
   } catch {
@@ -143,6 +143,7 @@ export async function POST(request: Request) {
   const postBody = typeof body.body === 'string' ? body.body.trim() : ''
   const pillarTag = typeof body.pillarTag === 'string' ? body.pillarTag : null
   const postType = typeof body.postType === 'string' ? body.postType : 'update'
+  const pollId = typeof body.pollId === 'string' ? body.pollId : null
 
   if (!channelId) return NextResponse.json({ error: 'channelId is required' }, { status: 422 })
   if (postBody.length < 10) return NextResponse.json({ error: 'Post must be at least 10 characters' }, { status: 422 })
@@ -151,7 +152,7 @@ export async function POST(request: Request) {
   const validPillarTags = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6']
   const validatedTag = pillarTag && validPillarTags.includes(pillarTag) ? pillarTag : null
 
-  const validPostTypes = ['update', 'question', 'win', 'announce']
+  const validPostTypes = ['update', 'question', 'win', 'announce', 'poll']
   const validatedPostType = validPostTypes.includes(postType) ? postType : 'update'
 
   const { data: post, error } = await supabase
@@ -162,6 +163,7 @@ export async function POST(request: Request) {
       body: postBody,
       pillar_tag: validatedTag as 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | null,
       post_type: validatedPostType,
+      ...(pollId ? { poll_id: pollId } : {}),
     })
     .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
     .single()

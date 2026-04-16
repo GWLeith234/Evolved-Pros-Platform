@@ -1,0 +1,149 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+
+export interface PollOption {
+  id: string
+  option_text: string
+  vote_count: number
+  sort_order: number
+}
+
+export interface PollData {
+  id: string
+  question: string
+  status: string
+  closes_at: string | null
+  poll_options: PollOption[]
+}
+
+interface PollCardProps {
+  poll: PollData
+  currentUserId: string
+}
+
+export function PollCard({ poll, currentUserId }: PollCardProps) {
+  const [selected, setSelected] = useState<string | null>(null)
+  const [hasVoted, setHasVoted] = useState(false)
+  const [options, setOptions] = useState(poll.poll_options.sort((a, b) => a.sort_order - b.sort_order))
+  const [voting, setVoting] = useState(false)
+
+  const totalVotes = options.reduce((s, o) => s + o.vote_count, 0)
+  const maxVotes = Math.max(...options.map(o => o.vote_count), 1)
+
+  // Check if user has already voted (client-side check via local storage fallback)
+  useEffect(() => {
+    const key = `poll_voted_${poll.id}`
+    if (localStorage.getItem(key) === currentUserId) {
+      setHasVoted(true)
+    }
+  }, [poll.id, currentUserId])
+
+  async function handleVote() {
+    if (!selected || voting) return
+    setVoting(true)
+    try {
+      const res = await fetch('/api/polls/vote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ poll_id: poll.id, option_id: selected }),
+      })
+      if (res.ok || res.status === 409) {
+        // Optimistic update
+        setOptions(prev => prev.map(o => o.id === selected ? { ...o, vote_count: o.vote_count + 1 } : o))
+        setHasVoted(true)
+        localStorage.setItem(`poll_voted_${poll.id}`, currentUserId)
+      }
+    } finally {
+      setVoting(false)
+    }
+  }
+
+  const isClosed = poll.status === 'closed' || (poll.closes_at && new Date(poll.closes_at) < new Date())
+
+  return (
+    <div style={{ marginTop: 8 }}>
+      {/* Question */}
+      <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 15, color: 'rgba(255,255,255,0.88)', margin: '0 0 10px' }}>
+        {poll.question}
+      </p>
+
+      {hasVoted || isClosed ? (
+        /* Voted/closed state — show results */
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {options.map(o => {
+            const pct = totalVotes > 0 ? Math.round((o.vote_count / totalVotes) * 100) : 0
+            const isWinner = o.vote_count === maxVotes && totalVotes > 0
+            return (
+              <div key={o.id} style={{ position: 'relative', borderRadius: 6, overflow: 'hidden', padding: '8px 12px', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                {/* Fill bar */}
+                <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: `${pct}%`, backgroundColor: isWinner ? 'rgba(201,168,76,0.4)' : 'rgba(201,168,76,0.15)', transition: 'width 0.5s ease', borderRadius: 6 }} />
+                <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>{o.option_text}</span>
+                  <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: isWinner ? '#C9A84C' : 'rgba(255,255,255,0.4)', marginLeft: 8 }}>{pct}%</span>
+                </div>
+              </div>
+            )
+          })}
+          <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+            {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}
+            {poll.closes_at && !isClosed && ` · Closes ${new Date(poll.closes_at).toLocaleDateString()}`}
+            {isClosed && ' · Poll closed'}
+          </p>
+        </div>
+      ) : (
+        /* Not voted state — show option buttons */
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {options.map(o => (
+            <button
+              key={o.id}
+              type="button"
+              onClick={() => setSelected(o.id)}
+              style={{
+                textAlign: 'left',
+                padding: '10px 14px',
+                borderRadius: 6,
+                border: selected === o.id ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                backgroundColor: selected === o.id ? 'rgba(201,168,76,0.08)' : 'rgba(255,255,255,0.05)',
+                color: 'rgba(255,255,255,0.7)',
+                fontSize: 12,
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}
+            >
+              {o.option_text}
+            </button>
+          ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+            <button
+              type="button"
+              onClick={handleVote}
+              disabled={!selected || voting}
+              style={{
+                fontFamily: 'var(--font-condensed)',
+                fontWeight: 700,
+                fontSize: 11,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                padding: '6px 16px',
+                borderRadius: 4,
+                border: 'none',
+                cursor: selected ? 'pointer' : 'not-allowed',
+                backgroundColor: selected ? '#C9A84C' : 'rgba(201,168,76,0.3)',
+                color: '#0A0F18',
+                opacity: voting ? 0.5 : 1,
+              }}
+            >
+              {voting ? 'Voting...' : 'Vote'}
+            </button>
+            {poll.closes_at && (
+              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>
+                Closes {new Date(poll.closes_at).toLocaleDateString()}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
