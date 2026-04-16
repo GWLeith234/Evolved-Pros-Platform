@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { getPillarLabel, getPillarColor } from '@/lib/pillars'
+import { PollWidget } from '@/components/media/PollWidget'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -347,6 +348,9 @@ export function MediaPortalClient({
                   </div>
                 </div>
               )}
+
+              {/* Poll widget */}
+              <PollWidget />
 
               {/* Ad zone B placeholder */}
               <div style={{ border: '1px dashed rgba(43,58,90,0.2)', borderRadius: 2, padding: '20px 10px', textAlign: 'center', backgroundColor: 'rgba(255,255,255,0.5)' }}>

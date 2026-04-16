@@ -8,12 +8,24 @@ export async function GET() {
   const check = await requireAdminApi()
   if (check instanceof Response) return check
 
-  const { data, error } = await adminClient
+  // Try with poll_options join first; fall back to polls-only if join fails
+  let data = null
+  const { data: withOptions, error } = await adminClient
     .from('polls')
     .select('*, poll_options(id, option_text, vote_count, sort_order)')
     .order('created_at', { ascending: false })
 
-  if (error) return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 })
+  if (error) {
+    // Join may fail if poll_options FK isn't set up yet — fetch polls only
+    const { data: pollsOnly, error: fallbackErr } = await adminClient
+      .from('polls')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (fallbackErr) return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 })
+    data = (pollsOnly ?? []).map((p: Record<string, unknown>) => ({ ...p, poll_options: [] }))
+  } else {
+    data = withOptions
+  }
   return NextResponse.json({ polls: data })
 }
 
