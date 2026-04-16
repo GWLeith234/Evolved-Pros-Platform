@@ -60,18 +60,18 @@ Tweet 5: Close + "${articleUrl}"
 Return each tweet on its own line, prefixed with "1/" through "5/". No JSON.\n\n${context}`,
         }],
       }),
-      // Email
+      // Email (returns JSON with subject + body)
       client.messages.create({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1024,
-        system: 'You are George Leith writing an email teaser. Warm, direct, no hype. Sales professional audience.',
+        system: 'You are George Leith writing an email teaser. Warm, direct, no hype. Sales professional audience. Always return valid JSON only.',
         messages: [{
           role: 'user',
-          content: `Write a 2-paragraph email teaser for this article.
-Para 1: The problem or tension the article addresses (2-3 sentences).
-Para 2: What they'll get from reading it + suggest link text for the CTA.
+          content: `Write an email newsletter teaser for this article.
+Return JSON only with this exact format (no markdown fences):
+{"subject": "compelling subject line under 50 chars", "body": "2 paragraphs: para 1 = problem/tension (2-3 sentences), para 2 = what they'll learn + CTA link text. 200-300 words total."}
 
-Return ONLY the email text, no JSON or subject line.\n\n${context}`,
+${context}`,
         }],
       }),
     ])
@@ -87,10 +87,23 @@ Return ONLY the email text, no JSON or subject line.\n\n${context}`,
       .map(l => l.replace(/^\d+\/\s*/, '').trim())
       .filter(l => l.length > 0)
 
+    // Parse email JSON (subject + body)
+    const emailRaw = extractText(emailRes)
+    let emailSubject = ''
+    let emailBody = emailRaw
+    try {
+      const parsed = JSON.parse(emailRaw)
+      if (parsed.subject) emailSubject = parsed.subject
+      if (parsed.body) emailBody = parsed.body
+    } catch {
+      // If Claude didn't return valid JSON, use the raw text as body
+    }
+
     return NextResponse.json({
       linkedin: extractText(linkedinRes),
       thread: tweets.length > 0 ? tweets : [threadText],
-      email: extractText(emailRes),
+      email: emailBody,
+      emailSubject,
     })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)

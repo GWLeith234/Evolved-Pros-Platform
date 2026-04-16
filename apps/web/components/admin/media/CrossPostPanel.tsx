@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 
 interface CrossPostPanelProps {
   title: string
@@ -23,9 +23,9 @@ export function CrossPostPanel({ title, body, slug, pillar }: CrossPostPanelProp
   const [linkedin, setLinkedin] = useState('')
   const [thread, setThread] = useState<string[]>([])
   const [email, setEmail] = useState('')
+  const [emailSubject, setEmailSubject] = useState('')
   const [activeTab, setActiveTab] = useState<Tab>('linkedin')
   const [copied, setCopied] = useState(false)
-  const textRef = useRef<HTMLTextAreaElement>(null)
 
   async function handleGenerate() {
     setGenerating(true)
@@ -41,6 +41,7 @@ export function CrossPostPanel({ title, body, slug, pillar }: CrossPostPanelProp
       setLinkedin(data.linkedin ?? '')
       setThread(data.thread ?? [])
       setEmail(data.email ?? '')
+      setEmailSubject(data.emailSubject ?? '')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate')
     } finally {
@@ -49,12 +50,12 @@ export function CrossPostPanel({ title, body, slug, pillar }: CrossPostPanelProp
   }
 
   function handleCopy() {
-    if (textRef.current) {
-      textRef.current.select()
-      document.execCommand('copy')
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
+    const text = activeTab === 'email' && emailSubject
+      ? `Subject: ${emailSubject}\n\n${currentContent}`
+      : currentContent
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   const hasContent = linkedin || thread.length > 0 || email
@@ -116,9 +117,32 @@ export function CrossPostPanel({ title, body, slug, pillar }: CrossPostPanelProp
             ))}
           </div>
 
+          {/* Email subject field */}
+          {activeTab === 'email' && (
+            <div style={{ marginBottom: 8 }}>
+              <label
+                style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7a8a96', display: 'block', marginBottom: 4 }}
+                className="font-condensed"
+              >
+                Subject line
+              </label>
+              <input
+                type="text"
+                value={emailSubject}
+                onChange={e => setEmailSubject(e.target.value)}
+                style={{ width: '100%', backgroundColor: '#fff', border: '1px solid rgba(27,60,90,0.15)', borderRadius: 6, padding: '8px 12px', fontSize: 12, color: '#1b3c5a', outline: 'none' }}
+                className="font-body"
+                placeholder="Email subject line..."
+                maxLength={60}
+              />
+              <div style={{ fontSize: 10, color: '#7a8a96', textAlign: 'right', marginTop: 2 }} className="font-condensed">
+                {emailSubject.length}/50
+              </div>
+            </div>
+          )}
+
           {/* Content */}
           <textarea
-            ref={textRef}
             value={currentContent}
             readOnly
             rows={10}
