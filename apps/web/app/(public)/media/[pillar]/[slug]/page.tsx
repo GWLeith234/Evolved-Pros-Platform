@@ -142,6 +142,21 @@ export default async function StoryPage({
   const pColor = getPillarColor(story.pillar)
   const articleUrl = `https://platform.evolvedpros.com/media/${params.pillar}/${params.slug}`
 
+  // Look up author avatar by full_name
+  let authorAvatar: string | null = null
+  if (story.author) {
+    try {
+      const { data: authorProfile } = await adminClient
+        .from('users')
+        .select('avatar_url')
+        .eq('full_name', story.author)
+        .single()
+      authorAvatar = authorProfile?.avatar_url ?? null
+    } catch {
+      // author not found in users table — fall back to initials
+    }
+  }
+
   // Related stories: same pillar, exclude current
   const { data: related } = await adminClient
     .from('media_stories')
@@ -230,9 +245,14 @@ export default async function StoryPage({
             {story.title}
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 700, fontFamily: 'var(--font-condensed)' }}>
-              {(story.author ?? 'GL').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
-            </div>
+            {authorAvatar ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={authorAvatar} alt={story.author ?? 'George Leith'} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+            ) : (
+              <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 700, fontFamily: 'var(--font-condensed)', flexShrink: 0 }}>
+                {(story.author ?? 'GL').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+              </div>
+            )}
             <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', fontFamily: 'var(--font-body)' }}>
               {story.author ?? 'George Leith'}
             </span>
@@ -290,9 +310,14 @@ export default async function StoryPage({
         <div>
           {/* Author card */}
           <div style={{ backgroundColor: '#fff', border: '1px solid rgba(43,58,90,0.1)', borderRadius: 2, padding: 14, textAlign: 'center', marginBottom: 16 }}>
-            <div style={{ width: 56, height: 56, borderRadius: '50%', backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', fontSize: 18, color: '#fff', fontWeight: 700, fontFamily: 'var(--font-condensed)' }}>
-              {(story.author ?? 'GL').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
-            </div>
+            {authorAvatar ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={authorAvatar} alt={story.author ?? 'George Leith'} style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 8px', display: 'block', border: '2px solid #E0D8CC' }} />
+            ) : (
+              <div style={{ width: 56, height: 56, borderRadius: '50%', backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', fontSize: 18, color: '#fff', fontWeight: 700, fontFamily: 'var(--font-condensed)' }}>
+                {(story.author ?? 'GL').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+              </div>
+            )}
             <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 16, color: '#2B3A5A', margin: '0 0 2px' }}>
               {story.author ?? 'George Leith'}
             </p>

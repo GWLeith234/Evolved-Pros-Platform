@@ -199,11 +199,13 @@ export function MediaPortalClient({
   sidebar,
   grid,
   episodes,
+  authorAvatars = {},
 }: {
   featured: MediaStory | null
   sidebar: MediaStory[]
   grid: MediaStory[]
   episodes: Episode[]
+  authorAvatars?: Record<string, string>
 }) {
   const [activePillar, setActivePillar] = useState('all')
 
@@ -287,9 +289,14 @@ export function MediaPortalClient({
 
               {/* Byline */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 700, fontFamily: 'var(--font-condensed)' }}>
-                  GL
-                </div>
+                {authorAvatars[featured.author ?? ''] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={authorAvatars[featured.author ?? '']} alt={featured.author ?? 'George Leith'} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                ) : (
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 700, fontFamily: 'var(--font-condensed)', flexShrink: 0 }}>
+                    {(featured.author ?? 'GL').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+                  </div>
+                )}
                 <span style={{ fontSize: 12, color: '#2B3A5A', fontFamily: 'var(--font-body)', fontWeight: 500 }}>
                   {featured.author ?? 'George Leith'} · Evolved Pros
                 </span>
