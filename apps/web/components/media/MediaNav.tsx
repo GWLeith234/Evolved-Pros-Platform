@@ -33,10 +33,10 @@ export function MediaNav() {
             key={item.href}
             href={item.href}
             style={{
-              fontFamily: 'var(--font-condensed)',
-              fontWeight: 700,
-              fontSize: 11,
-              letterSpacing: '0.06em',
+              fontFamily: 'var(--font-logo)',
+              fontWeight: 400,
+              fontSize: 14,
+              letterSpacing: '0.07em',
               textTransform: 'uppercase',
               color: active ? '#fff' : 'rgba(255,255,255,0.5)',
               padding: '9px 12px',

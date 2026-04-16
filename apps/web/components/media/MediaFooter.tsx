@@ -64,8 +64,11 @@ const FB = 'var(--font-body)'
 
 // ── Styles ───────────────────────────────────────────────────────────────────
 
+const FL = 'var(--font-logo)'
+const FA = 'var(--font-abril)'
+
 const hdr: React.CSSProperties = {
-  fontFamily: FC, fontWeight: 800, fontSize: 10, textTransform: 'uppercase',
+  fontFamily: FL, fontWeight: 400, fontSize: 12, textTransform: 'uppercase',
   letterSpacing: '0.1em', color: 'rgba(255,255,255,0.35)', paddingBottom: 6,
   borderBottom: '1px solid rgba(255,255,255,0.07)', marginBottom: 8,
 }
@@ -99,7 +102,7 @@ export function MediaFooter() {
           <p style={{ fontFamily: FC, fontWeight: 700, fontSize: 11, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 4px' }}>
             Join the community
           </p>
-          <h2 style={{ fontFamily: FC, fontWeight: 900, fontSize: 26, color: '#fff', textTransform: 'uppercase', lineHeight: 1.1, margin: 0 }}>
+          <h2 style={{ fontFamily: FA, fontWeight: 400, fontSize: 28, color: '#fff', textTransform: 'uppercase', lineHeight: 1.1, margin: 0 }}>
             Ready to evolve<br />your career?
           </h2>
           <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 5, fontFamily: FB }}>
@@ -124,7 +127,7 @@ export function MediaFooter() {
         >
           {/* COL 1 — Brand */}
           <div>
-            <p style={{ fontFamily: FC, fontWeight: 900, fontSize: 26, color: '#fff', textTransform: 'uppercase', lineHeight: 1, margin: '0 0 8px' }}>
+            <p style={{ fontFamily: FA, fontWeight: 400, fontSize: 28, color: '#fff', textTransform: 'uppercase', lineHeight: 1, margin: '0 0 8px' }}>
               EVOLVED <span style={{ color: '#C9302A' }}>M</span>EDIA
             </p>
             <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.38)', lineHeight: 1.65, fontFamily: FB, margin: '0 0 14px' }}>
@@ -215,7 +218,7 @@ export function MediaFooter() {
         {/* ── Bottom bar ── */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', marginTop: 24, padding: '14px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
           <div>
-            <span style={{ fontFamily: FC, fontWeight: 900, fontSize: 13, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <span style={{ fontFamily: FL, fontWeight: 400, fontSize: 16, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
               EV<span style={{ color: '#C9302A' }}>O</span>LVED PR<span style={{ color: '#C9302A' }}>O</span>S
             </span>
             <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.22)', fontFamily: FB, margin: '2px 0 0' }}>

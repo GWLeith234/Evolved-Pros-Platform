@@ -1,6 +1,6 @@
 // cache-bust: 2026-03-25
 import type { Metadata } from 'next'
-import { Playfair_Display, Barlow_Condensed, Barlow, Bebas_Neue, Merriweather } from 'next/font/google'
+import { Playfair_Display, Barlow_Condensed, Barlow, Bebas_Neue, Merriweather, Abril_Fatface } from 'next/font/google'
 import { createClient } from '@/lib/supabase/server'
 import { ThemeInit } from '@/components/ThemeInit'
 import './globals.css'
@@ -28,6 +28,12 @@ const bebasNeue = Bebas_Neue({
   subsets: ['latin'],
   variable: '--font-logo',
   weight: ['400'],
+})
+
+const abrilFatface = Abril_Fatface({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-abril',
 })
 
 const merriweather = Merriweather({
@@ -77,7 +83,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${barlowCondensed.variable} ${barlow.variable} ${bebasNeue.variable} ${merriweather.variable}`}
+      className={`${playfair.variable} ${barlowCondensed.variable} ${barlow.variable} ${bebasNeue.variable} ${abrilFatface.variable} ${merriweather.variable}`}
       suppressHydrationWarning
     >
       <head>

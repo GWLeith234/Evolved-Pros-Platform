@@ -54,12 +54,11 @@ export default async function MediaLayout({ children }: { children: React.ReactN
           <div>
             <h1
               style={{
-                fontFamily: 'var(--font-condensed)',
-                fontWeight: 900,
-                fontSize: 48,
+                fontFamily: 'var(--font-abril), serif',
+                fontWeight: 400,
+                fontSize: 50,
                 color: '#2B3A5A',
                 textTransform: 'uppercase',
-                letterSpacing: '0.04em',
                 lineHeight: 1,
                 margin: 0,
               }}

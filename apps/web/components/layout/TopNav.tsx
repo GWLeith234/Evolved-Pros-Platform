@@ -136,10 +136,12 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
               <Link
                 key={item.href}
                 href={item.href}
-                className="font-condensed uppercase tracking-[0.03em] text-[12px] px-3 py-1.5 rounded transition-colors"
+                className="uppercase px-3 py-1.5 rounded transition-colors"
                 style={{
+                  fontFamily: 'var(--font-logo)',
+                  fontSize: 15,
+                  letterSpacing: '0.07em',
                   color: item.highlight ? '#C9A84C' : active ? '#ffffff' : 'rgba(255,255,255,0.45)',
-                  fontWeight: item.highlight || active ? 600 : 500,
                   borderBottom: item.highlight && active ? '2px solid #C9A84C' : '2px solid transparent',
                 }}
               >
@@ -150,8 +152,8 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
           {profile.tier !== 'pro' && (
             <Link
               href="/pricing"
-              className="font-condensed uppercase tracking-[0.03em] text-[12px] px-3 py-1.5 rounded transition-colors"
-              style={{ color: 'rgba(201,168,76,0.6)', fontWeight: 500 }}
+              className="uppercase px-3 py-1.5 rounded transition-colors"
+              style={{ fontFamily: 'var(--font-logo)', fontSize: 15, letterSpacing: '0.07em', color: 'rgba(201,168,76,0.6)' }}
             >
               Upgrade
             </Link>
