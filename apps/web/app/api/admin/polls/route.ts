@@ -58,7 +58,8 @@ export async function POST(request: Request) {
   if (pollErr || !poll) return NextResponse.json({ error: 'Failed to create poll' }, { status: 500 })
 
   const optionRows = options.map((text, i) => ({ poll_id: poll.id, option_text: text.trim(), sort_order: i }))
-  await adminClient.from('poll_options').insert(optionRows)
+  const { error: optErr } = await adminClient.from('poll_options').insert(optionRows)
+  if (optErr) return NextResponse.json({ error: 'Poll created but options failed' }, { status: 500 })
 
   return NextResponse.json({ poll }, { status: 201 })
 }

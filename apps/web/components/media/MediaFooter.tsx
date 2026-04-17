@@ -92,6 +92,7 @@ export function MediaFooter() {
       .order('published_at', { ascending: false })
       .limit(3)
       .then(({ data }: { data: Episode[] | null }) => { if (data) setEpisodes(data) })
+      .catch(() => {})
   }, [])
 
   return (
