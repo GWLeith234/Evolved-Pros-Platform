@@ -23,6 +23,7 @@ interface ActivePollResponse {
 }
 
 export function PollWidget() {
+  const [loading, setLoading] = useState(true)
   const [poll, setPoll] = useState<Poll | null>(null)
   const [selected, setSelected] = useState<string | null>(null)
   const [hasVoted, setHasVoted] = useState(false)
@@ -32,21 +33,30 @@ export function PollWidget() {
   const [totalVotes, setTotalVotes] = useState(0)
 
   useEffect(() => {
+    console.log('[PollWidget] mounted, fetching...')
     fetch('/api/polls/active?context=media')
       .then(r => r.json())
       .then((data: ActivePollResponse) => {
+        console.log('[PollWidget] response:', JSON.stringify(data))
         if (data.poll) {
           setPoll(data.poll)
-          setOptions(data.poll.poll_options.sort((a, b) => a.sort_order - b.sort_order))
+          const opts = Array.isArray(data.poll.poll_options)
+            ? data.poll.poll_options.slice().sort((a, b) => a.sort_order - b.sort_order)
+            : []
+          setOptions(opts)
           setVoteCounts(data.voteCounts ?? {})
           setTotalVotes(data.totalVotes ?? 0)
           const key = `poll_voted_${data.poll.id}`
           if (localStorage.getItem(key)) setHasVoted(true)
         }
       })
-      .catch(() => {})
+      .catch(err => {
+        console.error('[PollWidget] fetch error:', err)
+      })
+      .finally(() => setLoading(false))
   }, [])
 
+  if (loading) return null
   if (!poll) return null
 
   const maxVotes = Math.max(...options.map(o => voteCounts[o.id] ?? 0), 1)
