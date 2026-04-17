@@ -12,7 +12,7 @@ export async function GET() {
   let data = null
   const { data: withOptions, error } = await adminClient
     .from('polls')
-    .select('*, poll_options(id, option_text, vote_count, sort_order)')
+    .select('*, poll_options(id, option_text, sort_order)')
     .order('created_at', { ascending: false })
 
   if (error) {

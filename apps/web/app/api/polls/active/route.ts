@@ -9,19 +9,32 @@ export async function GET(request: Request) {
 
   const { data: poll, error } = await adminClient
     .from('polls')
-    .select('id, question, status, closes_at, poll_options(id, option_text, vote_count, sort_order)')
+    .select('id, question, status, closes_at, poll_options(id, option_text, sort_order)')
     .eq('context', context)
     .eq('status', 'active')
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
 
-  console.log('[polls/active] context:', context, 'poll:', poll?.id ?? 'none', 'error:', error?.message ?? 'none')
-
   if (error) {
-    console.error('[polls/active] error:', JSON.stringify(error))
-    return NextResponse.json({ poll: null })
+    return NextResponse.json({ poll: null, voteCounts: {}, totalVotes: 0 })
   }
 
-  return NextResponse.json({ poll: poll ?? null })
+  if (!poll) {
+    return NextResponse.json({ poll: null, voteCounts: {}, totalVotes: 0 })
+  }
+
+  // Count votes from poll_votes table
+  const { data: votes } = await adminClient
+    .from('poll_votes')
+    .select('option_id')
+    .eq('poll_id', poll.id)
+
+  const voteCounts: Record<string, number> = {}
+  for (const v of votes ?? []) {
+    voteCounts[v.option_id] = (voteCounts[v.option_id] ?? 0) + 1
+  }
+  const totalVotes = votes?.length ?? 0
+
+  return NextResponse.json({ poll, voteCounts, totalVotes })
 }
