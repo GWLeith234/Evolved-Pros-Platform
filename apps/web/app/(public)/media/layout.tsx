@@ -39,6 +39,7 @@ export default async function MediaLayout({ children }: { children: React.ReactN
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F5F0E8' }}>
+      <style>{`html, body { background-color: #F5F0E8 !important; }`}</style>
       {/* Platform nav — only for logged-in users */}
       {profile && <TopNav profile={profile} />}
 
