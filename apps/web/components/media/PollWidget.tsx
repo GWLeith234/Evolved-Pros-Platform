@@ -99,6 +99,10 @@ export function PollWidget() {
     if (!selected || !poll || voting || isExpired) return
     setVoting(true)
     try {
+      console.log('[vote-diag] submitting vote', {
+        selectedOptionId: selected,
+        payload: { poll_id: poll.id, option_id: selected },
+      })
       const res = await fetch('/api/polls/vote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -207,21 +211,35 @@ export function PollWidget() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {options.map(o => (
-              <button
-                key={o.id}
-                type="button"
-                onClick={() => setSelected(o.id)}
-                style={{
-                  textAlign: 'left', padding: '6px 10px', borderRadius: 4,
-                  border: selected === o.id ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(27,42,74,0.1)',
-                  backgroundColor: selected === o.id ? 'rgba(201,168,76,0.06)' : 'transparent',
-                  color: '#1B2A4A', fontSize: 11, cursor: 'pointer', transition: 'all 0.15s',
-                }}
-              >
-                {o.option_text}
-              </button>
-            ))}
+            {options.map((o, index) => {
+              console.log('[vote-diag] rendering option', index, {
+                id: o.id,
+                text: o.option_text,
+                display_order: o.display_order,
+              })
+              return (
+                <button
+                  key={o.id}
+                  type="button"
+                  onClick={() => {
+                    console.log('[vote-diag] option clicked', {
+                      clickedOptionId: o.id,
+                      clickedOptionText: o.option_text,
+                      index,
+                    })
+                    setSelected(o.id)
+                  }}
+                  style={{
+                    textAlign: 'left', padding: '6px 10px', borderRadius: 4,
+                    border: selected === o.id ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(27,42,74,0.1)',
+                    backgroundColor: selected === o.id ? 'rgba(201,168,76,0.06)' : 'transparent',
+                    color: '#1B2A4A', fontSize: 11, cursor: 'pointer', transition: 'all 0.15s',
+                  }}
+                >
+                  {o.option_text}
+                </button>
+              )
+            })}
             <button
               type="button"
               onClick={handleVote}
