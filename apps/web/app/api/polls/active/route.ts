@@ -12,9 +12,13 @@ export async function GET(request: Request) {
     .select('id, question, status, closes_at, poll_options(id, option_text, sort_order)')
     .eq('context', context)
     .eq('status', 'active')
+    .or(`closes_at.is.null,closes_at.gt.${new Date().toISOString()}`)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
+
+  // TODO: remove pre-launch
+  console.log('[polls/active]', { context, error, poll })
 
   if (error) {
     return NextResponse.json({ poll: null, voteCounts: {}, totalVotes: 0 })
