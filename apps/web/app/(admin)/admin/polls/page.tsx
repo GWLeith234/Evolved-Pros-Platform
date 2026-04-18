@@ -73,7 +73,7 @@ export default function AdminPollsPage() {
         <h1 className="font-condensed font-bold text-[22px]" style={{ color: '#1b3c5a' }}>Polls</h1>
         <button
           type="button"
-          onClick={() => setEditing({ question: '', context: 'community', options: ['', ''], closes_at: '', status: 'active' })}
+          onClick={() => setEditing({ question: '', context: 'community', options: ['', ''], closes_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16), status: 'active' })}
           className="font-condensed font-bold uppercase tracking-wide text-[11px] px-4 py-2 rounded"
           style={{ backgroundColor: '#C9A84C', color: '#0A0F18' }}
         >
