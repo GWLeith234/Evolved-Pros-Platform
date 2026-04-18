@@ -146,15 +146,42 @@ export default async function StoryPage({
   // string not an FK — match on users.full_name).
   let authorUser: { full_name: string | null; avatar_url: string | null; role: string | null; current_pillar: string | null } | null = null
   if (story.author) {
-    const { data: profile } = await adminClient
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'UNSET'
+    const keyPrefix = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? 'UNSET').slice(0, 8)
+
+    // Count users to confirm we're hitting a populated DB
+    const { count: userCount, error: countError } = await adminClient
+      .from('users')
+      .select('*', { count: 'exact', head: true })
+
+    // Fetch a sample user to see what full_name values exist
+    const { data: sampleUsers } = await adminClient
+      .from('users')
+      .select('full_name')
+      .limit(3)
+
+    // Original query
+    const { data: profile, error: lookupError, status, statusText } = await adminClient
       .from('users')
       .select('full_name, avatar_url, role, current_pillar')
       .eq('full_name', story.author)
       .maybeSingle()
+
+    console.log('[author-diag]', {
+      supabaseUrlHost: supabaseUrl.replace('https://', '').slice(0, 30),
+      keyPrefix,
+      userCount,
+      countError: countError?.message,
+      sampleFullNames: sampleUsers?.map(u => u.full_name),
+      lookupAuthorString: JSON.stringify(story.author),
+      lookupAuthorLength: story.author?.length,
+      lookupResult: profile,
+      lookupError: lookupError?.message,
+      status,
+      statusText,
+    })
+
     authorUser = profile ?? null
-    if (!authorUser) {
-      console.warn('[author-photo] no user match for', story.author)
-    }
   }
   const authorAvatar = authorUser?.avatar_url ?? null
 
