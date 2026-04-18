@@ -142,20 +142,21 @@ export default async function StoryPage({
   const pColor = getPillarColor(story.pillar)
   const articleUrl = `https://platform.evolvedpros.com/media/${params.pillar}/${params.slug}`
 
-  // Look up author avatar by full_name
-  let authorAvatar: string | null = null
+  // Look up author avatar by full_name (media_stories.author is a plain
+  // string not an FK — match on users.full_name).
+  let authorUser: { full_name: string | null; avatar_url: string | null; role: string | null; current_pillar: string | null } | null = null
   if (story.author) {
-    try {
-      const { data: authorProfile } = await adminClient
-        .from('users')
-        .select('avatar_url')
-        .eq('full_name', story.author)
-        .single()
-      authorAvatar = authorProfile?.avatar_url ?? null
-    } catch {
-      // author not found in users table — fall back to initials
+    const { data: profile } = await adminClient
+      .from('users')
+      .select('full_name, avatar_url, role, current_pillar')
+      .eq('full_name', story.author)
+      .maybeSingle()
+    authorUser = profile ?? null
+    if (!authorUser) {
+      console.warn('[author-photo] no user match for', story.author)
     }
   }
+  const authorAvatar = authorUser?.avatar_url ?? null
 
   // Related stories: same pillar, exclude current
   const { data: related } = await adminClient
@@ -312,9 +313,9 @@ export default async function StoryPage({
           <div style={{ backgroundColor: '#fff', border: '1px solid rgba(43,58,90,0.1)', borderRadius: 2, padding: 14, textAlign: 'center', marginBottom: 16 }}>
             {authorAvatar ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={authorAvatar} alt={story.author ?? 'George Leith'} style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 8px', display: 'block', border: '2px solid #E0D8CC' }} />
+              <img src={authorAvatar} alt={story.author ?? 'George Leith'} style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 8px', display: 'block', border: '2px solid #E0D8CC', backgroundColor: '#F5F0E8' }} />
             ) : (
-              <div style={{ width: 56, height: 56, borderRadius: '50%', backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', fontSize: 18, color: '#fff', fontWeight: 700, fontFamily: 'var(--font-condensed)' }}>
+              <div style={{ width: 80, height: 80, borderRadius: '50%', backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', fontSize: 24, color: '#fff', fontWeight: 700, fontFamily: 'var(--font-condensed)' }}>
                 {(story.author ?? 'GL').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
               </div>
             )}
