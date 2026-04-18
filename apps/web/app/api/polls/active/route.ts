@@ -9,7 +9,7 @@ export async function GET(request: Request) {
 
   const { data: poll, error } = await adminClient
     .from('polls')
-    .select('id, question, status, closes_at, poll_options(id, option_text, sort_order)')
+    .select('id, question, status, closes_at, poll_options(id, option_text, display_order)')
     .eq('context', context)
     .eq('status', 'active')
     .or(`closes_at.is.null,closes_at.gt.${new Date().toISOString()}`)

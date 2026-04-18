@@ -42,7 +42,7 @@ export async function POST(request: Request) {
   const optionRows = options.map((text, i) => ({
     poll_id: poll.id,
     option_text: text,
-    sort_order: i,
+    display_order: i,
   }))
 
   const { error: optErr } = await supabase

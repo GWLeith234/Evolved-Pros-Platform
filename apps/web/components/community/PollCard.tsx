@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 export interface PollOption {
   id: string
   option_text: string
-  sort_order: number
+  display_order: number
 }
 
 export interface PollData {
@@ -26,7 +26,7 @@ interface PollCardProps {
 export function PollCard({ poll, currentUserId, voteCounts: initialCounts = {}, totalVotes: initialTotal = 0 }: PollCardProps) {
   const [selected, setSelected] = useState<string | null>(null)
   const [hasVoted, setHasVoted] = useState(false)
-  const options = poll.poll_options.slice().sort((a, b) => a.sort_order - b.sort_order)
+  const options = poll.poll_options.slice().sort((a, b) => a.display_order - b.display_order)
   const [voteCounts, setVoteCounts] = useState(initialCounts)
   const [totalVotes, setTotalVotes] = useState(initialTotal)
   const [voting, setVoting] = useState(false)

@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 interface PollOption {
   id: string
   option_text: string
-  sort_order: number
+  display_order: number
 }
 
 interface Poll {
@@ -41,7 +41,7 @@ export function PollWidget() {
         if (data.poll) {
           setPoll(data.poll)
           const opts = Array.isArray(data.poll.poll_options)
-            ? data.poll.poll_options.slice().sort((a, b) => a.sort_order - b.sort_order)
+            ? data.poll.poll_options.slice().sort((a, b) => a.display_order - b.display_order)
             : []
           setOptions(opts)
           setVoteCounts(data.voteCounts ?? {})

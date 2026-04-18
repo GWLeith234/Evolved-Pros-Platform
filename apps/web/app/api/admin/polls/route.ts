@@ -12,7 +12,7 @@ export async function GET() {
   let data = null
   const { data: withOptions, error } = await adminClient
     .from('polls')
-    .select('*, poll_options(id, option_text, sort_order)')
+    .select('*, poll_options(id, option_text, display_order)')
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
 
   if (pollErr || !poll) return NextResponse.json({ error: 'Failed to create poll' }, { status: 500 })
 
-  const optionRows = options.map((text, i) => ({ poll_id: poll.id, option_text: text.trim(), sort_order: i }))
+  const optionRows = options.map((text, i) => ({ poll_id: poll.id, option_text: text.trim(), display_order: i }))
   const { error: optErr } = await adminClient.from('poll_options').insert(optionRows)
   if (optErr) return NextResponse.json({ error: 'Poll created but options failed' }, { status: 500 })
 

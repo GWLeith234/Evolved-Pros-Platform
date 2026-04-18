@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 
-interface PollOption { id: string; option_text: string; vote_count: number; sort_order: number }
+interface PollOption { id: string; option_text: string; vote_count: number; display_order: number }
 interface Poll {
   id: string; question: string; context: string; status: string
   closes_at: string | null; created_at: string; poll_options: PollOption[]
