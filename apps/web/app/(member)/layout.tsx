@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { TopNav } from '@/components/layout/TopNav'
 import { BottomTabBar } from '@/components/layout/BottomTabBar'
 import { NextEventBanner } from '@/components/layout/NextEventBanner'
@@ -9,6 +9,16 @@ import { RightRail } from '@/components/layout/RightRail'
 import { ToastProvider } from '@/lib/toast'
 
 export default async function MemberLayout({ children }: { children: React.ReactNode }) {
+  // RSC prefetch guard: middleware lets prefetch requests through so it can't
+  // 503, but redirect() inside this layout would still break RSC payload
+  // parsing. Bypass all auth / profile fetching for prefetch requests and
+  // return bare children — the real navigation will re-render with full auth.
+  const h = headers()
+  const isRsc = h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1'
+  if (isRsc) {
+    return <>{children}</>
+  }
+
   // Dev bypass: skip Supabase when a dev_session cookie is present
   if (process.env.NODE_ENV === 'development') {
     const cookieStore = cookies()
