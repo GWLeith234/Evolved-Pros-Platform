@@ -52,7 +52,7 @@ export default async function MemberLayout({ children }: { children: React.React
   const { data: profile } = await supabase
     .from('users')
     .select('id, display_name, full_name, avatar_url, tier, tier_status, tier_expires_at, role, points')
-    .eq('id', user.id)
+    .eq('email', user.email!)
     .single()
 
   if (!profile) redirect('/login')

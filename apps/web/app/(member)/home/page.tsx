@@ -14,11 +14,11 @@ import { AcademyProgressWidget } from '@/components/home/AcademyProgressWidget'
 import { ProfileCompletePrompt } from '@/components/home/ProfileCompletePrompt'
 import { BadgeRow } from '@/components/home/BadgeRow'
 
-async function fetchCurrentUser(supabase: ReturnType<typeof createClient>, userId: string) {
+async function fetchCurrentUser(supabase: ReturnType<typeof createClient>, email: string) {
   const { data } = await supabase
     .from('users')
     .select('id, display_name, full_name, tier, points, avatar_url, bio, role_title')
-    .eq('id', userId)
+    .eq('email', email)
     .single()
   return data
 }
@@ -187,7 +187,7 @@ export default async function MemberHomePage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const profile = await fetchCurrentUser(supabase, user.id)
+  const profile = await fetchCurrentUser(supabase, user.email!)
   if (!profile) redirect('/login')
 
   const dayOfYear = Math.floor(
