@@ -210,7 +210,7 @@ export async function POST(request: Request) {
     .single()
   const authorId = profileRow?.id ?? user.id
 
-  const { data: post, error } = await supabase
+  const { data: post, error } = await adminClient
     .from('posts')
     .insert({
       author_id: authorId,
