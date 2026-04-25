@@ -1588,6 +1588,7 @@ export type Database = {
           is_pinned: boolean
           kind: string
           like_count: number
+          pillar: number | null
           pillar_tag: string | null
           poll_id: string | null
           post_type: string | null
@@ -1607,6 +1608,7 @@ export type Database = {
           is_pinned?: boolean
           kind?: string
           like_count?: number
+          pillar?: number | null
           pillar_tag?: string | null
           poll_id?: string | null
           post_type?: string | null
@@ -1626,6 +1628,7 @@ export type Database = {
           is_pinned?: boolean
           kind?: string
           like_count?: number
+          pillar?: number | null
           pillar_tag?: string | null
           poll_id?: string | null
           post_type?: string | null
