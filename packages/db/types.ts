@@ -541,19 +541,55 @@ export type Database = {
           },
         ]
       }
+      event_rsvps: {
+        Row: {
+          created_at: string
+          event_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_rsvps_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_rsvps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
+          attending_count: number
           created_at: string
           description: string | null
           ends_at: string | null
           event_type: string
           event_type_keynote: boolean
+          format: string
           hero_image_url: string | null
           id: string
           image_url: string | null
           is_draft: boolean | null
           is_featured: boolean
           is_published: boolean
+          pillar: number | null
           recording_url: string | null
           registration_count: number
           required_tier: string | null
@@ -563,17 +599,20 @@ export type Database = {
           zoom_url: string | null
         }
         Insert: {
+          attending_count?: number
           created_at?: string
           description?: string | null
           ends_at?: string | null
           event_type: string
           event_type_keynote?: boolean
+          format?: string
           hero_image_url?: string | null
           id?: string
           image_url?: string | null
           is_draft?: boolean | null
           is_featured?: boolean
           is_published?: boolean
+          pillar?: number | null
           recording_url?: string | null
           registration_count?: number
           required_tier?: string | null
@@ -583,17 +622,20 @@ export type Database = {
           zoom_url?: string | null
         }
         Update: {
+          attending_count?: number
           created_at?: string
           description?: string | null
           ends_at?: string | null
           event_type?: string
           event_type_keynote?: boolean
+          format?: string
           hero_image_url?: string | null
           id?: string
           image_url?: string | null
           is_draft?: boolean | null
           is_featured?: boolean
           is_published?: boolean
+          pillar?: number | null
           recording_url?: string | null
           registration_count?: number
           required_tier?: string | null
