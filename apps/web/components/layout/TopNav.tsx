@@ -2,15 +2,15 @@
 
 import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
-// useEffect kept for click-outside handler
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { NotifBell } from '@/components/notifications/NotifBell'
-import { Tooltip } from '@/components/ui/Tooltip'
 import { AskGeorgeDrawer } from '@/components/layout/AskGeorgeDrawer'
-import { tierColorRgba } from '@/lib/tier-color'
 import { LogoMark } from '@/components/ui/LogoMark'
 
+// FOUNDATION-TOPNAV-V2: feature-flag for renewal banner.
+// Flip to true once tier_expires_at data and dunning UX are ready.
+const RENEWAL_BANNER_ENABLED = false
 
 interface TopNavProps {
   profile: {
@@ -19,36 +19,28 @@ interface TopNavProps {
     full_name: string | null
     avatar_url: string | null
     tier: string | null
+    tier_status?: string | null
     tier_expires_at?: string | null
+    role?: string | null
+    points?: number | null
   }
   unreadCount?: number
   logoUrl?: string | null
   logoLightUrl?: string | null
-  membersCanToggleTheme?: boolean  // kept for backwards-compat; no longer used
+  membersCanToggleTheme?: boolean
 }
-
-function getInitials(name: string | null | undefined): string {
-  if (!name) return '?'
-  return name
-    .split(' ')
-    .map(w => w[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
-}
-
 
 interface NavItem { label: string; href: string; minTier?: 'vip' | 'pro'; highlight?: boolean }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Home',            href: '/home' },
-  { label: 'Community',       href: '/community' },
-  { label: 'Events',          href: '/events' },
-  { label: 'Academy',         href: '/academy',  minTier: 'vip' },
-  { label: 'Discipline',      href: '/habits',   minTier: 'vip' },
-  { label: 'Podcast',         href: '/podcast' },
-  { label: 'Live',            href: '/live' },
-  { label: 'Media',           href: '/media', highlight: true },
+  { label: 'Home',       href: '/home' },
+  { label: 'Community',  href: '/community' },
+  { label: 'Events',     href: '/events' },
+  { label: 'Academy',    href: '/academy',  minTier: 'vip' },
+  { label: 'Discipline', href: '/habits',   minTier: 'vip' },
+  { label: 'Podcast',    href: '/podcast' },
+  { label: 'Live',       href: '/live' },
+  { label: 'Media',      href: '/media',    highlight: true },
 ]
 
 const TIER_RANK: Record<string, number> = { community: 1, vip: 2, pro: 3 }
@@ -58,21 +50,53 @@ function canAccess(userTier: string | null, minTier?: string): boolean {
   return (TIER_RANK[userTier ?? ''] ?? 0) >= (TIER_RANK[minTier] ?? 0)
 }
 
-export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, membersCanToggleTheme: _membersCanToggleTheme }: TopNavProps) {
-  const pathname = usePathname()
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const [georgeOpen, setGeorgeOpen] = useState(false)
+function getInitials(name: string | null | undefined): string {
+  if (!name) return '?'
+  return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+}
 
-  // Renewal urgency calculation
-  const daysUntilExpiry = profile.tier_expires_at
-    ? Math.ceil((new Date(profile.tier_expires_at).getTime() - Date.now()) / (86_400_000))
-    : null
-  const showRenewalBanner = typeof daysUntilExpiry === 'number' && daysUntilExpiry > 0 && daysUntilExpiry <= 14
+function tierRingColor(tier: string | null | undefined): string {
+  if (tier === 'pro') return 'rgba(201,168,76,0.85)'
+  if (tier === 'vip') return 'rgba(96,165,250,0.7)'
+  return 'rgba(255,255,255,0.15)'
+}
+
+function tierLabelColor(tier: string | null | undefined, isLight: boolean): string {
+  if (tier === 'pro') return '#C9A84C'
+  if (tier === 'vip') return '#60A5FA'
+  return isLight ? 'rgba(27,42,74,0.5)' : 'rgba(255,255,255,0.4)'
+}
+
+// Detect whether <html> currently carries the `light-mode` class.
+// Defaults to false (dark) for SSR; updates on mount and on class mutations.
+function useIsLightMode(): boolean {
+  const [isLight, setIsLight] = useState(false)
+  useEffect(() => {
+    const update = () => setIsLight(document.documentElement.classList.contains('light-mode'))
+    update()
+    const observer = new MutationObserver(update)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+  return isLight
+}
+
+export function TopNav({
+  profile,
+  unreadCount = 0,
+  logoUrl: _logoUrl,
+  logoLightUrl: _logoLightUrl,
+  membersCanToggleTheme: _membersCanToggleTheme,
+}: TopNavProps) {
+  const pathname = usePathname()
+  const isLight = useIsLightMode()
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [aiOpen, setAiOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const displayName = profile.display_name ?? profile.full_name ?? ''
 
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking outside (preserved from v1)
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -89,121 +113,340 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
     window.location.href = '/login'
   }
 
+  // Renewal banner data — JSX is plumbed but currently flag-gated off.
+  const daysUntilExpiry = profile.tier_expires_at
+    ? Math.ceil((new Date(profile.tier_expires_at).getTime() - Date.now()) / 86_400_000)
+    : null
+  const showRenewalBanner =
+    RENEWAL_BANNER_ENABLED &&
+    typeof daysUntilExpiry === 'number' &&
+    daysUntilExpiry > 0 &&
+    daysUntilExpiry <= 30
+
+  // Theme-derived colors
+  const linkActive = isLight ? '#1B2A4A' : '#fff'
+  const linkIdle   = isLight ? 'rgba(27,42,74,0.55)' : 'rgba(255,255,255,0.5)'
+  const linkHover  = isLight ? '#1B2A4A' : 'rgba(255,255,255,0.85)'
+  const dividerColor = isLight ? 'rgba(27,42,74,0.12)' : 'rgba(255,255,255,0.08)'
+  const subtleText = isLight ? 'rgba(27,42,74,0.55)' : 'rgba(255,255,255,0.55)'
+  const aiLabelColor = isLight ? '#1B2A4A' : '#fff'
+
   return (
     <>
-      <AskGeorgeDrawer isOpen={georgeOpen} onClose={() => setGeorgeOpen(false)} />
-      {showRenewalBanner && (
+      <AskGeorgeDrawer isOpen={aiOpen} onClose={() => setAiOpen(false)} />
+
+      {showRenewalBanner && daysUntilExpiry !== null && (
         <div
-          className="flex items-center justify-center gap-3 px-4 py-2 text-[12px] font-body"
           style={{
-            backgroundColor: daysUntilExpiry! <= 7 ? 'rgba(239,14,48,0.08)' : 'rgba(201,168,76,0.1)',
-            color: daysUntilExpiry! <= 7 ? '#ef0e30' : '#8a6d1b',
-            borderBottom: '1px solid rgba(27,60,90,0.06)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 12,
+            padding: '8px 16px',
+            fontSize: 12,
+            fontFamily: '"Barlow", sans-serif',
+            background: daysUntilExpiry <= 7 ? 'rgba(239,14,48,0.08)' : 'rgba(201,168,76,0.1)',
+            color: daysUntilExpiry <= 7 ? '#ef6075' : (isLight ? '#8a6d1b' : '#dbbb6a'),
+            borderBottom: '1px solid var(--border-subtle)',
           }}
         >
           <span>
             Your membership renews in <strong>{daysUntilExpiry} day{daysUntilExpiry !== 1 ? 's' : ''}</strong>
           </span>
-          <a
+          <Link
             href="/membership"
-            className="font-condensed font-bold uppercase tracking-wide text-[10px] px-3 py-1 rounded"
             style={{
-              backgroundColor: daysUntilExpiry! <= 7 ? '#ef0e30' : '#C9A84C',
-              color: '#fff',
+              fontFamily: '"Barlow Condensed", sans-serif',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.16em',
+              fontSize: 10,
+              padding: '4px 10px',
               textDecoration: 'none',
+              background: daysUntilExpiry <= 7 ? '#ef0e30' : '#C9A84C',
+              color: '#fff',
             }}
           >
             Renew
-          </a>
+          </Link>
         </div>
       )}
+
       <header
-        className="sticky top-0 z-40 flex items-center justify-between px-6 h-14 flex-shrink-0 relative"
         style={{
-          backgroundColor: '#0D1B2A',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 40,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 24px',
+          height: 72,
+          background: 'var(--bg-topnav)',
+          borderBottom: '1px solid var(--border-subtle)',
         }}
       >
-        {/* Logo */}
-        <Link href="/home" className="flex items-center flex-shrink-0" style={{ textDecoration: 'none' }}>
-          <LogoMark variant="light" height={36} />
+        {/* Logo (left) */}
+        <Link
+          href="/home"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            flexShrink: 0,
+            height: '100%',
+            textDecoration: 'none',
+          }}
+        >
+          <LogoMark variant={isLight ? 'dark' : 'light'} height={32} />
         </Link>
 
-        {/* Primary nav links — desktop */}
-        <nav className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+        {/* Nav (centered absolute) */}
+        <nav
+          style={{
+            position: 'absolute',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
           {NAV_ITEMS.filter(item => canAccess(profile.tier, item.minTier)).map(item => {
             const active = pathname.startsWith(item.href)
+            const color = item.highlight ? '#C9A84C' : (active ? linkActive : linkIdle)
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="uppercase px-3 py-1.5 rounded transition-colors"
                 style={{
-                  fontFamily: 'var(--font-logo)',
-                  fontSize: 15,
-                  letterSpacing: '0.07em',
-                  color: item.highlight ? '#C9A84C' : active ? '#ffffff' : 'rgba(255,255,255,0.45)',
-                  borderBottom: item.highlight && active ? '2px solid #C9A84C' : '2px solid transparent',
+                  position: 'relative',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  padding: '8px 14px',
+                  fontFamily: '"Bebas Neue", sans-serif',
+                  fontSize: 16,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color,
+                  textDecoration: 'none',
+                  borderBottom: active
+                    ? `2px solid ${item.highlight ? '#C9A84C' : '#C9302A'}`
+                    : '2px solid transparent',
+                  marginBottom: -1,
+                  transition: 'color 120ms ease',
+                }}
+                onMouseEnter={e => {
+                  if (!active && !item.highlight) e.currentTarget.style.color = linkHover
+                }}
+                onMouseLeave={e => {
+                  if (!active && !item.highlight) e.currentTarget.style.color = linkIdle
                 }}
               >
-                {item.label}{item.highlight ? ' ↗' : ''}
+                {item.label}
+                {item.highlight && (
+                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                    <path
+                      d="M3 9 L9 3 M5 3 H9 V7"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
               </Link>
             )
           })}
-          {profile.tier !== 'pro' && (
-            <Link
-              href="/pricing"
-              className="uppercase px-3 py-1.5 rounded transition-colors"
-              style={{ fontFamily: 'var(--font-logo)', fontSize: 15, letterSpacing: '0.07em', color: 'rgba(201,168,76,0.6)' }}
-            >
-              Upgrade
-            </Link>
-          )}
         </nav>
 
-        {/* Right actions */}
-        <div className="flex items-center gap-2">
-          {/* Ask George */}
-          <Tooltip content="Ask George">
-            <button
-              type="button"
-              onClick={() => setGeorgeOpen(o => !o)}
-              className="w-8 h-8 flex items-center justify-center rounded flex-shrink-0 transition-colors"
-              style={{ color: georgeOpen ? '#A78BFA' : 'rgba(167,139,250,0.55)' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#A78BFA')}
-              onMouseLeave={e => (e.currentTarget.style.color = georgeOpen ? '#A78BFA' : 'rgba(167,139,250,0.55)')}
-              aria-label="Ask George AI"
+        {/* Right cluster */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+          {/* AI George — pill variant */}
+          <button
+            type="button"
+            onClick={() => setAiOpen(o => !o)}
+            aria-label="AI George"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              height: 40,
+              padding: '0 14px 0 4px',
+              background: aiOpen
+                ? 'rgba(167,139,250,0.18)'
+                : (isLight ? 'rgba(167,139,250,0.1)' : 'rgba(167,139,250,0.08)'),
+              border: `1px solid ${aiOpen ? '#A78BFA' : 'rgba(167,139,250,0.45)'}`,
+              color: aiLabelColor,
+              cursor: 'pointer',
+              transition: 'all 140ms ease',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(167,139,250,0.18)'
+              e.currentTarget.style.borderColor = '#A78BFA'
+            }}
+            onMouseLeave={e => {
+              if (aiOpen) return
+              e.currentTarget.style.background = isLight ? 'rgba(167,139,250,0.1)' : 'rgba(167,139,250,0.08)'
+              e.currentTarget.style.borderColor = 'rgba(167,139,250,0.45)'
+            }}
+          >
+            {/* Avatar + violet conic halo */}
+            <span
+              style={{
+                position: 'relative',
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
+                padding: 2,
+                background: 'conic-gradient(from 200deg, #A78BFA, #C9A4FF, #A78BFA, #8B6FE8, #A78BFA)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
             >
-              <svg width="20" height="20" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <text x="1" y="20" fontFamily="'Barlow Condensed', sans-serif" fontWeight="700" fontSize="17" fill="currentColor" letterSpacing="0.5">AI</text>
-                <line x1="23" y1="3" x2="23" y2="9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                <line x1="20" y1="6" x2="26" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                <line x1="21" y1="4" x2="25" y2="8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-                <line x1="25" y1="4" x2="21" y2="8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-              </svg>
-            </button>
-          </Tooltip>
+              <span
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  flexShrink: 0,
+                  background: profile.avatar_url ? '#1A2332' : '#ef0e30',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {profile.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={profile.avatar_url}
+                    alt=""
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                ) : (
+                  <span
+                    style={{
+                      fontFamily: '"Barlow Condensed", sans-serif',
+                      fontWeight: 800,
+                      fontSize: 12,
+                      color: '#fff',
+                      letterSpacing: '0.04em',
+                    }}
+                  >
+                    {getInitials(displayName)}
+                  </span>
+                )}
+              </span>
+              {/* Sparkle badge — bg matches nav so it appears cut out of the halo */}
+              <span
+                style={{
+                  position: 'absolute',
+                  top: -2,
+                  right: -2,
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  background: 'var(--bg-topnav)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="#A78BFA" aria-hidden="true">
+                  <path d="M12 2 L13.4 9 L20 10.5 L13.4 12 L12 19 L10.6 12 L4 10.5 L10.6 9 Z" />
+                </svg>
+              </span>
+            </span>
 
-          {/* Notification bell */}
+            {/* Stacked label */}
+            <span
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                lineHeight: 1,
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontWeight: 800,
+                  fontSize: 13,
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  color: '#A78BFA',
+                }}
+              >
+                AI
+              </span>
+              <span
+                style={{
+                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontWeight: 700,
+                  fontSize: 12,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: subtleText,
+                  marginTop: 1,
+                }}
+              >
+                George
+              </span>
+            </span>
+          </button>
+
+          {/* Vertical divider */}
+          <div style={{ width: 1, height: 24, background: dividerColor }} />
+
+          {/* Notification bell (visuals updated to v2 spec; preserves drawer + realtime) */}
           <NotifBell initialUnreadCount={unreadCount} userId={profile.id} />
 
-          {/* Avatar with dropdown */}
-          <div className="relative" ref={dropdownRef}>
+          {/* Avatar + dropdown */}
+          <div style={{ position: 'relative' }} ref={dropdownRef}>
             <button
               type="button"
               onClick={() => setDropdownOpen(o => !o)}
-              className="w-8 h-8 flex items-center justify-center rounded-full flex-shrink-0 focus:outline-none"
-              style={{ backgroundColor: '#ef0e30', boxShadow: `0 0 0 2px ${tierColorRgba(profile.tier, 0.4)}` }}
+              aria-label="Account menu"
+              style={{
+                position: 'relative',
+                width: 36,
+                height: 36,
+                borderRadius: '50%',
+                padding: 0,
+                border: 'none',
+                cursor: 'pointer',
+                background: profile.avatar_url ? '#1A2332' : '#ef0e30',
+                boxShadow: `0 0 0 2px ${tierRingColor(profile.tier)}, 0 0 0 3px var(--bg-topnav)`,
+                overflow: 'hidden',
+                transition: 'transform 120ms ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.04)' }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
             >
               {profile.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={profile.avatar_url}
                   alt={displayName}
-                  className="w-8 h-8 rounded-full object-cover"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />
               ) : (
-                <span className="font-condensed font-bold text-white text-xs">
+                <span
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    height: '100%',
+                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontWeight: 700,
+                    fontSize: 13,
+                    color: '#fff',
+                  }}
+                >
                   {getInitials(displayName)}
                 </span>
               )}
@@ -211,44 +454,147 @@ export function TopNav({ profile, unreadCount = 0, logoUrl, logoLightUrl, member
 
             {dropdownOpen && (
               <div
-                className="absolute right-0 mt-2 w-44 rounded overflow-hidden z-50"
                 style={{
-                  backgroundColor: '#fff',
-                  border: '1px solid rgba(27,60,90,0.1)',
-                  boxShadow: '0 4px 16px rgba(27,60,90,0.14)',
-                  top: '100%',
+                  position: 'absolute',
+                  top: 'calc(100% + 8px)',
+                  right: 0,
+                  width: 240,
+                  background: isLight ? '#FFFFFF' : '#111926',
+                  border: isLight ? '1px solid #E0D8CC' : '1px solid rgba(255,255,255,0.08)',
+                  zIndex: 50,
+                  overflow: 'hidden',
                 }}
               >
-                <div className="px-4 py-2.5" style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}>
-                  <p className="font-condensed font-bold text-[12px] truncate" style={{ color: '#1b3c5a' }}>
-                    {displayName || 'My Account'}
-                  </p>
-                  {profile.tier_expires_at && (
-                    <p className="font-body text-[10px] mt-0.5" style={{ color: '#7a8a96' }}>
-                      Renews {new Date(profile.tier_expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </p>
-                  )}
-                </div>
-                <Link
-                  href="/profile/me"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-2 px-4 py-2.5 text-[13px] font-body transition-colors"
-                  style={{ color: '#1b3c5a' }}
-                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.04)')}
-                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                {/* Header */}
+                <div
+                  style={{
+                    padding: '14px 16px',
+                    borderBottom: isLight ? '1px solid #E0D8CC' : '1px solid rgba(255,255,255,0.06)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                  }}
                 >
-                  My Profile
-                </Link>
-                <div style={{ borderTop: '1px solid rgba(27,60,90,0.08)' }}>
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
+                      background: profile.avatar_url ? 'transparent' : '#ef0e30',
+                      overflow: 'hidden',
+                      boxShadow: `0 0 0 2px ${tierRingColor(profile.tier)}`,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {profile.avatar_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={profile.avatar_url}
+                        alt=""
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <span
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '100%',
+                          height: '100%',
+                          fontFamily: '"Barlow Condensed", sans-serif',
+                          fontWeight: 700,
+                          color: '#fff',
+                          fontSize: 14,
+                        }}
+                      >
+                        {getInitials(displayName)}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontFamily: '"Barlow Condensed", sans-serif',
+                        fontWeight: 700,
+                        fontSize: 13,
+                        color: isLight ? '#1B2A4A' : '#fff',
+                        letterSpacing: '0.04em',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {displayName || 'My account'}
+                    </p>
+                    <p
+                      style={{
+                        margin: '2px 0 0',
+                        fontFamily: '"Barlow Condensed", sans-serif',
+                        fontWeight: 600,
+                        fontSize: 10,
+                        letterSpacing: '0.18em',
+                        textTransform: 'uppercase',
+                        color: tierLabelColor(profile.tier, isLight),
+                      }}
+                    >
+                      {profile.tier ?? 'community'} tier
+                    </p>
+                  </div>
+                </div>
+
+                {/* Links */}
+                {[
+                  { label: 'My profile', href: '/profile/me' },
+                  { label: 'Settings',   href: '/settings' },
+                  { label: 'Membership', href: '/membership' },
+                ].map(item => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setDropdownOpen(false)}
+                    style={{
+                      display: 'block',
+                      padding: '10px 16px',
+                      fontFamily: '"Barlow", sans-serif',
+                      fontSize: 13,
+                      color: isLight ? 'rgba(27,42,74,0.85)' : 'rgba(255,255,255,0.8)',
+                      textDecoration: 'none',
+                      transition: 'background 120ms ease',
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.background = isLight
+                        ? 'rgba(27,42,74,0.04)'
+                        : 'rgba(255,255,255,0.04)'
+                    }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+
+                {/* Sign out */}
+                <div
+                  style={{
+                    borderTop: isLight ? '1px solid #E0D8CC' : '1px solid rgba(255,255,255,0.06)',
+                  }}
+                >
                   <button
                     type="button"
                     onClick={handleSignOut}
-                    className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-[13px] font-body transition-colors"
-                    style={{ color: '#ef0e30' }}
-                    onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(239,14,48,0.04)')}
-                    onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '10px 16px',
+                      fontFamily: '"Barlow", sans-serif',
+                      fontSize: 13,
+                      color: '#ef6075',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
                   >
-                    Sign Out
+                    Sign out
                   </button>
                 </div>
               </div>

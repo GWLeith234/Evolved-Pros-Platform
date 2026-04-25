@@ -21,7 +21,7 @@ const barlowCondensed = Barlow_Condensed({
 const barlow = Barlow({
   subsets: ['latin'],
   variable: '--font-body',
-  weight: ['300', '400', '500', '600'],
+  weight: ['300', '400', '500', '600', '700'],
 })
 
 const bebasNeue = Bebas_Neue({

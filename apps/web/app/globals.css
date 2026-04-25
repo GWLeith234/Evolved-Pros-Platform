@@ -24,11 +24,29 @@
   /* DS1 semantic tokens */
   --bg-page:       #0A0F18;
   --bg-surface:    #111926;
-  --bg-elevated:   #0A0F18;
+  --bg-elevated:   #1A2332;
   --border-color:  rgba(255,255,255,0.07);
   --text-primary:  #ffffff;
   --text-secondary: rgba(255,255,255,0.6);
   --text-tertiary: rgba(255,255,255,0.35);
+
+  /* DS2 — TopNav v2 + brand (FOUNDATION-TOPNAV-V2) */
+  --bg-topnav:     #0D1B2A;
+  --text-dim:      rgba(255,255,255,0.6);
+  --text-muted:    rgba(255,255,255,0.45);
+  --border-subtle: rgba(255,255,255,0.06);
+  --brand-red:     #C9302A;
+  --brand-red-hot: #ef0e30;
+  --brand-gold:    #C9A84C;
+  --brand-teal:    #0ABFA3;
+  --brand-blue:    #60A5FA;
+  --brand-violet:  #A78BFA;
+  --pillar-1: #FFA538;
+  --pillar-2: #A78BFA;
+  --pillar-3: #F87171;
+  --pillar-4: #60A5FA;
+  --pillar-5: #C9A84C;
+  --pillar-6: #0ABFA3;
 }
 
 body {
@@ -54,6 +72,12 @@ html.light-mode {
   --text-primary:  #1b3c5a;
   --text-secondary: #6B7A8D;
   --text-tertiary: rgba(107,122,141,0.5);
+
+  /* DS2 light variants (FOUNDATION-TOPNAV-V2) */
+  --bg-topnav:     #FFFFFF;
+  --text-dim:      rgba(27,42,74,0.6);
+  --text-muted:    rgba(27,42,74,0.45);
+  --border-subtle: rgba(27,42,74,0.08);
 }
 
 /* Page background + body text */

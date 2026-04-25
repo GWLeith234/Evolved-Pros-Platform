@@ -61,33 +61,63 @@ export function NotifBell({ initialUnreadCount, userId }: NotifBellProps) {
   return (
     <>
       <button
+        type="button"
         onClick={() => setDrawerOpen(v => !v)}
-        className="relative w-8 h-8 flex items-center justify-center rounded transition-colors"
-        style={{
-          backgroundColor: 'rgba(255,255,255,0.05)',
-          border: '1px solid rgba(255,255,255,0.08)',
-        }}
         aria-label="Notifications"
+        style={{
+          position: 'relative',
+          width: 36,
+          height: 36,
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          color: 'var(--text-dim)',
+          transition: 'color 120ms ease',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.color = 'var(--text-primary)' }}
+        onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-dim)' }}
       >
         <svg
-          width="16"
-          height="16"
+          width="20"
+          height="20"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
-          style={{ color: 'rgba(255,255,255,0.5)' }}
+          aria-hidden="true"
         >
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
         {unreadCount > 0 && (
           <span
-            className="absolute top-0.5 right-0.5 w-[7px] h-[7px] rounded-full"
-            style={{ backgroundColor: '#ef0e30' }}
-          />
+            style={{
+              position: 'absolute',
+              top: 4,
+              right: 4,
+              minWidth: 14,
+              height: 14,
+              padding: '0 3px',
+              background: 'var(--brand-red-hot)',
+              color: '#fff',
+              fontFamily: '"Barlow Condensed", sans-serif',
+              fontWeight: 700,
+              fontSize: 9,
+              lineHeight: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '2px solid var(--bg-topnav)',
+              borderRadius: 999,
+            }}
+          >
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
         )}
       </button>
 
