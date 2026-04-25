@@ -1543,24 +1543,21 @@ export type Database = {
       }
       post_reactions: {
         Row: {
-          created_at: string | null
-          id: string
+          created_at: string
           post_id: string
-          reaction: string
+          reaction_type: string
           user_id: string
         }
         Insert: {
-          created_at?: string | null
-          id?: string
+          created_at?: string
           post_id: string
-          reaction: string
+          reaction_type: string
           user_id: string
         }
         Update: {
-          created_at?: string | null
-          id?: string
+          created_at?: string
           post_id?: string
-          reaction?: string
+          reaction_type?: string
           user_id?: string
         }
         Relationships: [
@@ -1589,10 +1586,12 @@ export type Database = {
           created_at: string
           id: string
           is_pinned: boolean
+          kind: string
           like_count: number
           pillar_tag: string | null
           poll_id: string | null
           post_type: string | null
+          reaction_count: number
           reply_count: number
           scheduled_at: string | null
           status: string | null
@@ -1606,10 +1605,12 @@ export type Database = {
           created_at?: string
           id?: string
           is_pinned?: boolean
+          kind?: string
           like_count?: number
           pillar_tag?: string | null
           poll_id?: string | null
           post_type?: string | null
+          reaction_count?: number
           reply_count?: number
           scheduled_at?: string | null
           status?: string | null
@@ -1623,10 +1624,12 @@ export type Database = {
           created_at?: string
           id?: string
           is_pinned?: boolean
+          kind?: string
           like_count?: number
           pillar_tag?: string | null
           poll_id?: string | null
           post_type?: string | null
+          reaction_count?: number
           reply_count?: number
           scheduled_at?: string | null
           status?: string | null
@@ -1886,6 +1889,60 @@ export type Database = {
           updated_at?: string
           user_id?: string
           wig_statement?: string | null
+        }
+        Relationships: []
+      }
+      sponsor_placements: {
+        Row: {
+          accent_color: string
+          call_to_action: string
+          created_at: string
+          cta_url: string
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          kind: string
+          logo_url: string | null
+          offer_details: string | null
+          slogan: string | null
+          sort_order: number
+          sponsor_name: string
+          starts_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string
+          call_to_action: string
+          created_at?: string
+          cta_url: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: string
+          logo_url?: string | null
+          offer_details?: string | null
+          slogan?: string | null
+          sort_order?: number
+          sponsor_name: string
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string
+          call_to_action?: string
+          created_at?: string
+          cta_url?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: string
+          logo_url?: string | null
+          offer_details?: string | null
+          slogan?: string | null
+          sort_order?: number
+          sponsor_name?: string
+          starts_at?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
