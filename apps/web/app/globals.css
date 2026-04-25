@@ -65,6 +65,27 @@
   --episode-banner-border:   rgba(255,255,255,0.08);
   --episode-banner-cta-bg:   #C9302A;
   --episode-banner-cta-text: #FFFFFF;
+
+  /* Community page + composer tokens (COMMUNITY-SPRINT-1) */
+  --community-page-bg:                  #0A0F18;
+  --community-header-eyebrow:           #C9A84C;
+  --community-header-title:             #FFFFFF;
+  --community-header-tagline:           rgba(255,255,255,0.65);
+  --composer-bg:                        #111926;
+  --composer-border:                    rgba(255,255,255,0.06);
+  --composer-tab-active:                #C9A84C;
+  --composer-tab-idle:                  rgba(255,255,255,0.45);
+  --composer-tab-hover:                 rgba(255,255,255,0.75);
+  --composer-tab-underline:             #C9A84C;
+  --composer-textarea-bg:               transparent;
+  --composer-textarea-text:             rgba(255,255,255,0.95);
+  --composer-placeholder:               rgba(255,255,255,0.40);
+  --composer-pillar-label:              rgba(255,255,255,0.45);
+  --composer-pillar-chip-bg:            rgba(255,255,255,0.04);
+  --composer-pillar-chip-active-text:   #0A0F18;
+  --composer-post-btn-bg:               #C9302A;
+  --composer-post-btn-text:             #FFFFFF;
+  --composer-post-btn-disabled:         rgba(255,255,255,0.10);
 }
 
 body {
@@ -115,6 +136,26 @@ html.light-mode {
   --episode-banner-border:   rgba(27,42,74,0.10);
   --episode-banner-cta-bg:   #C9302A;
   --episode-banner-cta-text: #FFFFFF;
+
+  /* Community page + composer — light overrides (COMMUNITY-SPRINT-1) */
+  --community-page-bg:                  #FAF7F2;
+  --community-header-eyebrow:           #8B7332;
+  --community-header-title:             #1B2A4A;
+  --community-header-tagline:           rgba(27,42,74,0.65);
+  --composer-bg:                        #FFFFFF;
+  --composer-border:                    rgba(27,42,74,0.10);
+  --composer-tab-active:                #8B7332;
+  --composer-tab-idle:                  rgba(27,42,74,0.45);
+  --composer-tab-hover:                 rgba(27,42,74,0.75);
+  --composer-tab-underline:             #8B7332;
+  --composer-textarea-text:             #1B2A4A;
+  --composer-placeholder:               rgba(27,42,74,0.40);
+  --composer-pillar-label:              rgba(27,42,74,0.45);
+  --composer-pillar-chip-bg:            rgba(27,42,74,0.04);
+  --composer-pillar-chip-active-text:   #FFFFFF;
+  --composer-post-btn-bg:               #C9302A;
+  --composer-post-btn-text:             #FFFFFF;
+  --composer-post-btn-disabled:         rgba(27,42,74,0.10);
 }
 
 /* Page background + body text */

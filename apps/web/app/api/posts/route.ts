@@ -130,9 +130,17 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  let body: { channelId?: unknown; body?: unknown; pillarTag?: unknown; postType?: unknown; pollId?: unknown }
+  let body: {
+    channelId?: unknown
+    body?: unknown
+    pillarTag?: unknown
+    postType?: unknown
+    pollId?: unknown
+    kind?: unknown      // COMMUNITY-SPRINT-1: new composer
+    pillar?: unknown    // COMMUNITY-SPRINT-1: integer 1-6 or null
+  }
   try {
     body = await request.json()
   } catch {
@@ -142,29 +150,80 @@ export async function POST(request: Request) {
   const channelId = typeof body.channelId === 'string' ? body.channelId : null
   const postBody = typeof body.body === 'string' ? body.body.trim() : ''
   const pillarTag = typeof body.pillarTag === 'string' ? body.pillarTag : null
-  const postType = typeof body.postType === 'string' ? body.postType : 'update'
+  const postType = typeof body.postType === 'string' ? body.postType : null
   const pollId = typeof body.pollId === 'string' ? body.pollId : null
 
+  // New (Sprint 1) inputs.
+  const rawKind = typeof body.kind === 'string' ? body.kind : null
+  const rawPillar =
+    typeof body.pillar === 'number' ? body.pillar :
+    body.pillar === null ? null :
+    undefined
+
+  // Detect call site so legacy callers keep their min-10-char rule and new
+  // composer callers (which gate on non-empty client-side) only need >0.
+  const isNewComposer = rawKind !== null
+  const minBodyLen = isNewComposer ? 1 : 10
+
   if (!channelId) return NextResponse.json({ error: 'channelId is required' }, { status: 422 })
-  if (postBody.length < 10) return NextResponse.json({ error: 'Post must be at least 10 characters' }, { status: 422 })
+  if (postBody.length < minBodyLen) {
+    return NextResponse.json(
+      { error: isNewComposer ? 'Post body required' : 'Post must be at least 10 characters' },
+      { status: isNewComposer ? 400 : 422 },
+    )
+  }
   if (postBody.length > 5000) return NextResponse.json({ error: 'Post exceeds 5000 characters' }, { status: 422 })
 
-  const validPillarTags = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6']
-  const validatedTag = pillarTag && validPillarTags.includes(pillarTag) ? pillarTag : null
+  const VALID_KINDS = ['update', 'win', 'question', 'poll'] as const
+  if (rawKind !== null && !VALID_KINDS.includes(rawKind as typeof VALID_KINDS[number])) {
+    return NextResponse.json({ error: 'Invalid kind' }, { status: 400 })
+  }
+  if (rawPillar !== undefined && rawPillar !== null) {
+    if (!Number.isInteger(rawPillar) || rawPillar < 1 || rawPillar > 6) {
+      return NextResponse.json({ error: 'Invalid pillar' }, { status: 400 })
+    }
+  }
 
+  // Resolve canonical kind / pillar — prefer new fields, fall back to legacy.
   const validPostTypes = ['update', 'question', 'win', 'announce', 'poll']
-  const validatedPostType = validPostTypes.includes(postType) ? postType : 'update'
+  const legacyType = postType && validPostTypes.includes(postType) ? postType : null
+  const kind: 'update' | 'win' | 'question' | 'poll' =
+    (rawKind as 'update' | 'win' | 'question' | 'poll' | null) ??
+    (legacyType === 'announce' ? 'update' : (legacyType as 'update' | 'win' | 'question' | 'poll' | null)) ??
+    'update'
+
+  const validPillarTags = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6']
+  const legacyTag = pillarTag && validPillarTags.includes(pillarTag) ? pillarTag : null
+  const pillarInt: number | null =
+    rawPillar !== undefined ? (rawPillar as number | null) :
+    legacyTag ? Number(legacyTag.slice(1)) :
+    null
+  const pillarText: string | null =
+    pillarInt !== null && pillarInt >= 1 && pillarInt <= 6 ? `p${pillarInt}` : legacyTag
+
+  // Resolve public.users.id by email per project rule (auth user.id is the
+  // auth-schema id, which doesn't always match public.users.id).
+  const { data: profileRow } = await adminClient
+    .from('users')
+    .select('id')
+    .eq('email', user.email)
+    .single()
+  const authorId = profileRow?.id ?? user.id
 
   const { data: post, error } = await supabase
     .from('posts')
     .insert({
-      author_id: user.id,
+      author_id: authorId,
       channel_id: channelId,
       body: postBody,
-      pillar_tag: validatedTag as 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | null,
-      post_type: validatedPostType,
+      // Legacy columns — kept in sync so existing fetchers keep returning posts correctly.
+      pillar_tag: pillarText as 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | null,
+      post_type: legacyType ?? kind,
+      // New columns (Sprint 0/1).
+      kind,
+      pillar: pillarInt,
       ...(pollId ? { poll_id: pollId } : {}),
-    })
+    } as never)
     .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
     .single()
 

@@ -2,13 +2,19 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { FeedCompose } from './FeedCompose'
 import { PostCard } from './PostCard'
 import { DashboardStrip } from './DashboardStrip'
 import { FeedAdUnit } from './FeedAdUnit'
+import { CommunityPageHeader } from './CommunityPageHeader'
+import { Composer } from './Composer'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import type { Post, CommunityAd } from '@/lib/community/types'
 import type { DashboardStripProps } from './DashboardStrip'
+
+function getInitials(name: string | null | undefined): string {
+  if (!name) return '?'
+  return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+}
 
 type Filter = 'all' | 'win' | 'question' | PillarFilter
 type PillarFilter = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6'
@@ -125,6 +131,17 @@ export function UnifiedCommunityPage({
     setPosts(prev => [post, ...prev])
   }
 
+  // New Composer (Sprint 1) doesn't return the created post object —
+  // re-fetch the latest row and prepend so the user sees their own post.
+  const handleNewComposerPost = useCallback(async () => {
+    try {
+      const res = await fetch('/api/posts?limit=1')
+      if (!res.ok) return
+      const data = await res.json() as { posts: Post[] }
+      if (data.posts[0]) handlePostCreated(data.posts[0])
+    } catch { /* swallow — realtime will catch up eventually */ }
+  }, [])
+
   function flushQueued() {
     setPosts(prev => {
       const ids = new Set(prev.map(p => p.id))
@@ -205,34 +222,15 @@ export function UnifiedCommunityPage({
   })
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 overflow-x-hidden" style={{ height: '100%' }}>
+    <div className="flex flex-col flex-1 min-h-0 overflow-x-hidden" style={{ height: '100%', background: 'var(--community-page-bg)' }}>
       {/* Dashboard strip */}
       <DashboardStrip {...dashboardProps} />
 
-      {/* Parchment header */}
-      <div
-        style={{ backgroundColor: '#F5F0E8', borderBottom: '1px solid rgba(27,42,74,0.1)', padding: '20px 24px 16px' }}
-      >
-        <p
-          className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] mb-1"
-          style={{ color: '#C9302A' }}
-        >
-          EVOLVED PROS
-        </p>
-        <h1
-          className="font-display font-black leading-tight mb-1"
-          style={{ fontSize: '28px', color: '#1B2A4A' }}
-        >
-          Community
-        </h1>
-        <p
-          className="font-body text-[14px] mb-4"
-          style={{ color: '#6B7A8D', maxWidth: '540px' }}
-        >
-          Connect with high-performing sales professionals. Share wins, ask questions, and build accountability.
-        </p>
+      {/* Editorial header (COMMUNITY-SPRINT-1) */}
+      <CommunityPageHeader />
 
-        {/* Filter pill bar */}
+      {/* Filter pills — held over from Sprint 0; new filter rail lands in Sprint 2 */}
+      <div style={{ padding: '0 24px 16px' }}>
         <div className="flex items-center gap-1.5 flex-wrap">
           {[
             { id: 'all' as Filter, label: 'All', color: null },
@@ -282,7 +280,7 @@ export function UnifiedCommunityPage({
       </div>
 
       {/* Feed — full-width, centered, scrollable */}
-      <div className="flex-1 overflow-y-auto" style={{ backgroundColor: '#0A0F18' }}>
+      <div className="flex-1 overflow-y-auto" style={{ background: 'var(--community-page-bg)' }}>
         <div className="w-full mx-auto px-6 py-4 space-y-3">
 
           {/* Pinned announcement */}
@@ -309,11 +307,16 @@ export function UnifiedCommunityPage({
             </div>
           )}
 
-          {/* Compose */}
-          <FeedCompose
+          {/* Compose (COMMUNITY-SPRINT-1) */}
+          <Composer
             channelId={defaultChannelId}
-            currentUser={currentUser}
-            onPostCreated={handlePostCreated}
+            currentUser={{
+              displayName: currentUser.displayName ?? '',
+              initials: getInitials(currentUser.displayName),
+              avatarUrl: currentUser.avatarUrl,
+              tier: currentUser.tier ?? null,
+            }}
+            onPostCreated={handleNewComposerPost}
           />
 
           {/* New posts banner */}
