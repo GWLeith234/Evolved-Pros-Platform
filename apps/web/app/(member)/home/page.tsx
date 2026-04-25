@@ -7,12 +7,11 @@ import { CommitmentTracker } from '@/components/academy/CommitmentTracker'
 export const metadata: Metadata = { title: 'Home — Evolved Pros' }
 import { HabitWidget } from '@/components/home/HabitWidget'
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
-import { StatRow } from '@/components/home/StatRow'
 import { ActivityFeed } from '@/components/home/ActivityFeed'
 import { UpcomingEventsWidget } from '@/components/home/UpcomingEventsWidget'
 import { AcademyProgressWidget } from '@/components/home/AcademyProgressWidget'
 import { ProfileCompletePrompt } from '@/components/home/ProfileCompletePrompt'
-import { BadgeRow } from '@/components/home/BadgeRow'
+import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
 async function fetchCurrentUser(supabase: ReturnType<typeof createClient>, email: string) {
   const { data } = await supabase
@@ -247,6 +246,18 @@ export default async function MemberHomePage() {
   const displayName = (profile.full_name ? profile.full_name.split(' ')[0] : null) ?? profile.display_name ?? 'Member'
   const upcomingEventCount = events.filter(e => !e.isRegistered).length
 
+  const earnedSet = new Set(earnedBadges)
+  const pillars = ([1, 2, 3, 4, 5, 6] as const).map(n => {
+    const name = PILLAR_CONFIG[n].label
+    if (earnedSet.has(n)) {
+      return { number: n, name, state: 'earned' as const }
+    }
+    if (n <= stats.pillarsUnlocked) {
+      return { number: n, name, state: 'in-progress' as const, progressPct: stats.academyProgressPct }
+    }
+    return { number: n, name, state: 'locked' as const }
+  })
+
   return (
     <div className="p-6 space-y-5">
       <WelcomeBanner
@@ -254,8 +265,13 @@ export default async function MemberHomePage() {
         tier={profile.tier}
         avatarUrl={profile.avatar_url}
         quote={quote}
-        unreadPostCount={unreadCount}
-        upcomingEventCount={upcomingEventCount}
+        scoreboard={{
+          unreadPostCount: unreadCount,
+          upcomingEventCount,
+          podcastCount: 0,
+          storyCount: 0,
+        }}
+        pillars={pillars}
       />
 
       <ProfileCompletePrompt
@@ -264,10 +280,6 @@ export default async function MemberHomePage() {
         hasTitle={Boolean(profile.role_title)}
         hasName={Boolean(profile.display_name || profile.full_name)}
       />
-
-      <StatRow stats={stats} />
-
-      <BadgeRow earnedBadges={earnedBadges} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[7fr_5fr] gap-5">
         <ActivityFeed
