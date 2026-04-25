@@ -63,9 +63,9 @@ export async function EpisodeBanner() {
   return (
     <div
       style={{
-        backgroundColor: '#111926',
+        backgroundColor: 'var(--episode-banner-bg)',
         borderTop: '2px solid #C9302A',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        borderBottom: '1px solid var(--episode-banner-border)',
         height: '38px',
         display: 'flex',
         alignItems: 'center',
@@ -96,7 +96,7 @@ export async function EpisodeBanner() {
         {/* Episode title — primary */}
         <span
           className="truncate max-w-[160px] sm:max-w-xs md:max-w-none text-sm"
-          style={{ color: '#ffffff', fontWeight: 500 }}
+          style={{ color: 'var(--episode-banner-text)', fontWeight: 500 }}
         >
           {displayText}
         </span>
@@ -104,8 +104,8 @@ export async function EpisodeBanner() {
         {/* Guest name */}
         {guestLabel && (
           <>
-            <span style={{ width: '3px', height: '3px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
-            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+            <span style={{ width: '3px', height: '3px', borderRadius: '50%', backgroundColor: 'var(--episode-banner-border)', flexShrink: 0 }} />
+            <span style={{ color: 'var(--episode-banner-text-dim)', fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>
               {guestLabel}
             </span>
           </>
@@ -114,22 +114,22 @@ export async function EpisodeBanner() {
         {/* Date */}
         {dateLabel && (
           <>
-            <span style={{ width: '3px', height: '3px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
-            <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+            <span style={{ width: '3px', height: '3px', borderRadius: '50%', backgroundColor: 'var(--episode-banner-border)', flexShrink: 0 }} />
+            <span style={{ color: 'var(--episode-banner-text-dim)', fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>
               {dateLabel}
             </span>
           </>
         )}
       </div>
 
-      {/* Right: CTA button */}
+      {/* Right: CTA button — solid red on both themes (brand action color) */}
       <Link
         href={href}
         {...(sanitizedYtUrl ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         style={{
-          backgroundColor: 'rgba(201,48,42,0.15)',
-          border: '1px solid rgba(201,48,42,0.3)',
-          color: '#C9302A',
+          backgroundColor: 'var(--episode-banner-cta-bg)',
+          border: '1px solid var(--episode-banner-cta-bg)',
+          color: 'var(--episode-banner-cta-text)',
           fontSize: '11px',
           fontWeight: 500,
           padding: '4px 12px',

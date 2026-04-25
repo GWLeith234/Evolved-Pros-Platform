@@ -57,6 +57,14 @@
   --topnav-divider:     rgba(255,255,255,0.08);
   --topnav-bell-icon:   rgba(255,255,255,0.65);
   --topnav-ring-bg:     #0D1B2A;
+
+  /* Episode banner tokens (EPISODEBANNER-THEME) */
+  --episode-banner-bg:       #111926;
+  --episode-banner-text:     rgba(255,255,255,0.85);
+  --episode-banner-text-dim: rgba(255,255,255,0.55);
+  --episode-banner-border:   rgba(255,255,255,0.08);
+  --episode-banner-cta-bg:   #C9302A;
+  --episode-banner-cta-text: #FFFFFF;
 }
 
 body {
@@ -97,6 +105,16 @@ html.light-mode {
   --topnav-divider:     rgba(27,42,74,0.12);
   --topnav-bell-icon:   rgba(27,42,74,0.70);
   --topnav-ring-bg:     #FAF7F2;
+
+  /* Episode banner — light overrides (EPISODEBANNER-THEME).
+     Banner bg sits a hair darker than topnav parchment so it reads as a
+     distinct strip rather than blending invisibly into the nav. */
+  --episode-banner-bg:       #F5F1EA;
+  --episode-banner-text:     #1B2A4A;
+  --episode-banner-text-dim: rgba(27,42,74,0.55);
+  --episode-banner-border:   rgba(27,42,74,0.10);
+  --episode-banner-cta-bg:   #C9302A;
+  --episode-banner-cta-text: #FFFFFF;
 }
 
 /* Page background + body text */
