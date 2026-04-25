@@ -74,11 +74,11 @@ export function NotifBell({ initialUnreadCount, userId }: NotifBellProps) {
           background: 'transparent',
           border: 'none',
           cursor: 'pointer',
-          color: 'var(--text-dim)',
+          color: 'var(--topnav-bell-icon)',
           transition: 'color 120ms ease',
         }}
-        onMouseEnter={e => { e.currentTarget.style.color = 'var(--text-primary)' }}
-        onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-dim)' }}
+        onMouseEnter={e => { e.currentTarget.style.color = 'var(--topnav-link-active)' }}
+        onMouseLeave={e => { e.currentTarget.style.color = 'var(--topnav-bell-icon)' }}
       >
         <svg
           width="20"

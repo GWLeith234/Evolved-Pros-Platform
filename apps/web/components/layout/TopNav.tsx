@@ -8,6 +8,8 @@ import { NotifBell } from '@/components/notifications/NotifBell'
 import { AskGeorgeDrawer } from '@/components/layout/AskGeorgeDrawer'
 import { LogoMark } from '@/components/ui/LogoMark'
 
+const SPARKLE_PATH = 'M12 2 L13.4 9 L20 10.5 L13.4 12 L12 19 L10.6 12 L4 10.5 L10.6 9 Z'
+
 // FOUNDATION-TOPNAV-V2: feature-flag for renewal banner.
 // Flip to true once tier_expires_at data and dunning UX are ready.
 const RENEWAL_BANNER_ENABLED = false
@@ -84,8 +86,8 @@ function useIsLightMode(): boolean {
 export function TopNav({
   profile,
   unreadCount = 0,
-  logoUrl: _logoUrl,
-  logoLightUrl: _logoLightUrl,
+  logoUrl,
+  logoLightUrl,
   membersCanToggleTheme: _membersCanToggleTheme,
 }: TopNavProps) {
   const pathname = usePathname()
@@ -123,13 +125,16 @@ export function TopNav({
     daysUntilExpiry > 0 &&
     daysUntilExpiry <= 30
 
-  // Theme-derived colors
-  const linkActive = isLight ? '#1B2A4A' : '#fff'
-  const linkIdle   = isLight ? 'rgba(27,42,74,0.55)' : 'rgba(255,255,255,0.5)'
-  const linkHover  = isLight ? '#1B2A4A' : 'rgba(255,255,255,0.85)'
-  const dividerColor = isLight ? 'rgba(27,42,74,0.12)' : 'rgba(255,255,255,0.08)'
-  const subtleText = isLight ? 'rgba(27,42,74,0.55)' : 'rgba(255,255,255,0.55)'
-  const aiLabelColor = isLight ? '#1B2A4A' : '#fff'
+  // All theme-aware colors below are CSS vars defined in globals.css —
+  // they resolve automatically based on the html.light-mode class.
+  const linkActive   = 'var(--topnav-link-active)'
+  const linkIdle     = 'var(--topnav-link-idle)'
+  const linkHover    = 'var(--topnav-link-hover)'
+  const dividerColor = 'var(--topnav-divider)'
+  const subtleText   = 'var(--topnav-link-idle)'
+  const aiLabelColor = 'var(--topnav-link-active)'
+
+  const activeLogoUrl = isLight ? logoLightUrl : logoUrl
 
   return (
     <>
@@ -146,8 +151,8 @@ export function TopNav({
             fontSize: 12,
             fontFamily: '"Barlow", sans-serif',
             background: daysUntilExpiry <= 7 ? 'rgba(239,14,48,0.08)' : 'rgba(201,168,76,0.1)',
-            color: daysUntilExpiry <= 7 ? '#ef6075' : (isLight ? '#8a6d1b' : '#dbbb6a'),
-            borderBottom: '1px solid var(--border-subtle)',
+            color: daysUntilExpiry <= 7 ? '#ef6075' : 'var(--brand-gold)',
+            borderBottom: '1px solid var(--topnav-border)',
           }}
         >
           <span>
@@ -183,10 +188,11 @@ export function TopNav({
           padding: '0 24px',
           height: 72,
           background: 'var(--bg-topnav)',
-          borderBottom: '1px solid var(--border-subtle)',
+          borderBottom: '1px solid var(--topnav-border)',
         }}
       >
-        {/* Logo (left) */}
+        {/* Logo (left) — actual brand mark from Branding bucket.
+           Falls back to LogoMark component if URL is missing for the active theme. */}
         <Link
           href="/home"
           style={{
@@ -197,7 +203,16 @@ export function TopNav({
             textDecoration: 'none',
           }}
         >
-          <LogoMark variant={isLight ? 'dark' : 'light'} height={32} />
+          {activeLogoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={activeLogoUrl}
+              alt="Evolved Pros"
+              style={{ height: 36, width: 'auto', display: 'block' }}
+            />
+          ) : (
+            <LogoMark variant={isLight ? 'dark' : 'light'} height={32} />
+          )}
         </Link>
 
         {/* Nav (centered absolute) */}
@@ -273,9 +288,7 @@ export function TopNav({
               gap: 8,
               height: 40,
               padding: '0 14px 0 4px',
-              background: aiOpen
-                ? 'rgba(167,139,250,0.18)'
-                : (isLight ? 'rgba(167,139,250,0.1)' : 'rgba(167,139,250,0.08)'),
+              background: aiOpen ? 'rgba(167,139,250,0.18)' : 'rgba(167,139,250,0.10)',
               border: `1px solid ${aiOpen ? '#A78BFA' : 'rgba(167,139,250,0.45)'}`,
               color: aiLabelColor,
               cursor: 'pointer',
@@ -287,11 +300,12 @@ export function TopNav({
             }}
             onMouseLeave={e => {
               if (aiOpen) return
-              e.currentTarget.style.background = isLight ? 'rgba(167,139,250,0.1)' : 'rgba(167,139,250,0.08)'
+              e.currentTarget.style.background = 'rgba(167,139,250,0.10)'
               e.currentTarget.style.borderColor = 'rgba(167,139,250,0.45)'
             }}
           >
-            {/* Avatar + violet conic halo */}
+            {/* Violet conic halo wrapping a sparkle puck — no user avatar
+               (avoids duplicate-avatar with the profile menu on the right). */}
             <span
               style={{
                 position: 'relative',
@@ -311,36 +325,18 @@ export function TopNav({
                   width: 28,
                   height: 28,
                   borderRadius: '50%',
-                  overflow: 'hidden',
                   flexShrink: 0,
-                  background: profile.avatar_url ? '#1A2332' : '#ef0e30',
+                  background: 'var(--bg-topnav)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
-                {profile.avatar_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={profile.avatar_url}
-                    alt=""
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  />
-                ) : (
-                  <span
-                    style={{
-                      fontFamily: '"Barlow Condensed", sans-serif',
-                      fontWeight: 800,
-                      fontSize: 12,
-                      color: '#fff',
-                      letterSpacing: '0.04em',
-                    }}
-                  >
-                    {getInitials(displayName)}
-                  </span>
-                )}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#A78BFA" aria-hidden="true">
+                  <path d={SPARKLE_PATH} />
+                </svg>
               </span>
-              {/* Sparkle badge — bg matches nav so it appears cut out of the halo */}
+              {/* Corner sparkle badge — bg matches nav so it appears cut out of the halo */}
               <span
                 style={{
                   position: 'absolute',
@@ -356,7 +352,7 @@ export function TopNav({
                 }}
               >
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="#A78BFA" aria-hidden="true">
-                  <path d="M12 2 L13.4 9 L20 10.5 L13.4 12 L12 19 L10.6 12 L4 10.5 L10.6 9 Z" />
+                  <path d={SPARKLE_PATH} />
                 </svg>
               </span>
             </span>
@@ -419,7 +415,7 @@ export function TopNav({
                 border: 'none',
                 cursor: 'pointer',
                 background: profile.avatar_url ? '#1A2332' : '#ef0e30',
-                boxShadow: `0 0 0 2px ${tierRingColor(profile.tier)}, 0 0 0 3px var(--bg-topnav)`,
+                boxShadow: `0 0 0 2px ${tierRingColor(profile.tier)}, 0 0 0 3px var(--topnav-ring-bg)`,
                 overflow: 'hidden',
                 transition: 'transform 120ms ease',
               }}

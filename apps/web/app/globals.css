@@ -47,6 +47,16 @@
   --pillar-4: #60A5FA;
   --pillar-5: #C9A84C;
   --pillar-6: #0ABFA3;
+
+  /* TopNav dual-theme tokens (TOPNAV-POLISH-DUAL-THEME).
+     The TopNav reads every color from these vars; light overrides live below. */
+  --topnav-border:      rgba(255,255,255,0.06);
+  --topnav-link-active: #FFFFFF;
+  --topnav-link-idle:   rgba(255,255,255,0.5);
+  --topnav-link-hover:  rgba(255,255,255,0.85);
+  --topnav-divider:     rgba(255,255,255,0.08);
+  --topnav-bell-icon:   rgba(255,255,255,0.65);
+  --topnav-ring-bg:     #0D1B2A;
 }
 
 body {
@@ -74,22 +84,25 @@ html.light-mode {
   --text-tertiary: rgba(107,122,141,0.5);
 
   /* DS2 light variants (FOUNDATION-TOPNAV-V2) */
-  --bg-topnav:     #FFFFFF;
+  --bg-topnav:     #FAF7F2;
   --text-dim:      rgba(27,42,74,0.6);
   --text-muted:    rgba(27,42,74,0.45);
-  --border-subtle: rgba(27,42,74,0.08);
+  --border-subtle: rgba(27,42,74,0.10);
+
+  /* TopNav dual-theme tokens — light overrides (TOPNAV-POLISH-DUAL-THEME) */
+  --topnav-border:      rgba(27,42,74,0.10);
+  --topnav-link-active: #1B2A4A;
+  --topnav-link-idle:   rgba(27,42,74,0.55);
+  --topnav-link-hover:  #1B2A4A;
+  --topnav-divider:     rgba(27,42,74,0.12);
+  --topnav-bell-icon:   rgba(27,42,74,0.70);
+  --topnav-ring-bg:     #FAF7F2;
 }
 
 /* Page background + body text */
 html.light-mode body {
   background-color: #F5F0E8;
   color: #1b3c5a;
-}
-
-/* Top nav */
-html.light-mode header {
-  background-color: #1b3c5a !important;
-  border-bottom-color: rgba(255,255,255,0.1) !important;
 }
 
 /* Sidebar */
