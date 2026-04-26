@@ -2141,7 +2141,13 @@ export type Database = {
           tier_status: string | null
           twitter_handle: string | null
           updated_at: string
+          vendasta_account_id: string | null
           vendasta_contact_id: string | null
+          vendasta_last_event_at: string | null
+          vendasta_sku: string | null
+          vendasta_subscription_started_at: string | null
+          first_name: string | null
+          last_name: string | null
           website_url: string | null
         }
         Insert: {
@@ -2156,6 +2162,7 @@ export type Database = {
           current_pillar?: string | null
           display_name?: string | null
           email?: string | null
+          first_name?: string | null
           focus_pillar?: number | null
           full_name?: string | null
           goal_90day?: string | null
@@ -2163,6 +2170,7 @@ export type Database = {
           id?: string
           is_alumni?: boolean | null
           keynote_access?: boolean
+          last_name?: string | null
           last_summary_sent_at?: string | null
           linkedin_url?: string | null
           location?: string | null
@@ -2183,7 +2191,11 @@ export type Database = {
           tier_status?: string | null
           twitter_handle?: string | null
           updated_at?: string
+          vendasta_account_id?: string | null
           vendasta_contact_id?: string | null
+          vendasta_last_event_at?: string | null
+          vendasta_sku?: string | null
+          vendasta_subscription_started_at?: string | null
           website_url?: string | null
         }
         Update: {
@@ -2198,6 +2210,7 @@ export type Database = {
           current_pillar?: string | null
           display_name?: string | null
           email?: string | null
+          first_name?: string | null
           focus_pillar?: number | null
           full_name?: string | null
           goal_90day?: string | null
@@ -2205,6 +2218,7 @@ export type Database = {
           id?: string
           is_alumni?: boolean | null
           keynote_access?: boolean
+          last_name?: string | null
           last_summary_sent_at?: string | null
           linkedin_url?: string | null
           location?: string | null
@@ -2225,7 +2239,11 @@ export type Database = {
           tier_status?: string | null
           twitter_handle?: string | null
           updated_at?: string
+          vendasta_account_id?: string | null
           vendasta_contact_id?: string | null
+          vendasta_last_event_at?: string | null
+          vendasta_sku?: string | null
+          vendasta_subscription_started_at?: string | null
           website_url?: string | null
         }
         Relationships: []
@@ -2233,34 +2251,40 @@ export type Database = {
       vendasta_webhooks: {
         Row: {
           error_message: string | null
-          event_type: string
+          event_id: string | null
+          event_type: string | null
           id: string
           payload: Json
           processed_at: string
           product_sku: string | null
-          status: string
+          received_at: string
+          status: string | null
           vendasta_contact_id: string | null
           vendasta_order_id: string | null
         }
         Insert: {
           error_message?: string | null
-          event_type: string
+          event_id?: string | null
+          event_type?: string | null
           id?: string
           payload: Json
           processed_at?: string
           product_sku?: string | null
-          status: string
+          received_at?: string
+          status?: string | null
           vendasta_contact_id?: string | null
           vendasta_order_id?: string | null
         }
         Update: {
           error_message?: string | null
-          event_type?: string
+          event_id?: string | null
+          event_type?: string | null
           id?: string
           payload?: Json
           processed_at?: string
           product_sku?: string | null
-          status?: string
+          received_at?: string
+          status?: string | null
           vendasta_contact_id?: string | null
           vendasta_order_id?: string | null
         }

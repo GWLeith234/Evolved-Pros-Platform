@@ -1,378 +1,319 @@
 export const dynamic = 'force-dynamic'
 
-import { createHmac, timingSafeEqual } from 'crypto'
+import { timingSafeEqual } from 'crypto'
 import { adminClient } from '@/lib/supabase/admin'
-import { VENDASTA_PRODUCTS, getTierExpiry } from '@/lib/vendasta/products'
-import { sendWelcomeEmail } from '@/lib/resend/emails/welcome'
-import { notifyNewMember } from '@/lib/notifications/create'
-import { updateContact, removeContactTag } from '@/lib/vendasta/contacts'
+import { mapSkuToTier, UnknownSkuError, type VendastaTier } from '@/lib/vendasta/sku-mapping'
+import { sendVendastaWelcomeEmail } from '@/lib/resend/emails/vendasta-welcome'
+import { sendVendastaTierChangedEmail } from '@/lib/resend/emails/vendasta-tier-changed'
 
 // ---------------------------------------------------------------------------
-// Signature verification
+// Vendasta automation webhook
+//
+// Vendasta's automation builder fires this endpoint with a custom JSON body
+// (configured per-automation in the Vendasta UI). There is no HMAC signature
+// and no event_type — all branching is by current DB state vs payload SKU.
+//
+// Retry policy (per Alistair):
+//   - 401 only for bad verifier token (intentional no-retry)
+//   - 2xx for success, duplicate, no-op, and Resend failure (we own that retry)
+//   - 5xx for everything else (Vendasta will retry; we ship a fix)
 // ---------------------------------------------------------------------------
 
-function verifySignature(body: string, signature: string, secret: string): boolean {
-  const expected = createHmac('sha256', secret).update(body).digest('hex')
+interface VendastaPayload {
+  verifier_token?:      string
+  accountId:            string
+  orderId:              string
+  partnerId?:           string
+  marketId?:            string
+  sku:                  string
+  customer_email:       string
+  customer_first_name?: string
+  customer_last_name?:  string
+}
+
+function constantTimeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a)
+  const bb = Buffer.from(b)
+  if (ab.length !== bb.length) return false
   try {
-    return timingSafeEqual(Buffer.from(signature), Buffer.from(expected))
+    return timingSafeEqual(ab, bb)
   } catch {
     return false
   }
 }
 
-// ---------------------------------------------------------------------------
-// Magic link delivery
-// VENDASTA_MAGIC_LINK_METHOD=response   → return in webhook response body (default)
-//                           =contact_field → PATCH Vendasta contact custom field
-// ---------------------------------------------------------------------------
-
-async function deliverMagicLink(
-  vendastaContactId: string,
-  magicLink: string,
-): Promise<void> {
-  const method = process.env.VENDASTA_MAGIC_LINK_METHOD ?? 'response'
-  if (method !== 'contact_field') return // Path A: link is already in the response body
-
-  // Path B: write to Vendasta contact custom field so the email template can use it
-  const apiKey = process.env.VENDASTA_API_KEY
-  if (!apiKey) {
-    console.warn('[Vendasta] VENDASTA_API_KEY not set — skipping contact_field delivery')
-    return
+function isDuplicateKeyError(err: unknown): boolean {
+  if (typeof err === 'object' && err !== null && 'code' in err) {
+    if ((err as { code?: unknown }).code === '23505') return true
   }
-
-  // NOTE: Confirm exact endpoint + field name with Brent Yates before enabling.
-  // Vendasta Partner API docs: https://developers.vendasta.com
-  const url = `https://api-gateway.vendasta.com/api/v1/contacts/${vendastaContactId}`
-  const res = await fetch(url, {
-    method: 'PATCH',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      custom_fields: { platform_magic_link: magicLink },
-    }),
-  })
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => '')
-    console.error(`[Vendasta] Failed to write magic link to contact ${vendastaContactId}: ${res.status} ${text}`)
-  }
+  if (err instanceof Error && /duplicate key/i.test(err.message)) return true
+  return false
 }
 
-// ---------------------------------------------------------------------------
-// Main POST handler
-// ---------------------------------------------------------------------------
-
 export async function POST(request: Request) {
-  const rawBody = await request.text()
-  const sig     = request.headers.get('x-vendasta-signature') ?? ''
-  const secret  = process.env.VENDASTA_WEBHOOK_SECRET
-
-  // If secret is not configured, fail loudly (never silently skip verification)
-  if (!secret) {
-    console.error('[Vendasta] VENDASTA_WEBHOOK_SECRET is not set')
+  const expectedToken = process.env.VENDASTA_VERIFIER_TOKEN
+  if (!expectedToken) {
+    console.error('[Vendasta Webhook] VENDASTA_VERIFIER_TOKEN is not set')
     return Response.json({ error: 'Server misconfiguration' }, { status: 500 })
   }
 
-  if (!verifySignature(rawBody, sig, secret)) {
-    return Response.json({ error: 'Invalid signature' }, { status: 401 })
+  let payload: VendastaPayload
+  try {
+    payload = (await request.json()) as VendastaPayload
+  } catch {
+    console.error('[Vendasta Webhook] Invalid JSON body')
+    return Response.json({ error: 'Invalid JSON' }, { status: 500 })
   }
 
-  let payload: Record<string, unknown>
-  try {
-    payload = JSON.parse(rawBody)
-  } catch {
-    return Response.json({ error: 'Invalid JSON' }, { status: 400 })
+  // 1) VERIFY TOKEN — header preferred, body fallback
+  const headerToken = request.headers.get('x-vendasta-verifier-token') ?? ''
+  const bodyToken   = payload.verifier_token ?? ''
+  const presented   = headerToken || bodyToken
+  if (!presented || !constantTimeEqual(presented, expectedToken)) {
+    console.warn('[Vendasta Webhook] Token mismatch — rejecting')
+    return Response.json({ error: 'Invalid verifier token' }, { status: 401 })
   }
 
   const {
-    event_type,
-    order_id:      vendasta_order_id,
-    contact_id:    vendasta_contact_id,
-    product_sku,
-    contact_email: email,
-    contact_name:  fullName,
-  } = payload as {
-    event_type:    string
-    order_id:      string
-    contact_id:    string
-    product_sku:   string
-    contact_email: string
-    contact_name:  string
+    accountId,
+    orderId,
+    sku,
+    customer_email,
+    customer_first_name,
+    customer_last_name,
+  } = payload
+
+  if (!accountId || !orderId || !sku || !customer_email) {
+    console.error('[Vendasta Webhook] Missing required fields', {
+      hasAccountId: !!accountId,
+      hasOrderId:   !!orderId,
+      hasSku:       !!sku,
+      hasEmail:     !!customer_email,
+    })
+    return Response.json({ error: 'Missing required fields' }, { status: 500 })
   }
 
-  const logBase = { event_type, vendasta_order_id, vendasta_contact_id, product_sku, payload }
+  // 2) IDEMPOTENCY — INSERT with unique event_id; duplicate → 2xx ignored
+  const eventId = `${orderId}:${sku}`
+  const { error: insertError } = await adminClient
+    .from('vendasta_webhooks')
+    .insert({
+      event_id:    eventId,
+      payload:     JSON.parse(JSON.stringify(payload)),
+      received_at: new Date().toISOString(),
+    })
+
+  if (insertError) {
+    if (isDuplicateKeyError(insertError)) {
+      return Response.json({ status: 'duplicate_ignored', event_id: eventId })
+    }
+    console.error('[Vendasta Webhook] vendasta_webhooks insert failed:', insertError)
+    return Response.json({ error: 'DB error logging webhook' }, { status: 500 })
+  }
 
   try {
-    const { magicLink } = await handleWebhookEvent({
-      eventType:         event_type,
-      vendastaContactId: vendasta_contact_id,
-      email,
-      fullName,
-      productSku:        product_sku,
-    })
+    // 3) LOOK UP USER by vendasta_account_id (unique)
+    const { data: existing, error: selectError } = await adminClient
+      .from('users')
+      .select('id, email, vendasta_sku, tier')
+      .eq('vendasta_account_id', accountId)
+      .limit(1)
+      .maybeSingle()
 
-    // Deliver magic link via Path B if configured (Path A: already in response)
-    if (magicLink) {
-      await deliverMagicLink(vendasta_contact_id, magicLink)
+    if (selectError) {
+      console.error('[Vendasta Webhook] users select failed:', selectError)
+      return Response.json({ error: 'DB error reading user' }, { status: 500 })
     }
 
-    await adminClient.from('vendasta_webhooks').insert({
-      ...logBase, status: 'success',
-    })
-
-    // Return magic link in body for Path A (Vendasta email template uses {{magic_link}})
-    const responseBody: Record<string, unknown> = { ok: true }
-    if (magicLink && (process.env.VENDASTA_MAGIC_LINK_METHOD ?? 'response') === 'response') {
-      responseBody.magic_link = magicLink
+    // 4) BRANCH
+    if (!existing) {
+      return await handleNewPurchase({
+        accountId,
+        sku,
+        email:     customer_email,
+        firstName: customer_first_name ?? '',
+        lastName:  customer_last_name ?? '',
+      })
     }
-    return Response.json(responseBody)
 
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error'
-    await adminClient.from('vendasta_webhooks').insert({
-      ...logBase, status: 'error', error_message: message,
+    if (existing.vendasta_sku === sku) {
+      return await handleRenewal({ accountId })
+    }
+
+    return await handleUpgrade({
+      accountId,
+      sku,
+      userId:    existing.id,
+      email:     customer_email,
+      firstName: customer_first_name ?? '',
+      oldTier:   normalizeTier(existing.tier),
     })
-    console.error('[Vendasta Webhook Error]', message)
+  } catch (err) {
+    if (err instanceof UnknownSkuError) {
+      console.error('[Vendasta Webhook] Unknown SKU — please add to mapping:', err.sku)
+      return Response.json({ error: err.message }, { status: 500 })
+    }
+    const message = err instanceof Error ? err.message : 'Unknown error'
+    console.error('[Vendasta Webhook] Uncaught error:', message)
     return Response.json({ error: message }, { status: 500 })
   }
 }
 
-// ---------------------------------------------------------------------------
-// Event dispatch
-// ---------------------------------------------------------------------------
-
-async function handleWebhookEvent({
-  eventType, vendastaContactId, email, fullName, productSku,
-}: {
-  eventType:         string
-  vendastaContactId: string
-  email:             string
-  fullName:          string
-  productSku:        string
-}): Promise<{ magicLink?: string }> {
-  const product = VENDASTA_PRODUCTS[productSku]
-  if (!product) throw new Error(`Unknown product SKU: ${productSku}`)
-
-  switch (eventType) {
-    case 'order.created':
-    case 'order.renewed': {
-      // Keynote add-on: flip the flag, do not change tier
-      if (product.keynote_access) {
-        const magicLink = await grantKeynoteAccess({ vendastaContactId, email, fullName })
-        if (eventType === 'order.created' && magicLink) {
-          void updateContact(vendastaContactId, {
-            tags:   ['keynote-purchaser'],
-            fields: { magic_link: magicLink },
-          })
-        }
-        return { magicLink }
-      }
-
-      const tierExpiresAt = getTierExpiry(product)
-      const { isNewUser, magicLink } = await upsertUser({
-        vendastaContactId, email, fullName,
-        tier:         product.tier!,
-        tierStatus:   'active',
-        tierExpiresAt,
-      })
-
-      if (isNewUser) {
-        await sendWelcomeEmail({ email, fullName, tier: product.tier! })
-
-        const { data: admins } = await adminClient
-          .from('users')
-          .select('id')
-          .eq('role', 'admin')
-        const adminIds = (admins ?? []).map((a: { id: string }) => a.id)
-        if (adminIds.length > 0) {
-          void notifyNewMember({
-            adminUserIds:  adminIds,
-            newMemberName: fullName,
-            newMemberTier: product.tier!,
-          })
-        }
-      }
-
-      if (eventType === 'order.created') {
-        // Tag depends on SKU: book purchaser vs tier-based member tag
-        const memberTag =
-          productSku === 'EP-BOOK'         ? 'book-purchaser'
-          : product.tier === 'pro'         ? 'professional-member'
-          : product.tier === 'community'   ? 'community-member'
-          : /* vip */                        'vip-member'
-        const tierLabel =
-          product.tier === 'pro'         ? 'Professional'
-          : product.tier === 'community' ? 'Community'
-          : 'VIP'
-        const appUrl      = process.env.NEXT_PUBLIC_APP_URL ?? ''
-        const checkoutBase = process.env.NEXT_PUBLIC_VENDASTA_CHECKOUT_URL ?? ''
-        const contactFields: Record<string, string> = {
-          tier:         tierLabel,
-          tier_expiry:  tierExpiresAt.toISOString(),
-          platform_url: appUrl,
-        }
-        if (magicLink) contactFields.magic_link = magicLink
-        if (checkoutBase) {
-          contactFields.vip_checkout_url  = `${checkoutBase}?sku=EP-VIP-M`
-          contactFields.book_checkout_url = `${checkoutBase}?sku=EP-BOOK`
-        }
-        void updateContact(vendastaContactId, { tags: [memberTag], fields: contactFields })
-      } else {
-        // order.renewed — refresh expiry, clear reminder tag
-        void updateContact(vendastaContactId, {
-          fields: { tier_expiry: tierExpiresAt.toISOString() },
-        })
-        void removeContactTag(vendastaContactId, 'renewal-reminder-due')
-      }
-
-      return { magicLink }
-    }
-
-    case 'order.upgraded': {
-      if (product.keynote_access) {
-        const magicLink = await grantKeynoteAccess({ vendastaContactId, email, fullName })
-        return { magicLink }
-      }
-      const tierExpiresAt = getTierExpiry(product)
-      await upsertUser({
-        vendastaContactId, email, fullName,
-        tier:         product.tier!,
-        tierStatus:   'active',
-        tierExpiresAt,
-      })
-      void updateContact(vendastaContactId, {
-        tags:   ['upgraded-to-professional'],
-        fields: { tier: 'Professional' },
-      })
-      return {}
-    }
-
-    case 'order.cancelled': {
-      await adminClient
-        .from('users')
-        .update({ tier_status: 'cancelled' })
-        .eq('vendasta_contact_id', vendastaContactId)
-      void updateContact(vendastaContactId, { tags: ['cancelled'] })
-      return {}
-    }
-
-    default:
-      console.log(`[Vendasta] Unhandled event: ${eventType}`)
-      return {}
-  }
+function normalizeTier(tier: string | null): VendastaTier {
+  // The schema also allows 'vip' (legacy), but the new flow only writes
+  // community/pro. Treat anything non-pro as community for tier-change copy.
+  return tier === 'pro' ? 'pro' : 'community'
 }
 
 // ---------------------------------------------------------------------------
-// grantKeynoteAccess — returns magic link for new users only
+// 5) NEW PURCHASE
 // ---------------------------------------------------------------------------
 
-async function grantKeynoteAccess({
-  vendastaContactId, email, fullName,
+async function handleNewPurchase({
+  accountId,
+  sku,
+  email,
+  firstName,
+  lastName,
 }: {
-  vendastaContactId: string
-  email:             string
-  fullName:          string
-}): Promise<string | undefined> {
-  const { data: existing } = await adminClient
-    .from('users')
-    .select('id')
-    .eq('vendasta_contact_id', vendastaContactId)
-    .maybeSingle()
+  accountId: string
+  sku:       string
+  email:     string
+  firstName: string
+  lastName:  string
+}) {
+  const tier = mapSkuToTier(sku)
 
-  if (existing) {
-    await adminClient.from('users').update({ keynote_access: true }).eq('id', existing.id)
-    return undefined // Existing user — no magic link needed
-  }
-
-  // New user purchasing keynote directly — create auth user with vip tier
   const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
     email,
     email_confirm: true,
+    user_metadata: { source: 'vendasta', vendasta_account_id: accountId },
   })
-  if (authError) throw new Error(`Auth user creation failed: ${authError.message}`)
-
-  await adminClient.from('users').insert({
-    id:                  authUser.user.id,
-    vendasta_contact_id: vendastaContactId,
-    email,
-    full_name:           fullName,
-    tier:                'vip',
-    tier_status:         'active',
-    keynote_access:      true,
-    tier_expires_at:     new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-  })
-
-  return generateMagicLink(email)
-}
-
-// ---------------------------------------------------------------------------
-// upsertUser — creates or updates a user, returns magic link for new users
-// ---------------------------------------------------------------------------
-
-async function upsertUser({
-  vendastaContactId, email, fullName, tier, tierStatus, tierExpiresAt,
-}: {
-  vendastaContactId: string
-  email:             string
-  fullName:          string
-  tier:              'community' | 'vip' | 'pro'
-  tierStatus:        string
-  tierExpiresAt:     Date
-}): Promise<{ isNewUser: boolean; magicLink?: string }> {
-  const { data: existing } = await adminClient
-    .from('users')
-    .select('id')
-    .eq('vendasta_contact_id', vendastaContactId)
-    .maybeSingle()
-
-  if (existing) {
-    await adminClient.from('users').update({
-      tier,
-      tier_status:     tierStatus,
-      tier_expires_at: tierExpiresAt.toISOString(),
-      full_name:       fullName,
-      updated_at:      new Date().toISOString(),
-    }).eq('id', existing.id)
-    return { isNewUser: false }
+  if (authError || !authUser?.user) {
+    throw new Error(`Auth user creation failed: ${authError?.message ?? 'no user returned'}`)
   }
 
-  // New user — create Supabase Auth user
-  const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
-    email,
-    email_confirm: true,
-  })
-  if (authError) throw new Error(`Auth user creation failed: ${authError.message}`)
+  const userId   = authUser.user.id
+  const now      = new Date().toISOString()
+  const fullName = [firstName, lastName].filter(Boolean).join(' ').trim() || null
 
-  await adminClient.from('users').insert({
-    id:                  authUser.user.id,
-    vendasta_contact_id: vendastaContactId,
+  const { error: insertError } = await adminClient.from('users').insert({
+    id:                               userId,
     email,
-    full_name:           fullName,
+    first_name:                       firstName || null,
+    last_name:                        lastName || null,
+    full_name:                        fullName,
+    role:                             'member',
     tier,
-    tier_status:         tierStatus,
-    tier_expires_at:     tierExpiresAt.toISOString(),
+    vendasta_account_id:              accountId,
+    vendasta_sku:                     sku,
+    vendasta_subscription_started_at: now,
+    vendasta_last_event_at:           now,
   })
 
-  const magicLink = await generateMagicLink(email)
-  return { isNewUser: true, magicLink }
-}
+  if (insertError) {
+    throw new Error(`users insert failed: ${insertError.message}`)
+  }
 
-// ---------------------------------------------------------------------------
-// generateMagicLink — returns the action_link URL string
-// ---------------------------------------------------------------------------
-
-async function generateMagicLink(email: string): Promise<string | undefined> {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
-  const { data, error } = await adminClient.auth.admin.generateLink({
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? ''
+  const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
     type:    'magiclink',
     email,
-    options: { redirectTo: `${appUrl}/auth/callback?next=/onboarding` },
+    options: { redirectTo: `${siteUrl}/home` },
   })
-  if (error) {
-    console.error('[Vendasta] Magic link generation failed:', error.message)
-    return undefined
+  if (linkError) {
+    console.error('[Vendasta Webhook] magic link generation failed:', linkError.message)
   }
-  return data.properties?.action_link ?? undefined
+
+  const magicLink = linkData?.properties?.action_link ?? `${siteUrl}/login`
+
+  // Resend failure must NOT cause a retry — we already created the user.
+  try {
+    await sendVendastaWelcomeEmail({
+      email,
+      firstName: firstName || email.split('@')[0],
+      tier,
+      magicLink,
+    })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[Vendasta Webhook] welcome email send failed (continuing):', msg)
+  }
+
+  return Response.json({ status: 'created', user_id: userId, tier })
+}
+
+// ---------------------------------------------------------------------------
+// 6) UPGRADE
+// ---------------------------------------------------------------------------
+
+async function handleUpgrade({
+  accountId,
+  sku,
+  userId,
+  email,
+  firstName,
+  oldTier,
+}: {
+  accountId: string
+  sku:       string
+  userId:    string
+  email:     string
+  firstName: string
+  oldTier:   VendastaTier
+}) {
+  const newTier = mapSkuToTier(sku)
+
+  if (newTier === oldTier) {
+    return await handleRenewal({ accountId })
+  }
+
+  const { error: updateError } = await adminClient
+    .from('users')
+    .update({
+      tier:                   newTier,
+      vendasta_sku:           sku,
+      vendasta_last_event_at: new Date().toISOString(),
+    })
+    .eq('vendasta_account_id', accountId)
+
+  if (updateError) {
+    throw new Error(`users update failed: ${updateError.message}`)
+  }
+
+  try {
+    await sendVendastaTierChangedEmail({
+      email,
+      firstName: firstName || email.split('@')[0],
+      oldTier,
+      newTier,
+    })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[Vendasta Webhook] tier-changed email send failed (continuing):', msg)
+  }
+
+  return Response.json({
+    status:   'upgraded',
+    user_id:  userId,
+    old_tier: oldTier,
+    new_tier: newTier,
+  })
+}
+
+// ---------------------------------------------------------------------------
+// 7) RENEWAL / NO-OP
+// ---------------------------------------------------------------------------
+
+async function handleRenewal({ accountId }: { accountId: string }) {
+  const { error } = await adminClient
+    .from('users')
+    .update({ vendasta_last_event_at: new Date().toISOString() })
+    .eq('vendasta_account_id', accountId)
+
+  if (error) {
+    throw new Error(`users renewal update failed: ${error.message}`)
+  }
+
+  return Response.json({ status: 'no_op' })
 }
