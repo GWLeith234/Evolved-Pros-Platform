@@ -65,7 +65,7 @@ export async function GET(request: Request) {
 
   const events: EventItem[] = page.map(e => {
     const isRegistered = registeredIds.has(e.id)
-    const access = hasTierAccess(profile?.tier, e.required_tier as 'community' | 'pro' | null)
+    const access = hasTierAccess(profile?.tier, e.required_tier as 'community' | 'vip' | 'pro' | null)
     return {
       id: e.id,
       title: e.title,
@@ -75,7 +75,7 @@ export async function GET(request: Request) {
       endsAt: e.ends_at,
       zoomUrl: isRegistered ? e.zoom_url : null,   // only expose when registered
       recordingUrl: e.recording_url,
-      requiredTier: e.required_tier as 'community' | 'pro' | null,
+      requiredTier: e.required_tier as 'community' | 'vip' | 'pro' | null,
       registrationCount: e.registration_count,
       isRegistered,
       hasAccess: access,

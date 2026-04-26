@@ -14,7 +14,7 @@ interface EventFormValues {
   zoomUrl: string
   recordingUrl: string
   imageUrl: string
-  requiredTier: 'community' | 'pro' | ''
+  requiredTier: 'community' | 'vip' | 'pro' | ''
   tierAccess: 'all' | 'vip' | 'pro'
   isPublished: boolean
 }
@@ -384,7 +384,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
       <div>
         <label className={labelClass}>Required Tier (legacy)</label>
         <div className="flex gap-2">
-          {([['', 'Any Tier'], ['community', 'Community'], ['pro', 'Pro']] as const).map(([val, label]) => (
+          {([['', 'Any Tier'], ['community', 'Community'], ['vip', 'VIP'], ['pro', 'Pro']] as const).map(([val, label]) => (
             <button
               key={val}
               type="button"

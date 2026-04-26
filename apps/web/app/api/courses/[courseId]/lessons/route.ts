@@ -40,7 +40,7 @@ export async function GET(
     .in('lesson_id', lessonIds)
 
   const progressMap = new Map((progress ?? []).map(p => [p.lesson_id, p]))
-  const isLocked = !hasTierAccess(profile?.tier, course.required_tier as 'community' | 'pro')
+  const isLocked = !hasTierAccess(profile?.tier, course.required_tier as 'community' | 'vip' | 'pro')
 
   const result = lessons.map(l => {
     const prog = progressMap.get(l.id)

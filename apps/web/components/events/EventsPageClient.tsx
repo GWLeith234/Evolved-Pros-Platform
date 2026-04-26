@@ -17,7 +17,7 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: 'registered', label: 'My Registrations' },
 ]
 
-function TierBadge({ requiredTier }: { requiredTier: 'community' | 'pro' | null }) {
+function TierBadge({ requiredTier }: { requiredTier: 'community' | 'vip' | 'pro' | null }) {
   if (requiredTier === 'pro') {
     return (
       <span
@@ -28,13 +28,23 @@ function TierBadge({ requiredTier }: { requiredTier: 'community' | 'pro' | null 
       </span>
     )
   }
-  if (requiredTier === 'community') {
+  if (requiredTier === 'vip') {
     return (
       <span
         className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] rounded px-2 py-0.5"
         style={{ backgroundColor: 'rgba(201,168,76,0.1)', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.2)' }}
       >
         VIP Only
+      </span>
+    )
+  }
+  if (requiredTier === 'community') {
+    return (
+      <span
+        className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] rounded px-2 py-0.5"
+        style={{ backgroundColor: 'rgba(104,162,185,0.1)', color: '#68a2b9', border: '1px solid rgba(104,162,185,0.2)' }}
+      >
+        Community
       </span>
     )
   }

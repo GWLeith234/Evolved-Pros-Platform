@@ -1,20 +1,27 @@
 /**
- * Vendasta SKU → Evolved Pros tier mapping.
+ * Vendasta SKU → Evolved Pros tier mapping (Path B canonical: 3-tier vocabulary).
  *
- * The mapping is intentionally pattern-based (case-insensitive substring match)
- * because Vendasta marketplace SKUs come in several shapes:
+ * Tiers:
+ *   community = entry tier (free)
+ *   vip       = mid tier ($79/mo)
+ *   pro       = top tier ($249/mo)
+ *
+ * Pattern-based (case-insensitive) because Vendasta marketplace SKUs come in
+ * several shapes:
  *   "MP-evolved:EDITION-community"
  *   "MP-evolved:EDITION-pro"
- *   "EP-COMM-M"  /  "EP-COMM-Y"
+ *   "EP-VIP-M"   /  "EP-VIP-Y"
  *   "EP-PRO-M"   /  "EP-PRO-Y"
+ *   "EP-COMM-M"  /  "EP-COMM-Y"   (legacy aliases, now route to community)
  *   "EP-TEST-FREE"
  *
- * Sprint A2 will hand us the production SKU list and we'll wire those in.
- * For now, throwing on an unknown SKU is intentional — the route returns 500
- * so Vendasta retries while we ship a fix.
+ * Order matters: /vip/i must be checked BEFORE /community|comm|member/i so
+ * a hypothetical "EP-COMMUNITY-VIP" SKU would not mis-route. /pro/i is also
+ * checked before /community/i so "MP-evolved:EDITION-pro-community-tagline"
+ * style SKUs route correctly. UnknownSkuError → 500 → Vendasta retries.
  */
 
-export type VendastaTier = 'community' | 'pro'
+export type VendastaTier = 'community' | 'vip' | 'pro'
 
 export class UnknownSkuError extends Error {
   readonly sku: string
@@ -26,8 +33,32 @@ export class UnknownSkuError extends Error {
 }
 
 export function mapSkuToTier(sku: string): VendastaTier {
-  if (/test|free/i.test(sku)) return 'community'
-  if (/pro/i.test(sku))       return 'pro'
-  if (/community/i.test(sku)) return 'community'
+  if (/vip/i.test(sku))                       return 'vip'        // top tier
+  if (/pro|professional/i.test(sku))          return 'pro'        // mid tier
+  if (/community|comm|member/i.test(sku))     return 'community'  // entry tier
+  if (/test|free/i.test(sku))                 return 'community'  // test SKUs default to entry
   throw new UnknownSkuError(sku)
+}
+
+// Dev-mode self-test: runs once at module load in development.
+// Catches mapper regressions before they reach the Vendasta webhook handler
+// (where a wrong tier is silent).
+if (process.env.NODE_ENV !== 'production') {
+  const cases: Array<[string, VendastaTier]> = [
+    ['EP-VIP-M',           'vip'],
+    ['EP-VIP-Y',           'vip'],
+    ['EP-PRO-M',           'pro'],
+    ['EP-PROFESSIONAL-Y',  'pro'],
+    ['EP-COMM-M',          'community'],
+    ['EP-COMMUNITY-Y',     'community'],
+    ['EP-MEMBER',          'community'],
+    ['EP-TEST-FREE',       'community'],
+    ['EP-FREE',            'community'],
+  ]
+  for (const [sku, expected] of cases) {
+    const actual = mapSkuToTier(sku)
+    if (actual !== expected) {
+      throw new Error(`[sku-mapping self-test] ${sku} → ${actual}, expected ${expected}`)
+    }
+  }
 }

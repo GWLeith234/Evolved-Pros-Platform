@@ -63,7 +63,7 @@ export type MemberSummary = {
   avatarUrl: string | null
   roleTitle: string | null
   location: string | null
-  tier: 'community' | 'pro' | null
+  tier: 'community' | 'vip' | 'pro' | null
   points: number
 }
 

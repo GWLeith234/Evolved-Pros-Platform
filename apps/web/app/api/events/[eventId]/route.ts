@@ -37,7 +37,7 @@ export async function GET(
   }
 
   const isRegistered = !!regResult.data
-  const access = hasTierAccess(profileResult.data?.tier, e.required_tier as 'community' | 'pro' | null)
+  const access = hasTierAccess(profileResult.data?.tier, e.required_tier as 'community' | 'vip' | 'pro' | null)
 
   const event: EventItem = {
     id: e.id,
@@ -48,7 +48,7 @@ export async function GET(
     endsAt: e.ends_at,
     zoomUrl: isRegistered ? e.zoom_url : null,
     recordingUrl: e.recording_url,
-    requiredTier: e.required_tier as 'community' | 'pro' | null,
+    requiredTier: e.required_tier as 'community' | 'vip' | 'pro' | null,
     registrationCount: e.registration_count,
     isRegistered,
     hasAccess: access,

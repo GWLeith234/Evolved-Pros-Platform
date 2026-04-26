@@ -41,7 +41,7 @@ export default async function EditEventPage({ params }: Props) {
           zoomUrl: row.zoom_url ?? '',
           recordingUrl: row.recording_url ?? '',
           imageUrl: row.image_url ?? '',
-          requiredTier: (row.required_tier as 'community' | 'pro' | '') ?? '',
+          requiredTier: (row.required_tier as 'community' | 'vip' | 'pro' | '') ?? '',
           isPublished: row.is_published,
         }}
       />

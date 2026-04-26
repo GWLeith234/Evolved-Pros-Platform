@@ -10,7 +10,7 @@ export async function sendWelcomeEmail({
 }: {
   email: string
   fullName: string
-  tier: 'community' | 'pro'
+  tier: 'community' | 'vip' | 'pro' | null
 }) {
   await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL!,

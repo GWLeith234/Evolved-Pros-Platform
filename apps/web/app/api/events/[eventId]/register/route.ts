@@ -45,7 +45,7 @@ export async function POST(
   if (new Date(event.starts_at) <= new Date()) {
     return NextResponse.json({ error: 'Event has already started' }, { status: 422 })
   }
-  if (!hasTierAccess(profile?.tier, event.required_tier as 'community' | 'pro' | null)) {
+  if (!hasTierAccess(profile?.tier, event.required_tier as 'community' | 'vip' | 'pro' | null)) {
     return NextResponse.json({ error: 'Upgrade required' }, { status: 403 })
   }
   if (existingReg.data) {

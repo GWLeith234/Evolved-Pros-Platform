@@ -12,24 +12,38 @@ import {
 } from '@react-email/components'
 import React from 'react'
 
+type WelcomeTier = 'community' | 'vip' | 'pro'
+
 interface WelcomeEmailProps {
   fullName: string
-  tier: 'community' | 'pro'
+  tier: WelcomeTier | null
 }
 
-const tierAccess = {
+// TODO(george): VIP-specific copy/branding — currently mirrors pro styling.
+const tierAccess: Record<WelcomeTier, { label: string; accent: string; features: string[] }> = {
   community: {
     label: 'Community',
+    accent: '#68a2b9',
     features: [
       'Pillars 1–4: Foundation, Identity, Mental Toughness & Strategy',
       'General community feed and all community channels',
       'Live event access (Community tier)',
     ],
   },
-  pro: {
-    label: 'Pro',
+  vip: {
+    label: 'VIP',
+    accent: '#c9a84c',
     features: [
       'All Community access +',
+      'VIP-only community channels and priority Q&A',
+      'Exclusive VIP live events and replays',
+    ],
+  },
+  pro: {
+    label: 'Pro',
+    accent: '#c9a84c',
+    features: [
+      'All VIP access +',
       'Pillars 5–6: Accountability & Execution',
       'Exclusive Pro channels and priority Q&A',
       'All live events including Pro-only sessions',
@@ -38,8 +52,9 @@ const tierAccess = {
 }
 
 export function WelcomeEmail({ fullName, tier }: WelcomeEmailProps) {
-  const firstName = fullName.split(' ')[0] ?? fullName
-  const access    = tierAccess[tier]
+  const firstName    = fullName.split(' ')[0] ?? fullName
+  const resolvedTier: WelcomeTier = tier ?? 'community'
+  const access       = tierAccess[resolvedTier]
 
   return (
     <Html>
@@ -60,7 +75,7 @@ export function WelcomeEmail({ fullName, tier }: WelcomeEmailProps) {
           {/* Body */}
           <Text style={textStyle}>
             {firstName}, welcome to Evolved Pros. You now have access to the{' '}
-            <strong style={{ color: tier === 'pro' ? '#c9a84c' : '#68a2b9' }}>
+            <strong style={{ color: access.accent }}>
               {access.label}
             </strong>{' '}
             membership — built for professionals who are done with motivation and
@@ -69,7 +84,7 @@ export function WelcomeEmail({ fullName, tier }: WelcomeEmailProps) {
 
           {/* Tier badge */}
           <Section style={tierBadgeSection}>
-            <Text style={{ ...tierBadgeText, color: tier === 'pro' ? '#c9a84c' : '#68a2b9' }}>
+            <Text style={{ ...tierBadgeText, color: access.accent }}>
               {access.label.toUpperCase()} MEMBER
             </Text>
           </Section>

@@ -3,8 +3,11 @@ import { VendastaTierChangedEmail } from './VendastaTierChangedEmail'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-const tierLabel: Record<'community' | 'pro', string> = {
+type VendastaTier = 'community' | 'vip' | 'pro'
+
+const tierLabel: Record<VendastaTier, string> = {
   community: 'Community',
+  vip:       'VIP',
   pro:       'Pro',
 }
 
@@ -16,8 +19,8 @@ export async function sendVendastaTierChangedEmail({
 }: {
   email: string
   firstName: string
-  oldTier: 'community' | 'pro'
-  newTier: 'community' | 'pro'
+  oldTier: VendastaTier
+  newTier: VendastaTier
 }) {
   await resend.emails.send({
     from:    process.env.RESEND_FROM_EMAIL!,

@@ -12,13 +12,16 @@ import {
 } from '@react-email/components'
 import React from 'react'
 
+type VendastaTier = 'community' | 'vip' | 'pro'
+
 interface VendastaWelcomeEmailProps {
   firstName: string
-  tier: 'community' | 'pro'
+  tier: VendastaTier
   magicLink: string
 }
 
-const tierAccess = {
+// TODO(george): VIP-specific copy/branding — currently mirrors pro styling.
+const tierAccess: Record<VendastaTier, { label: string; accent: string; features: string[] }> = {
   community: {
     label: 'Community',
     accent: '#68a2b9',
@@ -28,11 +31,20 @@ const tierAccess = {
       'Live event access (Community tier)',
     ],
   },
+  vip: {
+    label: 'VIP',
+    accent: '#c9a84c',
+    features: [
+      'All Community access +',
+      'VIP-only community channels and priority Q&A',
+      'Exclusive VIP live events and replays',
+    ],
+  },
   pro: {
     label: 'Pro',
     accent: '#c9a84c',
     features: [
-      'All Community access +',
+      'All VIP access +',
       'Pillars 5–6: Accountability & Execution',
       'Exclusive Pro channels and priority Q&A',
       'All live events including Pro-only sessions',

@@ -36,7 +36,7 @@ export default async function LessonPage({ params }: Props) {
   const allCourses = await fetchCoursesWithProgress(supabase, user.id, profile?.tier)
 
   if (!course || !lessonRow) notFound()
-  if (!hasTierAccess(profile?.tier, course.required_tier as 'community' | 'pro')) {
+  if (!hasTierAccess(profile?.tier, course.required_tier as 'community' | 'vip' | 'pro')) {
     redirect('/academy')
   }
 

@@ -11,7 +11,7 @@ export async function sendVendastaWelcomeEmail({
 }: {
   email: string
   firstName: string
-  tier: 'community' | 'pro'
+  tier: 'community' | 'vip' | 'pro'
   magicLink: string
 }) {
   await resend.emails.send({

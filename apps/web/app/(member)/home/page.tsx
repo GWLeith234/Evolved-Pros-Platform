@@ -16,6 +16,7 @@ import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStor
 import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
 import { DailyPulseTile, type PulseHabit, type PulseCommitment } from '@/components/home/tiles/DailyPulseTile'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { hasTierAccess } from '@/lib/tier'
 
 async function fetchCurrentUser(supabase: ReturnType<typeof createClient>, email: string) {
   const { data } = await supabase
@@ -39,7 +40,7 @@ async function fetchDashboardStats(supabase: ReturnType<typeof createClient>, us
   ])
 
   const allCourses = courses.data ?? []
-  const accessible = allCourses.filter(c => userTier === 'pro' || c.required_tier === 'community')
+  const accessible = allCourses.filter(c => hasTierAccess(userTier as 'community' | 'vip' | 'pro' | null, c.required_tier as 'community' | 'vip' | 'pro' | null))
   const pillarsUnlocked = accessible.length
   const pillarsTotal = allCourses.length
 

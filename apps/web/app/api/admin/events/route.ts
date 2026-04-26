@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       ends_at: typeof body.ends_at === 'string' ? body.ends_at : null,
       zoom_url: typeof body.zoom_url === 'string' ? body.zoom_url : null,
       image_url: typeof body.image_url === 'string' ? body.image_url : null,
-      required_tier: (body.required_tier as 'community' | 'pro' | null) ?? null,
+      required_tier: (body.required_tier as 'community' | 'vip' | 'pro' | null) ?? null,
       tier_access: tierAccess,
       is_published: body.is_published === true,
       is_draft: body.is_draft === true,

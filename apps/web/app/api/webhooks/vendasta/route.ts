@@ -160,9 +160,12 @@ export async function POST(request: Request) {
 }
 
 function normalizeTier(tier: string | null): VendastaTier {
-  // The schema also allows 'vip' (legacy), but the new flow only writes
-  // community/pro. Treat anything non-pro as community for tier-change copy.
-  return tier === 'pro' ? 'pro' : 'community'
+  // Path B canonical 3-tier vocabulary: community / vip / pro.
+  // Unknown / null falls back to community (entry tier).
+  if (tier === 'pro')       return 'pro'
+  if (tier === 'vip')       return 'vip'
+  if (tier === 'community') return 'community'
+  return 'community'
 }
 
 // ---------------------------------------------------------------------------

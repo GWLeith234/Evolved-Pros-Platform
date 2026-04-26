@@ -49,10 +49,10 @@ export async function GET() {
     endsAt: e.ends_at,
     zoomUrl: null,
     recordingUrl: e.recording_url,
-    requiredTier: e.required_tier as 'community' | 'pro' | null,
+    requiredTier: e.required_tier as 'community' | 'vip' | 'pro' | null,
     registrationCount: e.registration_count,
     isRegistered: registeredIds.has(e.id),
-    hasAccess: hasTierAccess(profile?.tier, e.required_tier as 'community' | 'pro' | null),
+    hasAccess: hasTierAccess(profile?.tier, e.required_tier as 'community' | 'vip' | 'pro' | null),
     isPublished: e.is_published,
   }))
 

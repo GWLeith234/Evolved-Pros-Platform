@@ -38,10 +38,10 @@ export async function GET(_req: Request, { params }: { params: { eventId: string
     endsAt: row.ends_at,
     zoomUrl: isRegistered ? row.zoom_url : null,
     recordingUrl: row.recording_url,
-    requiredTier: row.required_tier as 'community' | 'pro' | null,
+    requiredTier: row.required_tier as 'community' | 'vip' | 'pro' | null,
     registrationCount: row.registration_count,
     isRegistered,
-    hasAccess: hasTierAccess(profile?.tier, row.required_tier as 'community' | 'pro' | null),
+    hasAccess: hasTierAccess(profile?.tier, row.required_tier as 'community' | 'vip' | 'pro' | null),
     isPublished: row.is_published,
   }
 

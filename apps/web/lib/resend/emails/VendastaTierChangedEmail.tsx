@@ -12,20 +12,31 @@ import {
 } from '@react-email/components'
 import React from 'react'
 
+type VendastaTier = 'community' | 'vip' | 'pro'
+
 interface VendastaTierChangedEmailProps {
   firstName: string
-  oldTier: 'community' | 'pro'
-  newTier: 'community' | 'pro'
+  oldTier: VendastaTier
+  newTier: VendastaTier
 }
 
-const tierLabel: Record<'community' | 'pro', string> = {
+const tierLabel: Record<VendastaTier, string> = {
   community: 'Community',
+  vip:       'VIP',
   pro:       'Pro',
 }
 
-const tierAccent: Record<'community' | 'pro', string> = {
+// TODO(george): VIP-specific accent — currently mirrors pro gold.
+const tierAccent: Record<VendastaTier, string> = {
   community: '#68a2b9',
+  vip:       '#c9a84c',
   pro:       '#c9a84c',
+}
+
+const TIER_RANK: Record<VendastaTier, number> = {
+  community: 1,
+  vip:       2,
+  pro:       3,
 }
 
 export function VendastaTierChangedEmail({
@@ -33,7 +44,7 @@ export function VendastaTierChangedEmail({
   oldTier,
   newTier,
 }: VendastaTierChangedEmailProps) {
-  const isUpgrade = oldTier === 'community' && newTier === 'pro'
+  const isUpgrade = TIER_RANK[newTier] > TIER_RANK[oldTier]
   const verb      = isUpgrade ? 'upgraded' : 'changed'
   const newLabel  = tierLabel[newTier]
   const accent    = tierAccent[newTier]
@@ -67,7 +78,15 @@ export function VendastaTierChangedEmail({
             </Text>
           </Section>
 
-          {newTier === 'pro' && (
+          {isUpgrade && newTier === 'vip' && (
+            <>
+              <Text style={sectionLabelStyle}>What's newly unlocked:</Text>
+              <Text style={featureStyle}>→ VIP-only community channels and priority Q&A</Text>
+              <Text style={featureStyle}>→ Exclusive VIP live events and replays</Text>
+            </>
+          )}
+
+          {isUpgrade && newTier === 'pro' && (
             <>
               <Text style={sectionLabelStyle}>What's newly unlocked:</Text>
               <Text style={featureStyle}>→ Pillars 5–6: Accountability & Execution</Text>
