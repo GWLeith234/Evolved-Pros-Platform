@@ -13,9 +13,6 @@ export const VENDASTA_PRODUCTS: Record<string, ProductConfig> = {
   // VIP tier — $79/month
   'EP-VIP-M':  { tier: 'vip', billingPeriod: 'monthly'  },
   'EP-VIP-Y':  { tier: 'vip', billingPeriod: 'annual'   },
-  // Backward-compat aliases (existing customers keep working)
-  'EP-COMM-M': { tier: 'vip', billingPeriod: 'monthly'  },
-  'EP-COMM-Y': { tier: 'vip', billingPeriod: 'annual'   },
   // Professional tier — $249/month
   'EP-PRO-M':  { tier: 'pro', billingPeriod: 'monthly'  },
   'EP-PRO-Y':  { tier: 'pro', billingPeriod: 'annual'   },
