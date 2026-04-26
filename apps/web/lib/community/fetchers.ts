@@ -97,6 +97,7 @@ async function hydratePostMeta(
         id: author?.id ?? '',
         displayName: author?.display_name ?? author?.full_name ?? 'Member',
         avatarUrl: author?.avatar_url ?? null,
+        tier: author?.tier ?? null,
       },
       isLiked: myReactionMap.has(row.id),
       myReaction: myReactionMap.get(row.id) ?? null,
@@ -120,7 +121,7 @@ export async function fetchPosts(
 
   const { data: rows } = await adminClient
     .from('posts')
-    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url)')
+    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
     .eq('channel_id', channel.id)
     .eq('is_pinned', false)
     .order('created_at', { ascending: false })
@@ -142,7 +143,7 @@ export async function fetchAllPosts(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query: any = adminClient
     .from('posts')
-    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url)')
+    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
     .eq('is_pinned', false)
     .order('created_at', { ascending: false })
     .limit(limit + 1)

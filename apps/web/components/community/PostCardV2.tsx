@@ -68,10 +68,37 @@ function ClientTimeAgo({ dateStr }: { dateStr: string }) {
   return <>{ago}</>
 }
 
-function tierBadgeStyle(tier: string | null | undefined): { bg: string; color: string; label: string } | null {
+// COMMUNITY-TIER-BADGE-FIX: subtle tinted-bg + bordered chips (not solid pills)
+// to match the kind/pillar chip pattern used elsewhere in the editorial design.
+// Heart-gold for PRO, brand red for VIP, transparent + gray border for MEMBER.
+// DB stores 'community' for the base tier — display label is "MEMBER" per
+// brief. null/undefined → no badge.
+function tierBadgeStyle(tier: string | null | undefined): { bg: string; color: string; border: string; label: string } | null {
   const t = tier?.toLowerCase()
-  if (t === 'pro') return { bg: '#C9A84C', color: '#0A0F18', label: 'PRO' }
-  if (t === 'vip') return { bg: '#ef0e30', color: '#FFFFFF', label: 'VIP' }
+  if (t === 'pro') {
+    return {
+      bg:     'rgba(201,168,76,0.18)',
+      color:  '#C9A84C',
+      border: 'rgba(201,168,76,0.40)',
+      label:  'PRO',
+    }
+  }
+  if (t === 'vip') {
+    return {
+      bg:     'rgba(239,68,68,0.18)',
+      color:  '#EF4444',
+      border: 'rgba(239,68,68,0.40)',
+      label:  'VIP',
+    }
+  }
+  if (t === 'community' || t === 'member') {
+    return {
+      bg:     'transparent',
+      color:  'var(--text-tertiary)',
+      border: 'var(--text-tertiary)',
+      label:  'MEMBER',
+    }
+  }
   return null
 }
 
@@ -193,6 +220,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
                   textTransform: 'uppercase',
                   background: tierBadge.bg,
                   color: tierBadge.color,
+                  border: `1px solid ${tierBadge.border}`,
                 }}
               >
                 {tierBadge.label}
