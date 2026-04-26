@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { notifyCourseUnlock } from '@/lib/notifications/create'
 import { PILLAR_NAMES } from '@/lib/academy/types'
@@ -16,7 +17,7 @@ export async function POST(
 ) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   let body: ProgressBody
   try {
@@ -30,8 +31,17 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid watchTimeSeconds' }, { status: 400 })
   }
 
+  // RLS-FIX: lesson_progress.user_id and users.id-targeted updates need
+  // public.users.id, not auth.uid().
+  const { data: profile } = await adminClient
+    .from('users')
+    .select('id')
+    .eq('email', user.email)
+    .single()
+  const userId = profile?.id ?? user.id
+
   // Verify lesson exists and fetch course id + title
-  const { data: lesson } = await supabase
+  const { data: lesson } = await adminClient
     .from('lessons')
     .select('id, course_id, title, is_published')
     .eq('id', params.lessonId)
@@ -40,10 +50,10 @@ export async function POST(
   if (!lesson) return NextResponse.json({ error: 'Lesson not found' }, { status: 404 })
 
   // Fetch existing progress
-  const { data: existing } = await supabase
+  const { data: existing } = await adminClient
     .from('lesson_progress')
     .select('completed_at, watch_time_seconds')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .eq('lesson_id', params.lessonId)
     .single()
 
@@ -51,15 +61,15 @@ export async function POST(
   const completedAt = completed && !alreadyCompleted ? new Date().toISOString() : (existing?.completed_at ?? null)
   const maxWatchTime = Math.max(watchTimeSeconds, existing?.watch_time_seconds ?? 0)
 
-  const { data: upserted } = await supabase
+  const { data: upserted } = await adminClient
     .from('lesson_progress')
     .upsert({
-      user_id: user.id,
+      user_id: userId,
       lesson_id: params.lessonId,
       watch_time_seconds: maxWatchTime,
       completed_at: completedAt,
       updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,lesson_id' })
+    } as never, { onConflict: 'user_id,lesson_id' })
     .select('completed_at, watch_time_seconds')
     .single()
 
@@ -69,15 +79,15 @@ export async function POST(
   if (completed && !alreadyCompleted) {
     pointsAwarded = 50
     try {
-      await Promise.resolve(supabase.rpc('increment_points', { user_id: user.id, amount: 50 } as Record<string, unknown>))
+      await Promise.resolve(supabase.rpc('increment_points', { user_id: userId, amount: 50 } as Record<string, unknown>))
     } catch {
       // Fallback if RPC not available
-      const { data } = await supabase.from('users').select('points').eq('id', user.id).single()
-      await supabase.from('users').update({ points: (data?.points ?? 0) + 50 }).eq('id', user.id)
+      const { data } = await adminClient.from('users').select('points').eq('id', userId).single()
+      await adminClient.from('users').update({ points: (data?.points ?? 0) + 50 }).eq('id', userId)
     }
 
     // Check course completion
-    const { data: allLessons } = await supabase
+    const { data: allLessons } = await adminClient
       .from('lessons')
       .select('id')
       .eq('course_id', lesson.course_id)
@@ -85,10 +95,10 @@ export async function POST(
 
     const totalLessonIds = (allLessons ?? []).map(l => l.id)
 
-    const { data: completedProgress } = await supabase
+    const { data: completedProgress } = await adminClient
       .from('lesson_progress')
       .select('lesson_id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .in('lesson_id', totalLessonIds)
       .not('completed_at', 'is', null)
 
@@ -98,28 +108,28 @@ export async function POST(
     ) {
       // Course complete — award 100 bonus points
       pointsAwarded += 100
-      await supabase
+      await adminClient
         .from('users')
         .select('points')
-        .eq('id', user.id)
+        .eq('id', userId)
         .single()
         .then(({ data }) =>
-          supabase
+          adminClient
             .from('users')
             .update({ points: (data?.points ?? 0) + 100 })
-            .eq('id', user.id)
+            .eq('id', userId)
         )
 
       // Notify via factory
       {
-        const { data: course } = await supabase
+        const { data: course } = await adminClient
           .from('courses')
           .select('slug, pillar_number')
           .eq('id', lesson.course_id)
           .single()
 
         void notifyCourseUnlock({
-          userId:        user.id,
+          userId,
           lessonTitle:   lesson.title,
           courseSlug:    course?.slug ?? lesson.course_id,
           pillarNumber:  course?.pillar_number ?? 0,
@@ -132,7 +142,7 @@ export async function POST(
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              userId: user.id,
+              userId,
               eventType: 'pillar_complete',
               payload: { pillarNumber: pNum, pillarName: PILLAR_NAMES[pNum] ?? `Pillar ${pNum}` },
             }),

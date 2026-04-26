@@ -14,7 +14,7 @@ export async function POST(
 ) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   // Read reaction_type and optional remove flag from body
   let reactionType: ReactionType = 'thumbs_up'
@@ -27,7 +27,16 @@ export async function POST(
     if (body.remove === true) explicitRemove = true
   } catch { /* no body — use default */ }
 
-  const { data: post } = await supabase
+  // RLS-FIX: resolve public.users.id by email — post_likes.user_id FKs
+  // public.users(id), and RLS checks auth.uid() which can differ.
+  const { data: profileRow } = await adminClient
+    .from('users')
+    .select('id, display_name, full_name')
+    .eq('email', user.email)
+    .single()
+  const likerId = profileRow?.id ?? user.id
+
+  const { data: post } = await adminClient
     .from('posts')
     .select('like_count, author_id')
     .eq('id', params.postId)
@@ -35,11 +44,11 @@ export async function POST(
   if (!post) return NextResponse.json({ error: 'Post not found' }, { status: 404 })
 
   // Check if user already has any reaction on this post
-  const { data: existing } = await supabase
+  const { data: existing } = await adminClient
     .from('post_likes')
     .select('post_id, reaction_type')
     .eq('post_id', params.postId)
-    .eq('user_id', user.id)
+    .eq('user_id', likerId)
     .maybeSingle() as { data: { post_id: string; reaction_type: string | null } | null }
 
   let liked = true
@@ -49,7 +58,7 @@ export async function POST(
   // explicitRemove=true means the frontend detected the user is un-reacting
   // (same emoji clicked twice). Bypass the existing-row lookup entirely.
   if (explicitRemove) {
-    await supabase.from('post_likes').delete().eq('post_id', params.postId).eq('user_id', user.id)
+    await adminClient.from('post_likes').delete().eq('post_id', params.postId).eq('user_id', likerId)
     newLikeCount = Math.max(0, post.like_count - 1)
     liked = false
     myReaction = null
@@ -57,27 +66,27 @@ export async function POST(
     const sameType = existing.reaction_type === reactionType
     if (sameType) {
       // Toggle off — remove reaction
-      await supabase.from('post_likes').delete().eq('post_id', params.postId).eq('user_id', user.id)
+      await adminClient.from('post_likes').delete().eq('post_id', params.postId).eq('user_id', likerId)
       newLikeCount = Math.max(0, post.like_count - 1)
       liked = false
       myReaction = null
     } else {
       // Change to a different reaction — update type, like_count unchanged
-      await supabase
+      await adminClient
         .from('post_likes')
         .update({ reaction_type: reactionType } as never)
         .eq('post_id', params.postId)
-        .eq('user_id', user.id)
+        .eq('user_id', likerId)
     }
   } else {
     // New reaction
-    await supabase
+    await adminClient
       .from('post_likes')
-      .insert({ post_id: params.postId, user_id: user.id, reaction_type: reactionType } as never)
+      .insert({ post_id: params.postId, user_id: likerId, reaction_type: reactionType } as never)
     newLikeCount = post.like_count + 1
 
     // Award 2 points to post author (not self-reacting)
-    if (post.author_id !== user.id) {
+    if (post.author_id !== likerId) {
       try {
         const { error: rpcErr } = await supabase.rpc('increment_points', { user_id: post.author_id, amount: 2 } as Record<string, unknown>)
         if (rpcErr) console.warn('[like] increment_points failed:', rpcErr.message)
@@ -87,17 +96,18 @@ export async function POST(
     }
 
     // Notify author
-    const [likerProfile, channelData] = await Promise.all([
-      supabase.from('users').select('display_name, full_name').eq('id', user.id).single().then(r => r.data),
-      supabase.from('posts').select('channels(slug)').eq('id', params.postId).single().then(r => r.data),
-    ])
-    const likerName = likerProfile?.display_name ?? likerProfile?.full_name ?? 'Someone'
+    const { data: channelData } = await adminClient
+      .from('posts')
+      .select('channels(slug)')
+      .eq('id', params.postId)
+      .single()
+    const likerName = profileRow?.display_name ?? profileRow?.full_name ?? 'Someone'
     const channelSlug = (channelData?.channels as { slug: string } | null)?.slug ?? 'general'
-    void notifyLike({ postAuthorId: post.author_id, likerUserId: user.id, likerName, channelSlug, postId: params.postId })
+    void notifyLike({ postAuthorId: post.author_id, likerUserId: likerId, likerName, channelSlug, postId: params.postId })
   }
 
   // Update like_count on the post
-  await supabase.from('posts').update({ like_count: newLikeCount }).eq('id', params.postId)
+  await adminClient.from('posts').update({ like_count: newLikeCount }).eq('id', params.postId)
 
   // Fetch updated per-reaction counts (adminClient to see all users' reactions)
   const { data: allLikes } = await adminClient

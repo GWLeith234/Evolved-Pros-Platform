@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -101,7 +102,7 @@ export async function GET() {
 export async function POST(request: Request) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   let body: { recipientId?: unknown }
   try {
@@ -112,15 +113,27 @@ export async function POST(request: Request) {
 
   const recipientId = typeof body.recipientId === 'string' ? body.recipientId : null
   if (!recipientId) return NextResponse.json({ error: 'recipientId is required' }, { status: 422 })
-  if (recipientId === user.id) return NextResponse.json({ error: 'Cannot message yourself' }, { status: 422 })
+
+  // RLS-FIX: conversations.participant_one_id / participant_two_id both FK
+  // public.users(id). Resolve current user's public.users.id by email.
+  // recipientId is already a public.users.id from the caller (member directory
+  // / profile click), so no lookup needed for that side.
+  const { data: profile } = await adminClient
+    .from('users')
+    .select('id')
+    .eq('email', user.email)
+    .single()
+  const senderId = profile?.id ?? user.id
+
+  if (recipientId === senderId) return NextResponse.json({ error: 'Cannot message yourself' }, { status: 422 })
 
   // Try both orderings since UNIQUE constraint enforces (participant_one_id, participant_two_id)
   // Check if conversation already exists in either ordering
-  const { data: existing } = await supabase
+  const { data: existing } = await adminClient
     .from('conversations')
     .select('id, participant_one_id, participant_two_id, last_message_at, created_at')
     .or(
-      `and(participant_one_id.eq.${user.id},participant_two_id.eq.${recipientId}),and(participant_one_id.eq.${recipientId},participant_two_id.eq.${user.id})`
+      `and(participant_one_id.eq.${senderId},participant_two_id.eq.${recipientId}),and(participant_one_id.eq.${recipientId},participant_two_id.eq.${senderId})`
     )
     .maybeSingle()
 
@@ -129,22 +142,22 @@ export async function POST(request: Request) {
   }
 
   // Insert new conversation with current user as participant_one
-  const { data: created, error } = await supabase
+  const { data: created, error } = await adminClient
     .from('conversations')
     .insert({
-      participant_one_id: user.id,
+      participant_one_id: senderId,
       participant_two_id: recipientId,
-    })
+    } as never)
     .select('id, participant_one_id, participant_two_id, last_message_at, created_at')
     .single()
 
   if (error || !created) {
     // Race condition: try to fetch again
-    const { data: retry } = await supabase
+    const { data: retry } = await adminClient
       .from('conversations')
       .select('id, participant_one_id, participant_two_id, last_message_at, created_at')
       .or(
-        `and(participant_one_id.eq.${user.id},participant_two_id.eq.${recipientId}),and(participant_one_id.eq.${recipientId},participant_two_id.eq.${user.id})`
+        `and(participant_one_id.eq.${senderId},participant_two_id.eq.${recipientId}),and(participant_one_id.eq.${recipientId},participant_two_id.eq.${senderId})`
       )
       .maybeSingle()
 

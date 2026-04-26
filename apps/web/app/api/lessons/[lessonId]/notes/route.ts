@@ -1,7 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
+
+// RLS-FIX helper: resolve public.users.id by email (auth.uid() ≠ public.users.id).
+async function resolveUserId(email: string): Promise<string | null> {
+  const { data } = await adminClient
+    .from('users')
+    .select('id')
+    .eq('email', email)
+    .single()
+  return data?.id ?? null
+}
 
 export async function GET(
   _req: Request,
@@ -9,12 +20,14 @@ export async function GET(
 ) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data } = await supabase
+  const userId = (await resolveUserId(user.email)) ?? user.id
+
+  const { data } = await adminClient
     .from('lesson_progress')
     .select('notes, updated_at')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .eq('lesson_id', params.lessonId)
     .single()
 
@@ -27,7 +40,7 @@ export async function PATCH(
 ) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json() as { notes?: string }
   const notes = body.notes ?? ''
@@ -39,14 +52,16 @@ export async function PATCH(
     return NextResponse.json({ error: 'Notes too long (max 10,000 chars)' }, { status: 400 })
   }
 
-  const { data, error } = await supabase
+  const userId = (await resolveUserId(user.email)) ?? user.id
+
+  const { data, error } = await adminClient
     .from('lesson_progress')
     .upsert({
-      user_id: user.id,
+      user_id: userId,
       lesson_id: params.lessonId,
       notes,
       updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,lesson_id' })
+    } as never, { onConflict: 'user_id,lesson_id' })
     .select('notes, updated_at')
     .single()
 
