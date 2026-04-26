@@ -4,8 +4,30 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
-const VALID_KINDS = ['fire', 'hundred', 'clap', 'heart', 'mind'] as const
-type ReactionKind = typeof VALID_KINDS[number]
+// Brief naming (UI-facing) → DB CHECK-constraint values from Sprint 0 migration.
+// Sprint 0 locked DB values to ('fire','hundred','clap','heart','mind') —
+// COMMUNITY-SPRINT-2 brief renamed clap→hands and mind→mindblown for the UI.
+// Translate at the API boundary so the DB stays consistent.
+const EMOJI_TO_DB: Record<string, string> = {
+  fire:      'fire',
+  hundred:   'hundred',
+  hands:     'clap',
+  heart:     'heart',
+  mindblown: 'mind',
+  // Backward-compat: also accept DB names directly.
+  clap:      'clap',
+  mind:      'mind',
+}
+
+const DB_TO_EMOJI: Record<string, string> = {
+  fire:    'fire',
+  hundred: 'hundred',
+  clap:    'hands',
+  heart:   'heart',
+  mind:    'mindblown',
+}
+
+const EMPTY_COUNTS = { fire: 0, hundred: 0, hands: 0, heart: 0, mindblown: 0 }
 
 async function resolveUserId(email: string): Promise<string | null> {
   const { data } = await adminClient
@@ -16,13 +38,20 @@ async function resolveUserId(email: string): Promise<string | null> {
   return data?.id ?? null
 }
 
-async function readReactionCount(postId: string): Promise<number> {
+async function readCounts(postId: string): Promise<typeof EMPTY_COUNTS> {
   const { data } = await adminClient
-    .from('posts')
-    .select('reaction_count')
-    .eq('id', postId)
-    .single() as { data: { reaction_count: number } | null }
-  return data?.reaction_count ?? 0
+    .from('post_reactions')
+    .select('reaction_type')
+    .eq('post_id', postId) as { data: { reaction_type: string }[] | null }
+
+  const counts = { ...EMPTY_COUNTS }
+  for (const row of data ?? []) {
+    const ui = DB_TO_EMOJI[row.reaction_type]
+    if (ui && ui in counts) {
+      counts[ui as keyof typeof EMPTY_COUNTS] += 1
+    }
+  }
+  return counts
 }
 
 export async function POST(
@@ -33,13 +62,14 @@ export async function POST(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  let kind: ReactionKind
+  let dbValue: string
   try {
-    const body = await request.json() as { kind?: string }
-    if (!body.kind || !VALID_KINDS.includes(body.kind as ReactionKind)) {
-      return NextResponse.json({ error: 'Invalid kind' }, { status: 400 })
+    const body = await request.json() as { emoji?: string; kind?: string }
+    const raw = body.emoji ?? body.kind
+    if (!raw || !(raw in EMOJI_TO_DB)) {
+      return NextResponse.json({ error: 'Invalid emoji' }, { status: 400 })
     }
-    kind = body.kind as ReactionKind
+    dbValue = EMOJI_TO_DB[raw]
   } catch {
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
   }
@@ -52,15 +82,15 @@ export async function POST(
   const { error } = await adminClient
     .from('post_reactions')
     .upsert(
-      { user_id: userId, post_id: params.postId, reaction_type: kind } as never,
+      { user_id: userId, post_id: params.postId, reaction_type: dbValue } as never,
       { onConflict: 'user_id,post_id' } as never,
     )
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const reaction_count = await readReactionCount(params.postId)
-  return NextResponse.json({ ok: true, reaction_count })
+  const counts = await readCounts(params.postId)
+  return NextResponse.json({ ok: true, counts })
 }
 
 export async function DELETE(
@@ -83,6 +113,6 @@ export async function DELETE(
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  const reaction_count = await readReactionCount(params.postId)
-  return NextResponse.json({ ok: true, reaction_count })
+  const counts = await readCounts(params.postId)
+  return NextResponse.json({ ok: true, counts })
 }

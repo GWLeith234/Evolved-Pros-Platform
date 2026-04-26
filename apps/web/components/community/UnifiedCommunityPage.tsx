@@ -1,13 +1,14 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { PostCard } from './PostCard'
+import { PostCardV2 } from './PostCardV2'
 import { DashboardStrip } from './DashboardStrip'
 import { FeedAdUnit } from './FeedAdUnit'
 import { CommunityPageHeader } from './CommunityPageHeader'
 import { Composer } from './Composer'
-import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { FilterRail } from './FilterRail'
+import type { KindFilter, Pillar, SortBy } from './FilterRail'
 import type { Post, CommunityAd } from '@/lib/community/types'
 import type { DashboardStripProps } from './DashboardStrip'
 
@@ -16,14 +17,7 @@ function getInitials(name: string | null | undefined): string {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 }
 
-type Filter = 'all' | 'win' | 'question' | PillarFilter
-type PillarFilter = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6'
-
-const PILLAR_FILTERS = Object.entries(PILLAR_CONFIG).map(([num, config]) => ({
-  id: `p${num}` as PillarFilter,
-  label: config.label,
-  color: config.color,
-}))
+const PAGE_SIZE = 20
 
 interface UnifiedCommunityPageProps {
   posts: Post[]
@@ -57,11 +51,14 @@ export function UnifiedCommunityPage({
   const [cursor, setCursor] = useState<string | null>(initialCursor)
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [loadingMore, setLoadingMore] = useState(false)
-  const [activeFilter, setActiveFilter] = useState<Filter>('all')
   const [queuedCount, setQueuedCount] = useState(0)
   const [queued, setQueued] = useState<Post[]>([])
 
-  const sentinelRef = useRef<HTMLDivElement>(null)
+  // COMMUNITY-SPRINT-2: filter rail state
+  const [activeKind, setActiveKind] = useState<KindFilter>('all')
+  const [activePillars, setActivePillars] = useState<Pillar[]>([])
+  const [sortBy, setSortBy] = useState<SortBy>('newest')
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
   // Realtime subscription — no channel filter (unified)
   useEffect(() => {
@@ -99,7 +96,8 @@ export function UnifiedCommunityPage({
     return () => { supabase.removeChannel(sub) }
   }, [currentUser.id])
 
-  // Infinite scroll
+  // LOAD MORE button — explicit, not infinite scroll (anchors the page,
+  // easier on weak connections per Sprint 2 brief).
   const loadMore = useCallback(async () => {
     if (!hasMore || loadingMore || !cursor) return
     setLoadingMore(true)
@@ -113,19 +111,11 @@ export function UnifiedCommunityPage({
       })
       setCursor(data.nextCursor)
       setHasMore(data.hasMore)
+      setVisibleCount(c => c + PAGE_SIZE)
     } finally {
       setLoadingMore(false)
     }
   }, [cursor, hasMore, loadingMore])
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      entries => { if (entries[0].isIntersecting && hasMore && !loadingMore) loadMore() },
-      { threshold: 0.1 }
-    )
-    if (sentinelRef.current) observer.observe(sentinelRef.current)
-    return () => observer.disconnect()
-  }, [hasMore, loadingMore, loadMore])
 
   function handlePostCreated(post: Post) {
     setPosts(prev => [post, ...prev])
@@ -151,75 +141,41 @@ export function UnifiedCommunityPage({
     setQueuedCount(0)
   }
 
-  function handleReact(postId: string, reactionType: string) {
-    const currentPost = posts.find(p => p.id === postId)
-    const isToggleOff = currentPost?.myReaction === reactionType
-    let original: Post | null = null
+  // Reset visible count whenever filters change so the user sees the top of
+  // the freshly filtered list.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE)
+  }, [activeKind, activePillars, sortBy])
 
-    setPosts(prev => prev.map(p => {
-      if (p.id !== postId) return p
-      original = p
-      const toggleOff = p.myReaction === reactionType
-      const reactionMap = new Map(p.reactions.map(r => [r.type, r.count]))
-      if (p.myReaction && !toggleOff) {
-        const c = reactionMap.get(p.myReaction) ?? 0
-        c <= 1 ? reactionMap.delete(p.myReaction) : reactionMap.set(p.myReaction, c - 1)
+  // COMMUNITY-SPRINT-2 client-side filter + sort. Filter logic stays
+  // client-side per brief — DO NOT migrate to server in this sprint.
+  const filtered = useMemo(() => {
+    let list = posts.filter(post => {
+      if (activeKind !== 'all') {
+        // Match either legacy post_type or new kind values.
+        if (post.postType !== activeKind) return false
       }
-      if (toggleOff) {
-        const c = reactionMap.get(reactionType) ?? 0
-        c <= 1 ? reactionMap.delete(reactionType) : reactionMap.set(reactionType, c - 1)
-      } else {
-        reactionMap.set(reactionType, (reactionMap.get(reactionType) ?? 0) + 1)
+      if (activePillars.length > 0) {
+        const pillarNum = post.pillarTag ? parseInt(post.pillarTag.slice(1), 10) : null
+        if (pillarNum === null || !activePillars.includes(pillarNum as Pillar)) return false
       }
-      const reactions = Array.from(reactionMap.entries())
-        .map(([type, count]) => ({ type, count }))
-        .sort((a, b) => b.count - a.count)
-      return { ...p, myReaction: toggleOff ? null : reactionType, isLiked: !toggleOff, likeCount: reactions.reduce((s, r) => s + r.count, 0), reactions }
-    }))
-
-    fetch(`/api/posts/${postId}/like`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reaction_type: reactionType, remove: isToggleOff }),
+      return true
     })
-      .then(async res => {
-        if (res.ok) {
-          const data = await res.json()
-          setPosts(prev => prev.map(p => p.id !== postId ? p : {
-            ...p,
-            isLiked: data.liked,
-            likeCount: data.likeCount,
-            myReaction: data.myReaction,
-            reactions: data.reactions.length > 0 ? data.reactions : p.reactions,
-          }))
-        } else if (original) {
-          const snap = original
-          setPosts(prev => prev.map(p => p.id !== postId ? p : snap))
-        }
-      })
-      .catch(() => {
-        if (original) {
-          const snap = original
-          setPosts(prev => prev.map(p => p.id !== postId ? p : snap))
-        }
-      })
-  }
 
-  function handleBookmark(postId: string) {
-    setPosts(prev => prev.map(p => p.id !== postId ? p : { ...p, isBookmarked: !p.isBookmarked }))
-    fetch(`/api/posts/${postId}/bookmark`, { method: 'POST' })
-      .catch(() => {
-        setPosts(prev => prev.map(p => p.id !== postId ? p : { ...p, isBookmarked: !p.isBookmarked }))
-      })
-  }
+    if (sortBy === 'newest') {
+      list = [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    } else if (sortBy === 'oldest') {
+      list = [...list].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+    } else if (sortBy === 'most_reacted') {
+      const total = (p: Post) => (p.reactions ?? []).reduce((s, r) => s + r.count, 0)
+      list = [...list].sort((a, b) => total(b) - total(a))
+    }
 
-  // Client-side filtering
-  const filtered = posts.filter(post => {
-    if (activeFilter === 'all') return true
-    if (activeFilter === 'win') return post.postType === 'win'
-    if (activeFilter === 'question') return post.postType === 'question'
-    return post.pillarTag === activeFilter
-  })
+    return list
+  }, [posts, activeKind, activePillars, sortBy])
+
+  const visible = filtered.slice(0, visibleCount)
+  const hasMoreVisible = filtered.length > visibleCount || hasMore
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-x-hidden" style={{ height: '100%', background: 'var(--community-page-bg)' }}>
@@ -229,55 +185,15 @@ export function UnifiedCommunityPage({
       {/* Editorial header (COMMUNITY-SPRINT-1) */}
       <CommunityPageHeader />
 
-      {/* Filter pills — held over from Sprint 0; new filter rail lands in Sprint 2 */}
-      <div style={{ padding: '0 24px 16px' }}>
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {[
-            { id: 'all' as Filter, label: 'All', color: null },
-            { id: 'win' as Filter, label: '🏆 Wins', color: null },
-            { id: 'question' as Filter, label: '❓ Questions', color: null },
-          ].map(f => {
-            const active = activeFilter === f.id
-            return (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setActiveFilter(f.id)}
-                className="font-condensed font-semibold uppercase tracking-[0.1em] text-[10px] transition-all"
-                style={{
-                  padding: '5px 14px',
-                  borderRadius: '20px',
-                  backgroundColor: active ? '#1B2A4A' : '#ffffff',
-                  color: active ? '#ffffff' : '#1B2A4A',
-                  border: `1px solid ${active ? '#1B2A4A' : 'rgba(27,42,74,0.15)'}`,
-                }}
-              >
-                {f.label}
-              </button>
-            )
-          })}
-          {PILLAR_FILTERS.map(f => {
-            const active = activeFilter === f.id
-            return (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setActiveFilter(f.id)}
-                className="font-condensed font-semibold uppercase tracking-[0.1em] text-[10px] transition-all"
-                style={{
-                  padding: '5px 14px',
-                  borderRadius: '20px',
-                  backgroundColor: active ? '#1B2A4A' : '#ffffff',
-                  color: active ? '#ffffff' : '#1B2A4A',
-                  border: `1px solid ${active ? '#1B2A4A' : 'rgba(27,42,74,0.15)'}`,
-                }}
-              >
-                {f.label}
-              </button>
-            )
-          })}
-        </div>
-      </div>
+      {/* Filter rail (COMMUNITY-SPRINT-2) */}
+      <FilterRail
+        activeKind={activeKind}
+        activePillars={activePillars}
+        sortBy={sortBy}
+        onChangeKind={setActiveKind}
+        onChangePillars={setActivePillars}
+        onChangeSort={setSortBy}
+      />
 
       {/* Feed — full-width, centered, scrollable */}
       <div className="flex-1 overflow-y-auto" style={{ background: 'var(--community-page-bg)' }}>
@@ -330,25 +246,22 @@ export function UnifiedCommunityPage({
             </button>
           )}
 
-          {/* Posts + in-feed ads */}
+          {/* Posts + in-feed ads (COMMUNITY-SPRINT-2: PostCardV2 + visibleCount pagination) */}
           {filtered.length === 0 ? (
             <div className="py-16 text-center">
-              <p className="font-condensed text-xs tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                {activeFilter === 'all' ? 'No posts yet — be the first to share.' : 'No posts in this category yet.'}
+              <p className="font-condensed text-xs tracking-widest" style={{ color: 'var(--text-tertiary)' }}>
+                {activeKind === 'all' && activePillars.length === 0
+                  ? 'No posts yet — be the first to share.'
+                  : 'No posts match the current filters.'}
               </p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', background: '#0A0F18' }}>
-              {filtered.map((post, index) => (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {visible.map((post, index) => (
                 <React.Fragment key={post.id}>
-                  <PostCard
+                  <PostCardV2
                     post={post}
                     currentUserId={currentUser.id}
-                    currentUser={{ id: currentUser.id, displayName: currentUser.displayName, avatarUrl: currentUser.avatarUrl }}
-                    onReact={handleReact}
-                    onBookmark={handleBookmark}
-                    activeFilter={activeFilter}
-                    isAdmin={currentUser.isAdmin}
                   />
                   {/* Inject ad after every 3rd post */}
                   {(index + 1) % 3 === 0 && ads.length > 0 && (
@@ -359,14 +272,36 @@ export function UnifiedCommunityPage({
             </div>
           )}
 
-          <div ref={sentinelRef} className="h-4" />
-
-          {loadingMore && (
-            <div className="flex justify-center py-4">
-              <svg className="animate-spin h-5 w-5" style={{ color: 'rgba(255,255,255,0.3)' }} fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
+          {/* LOAD MORE button — explicit, anchors the page (COMMUNITY-SPRINT-2) */}
+          {hasMoreVisible && (
+            <div className="flex justify-center py-6">
+              <button
+                type="button"
+                onClick={() => {
+                  // First reveal more from already-fetched posts; only hit
+                  // the network once the local cache is exhausted.
+                  if (visibleCount < filtered.length) {
+                    setVisibleCount(c => c + PAGE_SIZE)
+                  } else {
+                    void loadMore()
+                  }
+                }}
+                disabled={loadingMore}
+                style={{
+                  padding: '10px 28px',
+                  fontFamily: '"Bebas Neue", sans-serif',
+                  fontSize: 13,
+                  letterSpacing: '0.16em',
+                  textTransform: 'uppercase',
+                  background: 'var(--bg-elevated)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border-color)',
+                  cursor: loadingMore ? 'wait' : 'pointer',
+                  borderRadius: 0,
+                }}
+              >
+                {loadingMore ? 'Loading…' : 'Load more'}
+              </button>
             </div>
           )}
 

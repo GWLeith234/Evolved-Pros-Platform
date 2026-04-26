@@ -98,6 +98,24 @@
   --banner-attribution:   #C9A84C;
   --banner-pillar-bg:     rgba(255,255,255,0.04);
   --banner-pillar-border: rgba(255,255,255,0.06);
+
+  /* Reactions + filter rail (COMMUNITY-SPRINT-2).
+     5 reactions: 🔥 fire, 💯 hundred, 🙌 hands, ❤️ heart (GOLD, brand lock),
+     🤯 mindblown. Heart is gold not red — Evolved Pros brand pattern. */
+  --reaction-fire-bg:         rgba(249,115,22,0.12);
+  --reaction-fire-color:      #F97316;
+  --reaction-hundred-bg:      rgba(239,68,68,0.12);
+  --reaction-hundred-color:   #EF4444;
+  --reaction-hands-bg:        rgba(34,197,94,0.12);
+  --reaction-hands-color:     #22C55E;
+  --reaction-heart-bg:        rgba(201,168,76,0.16);
+  --reaction-heart-color:     #C9A84C;
+  --reaction-mindblown-bg:    rgba(167,139,250,0.12);
+  --reaction-mindblown-color: #A78BFA;
+
+  --filter-rail-bg:           #111926;
+  --filter-rail-active-bg:    #1A2332;
+  --filter-rail-border:       rgba(255,255,255,0.08);
 }
 
 body {
@@ -180,6 +198,23 @@ html.light-mode {
   --banner-attribution:   #8B7332;
   --banner-pillar-bg:     rgba(27,42,74,0.04);
   --banner-pillar-border: rgba(27,42,74,0.08);
+
+  /* Reactions + filter rail — light overrides (COMMUNITY-SPRINT-2).
+     Slightly higher opacity than dark so chips read on parchment bg. */
+  --reaction-fire-bg:         rgba(249,115,22,0.18);
+  --reaction-fire-color:      #C2410C;
+  --reaction-hundred-bg:      rgba(239,68,68,0.18);
+  --reaction-hundred-color:   #B91C1C;
+  --reaction-hands-bg:        rgba(34,197,94,0.18);
+  --reaction-hands-color:     #15803D;
+  --reaction-heart-bg:        rgba(201,168,76,0.22);
+  --reaction-heart-color:     #8B7332;
+  --reaction-mindblown-bg:    rgba(167,139,250,0.18);
+  --reaction-mindblown-color: #6D28D9;
+
+  --filter-rail-bg:           #FFFFFF;
+  --filter-rail-active-bg:    #F5F0E8;
+  --filter-rail-border:       rgba(27,42,74,0.10);
 }
 
 /* Page background + body text */

@@ -94,29 +94,39 @@ export async function GET(request: Request) {
   const nextCursor = hasMore && page.length > 0 ? page[page.length - 1].created_at : null
 
   const postIds = page.map((p: { id: string }) => p.id)
-  type LikeRow = { post_id: string; reaction_type: string | null }
-  const [userLikesResult, bookmarksResult, allLikesResult] = await Promise.all([
+  // COMMUNITY-SPRINT-2: source reactions from post_reactions (Sprint 0
+  // table) instead of legacy post_likes. Sprint 0's migration backfilled
+  // post_likes data into post_reactions, so counts stay accurate.
+  // DB stores ('fire','hundred','clap','heart','mind') per Sprint 0 CHECK;
+  // map clap→hands and mind→mindblown for the new UI.
+  const DB_TO_EMOJI: Record<string, string> = {
+    fire: 'fire', hundred: 'hundred', clap: 'hands', heart: 'heart', mind: 'mindblown',
+  }
+  type ReactionRow = { post_id: string; user_id: string; reaction_type: string }
+  const [userReactionsResult, bookmarksResult, allReactionsResult] = await Promise.all([
     postIds.length > 0
-      ? supabase.from('post_likes').select('post_id, reaction_type').eq('user_id', user.id).in('post_id', postIds) as Promise<{ data: LikeRow[] | null }>
-      : Promise.resolve({ data: [] as LikeRow[] }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ? (adminClient as any).from('post_reactions').select('post_id, user_id, reaction_type').eq('user_id', user.id).in('post_id', postIds) as Promise<{ data: ReactionRow[] | null }>
+      : Promise.resolve({ data: [] as ReactionRow[] }),
     postIds.length > 0
       ? supabase.from('post_bookmarks').select('post_id').eq('user_id', user.id).in('post_id', postIds)
       : Promise.resolve({ data: [] as { post_id: string }[] }),
     postIds.length > 0
-      ? adminClient.from('post_likes').select('post_id, reaction_type').in('post_id', postIds) as Promise<{ data: LikeRow[] | null }>
-      : Promise.resolve({ data: [] as LikeRow[] }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ? (adminClient as any).from('post_reactions').select('post_id, user_id, reaction_type').in('post_id', postIds) as Promise<{ data: ReactionRow[] | null }>
+      : Promise.resolve({ data: [] as ReactionRow[] }),
   ])
 
   const myReactionMap = new Map<string, string>(
-    (userLikesResult.data ?? []).map(l => [l.post_id, l.reaction_type ?? 'thumbs_up'])
+    (userReactionsResult.data ?? []).map(r => [r.post_id, DB_TO_EMOJI[r.reaction_type] ?? r.reaction_type])
   )
   const bookmarkedIds = new Set((bookmarksResult.data ?? []).map(b => b.post_id))
 
   const reactionCountsByPost = new Map<string, Map<string, number>>()
-  for (const like of allLikesResult.data ?? []) {
-    const type = like.reaction_type ?? 'thumbs_up'
-    if (!reactionCountsByPost.has(like.post_id)) reactionCountsByPost.set(like.post_id, new Map())
-    const m = reactionCountsByPost.get(like.post_id)!
+  for (const r of allReactionsResult.data ?? []) {
+    const type = DB_TO_EMOJI[r.reaction_type] ?? r.reaction_type
+    if (!reactionCountsByPost.has(r.post_id)) reactionCountsByPost.set(r.post_id, new Map())
+    const m = reactionCountsByPost.get(r.post_id)!
     m.set(type, (m.get(type) ?? 0) + 1)
   }
 
