@@ -308,6 +308,18 @@ html, body { overflow-x: hidden; }
   50%      { opacity: 0.5; transform: scale(1.18); }
 }
 
+/* WELCOME-BANNER-V3: sparkle dot on earned pillar badges + JustEarned card pulse.
+   Ported verbatim from welcome-banner.jsx (line 497-504) — keep in CSS so SSR
+   doesn't have to inject via document.head at runtime. */
+@keyframes pillarSparkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50%      { opacity: 1;   transform: scale(1.3); }
+}
+@keyframes earnedPulse {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 1; }
+}
+
 /* ─── Academy always dark ──────────────────────────────────────────────────
    :has() selects <main> when it contains [data-academy-page], beating the
    html.light-mode .bg-[#faf9f7] !important rule above.
