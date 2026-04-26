@@ -1,22 +1,14 @@
 export const dynamic = 'force-dynamic'
 
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
-
-async function requireAdmin(supabase: ReturnType<typeof createClient>) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { user: null, error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
-  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return { user: null, error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
-  return { user, error: null }
-}
+import { requireAdminApi } from '@/lib/admin/helpers'
 
 export async function GET() {
-  const supabase = createClient()
-  const { error: authError } = await requireAdmin(supabase)
-  if (authError) return authError
+  const auth = await requireAdminApi()
+  if (auth instanceof Response) return auth
 
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('events')
     .select('id, title, event_type, starts_at, ends_at, required_tier, tier_access, registration_count, is_published, is_draft, recording_url, zoom_url, description, image_url')
     .order('starts_at', { ascending: false })
@@ -29,9 +21,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const supabase = createClient()
-  const { error: authError } = await requireAdmin(supabase)
-  if (authError) return authError
+  const auth = await requireAdminApi()
+  if (auth instanceof Response) return auth
 
   let body: Record<string, unknown>
   try { body = await request.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
@@ -48,7 +39,9 @@ export async function POST(request: Request) {
     ? body.tier_access
     : 'all'
 
-  const { data, error } = await supabase
+  // RLS-FIX: adminClient — events RLS admin-role check breaks for users
+  // where auth.uid() ≠ public.users.id.
+  const { data, error } = await adminClient
     .from('events')
     .insert({
       title,

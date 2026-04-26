@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { logAdminAction } from '@/lib/admin/audit'
@@ -30,10 +30,9 @@ export async function PATCH(
     return NextResponse.json({ error: 'Invalid tierStatus' }, { status: 422 })
   }
 
-  const supabase = createClient()
-
-  // Fetch current values for the audit log
-  const { data: before } = await supabase
+  // RLS-FIX: use adminClient for both the audit-log read and the write.
+  // The role-gate already happened in requireAdminApi() above.
+  const { data: before } = await adminClient
     .from('users')
     .select('tier, tier_status')
     .eq('id', params.userId)
@@ -43,7 +42,7 @@ export async function PATCH(
   if (tier !== undefined)       update.tier        = tier
   if (tierStatus !== undefined) update.tier_status = tierStatus
 
-  const { error } = await supabase
+  const { error } = await adminClient
     .from('users')
     .update(update)
     .eq('id', params.userId)

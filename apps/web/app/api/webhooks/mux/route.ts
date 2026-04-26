@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -12,8 +12,6 @@ interface MuxWebhookPayload {
 }
 
 export async function POST(req: Request) {
-  const supabase = createClient()
-
   let payload: MuxWebhookPayload
   try {
     payload = await req.json() as MuxWebhookPayload
@@ -21,8 +19,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
   }
 
+  // RLS-FIX: webhook has no user session, so auth.uid() is NULL and every
+  // RLS policy rejects. Use adminClient for all queries.
+
   // Log webhook
-  await supabase.from('mux_webhooks').insert({
+  await adminClient.from('mux_webhooks').insert({
     event_type: payload.type,
     asset_id: payload.data.id,
     playback_id: payload.data.playback_ids?.[0]?.id ?? null,
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
     const playbackId = payload.data.playback_ids?.[0]?.id
 
     if (playbackId) {
-      await supabase
+      await adminClient
         .from('lessons')
         .update({ mux_playback_id: playbackId })
         .eq('mux_asset_id', assetId)

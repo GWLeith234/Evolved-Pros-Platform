@@ -1,22 +1,14 @@
 export const dynamic = 'force-dynamic'
 
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
-
-async function requireAdmin(supabase: ReturnType<typeof createClient>) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { user: null, error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
-  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return { user: null, error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
-  return { user, error: null }
-}
+import { requireAdminApi } from '@/lib/admin/helpers'
 
 export async function GET() {
-  const supabase = createClient()
-  const { error: authError } = await requireAdmin(supabase)
-  if (authError) return authError
+  const auth = await requireAdminApi()
+  if (auth instanceof Response) return auth
 
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('platform_ads')
     .select('id, zone, sponsor_name, ad_type, image_url, click_url, headline, start_date, end_date, is_active, sort_order, created_at')
     .order('zone')
@@ -28,9 +20,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const supabase = createClient()
-    const { error: authError } = await requireAdmin(supabase)
-    if (authError) return authError
+    const auth = await requireAdminApi()
+    if (auth instanceof Response) return auth
 
     let body: Record<string, unknown>
     try { body = await request.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
@@ -42,7 +33,9 @@ export async function POST(request: Request) {
       ? body.ad_type
       : 'image'
 
-    const { data, error } = await supabase
+    // RLS-FIX: adminClient — platform_ads RLS admin-role check breaks for
+    // users where auth.uid() ≠ public.users.id.
+    const { data, error } = await adminClient
       .from('platform_ads')
       .insert({
         zone,

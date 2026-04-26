@@ -1,20 +1,12 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { requireAdminApi } from '@/lib/admin/helpers'
 
 export const dynamic = 'force-dynamic'
 
-async function requireAdmin(supabase: ReturnType<typeof createClient>) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
-  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
-  return { user }
-}
-
 export async function POST(req: Request) {
-  const supabase = createClient()
-  const auth = await requireAdmin(supabase)
-  if ('error' in auth) return auth.error
+  const auth = await requireAdminApi()
+  if (auth instanceof Response) return auth
 
   const body = await req.json() as {
     course_id: string
@@ -30,7 +22,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'course_id, title, and slug are required' }, { status: 400 })
   }
 
-  const { data, error } = await supabase
+  // RLS-FIX: adminClient bypasses the lessons RLS admin-role check that
+  // breaks for users where auth.uid() ≠ public.users.id.
+  const { data, error } = await adminClient
     .from('lessons')
     .insert({
       course_id: body.course_id,

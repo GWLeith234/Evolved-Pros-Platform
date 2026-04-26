@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { requireAdminApi } from '@/lib/admin/helpers'
 import type { Database } from '@evolved-pros/db'
 
 export const dynamic = 'force-dynamic'
@@ -71,19 +73,10 @@ export async function GET(request: Request) {
  * Used by the member detail page's "Send Notification" form.
  */
 export async function POST(request: Request) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  // Verify the caller is an admin
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-  if (profile?.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  // RLS-FIX: requireAdminApi() now email-resolves via adminClient, fixing
+  // the admin gate for users where auth.uid() ≠ public.users.id.
+  const auth = await requireAdminApi()
+  if (auth instanceof Response) return auth
 
   let body: Record<string, unknown>
   try {
@@ -103,7 +96,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'user_id, title, and body are required' }, { status: 422 })
   }
 
-  const { error } = await supabase.from('notifications').insert({
+  // RLS-FIX: adminClient — notifications RLS lets the recipient read their
+  // own row but the admin-broadcast INSERT path fails the same auth.uid()
+  // role check. user_id is the recipient's public.users.id (admin UI passes
+  // it correctly).
+  const { error } = await adminClient.from('notifications').insert({
     user_id,
     type: (type as NotifType) ?? 'system_general',
     title,

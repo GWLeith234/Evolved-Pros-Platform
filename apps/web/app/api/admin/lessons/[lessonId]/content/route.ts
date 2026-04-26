@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { requireAdminApi } from '@/lib/admin/helpers'
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 export async function PATCH(
@@ -18,8 +18,8 @@ export async function PATCH(
     return NextResponse.json({ error: 'content_blocks must be an array' }, { status: 422 })
   }
 
-  const supabase = createClient()
-  const { error } = await supabase
+  // RLS-FIX: adminClient — see lessons/route.ts.
+  const { error } = await adminClient
     .from('lessons')
     .update({ content_blocks: body.content_blocks })
     .eq('id', params.lessonId)
