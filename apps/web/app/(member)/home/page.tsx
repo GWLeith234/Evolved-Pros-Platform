@@ -203,7 +203,7 @@ export default async function MemberHomePage() {
     fetchUnreadCount(supabase, user.id),
     // Use adminClient to bypass RLS — greeting_quotes is a public table but anon key may be blocked
     adminClient.from('greeting_quotes').select('quote_text, source').order('day_number'),
-    supabase.from('member_badges').select('pillar_number').eq('user_id', user.id),
+    supabase.from('member_badges').select('pillar_number, awarded_at').eq('user_id', user.id),
     supabase
       .from('scoreboards')
       .select('id, wig_statement, lead_1_label, lead_1_weekly_target, lead_2_label, lead_2_weekly_target')
@@ -231,6 +231,9 @@ export default async function MemberHomePage() {
   const quotes = quotesResult.data ?? []
   const quote = quotes?.length ? quotes[dayOfYear % quotes.length] : null
   const earnedBadges = badgeData.data?.map(b => b.pillar_number) ?? []
+  const awardedAtByPillar = new Map(
+    (badgeData.data ?? []).map(b => [b.pillar_number, b.awarded_at]),
+  )
   const activeScoreboard = scoreboardResult.data as {
     id: string
     wig_statement: string
@@ -250,7 +253,7 @@ export default async function MemberHomePage() {
   const pillars = ([1, 2, 3, 4, 5, 6] as const).map(n => {
     const name = PILLAR_CONFIG[n].label
     if (earnedSet.has(n)) {
-      return { number: n, name, state: 'earned' as const }
+      return { number: n, name, state: 'earned' as const, earnedAt: awardedAtByPillar.get(n) ?? null }
     }
     if (n <= stats.pillarsUnlocked) {
       return { number: n, name, state: 'in-progress' as const, progressPct: stats.academyProgressPct }
