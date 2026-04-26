@@ -116,6 +116,19 @@
   --filter-rail-bg:           #111926;
   --filter-rail-active-bg:    #1A2332;
   --filter-rail-border:       rgba(255,255,255,0.08);
+
+  /* Events tokens (EVENTS-SPRINT-1). Hero overlay gradient + format chips
+     + RSVP active color. Format colors stay constant across themes —
+     they're brand category accents like reactions. */
+  --events-hero-overlay-from:  rgba(10,15,24,0);
+  --events-hero-overlay-to:    rgba(10,15,24,0.92);
+  --events-hero-pill-bg:       rgba(255,255,255,0.08);
+  --events-hero-pill-border:   rgba(255,255,255,0.16);
+  --events-format-live:        #EF0E30;
+  --events-format-in-person:   #E8B547;
+  --events-format-podcast:     #3FB8E8;
+  --events-format-replay:      #A78BFA;
+  --events-rsvp-active:        #19C9A6;
 }
 
 body {
@@ -215,6 +228,14 @@ html.light-mode {
   --filter-rail-bg:           #FFFFFF;
   --filter-rail-active-bg:    #F5F0E8;
   --filter-rail-border:       rgba(27,42,74,0.10);
+
+  /* Events — light overrides (EVENTS-SPRINT-1). Gradient leans warm-ink
+     so the cinematic hero still reads against parchment surfaces. Format
+     accent colors stay constant across themes. */
+  --events-hero-overlay-from:  rgba(35,28,18,0);
+  --events-hero-overlay-to:    rgba(35,28,18,0.85);
+  --events-hero-pill-bg:       rgba(255,255,255,0.10);
+  --events-hero-pill-border:   rgba(255,255,255,0.20);
 }
 
 /* Page background + body text */
@@ -279,6 +300,12 @@ html, body { overflow-x: hidden; }
 @keyframes skeleton-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+/* EVENTS-SPRINT-1: pulsing red dot for "live now / starting soon" indicator. */
+@keyframes events-live-pulse {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(1.18); }
 }
 
 /* ─── Academy always dark ──────────────────────────────────────────────────
