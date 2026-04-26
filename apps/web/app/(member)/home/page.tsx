@@ -11,6 +11,10 @@ import { ActivityFeed } from '@/components/home/ActivityFeed'
 import { UpcomingEventsWidget } from '@/components/home/UpcomingEventsWidget'
 import { AcademyProgressWidget } from '@/components/home/AcademyProgressWidget'
 import { ProfileCompletePrompt } from '@/components/home/ProfileCompletePrompt'
+import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
+import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStoriesTile'
+import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
+import { DailyPulseTile, type PulseHabit, type PulseCommitment } from '@/components/home/tiles/DailyPulseTile'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
 async function fetchCurrentUser(supabase: ReturnType<typeof createClient>, email: string) {
@@ -181,6 +185,272 @@ function getCurrentMonday(): string {
   return monday.toISOString().split('T')[0]
 }
 
+// HOME-4UP-TILES helpers ────────────────────────────────────────────────
+
+function getInitials(name: string | null | undefined): string {
+  if (!name) return '?'
+  return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+}
+
+function relativeAge(iso: string): string {
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
+  if (diff < 60) return 'now'
+  if (diff < 3600) return `${Math.floor(diff / 60)}m`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h`
+  if (diff < 604_800) return `${Math.floor(diff / 86400)}d`
+  return `${Math.floor(diff / 604_800)}w`
+}
+
+function dayLabelFor(iso: string): string {
+  const d = new Date(iso)
+  const today = new Date()
+  const diffDays = Math.floor((d.getTime() - new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()) / 86_400_000)
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Tmrw'
+  if (diffDays >= 2 && diffDays <= 6) return d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+function formatTimeLabel(iso: string): string {
+  return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })
+}
+
+function pillarColorFromTag(tag: string | null): string | null {
+  if (!tag) return null
+  // pillar can be 'p1'..'p6' (legacy) or '1'..'6' or a name
+  if (tag.startsWith('p')) {
+    const n = parseInt(tag.slice(1), 10)
+    return n in PILLAR_CONFIG ? PILLAR_CONFIG[n as 1 | 2 | 3 | 4 | 5 | 6].color : null
+  }
+  const n = parseInt(tag, 10)
+  if (!Number.isNaN(n) && n in PILLAR_CONFIG) return PILLAR_CONFIG[n as 1 | 2 | 3 | 4 | 5 | 6].color
+  // Match by label (case-insensitive)
+  const lower = tag.toLowerCase()
+  for (const k of [1, 2, 3, 4, 5, 6] as const) {
+    if (PILLAR_CONFIG[k].label.toLowerCase() === lower) return PILLAR_CONFIG[k].color
+  }
+  return null
+}
+
+function readTimeForBody(body: string | null): string {
+  if (!body) return '2 min'
+  const words = body.trim().split(/\s+/).length
+  const minutes = Math.max(1, Math.ceil(words / 220))
+  return `${minutes} min`
+}
+
+function formatDuration(seconds: number | null): string {
+  if (!seconds || seconds <= 0) return '—'
+  const mins = Math.round(seconds / 60)
+  if (mins < 60) return `${mins}m`
+  const h = Math.floor(mins / 60)
+  const m = mins % 60
+  return m === 0 ? `${h}h` : `${h}h ${m}m`
+}
+
+const TILE_PILLAR_ROTATION = [
+  PILLAR_CONFIG[4].color, // strategy blue
+  PILLAR_CONFIG[2].color, // identity violet
+  PILLAR_CONFIG[6].color, // execution teal
+  PILLAR_CONFIG[5].color, // accountability gold
+  PILLAR_CONFIG[1].color, // foundation orange
+  PILLAR_CONFIG[3].color, // mental toughness red
+]
+
+// HOME-4UP-TILES fetchers — adminClient reads (RLS pattern, public ISR
+// rule). Each returns the tile's own prop shape so the page just plumbs.
+
+async function fetchLatestPulsePosts(limit = 3): Promise<PulsePost[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: rows } = await (adminClient as any)
+    .from('posts')
+    .select('id, body, pillar, pillar_tag, like_count, reply_count, created_at, users!posts_author_id_fkey(display_name, full_name, tier)')
+    .eq('is_pinned', false)
+    .order('created_at', { ascending: false })
+    .limit(limit) as { data: Array<{
+      id: string
+      body: string
+      pillar: number | null
+      pillar_tag: string | null
+      like_count: number
+      reply_count: number
+      created_at: string
+      users: { display_name: string | null; full_name: string | null; tier: string | null } | null
+    }> | null }
+
+  return (rows ?? []).map(r => {
+    const name = r.users?.full_name ?? r.users?.display_name ?? 'Member'
+    const pillarColor = r.pillar
+      ? pillarColorFromTag(String(r.pillar))
+      : pillarColorFromTag(r.pillar_tag)
+    return {
+      id: r.id,
+      authorName: name,
+      initials: getInitials(name),
+      tier: r.users?.tier ?? null,
+      pillarColor,
+      age: relativeAge(r.created_at),
+      preview: (r.body ?? '').replace(/\s+/g, ' ').trim().slice(0, 200),
+      reactionCount: r.like_count ?? 0,
+      commentCount: r.reply_count ?? 0,
+    }
+  })
+}
+
+async function fetchPinnedLiveEvent(userId: string | null): Promise<PulseEvent | null> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: row } = await (adminClient as any)
+    .from('events')
+    .select('id, title, format, starts_at, attending_count')
+    .eq('is_published', true)
+    .gt('starts_at', new Date().toISOString())
+    .order('starts_at', { ascending: true })
+    .limit(1)
+    .maybeSingle() as { data: {
+      id: string
+      title: string
+      format: string | null
+      starts_at: string
+      attending_count: number | null
+    } | null }
+  if (!row) return null
+
+  let initiallyRsvpd = false
+  if (userId) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: rsvp } = await (adminClient as any)
+      .from('event_rsvps')
+      .select('user_id')
+      .eq('event_id', row.id)
+      .eq('user_id', userId)
+      .maybeSingle()
+    initiallyRsvpd = Boolean(rsvp)
+  }
+
+  return {
+    id: row.id,
+    title: row.title,
+    dayLabel: dayLabelFor(row.starts_at),
+    timeLabel: formatTimeLabel(row.starts_at),
+    attendingCount: row.attending_count ?? 0,
+    initiallyRsvpd,
+  }
+}
+
+async function fetchTopStories(limit = 3): Promise<PulseStory[]> {
+  const { data: rows } = await adminClient
+    .from('media_stories')
+    .select('id, slug, title, body, pillar, views, is_featured, published_at')
+    .eq('is_published', true)
+    .order('views', { ascending: false, nullsFirst: false })
+    .order('published_at', { ascending: false, nullsFirst: false })
+    .limit(limit)
+
+  return (rows ?? []).map(r => {
+    const pillarColor = pillarColorFromTag(r.pillar)
+    return {
+      id: r.id,
+      slug: r.slug,
+      category: r.pillar ?? 'Story',
+      categoryColor: pillarColor,
+      title: r.title,
+      readTime: readTimeForBody(r.body),
+      isHot: Boolean(r.is_featured) || (r.views ?? 0) >= 500,
+    }
+  })
+}
+
+async function fetchLatestEpisodes(limit = 3): Promise<{ episodes: PulseEpisode[]; latestNumber: number | null }> {
+  const { data: rows } = await adminClient
+    .from('episodes')
+    .select('id, slug, title, episode_number, guest_name, guest_title, guest_company, duration_seconds, is_published, published_at')
+    .eq('is_published', true)
+    .order('published_at', { ascending: false, nullsFirst: false })
+    .limit(limit)
+
+  const sevenDaysAgo = Date.now() - 7 * 86_400_000
+  const eps = (rows ?? []).map((r, i) => ({
+    id: r.id,
+    slug: r.slug,
+    episodeNumber: r.episode_number,
+    title: r.title,
+    guestName: r.guest_name,
+    guestTitle: r.guest_title,
+    guestCompany: r.guest_company,
+    durationLabel: formatDuration(r.duration_seconds),
+    isNew: r.published_at ? new Date(r.published_at).getTime() > sevenDaysAgo : false,
+    accent: TILE_PILLAR_ROTATION[i % TILE_PILLAR_ROTATION.length],
+  }))
+  const latestNumber = eps[0]?.episodeNumber ?? null
+  return { episodes: eps, latestNumber }
+}
+
+async function fetchTodayHabits(userId: string): Promise<PulseHabit[]> {
+  const today = new Date().toISOString().split('T')[0]
+  const sevenDaysAgo = new Date(Date.now() - 7 * 86_400_000).toISOString().split('T')[0]
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: stacks } = await (adminClient as any)
+    .from('habit_stacks')
+    .select('id, name')
+    .eq('user_id', userId)
+    .order('sort_order', { ascending: true })
+    .limit(3) as { data: Array<{ id: string; name: string }> | null }
+  if (!stacks?.length) return []
+
+  const stackIds = stacks.map(s => s.id)
+  const [todayCompletions, recentCompletions] = await Promise.all([
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (adminClient as any)
+      .from('habit_completions')
+      .select('habit_stack_id')
+      .eq('user_id', userId)
+      .eq('completed_on', today)
+      .in('habit_stack_id', stackIds) as Promise<{ data: Array<{ habit_stack_id: string }> | null }>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (adminClient as any)
+      .from('habit_completions')
+      .select('habit_stack_id, completed_on')
+      .eq('user_id', userId)
+      .gte('completed_on', sevenDaysAgo)
+      .in('habit_stack_id', stackIds) as Promise<{ data: Array<{ habit_stack_id: string; completed_on: string }> | null }>,
+  ])
+
+  const doneTodaySet = new Set((todayCompletions.data ?? []).map(c => c.habit_stack_id))
+  // Approximate streak: count distinct days in the last 7 with a completion for that stack.
+  const streakByStack = new Map<string, Set<string>>()
+  for (const c of recentCompletions.data ?? []) {
+    if (!streakByStack.has(c.habit_stack_id)) streakByStack.set(c.habit_stack_id, new Set())
+    streakByStack.get(c.habit_stack_id)!.add(c.completed_on)
+  }
+
+  return stacks.map((s, i) => ({
+    id: s.id,
+    label: s.name,
+    pillarColor: TILE_PILLAR_ROTATION[i % TILE_PILLAR_ROTATION.length],
+    streakDays: streakByStack.get(s.id)?.size ?? 0,
+    doneToday: doneTodaySet.has(s.id),
+  }))
+}
+
+async function fetchTodayCommitments(userId: string): Promise<PulseCommitment[]> {
+  const monday = getCurrentMonday()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: rows } = await (adminClient as any)
+    .from('weekly_commitments')
+    .select('id, commitment, is_completed')
+    .eq('user_id', userId)
+    .eq('week_start', monday)
+    .order('created_at', { ascending: true })
+    .limit(3) as { data: Array<{ id: string; commitment: string; is_completed: boolean }> | null }
+
+  return (rows ?? []).map(r => ({
+    id: r.id,
+    text: r.commitment,
+    doneToday: r.is_completed,
+  }))
+}
+
 export default async function MemberHomePage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -195,7 +465,25 @@ export default async function MemberHomePage() {
 
   const today = new Date().toISOString().split('T')[0]
 
-  const [stats, activity, events, courseProgress, unreadCount, quotesResult, badgeData, scoreboardResult, habitsResult, habitCompletionsResult] = await Promise.all([
+  const [
+    stats,
+    activity,
+    events,
+    courseProgress,
+    unreadCount,
+    quotesResult,
+    badgeData,
+    scoreboardResult,
+    habitsResult,
+    habitCompletionsResult,
+    // HOME-4UP-TILES fetchers
+    pulsePosts,
+    pinnedLiveEvent,
+    topStories,
+    latestEpisodesResult,
+    todayPulseHabits,
+    todayPulseCommitments,
+  ] = await Promise.all([
     fetchDashboardStats(supabase, user.id, profile.tier, profile.points),
     fetchRecentActivity(profile.id),
     fetchUpcomingEvents(supabase, user.id),
@@ -226,6 +514,12 @@ export default async function MemberHomePage() {
       .select('habit_stack_id')
       .eq('user_id', profile.id)
       .eq('completed_on', today),
+    fetchLatestPulsePosts(3),
+    fetchPinnedLiveEvent(profile.id),
+    fetchTopStories(3),
+    fetchLatestEpisodes(3),
+    fetchTodayHabits(profile.id),
+    fetchTodayCommitments(profile.id),
   ])
 
   const quotes = quotesResult.data ?? []
@@ -276,6 +570,24 @@ export default async function MemberHomePage() {
         }}
         pillars={pillars}
       />
+
+      {/* HOME-4UP-TILES: Community Pulse / Top Stories / Latest Drops / Daily Pulse */}
+      <div
+        className="home-4up-grid"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 16,
+          width: '100%',
+          maxWidth: 1440,
+          margin: '0 auto',
+        }}
+      >
+        <CommunityPulseTile posts={pulsePosts} pinnedEvent={pinnedLiveEvent} />
+        <TopStoriesTile stories={topStories} />
+        <PodcastReelTile episodes={latestEpisodesResult.episodes} latestEpisodeNumber={latestEpisodesResult.latestNumber} />
+        <DailyPulseTile habits={todayPulseHabits} commitments={todayPulseCommitments} />
+      </div>
 
       <ProfileCompletePrompt
         hasAvatar={Boolean(profile.avatar_url)}
