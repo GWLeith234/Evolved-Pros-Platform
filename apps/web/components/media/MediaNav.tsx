@@ -10,13 +10,10 @@ const NAV_ITEMS = [
   { label: 'Academy', href: '/media/academy' },
   { label: 'Podcast', href: '/media/podcast' },
   { label: 'Events', href: '/media/events' },
-  { label: 'Marketing', href: '/media/marketing' },
-  { label: 'AdTech', href: '/media/adtech' },
   { label: 'AI Trends', href: '/media/ai-trends' },
   { label: 'Wellness', href: '/media/wellness' },
   { label: 'Leadership', href: '/media/leadership' },
   { label: 'Careers', href: '/media/careers' },
-  { label: 'Lifestyle', href: '/media/lifestyle' },
 ]
 
 export function MediaNav() {
