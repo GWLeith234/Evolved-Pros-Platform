@@ -22,7 +22,7 @@ export default async function CommunityPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [profile, channels, postsResult, pinnedPost, leaderboard, activeMembers, ads, episode, coursesRes, scoreboardRes, eventRes] = await Promise.all([
+  const [profile, channels, postsResult, pinnedPost, leaderboard, activeMembers, ads, episode, coursesRes, eventRes] = await Promise.all([
     fetchCurrentUserProfile(supabase, user.id),
     fetchChannels(supabase),
     fetchAllPosts(supabase, { userId: user.id }),
@@ -36,15 +36,6 @@ export default async function CommunityPage() {
       .from('courses')
       .select('id, pillar_number, title')
       .order('pillar_number'),
-    // User's active scoreboard
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
-      .from('scoreboards')
-      .select('wig_statement, lead1_label, lead1_target, lead1_count')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .limit(1)
-      .maybeSingle(),
     // Next upcoming event
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any)
@@ -89,15 +80,6 @@ export default async function CommunityPage() {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const scoreboardData = (scoreboardRes.data as any) ?? null
-  const scoreboard = scoreboardData ? {
-    wigStatement: scoreboardData.wig_statement ?? null,
-    lead1Label: scoreboardData.lead1_label ?? null,
-    lead1Target: scoreboardData.lead1_target ?? null,
-    lead1Count: scoreboardData.lead1_count ?? null,
-  } : null
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const eventData = (eventRes.data as any) ?? null
   const nextEvent = eventData ? {
     title: eventData.title,
@@ -138,7 +120,6 @@ export default async function CommunityPage() {
       dashboardProps={{
         pillarProgress,
         episode: episodeSummary,
-        scoreboard,
         nextEvent,
         userRank,
         nextRankEntry,

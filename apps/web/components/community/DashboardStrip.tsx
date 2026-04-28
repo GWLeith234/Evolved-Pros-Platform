@@ -4,7 +4,6 @@ import Link from 'next/link'
 
 const BLUE   = '#60A5FA'
 const PURPLE = '#A78BFA'
-const GOLD   = '#C9A84C'
 const RED    = '#ef0e30'
 const CTA    = '#0ABFA3'
 
@@ -22,7 +21,6 @@ function formatDuration(seconds: number | null): string {
 export interface DashboardStripProps {
   pillarProgress: { pillar: string; label: string; pct: number } | null
   episode: { title: string; guestName: string | null; durationSeconds: number | null } | null
-  scoreboard: { wigStatement: string | null; lead1Label: string | null; lead1Target: number | null; lead1Count?: number | null } | null
   nextEvent: { title: string; startsAt: string } | null
   userRank: number | null
   nextRankEntry: { displayName: string; points: number } | null
@@ -95,7 +93,7 @@ const CTA_STYLE: React.CSSProperties = {
   lineHeight: 1,
 }
 
-export function DashboardStrip({ pillarProgress, episode, scoreboard, nextEvent, userRank, nextRankEntry, userPoints }: DashboardStripProps) {
+export function DashboardStrip({ pillarProgress, episode, nextEvent, userRank, nextRankEntry, userPoints }: DashboardStripProps) {
   const myPoints = userPoints
   const ahead = nextRankEntry && nextRankEntry.points > myPoints ? nextRankEntry : null
   const behind = nextRankEntry && nextRankEntry.points <= myPoints ? nextRankEntry : null
@@ -148,55 +146,6 @@ export function DashboardStrip({ pillarProgress, episode, scoreboard, nextEvent,
             <p style={{ ...CTA_STYLE, color: CTA }}>▶ Watch now →</p>
           </Link>
         )}
-
-        {/* Card 3 — Scoreboard */}
-        {(() => {
-          const TEAL = '#0ABFA3'
-          if (!scoreboard?.wigStatement) {
-            return (
-              <Link href="/academy/accountability" style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #1e1a08, #160f00)', border: '1px solid rgba(201,168,76,.3)' }}>
-                <p style={{ ...LABEL_STYLE, color: GOLD }}>📊 Scoreboard</p>
-                <p style={HEADLINE_STYLE}>Track your WIG (your #1 goal)</p>
-                <p style={SUB_STYLE}>No scoreboard set up yet</p>
-                <p style={{ ...CTA_STYLE, color: CTA }}>Set up Scoreboard →</p>
-              </Link>
-            )
-          }
-          const label = scoreboard.lead1Label ?? 'Lead measure'
-          const target = scoreboard.lead1Target ?? 0
-          const count = scoreboard.lead1Count ?? null
-          const short = count !== null && target > 0 ? target - count : null
-          const onTrack = short !== null && short <= 0
-          const barColor = onTrack ? TEAL : GOLD
-          const barPct = count !== null && target > 0 ? Math.min(Math.round((count / target) * 100), 100) : 0
-          const borderCol = onTrack ? 'rgba(10,191,163,.3)' : 'rgba(201,168,76,.3)'
-          return (
-            <Link href="/academy/accountability" style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #1e1a08, #160f00)', border: `1px solid ${borderCol}` }}>
-              <p style={{ ...LABEL_STYLE, color: onTrack ? TEAL : GOLD }}>📊 Scoreboard</p>
-              {onTrack ? (
-                <>
-                  <p style={HEADLINE_STYLE}>Lead measure hit ✓</p>
-                  <p style={SUB_STYLE}>{count}/{target} {label} · On track</p>
-                  <ProgressBar pct={100} color={TEAL} />
-                  <p style={{ ...CTA_STYLE, color: CTA }}>View scoreboard →</p>
-                </>
-              ) : short !== null ? (
-                <>
-                  <p style={HEADLINE_STYLE}>{short} {label} short</p>
-                  <p style={SUB_STYLE}>{count}/{target} {label} · WIG at risk</p>
-                  <ProgressBar pct={barPct} color={barColor} />
-                  <p style={{ ...CTA_STYLE, color: CTA }}>Log now →</p>
-                </>
-              ) : (
-                <>
-                  <p style={HEADLINE_STYLE}>{label}</p>
-                  <p style={SUB_STYLE}>Target: {target}/wk</p>
-                  <p style={{ ...CTA_STYLE, color: CTA }}>Log now →</p>
-                </>
-              )}
-            </Link>
-          )
-        })()}
 
         {/* Card 4 — Events (conditional) */}
         {nextEvent && (() => {

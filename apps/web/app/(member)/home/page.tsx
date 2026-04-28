@@ -5,7 +5,6 @@ import { redirect } from 'next/navigation'
 import { CommitmentTracker } from '@/components/academy/CommitmentTracker'
 
 export const metadata: Metadata = { title: 'Home — Evolved Pros' }
-import { HabitWidget } from '@/components/home/HabitWidget'
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
 import { ActivityFeed } from '@/components/home/ActivityFeed'
 import { UpcomingEventsWidget } from '@/components/home/UpcomingEventsWidget'
@@ -14,7 +13,6 @@ import { ProfileCompletePrompt } from '@/components/home/ProfileCompletePrompt'
 import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
 import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStoriesTile'
 import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
-import { DailyPulseTile, type PulseHabit, type PulseCommitment } from '@/components/home/tiles/DailyPulseTile'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { hasTierAccess } from '@/lib/tier'
 
@@ -386,72 +384,6 @@ async function fetchLatestEpisodes(limit = 3): Promise<{ episodes: PulseEpisode[
   return { episodes: eps, latestNumber }
 }
 
-async function fetchTodayHabits(userId: string): Promise<PulseHabit[]> {
-  const today = new Date().toISOString().split('T')[0]
-  const sevenDaysAgo = new Date(Date.now() - 7 * 86_400_000).toISOString().split('T')[0]
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: stacks } = await (adminClient as any)
-    .from('habit_stacks')
-    .select('id, name')
-    .eq('user_id', userId)
-    .order('sort_order', { ascending: true })
-    .limit(3) as { data: Array<{ id: string; name: string }> | null }
-  if (!stacks?.length) return []
-
-  const stackIds = stacks.map(s => s.id)
-  const [todayCompletions, recentCompletions] = await Promise.all([
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (adminClient as any)
-      .from('habit_completions')
-      .select('habit_stack_id')
-      .eq('user_id', userId)
-      .eq('completed_on', today)
-      .in('habit_stack_id', stackIds) as Promise<{ data: Array<{ habit_stack_id: string }> | null }>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (adminClient as any)
-      .from('habit_completions')
-      .select('habit_stack_id, completed_on')
-      .eq('user_id', userId)
-      .gte('completed_on', sevenDaysAgo)
-      .in('habit_stack_id', stackIds) as Promise<{ data: Array<{ habit_stack_id: string; completed_on: string }> | null }>,
-  ])
-
-  const doneTodaySet = new Set((todayCompletions.data ?? []).map(c => c.habit_stack_id))
-  // Approximate streak: count distinct days in the last 7 with a completion for that stack.
-  const streakByStack = new Map<string, Set<string>>()
-  for (const c of recentCompletions.data ?? []) {
-    if (!streakByStack.has(c.habit_stack_id)) streakByStack.set(c.habit_stack_id, new Set())
-    streakByStack.get(c.habit_stack_id)!.add(c.completed_on)
-  }
-
-  return stacks.map((s, i) => ({
-    id: s.id,
-    label: s.name,
-    pillarColor: TILE_PILLAR_ROTATION[i % TILE_PILLAR_ROTATION.length],
-    streakDays: streakByStack.get(s.id)?.size ?? 0,
-    doneToday: doneTodaySet.has(s.id),
-  }))
-}
-
-async function fetchTodayCommitments(userId: string): Promise<PulseCommitment[]> {
-  const monday = getCurrentMonday()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: rows } = await (adminClient as any)
-    .from('weekly_commitments')
-    .select('id, commitment, is_completed')
-    .eq('user_id', userId)
-    .eq('week_start', monday)
-    .order('created_at', { ascending: true })
-    .limit(3) as { data: Array<{ id: string; commitment: string; is_completed: boolean }> | null }
-
-  return (rows ?? []).map(r => ({
-    id: r.id,
-    text: r.commitment,
-    doneToday: r.is_completed,
-  }))
-}
-
 export default async function MemberHomePage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -464,8 +396,6 @@ export default async function MemberHomePage() {
     (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
   )
 
-  const today = new Date().toISOString().split('T')[0]
-
   const [
     stats,
     activity,
@@ -474,16 +404,11 @@ export default async function MemberHomePage() {
     unreadCount,
     quotesResult,
     badgeData,
-    scoreboardResult,
-    habitsResult,
-    habitCompletionsResult,
     // HOME-4UP-TILES fetchers
     pulsePosts,
     pinnedLiveEvent,
     topStories,
     latestEpisodesResult,
-    todayPulseHabits,
-    todayPulseCommitments,
   ] = await Promise.all([
     fetchDashboardStats(supabase, user.id, profile.tier, profile.points),
     fetchRecentActivity(profile.id),
@@ -493,34 +418,10 @@ export default async function MemberHomePage() {
     // Use adminClient to bypass RLS — greeting_quotes is a public table but anon key may be blocked
     adminClient.from('greeting_quotes').select('quote_text, source').order('day_number'),
     supabase.from('member_badges').select('pillar_number, awarded_at').eq('user_id', user.id),
-    supabase
-      .from('scoreboards')
-      .select('id, wig_statement, lead_1_label, lead_1_weekly_target, lead_2_label, lead_2_weekly_target')
-      .eq('user_id', user.id)
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-    // Habit stack — adminClient bypasses RLS; profile.id is the public UUID
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (adminClient as any)
-      .from('habit_stacks')
-      .select('id, name, time_of_day, sort_order')
-      .eq('user_id', profile.id)
-      .order('sort_order')
-      .limit(7),
-    // Today's habit completions
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (adminClient as any)
-      .from('habit_completions')
-      .select('habit_stack_id')
-      .eq('user_id', profile.id)
-      .eq('completed_on', today),
     fetchLatestPulsePosts(3),
     fetchPinnedLiveEvent(profile.id),
     fetchTopStories(3),
     fetchLatestEpisodes(3),
-    fetchTodayHabits(profile.id),
-    fetchTodayCommitments(profile.id),
   ])
 
   const quotes = quotesResult.data ?? []
@@ -529,17 +430,6 @@ export default async function MemberHomePage() {
   const awardedAtByPillar = new Map(
     (badgeData.data ?? []).map(b => [b.pillar_number, b.awarded_at]),
   )
-  const activeScoreboard = scoreboardResult.data as {
-    id: string
-    wig_statement: string
-    lead_1_label: string
-    lead_1_weekly_target: number
-    lead_2_label: string
-    lead_2_weekly_target: number
-  } | null
-
-  const homeHabits = (habitsResult.data ?? []) as { id: string; name: string; time_of_day: string }[]
-  const homeCompletedIds = ((habitCompletionsResult.data ?? []) as { habit_stack_id: string }[]).map(c => c.habit_stack_id)
 
   const displayName = (profile.full_name ? profile.full_name.split(' ')[0] : null) ?? profile.display_name ?? 'Member'
   const upcomingEventCount = events.filter(e => !e.isRegistered).length
@@ -587,7 +477,6 @@ export default async function MemberHomePage() {
         <CommunityPulseTile posts={pulsePosts} pinnedEvent={pinnedLiveEvent} />
         <TopStoriesTile stories={topStories} />
         <PodcastReelTile episodes={latestEpisodesResult.episodes} latestEpisodeNumber={latestEpisodesResult.latestNumber} />
-        <DailyPulseTile habits={todayPulseHabits} commitments={todayPulseCommitments} />
       </div>
 
       <ProfileCompletePrompt
@@ -606,60 +495,8 @@ export default async function MemberHomePage() {
         <div className="space-y-5">
           <UpcomingEventsWidget events={events} userId={user.id} />
           <AcademyProgressWidget courses={courseProgress} />
-          {/* Habit stack widget */}
-          <HabitWidget initialHabits={homeHabits} initialCompletions={homeCompletedIds} />
           {/* CommitmentTracker widget — weekly commitments from the Academy */}
           <CommitmentTracker weekStart={getCurrentMonday()} />
-          {/* Scoreboard widget */}
-          {activeScoreboard ? (
-            <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: '8px', overflow: 'hidden' }}>
-              <div style={{ height: '2px', backgroundColor: '#C9A84C' }} />
-              <div style={{ padding: '16px 18px' }}>
-                <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C9A84C', margin: '0 0 8px' }}>
-                  Scoreboard
-                </p>
-                <p style={{ color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600, lineHeight: 1.45, margin: '0 0 12px', fontStyle: 'italic' }}>
-                  &ldquo;{activeScoreboard.wig_statement.length > 90
-                    ? activeScoreboard.wig_statement.slice(0, 90) + '…'
-                    : activeScoreboard.wig_statement}&rdquo;
-                </p>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  {[
-                    { label: activeScoreboard.lead_1_label, target: activeScoreboard.lead_1_weekly_target },
-                    { label: activeScoreboard.lead_2_label, target: activeScoreboard.lead_2_weekly_target },
-                  ].filter(m => m.label).map((m, i) => (
-                    <div key={i} style={{ flex: 1, backgroundColor: 'var(--bg-elevated)', border: '1px solid rgba(201,168,76,0.15)', borderRadius: '4px', padding: '8px 10px' }}>
-                      <p style={{ color: 'var(--text-tertiary)', fontSize: '10px', margin: '0 0 2px', lineHeight: 1.3 }}>{m.label}</p>
-                      <p style={{ color: '#C9A84C', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '13px', margin: 0 }}>
-                        target: {m.target}/wk
-                      </p>
-                    </div>
-                  ))}
-                </div>
-                <a
-                  href="/academy/accountability"
-                  style={{ display: 'inline-block', marginTop: '12px', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.6)', textDecoration: 'none' }}
-                >
-                  Update scoreboard →
-                </a>
-              </div>
-            </div>
-          ) : (
-            <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid rgba(201,168,76,0.15)', borderRadius: '8px', padding: '16px 18px' }}>
-              <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.5)', margin: '0 0 6px' }}>
-                Scoreboard
-              </p>
-              <p style={{ color: 'var(--text-tertiary)', fontSize: '13px', margin: '0 0 10px', lineHeight: 1.5 }}>
-                Track your WIG and lead measures weekly.
-              </p>
-              <a
-                href="/academy/accountability"
-                style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#C9A84C', textDecoration: 'none' }}
-              >
-                Set up your Scoreboard →
-              </a>
-            </div>
-          )}
         </div>
       </div>
     </div>
