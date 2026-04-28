@@ -258,17 +258,6 @@ export function TopNav({
                 }}
               >
                 {item.label}
-                {item.highlight && (
-                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                    <path
-                      d="M3 9 L9 3 M5 3 H9 V7"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                )}
               </Link>
             )
           })}
