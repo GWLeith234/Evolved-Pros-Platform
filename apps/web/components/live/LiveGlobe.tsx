@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef } from 'react'
 import { SPEAKING_PINS, SPEAKING_STATS, type SpeakingPin } from '@/lib/live/speaking-pins'
+import { COASTLINES } from '@/lib/live/globe-coastlines'
 
 const FBC = 'Barlow Condensed, sans-serif'
 const FBN = 'Bebas Neue, sans-serif'
@@ -13,15 +14,27 @@ const CY = VB / 2
 const R = VB * 0.42
 const ROTATION_DEG_PER_SEC = 12
 
-interface ProjectedPin {
+// Pin appearance per featured-state
+const PIN_CORE_R = 3.2
+const PIN_CORE_R_FEATURED = 4.5
+const PIN_HALO_R = 14
+const PIN_HALO_R_FEATURED = 18
+const PIN_HALO_OPACITY = 0.55
+const PIN_HALO_OPACITY_FEATURED = 0.85
+const COAST_STROKE = 'rgba(96,165,250,0.55)'
+const COAST_STROKE_WIDTH = 1.1
+
+interface PinSphereData {
   pin: SpeakingPin
-  baseX: number   // x at lon0 = 0 (precomputed once)
-  baseY: number   // y at lon0 = 0
-  baseZ: number   // visibility component at lon0 = 0
-  // Spherical coords for runtime rotation
   cosPhi: number
   sinPhi: number
   lonRad: number
+}
+
+interface CoastlineSphereData {
+  // Per-point precomputed sphere data, so per-frame we only do
+  // (lon - lon0) trig and one screen-space mapping.
+  points: ReadonlyArray<{ cosPhi: number; sinPhi: number; lonRad: number }>
 }
 
 // Orthographic projection: sphere centered at origin, viewer at +Z.
@@ -38,14 +51,42 @@ function project(latDeg: number, lonDeg: number, lon0Deg: number) {
   }
 }
 
+// Build an SVG path d-string for one polyline. Where consecutive points
+// straddle the visible/hidden boundary (z crosses 0), we drop the segment
+// and start a new sub-path with M instead of drawing across the back of
+// the globe. Simpler than rim-arc clipping; produces stroke-only outlines.
+function buildPathD(points: ReadonlyArray<{ cosPhi: number; sinPhi: number; lonRad: number }>, lon0Rad: number): string {
+  let d = ''
+  let inSubpath = false
+  for (let i = 0; i < points.length; i++) {
+    const p = points[i]
+    const lam = p.lonRad - lon0Rad
+    const cosLam = Math.cos(lam)
+    const sinLam = Math.sin(lam)
+    const z = p.cosPhi * cosLam
+    if (z >= 0) {
+      const x = CX + p.cosPhi * sinLam * R
+      const y = CY - p.sinPhi * R
+      if (!inSubpath) {
+        d += `M${x.toFixed(1)} ${y.toFixed(1)}`
+        inSubpath = true
+      } else {
+        d += `L${x.toFixed(1)} ${y.toFixed(1)}`
+      }
+    } else {
+      inSubpath = false
+    }
+  }
+  return d
+}
+
 export function LiveGlobe() {
   // Per-pin precomputed sphere data — never changes between renders.
-  const pinData = useMemo<ProjectedPin[]>(() => {
+  const pinData = useMemo<PinSphereData[]>(() => {
     return SPEAKING_PINS.map(pin => {
       const phi = (pin.lat * Math.PI) / 180
       return {
         pin,
-        baseX: 0, baseY: 0, baseZ: 0,
         cosPhi: Math.cos(phi),
         sinPhi: Math.sin(phi),
         lonRad: (pin.lon * Math.PI) / 180,
@@ -53,11 +94,27 @@ export function LiveGlobe() {
     })
   }, [])
 
+  // Per-coastline precomputed sphere data.
+  const coastlineData = useMemo<CoastlineSphereData[]>(() => {
+    return COASTLINES.map(line => ({
+      points: line.map(([lat, lon]) => {
+        const phi = (lat * Math.PI) / 180
+        return {
+          cosPhi: Math.cos(phi),
+          sinPhi: Math.sin(phi),
+          lonRad: (lon * Math.PI) / 180,
+        }
+      }),
+    }))
+  }, [])
+
   // Refs for direct DOM mutation (no React re-renders per frame)
   const rafRef = useRef<number | null>(null)
   const lastTimeRef = useRef<number>(0)
   const lon0Ref = useRef<number>(-30)
-  const pinRefs = useRef<Array<SVGCircleElement | null>>([])
+  const pinCoreRefs = useRef<Array<SVGCircleElement | null>>([])
+  const pinHaloRefs = useRef<Array<SVGCircleElement | null>>([])
+  const coastPathRefs = useRef<Array<SVGPathElement | null>>([])
 
   useEffect(() => {
     const tick = (t: number) => {
@@ -66,9 +123,11 @@ export function LiveGlobe() {
       lon0Ref.current = (lon0Ref.current + dt * ROTATION_DEG_PER_SEC) % 360
       const lon0Rad = (lon0Ref.current * Math.PI) / 180
 
+      // Pins — update both core and halo positions/opacity
       for (let i = 0; i < pinData.length; i++) {
-        const el = pinRefs.current[i]
-        if (!el) continue
+        const core = pinCoreRefs.current[i]
+        const halo = pinHaloRefs.current[i]
+        if (!core && !halo) continue
         const d = pinData[i]
         const lam = d.lonRad - lon0Rad
         const cosLam = Math.cos(lam)
@@ -77,12 +136,30 @@ export function LiveGlobe() {
         if (z >= 0) {
           const x = CX + d.cosPhi * sinLam * R
           const y = CY - d.sinPhi * R
-          el.setAttribute('cx', String(x))
-          el.setAttribute('cy', String(y))
-          el.setAttribute('opacity', '1')
+          if (core) {
+            core.setAttribute('cx', String(x))
+            core.setAttribute('cy', String(y))
+            core.setAttribute('opacity', '1')
+          }
+          if (halo) {
+            halo.setAttribute('cx', String(x))
+            halo.setAttribute('cy', String(y))
+            halo.setAttribute(
+              'opacity',
+              String(d.pin.featured ? PIN_HALO_OPACITY_FEATURED : PIN_HALO_OPACITY),
+            )
+          }
         } else {
-          el.setAttribute('opacity', '0')
+          if (core) core.setAttribute('opacity', '0')
+          if (halo) halo.setAttribute('opacity', '0')
         }
+      }
+
+      // Coastlines — rebuild d-string per frame and write via setAttribute
+      for (let i = 0; i < coastlineData.length; i++) {
+        const path = coastPathRefs.current[i]
+        if (!path) continue
+        path.setAttribute('d', buildPathD(coastlineData[i].points, lon0Rad))
       }
 
       rafRef.current = requestAnimationFrame(tick)
@@ -91,10 +168,10 @@ export function LiveGlobe() {
     return () => {
       if (rafRef.current != null) cancelAnimationFrame(rafRef.current)
     }
-  }, [pinData])
+  }, [pinData, coastlineData])
 
   // Initial-frame projection so SSR / first paint shows pins in place.
-  const initialPositions = useMemo(() => {
+  const initialPinPositions = useMemo(() => {
     return SPEAKING_PINS.map(pin => {
       const p = project(pin.lat, pin.lon, -30)
       return {
@@ -104,6 +181,12 @@ export function LiveGlobe() {
       }
     })
   }, [])
+
+  // Initial coastline d-strings for first paint (lon0 = -30).
+  const initialCoastlinePaths = useMemo(() => {
+    const lon0Rad = (-30 * Math.PI) / 180
+    return coastlineData.map(c => buildPathD(c.points, lon0Rad))
+  }, [coastlineData])
 
   return (
     <div
@@ -144,6 +227,16 @@ export function LiveGlobe() {
             <stop offset="0%" stopColor="rgba(255,255,255,0.18)" />
             <stop offset="100%" stopColor="rgba(255,255,255,0)" />
           </radialGradient>
+          <radialGradient id="livePinGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="rgba(232,181,71,1)" />
+            <stop offset="40%" stopColor="rgba(232,181,71,0.6)" />
+            <stop offset="100%" stopColor="rgba(232,181,71,0)" />
+          </radialGradient>
+          <radialGradient id="livePinGlowRed" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="rgba(255,120,140,1)" />
+            <stop offset="35%" stopColor="rgba(239,14,48,0.85)" />
+            <stop offset="100%" stopColor="rgba(239,14,48,0)" />
+          </radialGradient>
         </defs>
 
         {/* Atmosphere halo */}
@@ -152,24 +245,65 @@ export function LiveGlobe() {
         {/* Sphere base */}
         <circle cx={CX} cy={CY} r={R} fill="url(#liveSphereGrad)" />
 
-        {/* Specular highlight */}
+        {/* Coastlines — d attribute mutated per frame via RAF */}
+        <g pointerEvents="none">
+          {coastlineData.map((_c, i) => (
+            <path
+              key={`coast-${i}`}
+              ref={(el: SVGPathElement | null) => {
+                coastPathRefs.current[i] = el
+              }}
+              d={initialCoastlinePaths[i]}
+              fill="none"
+              stroke={COAST_STROKE}
+              strokeWidth={COAST_STROKE_WIDTH}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+          ))}
+        </g>
+
+        {/* Specular highlight — drawn over coastlines, under pins */}
         <circle cx={CX} cy={CY} r={R} fill="url(#liveSpecGrad)" pointerEvents="none" />
 
-        {/* Pins — refs let RAF mutate cx/cy/opacity directly without React re-renders */}
+        {/* Pin halos — separate group so they sit beneath cores */}
+        <g pointerEvents="none">
+          {SPEAKING_PINS.map((pin, i) => (
+            <circle
+              key={`halo-${pin.city}-${pin.country}-${i}`}
+              ref={(el: SVGCircleElement | null) => {
+                pinHaloRefs.current[i] = el
+              }}
+              cx={initialPinPositions[i].x}
+              cy={initialPinPositions[i].y}
+              r={pin.featured ? PIN_HALO_R_FEATURED : PIN_HALO_R}
+              fill={pin.featured ? 'url(#livePinGlowRed)' : 'url(#livePinGlow)'}
+              opacity={
+                initialPinPositions[i].visible
+                  ? pin.featured
+                    ? PIN_HALO_OPACITY_FEATURED
+                    : PIN_HALO_OPACITY
+                  : 0
+              }
+            />
+          ))}
+        </g>
+
+        {/* Pin cores */}
         <g>
           {SPEAKING_PINS.map((pin, i) => (
             <circle
-              key={`${pin.city}-${pin.country}-${i}`}
+              key={`core-${pin.city}-${pin.country}-${i}`}
               ref={(el: SVGCircleElement | null) => {
-                pinRefs.current[i] = el
+                pinCoreRefs.current[i] = el
               }}
-              cx={initialPositions[i].x}
-              cy={initialPositions[i].y}
-              r={3.2}
-              fill="#C9A84C"
+              cx={initialPinPositions[i].x}
+              cy={initialPinPositions[i].y}
+              r={pin.featured ? PIN_CORE_R_FEATURED : PIN_CORE_R}
+              fill={pin.featured ? '#ef0e30' : '#C9A84C'}
               stroke="rgba(10,15,24,0.9)"
               strokeWidth={0.8}
-              opacity={initialPositions[i].visible ? 1 : 0}
+              opacity={initialPinPositions[i].visible ? 1 : 0}
             />
           ))}
         </g>
