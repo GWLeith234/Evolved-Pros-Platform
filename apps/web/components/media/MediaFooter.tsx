@@ -54,8 +54,8 @@ const NETWORK_LINKS = [
 ]
 
 const ABOUT_LINKS = [
-  { label: 'About George Leith', href: '/about' },
-  { label: 'The EVOLVED Framework', href: '/about#framework' },
+  { label: 'About George Leith', href: '/live' },
+  { label: 'The EVOLVED Framework', href: '/academy' },
   { label: 'Advertise with us', href: 'mailto:geoleith@gmail.com' },
 ]
 
@@ -111,7 +111,7 @@ export function MediaFooter() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <Link href="/about" style={{ fontFamily: FC, fontWeight: 600, fontSize: 12, color: 'rgba(255,255,255,0.65)', border: '1.5px solid rgba(255,255,255,0.2)', padding: '8px 18px', borderRadius: 3, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <Link href="/live" style={{ fontFamily: FC, fontWeight: 600, fontSize: 12, color: 'rgba(255,255,255,0.65)', border: '1.5px solid rgba(255,255,255,0.2)', padding: '8px 18px', borderRadius: 3, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Learn more
           </Link>
           <Link href="/pricing" style={{ fontFamily: FC, fontWeight: 700, fontSize: 12, color: '#fff', backgroundColor: '#C9302A', padding: '8px 18px', borderRadius: 3, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em', border: '1.5px solid #C9302A' }}>
