@@ -352,6 +352,25 @@ html.light-mode main:has([data-academy-page]) {
 }
 
 /* ─────────────────────────────────────────────────────────────────
+   Shared design-system tokens used by editorial pages (/live, etc).
+   /live is navy-only (no theme toggle) so these values are constant.
+   Canonical names per the design handoff colors_and_type.css.
+   ───────────────────────────────────────────────────────────────── */
+:root {
+  --text-strong:   #fff;
+  --text-1:        rgba(255,255,255,0.85);
+  --text-2:        rgba(255,255,255,0.65);
+  --text-3:        rgba(255,255,255,0.55);
+  --text-4:        rgba(255,255,255,0.45);
+  --text-5:        rgba(255,255,255,0.35);
+  --border-soft:   rgba(255,255,255,0.05);
+  --border-soft2:  rgba(255,255,255,0.08);
+  --border-med:    rgba(255,255,255,0.10);
+  --border-med2:   rgba(255,255,255,0.12);
+  --border-strong: rgba(255,255,255,0.15);
+}
+
+/* ─────────────────────────────────────────────────────────────────
    Podcast redesign tokens (DESIGN-REF-PODCAST)
    Scoped to data-theme + page wrapper so they don't leak into other
    pages. Navy is default; body[data-theme="light"] flips parchment.
