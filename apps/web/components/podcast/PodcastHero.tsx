@@ -98,7 +98,7 @@ export function PodcastHero({ episode, shareUrl }: PodcastHeroProps) {
       <section
         style={{
           maxWidth: 1280,
-          margin: '-72px auto 0',
+          margin: '0 auto',
           padding: '0 24px',
           position: 'relative',
           zIndex: 2,
