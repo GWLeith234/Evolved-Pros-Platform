@@ -350,3 +350,44 @@ html.light-mode main:has([data-academy-page]) {
   color: #ffffff !important;
   min-height: 100%;
 }
+
+/* ─────────────────────────────────────────────────────────────────
+   Podcast redesign tokens (DESIGN-REF-PODCAST)
+   Scoped to data-theme + page wrapper so they don't leak into other
+   pages. Navy is default; body[data-theme="light"] flips parchment.
+   ───────────────────────────────────────────────────────────────── */
+:root {
+  --podcast-text-strong:  #fff;
+  --podcast-text-1:       rgba(255,255,255,0.85);
+  --podcast-text-2:       rgba(255,255,255,0.65);
+  --podcast-text-3:       rgba(255,255,255,0.55);
+  --podcast-text-4:       rgba(255,255,255,0.45);
+  --podcast-text-5:       rgba(255,255,255,0.35);
+  --podcast-text-6:       rgba(255,255,255,0.25);
+  --podcast-bg-page:      #0A0F18;
+  --podcast-bg-surface:   #111926;
+  --podcast-bg-elevated:  #1A2332;
+  --podcast-border-soft:   rgba(255,255,255,0.05);
+  --podcast-border-soft2:  rgba(255,255,255,0.08);
+  --podcast-border-med:    rgba(255,255,255,0.10);
+  --podcast-border-med2:   rgba(255,255,255,0.12);
+  --podcast-border-strong: rgba(255,255,255,0.15);
+}
+
+body[data-theme="light"] {
+  --podcast-text-strong:  #0A0F18;
+  --podcast-text-1:       rgba(10,15,24,0.85);
+  --podcast-text-2:       rgba(10,15,24,0.68);
+  --podcast-text-3:       rgba(10,15,24,0.58);
+  --podcast-text-4:       rgba(10,15,24,0.48);
+  --podcast-text-5:       rgba(10,15,24,0.38);
+  --podcast-text-6:       rgba(10,15,24,0.25);
+  --podcast-bg-page:      #F5F1E8;
+  --podcast-bg-surface:   #FFFFFF;
+  --podcast-bg-elevated:  #FAF7EE;
+  --podcast-border-soft:   rgba(10,15,24,0.06);
+  --podcast-border-soft2:  rgba(10,15,24,0.10);
+  --podcast-border-med:    rgba(10,15,24,0.12);
+  --podcast-border-med2:   rgba(10,15,24,0.15);
+  --podcast-border-strong: rgba(10,15,24,0.20);
+}
