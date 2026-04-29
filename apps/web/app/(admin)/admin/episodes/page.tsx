@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import { EpisodeThumbnail } from './EpisodeThumbnail'
 
@@ -13,6 +14,11 @@ function formatDuration(seconds: number | null): string {
 }
 
 export default async function AdminEpisodesPage() {
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
+
   const supabase = createClient()
 
   const { data: rows } = await supabase

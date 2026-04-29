@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { headers } from 'next/headers'
 import { getEngagementLevel, getEngagementScore, getTierMrr } from '@/lib/admin/helpers'
 import { MembersTable } from '@/components/admin/MembersTable'
 import type { MemberRow } from '@/components/admin/MembersTable'
@@ -6,6 +7,11 @@ import type { MemberRow } from '@/components/admin/MembersTable'
 export const dynamic = 'force-dynamic'
 
 export default async function AdminMembersPage() {
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
+
   const supabase = createClient()
 
   const { data: users } = await supabase
