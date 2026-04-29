@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { EpisodeThumbnail } from './EpisodeThumbnail'
@@ -19,9 +19,10 @@ export default async function AdminEpisodesPage() {
     return null
   }
 
-  const supabase = createClient()
-
-  const { data: rows } = await supabase
+  // RLS-FIX: adminClient — episodes RLS admin policy keys on users.id = auth.uid(),
+  // which the codebase documents as mismatched. SSR client would silently filter
+  // drafts for admins. Service role bypasses RLS so admins see all rows.
+  const { data: rows } = await adminClient
     .from('episodes')
     .select('id, episode_number, season, title, guest_name, guest_company, thumbnail_url, duration_seconds, is_published, published_at, created_at')
     .order('episode_number', { ascending: false })
@@ -124,7 +125,7 @@ export default async function AdminEpisodesPage() {
                       style={
                         ep.is_published
                           ? { backgroundColor: 'rgba(104,162,185,0.12)', color: '#68a2b9' }
-                          : { backgroundColor: 'rgba(27,60,90,0.06)', color: '#7a8a96' }
+                          : { backgroundColor: 'rgba(217,119,6,0.12)', color: '#b45309' }
                       }
                     >
                       {ep.is_published ? 'Published' : 'Draft'}

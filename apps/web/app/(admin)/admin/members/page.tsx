@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
 import { getEngagementLevel, getEngagementScore, getTierMrr } from '@/lib/admin/helpers'
 import { MembersTable } from '@/components/admin/MembersTable'
@@ -12,9 +12,10 @@ export default async function AdminMembersPage() {
     return null
   }
 
-  const supabase = createClient()
-
-  const { data: users } = await supabase
+  // RLS-FIX: adminClient — bypass RLS so the admin sees the canonical row set,
+  // matching the pattern used in the episodes admin queries. The (admin) layout
+  // already gates this page on role = 'admin'.
+  const { data: users } = await adminClient
     .from('users')
     .select('id, email, full_name, display_name, avatar_url, tier, tier_status, vendasta_contact_id, points, created_at')
     .neq('role', 'admin')
@@ -27,10 +28,10 @@ export default async function AdminMembersPage() {
 
   const [postsData, lessonsData] = await Promise.all([
     userIds.length > 0
-      ? supabase.from('posts').select('author_id').in('author_id', userIds).gte('created_at', thirtyDaysAgo)
+      ? adminClient.from('posts').select('author_id').in('author_id', userIds).gte('created_at', thirtyDaysAgo)
       : Promise.resolve({ data: [] }),
     userIds.length > 0
-      ? supabase.from('lesson_progress').select('user_id').in('user_id', userIds).gte('updated_at', thirtyDaysAgo).not('completed_at', 'is', null)
+      ? adminClient.from('lesson_progress').select('user_id').in('user_id', userIds).gte('updated_at', thirtyDaysAgo).not('completed_at', 'is', null)
       : Promise.resolve({ data: [] }),
   ])
 

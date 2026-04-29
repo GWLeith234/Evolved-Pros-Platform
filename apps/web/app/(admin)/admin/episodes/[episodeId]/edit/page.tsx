@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import { EpisodeForm } from '../../EpisodeForm'
 
@@ -9,9 +9,11 @@ interface Props {
 }
 
 export default async function EditEpisodePage({ params }: Props) {
-  const supabase = createClient()
-
-  const { data: ep } = await supabase
+  // RLS-FIX: adminClient — episodes RLS admin policy keys on users.id = auth.uid(),
+  // which the codebase documents as mismatched. SSR client returns no row for
+  // drafts (or any row, depending on policy match), causing a false 404. The
+  // (admin) layout already gates this page on role = 'admin'.
+  const { data: ep } = await adminClient
     .from('episodes')
     .select('*')
     .eq('id', params.episodeId)
