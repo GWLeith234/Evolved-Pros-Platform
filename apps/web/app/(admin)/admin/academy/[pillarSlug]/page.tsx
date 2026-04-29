@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
@@ -10,9 +11,14 @@ interface Props {
 }
 
 export default async function AdminPillarLessonsPage({ params }: Props) {
-  const supabase = createClient()
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
-  const { data: course } = await supabase
+  // RLS-FIX: adminClient — courses/lessons SELECT policies filter drafts,
+  // hiding entire pillars and individual lessons from admins.
+  const { data: course } = await adminClient
     .from('courses')
     .select('id, pillar_number, slug, title, required_tier')
     .eq('slug', params.pillarSlug)
@@ -20,7 +26,7 @@ export default async function AdminPillarLessonsPage({ params }: Props) {
 
   if (!course) notFound()
 
-  const { data: lessons } = await supabase
+  const { data: lessons } = await adminClient
     .from('lessons')
     .select('id, title, slug, sort_order, is_published, content_blocks')
     .eq('course_id', course.id)

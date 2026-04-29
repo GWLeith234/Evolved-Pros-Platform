@@ -1,19 +1,26 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import { getTierMrr } from '@/lib/admin/helpers'
 import { RevenueChart } from '@/components/admin/RevenueChart'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminRevenuePage() {
-  const supabase = createClient()
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
+
+  // RLS-FIX: adminClient — bypass RLS so admin sees the canonical row set
+  // for users + vendasta_webhooks, matching the pattern across other admin pages.
   const now = new Date()
 
   const [membersResult, webhooksResult] = await Promise.all([
-    supabase
+    adminClient
       .from('users')
       .select('tier, tier_status')
       .neq('role', 'admin'),
-    supabase
+    adminClient
       .from('vendasta_webhooks')
       .select('event_type, processed_at, product_sku')
       .in('event_type', ['order.activated', 'order.deactivated', 'subscription.activated', 'subscription.cancelled'])

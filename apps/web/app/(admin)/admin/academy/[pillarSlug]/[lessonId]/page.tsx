@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
@@ -11,15 +12,19 @@ interface Props {
 }
 
 export default async function AdminContentBuilderPage({ params }: Props) {
-  const supabase = createClient()
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
+  // RLS-FIX: adminClient — courses/lessons SELECT policies filter drafts.
   const [{ data: course }, { data: lesson }] = await Promise.all([
-    supabase
+    adminClient
       .from('courses')
       .select('id, pillar_number, slug, title')
       .eq('slug', params.pillarSlug)
       .single(),
-    supabase
+    adminClient
       .from('lessons')
       .select('id, title, slug, is_published, content_blocks')
       .eq('id', params.lessonId)

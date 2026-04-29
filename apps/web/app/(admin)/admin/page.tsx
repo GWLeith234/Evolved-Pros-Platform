@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import { InviteMemberButton } from './InviteMemberButton'
 
@@ -22,7 +22,10 @@ const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
 }
 
 export default async function AdminDashboardPage() {
-  const supabase = createClient()
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
   const now = new Date()
   const oneWeekAgo   = new Date(now.getTime() - 7  * 24 * 60 * 60 * 1000).toISOString()

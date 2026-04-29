@@ -1,12 +1,19 @@
 export const dynamic = 'force-dynamic'
 
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import { AdsManager } from './AdsManager'
 
 export default async function AdminAdsPage() {
-  const supabase = createClient()
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
-  const { data: rows } = await supabase
+  // RLS-FIX: adminClient — Members can read active platform_ads policy
+  // filters is_active=true, so admins on the SSR client wouldn't see
+  // disabled/expired ads they need to manage.
+  const { data: rows } = await adminClient
     .from('platform_ads')
     .select('id, zone, sponsor_name, ad_type, image_url, click_url, headline, start_date, end_date, is_active, sort_order, created_at')
     .order('zone')

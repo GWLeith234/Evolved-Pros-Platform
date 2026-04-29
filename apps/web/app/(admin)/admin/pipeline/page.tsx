@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import { getEngagementLevel, getEngagementScore } from '@/lib/admin/helpers'
 import { PipelineBoard } from '@/components/admin/PipelineBoard'
 import type { PipelineMemberCard } from '@/components/admin/PipelineCard'
@@ -8,12 +9,18 @@ export const dynamic = 'force-dynamic'
 type PipelineStage = 'awareness' | 'engaged' | 'upgrade_ready' | 'closed'
 
 export default async function AdminPipelinePage() {
-  const supabase = createClient()
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
+
+  // RLS-FIX: adminClient — bypass RLS so admin sees canonical user / posts /
+  // lesson_progress rows. Matches AD2.3 episodes/members fix.
   const now = new Date()
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
   const monthStart    = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
 
-  const { data: members } = await supabase
+  const { data: members } = await adminClient
     .from('users')
     .select('id, display_name, full_name, tier, tier_status, created_at, updated_at')
     .neq('role', 'admin')
@@ -32,14 +39,14 @@ export default async function AdminPipelinePage() {
   const userIds = memberList.map(m => m.id)
 
   const [postsData, lessonsData, pillar4Data, overridesData] = await Promise.all([
-    supabase.from('posts').select('author_id').in('author_id', userIds).gte('created_at', thirtyDaysAgo),
-    supabase.from('lesson_progress').select('user_id').in('user_id', userIds).gte('updated_at', thirtyDaysAgo).not('completed_at', 'is', null),
-    supabase
+    adminClient.from('posts').select('author_id').in('author_id', userIds).gte('created_at', thirtyDaysAgo),
+    adminClient.from('lesson_progress').select('user_id').in('user_id', userIds).gte('updated_at', thirtyDaysAgo).not('completed_at', 'is', null),
+    adminClient
       .from('lesson_progress')
       .select('user_id, lessons(course_id, courses(pillar_number))')
       .in('user_id', userIds)
       .not('completed_at', 'is', null),
-    supabase.from('pipeline_stage_overrides').select('user_id, stage, note').in('user_id', userIds),
+    adminClient.from('pipeline_stage_overrides').select('user_id, stage, note').in('user_id', userIds),
   ])
 
   const postCounts: Record<string, number>   = {}

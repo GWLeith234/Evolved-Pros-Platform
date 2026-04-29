@@ -1,13 +1,19 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminCoursesPage() {
-  const supabase = createClient()
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
-  const { data: courses } = await supabase
+  // RLS-FIX: adminClient — courses_select_authenticated filters is_published=true,
+  // hiding drafts from admins on the SSR client. Mirrors AD2.3 episodes fix.
+  const { data: courses } = await adminClient
     .from('courses')
     .select('id, pillar_number, slug, title, required_tier, is_published, sort_order')
     .order('sort_order')
@@ -15,7 +21,7 @@ export default async function AdminCoursesPage() {
   // Fetch lesson counts per course
   const courseIds = (courses ?? []).map(c => c.id)
   const { data: lessonCounts } = courseIds.length > 0
-    ? await supabase
+    ? await adminClient
         .from('lessons')
         .select('course_id, id')
         .in('course_id', courseIds)

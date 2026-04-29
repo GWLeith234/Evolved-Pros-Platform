@@ -1,15 +1,21 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminAcademyPage() {
-  const supabase = createClient()
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
+  // RLS-FIX: adminClient — courses/lessons SELECT policies filter is_published=true,
+  // hiding drafts from admins on the SSR client. Mirrors AD2.3 episodes fix.
   const [{ data: courses }, { data: lessons }] = await Promise.all([
-    supabase.from('courses').select('id, pillar_number, slug, title, required_tier, is_published').order('pillar_number'),
-    supabase.from('lessons').select('course_id, is_published'),
+    adminClient.from('courses').select('id, pillar_number, slug, title, required_tier, is_published').order('pillar_number'),
+    adminClient.from('lessons').select('course_id, is_published'),
   ])
 
   const totalMap = new Map<string, number>()

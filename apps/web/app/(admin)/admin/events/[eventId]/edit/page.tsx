@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { EventForm } from '../../EventForm'
 
@@ -9,9 +10,14 @@ interface Props {
 export const dynamic = 'force-dynamic'
 
 export default async function EditEventPage({ params }: Props) {
-  const supabase = createClient()
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
-  const { data: row } = await supabase
+  // RLS-FIX: adminClient — events_select_authenticated filters drafts,
+  // causing false 404s when an admin opens an unpublished event.
+  const { data: row } = await adminClient
     .from('events')
     .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, image_url, required_tier, is_published')
     .eq('id', params.eventId)

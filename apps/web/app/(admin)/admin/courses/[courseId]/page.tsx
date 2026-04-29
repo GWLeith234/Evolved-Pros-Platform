@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { AdminLessonsTable } from './AdminLessonsTable'
@@ -11,15 +12,20 @@ interface Props {
 }
 
 export default async function AdminCourseDetailPage({ params }: Props) {
-  const supabase = createClient()
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
+  // RLS-FIX: adminClient — courses/lessons SELECT policies filter is_published=true,
+  // so admins viewing draft courses/lessons would 404 on the SSR client.
   const [{ data: course }, { data: lessons }] = await Promise.all([
-    supabase
+    adminClient
       .from('courses')
       .select('id, pillar_number, slug, title, description, required_tier')
       .eq('id', params.courseId)
       .single(),
-    supabase
+    adminClient
       .from('lessons')
       .select('id, title, slug, description, duration_seconds, sort_order, is_published, mux_playback_id')
       .eq('course_id', params.courseId)

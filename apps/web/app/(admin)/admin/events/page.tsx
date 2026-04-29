@@ -1,13 +1,19 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import { AdminEventsTable } from './AdminEventsTable'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminEventsPage() {
-  const supabase = createClient()
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
-  const { data: rows } = await supabase
+  // RLS-FIX: adminClient — events_select_authenticated filters is_published=true,
+  // hiding drafts from admins on the SSR client. Mirrors AD2.3 episodes fix.
+  const { data: rows } = await adminClient
     .from('events')
     .select('id, title, event_type, starts_at, is_published, registration_count, required_tier')
     .order('starts_at', { ascending: false })

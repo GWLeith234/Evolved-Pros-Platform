@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getEngagementLevel, getEngagementScore, getTierMrr } from '@/lib/admin/helpers'
@@ -11,21 +12,26 @@ interface Props {
 }
 
 export default async function AdminMemberDetailPage({ params }: Props) {
-  const supabase = createClient()
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
+  // RLS-FIX: adminClient — bypass RLS so admin sees canonical user / posts /
+  // lesson_progress / vendasta_webhooks rows.
   const [userResult, postsResult, progressResult] = await Promise.all([
-    supabase
+    adminClient
       .from('users')
       .select('id, email, full_name, display_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, vendasta_contact_id, points, created_at, updated_at')
       .eq('id', params.userId)
       .single(),
-    supabase
+    adminClient
       .from('posts')
       .select('id, body, created_at, channels(name, slug)')
       .eq('author_id', params.userId)
       .order('created_at', { ascending: false })
       .limit(20),
-    supabase
+    adminClient
       .from('lesson_progress')
       .select('lesson_id, completed_at, watch_time_seconds, updated_at, lessons(title, course_id, courses(title, pillar_number))')
       .eq('user_id', params.userId)
@@ -37,7 +43,7 @@ export default async function AdminMemberDetailPage({ params }: Props) {
 
   // Fetch Vendasta webhooks if contact linked
   const webhooksResult = user.vendasta_contact_id
-    ? await supabase
+    ? await adminClient
         .from('vendasta_webhooks')
         .select('id, event_type, vendasta_order_id, product_sku, processed_at, status, error_message')
         .eq('vendasta_contact_id', user.vendasta_contact_id)

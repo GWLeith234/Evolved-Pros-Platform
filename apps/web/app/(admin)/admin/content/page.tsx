@@ -1,15 +1,21 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminContentPage() {
-  const supabase = createClient()
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
+  // RLS-FIX: adminClient — courses/events/lessons SELECT policies filter
+  // is_published=true, hiding drafts from admins. Mirrors AD2.3 episodes fix.
   const [coursesResult, eventsResult, lessonsResult] = await Promise.all([
-    supabase.from('courses').select('id, title, pillar_number, is_published, required_tier').order('pillar_number'),
-    supabase.from('events').select('id, title, event_type, starts_at, is_published').order('starts_at', { ascending: false }).limit(10),
-    supabase.from('lessons').select('course_id, is_published'),
+    adminClient.from('courses').select('id, title, pillar_number, is_published, required_tier').order('pillar_number'),
+    adminClient.from('events').select('id, title, event_type, starts_at, is_published').order('starts_at', { ascending: false }).limit(10),
+    adminClient.from('lessons').select('course_id, is_published'),
   ])
 
   type CourseRow = { id: string; title: string; pillar_number: number; is_published: boolean; required_tier: string | null }

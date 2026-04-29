@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { LessonForm } from '../../../LessonForm'
@@ -8,7 +9,10 @@ interface Props {
 }
 
 export default async function EditLessonPage({ params }: Props) {
-  const supabase = createClient()
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
   type CourseData = { id: string; title: string }
   type LessonData = {
@@ -17,9 +21,11 @@ export default async function EditLessonPage({ params }: Props) {
     mux_playback_id: string | null
   }
 
+  // RLS-FIX: adminClient — courses/lessons SELECT policies filter drafts,
+  // causing false 404s when an admin opens an unpublished lesson.
   const [{ data: courseRaw }, { data: lessonRaw }] = await Promise.all([
-    supabase.from('courses').select('id, title').eq('id', params.courseId).single(),
-    supabase.from('lessons')
+    adminClient.from('courses').select('id, title').eq('id', params.courseId).single(),
+    adminClient.from('lessons')
       .select('id, title, slug, description, duration_seconds, sort_order, is_published, mux_playback_id')
       .eq('id', params.lessonId).eq('course_id', params.courseId).single(),
   ])
