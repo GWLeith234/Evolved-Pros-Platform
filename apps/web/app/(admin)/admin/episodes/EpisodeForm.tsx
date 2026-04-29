@@ -3,6 +3,23 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
+type Pillar =
+  | 'foundation'
+  | 'identity'
+  | 'mental-toughness'
+  | 'strategy'
+  | 'accountability'
+  | 'execution'
+
+const PILLAR_OPTIONS: { value: Pillar; label: string }[] = [
+  { value: 'foundation', label: 'Foundation' },
+  { value: 'identity', label: 'Identity' },
+  { value: 'mental-toughness', label: 'Mental Toughness' },
+  { value: 'strategy', label: 'Strategy' },
+  { value: 'accountability', label: 'Accountability' },
+  { value: 'execution', label: 'Execution' },
+]
+
 interface EpisodeFormValues {
   title: string
   slug: string
@@ -18,6 +35,10 @@ interface EpisodeFormValues {
   thumbnailUrl: string
   durationSeconds: string
   transcript: string
+  showNotes: string
+  pillars: Pillar[]
+  transistorEpisodeId: string
+  isMembersOnly: boolean
   isPublished: boolean
 }
 
@@ -41,6 +62,10 @@ const DEFAULT_VALUES: EpisodeFormValues = {
   thumbnailUrl: '',
   durationSeconds: '',
   transcript: '',
+  showNotes: '',
+  pillars: [],
+  transistorEpisodeId: '',
+  isMembersOnly: false,
   isPublished: false,
 }
 
@@ -190,6 +215,10 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
       thumbnail_url: values.thumbnailUrl.trim() || null,
       duration_seconds: values.durationSeconds ? parseInt(values.durationSeconds, 10) : null,
       transcript: values.transcript.trim() || null,
+      show_notes: values.showNotes.trim() || null,
+      pillars: values.pillars,
+      transistor_episode_id: values.transistorEpisodeId.trim() || null,
+      is_members_only: values.isMembersOnly,
       is_published: values.isPublished,
     }
 
@@ -599,6 +628,88 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
             placeholder="Transcript will appear here after generation…"
           />
         </LabelledInput>
+      </div>
+
+      {/* Show notes */}
+      <LabelledInput label="Show notes" hint="Markdown supported. Distinct from description (short summary) and transcript (full text).">
+        <textarea
+          value={values.showNotes}
+          onChange={e => set('showNotes', e.target.value)}
+          className={`${inputClass} resize-y`}
+          style={{ ...inputStyle, minHeight: '200px' }}
+          placeholder="Episode show notes — links, timestamps, key takeaways…"
+        />
+      </LabelledInput>
+
+      {/* Pillars */}
+      <LabelledInput label="Pillars" hint="Tag this episode with one or more EVOLVED pillars.">
+        <div className="flex flex-wrap gap-2">
+          {PILLAR_OPTIONS.map(opt => {
+            const selected = values.pillars.includes(opt.value)
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() =>
+                  set(
+                    'pillars',
+                    selected
+                      ? values.pillars.filter(p => p !== opt.value)
+                      : [...values.pillars, opt.value]
+                  )
+                }
+                className="font-condensed font-semibold uppercase tracking-wide text-[11px] rounded-full px-3 py-1.5 transition-all"
+                style={{
+                  backgroundColor: selected ? '#1b3c5a' : 'white',
+                  color: selected ? 'white' : '#1b3c5a',
+                  border: selected ? '1px solid #1b3c5a' : '1px solid rgba(27,60,90,0.2)',
+                }}
+              >
+                {opt.label}
+              </button>
+            )
+          })}
+        </div>
+      </LabelledInput>
+
+      {/* Transistor episode ID */}
+      <LabelledInput
+        label="Transistor episode ID"
+        hint="Paste from Transistor's episode URL after publishing there. Leave blank if not yet published on Transistor."
+      >
+        <input
+          type="text"
+          value={values.transistorEpisodeId}
+          onChange={e => set('transistorEpisodeId', e.target.value)}
+          maxLength={100}
+          className={inputClass}
+          style={inputStyle}
+          placeholder="e.g. 1234567"
+        />
+      </LabelledInput>
+
+      {/* Members-only toggle */}
+      <div className="flex items-start gap-3">
+        <button
+          type="button"
+          onClick={() => set('isMembersOnly', !values.isMembersOnly)}
+          className="relative w-10 h-5 rounded-full transition-colors flex-shrink-0 mt-0.5"
+          style={{ backgroundColor: values.isMembersOnly ? '#68a2b9' : 'rgba(27,60,90,0.15)' }}
+          aria-label="Toggle members-only"
+        >
+          <span
+            className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform"
+            style={{ transform: values.isMembersOnly ? 'translateX(22px)' : 'translateX(2px)' }}
+          />
+        </button>
+        <div>
+          <span className="font-condensed font-semibold text-[12px] text-[#1b3c5a] block">
+            Members only
+          </span>
+          <span className="font-condensed text-[10px] text-[#7a8a96]">
+            If on, only VIP and Pro tiers can play this episode.
+          </span>
+        </div>
       </div>
 
       {/* Published toggle */}

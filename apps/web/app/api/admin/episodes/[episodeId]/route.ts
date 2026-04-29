@@ -36,6 +36,7 @@ export async function PATCH(
     'guest_name', 'guest_title', 'guest_company', 'guest_image_url',
     'mux_playback_id', 'youtube_url', 'thumbnail_url',
     'duration_seconds', 'is_published', 'transcript',
+    'show_notes', 'pillars', 'transistor_episode_id', 'is_members_only',
   ] as const
 
   const update: Record<string, unknown> = {}

@@ -34,6 +34,10 @@ export default async function EditEpisodePage({ params }: Props) {
     thumbnailUrl: ep.thumbnail_url ?? '',
     durationSeconds: ep.duration_seconds != null ? String(ep.duration_seconds) : '',
     transcript: ep.transcript ?? '',
+    showNotes: ep.show_notes ?? '',
+    pillars: Array.isArray(ep.pillars) ? ep.pillars : [],
+    transistorEpisodeId: ep.transistor_episode_id ?? '',
+    isMembersOnly: ep.is_members_only ?? false,
     isPublished: ep.is_published ?? false,
   }
 

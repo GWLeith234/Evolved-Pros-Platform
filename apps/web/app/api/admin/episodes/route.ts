@@ -62,6 +62,10 @@ export async function POST(request: Request) {
       duration_seconds: typeof body.duration_seconds === 'number' ? body.duration_seconds : null,
       transcript: typeof body.transcript === 'string' ? body.transcript.trim() || null : null,
       guest_image_url: typeof body.guest_image_url === 'string' ? body.guest_image_url.trim() || null : null,
+      show_notes: typeof body.show_notes === 'string' ? body.show_notes.trim() || null : null,
+      pillars: Array.isArray(body.pillars) ? body.pillars.filter((p): p is string => typeof p === 'string') : [],
+      transistor_episode_id: typeof body.transistor_episode_id === 'string' ? body.transistor_episode_id.trim() || null : null,
+      is_members_only: body.is_members_only === true,
       is_published: isPublished,
       published_at: publishedAt,
     })
