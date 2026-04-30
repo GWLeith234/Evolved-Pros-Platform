@@ -56,7 +56,7 @@ const NETWORK_LINKS = [
 const ABOUT_LINKS = [
   { label: 'About George Leith', href: '/live' },
   { label: 'The EVOLVED Framework', href: '/academy' },
-  { label: 'Advertise with us', href: 'mailto:geoleith@gmail.com' },
+  { label: 'Advertise with us', href: 'mailto:support@evolvedpros.com?subject=Advertising%20inquiry' },
 ]
 
 const FC = 'var(--font-condensed)'
@@ -151,7 +151,7 @@ export function MediaFooter() {
                 </span>
                 <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', fontFamily: FC, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Evolved Pros Live</span>
               </Link>
-              <a href="mailto:geoleith@gmail.com" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
+              <a href="mailto:support@evolvedpros.com?subject=Sponsorship%20inquiry" style={{ display: 'flex', alignItems: 'center', gap: 6, textDecoration: 'none' }}>
                 <span style={{ width: 20, height: 20, borderRadius: 3, backgroundColor: '#C9A84C', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 700 }}>$</span>
                 <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', fontFamily: FC, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Sponsor</span>
               </a>

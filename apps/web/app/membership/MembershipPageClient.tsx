@@ -12,7 +12,7 @@ interface MembershipPageClientProps {
 
 const CHECKOUT_BASE       = process.env.NEXT_PUBLIC_VENDASTA_CHECKOUT_URL ?? ''
 const KEYNOTE_INQUIRY_URL = process.env.NEXT_PUBLIC_VENDASTA_KEYNOTE_INQUIRY_URL
-  ?? 'mailto:geoleith@gmail.com?subject=Keynote%20Inquiry%20-%20Evolved%20Pros'
+  ?? 'mailto:support@evolvedpros.com?subject=Keynote%20Inquiry%20-%20Evolved%20Pros'
 
 function CheckIcon() {
   return (

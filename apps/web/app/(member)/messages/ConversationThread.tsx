@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useToast } from '@/lib/toast'
 
 interface Message {
   id: string
@@ -32,8 +33,10 @@ export function ConversationThread({ conversationId, currentUserId }: Conversati
   const [loading, setLoading] = useState(true)
   const [inputValue, setInputValue] = useState('')
   const [sending, setSending] = useState(false)
+  const [pendingIds, setPendingIds] = useState<Set<string>>(() => new Set())
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const { showToast } = useToast()
 
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -131,6 +134,17 @@ export function ConversationThread({ conversationId, currentUserId }: Conversati
       created_at: new Date().toISOString(),
     }
     setMessages(prev => [...prev, optimistic])
+    setPendingIds(prev => {
+      const next = new Set(prev)
+      next.add(optimisticId)
+      return next
+    })
+
+    const clearPending = () => setPendingIds(prev => {
+      const next = new Set(prev)
+      next.delete(optimisticId)
+      return next
+    })
 
     try {
       const res = await fetch(`/api/conversations/${conversationId}/messages`, {
@@ -142,14 +156,19 @@ export function ConversationThread({ conversationId, currentUserId }: Conversati
         const msg = await res.json()
         // Replace optimistic message with real one
         setMessages(prev => prev.map(m => m.id === optimisticId ? msg : m))
+        clearPending()
       } else {
         // Remove optimistic message on error
         setMessages(prev => prev.filter(m => m.id !== optimisticId))
+        clearPending()
         setInputValue(trimmed)
+        showToast('Couldn’t send message. Try again.', 'error')
       }
     } catch {
       setMessages(prev => prev.filter(m => m.id !== optimisticId))
+      clearPending()
       setInputValue(trimmed)
+      showToast('Network error. Message not sent.', 'error')
     } finally {
       setSending(false)
     }
@@ -193,6 +212,7 @@ export function ConversationThread({ conversationId, currentUserId }: Conversati
         )}
         {messages.map(m => {
           const isMine = m.sender_id === currentUserId
+          const isPending = pendingIds.has(m.id)
           return (
             <div key={m.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
               <div
@@ -203,14 +223,17 @@ export function ConversationThread({ conversationId, currentUserId }: Conversati
                   color: isMine ? 'white' : 'rgba(255,255,255,0.85)',
                   borderBottomRightRadius: isMine ? '4px' : undefined,
                   borderBottomLeftRadius: !isMine ? '4px' : undefined,
+                  opacity: isPending ? 0.55 : 1,
+                  transition: 'opacity 120ms ease',
                 }}
               >
                 {m.body}
                 <div
                   className="text-[10px] mt-0.5 opacity-50 text-right"
                   style={{ color: 'rgba(255,255,255,0.5)' }}
+                  aria-live={isPending ? 'polite' : undefined}
                 >
-                  {formatTime(m.created_at)}
+                  {isPending ? 'Sending…' : formatTime(m.created_at)}
                 </div>
               </div>
             </div>
@@ -244,6 +267,7 @@ export function ConversationThread({ conversationId, currentUserId }: Conversati
           type="button"
           onClick={handleSend}
           disabled={!inputValue.trim() || sending}
+          aria-busy={sending}
           className="flex-shrink-0 px-4 py-2 rounded-lg font-condensed font-bold uppercase tracking-wide text-xs transition-opacity"
           style={{
             backgroundColor: '#68a2b9',
@@ -251,7 +275,7 @@ export function ConversationThread({ conversationId, currentUserId }: Conversati
             opacity: !inputValue.trim() || sending ? 0.4 : 1,
           }}
         >
-          Send
+          {sending ? 'Sending…' : 'Send'}
         </button>
       </div>
     </div>

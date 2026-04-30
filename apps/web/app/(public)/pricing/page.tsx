@@ -308,14 +308,14 @@ export default function PricingPage() {
         {/* Footer CTA */}
         <div className="text-center">
           <p className="font-body text-sm mb-4" style={{ color: 'rgba(245,240,232,0.4)' }}>
-            Questions? Reach out to George directly.
+            Questions? Reach out and we&rsquo;ll get back to you.
           </p>
           <Link
-            href="mailto:geoleith@gmail.com"
+            href="mailto:support@evolvedpros.com?subject=Pricing%20question%20-%20Evolved%20Pros"
             className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] px-5 py-2.5 rounded transition-opacity hover:opacity-80"
             style={{ color: '#C9A84C', border: '1px solid rgba(201,168,76,0.3)' }}
           >
-            Contact George
+            Contact support
           </Link>
         </div>
       </div>
