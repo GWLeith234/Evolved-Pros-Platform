@@ -14,6 +14,8 @@ interface ModalProps {
   maxWidth?: number
   ariaLabel?: string
   className?: string
+  /** Style overrides merged onto the dialog panel (e.g. dark surface). */
+  panelStyle?: React.CSSProperties
   children: React.ReactNode
 }
 
@@ -42,6 +44,7 @@ export function Modal({
   maxWidth = 480,
   ariaLabel,
   className,
+  panelStyle,
   children,
 }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
@@ -145,6 +148,7 @@ export function Modal({
           borderRadius: 8,
           outline: 'none',
           boxShadow: '0 20px 50px rgba(0,0,0,0.35)',
+          ...panelStyle,
         }}
       >
         {title && (
