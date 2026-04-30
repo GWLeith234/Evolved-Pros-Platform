@@ -2,7 +2,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
-import { EpisodePlayer } from '@/components/podcast/EpisodePlayer'
+import { DynamicEpisodePlayer as EpisodePlayer } from '@/components/podcast/DynamicEpisodePlayer'
 import { TranscriptSection } from '@/components/podcast/TranscriptSection'
 
 export const dynamic = 'force-dynamic'
