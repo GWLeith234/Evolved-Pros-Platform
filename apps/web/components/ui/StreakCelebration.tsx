@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 interface StreakCelebrationProps {
   streak: number
@@ -28,6 +29,7 @@ function makeConfetti(color: string) {
 export function StreakCelebration({ streak, onDismiss }: StreakCelebrationProps) {
   const [visible, setVisible] = useState(false)
   const milestone = MILESTONES[streak]
+  const reduced = useReducedMotion()
 
   useEffect(() => {
     if (!milestone) return
@@ -55,24 +57,26 @@ export function StreakCelebration({ streak, onDismiss }: StreakCelebrationProps)
       style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}
       onClick={handleDismiss}
     >
-      {/* Confetti */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-        {confetti.map(c => (
-          <div
-            key={c.id}
-            className="absolute rounded-sm"
-            style={{
-              left: `${c.left}%`,
-              top: '-12px',
-              width: `${c.size}px`,
-              height: `${c.size * 1.8}px`,
-              backgroundColor: c.color,
-              transform: `rotate(${c.rotate}deg)`,
-              animation: `streakFall ${c.duration}ms ${c.delay}ms ease-in both`,
-            }}
-          />
-        ))}
-      </div>
+      {/* Confetti — skipped under prefers-reduced-motion */}
+      {!reduced && (
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+          {confetti.map(c => (
+            <div
+              key={c.id}
+              className="absolute rounded-sm"
+              style={{
+                left: `${c.left}%`,
+                top: '-12px',
+                width: `${c.size}px`,
+                height: `${c.size * 1.8}px`,
+                backgroundColor: c.color,
+                transform: `rotate(${c.rotate}deg)`,
+                animation: `streakFall ${c.duration}ms ${c.delay}ms ease-in both`,
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Card */}
       <div

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 interface ConfettiBlastProps {
   active: boolean
@@ -11,16 +12,23 @@ interface ConfettiBlastProps {
 
 export function ConfettiBlast({ active, colors, count = 30, onComplete }: ConfettiBlastProps) {
   const [show, setShow] = useState(false)
+  const reduced = useReducedMotion()
 
   useEffect(() => {
     if (!active) { setShow(false); return }
+    if (reduced) {
+      // Honor prefers-reduced-motion: skip the visual entirely but keep the
+      // promise contract so callers don't deadlock waiting for onComplete.
+      onComplete?.()
+      return
+    }
     setShow(true)
     const t = setTimeout(() => {
       setShow(false)
       onComplete?.()
     }, 2000)
     return () => clearTimeout(t)
-  }, [active, onComplete])
+  }, [active, onComplete, reduced])
 
   if (!show) return null
 

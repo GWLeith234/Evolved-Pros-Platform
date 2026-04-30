@@ -439,3 +439,16 @@ html.cream-mode body {
   --ed-accent-action:  #C9302A;
   --ed-accent-urgency: #C9A84C;
 }
+
+/* prefers-reduced-motion safety net — neutralise decorative animations and
+   transitions for OS-configured users. Components that need motion to
+   express state (e.g. loading spinners) opt out via the useReducedMotion()
+   hook explicitly. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:        0.001ms !important;
+    animation-iteration-count: 1       !important;
+    transition-duration:       0.001ms !important;
+    scroll-behavior:           auto    !important;
+  }
+}
