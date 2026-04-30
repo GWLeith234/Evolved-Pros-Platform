@@ -35,59 +35,7 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
   })
 
   return (
-    <header style={{ background: 'var(--ed-bg)', borderBottom: '1px solid var(--ed-border)', position: 'relative' }}>
-      {/* CTA cluster — migrated verbatim from the old layout.tsx inline header
-          (Apr 16-17 design) so visual continuity is preserved while the
-          editorial Masthead absorbs ownership. */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 14,
-          right: 24,
-          display: 'flex',
-          gap: 8,
-          zIndex: 1,
-        }}
-      >
-        <Link
-          href="/home"
-          style={{
-            fontFamily: 'var(--font-condensed)',
-            fontWeight: 600,
-            fontSize: 12,
-            color: '#2B3A5A',
-            border: '1.5px solid #2B3A5A',
-            padding: '6px 14px',
-            borderRadius: 3,
-            textDecoration: 'none',
-            textTransform: 'uppercase',
-            letterSpacing: '0.04em',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          ← Back to platform
-        </Link>
-        <Link
-          href="/pricing"
-          style={{
-            fontFamily: 'var(--font-condensed)',
-            fontWeight: 600,
-            fontSize: 12,
-            color: '#ffffff',
-            backgroundColor: '#C9302A',
-            padding: '6px 14px',
-            borderRadius: 3,
-            textDecoration: 'none',
-            textTransform: 'uppercase',
-            letterSpacing: '0.04em',
-            border: '1.5px solid #C9302A',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          Join Evolved Pros
-        </Link>
-      </div>
-
+    <header style={{ background: 'var(--ed-bg)', borderBottom: '1px solid var(--ed-border)' }}>
       {/* Date strip */}
       <div
         style={{
@@ -106,7 +54,23 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
           color: 'var(--ed-text-muted)',
         }}
       >
-        <span suppressHydrationWarning>{today}</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <span suppressHydrationWarning>{today}</span>
+          <span aria-hidden="true">·</span>
+          <Link
+            href="/home"
+            style={{ color: 'var(--ed-text)', textDecoration: 'none' }}
+          >
+            Back to platform
+          </Link>
+          <span aria-hidden="true">·</span>
+          <Link
+            href="/pricing"
+            style={{ color: 'var(--ed-text)', textDecoration: 'none' }}
+          >
+            Join Evolved Pros
+          </Link>
+        </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <span>Issue {issueNumber}</span>
           <span style={{ width: 1, height: 12, background: 'var(--ed-border)' }} />
