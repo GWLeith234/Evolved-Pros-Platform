@@ -2,6 +2,10 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { MediaPortalClient } from './MediaPortalClient'
 import type { MediaStory, Episode } from './MediaPortalClient'
+import { ThemeBridge } from '@/components/media/ThemeBridge'
+import { Masthead } from '@/components/media/Masthead'
+import { Ticker } from '@/components/media/Ticker'
+import { CategoryPills } from '@/components/media/CategoryPills'
 
 export const revalidate = 60
 
@@ -59,12 +63,18 @@ export default async function MediaPage() {
   }
 
   return (
-    <MediaPortalClient
-      featured={featured}
-      sidebar={sidebar}
-      grid={grid}
-      episodes={episodes}
-      authorAvatars={authorAvatars}
-    />
+    <>
+      <ThemeBridge />
+      <Ticker />
+      <Masthead />
+      <CategoryPills />
+      <MediaPortalClient
+        featured={featured}
+        sidebar={sidebar}
+        grid={grid}
+        episodes={episodes}
+        authorAvatars={authorAvatars}
+      />
+    </>
   )
 }

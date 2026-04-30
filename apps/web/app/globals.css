@@ -410,3 +410,32 @@ body[data-theme="light"] {
   --podcast-border-med2:   rgba(10,15,24,0.15);
   --podcast-border-strong: rgba(10,15,24,0.20);
 }
+
+/* ─────────────────────────────────────────────────────────────────
+   Editorial cream-paper tokens (DESIGN-REF-PLATFORM-HANDOFF, MR1).
+   Ported verbatim from _design_refs/platform-handoff-2026-04-29/
+   styles/colors_and_type.css. The --ed-* prefix is reserved for the
+   /media editorial chrome and must not collide with --podcast-* or
+   the platform DS tokens above. Activated by Media's ThemeBridge,
+   which sets BOTH body[data-theme="cream"] AND html.cream-mode so
+   TopNav (which reads platform tokens) stays navy.
+   ───────────────────────────────────────────────────────────────── */
+body[data-theme="cream"],
+html.cream-mode body {
+  --ed-bg:             #F5F0E8;
+  --ed-surface:        #FFFFFF;
+  --ed-cream:          #FAF6EE;
+  --ed-border:         #E0D8CC;
+  --ed-border-soft:    #EAE3D5;
+  --ed-text:           #1B2A4A;
+  --ed-text-muted:     #6B7A8D;
+  --ed-text-subtle:    #8A9099;
+  --ed-navy:           #1B2A4A;
+  --ed-red:            #C9302A;
+  --ed-gold:           #8B6A00;
+  --ed-gold-soft:      #C9A84C;
+  --ed-header-bg:      #1B2A4A;
+  --ed-header-text:    #F5F0E8;
+  --ed-accent-action:  #C9302A;
+  --ed-accent-urgency: #C9A84C;
+}
