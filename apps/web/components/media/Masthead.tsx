@@ -3,6 +3,8 @@
 // (MediaMasthead). EdShare sub-component intentionally excluded; share UI
 // lands in MR4 (per SPRINT_BRIEF section 4.3 + 6).
 
+import Link from 'next/link'
+
 const NAV_ITEMS: ReadonlyArray<{ label: string; href: string }> = [
   { label: 'Top Stories', href: '#top' },
   { label: 'Revenue', href: '#revenue' },
@@ -33,7 +35,59 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
   })
 
   return (
-    <header style={{ background: 'var(--ed-bg)', borderBottom: '1px solid var(--ed-border)' }}>
+    <header style={{ background: 'var(--ed-bg)', borderBottom: '1px solid var(--ed-border)', position: 'relative' }}>
+      {/* CTA cluster — migrated verbatim from the old layout.tsx inline header
+          (Apr 16-17 design) so visual continuity is preserved while the
+          editorial Masthead absorbs ownership. */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 14,
+          right: 24,
+          display: 'flex',
+          gap: 8,
+          zIndex: 1,
+        }}
+      >
+        <Link
+          href="/home"
+          style={{
+            fontFamily: 'var(--font-condensed)',
+            fontWeight: 600,
+            fontSize: 12,
+            color: '#2B3A5A',
+            border: '1.5px solid #2B3A5A',
+            padding: '6px 14px',
+            borderRadius: 3,
+            textDecoration: 'none',
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          ← Back to platform
+        </Link>
+        <Link
+          href="/pricing"
+          style={{
+            fontFamily: 'var(--font-condensed)',
+            fontWeight: 600,
+            fontSize: 12,
+            color: '#ffffff',
+            backgroundColor: '#C9302A',
+            padding: '6px 14px',
+            borderRadius: 3,
+            textDecoration: 'none',
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
+            border: '1.5px solid #C9302A',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          Join Evolved Pros
+        </Link>
+      </div>
+
       {/* Date strip */}
       <div
         style={{
