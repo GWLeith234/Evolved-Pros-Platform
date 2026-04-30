@@ -2,6 +2,9 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState } from 'react'
+import { Modal } from '@/components/ui/Modal'
+import { AdminSidebarNav } from './AdminSidebar'
 
 const NAV_TABS = [
   { label: 'Members',      href: '/admin/members',  match: /^\/admin\/members/ },
@@ -25,10 +28,11 @@ function getInitials(name: string | null | undefined): string {
 export function AdminTopNav({ profile }: AdminTopNavProps) {
   const pathname = usePathname()
   const displayName = profile.display_name ?? profile.full_name ?? ''
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <header
-      className="sticky top-0 z-40 flex items-center justify-between px-6 h-14 flex-shrink-0"
+      className="sticky top-0 z-40 flex items-center justify-between px-4 sm:px-6 h-14 flex-shrink-0"
       style={{
         backgroundColor: '#0d1c27',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
@@ -36,6 +40,21 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
     >
       {/* Logo + Admin label */}
       <div className="flex items-center gap-3">
+        {/* Mobile menu trigger — visible only when desktop sidebar is hidden */}
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label="Open admin navigation"
+          aria-expanded={mobileMenuOpen}
+          className="md:hidden -ml-1 p-2 rounded"
+          style={{ color: 'rgba(255,255,255,0.7)' }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+            <line x1="4" y1="6" x2="20" y2="6" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <line x1="4" y1="18" x2="20" y2="18" />
+          </svg>
+        </button>
         <Link
           href="/admin"
           className="font-condensed font-bold text-white tracking-[0.14em] text-base select-none"
@@ -43,7 +62,7 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
           EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS
         </Link>
         <span
-          className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] px-2 py-0.5 rounded"
+          className="hidden sm:inline-block font-condensed font-bold uppercase tracking-[0.18em] text-[10px] px-2 py-0.5 rounded"
           style={{
             color: 'rgba(255,255,255,0.5)',
             backgroundColor: 'rgba(255,255,255,0.06)',
@@ -53,6 +72,25 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
           Admin
         </span>
       </div>
+
+      {/* Mobile nav modal — surfaces the same sections as the desktop sidebar
+          when the viewport is below md (where AdminSidebar is hidden). */}
+      <Modal
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        ariaLabel="Admin navigation"
+        maxWidth={320}
+        panelStyle={{
+          backgroundColor: '#0d1c27',
+          color: 'rgba(255,255,255,0.85)',
+          padding: '20px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: '85vh',
+        }}
+      >
+        <AdminSidebarNav onSelect={() => setMobileMenuOpen(false)} />
+      </Modal>
 
       {/* Nav tabs */}
       <nav className="hidden md:flex items-end h-full gap-1">
@@ -86,10 +124,24 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
         })}
       </nav>
 
-      {/* Right: Vendasta Sync badge + avatar */}
+      {/* Right: Back to platform + Vendasta Sync badge + avatar */}
       <div className="flex items-center gap-3">
+        <Link
+          href="/home"
+          className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] px-2.5 py-1 rounded transition-colors"
+          style={{
+            color: 'rgba(255,255,255,0.55)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            textDecoration: 'none',
+            whiteSpace: 'nowrap',
+          }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.9)'}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.55)'}
+        >
+          ← Platform
+        </Link>
         <span
-          className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] px-2.5 py-1 rounded"
+          className="hidden sm:inline-block font-condensed font-bold uppercase tracking-[0.14em] text-[10px] px-2.5 py-1 rounded"
           style={{
             color: '#68a2b9',
             backgroundColor: 'rgba(104,162,185,0.1)',

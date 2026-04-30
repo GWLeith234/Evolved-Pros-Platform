@@ -9,7 +9,46 @@ interface SidebarItem {
   match: RegExp
 }
 
-function SidebarSection({ title, items }: { title: string; items: SidebarItem[] }) {
+interface SidebarSectionData {
+  title: string
+  items: SidebarItem[]
+}
+
+const SECTIONS: ReadonlyArray<SidebarSectionData> = [
+  {
+    title: 'Admin',
+    items: [
+      { label: 'Dashboard',   href: '/admin',         match: /^\/admin$/ },
+      { label: 'All Members', href: '/admin/members', match: /^\/admin\/members/ },
+      { label: 'Revenue',     href: '/admin/revenue', match: /^\/admin\/revenue/ },
+      { label: 'Pipeline',    href: '/admin/pipeline',match: /^\/admin\/pipeline/ },
+      { label: 'Broadcast',   href: '/admin/broadcast', match: /^\/admin\/broadcast/ },
+    ],
+  },
+  {
+    title: 'Vendasta CRM',
+    items: [
+      { label: 'Contacts',      href: 'https://business.vendasta.com/crm/contacts',     match: /^$/ },
+      { label: 'Opportunities', href: 'https://business.vendasta.com/crm/opportunities', match: /^$/ },
+    ],
+  },
+  {
+    title: 'Content',
+    items: [
+      { label: 'Academy',   href: '/admin/academy',   match: /^\/admin\/academy/ },
+      { label: 'Courses',   href: '/admin/courses',   match: /^\/admin\/courses/ },
+      { label: 'Episodes',  href: '/admin/episodes',  match: /^\/admin\/episodes/ },
+      { label: 'Events',    href: '/admin/events',    match: /^\/admin\/events/ },
+      { label: 'Media',     href: '/admin/media',     match: /^\/admin\/media/ },
+      { label: 'Careers',   href: '/admin/careers',   match: /^\/admin\/careers/ },
+      { label: 'Polls',     href: '/admin/polls',     match: /^\/admin\/polls/ },
+      { label: 'Ads',       href: '/admin/ads',       match: /^\/admin\/ads/ },
+      { label: 'Branding',  href: '/admin/branding',  match: /^\/admin\/branding/ },
+    ],
+  },
+]
+
+function SidebarSection({ title, items, onSelect }: { title: string; items: SidebarItem[]; onSelect?: () => void }) {
   const pathname = usePathname()
   return (
     <div className="mb-5">
@@ -25,6 +64,7 @@ function SidebarSection({ title, items }: { title: string; items: SidebarItem[] 
           <Link
             key={item.href}
             href={item.href}
+            onClick={onSelect}
             className="flex items-center px-5 py-[9px] font-condensed font-semibold uppercase tracking-[0.12em] text-[12px] transition-all duration-150"
             style={{
               color: active ? '#68a2b9' : 'rgba(255,255,255,0.5)',
@@ -55,53 +95,35 @@ function SidebarSection({ title, items }: { title: string; items: SidebarItem[] 
   )
 }
 
-export function AdminSidebar() {
+/** Renders just the navigation sections — used by both the desktop aside
+ *  and the mobile drawer in AdminTopNav. */
+export function AdminSidebarNav({ onSelect }: { onSelect?: () => void }) {
   return (
-    <aside
-      className="w-[200px] flex-shrink-0 flex flex-col py-5"
-      style={{ backgroundColor: '#0d1c27', borderRight: '1px solid rgba(255,255,255,0.06)' }}
-    >
-      <SidebarSection
-        title="Admin"
-        items={[
-          { label: 'Dashboard',    href: '/admin',         match: /^\/admin$/ },
-          { label: 'All Members',  href: '/admin/members', match: /^\/admin\/members/ },
-          { label: 'Revenue',      href: '/admin/revenue', match: /^\/admin\/revenue/ },
-          { label: 'Pipeline',     href: '/admin/pipeline',match: /^\/admin\/pipeline/ },
-          { label: 'Broadcast',    href: '/admin/broadcast', match: /^\/admin\/broadcast/ },
-        ]}
-      />
-      <SidebarSection
-        title="Vendasta CRM"
-        items={[
-          { label: 'Contacts',      href: 'https://business.vendasta.com/crm/contacts',     match: /^$/ },
-          { label: 'Opportunities', href: 'https://business.vendasta.com/crm/opportunities', match: /^$/ },
-        ]}
-      />
-      <SidebarSection
-        title="Content"
-        items={[
-          { label: 'Academy',   href: '/admin/academy',   match: /^\/admin\/academy/ },
-          { label: 'Courses',   href: '/admin/courses',   match: /^\/admin\/courses/ },
-          { label: 'Episodes',  href: '/admin/episodes',  match: /^\/admin\/episodes/ },
-          { label: 'Events',    href: '/admin/events',    match: /^\/admin\/events/ },
-          { label: 'Media',     href: '/admin/media',     match: /^\/admin\/media/ },
-          { label: 'Careers',   href: '/admin/careers',   match: /^\/admin\/careers/ },
-          { label: 'Polls',     href: '/admin/polls',     match: /^\/admin\/polls/ },
-          { label: 'Ads',       href: '/admin/ads',       match: /^\/admin\/ads/ },
-          { label: 'Branding',  href: '/admin/branding',  match: /^\/admin\/branding/ },
-        ]}
-      />
-
+    <>
+      {SECTIONS.map(section => (
+        <SidebarSection key={section.title} title={section.title} items={section.items} onSelect={onSelect} />
+      ))}
       <div className="mt-auto px-5 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <Link
           href="/home"
+          onClick={onSelect}
           className="font-condensed text-[11px] tracking-wide transition-colors hover:text-white"
           style={{ color: 'rgba(255,255,255,0.3)' }}
         >
           ← Back to Platform
         </Link>
       </div>
+    </>
+  )
+}
+
+export function AdminSidebar() {
+  return (
+    <aside
+      className="hidden md:flex w-[200px] flex-shrink-0 flex-col py-5"
+      style={{ backgroundColor: '#0d1c27', borderRight: '1px solid rgba(255,255,255,0.06)' }}
+    >
+      <AdminSidebarNav />
     </aside>
   )
 }
