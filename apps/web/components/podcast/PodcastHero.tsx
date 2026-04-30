@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import type { PodcastEpisode } from '@/lib/podcast/transforms'
 import { PILLAR_META, fmtPodcastDate } from '@/lib/podcast/transforms'
@@ -226,10 +227,11 @@ export function PodcastHero({ episode, shareUrl }: PodcastHeroProps) {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               {episode.guest.photo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={episode.guest.photo}
-                  alt={episode.guest.name}
+                  alt={`${episode.guest.name} — guest photo`}
+                  width={40}
+                  height={40}
                   style={{ width: 40, height: 40, borderRadius: '50%', border: '2px solid var(--podcast-border-med2)', objectFit: 'cover' }}
                 />
               ) : (

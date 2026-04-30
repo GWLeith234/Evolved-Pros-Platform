@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getAvatarColor } from '@/lib/community/types'
 import { MemberBadge } from '@/components/ui/MemberBadge'
 import { Tooltip } from '@/components/ui/Tooltip'
@@ -66,8 +67,13 @@ function LeaderboardRow({ entry, currentUserTier }: { entry: LeaderboardEntry; c
       </span>
       <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden" style={{ backgroundColor: avatarBg }}>
         {entry.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={entry.avatarUrl} alt={entry.displayName} className="w-7 h-7 rounded-full object-cover" />
+          <Image
+            src={entry.avatarUrl}
+            alt={`${entry.displayName} avatar`}
+            width={28}
+            height={28}
+            className="w-7 h-7 rounded-full object-cover"
+          />
         ) : (
           <span style={{ fontSize: '9px' }} className="font-condensed font-bold text-white">{getInitials(entry.displayName)}</span>
         )}
@@ -90,8 +96,13 @@ function ActiveMemberRow({ member }: { member: MemberSummary }) {
     <Link href={`/profile/${member.id}`} className="flex items-center gap-2.5 py-2 group">
       <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden" style={{ backgroundColor: avatarBg }}>
         {member.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={member.avatarUrl} alt={member.displayName} className="w-8 h-8 rounded-full object-cover" />
+          <Image
+            src={member.avatarUrl}
+            alt={`${member.displayName} avatar`}
+            width={32}
+            height={32}
+            className="w-8 h-8 rounded-full object-cover"
+          />
         ) : (
           <span className="text-[10px] font-condensed font-bold text-white">{getInitials(member.displayName)}</span>
         )}
@@ -119,6 +130,8 @@ function AdCard({ ad }: { ad: CommunityAd }) {
         <img
           src={ad.image_url}
           alt={label}
+          loading="lazy"
+          decoding="async"
           className="w-full object-cover"
           style={{ aspectRatio: '4/3' }}
         />
@@ -165,14 +178,18 @@ function PodcastCard({ episode }: { episode: EpisodeSummary }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={episode.guest_image_url}
-            alt={episode.title}
+            alt={`${episode.title} — guest`}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover object-top"
           />
         ) : episode.thumbnail_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={episode.thumbnail_url}
-            alt={episode.title}
+            alt={`${episode.title} — episode thumbnail`}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover"
           />
         ) : (

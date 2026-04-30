@@ -9,6 +9,7 @@ const nextConfig = {
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: 'image.mux.com' },
       { protocol: 'https', hostname: 'media.evolvedpros.com' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
     ],
   },
   async rewrites() {

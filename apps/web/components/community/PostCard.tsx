@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { PostReplyThread } from './PostReplyThread'
 import { ReactionPicker } from './ReactionPicker'
 import { getAvatarColor, PILLAR_LABELS } from '@/lib/community/types'
@@ -190,10 +191,11 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
           style={{ backgroundColor: avatarBg }}
         >
           {post.author.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={post.author.avatarUrl}
-              alt={post.author.displayName}
+              alt={`${post.author.displayName} avatar`}
+              width={36}
+              height={36}
               className="w-9 h-9 rounded-full object-cover"
             />
           ) : (

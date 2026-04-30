@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import type { Post } from '@/lib/community/types'
 
@@ -177,10 +178,11 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
           }}
         >
           {post.author.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={post.author.avatarUrl}
-              alt=""
+              alt={`${post.author.displayName} avatar`}
+              width={40}
+              height={40}
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
             />
           ) : (
