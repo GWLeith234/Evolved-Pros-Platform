@@ -1,10 +1,29 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { getAvatarColor } from '@/lib/community/types'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { clearDraft, loadDraft, useDraftAutosave } from '@/hooks/useDraft'
 import type { Post, PillarTag, PostType } from '@/lib/community/types'
+
+interface ComposeDraft {
+  body: string
+  selectedTag: PillarTag | null
+  activePostType: PostType
+  pollOptions: string[]
+  pollClosesAt: string
+}
+
+function isDraftEmpty(d: ComposeDraft): boolean {
+  return (
+    d.body.trim().length === 0 &&
+    d.selectedTag === null &&
+    d.activePostType === 'update' &&
+    d.pollOptions.every(o => o.trim().length === 0) &&
+    d.pollClosesAt === ''
+  )
+}
 
 interface FeedComposeProps {
   channelId: string
@@ -37,13 +56,23 @@ function getInitials(name: string | null | undefined): string {
 }
 
 export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedComposeProps) {
-  const [body, setBody] = useState('')
-  const [selectedTag, setSelectedTag] = useState<PillarTag | null>(null)
-  const [activePostType, setActivePostType] = useState<PostType>('update')
+  const draftKey = `community:compose:${channelId}`
+  const initial = useMemo(() => loadDraft<ComposeDraft>(draftKey), [draftKey])
+  const [body, setBody] = useState<string>(initial?.body ?? '')
+  const [selectedTag, setSelectedTag] = useState<PillarTag | null>(initial?.selectedTag ?? null)
+  const [activePostType, setActivePostType] = useState<PostType>(initial?.activePostType ?? 'update')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [pollOptions, setPollOptions] = useState<string[]>(['', ''])
-  const [pollClosesAt, setPollClosesAt] = useState('')
+  const [pollOptions, setPollOptions] = useState<string[]>(
+    initial?.pollOptions && initial.pollOptions.length >= 2 ? initial.pollOptions : ['', ''],
+  )
+  const [pollClosesAt, setPollClosesAt] = useState<string>(initial?.pollClosesAt ?? '')
+
+  useDraftAutosave<ComposeDraft>(
+    draftKey,
+    { body, selectedTag, activePostType, pollOptions, pollClosesAt },
+    { isEmpty: isDraftEmpty },
+  )
 
   const isPoll = activePostType === 'poll'
   const hasContent = isPoll ? body.trim().length > 0 && pollOptions.filter(o => o.trim()).length >= 2 : body.trim().length > 0
@@ -114,6 +143,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
       setActivePostType('update')
       setPollOptions(['', ''])
       setPollClosesAt('')
+      clearDraft(draftKey)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to post.')
     } finally {
