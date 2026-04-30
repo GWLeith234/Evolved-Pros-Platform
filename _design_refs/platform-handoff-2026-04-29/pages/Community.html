@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Community — Redesign</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Barlow:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand-red:#C9302A; --brand-red-hot:#ef0e30; --brand-gold:#C9A84C;
+    --brand-teal:#0ABFA3; --brand-blue:#60A5FA; --brand-violet:#A78BFA;
+    /* Dark theme (default) */
+    --bg-page:#0A0F18;
+    --bg-surface:#111926;
+    --bg-elevated:#1A2332;
+    --border:rgba(255,255,255,0.06);
+    --border-soft:rgba(255,255,255,0.05);
+    --border-soft2:rgba(255,255,255,0.08);
+    --border-med:rgba(255,255,255,0.1);
+    --border-med2:rgba(255,255,255,0.12);
+    --border-strong:rgba(255,255,255,0.15);
+    --text-strong:#fff;
+    --text-1:rgba(255,255,255,0.85);
+    --text-2:rgba(255,255,255,0.65);
+    --text-3:rgba(255,255,255,0.55);
+    --text-4:rgba(255,255,255,0.45);
+    --text-5:rgba(255,255,255,0.35);
+    --text-6:rgba(255,255,255,0.25);
+  }
+  body[data-theme="light"]{
+    --bg-page:#F5F1E8;
+    --bg-surface:#FFFFFF;
+    --bg-elevated:#FAF7EE;
+    --border:rgba(10,15,24,0.08);
+    --border-soft:rgba(10,15,24,0.06);
+    --border-soft2:rgba(10,15,24,0.1);
+    --border-med:rgba(10,15,24,0.12);
+    --border-med2:rgba(10,15,24,0.15);
+    --border-strong:rgba(10,15,24,0.2);
+    --text-strong:#0A0F18;
+    --text-1:rgba(10,15,24,0.85);
+    --text-2:rgba(10,15,24,0.68);
+    --text-3:rgba(10,15,24,0.58);
+    --text-4:rgba(10,15,24,0.48);
+    --text-5:rgba(10,15,24,0.38);
+    --text-6:rgba(10,15,24,0.25);
+  }
+  *{box-sizing:border-box}
+  html,body{
+    margin:0;padding:0;
+    background:var(--bg-page);
+    color:var(--text-strong);
+    font-family:'Barlow',sans-serif;
+    transition:background 200ms ease, color 200ms ease;
+  }
+  a{text-decoration:none;color:inherit}
+  button{font-family:inherit}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="topnav.jsx"></script>
+<script type="text/babel" src="community-header.jsx"></script>
+<script type="text/babel" src="community-feed.jsx"></script>
+<script type="text/babel" src="community-rail.jsx"></script>
+<script type="text/babel" src="community-app.jsx"></script>
+</body>
+</html>
