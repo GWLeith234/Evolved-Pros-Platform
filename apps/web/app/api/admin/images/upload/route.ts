@@ -12,14 +12,13 @@ export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { requireAdminApi } from '@/lib/admin/helpers'
 
 export async function POST(request: Request) {
   try {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const guard = await requireAdminApi()
+    if (guard instanceof Response) return guard
 
     let formData: FormData
     try { formData = await request.formData() } catch {

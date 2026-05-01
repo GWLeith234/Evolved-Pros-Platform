@@ -16,21 +16,15 @@ export const runtime = 'nodejs'
 
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
-import { createClient } from '@/lib/supabase/server'
+import { requireAdminApi } from '@/lib/admin/helpers'
 
 export async function POST(request: Request) {
   try {
-    // Auth check
-    try {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-      const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-      if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    } catch (authErr) {
-      console.error('[upload-guest-photo] Auth error:', authErr)
-      return NextResponse.json({ error: 'Auth check failed' }, { status: 500 })
-    }
+    // Canonical admin gate — resolves role via .eq('email', user.email),
+    // avoiding the auth.uid() ≠ public.users.id footgun the previous
+    // .eq('id', user.id) lookup hit.
+    const guard = await requireAdminApi()
+    if (guard instanceof Response) return guard
 
     // Parse form data
     let formData: FormData

@@ -7,10 +7,6 @@ const PUBLIC_ROUTES = [
   '/auth/callback',
   '/api/webhooks/vendasta',
   '/api/health',
-  '/api/admin/upload-guest-photo',
-  '/api/admin/upload-event-image',
-  '/api/admin/upload-story-image',
-  '/api/admin/images/',
   '/api/cron/publish-posts',
   '/dev-login',
   '/api/dev-login',
@@ -22,7 +18,7 @@ const PUBLIC_ROUTES = [
 // Routes that are publicly accessible but still need session refresh
 // so server components can read the user's auth state.
 const SESSION_OPTIONAL_ROUTES = ['/membership']
-const ADMIN_ROUTES = ['/admin']
+const ADMIN_ROUTES = ['/admin', '/api/admin']
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -58,9 +54,15 @@ export async function middleware(request: NextRequest) {
         try {
           const profile = JSON.parse(devSession) as { role?: string }
           if (profile.role !== 'admin') {
+            if (pathname.startsWith('/api/')) {
+              return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+            }
             return NextResponse.redirect(new URL('/home', request.url))
           }
         } catch {
+          if (pathname.startsWith('/api/')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+          }
           return NextResponse.redirect(new URL('/login', request.url))
         }
       }
@@ -103,6 +105,11 @@ export async function middleware(request: NextRequest) {
     if (SESSION_OPTIONAL_ROUTES.some(r => pathname.startsWith(r))) {
       return supabaseResponse
     }
+    // /api/* paths are programmatic — return JSON 401 instead of a 307 redirect
+    // to /login (which would leak HTML to a fetch() caller).
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
@@ -132,8 +139,11 @@ export async function middleware(request: NextRequest) {
       .eq('email', user.email!)
       .single()
 
-    // Admin route guard
+    // Admin route guard — JSON 403 for /api/admin/*, redirect for /admin/*
     if (isAdminRoute && profile?.role !== 'admin') {
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.redirect(new URL('/home', request.url))
     }
 
