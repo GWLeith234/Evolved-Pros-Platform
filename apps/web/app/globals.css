@@ -284,16 +284,19 @@ html.light-mode .bg-\[\#faf9f7\] {
   background-color: #FAF7F2 !important;
 }
 
-/* Tailwind text-white inside card panels → body text color */
-html.light-mode main .text-white {
+/* Tailwind text-white → body text color (any element, not just <main>) */
+html.light-mode .text-white {
   color: #1b3c5a !important;
 }
 
-/* Muted text */
-html.light-mode main .text-white\/40,
-html.light-mode main .text-white\/50,
-html.light-mode main .text-white\/60,
-html.light-mode main .text-white\/70 {
+/* Muted text — covers /20, /25, /30 in addition to /40–/70 */
+html.light-mode .text-white\/20,
+html.light-mode .text-white\/25,
+html.light-mode .text-white\/30,
+html.light-mode .text-white\/40,
+html.light-mode .text-white\/50,
+html.light-mode .text-white\/60,
+html.light-mode .text-white\/70 {
   color: #7a8a96 !important;
 }
 
