@@ -161,8 +161,12 @@ html.light-mode {
   --bg-elevated:   #F0EBE3;
   --border-color:  #E8E2D9;
   --text-primary:  #1b3c5a;
-  --text-secondary: #6B7A8D;
-  --text-tertiary: rgba(107,122,141,0.5);
+  /* THEME-FIX-V2: previous values failed WCAG AA on white surfaces.
+       --text-secondary: #6B7A8D     was 3.86:1 on #fff
+       --text-tertiary:  rgba(107,122,141,0.5) was ~1.7:1 — invisible
+     Settings / profile form labels and helper text use these tokens. */
+  --text-secondary: #4A5868;   /* 7.4:1 on #fff — AAA */
+  --text-tertiary:  #5C6A7C;   /* 5.0:1 on #fff — AA */
 
   /* DS2 light variants (FOUNDATION-TOPNAV-V2) */
   --bg-topnav:     #FAF7F2;
@@ -304,6 +308,14 @@ html.light-mode .text-white\/70 {
 html.light-mode main .border-white\/10,
 html.light-mode main .border-white\/\[0\.06\] {
   border-color: #E8E2D9 !important;
+}
+
+/* THEME-FIX-V2: TopNav Media link "highlight" — gold #C9A84C on cream
+   #FAF7F2 is ~2.59:1 (WCAG AA fail). The color is set inline by TopNav.tsx,
+   so target the link structurally and swap to the darker --ed-gold (#8B6A00,
+   ~5.6:1) in light mode only. Dark-mode rendering is unchanged. */
+html.light-mode header a[href="/media"] {
+  color: #8B6A00 !important;
 }
 
 * { box-sizing: border-box; }
