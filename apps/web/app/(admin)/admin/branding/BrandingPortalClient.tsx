@@ -318,9 +318,9 @@ function AdsTab({ initialAds, settings }: { initialAds: Ad[]; settings: Record<s
     try {
       const supabase = createClient()
       const path = `ads/${Date.now()}.${file.name.split('.').pop()}`
-      const { error } = await supabase.storage.from('branding').upload(path, file, { upsert: true, contentType: file.type })
+      const { error } = await supabase.storage.from('Branding').upload(path, file, { upsert: true, contentType: file.type })
       if (error) throw error
-      const { data } = supabase.storage.from('branding').getPublicUrl(path)
+      const { data } = supabase.storage.from('Branding').getPublicUrl(path)
       setNewAd(prev => ({ ...prev, image_url: data.publicUrl }))
     } finally {
       setUploading(false)
@@ -717,9 +717,9 @@ function BannersTab({ initialBanners }: { initialBanners: Banner[] }) {
     try {
       const supabase = createClient()
       const path = `banners/preset_${bannerId}_${Date.now()}.${file.name.split('.').pop()}`
-      const { error } = await supabase.storage.from('branding').upload(path, file, { upsert: true, contentType: file.type })
+      const { error } = await supabase.storage.from('Branding').upload(path, file, { upsert: true, contentType: file.type })
       if (error) throw error
-      const { data } = supabase.storage.from('branding').getPublicUrl(path)
+      const { data } = supabase.storage.from('Branding').getPublicUrl(path)
       await supabase.from('profile_banners').update({ image_url: data.publicUrl }).eq('id', bannerId)
       setBanners(prev => prev.map(b => b.id === bannerId ? { ...b, image_url: data.publicUrl } : b))
     } finally {
@@ -815,9 +815,9 @@ function BannersTab({ initialBanners }: { initialBanners: Banner[] }) {
                 try {
                   const supabase = createClient()
                   const path = `banners/custom_${Date.now()}.${file.name.split('.').pop()}`
-                  const { error } = await supabase.storage.from('branding').upload(path, file, { upsert: true, contentType: file.type })
+                  const { error } = await supabase.storage.from('Branding').upload(path, file, { upsert: true, contentType: file.type })
                   if (error) throw error
-                  const { data } = supabase.storage.from('branding').getPublicUrl(path)
+                  const { data } = supabase.storage.from('Branding').getPublicUrl(path)
                   setNewImage(data.publicUrl)
                 } finally { setAddUploading(false) }
               }} />
