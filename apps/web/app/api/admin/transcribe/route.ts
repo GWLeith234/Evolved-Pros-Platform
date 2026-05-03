@@ -4,8 +4,8 @@ export const maxDuration = 300
 
 import OpenAI from 'openai'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { requireAdminApi } from '@/lib/admin/helpers'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -15,19 +15,8 @@ const adminClient = createSupabaseClient(
 )
 
 export async function POST(request: Request) {
-  // Auth — admin only
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-  if (profile?.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  const guard = await requireAdminApi()
+  if (guard instanceof Response) return guard
 
   let episodeId: string
   let audioUrl: string

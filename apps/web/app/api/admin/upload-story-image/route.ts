@@ -16,15 +16,12 @@ export const runtime = 'nodejs'
 
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
-import { createClient } from '@/lib/supabase/server'
+import { requireAdminApi } from '@/lib/admin/helpers'
 
 export async function POST(request: Request) {
   try {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-    if (profile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    const guard = await requireAdminApi()
+    if (guard instanceof Response) return guard
 
     let formData: FormData
     try { formData = await request.formData() } catch {

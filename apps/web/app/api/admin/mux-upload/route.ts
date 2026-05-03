@@ -1,21 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { requireAdminApi } from '@/lib/admin/helpers'
 
 export const dynamic = 'force-dynamic'
 
-// Requires requireAdmin helper
-async function requireAdmin(supabase: ReturnType<typeof createClient>) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
-  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
-  return { user }
-}
-
 export async function POST() {
-  const supabase = createClient()
-  const auth = await requireAdmin(supabase)
-  if (auth.error) return auth.error
+  const guard = await requireAdminApi()
+  if (guard instanceof Response) return guard
 
   // Mux direct upload — only available if credentials are configured
   const tokenId = process.env.MUX_TOKEN_ID

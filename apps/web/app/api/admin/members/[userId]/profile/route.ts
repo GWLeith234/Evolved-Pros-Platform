@@ -1,22 +1,14 @@
 export const dynamic = 'force-dynamic'
 
-import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { requireAdminApi } from '@/lib/admin/helpers'
 
 export async function PATCH(
   request: Request,
   { params }: { params: { userId: string } },
 ) {
-  // Verify caller is admin
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: caller } = await supabase
-    .from('users').select('role').eq('id', user.id).single()
-  if (caller?.role !== 'admin') {
-    return Response.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  const guard = await requireAdminApi()
+  if (guard instanceof Response) return guard
 
   const body = await request.json() as {
     display_name?: string
