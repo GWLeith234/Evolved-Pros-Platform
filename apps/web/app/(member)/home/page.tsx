@@ -494,12 +494,14 @@ export default async function MemberHomePage() {
         pillars={pillars}
       />
 
-      {/* HOME-4UP-TILES: Community Pulse / Top Stories / Latest Drops / Daily Pulse */}
+      {/* HOME tiles — Community Pulse / Top Stories / Latest Drops.
+          (Was a 4-up grid that left the 4th column empty because the
+          planned Daily Pulse tile never landed.) */}
       <div
         className="home-4up-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateColumns: 'repeat(3, 1fr)',
           gap: 16,
           width: '100%',
           maxWidth: 1440,
@@ -518,16 +520,19 @@ export default async function MemberHomePage() {
         hasName={Boolean(profile.display_name || profile.full_name)}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[7fr_5fr] gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-[7fr_5fr] gap-5 items-start">
         <ActivityFeed
           notifications={activity.notifications}
           completions={activity.completions}
           posts={activity.posts}
         />
-        <div className="space-y-5">
+        <div className="space-y-5 lg:self-start">
           <UpcomingEventsWidget events={events} userId={user.id} />
           <AcademyProgressWidget courses={activeCourses} />
-          {/* CommitmentTracker widget — weekly commitments from the Academy */}
+          {/* CommitmentTracker widget — weekly commitments from the Academy.
+              weekStart is a hint; the component derives the user's local
+              Monday on mount (server is UTC and would otherwise hand a
+              stale week to TZ-behind users on Sunday evening). */}
           <CommitmentTracker weekStart={getCurrentMonday()} />
         </div>
       </div>

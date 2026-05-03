@@ -19,14 +19,26 @@ export function RightRail() {
 
   useEffect(() => {
     const supabase = createClient()
-    supabase
-      .from('platform_ads')
-      .select('id, image_url, click_url, link_url, headline, sponsor_name')
-      .eq('zone', 'A')
-      .eq('is_active', true)
-      .then(({ data }) => {
-        if (data?.length) setAds(data)
-      })
+    // Prefer zone='A' (the right-rail-canonical zone) but fall back to any
+    // active ad if zone A has no rows. Fixes MR-HOME-2 GAP 1: members were
+    // seeing an empty rail because all active ads in the live DB were in
+    // zones other than A.
+    void (async () => {
+      const primary = await supabase
+        .from('platform_ads')
+        .select('id, image_url, click_url, link_url, headline, sponsor_name, zone')
+        .eq('zone', 'A')
+        .eq('is_active', true)
+      if (primary.data?.length) {
+        setAds(primary.data)
+        return
+      }
+      const fallback = await supabase
+        .from('platform_ads')
+        .select('id, image_url, click_url, link_url, headline, sponsor_name, zone')
+        .eq('is_active', true)
+      if (fallback.data?.length) setAds(fallback.data)
+    })()
   }, [])
 
   useEffect(() => {

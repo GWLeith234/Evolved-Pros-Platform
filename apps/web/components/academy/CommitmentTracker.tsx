@@ -14,18 +14,47 @@ interface Commitment {
 
 interface Props {
   courseId?: string
-  weekStart: string // YYYY-MM-DD — Monday of current week
+  /** YYYY-MM-DD — Monday hint from the server. Optional; the component
+   *  derives the user's local Monday on mount and uses that for both
+   *  the displayed range and the API request. The server-passed value
+   *  is only honoured for the brief moment between SSR and hydration
+   *  to avoid a layout flash. */
+  weekStart?: string
 }
 
 function formatWeekRange(weekStart: string): string {
+  if (!weekStart) return ''
   const start = new Date(weekStart + 'T00:00:00')
+  if (Number.isNaN(start.getTime())) return ''
   const end = new Date(start)
   end.setDate(start.getDate() + 6)
   const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   return `${fmt(start)} — ${fmt(end)}`
 }
 
-export function CommitmentTracker({ courseId, weekStart }: Props) {
+/** Compute Monday of the user's local current week, formatted YYYY-MM-DD. */
+function localMondayString(): string {
+  const now = new Date()
+  const day = now.getDay()                 // 0=Sun, 1=Mon, ..., 6=Sat
+  const diff = day === 0 ? -6 : 1 - day
+  const monday = new Date(now)
+  monday.setHours(0, 0, 0, 0)
+  monday.setDate(now.getDate() + diff)
+  const yyyy = monday.getFullYear()
+  const mm = String(monday.getMonth() + 1).padStart(2, '0')
+  const dd = String(monday.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
+export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props) {
+  // Derive the user's local Monday on mount. Until then we render against the
+  // server-passed prop (or an empty string) so SSR and hydration align.
+  const [resolvedWeekStart, setResolvedWeekStart] = useState<string>(weekStartProp ?? '')
+  useEffect(() => {
+    setResolvedWeekStart(localMondayString())
+  }, [])
+  const weekStart = resolvedWeekStart || weekStartProp || ''
+
   const [savedCommitments, setSavedCommitments] = useState<Commitment[]>([])
   const [inputs, setInputs] = useState(['', '', ''])
   const [loading, setLoading] = useState(true)
@@ -33,6 +62,7 @@ export function CommitmentTracker({ courseId, weekStart }: Props) {
   const [togglingId, setTogglingId] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!weekStart) return
     fetch(`/api/commitments?week_start=${encodeURIComponent(weekStart)}`)
       .then(r => r.json())
       .then((data: { commitments?: Commitment[] }) => {
