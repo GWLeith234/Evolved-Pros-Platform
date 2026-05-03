@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { getPillarLabel, getPillarColor } from '@/lib/pillars'
+import { CategoryPills, CATEGORY_COLORS } from '@/components/media/CategoryPills'
+import { getPillarLabel } from '@/lib/pillars'
 import { PollWidget } from '@/components/media/PollWidget'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -31,15 +32,57 @@ export interface Episode {
   published_at: string | null
 }
 
-// ── Constants ──────────────────────────────────────────────────────────────
+interface MediaPortalClientProps {
+  stories: MediaStory[]
+  episodes: Episode[]
+  authorAvatars?: Record<string, string>
+}
 
-const PILLAR_TEXT_COLORS: Record<string, string> = {
-  foundation: '#CC7700',
-  identity: '#534AB7',
-  'mental-toughness': '#993556',
-  strategy: '#185FA5',
-  accountability: '#AA8C3C',
-  execution: '#0F6E56',
+// ── Pillar / category helpers ───────────────────────────────────────────────
+
+const ALL_LABEL = 'All'
+
+/** Tag colour by pillar slug — Foundation/Identity/Mental Toughness/Strategy/
+ *  Accountability/Execution use the brief's spec; everything else (null,
+ *  story-type only, future "revenue"/"ai" sections) falls back to red. */
+const PILLAR_TAG_COLORS: Record<string, string> = {
+  foundation:         '#FFA538',
+  identity:           '#A78BFA',
+  'mental-toughness': '#F87171',
+  strategy:           '#60A5FA',
+  accountability:     '#C9A84C',
+  execution:          '#0ABFA3',
+}
+const FALLBACK_TAG_COLOR = '#C9302A'
+
+function tagColorForStory(story: MediaStory): string {
+  return PILLAR_TAG_COLORS[story.pillar ?? ''] ?? FALLBACK_TAG_COLOR
+}
+
+function tagLabelForStory(story: MediaStory): string {
+  if (story.pillar && PILLAR_TAG_COLORS[story.pillar]) {
+    return getPillarLabel(story.pillar)
+  }
+  return story.story_type ? story.story_type.toUpperCase() : 'EVOLVED'
+}
+
+/** Map a CategoryPills label to the matching story.pillar slug. Editorial
+ *  sections (Revenue/AI/Leadership) don't have a column today, so they
+ *  filter to nothing until media_stories.section ships. */
+function categoryToPillar(category: string): string | null {
+  switch (category) {
+    case 'Foundation':       return 'foundation'
+    case 'Identity':         return 'identity'
+    case 'Mental Toughness': return 'mental-toughness'
+    case 'Strategy':         return 'strategy'
+    case 'Accountability':   return 'accountability'
+    case 'Execution':        return 'execution'
+    default:                 return null   // Revenue / AI / Leadership / All
+  }
+}
+
+function isEditorialCategory(category: string): boolean {
+  return category === 'Revenue' || category === 'AI' || category === 'Leadership'
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -61,366 +104,431 @@ function formatDuration(seconds: number | null): string {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-function pillarTextColor(p: string | null): string {
-  return PILLAR_TEXT_COLORS[p ?? ''] ?? getPillarColor(p)
-}
-
 function storyUrl(story: MediaStory): string {
   return `/media/${story.pillar ?? 'general'}/${story.slug}`
 }
 
-function fullUrl(story: MediaStory): string {
-  if (typeof window === 'undefined') return ''
-  return window.location.origin + storyUrl(story)
-}
+// ── Pillar tag chip (shared by hero + cards) ───────────────────────────────
 
-// ── Share helpers ────────────────────────────────────────────────────────────
-
-function shareLinkedIn(url: string) {
-  window.open(`https://linkedin.com/shareArticle?url=${encodeURIComponent(url)}`, '_blank', 'noopener')
-}
-
-function shareX(url: string, title: string) {
-  window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank', 'noopener')
-}
-
-function shareEmail(url: string, title: string) {
-  window.location.href = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(url)}`
-}
-
-// ── Share button components ────────────────────────────────────────────────
-
-function LinkedInBtn({ onClick }: { onClick: () => void }) {
-  return (
-    <button type="button" onClick={onClick} title="Share on LinkedIn" style={{ width: 24, height: 24, borderRadius: 2, backgroundColor: '#0077B5', color: '#fff', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-condensed)' }}>
-      in
-    </button>
-  )
-}
-
-function XBtn({ onClick }: { onClick: () => void }) {
-  return (
-    <button type="button" onClick={onClick} title="Share on X" style={{ width: 24, height: 24, borderRadius: 2, backgroundColor: '#000', color: '#fff', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-condensed)' }}>
-      X
-    </button>
-  )
-}
-
-function EmailBtn({ onClick }: { onClick: () => void }) {
-  return (
-    <button type="button" onClick={onClick} title="Share via Email" style={{ width: 24, height: 24, borderRadius: 2, backgroundColor: '#2B3A5A', color: '#fff', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>
-      ✉
-    </button>
-  )
-}
-
-function CopyBtn({ url }: { url: string }) {
-  const [copied, setCopied] = useState(false)
-  return (
-    <button
-      type="button"
-      title="Copy link"
-      onClick={() => {
-        navigator.clipboard.writeText(url)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      }}
-      style={{ width: copied ? 'auto' : 24, height: 24, borderRadius: 2, backgroundColor: 'transparent', color: '#2B3A5A', border: '1px solid #2B3A5A', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontFamily: 'var(--font-condensed)', padding: copied ? '0 8px' : 0 }}
-    >
-      {copied ? 'Copied!' : '🔗'}
-    </button>
-  )
-}
-
-// ── Article Card ────────────────────────────────────────────────────────────
-
-function ArticleCard({ story }: { story: MediaStory }) {
-  const url = fullUrl(story)
-  return (
-    <div style={{ backgroundColor: '#fff', border: '0.5px solid rgba(43,58,90,0.1)', borderRadius: 2, overflow: 'hidden' }}>
-      {/* Image */}
-      <Link href={storyUrl(story)} style={{ textDecoration: 'none', display: 'block' }}>
-        <div style={{ aspectRatio: '16/9', backgroundColor: '#2B3A5A', overflow: 'hidden', position: 'relative' }}>
-          {story.featured_image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={story.featured_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-          ) : (
-            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1a2540)' }} />
-          )}
-        </div>
-      </Link>
-      <div style={{ padding: '10px 12px 12px' }}>
-        {/* Pillar tag */}
-        {story.pillar && (
-          <p style={{ fontSize: 9, textTransform: 'uppercase', fontWeight: 700, fontFamily: 'var(--font-condensed)', color: pillarTextColor(story.pillar), letterSpacing: '0.06em', marginBottom: 4 }}>
-            {getPillarLabel(story.pillar)}
-          </p>
-        )}
-        {/* Title */}
-        <Link href={storyUrl(story)} style={{ textDecoration: 'none' }}>
-          <h3 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 15, color: '#2B3A5A', lineHeight: 1.3, margin: '0 0 4px' }}>
-            {story.title}
-          </h3>
-        </Link>
-        {/* Excerpt */}
-        {story.excerpt && (
-          <p style={{ fontSize: 11, color: 'rgba(43,58,90,0.55)', lineHeight: 1.5, margin: '0 0 8px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-            {story.excerpt}
-          </p>
-        )}
-        {/* Footer */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span suppressHydrationWarning style={{ fontSize: 10, color: 'rgba(43,58,90,0.4)', fontFamily: 'var(--font-body)' }}>
-            {formatDate(story.published_at)} · {readTime(story.body)} read
-          </span>
-          <div style={{ display: 'flex', gap: 4 }}>
-            <LinkedInBtn onClick={() => shareLinkedIn(url)} />
-            <XBtn onClick={() => shareX(url, story.title)} />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ── Main Component ──────────────────────────────────────────────────────────
-
-export function MediaPortalClient({
-  featured,
-  sidebar,
-  grid,
-  episodes,
-  authorAvatars = {},
+function PillarTag({
+  story,
+  variant = 'card',
 }: {
-  featured: MediaStory | null
-  sidebar: MediaStory[]
-  grid: MediaStory[]
-  episodes: Episode[]
-  authorAvatars?: Record<string, string>
+  story: MediaStory
+  variant?: 'card' | 'hero'
 }) {
+  const color = tagColorForStory(story)
+  const label = tagLabelForStory(story)
+  // Hero variant sits on a dark gradient overlay → solid colour reads cleaner.
+  // Card variant sits on white surface → 10%/30% chip per the brief.
+  const style: React.CSSProperties = variant === 'hero'
+    ? {
+        backgroundColor: color,
+        color: '#fff',
+        border: `1px solid ${color}`,
+      }
+    : {
+        backgroundColor: `${color}1A`,   // ~10%
+        color,
+        border: `1px solid ${color}4D`,  // ~30%
+      }
   return (
-    <>
-      {/* ── Section 1: Hero + Sidebar ── */}
-      {featured && (
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 24px 0' }}>
-          <div
-            style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 16 }}
-            className="media-hero-grid"
-          >
-            {/* LEFT — Hero article */}
-            <div>
-              {/* Hero image */}
-              <Link href={storyUrl(featured)} style={{ textDecoration: 'none', display: 'block' }}>
-                <div style={{ position: 'relative', aspectRatio: '16/9', borderRadius: 2, overflow: 'hidden', backgroundColor: '#2B3A5A' }}>
-                  {featured.featured_image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={featured.featured_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                  ) : (
-                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1a2540)' }} />
-                  )}
-                  {/* Overlay */}
-                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '40px 16px 14px', background: 'linear-gradient(transparent, rgba(0,0,0,0.7))' }}>
-                    {featured.pillar && (
-                      <span style={{ fontSize: 9, textTransform: 'uppercase', fontWeight: 700, fontFamily: 'var(--font-condensed)', color: '#C9A84C', letterSpacing: '0.08em' }}>
-                        {getPillarLabel(featured.pillar)}
-                      </span>
-                    )}
-                    <h2 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 24, color: '#fff', lineHeight: 1.2, margin: '4px 0 6px' }}>
-                      {featured.title}
-                    </h2>
-                    <span suppressHydrationWarning style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)' }}>
-                      {featured.author ?? 'George Leith'} · {formatDate(featured.published_at)} · {readTime(featured.body)} read
-                    </span>
-                  </div>
-                </div>
-              </Link>
+    <span
+      style={{
+        ...style,
+        display: 'inline-block',
+        padding: '3px 8px',
+        fontFamily: '"Barlow Condensed", sans-serif',
+        fontWeight: 700,
+        fontSize: 10,
+        letterSpacing: '0.14em',
+        textTransform: 'uppercase',
+        borderRadius: 2,
+      }}
+    >
+      {label}
+    </span>
+  )
+}
 
-              {/* Excerpt */}
-              {featured.excerpt && (
-                <p style={{ fontFamily: 'var(--font-serif)', fontSize: 13, lineHeight: 1.75, color: '#3a4a56', margin: '12px 0 10px' }}>
-                  {featured.excerpt}
-                </p>
-              )}
+// ── Featured hero card ─────────────────────────────────────────────────────
 
-              {/* Byline */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                {authorAvatars[featured.author ?? ''] ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={authorAvatars[featured.author ?? '']} alt={featured.author ?? 'George Leith'} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                ) : (
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 700, fontFamily: 'var(--font-condensed)', flexShrink: 0 }}>
-                    {(featured.author ?? 'GL').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
-                  </div>
-                )}
-                <span style={{ fontSize: 12, color: '#2B3A5A', fontFamily: 'var(--font-body)', fontWeight: 500 }}>
-                  {featured.author ?? 'George Leith'} · Evolved Pros
-                </span>
-              </div>
-
-              {/* Share strip */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingBottom: 16, borderBottom: '1px solid rgba(43,58,90,0.1)' }}>
-                <span style={{ fontSize: 9, fontWeight: 700, fontFamily: 'var(--font-condensed)', color: 'rgba(43,58,90,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 4 }}>Share</span>
-                <LinkedInBtn onClick={() => shareLinkedIn(fullUrl(featured))} />
-                <XBtn onClick={() => shareX(fullUrl(featured), featured.title)} />
-                <EmailBtn onClick={() => shareEmail(fullUrl(featured), featured.title)} />
-                <CopyBtn url={fullUrl(featured)} />
-              </div>
-            </div>
-
-            {/* RIGHT — Sidebar */}
-            <div>
-              {/* Latest Podcast */}
-              {episodes.length > 0 && (
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{ backgroundColor: '#2B3A5A', padding: '7px 10px', marginBottom: 0 }}>
-                    <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Latest Podcast
-                    </span>
-                  </div>
-                  <div style={{ backgroundColor: '#fff', border: '0.5px solid rgba(43,58,90,0.1)', borderTop: 'none' }}>
-                    {episodes.map(ep => (
-                      <div key={ep.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderBottom: '0.5px solid rgba(43,58,90,0.06)' }}>
-                        {/* Podcast thumb */}
-                        <div style={{ width: 44, height: 44, borderRadius: 4, backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', flexShrink: 0 }}>
-                          <span style={{ fontSize: 18 }}>🎙</span>
-                          <span style={{ position: 'absolute', bottom: -2, right: -2, fontSize: 7, fontWeight: 700, fontFamily: 'var(--font-condensed)', backgroundColor: '#C9302A', color: '#fff', padding: '1px 4px', borderRadius: 2, textTransform: 'uppercase' }}>
-                            EP
-                          </span>
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontSize: 9, color: 'rgba(43,58,90,0.45)', fontFamily: 'var(--font-condensed)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>
-                            Episode {ep.episode_number}
-                          </p>
-                          <p style={{ fontSize: 11, color: '#2B3A5A', fontWeight: 600, fontFamily: 'var(--font-body)', lineHeight: 1.3, margin: '1px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            {ep.title}
-                          </p>
-                          <p style={{ fontSize: 9, color: 'rgba(43,58,90,0.4)', fontFamily: 'var(--font-body)', margin: 0 }}>
-                            {formatDuration(ep.duration_seconds)}
-                          </p>
-                        </div>
-                        {/* Play button */}
-                        <Link href={`/podcast/${ep.slug ?? ''}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
-                          <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#C9302A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ width: 0, height: 0, borderLeft: '8px solid #fff', borderTop: '5px solid transparent', borderBottom: '5px solid transparent', marginLeft: 2 }} />
-                          </div>
-                        </Link>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Latest Stories */}
-              {sidebar.length > 0 && (
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{ backgroundColor: '#2B3A5A', padding: '7px 10px', marginBottom: 0 }}>
-                    <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Latest Stories
-                    </span>
-                  </div>
-                  <div style={{ backgroundColor: '#fff', border: '0.5px solid rgba(43,58,90,0.1)', borderTop: 'none' }}>
-                    {sidebar.map(s => (
-                      <Link key={s.id} href={storyUrl(s)} style={{ display: 'flex', alignItems: 'start', gap: 8, padding: '8px 10px', borderBottom: '0.5px solid rgba(43,58,90,0.06)', textDecoration: 'none' }}>
-                        {/* Thumbnail */}
-                        <div style={{ width: 58, height: 42, borderRadius: 2, backgroundColor: '#2B3A5A', overflow: 'hidden', flexShrink: 0 }}>
-                          {s.featured_image_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={s.featured_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                          ) : (
-                            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1a2540)' }} />
-                          )}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          {s.pillar && (
-                            <p style={{ fontSize: 8, textTransform: 'uppercase', fontWeight: 700, fontFamily: 'var(--font-condensed)', color: pillarTextColor(s.pillar), letterSpacing: '0.06em', margin: '0 0 2px' }}>
-                              {getPillarLabel(s.pillar)}
-                            </p>
-                          )}
-                          <p style={{ fontSize: 11, fontWeight: 600, color: '#2B3A5A', lineHeight: 1.3, fontFamily: 'var(--font-body)', margin: '0 0 2px' }}>
-                            {s.title}
-                          </p>
-                          <p suppressHydrationWarning style={{ fontSize: 9, color: 'rgba(43,58,90,0.4)', fontFamily: 'var(--font-body)', margin: 0 }}>
-                            {formatDate(s.published_at)} · {readTime(s.body)} read
-                          </p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Poll widget */}
-              <PollWidget />
-
-              {/* Ad zone B placeholder */}
-              <div style={{ border: '1px dashed rgba(43,58,90,0.2)', borderRadius: 2, padding: '20px 10px', textAlign: 'center', backgroundColor: 'rgba(255,255,255,0.5)' }}>
-                <span style={{ fontSize: 10, color: 'rgba(43,58,90,0.3)', fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  Ad Zone B · 280×200
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+function FeaturedCard({ story }: { story: MediaStory }) {
+  return (
+    <Link
+      href={storyUrl(story)}
+      style={{
+        display: 'block',
+        textDecoration: 'none',
+        position: 'relative',
+        aspectRatio: '16/9',
+        borderRadius: 4,
+        overflow: 'hidden',
+        background: '#1B2A4A',
+      }}
+    >
+      {story.featured_image_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={story.featured_image_url}
+          alt=""
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
+      ) : (
+        <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1A2540)' }} />
       )}
 
-      {/* ── Section 2: "MORE FROM EVOLVED MEDIA" divider ── */}
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 24px 0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 40, height: 2, backgroundColor: '#2B3A5A', flexShrink: 0 }} />
-          <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 13, color: '#2B3A5A', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
-            More from Evolved Media
-          </span>
-          <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(43,58,90,0.15)' }} />
+      {/* Pillar tag — top-left */}
+      <div style={{ position: 'absolute', top: 16, left: 16 }}>
+        <PillarTag story={story} variant="hero" />
+      </div>
+
+      {/* Dark gradient overlay (bottom → top) */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background:
+            'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.55) 35%, rgba(0,0,0,0.0) 60%)',
+        }}
+      />
+
+      {/* Title + meta */}
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          padding: '20px 24px 22px',
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) auto',
+          gap: 16,
+          alignItems: 'end',
+        }}
+      >
+        <h2
+          style={{
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontWeight: 500,
+            fontSize: 24,
+            lineHeight: 1.2,
+            color: '#fff',
+            margin: 0,
+            display: '-webkit-box',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: 3,
+            overflow: 'hidden',
+          }}
+        >
+          {story.title}
+        </h2>
+        <span
+          suppressHydrationWarning
+          style={{
+            fontSize: 12,
+            color: 'rgba(255,255,255,0.7)',
+            fontFamily: 'var(--font-body)',
+            whiteSpace: 'nowrap',
+            textAlign: 'right',
+          }}
+        >
+          {story.author ?? 'George Leith'} · {readTime(story.body)} read
+        </span>
+      </div>
+    </Link>
+  )
+}
+
+// ── Supporting card ─────────────────────────────────────────────────────────
+
+function ArticleCard({ story }: { story: MediaStory }) {
+  return (
+    <Link
+      href={storyUrl(story)}
+      className="media-card"
+      style={{
+        display: 'block',
+        textDecoration: 'none',
+        background: '#fff',
+        border: '1px solid rgba(43,58,90,0.10)',
+        borderRadius: 4,
+        overflow: 'hidden',
+        transition: 'transform 160ms ease, box-shadow 160ms ease',
+      }}
+    >
+      {/* Image — 4:3 */}
+      <div style={{ aspectRatio: '4/3', background: '#1B2A4A', overflow: 'hidden' }}>
+        {story.featured_image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={story.featured_image_url}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+        ) : (
+          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1A2540)' }} />
+        )}
+      </div>
+
+      <div style={{ padding: '14px 14px 16px' }}>
+        <PillarTag story={story} />
+        <h3
+          style={{
+            margin: '10px 0 8px',
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontWeight: 700,
+            fontSize: 16,
+            lineHeight: 1.3,
+            color: '#1B2A4A',
+            display: '-webkit-box',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: 2,
+            overflow: 'hidden',
+          }}
+        >
+          {story.title}
+        </h3>
+        <p
+          suppressHydrationWarning
+          style={{
+            margin: 0,
+            fontSize: 11,
+            color: 'rgba(43,58,90,0.55)',
+            fontFamily: 'var(--font-body)',
+          }}
+        >
+          {story.author ?? 'George Leith'} · {formatDate(story.published_at)}
+        </p>
+      </div>
+    </Link>
+  )
+}
+
+// ── Main component ──────────────────────────────────────────────────────────
+
+export function MediaPortalClient({
+  stories,
+  episodes,
+  authorAvatars: _authorAvatars = {},
+}: MediaPortalClientProps) {
+  void _authorAvatars   // currently unused after the redesign — preserved on
+                        // the prop so the server fetch doesn't have to change.
+  const [activeCategory, setActiveCategory] = useState<string>(ALL_LABEL)
+
+  const filteredStories = useMemo(() => {
+    if (activeCategory === ALL_LABEL) return stories
+    if (isEditorialCategory(activeCategory)) {
+      // No backing column yet — return empty list for an honest empty state.
+      return []
+    }
+    const slug = categoryToPillar(activeCategory)
+    return slug ? stories.filter(s => s.pillar === slug) : stories
+  }, [stories, activeCategory])
+
+  const featured = filteredStories[0] ?? null
+  const grid = filteredStories.slice(1)
+  // Right rail "Latest Stories" stays unfiltered per the brief.
+  const sidebarStories = stories.slice(0, 4)
+
+  return (
+    <>
+      {/* Filter pills */}
+      <CategoryPills
+        initialActive={activeCategory}
+        onSelect={setActiveCategory}
+      />
+
+      {/* ── Section 1: Hero + right rail ── */}
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 0' }}>
+        <div
+          className="media-hero-grid"
+          style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24 }}
+        >
+          {/* LEFT — Featured card (or empty state) */}
+          <div>
+            {featured ? (
+              <FeaturedCard story={featured} />
+            ) : (
+              <div
+                style={{
+                  aspectRatio: '16/9',
+                  border: '1px dashed rgba(43,58,90,0.2)',
+                  borderRadius: 4,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'rgba(43,58,90,0.4)',
+                  fontSize: 13,
+                  fontFamily: 'var(--font-body)',
+                  background: 'rgba(255,255,255,0.5)',
+                }}
+              >
+                {isEditorialCategory(activeCategory)
+                  ? `No ${activeCategory} stories yet — section ships in MR2.`
+                  : 'No published stories in this category yet.'}
+              </div>
+            )}
+          </div>
+
+          {/* RIGHT — sidebar (intentionally NOT filtered per brief) */}
+          <aside>
+            {/* Latest Podcast */}
+            {episodes.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ background: '#2B3A5A', padding: '8px 12px' }}>
+                  <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 11, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.10em' }}>
+                    Latest Podcast
+                  </span>
+                </div>
+                <div style={{ background: '#fff', border: '1px solid rgba(43,58,90,0.1)', borderTop: 'none' }}>
+                  {episodes.map(ep => (
+                    <div key={ep.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderBottom: '1px solid rgba(43,58,90,0.06)' }}>
+                      <div style={{ width: 44, height: 44, borderRadius: 4, background: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', flexShrink: 0 }}>
+                        <span style={{ fontSize: 18 }}>🎙</span>
+                        <span style={{ position: 'absolute', bottom: -2, right: -2, fontSize: 7, fontWeight: 700, fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: '#C9302A', color: '#fff', padding: '1px 4px', borderRadius: 2, textTransform: 'uppercase' }}>
+                          EP
+                        </span>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: 9, color: 'rgba(43,58,90,0.45)', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>
+                          Episode {ep.episode_number}
+                        </p>
+                        <p style={{ fontSize: 12, color: '#1B2A4A', fontWeight: 600, fontFamily: 'var(--font-body)', lineHeight: 1.3, margin: '1px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {ep.title}
+                        </p>
+                        <p style={{ fontSize: 10, color: 'rgba(43,58,90,0.4)', fontFamily: 'var(--font-body)', margin: 0 }}>
+                          {formatDuration(ep.duration_seconds)}
+                        </p>
+                      </div>
+                      <Link href={`/podcast/${ep.slug ?? ''}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
+                        <span style={{ width: 28, height: 28, borderRadius: '50%', background: '#C9302A', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span aria-hidden="true" style={{ width: 0, height: 0, borderLeft: '8px solid #fff', borderTop: '5px solid transparent', borderBottom: '5px solid transparent', marginLeft: 2 }} />
+                        </span>
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Latest Stories — always unfiltered so the rail stays useful */}
+            {sidebarStories.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ background: '#2B3A5A', padding: '8px 12px' }}>
+                  <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 11, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.10em' }}>
+                    Latest Stories
+                  </span>
+                </div>
+                <div style={{ background: '#fff', border: '1px solid rgba(43,58,90,0.1)', borderTop: 'none' }}>
+                  {sidebarStories.map(s => (
+                    <Link key={s.id} href={storyUrl(s)} style={{ display: 'flex', alignItems: 'start', gap: 10, padding: '10px 12px', borderBottom: '1px solid rgba(43,58,90,0.06)', textDecoration: 'none' }}>
+                      <div style={{ width: 64, height: 48, borderRadius: 2, background: '#2B3A5A', overflow: 'hidden', flexShrink: 0 }}>
+                        {s.featured_image_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={s.featured_image_url} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                        ) : (
+                          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1A2540)' }} />
+                        )}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: 9, textTransform: 'uppercase', fontWeight: 700, fontFamily: '"Barlow Condensed", sans-serif', color: tagColorForStory(s), letterSpacing: '0.10em', margin: '0 0 3px' }}>
+                          {tagLabelForStory(s)}
+                        </p>
+                        <p style={{ fontSize: 12, fontWeight: 600, color: '#1B2A4A', lineHeight: 1.3, fontFamily: 'var(--font-body)', margin: '0 0 3px' }}>
+                          {s.title}
+                        </p>
+                        <p suppressHydrationWarning style={{ fontSize: 10, color: 'rgba(43,58,90,0.45)', fontFamily: 'var(--font-body)', margin: 0 }}>
+                          {formatDate(s.published_at)} · {readTime(s.body)} read
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <PollWidget />
+
+            <div
+              style={{
+                marginTop: 16,
+                border: '1px dashed rgba(43,58,90,0.2)',
+                borderRadius: 2,
+                padding: '24px 12px',
+                textAlign: 'center',
+                background: 'rgba(255,255,255,0.5)',
+              }}
+            >
+              <span style={{ fontSize: 10, color: 'rgba(43,58,90,0.3)', fontFamily: '"Barlow Condensed", sans-serif', textTransform: 'uppercase', letterSpacing: '0.10em' }}>
+                Ad Zone B · 320×200
+              </span>
+            </div>
+          </aside>
         </div>
       </div>
 
-      {/* ── Section 3: Article grid ── */}
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '16px 24px 40px' }}>
+      {/* ── Section 2: "More from Evolved Media" divider ── */}
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px 0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 40, height: 2, background: '#1B2A4A' }} />
+          <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 12, color: '#1B2A4A', textTransform: 'uppercase', letterSpacing: '0.14em', whiteSpace: 'nowrap' }}>
+            {activeCategory === ALL_LABEL ? 'More from Evolved Media' : `More in ${activeCategory}`}
+          </span>
+          <div style={{ flex: 1, height: 1, background: 'rgba(43,58,90,0.15)' }} />
+        </div>
+      </div>
+
+      {/* ── Section 3: Card grid ── */}
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 56px' }}>
         {grid.length > 0 ? (
-          <>
-            {/* First row */}
-            <div className="media-article-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 14 }}>
-              {grid.slice(0, 3).map(s => (
-                <ArticleCard key={s.id} story={s} />
-              ))}
-            </div>
-
-            {/* Ad Zone A */}
-            <div style={{ border: '1px dashed rgba(43,58,90,0.2)', borderRadius: 2, padding: '16px', textAlign: 'center', marginBottom: 14, backgroundColor: 'rgba(255,255,255,0.5)' }}>
-              <span style={{ fontSize: 10, color: 'rgba(43,58,90,0.3)', fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                Ad Zone A · Full Width
-              </span>
-            </div>
-
-            {/* Second row */}
-            {grid.length > 3 && (
-              <div className="media-article-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
-                {grid.slice(3, 6).map(s => (
-                  <ArticleCard key={s.id} story={s} />
-                ))}
-              </div>
-            )}
-          </>
+          <div className="media-card-grid">
+            {grid.map(s => (
+              <ArticleCard key={s.id} story={s} />
+            ))}
+          </div>
         ) : (
-          <div style={{ padding: '60px 0', textAlign: 'center' }}>
-            <span style={{ fontSize: 13, color: 'rgba(43,58,90,0.35)', fontFamily: 'var(--font-body)' }}>
-              No published stories in this category yet.
+          <div style={{ padding: '40px 0', textAlign: 'center' }}>
+            <span style={{ fontSize: 13, color: 'rgba(43,58,90,0.4)', fontFamily: 'var(--font-body)' }}>
+              {filteredStories.length === 0
+                ? 'No published stories in this category yet.'
+                : 'That’s the only story in this category right now.'}
             </span>
           </div>
         )}
       </div>
 
-      {/* Responsive styles */}
+      {/* Responsive + hover styles */}
       <style>{`
+        .media-card-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+        }
+        .media-card { transform: translateZ(0); }
+        .media-card:hover {
+          transform: scale(1.02);
+          box-shadow: 0 14px 30px rgba(27,42,74,0.12);
+        }
+        @media (max-width: 1023px) {
+          .media-card-grid { grid-template-columns: repeat(2, 1fr); }
+        }
         @media (max-width: 767px) {
-          .media-hero-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .media-article-grid {
-            grid-template-columns: 1fr !important;
-          }
+          .media-hero-grid { grid-template-columns: 1fr !important; }
+          .media-card-grid { grid-template-columns: 1fr; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .media-card:hover { transform: none; }
         }
       `}</style>
+
+      {/* Reference CATEGORY_COLORS so the import isn't shaken out by tree-
+          shakers — it backs CategoryPills' visual mapping which the brief
+          asks us to keep aligned with this client. */}
+      {CATEGORY_COLORS && null}
     </>
   )
 }

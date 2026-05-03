@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/server'
 import { MediaPortalClient } from './MediaPortalClient'
 import type { MediaStory, Episode } from './MediaPortalClient'
 import { Masthead } from '@/components/media/Masthead'
-import { CategoryPills } from '@/components/media/CategoryPills'
 
 export const revalidate = 60
 
@@ -15,19 +14,16 @@ export const metadata: Metadata = {
 export default async function MediaPage() {
   const supabase = createClient()
 
-  // Fetch 10 most recent published stories
+  // Fetch a wider window so the client can filter by category without
+  // a refetch round-trip.
   const { data: allStories } = await supabase
     .from('media_stories')
     .select('id, title, slug, excerpt, pillar, story_type, featured_image_url, author, published_at, body, views')
     .eq('is_published', true)
     .order('published_at', { ascending: false })
-    .limit(10)
+    .limit(30)
 
   const stories = (allStories ?? []) as MediaStory[]
-
-  const featured = stories[0] ?? null
-  const sidebar = stories.slice(1, 4)
-  const grid = stories.slice(4, 10)
 
   // Look up author avatars from users table by full_name
   const authorNames = [...new Set(stories.map(s => s.author).filter(Boolean) as string[])]
@@ -63,11 +59,8 @@ export default async function MediaPage() {
   return (
     <>
       <Masthead />
-      <CategoryPills />
       <MediaPortalClient
-        featured={featured}
-        sidebar={sidebar}
-        grid={grid}
+        stories={stories}
         episodes={episodes}
         authorAvatars={authorAvatars}
       />
