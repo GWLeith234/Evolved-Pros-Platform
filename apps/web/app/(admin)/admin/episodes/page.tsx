@@ -2,6 +2,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { EpisodeThumbnail } from './EpisodeThumbnail'
+import { SyncPodcastButton } from './SyncPodcastButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,13 +40,16 @@ export default async function AdminEpisodesPage() {
             {episodes.length} total · {episodes.filter(e => e.is_published).length} published
           </p>
         </div>
-        <Link
-          href="/admin/episodes/new"
-          className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-5 py-2.5 transition-all"
-          style={{ backgroundColor: '#1b3c5a', color: 'white' }}
-        >
-          + New Episode
-        </Link>
+        <div className="flex items-start gap-3">
+          <SyncPodcastButton />
+          <Link
+            href="/admin/episodes/new"
+            className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-5 py-2.5 transition-all"
+            style={{ backgroundColor: '#1b3c5a', color: 'white' }}
+          >
+            + New Episode
+          </Link>
+        </div>
       </div>
 
       {episodes.length === 0 ? (
