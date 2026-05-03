@@ -10,6 +10,8 @@ interface LessonPlayerClientProps {
   lessonNumber: number
   totalLessons: number
   courseTitle: string
+  /** Optional height cap (px). Pass a larger value or omit for full-width. */
+  maxHeight?: number
 }
 
 /**
