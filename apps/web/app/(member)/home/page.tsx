@@ -123,7 +123,7 @@ async function fetchUpcomingEvents(supabase: ReturnType<typeof createClient>, us
 
 async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, userId: string) {
   const [courses, lessons, progress] = await Promise.all([
-    supabase.from('courses').select('id, title, slug, sort_order').eq('is_published', true).order('sort_order'),
+    supabase.from('courses').select('id, title, slug, sort_order, pillar_number').eq('is_published', true).order('sort_order'),
     supabase.from('lessons').select('id, course_id').eq('is_published', true),
     supabase
       .from('lesson_progress')
@@ -142,28 +142,26 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
     progressByLesson[p.lesson_id] = { completed_at: p.completed_at, updated_at: p.updated_at }
   }
 
-  const results = (courses.data ?? []).map(c => {
+  // Return ALL published courses with their progress. Caller filters/slices for
+  // the AcademyProgressWidget (top-N active) and uses the full list to derive
+  // per-pillar Architecture-column state in the WelcomeBanner.
+  return (courses.data ?? []).map(c => {
     const courseLesson = lessonsByCourse[c.id] ?? []
     const total = courseLesson.length
     const completed = courseLesson.filter(id => progressByLesson[id]?.completed_at).length
     const pct = total > 0 ? Math.round((completed / total) * 100) : 0
+    const completedAts = courseLesson
+      .map(id => progressByLesson[id]?.completed_at)
+      .filter((v): v is string => Boolean(v))
+      .sort()
     const lastActivity = courseLesson
       .map(id => progressByLesson[id]?.updated_at)
       .filter(Boolean)
       .sort()
       .pop() ?? null
-    return { ...c, total, completed, pct, lastActivity }
+    const lastCompletedAt = completedAts.length > 0 ? completedAts[completedAts.length - 1] : null
+    return { ...c, total, completed, pct, lastActivity, lastCompletedAt }
   })
-
-  // Return top 3 by last activity
-  return results
-    .filter(c => c.lastActivity !== null || c.pct > 0)
-    .sort((a, b) => {
-      if (!a.lastActivity) return 1
-      if (!b.lastActivity) return -1
-      return new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()
-    })
-    .slice(0, 3)
 }
 
 async function fetchUnreadCount(supabase: ReturnType<typeof createClient>, userId: string) {
@@ -410,14 +408,19 @@ export default async function MemberHomePage() {
     topStories,
     latestEpisodesResult,
   ] = await Promise.all([
-    fetchDashboardStats(supabase, user.id, profile.tier, profile.points),
+    // MR-HOME-1: lesson_progress / member_badges store rows under
+    // public.users.id, NOT auth.uid(). Pass profile.id (resolved via
+    // email in fetchCurrentUser) so the queries actually return data
+    // for accounts where auth.uid() ≠ public.users.id. Same root cause
+    // as B1 / B2 / UI-3.
+    fetchDashboardStats(supabase, profile.id, profile.tier, profile.points),
     fetchRecentActivity(profile.id),
     fetchUpcomingEvents(supabase, user.id),
-    fetchCourseProgress(supabase, user.id),
+    fetchCourseProgress(supabase, profile.id),
     fetchUnreadCount(supabase, user.id),
     // Use adminClient to bypass RLS — greeting_quotes is a public table but anon key may be blocked
     adminClient.from('greeting_quotes').select('quote_text, source').order('day_number'),
-    supabase.from('member_badges').select('pillar_number, awarded_at').eq('user_id', user.id),
+    supabase.from('member_badges').select('pillar_number, awarded_at').eq('user_id', profile.id),
     fetchLatestPulsePosts(3),
     fetchPinnedLiveEvent(profile.id),
     fetchTopStories(3),
@@ -435,16 +438,45 @@ export default async function MemberHomePage() {
   const upcomingEventCount = events.filter(e => !e.isRegistered).length
 
   const earnedSet = new Set(earnedBadges)
+
+  // Index courses by pillar_number so the Architecture column can read
+  // per-pillar progress directly. Earned wins over progress (a member
+  // can have a manually-awarded badge before they hit 100%, and a 100%
+  // course should also count as earned even when no badge row exists).
+  const courseByPillar = new Map<number, typeof courseProgress[number]>()
+  for (const c of courseProgress) {
+    if (c.pillar_number != null) courseByPillar.set(c.pillar_number, c)
+  }
+
   const pillars = ([1, 2, 3, 4, 5, 6] as const).map(n => {
     const name = PILLAR_CONFIG[n].label
-    if (earnedSet.has(n)) {
-      return { number: n, name, state: 'earned' as const, earnedAt: awardedAtByPillar.get(n) ?? null }
+    const cp = courseByPillar.get(n)
+    const isEarnedFromCompletion = cp ? cp.total > 0 && cp.pct === 100 : false
+
+    if (earnedSet.has(n) || isEarnedFromCompletion) {
+      // earnedAt: prefer the badge-awarded timestamp; otherwise fall back to
+      // the most recent lesson completed_at within the course. This is what
+      // the WelcomeBanner JustEarned pill gates on (fires when < 7 days old).
+      const earnedAt = awardedAtByPillar.get(n) ?? cp?.lastCompletedAt ?? null
+      return { number: n, name, state: 'earned' as const, earnedAt }
     }
-    if (n <= stats.pillarsUnlocked) {
-      return { number: n, name, state: 'in-progress' as const, progressPct: stats.academyProgressPct }
+    if (cp && cp.completed > 0) {
+      return { number: n, name, state: 'in-progress' as const, progressPct: cp.pct }
     }
     return { number: n, name, state: 'locked' as const }
   })
+
+  // Top-N active courses for the AcademyProgressWidget. "Active" = the
+  // member touched at least one lesson (lastActivity present) or made
+  // any completion progress (pct > 0). Sorted by recency.
+  const activeCourses = [...courseProgress]
+    .filter(c => c.lastActivity !== null || c.pct > 0)
+    .sort((a, b) => {
+      if (!a.lastActivity) return 1
+      if (!b.lastActivity) return -1
+      return new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()
+    })
+    .slice(0, 3)
 
   return (
     <div className="p-6 space-y-5">
@@ -494,7 +526,7 @@ export default async function MemberHomePage() {
         />
         <div className="space-y-5">
           <UpcomingEventsWidget events={events} userId={user.id} />
-          <AcademyProgressWidget courses={courseProgress} />
+          <AcademyProgressWidget courses={activeCourses} />
           {/* CommitmentTracker widget — weekly commitments from the Academy */}
           <CommitmentTracker weekStart={getCurrentMonday()} />
         </div>
