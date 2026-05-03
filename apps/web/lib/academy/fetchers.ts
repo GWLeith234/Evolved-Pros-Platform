@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
 import type { CourseWithProgress, LessonWithProgress } from './types'
 import { hasTierAccess } from '@/lib/tier'
+import { adminClient } from '@/lib/supabase/admin'
 
 type SB = SupabaseClient<Database>
 
@@ -13,11 +14,14 @@ export async function fetchCoursesWithProgress(
   userId: string,
   userTier?: 'community' | 'vip' | 'pro' | null,
 ): Promise<CourseWithProgress[]> {
-  const tierPromise = userTier === undefined
-    ? supabase.from('users').select('tier').eq('id', userId).single()
-    : Promise.resolve({ data: { tier: userTier } })
+  // When the caller didn't pre-resolve userTier (e.g. /api/courses),
+  // route through fetchUserProfile so we benefit from the same RLS-bypass
+  // + email fallback. Otherwise short-circuit.
+  const tierPromise: Promise<string | null> = userTier === undefined
+    ? fetchUserProfile(supabase, userId).then(p => p?.tier ?? null)
+    : Promise.resolve(userTier ?? null)
 
-  const [{ data: courses }, { data: tierData }] = await Promise.all([
+  const [{ data: courses }, resolvedTier] = await Promise.all([
     supabase
       .from('courses')
       .select('id, pillar_number, slug, title, description, required_tier, is_published, sort_order')
@@ -25,7 +29,7 @@ export async function fetchCoursesWithProgress(
       .order('sort_order'),
     tierPromise,
   ])
-  const profile = tierData
+  const profile = { tier: resolvedTier }
 
   if (!courses?.length) return []
 
@@ -240,14 +244,34 @@ export async function fetchWIGByDomain(
   return (data as WIGRow | null) ?? null
 }
 
+/**
+ * Resolves the public.users row for the currently-authenticated caller.
+ *
+ * Bypasses RLS via the service-role adminClient so reads always succeed.
+ * Tries `.eq('id', userId)` first, then falls back to `.eq('email', user.email)`
+ * via supabase.auth.getUser() when the id-lookup misses — this is the
+ * documented auth.uid() ≠ public.users.id footgun (lib/admin/helpers.ts:18-22)
+ * that was silently 403'ing admins (B1/B2) and locking every Academy course
+ * on PRO accounts (this sprint).
+ */
 export async function fetchUserProfile(
   supabase: SB,
   userId: string,
 ): Promise<Database['public']['Tables']['users']['Row'] | null> {
-  const { data } = await supabase
+  const { data: byId } = await adminClient
     .from('users')
     .select('*')
     .eq('id', userId)
     .single()
-  return data ?? null
+  if (byId) return byId
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user?.email) return null
+
+  const { data: byEmail } = await adminClient
+    .from('users')
+    .select('*')
+    .eq('email', user.email)
+    .single()
+  return byEmail ?? null
 }
