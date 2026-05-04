@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { CountdownTimer } from './CountdownTimer'
 
-// Mirrors the events row shape we actually need on the hero. Defining it
-// inline (vs Database['public']['Tables']['events']) keeps the component
-// independent of generated types churn.
+// MR2 redesign: full-bleed hero with countdown, badges, host info, price.
+// Public type kept identical to the previous version so existing imports
+// (events/page.tsx) don't have to change.
 export interface HeroEvent {
   id: string
   title: string
@@ -25,87 +26,46 @@ interface CinematicHeroProps {
   initialIsRsvpd?: boolean
 }
 
-const FORMAT_VAR: Record<string, string> = {
-  'live':       'var(--events-format-live)',
-  'in-person':  'var(--events-format-in-person)',
-  'podcast':    'var(--events-format-podcast)',
-  'replay':     'var(--events-format-replay)',
+const FORMAT_BADGE_LABEL: Record<string, string> = {
+  'live':      'Live Event',
+  'in-person': 'In-Person',
+  'podcast':   'Podcast Live',
+  'replay':    'Replay',
 }
 
-const FORMAT_LABEL: Record<string, string> = {
-  'live':      'LIVE',
-  'in-person': 'IN-PERSON',
-  'podcast':   'PODCAST',
-  'replay':    'REPLAY',
+const HOST_NAME = 'George Leith'
+const HOST_ROLE = 'Founder · EVOLVEX360'
+const WATERMARK = 'On Stage · 2024'
+
+function priceLabel(requiredTier: string | null): string {
+  if (!requiredTier) return 'Free'
+  const tier = requiredTier.toLowerCase()
+  if (tier === 'community') return 'Free'
+  return 'Included'
 }
-
-function formatTier(tier: string | null): string {
-  if (!tier) return 'MEMBER'
-  return tier.toUpperCase()
-}
-
-function formatWhen(iso: string): string {
-  // "Apr 30 · 7:00 PM PT" style. Server and client may compute different
-  // tz strings; render this client-side from a stable seed so SSR/client
-  // first paint match (component is 'use client' — first paint runs once
-  // on hydration with the same Date input).
-  const d = new Date(iso)
-  const datePart = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  const timePart = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-  return `${datePart} · ${timePart}`.toUpperCase()
-}
-
-function countdownLabel(iso: string, nowMs: number): string {
-  const target = new Date(iso).getTime()
-  const diffMs = target - nowMs
-  if (diffMs <= 0) return 'STARTING NOW'
-  const totalSeconds = Math.floor(diffMs / 1000)
-  const days = Math.floor(totalSeconds / 86_400)
-  const hours = Math.floor((totalSeconds % 86_400) / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  const seconds = totalSeconds % 60
-
-  if (days > 0) return `STARTS IN ${days}D ${hours}H`
-  if (hours > 0) return `STARTS IN ${hours}H ${minutes}M`
-  if (minutes >= 1) return `STARTS IN ${minutes}M`
-  return `STARTS IN ${seconds}S`
-}
-
-function truncate(s: string | null, n: number): string {
-  if (!s) return ''
-  if (s.length <= n) return s
-  return s.slice(0, n - 1).trimEnd() + '…'
-}
-
-const HERO_HEIGHT = 560
 
 export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroProps) {
-  // Ticking clock for the countdown. Default to 60s tick; switch to 1s
-  // when the event is within 60s. Initial nowMs is null on SSR to avoid
-  // hydration mismatch — the countdown pill renders nothing until mount.
-  const [nowMs, setNowMs] = useState<number | null>(null)
   const [rsvpd, setRsvpd] = useState(initialIsRsvpd)
   const [rsvpInFlight, setRsvpInFlight] = useState(false)
-  const [shareLabel, setShareLabel] = useState<'SHARE' | 'COPIED ✓'>('SHARE')
+  const [whenLabel, setWhenLabel] = useState('')
 
+  // Defer locale-dependent date string to client so SSR and hydration agree.
   useEffect(() => {
     if (!event) return
-    const tick = () => setNowMs(Date.now())
-    tick()
-    const targetMs = new Date(event.starts_at).getTime()
-    const interval = targetMs - Date.now() < 60_000 ? 1000 : 60_000
-    const handle = window.setInterval(tick, interval)
-    return () => window.clearInterval(handle)
+    const d = new Date(event.starts_at)
+    const datePart = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const timePart = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+    setWhenLabel(`${datePart} · ${timePart}`.toUpperCase())
   }, [event])
 
   if (!event) {
     return (
-      <div
+      <section
         style={{
           position: 'relative',
           width: '100vw',
           marginLeft: 'calc(-50vw + 50%)',
-          height: HERO_HEIGHT,
+          minHeight: 480,
           background: 'var(--bg-surface)',
           borderBottom: '1px solid var(--border-color)',
           display: 'flex',
@@ -139,30 +99,20 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             Check back soon — new sessions drop weekly.
           </p>
         </div>
-      </div>
+      </section>
     )
   }
 
   const pillarConf = event.pillar && event.pillar >= 1 && event.pillar <= 6
     ? PILLAR_CONFIG[event.pillar]
     : null
-
-  const formatLabel = FORMAT_LABEL[event.format] ?? String(event.format).toUpperCase()
-  const formatColor = FORMAT_VAR[event.format] ?? 'var(--events-format-replay)'
   const coverUrl = event.hero_image_url ?? event.image_url ?? null
-  const fallbackBg = pillarConf
-    ? `linear-gradient(135deg, ${pillarConf.color}33 0%, ${pillarConf.color}11 100%), var(--bg-elevated)`
-    : 'var(--bg-elevated)'
-
-  const startsMs = new Date(event.starts_at).getTime()
-  const minutesUntil = nowMs !== null ? (startsMs - nowMs) / 60_000 : Infinity
-  const showLivePulse = event.format === 'live' && minutesUntil <= 60 && minutesUntil > -10
-  const countdown = nowMs !== null ? countdownLabel(event.starts_at, nowMs) : ''
+  const formatLabel = FORMAT_BADGE_LABEL[event.format] ?? String(event.format).toUpperCase()
+  const featuredSuffix = event.is_featured ? ' · Featured' : ''
 
   async function handleRsvpClick() {
     if (rsvpInFlight) return
     const wasRsvpd = rsvpd
-    // Optimistic
     setRsvpd(!wasRsvpd)
     setRsvpInFlight(true)
     try {
@@ -178,44 +128,16 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
     }
   }
 
-  async function handleShareClick() {
-    if (typeof window === 'undefined') return
-    const url = `${window.location.origin}/events/${event!.id}`
-    try {
-      await navigator.clipboard?.writeText(url)
-    } catch {
-      // Ignore — clipboard may be unavailable in non-secure contexts.
-    }
-    setShareLabel('COPIED ✓')
-    window.setTimeout(() => setShareLabel('SHARE'), 1500)
-  }
-
-  const pillStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '8px 14px',
-    background: 'var(--events-hero-pill-bg)',
-    border: '1px solid var(--events-hero-pill-border)',
-    color: '#FFFFFF',
-    fontFamily: '"Barlow Condensed", sans-serif',
-    fontSize: 10,
-    fontWeight: 700,
-    letterSpacing: '0.18em',
-    textTransform: 'uppercase',
-    backdropFilter: 'blur(6px)',
-    WebkitBackdropFilter: 'blur(6px)',
-  }
-
   return (
     <section
+      aria-label="Featured event"
       style={{
         position: 'relative',
         width: '100vw',
         marginLeft: 'calc(-50vw + 50%)',
-        height: HERO_HEIGHT,
+        minHeight: 560,
         overflow: 'hidden',
-        background: coverUrl ? '#000' : fallbackBg,
+        background: coverUrl ? '#000' : 'linear-gradient(135deg, #0A0F18, #1B2A4A)',
       }}
     >
       {/* Cover image */}
@@ -232,195 +154,286 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
         />
       )}
 
-      {/* Gradient overlay */}
+      {/* Dark overlay (per brief: rgba 0,0,0,0.5) */}
       <div
         aria-hidden="true"
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'linear-gradient(180deg, var(--events-hero-overlay-from) 0%, var(--events-hero-overlay-to) 100%)',
+          background:
+            'linear-gradient(180deg, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.85) 100%)',
         }}
       />
 
-      {/* Top bar */}
+      {/* TOP-LEFT badges */}
       <div
         style={{
           position: 'absolute',
           top: 24,
           left: 24,
-          right: 24,
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 12,
+          gap: 10,
           flexWrap: 'wrap',
         }}
       >
-        <span style={pillStyle}>
-          {showLivePulse && (
-            <span
-              aria-hidden="true"
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                background: formatColor,
-                animation: 'events-live-pulse 1.4s ease-in-out infinite',
-                flexShrink: 0,
-              }}
-            />
-          )}
-          <span style={{ color: formatColor }}>{formatLabel}</span>
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: '7px 14px',
+            background: '#C9302A',
+            color: '#FFFFFF',
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontWeight: 700,
+            fontSize: 11,
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+          }}
+        >
+          {formatLabel}
         </span>
-
-        {countdown && (
-          <span style={pillStyle} aria-live="polite">
-            {countdown}
+        {rsvpd && (
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '7px 14px',
+              background: 'rgba(201,168,76,0.18)',
+              border: '1px solid rgba(201,168,76,0.55)',
+              color: '#C9A84C',
+              fontFamily: '"Barlow Condensed", sans-serif',
+              fontWeight: 700,
+              fontSize: 11,
+              letterSpacing: '0.22em',
+              textTransform: 'uppercase',
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
+            }}
+          >
+            ✓ On your calendar
           </span>
         )}
       </div>
 
-      {/* Content block */}
+      {/* TOP-RIGHT countdown */}
+      <div style={{ position: 'absolute', top: 24, right: 24 }}>
+        <CountdownTimer
+          targetIso={event.starts_at}
+          liveWindowBeforeMinutes={5}
+          liveWindowAfterMinutes={event.format === 'live' ? 180 : 120}
+        />
+      </div>
+
+      {/* BOTTOM watermark */}
+      <span
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          bottom: 18,
+          right: 24,
+          fontFamily: '"Barlow Condensed", sans-serif',
+          fontWeight: 700,
+          fontSize: 10,
+          letterSpacing: '0.4em',
+          textTransform: 'uppercase',
+          color: 'rgba(255,255,255,0.18)',
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}
+      >
+        {WATERMARK}
+      </span>
+
+      {/* BOTTOM content */}
       <div
         style={{
           position: 'absolute',
-          bottom: 48,
-          left: 48,
-          right: 48,
-          maxWidth: 720,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          padding: '0 48px 56px',
+          maxWidth: 980,
+          color: '#FFFFFF',
         }}
       >
+        {/* Pillar tag */}
         {pillarConf && (
           <span
             style={{
               display: 'inline-block',
               padding: '4px 10px',
               fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: 9,
+              fontSize: 10,
               fontWeight: 700,
               letterSpacing: '0.22em',
               textTransform: 'uppercase',
               background: `${pillarConf.color}2E`,
-              border: `1px solid ${pillarConf.color}55`,
+              border: `1px solid ${pillarConf.color}66`,
               color: pillarConf.color,
-              marginBottom: 16,
+              marginBottom: 14,
             }}
           >
-            {pillarConf.label}
+            {pillarConf.label}{featuredSuffix}
           </span>
         )}
 
+        {/* Title */}
         <h2
           style={{
             margin: 0,
-            fontFamily: '"Playfair Display", Georgia, serif',
-            fontWeight: 700,
-            fontSize: 'clamp(40px, 5.5vw, 56px)',
-            lineHeight: 1.05,
-            color: '#FFFFFF',
-            letterSpacing: '-0.005em',
+            fontFamily: '"Bebas Neue", sans-serif',
+            fontWeight: 400,
+            fontSize: 'clamp(40px, 6vw, 72px)',
+            lineHeight: 1.02,
+            letterSpacing: '0.01em',
+            textTransform: 'uppercase',
+            textShadow: '0 2px 16px rgba(0,0,0,0.5)',
           }}
         >
           {event.title}
         </h2>
 
+        {/* Description */}
         {event.description && (
           <p
             style={{
-              margin: '24px 0 0',
+              margin: '14px 0 0',
               fontFamily: '"Barlow", sans-serif',
-              fontSize: 18,
-              lineHeight: 1.4,
+              fontSize: 16,
+              lineHeight: 1.45,
               color: 'rgba(255,255,255,0.78)',
+              maxWidth: 720,
+              display: '-webkit-box',
+              WebkitBoxOrient: 'vertical',
+              WebkitLineClamp: 2,
+              overflow: 'hidden',
             }}
           >
-            {truncate(event.description, 180)}
+            {event.description}
           </p>
         )}
 
+        {/* Host row */}
         <div
           style={{
-            marginTop: 32,
+            marginTop: 22,
             display: 'flex',
             alignItems: 'center',
+            gap: 12,
+          }}
+        >
+          <span
+            aria-hidden="true"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #C9302A, #8B1F1B)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontFamily: '"Bebas Neue", sans-serif',
+              fontSize: 14,
+              color: '#FFFFFF',
+              flexShrink: 0,
+            }}
+          >
+            GL
+          </span>
+          <div style={{ minWidth: 0 }}>
+            <p
+              style={{
+                margin: 0,
+                fontFamily: '"Barlow", sans-serif',
+                fontWeight: 600,
+                fontSize: 14,
+                color: '#FFFFFF',
+              }}
+            >
+              {HOST_NAME}
+            </p>
+            <p
+              style={{
+                margin: 0,
+                fontFamily: '"Barlow Condensed", sans-serif',
+                fontWeight: 600,
+                fontSize: 10,
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.55)',
+              }}
+            >
+              {HOST_ROLE}
+            </p>
+          </div>
+        </div>
+
+        {/* Details row: WHEN | PRICE */}
+        <div
+          style={{
+            marginTop: 18,
+            display: 'flex',
+            alignItems: 'baseline',
             gap: 24,
             flexWrap: 'wrap',
             fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: 12,
             fontWeight: 600,
-            letterSpacing: '0.16em',
+            fontSize: 12,
+            letterSpacing: '0.18em',
             textTransform: 'uppercase',
             color: 'rgba(255,255,255,0.78)',
           }}
         >
-          <span>
-            <ClientWhen iso={event.starts_at} />
+          <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ color: 'rgba(255,255,255,0.45)' }}>When</span>
+            <span style={{ color: '#FFFFFF', fontWeight: 700 }} suppressHydrationWarning>
+              {whenLabel || '—'}
+            </span>
           </span>
-          <span>
-            {formatLabel} · {formatTier(event.required_tier)}
+          <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ color: 'rgba(255,255,255,0.45)' }}>Price</span>
+            <span style={{ color: '#FFFFFF', fontWeight: 700 }}>
+              {priceLabel(event.required_tier)}
+            </span>
           </span>
+          {typeof event.attending_count === 'number' && event.attending_count > 0 && (
+            <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 8 }}>
+              <span style={{ color: 'rgba(255,255,255,0.45)' }}>Going</span>
+              <span style={{ color: '#FFFFFF', fontWeight: 700 }}>
+                {event.attending_count}
+              </span>
+            </span>
+          )}
         </div>
 
-        <div
-          style={{
-            marginTop: 32,
-            display: 'flex',
-            gap: 12,
-            flexWrap: 'wrap',
-          }}
-        >
+        {/* RSVP CTA */}
+        <div style={{ marginTop: 24, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <button
             type="button"
             onClick={handleRsvpClick}
             disabled={rsvpInFlight}
             aria-pressed={rsvpd}
+            aria-busy={rsvpInFlight}
             style={{
-              padding: '14px 28px',
+              padding: '14px 32px',
               fontFamily: '"Bebas Neue", sans-serif',
-              fontSize: 14,
-              letterSpacing: '0.08em',
+              fontSize: 15,
+              letterSpacing: '0.14em',
               textTransform: 'uppercase',
-              background: rsvpd ? 'var(--events-rsvp-active)' : 'var(--events-format-live)',
-              color: '#FFFFFF',
+              background: rsvpd ? '#C9A84C' : '#C9302A',
+              color: rsvpd ? '#0A0F18' : '#FFFFFF',
               border: 'none',
               borderRadius: 0,
               cursor: rsvpInFlight ? 'wait' : 'pointer',
               transition: 'background 160ms ease',
+              minWidth: 180,
             }}
           >
-            {rsvpd ? '✓ Added' : '+ Add to my events'}
-          </button>
-
-          <button
-            type="button"
-            onClick={handleShareClick}
-            style={{
-              padding: '14px 28px',
-              fontFamily: '"Bebas Neue", sans-serif',
-              fontSize: 14,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              background: 'transparent',
-              color: '#FFFFFF',
-              border: '1px solid rgba(255,255,255,0.16)',
-              borderRadius: 0,
-              cursor: 'pointer',
-              transition: 'border-color 160ms ease',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.16)' }}
-          >
-            {shareLabel}
+            {rsvpd ? '✓ Going' : 'RSVP'}
           </button>
         </div>
       </div>
     </section>
   )
-}
-
-// Defers Date construction to client-only — avoids SSR/client tz mismatch (#425).
-function ClientWhen({ iso }: { iso: string }) {
-  const [label, setLabel] = useState('')
-  useEffect(() => { setLabel(formatWhen(iso)) }, [iso])
-  return <>{label}</>
 }

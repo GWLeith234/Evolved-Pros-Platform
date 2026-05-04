@@ -2,8 +2,10 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { EventsPageHeader } from '@/components/events/EventsPageHeader'
 import { CinematicHero, type HeroEvent } from '@/components/events/CinematicHero'
+import { UpcomingEventsList } from '@/components/events/UpcomingEventsList'
 
 export const metadata: Metadata = { title: 'Events — Evolved Pros' }
 export const dynamic = 'force-dynamic'
@@ -34,12 +36,9 @@ function pickFeatured(rows: HeroEvent[]): HeroEvent | null {
 
 export default async function EventsPage() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) redirect('/login')
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) redirect('/login')
 
-  // Featured-event query — adminClient guarantees the read regardless of
-  // RLS quirks, matching the project's "use adminClient for public-table
-  // reads on authenticated render paths" pattern (per Sprint sequence).
   const nowIso = new Date().toISOString()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: rows } = await (adminClient as any)
@@ -51,59 +50,34 @@ export default async function EventsPage() {
     .order('starts_at', { ascending: true })
     .limit(50) as { data: HeroEvent[] | null }
 
-  const featured = pickFeatured(rows ?? [])
+  const allUpcoming = rows ?? []
+  const featured = pickFeatured(allUpcoming)
+  const upcoming = featured
+    ? allUpcoming.filter(e => e.id !== featured.id).slice(0, 5)
+    : []
 
-  // Look up current RSVP status so the hero CTA hydrates already-correct.
-  let initialIsRsvpd = false
-  if (featured) {
+  // RSVP set covers featured + upcoming so both surfaces hydrate already-correct.
+  const idsToCheck = [
+    ...(featured ? [featured.id] : []),
+    ...upcoming.map(e => e.id),
+  ]
+  let registeredIds: string[] = []
+  if (idsToCheck.length > 0) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: profile } = await (adminClient as any)
-      .from('users')
-      .select('id')
-      .eq('email', user.email)
-      .single() as { data: { id: string } | null }
-
-    if (profile?.id) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: rsvp } = await (adminClient as any)
-        .from('event_rsvps')
-        .select('user_id')
-        .eq('user_id', profile.id)
-        .eq('event_id', featured.id)
-        .maybeSingle() as { data: { user_id: string } | null }
-      initialIsRsvpd = Boolean(rsvp)
-    }
+    const { data: rsvps } = await (adminClient as any)
+      .from('event_rsvps')
+      .select('event_id')
+      .eq('user_id', profile.id)
+      .in('event_id', idsToCheck) as { data: { event_id: string }[] | null }
+    registeredIds = (rsvps ?? []).map(r => r.event_id)
   }
+  const initialIsRsvpd = featured ? registeredIds.includes(featured.id) : false
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100%' }}>
       <EventsPageHeader />
       <CinematicHero event={featured} initialIsRsvpd={initialIsRsvpd} />
-
-      {/* Sprint 2 placeholder — shelves land in EVENTS-SPRINT-2 */}
-      <div
-        style={{
-          margin: '40px 24px',
-          padding: '64px 24px',
-          border: '1px dashed var(--border-color)',
-          borderRadius: 0,
-          textAlign: 'center',
-        }}
-      >
-        <p
-          style={{
-            margin: 0,
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: '0.22em',
-            textTransform: 'uppercase',
-            color: 'var(--text-tertiary)',
-          }}
-        >
-          Event shelves — coming in Sprint 2
-        </p>
-      </div>
+      <UpcomingEventsList events={upcoming} registeredIds={registeredIds} />
     </div>
   )
 }
