@@ -20,6 +20,29 @@ const EMOJI_GLYPH: Record<Emoji, string> = {
   mindblown: '🤯',
 }
 
+// UI-HEART: render the heart with an SVG so its colour follows the
+// `currentColor` token (gold #C9A84C when active, muted otherwise).
+// Native ❤️ emoji ignores CSS color and stays red, which is why the
+// button "looked red" even though the active text token is gold.
+function HeartGlyph({ active }: { active: boolean }) {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      style={{ display: 'block', overflow: 'visible' }}
+      fill={active ? 'currentColor' : 'none'}
+      stroke="currentColor"
+      strokeWidth={active ? 1.4 : 2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+  )
+}
+
 const EMOJI_VAR: Record<Emoji, { bg: string; color: string }> = {
   fire:      { bg: 'var(--reaction-fire-bg)',      color: 'var(--reaction-fire-color)' },
   hundred:   { bg: 'var(--reaction-hundred-bg)',   color: 'var(--reaction-hundred-color)' },
@@ -118,6 +141,30 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
     EMOJI_ORDER.includes(post.myReaction as Emoji) ? (post.myReaction as Emoji) : null,
   )
 
+  // UI-HEART: each entry is one confetti burst rendered inside the heart
+  // button; cleared 700ms after fire so the DOM doesn't accumulate.
+  const [bursts, setBursts] = useState<Array<{ id: number; particles: Array<{ dx: number; dy: number; rot: number; glyph: string }> }>>([])
+
+  function fireHeartConfetti() {
+    const id = Date.now() + Math.random()
+    const glyphs = ['💛', '✦', '•', '💛', '✦', '•', '💛']
+    const particles = Array.from({ length: 7 }, (_, i) => {
+      // Spread roughly upward in a fan: -150° to -30° in screen space.
+      const angle = (-150 + (i / 6) * 120 + (Math.random() - 0.5) * 18) * (Math.PI / 180)
+      const dist = 28 + Math.random() * 16
+      return {
+        dx: Math.round(Math.cos(angle) * dist),
+        dy: Math.round(Math.sin(angle) * dist),
+        rot: Math.round((Math.random() - 0.5) * 240),
+        glyph: glyphs[i],
+      }
+    })
+    setBursts(prev => [...prev, { id, particles }])
+    window.setTimeout(() => {
+      setBursts(prev => prev.filter(b => b.id !== id))
+    }, 700)
+  }
+
   const pillarNum = post.pillarTag ? parseInt(post.pillarTag.slice(1), 10) : null
   const pillarConf = pillarNum && pillarNum >= 1 && pillarNum <= 6 ? PILLAR_CONFIG[pillarNum] : null
   const tierBadge = tierBadgeStyle(post.author.tier)
@@ -134,6 +181,9 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
     if (!isToggleOff) next[emoji] = (next[emoji] ?? 0) + 1
     setCounts(next)
     setMyReaction(isToggleOff ? null : emoji)
+
+    // UI-HEART: fire confetti only when toggling the heart ON.
+    if (emoji === 'heart' && !isToggleOff) fireHeartConfetti()
 
     try {
       const res = await fetch(`/api/posts/${post.id}/react`, {
@@ -313,6 +363,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
           const active = myReaction === emoji
           const count = counts[emoji] ?? 0
           const v = EMOJI_VAR[emoji]
+          const isHeart = emoji === 'heart'
           return (
             <button
               key={emoji}
@@ -321,6 +372,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
               aria-pressed={active}
               aria-label={`React with ${emoji}`}
               style={{
+                position: 'relative',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 6,
@@ -351,10 +403,47 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
                 }
               }}
             >
-              <span style={{ fontSize: 14, lineHeight: 1 }} aria-hidden="true">
-                {EMOJI_GLYPH[emoji]}
+              <span style={{ fontSize: 14, lineHeight: 1, display: 'inline-flex' }} aria-hidden="true">
+                {isHeart ? <HeartGlyph active={active} /> : EMOJI_GLYPH[emoji]}
               </span>
               {count > 0 && <span>{formatCount(count)}</span>}
+              {isHeart && bursts.length > 0 && (
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    top: '50%',
+                    width: 0,
+                    height: 0,
+                    pointerEvents: 'none',
+                  }}
+                >
+                  {bursts.flatMap(b =>
+                    b.particles.map((p, i) => (
+                      <span
+                        key={`${b.id}-${i}`}
+                        style={{
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          fontSize: 11,
+                          lineHeight: 1,
+                          color: '#C9A84C',
+                          willChange: 'transform, opacity',
+                          animation: 'ui-heart-confetti 600ms ease-out forwards',
+                          // Custom props consumed by the keyframe.
+                          ['--dx' as string]: `${p.dx}px`,
+                          ['--dy' as string]: `${p.dy}px`,
+                          ['--rot' as string]: `${p.rot}deg`,
+                        } as React.CSSProperties}
+                      >
+                        {p.glyph}
+                      </span>
+                    )),
+                  )}
+                </span>
+              )}
             </button>
           )
         })}
