@@ -95,8 +95,8 @@ export function PodcastGrid({ episodes }: PodcastGridProps) {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-          gap: '32px 22px',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+          gap: '36px 28px',
         }}
       >
         {filtered.map(ep => (

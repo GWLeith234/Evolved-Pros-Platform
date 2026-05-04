@@ -33,7 +33,5 @@ export default async function PodcastIndexPage() {
 
   const episodes = (rawEpisodes ?? []).map(row => dbRowToEpisode(row, progressByEpisode.get(row.id)))
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? ''
-
-  return <PodcastPageShell episodes={episodes} shareUrlBase={siteUrl} />
+  return <PodcastPageShell episodes={episodes} />
 }

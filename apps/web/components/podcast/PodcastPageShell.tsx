@@ -9,10 +9,9 @@ import { PodcastGrid } from './PodcastGrid'
 
 interface PodcastPageShellProps {
   episodes: PodcastEpisode[]
-  shareUrlBase: string
 }
 
-export function PodcastPageShell({ episodes, shareUrlBase }: PodcastPageShellProps) {
+export function PodcastPageShell({ episodes }: PodcastPageShellProps) {
   if (episodes.length === 0) {
     return (
       <div style={{ background: 'var(--podcast-bg-page)', minHeight: '100vh', color: 'var(--podcast-text-strong)' }}>
@@ -27,14 +26,13 @@ export function PodcastPageShell({ episodes, shareUrlBase }: PodcastPageShellPro
 
   const latest = episodes.find(e => e.pinned) ?? episodes[0]
   const rest = episodes.filter(e => e.id !== latest.id)
-  const shareUrl = `${shareUrlBase}/podcast/${latest.slug}`
 
   return (
     <div style={{ background: 'var(--podcast-bg-page)', minHeight: '100vh', color: 'var(--podcast-text-strong)' }}>
       <PodcastThemeBridge theme="parchment" />
       <PodcastLatestStrip episode={latest} />
       <PodcastMasthead />
-      <PodcastHero episode={latest} shareUrl={shareUrl} />
+      <PodcastHero episode={latest} />
       <PodcastGrid episodes={rest} />
     </div>
   )
