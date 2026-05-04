@@ -142,7 +142,7 @@ export default async function LessonPage({ params }: Props) {
             lessonId={lessonRow.id}
             lessonNumber={currentIdx + 1}
             totalLessons={lessons.length}
-            courseTitle={`${pillarLabel} — ${course.title}`}
+            courseTitle={`Pillar ${course.pillar_number} — ${course.title}`}
             maxHeight={720}
           />
         </div>

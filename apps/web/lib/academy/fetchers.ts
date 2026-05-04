@@ -35,8 +35,13 @@ export async function fetchCoursesWithProgress(
 
   const courseIds = courses.map(c => c.id)
 
-  // Fetch lesson counts per course
-  const { data: lessons } = await supabase
+  // Fetch lesson counts per course. Use adminClient so the count
+  // doesn't disappear behind the lessons RLS policy
+  // (`auth.role() = 'authenticated' AND is_published = TRUE`) — server
+  // components hit Supabase under the user JWT but the academy grid is
+  // a public-by-tier catalog: every authenticated user should see the
+  // published lesson count regardless of per-lesson access.
+  const { data: lessons } = await adminClient
     .from('lessons')
     .select('id, course_id, updated_at')
     .in('course_id', courseIds)

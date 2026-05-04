@@ -153,6 +153,12 @@ export function CourseCard({ course, isLocked, userTier }: CourseCardProps) {
           </p>
         ) : (
           <div className="flex items-center gap-2">
+            <span
+              className="font-condensed font-bold uppercase tracking-[0.12em] text-[10px] flex-shrink-0"
+              style={{ color: 'rgba(255,255,255,0.65)' }}
+            >
+              {course.totalLessons} {course.totalLessons === 1 ? 'lesson' : 'lessons'}
+            </span>
             <div
               className="flex-1 h-[3px] rounded-full overflow-hidden"
               style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}

@@ -13,6 +13,7 @@ interface CountdownTimerProps {
 }
 
 interface RemainingPieces {
+  days: number
   hours: number
   minutes: number
   seconds: number
@@ -27,10 +28,11 @@ function diff(targetIso: string): RemainingPieces {
   const targetMs = new Date(targetIso).getTime()
   const totalMs = targetMs - Date.now()
   const totalSeconds = Math.max(0, Math.floor(totalMs / 1000))
-  const hours = Math.floor(totalSeconds / 3600)
+  const days = Math.floor(totalSeconds / 86400)
+  const hours = Math.floor((totalSeconds % 86400) / 3600)
   const minutes = Math.floor((totalSeconds % 3600) / 60)
   const seconds = totalSeconds % 60
-  return { hours, minutes, seconds, totalMs }
+  return { days, hours, minutes, seconds, totalMs }
 }
 
 /**
@@ -47,7 +49,7 @@ export function CountdownTimer({
   liveWindowAfterMinutes = 120,
 }: CountdownTimerProps) {
   const [mounted, setMounted] = useState(false)
-  const [pieces, setPieces] = useState<RemainingPieces>({ hours: 0, minutes: 0, seconds: 0, totalMs: 0 })
+  const [pieces, setPieces] = useState<RemainingPieces>({ days: 0, hours: 0, minutes: 0, seconds: 0, totalMs: 0 })
 
   useEffect(() => {
     setMounted(true)
@@ -103,7 +105,7 @@ export function CountdownTimer({
     )
   }
 
-  const { hours, minutes, seconds } = pieces
+  const { days, hours, minutes, seconds } = pieces
 
   return (
     <span
@@ -127,7 +129,7 @@ export function CountdownTimer({
     >
       <span style={{ color: 'rgba(255,255,255,0.6)' }}>Starts in</span>
       <span style={{ fontVariantNumeric: 'tabular-nums', letterSpacing: '0.12em' }}>
-        {pad(hours)}:{pad(minutes)}:{pad(seconds)}
+        {days > 0 && `${days}d `}{pad(hours)}:{pad(minutes)}:{pad(seconds)}
       </span>
     </span>
   )
