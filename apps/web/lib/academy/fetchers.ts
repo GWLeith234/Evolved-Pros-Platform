@@ -45,15 +45,34 @@ export async function fetchCoursesWithProgress(
   // rendered "Lessons coming soon" everywhere even when lessons existed.
   // Per-lesson access is still gated on the lesson detail page (which
   // applies its own filter), so unpublished rows don't leak through.
-  const { data: lessons } = await adminClient
+  let { data: lessons } = await adminClient
     .from('lessons')
     .select('id, course_id, updated_at')
     .in('course_id', courseIds)
 
-  // Fetch completed progress for this user
+  // Diagnostic + fallback: if SUPABASE_SERVICE_ROLE_KEY is unset in the
+  // runtime environment, adminClient queries return empty silently. Retry
+  // through the SSR client (RLS-bound, but at least published rows come
+  // through) so the academy grid never lies about lesson counts.
+  if (!lessons || lessons.length === 0) {
+    console.warn(
+      '[academy.fetchCoursesWithProgress] adminClient lessons returned 0 — falling back to RLS-bound client. Check SUPABASE_SERVICE_ROLE_KEY.',
+    )
+    const fallback = await supabase
+      .from('lessons')
+      .select('id, course_id, updated_at')
+      .in('course_id', courseIds)
+    lessons = fallback.data ?? []
+  }
+
+  // Fetch completed progress for this user — adminClient because
+  // lesson_progress.user_id stores public.users.id, but the RLS policy
+  // is `auth.uid() = user_id`. The SSR client returns [] silently for
+  // any account where auth.uid() ≠ public.users.id, which made every
+  // course render 0% complete on the academy grid.
   const lessonIds = (lessons ?? []).map(l => l.id)
   const { data: progress } = lessonIds.length > 0
-    ? await supabase
+    ? await adminClient
         .from('lesson_progress')
         .select('lesson_id, completed_at, updated_at')
         .eq('user_id', userId)

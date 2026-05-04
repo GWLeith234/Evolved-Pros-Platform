@@ -116,6 +116,7 @@ interface ArchPillar {
 
 function PillarRow({ pillar }: { pillar: ArchPillar }) {
   const { earned, color, num, short, progress } = pillar
+  const inProgress = !earned && progress > 0
   const size = 18
   const innerR = size / 2 - 1.5
   const circ = 2 * Math.PI * innerR
@@ -134,8 +135,14 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
           justifyContent: 'center',
           background: earned
             ? `radial-gradient(circle at 35% 30%, ${color}, ${color}99)`
-            : 'rgba(10,15,24,0.4)',
-          border: earned ? `1.5px solid ${color}` : '1px solid rgba(255,255,255,0.18)',
+            : inProgress
+              ? `radial-gradient(circle at 35% 30%, ${color}55, ${color}22)`
+              : 'rgba(10,15,24,0.4)',
+          border: earned
+            ? `1.5px solid ${color}`
+            : inProgress
+              ? `1px solid ${color}99`
+              : '1px solid rgba(255,255,255,0.18)',
           boxShadow: earned ? `0 0 6px ${color}55` : 'none',
           flexShrink: 0,
         }}
@@ -163,7 +170,11 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
           style={{
             fontFamily: '"Bebas Neue", sans-serif',
             fontSize: 10,
-            color: earned ? '#0A0F18' : 'rgba(255,255,255,0.4)',
+            color: earned
+              ? '#0A0F18'
+              : inProgress
+                ? color
+                : 'rgba(255,255,255,0.4)',
             lineHeight: 1,
             fontWeight: 400,
           }}
@@ -189,11 +200,15 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
       <span
         style={{
           fontFamily: '"Barlow Condensed", sans-serif',
-          fontWeight: earned ? 700 : 500,
+          fontWeight: earned ? 700 : inProgress ? 600 : 500,
           fontSize: 10,
           letterSpacing: '0.18em',
           textTransform: 'uppercase',
-          color: earned ? '#fff' : 'rgba(255,255,255,0.45)',
+          color: earned
+            ? '#fff'
+            : inProgress
+              ? 'rgba(255,255,255,0.85)'
+              : 'rgba(255,255,255,0.45)',
           flex: 1,
           whiteSpace: 'nowrap',
         }}
