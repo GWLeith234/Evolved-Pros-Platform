@@ -2,11 +2,12 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export async function POST(request: Request) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   let body: { poll_id?: unknown; option_id?: unknown }
   try {
@@ -25,7 +26,7 @@ export async function POST(request: Request) {
     .from('poll_votes')
     .select('id')
     .eq('poll_id', pollId)
-    .eq('user_id', user.id)
+    .eq('user_id', profile.id)
     .maybeSingle()
 
   if (existing) return NextResponse.json({ error: 'Already voted' }, { status: 409 })
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
   // Cast vote
   const { error } = await supabase
     .from('poll_votes')
-    .insert({ poll_id: pollId, option_id: optionId, user_id: user.id })
+    .insert({ poll_id: pollId, option_id: optionId, user_id: profile.id })
 
   if (error) return NextResponse.json({ error: 'Failed to vote' }, { status: 500 })
 

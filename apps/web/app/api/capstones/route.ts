@@ -4,11 +4,12 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { sendProgramCompletionEmail } from '@/lib/resend/emails/program-completion'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export async function POST(request: Request) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   let body: Record<string, unknown>
   try { body = await request.json() } catch {
@@ -25,7 +26,7 @@ export async function POST(request: Request) {
   const { data: capstone, error: insertError } = await adminClient
     .from('capstones')
     .insert({
-      user_id: user.id,
+      user_id: profile.id,
       course_id: courseId,
       content,
       status: 'submitted',
@@ -58,39 +59,28 @@ export async function POST(request: Request) {
   if (currentPillar === 6) {
     const now = new Date().toISOString()
 
-    // Fetch user profile for email
-    const { data: profile } = await adminClient
-      .from('users')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .select('email, display_name, full_name, program_completed_at' as any)
-      .eq('id', user.id)
-      .single()
-
-    const profileData = profile as { email?: string; display_name?: string; full_name?: string; program_completed_at?: string | null } | null
-
     // Only run completion logic once (idempotent)
-    if (!profileData?.program_completed_at) {
+    if (!profile.program_completed_at) {
       await Promise.all([
         // Mark program as complete
         adminClient
           .from('users')
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .update({ program_completed_at: now } as any)
-          .eq('id', user.id),
+          .update({ program_completed_at: now })
+          .eq('id', profile.id),
         // Award alumni badge (pillar_number = 0)
         adminClient
           .from('member_badges')
           .upsert(
-            { user_id: user.id, pillar_number: 7, badge_name: 'EVOLVED Alumni', awarded_at: now },
+            { user_id: profile.id, pillar_number: 7, badge_name: 'EVOLVED Alumni', awarded_at: now },
             { onConflict: 'user_id,pillar_number' }
           ),
       ])
 
       // Send completion email (fire-and-forget)
-      const displayName = profileData?.display_name ?? profileData?.full_name ?? 'Member'
+      const displayName = profile.display_name ?? profile.full_name ?? 'Member'
       const completionDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-      if (profileData?.email) {
-        sendProgramCompletionEmail({ email: profileData.email, displayName, completionDate }).catch(console.error)
+      if (profile.email) {
+        sendProgramCompletionEmail({ email: profile.email, displayName, completionDate }).catch(console.error)
       }
     }
 

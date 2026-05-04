@@ -2,11 +2,12 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export async function GET(request: Request) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const courseId = searchParams.get('course_id')
@@ -66,8 +67,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   let body: Record<string, unknown>
   try { body = await request.json() } catch {
@@ -85,7 +86,7 @@ export async function POST(request: Request) {
   const { data: inserted, error: insertError } = await supabase
     .from('discussion_posts')
     .insert({
-      user_id: user.id,
+      user_id: profile.id,
       course_id: courseId,
       module_number: moduleNumber,
       body: postBody,
@@ -100,20 +101,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: insertError?.message ?? 'Failed to post' }, { status: 500 })
   }
 
-  // Fetch author for the response
-  const { data: author } = await supabase
-    .from('users')
-    .select('display_name, avatar_url')
-    .eq('id', user.id)
-    .single()
-
   return NextResponse.json({
     post: {
       id: inserted.id,
       body: inserted.body,
       like_count: inserted.like_count ?? 0,
       created_at: inserted.created_at,
-      author: author ?? { display_name: 'Member', avatar_url: null },
+      author: { display_name: profile.display_name, avatar_url: profile.avatar_url },
     },
   }, { status: 201 })
 }
