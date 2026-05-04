@@ -1731,6 +1731,45 @@ export type Database = {
         }
         Relationships: []
       }
+      quarterly_goals: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          period: string
+          pillar: string | null
+          progress_pct: number | null
+          title: string
+          updated_at: string | null
+          user_id: string
+          weekly_delta: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          period: string
+          pillar?: string | null
+          progress_pct?: number | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+          weekly_delta?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          period?: string
+          pillar?: string | null
+          progress_pct?: number | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+          weekly_delta?: number | null
+        }
+        Relationships: []
+      }
       reflections: {
         Row: {
           body: string

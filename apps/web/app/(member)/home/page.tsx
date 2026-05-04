@@ -10,6 +10,7 @@ import { ActivityFeed } from '@/components/home/ActivityFeed'
 import { UpcomingEventsWidget } from '@/components/home/UpcomingEventsWidget'
 import { AcademyProgressWidget } from '@/components/home/AcademyProgressWidget'
 import { ProfileCompletePrompt } from '@/components/home/ProfileCompletePrompt'
+import { QuarterlyGoals, type QuarterlyGoal } from '@/components/home/QuarterlyGoals'
 import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
 import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStoriesTile'
 import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
@@ -407,6 +408,7 @@ export default async function MemberHomePage() {
     pinnedLiveEvent,
     topStories,
     latestEpisodesResult,
+    quarterlyGoalsResult,
   ] = await Promise.all([
     // MR-HOME-1: lesson_progress / member_badges store rows under
     // public.users.id, NOT auth.uid(). Pass profile.id (resolved via
@@ -425,7 +427,16 @@ export default async function MemberHomePage() {
     fetchPinnedLiveEvent(profile.id),
     fetchTopStories(3),
     fetchLatestEpisodes(3),
+    supabase
+      .from('quarterly_goals')
+      .select('id, title, period, progress_pct, weekly_delta, pillar')
+      .eq('user_id', profile.id)
+      .eq('is_active', true)
+      .order('created_at', { ascending: true })
+      .limit(5),
   ])
+
+  const quarterlyGoals = (quarterlyGoalsResult.data ?? []) as QuarterlyGoal[]
 
   const quotes = quotesResult.data ?? []
   const quote = quotes?.length ? quotes[dayOfYear % quotes.length] : null
@@ -528,7 +539,10 @@ export default async function MemberHomePage() {
         />
         <div className="space-y-5 lg:self-start">
           <UpcomingEventsWidget events={events} userId={profile.id} />
-          <AcademyProgressWidget courses={activeCourses} />
+          <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-5 items-start">
+            <AcademyProgressWidget courses={activeCourses} />
+            <QuarterlyGoals goals={quarterlyGoals} editHref="#" />
+          </div>
           {/* CommitmentTracker widget — weekly commitments from the Academy.
               weekStart is a hint; the component derives the user's local
               Monday on mount (server is UTC and would otherwise hand a
