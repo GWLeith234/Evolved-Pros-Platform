@@ -128,7 +128,16 @@ async function fetchUpcomingEvents(supabase: ReturnType<typeof createClient>, us
 async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, userId: string) {
   const [courses, lessons, progress] = await Promise.all([
     supabase.from('courses').select('id, title, slug, sort_order, pillar_number').eq('is_published', true).order('sort_order'),
-    supabase.from('lessons').select('id, course_id').eq('is_published', true),
+    // adminClient: bypasses the lessons RLS policy
+    //   `auth.role() = 'authenticated' AND is_published = TRUE`
+    // and the brittle is_published gate. The Architecture pillar column on
+    // /home derives state from per-course lesson totals — when this query
+    // returned [] for accounts blocked by RLS or for courses whose lesson
+    // rows had is_published=false, every pillar fell through to 'locked'
+    // (no `cp.completed > 0`) and the dots stayed grey. Counting all lesson
+    // rows for the course is correct here: the catalogue gate is the course's
+    // own is_published flag, not per-lesson.
+    adminClient.from('lessons').select('id, course_id'),
     // adminClient: lesson_progress.user_id = public.users.id, but the RLS
     // policy gates on auth.uid(). Reading via the SSR client returns []
     // for accounts where auth.uid() ≠ public.users.id, which is what was
@@ -556,13 +565,16 @@ export default async function MemberHomePage() {
             <AcademyProgressWidget courses={activeCourses} />
             <QuarterlyGoals goals={quarterlyGoals} editHref="#" />
           </div>
-          {/* CommitmentTracker widget — weekly commitments from the Academy.
-              weekStart is a hint; the component derives the user's local
-              Monday on mount (server is UTC and would otherwise hand a
-              stale week to TZ-behind users on Sunday evening). */}
-          <CommitmentTracker weekStart={getCurrentMonday()} />
         </div>
       </div>
+
+      {/* CommitmentTracker — full-width row below the activity grid so the
+          right column doesn't leave a tall empty gap to the right of
+          ActivityFeed (which is consistently the tallest left-column child).
+          weekStart is a hint; the component derives the user's local Monday
+          on mount (server is UTC and would otherwise hand a stale week to
+          TZ-behind users on Sunday evening). */}
+      <CommitmentTracker weekStart={getCurrentMonday()} />
     </div>
   )
 }

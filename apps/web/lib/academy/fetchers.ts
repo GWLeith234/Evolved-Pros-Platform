@@ -35,17 +35,20 @@ export async function fetchCoursesWithProgress(
 
   const courseIds = courses.map(c => c.id)
 
-  // Fetch lesson counts per course. Use adminClient so the count
-  // doesn't disappear behind the lessons RLS policy
-  // (`auth.role() = 'authenticated' AND is_published = TRUE`) — server
-  // components hit Supabase under the user JWT but the academy grid is
-  // a public-by-tier catalog: every authenticated user should see the
-  // published lesson count regardless of per-lesson access.
+  // Fetch lesson counts per course via adminClient (bypasses the
+  // `auth.role() = 'authenticated' AND is_published = TRUE` lessons RLS).
+  //
+  // No is_published filter on the count: the course-level is_published
+  // flag (line 24 above) already controls whether a course shows up in
+  // the catalog. Counting only published lessons hid every course whose
+  // rows had is_published=false in the live DB — the academy grid then
+  // rendered "Lessons coming soon" everywhere even when lessons existed.
+  // Per-lesson access is still gated on the lesson detail page (which
+  // applies its own filter), so unpublished rows don't leak through.
   const { data: lessons } = await adminClient
     .from('lessons')
     .select('id, course_id, updated_at')
     .in('course_id', courseIds)
-    .eq('is_published', true)
 
   // Fetch completed progress for this user
   const lessonIds = (lessons ?? []).map(l => l.id)
