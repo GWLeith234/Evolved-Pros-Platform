@@ -584,18 +584,23 @@ export type Database = {
           event_type_keynote: boolean
           format: string
           hero_image_url: string | null
+          host_avatar_url: string | null
+          host_name: string | null
+          host_role: string | null
           id: string
           image_url: string | null
           is_draft: boolean | null
           is_featured: boolean
           is_published: boolean
           pillar: number | null
+          price_cents: number | null
           recording_url: string | null
           registration_count: number
           required_tier: string | null
           starts_at: string
           tier_access: string | null
           title: string
+          watermark: string | null
           zoom_url: string | null
         }
         Insert: {
@@ -607,18 +612,23 @@ export type Database = {
           event_type_keynote?: boolean
           format?: string
           hero_image_url?: string | null
+          host_avatar_url?: string | null
+          host_name?: string | null
+          host_role?: string | null
           id?: string
           image_url?: string | null
           is_draft?: boolean | null
           is_featured?: boolean
           is_published?: boolean
           pillar?: number | null
+          price_cents?: number | null
           recording_url?: string | null
           registration_count?: number
           required_tier?: string | null
           starts_at: string
           tier_access?: string | null
           title: string
+          watermark?: string | null
           zoom_url?: string | null
         }
         Update: {
@@ -630,18 +640,23 @@ export type Database = {
           event_type_keynote?: boolean
           format?: string
           hero_image_url?: string | null
+          host_avatar_url?: string | null
+          host_name?: string | null
+          host_role?: string | null
           id?: string
           image_url?: string | null
           is_draft?: boolean | null
           is_featured?: boolean
           is_published?: boolean
           pillar?: number | null
+          price_cents?: number | null
           recording_url?: string | null
           registration_count?: number
           required_tier?: string | null
           starts_at?: string
           tier_access?: string | null
           title?: string
+          watermark?: string | null
           zoom_url?: string | null
         }
         Relationships: []

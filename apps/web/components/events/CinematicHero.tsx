@@ -19,6 +19,11 @@ export interface HeroEvent {
   required_tier: string | null
   is_featured?: boolean
   attending_count?: number | null
+  host_name?: string | null
+  host_role?: string | null
+  host_avatar_url?: string | null
+  price_cents?: number | null
+  watermark?: string | null
 }
 
 interface CinematicHeroProps {
@@ -33,15 +38,20 @@ const FORMAT_BADGE_LABEL: Record<string, string> = {
   'replay':    'Replay',
 }
 
-const HOST_NAME = 'George Leith'
-const HOST_ROLE = 'Founder · EVOLVEX360'
-const WATERMARK = 'On Stage · 2024'
-
-function priceLabel(requiredTier: string | null): string {
+function priceLabel(priceCents: number | null | undefined, requiredTier: string | null): string {
+  if (typeof priceCents === 'number' && priceCents > 0) {
+    const dollars = priceCents / 100
+    return Number.isInteger(dollars) ? `$${dollars}` : `$${dollars.toFixed(2)}`
+  }
   if (!requiredTier) return 'Free'
   const tier = requiredTier.toLowerCase()
   if (tier === 'community') return 'Free'
   return 'Included'
+}
+
+function hostInitials(name: string | null | undefined): string {
+  if (!name) return '?'
+  return name.split(/\s+/).filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase()
 }
 
 export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroProps) {
@@ -226,24 +236,26 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
       </div>
 
       {/* BOTTOM watermark */}
-      <span
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          bottom: 18,
-          right: 24,
-          fontFamily: '"Barlow Condensed", sans-serif',
-          fontWeight: 700,
-          fontSize: 10,
-          letterSpacing: '0.4em',
-          textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.18)',
-          pointerEvents: 'none',
-          userSelect: 'none',
-        }}
-      >
-        {WATERMARK}
-      </span>
+      {event.watermark && (
+        <span
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            bottom: 18,
+            right: 24,
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontWeight: 700,
+            fontSize: 10,
+            letterSpacing: '0.4em',
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.18)',
+            pointerEvents: 'none',
+            userSelect: 'none',
+          }}
+        >
+          {event.watermark}
+        </span>
+      )}
 
       {/* BOTTOM content */}
       <div
@@ -315,59 +327,81 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
         )}
 
         {/* Host row */}
-        <div
-          style={{
-            marginTop: 22,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-          }}
-        >
-          <span
-            aria-hidden="true"
+        {(event.host_name || event.host_role) && (
+          <div
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #C9302A, #8B1F1B)',
-              display: 'inline-flex',
+              marginTop: 22,
+              display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              fontFamily: '"Bebas Neue", sans-serif',
-              fontSize: 14,
-              color: '#FFFFFF',
-              flexShrink: 0,
+              gap: 12,
             }}
           >
-            GL
-          </span>
-          <div style={{ minWidth: 0 }}>
-            <p
-              style={{
-                margin: 0,
-                fontFamily: '"Barlow", sans-serif',
-                fontWeight: 600,
-                fontSize: 14,
-                color: '#FFFFFF',
-              }}
-            >
-              {HOST_NAME}
-            </p>
-            <p
-              style={{
-                margin: 0,
-                fontFamily: '"Barlow Condensed", sans-serif',
-                fontWeight: 600,
-                fontSize: 10,
-                letterSpacing: '0.18em',
-                textTransform: 'uppercase',
-                color: 'rgba(255,255,255,0.55)',
-              }}
-            >
-              {HOST_ROLE}
-            </p>
+            {event.host_avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={event.host_avatar_url}
+                alt=""
+                aria-hidden="true"
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  flexShrink: 0,
+                }}
+              />
+            ) : (
+              <span
+                aria-hidden="true"
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #C9302A, #8B1F1B)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontFamily: '"Bebas Neue", sans-serif',
+                  fontSize: 14,
+                  color: '#FFFFFF',
+                  flexShrink: 0,
+                }}
+              >
+                {hostInitials(event.host_name)}
+              </span>
+            )}
+            <div style={{ minWidth: 0 }}>
+              {event.host_name && (
+                <p
+                  style={{
+                    margin: 0,
+                    fontFamily: '"Barlow", sans-serif',
+                    fontWeight: 600,
+                    fontSize: 14,
+                    color: '#FFFFFF',
+                  }}
+                >
+                  {event.host_name}
+                </p>
+              )}
+              {event.host_role && (
+                <p
+                  style={{
+                    margin: 0,
+                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontWeight: 600,
+                    fontSize: 10,
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(255,255,255,0.55)',
+                  }}
+                >
+                  {event.host_role}
+                </p>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Details row: WHEN | PRICE */}
         <div
@@ -394,7 +428,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
           <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 8 }}>
             <span style={{ color: 'rgba(255,255,255,0.45)' }}>Price</span>
             <span style={{ color: '#FFFFFF', fontWeight: 700 }}>
-              {priceLabel(event.required_tier)}
+              {priceLabel(event.price_cents, event.required_tier)}
             </span>
           </span>
           {typeof event.attending_count === 'number' && event.attending_count > 0 && (
