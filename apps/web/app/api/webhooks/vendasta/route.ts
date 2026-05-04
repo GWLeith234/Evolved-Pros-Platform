@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { timingSafeEqual } from 'crypto'
+import { createHmac, timingSafeEqual } from 'crypto'
 import { adminClient } from '@/lib/supabase/admin'
 import { mapSkuToTier, UnknownSkuError, type VendastaTier } from '@/lib/vendasta/sku-mapping'
 import { sendVendastaWelcomeEmail } from '@/lib/resend/emails/vendasta-welcome'
@@ -10,11 +10,20 @@ import { sendVendastaTierChangedEmail } from '@/lib/resend/emails/vendasta-tier-
 // Vendasta automation webhook
 //
 // Vendasta's automation builder fires this endpoint with a custom JSON body
-// (configured per-automation in the Vendasta UI). There is no HMAC signature
-// and no event_type — all branching is by current DB state vs payload SKU.
+// (configured per-automation in the Vendasta UI). Branching is by current
+// DB state vs payload SKU, with an optional explicit `event_type` for
+// cancellation.
+//
+// Security ladder (must pass at least one):
+//   1. HMAC SHA-256 over the raw body keyed on VENDASTA_WEBHOOK_SECRET,
+//      delivered as `x-vendasta-signature: <hex>`. Optional — only enforced
+//      when the header AND the env are both present.
+//   2. Static verifier token via header `x-vendasta-verifier-token` or body
+//      `verifier_token` field, compared constant-time to
+//      VENDASTA_VERIFIER_TOKEN. Always required (this is the canonical gate).
 //
 // Retry policy (per Alistair):
-//   - 401 only for bad verifier token (intentional no-retry)
+//   - 401 only for bad verifier token / signature (intentional no-retry)
 //   - 2xx for success, duplicate, no-op, and Resend failure (we own that retry)
 //   - 5xx for everything else (Vendasta will retry; we ship a fix)
 // ---------------------------------------------------------------------------
@@ -25,10 +34,20 @@ interface VendastaPayload {
   orderId:              string
   partnerId?:           string
   marketId?:            string
-  sku:                  string
-  customer_email:       string
+  // Canonical field names (existing automations).
+  sku?:                 string
+  customer_email?:      string
   customer_first_name?: string
   customer_last_name?:  string
+  // Alternate field names accepted from newer automation configs that use
+  // "contact_*" / "product_sku" labels in the Vendasta UI. Either set works.
+  product_sku?:         string
+  contact_email?:       string
+  contact_first_name?:  string
+  contact_last_name?:   string
+  // Explicit event hint. When omitted we infer from DB state (existing user
+  // + same SKU = renewal, different SKU = upgrade, no user = new purchase).
+  event_type?:          'purchase' | 'renewal' | 'cancellation' | string
 }
 
 function constantTimeEqual(a: string, b: string): boolean {
@@ -50,6 +69,22 @@ function isDuplicateKeyError(err: unknown): boolean {
   return false
 }
 
+/** Verify the optional HMAC signature against the raw body. Returns null
+ *  when verification passes (or is skipped). Returns a 401 Response when
+ *  verification fails. */
+function verifyHmac(rawBody: string, signature: string | null): Response | null {
+  const secret = process.env.VENDASTA_WEBHOOK_SECRET
+  if (!secret || !signature) return null   // not configured / not provided → fall through
+
+  const expected = createHmac('sha256', secret).update(rawBody).digest('hex')
+  const a = Buffer.from(signature)
+  const b = Buffer.from(expected)
+  if (a.length !== b.length || !timingSafeEqual(a, b)) {
+    return Response.json({ error: 'Invalid signature' }, { status: 401 })
+  }
+  return null
+}
+
 export async function POST(request: Request) {
   const expectedToken = process.env.VENDASTA_VERIFIER_TOKEN
   if (!expectedToken) {
@@ -57,15 +92,22 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Server misconfiguration' }, { status: 500 })
   }
 
+  // Read the raw body once — request.json() consumes the stream and we need
+  // the exact bytes that were signed for HMAC verification.
+  const rawBody = await request.text()
+  const sigHeader = request.headers.get('x-vendasta-signature')
+  const sigError = verifyHmac(rawBody, sigHeader)
+  if (sigError) return sigError
+
   let payload: VendastaPayload
   try {
-    payload = (await request.json()) as VendastaPayload
+    payload = JSON.parse(rawBody) as VendastaPayload
   } catch {
     console.error('[Vendasta Webhook] Invalid JSON body')
     return Response.json({ error: 'Invalid JSON' }, { status: 500 })
   }
 
-  // 1) VERIFY TOKEN — header preferred, body fallback
+  // 1) VERIFY TOKEN — header preferred, body fallback. Always required.
   const headerToken = request.headers.get('x-vendasta-verifier-token') ?? ''
   const bodyToken   = payload.verifier_token ?? ''
   const presented   = headerToken || bodyToken
@@ -74,27 +116,32 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Invalid verifier token' }, { status: 401 })
   }
 
-  const {
-    accountId,
-    orderId,
-    sku,
-    customer_email,
-    customer_first_name,
-    customer_last_name,
-  } = payload
+  // 2) NORMALISE FIELDS — accept both `customer_*`/`sku` and
+  //    `contact_*`/`product_sku` field-name styles.
+  const accountId  = payload.accountId
+  const orderId    = payload.orderId
+  const sku        = payload.sku ?? payload.product_sku ?? ''
+  const email      = payload.customer_email ?? payload.contact_email ?? ''
+  const firstName  = payload.customer_first_name ?? payload.contact_first_name ?? ''
+  const lastName   = payload.customer_last_name ?? payload.contact_last_name ?? ''
+  const eventType  = (payload.event_type ?? '').toLowerCase()
 
-  if (!accountId || !orderId || !sku || !customer_email) {
+  // Cancellation doesn't need a SKU; everything else does.
+  const requiresSku = eventType !== 'cancellation'
+
+  if (!accountId || !orderId || (requiresSku && !sku) || !email) {
     console.error('[Vendasta Webhook] Missing required fields', {
       hasAccountId: !!accountId,
       hasOrderId:   !!orderId,
       hasSku:       !!sku,
-      hasEmail:     !!customer_email,
+      hasEmail:     !!email,
+      eventType,
     })
     return Response.json({ error: 'Missing required fields' }, { status: 500 })
   }
 
-  // 2) IDEMPOTENCY — INSERT with unique event_id; duplicate → 2xx ignored
-  const eventId = `${orderId}:${sku}`
+  // 3) IDEMPOTENCY — INSERT with unique event_id; duplicate → 2xx ignored
+  const eventId = `${orderId}:${sku || eventType || 'event'}`
   const { error: insertError } = await adminClient
     .from('vendasta_webhooks')
     .insert({
@@ -112,7 +159,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    // 3) LOOK UP USER by vendasta_account_id (unique)
+    // 4) LOOK UP USER by vendasta_account_id (unique)
     const { data: existing, error: selectError } = await adminClient
       .from('users')
       .select('id, email, vendasta_sku, tier')
@@ -125,14 +172,27 @@ export async function POST(request: Request) {
       return Response.json({ error: 'DB error reading user' }, { status: 500 })
     }
 
-    // 4) BRANCH
+    // 5) BRANCH
+
+    // Explicit cancellation path — preserves tier, marks status, keeps
+    // access until tier_expires_at fires.
+    if (eventType === 'cancellation') {
+      if (!existing) {
+        // Cancellation for an unknown account — still 200 so Vendasta
+        // doesn't retry, but log it so we can investigate.
+        console.warn('[Vendasta Webhook] cancellation for unknown account:', accountId)
+        return Response.json({ status: 'cancellation_no_user', account_id: accountId })
+      }
+      return await handleCancellation({ accountId, userId: existing.id })
+    }
+
     if (!existing) {
       return await handleNewPurchase({
         accountId,
         sku,
-        email:     customer_email,
-        firstName: customer_first_name ?? '',
-        lastName:  customer_last_name ?? '',
+        email,
+        firstName,
+        lastName,
       })
     }
 
@@ -144,8 +204,8 @@ export async function POST(request: Request) {
       accountId,
       sku,
       userId:    existing.id,
-      email:     customer_email,
-      firstName: customer_first_name ?? '',
+      email,
+      firstName,
       oldTier:   normalizeTier(existing.tier),
     })
   } catch (err) {
@@ -169,7 +229,7 @@ function normalizeTier(tier: string | null): VendastaTier {
 }
 
 // ---------------------------------------------------------------------------
-// 5) NEW PURCHASE
+// 5a) NEW PURCHASE
 // ---------------------------------------------------------------------------
 
 async function handleNewPurchase({
@@ -208,6 +268,7 @@ async function handleNewPurchase({
     full_name:                        fullName,
     role:                             'member',
     tier,
+    tier_status:                      'active',
     vendasta_account_id:              accountId,
     vendasta_sku:                     sku,
     vendasta_subscription_started_at: now,
@@ -247,7 +308,7 @@ async function handleNewPurchase({
 }
 
 // ---------------------------------------------------------------------------
-// 6) UPGRADE
+// 5b) UPGRADE
 // ---------------------------------------------------------------------------
 
 async function handleUpgrade({
@@ -275,6 +336,7 @@ async function handleUpgrade({
     .from('users')
     .update({
       tier:                   newTier,
+      tier_status:            'active',
       vendasta_sku:           sku,
       vendasta_last_event_at: new Date().toISOString(),
     })
@@ -305,13 +367,16 @@ async function handleUpgrade({
 }
 
 // ---------------------------------------------------------------------------
-// 7) RENEWAL / NO-OP
+// 5c) RENEWAL / NO-OP
 // ---------------------------------------------------------------------------
 
 async function handleRenewal({ accountId }: { accountId: string }) {
   const { error } = await adminClient
     .from('users')
-    .update({ vendasta_last_event_at: new Date().toISOString() })
+    .update({
+      tier_status:            'active',
+      vendasta_last_event_at: new Date().toISOString(),
+    })
     .eq('vendasta_account_id', accountId)
 
   if (error) {
@@ -319,4 +384,36 @@ async function handleRenewal({ accountId }: { accountId: string }) {
   }
 
   return Response.json({ status: 'no_op' })
+}
+
+// ---------------------------------------------------------------------------
+// 5d) CANCELLATION
+// ---------------------------------------------------------------------------
+//
+// Sets tier_status='cancelled' but preserves the tier itself so the member
+// keeps access until the existing tier_expires_at runs out (the
+// /membership-expired redirect in (member)/layout.tsx handles the lockout
+// when the date passes). Does not generate a magic link or send a welcome
+// email — admins can manually re-invite if the member rejoins later.
+
+async function handleCancellation({
+  accountId,
+  userId,
+}: {
+  accountId: string
+  userId:    string
+}) {
+  const { error } = await adminClient
+    .from('users')
+    .update({
+      tier_status:            'cancelled',
+      vendasta_last_event_at: new Date().toISOString(),
+    })
+    .eq('vendasta_account_id', accountId)
+
+  if (error) {
+    throw new Error(`users cancellation update failed: ${error.message}`)
+  }
+
+  return Response.json({ status: 'cancelled', user_id: userId })
 }
