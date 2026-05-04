@@ -7,7 +7,7 @@ import { MagicLinkEmail } from '@/lib/resend/emails/MagicLink'
 
 // Use RESEND_FROM_EMAIL env var (set to hello@evolvedpros.com once domain is verified in Resend)
 // Falls back to sandbox sender so invites never silently break if env var is missing
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL ?? 'Evolved Pros <onboarding@resend.dev>'
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL ?? 'Evolved Pros <noreply@evolvedpros.com>'
 
 export async function POST(request: Request) {
   // Canonical admin gate — resolves role via .eq('email', user.email) on
