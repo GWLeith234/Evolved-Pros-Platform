@@ -35,19 +35,19 @@ const TABS: TabConfig[] = [
     kind: 'question',
     label: 'Question',
     icon: <span aria-hidden="true">?</span>,
-    placeholder: 'Ask the community a hard question...',
+    placeholder: 'Ask the community something...',
   },
   {
     kind: 'win',
     label: 'Win',
     icon: <span aria-hidden="true">🏆</span>,
-    placeholder: 'Share a recent win that took work...',
+    placeholder: 'Share a win — big or small...',
   },
   {
     kind: 'poll',
     label: 'Poll',
     icon: <span aria-hidden="true">📊</span>,
-    placeholder: 'Pose a question for the community to vote on...',
+    placeholder: 'Ask a poll question...',
   },
 ]
 

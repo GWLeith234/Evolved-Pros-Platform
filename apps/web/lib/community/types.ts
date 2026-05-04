@@ -57,6 +57,19 @@ export type LeaderboardEntry = {
   isCurrentUser: boolean
 }
 
+// MR1: weekly leaderboard sourced from post counts in the last 7 days,
+// since no points-history table exists yet. `weeklyPosts` is the raw
+// post count used for ranking and surfaced as the weekly delta.
+export type WeeklyLeaderboardEntry = {
+  rank: number
+  userId: string
+  displayName: string
+  avatarUrl: string | null
+  points: number
+  weeklyPosts: number
+  isCurrentUser: boolean
+}
+
 export type MemberSummary = {
   id: string
   displayName: string

@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
 import { adminClient } from '@/lib/supabase/admin'
-import type { Channel, Post, LeaderboardEntry, MemberSummary, CommunityAd, EpisodeSummary } from './types'
+import type { Channel, Post, LeaderboardEntry, MemberSummary, CommunityAd, EpisodeSummary, WeeklyLeaderboardEntry } from './types'
 
 type SB = SupabaseClient<Database>
 
@@ -284,6 +284,55 @@ export async function fetchCommunityAds(): Promise<CommunityAd[]> {
     .limit(2)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (data ?? []) as any[]
+}
+
+// MR1: weekly leaderboard. No points-history table exists, so we rank by
+// post count over the last 7 days as the spec proxy. The user's lifetime
+// points come from users.points; weeklyPosts is both the ranking signal
+// and the displayed weekly delta.
+export async function fetchWeeklyLeaderboard(
+  supabase: SB,
+  currentUserId: string,
+): Promise<WeeklyLeaderboardEntry[]> {
+  const since = new Date(Date.now() - 7 * 86_400_000).toISOString()
+
+  const { data: postRows } = await supabase
+    .from('posts')
+    .select('author_id')
+    .gte('created_at', since)
+
+  const counts = new Map<string, number>()
+  for (const row of postRows ?? []) {
+    const id = (row as { author_id: string | null }).author_id
+    if (!id) continue
+    counts.set(id, (counts.get(id) ?? 0) + 1)
+  }
+  if (counts.size === 0) return []
+
+  const topIds = [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([id]) => id)
+
+  const { data: users } = await supabase
+    .from('users')
+    .select('id, display_name, full_name, avatar_url, points')
+    .in('id', topIds)
+
+  const byId = new Map((users ?? []).map(u => [u.id, u]))
+
+  return topIds.map((id, i) => {
+    const u = byId.get(id)
+    return {
+      rank: i + 1,
+      userId: id,
+      displayName: u?.display_name ?? u?.full_name ?? 'Member',
+      avatarUrl: u?.avatar_url ?? null,
+      points: u?.points ?? 0,
+      weeklyPosts: counts.get(id) ?? 0,
+      isCurrentUser: id === currentUserId,
+    }
+  })
 }
 
 export async function fetchLatestPodcastEpisode(): Promise<EpisodeSummary | null> {

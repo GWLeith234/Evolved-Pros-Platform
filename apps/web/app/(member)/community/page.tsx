@@ -13,6 +13,7 @@ import {
   fetchActiveMembers,
   fetchCommunityAds,
   fetchLatestPodcastEpisode,
+  fetchWeeklyLeaderboard,
 } from '@/lib/community/fetchers'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
@@ -21,11 +22,12 @@ export default async function CommunityPage() {
   const profile = await resolveCurrentUser(supabase)
   if (!profile) redirect('/login')
 
-  const [channels, postsResult, pinnedPost, leaderboard, activeMembers, ads, episode, coursesRes, eventRes] = await Promise.all([
+  const [channels, postsResult, pinnedPost, leaderboard, weeklyLeaderboard, activeMembers, ads, episode, coursesRes, eventRes] = await Promise.all([
     fetchChannels(supabase),
     fetchAllPosts(supabase, { userId: profile.id }),
     fetchPinnedAnnouncement(supabase),
     fetchLeaderboard(supabase, profile.id),
+    fetchWeeklyLeaderboard(supabase, profile.id),
     fetchActiveMembers(supabase),
     fetchCommunityAds(),
     fetchLatestPodcastEpisode(),
@@ -119,6 +121,7 @@ export default async function CommunityPage() {
         isAdmin,
       }}
       defaultChannelId={generalChannel.id}
+      weeklyLeaderboard={weeklyLeaderboard}
       dashboardProps={{
         pillarProgress,
         episode: episodeSummary,

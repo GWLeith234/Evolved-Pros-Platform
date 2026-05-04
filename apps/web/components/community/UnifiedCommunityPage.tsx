@@ -9,8 +9,9 @@ import { CommunityPageHeader } from './CommunityPageHeader'
 import { Composer } from './Composer'
 import { FilterRail } from './FilterRail'
 import type { KindFilter, Pillar, SortBy } from './FilterRail'
-import type { Post, CommunityAd } from '@/lib/community/types'
+import type { Post, CommunityAd, WeeklyLeaderboardEntry } from '@/lib/community/types'
 import type { DashboardStripProps } from './DashboardStrip'
+import { WeeklyLeaderboardRail } from './WeeklyLeaderboardRail'
 
 function getInitials(name: string | null | undefined): string {
   if (!name) return '?'
@@ -35,6 +36,7 @@ interface UnifiedCommunityPageProps {
   defaultChannelId: string
   // Dashboard strip data
   dashboardProps: Omit<DashboardStripProps, never>
+  weeklyLeaderboard: WeeklyLeaderboardEntry[]
 }
 
 export function UnifiedCommunityPage({
@@ -46,6 +48,7 @@ export function UnifiedCommunityPage({
   currentUser,
   defaultChannelId,
   dashboardProps,
+  weeklyLeaderboard,
 }: UnifiedCommunityPageProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts)
   const [cursor, setCursor] = useState<string | null>(initialCursor)
@@ -195,9 +198,18 @@ export function UnifiedCommunityPage({
         onChangeSort={setSortBy}
       />
 
-      {/* Feed — full-width, centered, scrollable */}
+      {/* Feed (left) + weekly leaderboard rail (right) */}
       <div className="flex-1 overflow-y-auto" style={{ background: 'var(--community-page-bg)' }}>
-        <div className="w-full mx-auto px-6 py-4 space-y-3">
+        <div
+          className="w-full mx-auto px-6 py-4"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 65fr) minmax(280px, 35fr)',
+            gap: 24,
+            maxWidth: 1280,
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
 
           {/* Pinned announcement */}
           {pinnedPost && (
@@ -310,6 +322,14 @@ export function UnifiedCommunityPage({
               You&apos;ve reached the beginning
             </p>
           )}
+          </div>
+
+          {/* Right rail — weekly leaderboard */}
+          <div style={{ minWidth: 0 }}>
+            <div style={{ position: 'sticky', top: 0 }}>
+              <WeeklyLeaderboardRail entries={weeklyLeaderboard} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
