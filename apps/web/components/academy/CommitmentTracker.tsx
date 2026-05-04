@@ -32,14 +32,19 @@ function formatWeekRange(weekStart: string): string {
   return `${fmt(start)} — ${fmt(end)}`
 }
 
-/** Compute Monday of the user's local current week, formatted YYYY-MM-DD. */
+/** Compute Monday of the user's local current week, formatted YYYY-MM-DD.
+ *  On Sunday, advance the reference date by 1 day so we return the upcoming
+ *  Monday rather than the prior one — Sunday evening should already be
+ *  showing the new week the member is about to commit to.
+ */
 function localMondayString(): string {
   const now = new Date()
-  const day = now.getDay()                 // 0=Sun, 1=Mon, ..., 6=Sat
-  const diff = day === 0 ? -6 : 1 - day
-  const monday = new Date(now)
+  const ref = now.getDay() === 0 ? new Date(now.getTime() + 86_400_000) : now
+  const day = ref.getDay()                 // 1=Mon … 6=Sat after Sunday-bump
+  const diff = 1 - day
+  const monday = new Date(ref)
   monday.setHours(0, 0, 0, 0)
-  monday.setDate(now.getDate() + diff)
+  monday.setDate(ref.getDate() + diff)
   const yyyy = monday.getFullYear()
   const mm = String(monday.getMonth() + 1).padStart(2, '0')
   const dd = String(monday.getDate()).padStart(2, '0')

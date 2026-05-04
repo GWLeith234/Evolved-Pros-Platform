@@ -34,7 +34,10 @@ async function fetchDashboardStats(supabase: ReturnType<typeof createClient>, us
     supabase.from('users').select('id', { count: 'exact', head: true }).eq('tier_status', 'active').gte('created_at', oneWeekAgo),
     supabase.from('courses').select('id, required_tier').eq('is_published', true),
     supabase.from('lessons').select('id, course_id').eq('is_published', true),
-    supabase.from('lesson_progress').select('lesson_id, completed_at').eq('user_id', userId).not('completed_at', 'is', null),
+    // lesson_progress.user_id stores public.users.id (the value passed in here),
+    // NOT auth.uid(). The RLS policy is `auth.uid() = user_id`, which silently
+    // filters every row when those two diverge. Use adminClient to bypass it.
+    adminClient.from('lesson_progress').select('lesson_id, completed_at').eq('user_id', userId).not('completed_at', 'is', null),
     supabase.from('users').select('id', { count: 'exact', head: true }).gt('points', userPoints),
   ])
 
@@ -126,7 +129,12 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
   const [courses, lessons, progress] = await Promise.all([
     supabase.from('courses').select('id, title, slug, sort_order, pillar_number').eq('is_published', true).order('sort_order'),
     supabase.from('lessons').select('id, course_id').eq('is_published', true),
-    supabase
+    // adminClient: lesson_progress.user_id = public.users.id, but the RLS
+    // policy gates on auth.uid(). Reading via the SSR client returns []
+    // for accounts where auth.uid() ≠ public.users.id, which is what was
+    // making YOUR ACADEMY render "No courses started yet" and the
+    // Architecture pillars stay grey for George.
+    adminClient
       .from('lesson_progress')
       .select('lesson_id, completed_at, updated_at')
       .eq('user_id', userId),
@@ -175,11 +183,16 @@ async function fetchUnreadCount(supabase: ReturnType<typeof createClient>, userI
 }
 
 function getCurrentMonday(): string {
+  // On Sunday, treat the upcoming Monday (tomorrow) as belonging to the
+  // member's "this week" — that matches the user's mental model of the
+  // workweek and keeps server-rendered SSR aligned with the client-side
+  // localMondayString() helper inside CommitmentTracker.
   const now = new Date()
-  const day = now.getDay()
-  const diff = day === 0 ? -6 : 1 - day
-  const monday = new Date(now)
-  monday.setDate(now.getDate() + diff)
+  const ref = now.getDay() === 0 ? new Date(now.getTime() + 86_400_000) : now
+  const day = ref.getDay()
+  const diff = 1 - day
+  const monday = new Date(ref)
+  monday.setDate(ref.getDate() + diff)
   return monday.toISOString().split('T')[0]
 }
 
