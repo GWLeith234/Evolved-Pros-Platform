@@ -7,7 +7,7 @@ const PUBLIC_ROUTES = [
   '/auth/callback',
   '/api/webhooks/vendasta',
   '/api/health',
-  '/api/cron/publish-posts',
+  '/api/cron',
   '/dev-login',
   '/api/dev-login',
   '/pricing',
@@ -188,5 +188,6 @@ export const config = {
     '/api/admin/:path*',
     '/api/onboarding/:path*',
     '/api/settings/:path*',
+    '/api/cron/:path*',
   ],
 }
