@@ -79,7 +79,7 @@ export default async function MemberLayout({ children }: { children: React.React
     supabase
       .from('notifications')
       .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
+      .eq('user_id', profile.id)
       .eq('is_read', false),
     supabase
       .from('platform_settings')

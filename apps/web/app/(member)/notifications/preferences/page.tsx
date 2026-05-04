@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { EmailPrefsForm } from '@/components/notifications/EmailPrefsForm'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,18 +16,12 @@ const DEFAULT_PREFS = {
 
 export default async function NotificationPreferencesPage() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('users')
-    .select('notification_preferences')
-    .eq('id', user.id)
-    .single()
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) redirect('/login')
 
   const prefs = {
     ...DEFAULT_PREFS,
-    ...(profile?.notification_preferences ?? {}),
+    ...((profile.notification_preferences as Record<string, unknown> | null) ?? {}),
   }
 
   return (

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
-import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { UnifiedCommunityPage } from '@/components/community/UnifiedCommunityPage'
 
 export const metadata: Metadata = { title: 'Community — Evolved Pros' }
@@ -11,7 +11,6 @@ import {
   fetchPinnedAnnouncement,
   fetchLeaderboard,
   fetchActiveMembers,
-  fetchCurrentUserProfile,
   fetchCommunityAds,
   fetchLatestPodcastEpisode,
 } from '@/lib/community/fetchers'
@@ -19,15 +18,14 @@ import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
 export default async function CommunityPage() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) redirect('/login')
 
-  const [profile, channels, postsResult, pinnedPost, leaderboard, activeMembers, ads, episode, coursesRes, eventRes] = await Promise.all([
-    fetchCurrentUserProfile(supabase, user.id),
+  const [channels, postsResult, pinnedPost, leaderboard, activeMembers, ads, episode, coursesRes, eventRes] = await Promise.all([
     fetchChannels(supabase),
-    fetchAllPosts(supabase, { userId: user.id }),
+    fetchAllPosts(supabase, { userId: profile.id }),
     fetchPinnedAnnouncement(supabase),
-    fetchLeaderboard(supabase, user.id),
+    fetchLeaderboard(supabase, profile.id),
     fetchActiveMembers(supabase),
     fetchCommunityAds(),
     fetchLatestPodcastEpisode(),
@@ -57,13 +55,17 @@ export default async function CommunityPage() {
   let pillarProgress: { pillar: string; label: string; pct: number } | null = null
   const courses = (coursesRes.data ?? []) as { id: string; pillar_number: number; title: string }[]
   if (courses.length > 0 && profile) {
-    const currentPillar = profile.current_pillar ?? 1
+    // current_pillar stores 'p1'..'p6' (or null). Normalize to a 1-6 int
+    // for matching against courses.pillar_number / PILLAR_CONFIG keys.
+    const rawPillar = profile.current_pillar
+    const parsedPillar = typeof rawPillar === 'string' ? parseInt(rawPillar.replace(/^p/, ''), 10) : NaN
+    const currentPillar: number = Number.isFinite(parsedPillar) && parsedPillar >= 1 && parsedPillar <= 6 ? parsedPillar : 1
     const pillarCourses = courses.filter(c => c.pillar_number === currentPillar)
     if (pillarCourses.length > 0) {
       const courseIds = pillarCourses.map(c => c.id)
       const [lessonsRes, progressRes] = await Promise.all([
         supabase.from('lessons').select('id, course_id').in('course_id', courseIds),
-        supabase.from('lesson_progress').select('lesson_id').eq('user_id', user.id).eq('completed', true),
+        supabase.from('lesson_progress').select('lesson_id').eq('user_id', profile.id).eq('completed', true),
       ])
       const totalLessons = (lessonsRes.data ?? []).length
       const completedIds = new Set((progressRes.data ?? []).map(p => p.lesson_id))
@@ -110,7 +112,7 @@ export default async function CommunityPage() {
       pinnedPost={pinnedPost}
       ads={ads}
       currentUser={{
-        id: user.id,
+        id: profile.id,
         displayName: profile?.display_name ?? profile?.full_name ?? null,
         avatarUrl: profile?.avatar_url ?? null,
         tier: profile?.tier ?? null,

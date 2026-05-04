@@ -415,9 +415,9 @@ export default async function MemberHomePage() {
     // as B1 / B2 / UI-3.
     fetchDashboardStats(supabase, profile.id, profile.tier, profile.points),
     fetchRecentActivity(profile.id),
-    fetchUpcomingEvents(supabase, user.id),
+    fetchUpcomingEvents(supabase, profile.id),
     fetchCourseProgress(supabase, profile.id),
-    fetchUnreadCount(supabase, user.id),
+    fetchUnreadCount(supabase, profile.id),
     // Use adminClient to bypass RLS — greeting_quotes is a public table but anon key may be blocked
     adminClient.from('greeting_quotes').select('quote_text, source').order('day_number'),
     supabase.from('member_badges').select('pillar_number, awarded_at').eq('user_id', profile.id),
@@ -527,7 +527,7 @@ export default async function MemberHomePage() {
           posts={activity.posts}
         />
         <div className="space-y-5 lg:self-start">
-          <UpcomingEventsWidget events={events} userId={user.id} />
+          <UpcomingEventsWidget events={events} userId={profile.id} />
           <AcademyProgressWidget courses={activeCourses} />
           {/* CommitmentTracker widget — weekly commitments from the Academy.
               weekStart is a hint; the component derives the user's local

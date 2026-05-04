@@ -1,21 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  // Fetch user profile for tier and points
-  const { data: profile } = await supabase
-    .from('users')
-    .select('tier, points')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   // Run all stat queries in parallel
   const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
@@ -51,7 +43,7 @@ export async function GET() {
     supabase
       .from('lesson_progress')
       .select('lesson_id, completed_at')
-      .eq('user_id', user.id)
+      .eq('user_id', profile.id)
       .not('completed_at', 'is', null),
 
     // Current leaderboard rank: count users with more points
@@ -64,7 +56,7 @@ export async function GET() {
     supabase
       .from('lesson_progress')
       .select('lesson_id, completed_at')
-      .eq('user_id', user.id)
+      .eq('user_id', profile.id)
       .not('completed_at', 'is', null)
       .lt('completed_at', oneWeekAgo),
   ])

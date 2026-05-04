@@ -3,14 +3,15 @@ import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { dbRowToEpisode, type EpisodeRow, type ProgressRow } from '@/lib/podcast/transforms'
 import { PodcastPageShell } from '@/components/podcast/PodcastPageShell'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'The Evolved Pros Podcast | Evolved Pros' }
 
 export default async function PodcastIndexPage() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) redirect('/login')
 
   // Fetch all published episodes via adminClient (bypass RLS for catalog browsing).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,7 +26,7 @@ export default async function PodcastIndexPage() {
   const { data: rawProgress } = await (adminClient as any)
     .from('user_episode_progress')
     .select('episode_id, progress')
-    .eq('user_id', user.id) as { data: ProgressRow[] | null }
+    .eq('user_id', profile.id) as { data: ProgressRow[] | null }
 
   const progressByEpisode = new Map<string, ProgressRow>()
   for (const p of rawProgress ?? []) progressByEpisode.set(p.episode_id, p)

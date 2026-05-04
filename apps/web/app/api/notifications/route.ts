@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import type { Database } from '@evolved-pros/db'
 
 export const dynamic = 'force-dynamic'
@@ -10,8 +11,8 @@ type NotifType = Database['public']['Tables']['notifications']['Row']['type']
 
 export async function GET(request: Request) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const typeFilter = searchParams.get('type') as NotifType | null
@@ -23,14 +24,14 @@ export async function GET(request: Request) {
   const { count: unreadCount } = await supabase
     .from('notifications')
     .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
+    .eq('user_id', profile.id)
     .eq('is_read', false)
 
   // Build query — unread first, then by created_at DESC
   let query = supabase
     .from('notifications')
     .select('id, type, title, body, action_url, is_read, created_at')
-    .eq('user_id', user.id)
+    .eq('user_id', profile.id)
     .order('is_read', { ascending: true })
     .order('created_at', { ascending: false })
     .limit(limit + 1)

@@ -4,19 +4,14 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { hasTierAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const revalidate = 300
 
 export async function GET() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: profile } = await supabase
-    .from('users')
-    .select('tier')
-    .eq('id', user.id)
-    .single()
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: rows, error } = await supabase
     .from('events')
@@ -34,7 +29,7 @@ export async function GET() {
     ? await supabase
         .from('event_registrations')
         .select('event_id')
-        .eq('user_id', user.id)
+        .eq('user_id', profile.id)
         .in('event_id', eventIds)
     : { data: [] }
 
@@ -52,7 +47,7 @@ export async function GET() {
     requiredTier: e.required_tier as 'community' | 'vip' | 'pro' | null,
     registrationCount: e.registration_count,
     isRegistered: registeredIds.has(e.id),
-    hasAccess: hasTierAccess(profile?.tier, e.required_tier as 'community' | 'vip' | 'pro' | null),
+    hasAccess: hasTierAccess(profile.tier, e.required_tier as 'community' | 'vip' | 'pro' | null),
     isPublished: e.is_published,
   }))
 

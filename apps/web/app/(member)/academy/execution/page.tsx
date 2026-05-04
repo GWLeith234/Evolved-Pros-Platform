@@ -2,7 +2,8 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { fetchUserProfile, fetchCourseByPillarNumber } from '@/lib/academy/fetchers'
+import { fetchCourseByPillarNumber } from '@/lib/academy/fetchers'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { PillarPageShell } from '@/components/academy/PillarPageShell'
 import { LiveSessionCard } from '@/components/academy/LiveSessionCard'
 import { ReviewCadences } from '@/components/academy/ReviewCadences'
@@ -146,20 +147,17 @@ const P6_MCQ_QUESTIONS: ComponentProps<typeof ScenarioMCQ>['questions'] = [
 
 export default async function Page() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) redirect('/login')
 
-  const [profile, p6Course] = await Promise.all([
-    fetchUserProfile(supabase, user.id),
-    fetchCourseByPillarNumber(supabase, 6),
-  ])
+  const p6Course = await fetchCourseByPillarNumber(supabase, 6)
 
   // Fetch review cadences server-side
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cadencesRes = p6Course ? await (supabase as any)
     .from('review_cadences')
     .select('id, cadence_type, schedule_json, focus_area')
-    .eq('user_id', user.id)
+    .eq('user_id', profile.id)
     .eq('course_id', p6Course.id) : { data: [] }
 
   const memberName = profile?.full_name ?? profile?.display_name ?? null

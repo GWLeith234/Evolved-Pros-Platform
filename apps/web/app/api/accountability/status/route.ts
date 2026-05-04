@@ -3,11 +3,12 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export async function GET(request: Request) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const courseId = searchParams.get('course_id')
@@ -16,7 +17,7 @@ export async function GET(request: Request) {
   let query = adminClient
     .from('accountability_pairs')
     .select('id, user_id, partner_id, course_id, status, paired_at, created_at')
-    .or(`user_id.eq.${user.id},partner_id.eq.${user.id}`)
+    .or(`user_id.eq.${profile.id},partner_id.eq.${profile.id}`)
     .in('status', ['active', 'pending'])
     .order('created_at', { ascending: false })
     .limit(1)
@@ -35,8 +36,8 @@ export async function GET(request: Request) {
   }
 
   // Determine state from the user's perspective
-  const isSender   = pair.user_id    === user.id
-  const isReceiver = pair.partner_id === user.id
+  const isSender   = pair.user_id    === profile.id
+  const isReceiver = pair.partner_id === profile.id
   let state: string
   if (pair.status === 'active') {
     state = 'active'
@@ -59,7 +60,7 @@ export async function GET(request: Request) {
     .from('partner_checkins')
     .select('id, user_id, pair_id, week_start, commitment, outcome, note, created_at')
     .eq('pair_id', pair.id)
-    .eq('user_id', user.id)
+    .eq('user_id', profile.id)
     .order('week_start', { ascending: false })
     .limit(4)
 

@@ -1,34 +1,27 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { MessagesClient } from './MessagesClient'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const dynamic = 'force-dynamic'
 
 export default async function MessagesPage() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('users')
-    .select('id, display_name, full_name, avatar_url')
-    .eq('id', user.id)
-    .single()
-
+  const profile = await resolveCurrentUser(supabase)
   if (!profile) redirect('/login')
 
   // Fetch initial conversation list
   const { data: convRows } = await supabase
     .from('conversations')
     .select('id, participant_one_id, participant_two_id, last_message_at, created_at')
-    .or(`participant_one_id.eq.${user.id},participant_two_id.eq.${user.id}`)
+    .or(`participant_one_id.eq.${profile.id},participant_two_id.eq.${profile.id}`)
     .order('last_message_at', { ascending: false, nullsFirst: false })
 
   const rows = convRows ?? []
 
   // Get other participant IDs
   const otherIds = rows.map(c =>
-    c.participant_one_id === user.id ? c.participant_two_id : c.participant_one_id
+    c.participant_one_id === profile.id ? c.participant_two_id : c.participant_one_id
   )
   const uniqueIds = [...new Set(otherIds)]
 
@@ -68,7 +61,7 @@ export default async function MessagesPage() {
       .from('messages')
       .select('conversation_id')
       .in('conversation_id', convIds)
-      .neq('sender_id', user.id)
+      .neq('sender_id', profile.id)
       .is('read_at', null)
     for (const r of unreadRows ?? []) {
       unreadMap[r.conversation_id] = (unreadMap[r.conversation_id] ?? 0) + 1
@@ -76,7 +69,7 @@ export default async function MessagesPage() {
   }
 
   const conversations = rows.map(c => {
-    const otherId = c.participant_one_id === user.id ? c.participant_two_id : c.participant_one_id
+    const otherId = c.participant_one_id === profile.id ? c.participant_two_id : c.participant_one_id
     const other = profileMap[otherId]
     const lastMsg = lastMsgMap[c.id]
     return {

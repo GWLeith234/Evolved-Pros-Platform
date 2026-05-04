@@ -3,19 +3,20 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 type AssessmentType = 'PIONEER' | 'DRIVER' | 'CONNECTOR' | 'ARCHITECT'
 const VALID_TYPES: AssessmentType[] = ['PIONEER', 'DRIVER', 'CONNECTOR', 'ARCHITECT']
 
 export async function GET() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data, error } = await supabase
     .from('assessments')
     .select('id, user_id, assessment_type, type_result, scores_json, created_at')
-    .eq('user_id', user.id)
+    .eq('user_id', profile.id)
     .eq('assessment_type', 'pioneer-driver')
     .order('created_at', { ascending: false })
     .limit(1)
@@ -31,8 +32,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   let body: Record<string, unknown>
   try { body = await request.json() } catch {
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
   const { data: assessment, error: insertError } = await adminClient
     .from('assessments')
     .insert({
-      user_id: user.id,
+      user_id: profile.id,
       assessment_type: 'pioneer-driver',
       type_result: typeResult,
       scores_json: scoresJson,
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
   const { error: updateError } = await adminClient
     .from('users')
     .update({ pioneer_driver_type: typeResult })
-    .eq('id', user.id)
+    .eq('id', profile.id)
 
   if (updateError) {
     console.error('[POST /api/assessments/pioneer-driver] user update', updateError)

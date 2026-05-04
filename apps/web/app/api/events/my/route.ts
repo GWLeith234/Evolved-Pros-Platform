@@ -2,24 +2,19 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { hasTierAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: profile } = await supabase
-    .from('users')
-    .select('tier')
-    .eq('id', user.id)
-    .single()
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: regs } = await supabase
     .from('event_registrations')
     .select('event_id, events(id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published)')
-    .eq('user_id', user.id)
+    .eq('user_id', profile.id)
     .order('registered_at', { ascending: true })
 
   const events: EventItem[] = (regs ?? [])
@@ -43,7 +38,7 @@ export async function GET() {
         requiredTier: e.required_tier as 'community' | 'vip' | 'pro' | null,
         registrationCount: e.registration_count,
         isRegistered: true,
-        hasAccess: hasTierAccess(profile?.tier, e.required_tier as 'community' | 'vip' | 'pro' | null),
+        hasAccess: hasTierAccess(profile.tier, e.required_tier as 'community' | 'vip' | 'pro' | null),
         isPublished: e.is_published,
       } satisfies EventItem
     })

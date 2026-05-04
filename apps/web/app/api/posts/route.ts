@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import type { Post } from '@/lib/community/types'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,8 +52,8 @@ function toPost(
 
 export async function GET(request: Request) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const channelSlug = searchParams.get('channelSlug')
@@ -106,10 +107,10 @@ export async function GET(request: Request) {
   const [userReactionsResult, bookmarksResult, allReactionsResult] = await Promise.all([
     postIds.length > 0
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ? (adminClient as any).from('post_reactions').select('post_id, user_id, reaction_type').eq('user_id', user.id).in('post_id', postIds) as Promise<{ data: ReactionRow[] | null }>
+      ? (adminClient as any).from('post_reactions').select('post_id, user_id, reaction_type').eq('user_id', profile.id).in('post_id', postIds) as Promise<{ data: ReactionRow[] | null }>
       : Promise.resolve({ data: [] as ReactionRow[] }),
     postIds.length > 0
-      ? supabase.from('post_bookmarks').select('post_id').eq('user_id', user.id).in('post_id', postIds)
+      ? supabase.from('post_bookmarks').select('post_id').eq('user_id', profile.id).in('post_id', postIds)
       : Promise.resolve({ data: [] as { post_id: string }[] }),
     postIds.length > 0
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -139,8 +140,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   let body: {
     channelId?: unknown
@@ -211,14 +212,7 @@ export async function POST(request: Request) {
   const pillarText: string | null =
     pillarInt !== null && pillarInt >= 1 && pillarInt <= 6 ? `p${pillarInt}` : legacyTag
 
-  // Resolve public.users.id by email per project rule (auth user.id is the
-  // auth-schema id, which doesn't always match public.users.id).
-  const { data: profileRow } = await adminClient
-    .from('users')
-    .select('id')
-    .eq('email', user.email)
-    .single()
-  const authorId = profileRow?.id ?? user.id
+  const authorId = profile.id
 
   const { data: post, error } = await adminClient
     .from('posts')
@@ -244,7 +238,7 @@ export async function POST(request: Request) {
 
   // Award 10 points for posting (fire-and-forget — never block the response)
   try {
-    const { error: rpcErr } = await supabase.rpc('increment_points', { user_id: user.id, amount: 10 } as Record<string, unknown>)
+    const { error: rpcErr } = await supabase.rpc('increment_points', { user_id: profile.id, amount: 10 } as Record<string, unknown>)
     if (rpcErr) console.warn('[posts] increment_points failed:', rpcErr.message)
   } catch (err) {
     console.warn('[posts] increment_points exception:', err)

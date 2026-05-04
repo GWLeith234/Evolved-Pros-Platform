@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const metadata: Metadata = { title: 'Settings — Evolved Pros' }
 import { Tooltip } from '@/components/ui/Tooltip'
@@ -15,23 +16,15 @@ export const dynamic = 'force-dynamic'
 
 export default async function SettingsPage() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) redirect('/login')
 
-  const [{ data: profile }, { data: adData }] = await Promise.all([
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
-      .from('users')
-      .select('id, display_name, full_name, avatar_url, banner_url, bio, role_title, location, tier, notification_preferences, company, linkedin_url, website_url, twitter_handle, phone, phone_visible, current_pillar, goal_90day, goal_visible, theme')
-      .eq('id', user.id)
-      .single(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (adminClient.from('platform_ads' as any) as any)
-      .select('id, image_url, headline, tool_name, cta_text, link_url, click_url, sponsor_name')
-      .eq('is_active', true)
-      .limit(1)
-      .maybeSingle(),
-  ])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: adData } = await (adminClient.from('platform_ads' as any) as any)
+    .select('id, image_url, headline, tool_name, cta_text, link_url, click_url, sponsor_name')
+    .eq('is_active', true)
+    .limit(1)
+    .maybeSingle()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const settingsAd = (adData as any) ?? null
@@ -78,7 +71,7 @@ export default async function SettingsPage() {
         </div>
         <div className="px-6 py-6">
           <ProfileEditForm
-            userId={user.id}
+            userId={profile.id}
             profile={{
               display_name: profile?.display_name ?? null,
               full_name: profile?.full_name ?? null,
@@ -125,7 +118,7 @@ export default async function SettingsPage() {
                 {profile?.tier === 'pro' ? 'Professional' : 'VIP'}
               </p>
             </div>
-            {!hasTierAccess(profile?.tier, 'pro') && (
+            {!hasTierAccess(profile?.tier as 'community' | 'vip' | 'pro' | null, 'pro') && (
               <a
                 href="/membership-upgrade"
                 className="font-condensed font-bold uppercase tracking-wider text-[11px] rounded px-4 py-2 transition-all"
