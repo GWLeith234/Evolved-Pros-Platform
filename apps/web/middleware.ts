@@ -109,9 +109,17 @@ export async function middleware(request: NextRequest) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    // Carry forward any cookies Supabase wrote during getUser() (e.g. a partial
+    // token-refresh attempt). A bare NextResponse.redirect() drops them, which
+    // can drop the user's session on the very next request — the symptom QA hit
+    // when /home → /podcast or /home → /live unexpectedly bounced to /login.
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    return NextResponse.redirect(url)
+    const redirect = NextResponse.redirect(url)
+    supabaseResponse.cookies.getAll().forEach(c => {
+      redirect.cookies.set(c.name, c.value, c)
+    })
+    return redirect
   }
 
   // Onboarding routes: authenticated user is allowed through unconditionally.

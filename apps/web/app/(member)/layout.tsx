@@ -7,6 +7,7 @@ import { NextEventBanner } from '@/components/layout/NextEventBanner'
 import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
 import { RightRail } from '@/components/layout/RightRail'
 import { ToastProvider } from '@/lib/toast'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export default async function MemberLayout({ children }: { children: React.ReactNode }) {
   // RSC prefetch guard: middleware lets prefetch requests through so it can't
@@ -46,15 +47,11 @@ export default async function MemberLayout({ children }: { children: React.React
   }
 
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('users')
-    .select('id, display_name, full_name, avatar_url, tier, tier_status, tier_expires_at, role, points')
-    .eq('email', user.email!)
-    .single()
-
+  // Use the canonical id-then-email resolver so a transient miss on the
+  // brittle .eq('email', user.email).single() doesn't bounce the user to
+  // /login — the bug QA hit on /podcast nav. resolveCurrentUser also goes
+  // through adminClient so RLS on public.users can't shadow the read.
+  const profile = await resolveCurrentUser(supabase)
   if (!profile) redirect('/login')
 
   // Normalize tier and role to lowercase so all downstream comparisons work

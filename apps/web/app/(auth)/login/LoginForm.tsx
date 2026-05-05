@@ -4,6 +4,40 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { LogoMark } from '@/components/ui/LogoMark'
 
+// Map raw Supabase auth errors into copy that doesn't sound like a stack trace.
+function humanizeAuthError(message: string): string {
+  const m = message.toLowerCase()
+  if (m.includes('invalid login credentials') || m.includes('invalid email or password')) {
+    return "That email and password don't match. Try again or use a magic link."
+  }
+  if (m.includes('email not confirmed')) {
+    return 'Confirm your email first — check your inbox for the verification link.'
+  }
+  if (m.includes('rate limit') || m.includes('too many')) {
+    return 'Too many attempts. Wait a minute and try again.'
+  }
+  return message
+}
+
+function Spinner() {
+  return (
+    <svg
+      aria-hidden="true"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      style={{ animation: 'loginSpin 0.8s linear infinite', marginRight: 8, verticalAlign: '-2px' }}
+    >
+      <path d="M12 3a9 9 0 0 1 9 9" />
+      <style>{`@keyframes loginSpin { to { transform: rotate(360deg); } }`}</style>
+    </svg>
+  )
+}
+
 export function LoginForm() {
   const isSignup = useSearchParams().get('mode') === 'signup'
   const [tab, setTab] = useState<'password' | 'magic'>('password')
@@ -28,7 +62,7 @@ export function LoginForm() {
     })
     setLoading(false)
     if (err) {
-      setError(err.message)
+      setError(humanizeAuthError(err.message))
       return
     }
     window.location.href = '/auth/callback?next=/home'
@@ -48,7 +82,7 @@ export function LoginForm() {
       },
     })
     setLoading(false)
-    if (err) { setError(err.message); return }
+    if (err) { setError(humanizeAuthError(err.message)); return }
     setSent(true)
   }
 
@@ -128,7 +162,11 @@ export function LoginForm() {
               </div>
 
               {error && (
-                <p className="text-[#ef0e30] text-sm rounded bg-[rgba(239,14,48,0.06)] px-3 py-2 border border-[rgba(239,14,48,0.15)] mb-4">
+                <p
+                  role="alert"
+                  aria-live="polite"
+                  className="text-[#ef0e30] text-sm rounded bg-[rgba(239,14,48,0.06)] px-3 py-2 border border-[rgba(239,14,48,0.15)] mb-4"
+                >
                   {error}
                 </p>
               )}
@@ -214,10 +252,11 @@ export function LoginForm() {
                   <button
                     type="submit"
                     disabled={loading}
+                    aria-busy={loading}
                     className={`w-full py-3 rounded font-bold uppercase tracking-wider text-sm text-white transition-all disabled:opacity-50 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                     style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: '#ef0e30' }}
                   >
-                    {loading ? 'Signing in…' : 'Sign In →'}
+                    {loading ? (<><Spinner />Signing in…</>) : 'Sign In →'}
                   </button>
                 </form>
               ) : (
@@ -240,10 +279,11 @@ export function LoginForm() {
                   <button
                     type="submit"
                     disabled={loading}
+                    aria-busy={loading}
                     className={`w-full py-3 rounded font-bold uppercase tracking-wider text-sm text-white transition-all disabled:opacity-50 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                     style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: '#ef0e30' }}
                   >
-                    {loading ? 'Sending…' : 'Send Login Link →'}
+                    {loading ? (<><Spinner />Sending…</>) : 'Send Login Link →'}
                   </button>
                 </form>
               )}
