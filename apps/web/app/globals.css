@@ -140,6 +140,10 @@
   --events-rsvp-active:        #19C9A6;
 }
 
+html {
+  background-color: #0A0F18;
+}
+
 body {
   background-color: #0A0F18;
 }
@@ -252,6 +256,9 @@ html.light-mode {
 }
 
 /* Page background + body text */
+html.light-mode {
+  background-color: #F5F0E8;
+}
 html.light-mode body {
   background-color: #F5F0E8;
   color: #1b3c5a;
@@ -349,6 +356,12 @@ html, body { overflow-x: hidden; }
   0%   { transform: translate(0, 0) scale(0) rotate(0deg);                                 opacity: 0; }
   20%  { transform: translate(0, 0) scale(1) rotate(0deg);                                 opacity: 1; }
   100% { transform: translate(var(--dx, 0), var(--dy, 0)) scale(0) rotate(var(--rot, 0)); opacity: 0; }
+}
+
+/* LOAD-1: subtle logo breath on the branded loading screens. */
+@keyframes brand-loading-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1);    }
+  50%      { opacity: 1;   transform: scale(1.04); }
 }
 
 /* HOME-4UP-TILES responsive grid breakpoints. */

@@ -147,7 +147,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
         marginLeft: 'calc(-50vw + 50%)',
         minHeight: 560,
         overflow: 'hidden',
-        background: coverUrl ? '#000' : 'linear-gradient(135deg, #0A0F18, #1B2A4A)',
+        background: coverUrl ? '#000' : 'linear-gradient(135deg, #0A0F18 0%, #111926 50%, #1a0a0a 100%)',
       }}
     >
       {/* Cover image */}
