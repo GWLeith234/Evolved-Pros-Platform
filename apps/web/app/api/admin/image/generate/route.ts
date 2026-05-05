@@ -3,111 +3,106 @@ export const runtime = 'nodejs'
 export const maxDuration = 60
 
 import { NextResponse } from 'next/server'
-import OpenAI from 'openai'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
 
-const BRAND_PREFIX =
-  'Professional dark editorial photography, Evolved Pros brand, dark navy background, gold accents, sales leadership theme. '
+type Style = 'photorealistic' | 'cinematic' | 'dark editorial'
 
-const STYLE_SUFFIX: Record<string, string> = {
-  Photorealistic: ' Photorealistic, sharp detail, natural lighting.',
-  Cinematic: ' Cinematic composition, dramatic lighting, shallow depth of field.',
-  'Dark editorial': ' Dark editorial mood, moody contrast, magazine-grade composition.',
+const STYLE_PREFIX: Record<Style, string> = {
+  'photorealistic': 'Professional photorealistic photography,',
+  'cinematic':      'Cinematic film still,',
+  'dark editorial': 'Dark editorial photography,',
 }
 
-async function generateOnce(prompt: string): Promise<string | null> {
-  const xaiKey = process.env.XAI_API_KEY
-  if (xaiKey) {
-    try {
-      const xai = new OpenAI({ apiKey: xaiKey, baseURL: 'https://api.x.ai/v1' })
-      const res = await xai.images.generate({ model: 'grok-2-image', prompt, n: 1 })
-      const url = res.data?.[0]?.url
-      if (url) return url
-    } catch (err) {
-      console.error('[image/generate] Grok failed:', err instanceof Error ? err.message : err)
-    }
-  }
+const BRAND_SUFFIX =
+  ' Evolved Pros brand aesthetic, dark navy background #0A0F18, gold accent lighting #C9A84C, professional business environment, high contrast, sharp focus.'
 
-  const openaiKey = process.env.OPENAI_API_KEY
-  if (openaiKey) {
-    try {
-      const openai = new OpenAI({ apiKey: openaiKey })
-      const res = await openai.images.generate({
-        model: 'dall-e-3',
-        prompt,
-        size: '1792x1024',
-        quality: 'standard',
-        n: 1,
-      })
-      const url = res.data?.[0]?.url
-      if (url) return url
-    } catch (err) {
-      console.error('[image/generate] DALL-E fallback failed:', err instanceof Error ? err.message : err)
-    }
-  }
-
-  return null
+interface GenerateBody {
+  prompt?: unknown
+  style?: unknown
 }
 
-async function persistToBranding(remoteUrl: string): Promise<string | null> {
-  try {
-    const res = await fetch(remoteUrl)
-    if (!res.ok) return null
-    const buffer = Buffer.from(await res.arrayBuffer())
-    const path = `ai-generated/${Date.now()}.png`
+interface XaiImageResponse {
+  data?: { url?: string }[]
+}
 
-    const { error } = await adminClient.storage
-      .from('Branding')
-      .upload(path, buffer, { contentType: 'image/png', upsert: true })
+async function uploadToBranding(remoteUrl: string): Promise<string> {
+  const res = await fetch(remoteUrl)
+  if (!res.ok) throw new Error(`Failed to fetch generated image (${res.status})`)
+  const buffer = Buffer.from(await res.arrayBuffer())
+  const path = `generated/${Date.now()}.png`
 
-    if (error) {
-      console.error('[image/generate] Storage upload failed:', error.message)
-      return null
-    }
+  const { error } = await adminClient.storage
+    .from('Branding')
+    .upload(path, buffer, { contentType: 'image/png', upsert: true })
 
-    const { data: { publicUrl } } = adminClient.storage.from('Branding').getPublicUrl(path)
-    return publicUrl
-  } catch {
-    return null
-  }
+  if (error) throw new Error(`Storage upload failed: ${error.message}`)
+
+  const { data: { publicUrl } } = adminClient.storage.from('Branding').getPublicUrl(path)
+  return publicUrl
 }
 
 export async function POST(request: Request) {
+  const guard = await requireAdminApi()
+  if (guard instanceof Response) return guard
+
+  let body: GenerateBody
+  try { body = (await request.json()) as GenerateBody } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
+
+  const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : ''
+  if (!prompt) return NextResponse.json({ error: 'prompt is required' }, { status: 422 })
+
+  const styleRaw = typeof body.style === 'string' ? body.style.trim().toLowerCase() : ''
+  const style: Style = (styleRaw in STYLE_PREFIX ? styleRaw : 'dark editorial') as Style
+
+  const apiKey = process.env.XAI_API_KEY
+  if (!apiKey) {
+    return NextResponse.json({ error: 'XAI_API_KEY not configured' }, { status: 500 })
+  }
+
+  const brandPrefix = `${STYLE_PREFIX[style]}${BRAND_SUFFIX}`
+  const fullPrompt = `${brandPrefix} ${prompt}`
+
+  let xaiData: XaiImageResponse
   try {
-    const guard = await requireAdminApi()
-    if (guard instanceof Response) return guard
-
-    let body: Record<string, unknown>
-    try { body = await request.json() } catch {
-      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+    const xaiRes = await fetch('https://api.x.ai/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'grok-2-image',
+        prompt: fullPrompt,
+        n: 1,
+      }),
+    })
+    if (!xaiRes.ok) {
+      const errText = await xaiRes.text().catch(() => '')
+      throw new Error(`xAI ${xaiRes.status}: ${errText.slice(0, 300)}`)
     }
-
-    const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : ''
-    const styleRaw = typeof body.style === 'string' ? body.style.trim() : ''
-    if (!prompt) return NextResponse.json({ error: 'prompt is required' }, { status: 422 })
-
-    if (!process.env.XAI_API_KEY && !process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ error: 'No AI image API keys configured' }, { status: 500 })
-    }
-
-    const styleSuffix = STYLE_SUFFIX[styleRaw] ?? ''
-    const fullPrompt = `${BRAND_PREFIX}${prompt}${styleSuffix}`
-
-    const remoteUrl = await generateOnce(fullPrompt)
-    if (!remoteUrl) {
-      return NextResponse.json({ error: 'Image generation failed' }, { status: 502 })
-    }
-
-    const persisted = await persistToBranding(remoteUrl)
-    if (!persisted) {
-      return NextResponse.json({ error: 'Failed to persist generated image' }, { status: 500 })
-    }
-
-    return NextResponse.json({ url: persisted })
+    xaiData = (await xaiRes.json()) as XaiImageResponse
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err)
-    console.error('[image/generate] Unhandled error:', message)
+    const message = err instanceof Error ? err.message : 'xAI request failed'
+    console.error('[image/generate] xAI error:', message)
+    return NextResponse.json({ error: message }, { status: 502 })
+  }
+
+  const remoteUrl = xaiData.data?.[0]?.url
+  if (!remoteUrl) {
+    return NextResponse.json({ error: 'xAI returned no image URL' }, { status: 502 })
+  }
+
+  let publicUrl: string
+  try {
+    publicUrl = await uploadToBranding(remoteUrl)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Storage upload failed'
+    console.error('[image/generate] storage error:', message)
     return NextResponse.json({ error: message }, { status: 500 })
   }
+
+  return NextResponse.json({ url: publicUrl })
 }

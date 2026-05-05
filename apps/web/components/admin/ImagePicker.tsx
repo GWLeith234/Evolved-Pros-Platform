@@ -4,8 +4,12 @@ import { useRef, useState } from 'react'
 
 type Tab = 'upload' | 'stock' | 'generate'
 
-const STYLES = ['Photorealistic', 'Cinematic', 'Dark editorial'] as const
-type Style = typeof STYLES[number]
+const STYLES = [
+  { value: 'photorealistic', label: 'Photorealistic' },
+  { value: 'cinematic',      label: 'Cinematic' },
+  { value: 'dark editorial', label: 'Dark editorial' },
+] as const
+type Style = typeof STYLES[number]['value']
 
 interface UnsplashResult {
   id: string
@@ -220,7 +224,7 @@ function StockTab({ onChange }: { onChange: (url: string) => void }) {
 
 function GenerateTab({ onChange }: { onChange: (url: string) => void }) {
   const [prompt, setPrompt] = useState('')
-  const [style, setStyle] = useState<Style>('Cinematic')
+  const [style, setStyle] = useState<Style>('dark editorial')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [generated, setGenerated] = useState<string | null>(null)
@@ -254,7 +258,7 @@ function GenerateTab({ onChange }: { onChange: (url: string) => void }) {
       <textarea
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
-        placeholder="Describe the image…"
+        placeholder="e.g. Sales leader presenting on a dark stage, gold spotlight, confident posture"
         rows={3}
         className="w-full rounded border border-[#1E2535] bg-[#0B1220] px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-[#C9302A] focus:outline-none"
       />
@@ -262,16 +266,16 @@ function GenerateTab({ onChange }: { onChange: (url: string) => void }) {
       <div className="flex flex-wrap gap-2">
         {STYLES.map((s) => (
           <button
-            key={s}
+            key={s.value}
             type="button"
-            onClick={() => setStyle(s)}
+            onClick={() => setStyle(s.value)}
             className={`rounded-full border px-3 py-1 text-xs transition ${
-              style === s
+              style === s.value
                 ? 'border-[#C9302A] bg-[#C9302A]/10 text-white'
                 : 'border-[#1E2535] text-slate-400 hover:text-slate-200'
             }`}
           >
-            {s}
+            {s.label}
           </button>
         ))}
       </div>
@@ -285,18 +289,27 @@ function GenerateTab({ onChange }: { onChange: (url: string) => void }) {
         {busy ? 'Generating…' : 'Generate'}
       </button>
 
+      {busy && (
+        <div
+          className="flex items-center justify-center w-full rounded border border-[#1E2535] bg-[#0B1220] animate-pulse"
+          style={{ aspectRatio: '16/9' }}
+        >
+          <span className="text-sm text-slate-400">Generating with Grok…</span>
+        </div>
+      )}
+
       {error && <p className="text-sm text-red-400">{error}</p>}
 
-      {generated && (
+      {generated && !busy && (
         <div className="space-y-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={generated} alt="Generated" className="h-48 w-full rounded object-cover" />
+          <img src={generated} alt="Generated" className="w-full rounded object-cover" />
           <button
             type="button"
             onClick={() => onChange(generated)}
             className="w-full rounded border border-[#C9302A] bg-transparent px-4 py-2 text-sm font-medium text-white hover:bg-[#C9302A]/10"
           >
-            Save
+            Save Image
           </button>
         </div>
       )}
