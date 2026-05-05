@@ -122,6 +122,63 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
   const [transcribeError, setTranscribeError] = useState<string | null>(null)
   const [transcribeSuccess, setTranscribeSuccess] = useState(false)
 
+  // AI writer state
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
+  const [aiImagePrompt, setAiImagePrompt] = useState<string | null>(null)
+
+  async function handleAIWrite() {
+    const titleVal = values.title.trim()
+    const guestVal = values.guestName.trim()
+    if (!titleVal || !guestVal) {
+      setAiError('Enter a title and guest name first.')
+      return
+    }
+    setAiLoading(true)
+    setAiError(null)
+    try {
+      const res = await fetch('/api/admin/ai/write-episode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: titleVal,
+          guest_name: guestVal,
+          guest_title: values.guestTitle.trim() || undefined,
+          guest_company: values.guestCompany.trim() || undefined,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Could not generate')
+      const ep = data.episode
+
+      // Map AI's 'mental' → form's 'mental-toughness'.
+      const aiPillar = ep.pillar === 'mental' ? 'mental-toughness' : ep.pillar
+      const validPillars: Pillar[] = [
+        'foundation', 'identity', 'mental-toughness', 'strategy', 'accountability', 'execution',
+      ]
+      const pillarTag = validPillars.includes(aiPillar as Pillar) ? (aiPillar as Pillar) : null
+
+      // Stitch show_notes + key_takeaways into the existing showNotes field.
+      const merged = ep.key_takeaways
+        ? `${ep.show_notes ?? ''}\n\n## Key Takeaways\n${ep.key_takeaways}`.trim()
+        : (ep.show_notes ?? '')
+
+      setValues(prev => ({
+        ...prev,
+        description: ep.description ?? prev.description,
+        showNotes: merged || prev.showNotes,
+        pillars: pillarTag
+          ? Array.from(new Set([...prev.pillars, pillarTag]))
+          : prev.pillars,
+      }))
+      setAiImagePrompt(ep.image_prompt ?? null)
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'Could not generate — try again')
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
   function set<K extends keyof EpisodeFormValues>(key: K, value: EpisodeFormValues[K]) {
     setValues(prev => ({ ...prev, [key]: value }))
   }
@@ -324,6 +381,41 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
           style={inputStyle}
           placeholder="Episode title"
         />
+        <div className="flex items-center gap-3 mt-2">
+          <button
+            type="button"
+            onClick={handleAIWrite}
+            disabled={aiLoading}
+            className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-3 py-1.5 transition-all disabled:opacity-50"
+            style={{ border: '1px solid #0ABFA3', color: '#0ABFA3', backgroundColor: 'transparent' }}
+          >
+            {aiLoading ? (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#0ABFA3' }} />
+                Writing…
+              </span>
+            ) : 'Write with AI'}
+          </button>
+          {aiError && (
+            <span className="font-condensed text-[11px]" style={{ color: '#ef0e30' }}>{aiError}</span>
+          )}
+        </div>
+        {aiImagePrompt && (
+          <div
+            className="rounded-lg p-3 mt-3"
+            style={{ backgroundColor: 'rgba(10,191,163,0.06)', border: '1px solid rgba(10,191,163,0.2)' }}
+          >
+            <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-1" style={{ color: '#0ABFA3' }}>
+              AI image prompt
+            </p>
+            <p className="font-body text-[12px] leading-relaxed" style={{ color: '#1b3c5a' }}>
+              {aiImagePrompt}
+            </p>
+            <p className="font-condensed text-[10px] mt-1" style={{ color: '#7a8a96' }}>
+              Use this prompt in the image generator below.
+            </p>
+          </div>
+        )}
       </LabelledInput>
 
       {/* Slug */}

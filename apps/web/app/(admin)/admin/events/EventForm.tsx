@@ -53,6 +53,50 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // AI writer state
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
+  const [aiOutput, setAiOutput] = useState<{
+    tagline: string
+    cta_text: string
+    pillar: string
+    image_prompt: string
+  } | null>(null)
+
+  async function handleAIWrite() {
+    if (!values.title.trim()) {
+      setAiError('Enter a title first.')
+      return
+    }
+    setAiLoading(true)
+    setAiError(null)
+    try {
+      const res = await fetch('/api/admin/ai/write-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: values.title.trim(),
+          format: values.eventType,
+          date: values.startsAt || undefined,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Could not generate')
+      const ev = data.event
+      setValues(prev => ({ ...prev, description: ev.description ?? prev.description }))
+      setAiOutput({
+        tagline: ev.tagline ?? '',
+        cta_text: ev.cta_text ?? '',
+        pillar: ev.pillar ?? '',
+        image_prompt: ev.image_prompt ?? '',
+      })
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'Could not generate — try again')
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
   function set<K extends keyof EventFormValues>(key: K, value: EventFormValues[K]) {
     setValues(prev => ({ ...prev, [key]: value }))
   }
@@ -150,7 +194,68 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
           style={inputStyle}
           placeholder="Event title"
         />
+        <div className="flex items-center gap-3 mt-2">
+          <button
+            type="button"
+            onClick={handleAIWrite}
+            disabled={aiLoading || !values.title.trim()}
+            className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-3 py-1.5 transition-all disabled:opacity-50"
+            style={{ border: '1px solid #0ABFA3', color: '#0ABFA3', backgroundColor: 'transparent' }}
+          >
+            {aiLoading ? (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#0ABFA3' }} />
+                Writing…
+              </span>
+            ) : 'Write with AI'}
+          </button>
+          {aiError && (
+            <span className="font-condensed text-[11px]" style={{ color: '#ef0e30' }}>{aiError}</span>
+          )}
+        </div>
       </div>
+
+      {aiOutput && (
+        <div
+          className="rounded-lg p-4 space-y-2"
+          style={{ backgroundColor: 'rgba(10,191,163,0.06)', border: '1px solid rgba(10,191,163,0.2)' }}
+        >
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px]" style={{ color: '#0ABFA3' }}>
+            AI suggestions
+          </p>
+          {aiOutput.tagline && (
+            <p className="font-body text-[13px]" style={{ color: '#1b3c5a' }}>
+              <span className="font-condensed font-bold uppercase tracking-wide text-[10px] mr-2" style={{ color: '#7a8a96' }}>Tagline</span>
+              {aiOutput.tagline}
+            </p>
+          )}
+          {aiOutput.cta_text && (
+            <p className="font-body text-[13px]" style={{ color: '#1b3c5a' }}>
+              <span className="font-condensed font-bold uppercase tracking-wide text-[10px] mr-2" style={{ color: '#7a8a96' }}>CTA</span>
+              {aiOutput.cta_text}
+            </p>
+          )}
+          {aiOutput.pillar && (
+            <p className="font-body text-[13px]" style={{ color: '#1b3c5a' }}>
+              <span className="font-condensed font-bold uppercase tracking-wide text-[10px] mr-2" style={{ color: '#7a8a96' }}>Pillar</span>
+              {aiOutput.pillar}
+            </p>
+          )}
+          {aiOutput.image_prompt && (
+            <div>
+              <p className="font-condensed font-bold uppercase tracking-wide text-[10px] mb-1" style={{ color: '#7a8a96' }}>
+                Image prompt
+              </p>
+              <p className="font-body text-[12px] leading-relaxed" style={{ color: '#1b3c5a' }}>
+                {aiOutput.image_prompt}
+              </p>
+              <p className="font-condensed text-[10px] mt-1" style={{ color: '#7a8a96' }}>
+                Use this prompt in the image generator below.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Description */}
       <div>
