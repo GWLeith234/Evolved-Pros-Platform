@@ -183,7 +183,7 @@ export function TopNav({
           zIndex: 40,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
+          gap: 12,
           padding: '0 24px',
           height: 72,
           background: 'var(--bg-topnav)',
@@ -214,15 +214,20 @@ export function TopNav({
           )}
         </Link>
 
-        {/* Nav (centered absolute) */}
+        {/* Nav — flex-grow centred. Was previously position:absolute / left:50%
+            which collided with the logo + right cluster at 800–1440px viewports.
+            Now it sits in the natural flow as `flex: 1` and centers its links via
+            `justifyContent: 'center'`. minWidth:0 lets it shrink rather than push
+            the right cluster off-screen on narrow viewports. */}
         <nav
           style={{
-            position: 'absolute',
-            left: '50%',
-            transform: 'translateX(-50%)',
+            flex: 1,
+            minWidth: 0,
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'center',
             gap: 2,
+            overflow: 'hidden',
           }}
         >
           {NAV_ITEMS.filter(item => canAccess(profile.tier, item.minTier)).map(item => {
@@ -237,7 +242,9 @@ export function TopNav({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: 4,
-                  padding: '8px 14px',
+                  padding: '8px 10px',
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
                   fontFamily: '"Bebas Neue", sans-serif',
                   fontSize: 16,
                   letterSpacing: '0.08em',

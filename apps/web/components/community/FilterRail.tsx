@@ -52,7 +52,11 @@ export function FilterRail({
     <div
       style={{
         position: 'sticky',
-        top: 64,
+        // top:0 because the rail lives inside <main className="overflow-y-auto"> —
+        // sticky pins to main's top edge, which is already directly under the
+        // 72px TopNav. The previous top:64 was a vestige from a body-scroll era
+        // and dropped a 64px gap below the nav at every scroll position.
+        top: 0,
         zIndex: 10,
         background: 'var(--filter-rail-bg)',
         borderBottom: '1px solid var(--filter-rail-border)',
