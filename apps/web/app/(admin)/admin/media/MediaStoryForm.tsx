@@ -106,7 +106,11 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
         setError((data as { error?: string }).error ?? 'Save failed')
         return
       }
-      router.push('/admin/media')
+      // Toast lives on /admin/media — read ?toast=… and render an
+      // aria-live banner. 'published' / 'saved' / 'deleted' are the
+      // three keys the list page knows about.
+      const toast = publish ? 'published' : 'saved'
+      router.push(`/admin/media?toast=${toast}`)
       router.refresh()
     } finally {
       setSaving(false)
@@ -118,7 +122,7 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
     if (!window.confirm('Delete this story? This cannot be undone.')) return
     setSaving(true)
     await fetch(`/api/admin/media/${initial.id}`, { method: 'DELETE' })
-    router.push('/admin/media')
+    router.push('/admin/media?toast=deleted')
     router.refresh()
   }
 

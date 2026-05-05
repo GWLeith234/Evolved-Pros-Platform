@@ -127,8 +127,15 @@ export function ImagePicker({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: aiPromptText, style: aiStyle }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Generation failed')
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        // 422 + code 404: the xAI model isn't accessible. Don't expose the
+        // raw upstream message — give a clear next-step instruction.
+        if (res.status === 422 && data.code === 404) {
+          throw new Error("Image generation isn't available right now. Try Stock or Upload.")
+        }
+        throw new Error(data.error ?? 'Generation failed')
+      }
       setAiImages(data.images ?? [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Generation failed')
@@ -217,7 +224,7 @@ export function ImagePicker({
 
       <div className="p-4">
         {error && (
-          <p className="font-condensed text-[11px] mb-3" style={{ color: '#ef0e30' }}>{error}</p>
+          <p role="alert" className="font-condensed text-[11px] mb-3" style={{ color: '#ef0e30' }}>{error}</p>
         )}
 
         {/* ── UNSPLASH TAB ─────────────────────────────────────── */}

@@ -15,16 +15,6 @@ interface Props {
   onPrefill: (fields: AIStoryFields) => void
 }
 
-const PILLAR_OPTIONS = [
-  { value: '',                label: '— optional —' },
-  { value: 'foundation',      label: 'Foundation' },
-  { value: 'identity',        label: 'Identity' },
-  { value: 'mental',          label: 'Mental Toughness' },
-  { value: 'strategy',        label: 'Strategy' },
-  { value: 'accountability',  label: 'Accountability' },
-  { value: 'execution',       label: 'Execution' },
-]
-
 const TEAL = '#0ABFA3'
 const RED = '#C9302A'
 
@@ -34,7 +24,6 @@ const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] t
 
 export function StoryAIWriter({ onPrefill }: Props) {
   const [topic, setTopic] = useState('')
-  const [pillar, setPillar] = useState('')
   const [keywords, setKeywords] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -55,7 +44,6 @@ export function StoryAIWriter({ onPrefill }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           topic: trimmed,
-          pillar: pillar || undefined,
           keywords: keywords.split(',').map(k => k.trim()).filter(Boolean),
         }),
       })
@@ -105,33 +93,20 @@ export function StoryAIWriter({ onPrefill }: Props) {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-        <div>
-          <label className={labelClass}>Pillar (optional)</label>
-          <select
-            value={pillar}
-            onChange={e => setPillar(e.target.value)}
-            disabled={loading}
-            className={inputClass}
-            style={inputStyle}
-          >
-            {PILLAR_OPTIONS.map(p => (
-              <option key={p.value} value={p.value}>{p.label}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className={labelClass}>Keywords (optional, comma-separated)</label>
-          <input
-            type="text"
-            value={keywords}
-            onChange={e => setKeywords(e.target.value)}
-            disabled={loading}
-            className={inputClass}
-            style={inputStyle}
-            placeholder="time-blocking, focus, calendar discipline"
-          />
-        </div>
+      <div className="mb-4">
+        <label className={labelClass}>Keywords (optional, comma-separated)</label>
+        <input
+          type="text"
+          value={keywords}
+          onChange={e => setKeywords(e.target.value)}
+          disabled={loading}
+          className={inputClass}
+          style={inputStyle}
+          placeholder="time-blocking, focus, calendar discipline"
+        />
+        <p className="font-condensed text-[10px] mt-1" style={{ color: '#7a8a96' }}>
+          The AI will suggest a pillar — you can adjust it in the form below.
+        </p>
       </div>
 
       <button
@@ -145,7 +120,7 @@ export function StoryAIWriter({ onPrefill }: Props) {
           letterSpacing: '0.14em',
         }}
       >
-        {loading ? 'Writing in George’s voice…' : 'Write with AI'}
+        {loading ? 'Drafting…' : 'Write with AI'}
       </button>
 
       {loading && (

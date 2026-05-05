@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { adminClient } from '@/lib/supabase/admin'
 import { MediaListClient } from './MediaListClient'
+import { MediaToast } from './MediaToast'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,6 +49,10 @@ export default async function AdminMediaPage() {
           </Link>
         </div>
       </div>
+
+      <Suspense fallback={null}>
+        <MediaToast />
+      </Suspense>
 
       <MediaListClient initialStories={stories ?? []} pillarLabels={PILLAR_LABELS} />
     </div>

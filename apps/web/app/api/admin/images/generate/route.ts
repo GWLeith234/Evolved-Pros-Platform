@@ -7,12 +7,15 @@ import { requireAdminApi } from '@/lib/admin/helpers'
 import OpenAI from 'openai'
 
 async function generateOne(prompt: string): Promise<string | null> {
-  // Try Grok Aurora first
+  // Try Grok Aurora first. Model id is env-overrideable so a rename /
+  // access change ("model does not exist or your team doesn't have
+  // access") can be patched without a code deploy.
   const xaiKey = process.env.XAI_API_KEY
+  const model = process.env.XAI_IMAGE_MODEL?.trim() || 'grok-2-image'
   if (xaiKey) {
     try {
       const xai = new OpenAI({ apiKey: xaiKey, baseURL: 'https://api.x.ai/v1' })
-      const res = await xai.images.generate({ model: 'grok-2-image', prompt, n: 1 })
+      const res = await xai.images.generate({ model, prompt, n: 1 })
       const url = res.data?.[0]?.url
       if (url) return url
     } catch (err) {
@@ -98,6 +101,15 @@ export async function POST(request: Request) {
     )
 
     const images = persistedUrls.filter(Boolean) as string[]
+    if (images.length === 0) {
+      // Surface a structured 422 (not a silent empty 200) so the client can
+      // distinguish "no provider available / 404 from xAI / DALL-E off"
+      // from a network failure and show a real error in the UI.
+      return NextResponse.json(
+        { error: 'Image generation unavailable', code: 404, images: [] },
+        { status: 422 },
+      )
+    }
     return NextResponse.json({ images })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)

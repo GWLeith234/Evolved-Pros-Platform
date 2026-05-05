@@ -243,8 +243,15 @@ function GenerateTab({ onChange }: { onChange: (url: string) => void }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: prompt.trim(), style }),
       })
-      const data = await res.json()
-      if (!res.ok || !data.url) throw new Error(data.error ?? 'Generation failed')
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || !data.url) {
+        // Route returns 422 + { code: 404 } when xAI rejects the model id —
+        // give the user a helpful, specific message instead of a raw stack.
+        if (res.status === 422 && data.code === 404) {
+          throw new Error("Image generation isn't available right now. Try Stock or Upload.")
+        }
+        throw new Error(data.error ?? 'Generation failed')
+      }
       setGenerated(data.url)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Generation failed')
@@ -298,7 +305,7 @@ function GenerateTab({ onChange }: { onChange: (url: string) => void }) {
         </div>
       )}
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
 
       {generated && !busy && (
         <div className="space-y-2">

@@ -65,6 +65,10 @@ export async function POST(request: Request) {
   const brandPrefix = `${STYLE_PREFIX[style]}${BRAND_SUFFIX}`
   const fullPrompt = `${brandPrefix} ${prompt}`
 
+  // Override-able via env so a model rename / access change doesn't
+  // require a redeploy. Default keeps the original identifier.
+  const model = process.env.XAI_IMAGE_MODEL?.trim() || 'grok-2-image'
+
   let xaiData: XaiImageResponse
   try {
     const xaiRes = await fetch('https://api.x.ai/v1/images/generations', {
@@ -73,14 +77,20 @@ export async function POST(request: Request) {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'grok-2-image',
-        prompt: fullPrompt,
-        n: 1,
-      }),
+      body: JSON.stringify({ model, prompt: fullPrompt, n: 1 }),
     })
     if (!xaiRes.ok) {
       const errText = await xaiRes.text().catch(() => '')
+      console.error(`[image/generate] xAI ${xaiRes.status}:`, errText.slice(0, 400))
+      // 404 specifically means the model id isn't accessible to this key.
+      // Surface a structured 422 the client can show inline rather than a
+      // generic 500/502 (the route already used 502 for everything).
+      if (xaiRes.status === 404) {
+        return NextResponse.json(
+          { error: 'Image generation unavailable', code: 404, detail: `Model "${model}" not accessible. Set XAI_IMAGE_MODEL to a model your team has access to.` },
+          { status: 422 },
+        )
+      }
       throw new Error(`xAI ${xaiRes.status}: ${errText.slice(0, 300)}`)
     }
     xaiData = (await xaiRes.json()) as XaiImageResponse
