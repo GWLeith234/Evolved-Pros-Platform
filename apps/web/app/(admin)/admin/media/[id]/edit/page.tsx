@@ -1,4 +1,5 @@
 import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { MediaStoryForm } from '../../MediaStoryForm'
 import { CrossPostPanel } from '@/components/admin/media/CrossPostPanel'
@@ -6,6 +7,14 @@ import { CrossPostPanel } from '@/components/admin/media/CrossPostPanel'
 export const dynamic = 'force-dynamic'
 
 export default async function EditMediaStoryPage({ params }: { params: { id: string } }) {
+  // RSC prefetch guard — redirect() during a prefetch yields a 503 because
+  // Next can't pack a redirect into the streamed RSC payload. Render
+  // nothing on prefetch; the real navigation re-renders with full data.
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
+
   const { data: story, error } = await adminClient
     .from('media_stories')
     .select('*')

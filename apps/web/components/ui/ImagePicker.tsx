@@ -59,26 +59,60 @@ export function ImagePicker({
   const [selected, setSelected] = useState<string | null>(currentUrl ?? null)
   const [error, setError] = useState<string | null>(null)
 
-  // Auto-load Unsplash on mount if in full mode
+  // Whether Unsplash photos have been fetched at least once. Stays false
+  // until the user explicitly opens the Unsplash tab, so the page can
+  // reach document_idle without an unnecessary 3rd-party round-trip on
+  // mount (admin/media/new was timing out at 45s on this).
+  const [unsplashLoaded, setUnsplashLoaded] = useState(false)
+
+  // Track the in-flight Unsplash request so an unmount can cancel it
+  // — otherwise a slow remote call holds the page in a loading state
+  // long after the user has navigated away.
+  const unsplashAbortRef = useRef<AbortController | null>(null)
+
   useEffect(() => {
-    if (mode !== 'upload-only' && activeTab === 'unsplash') loadUnsplash()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      unsplashAbortRef.current?.abort()
+    }
   }, [])
 
   // ── Unsplash ─────────────────────────────────────────────────────
 
   async function loadUnsplash() {
+    // Cancel any prior in-flight load before starting a new one.
+    unsplashAbortRef.current?.abort()
+    const controller = new AbortController()
+    unsplashAbortRef.current = controller
+
     setPhotosLoading(true)
     setError(null)
     try {
       const q = aiPrompt || 'professional business sales'
-      const res = await fetch(`/api/admin/images/unsplash?query=${encodeURIComponent(q)}`)
+      const res = await fetch(
+        `/api/admin/images/unsplash?query=${encodeURIComponent(q)}`,
+        { signal: controller.signal },
+      )
       const data = await res.json()
       setPhotos(data.photos ?? [])
-    } catch {
+      setUnsplashLoaded(true)
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return
       setError('Failed to load photos')
     } finally {
-      setPhotosLoading(false)
+      // Only clear the flag if this is still the current controller —
+      // a newer load might have replaced us.
+      if (unsplashAbortRef.current === controller) {
+        unsplashAbortRef.current = null
+        setPhotosLoading(false)
+      }
+    }
+  }
+
+  function handleSelectTab(tab: Tab) {
+    setActiveTab(tab)
+    // Lazy-load Unsplash the first time the tab is actually shown.
+    if (tab === 'unsplash' && !unsplashLoaded && !photosLoading) {
+      loadUnsplash()
     }
   }
 
@@ -167,7 +201,7 @@ export function ImagePicker({
             <button
               key={tab}
               type="button"
-              onClick={() => { setActiveTab(tab); setError(null); if (tab === 'unsplash' && photos.length === 0) loadUnsplash() }}
+              onClick={() => { handleSelectTab(tab); setError(null) }}
               className="flex-1 py-2.5 font-condensed font-semibold uppercase tracking-[0.12em] text-[10px] transition-colors"
               style={{
                 color: activeTab === tab ? '#fff' : 'rgba(255,255,255,0.4)',
@@ -192,6 +226,20 @@ export function ImagePicker({
             {photosLoading ? (
               <div className="flex items-center justify-center py-12">
                 <span className="font-condensed text-[11px]" style={{ color: 'rgba(255,255,255,0.3)' }}>Loading photos...</span>
+              </div>
+            ) : !unsplashLoaded ? (
+              <div className="flex flex-col items-center gap-2 py-12">
+                <p className="font-condensed text-[11px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                  Browse stock photos for: {aiPrompt || 'professional business sales'}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => loadUnsplash()}
+                  className="font-condensed font-bold uppercase tracking-[0.14em] text-[11px] px-4 py-2 rounded transition-all"
+                  style={{ border: `1px solid ${GOLD}`, color: GOLD, backgroundColor: 'transparent' }}
+                >
+                  Search Unsplash
+                </button>
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-2">
