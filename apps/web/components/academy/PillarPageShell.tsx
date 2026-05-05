@@ -10,8 +10,8 @@ import {
   fetchLessonsWithProgress,
 } from '@/lib/academy/fetchers'
 import { PillarModuleAccordion } from '@/components/academy/PillarModuleAccordion'
-import { ReflectionPrompt } from '@/components/academy/ReflectionPrompt'
-import { PillarAudit } from '@/components/academy/PillarAudit'
+import { DynamicReflectionPrompt } from '@/components/academy/DynamicReflectionPrompt'
+import { DynamicPillarAudit } from '@/components/academy/DynamicPillarAudit'
 import { adminClient } from '@/lib/supabase/admin'
 import { ProfileAdUnit } from '@/components/profile/ProfileAdUnit'
 
@@ -364,14 +364,14 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
         <section style={{ backgroundColor: '#0A0F18', padding: '0 clamp(24px, 8vw, 96px) 56px' }}>
           <div style={{ maxWidth: '820px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {showReflection && (
-              <ReflectionPrompt
+              <DynamicReflectionPrompt
                 pillarId={String(pNum)}
                 courseId={(course as Record<string, unknown>).id as string}
                 promptText={PILLAR_REFLECTION_PROMPTS[pNum] ?? 'What stood out to you from this pillar?'}
               />
             )}
             {showAudit && (
-              <PillarAudit
+              <DynamicPillarAudit
                 pillarId={String(pNum)}
                 courseId={(course as Record<string, unknown>).id as string}
                 questions={PILLAR_AUDIT_QUESTIONS[pNum] ?? []}
