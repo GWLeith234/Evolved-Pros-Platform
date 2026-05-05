@@ -32,7 +32,14 @@ export default async function AdminDashboardPage() {
   const oneMonthAgo  = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
   const twoMonthsAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString()
 
-  const [allUsers, newThisWeek, recentMembers, proLastMonth] = await Promise.all([
+  const [
+    allUsers,
+    newThisWeek,
+    recentMembers,
+    proLastMonth,
+    postsCount,
+    episodesCount,
+  ] = await Promise.all([
     adminClient.from('users').select('id, tier, tier_status').neq('role', 'admin'),
     adminClient.from('users').select('id', { count: 'exact', head: true })
       .neq('role', 'admin').gte('created_at', oneWeekAgo),
@@ -42,6 +49,11 @@ export default async function AdminDashboardPage() {
       .limit(5),
     adminClient.from('users').select('id', { count: 'exact', head: true })
       .eq('tier', 'pro').gte('created_at', twoMonthsAgo).lte('created_at', oneMonthAgo),
+    // Total posts across the platform — no status filter, the count is the
+    // raw signal (admins will look at the community page for breakdowns).
+    adminClient.from('posts').select('id', { count: 'exact', head: true }),
+    // Published episodes only — drafts shouldn't count toward the public catalog tile.
+    adminClient.from('episodes').select('id', { count: 'exact', head: true }).eq('is_published', true),
   ])
 
   // vendasta_webhooks may not exist in all environments — fetch separately so it can't crash the page
@@ -59,18 +71,28 @@ export default async function AdminDashboardPage() {
   const proUsers       = users.filter(u => u.tier === 'pro' && u.tier_status === 'active')
   const vipUsers       = users.filter(u => u.tier === 'vip' && u.tier_status === 'active')
 
-  const totalMembers  = activeUsers.length
+  // The "Active Members" tile counts only tier_status in {active, trial}.
+  // /admin/members deliberately renders the full non-admin roster (incl.
+  // cancelled / expired) so admins can re-engage churned accounts. Labelling
+  // the tile "Total Members" while filtering tier_status diverged from
+  // /admin/members's count and looked like a bug to QA — relabel + sub-label
+  // so the filter is explicit on screen.
+  const activeMembers = activeUsers.length
   const mrr           = proUsers.length * 79 + vipUsers.length * 39
   const proMembers    = proUsers.length
   const proLastMo     = proLastMonth.count ?? 0
   const totalEver     = activeUsers.length + cancelledUsers.length
   const retention     = totalEver > 0 ? Math.round(activeUsers.length / totalEver * 100) : 100
+  const totalPosts    = postsCount.count ?? 0
+  const publishedEpisodes = episodesCount.count ?? 0
 
   const stats = [
     {
-      label:    'Total Members',
-      value:    fmt(totalMembers),
-      delta:    (newThisWeek.count ?? 0) > 0 ? `+${newThisWeek.count} this week` : '',
+      label:    'Active Members',
+      value:    fmt(activeMembers),
+      delta:    (newThisWeek.count ?? 0) > 0
+        ? `+${newThisWeek.count} this week · excludes cancelled / expired`
+        : 'excludes cancelled / expired',
       deltaPos: true,
       color:    '#ef0e30',
       bg:       'rgba(239,14,48,0.08)',
@@ -99,6 +121,22 @@ export default async function AdminDashboardPage() {
       color:    '#c9a84c',
       bg:       'rgba(201,168,76,0.08)',
     },
+    {
+      label:    'Total Posts',
+      value:    fmt(totalPosts),
+      delta:    'community feed',
+      deltaPos: true,
+      color:    '#a78bfa',
+      bg:       'rgba(167,139,250,0.08)',
+    },
+    {
+      label:    'Published Episodes',
+      value:    fmt(publishedEpisodes),
+      delta:    'live podcast catalog',
+      deltaPos: true,
+      color:    '#0ABFA3',
+      bg:       'rgba(10,191,163,0.08)',
+    },
   ]
 
   return (
@@ -113,8 +151,9 @@ export default async function AdminDashboardPage() {
         <InviteMemberButton />
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {/* Stat cards — 6 tiles; 2/3/3 grid keeps each tile readable instead of
+          cramming all six onto a single 6-col row. */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
         {stats.map(s => (
           <div
             key={s.label}
@@ -219,14 +258,33 @@ export default async function AdminDashboardPage() {
           </a>
         </div>
 
-        {(recentWebhooks.data ?? []).length === 0 ? (
-          <div className="px-5 py-8 text-center">
-            <p className="font-condensed text-[12px] text-[#7a8a96]">No webhook activity yet.</p>
-          </div>
-        ) : (
+        {(() => {
+          // Drop rows that would render as em-dashes for every meaningful
+          // field — when neither the contact id nor the product sku is set,
+          // the row is just placeholder noise and looks broken to QA.
+          const rows = (recentWebhooks.data ?? []).filter(
+            wh => (wh.vendasta_contact_id && String(wh.vendasta_contact_id).trim())
+              || (wh.product_sku && String(wh.product_sku).trim()),
+          )
+          if (rows.length === 0) {
+            return (
+              <div className="px-5 py-8 text-center space-y-2">
+                <p className="font-condensed text-[12px] text-[#7a8a96]">No recent Vendasta activity.</p>
+                <a
+                  href="https://business.vendasta.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block font-condensed text-[11px] text-[#68a2b9] hover:text-[#1b3c5a] underline transition-colors"
+                >
+                  Connect Vendasta to see member events here.
+                </a>
+              </div>
+            )
+          }
+          return (
           <table className="w-full">
             <tbody>
-              {(recentWebhooks.data ?? []).map((wh, i, arr) => {
+              {rows.map((wh, i, arr) => {
                 const sc = STATUS_COLORS[wh.status] ?? STATUS_COLORS.error
                 return (
                   <tr
@@ -267,7 +325,8 @@ export default async function AdminDashboardPage() {
               })}
             </tbody>
           </table>
-        )}
+          )
+        })()}
       </div>
     </div>
   )
