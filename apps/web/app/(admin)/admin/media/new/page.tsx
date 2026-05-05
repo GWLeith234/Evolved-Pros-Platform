@@ -1,4 +1,4 @@
-import { MediaStoryForm } from '../MediaStoryForm'
+import { NewStoryClient } from './NewStoryClient'
 
 export default function NewMediaStoryPage() {
   return (
@@ -9,7 +9,7 @@ export default function NewMediaStoryPage() {
       <h1 className="font-display font-bold text-xl mb-6" style={{ color: '#1b3c5a' }}>
         New Story
       </h1>
-      <MediaStoryForm />
+      <NewStoryClient />
     </div>
   )
 }
