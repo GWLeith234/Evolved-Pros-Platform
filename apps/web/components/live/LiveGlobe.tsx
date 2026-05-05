@@ -423,7 +423,7 @@ export function LiveGlobe() {
             color: 'rgba(255,255,255,0.55)',
           }}
         >
-          Stages · {SPEAKING_STATS.countries} countries
+          Stages mapped · {SPEAKING_STATS.countries} countries
         </p>
       </div>
     </div>
