@@ -41,11 +41,18 @@ export async function POST(request: Request) {
 
   // RLS-FIX: adminClient — events RLS admin-role check breaks for users
   // where auth.uid() ≠ public.users.id.
+  const pillar = typeof body.pillar === 'number' && body.pillar >= 1 && body.pillar <= 6
+    ? body.pillar
+    : null
+
   const { data, error } = await adminClient
     .from('events')
     .insert({
       title,
       description: typeof body.description === 'string' ? body.description : null,
+      tagline:     typeof body.tagline === 'string'     ? body.tagline     : null,
+      cta_text:    typeof body.cta_text === 'string'    ? body.cta_text    : null,
+      pillar,
       event_type: eventType,
       starts_at: typeof body.starts_at === 'string' ? body.starts_at : null,
       ends_at: typeof body.ends_at === 'string' ? body.ends_at : null,

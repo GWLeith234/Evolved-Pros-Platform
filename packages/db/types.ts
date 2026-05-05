@@ -583,6 +583,7 @@ export type Database = {
           event_type: string
           event_type_keynote: boolean
           format: string
+          cta_text: string | null
           hero_image_url: string | null
           host_avatar_url: string | null
           host_name: string | null
@@ -598,6 +599,7 @@ export type Database = {
           registration_count: number
           required_tier: string | null
           starts_at: string
+          tagline: string | null
           tier_access: string | null
           title: string
           watermark: string | null
@@ -611,6 +613,7 @@ export type Database = {
           event_type: string
           event_type_keynote?: boolean
           format?: string
+          cta_text?: string | null
           hero_image_url?: string | null
           host_avatar_url?: string | null
           host_name?: string | null
@@ -626,6 +629,7 @@ export type Database = {
           registration_count?: number
           required_tier?: string | null
           starts_at: string
+          tagline?: string | null
           tier_access?: string | null
           title: string
           watermark?: string | null
@@ -639,6 +643,7 @@ export type Database = {
           event_type?: string
           event_type_keynote?: boolean
           format?: string
+          cta_text?: string | null
           hero_image_url?: string | null
           host_avatar_url?: string | null
           host_name?: string | null
@@ -654,6 +659,7 @@ export type Database = {
           registration_count?: number
           required_tier?: string | null
           starts_at?: string
+          tagline?: string | null
           tier_access?: string | null
           title?: string
           watermark?: string | null

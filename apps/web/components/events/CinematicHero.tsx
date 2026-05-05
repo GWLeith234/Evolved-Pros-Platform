@@ -24,6 +24,8 @@ export interface HeroEvent {
   host_avatar_url?: string | null
   price_cents?: number | null
   watermark?: string | null
+  tagline?: string | null
+  cta_text?: string | null
 }
 
 interface CinematicHeroProps {
@@ -306,6 +308,24 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
           {event.title}
         </h2>
 
+        {/* Tagline */}
+        {event.tagline && (
+          <p
+            style={{
+              margin: '10px 0 0',
+              fontFamily: '"Barlow Condensed", sans-serif',
+              fontWeight: 600,
+              fontSize: 14,
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
+              color: 'rgba(255,255,255,0.85)',
+              maxWidth: 720,
+            }}
+          >
+            {event.tagline}
+          </p>
+        )}
+
         {/* Description */}
         {event.description && (
           <p
@@ -464,7 +484,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
               minWidth: 180,
             }}
           >
-            {rsvpd ? '✓ Going' : 'RSVP'}
+            {rsvpd ? '✓ Going' : (event.cta_text?.trim() || 'RSVP')}
           </button>
         </div>
       </div>

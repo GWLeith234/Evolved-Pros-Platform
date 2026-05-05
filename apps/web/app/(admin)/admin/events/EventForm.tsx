@@ -7,6 +7,9 @@ import { ImagePicker } from '@/components/admin/ImagePicker'
 interface EventFormValues {
   title: string
   description: string
+  tagline: string
+  ctaText: string
+  pillar: string
   eventType: 'live' | 'virtual' | 'inperson'
   startsAt: string
   endsAt: string
@@ -26,6 +29,9 @@ interface EventFormProps {
 const DEFAULT_VALUES: EventFormValues = {
   title: '',
   description: '',
+  tagline: '',
+  ctaText: '',
+  pillar: '',
   eventType: 'virtual',
   startsAt: '',
   endsAt: '',
@@ -42,6 +48,12 @@ function toDatetimeLocal(iso: string): string {
   return iso.slice(0, 16)
 }
 
+// events.pillar is stored as integer 1-6. The AI returns the slug
+// vocabulary. Map at save time so the column stays integer.
+const PILLAR_SLUG_TO_NUMBER: Record<string, number> = {
+  foundation: 1, identity: 2, mental: 3, strategy: 4, accountability: 5, execution: 6,
+}
+
 export function EventForm({ initialValues, eventId }: EventFormProps) {
   const router = useRouter()
   const [values, setValues] = useState<EventFormValues>({
@@ -53,15 +65,12 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // AI writer state
+  // AI writer state. Image prompt is the only field that doesn't have a
+  // dedicated form input — it's a hint for the ImagePicker generator and
+  // stays in component state for the user to copy into that flow.
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
-  const [aiOutput, setAiOutput] = useState<{
-    tagline: string
-    cta_text: string
-    pillar: string
-    image_prompt: string
-  } | null>(null)
+  const [aiImagePrompt, setAiImagePrompt] = useState<string>('')
 
   async function handleAIWrite() {
     if (!values.title.trim()) {
@@ -82,14 +91,15 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Could not generate')
-      const ev = data.event
-      setValues(prev => ({ ...prev, description: ev.description ?? prev.description }))
-      setAiOutput({
-        tagline: ev.tagline ?? '',
-        cta_text: ev.cta_text ?? '',
-        pillar: ev.pillar ?? '',
-        image_prompt: ev.image_prompt ?? '',
-      })
+      const ev = data.event ?? {}
+      setValues(prev => ({
+        ...prev,
+        description: ev.description ?? prev.description,
+        tagline:     ev.tagline     ?? prev.tagline,
+        ctaText:     ev.cta_text    ?? prev.ctaText,
+        pillar:      ev.pillar      ?? prev.pillar,
+      }))
+      setAiImagePrompt(ev.image_prompt ?? '')
     } catch (err) {
       setAiError(err instanceof Error ? err.message : 'Could not generate — try again')
     } finally {
@@ -108,6 +118,9 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
     const payload = {
       title: values.title.trim(),
       description: values.description.trim() || null,
+      tagline: values.tagline.trim() || null,
+      cta_text: values.ctaText.trim() || null,
+      pillar: values.pillar ? PILLAR_SLUG_TO_NUMBER[values.pillar] ?? null : null,
       event_type: values.eventType,
       starts_at: values.startsAt ? new Date(values.startsAt).toISOString() : null,
       ends_at: values.endsAt ? new Date(values.endsAt).toISOString() : null,
@@ -215,47 +228,36 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
         </div>
       </div>
 
-      {aiOutput && (
+      {aiImagePrompt && (
         <div
-          className="rounded-lg p-4 space-y-2"
+          className="rounded-lg p-4"
           style={{ backgroundColor: 'rgba(10,191,163,0.06)', border: '1px solid rgba(10,191,163,0.2)' }}
         >
-          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px]" style={{ color: '#0ABFA3' }}>
-            AI suggestions
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-1" style={{ color: '#0ABFA3' }}>
+            AI image prompt
           </p>
-          {aiOutput.tagline && (
-            <p className="font-body text-[13px]" style={{ color: '#1b3c5a' }}>
-              <span className="font-condensed font-bold uppercase tracking-wide text-[10px] mr-2" style={{ color: '#7a8a96' }}>Tagline</span>
-              {aiOutput.tagline}
-            </p>
-          )}
-          {aiOutput.cta_text && (
-            <p className="font-body text-[13px]" style={{ color: '#1b3c5a' }}>
-              <span className="font-condensed font-bold uppercase tracking-wide text-[10px] mr-2" style={{ color: '#7a8a96' }}>CTA</span>
-              {aiOutput.cta_text}
-            </p>
-          )}
-          {aiOutput.pillar && (
-            <p className="font-body text-[13px]" style={{ color: '#1b3c5a' }}>
-              <span className="font-condensed font-bold uppercase tracking-wide text-[10px] mr-2" style={{ color: '#7a8a96' }}>Pillar</span>
-              {aiOutput.pillar}
-            </p>
-          )}
-          {aiOutput.image_prompt && (
-            <div>
-              <p className="font-condensed font-bold uppercase tracking-wide text-[10px] mb-1" style={{ color: '#7a8a96' }}>
-                Image prompt
-              </p>
-              <p className="font-body text-[12px] leading-relaxed" style={{ color: '#1b3c5a' }}>
-                {aiOutput.image_prompt}
-              </p>
-              <p className="font-condensed text-[10px] mt-1" style={{ color: '#7a8a96' }}>
-                Use this prompt in the image generator below.
-              </p>
-            </div>
-          )}
+          <p className="font-body text-[12px] leading-relaxed" style={{ color: '#1b3c5a' }}>
+            {aiImagePrompt}
+          </p>
+          <p className="font-condensed text-[10px] mt-1" style={{ color: '#7a8a96' }}>
+            Tagline, CTA, description and pillar were filled in below — this prompt is for the image generator.
+          </p>
         </div>
       )}
+
+      {/* Tagline */}
+      <div>
+        <label className={labelClass}>Tagline</label>
+        <input
+          type="text"
+          value={values.tagline}
+          onChange={e => set('tagline', e.target.value)}
+          maxLength={140}
+          className={inputClass}
+          style={inputStyle}
+          placeholder="Short hook shown beneath the title in the hero"
+        />
+      </div>
 
       {/* Description */}
       <div>
@@ -268,6 +270,39 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
           style={inputStyle}
           placeholder="What is this event about?"
         />
+      </div>
+
+      {/* CTA + Pillar */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className={labelClass}>CTA Button Text</label>
+          <input
+            type="text"
+            value={values.ctaText}
+            onChange={e => set('ctaText', e.target.value)}
+            maxLength={40}
+            className={inputClass}
+            style={inputStyle}
+            placeholder="Defaults to RSVP"
+          />
+        </div>
+        <div>
+          <label className={labelClass}>Pillar</label>
+          <select
+            value={values.pillar}
+            onChange={e => set('pillar', e.target.value)}
+            className={inputClass}
+            style={inputStyle}
+          >
+            <option value="">— none —</option>
+            <option value="foundation">Foundation</option>
+            <option value="identity">Identity</option>
+            <option value="mental">Mental Toughness</option>
+            <option value="strategy">Strategy</option>
+            <option value="accountability">Accountability</option>
+            <option value="execution">Execution</option>
+          </select>
+        </div>
       </div>
 
       {/* Event type */}

@@ -15,7 +15,7 @@ export async function PATCH(
   try { body = await request.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
 
   // required_tier excluded — tier_access is the new standard
-  const allowed = ['title', 'description', 'event_type', 'starts_at', 'ends_at', 'zoom_url', 'recording_url', 'image_url', 'tier_access', 'is_published', 'is_draft'] as const
+  const allowed = ['title', 'description', 'tagline', 'cta_text', 'pillar', 'event_type', 'starts_at', 'ends_at', 'zoom_url', 'recording_url', 'image_url', 'tier_access', 'is_published', 'is_draft'] as const
   const update: Record<string, unknown> = {}
   for (const key of allowed) {
     if (key in body) update[key] = body[key]
