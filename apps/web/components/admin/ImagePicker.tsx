@@ -17,9 +17,10 @@ interface ImagePickerProps {
   value: string | null
   onChange: (url: string) => void
   label?: string
+  uploadEndpoint?: string
 }
 
-export function ImagePicker({ value, onChange, label }: ImagePickerProps) {
+export function ImagePicker({ value, onChange, label, uploadEndpoint }: ImagePickerProps) {
   const [tab, setTab] = useState<Tab>('upload')
 
   return (
@@ -49,7 +50,7 @@ export function ImagePicker({ value, onChange, label }: ImagePickerProps) {
       </div>
 
       <div className="p-4">
-        {tab === 'upload' && <UploadTab onChange={onChange} />}
+        {tab === 'upload' && <UploadTab onChange={onChange} endpoint={uploadEndpoint} />}
         {tab === 'stock' && <StockTab onChange={onChange} />}
         {tab === 'generate' && <GenerateTab onChange={onChange} />}
       </div>
@@ -84,7 +85,7 @@ function TabButton({
 
 // ── Upload ──────────────────────────────────────────────────────────
 
-function UploadTab({ onChange }: { onChange: (url: string) => void }) {
+function UploadTab({ onChange, endpoint }: { onChange: (url: string) => void; endpoint?: string }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -99,7 +100,7 @@ function UploadTab({ onChange }: { onChange: (url: string) => void }) {
       fd.append('bucket', 'Branding')
       fd.append('folder', 'uploads')
 
-      const res = await fetch('/api/admin/images/upload', { method: 'POST', body: fd })
+      const res = await fetch(endpoint ?? '/api/admin/images/upload', { method: 'POST', body: fd })
       const data = await res.json()
       if (!res.ok || !data.url) throw new Error(data.error ?? 'Upload failed')
       setPreview(data.url)

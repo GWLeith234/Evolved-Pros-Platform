@@ -152,6 +152,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
         label="Profile Photo"
         value={avatarUrl || null}
         onChange={handleAvatarSelected}
+        uploadEndpoint="/api/user/avatar"
       />
 
       {/* ── Profile Banner ────────────────────────────────────────── */}
