@@ -55,15 +55,31 @@ export function FilterRail({
         zIndex: 10,
         background: 'var(--filter-rail-bg)',
         borderBottom: '1px solid var(--filter-rail-border)',
-        padding: '16px 24px',
+        padding: '12px 16px',
         display: 'flex',
         alignItems: 'center',
-        gap: 24,
+        gap: 16,
         flexWrap: 'wrap',
       }}
     >
+      <style>{`
+        .filter-rail-scroll-row {
+          overflow-x: auto;
+          overflow-y: hidden;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+          max-width: 100%;
+        }
+        .filter-rail-scroll-row::-webkit-scrollbar { display: none; }
+        .filter-rail-scroll-row > * { flex-shrink: 0; }
+      `}</style>
+
       {/* LEFT — kind tabs (segmented) */}
-      <div role="tablist" style={{ display: 'flex', alignItems: 'stretch' }}>
+      <div
+        role="tablist"
+        className="filter-rail-scroll-row"
+        style={{ display: 'flex', alignItems: 'stretch' }}
+      >
         {KIND_TABS.map(tab => {
           const active = tab.id === activeKind
           return (
@@ -102,7 +118,7 @@ export function FilterRail({
       </div>
 
       {/* CENTER — pillar dots */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div className="filter-rail-scroll-row" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <span
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',

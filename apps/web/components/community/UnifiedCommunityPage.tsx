@@ -201,13 +201,8 @@ export function UnifiedCommunityPage({
       {/* Feed (left) + weekly leaderboard rail (right) */}
       <div className="flex-1 overflow-y-auto" style={{ background: 'var(--community-page-bg)' }}>
         <div
-          className="w-full mx-auto px-6 py-4"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 65fr) minmax(280px, 35fr)',
-            gap: 24,
-            maxWidth: 1280,
-          }}
+          className="w-full mx-auto px-4 md:px-6 py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(280px,35fr)] gap-6"
+          style={{ maxWidth: 1280 }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
 

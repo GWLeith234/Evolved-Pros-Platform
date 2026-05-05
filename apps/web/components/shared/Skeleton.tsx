@@ -7,6 +7,10 @@ interface SkeletonProps {
   rounded?: boolean
 }
 
+// Theme-aware shimmer. Uses CSS custom properties so the same component
+// reads correctly on light admin surfaces (where bg is #fff) and on the
+// dark member surfaces (where bg is #0A0F18 / #111926). Falls back to
+// neutral mid-grey when the variables aren't set.
 export function Skeleton({ width, height, className, rounded = false }: SkeletonProps) {
   return (
     <div
@@ -14,7 +18,7 @@ export function Skeleton({ width, height, className, rounded = false }: Skeleton
       style={{
         width,
         height,
-        background:     'linear-gradient(90deg, rgba(27,60,90,0.06) 25%, rgba(27,60,90,0.10) 50%, rgba(27,60,90,0.06) 75%)',
+        background:     'linear-gradient(90deg, var(--skeleton-base, rgba(255,255,255,0.06)) 25%, var(--skeleton-highlight, rgba(255,255,255,0.12)) 50%, var(--skeleton-base, rgba(255,255,255,0.06)) 75%)',
         backgroundSize: '200% 100%',
         animation:      'skeleton-shimmer 1.5s infinite',
         borderRadius:   rounded ? 9999 : 4,
@@ -24,17 +28,24 @@ export function Skeleton({ width, height, className, rounded = false }: Skeleton
 }
 
 // ── Preset composite skeletons ─────────────────────────────────────────────
+// All cards use var(--bg-surface) so they sit correctly on every theme.
+// The dark member theme defines --bg-surface = #111926; the light admin
+// theme leaves it as #fff via the css fallback chain.
+
+const cardStyle: React.CSSProperties = {
+  background:      'var(--bg-surface, #fff)',
+  border:          '1px solid var(--border-color, rgba(27,60,90,0.10))',
+}
 
 export function StatCardSkeleton() {
   return (
     <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' as const }}>
       {[0, 1, 2, 3].map(i => (
         <div key={i} style={{
-          flex:            '1 1 140px',
-          background:      '#fff',
-          border:          '1px solid rgba(27,60,90,0.10)',
-          borderRadius:    8,
-          padding:         '16px 20px',
+          ...cardStyle,
+          flex:         '1 1 140px',
+          borderRadius: 8,
+          padding:      '16px 20px',
         }}>
           <Skeleton height={10} width={60} className="mb-2" />
           <Skeleton height={28} width={80} />
@@ -47,9 +58,12 @@ export function StatCardSkeleton() {
 export function PostSkeleton() {
   return (
     <div style={{
-      background:      '#fff',
-      borderBottom:    '1px solid rgba(27,60,90,0.08)',
-      padding:         '20px 24px',
+      ...cardStyle,
+      borderBottom: '1px solid var(--border-color, rgba(27,60,90,0.08))',
+      borderTop:    'none',
+      borderLeft:   'none',
+      borderRight:  'none',
+      padding:      '20px 24px',
     }}>
       <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
         <Skeleton width={36} height={36} rounded />
@@ -67,8 +81,7 @@ export function PostSkeleton() {
 export function CourseCardSkeleton() {
   return (
     <div style={{
-      background:   '#fff',
-      border:       '1px solid rgba(27,60,90,0.10)',
+      ...cardStyle,
       borderRadius: 8,
       overflow:     'hidden',
       marginBottom: 8,
@@ -87,8 +100,7 @@ export function CourseCardSkeleton() {
 export function EventCardSkeleton() {
   return (
     <div style={{
-      background:   '#fff',
-      border:       '1px solid rgba(27,60,90,0.10)',
+      ...cardStyle,
       borderRadius: 8,
       padding:      16,
       display:      'flex',
@@ -109,7 +121,7 @@ export function NotificationSkeleton() {
   return (
     <div style={{
       padding:      '14px 20px',
-      borderBottom: '1px solid rgba(27,60,90,0.06)',
+      borderBottom: '1px solid var(--border-color, rgba(27,60,90,0.06))',
       display:      'flex',
       gap:          12,
     }}>

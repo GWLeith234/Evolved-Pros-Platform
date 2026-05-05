@@ -143,6 +143,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
   return (
     <section
       aria-label="Featured event"
+      className="cinematic-hero"
       style={{
         position: 'relative',
         width: '100vw',
@@ -152,6 +153,26 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
         background: coverUrl ? '#000' : 'linear-gradient(135deg, #0A0F18 0%, #111926 50%, #1a0a0a 100%)',
       }}
     >
+      <style>{`
+        @media (max-width: 640px) {
+          .cinematic-hero { min-height: 520px; }
+          .cinematic-hero .ch-badges { top: 12px !important; left: 12px !important; gap: 6px !important; }
+          .cinematic-hero .ch-badges > * { padding: 5px 10px !important; font-size: 10px !important; letter-spacing: 0.18em !important; }
+          .cinematic-hero .ch-countdown { top: auto !important; right: 12px !important; bottom: auto !important; left: 12px !important; position: static !important; margin: 56px 12px 0 !important; }
+          .cinematic-hero .ch-content { padding: 12px 20px 28px !important; max-width: 100% !important; }
+          .cinematic-hero .ch-title { font-size: clamp(28px, 8vw, 40px) !important; }
+          .cinematic-hero .ch-tagline { font-size: 12px !important; letter-spacing: 0.14em !important; }
+          .cinematic-hero .ch-description { font-size: 14px !important; -webkit-line-clamp: 2 !important; }
+          .cinematic-hero .ch-host { gap: 8px !important; margin-top: 14px !important; }
+          .cinematic-hero .ch-host-avatar { width: 24px !important; height: 24px !important; font-size: 10px !important; }
+          .cinematic-hero .ch-host-name { font-size: 13px !important; }
+          .cinematic-hero .ch-host-role { font-size: 9px !important; }
+          .cinematic-hero .ch-details { gap: 14px !important; font-size: 11px !important; margin-top: 12px !important; }
+          .cinematic-hero .ch-rsvp-row { margin-top: 16px !important; }
+          .cinematic-hero .ch-rsvp { width: 100% !important; padding: 14px 20px !important; }
+          .cinematic-hero .ch-watermark { display: none !important; }
+        }
+      `}</style>
       {/* Cover image */}
       {coverUrl && (
         <div
@@ -179,6 +200,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
 
       {/* TOP-LEFT badges */}
       <div
+        className="ch-badges"
         style={{
           position: 'absolute',
           top: 24,
@@ -229,7 +251,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
       </div>
 
       {/* TOP-RIGHT countdown */}
-      <div style={{ position: 'absolute', top: 24, right: 24 }}>
+      <div className="ch-countdown" style={{ position: 'absolute', top: 24, right: 24 }}>
         <CountdownTimer
           targetIso={event.starts_at}
           liveWindowBeforeMinutes={5}
@@ -241,6 +263,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
       {event.watermark && (
         <span
           aria-hidden="true"
+          className="ch-watermark"
           style={{
             position: 'absolute',
             bottom: 18,
@@ -261,6 +284,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
 
       {/* BOTTOM content */}
       <div
+        className="ch-content"
         style={{
           position: 'absolute',
           left: 0,
@@ -294,6 +318,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
 
         {/* Title */}
         <h2
+          className="ch-title"
           style={{
             margin: 0,
             fontFamily: '"Bebas Neue", sans-serif',
@@ -303,6 +328,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             letterSpacing: '0.01em',
             textTransform: 'uppercase',
             textShadow: '0 2px 16px rgba(0,0,0,0.5)',
+            wordBreak: 'break-word',
           }}
         >
           {event.title}
@@ -311,6 +337,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
         {/* Tagline */}
         {event.tagline && (
           <p
+            className="ch-tagline"
             style={{
               margin: '10px 0 0',
               fontFamily: '"Barlow Condensed", sans-serif',
@@ -329,6 +356,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
         {/* Description */}
         {event.description && (
           <p
+            className="ch-description"
             style={{
               margin: '14px 0 0',
               fontFamily: '"Barlow", sans-serif',
@@ -340,6 +368,8 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
               WebkitBoxOrient: 'vertical',
               WebkitLineClamp: 2,
               overflow: 'hidden',
+              wordBreak: 'break-word',
+              overflowWrap: 'anywhere',
             }}
           >
             {event.description}
@@ -349,6 +379,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
         {/* Host row */}
         {(event.host_name || event.host_role) && (
           <div
+            className="ch-host"
             style={{
               marginTop: 22,
               display: 'flex',
@@ -362,6 +393,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
                 src={event.host_avatar_url}
                 alt=""
                 aria-hidden="true"
+                className="ch-host-avatar"
                 style={{
                   width: 36,
                   height: 36,
@@ -373,6 +405,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             ) : (
               <span
                 aria-hidden="true"
+                className="ch-host-avatar"
                 style={{
                   width: 36,
                   height: 36,
@@ -393,6 +426,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             <div style={{ minWidth: 0 }}>
               {event.host_name && (
                 <p
+                  className="ch-host-name"
                   style={{
                     margin: 0,
                     fontFamily: '"Barlow", sans-serif',
@@ -406,6 +440,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
               )}
               {event.host_role && (
                 <p
+                  className="ch-host-role"
                   style={{
                     margin: 0,
                     fontFamily: '"Barlow Condensed", sans-serif',
@@ -425,6 +460,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
 
         {/* Details row: WHEN | PRICE */}
         <div
+          className="ch-details"
           style={{
             marginTop: 18,
             display: 'flex',
@@ -462,13 +498,14 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
         </div>
 
         {/* RSVP CTA */}
-        <div style={{ marginTop: 24, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        <div className="ch-rsvp-row" style={{ marginTop: 24, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <button
             type="button"
             onClick={handleRsvpClick}
             disabled={rsvpInFlight}
             aria-pressed={rsvpd}
             aria-busy={rsvpInFlight}
+            className="ch-rsvp"
             style={{
               padding: '14px 32px',
               fontFamily: '"Bebas Neue", sans-serif',
