@@ -62,6 +62,19 @@ const PILLAR_LABELS: Record<Pillar, string> = {
 
 const PILLARS: Pillar[] = [1, 2, 3, 4, 5, 6]
 
+// AI returns canonical pillar slugs ('mental') — map to the composer's
+// numeric pillar identity so the chip auto-selects post-generation.
+const PILLAR_SLUG_TO_NUMBER: Record<string, Pillar> = {
+  foundation:     1,
+  identity:       2,
+  mental:         3,
+  strategy:       4,
+  accountability: 5,
+  execution:      6,
+}
+
+const TEAL = '#0ABFA3'
+
 function tierAvatarBg(tier: string | null): string {
   if (tier === 'pro') return 'linear-gradient(135deg, #C9A84C 0%, #E2C572 100%)'
   if (tier === 'vip') return 'linear-gradient(135deg, #60A5FA 0%, #93C5FD 100%)'
@@ -76,10 +89,56 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
   const [error, setError] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  // "Write for me" assist
+  const [aiOpen, setAiOpen] = useState(false)
+  const [aiIdea, setAiIdea] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState('')
+  const aiInputRef = useRef<HTMLInputElement>(null)
+
   // Refocus the textarea whenever the active tab changes.
   useEffect(() => {
     textareaRef.current?.focus()
   }, [activeKind])
+
+  // Auto-focus the idea input when the panel opens.
+  useEffect(() => {
+    if (aiOpen) aiInputRef.current?.focus()
+  }, [aiOpen])
+
+  async function handleAIWrite() {
+    const idea = aiIdea.trim()
+    if (!idea || aiLoading) return
+    setAiLoading(true)
+    setAiError('')
+    try {
+      const res = await fetch('/api/ai/write-post', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idea, type: activeKind }),
+      })
+      const data = await res.json().catch(() => ({})) as {
+        content?: string
+        suggested_pillar?: string
+        error?: string
+      }
+      if (!res.ok || !data.content) {
+        setAiError('Could not generate — try again')
+        return
+      }
+      setBody(data.content)
+      const mapped = data.suggested_pillar ? PILLAR_SLUG_TO_NUMBER[data.suggested_pillar] : undefined
+      if (mapped) setSelectedPillar(mapped)
+      setAiOpen(false)
+      setAiIdea('')
+      // Scroll the new content into view + focus so the user can edit.
+      requestAnimationFrame(() => textareaRef.current?.focus())
+    } catch {
+      setAiError('Could not generate — try again')
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   const activeTab = TABS.find(t => t.kind === activeKind) ?? TABS[0]
   const canPost = body.trim().length > 0 && !isPosting
@@ -211,26 +270,115 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
           )}
         </div>
 
-        <textarea
-          ref={textareaRef}
-          value={body}
-          onChange={e => { setBody(e.target.value); if (error) setError('') }}
-          placeholder={activeTab.placeholder}
-          style={{
-            flex: 1,
-            background: 'var(--composer-textarea-bg)',
-            border: 'none',
-            outline: 'none',
-            color: 'var(--composer-textarea-text)',
-            fontFamily: '"Barlow", sans-serif',
-            fontSize: 14,
-            lineHeight: 1.5,
-            minHeight: 70,
-            maxHeight: 240,
-            resize: 'vertical',
-          }}
-        />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <textarea
+            ref={textareaRef}
+            value={body}
+            onChange={e => { setBody(e.target.value); if (error) setError('') }}
+            placeholder={aiLoading ? 'Writing…' : activeTab.placeholder}
+            disabled={aiLoading}
+            style={{
+              background: 'var(--composer-textarea-bg)',
+              border: 'none',
+              outline: 'none',
+              color: 'var(--composer-textarea-text)',
+              fontFamily: '"Barlow", sans-serif',
+              fontSize: 14,
+              lineHeight: 1.5,
+              minHeight: 70,
+              maxHeight: 240,
+              resize: 'vertical',
+              opacity: aiLoading ? 0.55 : 1,
+              animation: aiLoading ? 'composerAIPulse 1.4s ease-in-out infinite' : 'none',
+              transition: 'opacity 160ms ease',
+            }}
+          />
+
+          {aiOpen && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '8px 10px',
+                background: 'rgba(10,191,163,0.06)',
+                border: `1px solid ${TEAL}33`,
+                borderRadius: 4,
+                animation: 'composerAISlide 160ms ease-out',
+              }}
+            >
+              <input
+                ref={aiInputRef}
+                type="text"
+                value={aiIdea}
+                onChange={e => { setAiIdea(e.target.value); if (aiError) setAiError('') }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAIWrite() }
+                  if (e.key === 'Escape')                { setAiOpen(false); setAiIdea('') }
+                }}
+                disabled={aiLoading}
+                placeholder="Give me an idea or topic…"
+                style={{
+                  flex: 1,
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  color: 'var(--composer-textarea-text)',
+                  fontFamily: '"Barlow", sans-serif',
+                  fontSize: 13,
+                  lineHeight: 1.4,
+                }}
+              />
+              <button
+                type="button"
+                onClick={handleAIWrite}
+                disabled={!aiIdea.trim() || aiLoading}
+                style={{
+                  padding: '6px 14px',
+                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                  background: aiIdea.trim() && !aiLoading ? TEAL : 'transparent',
+                  color: aiIdea.trim() && !aiLoading ? '#0A0F18' : `${TEAL}99`,
+                  border: `1px solid ${TEAL}`,
+                  cursor: aiIdea.trim() && !aiLoading ? 'pointer' : 'not-allowed',
+                  borderRadius: 2,
+                  transition: 'all 140ms ease',
+                }}
+              >
+                {aiLoading ? 'Writing…' : 'Generate'}
+              </button>
+            </div>
+          )}
+
+          {aiError && !aiLoading && (
+            <p
+              role="alert"
+              style={{
+                margin: 0,
+                fontFamily: '"Barlow", sans-serif',
+                fontSize: 12,
+                color: '#ef6075',
+              }}
+            >
+              {aiError}
+            </p>
+          )}
+        </div>
       </div>
+
+      <style>{`
+        @keyframes composerAIPulse {
+          0%, 100% { background: var(--composer-textarea-bg); }
+          50%      { background: rgba(10,191,163,0.08); }
+        }
+        @keyframes composerAISlide {
+          from { transform: translateY(-4px); opacity: 0; }
+          to   { transform: translateY(0);     opacity: 1; }
+        }
+      `}</style>
 
       {/* Pillar tag row */}
       <div
@@ -285,10 +433,33 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
 
         <button
           type="button"
+          onClick={() => { setAiOpen(o => !o); setAiError('') }}
+          disabled={aiLoading || isPosting}
+          aria-pressed={aiOpen}
+          style={{
+            marginLeft: 'auto',
+            padding: '8px 14px',
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            background: aiOpen ? `${TEAL}1A` : 'transparent',
+            color: TEAL,
+            border: `1px solid ${aiOpen ? TEAL : `${TEAL}66`}`,
+            borderRadius: 0,
+            cursor: aiLoading || isPosting ? 'not-allowed' : 'pointer',
+            transition: 'all 140ms ease',
+          }}
+        >
+          {aiOpen ? 'Cancel AI' : 'Write for me'}
+        </button>
+
+        <button
+          type="button"
           onClick={handleSubmit}
           disabled={!canPost}
           style={{
-            marginLeft: 'auto',
             padding: '10px 24px',
             fontFamily: '"Bebas Neue", sans-serif',
             fontSize: 13,
