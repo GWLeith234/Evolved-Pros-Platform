@@ -157,7 +157,7 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
         </Link>
 
         <Link
-          href="/settings"
+          href="/profile/me"
           onClick={onClose}
           className={linkClass}
           style={{ color: 'rgba(255,255,255,0.85)' }}

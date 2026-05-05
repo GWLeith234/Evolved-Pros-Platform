@@ -81,7 +81,7 @@ export function ProfileCompletePrompt({ hasAvatar, hasBio, hasTitle, hasName }: 
           Add {missing.join(', ')} so members know who you are.
         </p>
         <Link
-          href="/settings"
+          href="/profile/me"
           className="inline-flex items-center font-condensed font-semibold uppercase tracking-wide text-xs transition-colors"
           style={{ color: '#68a2b9' }}
         >

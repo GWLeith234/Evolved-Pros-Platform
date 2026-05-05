@@ -139,7 +139,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
           <div style={{ paddingTop: '64px', flexShrink: 0 }}>
             {isSelf ? (
               <a
-                href="/settings"
+                href="/profile/me"
                 className="eop-btn"
                 style={{
                   display: 'inline-flex',
@@ -191,7 +191,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
               color: '#7a8a96',
             }}
           >
-            <a href="/settings" style={{ color: '#7a8a96', textDecoration: 'underline' }}>
+            <a href="/profile/me" style={{ color: '#7a8a96', textDecoration: 'underline' }}>
               Add a bio from Settings →
             </a>
           </p>
