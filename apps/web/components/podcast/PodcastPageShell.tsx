@@ -15,7 +15,7 @@ export function PodcastPageShell({ episodes }: PodcastPageShellProps) {
   if (episodes.length === 0) {
     return (
       <div style={{ background: 'var(--podcast-bg-page)', minHeight: '100vh', color: 'var(--podcast-text-strong)' }}>
-        <PodcastThemeBridge theme="parchment" />
+        <PodcastThemeBridge theme="navy" />
         <PodcastMasthead />
         <section style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 24px 96px' }}>
           <p style={{ color: 'var(--podcast-text-3)' }}>No episodes published yet.</p>
@@ -35,7 +35,7 @@ export function PodcastPageShell({ episodes }: PodcastPageShellProps) {
   // catalogue is small.
   return (
     <div style={{ background: 'var(--podcast-bg-page)', minHeight: '100vh', color: 'var(--podcast-text-strong)' }}>
-      <PodcastThemeBridge theme="parchment" />
+      <PodcastThemeBridge theme="navy" />
       <PodcastLatestStrip episode={latest} />
       <PodcastMasthead />
       <PodcastHero episode={latest} />

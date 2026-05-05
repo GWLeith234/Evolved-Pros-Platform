@@ -5,6 +5,7 @@ import { TopNav } from '@/components/layout/TopNav'
 import { BottomTabBar } from '@/components/layout/BottomTabBar'
 import { NextEventBanner } from '@/components/layout/NextEventBanner'
 import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
+import { HideOnPodcast } from '@/components/layout/HideOnPodcast'
 import { RightRail } from '@/components/layout/RightRail'
 import { ToastProvider } from '@/lib/toast'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
@@ -37,7 +38,9 @@ export default async function MemberLayout({ children }: { children: React.React
         <ToastProvider>
           <div className="flex flex-col min-h-screen">
             <TopNav profile={profile} unreadCount={0} />
-            <EpisodeBanner />
+            <HideOnPodcast>
+              <EpisodeBanner />
+            </HideOnPodcast>
             <NextEventBanner />
             <div className="flex flex-1 min-h-0">
               <main className="flex-1 overflow-y-auto pb-16 md:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>{children}</main>
