@@ -61,11 +61,22 @@ interface MemberDetail {
 
 type Tab = 'overview' | 'activity' | 'progress' | 'vendasta'
 
+// Hydration-safe UTC formatters — toLocaleDateString depended on the runtime
+// timezone / ICU data and threw React #418/#425 hydration warnings.
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 function fmtDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`
 }
 function fmtDatetime(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const h = d.getUTCHours()
+  const m = d.getUTCMinutes().toString().padStart(2, '0')
+  const period = h >= 12 ? 'PM' : 'AM'
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h
+  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${h12}:${m} ${period} UTC`
 }
 
 const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
@@ -182,7 +193,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
                   className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded"
                   style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.15)' }}
                 >
-                  {member.tier}
+                  {member.tier.toUpperCase()}
                 </span>
               )}
               {member.tierStatus && (
@@ -190,7 +201,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
                   className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded"
                   style={{ backgroundColor: 'rgba(34,197,94,0.08)', color: '#15803d' }}
                 >
-                  {member.tierStatus}
+                  {member.tierStatus.toUpperCase()}
                 </span>
               )}
               <span className="font-condensed text-[10px] text-[#c9a84c] font-bold">{member.points} pts</span>

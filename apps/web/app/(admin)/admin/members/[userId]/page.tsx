@@ -12,8 +12,13 @@ interface Props {
 }
 
 export default async function AdminMemberDetailPage({ params }: Props) {
+  // Short-circuit ONLY on prefetch — regular RSC navigations also send
+  // RSC=1 and short-circuiting them was the BUG-1 root cause: the detail
+  // page returned null on click-through, leaving the admin layout shell
+  // visible and giving QA the impression that "/admin/members/[id] renders
+  // index instead of detail."
   const h = headers()
-  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+  if (h.get('Next-Router-Prefetch') === '1') {
     return null
   }
 

@@ -43,8 +43,15 @@ const ENG_COLORS: Record<EngagementLevel, { bar: string; text: string }> = {
 const FILTERS = ['All', 'Pro', 'VIP', 'Trial', 'Cancelled'] as const
 type Filter = typeof FILTERS[number]
 
+// Hydration-safe UTC formatter. toLocaleDateString() depends on the runtime's
+// ICU data and timezone — Node and the browser disagreed on borderline rows
+// and threw React #418/#425 hydration warnings. UTC + a fixed month table
+// produces identical output everywhere.
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 function fmtDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`
 }
 function getInitials(name: string | null | undefined): string {
   if (!name) return '?'
@@ -172,10 +179,10 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                     <td className="px-4 py-3">
                       {m.tier ? (
                         <span
-                          className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded capitalize"
+                          className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded"
                           style={{ backgroundColor: tierStyle.bg, color: tierStyle.color, border: `1px solid ${tierStyle.border}` }}
                         >
-                          {m.tier}
+                          {m.tier.toUpperCase()}
                         </span>
                       ) : (
                         <span className="font-condensed text-[10px] text-[#7a8a96]">—</span>
@@ -185,10 +192,10 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                     {/* Status */}
                     <td className="px-4 py-3">
                       <span
-                        className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded capitalize"
+                        className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded"
                         style={{ backgroundColor: statusStyle.bg, color: statusStyle.color }}
                       >
-                        {m.tierStatus ?? 'unknown'}
+                        {(m.tierStatus ?? 'unknown').toUpperCase()}
                       </span>
                     </td>
 

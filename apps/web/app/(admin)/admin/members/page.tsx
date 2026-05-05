@@ -3,12 +3,15 @@ import { headers } from 'next/headers'
 import { getEngagementLevel, getEngagementScore, getTierMrr } from '@/lib/admin/helpers'
 import { MembersTable } from '@/components/admin/MembersTable'
 import type { MemberRow } from '@/components/admin/MembersTable'
+import { InviteMemberButton } from '@/components/admin/InviteMemberButton'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminMembersPage() {
+  // Short-circuit ONLY on prefetch — regular RSC click navigations also set
+  // RSC=1, and returning null on those left the page blank (BUG-1 family).
   const h = headers()
-  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+  if (h.get('Next-Router-Prefetch') === '1') {
     return null
   }
 
@@ -64,11 +67,14 @@ export default async function AdminMembersPage() {
 
   return (
     <div className="px-8 py-6">
-      <div className="mb-6">
-        <h1 className="font-display font-black text-[28px] text-[#112535]">Members</h1>
-        <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
-          {members.length} total — search, filter, manage
-        </p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display font-black text-[28px] text-[#112535]">Members</h1>
+          <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
+            {members.length} total — search, filter, manage
+          </p>
+        </div>
+        <InviteMemberButton />
       </div>
       <MembersTable initialMembers={members} />
     </div>
