@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useToast } from '@/lib/toast'
 import { Input, Textarea } from '@evolved-pros/ui'
 import { Button } from '@/components/ui/Button'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { BannerPickerModal } from '@/components/profile/BannerPickerModal'
+import { ImagePicker } from '@/components/admin/ImagePicker'
 
 const PILLAR_LABELS: Record<string, string> = {
   p1: 'Foundation',
@@ -56,40 +57,6 @@ function InfoIcon() {
   )
 }
 
-function resizeImage(file: File, maxSize: number): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const img = new Image()
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        let { width, height } = img
-        if (width > maxSize || height > maxSize) {
-          if (width > height) {
-            height = Math.round((height * maxSize) / width)
-            width = maxSize
-          } else {
-            width = Math.round((width * maxSize) / height)
-            height = maxSize
-          }
-        }
-        canvas.width = width
-        canvas.height = height
-        const ctx = canvas.getContext('2d')!
-        ctx.drawImage(img, 0, 0, width, height)
-        canvas.toBlob(blob => {
-          if (blob) resolve(blob)
-          else reject(new Error('Canvas toBlob failed'))
-        }, 'image/jpeg', 0.9)
-      }
-      img.onerror = reject
-      img.src = e.target?.result as string
-    }
-    reader.onerror = reject
-    reader.readAsDataURL(file)
-  })
-}
-
 export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormProps) {
   const { showToast: globalToast } = useToast()
   const [fields, setFields] = useState({
@@ -110,10 +77,8 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
   const [goalVisible, setGoalVisible] = useState(profile.goal_visible ?? true)
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
   const [bannerUrl, setBannerUrl] = useState(profile.banner_url ?? '')
-  const [avatarLoading, setAvatarLoading] = useState(false)
   const [bannerModalOpen, setBannerModalOpen] = useState(false)
   const [saving, setSaving] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   function showToast(type: 'success' | 'error', message: string) {
     globalToast(message, type)
@@ -123,43 +88,19 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
     setFields(prev => ({ ...prev, [field]: value }))
   }
 
-  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      showToast('error', 'Please upload a JPEG, PNG, or WebP image.')
-      return
-    }
-    setAvatarLoading(true)
+  async function handleAvatarSelected(url: string) {
+    setAvatarUrl(url)
     try {
-      const resized = await resizeImage(file, 400)
-      const supabase = createClient()
-      // Upload to the 'Branding' bucket under the avatars/ path
-      const path = `avatars/${userId}.jpg`
-      const { error: uploadError } = await supabase.storage
-        .from('Branding')
-        .upload(path, resized, { upsert: true, contentType: 'image/jpeg' })
-      if (uploadError) throw uploadError
-
-      const { data } = supabase.storage.from('Branding').getPublicUrl(path)
-      const newUrl = `${data.publicUrl}?t=${Date.now()}`
-      setAvatarUrl(newUrl)
-
-      // Persist to public.users
       await fetch('/api/user/me', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ avatar_url: newUrl }),
+        body: JSON.stringify({ avatar_url: url }),
       })
-
-      // Propagate to auth.users metadata so it shows in nav immediately
-      await supabase.auth.updateUser({ data: { avatar_url: newUrl } })
-
+      const supabase = createClient()
+      await supabase.auth.updateUser({ data: { avatar_url: url } })
       showToast('success', 'Profile photo updated.')
     } catch {
-      showToast('error', 'Avatar upload failed. Please try again.')
-    } finally {
-      setAvatarLoading(false)
+      showToast('error', 'Could not save profile photo.')
     }
   }
 
@@ -204,59 +145,14 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
     }
   }
 
-  function getInitials(name: string): string {
-    return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
-  }
-
-  const displayName = fields.display_name || fields.full_name || 'Member'
-
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* ── Profile Photo ─────────────────────────────────────────── */}
-      <div>
-        <div className="flex items-center mb-2">
-          <label className="font-condensed font-medium uppercase text-[11px]" style={{ color: 'var(--text-secondary)', letterSpacing: '0.06em' }}>
-            Profile Photo
-          </label>
-          <Tooltip content="Square image recommended · JPEG, PNG or WebP · Max 400×400px · File size under 2MB · Your photo appears on your posts, profile, and in the member directory">
-            <InfoIcon />
-          </Tooltip>
-        </div>
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={avatarLoading}
-            className="relative w-16 h-16 rounded overflow-hidden flex items-center justify-center cursor-pointer flex-shrink-0 transition-opacity hover:opacity-80"
-            style={{ backgroundColor: '#ef0e30' }}
-          >
-            {avatarLoading ? (
-              <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-            ) : avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarUrl} alt="Avatar" className="w-16 h-16 object-cover" />
-            ) : (
-              <span className="font-condensed font-bold text-white text-xl">
-                {getInitials(displayName)}
-              </span>
-            )}
-          </button>
-          <div>
-            <p className="font-body text-sm" style={{ color: 'var(--text-secondary)' }}>Click to upload a new photo</p>
-            <p className="font-body text-xs mt-0.5" style={{ color: 'var(--text-tertiary)' }}>JPEG, PNG or WebP · max 400×400</p>
-          </div>
-        </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          className="hidden"
-          onChange={handleAvatarChange}
-        />
-      </div>
+      <ImagePicker
+        label="Profile Photo"
+        value={avatarUrl || null}
+        onChange={handleAvatarSelected}
+      />
 
       {/* ── Profile Banner ────────────────────────────────────────── */}
       <div>

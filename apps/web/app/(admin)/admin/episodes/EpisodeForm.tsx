@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { ImagePicker } from '@/components/admin/ImagePicker'
 
 type Pillar =
   | 'foundation'
@@ -525,16 +526,11 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
               placeholder="https://youtube.com/watch?v=..."
             />
           </LabelledInput>
-          <LabelledInput label="Thumbnail URL">
-            <input
-              type="url"
-              value={values.thumbnailUrl}
-              onChange={e => set('thumbnailUrl', e.target.value)}
-              className={inputClass}
-              style={inputStyle}
-              placeholder="https://..."
-            />
-          </LabelledInput>
+          <ImagePicker
+            label="Episode Thumbnail"
+            value={values.thumbnailUrl || null}
+            onChange={url => set('thumbnailUrl', url)}
+          />
           <LabelledInput label="Duration (seconds)">
             <input
               type="number"

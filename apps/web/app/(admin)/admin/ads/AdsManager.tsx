@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { ImagePicker } from '@/components/admin/ImagePicker'
 
 type Zone = 'A' | 'B' | 'C' | 'D'
 type AdType = 'image' | 'video' | 'native'
@@ -230,18 +231,12 @@ function AdForm({
         </div>
       </div>
 
-      {/* Image URL */}
-      <div>
-        <label className={labelClass}>Image URL</label>
-        <input
-          type="url"
-          value={values.imageUrl}
-          onChange={e => set('imageUrl', e.target.value)}
-          className={inputClass}
-          style={inputStyle}
-          placeholder="https://... (paste URL or upload to Branding bucket)"
-        />
-      </div>
+      {/* Image */}
+      <ImagePicker
+        label="Ad Image"
+        value={values.imageUrl || null}
+        onChange={url => set('imageUrl', url)}
+      />
 
       {/* Click URL */}
       <div>
