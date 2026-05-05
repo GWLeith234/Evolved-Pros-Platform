@@ -178,7 +178,10 @@ export function UnifiedCommunityPage({
   }, [posts, activeKind, activePillars, sortBy])
 
   const visible = filtered.slice(0, visibleCount)
-  const hasMoreVisible = filtered.length > visibleCount || hasMore
+  // Hide LOAD MORE entirely on an empty filter — fetching more posts that
+  // would also fail the filter is pure noise. Re-enable once at least one
+  // post matches.
+  const hasMoreVisible = filtered.length > 0 && (filtered.length > visibleCount || hasMore)
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-x-hidden" style={{ height: '100%', background: 'var(--community-page-bg)' }}>

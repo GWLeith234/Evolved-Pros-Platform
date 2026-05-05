@@ -149,6 +149,7 @@ export async function POST(request: Request) {
     pillarTag?: unknown
     postType?: unknown
     pollId?: unknown
+    pollOptions?: unknown
     kind?: unknown      // COMMUNITY-SPRINT-1: new composer
     pillar?: unknown    // COMMUNITY-SPRINT-1: integer 1-6 or null
   }
@@ -163,6 +164,12 @@ export async function POST(request: Request) {
   const pillarTag = typeof body.pillarTag === 'string' ? body.pillarTag : null
   const postType = typeof body.postType === 'string' ? body.postType : null
   const pollId = typeof body.pollId === 'string' ? body.pollId : null
+  const pollOptions: string[] | null = Array.isArray(body.pollOptions)
+    ? (body.pollOptions as unknown[])
+        .filter((s): s is string => typeof s === 'string')
+        .map(s => s.trim())
+        .filter(Boolean)
+    : null
 
   // New (Sprint 1) inputs.
   const rawKind = typeof body.kind === 'string' ? body.kind : null
@@ -214,6 +221,47 @@ export async function POST(request: Request) {
 
   const authorId = profile.id
 
+  // Poll creation: when kind === 'poll' and the composer sent options,
+  // create the poll + poll_options rows first so we can attach the
+  // resulting poll_id to the post insert below.
+  let resolvedPollId: string | null = pollId
+  if (kind === 'poll' && !resolvedPollId && pollOptions) {
+    if (pollOptions.length < 2) {
+      return NextResponse.json({ error: 'Polls need at least 2 options' }, { status: 422 })
+    }
+    if (pollOptions.length > 4) {
+      return NextResponse.json({ error: 'Polls support at most 4 options' }, { status: 422 })
+    }
+
+    const { data: pollRow, error: pollErr } = await adminClient
+      .from('polls')
+      .insert({
+        question: postBody.slice(0, 500),
+        created_by: profile.id,
+        status: 'active',
+      } as never)
+      .select('id')
+      .single()
+
+    if (pollErr || !pollRow) {
+      console.error('[posts] poll insert failed:', pollErr?.message)
+      return NextResponse.json({ error: 'Failed to create poll' }, { status: 500 })
+    }
+
+    const newPollId = (pollRow as { id: string }).id
+    const optionRows = pollOptions.map((text, idx) => ({
+      poll_id: newPollId,
+      option_text: text.slice(0, 200),
+      display_order: idx,
+    }))
+    const { error: optsErr } = await adminClient.from('poll_options').insert(optionRows as never)
+    if (optsErr) {
+      console.error('[posts] poll_options insert failed:', optsErr.message)
+      return NextResponse.json({ error: 'Failed to create poll options' }, { status: 500 })
+    }
+    resolvedPollId = newPollId
+  }
+
   const { data: post, error } = await adminClient
     .from('posts')
     .insert({
@@ -226,7 +274,7 @@ export async function POST(request: Request) {
       // New columns (Sprint 0/1).
       kind,
       pillar: pillarInt,
-      ...(pollId ? { poll_id: pollId } : {}),
+      ...(resolvedPollId ? { poll_id: resolvedPollId } : {}),
     } as never)
     .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
     .single()

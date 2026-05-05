@@ -85,6 +85,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
   const [activeKind, setActiveKind] = useState<Kind>('update')
   const [body, setBody] = useState('')
   const [selectedPillar, setSelectedPillar] = useState<Pillar | null>(null)
+  const [pollOptions, setPollOptions] = useState<string[]>(['', ''])
   const [isPosting, setIsPosting] = useState(false)
   const [error, setError] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -141,13 +142,16 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
   }
 
   const activeTab = TABS.find(t => t.kind === activeKind) ?? TABS[0]
-  const canPost = body.trim().length > 0 && !isPosting
+  const validPollOptionCount = pollOptions.filter(o => o.trim().length > 0).length
+  const pollReady = activeKind !== 'poll' || validPollOptionCount >= 2
+  const canPost = body.trim().length > 0 && pollReady && !isPosting
 
   async function handleSubmit() {
     if (!canPost) return
     setIsPosting(true)
     setError('')
     try {
+      const cleanedPollOptions = pollOptions.map(o => o.trim()).filter(Boolean)
       const res = await fetch('/api/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -156,6 +160,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
           body: body.trim(),
           kind: activeKind,
           pillar: selectedPillar,
+          ...(activeKind === 'poll' ? { pollOptions: cleanedPollOptions } : {}),
         }),
       })
       if (!res.ok) {
@@ -164,6 +169,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
       }
       setBody('')
       setSelectedPillar(null)
+      setPollOptions(['', ''])
       onPostCreated?.()
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to post.')
@@ -293,6 +299,93 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
               transition: 'opacity 160ms ease',
             }}
           />
+
+          {activeKind === 'poll' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {pollOptions.map((opt, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <input
+                    type="text"
+                    value={opt}
+                    onChange={e => {
+                      const next = [...pollOptions]
+                      next[i] = e.target.value
+                      setPollOptions(next)
+                    }}
+                    placeholder={`Option ${i + 1}`}
+                    maxLength={200}
+                    disabled={aiLoading || isPosting}
+                    style={{
+                      flex: 1,
+                      background: 'var(--composer-textarea-bg)',
+                      border: '1px solid var(--composer-border)',
+                      outline: 'none',
+                      color: 'var(--composer-textarea-text)',
+                      fontFamily: '"Barlow", sans-serif',
+                      fontSize: 13,
+                      lineHeight: 1.4,
+                      padding: '8px 10px',
+                      borderRadius: 2,
+                    }}
+                  />
+                  {pollOptions.length > 2 && (
+                    <button
+                      type="button"
+                      aria-label={`Remove option ${i + 1}`}
+                      onClick={() => setPollOptions(pollOptions.filter((_, idx) => idx !== i))}
+                      style={{
+                        width: 28,
+                        height: 28,
+                        background: 'transparent',
+                        border: '1px solid var(--composer-border)',
+                        borderRadius: 2,
+                        cursor: 'pointer',
+                        color: 'var(--composer-pillar-label)',
+                        fontSize: 14,
+                        lineHeight: 1,
+                      }}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+              {pollOptions.length < 4 && (
+                <button
+                  type="button"
+                  onClick={() => setPollOptions([...pollOptions, ''])}
+                  style={{
+                    alignSelf: 'flex-start',
+                    padding: '6px 10px',
+                    background: 'transparent',
+                    border: `1px dashed ${TEAL}66`,
+                    color: TEAL,
+                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: '0.14em',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                    borderRadius: 2,
+                  }}
+                >
+                  + Add option
+                </button>
+              )}
+              {validPollOptionCount < 2 && (
+                <p
+                  style={{
+                    margin: 0,
+                    fontFamily: '"Barlow", sans-serif',
+                    fontSize: 11,
+                    color: 'var(--composer-pillar-label)',
+                  }}
+                >
+                  Add at least 2 options to post the poll.
+                </p>
+              )}
+            </div>
+          )}
 
           {aiOpen && (
             <div

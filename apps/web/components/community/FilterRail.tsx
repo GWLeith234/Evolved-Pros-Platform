@@ -6,12 +6,13 @@ export type KindFilter = 'all' | 'update' | 'question' | 'win' | 'poll'
 export type Pillar = 1 | 2 | 3 | 4 | 5 | 6
 export type SortBy = 'newest' | 'oldest' | 'most_reacted'
 
+// Reduced from 5 → 3 to remove the 1:1 label collision with the
+// composer's UPDATE/QUESTION/WIN/POLL tabs. Filter is now clearly a
+// "show me" verb (All / Wins / Questions), not a "post type" verb.
 const KIND_TABS: Array<{ id: KindFilter; label: string }> = [
   { id: 'all',      label: 'All' },
-  { id: 'update',   label: 'Update' },
-  { id: 'question', label: 'Question' },
-  { id: 'win',      label: 'Win' },
-  { id: 'poll',     label: 'Poll' },
+  { id: 'win',      label: 'Wins' },
+  { id: 'question', label: 'Questions' },
 ]
 
 const PILLARS: Pillar[] = [1, 2, 3, 4, 5, 6]
@@ -74,12 +75,24 @@ export function FilterRail({
         .filter-rail-scroll-row > * { flex-shrink: 0; }
       `}</style>
 
-      {/* LEFT — kind tabs (segmented) */}
+      {/* LEFT — kind filter (small outlined pills, distinct from composer tabs) */}
       <div
         role="tablist"
         className="filter-rail-scroll-row"
-        style={{ display: 'flex', alignItems: 'stretch' }}
+        style={{ display: 'flex', alignItems: 'center', gap: 6 }}
       >
+        <span
+          style={{
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontSize: 9,
+            fontWeight: 700,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: 'var(--text-tertiary)',
+          }}
+        >
+          Show:
+        </span>
         {KIND_TABS.map(tab => {
           const active = tab.id === activeKind
           return (
@@ -90,25 +103,24 @@ export function FilterRail({
               aria-selected={active}
               onClick={() => onChangeKind(tab.id)}
               style={{
-                padding: '8px 16px',
-                fontFamily: '"Bebas Neue", sans-serif',
-                fontSize: 13,
-                letterSpacing: '0.04em',
+                padding: '4px 10px',
+                fontFamily: '"Barlow Condensed", sans-serif',
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: '0.12em',
                 textTransform: 'uppercase',
-                background: active ? 'var(--filter-rail-active-bg)' : 'transparent',
-                color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
-                border: 'none',
-                borderBottom: active ? '2px solid var(--text-primary)' : '2px solid transparent',
-                marginBottom: -1,
-                borderRadius: 0,
+                background: active ? 'var(--text-primary)' : 'transparent',
+                color: active ? 'var(--filter-rail-bg)' : 'var(--text-secondary)',
+                border: '1px solid var(--filter-rail-border)',
+                borderRadius: 999,
                 cursor: 'pointer',
                 transition: 'all 120ms ease',
               }}
               onMouseEnter={e => {
-                if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+                if (!active) e.currentTarget.style.color = 'var(--text-primary)'
               }}
               onMouseLeave={e => {
-                if (!active) e.currentTarget.style.background = 'transparent'
+                if (!active) e.currentTarget.style.color = 'var(--text-secondary)'
               }}
             >
               {tab.label}
