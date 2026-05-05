@@ -10,13 +10,17 @@ import { ToastProvider } from '@/lib/toast'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export default async function MemberLayout({ children }: { children: React.ReactNode }) {
-  // RSC prefetch guard: middleware lets prefetch requests through so it can't
-  // 503, but redirect() inside this layout would still break RSC payload
-  // parsing. Bypass all auth / profile fetching for prefetch requests and
-  // return bare children — the real navigation will re-render with full auth.
+  // RSC prefetch guard: skip auth + profile fetching for *prefetch* requests
+  // only. Click navigations also send RSC=1 to fetch the streaming RSC payload
+  // for the new segment — short-circuiting those returned bare children with no
+  // TopNav / RightRail / tier checks, which surfaced as 503-on-click for
+  // /academy/[pillar]/[lessonSlug] (same root cause as ADMIN-MEMBERS d9c5228).
+  // Gate strictly on Next-Router-Prefetch so real navigations re-run the full
+  // layout. Middleware (middleware.ts:36-41) still lets prefetch through, so
+  // skipping here can't 503.
   const h = headers()
-  const isRsc = h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1'
-  if (isRsc) {
+  const isPrefetch = h.get('Next-Router-Prefetch') === '1'
+  if (isPrefetch) {
     return <>{children}</>
   }
 
