@@ -9,8 +9,6 @@ const FBC = 'Barlow Condensed, sans-serif'
 const FBN = 'Bebas Neue, sans-serif'
 const FP = 'Playfair Display, Georgia, serif'
 
-const NEW_WINDOW_MS = 7 * 86_400_000
-
 interface PodcastEpisodeTileProps {
   episode: PodcastEpisode
   focused: boolean
@@ -23,9 +21,10 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
   const [hovered, setHovered] = useState(false)
   const lift = focused || hovered
 
-  const isNewIn7Days =
-    episode.releasedAt.getTime() > 0 &&
-    Date.now() - episode.releasedAt.getTime() < NEW_WINDOW_MS
+  // Use the server-computed isNew flag from transforms.ts. Calling
+  // Date.now() in the tile body itself caused SSR↔CSR drift and threw
+  // React #425/#418 on every grid mount.
+  const isNewIn7Days = episode.isNew
 
   return (
     <article

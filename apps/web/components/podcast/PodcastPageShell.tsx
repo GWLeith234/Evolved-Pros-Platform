@@ -25,15 +25,21 @@ export function PodcastPageShell({ episodes }: PodcastPageShellProps) {
   }
 
   const latest = episodes.find(e => e.pinned) ?? episodes[0]
-  const rest = episodes.filter(e => e.id !== latest.id)
 
+  // The Archive grid is the canonical "all episodes" surface. Previously
+  // we excluded `latest` to avoid double-displaying it under the hero —
+  // but that meant a freshly-launched podcast with one episode showed
+  // an empty "Nothing in this pillar yet" state when the user clicked
+  // ALL EPISODES. Include everything; the hero is a different visual
+  // unit and a duplicate appearance in the grid is fine while the
+  // catalogue is small.
   return (
     <div style={{ background: 'var(--podcast-bg-page)', minHeight: '100vh', color: 'var(--podcast-text-strong)' }}>
       <PodcastThemeBridge theme="parchment" />
       <PodcastLatestStrip episode={latest} />
       <PodcastMasthead />
       <PodcastHero episode={latest} />
-      <PodcastGrid episodes={rest} />
+      <PodcastGrid episodes={episodes} fallbackEpisode={latest} />
     </div>
   )
 }
