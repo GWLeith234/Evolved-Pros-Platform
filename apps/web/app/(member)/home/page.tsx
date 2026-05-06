@@ -11,6 +11,11 @@ import { UpcomingEventsWidget } from '@/components/home/UpcomingEventsWidget'
 import { AcademyProgressWidget } from '@/components/home/AcademyProgressWidget'
 import { ProfileCompletePrompt } from '@/components/home/ProfileCompletePrompt'
 import { QuarterlyGoals, type QuarterlyGoal } from '@/components/home/QuarterlyGoals'
+import { PillarJourneyStrip, type PillarStripItem } from '@/components/home/PillarJourneyStrip'
+import { InProgressPillarHero } from '@/components/home/InProgressPillarHero'
+import { ClimbingTowardCard } from '@/components/home/ClimbingTowardCard'
+import { GoalCard, type GoalForCard } from '@/components/home/GoalCard'
+import { AddGoalCTA } from '@/components/home/AddGoalCTA'
 import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
 import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStoriesTile'
 import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
@@ -137,7 +142,7 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
     // (no `cp.completed > 0`) and the dots stayed grey. Counting all lesson
     // rows for the course is correct here: the catalogue gate is the course's
     // own is_published flag, not per-lesson.
-    adminClient.from('lessons').select('id, course_id'),
+    adminClient.from('lessons').select('id, course_id, title, slug, sort_order'),
     // adminClient: lesson_progress.user_id = public.users.id, but the RLS
     // policy gates on auth.uid(). Reading via the SSR client returns []
     // for accounts where auth.uid() ≠ public.users.id, which is what was
@@ -149,10 +154,14 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
       .eq('user_id', userId),
   ])
 
-  const lessonsByCourse: Record<string, string[]> = {}
-  for (const l of lessons.data ?? []) {
+  // Lessons grouped by course, sorted so we can pick the first uncompleted.
+  const lessonsByCourse: Record<string, { id: string; title: string | null; slug: string | null; sort_order: number | null }[]> = {}
+  for (const l of (lessons.data ?? []) as { id: string; course_id: string; title: string | null; slug: string | null; sort_order: number | null }[]) {
     if (!lessonsByCourse[l.course_id]) lessonsByCourse[l.course_id] = []
-    lessonsByCourse[l.course_id].push(l.id)
+    lessonsByCourse[l.course_id].push(l)
+  }
+  for (const list of Object.values(lessonsByCourse)) {
+    list.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
   }
 
   const progressByLesson: Record<string, { completed_at: string | null; updated_at: string }> = {}
@@ -166,19 +175,33 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
   return (courses.data ?? []).map(c => {
     const courseLesson = lessonsByCourse[c.id] ?? []
     const total = courseLesson.length
-    const completed = courseLesson.filter(id => progressByLesson[id]?.completed_at).length
+    const completed = courseLesson.filter(l => progressByLesson[l.id]?.completed_at).length
     const pct = total > 0 ? Math.round((completed / total) * 100) : 0
     const completedAts = courseLesson
-      .map(id => progressByLesson[id]?.completed_at)
+      .map(l => progressByLesson[l.id]?.completed_at)
       .filter((v): v is string => Boolean(v))
       .sort()
-    const lastActivity = courseLesson
-      .map(id => progressByLesson[id]?.updated_at)
-      .filter(Boolean)
+    const updatedAts = courseLesson
+      .map(l => progressByLesson[l.id]?.updated_at)
+      .filter((v): v is string => Boolean(v))
       .sort()
-      .pop() ?? null
-    const lastCompletedAt = completedAts.length > 0 ? completedAts[completedAts.length - 1] : null
-    return { ...c, total, completed, pct, lastActivity, lastCompletedAt }
+    const lastActivity     = updatedAts.length > 0 ? updatedAts[updatedAts.length - 1] : null
+    const firstActivity    = updatedAts.length > 0 ? updatedAts[0] : null
+    const lastCompletedAt  = completedAts.length > 0 ? completedAts[completedAts.length - 1] : null
+    // First uncompleted lesson by sort_order — the "Next up" target for the
+    // InProgressPillarHero CTA and the GoalCard's tied-to-path mirror.
+    const nextLesson = courseLesson.find(l => !progressByLesson[l.id]?.completed_at) ?? null
+    return {
+      ...c,
+      total,
+      completed,
+      pct,
+      lastActivity,
+      firstActivity,
+      lastCompletedAt,
+      nextLessonTitle: nextLesson?.title ?? null,
+      nextLessonSlug:  nextLesson?.slug  ?? null,
+    }
   })
 }
 
@@ -511,6 +534,78 @@ export default async function MemberHomePage() {
     })
     .slice(0, 3)
 
+  // ── Path Forward + Long Game (HOME-2) ───────────────────────────────
+  // Derive the in-progress and "climbing toward" pillars from the same
+  // pillar state the WelcomeBanner uses, then attach the per-course
+  // metadata each card needs (slug, lesson counts, next lesson, etc).
+  const PILLAR_NUM_TO_SLUG: Record<number, string> = {
+    1: 'foundation',
+    2: 'identity',
+    3: 'mental-toughness',
+    4: 'strategy',
+    5: 'accountability',
+    6: 'execution',
+  }
+
+  const stripPillars: PillarStripItem[] = pillars.map(p => ({
+    number: p.number,
+    name: p.name,
+    state: p.state,
+    progressPct: p.state === 'in-progress' ? p.progressPct : undefined,
+  }))
+
+  const inProgressEntry = pillars.find(p => p.state === 'in-progress')
+  const inProgressCourse = inProgressEntry ? courseByPillar.get(inProgressEntry.number) : null
+  const inProgressData = inProgressEntry && inProgressCourse
+    ? {
+        number: inProgressEntry.number,
+        name:   inProgressEntry.name,
+        progressPct:      inProgressCourse.pct,
+        completedLessons: inProgressCourse.completed,
+        totalLessons:     inProgressCourse.total,
+        courseSlug:       inProgressCourse.slug ?? PILLAR_NUM_TO_SLUG[inProgressEntry.number],
+        nextLessonTitle:  inProgressCourse.nextLessonTitle,
+        nextLessonSlug:   inProgressCourse.nextLessonSlug,
+        // DAY N OF 21 — earliest progress on this course's lessons. The
+        // schema has updated_at (touched-at proxy); good enough for a
+        // motivational counter, capped at the 21-day program cadence.
+        dayOfTwentyOne: inProgressCourse.firstActivity
+          ? Math.min(21, Math.max(1,
+              Math.ceil((Date.now() - new Date(inProgressCourse.firstActivity).getTime()) / 86_400_000),
+            ))
+          : null,
+      }
+    : null
+
+  const climbingEntry = pillars.find(p => p.state === 'locked')
+  const climbingCourse = climbingEntry ? courseByPillar.get(climbingEntry.number) : null
+  const climbingData = climbingEntry
+    ? {
+        number: climbingEntry.number,
+        name:   climbingEntry.name,
+        totalLessons: climbingCourse?.total ?? 0,
+        courseSlug:   climbingCourse?.slug ?? PILLAR_NUM_TO_SLUG[climbingEntry.number],
+      }
+    : null
+
+  // The accountability mirror: a goal whose pillar slug matches the
+  // in-progress pillar gets a "↳ TIED TO PATH FORWARD" footer linking
+  // to the same lesson the InProgressPillarHero CTA points at.
+  const inProgressPillarSlug = inProgressData?.courseSlug ?? null
+  const inProgressContinueHref = inProgressData
+    ? (inProgressData.nextLessonSlug
+        ? `/academy/${inProgressData.courseSlug}/${inProgressData.nextLessonSlug}`
+        : `/academy/${inProgressData.courseSlug}`)
+    : null
+  const goalsForCards: GoalForCard[] = quarterlyGoals.map(g => ({
+    id: g.id,
+    title: g.title,
+    period: g.period,
+    progress_pct: g.progress_pct,
+    weekly_delta: g.weekly_delta,
+    pillar: g.pillar,
+  }))
+
   return (
     <div className="p-6 space-y-5">
       <WelcomeBanner
@@ -561,10 +656,76 @@ export default async function MemberHomePage() {
         />
         <div className="space-y-5 lg:self-start">
           <UpcomingEventsWidget events={events} userId={profile.id} />
-          <div className="grid grid-cols-1 lg:grid-cols-[65fr_35fr] gap-5 items-start">
-            <AcademyProgressWidget courses={activeCourses} />
-            <QuarterlyGoals goals={quarterlyGoals} editHref="#" />
-          </div>
+          <AcademyProgressWidget courses={activeCourses} />
+        </div>
+      </div>
+
+      {/* HOME-2 — Path Forward (left) + Long Game (right). Full-width row
+          so the in-progress pillar hero gets real estate to render the
+          big number + tagline + CTA. The old AcademyProgress + QuarterlyGoals
+          inner grid lived in the right-column slot, which cramped both. */}
+      <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-5 items-start">
+        {/* Path Forward */}
+        <div className="space-y-4">
+          <PillarJourneyStrip pillars={stripPillars} />
+          {inProgressData && (
+            <InProgressPillarHero
+              pillar={{
+                number: inProgressData.number,
+                name: inProgressData.name,
+                progressPct: inProgressData.progressPct,
+                completedLessons: inProgressData.completedLessons,
+                totalLessons: inProgressData.totalLessons,
+              }}
+              courseSlug={inProgressData.courseSlug}
+              dayOfTwentyOne={inProgressData.dayOfTwentyOne}
+              nextLessonTitle={inProgressData.nextLessonTitle}
+              nextLessonSlug={inProgressData.nextLessonSlug}
+            />
+          )}
+          {climbingData && (
+            <ClimbingTowardCard
+              pillar={{
+                number: climbingData.number,
+                name: climbingData.name,
+                totalLessons: climbingData.totalLessons,
+              }}
+              courseSlug={climbingData.courseSlug}
+            />
+          )}
+        </div>
+
+        {/* Long Game */}
+        <div className="space-y-3">
+          <p
+            className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px]"
+            style={{ color: '#7a8a96' }}
+          >
+            The Long Game
+          </p>
+          {goalsForCards.length === 0 ? (
+            <div
+              className="rounded-lg p-5 bg-white text-center"
+              style={{ border: '1px solid rgba(27,60,90,0.1)' }}
+            >
+              <p className="font-condensed text-[12px] mb-3" style={{ color: '#7a8a96' }}>
+                No active goals yet — set one to anchor the quarter.
+              </p>
+              <AddGoalCTA />
+            </div>
+          ) : (
+            <>
+              {goalsForCards.map(g => (
+                <GoalCard
+                  key={g.id}
+                  goal={g}
+                  inProgressPillarSlug={inProgressPillarSlug}
+                  inProgressContinueHref={inProgressContinueHref}
+                />
+              ))}
+              <AddGoalCTA />
+            </>
+          )}
         </div>
       </div>
 

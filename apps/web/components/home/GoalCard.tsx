@@ -1,0 +1,181 @@
+import Link from 'next/link'
+import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+
+// Map AI / DB pillar slugs → numeric key used by PILLAR_CONFIG.
+const PILLAR_SLUG_TO_NUMBER: Record<string, 1 | 2 | 3 | 4 | 5 | 6> = {
+  foundation:        1,
+  identity:          2,
+  mental:            3,
+  'mental-toughness': 3,
+  strategy:          4,
+  accountability:    5,
+  execution:         6,
+}
+
+export interface GoalForCard {
+  id: string
+  title: string
+  /** e.g. 'Q2-2026' */
+  period: string
+  progress_pct: number
+  weekly_delta: number
+  pillar: string | null
+}
+
+interface GoalCardProps {
+  goal: GoalForCard
+  /**
+   * If set and matches the goal's pillar, render the "↳ TIED TO PATH FORWARD"
+   * footer with a CONTINUE link to the in-progress lesson.
+   */
+  inProgressPillarSlug?: string | null
+  inProgressContinueHref?: string | null
+}
+
+interface PaceInfo {
+  expectedPct: number
+  status: 'on-track' | 'ahead' | 'behind'
+  label: string
+  /** Days remaining until period end. Negative means past due. */
+  daysLeft: number
+}
+
+/**
+ * Derive pace info from a quarterly_goals row. The schema doesn't store an
+ * explicit target_date, so we infer it from `period` ('Q{1-4}-YYYY' or 'YYYY-Q{1-4}').
+ * On-track threshold: within 10% of the linear-pace expectation.
+ */
+function computePace(period: string, progressPct: number, now: Date = new Date()): PaceInfo | null {
+  const m = period.match(/Q(\d)[-/](\d{4})/i) ?? period.match(/(\d{4})[-/]Q(\d)/i)
+  if (!m) return null
+  const q     = parseInt(m[1].length === 4 ? m[2] : m[1], 10)
+  const yyyy  = parseInt(m[1].length === 4 ? m[1] : m[2], 10)
+  if (q < 1 || q > 4) return null
+
+  const startMonth = (q - 1) * 3 // 0,3,6,9
+  const start = new Date(Date.UTC(yyyy, startMonth, 1))
+  const end   = new Date(Date.UTC(yyyy, startMonth + 3, 0, 23, 59, 59)) // last day of quarter
+
+  const totalMs   = end.getTime() - start.getTime()
+  const elapsedMs = Math.max(0, Math.min(totalMs, now.getTime() - start.getTime()))
+  const expectedPct = Math.round((elapsedMs / totalMs) * 100)
+  const daysLeft = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+
+  const delta = progressPct - expectedPct
+  let status: PaceInfo['status'] = 'on-track'
+  if (delta > 10)  status = 'ahead'
+  if (delta < -10) status = 'behind'
+
+  const label = status === 'on-track'
+    ? 'On track'
+    : status === 'ahead'
+      ? `Ahead by ${delta}%`
+      : `Behind by ${Math.abs(delta)}%`
+
+  return { expectedPct, status, label, daysLeft }
+}
+
+const STATUS_STYLE: Record<PaceInfo['status'], { bg: string; color: string }> = {
+  'on-track': { bg: 'rgba(34,197,94,0.10)',  color: '#15803d' },
+  'ahead':    { bg: 'rgba(10,191,163,0.10)', color: '#0ABFA3' },
+  'behind':   { bg: 'rgba(239,14,48,0.08)',  color: '#ef0e30' },
+}
+
+export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }: GoalCardProps) {
+  const pillarKey = goal.pillar ? PILLAR_SLUG_TO_NUMBER[goal.pillar.toLowerCase()] : null
+  const cfg = pillarKey ? PILLAR_CONFIG[pillarKey] : null
+  const accentColor = cfg?.color ?? '#68a2b9'
+
+  const pace = computePace(goal.period, goal.progress_pct)
+  // Resolve both sides to the canonical numeric key so 'mental' and
+  // 'mental-toughness' (DB vs course-slug forms) compare equal.
+  const inProgressKey = inProgressPillarSlug ? PILLAR_SLUG_TO_NUMBER[inProgressPillarSlug.toLowerCase()] : null
+  const tiedToPath = !!inProgressKey && !!pillarKey && inProgressKey === pillarKey
+
+  const deltaArrow = goal.weekly_delta > 0 ? '↑' : goal.weekly_delta < 0 ? '↓' : '·'
+  const deltaSign  = goal.weekly_delta > 0 ? '+' : ''
+
+  return (
+    <div
+      className="rounded-lg overflow-hidden bg-white"
+      style={{
+        border: '1px solid rgba(27,60,90,0.1)',
+        borderLeft: `3px solid ${accentColor}`,
+      }}
+    >
+      <div className="px-4 py-3">
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <span className="font-body font-bold text-[13px] leading-snug text-[#1b3c5a]">
+            {goal.title}
+          </span>
+          <span
+            className="font-condensed text-[9px] font-bold tracking-[0.12em] uppercase rounded px-1.5 py-0.5 shrink-0"
+            style={{ color: accentColor, backgroundColor: `${accentColor}1f` }}
+          >
+            {goal.period}
+          </span>
+        </div>
+
+        <div className="flex items-baseline justify-between mb-1.5">
+          <span
+            className="font-display font-extrabold leading-none"
+            style={{ fontSize: 26, color: accentColor }}
+          >
+            {goal.progress_pct}%
+          </span>
+          <span
+            className="font-condensed font-bold tracking-[0.1em] text-[10px]"
+            style={{ color: goal.weekly_delta < 0 ? '#ef0e30' : accentColor }}
+          >
+            {deltaArrow} {deltaSign}{goal.weekly_delta}% wk
+          </span>
+        </div>
+
+        <div
+          className="w-full rounded-full overflow-hidden"
+          style={{ height: 4, backgroundColor: 'rgba(27,60,90,0.08)' }}
+        >
+          <div
+            className="h-full rounded-full transition-all"
+            style={{ width: `${goal.progress_pct}%`, backgroundColor: accentColor }}
+          />
+        </div>
+
+        {pace && (
+          <div className="flex items-center justify-between mt-2">
+            <span
+              className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] px-2 py-0.5 rounded"
+              style={STATUS_STYLE[pace.status]}
+            >
+              {pace.label}
+            </span>
+            <span className="font-condensed text-[10px]" style={{ color: '#94a3b8' }}>
+              {pace.daysLeft >= 0 ? `${pace.daysLeft} days left` : 'past due'}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {tiedToPath && inProgressContinueHref && (
+        <Link
+          href={inProgressContinueHref}
+          className="flex items-center justify-between px-4 py-2 transition-colors hover:bg-[rgba(27,60,90,0.03)]"
+          style={{ borderTop: '1px solid rgba(27,60,90,0.06)', backgroundColor: 'rgba(27,60,90,0.02)' }}
+        >
+          <span
+            className="font-condensed font-bold uppercase tracking-[0.16em] text-[10px]"
+            style={{ color: accentColor }}
+          >
+            ↳ Tied to path forward
+          </span>
+          <span
+            className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px]"
+            style={{ color: accentColor }}
+          >
+            Continue →
+          </span>
+        </Link>
+      )}
+    </div>
+  )
+}
