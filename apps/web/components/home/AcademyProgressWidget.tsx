@@ -1,6 +1,5 @@
 import Link from 'next/link'
-import { Card, CardHeader, CardBody } from '@evolved-pros/ui'
-import { Button } from '@/components/ui/Button'
+import { Card, CardBody } from '@evolved-pros/ui'
 
 type CourseProgress = {
   id: string
@@ -18,8 +17,24 @@ interface AcademyProgressWidgetProps {
 export function AcademyProgressWidget({ courses }: AcademyProgressWidgetProps) {
   return (
     <Card>
-      <CardHeader title="Your Academy" />
-      <CardBody className="!px-6 !py-4 space-y-4">
+      <CardBody className="!px-6 !py-5 space-y-4">
+        {/* Single 22px/500 uppercase headline + right-aligned action link
+            (HOME-1). Replaces the previous "Your Academy" CardHeader and
+            the bottom-of-card "Continue Learning →" full-width button. */}
+        <div className="flex items-baseline justify-between gap-3">
+          <h3
+            className="font-condensed text-[22px] font-medium uppercase tracking-[0.04em] text-[#1b3c5a] leading-none"
+          >
+            Path Forward
+          </h3>
+          <Link
+            href="/academy"
+            className="font-condensed text-[11px] tracking-[0.18em] text-[#68a2b9] hover:text-[#1b3c5a] uppercase whitespace-nowrap"
+          >
+            Continue Learning →
+          </Link>
+        </div>
+
         {courses.length === 0 ? (
           <p className="font-condensed text-xs tracking-widest text-[#7a8a96] text-center py-4">
             No courses started yet
@@ -57,12 +72,6 @@ export function AcademyProgressWidget({ courses }: AcademyProgressWidgetProps) {
             )
           })
         )}
-
-        <div className="pt-2">
-          <Button variant="primary" size="lg" href="/academy" fullWidth>
-            Continue Learning →
-          </Button>
-        </div>
       </CardBody>
     </Card>
   )

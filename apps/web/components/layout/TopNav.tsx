@@ -207,10 +207,10 @@ export function TopNav({
             <img
               src={activeLogoUrl}
               alt="Evolved Pros"
-              style={{ height: 36, width: 'auto', display: 'block' }}
+              style={{ height: 44, width: 'auto', display: 'block' }}
             />
           ) : (
-            <LogoMark variant={isLight ? 'dark' : 'light'} height={32} />
+            <LogoMark variant={isLight ? 'dark' : 'light'} height={44} />
           )}
         </Link>
 

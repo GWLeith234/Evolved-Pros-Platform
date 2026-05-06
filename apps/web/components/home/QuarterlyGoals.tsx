@@ -51,18 +51,18 @@ export function QuarterlyGoals({ goals, editHref = '#' }: QuarterlyGoalsProps) {
   return (
     <Card>
       <CardBody className="!px-6 !py-5 space-y-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="font-condensed text-[10px] tracking-[0.18em] text-[#7a8a96] uppercase">
-              The Long Game
-            </p>
-            <h3 className="font-display text-[18px] font-bold text-[#1b3c5a] leading-tight tracking-tight">
-              Quarterly Goals
-            </h3>
-          </div>
+        {/* HOME-1: single 22px/500 uppercase headline + right-aligned
+            action link. Replaces the eyebrow "THE LONG GAME" + h3
+            "Quarterly Goals" stack. */}
+        <div className="flex items-baseline justify-between gap-3">
+          <h3
+            className="font-condensed text-[22px] font-medium uppercase tracking-[0.04em] text-[#1b3c5a] leading-none"
+          >
+            Long Game
+          </h3>
           <Link
             href={editHref}
-            className="font-condensed text-[10px] tracking-[0.18em] text-[#68a2b9] hover:text-[#1b3c5a] uppercase"
+            className="font-condensed text-[11px] tracking-[0.18em] text-[#68a2b9] hover:text-[#1b3c5a] uppercase whitespace-nowrap"
           >
             Edit →
           </Link>
