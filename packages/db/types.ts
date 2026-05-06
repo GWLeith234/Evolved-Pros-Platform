@@ -690,6 +690,38 @@ export type Database = {
         }
         Relationships: []
       }
+      goal_snapshots: {
+        Row: {
+          captured_at: string | null
+          goal_id: string
+          id: string
+          progress_pct: number
+          snapshot_date: string
+        }
+        Insert: {
+          captured_at?: string | null
+          goal_id: string
+          id?: string
+          progress_pct: number
+          snapshot_date: string
+        }
+        Update: {
+          captured_at?: string | null
+          goal_id?: string
+          id?: string
+          progress_pct?: number
+          snapshot_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_snapshots_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "quarterly_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       greeting_quotes: {
         Row: {
           created_at: string | null
@@ -1783,6 +1815,7 @@ export type Database = {
           period: string
           pillar: string | null
           progress_pct: number | null
+          target_date: string | null
           title: string
           updated_at: string | null
           user_id: string
@@ -1795,6 +1828,7 @@ export type Database = {
           period: string
           pillar?: string | null
           progress_pct?: number | null
+          target_date?: string | null
           title: string
           updated_at?: string | null
           user_id: string
@@ -1807,6 +1841,7 @@ export type Database = {
           period?: string
           pillar?: string | null
           progress_pct?: number | null
+          target_date?: string | null
           title?: string
           updated_at?: string | null
           user_id?: string
