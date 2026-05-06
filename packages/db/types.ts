@@ -1,4 +1,6 @@
-export type Json =
+Need to install the following packages:
+supabase@2.98.2
+Ok to proceed? (y) export type Json =
   | string
   | number
   | boolean
@@ -441,6 +443,7 @@ export type Database = {
       }
       episodes: {
         Row: {
+          audio_url: string | null
           created_at: string | null
           description: string | null
           duration_seconds: number | null
@@ -450,19 +453,26 @@ export type Database = {
           guest_name: string | null
           guest_title: string | null
           id: string
+          is_members_only: boolean | null
           is_published: boolean | null
           mux_asset_id: string | null
           mux_playback_id: string | null
+          pillar: string | null
+          pillars: string[] | null
+          pinned: boolean
           published_at: string | null
           season: number | null
+          show_notes: string | null
           slug: string
           thumbnail_url: string | null
           title: string
           transcript: string | null
+          transistor_episode_id: string | null
           updated_at: string | null
           youtube_url: string | null
         }
         Insert: {
+          audio_url?: string | null
           created_at?: string | null
           description?: string | null
           duration_seconds?: number | null
@@ -472,19 +482,26 @@ export type Database = {
           guest_name?: string | null
           guest_title?: string | null
           id?: string
+          is_members_only?: boolean | null
           is_published?: boolean | null
           mux_asset_id?: string | null
           mux_playback_id?: string | null
+          pillar?: string | null
+          pillars?: string[] | null
+          pinned?: boolean
           published_at?: string | null
           season?: number | null
+          show_notes?: string | null
           slug: string
           thumbnail_url?: string | null
           title: string
           transcript?: string | null
+          transistor_episode_id?: string | null
           updated_at?: string | null
           youtube_url?: string | null
         }
         Update: {
+          audio_url?: string | null
           created_at?: string | null
           description?: string | null
           duration_seconds?: number | null
@@ -494,15 +511,21 @@ export type Database = {
           guest_name?: string | null
           guest_title?: string | null
           id?: string
+          is_members_only?: boolean | null
           is_published?: boolean | null
           mux_asset_id?: string | null
           mux_playback_id?: string | null
+          pillar?: string | null
+          pillars?: string[] | null
+          pinned?: boolean
           published_at?: string | null
           season?: number | null
+          show_notes?: string | null
           slug?: string
           thumbnail_url?: string | null
           title?: string
           transcript?: string | null
+          transistor_episode_id?: string | null
           updated_at?: string | null
           youtube_url?: string | null
         }
@@ -578,12 +601,12 @@ export type Database = {
         Row: {
           attending_count: number
           created_at: string
+          cta_text: string | null
           description: string | null
           ends_at: string | null
           event_type: string
           event_type_keynote: boolean
           format: string
-          cta_text: string | null
           hero_image_url: string | null
           host_avatar_url: string | null
           host_name: string | null
@@ -608,12 +631,12 @@ export type Database = {
         Insert: {
           attending_count?: number
           created_at?: string
+          cta_text?: string | null
           description?: string | null
           ends_at?: string | null
           event_type: string
           event_type_keynote?: boolean
           format?: string
-          cta_text?: string | null
           hero_image_url?: string | null
           host_avatar_url?: string | null
           host_name?: string | null
@@ -638,12 +661,12 @@ export type Database = {
         Update: {
           attending_count?: number
           created_at?: string
+          cta_text?: string | null
           description?: string | null
           ends_at?: string | null
           event_type?: string
           event_type_keynote?: boolean
           format?: string
-          cta_text?: string | null
           hero_image_url?: string | null
           host_avatar_url?: string | null
           host_name?: string | null
@@ -1997,57 +2020,191 @@ export type Database = {
         }
         Relationships: []
       }
-      sponsor_placements: {
+      sponsor_clicks: {
         Row: {
-          accent_color: string
-          call_to_action: string
-          created_at: string
-          cta_url: string
-          ends_at: string | null
+          clicked_at: string
+          commission_amount: number | null
+          conversion_at: string | null
+          converted: boolean
           id: string
-          is_active: boolean
-          kind: string
-          logo_url: string | null
-          offer_details: string | null
-          slogan: string | null
-          sort_order: number
-          sponsor_name: string
-          starts_at: string | null
-          updated_at: string
+          placement_id: string
+          surface: string
+          user_id: string | null
         }
         Insert: {
-          accent_color?: string
-          call_to_action: string
-          created_at?: string
-          cta_url: string
-          ends_at?: string | null
+          clicked_at?: string
+          commission_amount?: number | null
+          conversion_at?: string | null
+          converted?: boolean
           id?: string
-          is_active?: boolean
-          kind?: string
-          logo_url?: string | null
-          offer_details?: string | null
-          slogan?: string | null
-          sort_order?: number
-          sponsor_name: string
-          starts_at?: string | null
-          updated_at?: string
+          placement_id: string
+          surface: string
+          user_id?: string | null
         }
         Update: {
-          accent_color?: string
-          call_to_action?: string
-          created_at?: string
-          cta_url?: string
-          ends_at?: string | null
+          clicked_at?: string
+          commission_amount?: number | null
+          conversion_at?: string | null
+          converted?: boolean
           id?: string
-          is_active?: boolean
-          kind?: string
-          logo_url?: string | null
-          offer_details?: string | null
-          slogan?: string | null
-          sort_order?: number
-          sponsor_name?: string
-          starts_at?: string | null
+          placement_id?: string
+          surface?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsor_clicks_placement_id_fkey"
+            columns: ["placement_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_placements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsor_clicks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsor_impressions: {
+        Row: {
+          id: string
+          placement_id: string
+          rendered_at: string
+          surface: string
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          placement_id: string
+          rendered_at?: string
+          surface: string
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          placement_id?: string
+          rendered_at?: string
+          surface?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsor_impressions_placement_id_fkey"
+            columns: ["placement_id"]
+            isOneToOne: false
+            referencedRelation: "sponsor_placements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsor_impressions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsor_placements: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          sponsor_id: string
+          surface: string
+          updated_at: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          sponsor_id: string
+          surface: string
           updated_at?: string
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          sponsor_id?: string
+          surface?: string
+          updated_at?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsor_placements_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsors: {
+        Row: {
+          body_copy: string | null
+          brand_color: string | null
+          commission_pct: number | null
+          contract_end: string | null
+          contract_start: string | null
+          created_at: string
+          cta_text: string | null
+          cta_url: string | null
+          id: string
+          impression_cap: number | null
+          logo_url: string | null
+          name: string
+          status: string
+          tagline: string | null
+          tracking_id: string | null
+          type: string
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          body_copy?: string | null
+          brand_color?: string | null
+          commission_pct?: number | null
+          contract_end?: string | null
+          contract_start?: string | null
+          created_at?: string
+          cta_text?: string | null
+          cta_url?: string | null
+          id?: string
+          impression_cap?: number | null
+          logo_url?: string | null
+          name: string
+          status?: string
+          tagline?: string | null
+          tracking_id?: string | null
+          type?: string
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          body_copy?: string | null
+          brand_color?: string | null
+          commission_pct?: number | null
+          contract_end?: string | null
+          contract_start?: string | null
+          created_at?: string
+          cta_text?: string | null
+          cta_url?: string | null
+          id?: string
+          impression_cap?: number | null
+          logo_url?: string | null
+          name?: string
+          status?: string
+          tagline?: string | null
+          tracking_id?: string | null
+          type?: string
+          updated_at?: string
+          url?: string | null
         }
         Relationships: []
       }
@@ -2161,6 +2318,35 @@ export type Database = {
           },
         ]
       }
+      user_episode_progress: {
+        Row: {
+          episode_id: string
+          progress: number
+          user_id: string
+          watched_at: string
+        }
+        Insert: {
+          episode_id: string
+          progress?: number
+          user_id: string
+          watched_at?: string
+        }
+        Update: {
+          episode_id?: string
+          progress?: number
+          user_id?: string
+          watched_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_episode_progress_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "episodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           academy_completed_at: string | null
@@ -2174,6 +2360,7 @@ export type Database = {
           current_pillar: string | null
           display_name: string | null
           email: string | null
+          first_name: string | null
           focus_pillar: number | null
           full_name: string | null
           goal_90day: string | null
@@ -2181,6 +2368,7 @@ export type Database = {
           id: string
           is_alumni: boolean | null
           keynote_access: boolean
+          last_name: string | null
           last_summary_sent_at: string | null
           linkedin_url: string | null
           location: string | null
@@ -2206,8 +2394,6 @@ export type Database = {
           vendasta_last_event_at: string | null
           vendasta_sku: string | null
           vendasta_subscription_started_at: string | null
-          first_name: string | null
-          last_name: string | null
           website_url: string | null
         }
         Insert: {
@@ -2308,6 +2494,44 @@ export type Database = {
         }
         Relationships: []
       }
+      vendasta_account_mapping: {
+        Row: {
+          created_at: string
+          id: string
+          partner_id: string
+          updated_at: string
+          user_id: string
+          vendasta_account_id: string
+          vendasta_contact_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          partner_id?: string
+          updated_at?: string
+          user_id: string
+          vendasta_account_id: string
+          vendasta_contact_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          partner_id?: string
+          updated_at?: string
+          user_id?: string
+          vendasta_account_id?: string
+          vendasta_contact_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendasta_account_mapping_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendasta_webhooks: {
         Row: {
           error_message: string | null
@@ -2317,7 +2541,7 @@ export type Database = {
           payload: Json
           processed_at: string
           product_sku: string | null
-          received_at: string
+          received_at: string | null
           status: string | null
           vendasta_contact_id: string | null
           vendasta_order_id: string | null
@@ -2330,7 +2554,7 @@ export type Database = {
           payload: Json
           processed_at?: string
           product_sku?: string | null
-          received_at?: string
+          received_at?: string | null
           status?: string | null
           vendasta_contact_id?: string | null
           vendasta_order_id?: string | null
@@ -2343,7 +2567,7 @@ export type Database = {
           payload?: Json
           processed_at?: string
           product_sku?: string | null
-          received_at?: string
+          received_at?: string | null
           status?: string | null
           vendasta_contact_id?: string | null
           vendasta_order_id?: string | null
