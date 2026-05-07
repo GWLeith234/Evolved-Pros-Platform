@@ -107,7 +107,11 @@ export function NotifItem({ notification, variant, onRead }: NotifItemProps) {
           >
             {meta.label}
           </span>
-          <span className="font-condensed text-[10px] ml-auto" style={{ color: 'rgba(255,255,255,0.25)' }}>
+          <span
+            suppressHydrationWarning
+            className="font-condensed text-[10px] ml-auto"
+            style={{ color: 'rgba(255,255,255,0.25)' }}
+          >
             {formatRelativeTime(notification.createdAt)}
           </span>
         </div>
@@ -148,7 +152,11 @@ export function NotifItem({ notification, variant, onRead }: NotifItemProps) {
           >
             {meta.label}
           </span>
-          <span className="font-condensed text-[10px] ml-auto flex-shrink-0" style={{ color: '#7a8a96' }}>
+          <span
+            suppressHydrationWarning
+            className="font-condensed text-[10px] ml-auto flex-shrink-0"
+            style={{ color: '#7a8a96' }}
+          >
             {formatRelativeTime(notification.createdAt)}
           </span>
         </div>

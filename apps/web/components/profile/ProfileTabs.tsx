@@ -129,7 +129,7 @@ export function ProfileTabs({
                   </p>
                   <div className="flex items-center gap-4">
                     <span className="font-condensed text-[10px] text-[#7a8a96]">
-                      {new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      {new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}
                     </span>
                     <span className="font-condensed text-[10px] text-[#7a8a96]">♥ {post.like_count}</span>
                     <span className="font-condensed text-[10px] text-[#7a8a96]">↩ {post.reply_count}</span>
@@ -196,7 +196,7 @@ export function ProfileTabs({
                       {entry.description}
                     </p>
                     <p className="font-condensed text-[10px] mt-0.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.30)' }}>
-                      {new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      {new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}
                     </p>
                   </div>
                   <div className="flex-shrink-0 text-right">
