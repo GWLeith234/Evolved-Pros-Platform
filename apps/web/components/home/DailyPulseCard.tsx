@@ -22,16 +22,24 @@ export interface DailyPulseCommitment {
 }
 
 interface Props {
-  habits: DailyPulseHabit[]
-  commitments: DailyPulseCommitment[]
+  habits?: DailyPulseHabit[]
+  commitments?: DailyPulseCommitment[]
 }
 
 const HABITS_TOTAL  = 3
 const COMMITS_TOTAL = 2
 
-export function DailyPulseCard({ habits: initialHabits, commitments: initialCommits }: Props) {
-  const [habits, setHabits] = useState(initialHabits)
-  const [commits, setCommits] = useState(initialCommits)
+export function DailyPulseCard({ habits: initialHabits = [], commitments: initialCommits = [] }: Props) {
+  // Defensive: an undefined fetch result on the page side used to bubble
+  // up here as `habits.filter is not a function`, which the React
+  // Suspense/error boundary swallowed silently (#422) — the entire card
+  // disappeared from the 4-up grid. Defaulting to [] at the prop level
+  // keeps the empty-state UI in place even if the upstream fetcher
+  // returns undefined.
+  const safeInitialHabits = Array.isArray(initialHabits) ? initialHabits : []
+  const safeInitialCommits = Array.isArray(initialCommits) ? initialCommits : []
+  const [habits, setHabits] = useState(safeInitialHabits)
+  const [commits, setCommits] = useState(safeInitialCommits)
   const [pendingHabit, setPendingHabit] = useState<string | null>(null)
   const [pendingCommit, setPendingCommit] = useState<string | null>(null)
 
@@ -140,7 +148,14 @@ export function DailyPulseCard({ habits: initialHabits, commitments: initialComm
         <div style={{ position: 'relative', width: 116, height: 116 }}>
           <svg width="116" height="116" viewBox="0 0 120 120" style={{ transform: 'rotate(-90deg)' }}>
             <circle cx="60" cy="60" r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+            {/* strokeDashoffset is derived from completion state. The
+                value is float-precision (circumference × (1 - pct/100))
+                and used to surface as a hydration mismatch (#425) when
+                React's stringified attribute differed by a sub-pixel
+                between SSR and client. Suppress the warning on this
+                element only — the visual is identical either way. */}
             <circle
+              suppressHydrationWarning
               cx="60" cy="60" r={radius} fill="none"
               stroke={ringColor} strokeWidth="8" strokeLinecap="round"
               strokeDasharray={circumference}

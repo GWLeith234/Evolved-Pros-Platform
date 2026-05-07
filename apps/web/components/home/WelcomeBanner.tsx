@@ -610,6 +610,7 @@ export function WelcomeBanner({
             style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0, flexWrap: 'wrap' }}
           >
             <span
+              suppressHydrationWarning
               style={{
                 fontFamily: '"Barlow Condensed", sans-serif',
                 fontWeight: 700,
@@ -632,6 +633,7 @@ export function WelcomeBanner({
               }}
             />
             <span
+              suppressHydrationWarning
               style={{
                 fontFamily: '"Barlow Condensed", sans-serif',
                 fontWeight: 600,
@@ -665,6 +667,7 @@ export function WelcomeBanner({
               }}
             >
               <span
+                suppressHydrationWarning
                 style={{
                   fontFamily: '"Barlow Condensed", sans-serif',
                   fontWeight: 800,
@@ -686,6 +689,7 @@ export function WelcomeBanner({
                 }}
               >
                 <span
+                  suppressHydrationWarning
                   style={{
                     position: 'absolute',
                     left: 0,

@@ -451,54 +451,68 @@ async function fetchLatestEpisodes(limit = 3): Promise<{ episodes: PulseEpisode[
 // auth.users(id), so reads key on user.id (auth UID), not profile.id.
 
 async function fetchTodaysHabits(authUserId: string): Promise<DailyPulseHabit[]> {
-  const today = new Date().toISOString().split('T')[0]
-  const sixtyDaysAgo = new Date(Date.now() - 60 * 86_400_000).toISOString().split('T')[0]
+  // Wrapped in try/catch so a transient network blip or unexpected RLS
+  // change returns [] instead of bubbling up. An undefined return here
+  // used to trip the Daily Pulse card's Suspense boundary (#422) and
+  // remove the entire 4th tile silently.
+  try {
+    const today = new Date().toISOString().split('T')[0]
+    const sixtyDaysAgo = new Date(Date.now() - 60 * 86_400_000).toISOString().split('T')[0]
 
-  const [habitsRes, completionsRes] = await Promise.all([
-    adminClient
-      .from('habits')
-      .select('id, name, pillar, sort_order')
-      .eq('user_id', authUserId)
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true }),
-    adminClient
-      .from('habit_completions')
-      .select('habit_id, completed_date')
-      .eq('user_id', authUserId)
-      .gte('completed_date', sixtyDaysAgo)
-      .not('habit_id', 'is', null),
-  ])
+    const [habitsRes, completionsRes] = await Promise.all([
+      adminClient
+        .from('habits')
+        .select('id, name, pillar, sort_order')
+        .eq('user_id', authUserId)
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true }),
+      adminClient
+        .from('habit_completions')
+        .select('habit_id, completed_date')
+        .eq('user_id', authUserId)
+        .gte('completed_date', sixtyDaysAgo)
+        .not('habit_id', 'is', null),
+    ])
 
-  const completedToday = new Set<string>()
-  const recentCount: Record<string, number> = {}
-  for (const c of completionsRes.data ?? []) {
-    if (!c.habit_id) continue
-    recentCount[c.habit_id] = (recentCount[c.habit_id] ?? 0) + 1
-    if (c.completed_date === today) completedToday.add(c.habit_id)
+    const completedToday = new Set<string>()
+    const recentCount: Record<string, number> = {}
+    for (const c of completionsRes.data ?? []) {
+      if (!c.habit_id) continue
+      recentCount[c.habit_id] = (recentCount[c.habit_id] ?? 0) + 1
+      if (c.completed_date === today) completedToday.add(c.habit_id)
+    }
+
+    return (habitsRes.data ?? []).map(h => ({
+      id: h.id,
+      name: h.name,
+      pillar: h.pillar,
+      completedToday: completedToday.has(h.id),
+      recentCount: recentCount[h.id] ?? 0,
+    }))
+  } catch (err) {
+    console.error('[home.fetchTodaysHabits] failed:', err instanceof Error ? err.message : err)
+    return []
   }
-
-  return (habitsRes.data ?? []).map(h => ({
-    id: h.id,
-    name: h.name,
-    pillar: h.pillar,
-    completedToday: completedToday.has(h.id),
-    recentCount: recentCount[h.id] ?? 0,
-  }))
 }
 
 async function fetchWeekCommitments(authUserId: string, weekStart: string): Promise<DailyPulseCommitment[]> {
-  const { data } = await adminClient
-    .from('weekly_commitments')
-    .select('id, commitment, is_completed, week_start, created_at')
-    .eq('user_id', authUserId)
-    .eq('week_start', weekStart)
-    .order('created_at', { ascending: true })
-    .limit(2)
-  return (data ?? []).map(c => ({
-    id: c.id,
-    commitment: c.commitment,
-    is_completed: c.is_completed,
-  }))
+  try {
+    const { data } = await adminClient
+      .from('weekly_commitments')
+      .select('id, commitment, is_completed, week_start, created_at')
+      .eq('user_id', authUserId)
+      .eq('week_start', weekStart)
+      .order('created_at', { ascending: true })
+      .limit(2)
+    return (data ?? []).map(c => ({
+      id: c.id,
+      commitment: c.commitment,
+      is_completed: c.is_completed,
+    }))
+  } catch (err) {
+    console.error('[home.fetchWeekCommitments] failed:', err instanceof Error ? err.message : err)
+    return []
+  }
 }
 
 export default async function MemberHomePage() {
