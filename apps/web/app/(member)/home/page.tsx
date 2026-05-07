@@ -131,7 +131,7 @@ async function fetchUpcomingEvents(supabase: ReturnType<typeof createClient>, us
 }
 
 async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, userId: string) {
-  const [courses, lessons, progress] = await Promise.all([
+  const [courses, lessonsResult, progress] = await Promise.all([
     supabase.from('courses').select('id, title, slug, sort_order, pillar_number').eq('is_published', true).order('sort_order'),
     // adminClient: bypasses the lessons RLS policy
     //   `auth.role() = 'authenticated' AND is_published = TRUE`
@@ -153,6 +153,24 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
       .select('lesson_id, completed_at, updated_at')
       .eq('user_id', userId),
   ])
+
+  // SSR fallback: adminClient silently returns [] when SUPABASE_SERVICE_ROLE_KEY
+  // is missing in the deploy env. The SSR client still satisfies the lessons
+  // RLS policy (auth.role()='authenticated' AND is_published=true) for
+  // logged-in members, so we can recover lesson totals — the Architecture
+  // pillars stay grey otherwise. Mirrors the fallback in lib/academy/fetchers.ts.
+  let lessonRows = lessonsResult.data ?? []
+  if (lessonRows.length === 0) {
+    console.warn(
+      '[home.fetchCourseProgress] adminClient lessons returned 0 — falling back to RLS-bound client. Check SUPABASE_SERVICE_ROLE_KEY.',
+    )
+    const fallback = await supabase
+      .from('lessons')
+      .select('id, course_id, title, slug, sort_order')
+      .eq('is_published', true)
+    lessonRows = fallback.data ?? []
+  }
+  const lessons = { data: lessonRows }
 
   // Lessons grouped by course, sorted so we can pick the first uncompleted.
   const lessonsByCourse: Record<string, { id: string; title: string | null; slug: string | null; sort_order: number | null }[]> = {}
