@@ -29,6 +29,7 @@ type SidebarAd = {
   id: string
   image_url: string | null
   headline: string | null
+  body_copy: string | null
   cta_text: string | null
   link_url: string | null
   click_url: string | null
@@ -202,7 +203,7 @@ function SidebarAdUnit() {
     Promise.all([
       supabase
         .from('platform_ads')
-        .select('id, image_url, headline, cta_text, link_url, click_url')
+        .select('id, image_url, headline, body_copy, cta_text, link_url, click_url')
         .eq('placement', 'sidebar')
         .eq('is_active', true)
         .order('sort_order'),
@@ -281,6 +282,37 @@ function SidebarAdUnit() {
       }}>
         AD
       </span>
+
+      {/* Body copy under image */}
+      {ad.body_copy && (
+        <div style={{
+          background: 'rgba(0,0,0,0.55)',
+          padding: '6px 10px 4px',
+          color: 'rgba(255,255,255,0.85)',
+          fontSize: '10px',
+          lineHeight: '14px',
+        }}>
+          {ad.body_copy}
+        </div>
+      )}
+
+      {/* CTA button row */}
+      {ad.cta_text && (
+        <div style={{
+          background: 'rgba(0,0,0,0.65)',
+          padding: '6px 10px',
+          color: '#ef0e30',
+          fontSize: '10px',
+          fontWeight: 700,
+          letterSpacing: '0.04em',
+          textTransform: 'uppercase',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}>
+          {ad.cta_text}
+        </div>
+      )}
 
       {/* Bottom bar */}
       <div style={{

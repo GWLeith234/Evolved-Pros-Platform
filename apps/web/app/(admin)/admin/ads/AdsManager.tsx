@@ -14,6 +14,8 @@ interface Ad {
   image_url: string | null
   click_url: string | null
   headline: string | null
+  body_copy: string | null
+  cta_text: string | null
   start_date: string | null
   end_date: string | null
   is_active: boolean
@@ -27,6 +29,8 @@ interface AdFormValues {
   imageUrl: string
   clickUrl: string
   headline: string
+  bodyCopy: string
+  ctaText: string
   startDate: string
   endDate: string
   isActive: boolean
@@ -54,26 +58,39 @@ const DEFAULT_FORM: AdFormValues = {
   imageUrl: '',
   clickUrl: '',
   headline: '',
+  bodyCopy: '',
+  ctaText: '',
   startDate: '',
   endDate: '',
   isActive: true,
   placements: ['platform'],
 }
 
-function adStatus(ad: Ad): 'active' | 'scheduled' | 'expired' | 'inactive' {
+// QA-FIX: status + header count must agree on the same definition of "active".
+// Previously the header counted is_active=true ignoring end_date, while the
+// badge derived EXPIRED from end_date alone — producing "12 active" with all
+// rows showing EXPIRED. Now both gate on the same expression and the
+// expired-end-date check wins regardless of the is_active flag (an expired
+// row with is_active=true is still expired, not active).
+function isExpired(ad: Pick<Ad, 'end_date'>): boolean {
+  return Boolean(ad.end_date) && new Date(ad.end_date as string).getTime() <= Date.now()
+}
+
+function isActiveAd(ad: Pick<Ad, 'is_active' | 'end_date'>): boolean {
+  return ad.is_active === true && !isExpired(ad)
+}
+
+function adStatus(ad: Ad): 'active' | 'expired' | 'inactive' {
+  if (isExpired(ad)) return 'expired'
   if (!ad.is_active) return 'inactive'
-  const now = Date.now()
-  if (ad.start_date && new Date(ad.start_date).getTime() > now) return 'scheduled'
-  if (ad.end_date && new Date(ad.end_date).getTime() < now) return 'expired'
   return 'active'
 }
 
 function StatusBadge({ status }: { status: ReturnType<typeof adStatus> }) {
   const styles: Record<typeof status, React.CSSProperties> = {
-    active:    { backgroundColor: 'rgba(104,162,185,0.12)', color: '#68a2b9' },
-    scheduled: { backgroundColor: 'rgba(201,168,76,0.12)',  color: '#C9A84C' },
-    expired:   { backgroundColor: 'rgba(27,60,90,0.08)',    color: '#7a8a96' },
-    inactive:  { backgroundColor: 'rgba(27,60,90,0.06)',    color: '#7a8a96' },
+    active:   { backgroundColor: 'rgba(0,200,100,0.15)', color: '#00c864' },
+    expired:  { backgroundColor: 'rgba(27,60,90,0.08)',  color: '#7a8a96' },
+    inactive: { backgroundColor: 'transparent',          color: '#7a8a96', border: '1px solid rgba(27,60,90,0.2)' },
   }
   return (
     <span
@@ -131,6 +148,8 @@ function AdForm({
       image_url: values.imageUrl.trim() || null,
       click_url: values.clickUrl.trim() || null,
       headline: values.headline.trim() || null,
+      body_copy: values.bodyCopy.trim() || null,
+      cta_text: values.ctaText.trim() || null,
       start_date: values.startDate || null,
       end_date: values.endDate || null,
       is_active: values.isActive,
@@ -195,6 +214,36 @@ function AdForm({
           style={inputStyle}
           placeholder="Short display headline"
           maxLength={200}
+        />
+      </div>
+
+      {/* Body copy — supporting sentence under the headline on the sponsor rail */}
+      <div>
+        <label className={labelClass}>Body copy</label>
+        <textarea
+          value={values.bodyCopy}
+          onChange={e => set('bodyCopy', e.target.value)}
+          className={inputClass}
+          style={{ ...inputStyle, minHeight: 64, resize: 'vertical' }}
+          placeholder="Supporting sentence under the headline"
+          maxLength={120}
+        />
+        <p className="font-condensed text-[10px] text-[#7a8a96] mt-1">
+          {values.bodyCopy.length}/120
+        </p>
+      </div>
+
+      {/* CTA button text */}
+      <div>
+        <label className={labelClass}>CTA button text</label>
+        <input
+          type="text"
+          value={values.ctaText}
+          onChange={e => set('ctaText', e.target.value)}
+          className={inputClass}
+          style={inputStyle}
+          placeholder="e.g. TRY FREE FOR 30 DAYS ->"
+          maxLength={40}
         />
       </div>
 
@@ -441,6 +490,8 @@ function ZonePanel({
               imageUrl: editingAd.image_url ?? '',
               clickUrl: editingAd.click_url ?? '',
               headline: editingAd.headline ?? '',
+              bodyCopy: editingAd.body_copy ?? '',
+              ctaText: editingAd.cta_text ?? '',
               startDate: editingAd.start_date ? editingAd.start_date.slice(0, 10) : '',
               endDate: editingAd.end_date ? editingAd.end_date.slice(0, 10) : '',
               isActive: editingAd.is_active,
@@ -557,7 +608,7 @@ export function AdsManager({ initialAds }: { initialAds: Ad[] }) {
   const [activeZone, setActiveZone] = useState<Zone>('A')
 
   const zones: Zone[] = ['A', 'B', 'C', 'D']
-  const activeCount = ads.filter(a => a.is_active).length
+  const activeCount = ads.filter(isActiveAd).length
 
   return (
     <div>

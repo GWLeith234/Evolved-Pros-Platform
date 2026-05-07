@@ -10,7 +10,7 @@ export async function GET() {
 
   const { data, error } = await adminClient
     .from('platform_ads')
-    .select('id, zone, sponsor_name, ad_type, image_url, click_url, headline, start_date, end_date, is_active, sort_order, created_at')
+    .select('id, zone, sponsor_name, ad_type, image_url, click_url, headline, body_copy, cta_text, start_date, end_date, is_active, sort_order, created_at')
     .order('zone')
     .order('sort_order')
 
@@ -45,6 +45,8 @@ export async function POST(request: Request) {
         image_url: typeof body.image_url === 'string' ? body.image_url.trim() || null : null,
         click_url: typeof body.click_url === 'string' ? body.click_url.trim() || null : null,
         headline: typeof body.headline === 'string' ? body.headline.trim() || null : null,
+        body_copy: typeof body.body_copy === 'string' ? body.body_copy.trim() || null : null,
+        cta_text: typeof body.cta_text === 'string' ? body.cta_text.trim() || null : null,
         start_date: typeof body.start_date === 'string' ? body.start_date || null : null,
         end_date: typeof body.end_date === 'string' ? body.end_date || null : null,
         is_active: body.is_active === true,
