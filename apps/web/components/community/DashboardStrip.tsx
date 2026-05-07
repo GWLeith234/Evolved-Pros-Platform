@@ -41,9 +41,6 @@ function ProgressBar({ pct, color }: { pct: number; color: string }) {
 
 const CARD_BASE: React.CSSProperties = {
   display: 'block',
-  minWidth: '152px',
-  maxWidth: '200px',
-  flex: '0 0 auto',
   borderRadius: '10px',
   padding: '12px 14px',
   textDecoration: 'none',
@@ -104,17 +101,47 @@ export function DashboardStrip({ pillarProgress, episode, nextEvent, userRank, n
         backgroundColor: '#111926',
         borderBottom: '1px solid rgba(255,255,255,0.08)',
         padding: '10px 16px',
-        overflowX: 'hidden',
-        overflowY: 'hidden',
-        msOverflowStyle: 'none',
       }}
     >
-      <style>{`.ep-strip::-webkit-scrollbar { display: none; }`}</style>
-      <div className="ep-strip" style={{ display: 'flex', gap: '10px', width: 'max-content', overflowX: 'auto', scrollbarWidth: 'none' }}>
+      <style>{`
+        .ep-strip::-webkit-scrollbar { display: none; }
+        .ep-strip {
+          display: flex;
+          flex-wrap: nowrap;
+          gap: 12px;
+          overflow-x: auto;
+          overflow-y: hidden;
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .ep-strip-card {
+          flex: 0 0 auto;
+          flex-shrink: 0;
+          width: 80vw;
+          scroll-snap-align: start;
+        }
+        @media (min-width: 768px) {
+          .ep-strip {
+            gap: 10px;
+            width: max-content;
+            scroll-snap-type: none;
+          }
+          .ep-strip-card {
+            width: auto;
+            min-width: 152px;
+            max-width: 200px;
+            scroll-snap-align: none;
+          }
+        }
+      `}</style>
+      <div className="ep-strip">
 
         {/* Card 1 — Academy */}
         <Link
           href="/academy"
+          className="ep-strip-card"
           style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #0d1e38, #0a1528)', border: '1px solid rgba(96,165,250,.25)' }}
         >
           <p style={{ ...LABEL_STYLE, color: BLUE }}>📚 Academy</p>
@@ -136,6 +163,7 @@ export function DashboardStrip({ pillarProgress, episode, nextEvent, userRank, n
         {episode && (
           <Link
             href="/podcast"
+            className="ep-strip-card"
             style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #1a1228, #110d1e)', border: '1px solid rgba(167,139,250,.25)' }}
           >
             <p style={{ ...LABEL_STYLE, color: PURPLE }}>🎙 Just Dropped</p>
@@ -169,7 +197,7 @@ export function DashboardStrip({ pillarProgress, episode, nextEvent, userRank, n
             evtCta = 'View →'
           }
           return (
-            <Link href="/events" style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #200a0a, #180606)', border: '1px solid rgba(201,48,42,.3)' }}>
+            <Link href="/events" className="ep-strip-card" style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #200a0a, #180606)', border: '1px solid rgba(201,48,42,.3)' }}>
               <p style={{ ...LABEL_STYLE, color: RED }}>{evtLabel}</p>
               <p style={HEADLINE_STYLE}>{nextEvent.title}</p>
               <p style={SUB_STYLE}>{formatEventDate(nextEvent.startsAt)}</p>
@@ -181,6 +209,7 @@ export function DashboardStrip({ pillarProgress, episode, nextEvent, userRank, n
         {/* Card 5 — Leaderboard */}
         <Link
           href="/community"
+          className="ep-strip-card"
           style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #120d1e, #0d0a16)', border: '1px solid rgba(167,139,250,.2)' }}
         >
           <p style={{ ...LABEL_STYLE, color: PURPLE }}>🏆 Leaderboard</p>

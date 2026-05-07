@@ -138,7 +138,7 @@ export function LoginForm() {
                 <button
                   type="button"
                   onClick={() => { setTab('password'); setError(null) }}
-                  className="flex-1 py-2 text-xs font-bold tracking-wider transition-colors"
+                  className="flex-1 min-h-[44px] py-2 text-xs font-bold tracking-wider transition-colors"
                   style={{
                     fontFamily: '"Barlow Condensed", sans-serif',
                     backgroundColor: tab === 'password' ? '#1b3c5a' : 'transparent',
@@ -150,7 +150,7 @@ export function LoginForm() {
                 <button
                   type="button"
                   onClick={() => { setTab('magic'); setError(null) }}
-                  className="flex-1 py-2 text-xs font-bold tracking-wider transition-colors"
+                  className="flex-1 min-h-[44px] py-2 text-xs font-bold tracking-wider transition-colors"
                   style={{
                     fontFamily: '"Barlow Condensed", sans-serif',
                     backgroundColor: tab === 'magic' ? '#1b3c5a' : 'transparent',
@@ -183,7 +183,7 @@ export function LoginForm() {
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       required
-                      className="w-full border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 text-sm text-[#1b3c5a] focus:outline-none focus:border-[#68a2b9]"
+                      className="w-full min-h-[44px] border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 text-sm text-[#1b3c5a] focus:outline-none focus:border-[#68a2b9]"
                     />
                   </div>
                   <div>
@@ -197,7 +197,7 @@ export function LoginForm() {
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                         required
-                        className="w-full border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 pr-10 text-sm text-[#1b3c5a] focus:outline-none focus:border-[#68a2b9]"
+                        className="w-full min-h-[44px] border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 pr-10 text-sm text-[#1b3c5a] focus:outline-none focus:border-[#68a2b9]"
                       />
                       <button
                         type="button"
@@ -273,7 +273,7 @@ export function LoginForm() {
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       required
-                      className="w-full border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 text-sm text-[#1b3c5a] focus:outline-none focus:border-[#68a2b9]"
+                      className="w-full min-h-[44px] border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 text-sm text-[#1b3c5a] focus:outline-none focus:border-[#68a2b9]"
                     />
                   </div>
                   <button
