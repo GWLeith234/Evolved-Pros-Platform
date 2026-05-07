@@ -11,7 +11,7 @@ export async function GET() {
 
   const courses = await fetchCoursesWithProgress(supabase, user.id)
 
-  const totalLessons = courses.reduce((s, c) => s + c.totalLessons, 0)
+  const totalLessons = courses.reduce((s, c) => s + (c.totalLessons ?? 0), 0)
   const completedLessons = courses.reduce((s, c) => s + c.completedLessons, 0)
   const overallProgressPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
 
