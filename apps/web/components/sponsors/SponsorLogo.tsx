@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { logoLetter, type Sponsor } from './types'
 
 export function SponsorLogo({
@@ -11,10 +12,11 @@ export function SponsorLogo({
 }) {
   if (sponsor.logo_url) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <Image
         src={sponsor.logo_url}
         alt={`${sponsor.name} logo`}
+        width={size}
+        height={size}
         style={{
           width: size,
           height: size,

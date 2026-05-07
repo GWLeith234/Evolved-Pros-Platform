@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { ConversationThread } from './ConversationThread'
 import { Modal } from '@/components/ui/Modal'
@@ -44,10 +45,11 @@ function getInitials(name: string): string {
 function Avatar({ url, name, size = 36 }: { url: string | null; name: string; size?: number }) {
   if (url) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <Image
         src={url}
         alt={name}
+        width={size}
+        height={size}
         style={{
           width: size,
           height: size,

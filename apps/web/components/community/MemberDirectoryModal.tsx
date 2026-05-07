@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { getAvatarColor } from '@/lib/community/types'
 import type { MemberSummary } from '@/lib/community/types'
@@ -156,8 +157,7 @@ export function MemberDirectoryModal({ onClose }: MemberDirectoryModalProps) {
                     style={{ backgroundColor: avatarBg }}
                   >
                     {member.avatarUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={member.avatarUrl} alt={member.displayName} className="w-11 h-11 rounded-full object-cover" />
+                      <Image src={member.avatarUrl} alt={member.displayName} width={44} height={44} className="w-11 h-11 rounded-full object-cover" />
                     ) : (
                       <span className="font-condensed font-bold text-white text-sm">
                         {getInitials(member.displayName)}

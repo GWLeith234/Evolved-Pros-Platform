@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { MemberBadge } from '@/components/ui/MemberBadge'
 import type { MemberSummary } from '@/lib/community/types'
@@ -167,10 +168,11 @@ export function MemberDirectoryClient() {
                         style={{ backgroundColor: avatarBg }}
                       >
                         {member.avatarUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
+                          <Image
                             src={member.avatarUrl}
                             alt={member.displayName}
+                            width={56}
+                            height={56}
                             className="w-14 h-14 rounded-full object-cover"
                           />
                         ) : (

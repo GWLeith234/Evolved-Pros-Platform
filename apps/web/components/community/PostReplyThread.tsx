@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { getAvatarColor } from '@/lib/community/types'
 import type { Reply } from '@/lib/community/types'
 
@@ -43,8 +44,7 @@ function ReplyItem({ reply }: { reply: Reply }) {
         style={{ backgroundColor: avatarBg }}
       >
         {reply.author.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={reply.author.avatarUrl} alt={reply.author.displayName} className="w-7 h-7 rounded-full object-cover" />
+          <Image src={reply.author.avatarUrl} alt={reply.author.displayName} width={28} height={28} className="w-7 h-7 rounded-full object-cover" />
         ) : (
           <span className="font-condensed font-bold text-white" style={{ fontSize: '9px' }}>
             {getInitials(reply.author.displayName)}
@@ -121,8 +121,7 @@ export function PostReplyThread({
           style={{ backgroundColor: getAvatarColor(currentUser.id) }}
         >
           {currentUser.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={currentUser.avatarUrl} alt={currentUser.displayName ?? ''} className="w-7 h-7 rounded-full object-cover" />
+            <Image src={currentUser.avatarUrl} alt={currentUser.displayName ?? ''} width={28} height={28} className="w-7 h-7 rounded-full object-cover" />
           ) : (
             <span className="font-condensed font-bold text-white" style={{ fontSize: '9px' }}>
               {getInitials(currentUser.displayName)}

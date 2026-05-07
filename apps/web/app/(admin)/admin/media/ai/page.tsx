@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { PILLAR_CONFIG } from '@/lib/pillars'
 import { ImagePicker } from '@/components/ui/ImagePicker'
@@ -243,8 +244,9 @@ export default function ContentEnginePage() {
           {heroImageUrl && (
             <div>
               <label className={labelClass}>Featured Image</label>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={heroImageUrl} alt="" className="w-full rounded max-h-60 object-cover" />
+              <div style={{ position: 'relative', width: '100%', maxHeight: '15rem', height: '15rem' }}>
+                <Image src={heroImageUrl} alt="" fill className="rounded object-cover" />
+              </div>
             </div>
           )}
           <div className="flex gap-3">
@@ -259,8 +261,9 @@ export default function ContentEnginePage() {
         <div className="space-y-6">
           <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.1)' }}>
             {heroImageUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={heroImageUrl} alt="" className="w-full h-48 object-cover" />
+              <div style={{ position: 'relative', width: '100%', height: '12rem' }}>
+                <Image src={heroImageUrl} alt="" fill className="object-cover" />
+              </div>
             )}
             <div className="p-5">
               {pillar && (
