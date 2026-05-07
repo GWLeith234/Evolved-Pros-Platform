@@ -25,7 +25,7 @@ export default async function AcademyPage() {
 
   const courses = await fetchCoursesWithProgress(supabase, user.id, profile?.tier)
 
-  const totalLessons = courses.reduce((s, c) => s + c.totalLessons, 0)
+  const totalLessons = courses.reduce((s, c) => s + (c.totalLessons ?? 0), 0)
   const completedLessons = courses.reduce((s, c) => s + c.completedLessons, 0)
   const overallPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
 

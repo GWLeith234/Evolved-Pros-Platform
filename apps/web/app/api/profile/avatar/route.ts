@@ -20,7 +20,10 @@ export async function PATCH(request: Request) {
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+    return NextResponse.json(
+      { error: 'Content-Type must be application/json' },
+      { status: 415 },
+    )
   }
 
   const url = typeof body.url === 'string' ? body.url.trim() : ''

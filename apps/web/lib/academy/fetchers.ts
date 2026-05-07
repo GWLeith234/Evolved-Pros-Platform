@@ -21,14 +21,21 @@ export async function fetchCoursesWithProgress(
     ? fetchUserProfile(supabase, userId).then(p => p?.tier ?? null)
     : Promise.resolve(userTier ?? null)
 
-  const [{ data: courses }, resolvedTier] = await Promise.all([
-    supabase
+  // Pull courses through adminClient too. The SSR client respects RLS on
+  // public.courses, which has bitten us before when a session arrives at
+  // an RSC stream without the cookie threaded through (e.g. prefetch
+  // races). adminClient is consistent with how lessons are fetched a few
+  // lines below, so the IDs we filter on are guaranteed to come from the
+  // same scope.
+  const [coursesResult, resolvedTier] = await Promise.all([
+    adminClient
       .from('courses')
       .select('id, pillar_number, slug, title, description, required_tier, is_published, sort_order')
       .eq('is_published', true)
       .order('sort_order'),
     tierPromise,
   ])
+  const courses = coursesResult.data
   const profile = { tier: resolvedTier }
 
   if (!courses?.length) return []
@@ -39,33 +46,49 @@ export async function fetchCoursesWithProgress(
   // `auth.role() = 'authenticated' AND is_published = TRUE` lessons RLS).
   //
   // No is_published filter on the count: the course-level is_published
-  // flag (line 24 above) already controls whether a course shows up in
-  // the catalog. Counting only published lessons hid every course whose
+  // flag above already controls whether a course shows up in the
+  // catalog. Counting only published lessons hid every course whose
   // rows had is_published=false in the live DB — the academy grid then
   // rendered "Lessons coming soon" everywhere even when lessons existed.
   // Per-lesson access is still gated on the lesson detail page (which
   // applies its own filter), so unpublished rows don't leak through.
-  let { data: lessons } = await adminClient
+  const lessonsResult = await adminClient
     .from('lessons')
     .select('id, course_id, updated_at')
     .in('course_id', courseIds)
 
-  // Diagnostic + fallback: if SUPABASE_SERVICE_ROLE_KEY is unset in the
-  // runtime environment, adminClient queries return empty silently. Retry
-  // through the SSR client (RLS-bound, but at least published rows come
-  // through) so the academy grid never lies about lesson counts.
-  if (!lessons || lessons.length === 0) {
-    const keyPrefix = process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 8)
+  // We need to distinguish "fetch failed / RLS shadow / missing service
+  // key" from "course has zero lessons." The card fallback should only
+  // kick in for the former — a real empty course should render "0
+  // lessons" (or the bar) so the gap is visible to the team. Track that
+  // signal with `lessonsFetchFailed` and surface it as a null on the
+  // card so the UI can render "—" / "coming soon" only when warranted.
+  let lessons = lessonsResult.data ?? []
+  let lessonsFetchFailed = false
+
+  if (lessonsResult.error) {
     console.warn(
-      '[academy.fetchCoursesWithProgress] adminClient lessons returned 0 — falling back to RLS-bound client. SUPABASE_SERVICE_ROLE_KEY prefix=',
-      keyPrefix ? `${keyPrefix}…` : 'MISSING',
+      '[academy.fetchCoursesWithProgress] adminClient lessons error:',
+      lessonsResult.error.message,
     )
+    lessonsFetchFailed = true
+  } else if (lessons.length === 0) {
+    // Could be a genuinely empty DB. Probe the SSR client as a
+    // tie-breaker; if that also returns 0 across the board, treat it as
+    // a real "no lessons yet" state. If it returns rows, adminClient
+    // hit a service-role config issue and we should mark the count
+    // null per-course.
     const fallback = await supabase
       .from('lessons')
       .select('id, course_id, updated_at')
-      .eq('is_published', true)
       .in('course_id', courseIds)
-    lessons = fallback.data ?? []
+    if ((fallback.data?.length ?? 0) > 0) {
+      console.warn(
+        '[academy.fetchCoursesWithProgress] adminClient returned 0 but SSR client returned rows. Check SUPABASE_SERVICE_ROLE_KEY.',
+      )
+      lessons = fallback.data ?? []
+      lessonsFetchFailed = true
+    }
   }
 
   // Fetch completed progress for this user — adminClient because
@@ -86,9 +109,12 @@ export async function fetchCoursesWithProgress(
 
   return courses.map(course => {
     const courseLessons = (lessons ?? []).filter(l => l.course_id === course.id)
-    const total = courseLessons.length
     const completed = courseLessons.filter(l => completedSet.has(l.id)).length
-    const pct = total > 0 ? Math.round((completed / total) * 100) : 0
+    // total === null means the lesson fetch failed (RLS / missing
+    // service-role key). The card layer uses null to differentiate that
+    // from a genuinely empty course (total === 0).
+    const total: number | null = lessonsFetchFailed && courseLessons.length === 0 ? null : courseLessons.length
+    const pct = total !== null && total > 0 ? Math.round((completed / total) * 100) : 0
 
     // Find last activity from progress records for this course's lessons
     const courseLessonIds = new Set(courseLessons.map(l => l.id))

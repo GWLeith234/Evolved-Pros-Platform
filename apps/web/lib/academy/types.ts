@@ -7,7 +7,7 @@ export type CourseWithProgress = {
   requiredTier: 'community' | 'vip' | 'pro'
   isPublished: boolean
   sortOrder: number
-  totalLessons: number
+  totalLessons: number | null
   completedLessons: number
   progressPct: number
   lastActivityAt: string | null

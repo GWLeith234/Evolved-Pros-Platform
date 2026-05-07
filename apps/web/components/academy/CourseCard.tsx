@@ -147,7 +147,11 @@ export function CourseCard({ course, isLocked, userTier }: CourseCardProps) {
               Upgrade
             </a>
           </div>
-        ) : course.totalLessons === 0 ? (
+        ) : course.totalLessons === null ? (
+          // null only when the fetcher couldn't read the lessons table at
+          // all (RLS shadow / missing service-role key). A genuinely empty
+          // course renders the regular "0 lessons" pill below so the gap
+          // is visible to admins instead of looking like a fetch failure.
           <p className="font-condensed text-[11px]" style={{ color: 'rgba(255,255,255,0.50)' }}>
             Lessons coming soon
           </p>
