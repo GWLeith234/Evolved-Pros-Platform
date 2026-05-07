@@ -295,9 +295,9 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                       key={t} type="button" onClick={() => setTier(t)}
                       className="flex-1 py-2 rounded font-condensed font-bold uppercase tracking-[0.1em] text-[10px] transition-all"
                       style={{
-                        backgroundColor: tier === t ? (t === 'pro' ? 'rgba(201,168,76,0.1)' : 'rgba(27,60,90,0.06)') : 'transparent',
-                        border: `1.5px solid ${tier === t ? (t === 'pro' ? '#c9a84c' : '#1b3c5a') : 'rgba(27,60,90,0.12)'}`,
-                        color: tier === t ? (t === 'pro' ? '#a07c1e' : '#1b3c5a') : '#7a8a96',
+                        backgroundColor: tier === t ? (t === 'pro' ? 'rgba(201,48,42,0.1)' : 'rgba(201,168,76,0.1)') : 'transparent',
+                        border: `1.5px solid ${tier === t ? (t === 'pro' ? '#C9302A' : '#c9a84c') : 'rgba(27,60,90,0.12)'}`,
+                        color: tier === t ? (t === 'pro' ? '#C9302A' : '#a07c1e') : '#7a8a96',
                       }}
                     >
                       {t === 'pro' ? 'Professional' : 'VIP'}

@@ -20,11 +20,11 @@ const BADGE_CONFIG = {
     ),
   },
   vip: {
-    background: '#0ABFA3',
+    background: '#C9A84C',
     border: '1px solid rgba(0,0,0,0.1)',
     color: '#ffffff',
     borderRadius: '20px',
-    boxShadow: '0 2px 8px rgba(10,191,163,0.35)',
+    boxShadow: '0 2px 8px rgba(201,168,76,0.35)',
     label: 'VIP MEMBER',
     icon: (size: number) => (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="white" stroke="none">
@@ -33,11 +33,11 @@ const BADGE_CONFIG = {
     ),
   },
   pro: {
-    background: '#C9A84C',
+    background: '#C9302A',
     border: '1px solid rgba(0,0,0,0.1)',
     color: '#ffffff',
     borderRadius: '20px',
-    boxShadow: '0 2px 8px rgba(201,168,76,0.35)',
+    boxShadow: '0 2px 8px rgba(201,48,42,0.35)',
     label: 'PROFESSIONAL',
     icon: (size: number) => (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="white" stroke="none">

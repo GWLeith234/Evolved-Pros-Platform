@@ -139,8 +139,8 @@ export function MemberDirectoryModal({ onClose }: MemberDirectoryModalProps) {
           ) : (
             members.map(member => {
               const avatarBg = getAvatarColor(member.id)
-              const tierColor = member.tier === 'pro' ? '#c9a84c' : '#68a2b9'
-              const tierBorder = member.tier === 'pro' ? 'rgba(201,168,76,0.3)' : 'rgba(104,162,185,0.3)'
+              const tierColor = member.tier === 'pro' ? '#C9302A' : member.tier === 'vip' ? '#C9A84C' : '#68a2b9'
+              const tierBorder = member.tier === 'pro' ? 'rgba(201,48,42,0.3)' : member.tier === 'vip' ? 'rgba(201,168,76,0.3)' : 'rgba(104,162,185,0.3)'
 
               return (
                 <Link
