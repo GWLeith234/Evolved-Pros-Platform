@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { CountdownTimer } from './CountdownTimer'
 
@@ -388,11 +389,12 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             }}
           >
             {event.host_avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={event.host_avatar_url}
                 alt=""
                 aria-hidden="true"
+                width={36}
+                height={36}
                 className="ch-host-avatar"
                 style={{
                   width: 36,

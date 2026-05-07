@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 
 const MOODS = ['Professional', 'Energetic', 'Intimate', 'Epic', 'Tech-Forward', 'Community'] as const
 type Mood = typeof MOODS[number]
@@ -124,11 +125,11 @@ export function EventImageGenerator({ eventTitle, onSelect }: EventImageGenerato
                   outlineOffset: '2px',
                 }}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={url}
                   alt={`Variant ${i + 1}`}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                 />
                 {selected === url && (
                   <div

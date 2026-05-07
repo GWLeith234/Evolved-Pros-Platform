@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/Button'
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import type { EventItem } from '@/lib/events/types'
 import { formatEventDate, EVENT_TYPE_LABELS, EVENT_TYPE_STYLES } from '@/lib/events/types'
@@ -101,11 +102,11 @@ function EventGridCard({ event, isRegistered, canRegister, onRegister, onUnregis
       {/* 16:9 image area */}
       <div className="relative w-full aspect-video overflow-hidden">
         {event.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={event.imageUrl}
             alt={event.title}
-            className="absolute inset-0 w-full h-full object-cover"
+            fill
+            className="object-cover"
           />
         ) : (
           <div

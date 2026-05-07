@@ -137,8 +137,7 @@ function IdentityTab({ settings }: { settings: Record<string, string> }) {
             <p className="font-condensed font-semibold uppercase text-[11px] tracking-wide mb-2" style={{ color: '#7a8a96' }}>Dark Logo (nav/dark bg)</p>
             <div className="rounded flex items-center justify-center mb-2" style={{ backgroundColor: '#112535', width: '180px', height: '60px' }}>
               {logoDark ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={logoDark} alt="Dark logo" style={{ height: '36px', width: 'auto', maxWidth: '160px', objectFit: 'contain' }} />
+                <Image src={logoDark} alt="Dark logo" width={160} height={36} style={{ height: '36px', width: 'auto', maxWidth: '160px', objectFit: 'contain' }} />
               ) : (
                 <span className="font-condensed font-bold text-white text-sm tracking-[0.14em]">EVOLVED·PROS</span>
               )}
@@ -156,8 +155,7 @@ function IdentityTab({ settings }: { settings: Record<string, string> }) {
             <p className="font-condensed font-semibold uppercase text-[11px] tracking-wide mb-2" style={{ color: '#7a8a96' }}>Light Logo (light backgrounds)</p>
             <div className="rounded flex items-center justify-center mb-2" style={{ backgroundColor: '#f0f4f7', width: '180px', height: '60px', border: '1px solid rgba(27,60,90,0.1)' }}>
               {logoLight ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={logoLight} alt="Light logo" style={{ height: '36px', width: 'auto', maxWidth: '160px', objectFit: 'contain' }} />
+                <Image src={logoLight} alt="Light logo" width={160} height={36} style={{ height: '36px', width: 'auto', maxWidth: '160px', objectFit: 'contain' }} />
               ) : (
                 <span className="font-condensed font-bold text-[#112535] text-sm tracking-[0.14em]">EVOLVED·PROS</span>
               )}
@@ -393,10 +391,9 @@ function AdsTab({ initialAds, settings }: { initialAds: Ad[]; settings: Record<s
                 style={{ borderBottom: i < ads.length - 1 ? '1px solid rgba(27,60,90,0.08)' : 'none' }}
               >
                 {/* Thumbnail */}
-                <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0" style={{ backgroundColor: '#f0f4f7' }}>
+                <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0" style={{ backgroundColor: '#f0f4f7', position: 'relative' }}>
                   {ad.image_url && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={ad.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <Image src={ad.image_url} alt="" fill style={{ objectFit: 'cover' }} />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -471,8 +468,7 @@ function AdsTab({ initialAds, settings }: { initialAds: Ad[]; settings: Record<s
                 <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
               </label>
               {newAd.image_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={newAd.image_url} alt="" style={{ height: '60px', marginTop: '8px', borderRadius: '4px', objectFit: 'cover' }} />
+                <Image src={newAd.image_url} alt="" width={120} height={60} style={{ height: '60px', width: 'auto', marginTop: '8px', borderRadius: '4px', objectFit: 'cover' }} />
               )}
             </div>
             <div>
@@ -759,8 +755,9 @@ function BannersTab({ initialBanners }: { initialBanners: Banner[] }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
         {banners.map(banner => (
           <div key={banner.id} style={{ border: '1px solid rgba(27,60,90,0.1)', borderRadius: '8px', overflow: 'hidden' }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={banner.image_url} alt={banner.title ?? ''} style={{ width: '100%', height: '80px', objectFit: 'cover', display: 'block' }} />
+            <div style={{ position: 'relative', width: '100%', height: '80px' }}>
+              <Image src={banner.image_url} alt={banner.title ?? ''} fill style={{ objectFit: 'cover', display: 'block' }} />
+            </div>
             <div className="px-3 py-2 flex items-center justify-between">
               <div>
                 {banner.pillar && <p className="font-condensed font-bold text-[10px] uppercase tracking-wide" style={{ color: '#68a2b9' }}>Pillar {banner.pillar}</p>}
@@ -824,8 +821,7 @@ function BannersTab({ initialBanners }: { initialBanners: Banner[] }) {
               }} />
             </label>
             {newImage && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={newImage} alt="" style={{ height: '60px', marginTop: '8px', borderRadius: '4px', objectFit: 'cover' }} />
+              <Image src={newImage} alt="" width={120} height={60} style={{ height: '60px', width: 'auto', marginTop: '8px', borderRadius: '4px', objectFit: 'cover' }} />
             )}
           </div>
           <button

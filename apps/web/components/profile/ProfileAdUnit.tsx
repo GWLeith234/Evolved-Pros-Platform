@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 interface Ad {
   headline?: string | null
   tool_name?: string | null
@@ -61,8 +63,7 @@ export function ProfileAdUnit({ ad }: ProfileAdUnitProps) {
         }}
       >
         {ad.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={ad.image_url} alt={label} style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }} />
+          <Image src={ad.image_url} alt={label} width={40} height={40} style={{ width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover' }} />
         ) : (
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2"/>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 
 type Zone = 'A' | 'B' | 'C' | 'D'
@@ -53,12 +54,14 @@ export function MediaAdZone({ zone }: MediaAdZoneProps) {
       >
         Advertisement
       </p>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={ad.image_url}
         alt={ad.headline ?? ad.sponsor_name ?? 'Ad'}
+        width={300}
+        height={250}
         style={{
           width: '100%',
+          height: 'auto',
           borderRadius: '4px',
           display: 'block',
         }}

@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import type { CommunityAd } from '@/lib/community/types'
 
 interface FeedAdUnitProps {
@@ -54,8 +55,7 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
         }}
       >
         {ad.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={ad.image_url} alt={label} style={{ width: '36px', height: '36px', objectFit: 'cover' }} />
+          <Image src={ad.image_url} alt={label} width={36} height={36} style={{ width: '36px', height: '36px', objectFit: 'cover' }} />
         ) : (
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2"/>

@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
@@ -117,10 +118,11 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
             className="rounded-full"
             style={{ width: '32px', height: '4px', backgroundColor: 'rgba(255,255,255,0.2)' }}
           />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={isDark ? LOGO_CIRCLE_DARK : LOGO_CIRCLE_LIGHT}
             alt="Evolved Pros"
+            width={32}
+            height={32}
             style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'contain' }}
           />
         </div>

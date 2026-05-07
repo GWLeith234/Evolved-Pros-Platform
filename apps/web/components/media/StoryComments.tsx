@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
@@ -32,10 +33,11 @@ function timeAgo(iso: string): string {
 function AvatarCircle({ name, url, color }: { name: string; url: string | null; color: string }) {
   if (url) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      <Image
         src={url}
         alt={name}
+        width={32}
+        height={32}
         className="rounded-full object-cover"
         style={{ width: 32, height: 32 }}
       />

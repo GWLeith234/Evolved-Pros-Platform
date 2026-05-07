@@ -1,5 +1,6 @@
 import { adminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
@@ -84,8 +85,7 @@ export default async function AdminPartnersPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {s.logo_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={s.logo_url} alt={s.name} style={{ width: 28, height: 28, objectFit: 'contain', background: '#fff', borderRadius: 4, border: '1px solid rgba(27,60,90,0.08)' }} />
+                          <Image src={s.logo_url} alt={s.name} width={28} height={28} style={{ width: 28, height: 28, objectFit: 'contain', background: '#fff', borderRadius: 4, border: '1px solid rgba(27,60,90,0.08)' }} />
                         ) : (
                           <div
                             style={{

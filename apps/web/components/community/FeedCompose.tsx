@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
 import { getAvatarColor } from '@/lib/community/types'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
@@ -190,10 +191,11 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
           style={{ backgroundColor: currentUser.avatarUrl ? undefined : avatarBg }}
         >
           {currentUser.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={currentUser.avatarUrl}
               alt={currentUser.displayName ?? ''}
+              width={36}
+              height={36}
               className="w-9 h-9 rounded-full object-cover"
             />
           ) : (

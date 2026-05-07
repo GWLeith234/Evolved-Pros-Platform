@@ -126,15 +126,15 @@ function AdCard({ ad }: { ad: CommunityAd }) {
   const inner = (
     <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.1)' }}>
       {ad.image_url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={ad.image_url}
-          alt={label}
-          loading="lazy"
-          decoding="async"
-          className="w-full object-cover"
-          style={{ aspectRatio: '4/3' }}
-        />
+        <div className="relative w-full" style={{ aspectRatio: '4/3' }}>
+          <Image
+            src={ad.image_url}
+            alt={label}
+            fill
+            decoding="async"
+            className="object-cover"
+          />
+        </div>
       ) : (
         <div
           className="w-full flex items-center justify-center"
@@ -175,22 +175,20 @@ function PodcastCard({ episode }: { episode: EpisodeSummary }) {
       {/* 16:9 image */}
       <div className="relative w-full rounded-t-lg overflow-hidden" style={{ aspectRatio: '16/9' }}>
         {episode.guest_image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={episode.guest_image_url}
             alt={`${episode.title} — guest`}
-            loading="lazy"
+            fill
             decoding="async"
-            className="w-full h-full object-cover object-top"
+            className="object-cover object-top"
           />
         ) : episode.thumbnail_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={episode.thumbnail_url}
             alt={`${episode.title} — episode thumbnail`}
-            loading="lazy"
+            fill
             decoding="async"
-            className="w-full h-full object-cover"
+            className="object-cover"
           />
         ) : (
           <div

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { Modal } from '@/components/ui/Modal'
 
@@ -89,12 +90,14 @@ export function BannerPickerModal({ userId, currentBannerUrl, onSave, onClose }:
                 textAlign: 'left',
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={banner.image_url}
-                alt={banner.label ?? banner.pillar ?? 'Profile banner option'}
-                style={{ width: '100%', height: '90px', objectFit: 'cover', display: 'block' }}
-              />
+              <div style={{ position: 'relative', width: '100%', height: '90px' }}>
+                <Image
+                  src={banner.image_url}
+                  alt={banner.label ?? banner.pillar ?? 'Profile banner option'}
+                  fill
+                  style={{ objectFit: 'cover', display: 'block' }}
+                />
+              </div>
               <p
                 className="font-condensed font-semibold text-[12px] px-2 py-1.5"
                 style={{ color: '#7a8a96' }}
@@ -134,12 +137,12 @@ export function BannerPickerModal({ userId, currentBannerUrl, onSave, onClose }:
             />
           </label>
           {selected && !banners.some(b => b.image_url === selected) && (
-            <div className="mt-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+            <div className="mt-3" style={{ position: 'relative', width: '100%', height: '80px' }}>
+              <Image
                 src={selected}
                 alt="Custom banner preview"
-                style={{ width: '100%', height: '80px', objectFit: 'cover', borderRadius: '6px' }}
+                fill
+                style={{ objectFit: 'cover', borderRadius: '6px' }}
               />
             </div>
           )}

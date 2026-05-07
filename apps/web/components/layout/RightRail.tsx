@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 
 interface Ad {
@@ -61,10 +62,11 @@ export function RightRail() {
     <>
       {/* 300×250 image slot */}
       {ad.image_url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={ad.image_url}
           alt={ad.sponsor_name ?? ad.headline ?? 'Ad'}
+          width={250}
+          height={208}
           style={{ width: '250px', height: '208px', objectFit: 'cover', display: 'block' }}
         />
       ) : (

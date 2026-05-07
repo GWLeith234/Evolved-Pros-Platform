@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
@@ -256,12 +257,14 @@ function SidebarAdUnit() {
     <>
       {/* Image */}
       {ad.image_url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={ad.image_url}
-          alt={ad.headline ?? 'Ad'}
-          style={{ width: '100%', height: '160px', objectFit: 'cover', display: 'block' }}
-        />
+        <div style={{ position: 'relative', width: '100%', height: '160px' }}>
+          <Image
+            src={ad.image_url}
+            alt={ad.headline ?? 'Ad'}
+            fill
+            style={{ objectFit: 'cover', display: 'block' }}
+          />
+        </div>
       ) : (
         <div style={{ width: '100%', height: '160px', backgroundColor: 'rgba(255,255,255,0.06)' }} />
       )}

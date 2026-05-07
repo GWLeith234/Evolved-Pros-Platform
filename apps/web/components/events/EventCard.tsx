@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { formatEventDate, formatDuration, EVENT_TYPE_LABELS } from '@/lib/events/types'
@@ -112,11 +113,11 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
       <Link href={`/events/${event.id}`} tabIndex={-1}>
         <div className="relative w-full overflow-hidden" style={{ height: '160px' }}>
           {event.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={event.imageUrl}
               alt={event.title}
-              className="absolute inset-0 w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
           ) : (
             <div className="absolute inset-0" style={{ background: gradient }} />

@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import Image from 'next/image'
 
 type Tab = 'upload' | 'stock' | 'generate'
 
@@ -38,12 +39,14 @@ export function ImagePicker({ value, onChange, label, uploadEndpoint }: ImagePic
       {value && (
         <div className="border-b border-[#1E2535] p-4">
           <div className="mb-2 text-xs uppercase tracking-wide text-slate-400">Current</div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={value}
-            alt="Current selection"
-            className="h-32 w-full rounded object-cover"
-          />
+          <div className="relative h-32 w-full">
+            <Image
+              src={value}
+              alt="Current selection"
+              fill
+              className="rounded object-cover"
+            />
+          </div>
         </div>
       )}
 
@@ -138,8 +141,9 @@ function UploadTab({ onChange, endpoint }: { onChange: (url: string) => void; en
       </button>
       {error && <p className="text-sm text-red-400">{error}</p>}
       {preview && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={preview} alt="Uploaded" className="h-40 w-full rounded object-cover" />
+        <div className="relative h-40 w-full">
+          <Image src={preview} alt="Uploaded" fill className="rounded object-cover" />
+        </div>
       )}
     </div>
   )
@@ -199,12 +203,14 @@ function StockTab({ onChange }: { onChange: (url: string) => void }) {
               onClick={() => onChange(photo.urls.regular)}
               className="group overflow-hidden rounded border border-[#1E2535] bg-[#0B1220] text-left hover:border-[#C9302A]"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={photo.urls.small}
-                alt={`Photo by ${photo.user.name}`}
-                className="h-24 w-full object-cover"
-              />
+              <div className="relative h-24 w-full">
+                <Image
+                  src={photo.urls.small}
+                  alt={`Photo by ${photo.user.name}`}
+                  fill
+                  className="object-cover"
+                />
+              </div>
               <div className="px-2 py-1 text-[11px] text-slate-400 group-hover:text-slate-200">
                 by {photo.user.name}
               </div>
@@ -309,8 +315,9 @@ function GenerateTab({ onChange }: { onChange: (url: string) => void }) {
 
       {generated && !busy && (
         <div className="space-y-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={generated} alt="Generated" className="w-full rounded object-cover" />
+          <div className="relative w-full" style={{ aspectRatio: '16/9' }}>
+            <Image src={generated} alt="Generated" fill className="rounded object-cover" />
+          </div>
           <button
             type="button"
             onClick={() => onChange(generated)}

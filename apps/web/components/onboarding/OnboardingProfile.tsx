@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 
 interface Props {
@@ -119,11 +120,11 @@ export function OnboardingProfile({ userId, onContinue }: Props) {
             justifyContent: 'center',
             padding: 0,
             flexShrink: 0,
+            position: 'relative',
           }}
         >
           {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatarUrl} alt="Avatar preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <Image src={avatarUrl} alt="Avatar preview" fill style={{ objectFit: 'cover' }} />
           ) : (
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>

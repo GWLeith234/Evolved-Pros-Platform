@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import type { MemberRow } from './MembersTable'
 
@@ -205,8 +206,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                   style={{ backgroundColor: '#1b3c5a' }}
                 >
                   {avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={avatarUrl} alt={name} className="w-14 h-14 rounded-full object-cover" />
+                    <Image src={avatarUrl} alt={name} width={56} height={56} className="w-14 h-14 rounded-full object-cover" />
                   ) : getInitials(name)}
                 </div>
                 <div className="flex-1">
@@ -237,8 +237,9 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
             <div>
               <label style={labelStyle}>Profile Banner</label>
               {bannerUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={bannerUrl} alt="Banner preview" className="w-full rounded-lg mb-2" style={{ height: '80px', objectFit: 'cover' }} />
+                <div className="relative w-full rounded-lg mb-2 overflow-hidden" style={{ height: '80px' }}>
+                  <Image src={bannerUrl} alt="Banner preview" fill style={{ objectFit: 'cover' }} />
+                </div>
               ) : (
                 <div className="w-full rounded-lg mb-2" style={{ height: '80px', background: 'linear-gradient(135deg, #112535 0%, #1b3c5a 100%)' }} />
               )}

@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 // Shared branded full-screen loading state used by route segment
 // loading.tsx files. Dark surface, pulsing logo mark, "EVOLVED PROS"
 // wordmark — kills the white-flash transitions.
@@ -18,8 +20,7 @@ export function BrandedLoading() {
       }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18 }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/logo_nav_dark.png"
           alt=""
           aria-hidden="true"

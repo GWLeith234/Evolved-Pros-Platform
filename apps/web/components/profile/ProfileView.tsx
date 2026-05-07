@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { ProfileStats } from './ProfileStats'
 import { SendMessageButton } from './SendMessageButton'
 
@@ -86,10 +87,11 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
             }}
           >
             {profile.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={profile.avatar_url}
                 alt={displayName}
+                width={128}
+                height={128}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             ) : (

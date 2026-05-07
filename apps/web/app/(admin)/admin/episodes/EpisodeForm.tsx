@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { ImagePicker } from '@/components/admin/ImagePicker'
 
@@ -523,10 +524,11 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
               {/* Preview */}
               {values.guestImageUrl && (
                 <div className="flex items-start gap-4 mb-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={values.guestImageUrl}
                     alt="Guest photo"
+                    width={80}
+                    height={80}
                     className="w-20 h-20 rounded-lg object-cover object-top flex-shrink-0"
                     style={{ border: '1px solid rgba(27,60,90,0.15)' }}
                   />

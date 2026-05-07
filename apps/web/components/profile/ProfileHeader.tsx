@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { MemberBadge } from '@/components/ui/MemberBadge'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { tierColor, tierColorRgba } from '@/lib/tier-color'
@@ -72,11 +73,11 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
       {/* Banner */}
       <div style={{ position: 'relative', height: '180px' }}>
         {user.banner_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={user.banner_url}
             alt="Profile banner"
-            style={{ width: '100%', height: '180px', objectFit: 'cover', display: 'block' }}
+            fill
+            style={{ objectFit: 'cover', display: 'block' }}
           />
         ) : (
           <div style={{ width: '100%', height: '180px', background: 'linear-gradient(135deg, #112535 0%, #1b3c5a 100%)' }} />
@@ -125,10 +126,11 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
               }}
             >
               {user.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={user.avatar_url}
                   alt={displayName}
+                  width={120}
+                  height={120}
                   style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '50%' }}
                 />
               ) : (

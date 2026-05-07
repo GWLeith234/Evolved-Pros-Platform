@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { getVendastaCrmUrl } from '@/lib/admin/utils'
 
@@ -180,8 +181,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
             style={{ backgroundColor: '#1b3c5a' }}
           >
             {member.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={member.avatarUrl} alt={name} className="w-14 h-14 rounded object-cover" />
+              <Image src={member.avatarUrl} alt={name} width={56} height={56} className="w-14 h-14 rounded object-cover" />
             ) : name[0]?.toUpperCase()}
           </div>
           <div>

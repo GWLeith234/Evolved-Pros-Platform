@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { ImagePicker } from '@/components/admin/ImagePicker'
 
 type Zone = 'A' | 'B' | 'C' | 'D'
@@ -491,10 +492,11 @@ function ZonePanel({
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {ad.image_url && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
+                          <Image
                             src={ad.image_url}
                             alt={ad.sponsor_name ?? 'Ad'}
+                            width={32}
+                            height={32}
                             className="w-8 h-8 rounded object-cover flex-shrink-0"
                           />
                         )}

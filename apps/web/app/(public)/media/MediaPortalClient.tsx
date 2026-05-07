@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { CategoryPills, CATEGORY_COLORS } from '@/components/media/CategoryPills'
 import { getPillarLabel } from '@/lib/pillars'
@@ -168,11 +169,11 @@ function FeaturedCard({ story }: { story: MediaStory }) {
       }}
     >
       {story.featured_image_url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={story.featured_image_url}
           alt=""
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          fill
+          style={{ objectFit: 'cover', display: 'block' }}
         />
       ) : (
         <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1A2540)' }} />
@@ -259,15 +260,14 @@ function ArticleCard({ story }: { story: MediaStory }) {
       }}
     >
       {/* Image — 4:3 */}
-      <div style={{ aspectRatio: '4/3', background: '#1B2A4A', overflow: 'hidden' }}>
+      <div style={{ aspectRatio: '4/3', background: '#1B2A4A', overflow: 'hidden', position: 'relative' }}>
         {story.featured_image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={story.featured_image_url}
             alt=""
-            loading="lazy"
+            fill
             decoding="async"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            style={{ objectFit: 'cover', display: 'block' }}
           />
         ) : (
           <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1A2540)' }} />
@@ -426,10 +426,9 @@ export function MediaPortalClient({
                 <div style={{ background: '#fff', border: '1px solid rgba(43,58,90,0.1)', borderTop: 'none' }}>
                   {sidebarStories.map(s => (
                     <Link key={s.id} href={storyUrl(s)} style={{ display: 'flex', alignItems: 'start', gap: 10, padding: '10px 12px', borderBottom: '1px solid rgba(43,58,90,0.06)', textDecoration: 'none' }}>
-                      <div style={{ width: 64, height: 48, borderRadius: 2, background: '#2B3A5A', overflow: 'hidden', flexShrink: 0 }}>
+                      <div style={{ width: 64, height: 48, borderRadius: 2, background: '#2B3A5A', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
                         {s.featured_image_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={s.featured_image_url} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                          <Image src={s.featured_image_url} alt="" fill style={{ objectFit: 'cover', display: 'block' }} />
                         ) : (
                           <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1A2540)' }} />
                         )}

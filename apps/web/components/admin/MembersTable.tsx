@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { getVendastaCrmUrl } from '@/lib/admin/utils'
 import type { EngagementLevel } from '@/lib/admin/utils'
@@ -164,8 +165,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                           style={{ backgroundColor: '#1b3c5a' }}
                         >
                           {m.avatarUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={m.avatarUrl} alt={name} className="w-7 h-7 rounded-full object-cover" />
+                            <Image src={m.avatarUrl} alt={name} width={28} height={28} className="w-7 h-7 rounded-full object-cover" />
                           ) : getInitials(name)}
                         </div>
                         <div>

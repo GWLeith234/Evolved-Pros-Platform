@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
 type Kind = 'update' | 'question' | 'win' | 'poll'
@@ -252,14 +253,15 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            position: 'relative',
           }}
         >
           {currentUser.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={currentUser.avatarUrl}
               alt=""
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              fill
+              style={{ objectFit: 'cover', display: 'block' }}
             />
           ) : (
             <span

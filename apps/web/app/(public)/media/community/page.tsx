@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { adminClient } from '@/lib/supabase/admin'
 import { PILLAR_LABELS } from '@/lib/community/types'
@@ -75,8 +76,7 @@ function PostCard({ post, blurred }: { post: PostRow; blurred?: boolean }) {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         {author?.avatar_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={author.avatar_url} alt={author.full_name ?? ''} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+          <Image src={author.avatar_url} alt={author.full_name ?? ''} width={32} height={32} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
         ) : (
           <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: '#fff', fontWeight: 700, fontFamily: 'var(--font-condensed)', flexShrink: 0 }}>
             {getInitials(author?.full_name ?? null)}

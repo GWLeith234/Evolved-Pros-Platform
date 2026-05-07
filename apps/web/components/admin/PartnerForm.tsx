@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
 const SURFACES = [
@@ -518,10 +519,11 @@ function PartnerPreview({ values }: { values: PartnerFormValues }) {
       <div className="p-5 space-y-3">
         <div className="flex items-center gap-3">
           {values.logo_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={values.logo_url}
               alt={values.name}
+              width={40}
+              height={40}
               style={{ width: 40, height: 40, objectFit: 'contain', background: '#fff', borderRadius: 4 }}
             />
           ) : (

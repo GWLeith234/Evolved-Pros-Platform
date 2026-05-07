@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
@@ -203,10 +204,11 @@ export function TopNav({
           }}
         >
           {activeLogoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={activeLogoUrl}
               alt="Evolved Pros"
+              width={160}
+              height={44}
               style={{ height: 44, width: 'auto', display: 'block' }}
             />
           ) : (
@@ -418,11 +420,11 @@ export function TopNav({
               onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
             >
               {profile.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={profile.avatar_url}
                   alt={displayName}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  fill
+                  style={{ objectFit: 'cover', display: 'block' }}
                 />
               ) : (
                 <span
@@ -475,14 +477,15 @@ export function TopNav({
                       overflow: 'hidden',
                       boxShadow: `0 0 0 2px ${tierRingColor(profile.tier)}`,
                       flexShrink: 0,
+                      position: 'relative',
                     }}
                   >
                     {profile.avatar_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <Image
                         src={profile.avatar_url}
                         alt=""
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        fill
+                        style={{ objectFit: 'cover' }}
                       />
                     ) : (
                       <span

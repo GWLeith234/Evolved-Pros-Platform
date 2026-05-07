@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -261,8 +262,9 @@ export function ImagePicker({
                       aspectRatio,
                     }}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.thumb} alt={p.credit} className="w-full h-full object-cover" />
+                    <div className="relative w-full" style={{ aspectRatio }}>
+                      <Image src={p.thumb} alt={p.credit} fill className="object-cover" />
+                    </div>
                     <p className="font-condensed text-[8px] px-1 py-0.5 truncate" style={{ color: 'rgba(255,255,255,0.35)' }}>
                       {p.credit}
                     </p>
@@ -327,8 +329,7 @@ export function ImagePicker({
                       aspectRatio,
                     }}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={url} alt={`AI generated ${i + 1}`} className="w-full h-full object-cover" />
+                    <Image src={url} alt={`AI generated ${i + 1}`} fill className="object-cover" />
                     <span
                       className="absolute top-1 left-1 font-condensed font-bold text-[7px] uppercase rounded px-1 py-0.5"
                       style={{ backgroundColor: `${PURPLE}cc`, color: '#fff' }}
@@ -387,10 +388,11 @@ export function ImagePicker({
         {/* ── Selected preview + confirm ────────────────────── */}
         {selected && activeTab !== 'upload' && (
           <div className="mt-3 flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={selected}
               alt="Selected"
+              width={48}
+              height={48}
               className="rounded object-cover flex-shrink-0"
               style={{ width: 48, height: 48, border: `2px solid ${GOLD}` }}
             />
