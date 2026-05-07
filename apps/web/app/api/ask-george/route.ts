@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-const WIDGET_ID = '96dd7dbb-2a14-11f1-93eb-72103b668f62'
-const VENDASTA_ORG_ID = 'C5L0'
+const WIDGET_ID = process.env.VENDASTA_WIDGET_ID!
+const VENDASTA_ORG_ID = process.env.VENDASTA_ORG_ID!
 const TOKEN_URL = 'https://sso-api.vendasta.com/openid/connect/token'
 const CHAT_URL = `https://prod.apigateway.co/org/${VENDASTA_ORG_ID}/aiAssistants/${WIDGET_ID}/chat`
 

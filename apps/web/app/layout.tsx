@@ -43,7 +43,7 @@ const merriweather = Merriweather({
   style: ['normal', 'italic'],
 })
 
-const LOGO_CIRCLE_DARK = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_circle_dark.png'
+const LOGO_CIRCLE_DARK = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Branding/logo_circle_dark.png`
 
 export const metadata: Metadata = {
   title:       'Evolved Pros — The Platform for High Performers',

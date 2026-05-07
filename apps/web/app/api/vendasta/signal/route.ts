@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { getVendastaToken } from '@/lib/vendasta/oauth'
 
-const VENDASTA_BASE = 'https://prod.apigateway.co/org/C5L0'
+const VENDASTA_BASE = `https://prod.apigateway.co/org/${process.env.VENDASTA_ORG_ID}`
 
 interface SignalBody {
   userId: string

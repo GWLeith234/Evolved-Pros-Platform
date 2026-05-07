@@ -11,6 +11,10 @@ export async function POST() {
   const guard = await requireAdminApi()
   if (guard instanceof Response) return guard
 
+  if (!process.env.ADMIN_SCHEDULER_EMAIL) {
+    return NextResponse.json({ error: 'ADMIN_SCHEDULER_EMAIL not set' }, { status: 500 })
+  }
+
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })
 
@@ -18,7 +22,7 @@ export async function POST() {
   const { data: george } = await adminClient
     .from('users')
     .select('id')
-    .eq('email', 'geoleith@gmail.com')
+    .eq('email', process.env.ADMIN_SCHEDULER_EMAIL!)
     .single()
   if (!george) return NextResponse.json({ error: 'George user not found' }, { status: 500 })
 

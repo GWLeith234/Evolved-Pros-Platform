@@ -5,7 +5,7 @@ export interface PillarConfig {
   label: string
 }
 
-const SUPABASE_BRANDING = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding'
+const SUPABASE_BRANDING = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Branding`
 
 export const PILLAR_CONFIG: Record<number, PillarConfig> = {
   1: { color: '#FFA538', colorMuted: 'rgba(255,165,56,0.12)',  image: `${SUPABASE_BRANDING}/pillar-1-foundation.jpg`,      label: 'Foundation' },
