@@ -214,16 +214,20 @@ export function TopNav({
           )}
         </Link>
 
-        {/* Nav — flex-grow centred. Was previously position:absolute / left:50%
-            which collided with the logo + right cluster at 800–1440px viewports.
-            Now it sits in the natural flow as `flex: 1` and centers its links via
-            `justifyContent: 'center'`. minWidth:0 lets it shrink rather than push
-            the right cluster off-screen on narrow viewports. */}
+        {/* Nav — flex-grow centred. `flex: 1 / minWidth: 0 / overflow: hidden`
+            keeps it from pushing the right cluster off-screen.
+            `hidden lg:flex` hides links entirely below 1024px (Tailwind lg)
+            because at 800–1100px there isn't room for all 7 + the right cluster
+            without the leftmost / rightmost links clipping behind the AI button
+            or avatar. Below 768px the BottomTabBar takes over; the 768–1023px
+            band falls back to logo + right-cluster only.
+            display:flex is set by `lg:flex` (intentionally NOT in inline style
+            so Tailwind's `hidden` can override it below the breakpoint). */}
         <nav
+          className="hidden lg:flex"
           style={{
             flex: 1,
             minWidth: 0,
-            display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 2,
