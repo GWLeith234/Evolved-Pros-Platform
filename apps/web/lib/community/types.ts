@@ -84,6 +84,7 @@ export type CommunityAd = {
   id: string
   image_url: string | null
   headline: string | null
+  body_copy: string | null
   tool_name: string | null
   cta_text: string | null
   link_url: string | null

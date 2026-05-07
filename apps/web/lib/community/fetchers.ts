@@ -278,7 +278,7 @@ export async function fetchActiveMembers(supabase: SB, limit = 5): Promise<Membe
 export async function fetchCommunityAds(): Promise<CommunityAd[]> {
   const { data } = await adminClient
     .from('platform_ads')
-    .select('id, image_url, headline, tool_name, cta_text, link_url, click_url, sponsor_name')
+    .select('id, image_url, headline, body_copy, tool_name, cta_text, link_url, click_url, sponsor_name')
     .eq('is_active', true)
     .order('sort_order')
     .limit(2)

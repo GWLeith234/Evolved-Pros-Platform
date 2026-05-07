@@ -147,6 +147,9 @@ function AdCard({ ad }: { ad: CommunityAd }) {
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <p className="font-condensed font-bold text-[12px] leading-tight truncate" style={{ color: '#112535' }}>{label}</p>
+            {ad.body_copy && (
+              <p className="font-condensed text-[11px] mt-0.5 leading-snug" style={{ color: '#7a8a96' }}>{ad.body_copy}</p>
+            )}
             <p className="font-condensed font-semibold text-[11px] mt-1" style={{ color: '#68a2b9' }}>{cta}</p>
           </div>
           <span
