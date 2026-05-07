@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { NotifDrawer } from './NotifDrawer'
 
 interface NotifBellProps {
@@ -29,34 +28,13 @@ export function NotifBell({ initialUnreadCount, userId }: NotifBellProps) {
     setUnreadCount(count)
   }, [])
 
+  // Poll every 30s instead of holding a Supabase Realtime WebSocket open.
+  // The persistent transport prevented the browser from reaching idle, which
+  // broke Lighthouse, Puppeteer, and any tool that waits on the `load` event.
   useEffect(() => {
-    const supabase = createClient()
-    const channel = supabase
-      .channel(`notif-bell-${userId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${userId}`,
-        },
-        () => setUnreadCount(c => c + 1),
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${userId}`,
-        },
-        () => { void refreshCount() },
-      )
-      .subscribe()
-
-    return () => { void supabase.removeChannel(channel) }
-  }, [userId, refreshCount])
+    const interval = setInterval(() => { void refreshCount() }, 30000)
+    return () => clearInterval(interval)
+  }, [refreshCount])
 
   return (
     <>
