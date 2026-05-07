@@ -236,8 +236,16 @@ export async function POST(request: Request) {
     .select('id, title')
 
   if (upsertError) {
-    console.error('[podcast/sync] upsert error:', upsertError)
-    return NextResponse.json({ error: upsertError.message }, { status: 500 })
+    // Never surface raw Postgres errors to the admin UI — they're
+    // unintelligible to the human clicking "Sync Podcast" and have leaked
+    // schema details before (e.g. the ON CONFLICT mismatch that prompted
+    // migration 046). Log the full error server-side; return a friendly
+    // generic message.
+    console.error('[podcast-sync] RSS upsert failed:', upsertError)
+    return NextResponse.json(
+      { error: 'Sync failed. Check server logs for details.' },
+      { status: 500 },
+    )
   }
 
   const insertedRows = (inserted ?? []) as Array<{ id: string; title: string }>
