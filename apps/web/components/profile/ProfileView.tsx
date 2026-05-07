@@ -72,6 +72,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
       <div className="px-6">
         {/* Avatar + name row, overlapping banner by -64px */}
         <div
+          className="profile-hero-row"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -116,7 +117,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
             )}
           </div>
 
-          <div style={{ flex: 1, paddingTop: '64px' }}>
+          <div className="profile-hero-name" style={{ flex: 1, paddingTop: '64px', minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               <h1
                 style={{
@@ -168,14 +169,15 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
             )}
           </div>
 
-          <div style={{ paddingTop: '64px', flexShrink: 0 }}>
+          <div className="profile-hero-cta" style={{ paddingTop: '64px', flexShrink: 0 }}>
             {isSelf ? (
               <a
                 href={`/profile/${profile.id}?edit=1`}
-                className="eop-btn"
+                className="eop-btn profile-hero-edit-btn"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   padding: '8px 16px',
                   borderRadius: '4px',
                   border: '1px solid #C9A84C',
@@ -196,6 +198,19 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
             )}
           </div>
         </div>
+
+        {/* Mobile (<640px): stack avatar/name/CTA vertically and let the
+            edit button span the row. The default flex-row layout puts the
+            avatar (128px), name, and gold CTA on one line, which clips off
+            the right edge of a 390px viewport. */}
+        <style>{`
+          @media (max-width: 639px) {
+            .profile-hero-row { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
+            .profile-hero-name { padding-top: 12px !important; }
+            .profile-hero-cta { padding-top: 0 !important; width: 100%; }
+            .profile-hero-edit-btn { width: 100%; }
+          }
+        `}</style>
 
         {/* Bio */}
         {profile.bio ? (

@@ -36,7 +36,7 @@ export default async function MemberLayout({ children }: { children: React.React
       }
       return (
         <ToastProvider>
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-screen overflow-x-hidden">
             <TopNav profile={profile} unreadCount={0} />
             <HideOnPodcast>
               <EpisodeBanner />
@@ -108,7 +108,11 @@ export default async function MemberLayout({ children }: { children: React.React
 
   return (
     <ToastProvider>
-      <div className="flex flex-col min-h-screen">
+      {/* overflow-x-hidden contains off-canvas drawers (NotifDrawer,
+          AskGeorgeDrawer) whose translateX(100%) state otherwise inflates
+          body.scrollWidth on mobile. Stays at the wrapper level so modals
+          and the page's own vertical scroll keep working. */}
+      <div className="flex flex-col min-h-screen overflow-x-hidden">
         <TopNav profile={profile} unreadCount={unreadCount ?? 0} logoUrl={logoUrl} logoLightUrl={logoLightUrl} membersCanToggleTheme={membersCanToggleTheme} />
         <EpisodeBanner />
         <NextEventBanner />
