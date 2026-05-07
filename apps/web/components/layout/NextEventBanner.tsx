@@ -7,11 +7,15 @@ import { createClient } from '@/lib/supabase/client'
 type NextEvent = { id: string; title: string; starts_at: string } | null
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', {
+  // timeZone: 'UTC' so the rendered string is deterministic regardless of the
+  // viewer's locale. starts_at is stored as ISO UTC; matches the EpisodeBanner
+  // formatter pattern. Keeps SSR/CSR text identical and avoids React #425.
+  return new Date(iso).toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
+    timeZone: 'UTC',
   })
 }
 
