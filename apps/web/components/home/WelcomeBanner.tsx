@@ -701,6 +701,7 @@ export function WelcomeBanner({
                 />
               </span>
               <span
+                suppressHydrationWarning
                 style={{
                   fontFamily: '"Barlow Condensed", sans-serif',
                   fontWeight: 800,
