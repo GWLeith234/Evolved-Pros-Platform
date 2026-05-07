@@ -3,13 +3,14 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { PostCardV2 } from './PostCardV2'
+import { PostReplyThread } from './PostReplyThread'
 import { DashboardStrip } from './DashboardStrip'
 import { FeedAdUnit } from './FeedAdUnit'
 import { CommunityPageHeader } from './CommunityPageHeader'
 import { Composer } from './Composer'
 import { FilterRail } from './FilterRail'
 import type { KindFilter, Pillar, SortBy } from './FilterRail'
-import type { Post, CommunityAd, WeeklyLeaderboardEntry } from '@/lib/community/types'
+import type { Post, Reply, CommunityAd, WeeklyLeaderboardEntry } from '@/lib/community/types'
 import type { DashboardStripProps } from './DashboardStrip'
 import { WeeklyLeaderboardRail } from './WeeklyLeaderboardRail'
 
@@ -62,6 +63,69 @@ export function UnifiedCommunityPage({
   const [activePillars, setActivePillars] = useState<Pillar[]>([])
   const [sortBy, setSortBy] = useState<SortBy>('newest')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+
+  // Inline reply thread — the comment icon on PostCardV2 calls
+  // onCommentClick(postId) which toggles expandedPostId; PostReplyThread
+  // renders directly below the matching card. Replies are lazy-loaded on
+  // first expand and cached so re-opening is instant.
+  const [expandedPostId, setExpandedPostId] = useState<string | null>(null)
+  const [repliesByPost, setRepliesByPost] = useState<Record<string, Reply[]>>({})
+  const [loadingRepliesFor, setLoadingRepliesFor] = useState<string | null>(null)
+
+  const handleCommentClick = useCallback((postId: string) => {
+    setExpandedPostId(prev => (prev === postId ? null : postId))
+  }, [])
+
+  // Fetch replies whenever a post is expanded for the first time. Posts that
+  // already have replies in the cache (or never had any per replyCount=0)
+  // skip the fetch.
+  useEffect(() => {
+    if (!expandedPostId) return
+    if (repliesByPost[expandedPostId] !== undefined) return
+    const post = posts.find(p => p.id === expandedPostId)
+    if (!post) return
+    if (post.replyCount === 0) {
+      setRepliesByPost(prev => ({ ...prev, [expandedPostId]: [] }))
+      return
+    }
+    let cancelled = false
+    setLoadingRepliesFor(expandedPostId)
+    void fetch(`/api/posts/${expandedPostId}/replies`)
+      .then(res => (res.ok ? res.json() as Promise<{ replies: Reply[] }> : { replies: [] as Reply[] }))
+      .then(data => {
+        if (cancelled) return
+        setRepliesByPost(prev => ({ ...prev, [expandedPostId]: data.replies ?? [] }))
+      })
+      .catch(() => {
+        if (cancelled) return
+        setRepliesByPost(prev => ({ ...prev, [expandedPostId]: [] }))
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingRepliesFor(prev => (prev === expandedPostId ? null : prev))
+      })
+    return () => { cancelled = true }
+  }, [expandedPostId, posts, repliesByPost])
+
+  // Submit handler for the inline composer inside PostReplyThread. Posts the
+  // reply, appends it to the local cache, and bumps the post's replyCount so
+  // the icon's number reflects the new state without a refetch.
+  const handleReplySubmit = useCallback(async (postId: string, body: string) => {
+    const res = await fetch(`/api/posts/${postId}/replies`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ body }),
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({})) as { error?: string }
+      throw new Error(data.error ?? 'Failed to reply')
+    }
+    const reply = await res.json() as Reply
+    setRepliesByPost(prev => ({
+      ...prev,
+      [postId]: [...(prev[postId] ?? []), reply],
+    }))
+    setPosts(prev => prev.map(p => p.id === postId ? { ...p, replyCount: (p.replyCount ?? 0) + 1 } : p))
+  }, [])
 
   // Realtime subscription — no channel filter (unified)
   useEffect(() => {
@@ -272,7 +336,41 @@ export function UnifiedCommunityPage({
                   <PostCardV2
                     post={post}
                     currentUserId={currentUser.id}
+                    onCommentClick={handleCommentClick}
                   />
+                  {/* Inline reply thread — renders directly under the card
+                      when its comment icon is clicked. Lives outside
+                      PostCardV2 so the card stays presentational. */}
+                  {expandedPostId === post.id && (
+                    <div
+                      style={{
+                        background: 'var(--bg-surface)',
+                        borderBottom: '1px solid var(--border-color)',
+                        padding: '0 24px 20px',
+                      }}
+                    >
+                      {loadingRepliesFor === post.id && repliesByPost[post.id] === undefined ? (
+                        <p
+                          className="font-condensed text-xs uppercase tracking-widest pl-4 pt-3"
+                          style={{ color: 'var(--text-tertiary)' }}
+                        >
+                          Loading…
+                        </p>
+                      ) : (
+                        <PostReplyThread
+                          postId={post.id}
+                          replies={repliesByPost[post.id] ?? []}
+                          totalReplies={post.replyCount ?? 0}
+                          currentUser={{
+                            id: currentUser.id,
+                            displayName: currentUser.displayName,
+                            avatarUrl: currentUser.avatarUrl,
+                          }}
+                          onReplySubmit={body => handleReplySubmit(post.id, body)}
+                        />
+                      )}
+                    </div>
+                  )}
                   {/* Inject ad after every 3rd post */}
                   {(index + 1) % 3 === 0 && ads.length > 0 && (
                     <FeedAdUnit ad={ads[Math.floor(index / 3) % ads.length]} />
