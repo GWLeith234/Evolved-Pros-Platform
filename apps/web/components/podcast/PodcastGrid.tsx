@@ -88,7 +88,7 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
             color: 'var(--podcast-text-3)',
           }}
         >
-          {filtered.length} episodes
+          {filtered.length} {filtered.length === 1 ? 'episode' : 'episodes'}
         </p>
       </header>
 

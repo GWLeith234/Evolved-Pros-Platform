@@ -114,7 +114,15 @@ export default async function MemberLayout({ children }: { children: React.React
           and the page's own vertical scroll keep working. */}
       <div className="flex flex-col min-h-screen overflow-x-hidden">
         <TopNav profile={profile} unreadCount={unreadCount ?? 0} logoUrl={logoUrl} logoLightUrl={logoLightUrl} membersCanToggleTheme={membersCanToggleTheme} />
-        <EpisodeBanner />
+        {/* /podcast renders its own page-level <PodcastLatestStrip/>; this
+            global EpisodeBanner would stack a second "LATEST EPISODE" bar
+            directly on top of it. HideOnPodcast hides the global one only on
+            /podcast/* — every other route keeps it. The dev-bypass branch
+            above already wraps EpisodeBanner the same way; this matches it
+            for the production path. */}
+        <HideOnPodcast>
+          <EpisodeBanner />
+        </HideOnPodcast>
         <NextEventBanner />
         <div className="flex flex-1 min-h-0">
           <main className="flex-1 overflow-y-auto pb-16 md:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>
