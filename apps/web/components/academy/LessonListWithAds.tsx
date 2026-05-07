@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Image from 'next/image'
 import { LessonItem } from './LessonItem'
 import { SponsorCard } from '@/components/ads/SponsorCard'
 import { useSponsorAd } from '@/hooks/useSponsorAd'
@@ -45,8 +46,7 @@ export function LessonListWithAds({ lessons, currentLessonId, courseSlug, accent
           )}
           {midQuoteIdx !== undefined && i === midQuoteIdx && quoteText && bannerUrl && (
             <div className="relative overflow-hidden my-1" style={{ height: '110px' }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={bannerUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <Image src={bannerUrl} alt="" fill className="object-cover" />
               <div
                 className="absolute inset-0"
                 style={{ background: 'linear-gradient(to right, rgba(10,15,24,0.88) 0%, rgba(10,15,24,0.6) 100%)' }}

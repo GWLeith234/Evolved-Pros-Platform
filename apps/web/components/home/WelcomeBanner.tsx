@@ -7,6 +7,7 @@
 // no page-level wiring change is needed.
 
 import { useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
 import { MarvelSkyScene, type MarvelScenePeriod } from './scenes/MarvelSkyScene'
 
 // ── Public props (v2 shape kept; new fields optional) ──────────────────────
@@ -411,13 +412,14 @@ export function WelcomeBanner({
                   borderRadius: '50%',
                   overflow: 'hidden',
                   boxShadow: '0 0 0 3px rgba(255,255,255,0.18), 0 0 0 5px rgba(0,0,0,0.4)',
+                  position: 'relative',
                 }}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={avatarUrl}
                   alt={displayName}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  fill
+                  style={{ objectFit: 'cover', display: 'block' }}
                 />
               </div>
             ) : (

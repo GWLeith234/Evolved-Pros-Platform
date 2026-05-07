@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 
 const CRIMSON = '#F87171'
 const GOLD = '#C9A84C'

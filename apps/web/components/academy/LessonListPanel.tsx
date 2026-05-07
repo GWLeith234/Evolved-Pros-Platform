@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { LessonListWithAds } from './LessonListWithAds'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
@@ -51,11 +52,11 @@ export function LessonListPanel({ course, lessons, currentLessonId, progressPct 
     <div style={{ backgroundColor: '#0a0f18' }}>
       {/* Hero banner */}
       <div ref={heroRef} className="relative w-full overflow-hidden aspect-[16/7]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={bannerUrl}
           alt={course.title}
-          className="absolute inset-0 w-full h-full object-cover"
+          fill
+          className="object-cover"
         />
         <div
           className="absolute inset-0"

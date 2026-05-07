@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import type { CourseWithProgress } from '@/lib/academy/types'
 import { Tooltip } from '@/components/ui/Tooltip'
@@ -69,12 +70,12 @@ export function CourseCard({ course, isLocked, userTier }: CourseCardProps) {
       }}
     >
       {/* Background pillar photo */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={imageUrl}
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover object-center"
+        fill
+        className="object-cover object-center"
       />
 
       {/* Dark gradient overlay — black/60 at bottom, transparent at top */}

@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 const LOGO = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_nav_light.png'
 
 interface Props {
@@ -11,11 +13,12 @@ export function OnboardingWelcome({ displayName, onContinue }: Props) {
   return (
     <div style={{ textAlign: 'center' }}>
       {/* Logo */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={LOGO}
         alt="Evolved Pros"
-        style={{ height: 32, marginBottom: 28, opacity: 0.9 }}
+        width={140}
+        height={32}
+        style={{ height: 32, width: 'auto', marginBottom: 28, opacity: 0.9, display: 'inline-block' }}
       />
 
       {/* Heading */}

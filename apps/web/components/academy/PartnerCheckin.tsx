@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 
 const GOLD  = '#C9A84C'
 const TEAL  = '#0ABFA3'
@@ -335,9 +336,11 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
         {/* Partner card */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '28px', padding: '14px 16px', backgroundColor: '#0A0F18', borderRadius: '6px', border: `1px solid ${GOLD}18` }}>
           {partner.avatar_url ? (
-            <img
+            <Image
               src={partner.avatar_url}
               alt={partnerDisplayName}
+              width={44}
+              height={44}
               style={{ width: '44px', height: '44px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
             />
           ) : (
