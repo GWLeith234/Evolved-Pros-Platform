@@ -30,6 +30,8 @@ export function PollCard({ poll, currentUserId, voteCounts: initialCounts = {}, 
   const [voteCounts, setVoteCounts] = useState(initialCounts)
   const [totalVotes, setTotalVotes] = useState(initialTotal)
   const [voting, setVoting] = useState(false)
+  // Defers Date comparison to client-only — keeps SSR initial render stable (#425)
+  const [isPastClose, setIsPastClose] = useState(false)
 
   const maxVotes = Math.max(...options.map(o => voteCounts[o.id] ?? 0), 1)
 
@@ -39,6 +41,12 @@ export function PollCard({ poll, currentUserId, voteCounts: initialCounts = {}, 
       setHasVoted(true)
     }
   }, [poll.id, currentUserId])
+
+  useEffect(() => {
+    if (poll.closes_at) {
+      setIsPastClose(new Date(poll.closes_at) < new Date())
+    }
+  }, [poll.closes_at])
 
   async function handleVote() {
     if (!selected || voting) return
@@ -60,7 +68,7 @@ export function PollCard({ poll, currentUserId, voteCounts: initialCounts = {}, 
     }
   }
 
-  const isClosed = poll.status === 'closed' || (poll.closes_at && new Date(poll.closes_at) < new Date())
+  const isClosed = poll.status === 'closed' || isPastClose
 
   return (
     <div style={{ marginTop: 8 }}>

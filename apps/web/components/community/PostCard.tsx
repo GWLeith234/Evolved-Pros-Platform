@@ -283,6 +283,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
           <p
             className="font-condensed font-semibold uppercase text-[10px] mt-0.5"
             style={{ color: isAnnounce ? 'rgba(255,255,255,0.4)' : (isLightCard || !isDark) ? 'rgba(27,60,90,0.5)' : '#7a8a96' }}
+            suppressHydrationWarning
           >
             <ClientTimeAgo dateStr={post.createdAt} />
           </p>

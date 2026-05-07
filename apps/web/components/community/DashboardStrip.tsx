@@ -198,10 +198,10 @@ export function DashboardStrip({ pillarProgress, episode, nextEvent, userRank, n
           }
           return (
             <Link href="/events" className="ep-strip-card" style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #200a0a, #180606)', border: '1px solid rgba(201,48,42,.3)' }}>
-              <p style={{ ...LABEL_STYLE, color: RED }}>{evtLabel}</p>
+              <p style={{ ...LABEL_STYLE, color: RED }} suppressHydrationWarning>{evtLabel}</p>
               <p style={HEADLINE_STYLE}>{nextEvent.title}</p>
               <p style={SUB_STYLE}>{formatEventDate(nextEvent.startsAt)}</p>
-              <p style={{ ...CTA_STYLE, color: CTA }}>{evtCta}</p>
+              <p style={{ ...CTA_STYLE, color: CTA }} suppressHydrationWarning>{evtCta}</p>
             </Link>
           )
         })()}

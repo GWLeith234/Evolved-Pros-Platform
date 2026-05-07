@@ -56,7 +56,7 @@ function ReplyItem({ reply }: { reply: Reply }) {
           <span className="font-body font-semibold text-[13px] text-[#1b3c5a]">
             {reply.author.displayName}
           </span>
-          <span className="font-condensed text-[10px] text-[#7a8a96]">
+          <span className="font-condensed text-[10px] text-[#7a8a96]" suppressHydrationWarning>
             {ago}
           </span>
         </div>

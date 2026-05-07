@@ -286,6 +286,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
                 color: 'var(--text-tertiary)',
                 textTransform: 'uppercase',
               }}
+              suppressHydrationWarning
             >
               <ClientTimeAgo dateStr={post.createdAt} />
             </span>
