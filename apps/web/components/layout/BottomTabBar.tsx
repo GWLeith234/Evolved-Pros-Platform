@@ -97,7 +97,7 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
   return (
     <>
       <nav
-        className="md:hidden flex items-stretch fixed bottom-0 left-0 right-0 z-50"
+        className="lg:hidden flex items-stretch fixed bottom-0 left-0 right-0 z-50"
         style={{
           backgroundColor: '#112535',
           borderTop: '1px solid rgba(255,255,255,0.08)',
