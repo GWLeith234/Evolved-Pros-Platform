@@ -19,6 +19,7 @@ import { AddGoalCTA } from '@/components/home/AddGoalCTA'
 import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
 import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStoriesTile'
 import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
+import { DailyPulseCard, type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/DailyPulseCard'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { hasTierAccess } from '@/lib/tier'
 
@@ -446,6 +447,60 @@ async function fetchLatestEpisodes(limit = 3): Promise<{ episodes: PulseEpisode[
   return { episodes: eps, latestNumber }
 }
 
+// HOME-DAILY-PULSE fetchers — habits and habit_completions both FK to
+// auth.users(id), so reads key on user.id (auth UID), not profile.id.
+
+async function fetchTodaysHabits(authUserId: string): Promise<DailyPulseHabit[]> {
+  const today = new Date().toISOString().split('T')[0]
+  const sixtyDaysAgo = new Date(Date.now() - 60 * 86_400_000).toISOString().split('T')[0]
+
+  const [habitsRes, completionsRes] = await Promise.all([
+    adminClient
+      .from('habits')
+      .select('id, name, pillar, sort_order')
+      .eq('user_id', authUserId)
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true }),
+    adminClient
+      .from('habit_completions')
+      .select('habit_id, completed_date')
+      .eq('user_id', authUserId)
+      .gte('completed_date', sixtyDaysAgo)
+      .not('habit_id', 'is', null),
+  ])
+
+  const completedToday = new Set<string>()
+  const recentCount: Record<string, number> = {}
+  for (const c of completionsRes.data ?? []) {
+    if (!c.habit_id) continue
+    recentCount[c.habit_id] = (recentCount[c.habit_id] ?? 0) + 1
+    if (c.completed_date === today) completedToday.add(c.habit_id)
+  }
+
+  return (habitsRes.data ?? []).map(h => ({
+    id: h.id,
+    name: h.name,
+    pillar: h.pillar,
+    completedToday: completedToday.has(h.id),
+    recentCount: recentCount[h.id] ?? 0,
+  }))
+}
+
+async function fetchWeekCommitments(authUserId: string, weekStart: string): Promise<DailyPulseCommitment[]> {
+  const { data } = await adminClient
+    .from('weekly_commitments')
+    .select('id, commitment, is_completed, week_start, created_at')
+    .eq('user_id', authUserId)
+    .eq('week_start', weekStart)
+    .order('created_at', { ascending: true })
+    .limit(2)
+  return (data ?? []).map(c => ({
+    id: c.id,
+    commitment: c.commitment,
+    is_completed: c.is_completed,
+  }))
+}
+
 export default async function MemberHomePage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -457,6 +512,8 @@ export default async function MemberHomePage() {
   const dayOfYear = Math.floor(
     (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
   )
+
+  const weekStart = getCurrentMonday()
 
   const [
     stats,
@@ -472,6 +529,9 @@ export default async function MemberHomePage() {
     topStories,
     latestEpisodesResult,
     quarterlyGoalsResult,
+    // HOME-DAILY-PULSE fetchers
+    dailyHabits,
+    weekCommitments,
   ] = await Promise.all([
     // MR-HOME-1: lesson_progress / member_badges store rows under
     // public.users.id, NOT auth.uid(). Pass profile.id (resolved via
@@ -497,6 +557,9 @@ export default async function MemberHomePage() {
       .eq('is_active', true)
       .order('created_at', { ascending: true })
       .limit(5),
+    // HOME-DAILY-PULSE — habits FK to auth.users(id), so key on user.id.
+    fetchTodaysHabits(user.id),
+    fetchWeekCommitments(user.id, weekStart),
   ])
 
   const quarterlyGoals = (quarterlyGoalsResult.data ?? []) as QuarterlyGoal[]
@@ -640,23 +703,15 @@ export default async function MemberHomePage() {
         pillars={pillars}
       />
 
-      {/* HOME tiles — Community Pulse / Top Stories / Latest Drops.
-          (Was a 4-up grid that left the 4th column empty because the
-          planned Daily Pulse tile never landed.) */}
+      {/* HOME tiles — Community Pulse / Top Stories / Latest Drops / Daily Pulse */}
       <div
-        className="home-4up-grid"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 16,
-          width: '100%',
-          maxWidth: 1440,
-          margin: '0 auto',
-        }}
+        className="home-4up-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4"
+        style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }}
       >
         <CommunityPulseTile posts={pulsePosts} pinnedEvent={pinnedLiveEvent} />
         <TopStoriesTile stories={topStories} />
         <PodcastReelTile episodes={latestEpisodesResult.episodes} latestEpisodeNumber={latestEpisodesResult.latestNumber} />
+        <DailyPulseCard habits={dailyHabits} commitments={weekCommitments} />
       </div>
 
       <ProfileCompletePrompt
