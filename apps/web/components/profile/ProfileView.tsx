@@ -10,12 +10,21 @@ interface ProfileViewData {
   role_title: string | null
   banner_url: string | null
   points: number
+  tier: string | null
   created_at: string
 }
 
 interface ProfileViewStats {
   posts: number
   badges: number[]
+  lessons: number
+}
+
+function tierBadgeColor(tier: string | null): string | null {
+  const t = tier?.toLowerCase()
+  if (t === 'vip') return '#C9A84C'
+  if (t === 'pro' || t === 'professional') return '#C9302A'
+  return null
 }
 
 interface ProfileViewProps {
@@ -37,6 +46,7 @@ function getInitials(profile: ProfileViewData): string {
 export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
   const displayName = profile.display_name ?? profile.full_name ?? 'Member'
   const banner = profile.banner_url ?? DEFAULT_BANNER
+  const tierColor = tierBadgeColor(profile.tier)
 
   return (
     <div style={{ backgroundColor: '#0A0F18', minHeight: '100%' }}>
@@ -107,18 +117,40 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
           </div>
 
           <div style={{ flex: 1, paddingTop: '64px' }}>
-            <h1
-              style={{
-                fontFamily: '"Playfair Display", Georgia, serif',
-                fontWeight: 700,
-                fontSize: '32px',
-                color: '#F5F0E8',
-                margin: 0,
-                lineHeight: 1.15,
-              }}
-            >
-              {displayName}
-            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <h1
+                style={{
+                  fontFamily: '"Playfair Display", Georgia, serif',
+                  fontWeight: 700,
+                  fontSize: '32px',
+                  color: '#F5F0E8',
+                  margin: 0,
+                  lineHeight: 1.15,
+                }}
+              >
+                {displayName}
+              </h1>
+              {tierColor && (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    padding: '3px 10px',
+                    borderRadius: '999px',
+                    border: `1px solid ${tierColor}`,
+                    backgroundColor: `${tierColor}22`,
+                    color: tierColor,
+                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontWeight: 700,
+                    fontSize: '11px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.16em',
+                  }}
+                >
+                  {profile.tier!.toLowerCase() === 'vip' ? 'VIP' : 'Pro'}
+                </span>
+              )}
+            </div>
             {profile.role_title && (
               <p
                 style={{
@@ -139,7 +171,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
           <div style={{ paddingTop: '64px', flexShrink: 0 }}>
             {isSelf ? (
               <a
-                href="/profile/me"
+                href={`/profile/${profile.id}?edit=1`}
                 className="eop-btn"
                 style={{
                   display: 'inline-flex',
@@ -191,8 +223,8 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
               color: '#7a8a96',
             }}
           >
-            <a href="/profile/me" style={{ color: '#7a8a96', textDecoration: 'underline' }}>
-              Add a bio from Settings →
+            <a href={`/profile/${profile.id}?edit=1`} style={{ color: '#7a8a96', textDecoration: 'underline' }}>
+              Add a bio →
             </a>
           </p>
         ) : null}
@@ -202,7 +234,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
           <ProfileStats
             posts={stats.posts}
             points={profile.points}
-            joined={profile.created_at}
+            lessons={stats.lessons}
             badges={stats.badges}
           />
         </div>
