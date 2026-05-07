@@ -78,11 +78,19 @@ export function NotifDrawer({ open, onClose, userId, onRead }: NotifDrawerProps)
 
   return (
     <>
+      {/* Outer stage clips the off-screen translateX(100%) panel so it can't
+          inflate body.scrollWidth (was the source of the 751-px overshoot at
+          390-px viewport). pointer-events:none keeps the stage from
+          intercepting clicks; the inner panel re-enables them. */}
+      <div
+        className="fixed top-14 right-0 bottom-0 z-[300] max-w-full overflow-hidden pointer-events-none"
+        style={{ width: '360px', maxWidth: '100%' }}
+        aria-hidden={!open}
+      >
       {/* Drawer */}
       <div
-        className="fixed top-14 right-0 bottom-0 z-[300] flex flex-col"
+        className="flex flex-col w-full h-full pointer-events-auto"
         style={{
-          width: '360px',
           backgroundColor: '#112535',
           borderLeft: '1px solid rgba(255,255,255,0.06)',
           transform: open ? 'translateX(0)' : 'translateX(100%)',
@@ -166,6 +174,7 @@ export function NotifDrawer({ open, onClose, userId, onRead }: NotifDrawerProps)
             </Link>
           </div>
         )}
+      </div>
       </div>
 
       {/* Backdrop */}

@@ -156,15 +156,23 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
       )}
 
       {/*
+        Outer stage: clips the off-screen panel so translateX(100%) can't widen
+        body.scrollWidth (was 751-px overshoot at 390-px viewport). Stage is
+        pointer-events:none so it never intercepts clicks even though it covers
+        the viewport — the inner panel re-enables them.
         Mobile (<md):  full 100vw, starts below TopNav (top-14 = 56px), fills remaining height
         Desktop (md+): 400px wide, anchored top-0, full 100vh
       */}
       <div
         className={[
-          'fixed right-0 z-50 flex flex-col',
+          'fixed right-0 z-50 max-w-full overflow-hidden pointer-events-none',
           'w-full top-14 h-[calc(100vh-56px)]',
           'md:w-[400px] md:top-0 md:h-screen',
         ].join(' ')}
+        aria-hidden={!isOpen}
+      >
+      <div
+        className="flex flex-col w-full h-full pointer-events-auto"
         style={{
           backgroundColor: '#0A0F18',
           borderLeft: '1px solid rgba(255,255,255,0.08)',
@@ -174,7 +182,6 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
           willChange: 'transform',
         }}
         aria-label="Ask George AI assistant"
-        aria-hidden={!isOpen}
       >
         {/* Header */}
         <div
@@ -452,6 +459,7 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
             </svg>
           </button>
         </div>
+      </div>
       </div>
     </>
   )

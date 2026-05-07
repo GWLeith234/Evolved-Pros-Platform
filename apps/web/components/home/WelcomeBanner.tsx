@@ -238,6 +238,7 @@ function ScoreCell({
   return (
     <a
       href={href}
+      className="ep-score-cell"
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       style={{
@@ -386,6 +387,15 @@ export function WelcomeBanner({
         background: '#0A0F18',
       }}
     >
+      {/* Mobile-only ScoreCell shrink: scoreboard cells default to padding 8/20
+          and minWidth:84 (4×84=336 + arch ≈ 398 → 7-px past 391-px viewport).
+          Below 640-px we drop horizontal padding and the floor so 4 cells fit
+          inside the 342-px content box (390 - 24-px page padding × 2). */}
+      <style>{`
+        @media (max-width: 639px) {
+          .ep-score-cell { padding: 8px 8px !important; min-width: 56px !important; }
+        }
+      `}</style>
       <MarvelSkyScene period={period} />
 
       <div
@@ -683,8 +693,12 @@ export function WelcomeBanner({
             </div>
           </div>
 
-          {/* Right: scoreboard + architecture column */}
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14 }}>
+          {/* Right: scoreboard + architecture column.
+              flexWrap + minWidth:0 lets the architecture column drop below the
+              scoreboard at narrow viewports instead of pushing the row 7-px
+              past 391-px (QA: stats row 398 vs 391). Desktop has slack so
+              wrap never triggers — no regression at 1564-px. */}
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, flexWrap: 'wrap', minWidth: 0 }}>
             <div
               style={{
                 position: 'relative',

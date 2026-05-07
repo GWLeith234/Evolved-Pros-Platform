@@ -100,7 +100,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ThemeInit defaultTheme={defaultTheme} />
       </head>
       <body
-        className="bg-navy-deep text-navy antialiased"
+        className="bg-navy-deep text-navy antialiased overflow-x-hidden"
         style={{ fontFamily: 'var(--font-body)' }}
       >
         {children}
