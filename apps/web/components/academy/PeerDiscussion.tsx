@@ -295,10 +295,11 @@ function PostCard({
     <div style={{ display: 'flex', gap: '10px' }}>
       {/* Avatar */}
       {post.author.avatar_url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={post.author.avatar_url}
           alt={name}
+          width={isReply ? 28 : 36}
+          height={isReply ? 28 : 36}
           style={{
             flexShrink: 0, width: isReply ? '28px' : '36px', height: isReply ? '28px' : '36px',
             borderRadius: '50%', objectFit: 'cover',

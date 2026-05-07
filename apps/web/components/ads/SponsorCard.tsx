@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+
 type SponsorAd = {
   id: string
   image_url: string | null
@@ -89,10 +91,11 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
 
         {/* Tool logo */}
         {ad.image_url && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={ad.image_url}
             alt={ad.tool_name ?? ''}
+            width={40}
+            height={40}
             style={{
               width: '40px',
               height: '40px',
@@ -161,10 +164,11 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
           </div>
 
           {ad.image_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={ad.image_url}
               alt={ad.tool_name ?? ''}
+              width={40}
+              height={40}
               style={{
                 width: '40px',
                 height: '40px',
@@ -249,10 +253,11 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
           </div>
 
           {ad.image_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={ad.image_url}
               alt={ad.tool_name ?? ''}
+              width={40}
+              height={40}
               style={{
                 width: '40px',
                 height: '40px',
