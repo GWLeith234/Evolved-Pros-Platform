@@ -388,7 +388,32 @@ export function WelcomeBanner({
     >
       <MarvelSkyScene period={period} />
 
+      {/* Mobile (<640px) responsive overrides — keeps the JSX otherwise
+          identical to the design ref while preventing overflow at 390px:
+          - tighter side padding,
+          - avatar shrinks so name + quote get real width,
+          - score cells wrap to a 2x2 grid instead of a 4-wide nowrap row,
+          - architecture column gets full row beneath the scoreboard. */}
+      <style>{`
+        @media (max-width: 639px) {
+          .welcome-banner-inner { padding: 20px 16px 16px !important; }
+          .welcome-banner-top { gap: 16px !important; }
+          .welcome-banner-top > div:first-child > div { width: 88px !important; height: 88px !important; }
+          .welcome-banner-top h1 { font-size: 26px !important; }
+          .welcome-banner-bottom { gap: 16px !important; margin-top: 20px !important; }
+          .welcome-banner-daterow { gap: 8px !important; }
+          .welcome-banner-right { width: 100%; gap: 16px !important; }
+          .welcome-banner-right > div { width: 100%; }
+          .welcome-banner-scoreboard { display: grid !important; grid-template-columns: 1fr 1fr; }
+          .welcome-banner-scoreboard > a { min-width: 0 !important; border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.08); }
+          .welcome-banner-scoreboard > a:nth-child(2) { border-bottom: 1px solid rgba(255,255,255,0.08); }
+          .welcome-banner-scoreboard > a:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.08) !important; }
+          .welcome-banner-scoreboard > a:nth-child(n+3) { border-bottom: none; }
+        }
+      `}</style>
+
       <div
+        className="welcome-banner-inner"
         style={{
           position: 'relative',
           zIndex: 2,
@@ -400,7 +425,7 @@ export function WelcomeBanner({
         }}
       >
         {/* Top row: avatar + greeting + quote */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 28 }}>
+        <div className="welcome-banner-top" style={{ display: 'flex', alignItems: 'flex-start', gap: 28 }}>
           {/* Avatar with chevron tier badge */}
           <div style={{ position: 'relative', flexShrink: 0 }}>
             {avatarUrl ? (
@@ -569,6 +594,7 @@ export function WelcomeBanner({
 
         {/* Bottom row: date · time · year countdown  +  scoreboard + architecture */}
         <div
+          className="welcome-banner-bottom"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -579,7 +605,10 @@ export function WelcomeBanner({
           }}
         >
           {/* Left: date · time · year countdown */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+          <div
+            className="welcome-banner-daterow"
+            style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0, flexWrap: 'wrap' }}
+          >
             <span
               style={{
                 fontFamily: '"Barlow Condensed", sans-serif',
@@ -684,7 +713,10 @@ export function WelcomeBanner({
           </div>
 
           {/* Right: scoreboard + architecture column */}
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14 }}>
+          <div
+            className="welcome-banner-right"
+            style={{ display: 'flex', alignItems: 'flex-end', gap: 14, flexWrap: 'wrap', minWidth: 0 }}
+          >
             <div
               style={{
                 position: 'relative',
@@ -708,6 +740,7 @@ export function WelcomeBanner({
                 This week
               </span>
               <div
+                className="welcome-banner-scoreboard"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'stretch',
