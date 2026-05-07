@@ -1,9 +1,10 @@
 import { adminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
+import { Suspense } from 'react'
 import Link from 'next/link'
 import { DynamicEpisodePlayer as EpisodePlayer } from '@/components/podcast/DynamicEpisodePlayer'
-import { TranscriptSection } from '@/components/podcast/TranscriptSection'
+import { TranscriptSection, TranscriptSkeleton } from '@/components/podcast/TranscriptSection'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,7 +39,6 @@ interface Episode {
   thumbnail_url: string | null
   duration_seconds: number | null
   published_at: string | null
-  transcript?: string | null
 }
 
 function formatDate(iso: string | null): string {
@@ -81,9 +81,12 @@ export default async function EpisodePage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  // Explicit column list (was `select('*')`) so the heavy `transcript` field
+  // doesn't ride along with the page's primary fetch — TranscriptSection
+  // streams it separately under its own Suspense boundary.
   const { data: episode } = await adminClient
     .from('episodes')
-    .select('*')
+    .select('id, episode_number, season, title, slug, description, guest_name, guest_title, guest_company, mux_playback_id, youtube_url, thumbnail_url, duration_seconds, published_at')
     .eq('slug', params.slug)
     .eq('is_published', true)
     .single()
@@ -226,9 +229,14 @@ export default async function EpisodePage({ params }: Props) {
           )}
         </div>
 
-        {/* Transcript */}
+        {/* Transcript — streams independently of the page shell. The
+            transcript column is the slowest field on `episodes`, so it now
+            ships under its own Suspense boundary; the rest of the page
+            paints first. */}
         <div className="mt-8">
-          <TranscriptSection transcript={(ep as { transcript?: string | null }).transcript ?? null} />
+          <Suspense fallback={<TranscriptSkeleton />}>
+            <TranscriptSection slug={params.slug} />
+          </Suspense>
         </div>
       </div>
     </main>
