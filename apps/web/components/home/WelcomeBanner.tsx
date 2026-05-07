@@ -394,7 +394,11 @@ export function WelcomeBanner({
           - avatar shrinks so name + quote get real width,
           - score cells wrap to a 2x2 grid instead of a 4-wide nowrap row,
           - architecture column gets full row beneath the scoreboard. */}
-      <style>{`
+      {/* suppressHydrationWarning: SSR CSS minification strips `!important`
+          declarations, while the client React tree keeps them as authored —
+          producing a #425 on this <style> tag. Safe to suppress: style-tag
+          contents are never user-visible text. */}
+      <style suppressHydrationWarning>{`
         @media (max-width: 639px) {
           .welcome-banner-inner { padding: 20px 16px 16px !important; }
           .welcome-banner-top { gap: 16px !important; }
