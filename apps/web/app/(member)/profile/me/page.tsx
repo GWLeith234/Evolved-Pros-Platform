@@ -2,7 +2,11 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 
-export default async function MyProfileRedirectPage() {
+export default async function MyProfileRedirectPage({
+  searchParams,
+}: {
+  searchParams?: Record<string, string | string[] | undefined>
+}) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -16,5 +20,17 @@ export default async function MyProfileRedirectPage() {
 
   if (!profile) redirect('/login')
 
-  redirect(`/profile/${profile.id}`)
+  const params = new URLSearchParams()
+  if (searchParams) {
+    for (const [key, value] of Object.entries(searchParams)) {
+      if (value === undefined) continue
+      if (Array.isArray(value)) {
+        for (const v of value) params.append(key, v)
+      } else {
+        params.append(key, value)
+      }
+    }
+  }
+  const qs = params.toString()
+  redirect(`/profile/${profile.id}${qs ? `?${qs}` : ''}`)
 }
