@@ -47,14 +47,18 @@ export function CategoryPills({ initialActive = ALL_LABEL, onSelect }: CategoryP
   return (
     <nav
       aria-label="Filter stories by category"
+      className="ed-category-pills"
       style={{
         maxWidth: 1280,
         margin: '0 auto',
-        padding: '20px 24px 0',
+        padding: '20px 16px 4px',
         display: 'flex',
-        flexWrap: 'wrap',
+        flexWrap: 'nowrap',
         alignItems: 'center',
         gap: 8,
+        overflowX: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        scrollbarWidth: 'none',
       }}
     >
       <Pill
@@ -72,6 +76,12 @@ export function CategoryPills({ initialActive = ALL_LABEL, onSelect }: CategoryP
           onClick={() => handleSelect(category)}
         />
       ))}
+      <style>{`
+        .ed-category-pills::-webkit-scrollbar { display: none; }
+        @media (min-width: 640px) {
+          .ed-category-pills { flex-wrap: wrap !important; overflow-x: visible !important; padding: 20px 24px 0 !important; }
+        }
+      `}</style>
     </nav>
   )
 }
@@ -108,6 +118,7 @@ function Pill({
         cursor: 'pointer',
         borderRadius: 0,
         whiteSpace: 'nowrap',
+        flexShrink: 0,
       }}
     >
       <span

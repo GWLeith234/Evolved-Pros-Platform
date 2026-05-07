@@ -35,56 +35,78 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
   })
 
   return (
-    <header style={{ background: 'var(--ed-bg)', borderBottom: '1px solid var(--ed-border)' }}>
-      {/* Date strip */}
+    <header style={{ background: 'var(--ed-bg)', borderBottom: '1px solid var(--ed-border)', maxWidth: '100%', overflowX: 'hidden' }}>
+      {/* Date strip — on mobile (< 640px) the date / Join Evolved Pros / issue
+          number get hidden so the row collapses to BACK TO PLATFORM +
+          Community/Events/Podcast/Live, which already crowded out at 390px. */}
       <div
         style={{
           maxWidth: 1280,
           margin: '0 auto',
-          padding: '14px 24px 0',
+          padding: '14px 16px 0',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 16,
+          gap: 12,
           fontFamily: '"Barlow Condensed", sans-serif',
           fontSize: 11,
           fontWeight: 500,
           letterSpacing: '0.22em',
           textTransform: 'uppercase',
           color: 'var(--ed-text-muted)',
+          flexWrap: 'nowrap',
         }}
       >
-        <span style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <span suppressHydrationWarning>{today}</span>
-          <span aria-hidden="true">·</span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
+          <span suppressHydrationWarning className="hidden sm:inline">{today}</span>
+          <span aria-hidden="true" className="hidden sm:inline">·</span>
           <Link
             href="/home"
             style={{ color: 'var(--ed-text)', textDecoration: 'none' }}
           >
             Back to platform
           </Link>
-          <span aria-hidden="true">·</span>
+          <span aria-hidden="true" className="hidden sm:inline">·</span>
           <Link
             href="/pricing"
+            className="hidden sm:inline"
             style={{ color: 'var(--ed-text)', textDecoration: 'none' }}
           >
             Join Evolved Pros
           </Link>
         </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <span>Issue {issueNumber}</span>
-          <span style={{ width: 1, height: 12, background: 'var(--ed-border)' }} />
+        <span
+          className="ed-network-links"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 14,
+            flexShrink: 1,
+            minWidth: 0,
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+          }}
+        >
+          <span className="hidden sm:inline">Issue {issueNumber}</span>
+          <span aria-hidden="true" className="hidden sm:inline" style={{ width: 1, height: 12, background: 'var(--ed-border)' }} />
           {NETWORK_LINKS.map(link => (
             <a
               key={link.href}
               href={link.href}
-              style={{ color: 'var(--ed-text)', textDecoration: 'none' }}
+              style={{ color: 'var(--ed-text)', textDecoration: 'none', flexShrink: 0 }}
             >
               {link.label}
             </a>
           ))}
         </span>
       </div>
+
+      {/* Hide horizontal scrollbar on the network-links strip without losing
+          the swipe gesture on touch devices. */}
+      <style>{`
+        .ed-network-links::-webkit-scrollbar { display: none; }
+      `}</style>
 
       {/* Masthead title */}
       <div

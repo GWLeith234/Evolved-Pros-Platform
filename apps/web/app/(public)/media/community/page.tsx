@@ -88,7 +88,7 @@ function PostCard({ post, blurred }: { post: PostRow; blurred?: boolean }) {
               {author?.full_name ?? 'Member'}
             </span>
             {author?.tier && (
-              <span style={{ fontSize: 8, fontWeight: 700, fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '1px 5px', borderRadius: 2, backgroundColor: author.tier === 'pro' ? 'rgba(201,168,76,0.12)' : 'rgba(104,162,185,0.12)', color: author.tier === 'pro' ? '#C9A84C' : '#68a2b9' }}>
+              <span style={{ fontSize: 8, fontWeight: 700, fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '1px 5px', borderRadius: 2, backgroundColor: author.tier === 'pro' ? 'rgba(201,48,42,0.12)' : author.tier === 'vip' ? 'rgba(201,168,76,0.12)' : 'rgba(104,162,185,0.12)', color: author.tier === 'pro' ? '#C9302A' : author.tier === 'vip' ? '#C9A84C' : '#68a2b9' }}>
                 {author.tier}
               </span>
             )}

@@ -155,7 +155,7 @@ export function MemberDirectoryClient() {
                   <div
                     className="h-1 w-full"
                     style={{
-                      backgroundColor: member.tier === 'pro' ? '#ef0e30' : '#68a2b9',
+                      backgroundColor: member.tier === 'pro' ? '#C9302A' : member.tier === 'vip' ? '#C9A84C' : '#68a2b9',
                     }}
                   />
 

@@ -57,14 +57,14 @@ function getInitials(name: string | null | undefined): string {
 }
 
 function tierRingColor(tier: string | null | undefined): string {
-  if (tier === 'pro') return 'rgba(201,168,76,0.85)'
-  if (tier === 'vip') return 'rgba(96,165,250,0.7)'
+  if (tier === 'pro') return 'rgba(201,48,42,0.85)'
+  if (tier === 'vip') return 'rgba(201,168,76,0.85)'
   return 'rgba(255,255,255,0.15)'
 }
 
 function tierLabelColor(tier: string | null | undefined, isLight: boolean): string {
-  if (tier === 'pro') return '#C9A84C'
-  if (tier === 'vip') return '#60A5FA'
+  if (tier === 'pro') return '#C9302A'
+  if (tier === 'vip') return '#C9A84C'
   return isLight ? 'rgba(27,42,74,0.5)' : 'rgba(255,255,255,0.4)'
 }
 
