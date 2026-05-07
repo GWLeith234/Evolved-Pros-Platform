@@ -19,11 +19,20 @@ export default async function EditEventPage({ params }: Props) {
   // causing false 404s when an admin opens an unpublished event.
   const { data: row } = await adminClient
     .from('events')
-    .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, image_url, required_tier, is_published')
+    .select('id, title, description, tagline, cta_text, pillar, event_type, starts_at, ends_at, zoom_url, recording_url, image_url, required_tier, tier_access, is_published')
     .eq('id', params.eventId)
     .single()
 
   if (!row) notFound()
+
+  // events.pillar is stored as an integer 1-6; the form's <select> uses the
+  // matching slug vocabulary (foundation/identity/…). Reverse-map for the
+  // initial value so existing events round-trip cleanly through the editor.
+  const PILLAR_NUMBER_TO_SLUG: Record<number, string> = {
+    1: 'foundation', 2: 'identity', 3: 'mental',
+    4: 'strategy',   5: 'accountability', 6: 'execution',
+  }
+  const pillarSlug = typeof row.pillar === 'number' ? PILLAR_NUMBER_TO_SLUG[row.pillar] ?? '' : ''
 
   return (
     <div className="px-8 py-6">
@@ -41,6 +50,9 @@ export default async function EditEventPage({ params }: Props) {
         initialValues={{
           title: row.title,
           description: row.description ?? '',
+          tagline: (row as { tagline?: string | null }).tagline ?? '',
+          ctaText: (row as { cta_text?: string | null }).cta_text ?? '',
+          pillar: pillarSlug,
           eventType: row.event_type as 'live' | 'virtual' | 'inperson',
           startsAt: row.starts_at,
           endsAt: row.ends_at ?? '',
@@ -48,6 +60,7 @@ export default async function EditEventPage({ params }: Props) {
           recordingUrl: row.recording_url ?? '',
           imageUrl: row.image_url ?? '',
           requiredTier: (row.required_tier as 'community' | 'vip' | 'pro' | '') ?? '',
+          tierAccess: ((row as { tier_access?: string }).tier_access as 'all' | 'vip' | 'pro' | undefined) ?? 'all',
           isPublished: row.is_published,
         }}
       />

@@ -164,19 +164,19 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
 
   async function handleDelete() {
     if (!eventId) return
-    if (!confirm('Delete this event? This cannot be undone.')) return
-    setSaving(true)
+    // Use window.confirm/alert explicitly so this works even in browser
+    // contexts that strip the global shorthand (e.g. some embed wrappers).
+    if (!window.confirm('Delete this event? This cannot be undone.')) return
     try {
       const res = await fetch(`/api/admin/events/${eventId}`, { method: 'DELETE' })
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error ?? 'Delete failed')
+      if (res.ok) {
+        router.push('/admin/events')
+        router.refresh()
+      } else {
+        window.alert('Delete failed — please try again')
       }
-      router.push('/admin/events')
-      router.refresh()
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Delete failed')
-      setSaving(false)
+    } catch {
+      window.alert('Delete failed — please try again')
     }
   }
 
