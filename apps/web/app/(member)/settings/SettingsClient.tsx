@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { EmailPrefsForm } from '@/components/notifications/EmailPrefsForm'
+import { useToast } from '@/lib/toast'
 
 type TriOption = 'immediate' | 'digest' | 'off'
 type BinOption = 'immediate' | 'off'
@@ -195,14 +196,13 @@ function MembershipTab({ tier, createdAt }: { tier: string | null; createdAt: st
 }
 
 function AccountTab({ userId, email, fullName }: { userId: string; email: string; fullName: string }) {
+  const { showToast } = useToast()
   const [name, setName] = useState(fullName)
   const [savingName, setSavingName] = useState(false)
   const [nameSaved, setNameSaved] = useState(false)
   const [nameError, setNameError] = useState<string | null>(null)
 
   const [resetting, setResetting] = useState(false)
-  const [resetMessage, setResetMessage] = useState<string | null>(null)
-  const [resetError, setResetError] = useState<string | null>(null)
 
   async function handleSaveName() {
     setSavingName(true)
@@ -229,17 +229,12 @@ function AccountTab({ userId, email, fullName }: { userId: string; email: string
 
   async function handlePasswordReset() {
     setResetting(true)
-    setResetError(null)
-    setResetMessage(null)
     try {
       const res = await fetch('/api/auth/reset-password', { method: 'POST' })
-      if (!res.ok) {
-        const data = (await res.json().catch(() => ({}))) as { error?: string }
-        throw new Error(data.error ?? 'Request failed')
-      }
-      setResetMessage('Check your inbox for a password reset link.')
-    } catch (e) {
-      setResetError(e instanceof Error ? e.message : 'Something went wrong')
+      if (!res.ok) throw new Error('reset-failed')
+      showToast('Check your inbox for a password reset link.', 'success')
+    } catch {
+      showToast('Something went wrong. Please try again.', 'error')
     } finally {
       setResetting(false)
     }
@@ -344,14 +339,6 @@ function AccountTab({ userId, email, fullName }: { userId: string; email: string
         >
           {resetting ? 'Sending...' : 'Change Password'}
         </button>
-        {resetMessage && (
-          <p className="font-condensed text-[11px] mt-3" style={{ color: '#68a2b9' }}>
-            {resetMessage}
-          </p>
-        )}
-        {resetError && (
-          <p className="font-condensed text-[11px] text-[#ef0e30] mt-3">{resetError}</p>
-        )}
       </div>
     </div>
   )
