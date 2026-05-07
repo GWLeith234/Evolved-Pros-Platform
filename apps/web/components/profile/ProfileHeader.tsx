@@ -51,8 +51,11 @@ function getInitials(name: string | null | undefined): string {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 }
 
+// timeZone: 'UTC' keeps the rendered string identical between Node SSR
+// (UTC default) and the browser (user-local), which otherwise flipped
+// "joined" by a month for users in negative-UTC zones (#425).
 function formatJoinDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' })
 }
 
 export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHeaderProps) {
