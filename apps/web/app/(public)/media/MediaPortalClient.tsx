@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { CategoryPills, CATEGORY_COLORS } from '@/components/media/CategoryPills'
 import { getPillarLabel } from '@/lib/pillars'
 import { PollWidget } from '@/components/media/PollWidget'
+import { MediaAdZone } from '@/components/media/MediaAdZone'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -453,19 +454,12 @@ export function MediaPortalClient({
 
             <PollWidget />
 
-            <div
-              style={{
-                marginTop: 16,
-                border: '1px dashed rgba(43,58,90,0.2)',
-                borderRadius: 2,
-                padding: '24px 12px',
-                textAlign: 'center',
-                background: 'rgba(255,255,255,0.5)',
-              }}
-            >
-              <span style={{ fontSize: 10, color: 'rgba(43,58,90,0.3)', fontFamily: '"Barlow Condensed", sans-serif', textTransform: 'uppercase', letterSpacing: '0.10em' }}>
-                Ad Zone B · 320×200
-              </span>
+            {/* Wired to platform_ads (zone='B', placements contains 'media').
+                MediaAdZone returns null when no active ad is assigned, so an
+                unfilled slot collapses cleanly instead of leaking a debug
+                placeholder into production. */}
+            <div style={{ marginTop: 16 }}>
+              <MediaAdZone zone="B" />
             </div>
           </aside>
         </div>
@@ -485,7 +479,7 @@ export function MediaPortalClient({
       {/* ── Section 3: Card grid ── */}
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 56px' }}>
         {grid.length > 0 ? (
-          <div className="media-card-grid">
+          <div className="media-card-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {grid.map(s => (
               <ArticleCard key={s.id} story={s} />
             ))}
@@ -501,24 +495,17 @@ export function MediaPortalClient({
         )}
       </div>
 
-      {/* Responsive + hover styles */}
+      {/* Responsive + hover styles. Grid columns are owned by the Tailwind
+          classes on the container (grid-cols-1 md:grid-cols-2 lg:grid-cols-3)
+          so the hero-only collapse rule is the last bit of bespoke CSS. */}
       <style>{`
-        .media-card-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 16px;
-        }
         .media-card { transform: translateZ(0); }
         .media-card:hover {
           transform: scale(1.02);
           box-shadow: 0 14px 30px rgba(27,42,74,0.12);
         }
-        @media (max-width: 1023px) {
-          .media-card-grid { grid-template-columns: repeat(2, 1fr); }
-        }
         @media (max-width: 767px) {
           .media-hero-grid { grid-template-columns: 1fr !important; }
-          .media-card-grid { grid-template-columns: 1fr; }
         }
         @media (prefers-reduced-motion: reduce) {
           .media-card:hover { transform: none; }

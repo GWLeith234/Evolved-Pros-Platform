@@ -5,6 +5,7 @@ import { marked } from 'marked'
 import { adminClient } from '@/lib/supabase/admin'
 import { getPillarLabel, getPillarColor } from '@/lib/pillars'
 import { StoryComments } from '@/components/media/StoryComments'
+import { MediaAdZone } from '@/components/media/MediaAdZone'
 import { ArticleShareBar } from './ArticleShareBar'
 
 export const revalidate = 3600
@@ -54,13 +55,17 @@ interface Episode {
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 async function fetchStory(pillar: string, slug: string): Promise<Story | null> {
-  const { data } = await adminClient
+  // Stories badged "ORIGINAL" land at /media/general/[slug] (the listing
+  // builds that URL from `story.pillar ?? 'general'`). The DB stores those
+  // rows as pillar IS NULL — match that explicitly so the route doesn't 404.
+  const query = adminClient
     .from('media_stories')
     .select('*')
-    .eq('pillar', pillar)
     .eq('slug', slug)
     .eq('is_published', true)
-    .single()
+  const { data } = pillar === 'general'
+    ? await query.is('pillar', null).maybeSingle()
+    : await query.eq('pillar', pillar).maybeSingle()
   return (data as Story | null)
 }
 
@@ -89,8 +94,9 @@ export async function generateStaticParams() {
     .select('pillar, slug')
     .eq('is_published', true)
   return (data ?? [])
-    .filter(s => s.pillar && s.slug)
-    .map(s => ({ pillar: String(s.pillar), slug: String(s.slug) }))
+    .filter(s => s.slug)
+    // null pillar → 'general' (the URL slug used for ORIGINAL-badged stories).
+    .map(s => ({ pillar: s.pillar ? String(s.pillar) : 'general', slug: String(s.slug) }))
 }
 
 // ── Metadata ────────────────────────────────────────────────────────────────
@@ -138,8 +144,9 @@ export default async function StoryPage({
 
   const minutes = readTime(story.body)
   const html = story.body ? await marked.parse(story.body) : ''
-  const pLabel = getPillarLabel(story.pillar)
-  const pColor = getPillarColor(story.pillar)
+  const isOriginal = !story.pillar
+  const pLabel = isOriginal ? 'Original' : getPillarLabel(story.pillar)
+  const pColor = isOriginal ? '#C9A84C' : getPillarColor(story.pillar)
   const articleUrl = `https://platform.evolvedpros.com/media/${params.pillar}/${params.slug}`
 
   // Look up author avatar by full_name (media_stories.author is a plain
@@ -239,14 +246,14 @@ export default async function StoryPage({
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 30%, rgba(0,0,0,0.75))' }} />
         {/* Contents */}
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 24 }}>
-          {story.pillar && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
+            {!isOriginal && (
               <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#C9A84C', display: 'inline-block' }} />
-              <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                {pLabel}
-              </span>
-            </div>
-          )}
+            )}
+            <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              {isOriginal ? 'Original' : pLabel}
+            </span>
+          </div>
           <h1 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 32, color: '#fff', lineHeight: 1.1, maxWidth: 680, margin: '0 0 8px' }}>
             {story.title}
           </h1>
@@ -397,12 +404,11 @@ export default async function StoryPage({
             </div>
           )}
 
-          {/* Ad zone */}
-          <div style={{ border: '1px dashed rgba(43,58,90,0.2)', borderRadius: 2, padding: '24px 10px', textAlign: 'center', backgroundColor: 'rgba(255,255,255,0.5)' }}>
-            <span style={{ fontSize: 10, color: 'rgba(43,58,90,0.3)', fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Ad Zone · 260×200
-            </span>
-          </div>
+          {/* Ad zone — wired to platform_ads (zone='C', placements contains
+              'media'). MediaAdZone returns null when no active ad is
+              assigned, so the slot collapses cleanly instead of leaking a
+              placeholder into production. */}
+          <MediaAdZone zone="C" />
         </div>
       </div>
 
