@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { PodcastEpisode } from '@/lib/podcast/transforms'
+import { fmtPodcastDate } from '@/lib/podcast/transforms'
 
 const FB = 'Barlow, sans-serif'
 const FBC = 'Barlow Condensed, sans-serif'
@@ -25,6 +26,7 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
   // Date.now() in the tile body itself caused SSR↔CSR drift and threw
   // React #425/#418 on every grid mount.
   const isNewIn7Days = episode.isNew
+  const publishedAtLabel = fmtPodcastDate(episode.releasedAt)
 
   return (
     <article
@@ -197,6 +199,26 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
                 <span>{episode.guest.role}</span>
               </>
             )}
+          </p>
+        )}
+        {(publishedAtLabel || episode.duration > 0) && (
+          <p
+            style={{
+              margin: '4px 0 0',
+              fontFamily: FBC,
+              fontSize: 11,
+              letterSpacing: '0.06em',
+              color: 'var(--podcast-text-5)',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {publishedAtLabel && <span>{publishedAtLabel}</span>}
+            {publishedAtLabel && episode.duration > 0 && (
+              <span style={{ margin: '0 6px' }}>·</span>
+            )}
+            {episode.duration > 0 && <span>{episode.duration}M</span>}
           </p>
         )}
       </div>
