@@ -185,7 +185,9 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
             ) : name[0]?.toUpperCase()}
           </div>
           <div>
-            <h2 className="font-display font-black text-[22px] text-[#112535]">{name}</h2>
+            {member.roleTitle && (
+              <p className="font-body font-semibold text-[14px] text-[#112535]">{member.roleTitle}</p>
+            )}
             <p className="font-condensed text-[12px] text-[#7a8a96]">{member.email}</p>
             <div className="flex items-center gap-2 mt-1">
               {member.tier && (
@@ -243,7 +245,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
               style={{ border: '1px solid rgba(27,60,90,0.2)', color: '#112535', backgroundColor: 'white' }}
             >
               <option value="vip">VIP</option>
-              <option value="pro">Professional</option>
+              <option value="pro">Pro</option>
             </select>
           </div>
 

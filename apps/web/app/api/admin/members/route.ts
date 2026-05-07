@@ -19,7 +19,6 @@ export async function GET(request: Request) {
   let query = supabase
     .from('users')
     .select('id, email, full_name, display_name, avatar_url, tier, tier_status, vendasta_contact_id, points, created_at', { count: 'exact' })
-    .neq('role', 'admin')
     .order('created_at', { ascending: false })
     .limit(limit)
 

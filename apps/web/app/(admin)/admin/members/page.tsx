@@ -21,7 +21,6 @@ export default async function AdminMembersPage() {
   const { data: users } = await adminClient
     .from('users')
     .select('id, email, full_name, display_name, avatar_url, tier, tier_status, vendasta_contact_id, points, created_at')
-    .neq('role', 'admin')
     .order('created_at', { ascending: false })
     .limit(200)
 
