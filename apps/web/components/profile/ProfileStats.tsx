@@ -4,7 +4,7 @@ import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 interface ProfileStatsProps {
   posts: number
   points: number
-  joined: string
+  lessons: number
   badges: number[]
 }
 
@@ -29,11 +29,7 @@ const valueStyle: React.CSSProperties = {
   lineHeight: 1.1,
 }
 
-function formatJoined(iso: string): string {
-  return new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short' }).format(new Date(iso))
-}
-
-export function ProfileStats({ posts, points, joined, badges }: ProfileStatsProps) {
+export function ProfileStats({ posts, points, lessons, badges }: ProfileStatsProps) {
   const earned = new Set(badges)
 
   return (
@@ -57,8 +53,8 @@ export function ProfileStats({ posts, points, joined, badges }: ProfileStatsProp
         <p style={valueStyle}>{points}</p>
       </div>
       <div>
-        <p style={labelStyle}>Member Since</p>
-        <p style={valueStyle}>{formatJoined(joined)}</p>
+        <p style={labelStyle}>Lessons</p>
+        <p style={valueStyle}>{lessons}</p>
       </div>
       <div>
         <p style={labelStyle}>Badges</p>
