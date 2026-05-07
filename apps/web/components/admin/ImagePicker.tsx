@@ -153,8 +153,8 @@ function StockTab({ onChange }: { onChange: (url: string) => void }) {
   const [error, setError] = useState<string | null>(null)
   const [results, setResults] = useState<UnsplashResult[]>([])
 
-  async function search(e: React.FormEvent) {
-    e.preventDefault()
+  async function search(e?: React.FormEvent) {
+    e?.preventDefault()
     if (!query.trim()) return
     setBusy(true)
     setError(null)
@@ -172,21 +172,34 @@ function StockTab({ onChange }: { onChange: (url: string) => void }) {
 
   return (
     <div className="space-y-3">
-      <form onSubmit={search} className="flex gap-2">
+      {/* No <form> here on purpose: ImagePicker often renders inside a
+          parent <form> (e.g. ProfileEditForm). HTML doesn't allow nested
+          forms, so the browser silently drops the inner one and the
+          Search button ends up submitting the parent — kicking the user
+          off the edit page. type="button" + onClick is the safe pattern;
+          Enter-key support is preserved via onKeyDown on the input. */}
+      <div className="flex gap-2">
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              void search()
+            }
+          }}
           placeholder="Search Unsplash…"
           className="flex-1 rounded border border-[#1E2535] bg-[#0B1220] px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-[#C9302A] focus:outline-none"
         />
         <button
-          type="submit"
+          type="button"
+          onClick={() => void search()}
           disabled={busy || !query.trim()}
           className="rounded bg-[#C9302A] px-4 py-2 text-sm font-medium text-white hover:bg-[#A82822] disabled:opacity-50"
         >
           {busy ? 'Searching…' : 'Search'}
         </button>
-      </form>
+      </div>
 
       {error && <p className="text-sm text-red-400">{error}</p>}
 
