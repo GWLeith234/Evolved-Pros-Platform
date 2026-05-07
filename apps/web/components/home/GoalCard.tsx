@@ -143,13 +143,22 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
 
         {pace && (
           <div className="flex items-center justify-between mt-2">
+            {/* pace is derived from `new Date()` at render scope (computePace's
+                default arg). Server (UTC clock) and client can disagree if a
+                threshold is crossed mid-hydration — suppress the resulting
+                #425 warning; the value re-renders correctly on first effect. */}
             <span
               className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] px-2 py-0.5 rounded"
               style={STATUS_STYLE[pace.status]}
+              suppressHydrationWarning
             >
               {pace.label}
             </span>
-            <span className="font-condensed text-[10px]" style={{ color: '#94a3b8' }}>
+            <span
+              className="font-condensed text-[10px]"
+              style={{ color: '#94a3b8' }}
+              suppressHydrationWarning
+            >
               {pace.daysLeft >= 0 ? `${pace.daysLeft} days left` : 'past due'}
             </span>
           </div>

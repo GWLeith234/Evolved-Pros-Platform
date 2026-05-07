@@ -43,9 +43,13 @@ function EventItem({ event, userId }: { event: EventRow; userId: string }) {
   const [durationStr, setDurationStr] = useState('')
   useEffect(() => { setDurationStr(formatDuration(event.starts_at, event.ends_at)) }, [event.starts_at, event.ends_at])
 
+  // UTC accessors so SSR (UTC) and browser (local TZ) agree on the day/month
+  // label. starts_at is stored as an ISO UTC string, and getDate()/getMonth()
+  // would otherwise drift across the SSR→CSR boundary near midnight UTC and
+  // trip React #425.
   const date = new Date(event.starts_at)
-  const day = date.getDate()
-  const month = MONTH_ABBR[date.getMonth()]
+  const day = date.getUTCDate()
+  const month = MONTH_ABBR[date.getUTCMonth()]
   const platform = event.event_type === 'virtual' ? 'Zoom' : event.event_type === 'live' ? 'Live' : 'In-Person'
 
   async function handleRegister() {
