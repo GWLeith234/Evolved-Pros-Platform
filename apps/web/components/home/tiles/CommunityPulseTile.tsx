@@ -42,8 +42,8 @@ interface CommunityPulseTileProps {
 
 function tierGradient(tier: string | null | undefined): string {
   const t = tier?.toLowerCase()
-  if (t === 'pro') return 'linear-gradient(135deg, #C9A84C, #8b7332)'
-  if (t === 'vip') return 'linear-gradient(135deg, #ef0e30, #b00922)'
+  if (t === 'pro') return 'linear-gradient(135deg, #C9302A, #8a1f1c)'
+  if (t === 'vip') return 'linear-gradient(135deg, #C9A84C, #8b7332)'
   return 'linear-gradient(135deg, #60A5FA, #3a73c8)'
 }
 

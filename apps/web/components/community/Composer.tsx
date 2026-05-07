@@ -76,8 +76,8 @@ const PILLAR_SLUG_TO_NUMBER: Record<string, Pillar> = {
 const TEAL = '#0ABFA3'
 
 function tierAvatarBg(tier: string | null): string {
-  if (tier === 'pro') return 'linear-gradient(135deg, #C9A84C 0%, #E2C572 100%)'
-  if (tier === 'vip') return 'linear-gradient(135deg, #60A5FA 0%, #93C5FD 100%)'
+  if (tier === 'pro') return 'linear-gradient(135deg, #C9302A 0%, #E55B55 100%)'
+  if (tier === 'vip') return 'linear-gradient(135deg, #C9A84C 0%, #E2C572 100%)'
   return 'linear-gradient(135deg, #ef0e30 0%, #f87171 100%)'
 }
 

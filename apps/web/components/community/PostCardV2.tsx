@@ -101,17 +101,17 @@ function tierBadgeStyle(tier: string | null | undefined): { bg: string; color: s
   const t = tier?.toLowerCase()
   if (t === 'pro') {
     return {
-      bg:     'rgba(201,168,76,0.18)',
-      color:  '#C9A84C',
-      border: 'rgba(201,168,76,0.40)',
+      bg:     'rgba(201,48,42,0.18)',
+      color:  '#C9302A',
+      border: 'rgba(201,48,42,0.40)',
       label:  'PRO',
     }
   }
   if (t === 'vip') {
     return {
-      bg:     'rgba(239,68,68,0.18)',
-      color:  '#EF4444',
-      border: 'rgba(239,68,68,0.40)',
+      bg:     'rgba(201,168,76,0.18)',
+      color:  '#C9A84C',
+      border: 'rgba(201,168,76,0.40)',
       label:  'VIP',
     }
   }

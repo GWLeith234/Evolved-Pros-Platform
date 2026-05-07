@@ -25,8 +25,8 @@ export interface MemberRow {
 }
 
 const TIER_COLORS: Record<string, { bg: string; color: string; border: string }> = {
-  pro:       { bg: 'rgba(201,168,76,0.1)',  color: '#a07c1e', border: 'rgba(201,168,76,0.3)' },
-  vip:       { bg: 'rgba(27,60,90,0.06)',   color: '#1b3c5a', border: 'rgba(27,60,90,0.18)' },
+  pro:       { bg: 'rgba(201,48,42,0.1)',   color: '#C9302A', border: 'rgba(201,48,42,0.3)' },
+  vip:       { bg: 'rgba(201,168,76,0.1)',  color: '#a07c1e', border: 'rgba(201,168,76,0.3)' },
 }
 const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
   active:    { bg: 'rgba(34,197,94,0.08)',  color: '#15803d' },
