@@ -55,12 +55,15 @@ export async function fetchCoursesWithProgress(
   // through the SSR client (RLS-bound, but at least published rows come
   // through) so the academy grid never lies about lesson counts.
   if (!lessons || lessons.length === 0) {
+    const keyPrefix = process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 8)
     console.warn(
-      '[academy.fetchCoursesWithProgress] adminClient lessons returned 0 — falling back to RLS-bound client. Check SUPABASE_SERVICE_ROLE_KEY.',
+      '[academy.fetchCoursesWithProgress] adminClient lessons returned 0 — falling back to RLS-bound client. SUPABASE_SERVICE_ROLE_KEY prefix=',
+      keyPrefix ? `${keyPrefix}…` : 'MISSING',
     )
     const fallback = await supabase
       .from('lessons')
       .select('id, course_id, updated_at')
+      .eq('is_published', true)
       .in('course_id', courseIds)
     lessons = fallback.data ?? []
   }
