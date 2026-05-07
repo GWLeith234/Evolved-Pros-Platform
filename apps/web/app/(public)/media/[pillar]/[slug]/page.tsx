@@ -477,6 +477,7 @@ export default async function StoryPage({
         }
         .media-prose p {
           margin-bottom: 18px;
+          color: #E5E7EB;
         }
         .media-prose blockquote {
           border-left: 4px solid #C9302A;
