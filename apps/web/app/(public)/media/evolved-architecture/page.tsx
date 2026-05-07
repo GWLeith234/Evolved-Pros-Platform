@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { adminClient } from '@/lib/supabase/admin'
 
 export const revalidate = 120
@@ -57,8 +58,7 @@ export default async function EvolvedArchitecturePage() {
         <Link href={`/media/${featured.pillar ?? 'general'}/${featured.slug}`} style={{ textDecoration: 'none', display: 'block', marginBottom: 20 }}>
           <div style={{ position: 'relative', aspectRatio: '21/9', borderRadius: 4, overflow: 'hidden', backgroundColor: '#2B3A5A' }}>
             {featured.featured_image_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={featured.featured_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              <Image src={featured.featured_image_url} alt="" fill priority sizes="(max-width: 1100px) 100vw, 1100px" className="object-cover" />
             ) : (
               <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1a2540)' }} />
             )}
@@ -82,10 +82,9 @@ export default async function EvolvedArchitecturePage() {
         <div className="section-article-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
           {grid.map(a => (
             <Link key={a.id} href={`/media/${a.pillar ?? 'general'}/${a.slug}`} style={{ textDecoration: 'none', display: 'block', backgroundColor: '#fff', border: '0.5px solid rgba(43,58,90,0.1)', borderRadius: 2, overflow: 'hidden' }}>
-              <div style={{ aspectRatio: '16/9', backgroundColor: '#2B3A5A', overflow: 'hidden' }}>
+              <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: '#2B3A5A', overflow: 'hidden' }}>
                 {a.featured_image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={a.featured_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  <Image src={a.featured_image_url} alt="" fill sizes="(max-width: 767px) 100vw, 360px" className="object-cover" />
                 ) : (
                   <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1a2540)' }} />
                 )}

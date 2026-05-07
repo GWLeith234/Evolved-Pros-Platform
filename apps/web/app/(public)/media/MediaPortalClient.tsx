@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { CategoryPills, CATEGORY_COLORS } from '@/components/media/CategoryPills'
 import { getPillarLabel } from '@/lib/pillars'
 import { PollWidget } from '@/components/media/PollWidget'
@@ -427,10 +428,9 @@ export function MediaPortalClient({
                 <div style={{ background: '#fff', border: '1px solid rgba(43,58,90,0.1)', borderTop: 'none' }}>
                   {sidebarStories.map(s => (
                     <Link key={s.id} href={storyUrl(s)} style={{ display: 'flex', alignItems: 'start', gap: 10, padding: '10px 12px', borderBottom: '1px solid rgba(43,58,90,0.06)', textDecoration: 'none' }}>
-                      <div style={{ width: 64, height: 48, borderRadius: 2, background: '#2B3A5A', overflow: 'hidden', flexShrink: 0 }}>
+                      <div style={{ position: 'relative', width: 64, height: 48, borderRadius: 2, background: '#2B3A5A', overflow: 'hidden', flexShrink: 0 }}>
                         {s.featured_image_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={s.featured_image_url} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                          <Image src={s.featured_image_url} alt="" fill loading="lazy" sizes="64px" className="object-cover" />
                         ) : (
                           <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1A2540)' }} />
                         )}

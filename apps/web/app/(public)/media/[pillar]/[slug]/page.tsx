@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Metadata } from 'next'
 import { marked } from 'marked'
 import { adminClient } from '@/lib/supabase/admin'
@@ -259,8 +260,7 @@ export default async function StoryPage({
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {authorAvatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={authorAvatar} alt={story.author ?? 'George Leith'} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+              <Image src={authorAvatar} alt={story.author ?? 'George Leith'} width={28} height={28} className="rounded-full object-cover" style={{ flexShrink: 0 }} />
             ) : (
               <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 700, fontFamily: 'var(--font-condensed)', flexShrink: 0 }}>
                 {(story.author ?? 'GL').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
@@ -324,8 +324,7 @@ export default async function StoryPage({
           {/* Author card */}
           <div style={{ backgroundColor: '#fff', border: '1px solid rgba(43,58,90,0.1)', borderRadius: 2, padding: 14, textAlign: 'center', marginBottom: 16 }}>
             {authorAvatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={authorAvatar} alt={story.author ?? 'George Leith'} style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 8px', display: 'block', border: '2px solid #E0D8CC', backgroundColor: '#F5F0E8' }} />
+              <Image src={authorAvatar} alt={story.author ?? 'George Leith'} width={80} height={80} className="rounded-full object-cover" style={{ margin: '0 auto 8px', display: 'block', border: '2px solid #E0D8CC', backgroundColor: '#F5F0E8' }} />
             ) : (
               <div style={{ width: 80, height: 80, borderRadius: '50%', backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', fontSize: 24, color: '#fff', fontWeight: 700, fontFamily: 'var(--font-condensed)' }}>
                 {(story.author ?? 'GL').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
@@ -427,10 +426,9 @@ export default async function StoryPage({
           <div className="media-related-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
             {(related ?? []).map((r: RelatedStory) => (
               <Link key={r.id} href={`/media/${r.pillar}/${r.slug}`} style={{ textDecoration: 'none', display: 'block', backgroundColor: '#fff', border: '0.5px solid rgba(43,58,90,0.1)', borderRadius: 2, overflow: 'hidden' }}>
-                <div style={{ aspectRatio: '16/9', backgroundColor: '#2B3A5A', overflow: 'hidden' }}>
+                <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: '#2B3A5A', overflow: 'hidden' }}>
                   {r.featured_image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={r.featured_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                    <Image src={r.featured_image_url} alt="" fill sizes="(max-width: 767px) 100vw, 360px" className="object-cover" />
                   ) : (
                     <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1a2540)' }} />
                   )}
