@@ -137,7 +137,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
       }
       const updated = await res.json()
       onSaved?.(updated)
-      showToast('success', 'Profile saved successfully.')
+      showToast('success', 'Profile updated')
     } catch (err: unknown) {
       showToast('error', err instanceof Error ? err.message : 'Save failed.')
     } finally {
@@ -205,13 +205,18 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
       {/* ── Fields ───────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Tooltip content="Shown on your posts, leaderboard, and community profile." className="block">
-          <Input
-            label="Display Name"
-            value={fields.display_name}
-            onChange={e => handleChange('display_name', e.target.value)}
-            maxLength={50}
-            placeholder="How you appear to others"
-          />
+          <div>
+            <Input
+              label="Display Name"
+              value={fields.display_name}
+              onChange={e => handleChange('display_name', e.target.value)}
+              maxLength={50}
+              placeholder="How you appear to others"
+            />
+            <p className="font-condensed text-[11px] mt-1.5" style={{ color: 'var(--text-secondary)' }}>
+              Your public handle — shown in community posts and leaderboard.
+            </p>
+          </div>
         </Tooltip>
         <Tooltip content="Your full name. Only visible to administrators." className="block">
           <Input

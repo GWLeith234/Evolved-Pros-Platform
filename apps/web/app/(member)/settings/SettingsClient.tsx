@@ -82,7 +82,7 @@ export function SettingsClient({
   return (
     <div className="px-6 md:px-8 py-6 max-w-3xl">
       <div className="mb-6">
-        <h1 className="font-display font-black text-[28px] text-[#112535] tracking-wide">SETTINGS</h1>
+        <h1 className="font-display font-medium text-[28px] text-[#F5F0E8] tracking-widest">SETTINGS</h1>
         <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
           Manage your profile, notifications, membership, and account.
         </p>
@@ -255,7 +255,7 @@ function AccountTab({ userId, email, fullName }: { userId: string; email: string
       >
         <label className="block">
           <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-[#7a8a96] mb-2 block">
-            Display Name
+            Full Name
           </span>
           <input
             type="text"
@@ -265,6 +265,9 @@ function AccountTab({ userId, email, fullName }: { userId: string; email: string
             className="w-full px-3 py-2 rounded font-body text-[14px] text-[#1b3c5a] focus:outline-none"
             style={{ border: '1px solid rgba(27,60,90,0.18)', backgroundColor: 'white' }}
           />
+          <p className="font-condensed text-[11px] text-[#7a8a96] mt-1.5">
+            This is your real name shown in admin and billing.
+          </p>
         </label>
         {nameError && (
           <p className="font-condensed text-[11px] text-[#ef0e30] mt-2">{nameError}</p>
