@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { eventTypeBadge } from '@/lib/events/types'
 import { CountdownTimer } from './CountdownTimer'
 
 // MR2 redesign: full-bleed hero with countdown, badges, host info, price.
@@ -12,6 +14,7 @@ export interface HeroEvent {
   title: string
   description: string | null
   format: 'live' | 'in-person' | 'podcast' | 'replay' | string
+  event_type: string | null
   pillar: number | null
   starts_at: string
   hero_image_url: string | null
@@ -31,13 +34,6 @@ export interface HeroEvent {
 interface CinematicHeroProps {
   event: HeroEvent | null
   initialIsRsvpd?: boolean
-}
-
-const FORMAT_BADGE_LABEL: Record<string, string> = {
-  'live':      'Live Event',
-  'in-person': 'In-Person',
-  'podcast':   'Podcast Live',
-  'replay':    'Replay',
 }
 
 function priceLabel(priceCents: number | null | undefined, requiredTier: string | null): string {
@@ -119,8 +115,9 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
     ? PILLAR_CONFIG[event.pillar]
     : null
   const coverUrl = event.hero_image_url ?? event.image_url ?? null
-  const formatLabel = FORMAT_BADGE_LABEL[event.format] ?? String(event.format).toUpperCase()
+  const typeBadge = eventTypeBadge(event.event_type)
   const featuredSuffix = event.is_featured ? ' · Featured' : ''
+  const detailHref = `/events/${event.id}`
 
   async function handleRsvpClick() {
     if (rsvpInFlight) return
@@ -154,6 +151,10 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
       }}
     >
       <style>{`
+        @keyframes ch-pulse {
+          0%, 100% { opacity: 0.4; transform: scale(0.85); }
+          50%      { opacity: 1;   transform: scale(1.15); }
+        }
         @media (max-width: 640px) {
           .cinematic-hero { min-height: 520px; }
           .cinematic-hero .ch-badges { top: 12px !important; left: 12px !important; gap: 6px !important; }
@@ -214,9 +215,11 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
           style={{
             display: 'inline-flex',
             alignItems: 'center',
+            gap: 6,
             padding: '7px 14px',
-            background: '#C9302A',
-            color: '#FFFFFF',
+            background: typeBadge.background,
+            color: typeBadge.color,
+            border: `1px solid ${typeBadge.border}`,
             fontFamily: '"Barlow Condensed", sans-serif',
             fontWeight: 700,
             fontSize: 11,
@@ -224,7 +227,19 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             textTransform: 'uppercase',
           }}
         >
-          {formatLabel}
+          {typeBadge.pulse && (
+            <span
+              aria-hidden="true"
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                background: '#FFFFFF',
+                animation: 'ch-pulse 1.4s ease-in-out infinite',
+              }}
+            />
+          )}
+          {typeBadge.label}
         </span>
         {rsvpd && (
           <span
@@ -316,23 +331,26 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
           </span>
         )}
 
-        {/* Title */}
-        <h2
-          className="ch-title"
-          style={{
-            margin: 0,
-            fontFamily: '"Bebas Neue", sans-serif',
-            fontWeight: 400,
-            fontSize: 'clamp(40px, 6vw, 72px)',
-            lineHeight: 1.02,
-            letterSpacing: '0.01em',
-            textTransform: 'uppercase',
-            textShadow: '0 2px 16px rgba(0,0,0,0.5)',
-            wordBreak: 'break-word',
-          }}
-        >
-          {event.title}
-        </h2>
+        {/* Title — Link to detail page */}
+        <Link href={detailHref} style={{ color: 'inherit', textDecoration: 'none' }}>
+          <h2
+            className="ch-title"
+            style={{
+              margin: 0,
+              fontFamily: '"Bebas Neue", sans-serif',
+              fontWeight: 400,
+              fontSize: 'clamp(40px, 6vw, 72px)',
+              lineHeight: 1.02,
+              letterSpacing: '0.01em',
+              textTransform: 'uppercase',
+              textShadow: '0 2px 16px rgba(0,0,0,0.5)',
+              wordBreak: 'break-word',
+              cursor: 'pointer',
+            }}
+          >
+            {event.title}
+          </h2>
+        </Link>
 
         {/* Tagline */}
         {event.tagline && (
@@ -523,6 +541,29 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
           >
             {rsvpd ? '✓ Going' : (event.cta_text?.trim() || 'RSVP')}
           </button>
+          <Link
+            href={detailHref}
+            className="ch-rsvp"
+            style={{
+              padding: '14px 28px',
+              fontFamily: '"Bebas Neue", sans-serif',
+              fontSize: 15,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              background: 'transparent',
+              color: '#FFFFFF',
+              border: '1px solid rgba(255,255,255,0.4)',
+              borderRadius: 0,
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              minWidth: 160,
+              justifyContent: 'center',
+            }}
+          >
+            View Details →
+          </Link>
         </div>
       </div>
     </section>

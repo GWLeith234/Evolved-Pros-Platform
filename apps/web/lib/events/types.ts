@@ -29,6 +29,26 @@ export const EVENT_TYPE_STYLES: Record<EventType, { color: string; bg: string; b
   inperson: { color: '#1b3c5a', bg: 'rgba(27,60,90,0.06)',   border: 'rgba(27,60,90,0.15)' },
 }
 
+// Public events.event_type is free-text — admin form has shipped both
+// 'Virtual' (capitalised) and 'virtual', and prior copy referenced
+// 'in_person' / 'in-person' / 'In-Person' interchangeably. Normalise once.
+export type EventTypeBadge = {
+  label: string
+  background: string
+  color: string
+  border: string
+  pulse: boolean
+}
+export function eventTypeBadge(rawType: string | null | undefined): EventTypeBadge {
+  const t = (rawType ?? '').toLowerCase().replace(/[\s-]+/g, '_')
+  if (t === 'live')                       return { label: 'LIVE',      background: '#C9302A',                color: '#FFFFFF', border: '#C9302A',                 pulse: true  }
+  if (t === 'virtual')                    return { label: 'VIRTUAL',   background: 'rgba(10,191,163,0.08)',  color: '#0ABFA3', border: 'rgba(10,191,163,0.55)',   pulse: false }
+  if (t === 'in_person' || t === 'inperson') return { label: 'IN PERSON', background: 'rgba(201,168,76,0.08)',  color: '#C9A84C', border: 'rgba(201,168,76,0.55)',   pulse: false }
+  if (t === 'ama')                        return { label: 'AMA',       background: 'rgba(167,139,250,0.08)', color: '#A78BFA', border: 'rgba(167,139,250,0.55)',  pulse: false }
+  if (t === 'vip_only' || t === 'vip')    return { label: 'VIP ONLY',  background: '#C9A84C',                color: '#0A0F18', border: '#C9A84C',                 pulse: false }
+  return { label: (rawType ?? 'EVENT').toUpperCase(), background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', border: 'rgba(255,255,255,0.25)', pulse: false }
+}
+
 export function formatEventDate(iso: string) {
   const d = new Date(iso)
   return {

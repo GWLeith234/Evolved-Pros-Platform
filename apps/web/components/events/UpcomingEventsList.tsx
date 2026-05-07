@@ -3,19 +3,13 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { eventTypeBadge } from '@/lib/events/types'
 import type { HeroEvent } from './CinematicHero'
 
 interface UpcomingEventsListProps {
   events: HeroEvent[]
   /** Initial set of event ids the current user has RSVP'd to. */
   registeredIds: string[]
-}
-
-const FORMAT_BADGE: Record<string, { label: string; bg: string; fg: string }> = {
-  'live':      { label: 'Live',      bg: 'rgba(201,48,42,0.16)',  fg: '#E25450' },
-  'in-person': { label: 'In-Person', bg: 'rgba(96,165,250,0.16)', fg: '#60A5FA' },
-  'podcast':   { label: 'Podcast',   bg: 'rgba(167,139,250,0.16)', fg: '#A78BFA' },
-  'replay':    { label: 'Replay',    bg: 'rgba(255,255,255,0.08)', fg: 'rgba(255,255,255,0.7)' },
 }
 
 interface DateBadge {
@@ -131,7 +125,7 @@ export function UpcomingEventsList({ events, registeredIds }: UpcomingEventsList
           const isRegistered = registered.has(event.id)
           const isInflight = inflightId === event.id
           const badge = formatDateBadge(event.starts_at)
-          const fmt = FORMAT_BADGE[event.format] ?? FORMAT_BADGE.replay
+          const fmt = eventTypeBadge(event.event_type)
           const pillarConf = event.pillar && event.pillar >= 1 && event.pillar <= 6
             ? PILLAR_CONFIG[event.pillar]
             : null
@@ -205,18 +199,32 @@ export function UpcomingEventsList({ events, registeredIds }: UpcomingEventsList
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                   <span
                     style={{
-                      display: 'inline-block',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
                       padding: '2px 8px',
                       fontFamily: '"Barlow Condensed", sans-serif',
                       fontWeight: 700,
                       fontSize: 9,
                       letterSpacing: '0.18em',
                       textTransform: 'uppercase',
-                      background: fmt.bg,
-                      color: fmt.fg,
-                      border: `1px solid ${fmt.fg}33`,
+                      background: fmt.background,
+                      color: fmt.color,
+                      border: `1px solid ${fmt.border}`,
                     }}
                   >
+                    {fmt.pulse && (
+                      <span
+                        aria-hidden="true"
+                        style={{
+                          width: 5,
+                          height: 5,
+                          borderRadius: '50%',
+                          background: 'currentColor',
+                          animation: 'ch-pulse 1.4s ease-in-out infinite',
+                        }}
+                      />
+                    )}
                     {fmt.label}
                   </span>
                   {pillarConf && (

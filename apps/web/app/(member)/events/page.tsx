@@ -43,7 +43,7 @@ export default async function EventsPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: rows } = await (adminClient as any)
     .from('events')
-    .select('id, title, description, tagline, cta_text, format, pillar, starts_at, hero_image_url, image_url, required_tier, is_featured, attending_count, host_name, host_role, host_avatar_url, price_cents, watermark')
+    .select('id, title, description, tagline, cta_text, format, event_type, pillar, starts_at, hero_image_url, image_url, required_tier, is_featured, attending_count, host_name, host_role, host_avatar_url, price_cents, watermark')
     .eq('is_published', true)
     .gt('starts_at', nowIso)
     .order('is_featured', { ascending: false })
