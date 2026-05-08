@@ -479,7 +479,7 @@ export function MediaPortalClient({
       {/* ── Section 3: Card grid ── */}
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 56px' }}>
         {grid.length > 0 ? (
-          <div className="media-card-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="media-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {grid.map(s => (
               <ArticleCard key={s.id} story={s} />
             ))}
@@ -496,7 +496,7 @@ export function MediaPortalClient({
       </div>
 
       {/* Responsive + hover styles. Grid columns are owned by the Tailwind
-          classes on the container (grid-cols-1 md:grid-cols-2 lg:grid-cols-3)
+          classes on the container (grid-cols-1 sm:grid-cols-2 lg:grid-cols-3)
           so the hero-only collapse rule is the last bit of bespoke CSS. */}
       <style>{`
         .media-card { transform: translateZ(0); }

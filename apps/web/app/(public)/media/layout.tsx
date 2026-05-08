@@ -1,5 +1,3 @@
-import { ThemeBridge } from '@/components/media/ThemeBridge'
-
 export default function MediaLayout({ children }: { children: React.ReactNode }) {
   // The media sub-app routinely sets large clamp() type sizes and 1280-px
   // editorial rails. On a 390-px viewport that bleeds into the body and
@@ -7,8 +5,10 @@ export default function MediaLayout({ children }: { children: React.ReactNode })
   // here means every /media/* route inherits the fix without each child
   // having to remember.
   return (
-    <div style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
-      <ThemeBridge />
+    <div
+      className="min-h-screen bg-[#0A0F18]"
+      style={{ maxWidth: '100vw', overflowX: 'hidden' }}
+    >
       {children}
     </div>
   )
