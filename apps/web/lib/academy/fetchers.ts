@@ -35,10 +35,44 @@ export async function fetchCoursesWithProgress(
       .order('sort_order'),
     tierPromise,
   ])
-  const courses = coursesResult.data
   const profile = { tier: resolvedTier }
 
-  if (!courses?.length) return []
+  // ACADEMY-FIX: courses fetch must mirror the lessons-fetch hardening
+  // below. Previously a service-role failure here silently returned [] and
+  // the page rendered "header + 0% + no cards" with no log line — exactly
+  // the regression QA hit after SUPABASE_SERVICE_ROLE_KEY was rotated in
+  // Railway. Log on error, then fall back to the SSR client so cards still
+  // mount (locked/empty lessons are acceptable; an empty grid is not).
+  let courses = coursesResult.data ?? []
+  if (coursesResult.error) {
+    console.warn(
+      '[academy.fetchCoursesWithProgress] adminClient courses error:',
+      coursesResult.error.message,
+    )
+    const fallback = await supabase
+      .from('courses')
+      .select('id, pillar_number, slug, title, description, required_tier, is_published, sort_order')
+      .eq('is_published', true)
+      .order('sort_order')
+    courses = fallback.data ?? []
+  } else if (courses.length === 0) {
+    // Distinguish "service-role key is bad" from "DB legitimately has no
+    // published courses." Probe the SSR client; if it returns rows,
+    // adminClient is the broken side and we should surface that loudly.
+    const fallback = await supabase
+      .from('courses')
+      .select('id, pillar_number, slug, title, description, required_tier, is_published, sort_order')
+      .eq('is_published', true)
+      .order('sort_order')
+    if ((fallback.data?.length ?? 0) > 0) {
+      console.warn(
+        '[academy.fetchCoursesWithProgress] adminClient returned 0 but SSR returned rows — service role key likely wrong. Check SUPABASE_SERVICE_ROLE_KEY.',
+      )
+      courses = fallback.data ?? []
+    }
+  }
+
+  if (!courses.length) return []
 
   const courseIds = courses.map(c => c.id)
 
