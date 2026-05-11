@@ -69,6 +69,14 @@ function fmtDate(iso: string): string {
   if (Number.isNaN(d.getTime())) return ''
   return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`
 }
+// Same hazard as the dates: Number.toLocaleString() varies by ICU build
+// (Node prod vs the browser), so a 4-digit points value would render
+// "1234" server-side and "1,234" client-side and trip React #418.
+function fmtNumber(n: number): string {
+  const s = String(Math.trunc(Math.abs(n)))
+  const grouped = s.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return n < 0 ? `-${grouped}` : grouped
+}
 function fmtDatetime(iso: string): string {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ''
@@ -359,7 +367,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
           {[
             { label: 'Joined',         value: fmtDate(member.joinedAt) },
             { label: 'Last Active',    value: fmtDate(member.lastActive) },
-            { label: 'Points',         value: member.points.toLocaleString() },
+            { label: 'Points',         value: fmtNumber(member.points) },
             { label: 'MRR',            value: member.mrr > 0 ? `$${member.mrr}/mo` : '—' },
             { label: 'Engagement',     value: member.engagementLevel },
             { label: 'Posts (30d)',    value: String(member.postsLast30) },
