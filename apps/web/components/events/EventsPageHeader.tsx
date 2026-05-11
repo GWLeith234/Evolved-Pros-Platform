@@ -6,7 +6,7 @@ export function EventsPageHeader() {
   return (
     <header
       style={{
-        padding: '80px 24px 32px',
+        padding: '32px 24px',
         borderBottom: '1px solid var(--border-color)',
       }}
     >

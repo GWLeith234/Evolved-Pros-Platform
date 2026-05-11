@@ -43,7 +43,7 @@ export default async function MemberLayout({ children }: { children: React.React
             </HideOnPodcast>
             <NextEventBanner />
             <div className="flex flex-1 min-h-0">
-              <main className="flex-1 overflow-y-auto pb-16 lg:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>{children}</main>
+              <main className="flex-1 overflow-y-auto pt-[72px] pb-16 lg:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>{children}</main>
               <RightRail />
             </div>
             <BottomTabBar role={profile.role} unreadCount={0} dmUnreadCount={0} />
@@ -125,7 +125,10 @@ export default async function MemberLayout({ children }: { children: React.React
         </HideOnPodcast>
         <NextEventBanner />
         <div className="flex flex-1 min-h-0">
-          <main className="flex-1 overflow-y-auto pb-16 lg:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>
+          {/* NAV-OVERLAP-FIX: pt-[72px] reserves space for the 72px sticky
+              TopNav so page content can never slide under it at 800–1440px
+              viewports where main is the body-scroll container. */}
+          <main className="flex-1 overflow-y-auto pt-[72px] pb-16 lg:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>
             {children}
           </main>
           <RightRail />
