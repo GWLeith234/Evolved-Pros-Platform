@@ -65,11 +65,6 @@ export default async function AdminEpisodesPage() {
           </p>
         </div>
       ) : (
-        {/* CLEAN-C: overflow-x-auto on the wrapper + table-layout:fixed +
-            explicit <colgroup> widths keeps the # / thumbnail column anchored
-            to the left and lets the table scroll horizontally on narrow
-            viewports instead of pushing earlier columns off-screen when the
-            actions cell expands. */}
         <div className="rounded-lg overflow-x-auto" style={{ border: '1px solid rgba(27,60,90,0.1)' }}>
           <table className="w-full" style={{ tableLayout: 'fixed', minWidth: 640 }}>
             <colgroup>
