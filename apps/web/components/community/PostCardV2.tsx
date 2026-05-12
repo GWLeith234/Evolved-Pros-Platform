@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import type { Post } from '@/lib/community/types'
 
@@ -213,7 +214,9 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
     >
       {/* Header */}
       <header style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-        <div
+        <Link
+          href={`/profile/${post.author.id}`}
+          aria-label={`${post.author.displayName} profile`}
           style={{
             width: 40,
             height: 40,
@@ -247,20 +250,22 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
               {getInitials(post.author.displayName)}
             </span>
           )}
-        </div>
+        </Link>
 
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <span
+            <Link
+              href={`/profile/${post.author.id}`}
               style={{
                 fontFamily: '"Bebas Neue", sans-serif',
                 fontSize: 18,
                 letterSpacing: '0.01em',
                 color: 'var(--text-primary)',
+                textDecoration: 'none',
               }}
             >
               {post.author.displayName}
-            </span>
+            </Link>
             {tierBadge && (
               <span
                 style={{

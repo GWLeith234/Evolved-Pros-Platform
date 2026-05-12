@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { PostReplyThread } from './PostReplyThread'
 import { ReactionPicker } from './ReactionPicker'
 import { getAvatarColor, PILLAR_LABELS } from '@/lib/community/types'
@@ -186,9 +187,11 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
       {/* Header */}
       <div className="flex items-start gap-3 mb-3">
         {/* Avatar */}
-        <div
+        <Link
+          href={`/profile/${post.author.id}`}
           className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
           style={{ backgroundColor: avatarBg }}
+          aria-label={`${post.author.displayName} profile`}
         >
           {post.author.avatarUrl ? (
             <Image
@@ -203,16 +206,17 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
               {getInitials(post.author.displayName)}
             </span>
           )}
-        </div>
+        </Link>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span
-              className="font-body font-semibold text-[14px]"
+            <Link
+              href={`/profile/${post.author.id}`}
+              className="font-body font-semibold text-[14px] hover:underline"
               style={{ color: isAnnounce ? 'white' : (isLightCard || !isDark) ? '#1b3c5a' : 'rgba(255,255,255,0.9)' }}
             >
               {post.author.displayName}
-            </span>
+            </Link>
             {post.author.tier && (
               post.author.tier === 'pro' ? (
                 <Tooltip content="Pro members have access to all 6 pillars and exclusive events.">
