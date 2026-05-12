@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { getAvatarColor } from '@/lib/community/types'
 import type { Reply } from '@/lib/community/types'
 
@@ -38,7 +39,9 @@ function ReplyItem({ reply }: { reply: Reply }) {
   useEffect(() => { setAgo(timeAgo(reply.createdAt)) }, [reply.createdAt])
   return (
     <div className="flex gap-2.5">
-      <div
+      <Link
+        href={`/profile/${reply.author.id}`}
+        aria-label={`${reply.author.displayName} profile`}
         className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
         style={{ backgroundColor: avatarBg }}
       >
@@ -50,12 +53,15 @@ function ReplyItem({ reply }: { reply: Reply }) {
             {getInitials(reply.author.displayName)}
           </span>
         )}
-      </div>
+      </Link>
       <div className="flex-1">
         <div className="flex items-baseline gap-2">
-          <span className="font-body font-semibold text-[13px] text-[#1b3c5a]">
+          <Link
+            href={`/profile/${reply.author.id}`}
+            className="font-body font-semibold text-[13px] text-[#1b3c5a] hover:underline"
+          >
             {reply.author.displayName}
-          </span>
+          </Link>
           <span className="font-condensed text-[10px] text-[#7a8a96]" suppressHydrationWarning>
             {ago}
           </span>

@@ -136,14 +136,13 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
     supabase.from('courses').select('id, title, slug, sort_order, pillar_number').eq('is_published', true).order('sort_order'),
     // adminClient: bypasses the lessons RLS policy
     //   `auth.role() = 'authenticated' AND is_published = TRUE`
-    // and the brittle is_published gate. The Architecture pillar column on
-    // /home derives state from per-course lesson totals — when this query
-    // returned [] for accounts blocked by RLS or for courses whose lesson
-    // rows had is_published=false, every pillar fell through to 'locked'
-    // (no `cp.completed > 0`) and the dots stayed grey. Counting all lesson
-    // rows for the course is correct here: the catalogue gate is the course's
-    // own is_published flag, not per-lesson.
-    adminClient.from('lessons').select('id, course_id, title, slug, sort_order'),
+    // The Architecture pillar column on /home derives state from per-course
+    // lesson totals; without adminClient, accounts where auth.uid() ≠
+    // public.users.id (or anywhere RLS shadows the read) fell through to
+    // 'locked' and the dots stayed grey. is_published=true keeps this count
+    // aligned with the academy detail page (which also filters) — without it
+    // home reported 4 for Foundation while the detail page showed 3.
+    adminClient.from('lessons').select('id, course_id, title, slug, sort_order').eq('is_published', true),
     // adminClient: lesson_progress.user_id = public.users.id, but the RLS
     // policy gates on auth.uid(). Reading via the SSR client returns []
     // for accounts where auth.uid() ≠ public.users.id, which is what was
