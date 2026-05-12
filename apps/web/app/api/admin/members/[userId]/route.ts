@@ -20,7 +20,7 @@ export async function GET(
       .from('users')
       .select('id, email, full_name, display_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, vendasta_contact_id, points, created_at, updated_at, company, linkedin_url, website_url, twitter_handle, phone, phone_visible, current_pillar, goal_90day, goal_visible')
       .eq('id', params.userId)
-      .single(),
+      .maybeSingle(),
     adminClient
       .from('posts')
       .select('id, body, created_at, channels(name, slug)')

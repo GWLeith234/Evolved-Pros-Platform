@@ -70,7 +70,7 @@ export default async function MemberProfilePage({
     lessons: lessonsResult.count ?? 0,
   }
 
-  if (isSelf && searchParams?.edit === '1') {
+  if (isSelf && searchParams?.edit === '1' && authUser?.email) {
     const editProfile = {
       display_name: profile.display_name,
       full_name: profile.full_name,
@@ -119,7 +119,7 @@ export default async function MemberProfilePage({
               ← Back to profile
             </a>
           </div>
-          <ProfileEditForm userId={profile.id} profile={editProfile} />
+          <ProfileEditForm userId={profile.id} userEmail={authUser.email} profile={editProfile} />
         </div>
       </div>
     )

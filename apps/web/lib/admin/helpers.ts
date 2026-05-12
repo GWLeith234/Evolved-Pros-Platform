@@ -31,7 +31,7 @@ export async function requireAdminApi(): Promise<{ userId: string } | Response> 
     .from('users')
     .select('id, role')
     .eq('email', user.email)
-    .single()
+    .maybeSingle()
   if (!profile || profile.role !== 'admin') {
     return new Response(JSON.stringify({ error: 'Forbidden' }), {
       status: 403,
@@ -51,7 +51,7 @@ export async function requireAdminPage() {
     .from('users')
     .select('role, display_name, full_name')
     .eq('email', user.email)
-    .single()
+    .maybeSingle()
   if (!profile || profile.role !== 'admin') redirect('/home')
   return profile
 }

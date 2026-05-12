@@ -10,7 +10,7 @@ export async function fetchCurrentUserProfile(supabase: SB, userId: string) {
     .from('users')
     .select('display_name, full_name, avatar_url, tier, points, role, current_pillar')
     .eq('id', userId)
-    .single()
+    .maybeSingle()
   return data
 }
 
@@ -115,7 +115,7 @@ export async function fetchPosts(
     .from('channels')
     .select('id')
     .eq('slug', channelSlug)
-    .single()
+    .maybeSingle()
 
   if (!channel) return { posts: [], nextCursor: null, hasMore: false }
 
@@ -191,7 +191,7 @@ export async function fetchPinnedPost(
     .from('channels')
     .select('id')
     .eq('slug', channelSlug)
-    .single()
+    .maybeSingle()
 
   if (!channel) return null
 
@@ -234,7 +234,7 @@ export async function fetchLeaderboard(supabase: SB, currentUserId: string): Pro
       .from('users')
       .select('id, display_name, full_name, avatar_url, points')
       .eq('id', currentUserId)
-      .single()
+      .maybeSingle()
 
     if (currentUser) {
       const { count } = await supabase

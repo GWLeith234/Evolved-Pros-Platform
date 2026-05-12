@@ -183,7 +183,7 @@ export async function fetchCourseBySlug(
     .from('courses')
     .select('*')
     .eq('slug', slug)
-    .single()
+    .maybeSingle()
   return data ?? null
 }
 
@@ -200,7 +200,7 @@ export async function fetchLessonsWithProgress(
     .from('courses')
     .select('id, required_tier')
     .eq('slug', pillarSlug)
-    .single()
+    .maybeSingle()
 
   if (!course) return []
 
@@ -265,7 +265,7 @@ export async function fetchLessonBySlug(
     .from('courses')
     .select('id')
     .eq('slug', pillarSlug)
-    .single()
+    .maybeSingle()
 
   if (!course) return null
 
@@ -274,7 +274,7 @@ export async function fetchLessonBySlug(
     .select('*')
     .eq('course_id', course.id)
     .eq('slug', lessonSlug)
-    .single()
+    .maybeSingle()
 
   return lesson ?? null
 }
@@ -290,7 +290,7 @@ export async function fetchLessonProgress(
     .select('*')
     .eq('user_id', userId)
     .eq('lesson_id', lessonId)
-    .single()
+    .maybeSingle()
   return data ?? null
 }
 
@@ -305,7 +305,7 @@ export async function fetchLessonNotes(
     .select('notes')
     .eq('user_id', userId)
     .eq('lesson_id', lessonId)
-    .single()
+    .maybeSingle()
   return data?.notes ?? null
 }
 
@@ -352,7 +352,7 @@ export async function fetchUserProfile(
     .from('users')
     .select('*')
     .eq('id', userId)
-    .single()
+    .maybeSingle()
   if (byId) return byId
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -362,6 +362,6 @@ export async function fetchUserProfile(
     .from('users')
     .select('*')
     .eq('email', user.email)
-    .single()
+    .maybeSingle()
   return byEmail ?? null
 }
