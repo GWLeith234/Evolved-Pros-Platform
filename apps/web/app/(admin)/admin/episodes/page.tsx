@@ -65,8 +65,21 @@ export default async function AdminEpisodesPage() {
           </p>
         </div>
       ) : (
-        <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.1)' }}>
-          <table className="w-full">
+        {/* CLEAN-C: overflow-x-auto on the wrapper + table-layout:fixed +
+            explicit <colgroup> widths keeps the # / thumbnail column anchored
+            to the left and lets the table scroll horizontally on narrow
+            viewports instead of pushing earlier columns off-screen when the
+            actions cell expands. */}
+        <div className="rounded-lg overflow-x-auto" style={{ border: '1px solid rgba(27,60,90,0.1)' }}>
+          <table className="w-full" style={{ tableLayout: 'fixed', minWidth: 640 }}>
+            <colgroup>
+              <col style={{ width: 48 }} />
+              <col />
+              <col className="hidden md:table-column" style={{ width: 160 }} />
+              <col className="hidden md:table-column" style={{ width: 96 }} />
+              <col style={{ width: 96 }} />
+              <col style={{ width: 80 }} />
+            </colgroup>
             <thead>
               <tr style={{ backgroundColor: '#f5f7f9', borderBottom: '1px solid rgba(27,60,90,0.1)' }}>
                 <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96]">#</th>

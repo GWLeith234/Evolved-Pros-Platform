@@ -593,11 +593,17 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
 
       {/* Media */}
       <div>
-        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-3">
+        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1">
           Media
         </p>
+        <p className="font-condensed text-[11px] text-[#7a8a96] mb-3 leading-relaxed">
+          Provide a Mux Playback ID for native player playback, or a YouTube URL for YouTube-hosted episodes. Either is fine — both fields are optional, and an episode can be published with only one (or, for audio-only episodes, neither).
+        </p>
         <div className="space-y-4">
-          <LabelledInput label="Mux Playback ID" hint="The playback ID from Mux (not the full URL)">
+          <LabelledInput
+            label="Mux Playback ID"
+            hint="Optional — the playback ID from Mux (not the full URL). Leave blank for YouTube-hosted episodes."
+          >
             <input
               type="text"
               value={values.muxPlaybackId}
@@ -608,7 +614,10 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
               placeholder="e.g. abc123xyz"
             />
           </LabelledInput>
-          <LabelledInput label="YouTube URL">
+          <LabelledInput
+            label="YouTube URL"
+            hint="Optional — set this for YouTube-hosted episodes when there's no Mux upload."
+          >
             <input
               type="url"
               value={values.youtubeUrl}
@@ -623,7 +632,10 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
             value={values.thumbnailUrl || null}
             onChange={url => set('thumbnailUrl', url)}
           />
-          <LabelledInput label="Duration (seconds)">
+          <LabelledInput
+            label="Duration (seconds)"
+            hint="Optional — auto-populated for Mux uploads. Enter manually for YouTube-hosted episodes."
+          >
             <input
               type="number"
               value={values.durationSeconds}

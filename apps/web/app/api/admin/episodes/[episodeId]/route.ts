@@ -31,6 +31,11 @@ export async function PATCH(
   let body: Record<string, unknown>
   try { body = await request.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
 
+  // CLEAN-C: mux_playback_id, youtube_url, duration_seconds, and
+  // thumbnail_url are all explicitly optional on publish. A YouTube-hosted
+  // episode (e.g. the Pilot — no Mux asset) is publishable with just title
+  // and an optional description. Do NOT reintroduce a require-Mux check
+  // here without first wiring a UI alternative for YouTube/audio-only.
   const allowed = [
     'title', 'slug', 'episode_number', 'season', 'description',
     'guest_name', 'guest_title', 'guest_company', 'guest_image_url',
