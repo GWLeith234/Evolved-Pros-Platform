@@ -54,7 +54,7 @@ export async function fetchCoursesWithProgress(
   // applies its own filter), so unpublished rows don't leak through.
   const lessonsResult = await adminClient
     .from('lessons')
-    .select('id, course_id, updated_at')
+    .select('id, course_id')
     .in('course_id', courseIds)
 
   // We need to distinguish "fetch failed / RLS shadow / missing service
@@ -80,7 +80,7 @@ export async function fetchCoursesWithProgress(
     // null per-course.
     const fallback = await supabase
       .from('lessons')
-      .select('id, course_id, updated_at')
+      .select('id, course_id')
       .in('course_id', courseIds)
     if ((fallback.data?.length ?? 0) > 0) {
       console.warn(
