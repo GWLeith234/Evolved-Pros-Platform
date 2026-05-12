@@ -129,7 +129,7 @@ export function CountdownTimer({
     >
       <span style={{ color: 'rgba(255,255,255,0.6)' }}>Starts in</span>
       <span style={{ fontVariantNumeric: 'tabular-nums', letterSpacing: '0.12em' }}>
-        {days > 0 && `${days}d `}{pad(hours)}:{pad(minutes)}:{pad(seconds)}
+        {days > 0 ? `${days}D` : `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`}
       </span>
     </span>
   )

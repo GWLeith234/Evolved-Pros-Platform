@@ -702,7 +702,7 @@ export default async function MemberHomePage() {
   }))
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="px-6 pb-6 space-y-5">
       <WelcomeBanner
         displayName={displayName}
         tier={profile.tier}

@@ -232,6 +232,7 @@ export default async function StoryPage({
       <div
         style={{
           position: 'relative',
+          width: '100%',
           minHeight: 280,
           aspectRatio: '21/9',
           maxHeight: 380,
@@ -454,10 +455,15 @@ export default async function StoryPage({
       <style>{`
         .media-prose {
           font-family: var(--font-serif);
-          font-size: 14px;
+          font-size: 16px;
           line-height: 1.85;
           color: #1A1A1A;
           margin-top: 20px;
+        }
+        @media (max-width: 767px) {
+          .media-prose {
+            font-size: 14px;
+          }
         }
         .media-prose h2 {
           font-family: var(--font-condensed);
