@@ -39,6 +39,7 @@ type ProfileFields = {
 
 interface ProfileEditFormProps {
   userId: string
+  userEmail: string
   profile: ProfileFields
   onSaved?: (updated: ProfileFields) => void
 }
@@ -57,7 +58,7 @@ function InfoIcon() {
   )
 }
 
-export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormProps) {
+export function ProfileEditForm({ userId, userEmail, profile, onSaved }: ProfileEditFormProps) {
   const { showToast: globalToast } = useToast()
   const [fields, setFields] = useState({
     display_name: profile.display_name ?? '',
@@ -196,6 +197,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
       {bannerModalOpen && (
         <BannerPickerModal
           userId={userId}
+          userEmail={userEmail}
           currentBannerUrl={bannerUrl || null}
           onSave={handleBannerSaved}
           onClose={() => setBannerModalOpen(false)}

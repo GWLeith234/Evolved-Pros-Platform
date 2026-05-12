@@ -7,6 +7,7 @@ import { BannerPickerModal } from './BannerPickerModal'
 interface ProfileBannerWrapperProps {
   user: {
     id: string
+    email: string
     display_name: string | null
     full_name: string | null
     avatar_url: string | null
@@ -44,6 +45,7 @@ export function ProfileBannerWrapper({ user, isOwn }: ProfileBannerWrapperProps)
       {showPicker && isOwn && (
         <BannerPickerModal
           userId={user.id}
+          userEmail={user.email}
           currentBannerUrl={bannerUrl}
           onSave={url => { setBannerUrl(url); setShowPicker(false) }}
           onClose={() => setShowPicker(false)}

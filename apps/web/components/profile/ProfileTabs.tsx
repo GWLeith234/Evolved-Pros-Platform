@@ -58,6 +58,7 @@ export type ProfileForEdit = {
 
 interface ProfileTabsProps {
   userId: string
+  userEmail: string
   initialTab: Tab
   overviewPosts: OverviewPost[]
   courseProgress: CourseProgressItem[]
@@ -67,6 +68,7 @@ interface ProfileTabsProps {
 
 export function ProfileTabs({
   userId,
+  userEmail,
   initialTab,
   overviewPosts,
   courseProgress,
@@ -215,7 +217,7 @@ export function ProfileTabs({
         <Card>
           <CardHeader title="Edit Profile" />
           <CardBody>
-            <ProfileEditForm userId={userId} profile={profile} />
+            <ProfileEditForm userId={userId} userEmail={userEmail} profile={profile} />
           </CardBody>
         </Card>
       )}
