@@ -204,6 +204,15 @@ function AccountTab({ userId, email, fullName }: { userId: string; email: string
 
   const [resetting, setResetting] = useState(false)
 
+  // Clear the "saved!" indicator after 3s, but cancel the timer if the
+  // component unmounts mid-flight — otherwise the timer fires against a
+  // dead instance and React logs "setState on unmounted component".
+  useEffect(() => {
+    if (!nameSaved) return
+    const id = setTimeout(() => setNameSaved(false), 3000)
+    return () => clearTimeout(id)
+  }, [nameSaved])
+
   async function handleSaveName() {
     setSavingName(true)
     setNameError(null)
@@ -219,7 +228,6 @@ function AccountTab({ userId, email, fullName }: { userId: string; email: string
         throw new Error(data.error ?? 'Save failed')
       }
       setNameSaved(true)
-      setTimeout(() => setNameSaved(false), 3000)
     } catch (e) {
       setNameError(e instanceof Error ? e.message : 'Something went wrong')
     } finally {
