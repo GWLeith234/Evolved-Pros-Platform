@@ -33,12 +33,14 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
         width: '100%',
         maxWidth: 1280,
         margin: '24px auto 0',
-        padding: '0 24px',
+        padding: '0 clamp(16px, 4vw, 24px)',
       }}
     >
       <div
         style={{
           position: 'relative',
+          width: '100%',
+          maxWidth: '100%',
           height: 480,
           overflow: 'hidden',
           background: '#0A0F18',
@@ -96,22 +98,26 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
             left: 0,
             right: 0,
             bottom: 0,
-            padding: '0 36px 36px',
+            padding: 'clamp(20px, 4vw, 36px)',
+            paddingTop: 0,
             display: 'flex',
             flexDirection: 'column',
             gap: 18,
+            maxWidth: '100%',
           }}
         >
           <h2
             style={{
               margin: 0,
               fontFamily: FBN,
-              fontSize: 'clamp(34px, 4.6vw, 56px)',
+              fontSize: 'clamp(28px, 4.6vw, 56px)',
               lineHeight: 1.02,
               letterSpacing: '0.02em',
               textTransform: 'uppercase',
               color: '#fff',
-              maxWidth: 880,
+              maxWidth: '100%',
+              overflowWrap: 'break-word',
+              wordBreak: 'break-word',
               textShadow: '0 2px 16px rgba(0,0,0,0.6)',
             }}
           >

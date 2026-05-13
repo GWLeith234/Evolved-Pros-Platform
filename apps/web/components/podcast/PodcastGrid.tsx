@@ -34,7 +34,7 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
       style={{
         maxWidth: 1280,
         margin: '0 auto',
-        padding: '40px 24px 96px',
+        padding: '40px clamp(16px, 4vw, 24px) 96px',
         fontFamily: FB,
       }}
     >
@@ -43,6 +43,7 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'space-between',
+          flexWrap: 'wrap',
           gap: 16,
           marginBottom: 24,
           borderBottom: '1px solid var(--podcast-border-soft2)',
@@ -97,7 +98,7 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))',
           gap: '36px 28px',
         }}
       >
@@ -130,7 +131,7 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))',
               gap: '36px 28px',
             }}
           >

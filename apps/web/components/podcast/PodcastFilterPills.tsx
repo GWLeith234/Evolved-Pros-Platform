@@ -92,8 +92,8 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
           </button>
         )
       })}
-      <span style={{ flex: 1 }} />
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, position: 'relative' }}>
+      <span style={{ flex: 1, minWidth: 0 }} />
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, position: 'relative', flexShrink: 0, maxWidth: '100%' }}>
         <span
           style={{
             fontFamily: FBC,
@@ -102,6 +102,7 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
             letterSpacing: '0.32em',
             textTransform: 'uppercase',
             color: 'var(--podcast-text-4)',
+            flexShrink: 0,
           }}
         >
           Sort
@@ -112,7 +113,7 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
             onClick={() => setSortOpen(o => !o)}
             onBlur={() => setTimeout(() => setSortOpen(false), 120)}
             style={{
-              padding: '8px 32px 8px 12px',
+              padding: '8px 36px 8px 12px',
               background: 'var(--podcast-bg-surface)',
               color: 'var(--podcast-text-strong)',
               border: '1px solid var(--podcast-border-strong)',
@@ -124,6 +125,7 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
               cursor: 'pointer',
               position: 'relative',
               minWidth: 160,
+              maxWidth: '100%',
               textAlign: 'left',
             }}
           >

@@ -46,6 +46,9 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
       style={{
         display: 'flex',
         flexDirection: 'column',
+        width: '100%',
+        maxWidth: '100%',
+        minWidth: 0,
         cursor: 'pointer',
         transform: lift ? 'translateY(-3px)' : 'translateY(0)',
         transition: 'transform 220ms ease',
@@ -162,7 +165,7 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
         </span>
       </div>
 
-      <div style={{ padding: '14px 2px 0' }}>
+      <div style={{ padding: '14px 2px 0', minWidth: 0 }}>
         <h3
           style={{
             margin: 0,
@@ -175,6 +178,8 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
+            overflowWrap: 'break-word',
+            wordBreak: 'break-word',
             minHeight: '2.5em',
           }}
         >
