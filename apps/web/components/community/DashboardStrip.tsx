@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 const BLUE   = '#60A5FA'
@@ -8,7 +9,7 @@ const RED    = '#ef0e30'
 const CTA    = '#0ABFA3'
 
 function formatEventDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
 }
 
 function formatDuration(seconds: number | null): string {
@@ -88,6 +89,41 @@ const CTA_STYLE: React.CSSProperties = {
   fontSize: '11px',
   marginTop: '4px',
   lineHeight: 1,
+}
+
+// Defers Date.now()-based label/CTA to client-only — avoids SSR/client mismatch (#425).
+function EventCard({ nextEvent }: { nextEvent: { title: string; startsAt: string } }) {
+  const [evtLabel, setEvtLabel] = useState('📅 Upcoming')
+  const [evtCta, setEvtCta] = useState('View →')
+
+  useEffect(() => {
+    const days = daysUntil(nextEvent.startsAt)
+    if (days <= 0) {
+      setEvtLabel('🔴 Today')
+      setEvtCta('Register now →')
+    } else if (days === 1) {
+      setEvtLabel('🔴 Tomorrow')
+      setEvtCta('Register now →')
+    } else if (days <= 3) {
+      setEvtLabel(`🔴 ${days} days away`)
+      setEvtCta('Register now →')
+    } else if (days <= 7) {
+      setEvtLabel('📅 This week')
+      setEvtCta('Register →')
+    } else {
+      setEvtLabel('📅 Upcoming')
+      setEvtCta('View →')
+    }
+  }, [nextEvent.startsAt])
+
+  return (
+    <Link href="/events" className="ep-strip-card" style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #200a0a, #180606)', border: '1px solid rgba(201,48,42,.3)' }}>
+      <p style={{ ...LABEL_STYLE, color: RED }}>{evtLabel}</p>
+      <p style={HEADLINE_STYLE}>{nextEvent.title}</p>
+      <p style={SUB_STYLE}>{formatEventDate(nextEvent.startsAt)}</p>
+      <p style={{ ...CTA_STYLE, color: CTA }}>{evtCta}</p>
+    </Link>
+  )
 }
 
 export function DashboardStrip({ pillarProgress, episode, nextEvent, userRank, nextRankEntry, userPoints }: DashboardStripProps) {
@@ -176,35 +212,7 @@ export function DashboardStrip({ pillarProgress, episode, nextEvent, userRank, n
         )}
 
         {/* Card 4 — Events (conditional) */}
-        {nextEvent && (() => {
-          const days = daysUntil(nextEvent.startsAt)
-          let evtLabel: string
-          let evtCta: string
-          if (days <= 0) {
-            evtLabel = '🔴 Today'
-            evtCta = 'Register now →'
-          } else if (days === 1) {
-            evtLabel = '🔴 Tomorrow'
-            evtCta = 'Register now →'
-          } else if (days <= 3) {
-            evtLabel = `🔴 ${days} days away`
-            evtCta = 'Register now →'
-          } else if (days <= 7) {
-            evtLabel = '📅 This week'
-            evtCta = 'Register →'
-          } else {
-            evtLabel = '📅 Upcoming'
-            evtCta = 'View →'
-          }
-          return (
-            <Link href="/events" className="ep-strip-card" style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #200a0a, #180606)', border: '1px solid rgba(201,48,42,.3)' }}>
-              <p style={{ ...LABEL_STYLE, color: RED }} suppressHydrationWarning>{evtLabel}</p>
-              <p style={HEADLINE_STYLE}>{nextEvent.title}</p>
-              <p style={SUB_STYLE}>{formatEventDate(nextEvent.startsAt)}</p>
-              <p style={{ ...CTA_STYLE, color: CTA }} suppressHydrationWarning>{evtCta}</p>
-            </Link>
-          )
-        })()}
+        {nextEvent && <EventCard nextEvent={nextEvent} />}
 
         {/* Card 5 — Leaderboard */}
         <Link
