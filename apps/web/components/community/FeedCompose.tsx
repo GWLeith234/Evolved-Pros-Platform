@@ -161,7 +161,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
       }}
     >
       {/* Post type tabs */}
-      <div className="flex gap-1 mb-3">
+      <div className="flex flex-wrap gap-1 mb-3 pr-4 sm:flex-nowrap sm:pr-0">
         {visibleTabs.map(tab => {
           const active = activePostType === tab.type
           return (
