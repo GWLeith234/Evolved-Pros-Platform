@@ -83,7 +83,7 @@ function LeaderboardRow({ entry, currentUserTier }: { entry: LeaderboardEntry; c
           {entry.displayName}{entry.isCurrentUser ? ' (You)' : ''}
         </p>
         <p className="font-condensed font-bold text-[12px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          {entry.points.toLocaleString()} pts
+          {entry.points.toLocaleString('en-US')} pts
         </p>
       </div>
     </div>

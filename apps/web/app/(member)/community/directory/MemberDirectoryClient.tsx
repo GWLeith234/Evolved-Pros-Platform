@@ -210,7 +210,7 @@ export function MemberDirectoryClient() {
                         <p
                           className="font-display font-bold text-white text-sm leading-none"
                         >
-                          {member.points.toLocaleString()}
+                          {member.points.toLocaleString('en-US')}
                         </p>
                         <p
                           className="font-condensed uppercase tracking-widest text-[8px] mt-0.5"

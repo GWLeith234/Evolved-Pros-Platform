@@ -49,7 +49,7 @@ function formatDate(value: string | null): string {
   if (!value) return '—'
   try {
     const d = new Date(value)
-    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
   } catch {
     return '—'
   }

@@ -217,9 +217,9 @@ export function DashboardStrip({ pillarProgress, episode, nextEvent, userRank, n
             {userRank ? `You're #${userRank}` : 'Earn points'}
           </p>
           <p style={SUB_STYLE}>
-            {myPoints.toLocaleString()} pts
-            {ahead && ` · ${ahead.displayName} is ${(ahead.points - myPoints).toLocaleString()} ahead`}
-            {behind && !ahead && ` · ${behind.displayName} is ${(myPoints - behind.points).toLocaleString()} behind`}
+            {myPoints.toLocaleString('en-US')} pts
+            {ahead && ` · ${ahead.displayName} is ${(ahead.points - myPoints).toLocaleString('en-US')} ahead`}
+            {behind && !ahead && ` · ${behind.displayName} is ${(myPoints - behind.points).toLocaleString('en-US')} behind`}
           </p>
           <p style={{ ...CTA_STYLE, color: CTA }}>
             {ahead ? 'Close the gap →' : 'Stay ahead →'}

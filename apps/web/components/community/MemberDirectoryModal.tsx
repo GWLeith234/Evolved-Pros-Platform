@@ -201,7 +201,7 @@ export function MemberDirectoryModal({ onClose }: MemberDirectoryModalProps) {
                   {/* Points */}
                   <div className="flex-shrink-0 text-right">
                     <p className="font-condensed font-bold text-[12px] text-[#1b3c5a]">
-                      {member.points.toLocaleString()}
+                      {member.points.toLocaleString('en-US')}
                     </p>
                     <p className="font-condensed text-[9px] uppercase text-[#7a8a96]">pts</p>
                   </div>

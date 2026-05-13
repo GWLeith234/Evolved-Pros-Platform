@@ -94,7 +94,7 @@ export function PollCard({ poll, currentUserId, voteCounts: initialCounts = {}, 
           })}
           <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
             {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}
-            {poll.closes_at && !isClosed && ` · Closes ${new Date(poll.closes_at).toLocaleDateString()}`}
+            {poll.closes_at && !isClosed && ` · Closes ${new Date(poll.closes_at).toLocaleDateString('en-US')}`}
             {isClosed && ' · Poll closed'}
           </p>
         </div>
@@ -133,7 +133,7 @@ export function PollCard({ poll, currentUserId, voteCounts: initialCounts = {}, 
             </button>
             {poll.closes_at && (
               <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>
-                Closes {new Date(poll.closes_at).toLocaleDateString()}
+                Closes {new Date(poll.closes_at).toLocaleDateString('en-US')}
               </span>
             )}
           </div>

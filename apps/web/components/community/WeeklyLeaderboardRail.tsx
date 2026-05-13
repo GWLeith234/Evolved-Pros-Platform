@@ -119,7 +119,6 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
               <li key={entry.userId}>
                 <Link
                   href={`/profile/${entry.userId}`}
-                  suppressHydrationWarning
                   className="cursor-pointer hover:bg-white/5 transition-colors rounded"
                   style={{
                     display: 'grid',
@@ -134,7 +133,6 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
                   }}
                 >
                 <span
-                  suppressHydrationWarning
                   style={{
                     fontFamily: FBN,
                     fontSize: 18,
@@ -184,7 +182,6 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
 
                 <div style={{ minWidth: 0 }}>
                   <p
-                    suppressHydrationWarning
                     style={{
                       margin: 0,
                       fontFamily: FB,
@@ -200,7 +197,6 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
                     {entry.displayName}
                     {isMe && (
                       <span
-                        suppressHydrationWarning
                         style={{
                           marginLeft: 6,
                           fontFamily: FBC,
@@ -226,7 +222,7 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
                       fontVariantNumeric: 'tabular-nums',
                     }}
                   >
-                    {entry.points.toLocaleString()} pts
+                    {entry.points.toLocaleString('en-US')} pts
                   </p>
                 </div>
 
