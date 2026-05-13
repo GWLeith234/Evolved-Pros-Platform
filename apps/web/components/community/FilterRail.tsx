@@ -17,6 +17,17 @@ const KIND_TABS: Array<{ id: KindFilter; label: string }> = [
 
 const PILLARS: Pillar[] = [1, 2, 3, 4, 5, 6]
 
+// Mobile-only short labels under each pillar dot so users can tell pillars apart
+// without prior context. Hidden at sm+ to keep the desktop rail compact.
+const PILLAR_ABBREV: Record<Pillar, string> = {
+  1: 'FOUND.',
+  2: 'IDENT.',
+  3: 'MENTAL',
+  4: 'STRAT.',
+  5: 'ACCT.',
+  6: 'EXEC.',
+}
+
 const SORT_OPTIONS: Array<{ value: SortBy; label: string }> = [
   { value: 'newest',       label: 'Newest' },
   { value: 'oldest',       label: 'Oldest' },
@@ -77,6 +88,25 @@ export function FilterRail({
         }
         .filter-rail-scroll-row::-webkit-scrollbar { display: none; }
         .filter-rail-scroll-row > * { flex-shrink: 0; }
+        .pillar-cell {
+          display: inline-flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2px;
+        }
+        .pillar-abbrev {
+          display: none;
+          font-family: "Barlow Condensed", sans-serif;
+          font-weight: 700;
+          font-size: 10px;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: var(--text-tertiary);
+          line-height: 1;
+        }
+        @media (max-width: 639px) {
+          .pillar-abbrev { display: block; }
+        }
       `}</style>
 
       {/* LEFT — kind filter (small outlined pills, distinct from composer tabs) */}
@@ -151,33 +181,35 @@ export function FilterRail({
           const color = PILLAR_CONFIG[p].color
           const active = activePillars.includes(p)
           return (
-            <button
-              key={p}
-              type="button"
-              onClick={() => togglePillar(p)}
-              aria-pressed={active}
-              aria-label={`Filter by ${PILLAR_CONFIG[p].label}`}
-              title={PILLAR_CONFIG[p].label}
-              style={{
-                width: 24,
-                height: 24,
-                borderRadius: '50%',
-                background: color,
-                border: `2px solid ${active ? color : 'transparent'}`,
-                opacity: active ? 1 : 0.4,
-                cursor: 'pointer',
-                padding: 0,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: '"Bebas Neue", sans-serif',
-                fontSize: 11,
-                color: '#0A0F18',
-                transition: 'opacity 120ms ease, border-color 120ms ease',
-              }}
-            >
-              {p}
-            </button>
+            <div key={p} className="pillar-cell">
+              <button
+                type="button"
+                onClick={() => togglePillar(p)}
+                aria-pressed={active}
+                aria-label={`Filter by ${PILLAR_CONFIG[p].label}`}
+                title={PILLAR_CONFIG[p].label}
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: '50%',
+                  background: color,
+                  border: `2px solid ${active ? color : 'transparent'}`,
+                  opacity: active ? 1 : 0.4,
+                  cursor: 'pointer',
+                  padding: 0,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontFamily: '"Bebas Neue", sans-serif',
+                  fontSize: 11,
+                  color: '#0A0F18',
+                  transition: 'opacity 120ms ease, border-color 120ms ease',
+                }}
+              >
+                {p}
+              </button>
+              <span className="pillar-abbrev" aria-hidden="true">{PILLAR_ABBREV[p]}</span>
+            </div>
           )
         })}
         {activePillars.length > 0 && (
