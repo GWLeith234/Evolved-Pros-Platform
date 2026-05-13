@@ -39,38 +39,26 @@ export function EpisodeBannerClient({
 
   return (
     <div
+      className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:h-[38px] gap-2 sm:gap-0 px-4 sm:px-5 py-2 sm:py-0 w-full max-w-full overflow-hidden box-border"
       style={{
         backgroundColor: 'var(--episode-banner-bg)',
         borderTop: '2px solid #C9302A',
         borderBottom: '1px solid var(--episode-banner-border)',
-        height: '38px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingLeft: '20px',
-        paddingRight: '20px',
         flexShrink: 0,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+      <div className="flex items-center gap-2 sm:gap-[10px] min-w-0">
         <span
-          style={{
-            backgroundColor: '#C9302A',
-            color: '#ffffff',
-            fontSize: '9px',
-            fontWeight: 700,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            padding: '2px 8px',
-            borderRadius: '3px',
-            flexShrink: 0,
-          }}
+          className="text-[12px] sm:text-[9px] font-bold uppercase tracking-wider rounded-[3px] px-2 py-[2px] shrink-0"
+          style={{ backgroundColor: '#C9302A', color: '#ffffff' }}
         >
           LATEST EPISODE
         </span>
 
+        {/* Desktop: title inline alongside the badge. Hidden on mobile —
+            mobile renders the title on its own row below. */}
         <span
-          className="truncate max-w-[160px] sm:max-w-xs md:max-w-none text-sm"
+          className="hidden sm:inline truncate sm:max-w-xs md:max-w-none text-sm"
           style={{ color: 'var(--episode-banner-text)', fontWeight: 500 }}
         >
           {displayText}
@@ -78,8 +66,11 @@ export function EpisodeBannerClient({
 
         {guestLabel && (
           <>
-            <span style={{ width: '3px', height: '3px', borderRadius: '50%', backgroundColor: 'var(--episode-banner-border)', flexShrink: 0 }} />
-            <span style={{ color: 'var(--episode-banner-text-dim)', fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+            <span className="hidden sm:block shrink-0" style={{ width: '3px', height: '3px', borderRadius: '50%', backgroundColor: 'var(--episode-banner-border)' }} />
+            <span
+              className="hidden sm:inline whitespace-nowrap text-[11px] shrink-0"
+              style={{ color: 'var(--episode-banner-text-dim)' }}
+            >
               {guestLabel}
             </span>
           </>
@@ -87,28 +78,34 @@ export function EpisodeBannerClient({
 
         {dateLabel && (
           <>
-            <span style={{ width: '3px', height: '3px', borderRadius: '50%', backgroundColor: 'var(--episode-banner-border)', flexShrink: 0 }} />
-            <span style={{ color: 'var(--episode-banner-text-dim)', fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+            <span className="hidden sm:block shrink-0" style={{ width: '3px', height: '3px', borderRadius: '50%', backgroundColor: 'var(--episode-banner-border)' }} />
+            <span
+              className="hidden sm:inline whitespace-nowrap text-[11px] shrink-0"
+              style={{ color: 'var(--episode-banner-text-dim)' }}
+            >
               {dateLabel}
             </span>
           </>
         )}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+      {/* Mobile-only: title row stacked under the label row. */}
+      <span
+        className="sm:hidden truncate text-[13px] w-full min-w-0"
+        style={{ color: 'var(--episode-banner-text)', fontWeight: 500 }}
+      >
+        {displayText}
+      </span>
+
+      <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto shrink-0">
         <Link
           href={href}
           {...(externalLink ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+          className="text-[12px] sm:text-[11px] font-medium rounded px-3 py-2 sm:py-1 no-underline whitespace-nowrap"
           style={{
             backgroundColor: 'var(--episode-banner-cta-bg)',
             border: '1px solid var(--episode-banner-cta-bg)',
             color: 'var(--episode-banner-cta-text)',
-            fontSize: '11px',
-            fontWeight: 500,
-            padding: '4px 12px',
-            borderRadius: '4px',
-            textDecoration: 'none',
-            whiteSpace: 'nowrap',
           }}
         >
           {ctaLabel}
@@ -125,16 +122,8 @@ export function EpisodeBannerClient({
             setDismissed(true)
           }}
           aria-label="Dismiss latest episode banner"
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: 'var(--episode-banner-text-dim)',
-            fontSize: '14px',
-            lineHeight: 1,
-            padding: '4px 6px',
-            cursor: 'pointer',
-            borderRadius: '3px',
-          }}
+          className="min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 inline-flex items-center justify-center rounded-[3px] cursor-pointer text-[14px] leading-none px-[6px] py-1 bg-transparent border-0"
+          style={{ color: 'var(--episode-banner-text-dim)' }}
         >
           ✕
         </button>
