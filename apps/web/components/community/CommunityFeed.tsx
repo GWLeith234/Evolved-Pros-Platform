@@ -330,7 +330,7 @@ export function CommunityFeed({
           )}
 
           {!hasMore && posts.length > 0 && (
-            <p className="text-center font-condensed text-[10px] tracking-widest text-[#7a8a96] py-4">
+            <p className="text-center font-condensed text-[12px] sm:text-[10px] tracking-widest text-[#7a8a96] py-4">
               You've reached the beginning
             </p>
           )}

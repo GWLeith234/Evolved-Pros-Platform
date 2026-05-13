@@ -134,7 +134,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
   const accentColor = pillarConf?.color
     ?? (isWin ? '#C9A84C' : isAnnounce ? '#ef0e30' : isQuestion ? '#60A5FA' : '#68a2b9')
 
-  const actionBtnClass = `flex items-center justify-center gap-1.5 min-h-[44px] min-w-[44px] px-2 font-condensed font-semibold uppercase text-[11px] tracking-wide hover:text-[#ef0e30] transition-colors duration-150 ${isLightCard || !isDark ? 'text-[#1b3c5a]/70' : 'text-[#7a8a96]'}`
+  const actionBtnClass = `flex items-center justify-center gap-1.5 min-h-[44px] min-w-[44px] px-2 font-condensed font-semibold uppercase text-[12px] sm:text-[11px] tracking-wide hover:text-[#ef0e30] transition-colors duration-150 ${isLightCard || !isDark ? 'text-[#1b3c5a]/70' : 'text-[#7a8a96]'}`
 
   const cardStyle: React.CSSProperties = isWin
     ? {
@@ -229,7 +229,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
             {/* Post type badges */}
             {isWin && (
               <span
-                className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
+                className="font-condensed font-bold uppercase text-[12px] sm:text-[9px] rounded px-2 py-0.5"
                 style={{ backgroundColor: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.25)', color: '#C9A84C' }}
               >
                 🏆 Win
@@ -237,7 +237,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
             )}
             {isQuestion && (
               <span
-                className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
+                className="font-condensed font-bold uppercase text-[12px] sm:text-[9px] rounded px-2 py-0.5"
                 style={{ backgroundColor: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60A5FA' }}
               >
                 ❓ Question
@@ -245,7 +245,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
             )}
             {isAnnounce && (
               <span
-                className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
+                className="font-condensed font-bold uppercase text-[12px] sm:text-[9px] rounded px-2 py-0.5"
                 style={{ backgroundColor: 'rgba(239,14,48,0.15)', border: '1px solid rgba(239,14,48,0.25)', color: '#ef0e30' }}
               >
                 📣 Announcement
@@ -254,7 +254,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
             {/* Pillar badge */}
             {pillarLabel && pillarConf && (
               <span
-                className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
+                className="font-condensed font-bold uppercase text-[12px] sm:text-[9px] rounded px-2 py-0.5"
                 style={{
                   backgroundColor: `${pillarConf.color}18`,
                   border: `1px solid ${pillarConf.color}40`,
@@ -285,7 +285,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
             )}
           </div>
           <p
-            className="font-condensed font-semibold uppercase text-[10px] mt-0.5"
+            className="font-condensed font-semibold uppercase text-[12px] sm:text-[10px] mt-0.5"
             style={{ color: isAnnounce ? 'rgba(255,255,255,0.4)' : (isLightCard || !isDark) ? 'rgba(27,60,90,0.5)' : '#7a8a96' }}
             suppressHydrationWarning
           >
