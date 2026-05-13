@@ -31,7 +31,7 @@ export function PodcastMasthead() {
         style={{
           margin: '6px 0 8px',
           fontFamily: FBN,
-          fontSize: 64,
+          fontSize: 'clamp(40px, 11vw, 64px)',
           letterSpacing: '0.04em',
           color: 'var(--podcast-text-strong)',
           textTransform: 'uppercase',
