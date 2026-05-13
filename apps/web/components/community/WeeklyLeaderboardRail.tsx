@@ -116,18 +116,23 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
             const isMe = entry.isCurrentUser
             const avatarBg = getAvatarColor(entry.userId)
             return (
-              <li
-                key={entry.userId}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '24px 32px 1fr auto',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '8px 10px',
-                  background: isMe ? 'rgba(201,168,76,0.06)' : 'transparent',
-                  border: isMe ? `1px solid ${GOLD}` : '1px solid transparent',
-                }}
-              >
+              <li key={entry.userId}>
+                <Link
+                  href={`/profile/${entry.userId}`}
+                  suppressHydrationWarning
+                  className="cursor-pointer hover:bg-white/5 transition-colors rounded"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '24px 32px 1fr auto',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '8px 10px',
+                    background: isMe ? 'rgba(201,168,76,0.06)' : 'transparent',
+                    border: isMe ? `1px solid ${GOLD}` : '1px solid transparent',
+                    textDecoration: 'none',
+                    color: 'inherit',
+                  }}
+                >
                 <span
                   style={{
                     fontFamily: FBN,
@@ -236,6 +241,7 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
                 >
                   ↑+{entry.weeklyPosts}
                 </span>
+                </Link>
               </li>
             )
           })}
