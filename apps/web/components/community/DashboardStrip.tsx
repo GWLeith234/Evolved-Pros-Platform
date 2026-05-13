@@ -127,6 +127,10 @@ function EventCard({ nextEvent }: { nextEvent: { title: string; startsAt: string
 }
 
 export function DashboardStrip({ pillarProgress, episode, nextEvent, userRank, nextRankEntry, userPoints }: DashboardStripProps) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  if (!mounted) return null
+
   const myPoints = userPoints
   const ahead = nextRankEntry && nextRankEntry.points > myPoints ? nextRankEntry : null
   const behind = nextRankEntry && nextRankEntry.points <= myPoints ? nextRankEntry : null
