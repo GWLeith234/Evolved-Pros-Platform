@@ -134,7 +134,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
   const accentColor = pillarConf?.color
     ?? (isWin ? '#C9A84C' : isAnnounce ? '#ef0e30' : isQuestion ? '#60A5FA' : '#68a2b9')
 
-  const actionBtnClass = `flex items-center gap-1.5 font-condensed font-semibold uppercase text-[11px] tracking-wide hover:text-[#ef0e30] transition-colors duration-150 ${isLightCard || !isDark ? 'text-[#1b3c5a]/70' : 'text-[#7a8a96]'}`
+  const actionBtnClass = `flex items-center justify-center gap-1.5 min-h-[44px] min-w-[44px] px-2 font-condensed font-semibold uppercase text-[11px] tracking-wide hover:text-[#ef0e30] transition-colors duration-150 ${isLightCard || !isDark ? 'text-[#1b3c5a]/70' : 'text-[#7a8a96]'}`
 
   const cardStyle: React.CSSProperties = isWin
     ? {

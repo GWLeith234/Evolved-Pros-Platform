@@ -137,7 +137,10 @@ export function FilterRail({
               aria-selected={active}
               onClick={() => onChangeKind(tab.id)}
               style={{
-                padding: '4px 10px',
+                minHeight: 44,
+                padding: '0 14px',
+                display: 'inline-flex',
+                alignItems: 'center',
                 fontFamily: '"Barlow Condensed", sans-serif',
                 fontSize: 11,
                 fontWeight: 600,
