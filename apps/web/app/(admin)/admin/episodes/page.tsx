@@ -14,6 +14,28 @@ function formatDuration(seconds: number | null): string {
   return `${m}m`
 }
 
+// Timezone-stable: format in UTC so SSR and client renders agree.
+const PUBLISHED_DATE_FMT = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
+
+function fmtPublished(iso: string | null): string {
+  if (!iso) return '—'
+  return PUBLISHED_DATE_FMT.format(new Date(iso))
+}
+
+const PILLAR_META: Record<string, { label: string; color: string }> = {
+  foundation:         { label: 'Foundation',       color: '#FFA538' },
+  identity:           { label: 'Identity',         color: '#A78BFA' },
+  'mental-toughness': { label: 'Mental Toughness', color: '#F87171' },
+  strategy:           { label: 'Strategy',         color: '#60A5FA' },
+  accountability:     { label: 'Accountability',   color: '#C9A84C' },
+  execution:          { label: 'Execution',        color: '#0ABFA3' },
+}
+
 export default async function AdminEpisodesPage() {
   const h = headers()
   if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
@@ -25,7 +47,7 @@ export default async function AdminEpisodesPage() {
   // drafts for admins. Service role bypasses RLS so admins see all rows.
   const { data: rows } = await adminClient
     .from('episodes')
-    .select('id, episode_number, season, title, guest_name, guest_company, thumbnail_url, duration_seconds, is_published, published_at, created_at')
+    .select('id, episode_number, season, title, guest_name, guest_company, thumbnail_url, duration_seconds, is_published, published_at, created_at, pillars')
     .order('episode_number', { ascending: false })
     .limit(200)
 
@@ -66,22 +88,26 @@ export default async function AdminEpisodesPage() {
         </div>
       ) : (
         <div className="rounded-lg overflow-x-auto" style={{ border: '1px solid rgba(27,60,90,0.1)' }}>
-          <table className="w-full" style={{ tableLayout: 'fixed', minWidth: 640 }}>
+          <table className="w-full" style={{ minWidth: 880 }}>
             <colgroup>
               <col style={{ width: 48 }} />
               <col />
+              <col style={{ width: 160 }} />
               <col className="hidden md:table-column" style={{ width: 160 }} />
               <col className="hidden md:table-column" style={{ width: 96 }} />
               <col style={{ width: 96 }} />
+              <col style={{ width: 120 }} />
               <col style={{ width: 80 }} />
             </colgroup>
             <thead>
               <tr style={{ backgroundColor: '#f5f7f9', borderBottom: '1px solid rgba(27,60,90,0.1)' }}>
                 <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96]">#</th>
                 <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96]">Title</th>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96]">Pillar</th>
                 <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96] hidden md:table-cell">Guest</th>
                 <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96] hidden md:table-cell">Duration</th>
                 <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96]">Status</th>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96]">Published</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -99,13 +125,13 @@ export default async function AdminEpisodesPage() {
                       {ep.episode_number ?? '—'}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
+                  <td className="px-4 py-3 min-w-[260px]">
+                    <div className="flex items-center gap-3 min-w-0">
                       {ep.thumbnail_url && (
                         <EpisodeThumbnail src={ep.thumbnail_url} alt={ep.title} />
                       )}
-                      <div className="min-w-0">
-                        <p className="font-body font-semibold text-[13px] text-[#1b3c5a] truncate max-w-[240px]">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-body font-semibold text-[13px] text-[#1b3c5a] truncate">
                           {ep.title}
                         </p>
                         {ep.season && ep.season > 1 && (
@@ -113,6 +139,23 @@ export default async function AdminEpisodesPage() {
                         )}
                       </div>
                     </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    {(() => {
+                      const key = Array.isArray(ep.pillars) ? ep.pillars[0] : null
+                      const meta = key ? PILLAR_META[key] : null
+                      if (!meta) {
+                        return <span className="font-condensed text-[11px] text-[#7a8a96]">—</span>
+                      }
+                      return (
+                        <span
+                          className="font-condensed font-bold uppercase text-[9px] tracking-wider rounded-full px-2 py-0.5 whitespace-nowrap"
+                          style={{ backgroundColor: `${meta.color}1F`, color: meta.color }}
+                        >
+                          {meta.label}
+                        </span>
+                      )
+                    })()}
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
                     {ep.guest_name ? (
@@ -141,6 +184,11 @@ export default async function AdminEpisodesPage() {
                       }
                     >
                       {ep.is_published ? 'Published' : 'Draft'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="font-condensed text-[12px] text-[#7a8a96] whitespace-nowrap">
+                      {fmtPublished(ep.published_at)}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
