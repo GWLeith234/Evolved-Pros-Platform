@@ -132,7 +132,7 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
             margin: '6px 0 0',
             fontFamily: '"Abril Fatface", "Playfair Display", Georgia, serif',
             fontWeight: 400,
-            fontSize: 'clamp(56px, 9vw, 108px)',
+            fontSize: 'clamp(40px, 9vw, 108px)',
             lineHeight: 0.95,
             letterSpacing: '0.005em',
             color: 'var(--ed-text)',

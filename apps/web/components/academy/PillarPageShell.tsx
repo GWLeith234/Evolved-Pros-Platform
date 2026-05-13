@@ -192,7 +192,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
           <h1
             style={{
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900,
-              fontSize: 'clamp(56px, 10vw, 96px)', lineHeight: 0.88,
+              fontSize: 'clamp(40px, 10vw, 96px)', lineHeight: 0.88,
               textTransform: 'uppercase', color: '#faf9f7',
               margin: '0 0 20px', letterSpacing: '-0.02em',
             }}
