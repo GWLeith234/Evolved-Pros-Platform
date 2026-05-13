@@ -62,7 +62,7 @@ function ReplyItem({ reply }: { reply: Reply }) {
           >
             {reply.author.displayName}
           </Link>
-          <span className="font-condensed text-[10px] text-[#7a8a96]" suppressHydrationWarning>
+          <span className="font-condensed text-[12px] sm:text-[10px] text-[#7a8a96]" suppressHydrationWarning>
             {ago}
           </span>
         </div>
@@ -114,7 +114,7 @@ export function PostReplyThread({
       {!showAll && hiddenCount > 0 && (
         <button
           onClick={() => setShowAll(true)}
-          className="font-condensed text-[11px] font-semibold text-[#68a2b9] hover:underline"
+          className="font-condensed text-[12px] sm:text-[11px] font-semibold text-[#68a2b9] hover:underline"
         >
           Show {hiddenCount} more {hiddenCount === 1 ? 'reply' : 'replies'}
         </button>
@@ -156,7 +156,7 @@ export function PostReplyThread({
             <button
               onClick={handleSubmit}
               disabled={submitting || !replyBody.trim()}
-              className="font-condensed font-bold uppercase tracking-wide text-[10px] rounded px-3 py-1.5 text-white transition-all"
+              className="font-condensed font-bold uppercase tracking-wide text-[12px] sm:text-[10px] rounded px-3 py-1.5 text-white transition-all"
               style={{
                 backgroundColor: submitting || !replyBody.trim() ? 'rgba(239,14,48,0.4)' : '#ef0e30',
                 cursor: submitting || !replyBody.trim() ? 'not-allowed' : 'pointer',
