@@ -122,8 +122,8 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
       </div>
 
       {/* Table */}
-      <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'white' }}>
-        <table className="w-full">
+      <div className="rounded-lg overflow-x-auto" style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'white' }}>
+        <table className="w-full min-w-[820px]">
           <thead>
             <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.03)' }}>
               {['Member', 'Plan', 'Status', 'Joined', 'MRR', 'Engagement', 'Vendasta', ''].map(h => (

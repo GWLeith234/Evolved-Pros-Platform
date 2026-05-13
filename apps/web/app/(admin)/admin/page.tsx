@@ -193,7 +193,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Recent signups */}
-      <div className="rounded-lg overflow-hidden mb-6" style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.1)' }}>
+      <div className="rounded-lg overflow-x-auto mb-6" style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.1)' }}>
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}>
           <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[10px] text-[#1b3c5a]">Recent Signups</p>
           <Link href="/admin/members" className="font-condensed text-[10px] text-[#68a2b9] hover:text-[#1b3c5a] transition-colors">
@@ -205,7 +205,7 @@ export default async function AdminDashboardPage() {
             <p className="font-condensed text-[12px] text-[#7a8a96]">No members yet.</p>
           </div>
         ) : (
-          <table className="w-full">
+          <table className="w-full min-w-[520px]">
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.06)' }}>
                 {['Name', 'Email', 'Tier', 'Joined'].map(h => (

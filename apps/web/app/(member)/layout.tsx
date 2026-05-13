@@ -43,7 +43,7 @@ export default async function MemberLayout({ children }: { children: React.React
             </HideOnPodcast>
             <NextEventBanner />
             <div className="flex flex-1 min-h-0">
-              <main className="flex-1 overflow-y-auto pt-[72px] pb-16 lg:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>{children}</main>
+              <main className="flex-1 min-w-0 overflow-y-auto pt-[72px] pb-16 lg:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>{children}</main>
               <RightRail />
             </div>
             <BottomTabBar role={profile.role} unreadCount={0} dmUnreadCount={0} />
@@ -127,8 +127,16 @@ export default async function MemberLayout({ children }: { children: React.React
         <div className="flex flex-1 min-h-0">
           {/* NAV-OVERLAP-FIX: pt-[72px] reserves space for the 72px sticky
               TopNav so page content can never slide under it at 800–1440px
-              viewports where main is the body-scroll container. */}
-          <main className="flex-1 overflow-y-auto pt-[72px] pb-16 lg:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>
+              viewports where main is the body-scroll container.
+              SETTINGS-MEMBERSHIP-SHIFT: min-w-0 lets main shrink below its
+              min-content. Without it, a child with intrinsic min-width >
+              viewport (e.g. the settings tab strip's nowrap buttons) forces
+              main wider than its flex parent. The outer overflow-x-hidden
+              wrapper then becomes a programmatically-scrollable container,
+              and the browser's focus-into-view side-effect on tab clicks
+              scrolls it ~42px. */}
+          <main className="flex-1 min-w-0 overflow-y-auto pt-[72px] pb-16 lg:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>
+
             {children}
           </main>
           <RightRail />
