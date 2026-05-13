@@ -40,13 +40,13 @@ interface WelcomeBannerProps {
 // differ slightly from the project's PILLAR_CONFIG (e.g. orange #D4862B vs
 // #FFA538). Kept in sync with the JSX so the hero matches the design ref.
 
-const ARCH_PILLARS: Record<1 | 2 | 3 | 4 | 5 | 6, { short: string; color: string; label: string }> = {
-  1: { short: 'Foundtn.', color: '#D4862B', label: 'Foundation' },
-  2: { short: 'Identity', color: '#A86CFF', label: 'Identity' },
-  3: { short: 'Mental',   color: '#ef0e30', label: 'Mental Toughness' },
-  4: { short: 'Strategy', color: '#3FB8E8', label: 'Strategy' },
-  5: { short: 'Account.', color: '#E8B547', label: 'Accountability' },
-  6: { short: 'Exec.',    color: '#19C9A6', label: 'Execution' },
+const ARCH_PILLARS: Record<1 | 2 | 3 | 4 | 5 | 6, { short: string; color: string; mobileColor: string; label: string }> = {
+  1: { short: 'Foundtn.', color: '#D4862B', mobileColor: '#FFA538', label: 'Foundation' },
+  2: { short: 'Identity', color: '#A86CFF', mobileColor: '#A78BFA', label: 'Identity' },
+  3: { short: 'Mental',   color: '#ef0e30', mobileColor: '#F87171', label: 'Mental Toughness' },
+  4: { short: 'Strategy', color: '#3FB8E8', mobileColor: '#60A5FA', label: 'Strategy' },
+  5: { short: 'Account.', color: '#E8B547', mobileColor: '#C9A84C', label: 'Accountability' },
+  6: { short: 'Exec.',    color: '#19C9A6', mobileColor: '#0ABFA3', label: 'Execution' },
 }
 
 // Tier colors from welcome-banner.jsx (line 187-191).
@@ -109,13 +109,15 @@ function TierBadge({ tier }: { tier: string }) {
 interface ArchPillar {
   num: 1 | 2 | 3 | 4 | 5 | 6
   short: string
+  full: string
   color: string
+  mobileColor: string
   earned: boolean
   progress: number
 }
 
 function PillarRow({ pillar }: { pillar: ArchPillar }) {
-  const { earned, color, num, short, progress } = pillar
+  const { earned, color, mobileColor, num, short, full, progress } = pillar
   const inProgress = !earned && progress > 0
   const size = 18
   const innerR = size / 2 - 1.5
@@ -123,7 +125,8 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
   const dash = (progress / 100) * circ
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', minWidth: 96 }}>
+    <div className="arch-pillar-row" style={{ width: '100%' }}>
+    <div className="arch-pillar-desktop" style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', minWidth: 96 }}>
       <div
         style={{
           position: 'relative',
@@ -215,6 +218,96 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
       >
         {short}
       </span>
+    </div>
+
+    {/* Mobile variant (<640px): full pillar name, larger type, platform-palette
+        color dot. Hidden on desktop via the @media rule below; the desktop
+        markup above is hidden in turn at mobile widths. */}
+    <div
+      className="arch-pillar-mobile"
+      style={{
+        display: 'none',
+        alignItems: 'center',
+        gap: 12,
+        width: '100%',
+        padding: '10px 4px',
+      }}
+    >
+      <span
+        aria-hidden="true"
+        style={{
+          width: 10,
+          height: 10,
+          borderRadius: '50%',
+          background: mobileColor,
+          boxShadow: earned ? `0 0 6px ${mobileColor}99` : 'none',
+          opacity: earned || inProgress ? 1 : 0.4,
+          flexShrink: 0,
+        }}
+      />
+      <span
+        style={{
+          fontFamily: '"Barlow Condensed", sans-serif',
+          fontWeight: earned ? 700 : inProgress ? 600 : 500,
+          fontSize: 13,
+          letterSpacing: '0.04em',
+          color: earned
+            ? '#fff'
+            : inProgress
+              ? 'rgba(255,255,255,0.9)'
+              : 'rgba(255,255,255,0.6)',
+          flex: 1,
+          minWidth: 0,
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+      >
+        {full}
+      </span>
+      {inProgress && (
+        <span
+          style={{
+            fontFamily: '"Bebas Neue", sans-serif',
+            fontSize: 13,
+            color: mobileColor,
+            fontVariantNumeric: 'tabular-nums',
+            flexShrink: 0,
+          }}
+        >
+          {Math.round(progress)}%
+        </span>
+      )}
+      {earned && (
+        <span
+          style={{
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontWeight: 800,
+            fontSize: 11,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: mobileColor,
+            flexShrink: 0,
+          }}
+        >
+          Earned
+        </span>
+      )}
+      {!earned && !inProgress && (
+        <span
+          aria-hidden="true"
+          style={{
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontWeight: 600,
+            fontSize: 11,
+            color: 'rgba(255,255,255,0.35)',
+            flexShrink: 0,
+          }}
+        >
+          Locked
+        </span>
+      )}
+    </div>
     </div>
   )
 }
@@ -355,7 +448,7 @@ export function WelcomeBanner({
         const conf = ARCH_PILLARS[num]
         const earned = src?.state === 'earned'
         const progress = src?.state === 'in-progress' ? src.progressPct ?? 0 : earned ? 100 : 0
-        return { num, short: conf.short, color: conf.color, earned, progress }
+        return { num, short: conf.short, full: conf.label, color: conf.color, mobileColor: conf.mobileColor, earned, progress }
       }),
     [pillars],
   )
@@ -413,6 +506,12 @@ export function WelcomeBanner({
           .welcome-banner-scoreboard > a:nth-child(2) { border-bottom: 1px solid rgba(255,255,255,0.08); }
           .welcome-banner-scoreboard > a:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.08) !important; }
           .welcome-banner-scoreboard > a:nth-child(n+3) { border-bottom: none; }
+          /* Architecture column — swap to full-width mobile rows */
+          .welcome-banner-architecture { width: 100% !important; }
+          .welcome-banner-architecture > a { width: 100% !important; align-items: stretch !important; padding: 4px 12px !important; gap: 0 !important; }
+          .arch-pillar-desktop { display: none !important; }
+          .arch-pillar-mobile { display: flex !important; }
+          .arch-pillar-row + .arch-pillar-row { border-top: 1px solid rgba(255,255,255,0.06); }
         }
       `}</style>
 
@@ -786,7 +885,7 @@ export function WelcomeBanner({
               </div>
             </div>
 
-            <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'stretch' }}>
+            <div className="welcome-banner-architecture" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'stretch' }}>
               <span
                 style={{
                   fontFamily: '"Barlow Condensed", sans-serif',
