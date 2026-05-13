@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 const BLUE   = '#60A5FA'
@@ -7,8 +8,10 @@ const PURPLE = '#A78BFA'
 const RED    = '#ef0e30'
 const CTA    = '#0ABFA3'
 
+// timeZone: 'UTC' pins the rendered day so SSR (Node, typically UTC) and the
+// client (user's locale TZ) produce identical strings — hydration-stable.
 function formatEventDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
 }
 
 function formatDuration(seconds: number | null): string {
@@ -175,36 +178,9 @@ export function DashboardStrip({ pillarProgress, episode, nextEvent, userRank, n
           </Link>
         )}
 
-        {/* Card 4 — Events (conditional) */}
-        {nextEvent && (() => {
-          const days = daysUntil(nextEvent.startsAt)
-          let evtLabel: string
-          let evtCta: string
-          if (days <= 0) {
-            evtLabel = '🔴 Today'
-            evtCta = 'Register now →'
-          } else if (days === 1) {
-            evtLabel = '🔴 Tomorrow'
-            evtCta = 'Register now →'
-          } else if (days <= 3) {
-            evtLabel = `🔴 ${days} days away`
-            evtCta = 'Register now →'
-          } else if (days <= 7) {
-            evtLabel = '📅 This week'
-            evtCta = 'Register →'
-          } else {
-            evtLabel = '📅 Upcoming'
-            evtCta = 'View →'
-          }
-          return (
-            <Link href="/events" className="ep-strip-card" style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #200a0a, #180606)', border: '1px solid rgba(201,48,42,.3)' }}>
-              <p style={{ ...LABEL_STYLE, color: RED }} suppressHydrationWarning>{evtLabel}</p>
-              <p style={HEADLINE_STYLE}>{nextEvent.title}</p>
-              <p style={SUB_STYLE}>{formatEventDate(nextEvent.startsAt)}</p>
-              <p style={{ ...CTA_STYLE, color: CTA }} suppressHydrationWarning>{evtCta}</p>
-            </Link>
-          )
-        })()}
+        {/* Card 4 — Events (conditional). Time-sensitive label/CTA are
+            mount-deferred to keep SSR HTML stable; see EventCard below. */}
+        {nextEvent && <EventCard startsAt={nextEvent.startsAt} title={nextEvent.title} />}
 
         {/* Card 5 — Leaderboard */}
         <Link
@@ -228,5 +204,44 @@ export function DashboardStrip({ pillarProgress, episode, nextEvent, userRank, n
 
       </div>
     </div>
+  )
+}
+
+// daysUntil() reads Date.now() which differs between SSR write and client
+// hydrate — for an event close to a day boundary the result can shift,
+// producing different evtLabel / evtCta text and triggering React #425.
+// Defer the derived strings to a post-mount render (same pattern as
+// ClientTimeAgo in PostCard) so the first paint is identical SSR vs CSR.
+function EventCard({ startsAt, title }: { startsAt: string; title: string }) {
+  const [derived, setDerived] = useState<{ label: string; cta: string } | null>(null)
+
+  useEffect(() => {
+    const days = daysUntil(startsAt)
+    let label: string
+    let cta: string
+    if (days <= 0)      { label = '🔴 Today';                cta = 'Register now →' }
+    else if (days === 1){ label = '🔴 Tomorrow';             cta = 'Register now →' }
+    else if (days <= 3) { label = `🔴 ${days} days away`;    cta = 'Register now →' }
+    else if (days <= 7) { label = '📅 This week';            cta = 'Register →' }
+    else                { label = '📅 Upcoming';             cta = 'View →' }
+    setDerived({ label, cta })
+  }, [startsAt])
+
+  // First paint (SSR + initial client render) shows the stable, time-agnostic
+  // bucket so SSR HTML and the hydrate match exactly.
+  const label = derived?.label ?? '📅 Upcoming'
+  const cta   = derived?.cta   ?? 'View →'
+
+  return (
+    <Link
+      href="/events"
+      className="ep-strip-card"
+      style={{ ...CARD_BASE, background: 'linear-gradient(135deg, #200a0a, #180606)', border: '1px solid rgba(201,48,42,.3)' }}
+    >
+      <p style={{ ...LABEL_STYLE, color: RED }}>{label}</p>
+      <p style={HEADLINE_STYLE}>{title}</p>
+      <p style={SUB_STYLE}>{formatEventDate(startsAt)}</p>
+      <p style={{ ...CTA_STYLE, color: CTA }}>{cta}</p>
+    </Link>
   )
 }

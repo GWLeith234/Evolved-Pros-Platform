@@ -45,11 +45,14 @@ function tierBadge(tier: string | null): { label: string; color: string } {
   return { label: 'Member', color: '#7a8a96' }
 }
 
+// Pin locale + timezone so SSR (Node, typically UTC) and the client
+// (user's locale + TZ) render identical text — locale drift on
+// `undefined` was firing React #425 on /settings hydrate.
 function formatDate(value: string | null): string {
   if (!value) return '—'
   try {
     const d = new Date(value)
-    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })
   } catch {
     return '—'
   }
