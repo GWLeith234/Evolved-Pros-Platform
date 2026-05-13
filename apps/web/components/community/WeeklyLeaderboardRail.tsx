@@ -118,6 +118,7 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
             return (
               <li
                 key={entry.userId}
+                suppressHydrationWarning
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '24px 32px 1fr auto',
@@ -129,6 +130,7 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
                 }}
               >
                 <span
+                  suppressHydrationWarning
                   style={{
                     fontFamily: FBN,
                     fontSize: 18,
@@ -178,6 +180,7 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
 
                 <div style={{ minWidth: 0 }}>
                   <p
+                    suppressHydrationWarning
                     style={{
                       margin: 0,
                       fontFamily: FB,
@@ -193,6 +196,7 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
                     {entry.displayName}
                     {isMe && (
                       <span
+                        suppressHydrationWarning
                         style={{
                           marginLeft: 6,
                           fontFamily: FBC,
