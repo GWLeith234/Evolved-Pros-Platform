@@ -40,6 +40,7 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
           number get hidden so the row collapses to BACK TO PLATFORM +
           Community/Events/Podcast/Live, which already crowded out at 390px. */}
       <div
+        className="ed-masthead-date-strip"
         style={{
           maxWidth: 1280,
           margin: '0 auto',
@@ -106,6 +107,14 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
           the swipe gesture on touch devices. */}
       <style>{`
         .ed-network-links::-webkit-scrollbar { display: none; }
+        /* MOBILE-MEDIA-FIX: at <640px "BACK TO PLATFORM" + the network links
+           were crowding the row and clipping COMMUN[ity]. Push the network
+           links to a second flexed row on mobile and give the strip a
+           trailing pad so nothing renders flush to the right edge. */
+        @media (max-width: 639px) {
+          .ed-masthead-date-strip { flex-wrap: wrap !important; padding-right: 16px !important; row-gap: 8px; }
+          .ed-network-links { width: 100%; padding-right: 8px; }
+        }
       `}</style>
 
       {/* Masthead title */}

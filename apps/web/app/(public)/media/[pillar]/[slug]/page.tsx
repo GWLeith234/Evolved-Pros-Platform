@@ -220,7 +220,7 @@ export default async function StoryPage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
       {/* 1. Breadcrumb */}
-      <nav style={{ padding: '8px 24px', fontFamily: 'var(--font-condensed)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'rgba(43,58,90,0.45)' }}>
+      <nav className="media-detail-breadcrumb" style={{ padding: '8px 24px', fontFamily: 'var(--font-condensed)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'rgba(43,58,90,0.45)' }}>
         <Link href="/media" style={{ color: 'rgba(43,58,90,0.45)', textDecoration: 'none' }}>Evolved Media</Link>
         <span style={{ margin: '0 6px', color: '#2B3A5A' }}>/</span>
         <Link href={`/media?pillar=${params.pillar}`} style={{ color: pColor, textDecoration: 'none' }}>{pLabel}</Link>
@@ -230,9 +230,11 @@ export default async function StoryPage({
 
       {/* 2. Wide Hero */}
       <div
+        className="media-detail-hero"
         style={{
           position: 'relative',
           width: '100%',
+          maxWidth: '100%',
           minHeight: 280,
           aspectRatio: '21/9',
           maxHeight: 380,
@@ -256,7 +258,7 @@ export default async function StoryPage({
               {isOriginal ? 'Original' : pLabel}
             </span>
           </div>
-          <h1 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 32, color: '#fff', lineHeight: 1.1, maxWidth: 680, margin: '0 0 8px' }}>
+          <h1 className="media-detail-title" style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 32, color: '#fff', lineHeight: 1.1, maxWidth: 680, margin: '0 0 8px', overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
             {story.title}
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -516,6 +518,19 @@ export default async function StoryPage({
           .media-related-grid {
             grid-template-columns: 1fr !important;
           }
+        }
+        /* MOBILE-MEDIA-FIX: at <640px the 32px headline + 24px gutters spill
+           past the 375px viewport. Tighten gutters, shrink the headline, and
+           allow long words to wrap. Body prose inherits the max-width:100%
+           guard so figures/wide tokens can't extend past the article column. */
+        @media (max-width: 639px) {
+          .media-detail-breadcrumb { padding-left: 16px !important; padding-right: 16px !important; }
+          .media-detail-hero { width: 100%; max-width: 100%; }
+          .media-detail-hero > div[style*="position: absolute"]:last-child { padding: 16px !important; }
+          .media-detail-title { font-size: 22px !important; max-width: 100% !important; }
+          .media-detail-grid { padding-left: 16px !important; padding-right: 16px !important; max-width: 100% !important; }
+          .media-prose { max-width: 100%; overflow-wrap: anywhere; word-break: break-word; }
+          .media-prose img, .media-prose iframe, .media-prose table { max-width: 100%; height: auto; }
         }
       `}</style>
     </>

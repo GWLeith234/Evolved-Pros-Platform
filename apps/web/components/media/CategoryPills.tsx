@@ -78,6 +78,12 @@ export function CategoryPills({ initialActive = ALL_LABEL, onSelect }: CategoryP
       ))}
       <style>{`
         .ed-category-pills::-webkit-scrollbar { display: none; }
+        /* Mobile: keep horizontal scroll, but tail-pad the row so the last
+           pill has breathing room from the viewport edge instead of
+           rendering flush. */
+        @media (max-width: 639px) {
+          .ed-category-pills { padding-right: 16px !important; max-width: 100% !important; }
+        }
         @media (min-width: 640px) {
           .ed-category-pills { flex-wrap: wrap !important; overflow-x: visible !important; padding: 20px 24px 0 !important; }
         }

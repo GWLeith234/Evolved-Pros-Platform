@@ -198,6 +198,7 @@ function FeaturedCard({ story }: { story: MediaStory }) {
 
       {/* Title + meta */}
       <div
+        className="ed-featured-meta"
         style={{
           position: 'absolute',
           left: 0,
@@ -208,6 +209,7 @@ function FeaturedCard({ story }: { story: MediaStory }) {
           gridTemplateColumns: 'minmax(0, 1fr) auto',
           gap: 16,
           alignItems: 'end',
+          maxWidth: '100%',
         }}
       >
         <h2
@@ -222,12 +224,16 @@ function FeaturedCard({ story }: { story: MediaStory }) {
             WebkitBoxOrient: 'vertical',
             WebkitLineClamp: 3,
             overflow: 'hidden',
+            overflowWrap: 'anywhere',
+            wordBreak: 'break-word',
+            minWidth: 0,
           }}
         >
           {story.title}
         </h2>
         <span
           suppressHydrationWarning
+          className="ed-featured-meta-byline"
           style={{
             fontSize: 12,
             color: 'rgba(255,255,255,0.7)',
@@ -380,13 +386,13 @@ export function MediaPortalClient({
           <aside>
             {/* Latest Podcast */}
             {episodes.length > 0 && (
-              <div style={{ marginBottom: 16 }}>
+              <div className="ed-rail-card" style={{ marginBottom: 16, maxWidth: '100%', overflow: 'hidden' }}>
                 <div style={{ background: '#2B3A5A', padding: '8px 12px' }}>
                   <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 11, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.10em' }}>
                     Latest Podcast
                   </span>
                 </div>
-                <div style={{ background: '#fff', border: '1px solid rgba(43,58,90,0.1)', borderTop: 'none' }}>
+                <div className="ed-rail-card-body" style={{ background: '#fff', border: '1px solid rgba(43,58,90,0.1)', borderTop: 'none' }}>
                   {episodes.map(ep => (
                     <div key={ep.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderBottom: '1px solid rgba(43,58,90,0.06)' }}>
                       <div style={{ width: 44, height: 44, borderRadius: 4, background: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', flexShrink: 0 }}>
@@ -419,13 +425,13 @@ export function MediaPortalClient({
 
             {/* Latest Stories — always unfiltered so the rail stays useful */}
             {sidebarStories.length > 0 && (
-              <div style={{ marginBottom: 16 }}>
+              <div className="ed-rail-card" style={{ marginBottom: 16, maxWidth: '100%', overflow: 'hidden' }}>
                 <div style={{ background: '#2B3A5A', padding: '8px 12px' }}>
                   <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 11, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.10em' }}>
                     Latest Stories
                   </span>
                 </div>
-                <div style={{ background: '#fff', border: '1px solid rgba(43,58,90,0.1)', borderTop: 'none' }}>
+                <div className="ed-rail-card-body" style={{ background: '#fff', border: '1px solid rgba(43,58,90,0.1)', borderTop: 'none' }}>
                   {sidebarStories.map(s => (
                     <Link key={s.id} href={storyUrl(s)} style={{ display: 'flex', alignItems: 'start', gap: 10, padding: '10px 12px', borderBottom: '1px solid rgba(43,58,90,0.06)', textDecoration: 'none' }}>
                       <div style={{ position: 'relative', width: 64, height: 48, borderRadius: 2, background: '#2B3A5A', overflow: 'hidden', flexShrink: 0 }}>
@@ -506,6 +512,19 @@ export function MediaPortalClient({
         }
         @media (max-width: 767px) {
           .media-hero-grid { grid-template-columns: 1fr !important; }
+        }
+        /* MOBILE-MEDIA-FIX (<640px): featured-card byline must shrink (not
+           overflow) and sidebar rails were rendering white on what users
+           expect to be a dark surface. Constrain everything to viewport
+           width and switch rail cards to the platform dark surface. */
+        @media (max-width: 639px) {
+          .ed-featured-meta { padding: 14px 16px 16px !important; gap: 8px !important; grid-template-columns: 1fr !important; }
+          .ed-featured-meta-byline { text-align: left !important; white-space: normal !important; }
+          .ed-rail-card { width: 100%; max-width: 100%; }
+          .ed-rail-card-body { background: #111926 !important; border-color: #1E2535 !important; }
+          .ed-rail-card-body p { color: rgba(255,255,255,0.85) !important; }
+          .ed-rail-card-body p[style*="rgba(43,58,90,0.45)"],
+          .ed-rail-card-body p[style*="rgba(43,58,90,0.4)"] { color: rgba(255,255,255,0.45) !important; }
         }
         @media (prefers-reduced-motion: reduce) {
           .media-card:hover { transform: none; }
