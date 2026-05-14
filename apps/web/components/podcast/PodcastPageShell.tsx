@@ -25,6 +25,10 @@ export function PodcastPageShell({ episodes }: PodcastPageShellProps) {
   }
 
   const latest = episodes.find(e => e.pinned) ?? episodes[0]
+  // The LATEST EPISODE strip must always track the most-recently-published
+  // episode regardless of pin state — episodes are already ordered
+  // published_at desc by the page-level query.
+  const mostRecent = episodes[0]
 
   // The Archive grid is the canonical "all episodes" surface. Previously
   // we excluded `latest` to avoid double-displaying it under the hero —
@@ -36,7 +40,7 @@ export function PodcastPageShell({ episodes }: PodcastPageShellProps) {
   return (
     <div style={{ background: 'var(--podcast-bg-page)', minHeight: '100vh', color: 'var(--podcast-text-strong)' }}>
       <PodcastThemeBridge theme="navy" />
-      <PodcastLatestStrip episode={latest} />
+      <PodcastLatestStrip episode={mostRecent} />
       <PodcastMasthead />
       <PodcastHero episode={latest} />
       <PodcastGrid episodes={episodes} fallbackEpisode={latest} />
