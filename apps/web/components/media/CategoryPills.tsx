@@ -63,7 +63,7 @@ export function CategoryPills({ initialActive = ALL_LABEL, onSelect }: CategoryP
     >
       <Pill
         label={ALL_LABEL}
-        color="var(--ed-text, #1B2A4A)"
+        color="#112535"
         active={active === ALL_LABEL}
         onClick={() => handleSelect(ALL_LABEL)}
       />
@@ -71,7 +71,7 @@ export function CategoryPills({ initialActive = ALL_LABEL, onSelect }: CategoryP
         <Pill
           key={category}
           label={category}
-          color={CATEGORY_COLORS[category] ?? 'var(--ed-text, #1B2A4A)'}
+          color={CATEGORY_COLORS[category] ?? '#112535'}
           active={active === category}
           onClick={() => handleSelect(category)}
         />
@@ -113,9 +113,9 @@ function Pill({
         alignItems: 'center',
         gap: 6,
         padding: '6px 12px',
-        background: active ? color : 'transparent',
-        border: `1px solid ${active ? color : 'var(--ed-border, #E0D8CC)'}`,
-        color: active ? '#fff' : 'var(--ed-text, #1B2A4A)',
+        background: active ? color : '#FFFFFF',
+        border: `1px solid ${active ? color : '#E5E0D8'}`,
+        color: active ? '#fff' : '#374151',
         fontFamily: '"Barlow Condensed", sans-serif',
         fontWeight: 700,
         fontSize: 11,
