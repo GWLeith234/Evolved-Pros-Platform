@@ -113,9 +113,9 @@ function Pill({
         alignItems: 'center',
         gap: 6,
         padding: '6px 12px',
-        background: active ? color : '#FFFFFF',
-        border: `1px solid ${active ? color : '#E5E0D8'}`,
-        color: active ? '#fff' : '#374151',
+        background: active ? '#112535' : '#FFFFFF',
+        border: `1px solid ${active ? '#112535' : '#E5E0D8'}`,
+        color: active ? '#FFFFFF' : '#374151',
         fontFamily: '"Barlow Condensed", sans-serif',
         fontWeight: 700,
         fontSize: 11,
@@ -132,7 +132,7 @@ function Pill({
         style={{
           width: 6,
           height: 6,
-          background: active ? '#fff' : color,
+          background: active ? '#FFFFFF' : color,
           borderRadius: '50%',
           flexShrink: 0,
         }}

@@ -156,9 +156,9 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
 
       {/* Hairlines */}
       <div style={{ maxWidth: 1280, margin: '8px auto 0', padding: '0 24px' }}>
-        <div style={{ height: 1, background: '#112535' }} />
+        <div style={{ height: 1, background: '#C9A84C' }} />
         <div style={{ height: 3, background: 'transparent' }} />
-        <div style={{ height: 1, background: '#112535' }} />
+        <div style={{ height: 1, background: '#C9A84C' }} />
       </div>
 
       {/* Category nav */}
