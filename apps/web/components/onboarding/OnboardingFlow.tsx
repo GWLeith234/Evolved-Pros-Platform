@@ -127,7 +127,7 @@ export function OnboardingFlow({ initialStep, userId, displayName, company }: Pr
       <p
         style={{
           fontFamily: '"Barlow Condensed", sans-serif',
-          fontSize: '10px',
+          fontSize: '12px',
           fontWeight: 700,
           letterSpacing: '0.18em',
           textTransform: 'uppercase',

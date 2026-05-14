@@ -102,7 +102,7 @@ export function NotifDrawer({ open, onClose, userId, onRead }: NotifDrawerProps)
               <button
                 onClick={() => { void handleMarkAllRead() }}
                 disabled={markingAll}
-                className="font-condensed font-semibold uppercase tracking-wide text-[10px] transition-colors"
+                className="font-condensed font-semibold uppercase tracking-wide text-[12px] transition-colors"
                 style={{ color: 'rgba(255,255,255,0.4)', opacity: markingAll ? 0.5 : 1 }}
                 onMouseEnter={e => { if (!markingAll) (e.currentTarget as HTMLElement).style.color = '#68a2b9' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)' }}
@@ -132,7 +132,7 @@ export function NotifDrawer({ open, onClose, userId, onRead }: NotifDrawerProps)
             Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} />)
           ) : notifications.length === 0 ? (
             <div className="flex items-center justify-center h-32">
-              <p className="font-condensed text-[11px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.25)' }}>
+              <p className="font-condensed text-[12px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.25)' }}>
                 You're all caught up!
               </p>
             </div>
@@ -157,7 +157,7 @@ export function NotifDrawer({ open, onClose, userId, onRead }: NotifDrawerProps)
             <Link
               href="/notifications"
               onClick={onClose}
-              className="font-condensed font-semibold uppercase tracking-wide text-[11px] transition-colors"
+              className="font-condensed font-semibold uppercase tracking-wide text-[12px] transition-colors"
               style={{ color: 'rgba(255,255,255,0.45)' }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'white' }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)' }}

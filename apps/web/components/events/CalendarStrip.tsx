@@ -90,7 +90,7 @@ export function CalendarStrip({ events, onDayClick }: CalendarStripProps) {
         {/* Day labels */}
         <div className="grid grid-cols-7 mb-1">
           {DAY_LABELS.map(d => (
-            <div key={d} className="text-center font-condensed font-bold uppercase text-[9px] text-[#7a8a96] py-1">
+            <div key={d} className="text-center font-condensed font-bold uppercase text-[12px] text-[#7a8a96] py-1">
               {d}
             </div>
           ))}

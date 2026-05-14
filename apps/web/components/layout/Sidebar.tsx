@@ -167,7 +167,7 @@ function SidebarNavItem({
       </span>
       {item.badge !== undefined && item.badge > 0 && (
         <span
-          className="flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full font-condensed font-bold text-[9px] text-white flex items-center justify-center"
+          className="flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full font-condensed font-bold text-[12px] text-white flex items-center justify-center"
           style={{ backgroundColor: item.badgeColor ?? '#ef0e30' }}
         >
           {item.badge}
@@ -181,7 +181,7 @@ function SidebarSection({ title, children }: { title: string; children: React.Re
   return (
     <div className="mb-4">
       <p
-        className="px-5 mb-1 font-condensed font-bold uppercase tracking-[0.2em] text-[9px]"
+        className="px-5 mb-1 font-condensed font-bold uppercase tracking-[0.2em] text-[12px]"
         style={{ color: 'rgba(255,255,255,0.25)' }}
       >
         {title}
@@ -273,7 +273,7 @@ function SidebarAdUnit() {
         right: '8px',
         background: '#ef0e30',
         color: 'white',
-        fontSize: '9px',
+        fontSize: '12px',
         fontWeight: 700,
         borderRadius: '3px',
         padding: '2px 5px',
@@ -292,7 +292,7 @@ function SidebarAdUnit() {
       }}>
         <span style={{
           color: 'white',
-          fontSize: '11px',
+          fontSize: '12px',
           fontWeight: 600,
           overflow: 'hidden',
           textOverflow: 'ellipsis',

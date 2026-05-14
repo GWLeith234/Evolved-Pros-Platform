@@ -105,7 +105,7 @@ export function PipelineForm() {
         <div className="flex" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           {(['upload', 'paste', 'url'] as const).map(m => (
             <button key={m} type="button" onClick={() => setMode(m)}
-              className="flex-1 py-2.5 font-condensed font-semibold uppercase tracking-[0.12em] text-[10px] transition-colors"
+              className="flex-1 py-2.5 font-condensed font-semibold uppercase tracking-[0.12em] text-[12px] transition-colors"
               style={modeStyle(m)}>
               {m === 'upload' ? 'Upload file' : m === 'paste' ? 'Paste transcript' : 'Episode URL'}
             </button>
@@ -119,10 +119,10 @@ export function PipelineForm() {
               className="flex flex-col items-center justify-center gap-2 rounded-lg cursor-pointer py-8"
               style={{ border: '2px dashed rgba(255,255,255,0.12)' }}
             >
-              <span className="font-condensed font-semibold text-[11px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              <span className="font-condensed font-semibold text-[12px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
                 {transcribing ? 'Transcribing...' : 'Drop audio/text file or click to browse'}
               </span>
-              <span className="font-condensed text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>.mp3 .mp4 .m4a .txt</span>
+              <span className="font-condensed text-[12px]" style={{ color: 'rgba(255,255,255,0.2)' }}>.mp3 .mp4 .m4a .txt</span>
               <input ref={fileRef} type="file" accept=".mp3,.mp4,.m4a,.txt" className="hidden"
                 onChange={e => { const f = e.target.files?.[0]; if (f) handleFileUpload(f) }} />
             </div>
@@ -139,12 +139,12 @@ export function PipelineForm() {
             <div>
               <input type="url" placeholder="https://youtube.com/watch?v=..." className={inputClass}
                 style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} />
-              <p className="font-condensed text-[9px] mt-1" style={{ color: 'rgba(255,255,255,0.2)' }}>Paste transcript below after loading URL</p>
+              <p className="font-condensed text-[12px] mt-1" style={{ color: 'rgba(255,255,255,0.2)' }}>Paste transcript below after loading URL</p>
             </div>
           )}
 
           {transcript && (
-            <p className="font-condensed text-[10px]" style={{ color: '#0ABFA3' }}>
+            <p className="font-condensed text-[12px]" style={{ color: '#0ABFA3' }}>
               {transcript.split(/\s+/).length.toLocaleString()} words loaded
             </p>
           )}
@@ -156,7 +156,7 @@ export function PipelineForm() {
           <div className="flex flex-wrap gap-1.5">
             {PILLARS.map(p => (
               <button key={p.key} type="button" onClick={() => setPillar(p.key === pillar ? '' : p.key)}
-                className="font-condensed font-semibold uppercase tracking-[0.1em] text-[9px] rounded-full px-3 py-1 transition-all"
+                className="font-condensed font-semibold uppercase tracking-[0.1em] text-[12px] rounded-full px-3 py-1 transition-all"
                 style={{
                   backgroundColor: pillar === p.key ? `${p.color}20` : 'rgba(255,255,255,0.04)',
                   color: pillar === p.key ? p.color : 'rgba(255,255,255,0.35)',

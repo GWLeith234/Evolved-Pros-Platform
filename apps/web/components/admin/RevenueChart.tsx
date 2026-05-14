@@ -39,7 +39,7 @@ export function RevenueChart({
         className="rounded-lg p-6 mb-6"
         style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.1)' }}
       >
-        <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[10px] text-[#7a8a96] mb-5">
+        <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[12px] text-[#7a8a96] mb-5">
           MRR — Last 6 Months
         </p>
 
@@ -49,7 +49,7 @@ export function RevenueChart({
             const heightPct = maxMrr > 0 ? (month.mrr / maxMrr) * 100 : 0
             return (
               <div key={month.label} className="flex-1 flex flex-col items-center gap-1.5">
-                <span className="font-condensed font-bold text-[10px]" style={{ color: '#1b3c5a' }}>
+                <span className="font-condensed font-bold text-[12px]" style={{ color: '#1b3c5a' }}>
                   ${month.mrr > 999 ? `${(month.mrr / 1000).toFixed(1)}k` : month.mrr}
                 </span>
                 <div
@@ -60,13 +60,13 @@ export function RevenueChart({
                     maxHeight: '80px',
                   }}
                 />
-                <span className="font-condensed text-[10px] text-[#7a8a96]">{month.label}</span>
+                <span className="font-condensed text-[12px] text-[#7a8a96]">{month.label}</span>
               </div>
             )
           })}
         </div>
 
-        <p className="font-condensed text-[10px] text-[#7a8a96] mt-3">
+        <p className="font-condensed text-[12px] text-[#7a8a96] mt-3">
           Red bar = current month · Based on active tier counts × price
         </p>
       </div>
@@ -80,7 +80,7 @@ export function RevenueChart({
             style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.1)' }}
           >
             <p
-              className="font-condensed font-bold uppercase tracking-[0.16em] text-[9px] mb-2"
+              className="font-condensed font-bold uppercase tracking-[0.16em] text-[12px] mb-2"
               style={{ color: s.color }}
             >
               {s.label}
@@ -89,7 +89,7 @@ export function RevenueChart({
               {s.value.split(' ')[0]}
             </p>
             {s.value.includes(' ') && (
-              <p className="font-condensed text-[10px] text-[#7a8a96] mt-0.5">
+              <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
                 {s.value.slice(s.value.indexOf(' ') + 1)}
               </p>
             )}

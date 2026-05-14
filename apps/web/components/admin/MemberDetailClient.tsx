@@ -200,7 +200,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
             <div className="flex items-center gap-2 mt-1">
               {member.tier && (
                 <span
-                  className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded"
+                  className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
                   style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.15)' }}
                 >
                   {member.tier.toUpperCase()}
@@ -208,13 +208,13 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
               )}
               {member.tierStatus && (
                 <span
-                  className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded"
+                  className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
                   style={{ backgroundColor: 'rgba(34,197,94,0.08)', color: '#15803d' }}
                 >
                   {member.tierStatus.toUpperCase()}
                 </span>
               )}
-              <span className="font-condensed text-[10px] text-[#c9a84c] font-bold">{member.points} pts</span>
+              <span className="font-condensed text-[12px] text-[#c9a84c] font-bold">{member.points} pts</span>
             </div>
           </div>
         </div>
@@ -224,7 +224,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
             href={getVendastaCrmUrl(member.vendastaContactId)}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-condensed font-semibold uppercase tracking-wide text-[10px] px-3 py-2 rounded transition-all"
+            className="font-condensed font-semibold uppercase tracking-wide text-[12px] px-3 py-2 rounded transition-all"
             style={{ color: '#68a2b9', border: '1px solid rgba(104,162,185,0.3)' }}
           >
             View in Vendasta CRM →
@@ -237,13 +237,13 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
         className="rounded-lg p-5 mb-6"
         style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.1)' }}
       >
-        <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[10px] text-[#1b3c5a] mb-4">
+        <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[12px] text-[#1b3c5a] mb-4">
           Admin Actions
         </p>
         <div className="flex flex-wrap items-end gap-4">
           {/* Tier */}
           <div>
-            <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] mb-1">
+            <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[12px] text-[#7a8a96] mb-1">
               Tier
             </label>
             <select
@@ -259,7 +259,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
 
           {/* Status */}
           <div>
-            <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] mb-1">
+            <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[12px] text-[#7a8a96] mb-1">
               Status
             </label>
             <select
@@ -278,14 +278,14 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
           <button
             onClick={handleSaveTier}
             disabled={saving}
-            className="font-condensed font-bold uppercase tracking-wide text-[11px] px-4 py-2 rounded transition-all disabled:opacity-50"
+            className="font-condensed font-bold uppercase tracking-wide text-[12px] px-4 py-2 rounded transition-all disabled:opacity-50"
             style={{ backgroundColor: '#1b3c5a', color: 'white' }}
           >
             {saving ? 'Saving…' : 'Update'}
           </button>
 
           {saveMsg && (
-            <span className="font-condensed text-[11px] text-[#15803d]">{saveMsg}</span>
+            <span className="font-condensed text-[12px] text-[#15803d]">{saveMsg}</span>
           )}
 
           {/* Suspend shortcut — requires confirmation to prevent accidental clicks */}
@@ -299,7 +299,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
                 setTierStatus('cancelled')
                 void handleSaveTier()
               }}
-              className="font-condensed font-bold uppercase tracking-wide text-[11px] px-4 py-2 rounded transition-all ml-auto"
+              className="font-condensed font-bold uppercase tracking-wide text-[12px] px-4 py-2 rounded transition-all ml-auto"
               style={{ color: '#ef0e30', border: '1px solid rgba(239,14,48,0.3)' }}
             >
               Suspend Member
@@ -309,7 +309,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
 
         {/* Direct notification */}
         <div className="mt-5 pt-5" style={{ borderTop: '1px solid rgba(27,60,90,0.08)' }}>
-          <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] mb-3">
+          <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] text-[#7a8a96] mb-3">
             Send Direct Notification
           </p>
           <div className="flex flex-wrap gap-2">
@@ -334,13 +334,13 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
             <button
               onClick={handleSendNotif}
               disabled={notifSending || !notifTitle.trim() || !notifBody.trim()}
-              className="font-condensed font-bold uppercase tracking-wide text-[11px] px-4 py-1.5 rounded disabled:opacity-50"
+              className="font-condensed font-bold uppercase tracking-wide text-[12px] px-4 py-1.5 rounded disabled:opacity-50"
               style={{ backgroundColor: '#68a2b9', color: 'white' }}
             >
               {notifSending ? 'Sending…' : 'Send'}
             </button>
           </div>
-          {notifMsg && <p className="font-condensed text-[11px] text-[#15803d] mt-1">{notifMsg}</p>}
+          {notifMsg && <p className="font-condensed text-[12px] text-[#15803d] mt-1">{notifMsg}</p>}
         </div>
       </div>
 
@@ -350,7 +350,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className="font-condensed font-bold uppercase tracking-[0.12em] text-[11px] px-5 py-3 transition-all relative"
+            className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] px-5 py-3 transition-all relative"
             style={{ color: tab === t.id ? '#1b3c5a' : '#7a8a96' }}
           >
             {t.label}
@@ -380,7 +380,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
               className="rounded px-4 py-3"
               style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.08)' }}
             >
-              <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] mb-0.5">{item.label}</p>
+              <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] text-[#7a8a96] mb-0.5">{item.label}</p>
               <p className="font-condensed font-semibold text-[14px] text-[#112535]">{item.value}</p>
             </div>
           ))}
@@ -399,10 +399,10 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
                 style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.08)' }}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-condensed font-bold text-[10px] text-[#68a2b9]">
+                  <span className="font-condensed font-bold text-[12px] text-[#68a2b9]">
                     #{(post.channels as { name: string; slug: string } | null)?.slug ?? 'general'}
                   </span>
-                  <span className="font-condensed text-[10px] text-[#7a8a96]">{fmtDatetime(post.created_at)}</span>
+                  <span className="font-condensed text-[12px] text-[#7a8a96]">{fmtDatetime(post.created_at)}</span>
                 </div>
                 <p className="font-body text-[13px] text-[#112535] line-clamp-2">{post.body}</p>
               </div>
@@ -425,7 +425,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
               >
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <span className="font-condensed font-bold text-[10px] text-[#68a2b9] mr-2">P{group.pillarNumber}</span>
+                    <span className="font-condensed font-bold text-[12px] text-[#68a2b9] mr-2">P{group.pillarNumber}</span>
                     <span className="font-condensed font-semibold text-[13px] text-[#112535]">{group.courseTitle}</span>
                   </div>
                   <span className="font-condensed font-bold text-[12px] text-[#1b3c5a]">{completed}/{total} ({pct}%)</span>
@@ -459,7 +459,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.03)' }}>
                     {['Event', 'Order ID', 'SKU', 'Date', 'Status'].map(h => (
-                      <th key={h} className="px-4 py-2 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">
+                      <th key={h} className="px-4 py-2 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96]">
                         {h}
                       </th>
                     ))}
@@ -471,20 +471,20 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
                     return (
                       <tr key={wh.id} style={{ borderBottom: i === arr.length - 1 ? 'none' : '1px solid rgba(27,60,90,0.06)' }}>
                         <td className="px-4 py-2.5">
-                          <span className="font-condensed text-[11px] text-[#1b3c5a]">{wh.event_type}</span>
+                          <span className="font-condensed text-[12px] text-[#1b3c5a]">{wh.event_type}</span>
                         </td>
                         <td className="px-4 py-2.5">
-                          <span className="font-condensed text-[11px] text-[#7a8a96]">{wh.vendasta_order_id ?? '—'}</span>
+                          <span className="font-condensed text-[12px] text-[#7a8a96]">{wh.vendasta_order_id ?? '—'}</span>
                         </td>
                         <td className="px-4 py-2.5">
-                          <span className="font-condensed text-[11px] text-[#7a8a96]">{wh.product_sku ?? '—'}</span>
+                          <span className="font-condensed text-[12px] text-[#7a8a96]">{wh.product_sku ?? '—'}</span>
                         </td>
                         <td className="px-4 py-2.5">
-                          <span className="font-condensed text-[11px] text-[#7a8a96]">{fmtDatetime(wh.processed_at)}</span>
+                          <span className="font-condensed text-[12px] text-[#7a8a96]">{fmtDatetime(wh.processed_at)}</span>
                         </td>
                         <td className="px-4 py-2.5">
                           <span
-                            className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded"
+                            className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
                             style={{ backgroundColor: sc.bg, color: sc.color }}
                           >
                             {wh.status}

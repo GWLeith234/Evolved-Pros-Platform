@@ -147,7 +147,7 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
             </span>
             <span
               className="font-condensed font-bold uppercase leading-none"
-              style={{ fontSize: '10px', color: 'rgba(255,255,255,0.75)', marginTop: '2px' }}
+              style={{ fontSize: '12px', color: 'rgba(255,255,255,0.75)', marginTop: '2px' }}
             >
               {month}
             </span>
@@ -155,7 +155,7 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
           {/* Type badge — top-right */}
           <div className="absolute top-3 right-3">
             <span
-              className="font-condensed font-bold uppercase tracking-wide text-[9px] rounded px-2 py-1 text-white"
+              className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-2 py-1 text-white"
               style={{ backgroundColor: badgeBg }}
             >
               {typeLabel}
@@ -174,7 +174,7 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
             {event.title}
           </h3>
         </Link>
-        <p className="font-condensed text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+        <p className="font-condensed text-[12px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
           {time}{duration ? ` · ${duration}` : ''}
           {event.registrationCount > 0 && ` · ${event.registrationCount} registered`}
         </p>

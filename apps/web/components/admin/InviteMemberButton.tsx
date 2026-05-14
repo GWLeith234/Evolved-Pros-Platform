@@ -14,7 +14,7 @@ export function InviteMemberButton({ variant: _variant = 'header' }: InviteMembe
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="font-condensed font-bold uppercase tracking-[0.12em] text-[11px] rounded px-4 py-2 transition-all"
+        className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] rounded px-4 py-2 transition-all"
         style={{ backgroundColor: '#1b3c5a', color: 'white' }}
       >
         + Invite Member
@@ -84,7 +84,7 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
         <div className="flex items-start justify-between mb-4">
           <div>
             <h2 className="font-display font-bold text-[20px] text-[#112535]">Invite member</h2>
-            <p className="font-condensed text-[11px] text-[#7a8a96] mt-0.5">
+            <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
               We&rsquo;ll email a magic-link sign-in.
             </p>
           </div>
@@ -111,7 +111,7 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
               <button
                 type="button"
                 onClick={() => setSentTo(null)}
-                className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2 transition-all"
+                className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-4 py-2 transition-all"
                 style={{ border: '1px solid rgba(27,60,90,0.25)', color: '#1b3c5a' }}
               >
                 Send another
@@ -119,7 +119,7 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2 transition-all"
+                className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-4 py-2 transition-all"
                 style={{ backgroundColor: '#1b3c5a', color: 'white' }}
               >
                 Done
@@ -129,7 +129,7 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
         ) : (
           <div className="space-y-3">
             <div>
-              <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
+              <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96] mb-1.5">
                 Full name
               </label>
               <input
@@ -142,7 +142,7 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
               />
             </div>
             <div>
-              <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
+              <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96] mb-1.5">
                 Email
               </label>
               <input
@@ -155,7 +155,7 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
               />
             </div>
             <div>
-              <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
+              <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96] mb-1.5">
                 Tier
               </label>
               <div className="flex gap-2">
@@ -164,7 +164,7 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
                     key={t}
                     type="button"
                     onClick={() => setTier(t)}
-                    className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2 flex-1 transition-all"
+                    className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-4 py-2 flex-1 transition-all"
                     style={{
                       backgroundColor: tier === t ? '#1b3c5a' : 'transparent',
                       color: tier === t ? 'white' : '#1b3c5a',
@@ -193,7 +193,7 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={onClose}
                 disabled={busy}
-                className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2"
+                className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-4 py-2"
                 style={{ color: '#7a8a96' }}
               >
                 Cancel
@@ -202,7 +202,7 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={send}
                 disabled={busy || !email.trim() || !fullName.trim()}
-                className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2 transition-all disabled:opacity-50"
+                className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-4 py-2 transition-all disabled:opacity-50"
                 style={{ backgroundColor: '#1b3c5a', color: 'white' }}
               >
                 {busy ? 'Sending…' : 'Send Invite'}

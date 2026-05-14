@@ -107,7 +107,7 @@ export function EpisodePlayer({ muxPlaybackId, youtubeUrl, title }: EpisodePlaye
       className="w-full rounded-xl flex items-center justify-center"
       style={{ aspectRatio: '16/9', backgroundColor: '#112535', border: '1px dashed rgba(255,255,255,0.1)' }}
     >
-      <p className="font-condensed font-bold uppercase tracking-widest text-[11px]" style={{ color: 'rgba(255,255,255,0.3)' }}>
+      <p className="font-condensed font-bold uppercase tracking-widest text-[12px]" style={{ color: 'rgba(255,255,255,0.3)' }}>
         Video coming soon
       </p>
     </div>

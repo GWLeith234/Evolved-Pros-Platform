@@ -26,7 +26,7 @@ const inputStyle: React.CSSProperties = {
 const labelStyle: React.CSSProperties = {
   fontFamily: '"Barlow Condensed", sans-serif',
   fontWeight: 700,
-  fontSize: '9px',
+  fontSize: '12px',
   letterSpacing: '0.18em',
   textTransform: 'uppercase',
   color: 'rgba(255,255,255,0.35)',
@@ -131,11 +131,11 @@ export function OnboardingProfile({ userId, onContinue }: Props) {
             </svg>
           )}
         </button>
-        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: uploading ? GOLD : 'rgba(255,255,255,0.3)', marginTop: '8px' }}>
+        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: uploading ? GOLD : 'rgba(255,255,255,0.3)', marginTop: '8px' }}>
           {uploading ? 'Uploading…' : avatarUrl ? 'Tap to change' : 'Add a photo'}
         </p>
         {uploadError && (
-          <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '11px', color: '#ef0e30', marginTop: '4px', textAlign: 'center' }}>{uploadError}</p>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '12px', color: '#ef0e30', marginTop: '4px', textAlign: 'center' }}>{uploadError}</p>
         )}
         <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
       </div>

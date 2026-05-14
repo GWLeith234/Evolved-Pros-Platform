@@ -116,11 +116,11 @@ export function BannerPickerModal({ userId, userEmail, currentBannerUrl, onSave,
             marginBottom: '20px',
           }}
         >
-          <p className="font-condensed font-bold uppercase tracking-wide text-[11px] mb-2" style={{ color: '#7a8a96' }}>
+          <p className="font-condensed font-bold uppercase tracking-wide text-[12px] mb-2" style={{ color: '#7a8a96' }}>
             Upload your own
           </p>
           <label
-            className="inline-flex items-center gap-2 cursor-pointer rounded px-4 py-2 font-condensed font-semibold uppercase text-[11px] tracking-wide"
+            className="inline-flex items-center gap-2 cursor-pointer rounded px-4 py-2 font-condensed font-semibold uppercase text-[12px] tracking-wide"
             style={{
               border: '1px solid rgba(27,60,90,0.2)',
               color: '#1b3c5a',

@@ -100,7 +100,7 @@ export function AcademyMobileProgress({ courses, userTier, overallPct }: Academy
                     className="flex items-center justify-between py-1.5"
                     style={{ color: 'rgba(255,255,255,0.3)' }}
                   >
-                    <span className="font-condensed font-semibold text-[11px] uppercase tracking-wide">{label}</span>
+                    <span className="font-condensed font-semibold text-[12px] uppercase tracking-wide">{label}</span>
                     <span
                       className="font-condensed font-bold uppercase text-[8px] rounded px-1.5 py-0.5"
                       style={{ color: '#ef0e30', backgroundColor: 'rgba(239,14,48,0.12)', border: '1px solid rgba(239,14,48,0.2)' }}
@@ -114,8 +114,8 @@ export function AcademyMobileProgress({ courses, userTier, overallPct }: Academy
                     className="flex items-center justify-between py-1.5"
                     style={{ color: 'rgba(255,255,255,0.7)' }}
                   >
-                    <span className="font-condensed font-semibold text-[11px] uppercase tracking-wide">{label}</span>
-                    <span className="font-condensed font-bold text-[11px]" style={{ color: '#68a2b9' }}>
+                    <span className="font-condensed font-semibold text-[12px] uppercase tracking-wide">{label}</span>
+                    <span className="font-condensed font-bold text-[12px]" style={{ color: '#68a2b9' }}>
                       {course.progressPct}%
                     </span>
                   </Link>

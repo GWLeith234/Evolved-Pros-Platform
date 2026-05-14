@@ -77,7 +77,7 @@ export function ProfileAdUnit({ ad }: ProfileAdUnitProps) {
           {label}
         </p>
         {ad.sponsor_name && ad.headline && (
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '11px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.3 }}>
+          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.3 }}>
             {ad.sponsor_name}
           </p>
         )}
@@ -91,7 +91,7 @@ export function ProfileAdUnit({ ad }: ProfileAdUnitProps) {
           color: 'white',
           fontFamily: '"Barlow Condensed", sans-serif',
           fontWeight: 700,
-          fontSize: '11px',
+          fontSize: '12px',
           letterSpacing: '0.08em',
           textTransform: 'uppercase',
           padding: '7px 14px',

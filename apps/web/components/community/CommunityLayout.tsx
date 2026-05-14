@@ -73,7 +73,7 @@ export function CommunityLayout({
                 onClick={() => handleMobileChannelClick(ch.slug)}
                 className="flex-shrink-0 font-condensed font-semibold uppercase tracking-wide"
                 style={{
-                  fontSize: '11px',
+                  fontSize: '12px',
                   padding: '6px 12px',
                   borderRadius: '9999px',
                   backgroundColor: active ? 'rgba(104,162,185,0.2)' : 'rgba(255,255,255,0.06)',

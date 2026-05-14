@@ -284,7 +284,7 @@ export function UnifiedCommunityPage({
               }}
             >
               <p
-                className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] sm:text-[9px] mb-2"
+                className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] sm:text-[12px] mb-2"
                 style={{ color: '#C9A84C' }}
               >
                 📌 {pinnedPost.label}
@@ -414,7 +414,7 @@ export function UnifiedCommunityPage({
           )}
 
           {!hasMore && posts.length > 0 && (
-            <p className="text-center font-condensed text-[12px] sm:text-[10px] tracking-widest py-4" style={{ color: 'rgba(255,255,255,0.2)' }}>
+            <p className="text-center font-condensed text-[12px] sm:text-[12px] tracking-widest py-4" style={{ color: 'rgba(255,255,255,0.2)' }}>
               You&apos;ve reached the beginning
             </p>
           )}

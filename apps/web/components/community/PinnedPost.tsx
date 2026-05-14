@@ -15,7 +15,7 @@ export function PinnedPost({ label, body }: PinnedPostProps) {
       }}
     >
       <p
-        className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] sm:text-[9px] mb-2"
+        className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] sm:text-[12px] mb-2"
         style={{ color: '#ef0e30' }}
       >
         📌 {label}

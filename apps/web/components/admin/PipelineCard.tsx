@@ -32,10 +32,10 @@ export function PipelineCard({ member, isUpgradeReady = false }: PipelineCardPro
       }}
     >
       <p className="font-body font-semibold text-[13px] text-[#1b3c5a] mb-0.5">{name}</p>
-      <p className="font-condensed text-[11px] text-[#7a8a96] mb-1.5">{stageContext}</p>
+      <p className="font-condensed text-[12px] text-[#7a8a96] mb-1.5">{stageContext}</p>
 
       {member.stageNote && (
-        <p className="font-condensed text-[10px] text-[#7a8a96] mb-1.5">{member.stageNote}</p>
+        <p className="font-condensed text-[12px] text-[#7a8a96] mb-1.5">{member.stageNote}</p>
       )}
 
       <div className="flex items-center justify-between">
@@ -47,7 +47,7 @@ export function PipelineCard({ member, isUpgradeReady = false }: PipelineCardPro
             ${member.estimatedValue.toLocaleString()}/yr
           </span>
         ) : (
-          <span className="font-condensed text-[10px] text-[#7a8a96]">—</span>
+          <span className="font-condensed text-[12px] text-[#7a8a96]">—</span>
         )}
         {member.overridden && (
           <span

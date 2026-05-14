@@ -130,7 +130,7 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
       <div style={{ marginBottom: '16px' }}>
         <p style={{
           fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-          fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
+          fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
           color: GOLD, margin: '0 0 2px',
         }}>
           This Week&apos;s Commitments
@@ -142,7 +142,7 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
           {hasSaved && (
             <span style={{
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase',
+              fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase',
               color: completedCount === savedCommitments.length ? CRIMSON : 'rgba(250,249,247,0.3)',
             }}>
               {completedCount} / {savedCommitments.length}
@@ -203,7 +203,7 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
             style={{
               background: 'none', border: 'none', cursor: 'pointer',
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase',
+              fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase',
               color: 'var(--text-tertiary)', padding: '8px 0 0', textAlign: 'left',
             }}
           >
@@ -242,7 +242,7 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
               backgroundColor: inputs.some(s => s.trim()) ? GOLD : 'rgba(255,255,255,0.05)',
               color: inputs.some(s => s.trim()) ? '#0A0F18' : 'rgba(255,255,255,0.2)',
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase',
+              fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
               padding: '10px', borderRadius: '4px', border: 'none',
               cursor: inputs.some(s => s.trim()) ? 'pointer' : 'default',
               marginTop: '4px', transition: 'all 0.15s',

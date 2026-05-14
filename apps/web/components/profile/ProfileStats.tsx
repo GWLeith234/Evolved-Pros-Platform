@@ -13,7 +13,7 @@ const PILLAR_NUMBERS = [1, 2, 3, 4, 5, 6] as const
 const labelStyle: React.CSSProperties = {
   fontFamily: '"Barlow Condensed", sans-serif',
   fontWeight: 600,
-  fontSize: '9px',
+  fontSize: '12px',
   textTransform: 'uppercase',
   letterSpacing: '0.22em',
   color: '#7a8a96',

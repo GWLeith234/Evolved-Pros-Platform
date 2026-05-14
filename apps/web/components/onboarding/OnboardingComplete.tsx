@@ -80,7 +80,7 @@ export function OnboardingComplete({ displayName }: Props) {
         <p style={{
           fontFamily: '"Barlow Condensed", sans-serif',
           fontWeight: 700,
-          fontSize: '11px',
+          fontSize: '12px',
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
           color: TEAL,

@@ -195,7 +195,7 @@ export function ConceptMatch({ courseId, pairs, title }: Props) {
             </button>
           )}
           {submitted && (
-            <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: TEAL }}>
+            <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: TEAL }}>
               ✓ Score Saved
             </span>
           )}
@@ -226,7 +226,7 @@ export function ConceptMatch({ courseId, pairs, title }: Props) {
           <p style={{ color: 'rgba(250,249,247,0.4)', fontSize: '13px', margin: 0 }}>
             Match each term to its definition.
           </p>
-          <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', color: matchedCount > 0 ? TEAL : 'rgba(250,249,247,0.25)' }}>
+          <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', color: matchedCount > 0 ? TEAL : 'rgba(250,249,247,0.25)' }}>
             {matchedCount} / {pairs.length} matched
           </span>
         </div>
@@ -297,7 +297,7 @@ const surfaceCard: React.CSSProperties = {
 const eyebrow: React.CSSProperties = {
   fontFamily: '"Barlow Condensed", sans-serif',
   fontWeight: 700,
-  fontSize: '10px',
+  fontSize: '12px',
   letterSpacing: '0.22em',
   textTransform: 'uppercase',
   color: GOLD,
@@ -307,7 +307,7 @@ const eyebrow: React.CSSProperties = {
 const colHeader: React.CSSProperties = {
   fontFamily: '"Barlow Condensed", sans-serif',
   fontWeight: 700,
-  fontSize: '10px',
+  fontSize: '12px',
   letterSpacing: '0.18em',
   textTransform: 'uppercase',
   color: 'rgba(250,249,247,0.25)',
@@ -320,7 +320,7 @@ const ghostBtn: React.CSSProperties = {
   cursor: 'pointer',
   fontFamily: '"Barlow Condensed", sans-serif',
   fontWeight: 700,
-  fontSize: '11px',
+  fontSize: '12px',
   letterSpacing: '0.12em',
   textTransform: 'uppercase',
   color: 'rgba(250,249,247,0.3)',

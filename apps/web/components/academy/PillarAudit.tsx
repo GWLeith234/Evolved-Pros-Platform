@@ -85,7 +85,7 @@ export function PillarAudit({ courseId, questions, pillarColor = '#C9A84C' }: Pr
         <p
           style={{
             fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-            fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
+            fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
             color: pillarColor, margin: '0 0 20px',
           }}
         >
@@ -105,7 +105,7 @@ export function PillarAudit({ courseId, questions, pillarColor = '#C9A84C' }: Pr
             <p
               style={{
                 fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-                fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
+                fontSize: '12px', letterSpacing: '0.18em', textTransform: 'uppercase',
                 color: 'rgba(250,249,247,0.3)', margin: '4px 0 0',
               }}
             >
@@ -141,7 +141,7 @@ export function PillarAudit({ courseId, questions, pillarColor = '#C9A84C' }: Pr
               background: 'none', border: `1px solid rgba(255,255,255,0.12)`,
               borderRadius: '4px', padding: '6px 14px',
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase',
+              fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
               color: 'rgba(250,249,247,0.5)', cursor: 'pointer',
             }}
           >
@@ -165,7 +165,7 @@ export function PillarAudit({ courseId, questions, pillarColor = '#C9A84C' }: Pr
       <p
         style={{
           fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-          fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
+          fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
           color: pillarColor, margin: '0 0 4px',
         }}
       >

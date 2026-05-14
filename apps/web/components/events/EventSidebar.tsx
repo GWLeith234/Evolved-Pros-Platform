@@ -25,7 +25,7 @@ const TYPE_ITEMS: { key: EventType; label: string }[] = [
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="px-5 mt-5 mb-1 font-condensed font-bold uppercase tracking-[0.22em] text-[9px]"
+    <p className="px-5 mt-5 mb-1 font-condensed font-bold uppercase tracking-[0.22em] text-[12px]"
       style={{ color: 'rgba(255,255,255,0.2)' }}>
       {children}
     </p>
@@ -69,7 +69,7 @@ function SidebarBtn({
         {children}
       </span>
       {badge !== undefined && badge > 0 && (
-        <span className="flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full font-condensed font-bold text-[9px] text-white flex items-center justify-center"
+        <span className="flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full font-condensed font-bold text-[12px] text-white flex items-center justify-center"
           style={{ backgroundColor: '#68a2b9' }}>
           {badge}
         </span>

@@ -105,7 +105,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className="font-condensed font-bold uppercase tracking-[0.1em] text-[10px] px-3 py-1.5 rounded transition-all"
+              className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-3 py-1.5 rounded transition-all"
               style={{
                 backgroundColor: filter === f ? '#1b3c5a' : 'rgba(27,60,90,0.05)',
                 color: filter === f ? 'white' : '#7a8a96',
@@ -116,7 +116,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
             </button>
           ))}
         </div>
-        <span className="font-condensed text-[11px] text-[#7a8a96] ml-auto">
+        <span className="font-condensed text-[12px] text-[#7a8a96] ml-auto">
           {filtered.length} of {initialMembers.length}
         </span>
       </div>
@@ -129,7 +129,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
               {['Member', 'Plan', 'Status', 'Joined', 'MRR', 'Engagement', 'Vendasta', ''].map(h => (
                 <th
                   key={h}
-                  className="px-4 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]"
+                  className="px-4 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96]"
                 >
                   {h}
                 </th>
@@ -160,7 +160,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <div
-                          className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-white font-condensed font-bold text-[10px]"
+                          className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-white font-condensed font-bold text-[12px]"
                           style={{ backgroundColor: '#1b3c5a' }}
                         >
                           {m.avatarUrl ? (
@@ -170,7 +170,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                         </div>
                         <div>
                           <p className="font-body font-semibold text-[12px] text-[#112535] leading-tight">{name}</p>
-                          <p className="font-condensed text-[10px] text-[#7a8a96]">{m.email}</p>
+                          <p className="font-condensed text-[12px] text-[#7a8a96]">{m.email}</p>
                         </div>
                       </div>
                     </td>
@@ -179,20 +179,20 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                     <td className="px-4 py-3">
                       {m.tier ? (
                         <span
-                          className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded"
+                          className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
                           style={{ backgroundColor: tierStyle.bg, color: tierStyle.color, border: `1px solid ${tierStyle.border}` }}
                         >
                           {m.tier.toUpperCase()}
                         </span>
                       ) : (
-                        <span className="font-condensed text-[10px] text-[#7a8a96]">—</span>
+                        <span className="font-condensed text-[12px] text-[#7a8a96]">—</span>
                       )}
                     </td>
 
                     {/* Status */}
                     <td className="px-4 py-3">
                       <span
-                        className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded"
+                        className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
                         style={{ backgroundColor: statusStyle.bg, color: statusStyle.color }}
                       >
                         {(m.tierStatus ?? 'unknown').toUpperCase()}
@@ -201,7 +201,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
 
                     {/* Joined */}
                     <td className="px-4 py-3">
-                      <span className="font-condensed text-[11px] text-[#7a8a96]">{fmtDate(m.joinedAt)}</span>
+                      <span className="font-condensed text-[12px] text-[#7a8a96]">{fmtDate(m.joinedAt)}</span>
                     </td>
 
                     {/* MRR */}
@@ -223,7 +223,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                             style={{ width: `${engPct}%`, backgroundColor: engStyle.bar }}
                           />
                         </div>
-                        <span className="font-condensed font-bold uppercase text-[9px]" style={{ color: engStyle.text }}>
+                        <span className="font-condensed font-bold uppercase text-[12px]" style={{ color: engStyle.text }}>
                           {m.engagementLevel}
                         </span>
                       </div>
@@ -236,7 +236,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                           href={getVendastaCrmUrl(m.vendastaContactId)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded transition-colors"
+                          className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded transition-colors"
                           style={{
                             backgroundColor: 'rgba(104,162,185,0.08)',
                             color: '#68a2b9',
@@ -246,7 +246,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                           {m.vendastaContactId.slice(0, 10)}…
                         </a>
                       ) : (
-                        <span className="font-condensed text-[10px] text-[#7a8a96]">Not linked</span>
+                        <span className="font-condensed text-[12px] text-[#7a8a96]">Not linked</span>
                       )}
                     </td>
 
@@ -255,7 +255,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => setEditingMember(m)}
-                          className="font-condensed font-semibold uppercase tracking-wide text-[10px] px-3 py-1.5 rounded transition-all"
+                          className="font-condensed font-semibold uppercase tracking-wide text-[12px] px-3 py-1.5 rounded transition-all"
                           style={{ color: '#68a2b9', border: '1px solid rgba(104,162,185,0.3)' }}
                           onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(104,162,185,0.06)')}
                           onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
@@ -264,7 +264,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                         </button>
                         <Link
                           href={`/admin/members/${m.id}`}
-                          className="font-condensed font-semibold uppercase tracking-wide text-[10px] px-3 py-1.5 rounded transition-all"
+                          className="font-condensed font-semibold uppercase tracking-wide text-[12px] px-3 py-1.5 rounded transition-all"
                           style={{ color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.25)' }}
                         >
                           View →

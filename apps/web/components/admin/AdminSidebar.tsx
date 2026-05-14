@@ -54,7 +54,7 @@ function SidebarSection({ title, items, onSelect }: { title: string; items: Side
   return (
     <div className="mb-5">
       <p
-        className="px-5 mb-1 font-condensed font-bold uppercase tracking-[0.2em] text-[9px]"
+        className="px-5 mb-1 font-condensed font-bold uppercase tracking-[0.2em] text-[12px]"
         style={{ color: 'rgba(255,255,255,0.25)' }}
       >
         {title}
@@ -108,7 +108,7 @@ export function AdminSidebarNav({ onSelect }: { onSelect?: () => void }) {
         <Link
           href="/home"
           onClick={onSelect}
-          className="font-condensed text-[11px] tracking-wide transition-colors hover:text-white"
+          className="font-condensed text-[12px] tracking-wide transition-colors hover:text-white"
           style={{ color: 'rgba(255,255,255,0.3)' }}
         >
           ← Back to Platform

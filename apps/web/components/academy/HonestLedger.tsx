@@ -77,7 +77,7 @@ export function HonestLedger({ courseId }: Props) {
       <div style={{ marginBottom: '24px' }}>
         <p style={{
           fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-          fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
+          fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
           color: GOLD, margin: '0 0 4px',
         }}>
           Identity Tool
@@ -159,7 +159,7 @@ function LedgerColumn({
         }}>
           {label}
         </p>
-        <p style={{ color: 'rgba(250,249,247,0.25)', fontSize: '11px', margin: 0, letterSpacing: '0.02em' }}>
+        <p style={{ color: 'rgba(250,249,247,0.25)', fontSize: '12px', margin: 0, letterSpacing: '0.02em' }}>
           {subLabel}
         </p>
       </div>
@@ -188,7 +188,7 @@ function LedgerColumn({
             backgroundColor: inputValue.trim() ? GOLD : 'rgba(255,255,255,0.06)',
             color: inputValue.trim() ? '#0A0F18' : 'rgba(255,255,255,0.2)',
             fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-            fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase',
+            fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
             padding: '9px 16px', borderRadius: '4px', border: 'none',
             cursor: inputValue.trim() ? 'pointer' : 'default', transition: 'all 0.15s',
             flexShrink: 0,

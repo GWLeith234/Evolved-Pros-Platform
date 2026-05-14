@@ -53,7 +53,7 @@ export function RecordingsList({ events }: RecordingsListProps) {
                   >
                     {day}
                   </p>
-                  <p className="font-condensed font-bold uppercase text-[10px]" style={{ color: '#ef0e30' }}>
+                  <p className="font-condensed font-bold uppercase text-[12px]" style={{ color: '#ef0e30' }}>
                     {month}
                   </p>
                 </div>
@@ -66,14 +66,14 @@ export function RecordingsList({ events }: RecordingsListProps) {
                         {event.title}
                       </span>
                       <span
-                        className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5 flex-shrink-0"
+                        className="font-condensed font-bold uppercase text-[12px] rounded px-2 py-0.5 flex-shrink-0"
                         style={{ color: typeStyle.color, backgroundColor: typeStyle.bg, border: `1px solid ${typeStyle.border}` }}
                       >
                         {typeLabel}
                       </span>
                     </div>
                   </Link>
-                  <p className="font-condensed font-medium text-[11px] text-[#7a8a96]">
+                  <p className="font-condensed font-medium text-[12px] text-[#7a8a96]">
                     {time} · {duration}
                     {event.registrationCount > 0 && ` · ${event.registrationCount} attendees`}
                   </p>

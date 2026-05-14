@@ -68,7 +68,7 @@ export function ReactionPicker({ postId, reactions, myReaction, onReact }: React
             key={r.type}
             type="button"
             onClick={() => handlePick(r.type)}
-            className="flex items-center justify-center gap-1 rounded-full font-condensed font-semibold text-[11px] transition-colors"
+            className="flex items-center justify-center gap-1 rounded-full font-condensed font-semibold text-[12px] transition-colors"
             style={{
               minHeight: 44,
               minWidth: 44,
@@ -92,7 +92,7 @@ export function ReactionPicker({ postId, reactions, myReaction, onReact }: React
           ref={triggerRef}
           type="button"
           onClick={openPicker}
-          className="inline-flex items-center justify-center font-condensed font-semibold uppercase text-[11px] tracking-wide transition-colors"
+          className="inline-flex items-center justify-center font-condensed font-semibold uppercase text-[12px] tracking-wide transition-colors"
           style={{ color: '#7a8a96', minHeight: 44, minWidth: 44, padding: '0 8px' }}
           onMouseEnter={e => (e.currentTarget.style.color = '#ef0e30')}
           onMouseLeave={e => (e.currentTarget.style.color = '#7a8a96')}

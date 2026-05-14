@@ -140,10 +140,10 @@ export function NotificationPrefsForm({ initialPrefs }: NotificationPrefsFormPro
 
       <div className="mt-3 h-5 flex items-center">
         {error && (
-          <p className="font-condensed text-[11px]" style={{ color: '#ef0e30' }}>{error}</p>
+          <p className="font-condensed text-[12px]" style={{ color: '#ef0e30' }}>{error}</p>
         )}
         {saved && !error && (
-          <p className="font-condensed text-[11px]" style={{ color: '#68a2b9' }}>Saved</p>
+          <p className="font-condensed text-[12px]" style={{ color: '#68a2b9' }}>Saved</p>
         )}
       </div>
     </div>

@@ -50,8 +50,8 @@ const VARIANT_HOVER: Record<ButtonVariant, React.CSSProperties> = {
 }
 
 const SIZE_STYLE: Record<ButtonSize, React.CSSProperties> = {
-  sm: { padding: '5px 12px', fontSize: '10px' },
-  md: { padding: '8px 16px', fontSize: '11px' },
+  sm: { padding: '5px 12px', fontSize: '12px' },
+  md: { padding: '8px 16px', fontSize: '12px' },
   lg: { padding: '10px 24px', fontSize: '12px' },
 }
 

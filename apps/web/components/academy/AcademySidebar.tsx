@@ -22,7 +22,7 @@ export function AcademySidebar({ courses, userTier, overallPct }: AcademySidebar
     >
       {/* Section header */}
       <p
-        className="px-5 mb-1 font-condensed font-bold uppercase tracking-[0.2em] text-[9px]"
+        className="px-5 mb-1 font-condensed font-bold uppercase tracking-[0.2em] text-[12px]"
         style={{ color: 'rgba(255,255,255,0.25)' }}
       >
         Pillars
@@ -62,7 +62,7 @@ export function AcademySidebar({ courses, userTier, overallPct }: AcademySidebar
         style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
       >
         <p
-          className="font-condensed font-bold uppercase tracking-[0.2em] text-[9px] mb-2"
+          className="font-condensed font-bold uppercase tracking-[0.2em] text-[12px] mb-2"
           style={{ color: 'rgba(255,255,255,0.25)' }}
         >
           My Progress
@@ -74,7 +74,7 @@ export function AcademySidebar({ courses, userTier, overallPct }: AcademySidebar
           {overallPct}%
         </p>
         <p
-          className="font-condensed font-bold uppercase tracking-[0.15em] text-[9px] mb-2"
+          className="font-condensed font-bold uppercase tracking-[0.15em] text-[12px] mb-2"
           style={{ color: 'rgba(255,255,255,0.25)' }}
         >
           Overall Completion

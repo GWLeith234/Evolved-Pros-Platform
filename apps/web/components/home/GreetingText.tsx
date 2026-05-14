@@ -30,7 +30,7 @@ export function GreetingText({ firstName, tier }: GreetingTextProps) {
     <>
       <p
         className="font-condensed font-bold uppercase tracking-[0.2em] mb-1"
-        style={{ fontSize: '9px', color: '#c9a84c' }}
+        style={{ fontSize: '12px', color: '#c9a84c' }}
       >
         {weekLabel}
       </p>

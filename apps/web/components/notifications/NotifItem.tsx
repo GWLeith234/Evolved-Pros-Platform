@@ -102,14 +102,14 @@ export function NotifItem({ notification, variant, onRead }: NotifItemProps) {
             <span className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ backgroundColor: meta.color }} />
           )}
           <span
-            className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px]"
+            className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px]"
             style={{ color: meta.color }}
           >
             {meta.label}
           </span>
           <span
             suppressHydrationWarning
-            className="font-condensed text-[10px] ml-auto"
+            className="font-condensed text-[12px] ml-auto"
             style={{ color: 'rgba(255,255,255,0.25)' }}
           >
             {formatRelativeTime(notification.createdAt)}
@@ -147,14 +147,14 @@ export function NotifItem({ notification, variant, onRead }: NotifItemProps) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <span
-            className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px]"
+            className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px]"
             style={{ color: meta.color }}
           >
             {meta.label}
           </span>
           <span
             suppressHydrationWarning
-            className="font-condensed text-[10px] ml-auto flex-shrink-0"
+            className="font-condensed text-[12px] ml-auto flex-shrink-0"
             style={{ color: '#7a8a96' }}
           >
             {formatRelativeTime(notification.createdAt)}
@@ -169,7 +169,7 @@ export function NotifItem({ notification, variant, onRead }: NotifItemProps) {
       {/* Action */}
       {notification.actionUrl && (
         <span
-          className="flex-shrink-0 font-condensed font-semibold uppercase tracking-wide text-[10px] rounded px-3 py-1.5 self-center"
+          className="flex-shrink-0 font-condensed font-semibold uppercase tracking-wide text-[12px] rounded px-3 py-1.5 self-center"
           style={{ color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'transparent' }}
         >
           View →

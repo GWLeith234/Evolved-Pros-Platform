@@ -75,10 +75,10 @@ export function CrossPostPanel({ title, body, slug, pillar }: CrossPostPanelProp
     >
       <div className="flex items-center justify-between mb-4">
         <div>
-          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px]" style={{ color: '#C9A84C' }}>
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px]" style={{ color: '#C9A84C' }}>
             Cross-Post Kit
           </p>
-          <p className="font-condensed text-[11px]" style={{ color: '#7a8a96' }}>
+          <p className="font-condensed text-[12px]" style={{ color: '#7a8a96' }}>
             Generate LinkedIn, X, and email content from this article
           </p>
         </div>
@@ -86,7 +86,7 @@ export function CrossPostPanel({ title, body, slug, pillar }: CrossPostPanelProp
           type="button"
           onClick={handleGenerate}
           disabled={generating}
-          className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] px-4 py-2 rounded transition-opacity hover:opacity-90"
+          className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-4 py-2 rounded transition-opacity hover:opacity-90"
           style={{ backgroundColor: '#C9A84C', color: '#fff', opacity: generating ? 0.5 : 1 }}
         >
           {generating ? 'Generating...' : hasContent ? 'Regenerate' : 'Generate Social Content'}
@@ -94,7 +94,7 @@ export function CrossPostPanel({ title, body, slug, pillar }: CrossPostPanelProp
       </div>
 
       {error && (
-        <p className="font-condensed text-[11px] mb-3" style={{ color: '#ef0e30' }}>{error}</p>
+        <p className="font-condensed text-[12px] mb-3" style={{ color: '#ef0e30' }}>{error}</p>
       )}
 
       {hasContent && (
@@ -106,7 +106,7 @@ export function CrossPostPanel({ title, body, slug, pillar }: CrossPostPanelProp
                 key={tab}
                 type="button"
                 onClick={() => { setActiveTab(tab); setCopied(false) }}
-                className="font-condensed font-semibold uppercase tracking-[0.12em] text-[10px] px-4 py-2 transition-colors"
+                className="font-condensed font-semibold uppercase tracking-[0.12em] text-[12px] px-4 py-2 transition-colors"
                 style={{
                   color: activeTab === tab ? '#1b3c5a' : '#7a8a96',
                   borderBottom: activeTab === tab ? '2px solid #1b3c5a' : '2px solid transparent',
@@ -152,7 +152,7 @@ export function CrossPostPanel({ title, body, slug, pillar }: CrossPostPanelProp
 
           {/* Char count + Copy */}
           <div className="flex items-center justify-between mt-2">
-            <div className="font-condensed text-[10px]" style={{ color: '#7a8a96' }}>
+            <div className="font-condensed text-[12px]" style={{ color: '#7a8a96' }}>
               {activeTab === 'linkedin' && `${linkedin.length}/1300 chars`}
               {activeTab === 'thread' && thread.map((t, i) => (
                 <span key={i} style={{ marginRight: 8, color: t.length > 280 ? '#ef0e30' : '#7a8a96' }}>
@@ -164,7 +164,7 @@ export function CrossPostPanel({ title, body, slug, pillar }: CrossPostPanelProp
             <button
               type="button"
               onClick={handleCopy}
-              className="font-condensed font-bold uppercase tracking-[0.1em] text-[10px] px-3 py-1.5 rounded transition-colors"
+              className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-3 py-1.5 rounded transition-colors"
               style={{
                 backgroundColor: copied ? 'rgba(34,197,94,0.1)' : 'rgba(27,60,90,0.06)',
                 color: copied ? '#22c55e' : '#1b3c5a',

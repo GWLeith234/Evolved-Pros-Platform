@@ -55,7 +55,7 @@ export function InProgressPillarHero({
       {/* DAY N OF 21 stamp */}
       {dayOfTwentyOne !== null && (
         <span
-          className="absolute font-condensed font-bold uppercase tracking-[0.18em] text-[10px] px-2 py-1 rounded"
+          className="absolute font-condensed font-bold uppercase tracking-[0.18em] text-[12px] px-2 py-1 rounded"
           style={{
             top: 12, right: 12,
             color: cfg.color,
@@ -103,7 +103,7 @@ export function InProgressPillarHero({
           />
         </div>
         <div className="flex items-baseline justify-between mt-1">
-          <span className="font-condensed text-[11px]" style={{ color: '#7a8a96' }}>
+          <span className="font-condensed text-[12px]" style={{ color: '#7a8a96' }}>
             {pillar.completedLessons} of {pillar.totalLessons} lessons
           </span>
           <span
@@ -122,7 +122,7 @@ export function InProgressPillarHero({
           style={{ background: cfg.colorMuted, border: `1px solid ${cfg.color}33` }}
         >
           <p
-            className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-1"
+            className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] mb-1"
             style={{ color: cfg.color }}
           >
             Next up

@@ -14,7 +14,7 @@ export function VideoPlaceholder({ lessonTitle }: { lessonTitle: string }) {
             <path d="M3 2l15 9-15 9V2z" fill="#68a2b9"/>
           </svg>
         </div>
-        <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[11px] mb-1" style={{ color: '#68a2b9' }}>
+        <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] mb-1" style={{ color: '#68a2b9' }}>
           Video coming soon
         </p>
         <p className="font-body text-[13px]" style={{ color: 'rgba(250,249,247,0.4)' }}>

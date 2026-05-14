@@ -53,7 +53,7 @@ const EMPTY: PartnerFormValues = {
 
 const inputClass = 'w-full rounded px-3 py-2 font-body text-[13px] text-[#1b3c5a] outline-none transition-all'
 const inputStyle: React.CSSProperties = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }
-const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5'
+const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96] mb-1.5'
 
 export function PartnerForm({ initial }: { initial?: Partial<PartnerFormValues> & { id?: string } }) {
   const router = useRouter()
@@ -188,7 +188,7 @@ export function PartnerForm({ initial }: { initial?: Partial<PartnerFormValues> 
                 key={t}
                 type="button"
                 onClick={() => set('type', t)}
-                className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2 flex-1 transition-all"
+                className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-4 py-2 flex-1 transition-all"
                 style={{
                   backgroundColor: values.type === t ? '#1b3c5a' : 'transparent',
                   color: values.type === t ? 'white' : '#1b3c5a',
@@ -217,14 +217,14 @@ export function PartnerForm({ initial }: { initial?: Partial<PartnerFormValues> 
               type="button"
               onClick={handleExtract}
               disabled={extracting || !values.url.trim()}
-              className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2 transition-all disabled:opacity-50 whitespace-nowrap"
+              className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-4 py-2 transition-all disabled:opacity-50 whitespace-nowrap"
               style={{ backgroundColor: '#0ABFA3', color: '#0A0F18' }}
             >
               {extracting ? 'Generating…' : isEdit ? 'Re-generate' : 'Generate'}
             </button>
           </div>
           {extractError && (
-            <p className="mt-1 font-condensed text-[11px]" style={{ color: '#ef0e30' }}>{extractError}</p>
+            <p className="mt-1 font-condensed text-[12px]" style={{ color: '#ef0e30' }}>{extractError}</p>
           )}
         </div>
 
@@ -335,7 +335,7 @@ export function PartnerForm({ initial }: { initial?: Partial<PartnerFormValues> 
                   key={s.value}
                   type="button"
                   onClick={() => toggleSurface(s.value)}
-                  className="font-condensed font-bold uppercase tracking-wide text-[10px] rounded-full px-3 py-1 transition-all"
+                  className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded-full px-3 py-1 transition-all"
                   style={{
                     backgroundColor: active ? '#1b3c5a' : 'transparent',
                     color: active ? 'white' : '#1b3c5a',
@@ -355,7 +355,7 @@ export function PartnerForm({ initial }: { initial?: Partial<PartnerFormValues> 
             className="rounded-lg p-4 space-y-3"
             style={{ backgroundColor: 'rgba(10,191,163,0.04)', border: '1px solid rgba(10,191,163,0.2)' }}
           >
-            <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px]" style={{ color: '#0ABFA3' }}>
+            <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px]" style={{ color: '#0ABFA3' }}>
               Affiliate terms
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -391,7 +391,7 @@ export function PartnerForm({ initial }: { initial?: Partial<PartnerFormValues> 
             className="rounded-lg p-4 space-y-3"
             style={{ backgroundColor: 'rgba(27,60,90,0.04)', border: '1px solid rgba(27,60,90,0.12)' }}
           >
-            <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px]" style={{ color: '#1b3c5a' }}>
+            <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px]" style={{ color: '#1b3c5a' }}>
               Sponsor contract
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -438,7 +438,7 @@ export function PartnerForm({ initial }: { initial?: Partial<PartnerFormValues> 
                 key={s}
                 type="button"
                 onClick={() => set('status', s)}
-                className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-3 py-1.5 transition-all"
+                className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-3 py-1.5 transition-all"
                 style={{
                   backgroundColor: values.status === s ? '#1b3c5a' : 'transparent',
                   color: values.status === s ? 'white' : '#1b3c5a',
@@ -468,7 +468,7 @@ export function PartnerForm({ initial }: { initial?: Partial<PartnerFormValues> 
               type="button"
               onClick={handleDelete}
               disabled={saving}
-              className="font-condensed font-semibold uppercase tracking-wide text-[11px]"
+              className="font-condensed font-semibold uppercase tracking-wide text-[12px]"
               style={{ color: '#ef0e30' }}
             >
               Mark expired
@@ -477,7 +477,7 @@ export function PartnerForm({ initial }: { initial?: Partial<PartnerFormValues> 
           <div className="flex items-center gap-3">
             <a
               href="/admin/partners"
-              className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a]"
+              className="font-condensed font-semibold uppercase tracking-wide text-[12px] text-[#7a8a96] hover:text-[#1b3c5a]"
             >
               Cancel
             </a>
@@ -536,7 +536,7 @@ function PartnerPreview({ values }: { values: PartnerFormValues }) {
             </div>
           )}
           <div>
-            <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px]" style={{ color: accent }}>
+            <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px]" style={{ color: accent }}>
               {values.type === 'affiliate' ? 'Affiliate partner' : 'Sponsor'}
             </p>
             <p className="font-display font-bold text-[16px]" style={{ color: '#fff' }}>

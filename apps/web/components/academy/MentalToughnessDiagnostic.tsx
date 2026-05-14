@@ -172,7 +172,7 @@ export function MentalToughnessDiagnostic({ courseId }: Props) {
       <div style={{ backgroundColor: '#111926', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '8px', overflow: 'hidden' }}>
         <div style={{ height: '4px', backgroundColor: CRIMSON }} />
         <div style={{ padding: '28px' }}>
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: GOLD, margin: '0 0 4px' }}>
+          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase', color: GOLD, margin: '0 0 4px' }}>
             Mental Toughness Diagnostic · {formattedDate}
           </p>
           <h3 style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900, fontSize: 'clamp(22px, 4vw, 32px)', textTransform: 'uppercase', color: CRIMSON, margin: '0 0 6px', letterSpacing: '0.04em' }}>
@@ -205,13 +205,13 @@ export function MentalToughnessDiagnostic({ courseId }: Props) {
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                     <span style={{
                       fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-                      fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase',
+                      fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase',
                       color: isLowest ? CRIMSON : 'rgba(250,249,247,0.5)',
                     }}>
                       {DIMENSION_LABELS[dim]}
-                      {isLowest && <span style={{ marginLeft: '6px', fontSize: '9px', letterSpacing: '0.1em', color: CRIMSON }}>▲ FOCUS</span>}
+                      {isLowest && <span style={{ marginLeft: '6px', fontSize: '12px', letterSpacing: '0.1em', color: CRIMSON }}>▲ FOCUS</span>}
                     </span>
-                    <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '11px', color: isLowest ? CRIMSON : 'rgba(250,249,247,0.4)' }}>
+                    <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', color: isLowest ? CRIMSON : 'rgba(250,249,247,0.4)' }}>
                       {score} / 20
                     </span>
                   </div>
@@ -232,7 +232,7 @@ export function MentalToughnessDiagnostic({ courseId }: Props) {
             backgroundColor: `${CRIMSON}0D`, border: `1px solid ${CRIMSON}22`,
             borderRadius: '6px', padding: '14px 18px', marginBottom: '24px', maxWidth: '520px',
           }}>
-            <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: CRIMSON, margin: '0 0 6px' }}>
+            <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color: CRIMSON, margin: '0 0 6px' }}>
               Growth Focus — {DIMENSION_LABELS[lowestDim]}
             </p>
             <p style={{ color: 'rgba(250,249,247,0.65)', fontSize: '13px', lineHeight: 1.6, margin: 0 }}>
@@ -246,7 +246,7 @@ export function MentalToughnessDiagnostic({ courseId }: Props) {
             style={{
               background: 'none', border: 'none',
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase',
+              fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase',
               color: 'rgba(250,249,247,0.3)', cursor: 'pointer', padding: 0,
             }}
           >
@@ -262,7 +262,7 @@ export function MentalToughnessDiagnostic({ courseId }: Props) {
     <div style={{ backgroundColor: '#111926', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '8px', padding: '28px' }}>
       {/* Header */}
       <div style={{ marginBottom: '28px' }}>
-        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: GOLD, margin: '0 0 4px' }}>
+        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase', color: GOLD, margin: '0 0 4px' }}>
           Mental Toughness Diagnostic
         </p>
         <p style={{ color: '#faf9f7', fontSize: '15px', fontWeight: 600, margin: '0 0 6px' }}>
@@ -272,7 +272,7 @@ export function MentalToughnessDiagnostic({ courseId }: Props) {
           <div style={{ flex: 1, maxWidth: '280px', height: '3px', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: '2px' }}>
             <div style={{ height: '100%', width: `${Math.round((answeredCount / totalQuestions) * 100)}%`, backgroundColor: CRIMSON, borderRadius: '2px', transition: 'width 0.2s' }} />
           </div>
-          <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', color: 'rgba(250,249,247,0.4)' }}>
+          <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', color: 'rgba(250,249,247,0.4)' }}>
             {answeredCount} / {totalQuestions} answered
           </span>
         </div>
@@ -289,7 +289,7 @@ export function MentalToughnessDiagnostic({ courseId }: Props) {
                 <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color: CRIMSON, margin: 0 }}>
                   {DIMENSION_LABELS[dim]}
                 </p>
-                <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '10px', letterSpacing: '0.1em', color: dimAnswered === 4 ? CRIMSON : 'rgba(250,249,247,0.2)' }}>
+                <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', letterSpacing: '0.1em', color: dimAnswered === 4 ? CRIMSON : 'rgba(250,249,247,0.2)' }}>
                   {dimAnswered}/4
                 </span>
               </div>
@@ -312,7 +312,7 @@ export function MentalToughnessDiagnostic({ courseId }: Props) {
       {/* Rating legend */}
       <div style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
         {[['1', 'Never'], ['2', 'Rarely'], ['3', 'Sometimes'], ['4', 'Often'], ['5', 'Always']].map(([num, label]) => (
-          <span key={num} style={{ fontSize: '11px', color: 'rgba(250,249,247,0.25)', fontFamily: '"Barlow Condensed", sans-serif', letterSpacing: '0.06em' }}>
+          <span key={num} style={{ fontSize: '12px', color: 'rgba(250,249,247,0.25)', fontFamily: '"Barlow Condensed", sans-serif', letterSpacing: '0.06em' }}>
             <span style={{ fontWeight: 700 }}>{num}</span> = {label}
           </span>
         ))}

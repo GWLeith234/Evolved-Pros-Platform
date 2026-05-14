@@ -33,7 +33,7 @@ export function ClimbingTowardCard({ pillar, courseSlug }: ClimbingTowardCardPro
       }}
     >
       <p
-        className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] mb-2"
+        className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] mb-2"
         style={{ color: '#94a3b8' }}
       >
         Climbing toward
@@ -63,7 +63,7 @@ export function ClimbingTowardCard({ pillar, courseSlug }: ClimbingTowardCardPro
         </p>
       )}
 
-      <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px]" style={{ color: '#7a8a96' }}>
+      <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px]" style={{ color: '#7a8a96' }}>
         {pillar.totalLessons} lessons
         <span style={{ margin: '0 6px', color: '#cbd5e1' }}>·</span>
         {pillar.name} badge

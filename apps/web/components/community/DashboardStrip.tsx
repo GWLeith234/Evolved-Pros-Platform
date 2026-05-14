@@ -51,7 +51,7 @@ const CARD_BASE: React.CSSProperties = {
 const LABEL_STYLE: React.CSSProperties = {
   fontFamily: '"Barlow Condensed", sans-serif',
   fontWeight: 700,
-  fontSize: '10px',
+  fontSize: '12px',
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
   marginBottom: '4px',
@@ -73,7 +73,7 @@ const HEADLINE_STYLE: React.CSSProperties = {
 
 const SUB_STYLE: React.CSSProperties = {
   fontFamily: '"Barlow Condensed", sans-serif',
-  fontSize: '11px',
+  fontSize: '12px',
   color: 'rgba(255,255,255,0.45)',
   lineHeight: 1.3,
   marginBottom: '4px',
@@ -86,7 +86,7 @@ const SUB_STYLE: React.CSSProperties = {
 const CTA_STYLE: React.CSSProperties = {
   fontFamily: '"Barlow Condensed", sans-serif',
   fontWeight: 700,
-  fontSize: '11px',
+  fontSize: '12px',
   marginTop: '4px',
   lineHeight: 1,
 }

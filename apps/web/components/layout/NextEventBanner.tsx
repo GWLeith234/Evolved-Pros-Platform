@@ -57,7 +57,7 @@ export function NextEventBanner() {
       >
         <span
           className="font-condensed font-semibold text-white truncate"
-          style={{ fontSize: '11px', letterSpacing: '0.06em' }}
+          style={{ fontSize: '12px', letterSpacing: '0.06em' }}
         >
           <span style={{ color: '#ef0e30', fontWeight: 700 }}>NEXT EVENT</span>
           {' · '}

@@ -24,7 +24,7 @@ export function PillarJourneyStrip({ pillars }: PillarJourneyStripProps) {
   return (
     <div className="rounded-lg p-4 bg-white" style={{ border: '1px solid rgba(27,60,90,0.1)' }}>
       <p
-        className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] mb-3"
+        className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] mb-3"
         style={{ color: '#7a8a96' }}
       >
         The Path Forward
@@ -80,7 +80,7 @@ export function PillarJourneyStrip({ pillars }: PillarJourneyStripProps) {
         })}
       </div>
 
-      <p className="mt-3 font-condensed text-[11px]" style={{ color: '#7a8a96' }}>
+      <p className="mt-3 font-condensed text-[12px]" style={{ color: '#7a8a96' }}>
         {earnedCount} of 6 pillars earned
         {inProgress && (
           <>

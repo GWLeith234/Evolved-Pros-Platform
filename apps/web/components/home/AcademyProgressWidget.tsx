@@ -29,7 +29,7 @@ export function AcademyProgressWidget({ courses }: AcademyProgressWidgetProps) {
           </h3>
           <Link
             href="/academy"
-            className="font-condensed text-[11px] tracking-[0.18em] text-[#68a2b9] hover:text-[#1b3c5a] uppercase whitespace-nowrap"
+            className="font-condensed text-[12px] tracking-[0.18em] text-[#68a2b9] hover:text-[#1b3c5a] uppercase whitespace-nowrap"
           >
             Continue Learning →
           </Link>
@@ -52,7 +52,7 @@ export function AcademyProgressWidget({ courses }: AcademyProgressWidgetProps) {
                     {course.title}
                   </span>
                   <span
-                    className="font-condensed font-bold text-[10px]"
+                    className="font-condensed font-bold text-[12px]"
                     style={{ color: pctColor }}
                   >
                     {course.pct}%

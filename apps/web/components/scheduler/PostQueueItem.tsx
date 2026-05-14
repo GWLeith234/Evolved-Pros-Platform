@@ -43,7 +43,7 @@ export function PostQueueItem({ post, onAction }: Props) {
       {/* Day badge */}
       <div className="flex-shrink-0 text-center" style={{ width: 44 }}>
         <p className="font-condensed font-black text-[18px] leading-none" style={{ color: 'rgba(255,255,255,0.6)' }}>{day}</p>
-        <p suppressHydrationWarning className="font-condensed text-[9px]" style={{ color: 'rgba(255,255,255,0.25)' }}>{time}</p>
+        <p suppressHydrationWarning className="font-condensed text-[12px]" style={{ color: 'rgba(255,255,255,0.25)' }}>{time}</p>
       </div>
 
       {/* Content */}
@@ -61,7 +61,7 @@ export function PostQueueItem({ post, onAction }: Props) {
               <button
                 type="button"
                 onClick={() => { onAction(post.id, 'approve', editBody); setEditing(false) }}
-                className="font-condensed font-bold uppercase tracking-wide text-[9px] px-3 py-1 rounded"
+                className="font-condensed font-bold uppercase tracking-wide text-[12px] px-3 py-1 rounded"
                 style={{ backgroundColor: '#0ABFA3', color: '#fff' }}
               >
                 Save
@@ -69,7 +69,7 @@ export function PostQueueItem({ post, onAction }: Props) {
               <button
                 type="button"
                 onClick={() => { setEditBody(post.body); setEditing(false) }}
-                className="font-condensed text-[9px]"
+                className="font-condensed text-[12px]"
                 style={{ color: 'rgba(255,255,255,0.3)' }}
               >
                 Cancel
@@ -91,7 +91,7 @@ export function PostQueueItem({ post, onAction }: Props) {
             </span>
           )}
           {post.slot && (
-            <span className="font-condensed text-[9px]" style={{ color: tierColor }}>
+            <span className="font-condensed text-[12px]" style={{ color: tierColor }}>
               {post.tier === 'peak' ? '\u2605' : '\u2022'} {post.slot}
             </span>
           )}
@@ -108,7 +108,7 @@ export function PostQueueItem({ post, onAction }: Props) {
           <button
             type="button"
             onClick={() => onAction(post.id, 'approve')}
-            className="font-condensed font-bold uppercase tracking-wide text-[9px] px-3 py-1.5 rounded transition-opacity hover:opacity-80"
+            className="font-condensed font-bold uppercase tracking-wide text-[12px] px-3 py-1.5 rounded transition-opacity hover:opacity-80"
             style={{ backgroundColor: 'rgba(10,191,163,0.12)', color: '#0ABFA3', border: '1px solid rgba(10,191,163,0.25)' }}
           >
             Approve
@@ -117,7 +117,7 @@ export function PostQueueItem({ post, onAction }: Props) {
         <button
           type="button"
           onClick={() => setEditing(!editing)}
-          className="font-condensed text-[9px] px-2 py-1.5 rounded"
+          className="font-condensed text-[12px] px-2 py-1.5 rounded"
           style={{ color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)' }}
         >
           Edit
@@ -126,7 +126,7 @@ export function PostQueueItem({ post, onAction }: Props) {
           <button
             type="button"
             onClick={() => onAction(post.id, 'reject')}
-            className="font-condensed text-[9px] px-2 py-1.5 rounded"
+            className="font-condensed text-[12px] px-2 py-1.5 rounded"
             style={{ color: '#ef0e30', border: '1px solid rgba(239,14,48,0.15)' }}
           >
             ✕

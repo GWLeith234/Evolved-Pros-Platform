@@ -96,7 +96,7 @@ export function MemberBadge({ tier, size = 'md' }: MemberBadgeProps) {
         ...((config as any).boxShadow ? { boxShadow: (config as any).boxShadow } : {}),
       }}
     >
-      <span style={{ color: config.color, display: 'flex', alignItems: 'center', fontSize: '9px' }}>
+      <span style={{ color: config.color, display: 'flex', alignItems: 'center', fontSize: '12px' }}>
         {config.icon(9)}
       </span>
       {config.label}

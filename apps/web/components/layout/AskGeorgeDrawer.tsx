@@ -201,7 +201,7 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
                 style={{
                   fontFamily: '"Barlow Condensed", sans-serif',
                   fontWeight: 700,
-                  fontSize: '9px',
+                  fontSize: '12px',
                   letterSpacing: '0.1em',
                   textTransform: 'uppercase',
                   color: '#A78BFA',
@@ -217,7 +217,7 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
             <span
               style={{
                 fontFamily: '"Barlow Condensed", sans-serif',
-                fontSize: '11px',
+                fontSize: '12px',
                 color: 'rgba(255,255,255,0.35)',
                 letterSpacing: '0.02em',
               }}
@@ -293,7 +293,7 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
                     onClick={() => setInput(s)}
                     style={{
                       fontFamily: '"Barlow Condensed", sans-serif',
-                      fontSize: '10px',
+                      fontSize: '12px',
                       border: '1px solid rgba(255,255,255,0.12)',
                       borderRadius: '20px',
                       padding: '5px 12px',
@@ -330,7 +330,7 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
                         style={{
                           fontFamily: '"Barlow Condensed", sans-serif',
                           fontWeight: 700,
-                          fontSize: '10px',
+                          fontSize: '12px',
                           color: '#C9A84C',
                           letterSpacing: '0.06em',
                           textTransform: 'uppercase',
@@ -369,7 +369,7 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
                       style={{
                         fontFamily: '"Barlow Condensed", sans-serif',
                         fontWeight: 700,
-                        fontSize: '10px',
+                        fontSize: '12px',
                         color: '#C9A84C',
                         letterSpacing: '0.06em',
                         textTransform: 'uppercase',

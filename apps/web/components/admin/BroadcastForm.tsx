@@ -88,7 +88,7 @@ export function BroadcastForm() {
       >
         {/* Title */}
         <div className="mb-4">
-          <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] mb-1.5">
+          <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[12px] text-[#7a8a96] mb-1.5">
             Title <span className="text-[#ef0e30]">*</span>
           </label>
           <input
@@ -102,12 +102,12 @@ export function BroadcastForm() {
             onFocus={e => (e.currentTarget.style.borderColor = '#68a2b9')}
             onBlur={e => (e.currentTarget.style.borderColor = 'rgba(27,60,90,0.18)')}
           />
-          <p className="font-condensed text-[10px] text-[#7a8a96] mt-0.5 text-right">{title.length}/100</p>
+          <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5 text-right">{title.length}/100</p>
         </div>
 
         {/* Message */}
         <div className="mb-4">
-          <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] mb-1.5">
+          <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[12px] text-[#7a8a96] mb-1.5">
             Message <span className="text-[#ef0e30]">*</span>
           </label>
           <textarea
@@ -121,12 +121,12 @@ export function BroadcastForm() {
             onFocus={e => (e.currentTarget.style.borderColor = '#68a2b9')}
             onBlur={e => (e.currentTarget.style.borderColor = 'rgba(27,60,90,0.18)')}
           />
-          <p className="font-condensed text-[10px] text-[#7a8a96] mt-0.5 text-right">{message.length}/500</p>
+          <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5 text-right">{message.length}/500</p>
         </div>
 
         {/* Audience */}
         <div className="mb-4">
-          <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] mb-2">
+          <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[12px] text-[#7a8a96] mb-2">
             Audience
           </label>
           <div className="flex flex-col gap-2">
@@ -142,7 +142,7 @@ export function BroadcastForm() {
                 />
                 <div>
                   <span className="font-condensed font-semibold text-[12px] text-[#112535]">{opt.label}</span>
-                  <span className="font-condensed text-[11px] text-[#7a8a96] ml-2">{opt.desc}</span>
+                  <span className="font-condensed text-[12px] text-[#7a8a96] ml-2">{opt.desc}</span>
                 </div>
               </label>
             ))}
@@ -151,7 +151,7 @@ export function BroadcastForm() {
 
         {/* Type */}
         <div className="mb-4">
-          <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] mb-1.5">
+          <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[12px] text-[#7a8a96] mb-1.5">
             Notification Type
           </label>
           <select
@@ -168,7 +168,7 @@ export function BroadcastForm() {
 
         {/* Action URL */}
         <div className="mb-6">
-          <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] mb-1.5">
+          <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[12px] text-[#7a8a96] mb-1.5">
             Action URL <span className="text-[#7a8a96]">(optional)</span>
           </label>
           <input
@@ -207,7 +207,7 @@ export function BroadcastForm() {
 
       {/* Preview */}
       <div>
-        <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96] mb-3">
+        <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[12px] text-[#7a8a96] mb-3">
           Live Preview
         </p>
         <div
@@ -226,12 +226,12 @@ export function BroadcastForm() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span
-                      className="font-condensed font-bold uppercase text-[9px] px-1.5 py-0.5 rounded"
+                      className="font-condensed font-bold uppercase text-[12px] px-1.5 py-0.5 rounded"
                       style={{ backgroundColor: typeMeta.bg, color: typeMeta.color, border: `1px solid ${typeMeta.border}` }}
                     >
                       {TYPE_OPTIONS.find(t => t.value === type)?.label ?? type}
                     </span>
-                    <span className="font-condensed font-bold text-[9px] text-[#7a8a96]">just now</span>
+                    <span className="font-condensed font-bold text-[12px] text-[#7a8a96]">just now</span>
                   </div>
                   <p className="font-body font-semibold text-[13px] text-[#112535] mb-0.5">{title}</p>
                   <p className="font-body text-[12px] text-[#7a8a96]">
@@ -245,7 +245,7 @@ export function BroadcastForm() {
             </div>
           ) : (
             <div className="p-6 text-center">
-              <p className="font-condensed text-[11px] text-[#7a8a96]">Fill in title and message to see preview</p>
+              <p className="font-condensed text-[12px] text-[#7a8a96]">Fill in title and message to see preview</p>
             </div>
           )}
         </div>
@@ -254,11 +254,11 @@ export function BroadcastForm() {
           className="rounded mt-4 p-4"
           style={{ backgroundColor: 'rgba(27,60,90,0.04)', border: '1px solid rgba(27,60,90,0.08)' }}
         >
-          <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] mb-1">Audience</p>
+          <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] text-[#7a8a96] mb-1">Audience</p>
           <p className="font-condensed text-[12px] text-[#1b3c5a] font-semibold">
             {AUDIENCE_OPTIONS.find(a => a.value === audience)?.label ?? audience}
           </p>
-          <p className="font-condensed text-[10px] text-[#7a8a96] mt-0.5">
+          <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
             {AUDIENCE_OPTIONS.find(a => a.value === audience)?.desc}
             {audienceCount !== null && (
               <span className="font-semibold text-[#1b3c5a]"> \u2014 {audienceCount} member{audienceCount !== 1 ? 's' : ''}</span>

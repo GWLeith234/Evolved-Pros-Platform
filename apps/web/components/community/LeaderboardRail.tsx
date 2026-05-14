@@ -40,12 +40,12 @@ function RailSection({ eyebrow, children, tooltip }: { eyebrow: string; children
     <div>
       {tooltip ? (
         <Tooltip content={tooltip}>
-          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] sm:text-[9px] mb-3 cursor-help" style={{ color: '#ef0e30' }}>
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] sm:text-[12px] mb-3 cursor-help" style={{ color: '#ef0e30' }}>
             {eyebrow}
           </p>
         </Tooltip>
       ) : (
-        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] sm:text-[9px] mb-3" style={{ color: '#ef0e30' }}>
+        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] sm:text-[12px] mb-3" style={{ color: '#ef0e30' }}>
           {eyebrow}
         </p>
       )}
@@ -75,7 +75,7 @@ function LeaderboardRow({ entry, currentUserTier }: { entry: LeaderboardEntry; c
             className="w-7 h-7 rounded-full object-cover"
           />
         ) : (
-          <span style={{ fontSize: '9px' }} className="font-condensed font-bold text-white">{getInitials(entry.displayName)}</span>
+          <span style={{ fontSize: '12px' }} className="font-condensed font-bold text-white">{getInitials(entry.displayName)}</span>
         )}
       </div>
       <div className="flex-1 min-w-0">
@@ -104,7 +104,7 @@ function ActiveMemberRow({ member }: { member: MemberSummary }) {
             className="w-8 h-8 rounded-full object-cover"
           />
         ) : (
-          <span className="text-[12px] sm:text-[10px] font-condensed font-bold text-white">{getInitials(member.displayName)}</span>
+          <span className="text-[12px] sm:text-[12px] font-condensed font-bold text-white">{getInitials(member.displayName)}</span>
         )}
       </div>
       <div className="flex-1 min-w-0">
@@ -112,7 +112,7 @@ function ActiveMemberRow({ member }: { member: MemberSummary }) {
           <span className="font-body text-[13px] font-medium text-[#1b3c5a] group-hover:text-[#68a2b9] transition-colors truncate">{member.displayName}</span>
           {member.tier && <MemberBadge tier={member.tier} size="sm" />}
         </div>
-        {member.roleTitle && <p className="font-condensed text-[12px] sm:text-[10px] text-[#7a8a96] truncate">{member.roleTitle}</p>}
+        {member.roleTitle && <p className="font-condensed text-[12px] sm:text-[12px] text-[#7a8a96] truncate">{member.roleTitle}</p>}
       </div>
     </Link>
   )
@@ -140,7 +140,7 @@ function AdCard({ ad }: { ad: CommunityAd }) {
           className="w-full flex items-center justify-center"
           style={{ aspectRatio: '4/3', backgroundColor: 'rgba(27,60,90,0.06)' }}
         >
-          <span className="font-condensed text-[11px]" style={{ color: 'rgba(27,60,90,0.3)' }}>{label}</span>
+          <span className="font-condensed text-[12px]" style={{ color: 'rgba(27,60,90,0.3)' }}>{label}</span>
         </div>
       )}
       <div className="px-3 py-2.5" style={{ backgroundColor: '#f5f7f9' }}>
@@ -148,9 +148,9 @@ function AdCard({ ad }: { ad: CommunityAd }) {
           <div className="flex-1 min-w-0">
             <p className="font-condensed font-bold text-[12px] leading-tight truncate" style={{ color: '#112535' }}>{label}</p>
             {ad.body_copy && (
-              <p className="font-condensed text-[12px] sm:text-[11px] mt-0.5 leading-snug" style={{ color: '#7a8a96' }}>{ad.body_copy}</p>
+              <p className="font-condensed text-[12px] sm:text-[12px] mt-0.5 leading-snug" style={{ color: '#7a8a96' }}>{ad.body_copy}</p>
             )}
-            <p className="font-condensed font-semibold text-[12px] sm:text-[11px] mt-1" style={{ color: '#68a2b9' }}>{cta}</p>
+            <p className="font-condensed font-semibold text-[12px] sm:text-[12px] mt-1" style={{ color: '#68a2b9' }}>{cta}</p>
           </div>
           <span
             className="font-condensed font-bold text-[8px] uppercase tracking-wider rounded flex-shrink-0 px-1.5 py-0.5"
@@ -230,21 +230,21 @@ function PodcastCard({ episode }: { episode: EpisodeSummary }) {
           <p className="font-condensed font-bold text-[12px] text-white leading-tight">{episode.guest_name}</p>
         )}
         {(episode.guest_title || episode.guest_company) && (
-          <p className="font-condensed font-semibold text-[12px] sm:text-[10px]" style={{ color: '#C9A84C' }}>
+          <p className="font-condensed font-semibold text-[12px] sm:text-[12px]" style={{ color: '#C9A84C' }}>
             {episode.guest_title}
             {episode.guest_title && episode.guest_company && ' · '}
             {episode.guest_company}
           </p>
         )}
         {(duration || date) && (
-          <p className="font-condensed text-[12px] sm:text-[10px] mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
+          <p className="font-condensed text-[12px] sm:text-[12px] mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
             {duration}{duration && date ? ' · ' : ''}{date}
           </p>
         )}
 
         {/* Watch button */}
         <div
-          className="mt-2.5 rounded py-2 text-center font-condensed font-bold uppercase tracking-[0.12em] text-[12px] sm:text-[11px] text-white transition-all group-hover:bg-[#1b3c5a]"
+          className="mt-2.5 rounded py-2 text-center font-condensed font-bold uppercase tracking-[0.12em] text-[12px] sm:text-[12px] text-white transition-all group-hover:bg-[#1b3c5a]"
           style={{ backgroundColor: '#112535', border: '1px solid rgba(255,255,255,0.1)' }}
         >
           ▶ Watch Now
@@ -252,7 +252,7 @@ function PodcastCard({ episode }: { episode: EpisodeSummary }) {
       </div>
 
       <p
-        className="font-condensed text-[12px] sm:text-[9px] text-center mt-1.5 uppercase tracking-[0.18em]"
+        className="font-condensed text-[12px] sm:text-[12px] text-center mt-1.5 uppercase tracking-[0.18em]"
         style={{ color: '#0ABFA3' }}
       >
         ↻ Updates every week
@@ -328,7 +328,7 @@ export function LeaderboardRail({ leaderboard, activeMembers, currentUserId, cur
       {episode && (
         <>
           <Divider />
-          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] sm:text-[9px] mb-3" style={{ color: '#ef0e30' }}>
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] sm:text-[12px] mb-3" style={{ color: '#ef0e30' }}>
             Latest Podcast
           </p>
           <PodcastCard episode={episode} />

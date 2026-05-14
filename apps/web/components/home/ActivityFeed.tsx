@@ -194,13 +194,13 @@ export function ActivityFeed({ notifications, completions, posts = [] }: Activit
                         >
                           &ldquo;{item.preview}&rdquo;
                         </p>
-                        <p className="font-condensed text-[10px] mt-0.5" style={{ color: '#7a8a96' }}>
+                        <p className="font-condensed text-[12px] mt-0.5" style={{ color: '#7a8a96' }}>
                           Posted in #{item.channelSlug}
                         </p>
                       </div>
 
                       {/* Time */}
-                      <span className="font-condensed text-[10px] text-[#7a8a96] flex-shrink-0 mt-0.5">
+                      <span className="font-condensed text-[12px] text-[#7a8a96] flex-shrink-0 mt-0.5">
                         <ClientTimeAgo dateStr={item.time} />
                       </span>
                     </>
@@ -220,7 +220,7 @@ export function ActivityFeed({ notifications, completions, posts = [] }: Activit
                       </p>
 
                       {/* Time */}
-                      <span className="font-condensed text-[10px] text-[#7a8a96] flex-shrink-0 mt-0.5">
+                      <span className="font-condensed text-[12px] text-[#7a8a96] flex-shrink-0 mt-0.5">
                         <ClientTimeAgo dateStr={item.time} />
                       </span>
                     </>

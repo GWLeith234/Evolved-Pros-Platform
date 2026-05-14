@@ -20,7 +20,7 @@ export function AddGoalCTA({ href = '/settings#goals' }: AddGoalCTAProps) {
         color: '#1b3c5a',
       }}
     >
-      <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[11px]">
+      <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px]">
         + Add Goal
       </span>
     </Link>

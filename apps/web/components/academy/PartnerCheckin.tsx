@@ -188,7 +188,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
 
   const GOLD_EYEBROW: React.CSSProperties = {
     fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-    fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
+    fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
     color: GOLD, margin: '0 0 4px',
   }
 
@@ -357,7 +357,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
         {/* Partner's latest check-in (read only) */}
         {latestPartnerCheckin && (
           <div style={{ marginBottom: '28px' }}>
-            <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.3)', margin: '0 0 10px' }}>
+            <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.3)', margin: '0 0 10px' }}>
               {partnerDisplayName}&apos;s latest check-in
             </p>
             <div style={{ backgroundColor: '#0A0F18', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '6px', padding: '14px 16px' }}>
@@ -367,7 +367,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
                   backgroundColor: OUTCOME_CONFIG[latestPartnerCheckin.outcome].bg,
                   color:           OUTCOME_CONFIG[latestPartnerCheckin.outcome].color,
                   fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-                  fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase',
+                  fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                   padding: '3px 10px', borderRadius: '3px',
                 }}>
                   {OUTCOME_CONFIG[latestPartnerCheckin.outcome].label}
@@ -383,7 +383,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
                   &ldquo;{latestPartnerCheckin.note}&rdquo;
                 </p>
               )}
-              <p style={{ color: 'rgba(250,249,247,0.2)', fontSize: '11px', margin: '8px 0 0' }}>
+              <p style={{ color: 'rgba(250,249,247,0.2)', fontSize: '12px', margin: '8px 0 0' }}>
                 Week of {fmtWeek(latestPartnerCheckin.week_start)}
               </p>
             </div>
@@ -392,7 +392,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
 
         {/* My check-in form */}
         <div style={{ marginBottom: myCheckins.length > 0 ? '28px' : '0' }}>
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.3)', margin: '0 0 14px' }}>
+          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.3)', margin: '0 0 14px' }}>
             My weekly check-in
           </p>
 
@@ -466,7 +466,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
               {ciSubmitting ? 'Saving…' : 'Submit check-in'}
             </button>
             {ciSaved && (
-              <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: TEAL }}>
+              <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: TEAL }}>
                 ✓ Saved
               </span>
             )}
@@ -479,7 +479,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
         {/* History */}
         {myCheckins.length > 0 && (
           <div>
-            <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.22)', margin: '0 0 10px' }}>
+            <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.22)', margin: '0 0 10px' }}>
               My recent check-ins
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -488,9 +488,9 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
                 return (
                   <div key={c.id} style={{ backgroundColor: '#0A0F18', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px', padding: '10px 12px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                     <div style={{ flexShrink: 0, textAlign: 'center', minWidth: '52px' }}>
-                      <p style={{ color: 'rgba(250,249,247,0.3)', fontSize: '11px', margin: 0 }}>{fmtWeek(c.week_start)}</p>
+                      <p style={{ color: 'rgba(250,249,247,0.3)', fontSize: '12px', margin: 0 }}>{fmtWeek(c.week_start)}</p>
                       {cfg && (
-                        <span style={{ color: cfg.color, fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                        <span style={{ color: cfg.color, fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                           {cfg.label}
                         </span>
                       )}
@@ -526,7 +526,7 @@ const fieldLabel: React.CSSProperties = {
   display: 'block',
   fontFamily: '"Barlow Condensed", sans-serif',
   fontWeight: 700,
-  fontSize: '10px',
+  fontSize: '12px',
   letterSpacing: '0.18em',
   textTransform: 'uppercase',
   color: 'rgba(250,249,247,0.4)',
@@ -566,7 +566,7 @@ const ghostBtn: React.CSSProperties = {
   cursor: 'pointer',
   fontFamily: '"Barlow Condensed", sans-serif',
   fontWeight: 700,
-  fontSize: '10px',
+  fontSize: '12px',
   letterSpacing: '0.12em',
   textTransform: 'uppercase',
   color: 'rgba(250,249,247,0.3)',

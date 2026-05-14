@@ -70,7 +70,7 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
           {label}
         </p>
         {ad.sponsor_name && ad.headline && (
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '11px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.2 }}>
+          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.2 }}>
             {ad.sponsor_name}
           </p>
         )}
@@ -84,7 +84,7 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
           color: 'white',
           fontFamily: '"Barlow Condensed", sans-serif',
           fontWeight: 700,
-          fontSize: '9px',
+          fontSize: '12px',
           letterSpacing: '0.1em',
           textTransform: 'uppercase',
           padding: '6px 12px',

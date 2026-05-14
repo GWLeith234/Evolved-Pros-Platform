@@ -49,7 +49,7 @@ export function EpisodeBannerClient({
     >
       <div className="flex items-center gap-2 sm:gap-[10px] min-w-0">
         <span
-          className="text-[12px] sm:text-[9px] font-bold uppercase tracking-wider rounded-[3px] px-2 py-[2px] shrink-0"
+          className="text-[12px] sm:text-[12px] font-bold uppercase tracking-wider rounded-[3px] px-2 py-[2px] shrink-0"
           style={{ backgroundColor: '#C9302A', color: '#ffffff' }}
         >
           LATEST EPISODE
@@ -68,7 +68,7 @@ export function EpisodeBannerClient({
           <>
             <span className="hidden sm:block shrink-0" style={{ width: '3px', height: '3px', borderRadius: '50%', backgroundColor: 'var(--episode-banner-border)' }} />
             <span
-              className="hidden sm:inline whitespace-nowrap text-[11px] shrink-0"
+              className="hidden sm:inline whitespace-nowrap text-[12px] shrink-0"
               style={{ color: 'var(--episode-banner-text-dim)' }}
             >
               {guestLabel}
@@ -80,7 +80,7 @@ export function EpisodeBannerClient({
           <>
             <span className="hidden sm:block shrink-0" style={{ width: '3px', height: '3px', borderRadius: '50%', backgroundColor: 'var(--episode-banner-border)' }} />
             <span
-              className="hidden sm:inline whitespace-nowrap text-[11px] shrink-0"
+              className="hidden sm:inline whitespace-nowrap text-[12px] shrink-0"
               style={{ color: 'var(--episode-banner-text-dim)' }}
             >
               {dateLabel}
@@ -101,7 +101,7 @@ export function EpisodeBannerClient({
         <Link
           href={href}
           {...(externalLink ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-          className="text-[12px] sm:text-[11px] font-medium rounded px-3 py-2 sm:py-1 no-underline whitespace-nowrap"
+          className="text-[12px] sm:text-[12px] font-medium rounded px-3 py-2 sm:py-1 no-underline whitespace-nowrap"
           style={{
             backgroundColor: 'var(--episode-banner-cta-bg)',
             border: '1px solid var(--episode-banner-cta-bg)',

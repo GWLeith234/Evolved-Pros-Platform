@@ -109,7 +109,7 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
             {goal.title}
           </span>
           <span
-            className="font-condensed text-[9px] font-bold tracking-[0.12em] uppercase rounded px-1.5 py-0.5 shrink-0"
+            className="font-condensed text-[12px] font-bold tracking-[0.12em] uppercase rounded px-1.5 py-0.5 shrink-0"
             style={{ color: accentColor, backgroundColor: `${accentColor}1f` }}
           >
             {goal.period}
@@ -124,7 +124,7 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
             {goal.progress_pct}%
           </span>
           <span
-            className="font-condensed font-bold tracking-[0.1em] text-[10px]"
+            className="font-condensed font-bold tracking-[0.1em] text-[12px]"
             style={{ color: goal.weekly_delta < 0 ? '#ef0e30' : accentColor }}
           >
             {deltaArrow} {deltaSign}{goal.weekly_delta}% wk
@@ -148,14 +148,14 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
                 threshold is crossed mid-hydration — suppress the resulting
                 #425 warning; the value re-renders correctly on first effect. */}
             <span
-              className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] px-2 py-0.5 rounded"
+              className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] px-2 py-0.5 rounded"
               style={STATUS_STYLE[pace.status]}
               suppressHydrationWarning
             >
               {pace.label}
             </span>
             <span
-              className="font-condensed text-[10px]"
+              className="font-condensed text-[12px]"
               style={{ color: '#94a3b8' }}
               suppressHydrationWarning
             >
@@ -172,13 +172,13 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
           style={{ borderTop: '1px solid rgba(27,60,90,0.06)', backgroundColor: 'rgba(27,60,90,0.02)' }}
         >
           <span
-            className="font-condensed font-bold uppercase tracking-[0.16em] text-[10px]"
+            className="font-condensed font-bold uppercase tracking-[0.16em] text-[12px]"
             style={{ color: accentColor }}
           >
             ↳ Tied to path forward
           </span>
           <span
-            className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px]"
+            className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px]"
             style={{ color: accentColor }}
           >
             Continue →
