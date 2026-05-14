@@ -5,7 +5,7 @@ export function UpgradePrompt() {
       style={{ backgroundColor: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.25)' }}
     >
       <div>
-        <p className="font-condensed font-bold uppercase tracking-[0.15em] text-[11px] text-[#c9a84c] mb-1">
+        <p className="font-condensed font-bold uppercase tracking-[0.15em] text-[12px] text-[#c9a84c] mb-1">
           Pro Plan
         </p>
         <p className="font-body text-[14px] text-[#1b3c5a] leading-snug">

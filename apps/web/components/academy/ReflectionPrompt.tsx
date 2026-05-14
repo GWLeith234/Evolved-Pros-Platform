@@ -80,7 +80,7 @@ export function ReflectionPrompt({ courseId, promptText }: Props) {
         <p
           style={{
             fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-            fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
+            fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
             color: '#C9A84C', margin: '0 0 8px',
           }}
         >
@@ -116,13 +116,13 @@ export function ReflectionPrompt({ courseId, promptText }: Props) {
             <span
               style={{
                 fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-                fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase',
+                fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase',
                 color: '#C9A84C',
               }}
             >
               Reflection saved
             </span>
-            <span style={{ color: 'rgba(250,249,247,0.25)', fontSize: '11px', marginLeft: '4px' }}>
+            <span style={{ color: 'rgba(250,249,247,0.25)', fontSize: '12px', marginLeft: '4px' }}>
               {new Date(saved.created_at).toLocaleDateString()}
             </span>
           </div>
@@ -154,7 +154,7 @@ export function ReflectionPrompt({ courseId, promptText }: Props) {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px' }}>
             <span
               style={{
-                fontSize: '11px', fontFamily: '"Barlow Condensed", sans-serif',
+                fontSize: '12px', fontFamily: '"Barlow Condensed", sans-serif',
                 fontWeight: 600, color: text.length >= 50 ? 'rgba(250,249,247,0.3)' : 'rgba(250,249,247,0.2)',
               }}
             >

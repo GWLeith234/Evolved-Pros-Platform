@@ -45,7 +45,7 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
         <div className="flex-1 min-w-0">
           <p
             className="font-condensed font-bold uppercase tracking-wide mb-1"
-            style={{ color: '#68a2b9', fontSize: '9px' }}
+            style={{ color: '#68a2b9', fontSize: '12px' }}
           >
             From George&apos;s Stack
           </p>
@@ -66,7 +66,7 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
             <span
               className="inline-block font-condensed font-bold uppercase mt-2"
               style={{
-                fontSize: '9px',
+                fontSize: '12px',
                 color: '#68a2b9',
                 backgroundColor: 'rgba(104,162,185,0.15)',
                 border: '1px solid #68a2b9',
@@ -80,7 +80,7 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
           <div className="mt-2">
             <span
               className="font-condensed font-bold uppercase"
-              style={{ color: '#68a2b9', fontSize: '11px' }}
+              style={{ color: '#68a2b9', fontSize: '12px' }}
             >
               {ctaText}
             </span>
@@ -113,7 +113,7 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
         {/* Sponsored label top-right */}
         <p
           className="font-condensed uppercase absolute top-3 right-4"
-          style={{ color: '#68a2b9', fontSize: '9px' }}
+          style={{ color: '#68a2b9', fontSize: '12px' }}
         >
           Sponsored
         </p>
@@ -140,7 +140,7 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
               <span
                 className="inline-block font-condensed font-bold uppercase mt-2"
                 style={{
-                  fontSize: '9px',
+                  fontSize: '12px',
                   color: '#1b3c5a',
                   backgroundColor: 'rgba(27,60,90,0.08)',
                   borderRadius: '9999px',
@@ -153,7 +153,7 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
             <div className="mt-2">
               <span
                 className="font-condensed font-bold uppercase"
-                style={{ color: '#1b3c5a', fontSize: '11px' }}
+                style={{ color: '#1b3c5a', fontSize: '12px' }}
               >
                 {ctaText}
               </span>
@@ -201,7 +201,7 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
         {/* Sponsored label top-left */}
         <p
           className="font-condensed uppercase mb-2"
-          style={{ color: '#68a2b9', fontSize: '9px' }}
+          style={{ color: '#68a2b9', fontSize: '12px' }}
         >
           Sponsored
         </p>
@@ -228,7 +228,7 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
               <span
                 className="inline-block font-condensed font-bold uppercase mt-2"
                 style={{
-                  fontSize: '9px',
+                  fontSize: '12px',
                   color: '#1b3c5a',
                   backgroundColor: 'rgba(27,60,90,0.08)',
                   borderRadius: '9999px',
@@ -241,7 +241,7 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
             <div className="mt-2">
               <span
                 className="font-condensed font-bold uppercase"
-                style={{ color: '#1b3c5a', fontSize: '11px' }}
+                style={{ color: '#1b3c5a', fontSize: '12px' }}
               >
                 {ctaText}
               </span>

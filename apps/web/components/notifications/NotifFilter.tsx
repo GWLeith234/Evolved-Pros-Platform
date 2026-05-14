@@ -32,7 +32,7 @@ export function NotifFilter({ active, counts, onChange }: NotifFilterProps) {
       style={{ backgroundColor: '#112535', borderRight: '1px solid rgba(255,255,255,0.06)' }}
     >
       <p
-        className="px-5 mb-1 font-condensed font-bold uppercase tracking-[0.2em] text-[9px]"
+        className="px-5 mb-1 font-condensed font-bold uppercase tracking-[0.2em] text-[12px]"
         style={{ color: 'rgba(255,255,255,0.25)' }}
       >
         Filter
@@ -58,7 +58,7 @@ export function NotifFilter({ active, counts, onChange }: NotifFilterProps) {
             </span>
             {count > 0 && (
               <span
-                className="flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full font-condensed font-bold text-[9px] text-white flex items-center justify-center"
+                className="flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full font-condensed font-bold text-[12px] text-white flex items-center justify-center"
                 style={{ backgroundColor: '#ef0e30' }}
               >
                 {count}
@@ -74,7 +74,7 @@ export function NotifFilter({ active, counts, onChange }: NotifFilterProps) {
       >
         <a
           href="/notifications/preferences"
-          className="font-condensed text-[11px] tracking-wide transition-colors"
+          className="font-condensed text-[12px] tracking-wide transition-colors"
           style={{ color: 'rgba(255,255,255,0.3)' }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.7)' }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.3)' }}

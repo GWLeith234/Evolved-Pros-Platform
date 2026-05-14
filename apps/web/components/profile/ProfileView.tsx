@@ -143,7 +143,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
                     color: tierColor,
                     fontFamily: '"Barlow Condensed", sans-serif',
                     fontWeight: 700,
-                    fontSize: '11px',
+                    fontSize: '12px',
                     textTransform: 'uppercase',
                     letterSpacing: '0.16em',
                   }}

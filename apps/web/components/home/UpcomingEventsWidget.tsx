@@ -74,7 +74,7 @@ function EventItem({ event, userId }: { event: EventRow; userId: string }) {
           {day}
         </span>
         <span
-          className="font-condensed font-bold uppercase text-[10px] tracking-wide"
+          className="font-condensed font-bold uppercase text-[12px] tracking-wide"
           style={{ color: '#ef0e30' }}
         >
           {month}
@@ -86,7 +86,7 @@ function EventItem({ event, userId }: { event: EventRow; userId: string }) {
         <p className="font-body font-semibold text-[13px] text-[#1b3c5a] leading-tight mb-0.5">
           {event.title}
         </p>
-        <p className="font-condensed text-[11px] font-medium text-[#7a8a96]">
+        <p className="font-condensed text-[12px] font-medium text-[#7a8a96]">
           {durationStr} · {platform}
         </p>
       </div>

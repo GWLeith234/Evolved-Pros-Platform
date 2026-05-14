@@ -21,7 +21,7 @@ export function LessonTabs({ lessonId, initialNotes }: LessonTabsProps) {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className="font-condensed font-bold uppercase tracking-[0.12em] text-[11px] px-0 pb-2 mr-5 transition-all"
+            className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] px-0 pb-2 mr-5 transition-all"
             style={{
               color: activeTab === tab ? '#112535' : '#7a8a96',
               borderBottom: activeTab === tab ? '2px solid #ef0e30' : '2px solid transparent',

@@ -71,7 +71,7 @@ export function RightRail() {
         <div
           style={{ width: '250px', height: '208px', backgroundColor: 'rgba(27,60,90,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          <span className="font-condensed text-[11px]" style={{ color: 'rgba(27,60,90,0.25)' }}>
+          <span className="font-condensed text-[12px]" style={{ color: 'rgba(27,60,90,0.25)' }}>
             {ad.sponsor_name ?? 'Ad'}
           </span>
         </div>
@@ -83,7 +83,7 @@ export function RightRail() {
           className="px-3 py-2 flex items-center justify-between"
           style={{ backgroundColor: '#f5f7f9', borderTop: '1px solid rgba(27,60,90,0.08)' }}
         >
-          <span className="font-condensed text-[11px] font-semibold truncate" style={{ color: '#1b3c5a', maxWidth: '180px' }}>
+          <span className="font-condensed text-[12px] font-semibold truncate" style={{ color: '#1b3c5a', maxWidth: '180px' }}>
             {ad.headline ?? ad.sponsor_name}
           </span>
           <span
@@ -112,7 +112,7 @@ export function RightRail() {
       }}
     >
       <p
-        className="font-condensed font-bold uppercase tracking-[0.2em] text-[9px] mb-3"
+        className="font-condensed font-bold uppercase tracking-[0.2em] text-[12px] mb-3"
         style={{ color: 'rgba(27,60,90,0.3)' }}
       >
         Advertisement

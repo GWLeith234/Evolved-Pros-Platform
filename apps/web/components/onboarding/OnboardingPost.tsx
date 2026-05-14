@@ -84,7 +84,7 @@ export function OnboardingPost({ displayName, company, onContinue }: Props) {
         onBlur={e  => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
       />
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-        <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '10px', color: text.length > 450 ? '#ef0e30' : 'rgba(255,255,255,0.25)' }}>
+        <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', color: text.length > 450 ? '#ef0e30' : 'rgba(255,255,255,0.25)' }}>
           {text.length}/500
         </span>
       </div>
@@ -128,7 +128,7 @@ export function OnboardingPost({ displayName, company, onContinue }: Props) {
           border: 'none',
           cursor: 'pointer',
           fontFamily: '"Barlow Condensed", sans-serif',
-          fontSize: '11px',
+          fontSize: '12px',
           letterSpacing: '0.1em',
           textTransform: 'uppercase',
           color: 'rgba(255,255,255,0.2)',

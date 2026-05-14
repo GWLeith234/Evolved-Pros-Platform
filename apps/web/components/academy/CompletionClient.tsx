@@ -85,7 +85,7 @@ export function CompletionClient({ displayName, completedAt, alumniAwardedAt, pi
 
         {/* 6 Pillar badges */}
         <div style={{ marginBottom: 40 }}>
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginBottom: 16 }}>
+          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginBottom: 16 }}>
             All 6 Pillars Complete
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
@@ -99,7 +99,7 @@ export function CompletionClient({ displayName, completedAt, alumniAwardedAt, pi
                     {['🧱','🪞','🧠','🎯','📊','⚡'][b.number - 1]}
                   </span>
                 </div>
-                <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '11px', color: b.earned ? 'white' : 'rgba(255,255,255,0.25)', margin: '0 0 2px', letterSpacing: '0.04em' }}>
+                <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', color: b.earned ? 'white' : 'rgba(255,255,255,0.25)', margin: '0 0 2px', letterSpacing: '0.04em' }}>
                   {b.label}
                 </p>
                 <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color: b.earned ? b.color : 'rgba(255,255,255,0.15)', margin: 0 }}>

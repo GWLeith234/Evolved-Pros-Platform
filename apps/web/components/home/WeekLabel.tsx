@@ -18,7 +18,7 @@ export default function WeekLabel() {
   return (
     <p
       className="font-condensed font-bold uppercase tracking-widest"
-      style={{ fontSize: '9px', color: '#c9a84c' }}
+      style={{ fontSize: '12px', color: '#c9a84c' }}
     >
       {label}
     </p>

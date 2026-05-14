@@ -321,7 +321,7 @@ export function CommunityFeed({
               <button
                 type="button"
                 onClick={retryLoad}
-                className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] px-4 py-2 rounded transition-all"
+                className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-4 py-2 rounded transition-all"
                 style={{ backgroundColor: 'rgba(27,60,90,0.08)', color: '#1b3c5a' }}
               >
                 Retry
@@ -330,7 +330,7 @@ export function CommunityFeed({
           )}
 
           {!hasMore && posts.length > 0 && (
-            <p className="text-center font-condensed text-[12px] sm:text-[10px] tracking-widest text-[#7a8a96] py-4">
+            <p className="text-center font-condensed text-[12px] sm:text-[12px] tracking-widest text-[#7a8a96] py-4">
               You've reached the beginning
             </p>
           )}

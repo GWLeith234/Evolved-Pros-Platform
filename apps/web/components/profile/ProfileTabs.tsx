@@ -122,7 +122,7 @@ export function ProfileTabs({
               <Card key={post.id}>
                 <CardBody>
                   {post.channels && (
-                    <p className="font-condensed text-[10px] font-bold uppercase tracking-widest text-[#68a2b9] mb-1">
+                    <p className="font-condensed text-[12px] font-bold uppercase tracking-widest text-[#68a2b9] mb-1">
                       #{post.channels.name}
                     </p>
                   )}
@@ -130,11 +130,11 @@ export function ProfileTabs({
                     {post.body}
                   </p>
                   <div className="flex items-center gap-4">
-                    <span className="font-condensed text-[10px] text-[#7a8a96]">
+                    <span className="font-condensed text-[12px] text-[#7a8a96]">
                       {new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}
                     </span>
-                    <span className="font-condensed text-[10px] text-[#7a8a96]">♥ {post.like_count}</span>
-                    <span className="font-condensed text-[10px] text-[#7a8a96]">↩ {post.reply_count}</span>
+                    <span className="font-condensed text-[12px] text-[#7a8a96]">♥ {post.like_count}</span>
+                    <span className="font-condensed text-[12px] text-[#7a8a96]">↩ {post.reply_count}</span>
                   </div>
                 </CardBody>
               </Card>
@@ -197,7 +197,7 @@ export function ProfileTabs({
                     <p className="font-body text-sm leading-snug" style={{ color: 'rgba(255,255,255,0.75)' }}>
                       {entry.description}
                     </p>
-                    <p className="font-condensed text-[10px] mt-0.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.30)' }}>
+                    <p className="font-condensed text-[12px] mt-0.5 uppercase tracking-wide" style={{ color: 'rgba(255,255,255,0.30)' }}>
                       {new Date(entry.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}
                     </p>
                   </div>

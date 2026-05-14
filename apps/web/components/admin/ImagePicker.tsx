@@ -218,7 +218,7 @@ function StockTab({ onChange }: { onChange: (url: string) => void }) {
                 alt={`Photo by ${photo.user.name}`}
                 className="h-24 w-full object-cover"
               />
-              <div className="px-2 py-1 text-[11px] text-slate-400 group-hover:text-slate-200">
+              <div className="px-2 py-1 text-[12px] text-slate-400 group-hover:text-slate-200">
                 by {photo.user.name}
               </div>
             </button>

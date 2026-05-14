@@ -67,16 +67,16 @@ export function MuxUploader({ lessonId: _lessonId, existingPlaybackId, onUploadC
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-5 py-2.5"
+            className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-5 py-2.5"
             style={{ background: '#1b3c5a', color: '#fff', border: 'none', cursor: 'pointer' }}
           >
             {existingPlaybackId ? 'Replace Video' : 'Upload Video'}
           </button>
-          <p className="font-condensed text-[11px] mt-2" style={{ color: '#7a8a96' }}>
+          <p className="font-condensed text-[12px] mt-2" style={{ color: '#7a8a96' }}>
             MP4, MOV, or MKV · Max 10 GB
           </p>
           {errorMsg && (
-            <p className="font-condensed text-[11px] mt-2 font-semibold" style={{ color: '#ef0e30' }}>
+            <p className="font-condensed text-[12px] mt-2 font-semibold" style={{ color: '#ef0e30' }}>
               {errorMsg}
             </p>
           )}

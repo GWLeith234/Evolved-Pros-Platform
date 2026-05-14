@@ -109,7 +109,7 @@ export function CourseCard({ course, isLocked, userTier }: CourseCardProps) {
       <div className="absolute bottom-0 left-0 right-0 px-4 pb-4">
         {/* Pillar label */}
         <p
-          className="font-condensed font-bold uppercase tracking-[0.12em] text-[9px] mb-1"
+          className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] mb-1"
           style={{ color: PILLAR_CONFIG[course.pillarNumber]?.color ?? '#68a2b9' }}
         >
           {PILLAR_CONFIG[course.pillarNumber]?.label ?? course.title}
@@ -124,7 +124,7 @@ export function CourseCard({ course, isLocked, userTier }: CourseCardProps) {
         {isLocked ? (
           <div className="flex items-center gap-2">
             <span
-              className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
+              className="font-condensed font-bold uppercase text-[12px] rounded px-2 py-0.5"
               style={{
                 color: '#c9a84c',
                 backgroundColor: 'rgba(201,168,76,0.15)',
@@ -136,7 +136,7 @@ export function CourseCard({ course, isLocked, userTier }: CourseCardProps) {
             <a
               href="/pricing"
               onClick={e => e.stopPropagation()}
-              className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5 no-underline transition-colors duration-150"
+              className="font-condensed font-bold uppercase text-[12px] rounded px-2 py-0.5 no-underline transition-colors duration-150"
               style={{
                 color: '#0A0F18',
                 backgroundColor: '#c9a84c',
@@ -152,13 +152,13 @@ export function CourseCard({ course, isLocked, userTier }: CourseCardProps) {
           // all (RLS shadow / missing service-role key). A genuinely empty
           // course renders the regular "0 lessons" pill below so the gap
           // is visible to admins instead of looking like a fetch failure.
-          <p className="font-condensed text-[11px]" style={{ color: 'rgba(255,255,255,0.50)' }}>
+          <p className="font-condensed text-[12px]" style={{ color: 'rgba(255,255,255,0.50)' }}>
             Lessons coming soon
           </p>
         ) : (
           <div className="flex items-center gap-2">
             <span
-              className="font-condensed font-bold uppercase tracking-[0.12em] text-[10px] flex-shrink-0"
+              className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] flex-shrink-0"
               style={{ color: 'rgba(255,255,255,0.65)' }}
             >
               {course.totalLessons} {course.totalLessons === 1 ? 'lesson' : 'lessons'}
@@ -176,7 +176,7 @@ export function CourseCard({ course, isLocked, userTier }: CourseCardProps) {
               />
             </div>
             <span
-              className="font-condensed font-bold text-[10px] flex-shrink-0"
+              className="font-condensed font-bold text-[12px] flex-shrink-0"
               style={{ color: isComplete ? '#22c55e' : 'rgba(255,255,255,0.65)' }}
             >
               {isComplete ? '✓ Done' : `${course.progressPct}%`}

@@ -70,7 +70,7 @@ export function GeorgeReplyAssist({ postId, postBody, authorName, pillarTag, onR
       <button
         type="button"
         onClick={handleGenerate}
-        className="font-condensed font-semibold uppercase tracking-[0.1em] text-[9px] transition-opacity hover:opacity-70"
+        className="font-condensed font-semibold uppercase tracking-[0.1em] text-[12px] transition-opacity hover:opacity-70"
         style={{ color: GOLD, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}
       >
         Reply as George
@@ -81,7 +81,7 @@ export function GeorgeReplyAssist({ postId, postBody, authorName, pillarTag, onR
   if (mode === 'loading') {
     return (
       <div className="rounded-lg px-3 py-2.5 mt-2" style={{ backgroundColor: `${GOLD}0A`, border: `1px solid ${GOLD}25` }}>
-        <span className="font-condensed text-[10px]" style={{ color: `${GOLD}99` }}>Generating replies...</span>
+        <span className="font-condensed text-[12px]" style={{ color: `${GOLD}99` }}>Generating replies...</span>
       </div>
     )
   }
@@ -101,12 +101,12 @@ export function GeorgeReplyAssist({ postId, postBody, authorName, pillarTag, onR
             type="button"
             onClick={() => handleSend(editText)}
             disabled={sending || !editText.trim()}
-            className="font-condensed font-bold uppercase tracking-[0.1em] text-[10px] px-4 py-1.5 rounded transition-opacity"
+            className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-4 py-1.5 rounded transition-opacity"
             style={{ backgroundColor: GOLD, color: '#0A0F18', opacity: sending ? 0.5 : 1 }}
           >
             {sending ? 'Sending...' : 'Send reply \u2192'}
           </button>
-          <button type="button" onClick={() => setMode('options')} className="font-condensed text-[10px]" style={{ color: 'rgba(27,60,90,0.4)' }}>
+          <button type="button" onClick={() => setMode('options')} className="font-condensed text-[12px]" style={{ color: 'rgba(27,60,90,0.4)' }}>
             Cancel
           </button>
         </div>
@@ -117,7 +117,7 @@ export function GeorgeReplyAssist({ postId, postBody, authorName, pillarTag, onR
   // mode === 'options'
   return (
     <div className="rounded-lg px-3 py-3 mt-2" style={{ backgroundColor: `${GOLD}0A`, border: `1px solid ${GOLD}25` }}>
-      {error && <p className="font-condensed text-[10px] mb-2" style={{ color: '#ef0e30' }}>{error}</p>}
+      {error && <p className="font-condensed text-[12px] mb-2" style={{ color: '#ef0e30' }}>{error}</p>}
 
       <p className="font-condensed font-semibold uppercase tracking-[0.14em] text-[8px] mb-2" style={{ color: `${GOLD}99` }}>
         <span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', backgroundColor: GOLD, marginRight: 4, verticalAlign: 'middle' }} />
@@ -147,7 +147,7 @@ export function GeorgeReplyAssist({ postId, postBody, authorName, pillarTag, onR
           type="button"
           onClick={() => selectedIndex !== null && handleSend(replies[selectedIndex])}
           disabled={selectedIndex === null || sending}
-          className="font-condensed font-bold uppercase tracking-[0.1em] text-[10px] px-4 py-1.5 rounded transition-opacity"
+          className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-4 py-1.5 rounded transition-opacity"
           style={{ backgroundColor: GOLD, color: '#0A0F18', opacity: selectedIndex === null || sending ? 0.4 : 1 }}
         >
           {sending ? 'Sending...' : `Send option ${selectedIndex !== null ? selectedIndex + 1 : ''} \u2192`}
@@ -156,7 +156,7 @@ export function GeorgeReplyAssist({ postId, postBody, authorName, pillarTag, onR
           type="button"
           onClick={() => { if (selectedIndex !== null) { setEditText(replies[selectedIndex]); setMode('editing') } }}
           disabled={selectedIndex === null}
-          className="font-condensed text-[10px] px-3 py-1.5 rounded"
+          className="font-condensed text-[12px] px-3 py-1.5 rounded"
           style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: 'rgba(27,60,90,0.5)', opacity: selectedIndex === null ? 0.4 : 1 }}
         >
           Edit first
@@ -164,7 +164,7 @@ export function GeorgeReplyAssist({ postId, postBody, authorName, pillarTag, onR
         <button
           type="button"
           onClick={handleGenerate}
-          className="font-condensed text-[10px] px-3 py-1.5 rounded"
+          className="font-condensed text-[12px] px-3 py-1.5 rounded"
           style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: 'rgba(27,60,90,0.5)' }}
         >
           Regenerate

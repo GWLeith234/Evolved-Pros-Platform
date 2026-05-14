@@ -20,7 +20,7 @@ const RED = '#C9302A'
 
 const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none transition-all'
 const inputStyle: React.CSSProperties = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }
-const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5'
+const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96] mb-1.5'
 
 export function StoryAIWriter({ onPrefill }: Props) {
   const [topic, setTopic] = useState('')
@@ -71,7 +71,7 @@ export function StoryAIWriter({ onPrefill }: Props) {
       }}
     >
       <p
-        className="font-condensed font-bold uppercase tracking-[0.22em] text-[10px] mb-1"
+        className="font-condensed font-bold uppercase tracking-[0.22em] text-[12px] mb-1"
         style={{ color: TEAL }}
       >
         Write with AI
@@ -104,7 +104,7 @@ export function StoryAIWriter({ onPrefill }: Props) {
           style={inputStyle}
           placeholder="time-blocking, focus, calendar discipline"
         />
-        <p className="font-condensed text-[10px] mt-1" style={{ color: '#7a8a96' }}>
+        <p className="font-condensed text-[12px] mt-1" style={{ color: '#7a8a96' }}>
           The AI will suggest a pillar — you can adjust it in the form below.
         </p>
       </div>
@@ -164,7 +164,7 @@ export function StoryAIWriter({ onPrefill }: Props) {
           <span style={{ color: TEAL, fontWeight: 700 }}>Drafted:</span>{' '}
           {lastTitle}
           {lastImagePrompt && (
-            <p className="mt-1 font-condensed text-[10px] uppercase tracking-[0.14em] text-[#7a8a96]">
+            <p className="mt-1 font-condensed text-[12px] uppercase tracking-[0.14em] text-[#7a8a96]">
               Image prompt copied to the form&apos;s featured-image picker.
             </p>
           )}

@@ -32,7 +32,7 @@ export function CompletionCertificate({
       }}
     >
       {/* Watermark */}
-      <p className="font-condensed font-bold uppercase tracking-[0.25em] text-[11px] mb-8" style={{ color: 'rgba(201,168,76,0.6)' }}>
+      <p className="font-condensed font-bold uppercase tracking-[0.25em] text-[12px] mb-8" style={{ color: 'rgba(201,168,76,0.6)' }}>
         EVOLVED·PROS
       </p>
 
@@ -81,7 +81,7 @@ export function CompletionCertificate({
         )}
         <a
           href="/academy"
-          className="font-condensed font-semibold uppercase tracking-wide text-[11px] transition-colors text-center"
+          className="font-condensed font-semibold uppercase tracking-wide text-[12px] transition-colors text-center"
           style={{ color: 'rgba(250,249,247,0.4)' }}
         >
           Back to Academy

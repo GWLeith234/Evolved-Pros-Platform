@@ -26,7 +26,7 @@ export function LessonListPanel({
     >
       {/* Header */}
       <div className="px-7 pt-7 pb-5 flex-shrink-0">
-        <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-2" style={{ color: '#68a2b9' }}>
+        <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] mb-2" style={{ color: '#68a2b9' }}>
           Pillar {String(course.pillarNumber).padStart(2, '0')} — The Evolved Architecture™
         </p>
         <h2
@@ -51,7 +51,7 @@ export function LessonListPanel({
               style={{ width: `${progressPct}%`, backgroundColor: '#68a2b9' }}
             />
           </div>
-          <span className="font-condensed font-bold text-[10px] flex-shrink-0" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          <span className="font-condensed font-bold text-[12px] flex-shrink-0" style={{ color: 'rgba(255,255,255,0.4)' }}>
             {progressPct}% complete
           </span>
         </div>

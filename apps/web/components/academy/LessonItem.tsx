@@ -78,7 +78,7 @@ export function LessonItem({ lesson, index, isActive, courseSlug, accentColor }:
       }}
     >
       <span
-        className="font-condensed font-bold text-[11px] w-[28px] flex-shrink-0 text-center"
+        className="font-condensed font-bold text-[12px] w-[28px] flex-shrink-0 text-center"
         style={{ color: '#7a8a96' }}
       >
         {String(index + 1).padStart(2, '0')}
@@ -91,7 +91,7 @@ export function LessonItem({ lesson, index, isActive, courseSlug, accentColor }:
         {lesson.title}
       </span>
       {duration && (
-        <span className="font-condensed text-[10px] flex-shrink-0" style={{ color: '#7a8a96' }}>
+        <span className="font-condensed text-[12px] flex-shrink-0" style={{ color: '#7a8a96' }}>
           {duration}
         </span>
       )}

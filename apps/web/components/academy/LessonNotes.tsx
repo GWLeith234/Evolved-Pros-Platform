@@ -41,12 +41,12 @@ export function LessonNotes({ lessonId, initialNotes }: LessonNotesProps) {
       style={{ backgroundColor: 'rgba(27,60,90,0.03)', border: '1px solid rgba(27,60,90,0.1)', padding: '14px 16px' }}
     >
       <div className="flex items-center justify-between mb-2">
-        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px]" style={{ color: '#7a8a96' }}>
+        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px]" style={{ color: '#7a8a96' }}>
           Your Notes
         </p>
         {saveState !== 'idle' && (
           <span
-            className="font-condensed text-[10px] transition-opacity"
+            className="font-condensed text-[12px] transition-opacity"
             style={{
               color: '#68a2b9',
               opacity: saveState === 'saved' ? 1 : 0.5,

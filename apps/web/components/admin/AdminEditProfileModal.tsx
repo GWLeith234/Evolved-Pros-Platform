@@ -34,7 +34,7 @@ const inputStyle: React.CSSProperties = {
 }
 const labelStyle: React.CSSProperties = {
   display: 'block', fontFamily: 'var(--font-condensed)', fontWeight: 700,
-  fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase',
+  fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
   color: '#7a8a96', marginBottom: '5px',
 }
 
@@ -177,7 +177,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
             <h2 className="font-display font-black text-[18px]" style={{ color: '#112535' }}>
               Edit Profile
             </h2>
-            <p className="font-condensed text-[11px] mt-0.5" style={{ color: '#7a8a96' }}>
+            <p className="font-condensed text-[12px] mt-0.5" style={{ color: '#7a8a96' }}>
               {name} · {member.email}
             </p>
           </div>
@@ -211,7 +211,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                 </div>
                 <div className="flex-1">
                   <label
-                    className="inline-flex items-center gap-1.5 font-condensed font-bold uppercase tracking-[0.1em] text-[10px] px-3 py-2 rounded cursor-pointer transition-colors"
+                    className="inline-flex items-center gap-1.5 font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-3 py-2 rounded cursor-pointer transition-colors"
                     style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.15)' }}
                     onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.1)')}
                     onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.06)')}
@@ -227,7 +227,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                     />
                   </label>
                   {avatarUrl && (
-                    <p className="font-condensed text-[10px] mt-1" style={{ color: '#68a2b9' }}>✓ Photo uploaded</p>
+                    <p className="font-condensed text-[12px] mt-1" style={{ color: '#68a2b9' }}>✓ Photo uploaded</p>
                   )}
                 </div>
               </div>
@@ -243,7 +243,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                 <div className="w-full rounded-lg mb-2" style={{ height: '80px', background: 'linear-gradient(135deg, #112535 0%, #1b3c5a 100%)' }} />
               )}
               <label
-                className="inline-flex items-center gap-1.5 font-condensed font-bold uppercase tracking-[0.1em] text-[10px] px-3 py-2 rounded cursor-pointer transition-colors"
+                className="inline-flex items-center gap-1.5 font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-3 py-2 rounded cursor-pointer transition-colors"
                 style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.15)' }}
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.1)')}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.06)')}
@@ -259,7 +259,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                 />
               </label>
               {bannerUrl && (
-                <span className="font-condensed text-[10px] ml-2" style={{ color: '#68a2b9' }}>✓ Banner uploaded</span>
+                <span className="font-condensed text-[12px] ml-2" style={{ color: '#68a2b9' }}>✓ Banner uploaded</span>
               )}
             </div>
 
@@ -293,7 +293,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                   {(['vip', 'pro'] as const).map(t => (
                     <button
                       key={t} type="button" onClick={() => setTier(t)}
-                      className="flex-1 py-2 rounded font-condensed font-bold uppercase tracking-[0.1em] text-[10px] transition-all"
+                      className="flex-1 py-2 rounded font-condensed font-bold uppercase tracking-[0.1em] text-[12px] transition-all"
                       style={{
                         backgroundColor: tier === t ? (t === 'pro' ? 'rgba(201,48,42,0.1)' : 'rgba(201,168,76,0.1)') : 'transparent',
                         border: `1.5px solid ${tier === t ? (t === 'pro' ? '#C9302A' : '#c9a84c') : 'rgba(27,60,90,0.12)'}`,
@@ -323,7 +323,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
 
             {/* Professional section header */}
             <div style={{ borderTop: '1px solid rgba(27,60,90,0.08)', paddingTop: '16px' }}>
-              <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a8a96', marginBottom: '12px' }}>
+              <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a8a96', marginBottom: '12px' }}>
                 Professional
               </p>
 
@@ -385,7 +385,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                     type="checkbox" checked={phoneVisible} onChange={e => setPhoneVisible(e.target.checked)}
                     style={{ width: '14px', height: '14px', accentColor: '#1b3c5a', cursor: 'pointer' }}
                   />
-                  <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a8a96' }}>
+                  <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a8a96' }}>
                     Visible to members
                   </span>
                 </label>
@@ -404,7 +404,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                         style={{
                           padding: '5px 10px', borderRadius: '4px',
                           fontFamily: 'var(--font-condensed)', fontWeight: 700,
-                          fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase',
+                          fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase',
                           backgroundColor: isActive ? '#1b3c5a' : 'transparent',
                           color: isActive ? '#ffffff' : '#7a8a96',
                           border: `1.5px solid ${isActive ? '#1b3c5a' : 'rgba(27,60,90,0.2)'}`,
@@ -434,7 +434,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                     type="checkbox" checked={goalVisible} onChange={e => setGoalVisible(e.target.checked)}
                     style={{ width: '14px', height: '14px', accentColor: '#1b3c5a', cursor: 'pointer' }}
                   />
-                  <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a8a96' }}>
+                  <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a8a96' }}>
                     Make this public
                   </span>
                 </label>
@@ -444,7 +444,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
             {/* Error */}
             {status === 'error' && (
               <p
-                className="font-condensed text-[11px] px-3 py-2 rounded"
+                className="font-condensed text-[12px] px-3 py-2 rounded"
                 style={{ backgroundColor: 'rgba(239,14,48,0.06)', color: '#ef0e30', border: '1px solid rgba(239,14,48,0.15)' }}
               >
                 {errorMsg}
@@ -459,14 +459,14 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
           >
             <button
               type="button" onClick={onClose}
-              className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] px-4 py-2 rounded transition-colors"
+              className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-4 py-2 rounded transition-colors"
               style={{ backgroundColor: 'rgba(27,60,90,0.05)', color: '#7a8a96', border: '1px solid rgba(27,60,90,0.12)' }}
             >
               Cancel
             </button>
             <button
               type="submit" disabled={status === 'saving' || avatarUploading || bannerUploading}
-              className="font-condensed font-bold uppercase tracking-[0.12em] text-[11px] px-5 py-2 rounded transition-colors"
+              className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] px-5 py-2 rounded transition-colors"
               style={{
                 backgroundColor: (status === 'saving' || avatarUploading || bannerUploading) ? 'rgba(27,60,90,0.4)' : '#1b3c5a',
                 color: '#fff',

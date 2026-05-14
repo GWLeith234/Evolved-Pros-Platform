@@ -79,10 +79,10 @@ export function PipelineBoard({ initialData }: { initialData: PipelineData }) {
               style={{ borderBottom: '1px solid rgba(27,60,90,0.08)', backgroundColor: 'rgba(27,60,90,0.04)' }}
             >
               <div>
-                <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96]">
+                <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[12px] text-[#7a8a96]">
                   {col.label}
                 </p>
-                <p className="font-condensed text-[10px] text-[#7a8a96] mt-0.5">{col.desc}</p>
+                <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">{col.desc}</p>
               </div>
               <span
                 className="font-condensed font-bold text-[12px] px-2 py-0.5 rounded min-w-[24px] text-center"
@@ -98,7 +98,7 @@ export function PipelineBoard({ initialData }: { initialData: PipelineData }) {
               style={{ minHeight: '200px', backgroundColor: isOver ? 'rgba(104,162,185,0.04)' : 'transparent' }}
             >
               {members.length === 0 ? (
-                <p className="font-condensed text-[10px] text-[#7a8a96] text-center mt-4">
+                <p className="font-condensed text-[12px] text-[#7a8a96] text-center mt-4">
                   Drop cards here
                 </p>
               ) : (

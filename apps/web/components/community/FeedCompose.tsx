@@ -169,7 +169,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
               key={tab.type}
               type="button"
               onClick={() => setActivePostType(tab.type)}
-              className="flex items-center gap-1.5 font-condensed font-semibold text-[11px] uppercase tracking-[0.1em] rounded px-3 py-1.5 transition-all"
+              className="flex items-center gap-1.5 font-condensed font-semibold text-[12px] uppercase tracking-[0.1em] rounded px-3 py-1.5 transition-all"
               style={{
                 backgroundColor: active ? '#1b3c5a' : 'transparent',
                 color: active ? 'white' : '#7a8a96',
@@ -220,7 +220,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
       {/* Poll builder */}
       {isPoll && (
         <div className="mt-3 ml-12 space-y-2">
-          <p className="font-condensed font-semibold text-[10px] uppercase tracking-[0.1em]" style={{ color: '#7a8a96' }}>
+          <p className="font-condensed font-semibold text-[12px] uppercase tracking-[0.1em]" style={{ color: '#7a8a96' }}>
             Poll options (2–6)
           </p>
           {pollOptions.map((opt, i) => (
@@ -242,7 +242,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
                 <button
                   type="button"
                   onClick={() => setPollOptions(prev => prev.filter((_, j) => j !== i))}
-                  className="font-condensed text-[10px] px-2"
+                  className="font-condensed text-[12px] px-2"
                   style={{ color: '#ef0e30' }}
                 >
                   ×
@@ -254,14 +254,14 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
             <button
               type="button"
               onClick={() => setPollOptions(prev => [...prev, ''])}
-              className="font-condensed font-semibold text-[10px] uppercase tracking-[0.1em]"
+              className="font-condensed font-semibold text-[12px] uppercase tracking-[0.1em]"
               style={{ color: '#68a2b9' }}
             >
               + Add option
             </button>
           )}
           <div>
-            <label className="font-condensed text-[10px] uppercase tracking-[0.08em]" style={{ color: '#7a8a96' }}>
+            <label className="font-condensed text-[12px] uppercase tracking-[0.08em]" style={{ color: '#7a8a96' }}>
               Close date (optional)
             </label>
             <input
@@ -291,7 +291,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
                 onClick={() => setSelectedTag(active ? null : tag)}
                 className="font-condensed font-semibold transition-all duration-150 rounded"
                 style={{
-                  fontSize: '10px',
+                  fontSize: '12px',
                   padding: '4px 9px',
                   color: active ? color : '#7a8a96',
                   borderWidth: '1px',
@@ -305,7 +305,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
             )
           })}
         </div>
-        <p className="font-condensed text-[10px] text-[#7a8a96] mb-2">(Optional) Tag your post to a pillar</p>
+        <p className="font-condensed text-[12px] text-[#7a8a96] mb-2">(Optional) Tag your post to a pillar</p>
         <div className="flex justify-end">
           <Button
             variant="primary"

@@ -53,7 +53,7 @@ export function EventImageGenerator({ eventTitle, onSelect }: EventImageGenerato
       className="rounded-lg p-4"
       style={{ backgroundColor: 'rgba(27,60,90,0.03)', border: '1px solid rgba(27,60,90,0.1)' }}
     >
-      <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-3" style={{ color: '#7a8a96' }}>
+      <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] mb-3" style={{ color: '#7a8a96' }}>
         AI Image Generator
       </p>
 
@@ -64,7 +64,7 @@ export function EventImageGenerator({ eventTitle, onSelect }: EventImageGenerato
             key={m}
             type="button"
             onClick={() => setMood(m)}
-            className="font-condensed font-semibold text-[11px] rounded-full px-3 py-1 transition-all"
+            className="font-condensed font-semibold text-[12px] rounded-full px-3 py-1 transition-all"
             style={{
               backgroundColor: mood === m ? '#1b3c5a' : 'transparent',
               color: mood === m ? 'white' : '#7a8a96',
@@ -81,7 +81,7 @@ export function EventImageGenerator({ eventTitle, onSelect }: EventImageGenerato
         type="button"
         onClick={generate}
         disabled={loading}
-        className="font-condensed font-bold uppercase tracking-[0.12em] text-[11px] rounded px-5 py-2 transition-all"
+        className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] rounded px-5 py-2 transition-all"
         style={{
           backgroundColor: loading ? 'rgba(27,60,90,0.3)' : '#1b3c5a',
           color: 'white',
@@ -102,13 +102,13 @@ export function EventImageGenerator({ eventTitle, onSelect }: EventImageGenerato
 
       {/* Error */}
       {error && (
-        <p className="font-condensed text-[11px] mt-2" style={{ color: '#ef0e30' }}>{error}</p>
+        <p className="font-condensed text-[12px] mt-2" style={{ color: '#ef0e30' }}>{error}</p>
       )}
 
       {/* Thumbnails */}
       {images.length > 0 && (
         <div className="mt-4">
-          <p className="font-condensed text-[10px] mb-2" style={{ color: '#7a8a96' }}>
+          <p className="font-condensed text-[12px] mb-2" style={{ color: '#7a8a96' }}>
             Click a variant to use it as the cover image
           </p>
           <div className="grid grid-cols-3 gap-2">
@@ -136,7 +136,7 @@ export function EventImageGenerator({ eventTitle, onSelect }: EventImageGenerato
                     style={{ backgroundColor: 'rgba(27,60,90,0.25)' }}
                   >
                     <span
-                      className="font-condensed font-bold text-[10px] uppercase tracking-wide rounded-full px-2 py-0.5"
+                      className="font-condensed font-bold text-[12px] uppercase tracking-wide rounded-full px-2 py-0.5"
                       style={{ backgroundColor: '#1b3c5a', color: 'white' }}
                     >
                       ✓ Selected

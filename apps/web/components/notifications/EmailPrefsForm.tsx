@@ -121,7 +121,7 @@ export function EmailPrefsForm({ initialPrefs }: EmailPrefsFormProps) {
               type="button"
               disabled={disabled}
               onClick={() => onChange(opt.value)}
-              className="font-condensed font-semibold uppercase text-[10px] rounded px-3 py-1.5 transition-all"
+              className="font-condensed font-semibold uppercase text-[12px] rounded px-3 py-1.5 transition-all"
               style={{
                 backgroundColor: value === opt.value ? '#1b3c5a' : 'transparent',
                 color: value === opt.value ? 'white' : '#7a8a96',
@@ -146,10 +146,10 @@ export function EmailPrefsForm({ initialPrefs }: EmailPrefsFormProps) {
       >
         <div style={{ backgroundColor: 'rgba(27,60,90,0.03)' }}>
           <div className="grid grid-cols-[1fr_auto] px-4 py-2">
-            <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">
+            <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96]">
               Notification Type
             </span>
-            <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">
+            <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96]">
               Frequency
             </span>
           </div>
@@ -193,7 +193,7 @@ export function EmailPrefsForm({ initialPrefs }: EmailPrefsFormProps) {
         />
       </div>
 
-      <p className="font-condensed text-[11px] text-[#7a8a96]">
+      <p className="font-condensed text-[12px] text-[#7a8a96]">
         Changes save automatically.
       </p>
     </div>

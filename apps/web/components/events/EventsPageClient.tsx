@@ -21,7 +21,7 @@ function TierBadge({ requiredTier }: { requiredTier: 'community' | 'vip' | 'pro'
   if (requiredTier === 'pro') {
     return (
       <span
-        className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] rounded px-2 py-0.5"
+        className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] rounded px-2 py-0.5"
         style={{ backgroundColor: 'rgba(239,14,48,0.1)', color: '#ef0e30', border: '1px solid rgba(239,14,48,0.2)' }}
       >
         Pro Only
@@ -31,7 +31,7 @@ function TierBadge({ requiredTier }: { requiredTier: 'community' | 'vip' | 'pro'
   if (requiredTier === 'vip') {
     return (
       <span
-        className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] rounded px-2 py-0.5"
+        className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] rounded px-2 py-0.5"
         style={{ backgroundColor: 'rgba(201,168,76,0.1)', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.2)' }}
       >
         VIP Only
@@ -41,7 +41,7 @@ function TierBadge({ requiredTier }: { requiredTier: 'community' | 'vip' | 'pro'
   if (requiredTier === 'community') {
     return (
       <span
-        className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] rounded px-2 py-0.5"
+        className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] rounded px-2 py-0.5"
         style={{ backgroundColor: 'rgba(104,162,185,0.1)', color: '#68a2b9', border: '1px solid rgba(104,162,185,0.2)' }}
       >
         Community
@@ -50,7 +50,7 @@ function TierBadge({ requiredTier }: { requiredTier: 'community' | 'vip' | 'pro'
   }
   return (
     <span
-      className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] rounded px-2 py-0.5"
+      className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] rounded px-2 py-0.5"
       style={{ backgroundColor: 'rgba(122,138,150,0.1)', color: '#7a8a96', border: '1px solid rgba(122,138,150,0.2)' }}
     >
       All Members
@@ -120,7 +120,7 @@ function EventGridCard({ event, isRegistered, canRegister, onRegister, onUnregis
         {/* Type pill — top right */}
         <div className="absolute top-3 right-3">
           <span
-            className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] rounded-full px-2.5 py-1"
+            className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] rounded-full px-2.5 py-1"
             style={{ backgroundColor: typeStyle.bg, color: typeStyle.color, border: `1px solid ${typeStyle.border}`, backdropFilter: 'blur(4px)' }}
           >
             {typeLabel}
@@ -134,8 +134,8 @@ function EventGridCard({ event, isRegistered, canRegister, onRegister, onUnregis
         >
           <span className="font-display font-black text-white text-[18px] leading-none">{day}</span>
           <div className="flex flex-col">
-            <span className="font-condensed font-bold uppercase text-[9px] leading-none" style={{ color: 'rgba(255,255,255,0.7)' }}>{month}</span>
-            <span className="font-condensed text-[9px] leading-none mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>{time}</span>
+            <span className="font-condensed font-bold uppercase text-[12px] leading-none" style={{ color: 'rgba(255,255,255,0.7)' }}>{month}</span>
+            <span className="font-condensed text-[12px] leading-none mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>{time}</span>
           </div>
         </div>
 
@@ -150,7 +150,7 @@ function EventGridCard({ event, isRegistered, canRegister, onRegister, onUnregis
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
               </svg>
-              <span className="font-condensed font-bold text-[10px] uppercase tracking-[0.12em]" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              <span className="font-condensed font-bold text-[12px] uppercase tracking-[0.12em]" style={{ color: 'rgba(255,255,255,0.6)' }}>
                 Upgrade Required
               </span>
             </div>
@@ -183,7 +183,7 @@ function EventGridCard({ event, isRegistered, canRegister, onRegister, onUnregis
           {event.hasAccess && !isPast && !canRegister && (
             <a
               href="/pricing"
-              className="font-condensed font-bold uppercase tracking-[0.08em] text-[10px] transition-opacity hover:opacity-80"
+              className="font-condensed font-bold uppercase tracking-[0.08em] text-[12px] transition-opacity hover:opacity-80"
               style={{ color: '#C9A84C' }}
             >
               VIP members only
@@ -196,7 +196,7 @@ function EventGridCard({ event, isRegistered, canRegister, onRegister, onUnregis
               target="_blank"
               rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
-              className="font-condensed font-bold uppercase tracking-[0.1em] text-[10px] rounded-full px-3 py-1 transition-all"
+              className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] rounded-full px-3 py-1 transition-all"
               style={{ backgroundColor: 'rgba(104,162,185,0.1)', color: '#68a2b9', border: '1px solid rgba(104,162,185,0.2)' }}
             >
               Watch ▶
@@ -248,7 +248,7 @@ export function EventsPageClient({ events, registeredEventIds, canRegister = tru
         style={{ backgroundColor: '#F5F0E8', borderBottom: '1px solid rgba(27,42,74,0.1)' }}
       >
         <p
-          className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] mb-1"
+          className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] mb-1"
           style={{ color: '#C9302A' }}
         >
           EVOLVED PROS
@@ -273,7 +273,7 @@ export function EventsPageClient({ events, registeredEventIds, canRegister = tru
               key={f.key}
               type="button"
               onClick={() => setFilter(f.key)}
-              className="font-condensed font-semibold uppercase tracking-[0.1em] text-[11px] rounded-full transition-all"
+              className="font-condensed font-semibold uppercase tracking-[0.1em] text-[12px] rounded-full transition-all"
               style={{
                 padding: '5px 14px',
                 borderRadius: '20px',

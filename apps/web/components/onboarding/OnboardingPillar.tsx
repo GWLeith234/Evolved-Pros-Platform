@@ -97,7 +97,7 @@ export function OnboardingPillar({ onContinue }: Props) {
               </p>
               <p style={{
                 fontFamily: 'Barlow, sans-serif',
-                fontSize: '11px',
+                fontSize: '12px',
                 color: isSelected ? 'rgba(255,255,255,0.75)' : 'rgba(250,249,247,0.35)',
                 margin: 0,
                 lineHeight: 1.4,
@@ -147,7 +147,7 @@ export function OnboardingPillar({ onContinue }: Props) {
           border: 'none',
           cursor: 'pointer',
           fontFamily: '"Barlow Condensed", sans-serif',
-          fontSize: '11px',
+          fontSize: '12px',
           letterSpacing: '0.1em',
           textTransform: 'uppercase',
           color: 'rgba(255,255,255,0.2)',

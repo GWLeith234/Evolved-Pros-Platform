@@ -65,7 +65,7 @@ export function EventsContent({ events, registeredEventIds, userTier, registrati
                   onClick={() => setActiveView(item.key)}
                   className="flex-shrink-0 font-condensed font-semibold uppercase tracking-wide"
                   style={{
-                    fontSize: '11px',
+                    fontSize: '12px',
                     padding: '6px 12px',
                     borderRadius: '9999px',
                     backgroundColor: active ? 'rgba(104,162,185,0.2)' : 'rgba(255,255,255,0.06)',
@@ -89,7 +89,7 @@ export function EventsContent({ events, registeredEventIds, userTier, registrati
                   onClick={() => setTypeFilter(item.key)}
                   className="flex-shrink-0 font-condensed font-semibold uppercase tracking-wide"
                   style={{
-                    fontSize: '10px',
+                    fontSize: '12px',
                     padding: '4px 10px',
                     borderRadius: '9999px',
                     backgroundColor: active ? 'rgba(239,14,48,0.15)' : 'rgba(255,255,255,0.04)',

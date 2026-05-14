@@ -63,7 +63,7 @@ export function LessonListPanel({ course, lessons, currentLessonId, progressPct 
         />
         <Link
           href="/academy"
-          className="absolute top-4 left-5 flex items-center gap-1.5 font-condensed font-semibold text-[11px] uppercase tracking-wide transition-opacity hover:opacity-100"
+          className="absolute top-4 left-5 flex items-center gap-1.5 font-condensed font-semibold text-[12px] uppercase tracking-wide transition-opacity hover:opacity-100"
           style={{
             color: 'rgba(255,255,255,0.9)',
             backgroundColor: 'rgba(0,0,0,0.42)',
@@ -76,13 +76,13 @@ export function LessonListPanel({ course, lessons, currentLessonId, progressPct 
         </Link>
         <div className="absolute bottom-0 left-0 right-0 px-7 pb-5">
           <p
-            className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] mb-0.5"
+            className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] mb-0.5"
             style={{ color: config.color }}
           >
             {config.label}
           </p>
           <p
-            className="font-condensed text-[11px]"
+            className="font-condensed text-[12px]"
             style={{ color: 'rgba(255,255,255,0.38)', letterSpacing: '0.07em' }}
           >
             The Evolved Architecture™
@@ -116,13 +116,13 @@ export function LessonListPanel({ course, lessons, currentLessonId, progressPct 
       >
         <Link
           href="/academy"
-          className="font-condensed font-semibold text-[11px] uppercase tracking-wide flex-shrink-0 transition-colors"
+          className="font-condensed font-semibold text-[12px] uppercase tracking-wide flex-shrink-0 transition-colors"
           style={{ color: 'rgba(255,255,255,0.45)' }}
         >
           ← Back
         </Link>
         <span
-          className="font-condensed font-bold uppercase tracking-[0.16em] text-[10px] flex-shrink-0"
+          className="font-condensed font-bold uppercase tracking-[0.16em] text-[12px] flex-shrink-0"
           style={{ color: config.color }}
         >
           {config.label}
@@ -137,7 +137,7 @@ export function LessonListPanel({ course, lessons, currentLessonId, progressPct 
           />
         </div>
         <span
-          className="font-condensed font-bold text-[10px] flex-shrink-0"
+          className="font-condensed font-bold text-[12px] flex-shrink-0"
           style={{ color: 'rgba(255,255,255,0.3)' }}
         >
           {progressPct}%

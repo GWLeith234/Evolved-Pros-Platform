@@ -157,7 +157,7 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
             {/* Row 2: role · location · pillar */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               {user.role_title && (
-                <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.45)' }}>
+                <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 600, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.45)' }}>
                   {user.role_title}
                 </span>
               )}
@@ -167,7 +167,7 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
               {user.current_pillar && PILLAR_LABELS[user.current_pillar] && (
                 <span style={{
                   borderRadius: '4px', padding: '2px 8px',
-                  fontSize: '9px', fontWeight: 600, fontFamily: '"Barlow Condensed", sans-serif',
+                  fontSize: '12px', fontWeight: 600, fontFamily: '"Barlow Condensed", sans-serif',
                   textTransform: 'uppercase', letterSpacing: '0.08em',
                   color: '#C9A84C', border: '1px solid rgba(201,168,76,0.25)', background: 'rgba(201,168,76,0.06)',
                 }}>
@@ -229,7 +229,7 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
               border: '1px solid #C9A84C', color: '#C9A84C', backgroundColor: 'rgba(201,168,76,0.08)',
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
               textTransform: 'uppercase', letterSpacing: '0.08em',
-              fontSize: '10px', padding: '2px 8px', borderRadius: '4px', display: 'inline-block',
+              fontSize: '12px', padding: '2px 8px', borderRadius: '4px', display: 'inline-block',
             }}>
               {user.pioneer_driver_type} TYPE
             </span>

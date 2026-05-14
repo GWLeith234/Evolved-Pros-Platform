@@ -184,7 +184,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
           <p
             style={{
               color: config.color, fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '11px', letterSpacing: '0.25em', textTransform: 'uppercase', margin: '0 0 10px',
+              fontSize: '12px', letterSpacing: '0.25em', textTransform: 'uppercase', margin: '0 0 10px',
             }}
           >
             Pillar {pNum}
@@ -209,7 +209,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <span
                   style={{
-                    fontSize: '10px', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                    fontSize: '12px', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
                     letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.35)',
                   }}
                 >
@@ -217,7 +217,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
                 </span>
                 <span
                   style={{
-                    fontSize: '10px', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                    fontSize: '12px', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
                     letterSpacing: '0.12em', color: config.color,
                   }}
                 >
@@ -318,7 +318,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
                 href="/academy"
                 style={{
                   color: 'rgba(250,249,247,0.25)', fontFamily: '"Barlow Condensed", sans-serif',
-                  fontWeight: 700, fontSize: '11px', letterSpacing: '0.15em',
+                  fontWeight: 700, fontSize: '12px', letterSpacing: '0.15em',
                   textTransform: 'uppercase', textDecoration: 'none',
                 }}
               >
@@ -335,7 +335,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
           <div style={{ maxWidth: '820px' }}>
             <p
               style={{
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px',
+                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px',
                 letterSpacing: '0.25em', textTransform: 'uppercase',
                 color: 'rgba(250,249,247,0.3)', marginBottom: '24px',
               }}
@@ -412,7 +412,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
           )}
           <p
             style={{
-              color: 'rgba(250,249,247,0.3)', fontSize: '11px',
+              color: 'rgba(250,249,247,0.3)', fontSize: '12px',
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
               letterSpacing: '0.2em', textTransform: 'uppercase', marginTop: '28px',
             }}

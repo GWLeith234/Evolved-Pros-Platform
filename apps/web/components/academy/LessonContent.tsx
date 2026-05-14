@@ -51,7 +51,7 @@ export function LessonContent({
   return (
     <div className="px-7 py-6">
       {/* Eyebrow */}
-      <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-1" style={{ color: '#68a2b9' }}>
+      <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] mb-1" style={{ color: '#68a2b9' }}>
         Now Playing
       </p>
       <h1
@@ -76,7 +76,7 @@ export function LessonContent({
 
       {/* Action buttons */}
       {error && (
-        <p className="font-condensed text-[11px] text-[#ef0e30] mb-3">{error}</p>
+        <p className="font-condensed text-[12px] text-[#ef0e30] mb-3">{error}</p>
       )}
       <div className="grid grid-cols-2 gap-3">
         <button

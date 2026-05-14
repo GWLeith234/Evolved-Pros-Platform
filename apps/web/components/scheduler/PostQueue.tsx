@@ -20,7 +20,7 @@ interface PostQueueProps {
 export function PostQueue({ posts, onAction }: PostQueueProps) {
   return (
     <div>
-      <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
+      <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
         This Week&apos;s Queue
       </p>
       <div className="flex flex-col gap-2">

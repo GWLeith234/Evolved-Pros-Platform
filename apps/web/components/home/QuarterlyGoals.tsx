@@ -62,7 +62,7 @@ export function QuarterlyGoals({ goals, editHref = '#' }: QuarterlyGoalsProps) {
           </h3>
           <Link
             href={editHref}
-            className="font-condensed text-[11px] tracking-[0.18em] text-[#68a2b9] hover:text-[#1b3c5a] uppercase whitespace-nowrap"
+            className="font-condensed text-[12px] tracking-[0.18em] text-[#68a2b9] hover:text-[#1b3c5a] uppercase whitespace-nowrap"
           >
             Edit →
           </Link>
@@ -87,7 +87,7 @@ export function QuarterlyGoals({ goals, editHref = '#' }: QuarterlyGoalsProps) {
                       {goal.title}
                     </span>
                     <span
-                      className="font-condensed text-[9px] font-bold tracking-[0.12em] uppercase rounded px-1.5 py-0.5 shrink-0"
+                      className="font-condensed text-[12px] font-bold tracking-[0.12em] uppercase rounded px-1.5 py-0.5 shrink-0"
                       style={{ color, backgroundColor: `${color}1f` }}
                     >
                       {goal.period}
@@ -102,7 +102,7 @@ export function QuarterlyGoals({ goals, editHref = '#' }: QuarterlyGoalsProps) {
                     </span>
                     {delta && (
                       <span
-                        className="font-condensed text-[10px] font-bold tracking-[0.1em]"
+                        className="font-condensed text-[12px] font-bold tracking-[0.1em]"
                         style={{ color }}
                       >
                         {delta}

@@ -44,7 +44,7 @@ export function MediaAdZone({ zone }: MediaAdZoneProps) {
       <p
         style={{
           fontFamily: 'sans-serif',
-          fontSize: '9px',
+          fontSize: '12px',
           color: 'rgba(10,15,24,0.35)',
           textTransform: 'uppercase',
           letterSpacing: '0.08em',

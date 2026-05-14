@@ -36,7 +36,7 @@ function UsersIcon() {
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <p
-      className="px-4 mt-5 mb-1 font-condensed font-bold uppercase tracking-[0.22em] text-[12px] sm:text-[9px]"
+      className="px-4 mt-5 mb-1 font-condensed font-bold uppercase tracking-[0.22em] text-[12px] sm:text-[12px]"
       style={{ color: 'rgba(255,255,255,0.2)' }}
     >
       {children}
@@ -89,7 +89,7 @@ function ChannelItem({
       </span>
       {unreadCount > 0 && (
         <span
-          className="flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full font-condensed font-bold text-[12px] sm:text-[9px] text-white flex items-center justify-center"
+          className="flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full font-condensed font-bold text-[12px] sm:text-[12px] text-white flex items-center justify-center"
           style={{ backgroundColor: badgeColor }}
         >
           {unreadCount}

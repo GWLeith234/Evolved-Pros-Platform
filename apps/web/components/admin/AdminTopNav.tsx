@@ -62,7 +62,7 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
           EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS
         </Link>
         <span
-          className="hidden sm:inline-block font-condensed font-bold uppercase tracking-[0.18em] text-[10px] px-2 py-0.5 rounded"
+          className="hidden sm:inline-block font-condensed font-bold uppercase tracking-[0.18em] text-[12px] px-2 py-0.5 rounded"
           style={{
             color: 'rgba(255,255,255,0.5)',
             backgroundColor: 'rgba(255,255,255,0.06)',
@@ -103,7 +103,7 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
               href={tab.href}
               target={isExternal ? '_blank' : undefined}
               rel={isExternal ? 'noopener noreferrer' : undefined}
-              className="relative h-full flex items-center px-4 font-condensed font-semibold uppercase tracking-[0.12em] text-[11px] transition-colors duration-150"
+              className="relative h-full flex items-center px-4 font-condensed font-semibold uppercase tracking-[0.12em] text-[12px] transition-colors duration-150"
               style={{ color: isActive ? '#a8cdd9' : 'rgba(255,255,255,0.45)' }}
               onMouseEnter={e => {
                 if (!isActive) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.8)'
@@ -128,7 +128,7 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
       <div className="flex items-center gap-3">
         <Link
           href="/home"
-          className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] px-2.5 py-1 rounded transition-colors"
+          className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] px-2.5 py-1 rounded transition-colors"
           style={{
             color: 'rgba(255,255,255,0.55)',
             border: '1px solid rgba(255,255,255,0.12)',
@@ -141,7 +141,7 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
           ← Platform
         </Link>
         <span
-          className="hidden sm:inline-block font-condensed font-bold uppercase tracking-[0.14em] text-[10px] px-2.5 py-1 rounded"
+          className="hidden sm:inline-block font-condensed font-bold uppercase tracking-[0.14em] text-[12px] px-2.5 py-1 rounded"
           style={{
             color: '#68a2b9',
             backgroundColor: 'rgba(104,162,185,0.1)',

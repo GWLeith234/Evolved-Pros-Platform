@@ -28,7 +28,7 @@ export function PodcastLatestStrip({ episode }: PodcastLatestStripProps) {
       }}
     >
       <div
-        className="flex items-center px-4 sm:px-[18px] py-2 sm:py-0 text-[12px] sm:text-[11px]"
+        className="flex items-center px-4 sm:px-[18px] py-2 sm:py-0 text-[12px] sm:text-[12px]"
         style={{
           background: '#C9302A',
           color: '#fff',

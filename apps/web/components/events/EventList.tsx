@@ -61,7 +61,7 @@ export function EventList({ events, registeredEventIds, userTier, view = 'upcomi
 
   return (
     <div>
-      <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] mb-4" style={{ color: '#7a8a96' }}>
+      <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] mb-4" style={{ color: '#7a8a96' }}>
         {sectionLabel}
       </p>
 

@@ -132,7 +132,7 @@ export async function PointsHistory({ userId, supabase }: PointsHistoryProps) {
               {entry.description}
             </p>
             <p
-              className="font-condensed text-[10px] mt-0.5 uppercase tracking-wide"
+              className="font-condensed text-[12px] mt-0.5 uppercase tracking-wide"
               style={{ color: 'rgba(255,255,255,0.3)' }}
             >
               {new Date(entry.date).toLocaleDateString('en-US', {

@@ -209,7 +209,7 @@ export function ImagePicker({
               key={tab}
               type="button"
               onClick={() => { handleSelectTab(tab); setError(null) }}
-              className="flex-1 py-2.5 font-condensed font-semibold uppercase tracking-[0.12em] text-[10px] transition-colors"
+              className="flex-1 py-2.5 font-condensed font-semibold uppercase tracking-[0.12em] text-[12px] transition-colors"
               style={{
                 color: activeTab === tab ? '#fff' : 'rgba(255,255,255,0.4)',
                 backgroundColor: activeTab === tab ? 'rgba(255,255,255,0.07)' : 'transparent',
@@ -224,7 +224,7 @@ export function ImagePicker({
 
       <div className="p-4">
         {error && (
-          <p role="alert" className="font-condensed text-[11px] mb-3" style={{ color: '#ef0e30' }}>{error}</p>
+          <p role="alert" className="font-condensed text-[12px] mb-3" style={{ color: '#ef0e30' }}>{error}</p>
         )}
 
         {/* ── UNSPLASH TAB ─────────────────────────────────────── */}
@@ -232,17 +232,17 @@ export function ImagePicker({
           <>
             {photosLoading ? (
               <div className="flex items-center justify-center py-12">
-                <span className="font-condensed text-[11px]" style={{ color: 'rgba(255,255,255,0.3)' }}>Loading photos...</span>
+                <span className="font-condensed text-[12px]" style={{ color: 'rgba(255,255,255,0.3)' }}>Loading photos...</span>
               </div>
             ) : !unsplashLoaded ? (
               <div className="flex flex-col items-center gap-2 py-12">
-                <p className="font-condensed text-[11px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                <p className="font-condensed text-[12px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
                   Browse stock photos for: {aiPrompt || 'professional business sales'}
                 </p>
                 <button
                   type="button"
                   onClick={() => loadUnsplash()}
-                  className="font-condensed font-bold uppercase tracking-[0.14em] text-[11px] px-4 py-2 rounded transition-all"
+                  className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] px-4 py-2 rounded transition-all"
                   style={{ border: `1px solid ${GOLD}`, color: GOLD, backgroundColor: 'transparent' }}
                 >
                   Search Unsplash
@@ -290,7 +290,7 @@ export function ImagePicker({
                   key={s}
                   type="button"
                   onClick={() => setAiStyle(s)}
-                  className="font-condensed font-semibold uppercase tracking-[0.1em] text-[9px] px-3 py-1 rounded-full transition-all"
+                  className="font-condensed font-semibold uppercase tracking-[0.1em] text-[12px] px-3 py-1 rounded-full transition-all"
                   style={{
                     backgroundColor: aiStyle === s ? `${PURPLE}25` : 'rgba(255,255,255,0.04)',
                     color: aiStyle === s ? PURPLE : 'rgba(255,255,255,0.4)',
@@ -305,7 +305,7 @@ export function ImagePicker({
               type="button"
               onClick={handleGenerate}
               disabled={aiLoading || !aiPromptText.trim()}
-              className="w-full font-condensed font-bold uppercase tracking-[0.12em] text-[11px] py-2.5 rounded transition-opacity"
+              className="w-full font-condensed font-bold uppercase tracking-[0.12em] text-[12px] py-2.5 rounded transition-opacity"
               style={{
                 backgroundColor: PURPLE,
                 color: '#fff',
@@ -363,10 +363,10 @@ export function ImagePicker({
                   <polyline points="17 8 12 3 7 8" />
                   <line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
-                <span className="font-condensed font-semibold text-[11px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                <span className="font-condensed font-semibold text-[12px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
                   {mode === 'avatar' ? 'Upload avatar' : 'Drop image here or click to browse'}
                 </span>
-                <span className="font-condensed text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                <span className="font-condensed text-[12px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
                   JPG, PNG, WebP &middot; Max 10 MB
                 </span>
               </>
@@ -397,7 +397,7 @@ export function ImagePicker({
             <button
               type="button"
               onClick={handleConfirm}
-              className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] px-4 py-2 rounded transition-opacity hover:opacity-90"
+              className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-4 py-2 rounded transition-opacity hover:opacity-90"
               style={{ backgroundColor: GOLD, color: '#0A0F18' }}
             >
               Use this \u2192

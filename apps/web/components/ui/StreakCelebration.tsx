@@ -115,7 +115,7 @@ export function StreakCelebration({ streak, onDismiss }: StreakCelebrationProps)
 
         <p
           className="font-condensed font-bold uppercase tracking-[0.2em] mb-6"
-          style={{ fontSize: '10px', color: `${color}99` }}
+          style={{ fontSize: '12px', color: `${color}99` }}
         >
           Day Streak
         </p>
