@@ -19,10 +19,17 @@ interface DateBadge {
 }
 
 function formatDateBadge(iso: string): DateBadge {
+  // Use UTC for the SSR-stable parts (month + day) so server and client
+  // agree on the date label. Without timeZone: 'UTC', getDate() and the
+  // short-month formatter both read the browser/server local zone — and
+  // events stored as ISO UTC close to midnight render as different days
+  // on the server (UTC) vs the user's TZ, throwing React #425/#422.
   const d = new Date(iso)
   return {
-    month: d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
-    day: String(d.getDate()),
+    month: d.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }).toUpperCase(),
+    day: d.toLocaleDateString('en-US', { day: 'numeric', timeZone: 'UTC' }),
+    // `time` stays in the viewer's local zone (it's the more useful
+    // reading), so it remains mount-gated below via `mounted ? ...`.
     time: d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
   }
 }
