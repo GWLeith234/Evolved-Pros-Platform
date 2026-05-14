@@ -82,7 +82,10 @@ export function LiveFinalCTA() {
               Request a date
             </a>
             <a
-              href="mailto:george@evolvedpros.com?subject=Speaker%20kit%20request"
+              href="https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/Media%20Kit%202026.pdf"
+              download="George-Leith-Media-Kit-2026.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{
                 padding: '16px 32px',
                 background: 'transparent',
