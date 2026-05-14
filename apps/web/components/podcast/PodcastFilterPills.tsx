@@ -75,7 +75,10 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
             type="button"
             onClick={() => onFilterChange(f.key)}
             style={{
-              padding: '8px 14px',
+              minHeight: 44,
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding: '0 14px',
               background: active ? f.color : 'transparent',
               color: active ? '#0A0F18' : f.color,
               border: `1px solid ${active ? f.color : withAlpha(f.color, '66')}`,
@@ -112,7 +115,10 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
             onClick={() => setSortOpen(o => !o)}
             onBlur={() => setTimeout(() => setSortOpen(false), 120)}
             style={{
-              padding: '8px 32px 8px 12px',
+              minHeight: 44,
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding: '0 32px 0 12px',
               background: 'var(--podcast-bg-surface)',
               color: 'var(--podcast-text-strong)',
               border: '1px solid var(--podcast-border-strong)',
@@ -160,7 +166,10 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
                       }}
                       style={{
                         width: '100%',
-                        padding: '10px 14px',
+                        minHeight: 44,
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '0 14px',
                         background: active ? 'var(--podcast-bg-elevated)' : 'transparent',
                         color: 'var(--podcast-text-strong)',
                         border: 'none',
