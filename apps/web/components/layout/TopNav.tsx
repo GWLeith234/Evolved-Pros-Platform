@@ -115,9 +115,16 @@ export function TopNav({
   }
 
   // Renewal banner data — JSX is plumbed but currently flag-gated off.
-  const daysUntilExpiry = profile.tier_expires_at
-    ? Math.ceil((new Date(profile.tier_expires_at).getTime() - Date.now()) / 86_400_000)
-    : null
+  // Date.now() must not run at render: SSR and CSR produce different values
+  // around day boundaries and React #425 fires the moment the flag flips on.
+  // Defer to a mount-gated effect so the first client render matches SSR.
+  const [daysUntilExpiry, setDaysUntilExpiry] = useState<number | null>(null)
+  useEffect(() => {
+    if (!profile.tier_expires_at) return
+    setDaysUntilExpiry(
+      Math.ceil((new Date(profile.tier_expires_at).getTime() - Date.now()) / 86_400_000)
+    )
+  }, [profile.tier_expires_at])
   const showRenewalBanner =
     RENEWAL_BANNER_ENABLED &&
     typeof daysUntilExpiry === 'number' &&
