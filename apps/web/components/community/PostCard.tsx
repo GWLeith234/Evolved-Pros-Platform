@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { PostReplyThread } from './PostReplyThread'
 import { ReactionPicker } from './ReactionPicker'
-import { getAvatarColor, PILLAR_LABELS } from '@/lib/community/types'
+import { getAvatarColor } from '@/lib/community/types'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { MemberBadge } from '@/components/ui/MemberBadge'
 import { Tooltip } from '@/components/ui/Tooltip'
@@ -41,13 +41,6 @@ function getInitials(name: string): string {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 }
 
-function HeartIcon({ filled }: { filled: boolean }) {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-    </svg>
-  )
-}
 
 function ReplyIcon() {
   return (

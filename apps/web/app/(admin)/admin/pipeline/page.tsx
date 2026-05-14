@@ -1,6 +1,6 @@
 import { adminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
-import { getEngagementLevel, getEngagementScore } from '@/lib/admin/helpers'
+import { getEngagementLevel } from '@/lib/admin/helpers'
 import { PipelineBoard } from '@/components/admin/PipelineBoard'
 import type { PipelineMemberCard } from '@/components/admin/PipelineCard'
 

@@ -48,7 +48,7 @@ export default async function EventsPage() {
     .gt('starts_at', nowIso)
     .order('is_featured', { ascending: false })
     .order('starts_at', { ascending: true })
-    .limit(50) as { data: HeroEvent[] | null }
+    .limit(20) as { data: HeroEvent[] | null }
 
   const allUpcoming = rows ?? []
   const featured = pickFeatured(allUpcoming)

@@ -17,9 +17,6 @@ export async function GET(request: Request) {
     .limit(1)
     .maybeSingle()
 
-  // TODO: remove pre-launch
-  console.log('[polls/active]', { context, error, poll })
-
   if (error) {
     return NextResponse.json({ poll: null, voteCounts: {}, totalVotes: 0 })
   }
