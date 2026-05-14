@@ -249,7 +249,9 @@ export function UpcomingEventsList({ events, registeredIds }: UpcomingEventsList
                 <Link
                   href={`/events/${event.id}`}
                   style={{
-                    display: 'block',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
                     margin: '6px 0 4px',
                     fontFamily: '"Barlow", sans-serif',
                     fontSize: 16,
@@ -257,8 +259,6 @@ export function UpcomingEventsList({ events, registeredIds }: UpcomingEventsList
                     color: 'var(--text-primary)',
                     textDecoration: 'none',
                     overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
                   }}
                 >
                   {event.title}
@@ -300,6 +300,7 @@ export function UpcomingEventsList({ events, registeredIds }: UpcomingEventsList
                   cursor: isInflight ? 'wait' : 'pointer',
                   transition: 'background 140ms ease',
                   minWidth: 90,
+                  minHeight: 44,
                 }}
               >
                 {isRegistered ? '✓ Going' : 'RSVP'}

@@ -62,7 +62,7 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
         href={event.recordingUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="block w-full text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 transition-colors"
+        className="flex w-full items-center justify-center text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 min-h-[44px] transition-colors"
         style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.15)' }}
       >
         Watch Recording
@@ -72,7 +72,7 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
     cta = (
       <Tooltip content="This event requires a Pro membership. Upgrade in Settings to access it.">
         <span
-          className="block w-full text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 cursor-default"
+          className="flex w-full items-center justify-center text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 min-h-[44px] cursor-default"
           style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: '#7a8a96', border: '1px solid rgba(255,255,255,0.08)' }}
         >
           Pro Required
@@ -84,7 +84,7 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
       <button
         onClick={handleAction}
         disabled={loading}
-        className="block w-full text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 transition-colors"
+        className="flex w-full items-center justify-center text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 min-h-[44px] transition-colors"
         style={{ backgroundColor: '#0ABFA3', color: 'white' }}
       >
         {loading ? '...' : '✓ Registered'}
@@ -95,7 +95,7 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
       <button
         onClick={handleAction}
         disabled={loading}
-        className="block w-full text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 transition-colors"
+        className="flex w-full items-center justify-center text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 min-h-[44px] transition-colors"
         style={{ backgroundColor: '#ef0e30', color: 'white' }}
       >
         {loading ? '...' : 'Register →'}
@@ -168,7 +168,7 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
       <div className="flex flex-col flex-1 p-4 gap-2">
         <Link href={`/events/${event.id}`} className="group">
           <h3
-            className="font-body font-semibold leading-snug group-hover:text-[#68a2b9] transition-colors"
+            className="font-body font-semibold leading-snug line-clamp-2 group-hover:text-[#68a2b9] transition-colors"
             style={{ fontSize: '15px', color: '#faf9f7' }}
           >
             {event.title}
