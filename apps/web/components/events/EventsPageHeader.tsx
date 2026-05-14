@@ -14,7 +14,7 @@ export function EventsPageHeader() {
         style={{
           margin: 0,
           fontFamily: '"Barlow Condensed", sans-serif',
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: 600,
           letterSpacing: '0.32em',
           textTransform: 'uppercase',

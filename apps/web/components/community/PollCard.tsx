@@ -87,12 +87,12 @@ export function PollCard({ poll, currentUserId, voteCounts: initialCounts = {}, 
                 <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: `${pct}%`, backgroundColor: isWinner ? 'rgba(201,168,76,0.4)' : 'rgba(201,168,76,0.15)', transition: 'width 0.5s ease', borderRadius: 6 }} />
                 <div style={{ position: 'relative', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>{o.option_text}</span>
-                  <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: isWinner ? '#C9A84C' : 'rgba(255,255,255,0.4)', marginLeft: 8 }}>{pct}%</span>
+                  <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 12, color: isWinner ? '#C9A84C' : 'rgba(255,255,255,0.4)', marginLeft: 8 }}>{pct}%</span>
                 </div>
               </div>
             )
           })}
-          <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
             {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'}
             {poll.closes_at && !isClosed && ` · Closes ${new Date(poll.closes_at).toLocaleDateString('en-US')}`}
             {isClosed && ' · Poll closed'}
@@ -121,7 +121,7 @@ export function PollCard({ poll, currentUserId, voteCounts: initialCounts = {}, 
               onClick={handleVote}
               disabled={!selected || voting}
               style={{
-                fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11,
+                fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 12,
                 textTransform: 'uppercase', letterSpacing: '0.04em',
                 padding: '6px 16px', borderRadius: 4, border: 'none',
                 cursor: selected ? 'pointer' : 'not-allowed',
@@ -132,7 +132,7 @@ export function PollCard({ poll, currentUserId, voteCounts: initialCounts = {}, 
               {voting ? 'Voting...' : 'Vote'}
             </button>
             {poll.closes_at && (
-              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>
                 Closes {new Date(poll.closes_at).toLocaleDateString('en-US')}
               </span>
             )}

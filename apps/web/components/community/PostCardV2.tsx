@@ -271,7 +271,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
                 style={{
                   padding: '4px 8px',
                   fontFamily: '"Barlow Condensed", sans-serif',
-                  fontSize: 9,
+                  fontSize: 12,
                   fontWeight: 700,
                   letterSpacing: '0.18em',
                   textTransform: 'uppercase',
@@ -286,7 +286,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
             <span
               style={{
                 fontFamily: '"Barlow", sans-serif',
-                fontSize: 11,
+                fontSize: 12,
                 letterSpacing: '0.08em',
                 color: 'var(--text-tertiary)',
                 textTransform: 'uppercase',
@@ -303,7 +303,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
             style={{
               padding: '4px 10px',
               fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: 9,
+              fontSize: 12,
               fontWeight: 700,
               letterSpacing: '0.18em',
               textTransform: 'uppercase',
@@ -340,7 +340,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
             style={{
               padding: '4px 10px',
               fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: 700,
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
@@ -436,7 +436,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
                           position: 'absolute',
                           left: 0,
                           top: 0,
-                          fontSize: 11,
+                          fontSize: 12,
                           lineHeight: 1,
                           color: '#C9A84C',
                           willChange: 'transform, opacity',
@@ -475,7 +475,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
             color: 'var(--text-secondary)',
             cursor: 'pointer',
             fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: 700,
             letterSpacing: '0.14em',
             textTransform: 'uppercase',

@@ -158,17 +158,17 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
         @media (max-width: 640px) {
           .cinematic-hero { min-height: 520px; }
           .cinematic-hero .ch-badges { top: 12px !important; left: 12px !important; gap: 6px !important; }
-          .cinematic-hero .ch-badges > * { padding: 5px 10px !important; font-size: 10px !important; letter-spacing: 0.18em !important; }
+          .cinematic-hero .ch-badges > * { padding: 5px 10px !important; font-size: 12px !important; letter-spacing: 0.18em !important; }
           .cinematic-hero .ch-countdown { top: auto !important; right: 12px !important; bottom: auto !important; left: 12px !important; position: static !important; margin: 56px 12px 0 !important; }
           .cinematic-hero .ch-content { padding: 12px 20px 28px !important; max-width: 100% !important; }
           .cinematic-hero .ch-title { font-size: clamp(28px, 8vw, 40px) !important; }
           .cinematic-hero .ch-tagline { font-size: 12px !important; letter-spacing: 0.14em !important; }
           .cinematic-hero .ch-description { font-size: 14px !important; -webkit-line-clamp: 2 !important; }
           .cinematic-hero .ch-host { gap: 8px !important; margin-top: 14px !important; }
-          .cinematic-hero .ch-host-avatar { width: 24px !important; height: 24px !important; font-size: 10px !important; }
+          .cinematic-hero .ch-host-avatar { width: 24px !important; height: 24px !important; font-size: 12px !important; }
           .cinematic-hero .ch-host-name { font-size: 13px !important; }
-          .cinematic-hero .ch-host-role { font-size: 9px !important; }
-          .cinematic-hero .ch-details { gap: 14px !important; font-size: 11px !important; margin-top: 12px !important; }
+          .cinematic-hero .ch-host-role { font-size: 12px !important; }
+          .cinematic-hero .ch-details { gap: 14px !important; font-size: 12px !important; margin-top: 12px !important; }
           .cinematic-hero .ch-rsvp-row { margin-top: 16px !important; }
           .cinematic-hero .ch-rsvp { width: 100% !important; padding: 14px 20px !important; }
           .cinematic-hero .ch-watermark { display: none !important; }
@@ -222,7 +222,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             border: `1px solid ${typeBadge.border}`,
             fontFamily: '"Barlow Condensed", sans-serif',
             fontWeight: 700,
-            fontSize: 11,
+            fontSize: 12,
             letterSpacing: '0.22em',
             textTransform: 'uppercase',
           }}
@@ -253,7 +253,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
               color: '#C9A84C',
               fontFamily: '"Barlow Condensed", sans-serif',
               fontWeight: 700,
-              fontSize: 11,
+              fontSize: 12,
               letterSpacing: '0.22em',
               textTransform: 'uppercase',
               backdropFilter: 'blur(6px)',
@@ -285,7 +285,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             right: 24,
             fontFamily: '"Barlow Condensed", sans-serif',
             fontWeight: 700,
-            fontSize: 10,
+            fontSize: 12,
             letterSpacing: '0.4em',
             textTransform: 'uppercase',
             color: 'rgba(255,255,255,0.18)',
@@ -317,7 +317,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
               display: 'inline-block',
               padding: '4px 10px',
               fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: 700,
               letterSpacing: '0.22em',
               textTransform: 'uppercase',
@@ -463,7 +463,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
                     margin: 0,
                     fontFamily: '"Barlow Condensed", sans-serif',
                     fontWeight: 600,
-                    fontSize: 10,
+                    fontSize: 12,
                     letterSpacing: '0.18em',
                     textTransform: 'uppercase',
                     color: 'rgba(255,255,255,0.55)',

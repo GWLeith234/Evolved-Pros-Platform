@@ -119,7 +119,7 @@ export function GeorgeReplyAssist({ postId, postBody, authorName, pillarTag, onR
     <div className="rounded-lg px-3 py-3 mt-2" style={{ backgroundColor: `${GOLD}0A`, border: `1px solid ${GOLD}25` }}>
       {error && <p className="font-condensed text-[12px] mb-2" style={{ color: '#ef0e30' }}>{error}</p>}
 
-      <p className="font-condensed font-semibold uppercase tracking-[0.14em] text-[8px] mb-2" style={{ color: `${GOLD}99` }}>
+      <p className="font-condensed font-semibold uppercase tracking-[0.14em] text-[12px] mb-2" style={{ color: `${GOLD}99` }}>
         <span style={{ display: 'inline-block', width: 5, height: 5, borderRadius: '50%', backgroundColor: GOLD, marginRight: 4, verticalAlign: 'middle' }} />
         Reply as George &mdash; 3 options
       </p>

@@ -153,7 +153,7 @@ function AdCard({ ad }: { ad: CommunityAd }) {
             <p className="font-condensed font-semibold text-[12px] sm:text-[12px] mt-1" style={{ color: '#68a2b9' }}>{cta}</p>
           </div>
           <span
-            className="font-condensed font-bold text-[8px] uppercase tracking-wider rounded flex-shrink-0 px-1.5 py-0.5"
+            className="font-condensed font-bold text-[12px] uppercase tracking-wider rounded flex-shrink-0 px-1.5 py-0.5"
             style={{ backgroundColor: '#ef0e30', color: 'white' }}
           >
             Ad

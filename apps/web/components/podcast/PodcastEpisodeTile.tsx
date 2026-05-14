@@ -133,7 +133,7 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
               color: '#fff',
               fontFamily: FBC,
               fontWeight: 800,
-              fontSize: 10,
+              fontSize: 12,
               letterSpacing: '0.24em',
               textTransform: 'uppercase',
             }}
@@ -154,7 +154,7 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
             color: '#fff',
             fontFamily: FBC,
             fontWeight: 700,
-            fontSize: 11,
+            fontSize: 12,
             letterSpacing: '0.16em',
           }}
         >
@@ -206,7 +206,7 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
             style={{
               margin: '4px 0 0',
               fontFamily: FBC,
-              fontSize: 11,
+              fontSize: 12,
               letterSpacing: '0.06em',
               color: 'var(--podcast-text-5)',
               whiteSpace: 'nowrap',

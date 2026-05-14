@@ -98,7 +98,7 @@ export function FilterRail({
           display: none;
           font-family: "Barlow Condensed", sans-serif;
           font-weight: 700;
-          font-size: 10px;
+          font-size: 12px;
           letter-spacing: 0.06em;
           text-transform: uppercase;
           color: var(--text-tertiary);
@@ -118,7 +118,7 @@ export function FilterRail({
         <span
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: 9,
+            fontSize: 12,
             fontWeight: 700,
             letterSpacing: '0.18em',
             textTransform: 'uppercase',
@@ -142,7 +142,7 @@ export function FilterRail({
                 display: 'inline-flex',
                 alignItems: 'center',
                 fontFamily: '"Barlow Condensed", sans-serif',
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: 600,
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
@@ -171,7 +171,7 @@ export function FilterRail({
         <span
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: 9,
+            fontSize: 12,
             fontWeight: 700,
             letterSpacing: '0.18em',
             textTransform: 'uppercase',
@@ -213,7 +213,7 @@ export function FilterRail({
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontFamily: '"Bebas Neue", sans-serif',
-                  fontSize: 11,
+                  fontSize: 12,
                   color: '#0A0F18',
                   transition: 'opacity 120ms ease, border-color 120ms ease',
                 }}
@@ -235,7 +235,7 @@ export function FilterRail({
               border: 'none',
               cursor: 'pointer',
               fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: 600,
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
@@ -252,7 +252,7 @@ export function FilterRail({
         <span
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: 9,
+            fontSize: 12,
             fontWeight: 700,
             letterSpacing: '0.18em',
             textTransform: 'uppercase',
@@ -267,7 +267,7 @@ export function FilterRail({
           style={{
             padding: '6px 10px',
             fontFamily: '"Barlow", sans-serif',
-            fontSize: 11,
+            fontSize: 12,
             background: 'transparent',
             color: 'var(--text-primary)',
             border: '1px solid var(--filter-rail-border)',

@@ -58,7 +58,7 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
               margin: 0,
               fontFamily: FBC,
               fontWeight: 700,
-              fontSize: 10,
+              fontSize: 12,
               letterSpacing: '0.32em',
               textTransform: 'uppercase',
               color: '#ef0e30',
@@ -85,7 +85,7 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
           style={{
             fontFamily: FBC,
             fontWeight: 700,
-            fontSize: 10,
+            fontSize: 12,
             letterSpacing: '0.24em',
             textTransform: 'uppercase',
             color: MUTED,
@@ -102,7 +102,7 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
           style={{
             margin: 0,
             fontFamily: FBC,
-            fontSize: 11,
+            fontSize: 12,
             letterSpacing: '0.18em',
             textTransform: 'uppercase',
             color: MUTED,
@@ -171,7 +171,7 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
                       style={{
                         fontFamily: FBC,
                         fontWeight: 800,
-                        fontSize: 11,
+                        fontSize: 12,
                         color: '#0A0F18',
                       }}
                     >
@@ -201,7 +201,7 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
                           marginLeft: 6,
                           fontFamily: FBC,
                           fontWeight: 700,
-                          fontSize: 9,
+                          fontSize: 12,
                           letterSpacing: '0.2em',
                           textTransform: 'uppercase',
                           color: GOLD,
@@ -216,7 +216,7 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
                       margin: '2px 0 0',
                       fontFamily: FBC,
                       fontWeight: 700,
-                      fontSize: 11,
+                      fontSize: 12,
                       letterSpacing: '0.06em',
                       color: MUTED,
                       fontVariantNumeric: 'tabular-nums',
@@ -231,7 +231,7 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
                   style={{
                     fontFamily: FBC,
                     fontWeight: 800,
-                    fontSize: 11,
+                    fontSize: 12,
                     letterSpacing: '0.06em',
                     color: TEAL,
                     fontVariantNumeric: 'tabular-nums',

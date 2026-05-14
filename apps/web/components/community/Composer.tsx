@@ -361,7 +361,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
                     border: `1px dashed ${TEAL}66`,
                     color: TEAL,
                     fontFamily: '"Barlow Condensed", sans-serif',
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: 700,
                     letterSpacing: '0.14em',
                     textTransform: 'uppercase',
@@ -377,7 +377,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
                   style={{
                     margin: 0,
                     fontFamily: '"Barlow", sans-serif',
-                    fontSize: 11,
+                    fontSize: 12,
                     color: 'var(--composer-pillar-label)',
                   }}
                 >
@@ -429,7 +429,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
                 style={{
                   padding: '6px 14px',
                   fontFamily: '"Barlow Condensed", sans-serif',
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: 700,
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
@@ -487,7 +487,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
         <span
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: 9,
+            fontSize: 12,
             fontWeight: 600,
             letterSpacing: '0.22em',
             textTransform: 'uppercase',
@@ -508,7 +508,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
               style={{
                 padding: '4px 10px',
                 fontFamily: '"Barlow Condensed", sans-serif',
-                fontSize: 10,
+                fontSize: 12,
                 fontWeight: 700,
                 letterSpacing: '0.14em',
                 textTransform: 'uppercase',
@@ -533,7 +533,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
             marginLeft: 'auto',
             padding: '8px 14px',
             fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: 700,
             letterSpacing: '0.18em',
             textTransform: 'uppercase',

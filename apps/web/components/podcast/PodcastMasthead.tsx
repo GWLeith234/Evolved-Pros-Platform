@@ -21,7 +21,7 @@ export function PodcastMasthead() {
           margin: 0,
           fontFamily: FBC,
           fontWeight: 700,
-          fontSize: 11,
+          fontSize: 12,
           letterSpacing: '0.42em',
           textTransform: 'uppercase',
           color: 'rgba(201,168,76,0.85)',

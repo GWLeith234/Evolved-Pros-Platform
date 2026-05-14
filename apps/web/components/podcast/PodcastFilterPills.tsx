@@ -84,7 +84,7 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
               border: `1px solid ${active ? f.color : withAlpha(f.color, '66')}`,
               fontFamily: FBC,
               fontWeight: 700,
-              fontSize: 11,
+              fontSize: 12,
               letterSpacing: '0.22em',
               textTransform: 'uppercase',
               cursor: 'pointer',
@@ -101,7 +101,7 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
           style={{
             fontFamily: FBC,
             fontWeight: 700,
-            fontSize: 10,
+            fontSize: 12,
             letterSpacing: '0.32em',
             textTransform: 'uppercase',
             color: 'var(--podcast-text-4)',
