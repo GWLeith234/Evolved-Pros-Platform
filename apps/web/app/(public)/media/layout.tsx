@@ -6,8 +6,8 @@ export default function MediaLayout({ children }: { children: React.ReactNode })
   // having to remember.
   return (
     <div
-      className="min-h-screen bg-[#0A0F18]"
-      style={{ maxWidth: '100vw', overflowX: 'hidden' }}
+      className="min-h-screen bg-[#F5F0E8] text-[#374151]"
+      style={{ maxWidth: '100vw', overflowX: 'hidden', colorScheme: 'light' }}
     >
       {children}
     </div>

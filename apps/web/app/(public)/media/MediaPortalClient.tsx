@@ -513,18 +513,13 @@ export function MediaPortalClient({
         @media (max-width: 767px) {
           .media-hero-grid { grid-template-columns: 1fr !important; }
         }
-        /* MOBILE-MEDIA-FIX (<640px): featured-card byline must shrink (not
-           overflow) and sidebar rails were rendering white on what users
-           expect to be a dark surface. Constrain everything to viewport
-           width and switch rail cards to the platform dark surface. */
+        /* MOBILE-MEDIA-FIX (<640px): keep the featured-card byline from
+           overflowing and constrain rails to the viewport. Rails stay on
+           the light editorial surface — the page is hardcoded light. */
         @media (max-width: 639px) {
           .ed-featured-meta { padding: 14px 16px 16px !important; gap: 8px !important; grid-template-columns: 1fr !important; }
           .ed-featured-meta-byline { text-align: left !important; white-space: normal !important; }
           .ed-rail-card { width: 100%; max-width: 100%; }
-          .ed-rail-card-body { background: #111926 !important; border-color: #1E2535 !important; }
-          .ed-rail-card-body p { color: rgba(255,255,255,0.85) !important; }
-          .ed-rail-card-body p[style*="rgba(43,58,90,0.45)"],
-          .ed-rail-card-body p[style*="rgba(43,58,90,0.4)"] { color: rgba(255,255,255,0.45) !important; }
         }
         @media (prefers-reduced-motion: reduce) {
           .media-card:hover { transform: none; }

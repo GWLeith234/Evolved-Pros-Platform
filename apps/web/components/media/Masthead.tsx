@@ -35,7 +35,7 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
   })
 
   return (
-    <header style={{ position: 'relative', zIndex: 1, background: 'var(--ed-bg)', borderBottom: '1px solid var(--ed-border)', maxWidth: '100%', overflowX: 'hidden' }}>
+    <header style={{ background: '#F5F0E8', borderBottom: '1px solid #E5E0D8', maxWidth: '100%', overflowX: 'hidden' }}>
       {/* Date strip — on mobile (< 640px) the date / Join Evolved Pros / issue
           number get hidden so the row collapses to BACK TO PLATFORM +
           Community/Events/Podcast/Live, which already crowded out at 390px. */}
@@ -54,24 +54,24 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
           fontWeight: 500,
           letterSpacing: '0.22em',
           textTransform: 'uppercase',
-          color: 'var(--ed-text-muted)',
+          color: '#6B7280',
           flexWrap: 'nowrap',
         }}
       >
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
           <span suppressHydrationWarning className="hidden sm:inline">{today}</span>
-          <span aria-hidden="true" className="hidden sm:inline">·</span>
+          <span aria-hidden="true" className="hidden sm:inline" style={{ color: '#C9A84C' }}>·</span>
           <Link
             href="/home"
-            style={{ color: 'var(--ed-text)', textDecoration: 'none' }}
+            style={{ color: '#112535', textDecoration: 'none' }}
           >
             Back to platform
           </Link>
-          <span aria-hidden="true" className="hidden sm:inline">·</span>
+          <span aria-hidden="true" className="hidden sm:inline" style={{ color: '#C9A84C' }}>·</span>
           <Link
             href="/pricing"
             className="hidden sm:inline"
-            style={{ color: 'var(--ed-text)', textDecoration: 'none' }}
+            style={{ color: '#112535', textDecoration: 'none' }}
           >
             Join Evolved Pros
           </Link>
@@ -89,13 +89,13 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
             scrollbarWidth: 'none',
           }}
         >
-          <span className="hidden sm:inline">Issue {issueNumber}</span>
-          <span aria-hidden="true" className="hidden sm:inline" style={{ width: 1, height: 12, background: 'var(--ed-border)' }} />
+          <span className="hidden sm:inline" style={{ color: '#C9A84C' }}>Issue {issueNumber}</span>
+          <span aria-hidden="true" className="hidden sm:inline" style={{ width: 1, height: 12, background: '#E5E0D8' }} />
           {NETWORK_LINKS.map(link => (
             <a
               key={link.href}
               href={link.href}
-              style={{ color: 'var(--ed-text)', textDecoration: 'none', flexShrink: 0 }}
+              style={{ color: '#112535', textDecoration: 'none', flexShrink: 0 }}
             >
               {link.label}
             </a>
@@ -135,11 +135,11 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
             fontSize: 'clamp(40px, 9vw, 108px)',
             lineHeight: 0.95,
             letterSpacing: '0.005em',
-            color: 'var(--ed-text)',
+            color: '#112535',
           }}
         >
-          <span style={{ color: 'var(--ed-red)' }}>Evolved</span>{' '}
-          <span style={{ color: 'var(--ed-navy)' }}>Media</span>
+          <span style={{ color: '#C9302A' }}>Evolved</span>{' '}
+          <span style={{ color: '#112535' }}>Media</span>
         </h1>
         <p
           style={{
@@ -147,7 +147,7 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
             fontFamily: '"Playfair Display", Georgia, serif',
             fontStyle: 'italic',
             fontSize: 16,
-            color: 'var(--ed-text-muted)',
+            color: '#6B7280',
           }}
         >
           Promoting evolution &mdash; the topics George is actively researching, learning, and teaching.
@@ -156,9 +156,9 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
 
       {/* Hairlines */}
       <div style={{ maxWidth: 1280, margin: '8px auto 0', padding: '0 24px' }}>
-        <div style={{ height: 1, background: 'var(--ed-text)' }} />
+        <div style={{ height: 1, background: '#112535' }} />
         <div style={{ height: 3, background: 'transparent' }} />
-        <div style={{ height: 1, background: 'var(--ed-text)' }} />
+        <div style={{ height: 1, background: '#112535' }} />
       </div>
 
       {/* Category nav */}
@@ -187,9 +187,9 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
                 fontSize: 13,
                 letterSpacing: '0.16em',
                 textTransform: 'uppercase',
-                color: active ? 'var(--ed-red)' : 'var(--ed-text)',
+                color: active ? '#C9302A' : '#112535',
                 textDecoration: 'none',
-                borderBottom: active ? '2px solid var(--ed-red)' : '2px solid transparent',
+                borderBottom: active ? '2px solid #C9302A' : '2px solid transparent',
                 marginBottom: -1,
               }}
             >
@@ -207,8 +207,8 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
             gap: 8,
             padding: '6px 12px',
             background: 'transparent',
-            border: '1px solid var(--ed-border)',
-            color: 'var(--ed-text)',
+            border: '1px solid #E5E0D8',
+            color: '#112535',
             cursor: 'pointer',
             fontFamily: '"Barlow Condensed", sans-serif',
             fontWeight: 600,
