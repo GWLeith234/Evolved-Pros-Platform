@@ -196,7 +196,7 @@ function EventGridCard({ event, isRegistered, canRegister, onRegister, onUnregis
               target="_blank"
               rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
-              className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] rounded-full px-3 py-1 transition-all"
+              className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] rounded-full px-3 min-h-[44px] inline-flex items-center transition-all"
               style={{ backgroundColor: 'rgba(104,162,185,0.1)', color: '#68a2b9', border: '1px solid rgba(104,162,185,0.2)' }}
             >
               Watch ▶

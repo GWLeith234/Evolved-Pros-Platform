@@ -184,13 +184,24 @@ export function FilterRail({
           const color = PILLAR_CONFIG[p].color
           const active = activePillars.includes(p)
           return (
-            <div key={p} className="pillar-cell">
-              <button
-                type="button"
-                onClick={() => togglePillar(p)}
-                aria-pressed={active}
-                aria-label={`Filter by ${PILLAR_CONFIG[p].label}`}
-                title={PILLAR_CONFIG[p].label}
+            <button
+              key={p}
+              type="button"
+              onClick={() => togglePillar(p)}
+              aria-pressed={active}
+              aria-label={`Filter by ${PILLAR_CONFIG[p].label}`}
+              title={PILLAR_CONFIG[p].label}
+              className="pillar-cell"
+              style={{
+                minHeight: 44,
+                background: 'transparent',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+              }}
+            >
+              <span
+                aria-hidden="true"
                 style={{
                   width: 24,
                   height: 24,
@@ -198,8 +209,6 @@ export function FilterRail({
                   background: color,
                   border: `2px solid ${active ? color : 'transparent'}`,
                   opacity: active ? 1 : 0.4,
-                  cursor: 'pointer',
-                  padding: 0,
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -210,9 +219,9 @@ export function FilterRail({
                 }}
               >
                 {p}
-              </button>
+              </span>
               <span className="pillar-abbrev" aria-hidden="true">{PILLAR_ABBREV[p]}</span>
-            </div>
+            </button>
           )
         })}
         {activePillars.length > 0 && (

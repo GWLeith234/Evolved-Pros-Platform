@@ -109,10 +109,11 @@ function Pill({
       onClick={onClick}
       aria-pressed={active}
       style={{
-        display: 'inline-flex',
+        display: 'flex',
         alignItems: 'center',
         gap: 6,
-        padding: '6px 12px',
+        minHeight: 44,
+        padding: '0 12px',
         background: active ? '#112535' : '#FFFFFF',
         border: `1px solid ${active ? '#112535' : '#E5E0D8'}`,
         color: active ? '#FFFFFF' : '#374151',
