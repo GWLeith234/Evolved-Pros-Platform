@@ -7,6 +7,8 @@ export function PodcastMasthead() {
   return (
     <header
       style={{
+        position: 'relative',
+        zIndex: 1,
         maxWidth: 1280,
         margin: '0 auto',
         padding: '32px 24px 24px',

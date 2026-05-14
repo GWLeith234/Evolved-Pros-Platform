@@ -22,6 +22,8 @@ export function PodcastLatestStrip({ episode }: PodcastLatestStripProps) {
     <div
       className="flex flex-col sm:flex-row sm:items-stretch w-full max-w-full overflow-hidden"
       style={{
+        position: 'relative',
+        zIndex: 1,
         borderBottom: '1px solid var(--podcast-border-soft2)',
         background: 'var(--podcast-bg-surface)',
         fontFamily: FB,

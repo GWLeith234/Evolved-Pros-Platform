@@ -159,7 +159,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
   const pillarAd = (pillarAdData as any) ?? null
 
   return (
-    <main style={{ backgroundColor: '#0A0F18', minHeight: '100vh', color: '#faf9f7' }}>
+    <main style={{ position: 'relative', zIndex: 1, backgroundColor: '#0A0F18', minHeight: '100vh', color: '#faf9f7' }}>
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section style={{ position: 'relative', minHeight: '65vh', display: 'flex', alignItems: 'flex-end' }}>

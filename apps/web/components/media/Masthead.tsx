@@ -35,7 +35,7 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
   })
 
   return (
-    <header style={{ background: 'var(--ed-bg)', borderBottom: '1px solid var(--ed-border)', maxWidth: '100%', overflowX: 'hidden' }}>
+    <header style={{ position: 'relative', zIndex: 1, background: 'var(--ed-bg)', borderBottom: '1px solid var(--ed-border)', maxWidth: '100%', overflowX: 'hidden' }}>
       {/* Date strip — on mobile (< 640px) the date / Join Evolved Pros / issue
           number get hidden so the row collapses to BACK TO PLATFORM +
           Community/Events/Podcast/Live, which already crowded out at 390px. */}
