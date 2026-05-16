@@ -4,14 +4,12 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { PostCardV2 } from './PostCardV2'
 import { PostReplyThread } from './PostReplyThread'
-import { DashboardStrip } from './DashboardStrip'
 import { FeedAdUnit } from './FeedAdUnit'
 import { CommunityPageHeader } from './CommunityPageHeader'
 import { Composer } from './Composer'
 import { FilterRail } from './FilterRail'
 import type { KindFilter, Pillar, SortBy } from './FilterRail'
 import type { Post, Reply, CommunityAd, WeeklyLeaderboardEntry } from '@/lib/community/types'
-import type { DashboardStripProps } from './DashboardStrip'
 import { WeeklyLeaderboardRail } from './WeeklyLeaderboardRail'
 
 function getInitials(name: string | null | undefined): string {
@@ -35,8 +33,6 @@ interface UnifiedCommunityPageProps {
     isAdmin: boolean
   }
   defaultChannelId: string
-  // Dashboard strip data
-  dashboardProps: Omit<DashboardStripProps, never>
   weeklyLeaderboard: WeeklyLeaderboardEntry[]
 }
 
@@ -48,7 +44,6 @@ export function UnifiedCommunityPage({
   ads,
   currentUser,
   defaultChannelId,
-  dashboardProps,
   weeklyLeaderboard,
 }: UnifiedCommunityPageProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts)
@@ -249,9 +244,6 @@ export function UnifiedCommunityPage({
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-x-hidden" style={{ height: '100%', background: 'var(--community-page-bg)' }}>
-      {/* Dashboard strip */}
-      <DashboardStrip {...dashboardProps} />
-
       {/* Editorial header (COMMUNITY-SPRINT-1) */}
       <CommunityPageHeader />
 
