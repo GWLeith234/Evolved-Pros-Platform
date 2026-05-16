@@ -1,40 +1,60 @@
 /**
- * Vendasta 2-legged OAuth (client_credentials grant).
+ * Vendasta 2-legged JWT-bearer OAuth (service-account grant).
  *
- * Reads VENDASTA_CLIENT_ID + VENDASTA_CLIENT_SECRET from env.
- * Returns a short-lived bearer token, or null if credentials are missing.
+ * Builds a short-lived ES256 JWT, exchanges it at the SSO token endpoint
+ * for a bearer token, and caches the bearer in memory for its lifetime
+ * minus a 60-second buffer.
  *
- * Token is cached in-memory for its lifetime minus a 60-second buffer
- * to avoid using an about-to-expire token.
+ * Env:
+ *   VENDASTA_SERVICE_ACCOUNT_EMAIL — iss / sub claim value
+ *   VENDASTA_PRIVATE_KEY           — PEM private key from the service account
+ *                                    JSON download. Literal "\n" sequences in
+ *                                    the env var are replaced with real
+ *                                    newlines before import.
  */
 
+import { SignJWT, importPKCS8 } from 'jose'
+
 const TOKEN_URL = 'https://sso-api-prod.apigateway.co/oauth2/token'
+const AUDIENCE  = TOKEN_URL
+const ALGORITHM = 'ES256'
 
 let cachedToken: string | null = null
 let cachedExpiry = 0
 
 export async function getVendastaToken(): Promise<string | null> {
-  const clientId = process.env.VENDASTA_CLIENT_ID
-  const clientSecret = process.env.VENDASTA_CLIENT_SECRET
+  const serviceAccountEmail = process.env.VENDASTA_SERVICE_ACCOUNT_EMAIL
+  const privateKeyRaw       = process.env.VENDASTA_PRIVATE_KEY
 
-  if (!clientId || !clientSecret) {
-    console.warn('[Vendasta OAuth] VENDASTA_CLIENT_ID or VENDASTA_CLIENT_SECRET not set — skipping')
+  if (!serviceAccountEmail || !privateKeyRaw) {
+    console.warn('[Vendasta OAuth] VENDASTA_SERVICE_ACCOUNT_EMAIL or VENDASTA_PRIVATE_KEY not set — skipping')
     return null
   }
 
-  // Return cached token if still valid (with 60s buffer)
-  if (cachedToken && Date.now() < cachedExpiry) {
+  if (cachedToken && Date.now() < cachedExpiry - 60_000) {
     return cachedToken
   }
 
   try {
+    const privateKeyPem = privateKeyRaw.replace(/\\n/g, '\n')
+    const privateKey    = await importPKCS8(privateKeyPem, ALGORITHM)
+
+    const nowSeconds = Math.floor(Date.now() / 1000)
+    const assertion  = await new SignJWT({})
+      .setProtectedHeader({ alg: ALGORITHM })
+      .setIssuer(serviceAccountEmail)
+      .setSubject(serviceAccountEmail)
+      .setAudience(AUDIENCE)
+      .setIssuedAt(nowSeconds)
+      .setExpirationTime(nowSeconds + 3600)
+      .sign(privateKey)
+
     const res = await fetch(TOKEN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        grant_type: 'client_credentials',
-        client_id: clientId,
-        client_secret: clientSecret,
+        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        assertion,
       }),
     })
 
@@ -46,14 +66,13 @@ export async function getVendastaToken(): Promise<string | null> {
 
     const data = (await res.json()) as { access_token: string; expires_in: number }
 
-    cachedToken = data.access_token
-    // Cache for (expires_in - 60) seconds
-    cachedExpiry = Date.now() + (data.expires_in - 60) * 1000
+    cachedToken  = data.access_token
+    cachedExpiry = Date.now() + data.expires_in * 1000
 
     return cachedToken
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
-    console.error(`[Vendasta OAuth] Network error: ${msg}`)
+    console.error(`[Vendasta OAuth] Token exchange failed: ${msg}`)
     return null
   }
 }
