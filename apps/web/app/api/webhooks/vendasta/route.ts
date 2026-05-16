@@ -5,6 +5,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { mapSkuToTier, UnknownSkuError, type VendastaTier } from '@/lib/vendasta/sku-mapping'
 import { sendVendastaWelcomeEmail } from '@/lib/resend/emails/vendasta-welcome'
 import { sendVendastaTierChangedEmail } from '@/lib/resend/emails/vendasta-tier-changed'
+import { getVendastaToken } from '@/lib/vendasta/oauth'
 
 // ---------------------------------------------------------------------------
 // Vendasta automation webhook
@@ -85,6 +86,101 @@ function verifyHmac(rawBody: string, signature: string | null): Response | null 
   return null
 }
 
+// ---------------------------------------------------------------------------
+// enrichPayload — Vendasta's real automation webhooks only carry
+//   { accountId, orderId, entityId, marketId, partnerId, event }.
+// The handler below needs sku / email / firstName / lastName, so we fetch
+// the missing fields from the Orders API (for SKU) and Contacts API (for
+// email + name). Best-effort: any failure leaves the field missing, and
+// the existing "Missing required fields" validation triggers the 5xx that
+// makes Vendasta retry.
+// ---------------------------------------------------------------------------
+
+interface EnrichedPayload {
+  accountId?: string
+  orderId?:   string
+  event?:     string
+  sku?:       string | null
+  email?:     string | null
+  firstName?: string | null
+  lastName?:  string | null
+}
+
+async function enrichPayload(raw: {
+  accountId?: string
+  orderId?:   string
+  event?:     string
+  sku?:       string
+  email?:     string
+  firstName?: string
+  lastName?:  string
+}): Promise<EnrichedPayload> {
+  const enriched: EnrichedPayload = { ...raw }
+
+  // Only enrich order events that have an orderId
+  if (!raw.orderId) return enriched
+
+  const token = await getVendastaToken()
+  if (!token) {
+    console.error('[Vendasta Enrich] No OAuth token — cannot enrich payload')
+    return enriched // caller will fail on missing fields, triggering Vendasta retry
+  }
+
+  // Fetch SKU if missing
+  if (!enriched.sku && enriched.orderId) {
+    try {
+      const res = await fetch(
+        `https://prod.apigateway.co/platform/orders/${encodeURIComponent(enriched.orderId)}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      if (res.ok) {
+        const data = await res.json() as {
+          data?:      { lineItems?: Array<{ productId?: string }> }
+          lineItems?: Array<{ productId?: string }>
+        }
+        const productId = data?.data?.lineItems?.[0]?.productId
+          ?? data?.lineItems?.[0]?.productId
+          ?? null
+        if (productId) enriched.sku = productId
+      } else {
+        console.error('[Vendasta Enrich] Orders API', res.status, await res.text().catch(() => ''))
+      }
+    } catch (err) {
+      console.error('[Vendasta Enrich] Orders fetch error:', err)
+    }
+  }
+
+  // Fetch email + name if missing
+  if ((!enriched.email || !enriched.firstName) && enriched.accountId) {
+    try {
+      const res = await fetch(
+        `https://prod.apigateway.co/org/${encodeURIComponent(enriched.accountId)}/contacts?page[limit]=1`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/vnd.api+json',
+          },
+        }
+      )
+      if (res.ok) {
+        const data = await res.json() as {
+          data?: Array<{ attributes?: Record<string, string | null | undefined> }>
+        }
+        const attrs = data?.data?.[0]?.attributes ?? {}
+        if (!enriched.email)     enriched.email     = attrs.email ?? null
+        if (!enriched.firstName) enriched.firstName = attrs.givenName ?? attrs.firstName ?? null
+        if (!enriched.lastName)  enriched.lastName  = attrs.familyName ?? attrs.lastName ?? null
+      } else {
+        console.error('[Vendasta Enrich] Contacts API', res.status, await res.text().catch(() => ''))
+      }
+    } catch (err) {
+      console.error('[Vendasta Enrich] Contacts fetch error:', err)
+    }
+  }
+
+  return enriched
+}
+
 export async function POST(request: Request) {
   const expectedToken = process.env.VENDASTA_VERIFIER_TOKEN
   if (!expectedToken) {
@@ -116,15 +212,27 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Invalid verifier token' }, { status: 401 })
   }
 
-  // 2) NORMALISE FIELDS — accept both `customer_*`/`sku` and
-  //    `contact_*`/`product_sku` field-name styles.
-  const accountId  = payload.accountId
-  const orderId    = payload.orderId
-  const sku        = payload.sku ?? payload.product_sku ?? ''
-  const email      = payload.customer_email ?? payload.contact_email ?? ''
-  const firstName  = payload.customer_first_name ?? payload.contact_first_name ?? ''
-  const lastName   = payload.customer_last_name ?? payload.contact_last_name ?? ''
-  const eventType  = (payload.event_type ?? '').toLowerCase()
+  // 2) NORMALISE + ENRICH FIELDS — real Vendasta automation webhooks only
+  //    carry { accountId, orderId, event }. enrichPayload() fetches the rest
+  //    (sku, email, firstName, lastName) from the Vendasta APIs. We coalesce
+  //    nulls to '' so the rest of the handler can treat everything as string.
+  const raw = payload as unknown as Record<string, unknown>
+  const enriched = await enrichPayload({
+    accountId:  raw.accountId  as string | undefined,
+    orderId:    raw.orderId    as string | undefined,
+    event:      raw.event      as string | undefined,
+    sku:        raw.sku        as string | undefined,
+    email:      raw.email      as string | undefined,
+    firstName:  raw.firstName  as string | undefined,
+    lastName:   raw.lastName   as string | undefined,
+  })
+  const accountId = enriched.accountId ?? ''
+  const orderId   = enriched.orderId   ?? ''
+  const sku       = enriched.sku       ?? ''
+  const email     = enriched.email     ?? ''
+  const firstName = enriched.firstName ?? ''
+  const lastName  = enriched.lastName  ?? ''
+  const eventType = (enriched.event   ?? '').toLowerCase()
 
   // Cancellation doesn't need a SKU; everything else does.
   const requiresSku = eventType !== 'cancellation'
