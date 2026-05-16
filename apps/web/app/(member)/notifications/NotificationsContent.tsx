@@ -71,8 +71,16 @@ export function NotificationsContent({
         />
       </div>
 
-      {/* Mobile horizontal filter pills */}
-      <div className="flex md:hidden gap-2 overflow-x-auto pb-2 px-4 pt-4 flex-shrink-0">
+      {/* Mobile horizontal filter pills — snap-x scroll with a right-edge
+          fade so it's visually obvious there's more to swipe to at 375px. */}
+      <div
+        className="flex md:hidden gap-2 overflow-x-auto pb-2 px-4 pt-4 flex-shrink-0 max-w-full"
+        style={{
+          scrollSnapType: 'x mandatory',
+          WebkitMaskImage: 'linear-gradient(to right, black 85%, transparent 100%)',
+          maskImage: 'linear-gradient(to right, black 85%, transparent 100%)',
+        }}
+      >
         {MOBILE_FILTERS.map(f => {
           const isActive = filter === f.value
           return (
@@ -80,8 +88,9 @@ export function NotificationsContent({
               key={f.value}
               type="button"
               onClick={() => setFilter(f.value)}
-              className="px-3 py-1.5 rounded-full text-xs font-condensed font-semibold uppercase tracking-wider whitespace-nowrap border transition-colors"
+              className="px-3 py-1.5 rounded-full text-xs font-condensed font-semibold uppercase tracking-wider whitespace-nowrap border transition-colors flex-shrink-0"
               style={{
+                scrollSnapAlign: 'start',
                 backgroundColor: isActive ? 'rgba(255,255,255,0.1)' : 'transparent',
                 borderColor: isActive ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)',
                 color: isActive ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)',
@@ -93,15 +102,34 @@ export function NotificationsContent({
         })}
       </div>
 
-      <main className="flex-1 overflow-y-auto">
-        {/* Header */}
+      <main className="flex-1 overflow-y-auto min-w-0 max-w-full">
+        {/* Header — flex-wrap so the Mark All Read button drops below the
+            title at 375px instead of clipping the H1 / subtitle. */}
         <div
-          className="px-6 md:px-8 py-5 flex items-center justify-between"
+          className="px-4 md:px-8 py-5 flex items-start justify-between gap-3 flex-wrap"
           style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <div>
-            <h1 className="font-display font-black text-[28px] text-white">Notifications</h1>
-            <p className="font-condensed text-[12px] mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          <div className="min-w-0 max-w-full">
+            <h1
+              className="font-display font-black text-white"
+              style={{
+                fontSize: 'clamp(1.5rem, 6vw, 1.75rem)',
+                lineHeight: 1.1,
+                overflowWrap: 'break-word',
+                maxWidth: '100%',
+              }}
+            >
+              Notifications
+            </h1>
+            <p
+              className="font-condensed text-[12px] mt-0.5"
+              style={{
+                color: 'rgba(255,255,255,0.4)',
+                whiteSpace: 'normal',
+                maxWidth: '100%',
+                overflow: 'visible',
+              }}
+            >
               {unreadCount} unread · Last 7 days
             </p>
           </div>
@@ -109,7 +137,7 @@ export function NotificationsContent({
             <button
               onClick={handleMarkAllRead}
               disabled={markingAll}
-              className="font-condensed font-semibold uppercase tracking-wide text-[11px] rounded px-4 py-2 transition-all"
+              className="font-condensed font-semibold uppercase tracking-wide text-[11px] rounded px-4 py-2 transition-all flex-shrink-0"
               style={{ color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.12)', backgroundColor: 'transparent', opacity: markingAll ? 0.6 : 1 }}
             >
               {markingAll ? 'Marking...' : 'Mark All Read'}
@@ -117,7 +145,7 @@ export function NotificationsContent({
           )}
         </div>
 
-        <div className="px-6 md:px-8 py-6 space-y-2">
+        <div className="px-4 md:px-8 py-6 space-y-2">
           {filtered.length === 0 ? (
             /* Empty state */
             <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
