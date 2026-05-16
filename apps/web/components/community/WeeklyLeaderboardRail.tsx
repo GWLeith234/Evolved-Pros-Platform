@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getAvatarColor } from '@/lib/community/types'
@@ -7,6 +8,12 @@ import type { WeeklyLeaderboardEntry } from '@/lib/community/types'
 
 interface WeeklyLeaderboardRailProps {
   entries: WeeklyLeaderboardEntry[]
+}
+
+// Avoid Number.toLocaleString — slim/edge runtimes can ship without full ICU,
+// so the SSR output silently diverges from the browser and trips React #425.
+function formatPoints(n: number): string {
+  return Math.trunc(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
 const FB = 'Barlow, sans-serif'
@@ -33,6 +40,13 @@ function rankColor(rank: number, isMe: boolean): string {
 }
 
 export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
+  // Skip SSR for the rail — `isCurrentUser` rendering (highlighted row, "You"
+  // badge, gold border) can resolve differently on edge-cached HTML vs the
+  // hydrating client and throws React #425/#422.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  if (!mounted) return null
+
   return (
     <aside
       style={{
@@ -222,7 +236,7 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
                       fontVariantNumeric: 'tabular-nums',
                     }}
                   >
-                    {entry.points.toLocaleString('en-US')} pts
+                    {formatPoints(entry.points)} pts
                   </p>
                 </div>
 
