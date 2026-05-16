@@ -65,8 +65,8 @@ export default async function AdminMembersPage() {
   })
 
   return (
-    <div className="px-8 py-6">
-      <div className="mb-6 flex items-start justify-between gap-4">
+    <div className="px-4 sm:px-8 py-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div>
           <h1 className="font-display font-black text-[28px] text-[#112535]">Members</h1>
           <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">

@@ -58,6 +58,17 @@ function getInitials(name: string | null | undefined): string {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 }
 
+// Prefer the full legal name when present (e.g. "Jubal Chetty") over the
+// shorter displayName ("Jubal") so the admin list shows last names that exist
+// in the DB. Falls back to displayName, then to the email local-part.
+function resolveDisplayName(m: { fullName: string | null; displayName: string | null; email: string }): string {
+  const full = m.fullName?.trim()
+  if (full) return full
+  const display = m.displayName?.trim()
+  if (display) return display
+  return m.email.split('@')[0]
+}
+
 export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }) {
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<Filter>('All')
@@ -100,7 +111,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
           onFocus={e => (e.currentTarget.style.borderColor = '#68a2b9')}
           onBlur={e => (e.currentTarget.style.borderColor = 'rgba(27,60,90,0.18)')}
         />
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-wrap">
           {FILTERS.map(f => (
             <button
               key={f}
@@ -121,8 +132,107 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
         </span>
       </div>
 
-      {/* Table */}
-      <div className="rounded-lg overflow-x-auto" style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'white' }}>
+      {/* Mobile: stacked card list (<768px). Desktop table below is hidden
+          at that breakpoint. Keeps every column's data visible without
+          horizontal scrolling on a 375px viewport. */}
+      <div className="md:hidden rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'white' }}>
+        {filtered.length === 0 ? (
+          <p className="px-4 py-10 text-center font-condensed text-[12px] text-[#7a8a96]">No members found.</p>
+        ) : (
+          filtered.map((m, i) => {
+            const name = resolveDisplayName(m)
+            const tierStyle = TIER_COLORS[m.tier ?? ''] ?? TIER_COLORS.vip
+            const statusStyle = STATUS_COLORS[m.tierStatus ?? ''] ?? STATUS_COLORS.expired
+            const engStyle = ENG_COLORS[m.engagementLevel]
+            const engPct = Math.min(100, m.engagementScore * 10)
+            return (
+              <div
+                key={m.id}
+                className="p-4 flex flex-col gap-3"
+                style={{ borderBottom: i === filtered.length - 1 ? 'none' : '1px solid rgba(27,60,90,0.08)' }}
+              >
+                {/* Row 1: avatar + name + email */}
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-white font-condensed font-bold text-[13px]"
+                    style={{ backgroundColor: '#1b3c5a' }}
+                  >
+                    {m.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={m.avatarUrl} alt={name} className="w-10 h-10 rounded-full object-cover" />
+                    ) : getInitials(name)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-body font-semibold text-[14px] text-[#112535] leading-tight truncate">{name}</p>
+                    <p className="font-condensed text-[12px] text-[#7a8a96] truncate">{m.email}</p>
+                  </div>
+                </div>
+
+                {/* Row 2: Plan + Status + Joined */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {m.tier ? (
+                    <span
+                      className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
+                      style={{ backgroundColor: tierStyle.bg, color: tierStyle.color, border: `1px solid ${tierStyle.border}` }}
+                    >
+                      {m.tier.toUpperCase()}
+                    </span>
+                  ) : null}
+                  <span
+                    className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
+                    style={{ backgroundColor: statusStyle.bg, color: statusStyle.color }}
+                  >
+                    {(m.tierStatus ?? 'unknown').toUpperCase()}
+                  </span>
+                  <span className="font-condensed text-[12px] text-[#7a8a96] ml-auto">{fmtDate(m.joinedAt)}</span>
+                </div>
+
+                {/* Row 3: MRR + Engagement */}
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-condensed font-bold text-[14px] text-[#1b3c5a]">
+                    {m.mrr > 0 ? `$${m.mrr} MRR` : 'No MRR'}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-[60px] h-1.5 rounded-full overflow-hidden"
+                      style={{ backgroundColor: 'rgba(27,60,90,0.08)' }}
+                    >
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{ width: `${engPct}%`, backgroundColor: engStyle.bar }}
+                      />
+                    </div>
+                    <span className="font-condensed font-bold uppercase text-[12px]" style={{ color: engStyle.text }}>
+                      {m.engagementLevel}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Row 4: Edit (full width) + View */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setEditingMember(m)}
+                    className="flex-1 font-condensed font-semibold uppercase tracking-wide text-[13px] px-3 py-2 rounded transition-all"
+                    style={{ minHeight: 44, color: '#68a2b9', border: '1px solid rgba(104,162,185,0.3)' }}
+                  >
+                    Edit
+                  </button>
+                  <Link
+                    href={`/admin/members/${m.id}`}
+                    className="font-condensed font-semibold uppercase tracking-wide text-[13px] px-3 py-2 rounded transition-all inline-flex items-center justify-center"
+                    style={{ minHeight: 44, color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.25)' }}
+                  >
+                    View →
+                  </Link>
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
+
+      {/* Desktop table (≥768px) */}
+      <div className="hidden md:block rounded-lg overflow-x-auto" style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'white' }}>
         <table className="w-full min-w-[820px]">
           <thead>
             <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.03)' }}>
@@ -145,7 +255,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
               </tr>
             ) : (
               filtered.map((m, i) => {
-                const name = m.displayName ?? m.fullName ?? m.email
+                const name = resolveDisplayName(m)
                 const tierStyle = TIER_COLORS[m.tier ?? ''] ?? TIER_COLORS.vip
                 const statusStyle = STATUS_COLORS[m.tierStatus ?? ''] ?? STATUS_COLORS.expired
                 const engStyle = ENG_COLORS[m.engagementLevel]

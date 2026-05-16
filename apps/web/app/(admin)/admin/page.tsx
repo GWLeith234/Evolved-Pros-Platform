@@ -140,8 +140,8 @@ export default async function AdminDashboardPage() {
   ]
 
   return (
-    <div className="px-8 py-6 max-w-5xl">
-      <div className="mb-6 flex items-start justify-between gap-4">
+    <div className="px-4 sm:px-8 py-6 max-w-5xl">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div>
           <h1 className="font-display font-black text-[28px] text-[#112535]">Dashboard</h1>
           <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5" suppressHydrationWarning>
@@ -174,7 +174,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Quick links */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         {[
           { label: 'Members',  href: '/admin/members',  desc: 'Search, filter, view profiles' },
           { label: 'Pipeline', href: '/admin/pipeline', desc: 'Upgrade pipeline kanban' },
