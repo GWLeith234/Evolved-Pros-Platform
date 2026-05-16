@@ -10,13 +10,13 @@ const VALID_TYPES: AssessmentType[] = ['PIONEER', 'DRIVER', 'CONNECTOR', 'ARCHIT
 
 export async function GET() {
   const supabase = createClient()
-  const profile = await resolveCurrentUser(supabase)
-  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data, error } = await supabase
     .from('assessments')
     .select('id, user_id, assessment_type, type_result, scores_json, created_at')
-    .eq('user_id', profile.id)
+    .eq('user_id', user.id)
     .eq('assessment_type', 'pioneer-driver')
     .order('created_at', { ascending: false })
     .limit(1)
@@ -32,6 +32,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const profile = await resolveCurrentUser(supabase)
   if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -47,11 +49,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'type_result must be one of PIONEER, DRIVER, CONNECTOR, ARCHITECT' }, { status: 422 })
   }
 
-  // Use admin client to bypass RLS for both insert and user update
+  /* assessments.user_id FKs auth.users(id); insert must use auth.uid().
+     The follow-up users-table update keeps using public.users.id. */
   const { data: assessment, error: insertError } = await adminClient
     .from('assessments')
     .insert({
-      user_id: profile.id,
+      user_id: user.id,
       assessment_type: 'pioneer-driver',
       type_result: typeResult,
       scores_json: scoresJson,
@@ -64,7 +67,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: insertError?.message ?? 'Failed to save assessment' }, { status: 500 })
   }
 
-  // Update pioneer_driver_type on user profile
   const { error: updateError } = await adminClient
     .from('users')
     .update({ pioneer_driver_type: typeResult })
