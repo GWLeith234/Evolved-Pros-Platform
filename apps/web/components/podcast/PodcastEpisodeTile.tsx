@@ -10,6 +10,16 @@ const FBC = 'Barlow Condensed, sans-serif'
 const FBN = 'Bebas Neue, sans-serif'
 const FP = 'Playfair Display, Georgia, serif'
 
+function formatRuntime(minutes: number): string {
+  if (minutes <= 0) return '—'
+  if (minutes >= 60) {
+    const h = Math.floor(minutes / 60)
+    const m = minutes % 60
+    return `${h}:${m.toString().padStart(2, '0')}:00`
+  }
+  return `${minutes}:00`
+}
+
 interface PodcastEpisodeTileProps {
   episode: PodcastEpisode
   focused: boolean
@@ -158,7 +168,7 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
             letterSpacing: '0.16em',
           }}
         >
-          {episode.duration > 0 ? `${episode.duration}M` : '—'}
+          {formatRuntime(episode.duration)}
         </span>
       </div>
 
@@ -218,7 +228,7 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
             {publishedAtLabel && episode.duration > 0 && (
               <span style={{ margin: '0 6px' }}>·</span>
             )}
-            {episode.duration > 0 && <span>{episode.duration}M</span>}
+            {episode.duration > 0 && <span>{formatRuntime(episode.duration)}</span>}
           </p>
         )}
       </div>
