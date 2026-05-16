@@ -24,10 +24,22 @@ const MUTED = 'rgba(255,255,255,0.45)'
 
 type LeaderboardRow = {
   id: string
+  display_name: string | null
   full_name: string | null
+  email: string | null
   avatar_url: string | null
   tier: 'vip' | 'pro' | null
   points: number | null
+}
+
+function resolveDisplayName(row: LeaderboardRow): string {
+  const display = row.display_name?.trim()
+  if (display) return display
+  const full = row.full_name?.trim()
+  if (full) return full
+  const email = row.email?.trim()
+  if (email) return email[0].toUpperCase()
+  return 'Member'
 }
 
 function getInitials(name: string): string {
@@ -81,7 +93,7 @@ export default async function LeaderboardPage() {
 
   const { data } = await adminClient
     .from('users')
-    .select('id, full_name, avatar_url, tier, points')
+    .select('id, display_name, full_name, email, avatar_url, tier, points')
     .in('tier', ['vip', 'pro'])
     .order('points', { ascending: false, nullsFirst: false })
     .limit(50)
@@ -161,7 +173,7 @@ export default async function LeaderboardPage() {
             <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
               {rows.map((row, i) => {
                 const rank = i + 1
-                const displayName = row.full_name?.trim() || 'Unnamed Member'
+                const displayName = resolveDisplayName(row)
                 const avatarBg = getAvatarColor(row.id)
                 const isMe = me?.id === row.id
                 const accent = rankAccent(rank)

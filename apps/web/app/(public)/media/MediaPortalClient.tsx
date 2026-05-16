@@ -376,7 +376,7 @@ export function MediaPortalClient({
                 }}
               >
                 {isEditorialCategory(activeCategory)
-                  ? `No ${activeCategory} stories yet — section ships in MR2.`
+                  ? `${activeCategory} stories coming soon.`
                   : 'No published stories in this category yet.'}
               </div>
             )}
@@ -490,7 +490,7 @@ export function MediaPortalClient({
               <ArticleCard key={s.id} story={s} />
             ))}
           </div>
-        ) : (
+        ) : filteredStories.length === 0 && isEditorialCategory(activeCategory) ? null : (
           <div style={{ padding: '40px 0', textAlign: 'center' }}>
             <span style={{ fontSize: 13, color: '#6B7280', fontFamily: 'var(--font-body)' }}>
               {filteredStories.length === 0
