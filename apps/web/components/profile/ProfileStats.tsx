@@ -34,10 +34,8 @@ export function ProfileStats({ posts, points, lessons, badges }: ProfileStatsPro
 
   return (
     <div
+      className="grid grid-cols-2 min-[480px]:grid-cols-4 gap-6"
       style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '24px',
         backgroundColor: '#111926',
         border: '1px solid rgba(255,255,255,0.07)',
         borderRadius: '8px',
