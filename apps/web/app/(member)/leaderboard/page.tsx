@@ -33,12 +33,15 @@ type LeaderboardRow = {
 }
 
 function resolveDisplayName(row: LeaderboardRow): string {
-  const display = row.display_name?.trim()
-  if (display) return display
+  // Prefer full_name so QA sees "Jubal Chetty", not "Jubal" — a number
+  // of legacy rows have display_name set to just the first name while
+  // full_name carries the complete identity.
   const full = row.full_name?.trim()
   if (full) return full
+  const display = row.display_name?.trim()
+  if (display) return display
   const email = row.email?.trim()
-  if (email) return email[0].toUpperCase()
+  if (email) return email.split('@')[0]
   return 'Member'
 }
 
