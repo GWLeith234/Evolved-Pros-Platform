@@ -101,7 +101,7 @@ export function EmailPrefsForm({ initialPrefs }: EmailPrefsFormProps) {
     const isSaving = pendingKey === rowKey
     return (
       <div
-        className="flex items-center justify-between py-3 px-4"
+        className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-0 py-3 px-4"
         style={{ borderBottom: '1px solid rgba(27,60,90,0.06)' }}
       >
         <div className="flex items-center gap-2">
@@ -114,14 +114,18 @@ export function EmailPrefsForm({ initialPrefs }: EmailPrefsFormProps) {
             />
           )}
         </div>
-        <div className="flex items-center gap-1">
+        <div
+          className="grid w-full grid-flow-col auto-cols-fr gap-1 sm:flex sm:w-auto sm:items-center"
+          role="group"
+          aria-label={`${label} frequency`}
+        >
           {options.map(opt => (
             <button
               key={opt.value}
               type="button"
               disabled={disabled}
               onClick={() => onChange(opt.value)}
-              className="font-condensed font-semibold uppercase text-[12px] rounded px-3 py-1.5 transition-all"
+              className="font-condensed font-semibold uppercase text-[12px] rounded px-3 py-1.5 transition-all w-full sm:w-auto"
               style={{
                 backgroundColor: value === opt.value ? '#1b3c5a' : 'transparent',
                 color: value === opt.value ? 'white' : '#7a8a96',
@@ -149,7 +153,7 @@ export function EmailPrefsForm({ initialPrefs }: EmailPrefsFormProps) {
             <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96]">
               Notification Type
             </span>
-            <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96]">
+            <span className="hidden sm:inline font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96]">
               Frequency
             </span>
           </div>

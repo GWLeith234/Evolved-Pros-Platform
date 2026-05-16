@@ -89,23 +89,38 @@ export function SettingsClient({
         </p>
       </div>
 
-      <div className="flex gap-1 border-b border-[rgba(27,60,90,0.12)] mb-6 overflow-x-auto">
-        {TABS.map(t => (
-          <button
-            key={t.key}
-            type="button"
-            onClick={() => selectTab(t.key)}
-            className="px-4 py-2.5 font-condensed font-semibold uppercase tracking-wide text-xs transition-colors border-b-2 -mb-px whitespace-nowrap"
-            style={{
-              color: activeTab === t.key ? '#68a2b9' : '#7a8a96',
-              borderColor: activeTab === t.key ? '#68a2b9' : 'transparent',
-              background: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="relative mb-6 border-b border-[rgba(27,60,90,0.12)]">
+        <div
+          className="flex gap-1 overflow-x-auto snap-x snap-mandatory"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {TABS.map(t => (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => selectTab(t.key)}
+              className="px-4 py-2.5 font-condensed font-semibold uppercase tracking-wide text-xs transition-colors border-b-2 -mb-px whitespace-nowrap snap-start"
+              style={{
+                color: activeTab === t.key ? '#68a2b9' : '#7a8a96',
+                borderColor: activeTab === t.key ? '#68a2b9' : 'transparent',
+                background: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        {/* Right-edge fade mask: hints at scrollable overflow on mobile.
+            Hidden at >=640px where the full tab row fits. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute top-0 right-0 h-full w-8 sm:hidden"
+          style={{
+            background:
+              'linear-gradient(to right, rgba(245,240,232,0), rgba(245,240,232,1))',
+          }}
+        />
       </div>
 
       {activeTab === 'profile' && <ProfileTab userId={userId} />}
@@ -228,8 +243,11 @@ function AccountTab({ userId, email, fullName }: { userId: string; email: string
         throw new Error(data.error ?? 'Save failed')
       }
       setNameSaved(true)
+      showToast('Name saved', 'success')
     } catch (e) {
-      setNameError(e instanceof Error ? e.message : 'Something went wrong')
+      const msg = e instanceof Error ? e.message : 'Something went wrong'
+      setNameError(msg)
+      showToast(msg, 'error')
     } finally {
       setSavingName(false)
     }
