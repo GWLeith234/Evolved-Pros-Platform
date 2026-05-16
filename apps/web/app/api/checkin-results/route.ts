@@ -2,12 +2,11 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export async function GET(request: Request) {
   const supabase = createClient()
-  const profile = await resolveCurrentUser(supabase)
-  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const courseId = searchParams.get('course_id')
@@ -16,7 +15,7 @@ export async function GET(request: Request) {
   let query = supabase
     .from('checkin_results')
     .select('id, course_id, module_number, checkin_type, score, max_score, result_json, created_at')
-    .eq('user_id', profile.id)
+    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(1)
 
@@ -34,8 +33,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const supabase = createClient()
-  const profile = await resolveCurrentUser(supabase)
-  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   let body: Record<string, unknown>
   try { body = await request.json() } catch {
@@ -54,10 +53,11 @@ export async function POST(request: Request) {
   if (score === null) return NextResponse.json({ error: 'score is required' }, { status: 422 })
   if (maxScore === null) return NextResponse.json({ error: 'max_score is required' }, { status: 422 })
 
+  /* checkin_results.user_id FKs auth.users(id) and RLS checks auth.uid(). */
   const { data, error } = await supabase
     .from('checkin_results')
     .insert({
-      user_id: profile.id,
+      user_id: user.id,
       course_id: courseId,
       module_number: moduleNumber,
       checkin_type: checkinType,
