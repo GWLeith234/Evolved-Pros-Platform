@@ -320,12 +320,14 @@ function ScoreCell({
   value,
   accent,
   last,
+  zeroHint,
 }: {
   href: string
   label: string
   value: number
   accent: string
   last?: boolean
+  zeroHint?: string
 }) {
   const [hover, setHover] = useState(false)
   return (
@@ -385,6 +387,22 @@ function ScoreCell({
       >
         {label}
       </span>
+      {value === 0 && zeroHint && (
+        <span
+          style={{
+            marginTop: 3,
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontWeight: 500,
+            fontSize: 11,
+            letterSpacing: '0.04em',
+            color: 'rgba(255,255,255,0.4)',
+            whiteSpace: 'nowrap',
+            textAlign: 'center',
+          }}
+        >
+          {zeroHint}
+        </span>
+      )}
     </a>
   )
 }
@@ -495,7 +513,7 @@ export function WelcomeBanner({
         @media (max-width: 639px) {
           .welcome-banner-inner { padding: 20px 16px 16px !important; }
           .welcome-banner-top { gap: 16px !important; }
-          .welcome-banner-top > div:first-child > div { width: 88px !important; height: 88px !important; }
+          .welcome-banner-avatar { width: 88px !important; height: 88px !important; }
           .welcome-banner-top h1 { font-size: 26px !important; }
           .welcome-banner-bottom { gap: 16px !important; margin-top: 20px !important; }
           .welcome-banner-daterow { gap: 8px !important; }
@@ -533,6 +551,7 @@ export function WelcomeBanner({
           <div style={{ position: 'relative', flexShrink: 0 }}>
             {avatarUrl ? (
               <div
+                className="welcome-banner-avatar"
                 style={{
                   width: 128,
                   height: 128,
@@ -550,6 +569,7 @@ export function WelcomeBanner({
               </div>
             ) : (
               <div
+                className="welcome-banner-avatar"
                 style={{
                   width: 128,
                   height: 128,
@@ -862,6 +882,7 @@ export function WelcomeBanner({
                   label="Posts"
                   value={scoreboard.unreadPostCount}
                   accent="#A78BFA"
+                  zeroHint="Share an update"
                 />
                 <ScoreCell
                   href="/events"
@@ -874,12 +895,14 @@ export function WelcomeBanner({
                   label="Podcast"
                   value={scoreboard.podcastCount}
                   accent="#60A5FA"
+                  zeroHint="Listen to an episode"
                 />
                 <ScoreCell
                   href="/media"
                   label="Stories"
                   value={scoreboard.storyCount}
                   accent="#C9A84C"
+                  zeroHint="—"
                   last
                 />
               </div>
