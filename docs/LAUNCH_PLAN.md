@@ -183,21 +183,19 @@ Platform → Vendasta (outbound contact API):
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY
-VENDASTA_WEBHOOK_SECRET
-VENDASTA_API_KEY
-VENDASTA_API_BASE_URL
-VENDASTA_MAGIC_LINK_METHOD
+VENDASTA_VERIFIER_TOKEN
+VENDASTA_CLIENT_ID
+VENDASTA_CLIENT_SECRET
+VENDASTA_MP_COMMUNITY
+VENDASTA_MP_VIP_M
+VENDASTA_MP_VIP_Y
+VENDASTA_MP_PRO_M
+VENDASTA_MP_PRO_Y
+NEXT_PUBLIC_VENDASTA_STORE_URL
 NEXT_PUBLIC_APP_URL
 RESEND_API_KEY
 RESEND_FROM_EMAIL
 CRON_SECRET
-```
-
-### Need from Alistair:
-```
-NEXT_PUBLIC_VENDASTA_CHECKOUT_URL  — base checkout URL for upgrade CTAs
-VENDASTA_CLIENT_ID                — for Ask George OAuth (if not using API key)
-VENDASTA_CLIENT_SECRET            — for Ask George OAuth
 ```
 
 ---
@@ -211,11 +209,14 @@ VENDASTA_CLIENT_SECRET            — for Ask George OAuth
 - [ ] EP-PRO-M — Professional, $249/month, recurring
 - [ ] EP-PRO-Y — Professional, $2,490/year, recurring (optional)
 
-### Webhook configuration:
+### Webhook configuration (Partner Center → Automations):
 - [ ] Endpoint: `https://platform.evolvedpros.com/api/webhooks/vendasta`
-- [ ] Shared secret: (generate and set as VENDASTA_WEBHOOK_SECRET in Railway)
-- [ ] Events: order.created, order.renewed, order.upgraded, order.cancelled
-- [ ] Signature header: `x-vendasta-signature` (HMAC-SHA256)
+- [ ] Verifier token: set as `VENDASTA_VERIFIER_TOKEN` in Railway and as the
+      `x-vendasta-verifier` header value on each automation
+- [ ] Automations: Account Created, Order Activated, Order Cancelled
+- [ ] Add custom body `{ "event": "order_activated" }` to the Order Activated
+      automation and `{ "event": "order_cancelled" }` to the Order Cancelled
+      automation so the handler can disambiguate
 
 ### Contact custom fields to create:
 - [ ] tier (text)

@@ -13,7 +13,7 @@ export function UpgradePrompt() {
         </p>
       </div>
       <a
-        href={process.env.NEXT_PUBLIC_VENDASTA_CHECKOUT_URL ?? '/membership'}
+        href={process.env.NEXT_PUBLIC_VENDASTA_STORE_URL ?? '/membership'}
         className="flex-shrink-0 font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-5 py-2.5 transition-all"
         style={{ backgroundColor: '#ef0e30', color: 'white' }}
       >

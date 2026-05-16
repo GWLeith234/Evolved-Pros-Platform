@@ -72,13 +72,13 @@ function MembershipExpiredContent() {
 
       {/* CTAs */}
       <div className="space-y-3">
-        <Link
-          href="/membership"
+        <a
+          href={process.env.NEXT_PUBLIC_VENDASTA_STORE_URL ?? '/membership'}
           className="block w-full py-3 rounded font-condensed font-semibold uppercase tracking-wide text-sm text-white text-center transition-colors"
           style={{ backgroundColor: '#ef0e30' }}
         >
           {isCancelled ? 'Rejoin Evolved Pros →' : 'Renew Membership →'}
-        </Link>
+        </a>
         <Link
           href="mailto:support@evolvedpros.com"
           className="block w-full py-3 rounded font-condensed font-semibold uppercase tracking-wide text-sm transition-colors"

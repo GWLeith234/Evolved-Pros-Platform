@@ -15,7 +15,7 @@ export async function GET() {
       serviceRole:  !!process.env.SUPABASE_SERVICE_ROLE_KEY,
       resend:       !!process.env.RESEND_API_KEY,
       mux:          !!process.env.MUX_TOKEN_ID,
-      vendasta:     !!process.env.VENDASTA_WEBHOOK_SECRET,
+      vendasta:     !!process.env.VENDASTA_VERIFIER_TOKEN && !!process.env.VENDASTA_CLIENT_ID,
     },
   }
 

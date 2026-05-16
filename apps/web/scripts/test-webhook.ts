@@ -1,26 +1,26 @@
 // Run: npx tsx scripts/test-webhook.ts
-import { createHmac } from 'crypto'
-
-const SECRET = process.env.VENDASTA_WEBHOOK_SECRET ?? 'test-secret'
-const URL    = process.env.WEBHOOK_URL ?? 'http://localhost:3000/api/webhooks/vendasta'
+const TOKEN = process.env.VENDASTA_VERIFIER_TOKEN ?? 'test-token'
+const ENDPOINT = process.env.WEBHOOK_URL ?? 'http://localhost:3000/api/webhooks/vendasta'
 
 const payload = {
-  event_type:    'order.created',
-  order_id:      'TEST-ORDER-001',
-  contact_id:    'VENDASTA-CONTACT-TEST',
-  product_sku:   'EP-COMM-M',
-  contact_email: 'testmember@example.com',
-  contact_name:  'Test Member',
+  accountId: 'TEST-ACCOUNT-001',
+  marketId:  'test-market',
+  partnerId: 'test-partner',
 }
 
-const body = JSON.stringify(payload)
-const sig  = createHmac('sha256', SECRET).update(body).digest('hex')
+async function main() {
+  const res = await fetch(ENDPOINT, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'x-vendasta-verifier': TOKEN },
+    body:    JSON.stringify(payload),
+  })
+  console.log('Status:', res.status)
+  console.log('Body:',   await res.json())
+}
 
-const res = await fetch(URL, {
-  method:  'POST',
-  headers: { 'Content-Type': 'application/json', 'x-vendasta-signature': sig },
-  body,
+main().catch(err => {
+  console.error(err)
+  process.exit(1)
 })
 
-console.log('Status:', res.status)
-console.log('Body:',   await res.json())
+export {}

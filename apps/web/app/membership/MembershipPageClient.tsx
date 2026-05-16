@@ -10,7 +10,7 @@ interface MembershipPageClientProps {
   isLoggedIn: boolean
 }
 
-const CHECKOUT_BASE       = process.env.NEXT_PUBLIC_VENDASTA_CHECKOUT_URL ?? ''
+const STORE_URL           = process.env.NEXT_PUBLIC_VENDASTA_STORE_URL ?? ''
 const KEYNOTE_INQUIRY_URL = process.env.NEXT_PUBLIC_VENDASTA_KEYNOTE_INQUIRY_URL
   ?? 'mailto:support@evolvedpros.com?subject=Keynote%20Inquiry%20-%20Evolved%20Pros'
 
@@ -63,7 +63,7 @@ function CtaButton({ sku, accent, featured = false, isCurrent = false, label }: 
     )
   }
 
-  const checkoutUrl = CHECKOUT_BASE ? `${CHECKOUT_BASE}?sku=${sku}` : ''
+  const checkoutUrl = STORE_URL ? `${STORE_URL}?sku=${sku}` : ''
 
   if (checkoutUrl) {
     return (

@@ -57,7 +57,7 @@ domain will be provided before go-live. Source:
 | Header                  | Value                                                                 |
 | ----------------------- | --------------------------------------------------------------------- |
 | `Content-Type`          | `application/json`                                                    |
-| `x-vendasta-signature`  | `hex(HMAC-SHA256(rawBody, VENDASTA_WEBHOOK_SECRET))`                  |
+| `x-vendasta-verifier`   | Static token equal to `VENDASTA_VERIFIER_TOKEN` (env var)             |
 
 Body (JSON):
 
@@ -302,8 +302,8 @@ Vendasta settles on a single canonical shape.
 
 ## 8. Checkout URLs (outbound links in the UI)
 
-- `NEXT_PUBLIC_VENDASTA_CHECKOUT_URL` — base URL of the Vendasta checkout.
-  The platform appends `?sku=EP-VIP-M`, `?sku=EP-PRO-Y`, etc.
+- `NEXT_PUBLIC_VENDASTA_STORE_URL` — Vendasta marketplace store landing page.
+  The platform appends `?sku=…` as a non-binding hint.
 - `NEXT_PUBLIC_VENDASTA_KEYNOTE_INQUIRY_URL` — used for the keynote card
   CTA on the membership page (defaults to a `mailto:` if unset).
 
@@ -317,18 +317,21 @@ Grouped by purpose.
 
 | Variable                  | Purpose                                                                       |
 | ------------------------- | ----------------------------------------------------------------------------- |
-| `VENDASTA_WEBHOOK_SECRET` | HMAC-SHA256 shared secret for verifying inbound webhook signatures            |
-| `VENDASTA_API_KEY`        | Bearer token for outbound Marketplace Contact API + fallback for Ask George   |
+| `VENDASTA_VERIFIER_TOKEN` | Static token compared against the `x-vendasta-verifier` request header        |
+| `VENDASTA_CLIENT_ID`      | 2-legged OAuth client id (used to fetch order details from the Orders API)    |
+| `VENDASTA_CLIENT_SECRET`  | 2-legged OAuth client secret                                                  |
+| `VENDASTA_MP_COMMUNITY`   | Marketplace product ID that maps to the community (free) tier                 |
+| `VENDASTA_MP_VIP_M`       | Marketplace product ID for VIP monthly                                        |
+| `VENDASTA_MP_VIP_Y`       | Marketplace product ID for VIP annual                                         |
+| `VENDASTA_MP_PRO_M`       | Marketplace product ID for Pro monthly                                        |
+| `VENDASTA_MP_PRO_Y`       | Marketplace product ID for Pro annual                                         |
 
 ### Vendasta (optional)
 
 | Variable                              | Default                                   | Purpose                                      |
 | ------------------------------------- | ----------------------------------------- | -------------------------------------------- |
 | `VENDASTA_API_BASE_URL`               | `https://marketplace-api.vendasta.com/v1` | Override contact API base                    |
-| `VENDASTA_MAGIC_LINK_METHOD`          | `response`                                | `response` or `contact_field` (see §4)        |
-| `VENDASTA_CLIENT_ID`                  | —                                         | Ask George 2-legged OAuth client id           |
-| `VENDASTA_CLIENT_SECRET`              | —                                         | Ask George 2-legged OAuth client secret       |
-| `NEXT_PUBLIC_VENDASTA_CHECKOUT_URL`   | —                                         | Public checkout base URL                      |
+| `NEXT_PUBLIC_VENDASTA_STORE_URL`      | —                                         | Public store landing URL                      |
 | `NEXT_PUBLIC_VENDASTA_KEYNOTE_INQUIRY_URL` | `mailto:…`                            | Keynote inquiry CTA on membership page        |
 
 ### Platform
@@ -393,15 +396,12 @@ delivery.
 ## 11. Testing the integration locally
 
 A self-contained harness lives at `scripts/test-vendasta-webhook.ts`.
-It builds a payload, signs it with `VENDASTA_WEBHOOK_SECRET`, POSTs it
-to the webhook, and then queries Supabase to assert the user row was
-created with the correct tier / keynote flag.
+It builds an automation payload and POSTs it to the webhook with the
+verifier token in the `x-vendasta-verifier` header.
 
 ```bash
-VENDASTA_WEBHOOK_SECRET=dev-secret \
-SUPABASE_URL=https://… \
-SUPABASE_SERVICE_ROLE_KEY=… \
-pnpm test:webhook -- --sku EP-VIP-M --email qa@example.com --url http://localhost:3000
+VENDASTA_VERIFIER_TOKEN=dev-token \
+pnpm test:webhook -- --event account_created --url http://localhost:3000
 ```
 
 Flags:

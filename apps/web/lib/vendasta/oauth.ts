@@ -35,6 +35,7 @@ export async function getVendastaToken(): Promise<string | null> {
         grant_type: 'client_credentials',
         client_id: clientId,
         client_secret: clientSecret,
+        scope: 'order',
       }),
     })
 
