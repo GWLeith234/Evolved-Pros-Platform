@@ -83,16 +83,17 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
 
   return (
     <div>
-      {/* Controls */}
+      {/* Controls — search input goes full-width on mobile, filter chip row
+          wraps onto a second line so ALL / PRO / VIP / TRIAL / CANCELLED don't
+          overflow at 375px. */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <input
           type="text"
           placeholder="Search members…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="font-condensed text-[13px] rounded px-3 py-2 outline-none transition-all"
+          className="font-condensed text-[13px] rounded px-3 py-2 outline-none transition-all w-full sm:w-[260px]"
           style={{
-            width: '260px',
             backgroundColor: 'white',
             border: '1px solid rgba(27,60,90,0.18)',
             color: '#112535',
@@ -100,7 +101,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
           onFocus={e => (e.currentTarget.style.borderColor = '#68a2b9')}
           onBlur={e => (e.currentTarget.style.borderColor = 'rgba(27,60,90,0.18)')}
         />
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-wrap gap-y-2">
           {FILTERS.map(f => (
             <button
               key={f}
@@ -121,8 +122,115 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
         </span>
       </div>
 
-      {/* Table */}
-      <div className="rounded-lg overflow-x-auto" style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'white' }}>
+      {/* Mobile card list (<768px). Renders each member as a stacked card so
+          QA never sees a horizontally-scrolling table at 375px. Desktop table
+          below is unchanged — gated to `md:block`. */}
+      <div className="md:hidden flex flex-col gap-3">
+        {filtered.length === 0 ? (
+          <div
+            className="rounded-lg px-4 py-10 text-center font-condensed text-[12px] text-[#7a8a96]"
+            style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'white' }}
+          >
+            No members found.
+          </div>
+        ) : (
+          filtered.map(m => {
+            const name = m.fullName?.trim() || m.displayName?.trim() || m.email?.split('@')[0] || '—'
+            const tierStyle = TIER_COLORS[m.tier ?? ''] ?? TIER_COLORS.vip
+            const statusStyle = STATUS_COLORS[m.tierStatus ?? ''] ?? STATUS_COLORS.expired
+            const engStyle = ENG_COLORS[m.engagementLevel]
+            const engPct = Math.min(100, m.engagementScore * 10)
+            return (
+              <div
+                key={m.id}
+                className="rounded-lg p-4 flex flex-col gap-3"
+                style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'white' }}
+              >
+                {/* Row 1 — avatar + name + email */}
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden text-white font-condensed font-bold text-[13px]"
+                    style={{ backgroundColor: '#1b3c5a' }}
+                  >
+                    {m.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={m.avatarUrl} alt={name} className="w-10 h-10 rounded-full object-cover" />
+                    ) : getInitials(name)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-body font-semibold text-[14px] text-[#112535] leading-tight truncate">{name}</p>
+                    <p className="font-condensed text-[12px] text-[#7a8a96] truncate">{m.email}</p>
+                  </div>
+                </div>
+
+                {/* Row 2 — Plan / Status / Joined */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  {m.tier ? (
+                    <span
+                      className="font-condensed font-bold uppercase text-[11px] px-2 py-0.5 rounded"
+                      style={{ backgroundColor: tierStyle.bg, color: tierStyle.color, border: `1px solid ${tierStyle.border}` }}
+                    >
+                      {m.tier.toUpperCase()}
+                    </span>
+                  ) : (
+                    <span className="font-condensed text-[12px] text-[#7a8a96]">—</span>
+                  )}
+                  <span
+                    className="font-condensed font-bold uppercase text-[11px] px-2 py-0.5 rounded"
+                    style={{ backgroundColor: statusStyle.bg, color: statusStyle.color }}
+                  >
+                    {(m.tierStatus ?? 'unknown').toUpperCase()}
+                  </span>
+                  <span className="font-condensed text-[12px] text-[#7a8a96] ml-auto">{fmtDate(m.joinedAt)}</span>
+                </div>
+
+                {/* Row 3 — MRR + engagement bar */}
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-condensed font-bold text-[14px] text-[#1b3c5a]">
+                    {m.mrr > 0 ? `$${m.mrr}` : '—'}
+                  </span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div
+                      className="w-[80px] h-1.5 rounded-full overflow-hidden"
+                      style={{ backgroundColor: 'rgba(27,60,90,0.08)' }}
+                    >
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{ width: `${engPct}%`, backgroundColor: engStyle.bar }}
+                      />
+                    </div>
+                    <span className="font-condensed font-bold uppercase text-[12px]" style={{ color: engStyle.text }}>
+                      {m.engagementLevel}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Row 4 — Edit (full-width) + View */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setEditingMember(m)}
+                    className="flex-1 font-condensed font-semibold uppercase tracking-wide text-[12px] px-3 py-2 rounded transition-all"
+                    style={{ color: '#68a2b9', border: '1px solid rgba(104,162,185,0.3)' }}
+                  >
+                    Edit
+                  </button>
+                  <Link
+                    href={`/admin/members/${m.id}`}
+                    className="font-condensed font-semibold uppercase tracking-wide text-[12px] px-3 py-2 rounded transition-all"
+                    style={{ color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.25)' }}
+                  >
+                    View →
+                  </Link>
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
+
+      {/* Desktop table (>=768px). Kept identical to the desktop QA-approved
+          layout — hidden on mobile in favour of the card list above. */}
+      <div className="hidden md:block rounded-lg overflow-x-auto" style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'white' }}>
         <table className="w-full min-w-[820px]">
           <thead>
             <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.03)' }}>
@@ -145,7 +253,10 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
               </tr>
             ) : (
               filtered.map((m, i) => {
-                const name = m.displayName ?? m.fullName ?? m.email
+                // Prefer full_name so members like "Jubal Chetty" don't render
+                // as just "Jubal" when display_name is a first-name-only nick.
+                // Chain: full_name → display_name → email prefix.
+                const name = m.fullName?.trim() || m.displayName?.trim() || m.email?.split('@')[0] || '—'
                 const tierStyle = TIER_COLORS[m.tier ?? ''] ?? TIER_COLORS.vip
                 const statusStyle = STATUS_COLORS[m.tierStatus ?? ''] ?? STATUS_COLORS.expired
                 const engStyle = ENG_COLORS[m.engagementLevel]

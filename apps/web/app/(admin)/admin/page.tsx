@@ -140,8 +140,11 @@ export default async function AdminDashboardPage() {
   ]
 
   return (
-    <div className="px-8 py-6 max-w-5xl">
-      <div className="mb-6 flex items-start justify-between gap-4">
+    <div className="px-4 sm:px-8 py-6 max-w-5xl">
+      {/* Header — mobile stacks title above the Invite button so the button
+          can't clip the 375px viewport; desktop keeps the original side-by-side
+          treatment. */}
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
         <div>
           <h1 className="font-display font-black text-[28px] text-[#112535]">Dashboard</h1>
           <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5" suppressHydrationWarning>
@@ -173,8 +176,10 @@ export default async function AdminDashboardPage() {
         ))}
       </div>
 
-      {/* Quick links */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      {/* Quick links — 3 columns on desktop, single column at <=640px so the
+          MEMBERS / PIPELINE / REVENUE labels don't truncate to "MEMBE / PIPELI
+          / REVENU" and overflow the 375px viewport. */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8">
         {[
           { label: 'Members',  href: '/admin/members',  desc: 'Search, filter, view profiles' },
           { label: 'Pipeline', href: '/admin/pipeline', desc: 'Upgrade pipeline kanban' },
@@ -218,7 +223,7 @@ export default async function AdminDashboardPage() {
                 <tr key={m.id} style={{ borderBottom: i === arr.length - 1 ? 'none' : '1px solid rgba(27,60,90,0.06)' }}>
                   <td className="px-5 py-3">
                     <Link href={`/admin/members/${m.id}`} className="font-condensed text-[11px] text-[#1b3c5a] hover:text-[#ef0e30] transition-colors">
-                      {m.full_name ?? m.display_name ?? '—'}
+                      {m.full_name?.trim() || m.display_name?.trim() || m.email?.split('@')[0] || '—'}
                     </Link>
                   </td>
                   <td className="px-5 py-3"><p className="font-condensed text-[11px] text-[#7a8a96]">{m.email ?? '—'}</p></td>
