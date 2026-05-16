@@ -420,6 +420,10 @@ export function WelcomeBanner({
   now: nowOverride,
 }: WelcomeBannerProps) {
   // Live clock — ticks every 30 seconds (matches JSX line 548).
+  // CRITICAL: `now` MUST stay null on first render (SSR + first client render)
+  // so SSR and CSR produce byte-identical markup. Any Date-derived expression
+  // below must gate on `now` — running `new Date()` at render scope produces
+  // different output across the SSR/CSR boundary and fires React #425/#422.
   const [now, setNow] = useState<Date | null>(() => nowOverride ?? null)
   useEffect(() => {
     if (nowOverride) {
@@ -432,31 +436,39 @@ export function WelcomeBanner({
   }, [nowOverride])
 
   // Auto-period from local time, or override if provided.
+  // Default 'evening' is the deterministic SSR/first-render value; the real
+  // period only resolves after `now` is hydrated by the effect above.
   const period: MarvelScenePeriod = periodOverride ?? (now ? periodForHour(now.getHours()) : 'evening')
   const greet = GREETING_BY_PERIOD[period]
 
   // Year-countdown math — JSX line 552-559 (year-based, not quarter-based;
   // the Q label + bar both reflect year progress and quarter is just a label).
+  // Everything below must be `now`-gated. Previously `let year = new Date()`
+  // ran ungated at render scope; harmless most of the time but a #425 landmine
+  // around year-boundary clock skew.
   const dateStr = now
     ? now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
     : ''
   const timeStr = now
     ? now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
     : ''
-  let yearPct = 0
-  let daysLeft = 0
-  let quarter = 1
-  let year = new Date().getFullYear()
-  if (now) {
-    const yearStart = new Date(now.getFullYear(), 0, 1).getTime()
-    const yearEnd = new Date(now.getFullYear() + 1, 0, 1).getTime()
-    const totalMs = yearEnd - yearStart
-    const elapsedMs = now.getTime() - yearStart
-    yearPct = Math.min(100, Math.max(0, (elapsedMs / totalMs) * 100))
-    daysLeft = Math.ceil((yearEnd - now.getTime()) / 86400000)
-    quarter = Math.floor(now.getMonth() / 3) + 1
-    year = now.getFullYear()
-  }
+  const yearPct = now
+    ? Math.min(
+        100,
+        Math.max(
+          0,
+          ((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) /
+            (new Date(now.getFullYear() + 1, 0, 1).getTime() -
+              new Date(now.getFullYear(), 0, 1).getTime())) *
+            100,
+        ),
+      )
+    : 0
+  const daysLeft = now
+    ? Math.ceil((new Date(now.getFullYear() + 1, 0, 1).getTime() - now.getTime()) / 86400000)
+    : 0
+  const quarter = now ? Math.floor(now.getMonth() / 3) + 1 : 0
+  const year = now ? now.getFullYear() : 0
 
   // Transform v2 pillar shape → architecture-column shape with locked colors.
   const archPillars: ArchPillar[] = useMemo(
@@ -599,7 +611,14 @@ export function WelcomeBanner({
 
           {/* Greeting + quote */}
           <div style={{ flex: 1, paddingTop: 4, minWidth: 0 }}>
+            {/* suppressHydrationWarning: greet text is `now`-derived. SSR/first-
+                client render both use the 'evening' default so they normally match,
+                but route prerender + revalidate windows can produce a divergent
+                "Good evening, " vs "Good morning, " when an older SSR payload is
+                served to a browser whose local clock falls in a different period.
+                Suppress to absorb that without flashing blank between effect ticks. */}
             <h1
+              suppressHydrationWarning
               style={{
                 margin: 0,
                 fontFamily: '"Playfair Display", Georgia, serif',
