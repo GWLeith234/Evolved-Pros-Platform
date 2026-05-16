@@ -183,8 +183,7 @@ export default async function AdminDashboardPage() {
           <Link
             key={l.href}
             href={l.href}
-            className="block rounded-lg p-4 transition-all hover:shadow-sm"
-            style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.1)' }}
+            className="block rounded-lg p-4 cursor-pointer transition-all bg-white hover:bg-[#f3f7fa] border border-[#1b3c5a1a] hover:border-[#1b3c5a33] hover:shadow-sm"
           >
             <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[11px] text-[#1b3c5a] mb-1">{l.label} →</p>
             <p className="font-condensed text-[11px] text-[#7a8a96]">{l.desc}</p>

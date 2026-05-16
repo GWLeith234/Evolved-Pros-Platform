@@ -98,7 +98,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <input
           type="text"
-          placeholder="Search members…"
+          placeholder="Search name, email…"
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="font-condensed text-[13px] rounded px-3 py-2 outline-none transition-all"
@@ -236,14 +236,24 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
         <table className="w-full min-w-[820px]">
           <thead>
             <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.03)' }}>
-              {['Member', 'Plan', 'Status', 'Joined', 'MRR', 'Engagement', 'Vendasta', ''].map(h => (
-                <th
-                  key={h}
-                  className="px-4 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96]"
-                >
-                  {h}
-                </th>
-              ))}
+              {['Member', 'Plan', 'Status', 'Joined', 'MRR', 'Engagement', 'Vendasta', ''].map(h => {
+                const isActions = h === ''
+                const isEngagement = h === 'Engagement'
+                return (
+                  <th
+                    key={h}
+                    className={`${isEngagement ? 'px-2' : 'px-4'} py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96]`}
+                    style={isActions ? {
+                      position: 'sticky',
+                      right: 0,
+                      backgroundColor: 'rgb(247,248,249)',
+                      boxShadow: 'inset 1px 0 0 rgba(27,60,90,0.06)',
+                    } : undefined}
+                  >
+                    {h}
+                  </th>
+                )
+              })}
             </tr>
           </thead>
           <tbody>
@@ -321,11 +331,12 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                       </span>
                     </td>
 
-                    {/* Engagement */}
-                    <td className="px-4 py-3">
+                    {/* Engagement — narrower bar + compact padding to free up
+                        room for the Vendasta + Actions columns on 1280-1440px desktops. */}
+                    <td className="px-2 py-3">
                       <div className="flex items-center gap-2">
                         <div
-                          className="w-[60px] h-1.5 rounded-full overflow-hidden"
+                          className="w-[40px] h-1.5 rounded-full overflow-hidden"
                           style={{ backgroundColor: 'rgba(27,60,90,0.08)' }}
                         >
                           <div
@@ -360,8 +371,16 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                       )}
                     </td>
 
-                    {/* Actions */}
-                    <td className="px-4 py-3">
+                    {/* Actions — sticky-right so Edit/View never clip on narrow desktops. */}
+                    <td
+                      className="px-4 py-3"
+                      style={{
+                        position: 'sticky',
+                        right: 0,
+                        backgroundColor: 'white',
+                        boxShadow: 'inset 1px 0 0 rgba(27,60,90,0.06)',
+                      }}
+                    >
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => setEditingMember(m)}
