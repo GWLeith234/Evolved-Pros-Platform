@@ -3,10 +3,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import type { PodcastEpisode } from '@/lib/podcast/transforms'
+import { fmtPodcastDate, PILLAR_META } from '@/lib/podcast/transforms'
 
 const FB = 'Barlow, sans-serif'
 const FBC = 'Barlow Condensed, sans-serif'
-const FBN = 'Bebas Neue, sans-serif'
+const FP = 'Playfair Display, Georgia, serif'
 
 interface PodcastHeroProps {
   episode: PodcastEpisode
@@ -22,27 +23,42 @@ function formatRuntime(minutes: number): string {
   return `${minutes}:00`
 }
 
+function getInitials(name: string): string {
+  return name.split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase() || '—'
+}
+
+const SHARE_ICONS: Array<{ key: string; label: string; path: React.ReactNode }> = [
+  {
+    key: 'x',
+    label: 'Share on X',
+    path: <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />,
+  },
+  {
+    key: 'linkedin',
+    label: 'Share on LinkedIn',
+    path: <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.852 3.37-1.852 3.601 0 4.268 2.37 4.268 5.455v6.288zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />,
+  },
+  {
+    key: 'facebook',
+    label: 'Share on Facebook',
+    path: <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />,
+  },
+]
+
 export function PodcastHero({ episode }: PodcastHeroProps) {
-  const [hover, setHover] = useState(false)
+  const [watchHover, setWatchHover] = useState(false)
   const detailHref = `/podcast/${episode.slug}`
+  const pillar = PILLAR_META[episode.pillar]
 
   return (
-    <section
-      style={{
-        position: 'relative',
-        width: '100%',
-        maxWidth: 1280,
-        margin: '24px auto 0',
-        padding: '0 24px',
-      }}
-    >
-      <div
+    <>
+      {/* ── 1. IMAGE-ONLY BANNER ─────────────────────────────── */}
+      <section
         style={{
           position: 'relative',
-          height: 480,
+          height: 460,
           overflow: 'hidden',
           background: '#0A0F18',
-          borderRadius: 2,
         }}
       >
         <div
@@ -58,97 +74,329 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
           style={{
             position: 'absolute',
             inset: 0,
-            background:
-              'linear-gradient(0deg, rgba(10,15,24,0.92) 0%, rgba(10,15,24,0.55) 35%, rgba(10,15,24,0.15) 65%, rgba(10,15,24,0) 100%)',
+            background: 'linear-gradient(180deg, rgba(10,15,24,0) 60%, rgba(10,15,24,0.45) 100%)',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: `radial-gradient(ellipse at 18% 75%, ${pillar.color}26 0%, transparent 55%)`,
           }}
         />
 
-        {/* Runtime badge — top right */}
+        {/* Runtime badge — top right, floats over image */}
         <div
           style={{
             position: 'absolute',
-            top: 24,
-            right: 24,
-            padding: '8px 14px',
-            background: 'rgba(10,15,24,0.7)',
-            border: '1px solid rgba(255,255,255,0.18)',
-            backdropFilter: 'blur(10px)',
-            fontFamily: FBC,
-            fontWeight: 700,
-            fontSize: 13,
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            color: '#fff',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 8,
-            fontVariantNumeric: 'tabular-nums',
-          }}
-        >
-          <span style={{ color: 'rgba(255,255,255,0.6)' }}>Runtime</span>
-          <span>{formatRuntime(episode.duration)}</span>
-        </div>
-
-        {/* Title + guest + CTA — bottom left */}
-        <div
-          style={{
-            position: 'absolute',
+            top: 28,
             left: 0,
             right: 0,
-            bottom: 0,
-            padding: '0 36px 36px',
+            maxWidth: 1280,
+            margin: '0 auto',
+            padding: '0 24px',
             display: 'flex',
-            flexDirection: 'column',
-            gap: 18,
+            alignItems: 'center',
+            justifyContent: 'flex-end',
           }}
         >
-          <h2
+          <span
             style={{
-              margin: 0,
-              fontFamily: FBN,
-              fontSize: 'clamp(34px, 4.6vw, 56px)',
-              lineHeight: 1.02,
-              letterSpacing: '0.02em',
+              padding: '8px 14px',
+              background: 'rgba(10,15,24,0.55)',
+              border: '1px solid rgba(255,255,255,0.18)',
+              backdropFilter: 'blur(10px)',
+              fontFamily: FBC,
+              fontWeight: 700,
+              fontSize: 13,
+              letterSpacing: '0.18em',
               textTransform: 'uppercase',
               color: '#fff',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          >
+            <span style={{ color: 'rgba(255,255,255,0.6)' }}>Runtime</span>
+            <span>{formatRuntime(episode.duration)}</span>
+          </span>
+        </div>
+      </section>
+
+      {/* ── 2. EPISODE INTRO CARD (overlaps banner) ─────────── */}
+      <section
+        style={{
+          maxWidth: 1280,
+          margin: '-72px auto 0',
+          padding: '0 24px',
+          position: 'relative',
+          zIndex: 2,
+        }}
+      >
+        <div
+          style={{
+            background: 'var(--podcast-bg-surface)',
+            border: '1px solid var(--podcast-border-soft2)',
+            borderTop: `3px solid ${pillar.color}`,
+            padding: '36px 40px 32px',
+            boxShadow: '0 24px 60px -20px rgba(0,0,0,0.35)',
+          }}
+        >
+          {/* Eyebrow: LATEST EPISODE · pillar · #N · date */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '4px 10px',
+                background: 'rgba(201,48,42,0.12)',
+                border: '1px solid rgba(201,48,42,0.5)',
+                fontFamily: FBC,
+                fontWeight: 800,
+                fontSize: 12,
+                letterSpacing: '0.28em',
+                textTransform: 'uppercase',
+                color: '#C9302A',
+              }}
+            >
+              <span
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  background: '#ef0e30',
+                  boxShadow: '0 0 8px #ef0e30',
+                }}
+              />
+              Latest episode
+            </span>
+            <span
+              style={{
+                fontFamily: FBC,
+                fontWeight: 700,
+                fontSize: 12,
+                letterSpacing: '0.32em',
+                textTransform: 'uppercase',
+                color: pillar.color,
+              }}
+            >
+              {pillar.label}
+            </span>
+            {episode.episode > 0 && (
+              <>
+                <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--podcast-text-5)' }} />
+                <span
+                  style={{
+                    fontFamily: FP,
+                    fontStyle: 'italic',
+                    fontSize: 18,
+                    color: '#C9A84C',
+                  }}
+                >
+                  Episode #{episode.episode}
+                </span>
+              </>
+            )}
+            {fmtPodcastDate(episode.releasedAt) && (
+              <>
+                <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--podcast-text-5)' }} />
+                <span
+                  style={{
+                    fontFamily: FBC,
+                    fontWeight: 600,
+                    fontSize: 12,
+                    letterSpacing: '0.22em',
+                    textTransform: 'uppercase',
+                    color: 'var(--podcast-text-3)',
+                  }}
+                >
+                  {fmtPodcastDate(episode.releasedAt)}
+                </span>
+              </>
+            )}
+          </div>
+
+          {/* Title */}
+          <h1
+            style={{
+              margin: 0,
+              fontFamily: FP,
+              fontWeight: 700,
+              fontSize: 'clamp(32px, 4.2vw, 48px)',
+              lineHeight: 1.08,
+              letterSpacing: '-0.015em',
+              color: 'var(--podcast-text-strong)',
               maxWidth: 880,
-              textShadow: '0 2px 16px rgba(0,0,0,0.6)',
             }}
           >
             {episode.title}
-          </h2>
+          </h1>
 
-          {(episode.guest.name || episode.guest.role) && (
+          {/* Blurb */}
+          {episode.blurb && (
             <p
               style={{
-                margin: 0,
+                margin: '14px 0 0',
                 fontFamily: FB,
-                fontSize: 16,
-                lineHeight: 1.4,
-                color: 'rgba(255,255,255,0.85)',
+                fontSize: 17,
+                lineHeight: 1.55,
+                color: 'var(--podcast-text-2)',
                 maxWidth: 720,
               }}
             >
-              <span style={{ fontWeight: 600, color: '#fff' }}>{episode.guest.name}</span>
-              {episode.guest.role && (
-                <>
-                  <span style={{ margin: '0 10px', color: 'rgba(255,255,255,0.45)' }}>·</span>
-                  <span>{episode.guest.role}</span>
-                </>
-              )}
+              {episode.blurb}
             </p>
           )}
 
-          <div>
+          {/* Meta row */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 24,
+              marginTop: 24,
+              paddingTop: 20,
+              flexWrap: 'wrap',
+              borderTop: '1px solid var(--podcast-border-soft)',
+            }}
+          >
+            {episode.guest.name && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {episode.guest.photo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={episode.guest.photo}
+                    alt={episode.guest.name}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
+                      border: '2px solid var(--podcast-border-med2)',
+                      objectFit: 'cover',
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '50%',
+                      border: '2px solid var(--podcast-border-med2)',
+                      background: '#1b3c5a',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontFamily: FBC,
+                      fontWeight: 800,
+                      fontSize: 13,
+                      color: '#fff',
+                    }}
+                  >
+                    {getInitials(episode.guest.name)}
+                  </div>
+                )}
+                <div>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontFamily: FB,
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: 'var(--podcast-text-strong)',
+                    }}
+                  >
+                    {episode.guest.name}
+                  </p>
+                  {episode.guest.role && (
+                    <p
+                      style={{
+                        margin: 0,
+                        fontFamily: FBC,
+                        fontSize: 11,
+                        letterSpacing: '0.18em',
+                        textTransform: 'uppercase',
+                        color: 'var(--podcast-text-3)',
+                      }}
+                    >
+                      {episode.guest.role}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {fmtPodcastDate(episode.releasedAt) && (
+              <>
+                <span style={{ width: 1, height: 28, background: 'var(--podcast-border-soft2)' }} />
+                <div>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontFamily: FBC,
+                      fontSize: 11,
+                      letterSpacing: '0.22em',
+                      textTransform: 'uppercase',
+                      color: 'var(--podcast-text-4)',
+                    }}
+                  >
+                    Released
+                  </p>
+                  <p
+                    style={{
+                      margin: '2px 0 0',
+                      fontFamily: FB,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: 'var(--podcast-text-strong)',
+                    }}
+                  >
+                    {fmtPodcastDate(episode.releasedAt)}
+                  </p>
+                </div>
+              </>
+            )}
+
+            <span style={{ width: 1, height: 28, background: 'var(--podcast-border-soft2)' }} />
+            <div>
+              <p
+                style={{
+                  margin: 0,
+                  fontFamily: FBC,
+                  fontSize: 11,
+                  letterSpacing: '0.22em',
+                  textTransform: 'uppercase',
+                  color: 'var(--podcast-text-4)',
+                }}
+              >
+                Watch on
+              </p>
+              <p
+                style={{
+                  margin: '2px 0 0',
+                  fontFamily: FB,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: 'var(--podcast-text-strong)',
+                }}
+              >
+                YouTube · Spotify · Apple
+              </p>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24, flexWrap: 'wrap' }}>
             <Link
               href={detailHref}
-              onMouseEnter={() => setHover(true)}
-              onMouseLeave={() => setHover(false)}
+              onMouseEnter={() => setWatchHover(true)}
+              onMouseLeave={() => setWatchHover(false)}
               style={{
                 padding: '14px 28px',
-                background: hover ? '#E03A33' : '#C9302A',
+                background: watchHover ? '#ff1a40' : '#ef0e30',
                 color: '#fff',
-                border: 'none',
+                border: '1px solid #ef0e30',
                 fontFamily: FBC,
                 fontWeight: 800,
                 fontSize: 13,
@@ -157,17 +405,104 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 12,
+                gap: 10,
                 transition: 'background 120ms ease',
                 textDecoration: 'none',
               }}
             >
-              Play Episode
-              <span aria-hidden style={{ fontSize: 16, lineHeight: 1 }}>→</span>
+              <svg width="14" height="14" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                <path d="M3 2 L10 6 L3 10 Z" />
+              </svg>
+              Watch episode
             </Link>
+
+            <button
+              type="button"
+              style={{
+                padding: '14px 20px',
+                background: 'transparent',
+                color: 'var(--podcast-text-strong)',
+                border: '1px solid var(--podcast-border-strong)',
+                fontFamily: FBC,
+                fontWeight: 700,
+                fontSize: 12,
+                letterSpacing: '0.22em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+              </svg>
+              Save
+            </button>
+
+            {/* Share — channel-icon group */}
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'stretch',
+                border: '1px solid var(--podcast-border-strong)',
+                height: 46,
+              }}
+            >
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '0 14px',
+                  fontFamily: FBC,
+                  fontWeight: 700,
+                  fontSize: 11,
+                  letterSpacing: '0.28em',
+                  textTransform: 'uppercase',
+                  color: 'var(--podcast-text-3)',
+                  borderRight: '1px solid var(--podcast-border-soft2)',
+                }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="18" cy="5" r="3" />
+                  <circle cx="6" cy="12" r="3" />
+                  <circle cx="18" cy="19" r="3" />
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                </svg>
+                Share
+              </span>
+              {SHARE_ICONS.map((c, i) => (
+                <button
+                  key={c.key}
+                  type="button"
+                  title={c.label}
+                  aria-label={c.label}
+                  style={{
+                    width: 44,
+                    height: '100%',
+                    padding: 0,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'transparent',
+                    color: 'var(--podcast-text-2)',
+                    border: 'none',
+                    borderLeft: i === 0 ? 'none' : '1px solid var(--podcast-border-soft)',
+                    cursor: 'pointer',
+                    transition: 'background 120ms ease, color 120ms ease',
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    {c.path}
+                  </svg>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   )
 }
