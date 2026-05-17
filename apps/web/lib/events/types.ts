@@ -50,12 +50,19 @@ export function eventTypeBadge(rawType: string | null | undefined): EventTypeBad
 }
 
 export function formatEventDate(iso: string) {
+  // SSR↔CSR safety: `day`, `month`, and `full` MUST be deterministic
+  // regardless of viewer locale — server renders in UTC, client in the
+  // user's zone, and without an explicit timeZone the strings drift and
+  // throw React #425/#422 at the day/month boundary. Pin to UTC.
+  // `time` is intentionally local-zone (the more useful reading) and
+  // therefore callers MUST mount-gate the `time` field — see
+  // UpcomingEventsList's `mounted ? badge.time : ''` pattern.
   const d = new Date(iso)
   return {
-    day:   d.getDate(),
-    month: d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
+    day:   Number(d.toLocaleDateString('en-US', { day: 'numeric', timeZone: 'UTC' })),
+    month: d.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }).toUpperCase(),
     time:  d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }),
-    full:  d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }),
+    full:  d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' }),
   }
 }
 
