@@ -1,24 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { PodcastEpisode } from '@/lib/podcast/transforms'
-import { fmtPodcastDate } from '@/lib/podcast/transforms'
+import { fmtPodcastDate, PILLAR_META } from '@/lib/podcast/transforms'
 
 const FB = 'Barlow, sans-serif'
 const FBC = 'Barlow Condensed, sans-serif'
 const FBN = 'Bebas Neue, sans-serif'
 const FP = 'Playfair Display, Georgia, serif'
-
-function formatRuntime(minutes: number): string {
-  if (minutes <= 0) return '—'
-  if (minutes >= 60) {
-    const h = Math.floor(minutes / 60)
-    const m = minutes % 60
-    return `${h}:${m.toString().padStart(2, '0')}:00`
-  }
-  return `${minutes}:00`
-}
 
 interface PodcastEpisodeTileProps {
   episode: PodcastEpisode
@@ -29,51 +19,61 @@ interface PodcastEpisodeTileProps {
 
 export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: PodcastEpisodeTileProps) {
   const router = useRouter()
+  const tileRef = useRef<HTMLButtonElement | null>(null)
   const [hovered, setHovered] = useState(false)
-  const lift = focused || hovered
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
 
-  // Use the server-computed isNew flag from transforms.ts. Calling
-  // Date.now() in the tile body itself caused SSR↔CSR drift and threw
-  // React #425/#418 on every grid mount.
-  const isNewIn7Days = episode.isNew
-  const publishedAtLabel = fmtPodcastDate(episode.releasedAt)
+  const pillar = PILLAR_META[episode.pillar]
+  const lift = focused || hovered
+  const tx = tilt.x * 6
+  const ty = tilt.y * 6
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!tileRef.current) return
+    const rect = tileRef.current.getBoundingClientRect()
+    const px = (e.clientX - rect.left) / rect.width - 0.5
+    const py = (e.clientY - rect.top) / rect.height - 0.5
+    setTilt({ x: px, y: py })
+  }
+
+  const navigate = () => router.push(`/podcast/${episode.slug}`)
 
   return (
-    <article
-      onMouseEnter={() => { setHovered(true); onFocus(episode.id) }}
-      onMouseLeave={() => { setHovered(false); onBlur() }}
-      onFocus={() => onFocus(episode.id)}
-      onBlur={onBlur}
-      onClick={() => router.push(`/podcast/${episode.slug}`)}
-      role="link"
-      tabIndex={0}
-      onKeyDown={e => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          router.push(`/podcast/${episode.slug}`)
-        }
-      }}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        cursor: 'pointer',
-        transform: lift ? 'translateY(-3px)' : 'translateY(0)',
-        transition: 'transform 220ms ease',
-      }}
-    >
-      <div
+    <article style={{ display: 'flex', flexDirection: 'column' }}>
+      {/* POSTER — 2:3 portrait */}
+      <button
+        ref={tileRef}
+        type="button"
+        onMouseEnter={() => { setHovered(true); onFocus(episode.id) }}
+        onMouseLeave={() => { setHovered(false); setTilt({ x: 0, y: 0 }); onBlur() }}
+        onMouseMove={handleMouseMove}
+        onFocus={() => onFocus(episode.id)}
+        onBlur={onBlur}
+        onClick={navigate}
+        aria-label={`Watch ${episode.title}`}
         style={{
           position: 'relative',
+          display: 'block',
           width: '100%',
-          aspectRatio: '16 / 9',
-          overflow: 'hidden',
+          aspectRatio: '2 / 3',
+          padding: 0,
           background: '#0A0F18',
+          border: 'none',
+          cursor: 'pointer',
+          outline: 'none',
+          overflow: 'hidden',
+          transform: lift
+            ? `perspective(1200px) rotateY(${tx * 0.4}deg) rotateX(${-ty * 0.4}deg) translateY(-6px) scale(1.04)`
+            : 'perspective(1200px) rotateY(0) rotateX(0) translateY(0) scale(1)',
+          transition: 'transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 280ms ease',
           boxShadow: lift
-            ? '0 18px 40px -16px rgba(0,0,0,0.45)'
-            : '0 4px 12px -6px rgba(0,0,0,0.25)',
-          transition: 'box-shadow 220ms ease',
+            ? `0 24px 60px -12px rgba(0,0,0,0.7), 0 0 0 2px ${pillar.color}, 0 0 0 4px rgba(255,255,255,0.12)`
+            : '0 1px 0 rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.04)',
+          zIndex: lift ? 2 : 1,
+          willChange: 'transform',
         }}
       >
+        {/* Cover art */}
         <div
           style={{
             position: 'absolute',
@@ -81,103 +81,238 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
             backgroundImage: episode.cover ? `url(${episode.cover})` : undefined,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            transform: lift ? 'scale(1.05)' : 'scale(1)',
+            transform: lift ? `scale(1.08) translate(${tx * -0.6}px, ${ty * -0.6}px)` : 'scale(1) translate(0,0)',
             transition: 'transform 380ms cubic-bezier(0.2, 0.8, 0.2, 1)',
           }}
         />
+
+        {/* Heavy bottom fade for poster legibility */}
         <div
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(180deg, rgba(10,15,24,0.45) 0%, rgba(10,15,24,0) 40%, rgba(10,15,24,0) 100%)',
+            background: 'linear-gradient(180deg, rgba(10,15,24,0) 30%, rgba(10,15,24,0.45) 60%, rgba(10,15,24,0.92) 100%)',
           }}
         />
 
-        {/* Episode number — top-left overlay */}
+        {/* Pillar accent wash on hover */}
         <div
           style={{
             position: 'absolute',
-            top: 12,
-            left: 14,
-            display: 'flex',
-            alignItems: 'baseline',
-            gap: 4,
+            inset: 0,
+            background: `linear-gradient(135deg, ${pillar.color}1F 0%, transparent 55%)`,
+            opacity: lift ? 1 : 0,
+            transition: 'opacity 240ms ease',
           }}
-        >
-          <span
-            style={{
-              fontFamily: FP,
-              fontStyle: 'italic',
-              fontSize: 20,
-              color: '#C9A84C',
-              lineHeight: 1,
-              textShadow: '0 1px 6px rgba(0,0,0,0.6)',
-            }}
-          >
-            #
-          </span>
-          <span
-            style={{
-              fontFamily: FBN,
-              fontSize: 26,
-              lineHeight: 1,
-              color: '#fff',
-              letterSpacing: '0.04em',
-              fontVariantNumeric: 'tabular-nums',
-              textShadow: '0 1px 6px rgba(0,0,0,0.6)',
-            }}
-          >
-            {String(episode.episode).padStart(2, '0')}
-          </span>
-        </div>
+        />
 
-        {/* NEW badge — top-right (last 7 days only) */}
-        {isNewIn7Days && (
-          <span
+        {/* TOP-LEFT: episode number */}
+        {episode.episode > 0 && (
+          <div
             style={{
               position: 'absolute',
               top: 14,
-              right: 14,
-              padding: '3px 8px',
-              background: '#C9302A',
-              color: '#fff',
+              left: 16,
+              display: 'flex',
+              alignItems: 'baseline',
+              gap: 4,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: FP,
+                fontStyle: 'italic',
+                fontWeight: 400,
+                fontSize: 22,
+                color: '#C9A84C',
+                lineHeight: 1,
+                textShadow: '0 1px 6px rgba(0,0,0,0.6)',
+              }}
+            >
+              #
+            </span>
+            <span
+              style={{
+                fontFamily: FBN,
+                fontSize: 24,
+                lineHeight: 1,
+                color: '#fff',
+                letterSpacing: '0.04em',
+                fontVariantNumeric: 'tabular-nums',
+                textShadow: '0 1px 6px rgba(0,0,0,0.6)',
+              }}
+            >
+              {String(episode.episode).padStart(2, '0')}
+            </span>
+          </div>
+        )}
+
+        {/* TOP-RIGHT: NEW / WATCHED */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 14,
+            right: 14,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 6,
+            alignItems: 'flex-end',
+          }}
+        >
+          {episode.isNew && (
+            <span
+              style={{
+                padding: '3px 7px',
+                background: '#C9302A',
+                color: '#fff',
+                fontFamily: FBC,
+                fontWeight: 800,
+                fontSize: 12,
+                letterSpacing: '0.22em',
+                textTransform: 'uppercase',
+              }}
+            >
+              New
+            </span>
+          )}
+          {episode.watched >= 1 && (
+            <span
+              style={{
+                padding: '3px 7px',
+                background: 'rgba(10,15,24,0.7)',
+                color: '#0ABFA3',
+                border: '1px solid rgba(10,191,163,0.45)',
+                backdropFilter: 'blur(8px)',
+                fontFamily: FBC,
+                fontWeight: 700,
+                fontSize: 12,
+                letterSpacing: '0.22em',
+                textTransform: 'uppercase',
+              }}
+            >
+              ✓ Watched
+            </span>
+          )}
+        </div>
+
+        {/* CENTER: play button on hover */}
+        <span
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: `translate(-50%, -50%) scale(${lift ? 1 : 0.7})`,
+            opacity: lift ? 1 : 0,
+            width: 64,
+            height: 64,
+            borderRadius: '50%',
+            background: '#ef0e30',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#fff',
+            boxShadow: '0 12px 36px rgba(239,14,48,0.5), 0 0 0 8px rgba(255,255,255,0.08)',
+            transition: 'all 240ms cubic-bezier(0.2, 0.8, 0.2, 1)',
+            pointerEvents: 'none',
+          }}
+        >
+          <svg width="22" height="22" viewBox="0 0 12 12" fill="currentColor">
+            <path d="M3.5 2 L10 6 L3.5 10 Z" />
+          </svg>
+        </span>
+
+        {/* BOTTOM: pillar tag + duration */}
+        <div
+          style={{
+            position: 'absolute',
+            left: 16,
+            right: 16,
+            bottom: 16,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 10,
+          }}
+        >
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
               fontFamily: FBC,
-              fontWeight: 800,
+              fontWeight: 700,
               fontSize: 12,
               letterSpacing: '0.24em',
               textTransform: 'uppercase',
+              color: pillar.color,
+              textShadow: '0 1px 6px rgba(0,0,0,0.6)',
+              minWidth: 0,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
             }}
           >
-            New
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                background: pillar.color,
+                flexShrink: 0,
+              }}
+            />
+            {pillar.label}
           </span>
+          {episode.duration > 0 && (
+            <span
+              style={{
+                padding: '3px 7px',
+                background: 'rgba(10,15,24,0.7)',
+                backdropFilter: 'blur(8px)',
+                color: '#fff',
+                fontFamily: FBC,
+                fontWeight: 700,
+                fontSize: 12,
+                letterSpacing: '0.16em',
+                flexShrink: 0,
+              }}
+            >
+              {episode.duration}M
+            </span>
+          )}
+        </div>
+
+        {/* Watched progress bar (in-progress) */}
+        {episode.watched > 0 && episode.watched < 1 && (
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: 3,
+              background: 'rgba(255,255,255,0.15)',
+            }}
+          >
+            <div
+              style={{
+                width: `${Math.round(Math.min(1, episode.watched) * 100)}%`,
+                height: '100%',
+                background: pillar.color,
+              }}
+            />
+          </div>
         )}
+      </button>
 
-        {/* Runtime — bottom-right */}
-        <span
-          style={{
-            position: 'absolute',
-            right: 12,
-            bottom: 12,
-            padding: '3px 8px',
-            background: 'rgba(10,15,24,0.78)',
-            backdropFilter: 'blur(8px)',
-            color: '#fff',
-            fontFamily: FBC,
-            fontWeight: 700,
-            fontSize: 12,
-            letterSpacing: '0.16em',
-          }}
-        >
-          {formatRuntime(episode.duration)}
-        </span>
-      </div>
-
+      {/* META BELOW POSTER (Apple TV pattern) */}
       <div style={{ padding: '14px 2px 0' }}>
         <h3
           style={{
             margin: 0,
             fontFamily: FP,
-            fontSize: 17,
+            fontSize: 16,
             fontWeight: 700,
             lineHeight: 1.25,
             color: 'var(--podcast-text-strong)',
@@ -190,7 +325,7 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
         >
           {episode.title}
         </h3>
-        {(episode.guest.name || episode.guest.role) && (
+        {(episode.guest.name || fmtPodcastDate(episode.releasedAt)) && (
           <p
             style={{
               margin: '6px 0 0',
@@ -200,35 +335,14 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
+              textAlign: 'left',
             }}
           >
-            <span style={{ fontWeight: 600, color: 'var(--podcast-text-2)' }}>{episode.guest.name}</span>
-            {episode.guest.role && (
-              <>
-                <span style={{ margin: '0 6px', color: 'var(--podcast-text-5)' }}>·</span>
-                <span>{episode.guest.role}</span>
-              </>
+            {episode.guest.name && <span>{episode.guest.name}</span>}
+            {episode.guest.name && fmtPodcastDate(episode.releasedAt) && (
+              <span style={{ color: 'var(--podcast-text-5)', margin: '0 6px' }}>·</span>
             )}
-          </p>
-        )}
-        {(publishedAtLabel || episode.duration > 0) && (
-          <p
-            style={{
-              margin: '4px 0 0',
-              fontFamily: FBC,
-              fontSize: 12,
-              letterSpacing: '0.06em',
-              color: 'var(--podcast-text-5)',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {publishedAtLabel && <span>{publishedAtLabel}</span>}
-            {publishedAtLabel && episode.duration > 0 && (
-              <span style={{ margin: '0 6px' }}>·</span>
-            )}
-            {episode.duration > 0 && <span>{formatRuntime(episode.duration)}</span>}
+            {fmtPodcastDate(episode.releasedAt) && <span>{fmtPodcastDate(episode.releasedAt)}</span>}
           </p>
         )}
       </div>

@@ -97,8 +97,8 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-          gap: '36px 28px',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+          gap: '32px 22px',
         }}
       >
         {filtered.map(ep => (
@@ -130,8 +130,8 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-              gap: '36px 28px',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+              gap: '32px 22px',
             }}
           >
             <PodcastEpisodeTile
