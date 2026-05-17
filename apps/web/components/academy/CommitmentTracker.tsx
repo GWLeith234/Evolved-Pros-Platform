@@ -239,13 +239,17 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
             onClick={handleSave}
             disabled={!inputs.some(s => s.trim()) || saving}
             style={{
-              backgroundColor: inputs.some(s => s.trim()) ? GOLD : 'rgba(255,255,255,0.05)',
-              color: inputs.some(s => s.trim()) ? '#0A0F18' : 'rgba(255,255,255,0.2)',
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
-              padding: '10px', borderRadius: '4px', border: 'none',
+              // SPRINT-M: dark surface + gold stroke/label so the save CTA
+              // reads as a primary action against the surrounding card —
+              // matches the "dark background, uppercase" target.
+              backgroundColor: '#0A0F18',
+              color: inputs.some(s => s.trim()) ? GOLD : 'rgba(201,168,76,0.45)',
+              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 800,
+              fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
+              padding: '12px', borderRadius: '4px',
+              border: `1px solid ${inputs.some(s => s.trim()) ? GOLD : 'rgba(201,168,76,0.25)'}`,
               cursor: inputs.some(s => s.trim()) ? 'pointer' : 'default',
-              marginTop: '4px', transition: 'all 0.15s',
+              marginTop: '6px', transition: 'all 0.15s',
             }}
           >
             {saving ? 'Saving…' : 'Save Commitments'}

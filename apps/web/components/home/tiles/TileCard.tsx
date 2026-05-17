@@ -37,7 +37,7 @@ export function TileCard({ accent, eyebrow, title, count, children, footer, dens
           top: 0,
           left: 0,
           right: 0,
-          height: 2,
+          height: 3,
           background: accent,
         }}
       />

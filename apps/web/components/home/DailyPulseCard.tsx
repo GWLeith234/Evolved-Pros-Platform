@@ -114,9 +114,12 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
         overflow: 'hidden',
       }}
     >
+      {/* Fixed teal accent stripe per SPRINT-M design — the ring inside
+          still uses the dynamic completion color (gold at 100%, teal in
+          progress, dim at 0). */}
       <span
         aria-hidden="true"
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: ringColor, transition: 'background 0.2s' }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: TEAL }}
       />
 
       <header style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '16px 16px 8px', gap: 8 }}>
@@ -125,7 +128,7 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
             margin: 0,
             fontFamily: '"Barlow Condensed", sans-serif',
             fontWeight: 700, fontSize: 9, letterSpacing: '0.32em',
-            textTransform: 'uppercase', color: ringColor,
+            textTransform: 'uppercase', color: TEAL,
           }}>TODAY</p>
           <h3 style={{
             margin: '4px 0 0',

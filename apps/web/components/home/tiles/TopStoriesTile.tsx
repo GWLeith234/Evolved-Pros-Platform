@@ -42,7 +42,7 @@ export function TopStoriesTile({ stories }: TopStoriesTileProps) {
         textAlign: 'right',
       }}
     >
-      All Stories →
+      All in Media →
     </a>
   )
 

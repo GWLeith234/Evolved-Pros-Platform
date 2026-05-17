@@ -20,6 +20,7 @@ import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/component
 import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStoriesTile'
 import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
 import { DailyPulseCard, type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/DailyPulseCard'
+import { HomeSponsorRow } from '@/components/home/HomeSponsorRow'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { hasTierAccess } from '@/lib/tier'
 
@@ -716,7 +717,8 @@ export default async function MemberHomePage() {
         pillars={pillars}
       />
 
-      {/* HOME tiles — Community Pulse / Top Stories / Latest Drops / Daily Pulse */}
+      {/* SPRINT-M Section 1 — 4-up tile grid
+          (Community Pulse / Top Stories / Latest Drops / Daily Pulse) */}
       <div
         className="home-4up-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4"
         style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }}
@@ -727,6 +729,10 @@ export default async function MemberHomePage() {
         <DailyPulseCard habits={dailyHabits} commitments={weekCommitments} />
       </div>
 
+      {/* SPRINT-M Section 2 — Sponsor row (2-up; falls through to null
+          when no active platform_ads rows are available) */}
+      <HomeSponsorRow />
+
       <ProfileCompletePrompt
         hasAvatar={Boolean(profile.avatar_url)}
         hasBio={Boolean(profile.bio)}
@@ -734,15 +740,30 @@ export default async function MemberHomePage() {
         hasName={Boolean(profile.display_name || profile.full_name)}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[7fr_5fr] gap-5 items-start">
-        <ActivityFeed
-          notifications={activity.notifications}
-          completions={activity.completions}
-          posts={activity.posts}
-        />
-        <div className="space-y-5 lg:self-start">
-          <UpcomingEventsWidget events={events} userId={profile.id} />
-          <AcademyProgressWidget courses={activeCourses} />
+      {/* SPRINT-M Section 3 — The Daily Practice (Activity + Events) */}
+      <div style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }}>
+        <p
+          className="font-condensed font-bold uppercase mb-3"
+          style={{
+            fontFamily: '"Bebas Neue", sans-serif',
+            fontSize: 18,
+            letterSpacing: '0.32em',
+            color: '#C9A84C',
+            margin: '0 0 12px',
+          }}
+        >
+          The Daily Practice
+        </p>
+        <div className="grid grid-cols-1 lg:grid-cols-[7fr_5fr] gap-5 items-start">
+          <ActivityFeed
+            notifications={activity.notifications}
+            completions={activity.completions}
+            posts={activity.posts}
+          />
+          <div className="space-y-5 lg:self-start">
+            <UpcomingEventsWidget events={events} userId={profile.id} />
+            <AcademyProgressWidget courses={activeCourses} />
+          </div>
         </div>
       </div>
 

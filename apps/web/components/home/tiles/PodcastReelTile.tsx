@@ -62,7 +62,7 @@ export function PodcastReelTile({ episodes, latestEpisodeNumber }: PodcastReelTi
         textAlign: 'right',
       }}
     >
-      All Episodes →
+      All in Podcast →
     </a>
   )
 
