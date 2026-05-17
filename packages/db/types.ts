@@ -996,6 +996,7 @@ export type Database = {
           description: string | null
           duration_minutes: number | null
           duration_seconds: number | null
+          embed_url: string | null
           event_id: string | null
           id: string
           is_published: boolean
@@ -1015,6 +1016,7 @@ export type Database = {
           description?: string | null
           duration_minutes?: number | null
           duration_seconds?: number | null
+          embed_url?: string | null
           event_id?: string | null
           id?: string
           is_published?: boolean
@@ -1034,6 +1036,7 @@ export type Database = {
           description?: string | null
           duration_minutes?: number | null
           duration_seconds?: number | null
+          embed_url?: string | null
           event_id?: string | null
           id?: string
           is_published?: boolean

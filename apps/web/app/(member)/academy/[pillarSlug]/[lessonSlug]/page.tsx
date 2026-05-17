@@ -136,6 +136,7 @@ export default async function LessonPage({ params }: Props) {
       >
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <LessonPlayerClient
+            embedUrl={lessonRow.embed_url}
             playbackId={lessonRow.mux_playback_id ?? ''}
             token={muxToken}
             initialProgress={progress?.watch_time_seconds ?? 0}
