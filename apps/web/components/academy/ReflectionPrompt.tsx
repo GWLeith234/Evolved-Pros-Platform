@@ -123,7 +123,7 @@ export function ReflectionPrompt({ courseId, promptText }: Props) {
               Reflection saved
             </span>
             <span style={{ color: 'rgba(250,249,247,0.25)', fontSize: '12px', marginLeft: '4px' }}>
-              {new Date(saved.created_at).toLocaleDateString()}
+              {new Date(saved.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}
             </span>
           </div>
         </div>

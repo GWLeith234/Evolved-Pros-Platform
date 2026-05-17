@@ -69,7 +69,7 @@ function fmtDate(iso: string): string {
   if (Number.isNaN(d.getTime())) return ''
   return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`
 }
-// Same hazard as the dates: Number.toLocaleString() varies by ICU build
+// Same hazard as the dates: Number#toLocaleString varies by ICU build
 // (Node prod vs the browser), so a 4-digit points value would render
 // "1234" server-side and "1,234" client-side and trip React #418.
 function fmtNumber(n: number): string {

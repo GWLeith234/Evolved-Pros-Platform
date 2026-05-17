@@ -129,7 +129,7 @@ export default async function AdminPipelinePage() {
         </div>
         <div className="text-right">
           <p className="font-condensed font-bold text-[10px] uppercase tracking-[0.16em] text-[#7a8a96]">Pipeline Value</p>
-          <p className="font-display font-black text-[24px] text-[#c9a84c]">${totalValue.toLocaleString()}</p>
+          <p className="font-display font-black text-[24px] text-[#c9a84c]">${totalValue.toLocaleString('en-US')}</p>
           <p className="font-condensed text-[10px] text-[#7a8a96]">upgrade ready + closed · annual</p>
         </div>
       </div>

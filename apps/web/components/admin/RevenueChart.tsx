@@ -26,9 +26,9 @@ export function RevenueChart({
   const maxMrr = Math.max(...months.map(m => m.mrr), 1)
 
   const stats = [
-    { label: 'Total MRR',       value: `$${currentMrr.toLocaleString()}`,     color: '#68a2b9' },
-    { label: `Pro × $79`,       value: `$${proMrr.toLocaleString()} / ${proCount} members`,  color: '#c9a84c' },
-    { label: `Community × $39`, value: `$${communityMrr.toLocaleString()} / ${communityCount} members`, color: '#1b3c5a' },
+    { label: 'Total MRR',       value: `$${currentMrr.toLocaleString('en-US')}`,     color: '#68a2b9' },
+    { label: `Pro × $79`,       value: `$${proMrr.toLocaleString('en-US')} / ${proCount} members`,  color: '#c9a84c' },
+    { label: `Community × $39`, value: `$${communityMrr.toLocaleString('en-US')} / ${communityCount} members`, color: '#1b3c5a' },
     { label: 'Churn (month)',   value: `${churnThisMonth} cancelled`,           color: '#ef0e30' },
   ]
 

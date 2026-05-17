@@ -65,7 +65,7 @@ export function ProfileHeader({ user, isOwn = false, onChangeBanner }: ProfileHe
 
   const statCards: { label: string; value: string; tooltip?: string }[] = [
     { label: 'Posts', value: String(user.postCount) },
-    { label: 'Points', value: user.points.toLocaleString(), tooltip: 'Points are earned through community engagement — posting, replying, and receiving likes.' },
+    { label: 'Points', value: user.points.toLocaleString('en-US'), tooltip: 'Points are earned through community engagement — posting, replying, and receiving likes.' },
     { label: 'Joined', value: formatJoinDate(user.created_at) },
     ...(user.company ? [{ label: 'Company', value: user.company }] : []),
   ]

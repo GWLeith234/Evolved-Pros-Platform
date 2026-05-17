@@ -44,7 +44,7 @@ export function PipelineCard({ member, isUpgradeReady = false }: PipelineCardPro
             className="font-condensed font-bold text-[12px]"
             style={{ color: '#112535' }}
           >
-            ${member.estimatedValue.toLocaleString()}/yr
+            ${member.estimatedValue.toLocaleString('en-US')}/yr
           </span>
         ) : (
           <span className="font-condensed text-[12px] text-[#7a8a96]">—</span>
