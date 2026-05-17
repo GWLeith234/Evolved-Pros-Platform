@@ -55,10 +55,14 @@ function hostInitials(name: string | null | undefined): string {
 export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroProps) {
   const [rsvpd, setRsvpd] = useState(initialIsRsvpd)
   const [rsvpInFlight, setRsvpInFlight] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const [whenLabel, setWhenLabel] = useState('')
 
-  // Defer locale-dependent date string to client so SSR and hydration agree.
+  // Mount gate + locale-dependent date string deferred to the client so SSR
+  // and hydration agree (toLocale* + viewer-local TZ are non-deterministic
+  // across the SSR/CSR boundary and surface as React #425/#422).
   useEffect(() => {
+    setMounted(true)
     if (!event) return
     const d = new Date(event.starts_at)
     const datePart = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
@@ -495,8 +499,8 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
         >
           <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 8 }}>
             <span style={{ color: 'rgba(255,255,255,0.45)' }}>When</span>
-            <span style={{ color: '#FFFFFF', fontWeight: 700 }} suppressHydrationWarning>
-              {whenLabel || '—'}
+            <span style={{ color: '#FFFFFF', fontWeight: 700 }}>
+              {mounted ? (whenLabel || '—') : '—'}
             </span>
           </span>
           <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 8 }}>
