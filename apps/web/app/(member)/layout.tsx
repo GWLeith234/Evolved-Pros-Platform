@@ -7,6 +7,7 @@ import { NextEventBanner } from '@/components/layout/NextEventBanner'
 import { RightRail } from '@/components/layout/RightRail'
 import { ToastProvider } from '@/lib/toast'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { HydrationDiag } from '@/components/diag/HydrationDiag'
 
 export default async function MemberLayout({ children }: { children: React.ReactNode }) {
   // RSC prefetch guard: skip auth + profile fetching for *prefetch* requests
@@ -38,7 +39,10 @@ export default async function MemberLayout({ children }: { children: React.React
             <TopNav profile={profile} unreadCount={0} />
             <NextEventBanner />
             <div className="flex flex-1 min-h-0">
-              <main className="flex-1 min-w-0 overflow-y-auto pt-[72px] pb-16 lg:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>{children}</main>
+              <main className="flex-1 min-w-0 overflow-y-auto pt-[72px] pb-16 lg:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>
+                {/* SPRINT P DIAGNOSTIC — WILL REVERT */}
+                <HydrationDiag>{children}</HydrationDiag>
+              </main>
               <RightRail />
             </div>
             <BottomTabBar role={profile.role} unreadCount={0} dmUnreadCount={0} />
@@ -129,7 +133,11 @@ export default async function MemberLayout({ children }: { children: React.React
               scrolls it ~42px. */}
           <main className="flex-1 min-w-0 overflow-y-auto pt-[72px] pb-16 lg:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>
 
-            {children}
+            {/* SPRINT P DIAGNOSTIC — WILL REVERT after #425/#422 root cause
+                confirmed. HydrationDiag is a client error boundary that
+                logs error.message + componentStack to the browser console
+                so QA can read the exact failing component name from prod. */}
+            <HydrationDiag>{children}</HydrationDiag>
           </main>
           <RightRail />
         </div>
