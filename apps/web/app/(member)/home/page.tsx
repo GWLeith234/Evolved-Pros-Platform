@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { CommitmentTracker } from '@/components/academy/CommitmentTracker'
+import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
 
 export const metadata: Metadata = { title: 'Home — Evolved Pros' }
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
@@ -703,6 +704,8 @@ export default async function MemberHomePage() {
 
   return (
     <div className="px-6 pb-6 space-y-5">
+      {/* @ts-expect-error Async Server Component */}
+      <EpisodeBanner />
       <WelcomeBanner
         displayName={displayName}
         tier={profile.tier}

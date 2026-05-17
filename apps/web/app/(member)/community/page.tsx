@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { UnifiedCommunityPage } from '@/components/community/UnifiedCommunityPage'
+import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
 
 export const metadata: Metadata = { title: 'Community — Evolved Pros' }
 import {
@@ -32,7 +33,10 @@ export default async function CommunityPage() {
   const isAdmin = profile?.role === 'admin'
 
   return (
-    <UnifiedCommunityPage
+    <>
+      {/* @ts-expect-error Async Server Component */}
+      <EpisodeBanner />
+      <UnifiedCommunityPage
       posts={postsResult.posts}
       nextCursor={postsResult.nextCursor}
       hasMore={postsResult.hasMore}
@@ -47,6 +51,7 @@ export default async function CommunityPage() {
       }}
       defaultChannelId={generalChannel.id}
       weeklyLeaderboard={weeklyLeaderboard}
-    />
+      />
+    </>
   )
 }
