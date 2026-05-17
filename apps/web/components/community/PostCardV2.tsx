@@ -87,10 +87,12 @@ function timeAgo(dateStr: string): string {
 }
 
 // Defers Date.now() to client-only — avoids SSR/client mismatch (#425).
+// Pattern B: useState<string | null>(null) so the initial render is identical
+// on server and client (both produce ''), then useEffect fills in after mount.
 function ClientTimeAgo({ dateStr }: { dateStr: string }) {
-  const [ago, setAgo] = useState('')
-  useEffect(() => { setAgo(timeAgo(dateStr).toUpperCase()) }, [dateStr])
-  return <>{ago}</>
+  const [label, setLabel] = useState<string | null>(null)
+  useEffect(() => { setLabel(timeAgo(dateStr).toUpperCase()) }, [dateStr])
+  return <>{label ?? ''}</>
 }
 
 // COMMUNITY-TIER-BADGE-FIX: subtle tinted-bg + bordered chips (not solid pills)

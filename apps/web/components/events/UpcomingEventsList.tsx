@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { eventTypeBadge } from '@/lib/events/types'
 import type { HeroEvent } from './CinematicHero'
@@ -19,27 +19,25 @@ interface DateBadge {
 }
 
 function formatDateBadge(iso: string): DateBadge {
-  // Use UTC for the SSR-stable parts (month + day) so server and client
-  // agree on the date label. Without timeZone: 'UTC', getDate() and the
-  // short-month formatter both read the browser/server local zone — and
-  // events stored as ISO UTC close to midnight render as different days
-  // on the server (UTC) vs the user's TZ, throwing React #425/#422.
+  // SPRINT O Pattern B / Fix 2 Option A: pin every field to timeZone: 'UTC'
+  // so server (UTC) and client (local TZ) produce identical strings. The
+  // viewer-local time format was the last unguarded source of #425/#422 on
+  // /events — even with a mount gate the function still ran in render scope
+  // and returned a TZ-dependent object. Pinning UTC eliminates the diff and
+  // lets the time render unconditionally; timeZoneName: 'short' surfaces the
+  // "UTC" suffix so users know the zone (the CountdownTimer in the hero
+  // remains the primary actionable display).
   const d = new Date(iso)
   return {
     month: d.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }).toUpperCase(),
     day: d.toLocaleDateString('en-US', { day: 'numeric', timeZone: 'UTC' }),
-    // `time` stays in the viewer's local zone (it's the more useful
-    // reading), so it remains mount-gated below via `mounted ? ...`.
-    time: d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+    time: d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'UTC', timeZoneName: 'short' }),
   }
 }
 
 export function UpcomingEventsList({ events, registeredIds }: UpcomingEventsListProps) {
   const [registered, setRegistered] = useState<Set<string>>(() => new Set(registeredIds))
   const [inflightId, setInflightId] = useState<string | null>(null)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => { setMounted(true) }, [])
 
   const sorted = useMemo(
     () => [...events].sort((a, b) =>
@@ -186,7 +184,6 @@ export function UpcomingEventsList({ events, registeredIds }: UpcomingEventsList
                   {badge.day}
                 </p>
                 <p
-                  suppressHydrationWarning
                   style={{
                     margin: '4px 0 0',
                     fontFamily: '"Barlow Condensed", sans-serif',
@@ -197,7 +194,7 @@ export function UpcomingEventsList({ events, registeredIds }: UpcomingEventsList
                     textTransform: 'uppercase',
                   }}
                 >
-                  {mounted ? badge.time : ''}
+                  {badge.time}
                 </p>
               </div>
 

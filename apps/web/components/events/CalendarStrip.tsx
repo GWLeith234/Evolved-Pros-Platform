@@ -12,16 +12,20 @@ const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December']
 
 export function CalendarStrip({ events, onDayClick }: CalendarStripProps) {
-  // Defer today to useEffect — avoids server/client new Date() mismatch (hydration error #425)
+  // SPRINT O: defer BOTH today and viewDate to useEffect — the previous
+  // useState lazy initializer ran new Date() on the server AND on first
+  // client render, producing different values (server is UTC) and tripping
+  // React #425. Render nothing until we've got a client-side viewDate.
   const [today, setToday] = useState<Date | null>(null)
-  const [viewDate, setViewDate] = useState(() => {
-    const d = new Date()
-    return new Date(d.getFullYear(), d.getMonth(), 1)
-  })
+  const [viewDate, setViewDate] = useState<Date | null>(null)
 
   useEffect(() => {
-    setToday(new Date())
+    const now = new Date()
+    setToday(now)
+    setViewDate(new Date(now.getFullYear(), now.getMonth(), 1))
   }, [])
+
+  if (!viewDate) return null
 
   // Event days set for the displayed month
   const eventDays = useMemo(() => {

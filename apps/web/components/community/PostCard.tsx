@@ -31,10 +31,12 @@ function timeAgo(dateStr: string): string {
 }
 
 // Defers Date.now() to client-only — avoids server/client mismatch (hydration error #425)
+// Pattern B: useState<string | null>(null) so the initial render is identical
+// on server and client (both produce ''), then useEffect fills in after mount.
 function ClientTimeAgo({ dateStr }: { dateStr: string }) {
-  const [ago, setAgo] = useState('')
-  useEffect(() => { setAgo(timeAgo(dateStr)) }, [dateStr])
-  return <>{ago}</>
+  const [label, setLabel] = useState<string | null>(null)
+  useEffect(() => { setLabel(timeAgo(dateStr)) }, [dateStr])
+  return <>{label ?? ''}</>
 }
 
 function getInitials(name: string): string {
