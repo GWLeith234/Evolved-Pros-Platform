@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { eventTypeBadge } from '@/lib/events/types'
@@ -55,20 +55,22 @@ function hostInitials(name: string | null | undefined): string {
 export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroProps) {
   const [rsvpd, setRsvpd] = useState(initialIsRsvpd)
   const [rsvpInFlight, setRsvpInFlight] = useState(false)
-  const [mounted, setMounted] = useState(false)
-  const [whenLabel, setWhenLabel] = useState('')
 
-  // Mount gate + locale-dependent date string deferred to the client so SSR
-  // and hydration agree (toLocale* + viewer-local TZ are non-deterministic
-  // across the SSR/CSR boundary and surface as React #425/#422).
-  useEffect(() => {
-    setMounted(true)
-    if (!event) return
-    const d = new Date(event.starts_at)
-    const datePart = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    const timePart = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-    setWhenLabel(`${datePart} · ${timePart}`.toUpperCase())
-  }, [event])
+  // SPRINT O Pattern B / Fix 2 Option A: pin every part of whenLabel to
+  // timeZone: 'UTC' so SSR (server clock in UTC) and CSR (viewer-local TZ)
+  // produce the same string. Previously this lived in a useEffect+mount
+  // gate, but a render-scope UTC pin is simpler and removes one of the
+  // last two #425/#422 fault lines on /events. timeZoneName: 'short'
+  // surfaces "UTC" so users still know the zone — the CountdownTimer
+  // beside this label remains the actionable "starts in" display.
+  const whenLabel = event
+    ? (() => {
+        const d = new Date(event.starts_at)
+        const datePart = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
+        const timePart = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'UTC', timeZoneName: 'short' })
+        return `${datePart} · ${timePart}`.toUpperCase()
+      })()
+    : ''
 
   if (!event) {
     return (
@@ -500,7 +502,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
           <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 8 }}>
             <span style={{ color: 'rgba(255,255,255,0.45)' }}>When</span>
             <span style={{ color: '#FFFFFF', fontWeight: 700 }}>
-              {mounted ? (whenLabel || '—') : '—'}
+              {whenLabel || '—'}
             </span>
           </span>
           <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 8 }}>
