@@ -118,13 +118,14 @@
   --filter-rail-border:       rgba(255,255,255,0.08);
 
   /* Home 4-up tile accents (HOME-4UP-TILES). Top stripe + eyebrow color
-     for each below-fold tile. Reuses pillar-style accents — community is
-     identity violet, stories is foundation orange, podcast is strategy
-     blue, discipline is execution teal. */
+     for each below-fold tile. SPRINT M re-aligned --tile-stories to
+     accountability gold (#C9A84C) and --tile-discipline to execution
+     teal (#0ABFA3) so the bottom cards match the SPRINT M design's
+     violet / gold / blue / teal four-up palette. */
   --tile-community:   #A78BFA;
-  --tile-stories:     #FFA538;
+  --tile-stories:     #C9A84C;
   --tile-podcast:     #60A5FA;
-  --tile-discipline:  #19C9A6;
+  --tile-discipline:  #0ABFA3;
 
   /* Events tokens (EVENTS-SPRINT-1). Hero overlay gradient + format chips
      + RSVP active color. Format colors stay constant across themes —

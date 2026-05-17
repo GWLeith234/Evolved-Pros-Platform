@@ -114,9 +114,13 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
         overflow: 'hidden',
       }}
     >
+      {/* SPRINT M: pin the top stripe to teal so the 4-up palette stays
+          violet / gold / blue / teal regardless of the daily-progress
+          ring color. Eyebrow continues to flex with progress (dim → teal
+          → gold), so the card still communicates state. */}
       <span
         aria-hidden="true"
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: ringColor, transition: 'background 0.2s' }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: TEAL }}
       />
 
       <header style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '16px 16px 8px', gap: 8 }}>
