@@ -125,7 +125,9 @@ export function LiveSplitHero({ photo = '/live/george-stage-blue-jacket.jpg' }: 
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 28, flexWrap: 'wrap' }}>
             <a
-              href="mailto:george@evolvedpros.com?subject=Booking%20inquiry"
+              href="mailto:george@evolvex360.com?subject=Keynote%20Speaking%20Inquiry"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{
                 padding: '14px 28px',
                 background: '#ef0e30',
