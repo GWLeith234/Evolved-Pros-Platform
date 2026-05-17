@@ -4,8 +4,6 @@ import { cookies, headers } from 'next/headers'
 import { TopNav } from '@/components/layout/TopNav'
 import { BottomTabBar } from '@/components/layout/BottomTabBar'
 import { NextEventBanner } from '@/components/layout/NextEventBanner'
-import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
-import { HideOnPodcast } from '@/components/layout/HideOnPodcast'
 import { RightRail } from '@/components/layout/RightRail'
 import { ToastProvider } from '@/lib/toast'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
@@ -38,9 +36,6 @@ export default async function MemberLayout({ children }: { children: React.React
         <ToastProvider>
           <div className="flex flex-col min-h-screen overflow-x-hidden">
             <TopNav profile={profile} unreadCount={0} />
-            <HideOnPodcast>
-              <EpisodeBanner />
-            </HideOnPodcast>
             <NextEventBanner />
             <div className="flex flex-1 min-h-0">
               <main className="flex-1 min-w-0 overflow-y-auto pt-[72px] pb-16 lg:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>{children}</main>
@@ -114,15 +109,12 @@ export default async function MemberLayout({ children }: { children: React.React
           and the page's own vertical scroll keep working. */}
       <div className="flex flex-col min-h-screen overflow-x-hidden">
         <TopNav profile={profile} unreadCount={unreadCount ?? 0} logoUrl={logoUrl} logoLightUrl={logoLightUrl} membersCanToggleTheme={membersCanToggleTheme} />
-        {/* /podcast renders its own page-level <PodcastLatestStrip/>; this
-            global EpisodeBanner would stack a second "LATEST EPISODE" bar
-            directly on top of it. HideOnPodcast hides the global one only on
-            /podcast/* — every other route keeps it. The dev-bypass branch
-            above already wraps EpisodeBanner the same way; this matches it
-            for the production path. */}
-        <HideOnPodcast>
-          <EpisodeBanner />
-        </HideOnPodcast>
+        {/* SPRINT N-3: <EpisodeBanner /> moved out of the layout into each
+            page (home/community/events). HideOnPodcast was a client wrapper
+            and could not conditionally render the async server component
+            at runtime — Next collapsed it into an empty banner everywhere
+            and the page-level <PodcastLatestStrip/> was the only thing
+            that worked. /podcast routes intentionally don't import it. */}
         <NextEventBanner />
         <div className="flex flex-1 min-h-0">
           {/* NAV-OVERLAP-FIX: pt-[72px] reserves space for the 72px sticky
