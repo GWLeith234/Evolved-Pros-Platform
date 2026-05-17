@@ -145,7 +145,7 @@ export function PipelineForm() {
 
           {transcript && (
             <p className="font-condensed text-[12px]" style={{ color: '#0ABFA3' }}>
-              {transcript.split(/\s+/).length.toLocaleString()} words loaded
+              {transcript.split(/\s+/).length.toLocaleString('en-US')} words loaded
             </p>
           )}
 

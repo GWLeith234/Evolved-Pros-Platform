@@ -132,7 +132,7 @@ export function PillarAudit({ courseId, questions, pillarColor = '#C9A84C' }: Pr
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '12px', color: 'rgba(250,249,247,0.25)' }}>
-            Completed {new Date(saved.created_at).toLocaleDateString()}
+            Completed {new Date(saved.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}
           </span>
           <button
             type="button"

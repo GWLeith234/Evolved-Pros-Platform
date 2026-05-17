@@ -168,7 +168,7 @@ export default function AdminPollsPage() {
                     </td>
                     <td style={{ padding: '8px 10px', color: 'rgba(27,60,90,0.5)' }}>{(p.poll_options ?? []).length}</td>
                     <td style={{ padding: '8px 10px', color: 'rgba(27,60,90,0.5)' }}>{totalVotes}</td>
-                    <td style={{ padding: '8px 10px', color: 'rgba(27,60,90,0.4)', fontSize: 10 }}>{new Date(p.created_at).toLocaleDateString()}</td>
+                    <td style={{ padding: '8px 10px', color: 'rgba(27,60,90,0.4)', fontSize: 10 }}>{new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}</td>
                     <td style={{ padding: '8px 10px' }}>
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button type="button" onClick={() => setEditing({ question: p.question, context: p.context, options: (p.poll_options ?? []).map(o => o.option_text), closes_at: p.closes_at ?? '', status: p.status, id: p.id })} style={{ fontSize: 10, color: '#68a2b9', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600 }}>Edit</button>

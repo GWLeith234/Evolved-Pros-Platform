@@ -295,7 +295,7 @@ export default async function LeaderboardPage() {
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        {(row.points ?? 0).toLocaleString()}
+                        {(row.points ?? 0).toLocaleString('en-US')}
                         <span style={{ marginLeft: 4, color: MUTED, fontWeight: 700 }}>pts</span>
                       </span>
                     </Link>

@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: 'Admin — Evolved Pros' }
 export const dynamic = 'force-dynamic'
 
 function fmt(n: number, prefix = ''): string {
-  return `${prefix}${n.toLocaleString()}`
+  return `${prefix}${n.toLocaleString('en-US')}`
 }
 
 function fmtDate(iso: string): string {
