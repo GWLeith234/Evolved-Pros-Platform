@@ -52,10 +52,10 @@ export function eventTypeBadge(rawType: string | null | undefined): EventTypeBad
 export function formatEventDate(iso: string) {
   const d = new Date(iso)
   return {
-    day:   d.getDate(),
-    month: d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
-    time:  d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }),
-    full:  d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }),
+    day:   d.getUTCDate(),
+    month: d.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }).toUpperCase(),
+    time:  d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short', timeZone: 'UTC' }),
+    full:  d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' }),
   }
 }
 
