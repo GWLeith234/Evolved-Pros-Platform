@@ -24,11 +24,15 @@ interface Props {
 
 function formatWeekRange(weekStart: string): string {
   if (!weekStart) return ''
-  const start = new Date(weekStart + 'T00:00:00')
+  // Anchor to UTC midnight + format in UTC so server-rendered range text
+  // exactly matches client first paint, regardless of the user's local
+  // timezone. Sprint N hardening pattern.
+  const start = new Date(weekStart + 'T00:00:00Z')
   if (Number.isNaN(start.getTime())) return ''
   const end = new Date(start)
-  end.setDate(start.getDate() + 6)
-  const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  end.setUTCDate(start.getUTCDate() + 6)
+  const fmt = (d: Date) =>
+    d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
   return `${fmt(start)} — ${fmt(end)}`
 }
 
