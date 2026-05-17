@@ -20,6 +20,7 @@ import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/component
 import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStoriesTile'
 import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
 import { DailyPulseCard, type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/DailyPulseCard'
+import { HomeSponsorAd } from '@/components/home/HomeSponsorAd'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { hasTierAccess } from '@/lib/tier'
 
@@ -734,7 +735,30 @@ export default async function MemberHomePage() {
         hasName={Boolean(profile.display_name || profile.full_name)}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[7fr_5fr] gap-5 items-start">
+      {/* SPRINT J — Section divider: "The Daily Practice" (matches the
+          standalone Home design). Sits above the Activity/Events row to
+          create visible rhythm between the 4-up tiles and the rest of
+          the page. */}
+      <div className="flex items-center gap-4 pt-3" style={{ margin: '12px 0 4px' }}>
+        <span style={{ width: 28, height: 1, background: 'rgba(201,168,76,0.5)' }} />
+        <span
+          className="font-condensed font-bold uppercase"
+          style={{
+            fontSize: 10,
+            letterSpacing: '0.42em',
+            color: 'rgba(201,168,76,0.85)',
+          }}
+        >
+          The Daily Practice
+        </span>
+        <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+      </div>
+
+      {/* SPRINT J — Activity (2fr) + Events sidebar (1fr) with sponsor ad
+          tucked under the Events card. Was 7fr/5fr with AcademyProgressWidget
+          on the right; AcademyProgressWidget moved into "The Path Forward"
+          row below per the design. */}
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 items-start">
         <ActivityFeed
           notifications={activity.notifications}
           completions={activity.completions}
@@ -742,15 +766,33 @@ export default async function MemberHomePage() {
         />
         <div className="space-y-5 lg:self-start">
           <UpcomingEventsWidget events={events} userId={profile.id} />
-          <AcademyProgressWidget courses={activeCourses} />
+          {/* SPRINT J — sidebar sponsor ad. Pulls a single active row from
+              platform_ads (prefers placement IN ['home','all'], falls back to
+              any active ad). Positioned below the main sidebar content. */}
+          <HomeSponsorAd />
         </div>
       </div>
 
-      {/* HOME-2 — Path Forward (left) + Long Game (right). Full-width row
-          so the in-progress pillar hero gets real estate to render the
-          big number + tagline + CTA. The old AcademyProgress + QuarterlyGoals
-          inner grid lived in the right-column slot, which cramped both. */}
-      <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-5 items-start">
+      {/* SPRINT J — Section divider: "The Path Forward". */}
+      <div className="flex items-center gap-4 pt-3" style={{ margin: '12px 0 4px' }}>
+        <span style={{ width: 28, height: 1, background: 'rgba(201,168,76,0.5)' }} />
+        <span
+          className="font-condensed font-bold uppercase"
+          style={{
+            fontSize: 10,
+            letterSpacing: '0.42em',
+            color: 'rgba(201,168,76,0.85)',
+          }}
+        >
+          The Path Forward
+        </span>
+        <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+      </div>
+
+      {/* HOME-2 — Path Forward (left) + Long Game (right). SPRINT J: AcademyProgressWidget
+          moved into the left column (after the Climbing card) to match the design's
+          "Your Academy (2fr) | Goals (1fr)" lower row. Grid widened to 2fr/1fr. */}
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 items-start">
         {/* Path Forward */}
         <div className="space-y-4">
           <PillarJourneyStrip pillars={stripPillars} />
@@ -779,6 +821,7 @@ export default async function MemberHomePage() {
               courseSlug={climbingData.courseSlug}
             />
           )}
+          <AcademyProgressWidget courses={activeCourses} />
         </div>
 
         {/* Long Game */}
