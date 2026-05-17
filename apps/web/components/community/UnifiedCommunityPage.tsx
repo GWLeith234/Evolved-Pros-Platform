@@ -247,16 +247,6 @@ export function UnifiedCommunityPage({
       {/* Editorial header (COMMUNITY-SPRINT-1) */}
       <CommunityPageHeader />
 
-      {/* Filter rail (COMMUNITY-SPRINT-2) */}
-      <FilterRail
-        activeKind={activeKind}
-        activePillars={activePillars}
-        sortBy={sortBy}
-        onChangeKind={setActiveKind}
-        onChangePillars={setActivePillars}
-        onChangeSort={setSortBy}
-      />
-
       {/* Feed (left) + weekly leaderboard rail (right) */}
       <div className="flex-1 overflow-y-auto" style={{ background: 'var(--community-page-bg)' }}>
         <div
@@ -299,6 +289,18 @@ export function UnifiedCommunityPage({
               tier: currentUser.tier ?? null,
             }}
             onPostCreated={handleNewComposerPost}
+          />
+
+          {/* Filter rail — sits inside the main column between composer and
+              feed so the right rail can extend full-height (matches
+              SPRINT-K design). */}
+          <FilterRail
+            activeKind={activeKind}
+            activePillars={activePillars}
+            sortBy={sortBy}
+            onChangeKind={setActiveKind}
+            onChangePillars={setActivePillars}
+            onChangeSort={setSortBy}
           />
 
           {/* New posts banner */}
@@ -412,10 +414,21 @@ export function UnifiedCommunityPage({
           )}
           </div>
 
-          {/* Right rail — weekly leaderboard */}
+          {/* Right rail — weekly leaderboard + sponsor ad (SPRINT-K) */}
           <div style={{ minWidth: 0 }}>
-            <div style={{ position: 'sticky', top: 0 }}>
+            <div
+              style={{
+                position: 'sticky',
+                top: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 16,
+              }}
+            >
               <WeeklyLeaderboardRail entries={weeklyLeaderboard} />
+              {/* Sidebar sponsor — picks the last ad so it differs from the
+                  first in-feed slot when fetchCommunityAds returns >1 row. */}
+              {ads.length > 0 && <FeedAdUnit ad={ads[ads.length - 1]} />}
             </div>
           </div>
         </div>
