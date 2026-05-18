@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { UnifiedCommunityPage } from '@/components/community/UnifiedCommunityPage'
 import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
-import HydrationErrorBoundary from '@/components/ui/HydrationErrorBoundary'
 
 export const metadata: Metadata = { title: 'Community — Evolved Pros' }
 import {
@@ -34,27 +33,25 @@ export default async function CommunityPage() {
   const isAdmin = profile?.role === 'admin'
 
   return (
-    <HydrationErrorBoundary>
-      <>
-        {/* @ts-expect-error Async Server Component */}
-        <EpisodeBanner />
-        <UnifiedCommunityPage
-        posts={postsResult.posts}
-        nextCursor={postsResult.nextCursor}
-        hasMore={postsResult.hasMore}
-        pinnedPost={pinnedPost}
-        ads={ads}
-        currentUser={{
-          id: profile.id,
-          displayName: profile?.display_name ?? profile?.full_name ?? null,
-          avatarUrl: profile?.avatar_url ?? null,
-          tier: profile?.tier ?? null,
-          isAdmin,
-        }}
-        defaultChannelId={generalChannel.id}
-        weeklyLeaderboard={weeklyLeaderboard}
-        />
-      </>
-    </HydrationErrorBoundary>
+    <>
+      {/* @ts-expect-error Async Server Component */}
+      <EpisodeBanner />
+      <UnifiedCommunityPage
+      posts={postsResult.posts}
+      nextCursor={postsResult.nextCursor}
+      hasMore={postsResult.hasMore}
+      pinnedPost={pinnedPost}
+      ads={ads}
+      currentUser={{
+        id: profile.id,
+        displayName: profile?.display_name ?? profile?.full_name ?? null,
+        avatarUrl: profile?.avatar_url ?? null,
+        tier: profile?.tier ?? null,
+        isAdmin,
+      }}
+      defaultChannelId={generalChannel.id}
+      weeklyLeaderboard={weeklyLeaderboard}
+      />
+    </>
   )
 }

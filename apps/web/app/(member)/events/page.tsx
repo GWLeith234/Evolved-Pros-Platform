@@ -7,7 +7,6 @@ import { EventsPageHeader } from '@/components/events/EventsPageHeader'
 import { CinematicHero, type HeroEvent } from '@/components/events/CinematicHero'
 import { UpcomingEventsList } from '@/components/events/UpcomingEventsList'
 import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
-import HydrationErrorBoundary from '@/components/ui/HydrationErrorBoundary'
 
 export const metadata: Metadata = { title: 'Events — Evolved Pros' }
 export const dynamic = 'force-dynamic'
@@ -76,14 +75,12 @@ export default async function EventsPage() {
   const initialIsRsvpd = featured ? registeredIds.includes(featured.id) : false
 
   return (
-    <HydrationErrorBoundary>
-      <div style={{ background: 'var(--bg-page)', minHeight: '100%' }}>
-        {/* @ts-expect-error Async Server Component */}
-        <EpisodeBanner />
-        <EventsPageHeader />
-        <CinematicHero event={featured} initialIsRsvpd={initialIsRsvpd} />
-        <UpcomingEventsList events={upcoming} registeredIds={registeredIds} />
-      </div>
-    </HydrationErrorBoundary>
+    <div style={{ background: 'var(--bg-page)', minHeight: '100%' }}>
+      {/* @ts-expect-error Async Server Component */}
+      <EpisodeBanner />
+      <EventsPageHeader />
+      <CinematicHero event={featured} initialIsRsvpd={initialIsRsvpd} />
+      <UpcomingEventsList events={upcoming} registeredIds={registeredIds} />
+    </div>
   )
 }
