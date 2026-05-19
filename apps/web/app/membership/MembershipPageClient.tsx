@@ -10,9 +10,16 @@ interface MembershipPageClientProps {
   isLoggedIn: boolean
 }
 
-const CHECKOUT_BASE       = process.env.NEXT_PUBLIC_VENDASTA_CHECKOUT_URL ?? ''
 const KEYNOTE_INQUIRY_URL = process.env.NEXT_PUBLIC_VENDASTA_KEYNOTE_INQUIRY_URL
   ?? 'mailto:support@evolvedpros.com?subject=Keynote%20Inquiry%20-%20Evolved%20Pros'
+
+// SPRINT V-CHECKOUT — these are the public SKU values surfaced by the client.
+// The server validates them against VENDASTA_*_SKU env vars in /api/checkout
+// before submitting an order to Vendasta.
+const VIP_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_VIP_MONTHLY_SKU ?? ''
+const VIP_ANNUAL_SKU  = process.env.NEXT_PUBLIC_VENDASTA_VIP_ANNUAL_SKU  ?? ''
+const PRO_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_PRO_MONTHLY_SKU ?? ''
+const PRO_ANNUAL_SKU  = process.env.NEXT_PUBLIC_VENDASTA_PRO_ANNUAL_SKU  ?? ''
 
 function CheckIcon() {
   return (
@@ -44,6 +51,9 @@ interface CtaButtonProps {
 }
 
 function CtaButton({ sku, accent, featured = false, isCurrent = false, label }: CtaButtonProps) {
+  const [loading, setLoading] = useState(false)
+  const [error,   setError]   = useState<string | null>(null)
+
   if (isCurrent) {
     return (
       <button
@@ -63,37 +73,78 @@ function CtaButton({ sku, accent, featured = false, isCurrent = false, label }: 
     )
   }
 
-  const checkoutUrl = CHECKOUT_BASE ? `${CHECKOUT_BASE}?sku=${sku}` : ''
-
-  if (checkoutUrl) {
+  if (!sku) {
     return (
-      <a
-        href={checkoutUrl}
-        className="block w-full py-3 rounded font-condensed font-bold uppercase tracking-[0.12em] text-[12px] text-center transition-opacity hover:opacity-90"
-        style={{ backgroundColor: accent, color: 'white' }}
-      >
-        {label ?? 'Get Started'}
-      </a>
+      <Tooltip content="Checkout powered by Vendasta — launching soon">
+        <button
+          type="button"
+          disabled
+          className="w-full py-3 rounded font-condensed font-bold uppercase tracking-[0.12em] text-[12px] transition-opacity"
+          style={{
+            backgroundColor: featured ? accent : 'transparent',
+            color: featured ? 'white' : accent,
+            border: `1.5px solid ${accent}`,
+            opacity: 0.6,
+            cursor: 'not-allowed',
+          }}
+        >
+          Coming Soon
+        </button>
+      </Tooltip>
     )
   }
 
+  async function handleClick() {
+    setError(null)
+    setLoading(true)
+    try {
+      const res = await fetch('/api/checkout', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ sku }),
+      })
+      const data = (await res.json().catch(() => ({}))) as {
+        paymentUrl?: string
+        error?:      string
+      }
+      if (!res.ok || !data.paymentUrl) {
+        setError(data.error ?? 'Checkout failed — please try again')
+        setLoading(false)
+        return
+      }
+      window.location.href = data.paymentUrl
+    } catch {
+      setError('Network error — please try again')
+      setLoading(false)
+    }
+  }
+
   return (
-    <Tooltip content="Checkout powered by Vendasta — launching soon">
+    <div>
       <button
         type="button"
-        disabled
-        className="w-full py-3 rounded font-condensed font-bold uppercase tracking-[0.12em] text-[12px] transition-opacity"
+        onClick={handleClick}
+        disabled={loading}
+        className="block w-full py-3 rounded font-condensed font-bold uppercase tracking-[0.12em] text-[12px] text-center transition-opacity hover:opacity-90"
         style={{
-          backgroundColor: featured ? accent : 'transparent',
-          color: featured ? 'white' : accent,
-          border: `1.5px solid ${accent}`,
-          opacity: 0.6,
-          cursor: 'not-allowed',
+          backgroundColor: accent,
+          color: 'white',
+          opacity: loading ? 0.6 : 1,
+          cursor: loading ? 'wait' : 'pointer',
+          border: 'none',
         }}
       >
-        Coming Soon
+        {loading ? 'Loading…' : (label ?? 'Get Started')}
       </button>
-    </Tooltip>
+      {error && (
+        <p
+          className="font-body text-[11px] mt-2 text-center"
+          style={{ color: '#ef0e30' }}
+        >
+          {error}
+        </p>
+      )}
+    </div>
   )
 }
 
@@ -289,7 +340,7 @@ export function MembershipPageClient({ userTier, keynoteAccess, isLoggedIn }: Me
             </ul>
 
             <CtaButton
-              sku={isAnnual ? 'EP-VIP-Y' : 'EP-VIP-M'}
+              sku={isAnnual ? VIP_ANNUAL_SKU : VIP_MONTHLY_SKU}
               accent="#C9A84C"
               label="Get VIP"
               isCurrent={userTier === 'vip'}
@@ -365,7 +416,7 @@ export function MembershipPageClient({ userTier, keynoteAccess, isLoggedIn }: Me
             </ul>
 
             <CtaButton
-              sku={isAnnual ? 'EP-PRO-Y' : 'EP-PRO-M'}
+              sku={isAnnual ? PRO_ANNUAL_SKU : PRO_MONTHLY_SKU}
               accent="#C9302A"
               featured
               label="Get Professional"

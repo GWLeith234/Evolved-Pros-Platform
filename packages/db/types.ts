@@ -2425,6 +2425,7 @@ export type Database = {
           tier_status: string | null
           twitter_handle: string | null
           updated_at: string
+          vendasta_account_group_id: string | null
           vendasta_account_id: string | null
           vendasta_contact_id: string | null
           vendasta_last_event_at: string | null
@@ -2473,6 +2474,7 @@ export type Database = {
           tier_status?: string | null
           twitter_handle?: string | null
           updated_at?: string
+          vendasta_account_group_id?: string | null
           vendasta_account_id?: string | null
           vendasta_contact_id?: string | null
           vendasta_last_event_at?: string | null
@@ -2521,6 +2523,7 @@ export type Database = {
           tier_status?: string | null
           twitter_handle?: string | null
           updated_at?: string
+          vendasta_account_group_id?: string | null
           vendasta_account_id?: string | null
           vendasta_contact_id?: string | null
           vendasta_last_event_at?: string | null

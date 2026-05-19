@@ -32,7 +32,30 @@ export class UnknownSkuError extends Error {
   }
 }
 
+/**
+ * Env-var SKU map for the real Vendasta marketplace SKUs (MP-{hash} style).
+ * These are opaque so pattern matching can't reach them — the webhook /
+ * checkout flow injects the actual SKU values via env at deploy time.
+ *
+ * Read on every call (not at module-load) so test environments can override
+ * with process.env writes between test cases.
+ */
+function envSkuTier(sku: string): VendastaTier | null {
+  const vipMonthly = process.env.VENDASTA_VIP_MONTHLY_SKU
+  const vipAnnual  = process.env.VENDASTA_VIP_ANNUAL_SKU
+  const proMonthly = process.env.VENDASTA_PRO_MONTHLY_SKU
+  const proAnnual  = process.env.VENDASTA_PRO_ANNUAL_SKU
+  if (sku && (sku === vipMonthly || sku === vipAnnual)) return 'vip'
+  if (sku && (sku === proMonthly || sku === proAnnual)) return 'pro'
+  return null
+}
+
 export function mapSkuToTier(sku: string): VendastaTier {
+  // Env-var lookup wins — covers opaque MP-{hash} marketplace SKUs.
+  const fromEnv = envSkuTier(sku)
+  if (fromEnv) return fromEnv
+
+  // Legacy pattern fallback for human-readable SKUs (EP-VIP-M, etc).
   if (/vip/i.test(sku))                       return 'vip'        // top tier
   if (/pro|professional/i.test(sku))          return 'pro'        // mid tier
   if (/community|comm|member/i.test(sku))     return 'community'  // entry tier
