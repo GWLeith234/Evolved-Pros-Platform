@@ -1,10 +1,16 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { PricingCtaButton } from './PricingCtaButton'
 
 export const metadata: Metadata = {
   title: 'Pricing — Evolved Pros',
   description: 'Community, VIP, Professional, and Keynote tiers for high performers.',
 }
+
+// SPRINT V-CHECKOUT — SKUs surfaced to the client; server validates against
+// the matching VENDASTA_*_SKU env var in /api/checkout before submitting.
+const VIP_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_VIP_MONTHLY_SKU ?? ''
+const PRO_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_PRO_MONTHLY_SKU ?? ''
 
 // ── Tier data ────────────────────────────────────────────────────────────────────
 
@@ -22,7 +28,8 @@ interface Tier {
   features: Feature[]
   callout?: string
   cta: string
-  ctaHref: string
+  ctaHref?: string
+  ctaSku?: string
 }
 
 const TIERS: Tier[] = [
@@ -58,7 +65,7 @@ const TIERS: Tier[] = [
       { text: 'Academy Pillars 4\u20136', locked: true },
     ],
     cta: 'Start VIP',
-    ctaHref: '#vendasta-vip',
+    ctaSku: VIP_MONTHLY_SKU,
   },
   {
     name: 'Professional',
@@ -76,7 +83,7 @@ const TIERS: Tier[] = [
     ],
     callout: 'Bi-weekly 1hr mastermind with George. Topics rotate through all 6 EVOLVED pillars.',
     cta: 'Go Professional',
-    ctaHref: '#vendasta-pro',
+    ctaSku: PRO_MONTHLY_SKU,
   },
   {
     name: 'Keynotes',
@@ -241,17 +248,12 @@ export default function PricingPage() {
               )}
 
               {/* CTA */}
-              <Link
+              <PricingCtaButton
+                label={tier.cta}
                 href={tier.ctaHref}
-                className="block w-full py-3 rounded-lg font-condensed font-bold uppercase tracking-[0.1em] text-[12px] text-center transition-opacity hover:opacity-90"
-                style={{
-                  backgroundColor: tier.featured ? '#C9302A' : 'rgba(245,240,232,0.06)',
-                  color: tier.featured ? '#fff' : '#F5F0E8',
-                  border: tier.featured ? 'none' : '1px solid rgba(245,240,232,0.1)',
-                }}
-              >
-                {tier.cta}
-              </Link>
+                sku={tier.ctaSku}
+                featured={!!tier.featured}
+              />
             </div>
           ))}
         </div>
