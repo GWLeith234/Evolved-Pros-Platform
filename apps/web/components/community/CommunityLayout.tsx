@@ -1,10 +1,20 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { ChannelSidebar } from './ChannelSidebar'
-import { CommunityFeed } from './CommunityFeed'
 import { LeaderboardRail } from './LeaderboardRail'
 import type { Channel, Post, LeaderboardEntry, MemberSummary } from '@/lib/community/types'
+
+// SPRINT HYDRATION-FIX-3 — CommunityFeed opens a Supabase Realtime channel
+// inside its useEffect. The realtime-js client carries MessageChannel /
+// MessagePort plumbing that surfaces in React's scheduler stack during
+// hydration of /community/[channelSlug] (#425/#422). Forcing the subtree
+// client-only removes the dual-render entirely.
+const CommunityFeed = dynamic(
+  () => import('./CommunityFeed').then((m) => m.CommunityFeed),
+  { ssr: false },
+)
 
 interface CommunityLayoutProps {
   channels: Channel[]

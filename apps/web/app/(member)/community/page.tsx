@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
-import { UnifiedCommunityPage } from '@/components/community/UnifiedCommunityPage'
+import { UnifiedCommunityPageClient } from './UnifiedCommunityPageClient'
 import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
 
 export const metadata: Metadata = { title: 'Community — Evolved Pros' }
@@ -36,7 +36,7 @@ export default async function CommunityPage() {
     <>
       {/* @ts-expect-error Async Server Component */}
       <EpisodeBanner />
-      <UnifiedCommunityPage
+      <UnifiedCommunityPageClient
       posts={postsResult.posts}
       nextCursor={postsResult.nextCursor}
       hasMore={postsResult.hasMore}
