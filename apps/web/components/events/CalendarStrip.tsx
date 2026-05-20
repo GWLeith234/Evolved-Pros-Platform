@@ -25,11 +25,13 @@ export function CalendarStrip({ events, onDayClick }: CalendarStripProps) {
     setViewDate(new Date(now.getFullYear(), now.getMonth(), 1))
   }, [])
 
-  if (!viewDate) return null
-
-  // Event days set for the displayed month
+  // Event days set for the displayed month. Must be declared above the
+  // viewDate-null early return below — react-hooks/rules-of-hooks requires
+  // every hook to run on every render. The null-viewDate branch returns an
+  // empty Set so the hook is total and matches the "no calendar yet" state.
   const eventDays = useMemo(() => {
     const set = new Set<number>()
+    if (!viewDate) return set
     for (const e of events) {
       const d = new Date(e.startsAt)
       if (d.getFullYear() === viewDate.getFullYear() && d.getMonth() === viewDate.getMonth()) {
@@ -38,6 +40,8 @@ export function CalendarStrip({ events, onDayClick }: CalendarStripProps) {
     }
     return set
   }, [events, viewDate])
+
+  if (!viewDate) return null
 
   const year = viewDate.getFullYear()
   const month = viewDate.getMonth()
