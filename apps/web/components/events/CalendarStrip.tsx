@@ -25,10 +25,9 @@ export function CalendarStrip({ events, onDayClick }: CalendarStripProps) {
     setViewDate(new Date(now.getFullYear(), now.getMonth(), 1))
   }, [])
 
-  if (!viewDate) return null
-
   // Event days set for the displayed month
   const eventDays = useMemo(() => {
+    if (!viewDate) return new Set()
     const set = new Set<number>()
     for (const e of events) {
       const d = new Date(e.startsAt)
