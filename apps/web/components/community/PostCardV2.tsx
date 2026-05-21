@@ -264,6 +264,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
                 letterSpacing: '0.01em',
                 color: 'var(--text-primary)',
                 textDecoration: 'none',
+                wordBreak: 'break-word',
               }}
             >
               {post.author.displayName}
@@ -297,27 +298,28 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
             >
               <ClientTimeAgo dateStr={post.createdAt} />
             </span>
+            {kindLabel && (
+              <span
+                style={{
+                  marginLeft: 'auto',
+                  padding: '4px 10px',
+                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  background: 'var(--bg-elevated)',
+                  color: 'var(--text-secondary)',
+                  border: '1px solid var(--border-color)',
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {kindLabel}
+              </span>
+            )}
           </div>
         </div>
-
-        {kindLabel && (
-          <span
-            style={{
-              padding: '4px 10px',
-              fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-              background: 'var(--bg-elevated)',
-              color: 'var(--text-secondary)',
-              border: '1px solid var(--border-color)',
-              flexShrink: 0,
-            }}
-          >
-            {kindLabel}
-          </span>
-        )}
       </header>
 
       {/* Body */}
@@ -364,6 +366,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
           borderTop: '1px solid var(--border-color)',
           display: 'flex',
           alignItems: 'center',
+          flexWrap: 'wrap',
           gap: 6,
         }}
       >

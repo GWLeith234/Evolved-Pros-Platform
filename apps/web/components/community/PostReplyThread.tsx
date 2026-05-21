@@ -123,7 +123,7 @@ export function PostReplyThread({
       )}
 
       {/* Compose reply */}
-      <div className="flex gap-2 pt-1">
+      <div className="flex gap-2 pt-1 min-w-0">
         <div
           className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
           style={{ backgroundColor: getAvatarColor(currentUser.id) }}
@@ -137,12 +137,13 @@ export function PostReplyThread({
             </span>
           )}
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <textarea
             value={replyBody}
             onChange={e => { setReplyBody(e.target.value); if (error) setError('') }}
             placeholder="Write a reply…"
-            className="w-full resize-none rounded border font-body text-[13px] text-[#1b3c5a] placeholder:text-[#7a8a96] focus:outline-none px-3 py-2 transition-colors"
+            cols={1}
+            className="block w-full resize-none rounded border font-body text-[13px] text-[#1b3c5a] placeholder:text-[#7a8a96] focus:outline-none px-3 py-2 transition-colors"
             style={{
               minHeight: '48px',
               borderColor: 'rgba(27,60,90,0.18)',
