@@ -6,4 +6,5 @@ export interface RotatorPhoto {
 export const ROTATOR_PHOTOS: RotatorPhoto[] = [
   { src: '/live/george-cloud-broker.jpg',      caption: 'The Rise of the Cloud Broker' },
   { src: '/live/george-stage-blue-jacket.jpg', caption: 'Mainstage Keynote' },
+  { src: '/live/george-vendastacon-2018.jpg',  caption: 'A Path to Recurring Revenue' },
 ]
