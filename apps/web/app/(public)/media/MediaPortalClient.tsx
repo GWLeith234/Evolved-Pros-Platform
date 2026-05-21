@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { CategoryPills, CATEGORY_COLORS } from '@/components/media/CategoryPills'
 import { getPillarLabel } from '@/lib/pillars'
 import { PollWidget } from '@/components/media/PollWidget'
-import { MediaAdZone } from '@/components/media/MediaAdZone'
+import { MediaAdZoneClient as MediaAdZone } from './MediaClientShims'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 

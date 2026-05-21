@@ -5,8 +5,7 @@ import type { Metadata } from 'next'
 import { marked } from 'marked'
 import { adminClient } from '@/lib/supabase/admin'
 import { getPillarLabel, getPillarColor } from '@/lib/pillars'
-import { StoryComments } from '@/components/media/StoryComments'
-import { MediaAdZone } from '@/components/media/MediaAdZone'
+import { StoryCommentsClient as StoryComments, MediaAdZoneClient as MediaAdZone } from '../../MediaClientShims'
 import { ArticleShareBar } from './ArticleShareBar'
 
 export const revalidate = 3600
