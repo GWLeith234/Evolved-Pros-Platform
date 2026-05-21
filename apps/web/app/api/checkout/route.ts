@@ -35,29 +35,29 @@ interface SkuConfig {
 function skuCatalog(): Record<string, SkuConfig> {
   return {
     vip_monthly: {
-      envVar:      'VENDASTA_VIP_MONTHLY_SKU',
-      sku:         process.env.VENDASTA_VIP_MONTHLY_SKU,
+      envVar:      'VENDASTA_MP_VIP_M',
+      sku:         process.env.VENDASTA_MP_VIP_M,
       amountCents: 3900,
       interval:    'MONTHLY',
       tier:        'vip',
     },
     vip_annual: {
-      envVar:      'VENDASTA_VIP_ANNUAL_SKU',
-      sku:         process.env.VENDASTA_VIP_ANNUAL_SKU,
+      envVar:      'VENDASTA_MP_VIP_Y',
+      sku:         process.env.VENDASTA_MP_VIP_Y,
       amountCents: 39000,
       interval:    'YEARLY',
       tier:        'vip',
     },
     pro_monthly: {
-      envVar:      'VENDASTA_PRO_MONTHLY_SKU',
-      sku:         process.env.VENDASTA_PRO_MONTHLY_SKU,
+      envVar:      'VENDASTA_MP_PRO_M',
+      sku:         process.env.VENDASTA_MP_PRO_M,
       amountCents: 7900,
       interval:    'MONTHLY',
       tier:        'pro',
     },
     pro_annual: {
-      envVar:      'VENDASTA_PRO_ANNUAL_SKU',
-      sku:         process.env.VENDASTA_PRO_ANNUAL_SKU,
+      envVar:      'VENDASTA_MP_PRO_Y',
+      sku:         process.env.VENDASTA_MP_PRO_Y,
       amountCents: 79000,
       interval:    'YEARLY',
       tier:        'pro',
