@@ -4,8 +4,13 @@ import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { EventsPageHeader } from '@/components/events/EventsPageHeader'
-import { CinematicHero, type HeroEvent } from '@/components/events/CinematicHero'
-import { UpcomingEventsList } from '@/components/events/UpcomingEventsList'
+import type { HeroEvent } from '@/components/events/CinematicHero'
+// SPRINT HYDRATION-FIX-5 — CinematicHero (countdown + "ON YOUR CALENDAR"
+// pill) and UpcomingEventsList (per-card RSVP pill + time badges) render
+// time-dependent and user-state-dependent values that don't survive the
+// SSR → client diff. Loaded through ssr:false dynamic wrappers so they
+// mount post-hydration. See EventsPageClient.tsx.
+import { CinematicHeroClient, UpcomingEventsListClient } from './EventsPageClient'
 import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
 
 export const metadata: Metadata = { title: 'Events — Evolved Pros' }
@@ -79,8 +84,8 @@ export default async function EventsPage() {
       {/* @ts-expect-error Async Server Component */}
       <EpisodeBanner />
       <EventsPageHeader />
-      <CinematicHero event={featured} initialIsRsvpd={initialIsRsvpd} />
-      <UpcomingEventsList events={upcoming} registeredIds={registeredIds} />
+      <CinematicHeroClient event={featured} initialIsRsvpd={initialIsRsvpd} />
+      <UpcomingEventsListClient events={upcoming} registeredIds={registeredIds} />
     </div>
   )
 }
