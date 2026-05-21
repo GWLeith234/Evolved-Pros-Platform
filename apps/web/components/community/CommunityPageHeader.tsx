@@ -20,11 +20,13 @@ export function CommunityPageHeader() {
         style={{
           margin: '8px 0 0',
           fontFamily: '"Bebas Neue", sans-serif',
-          fontSize: 'clamp(64px, 9vw, 88px)',
+          fontSize: 'clamp(44px, 12vw, 88px)',
           lineHeight: 0.95,
           letterSpacing: '0.02em',
           color: 'var(--community-header-title)',
           textTransform: 'uppercase',
+          overflowWrap: 'break-word',
+          wordBreak: 'break-word',
         }}
       >
         Community
