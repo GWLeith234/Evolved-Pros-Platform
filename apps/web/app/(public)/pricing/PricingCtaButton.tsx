@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 /**
@@ -27,6 +27,16 @@ export function PricingCtaButton({ label, href, sku, featured }: PricingCtaButto
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState<string | null>(null)
 
+  // sku === ''        → tier expects a Vendasta SKU but the env var is missing
+  // sku === undefined → tier doesn't use Vendasta (Community, Keynotes); ordinary link
+  const skuMissing = sku === ''
+
+  useEffect(() => {
+    if (skuMissing) {
+      console.warn('PricingCtaButton: sku prop is empty — check NEXT_PUBLIC_VENDASTA_*_SKU env vars')
+    }
+  }, [skuMissing])
+
   const baseStyle = {
     backgroundColor: featured ? '#C9302A' : 'rgba(245,240,232,0.06)',
     color:           featured ? '#fff'    : '#F5F0E8',
@@ -37,7 +47,23 @@ export function PricingCtaButton({ label, href, sku, featured }: PricingCtaButto
     'block w-full py-3 rounded-lg font-condensed font-bold uppercase ' +
     'tracking-[0.1em] text-[12px] text-center transition-opacity hover:opacity-90'
 
-  // Non-Vendasta CTAs — just a normal link.
+  // Misconfig: tier expected a Vendasta SKU but env var resolved to ''.
+  // Surface as a disabled "Unavailable" button so the broken state is visible
+  // instead of silently rendering a dead href="#".
+  if (skuMissing) {
+    return (
+      <button
+        type="button"
+        disabled
+        className={className}
+        style={{ ...baseStyle, opacity: 0.5, cursor: 'not-allowed' }}
+      >
+        Unavailable
+      </button>
+    )
+  }
+
+  // Non-Vendasta CTAs (Community/Free, Keynotes) — just a normal link.
   if (!sku) {
     return (
       <a href={href ?? '#'} className={className} style={baseStyle}>
