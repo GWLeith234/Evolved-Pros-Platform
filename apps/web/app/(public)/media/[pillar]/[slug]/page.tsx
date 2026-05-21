@@ -159,9 +159,7 @@ export default async function StoryPage({
     const { data: profile } = await adminClient
       .from('users')
       .select('full_name, avatar_url, role, current_pillar')
-      .eq('full_name', story.author)
-      .order('created_at', { ascending: true })
-      .limit(1)
+      .eq('id', '266e82af-a5ed-4770-a81a-10716d497d3a')
       .maybeSingle()
     authorUser = profile ?? null
     if (!authorUser) {
@@ -484,7 +482,7 @@ export default async function StoryPage({
         }
         .media-prose p {
           margin-bottom: 18px;
-          color: #E5E7EB;
+          color: #1A1A1A;
         }
         .media-prose blockquote {
           border-left: 4px solid #C9302A;
