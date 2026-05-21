@@ -1,10 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cookies, headers } from 'next/headers'
-import { TopNav } from '@/components/layout/TopNav'
-import { BottomTabBar } from '@/components/layout/BottomTabBar'
-import { NextEventBanner } from '@/components/layout/NextEventBanner'
-import { RightRail } from '@/components/layout/RightRail'
+// SPRINT HYDRATION-FIX-4 — TopNav, BottomTabBar, NextEventBanner, and
+// RightRail each (directly or transitively) import @/lib/supabase/client,
+// which evaluates @supabase/realtime-js on first import. That eval lands
+// inside React's hydrator and trips errors #425 / #422 on every member
+// page. Loading them through ssr:false dynamic wrappers keeps the realtime
+// library off the SSR/hydration path. See MemberChromeClient.tsx.
+import {
+  TopNavClient,
+  BottomTabBarClient,
+  NextEventBannerClient,
+  RightRailClient,
+} from '@/components/layout/MemberChromeClient'
 import { ToastProvider } from '@/lib/toast'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
@@ -35,13 +43,13 @@ export default async function MemberLayout({ children }: { children: React.React
       return (
         <ToastProvider>
           <div className="flex flex-col min-h-screen overflow-x-hidden">
-            <TopNav profile={profile} unreadCount={0} />
-            <NextEventBanner />
+            <TopNavClient profile={profile} unreadCount={0} />
+            <NextEventBannerClient />
             <div className="flex flex-1 min-h-0">
               <main className="flex-1 min-w-0 overflow-y-auto pt-[72px] pb-16 lg:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>{children}</main>
-              <RightRail />
+              <RightRailClient />
             </div>
-            <BottomTabBar role={profile.role} unreadCount={0} dmUnreadCount={0} />
+            <BottomTabBarClient role={profile.role} unreadCount={0} dmUnreadCount={0} />
           </div>
         </ToastProvider>
       )
@@ -108,14 +116,14 @@ export default async function MemberLayout({ children }: { children: React.React
           body.scrollWidth on mobile. Stays at the wrapper level so modals
           and the page's own vertical scroll keep working. */}
       <div className="flex flex-col min-h-screen overflow-x-hidden">
-        <TopNav profile={profile} unreadCount={unreadCount ?? 0} logoUrl={logoUrl} logoLightUrl={logoLightUrl} membersCanToggleTheme={membersCanToggleTheme} />
+        <TopNavClient profile={profile} unreadCount={unreadCount ?? 0} logoUrl={logoUrl} logoLightUrl={logoLightUrl} membersCanToggleTheme={membersCanToggleTheme} />
         {/* SPRINT N-3: <EpisodeBanner /> moved out of the layout into each
             page (home/community/events). HideOnPodcast was a client wrapper
             and could not conditionally render the async server component
             at runtime — Next collapsed it into an empty banner everywhere
             and the page-level <PodcastLatestStrip/> was the only thing
             that worked. /podcast routes intentionally don't import it. */}
-        <NextEventBanner />
+        <NextEventBannerClient />
         <div className="flex flex-1 min-h-0">
           {/* NAV-OVERLAP-FIX: pt-[72px] reserves space for the 72px sticky
               TopNav so page content can never slide under it at 800–1440px
@@ -131,9 +139,9 @@ export default async function MemberLayout({ children }: { children: React.React
 
             {children}
           </main>
-          <RightRail />
+          <RightRailClient />
         </div>
-        <BottomTabBar role={profile.role} unreadCount={unreadCount ?? 0} dmUnreadCount={0} />
+        <BottomTabBarClient role={profile.role} unreadCount={unreadCount ?? 0} dmUnreadCount={0} />
       </div>
     </ToastProvider>
   )
