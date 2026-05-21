@@ -16,10 +16,10 @@ const KEYNOTE_INQUIRY_URL = process.env.NEXT_PUBLIC_VENDASTA_KEYNOTE_INQUIRY_URL
 // SPRINT V-CHECKOUT — these are the public SKU values surfaced by the client.
 // The server validates them against VENDASTA_*_SKU env vars in /api/checkout
 // before submitting an order to Vendasta.
-const VIP_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_VIP_MONTHLY_SKU ?? ''
-const VIP_ANNUAL_SKU  = process.env.NEXT_PUBLIC_VENDASTA_VIP_ANNUAL_SKU  ?? ''
-const PRO_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_PRO_MONTHLY_SKU ?? ''
-const PRO_ANNUAL_SKU  = process.env.NEXT_PUBLIC_VENDASTA_PRO_ANNUAL_SKU  ?? ''
+const VIP_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_MP_VIP_M ?? ''
+const VIP_ANNUAL_SKU  = process.env.NEXT_PUBLIC_VENDASTA_MP_VIP_Y ?? ''
+const PRO_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_M ?? ''
+const PRO_ANNUAL_SKU  = process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_Y ?? ''
 
 function CheckIcon() {
   return (

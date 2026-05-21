@@ -9,8 +9,8 @@ export const metadata: Metadata = {
 
 // SPRINT V-CHECKOUT — SKUs surfaced to the client; server validates against
 // the matching VENDASTA_*_SKU env var in /api/checkout before submitting.
-const VIP_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_VIP_MONTHLY_SKU ?? ''
-const PRO_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_PRO_MONTHLY_SKU ?? ''
+const VIP_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_MP_VIP_M ?? ''
+const PRO_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_M ?? ''
 
 // ── Tier data ────────────────────────────────────────────────────────────────────
 
