@@ -27,6 +27,9 @@ Thumbs.db
 # TypeScript
 *.tsbuildinfo
 
+# Supabase
+supabase/.temp/
+
 # Turbo
 .turbo/
 apps/web/tsconfig.tsbuildinfo
