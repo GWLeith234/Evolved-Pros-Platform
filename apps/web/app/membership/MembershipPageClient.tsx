@@ -14,11 +14,12 @@ const KEYNOTE_INQUIRY_URL = process.env.NEXT_PUBLIC_VENDASTA_KEYNOTE_INQUIRY_URL
   ?? 'mailto:support@evolvedpros.com?subject=Keynote%20Inquiry%20-%20Evolved%20Pros'
 
 // SPRINT V-CHECKOUT — these are the public SKU values surfaced by the client.
-// The server validates them against VENDASTA_*_SKU env vars in /api/checkout
-// before submitting an order to Vendasta.
-const VIP_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_VIP_MONTHLY_SKU ?? ''
+// The server validates them against the matching env vars in /api/checkout
+// before submitting an order to Vendasta. Monthly names match the
+// Railway-configured NEXT_PUBLIC_VENDASTA_MP_* marketplace product vars.
+const VIP_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_MP_VIP_M ?? ''
 const VIP_ANNUAL_SKU  = process.env.NEXT_PUBLIC_VENDASTA_VIP_ANNUAL_SKU  ?? ''
-const PRO_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_PRO_MONTHLY_SKU ?? ''
+const PRO_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_M ?? ''
 const PRO_ANNUAL_SKU  = process.env.NEXT_PUBLIC_VENDASTA_PRO_ANNUAL_SKU  ?? ''
 
 function CheckIcon() {

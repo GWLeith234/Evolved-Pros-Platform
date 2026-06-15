@@ -35,8 +35,8 @@ interface SkuConfig {
 function skuCatalog(): Record<string, SkuConfig> {
   return {
     vip_monthly: {
-      envVar:      'VENDASTA_VIP_MONTHLY_SKU',
-      sku:         process.env.VENDASTA_VIP_MONTHLY_SKU,
+      envVar:      'NEXT_PUBLIC_VENDASTA_MP_VIP_M',
+      sku:         process.env.NEXT_PUBLIC_VENDASTA_MP_VIP_M,
       amountCents: 3900,
       interval:    'MONTHLY',
       tier:        'vip',
@@ -49,8 +49,8 @@ function skuCatalog(): Record<string, SkuConfig> {
       tier:        'vip',
     },
     pro_monthly: {
-      envVar:      'VENDASTA_PRO_MONTHLY_SKU',
-      sku:         process.env.VENDASTA_PRO_MONTHLY_SKU,
+      envVar:      'NEXT_PUBLIC_VENDASTA_MP_PRO_M',
+      sku:         process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_M,
       amountCents: 7900,
       interval:    'MONTHLY',
       tier:        'pro',
