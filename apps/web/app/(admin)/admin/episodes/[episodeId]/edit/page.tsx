@@ -1,6 +1,6 @@
 import { adminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
-import { EpisodeForm } from '../../EpisodeForm'
+import { EpisodeForm, type Pillar } from '../../EpisodeForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,6 +21,22 @@ export default async function EditEpisodePage({ params }: Props) {
 
   if (!ep) notFound()
 
+  // duration_seconds → mm:ss (or h:mm:ss) for the runtime field.
+  const secs = ep.duration_seconds
+  let duration = ''
+  if (typeof secs === 'number' && Number.isFinite(secs)) {
+    const h = Math.floor(secs / 3600)
+    const m = Math.floor((secs % 3600) / 60)
+    const s = secs % 60
+    duration = h > 0
+      ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+      : `${m}:${String(s).padStart(2, '0')}`
+  }
+
+  // Canonical pillar is the singular column; fall back to the legacy array's
+  // first entry for any older rows that only populated `pillars`.
+  const pillar = (ep.pillar ?? (Array.isArray(ep.pillars) ? ep.pillars[0] : null) ?? '') as Pillar | ''
+
   const initialValues = {
     title: ep.title ?? '',
     slug: ep.slug ?? '',
@@ -33,14 +49,16 @@ export default async function EditEpisodePage({ params }: Props) {
     guestImageUrl: ep.guest_image_url ?? '',
     muxPlaybackId: ep.mux_playback_id ?? '',
     youtubeUrl: ep.youtube_url ?? '',
+    audioUrl: ep.audio_url ?? '',
     thumbnailUrl: ep.thumbnail_url ?? '',
-    durationSeconds: ep.duration_seconds != null ? String(ep.duration_seconds) : '',
+    duration,
     transcript: ep.transcript ?? '',
     showNotes: ep.show_notes ?? '',
-    pillars: Array.isArray(ep.pillars) ? ep.pillars : [],
+    pillar,
     transistorEpisodeId: ep.transistor_episode_id ?? '',
     isMembersOnly: ep.is_members_only ?? false,
     isPublished: ep.is_published ?? false,
+    pinned: ep.pinned ?? false,
   }
 
   return (

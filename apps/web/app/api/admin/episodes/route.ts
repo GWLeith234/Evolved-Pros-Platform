@@ -13,6 +13,17 @@ function slugify(title: string): string {
     .trim()
 }
 
+// Canonical pillar set — mirrors the episodes_pillar_check / episodes_pillars_check
+// constraints. The public /podcast read path keys on the singular `pillar` column,
+// so admin writes set `pillar` and keep the legacy `pillars` array in sync.
+const PILLAR_SET = new Set([
+  'foundation', 'identity', 'mental-toughness', 'strategy', 'accountability', 'execution',
+])
+
+function normalizePillar(value: unknown): string | null {
+  return typeof value === 'string' && PILLAR_SET.has(value) ? value : null
+}
+
 export async function GET() {
   const auth = await requireAdminApi()
   if (auth instanceof Response) return auth
@@ -42,6 +53,8 @@ export async function POST(request: Request) {
 
   const isPublished = body.is_published === true
   const publishedAt = isPublished ? new Date().toISOString() : null
+  const pinned = body.pinned === true
+  const pillar = normalizePillar(body.pillar)
 
   // RLS-FIX: adminClient — episodes RLS admin-role check breaks for users
   // where auth.uid() ≠ public.users.id.
@@ -58,14 +71,19 @@ export async function POST(request: Request) {
       guest_company: typeof body.guest_company === 'string' ? body.guest_company.trim() || null : null,
       mux_playback_id: typeof body.mux_playback_id === 'string' ? body.mux_playback_id.trim() || null : null,
       youtube_url: typeof body.youtube_url === 'string' ? body.youtube_url.trim() || null : null,
+      audio_url: typeof body.audio_url === 'string' ? body.audio_url.trim() || null : null,
       thumbnail_url: typeof body.thumbnail_url === 'string' ? body.thumbnail_url.trim() || null : null,
       duration_seconds: typeof body.duration_seconds === 'number' ? body.duration_seconds : null,
       transcript: typeof body.transcript === 'string' ? body.transcript.trim() || null : null,
       guest_image_url: typeof body.guest_image_url === 'string' ? body.guest_image_url.trim() || null : null,
       show_notes: typeof body.show_notes === 'string' ? body.show_notes.trim() || null : null,
-      pillars: Array.isArray(body.pillars) ? body.pillars.filter((p): p is string => typeof p === 'string') : [],
+      // Singular `pillar` is canonical (public /podcast reads it); keep the
+      // legacy `pillars` array in sync so the admin list + any array readers agree.
+      pillar,
+      pillars: pillar ? [pillar] : [],
       transistor_episode_id: typeof body.transistor_episode_id === 'string' ? body.transistor_episode_id.trim() || null : null,
       is_members_only: body.is_members_only === true,
+      pinned,
       is_published: isPublished,
       published_at: publishedAt,
     })
@@ -73,5 +91,11 @@ export async function POST(request: Request) {
     .single()
 
   if (error || !data) return NextResponse.json({ error: error?.message ?? 'Failed to create episode' }, { status: 500 })
+
+  // Pinned is single-occupancy: clear every other row in the same write.
+  if (pinned) {
+    await adminClient.from('episodes').update({ pinned: false }).neq('id', data.id)
+  }
+
   return NextResponse.json(data, { status: 201 })
 }

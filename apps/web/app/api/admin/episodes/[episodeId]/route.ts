@@ -39,14 +39,25 @@ export async function PATCH(
   const allowed = [
     'title', 'slug', 'episode_number', 'season', 'description',
     'guest_name', 'guest_title', 'guest_company', 'guest_image_url',
-    'mux_playback_id', 'youtube_url', 'thumbnail_url',
+    'mux_playback_id', 'youtube_url', 'audio_url', 'thumbnail_url',
     'duration_seconds', 'is_published', 'transcript',
-    'show_notes', 'pillars', 'transistor_episode_id', 'is_members_only',
+    'show_notes', 'transistor_episode_id', 'is_members_only', 'pinned',
   ] as const
 
   const update: Record<string, unknown> = {}
   for (const key of allowed) {
     if (key in body) update[key] = body[key]
+  }
+
+  // Singular `pillar` is canonical (public /podcast reads it). Validate against
+  // the constraint set and keep the legacy `pillars` array in sync.
+  if ('pillar' in body) {
+    const PILLAR_SET = new Set([
+      'foundation', 'identity', 'mental-toughness', 'strategy', 'accountability', 'execution',
+    ])
+    const pillar = typeof body.pillar === 'string' && PILLAR_SET.has(body.pillar) ? body.pillar : null
+    update.pillar = pillar
+    update.pillars = pillar ? [pillar] : []
   }
 
   // Auto-set published_at when publishing for first time
@@ -63,6 +74,12 @@ export async function PATCH(
 
   if (Object.keys(update).length === 0) {
     return NextResponse.json({ error: 'No valid fields' }, { status: 422 })
+  }
+
+  // Pinned is single-occupancy: clear every other row in the same write before
+  // setting this one, so at most one episode is ever pinned.
+  if (update.pinned === true) {
+    await adminClient.from('episodes').update({ pinned: false }).neq('id', params.episodeId)
   }
 
   // RLS-FIX: adminClient — see episodes/route.ts.

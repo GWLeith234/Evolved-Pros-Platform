@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import Link from 'next/link'
 import { EpisodeThumbnail } from './EpisodeThumbnail'
 import { SyncPodcastButton } from './SyncPodcastButton'
+import { DeleteEpisodeButton } from './DeleteEpisodeButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,7 +48,7 @@ export default async function AdminEpisodesPage() {
   // drafts for admins. Service role bypasses RLS so admins see all rows.
   const { data: rows } = await adminClient
     .from('episodes')
-    .select('id, episode_number, season, title, guest_name, guest_company, thumbnail_url, duration_seconds, is_published, published_at, created_at, pillars')
+    .select('id, episode_number, season, title, guest_name, guest_company, thumbnail_url, duration_seconds, is_published, published_at, created_at, pillar, pillars, pinned')
     .order('episode_number', { ascending: false })
     .limit(200)
 
@@ -132,6 +133,9 @@ export default async function AdminEpisodesPage() {
                       )}
                       <div className="min-w-0 flex-1">
                         <p className="font-body font-semibold text-[13px] text-[#1b3c5a] truncate">
+                          {ep.pinned && (
+                            <span title="Pinned" style={{ color: '#C9A84C' }} className="mr-1">★</span>
+                          )}
                           {ep.title}
                         </p>
                         {ep.season && ep.season > 1 && (
@@ -142,7 +146,7 @@ export default async function AdminEpisodesPage() {
                   </td>
                   <td className="px-4 py-3">
                     {(() => {
-                      const key = Array.isArray(ep.pillars) ? ep.pillars[0] : null
+                      const key = ep.pillar ?? (Array.isArray(ep.pillars) ? ep.pillars[0] : null)
                       const meta = key ? PILLAR_META[key] : null
                       if (!meta) {
                         return <span className="font-condensed text-[11px] text-[#7a8a96]">—</span>
@@ -192,12 +196,15 @@ export default async function AdminEpisodesPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/admin/episodes/${ep.id}/edit`}
-                      className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#68a2b9] hover:text-[#1b3c5a] transition-colors"
-                    >
-                      Edit
-                    </Link>
+                    <div className="flex items-center justify-end gap-3">
+                      <Link
+                        href={`/admin/episodes/${ep.id}/edit`}
+                        className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#68a2b9] hover:text-[#1b3c5a] transition-colors"
+                      >
+                        Edit
+                      </Link>
+                      <DeleteEpisodeButton episodeId={ep.id} title={ep.title} />
+                    </div>
                   </td>
                 </tr>
               ))}

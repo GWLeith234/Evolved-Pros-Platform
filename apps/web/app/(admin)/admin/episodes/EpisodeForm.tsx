@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ImagePicker } from '@/components/admin/ImagePicker'
 
-type Pillar =
+export type Pillar =
   | 'foundation'
   | 'identity'
   | 'mental-toughness'
@@ -33,14 +33,16 @@ interface EpisodeFormValues {
   guestImageUrl: string
   muxPlaybackId: string
   youtubeUrl: string
+  audioUrl: string
   thumbnailUrl: string
-  durationSeconds: string
+  duration: string
   transcript: string
   showNotes: string
-  pillars: Pillar[]
+  pillar: Pillar | ''
   transistorEpisodeId: string
   isMembersOnly: boolean
   isPublished: boolean
+  pinned: boolean
 }
 
 interface EpisodeFormProps {
@@ -60,14 +62,16 @@ const DEFAULT_VALUES: EpisodeFormValues = {
   guestImageUrl: '',
   muxPlaybackId: '',
   youtubeUrl: '',
+  audioUrl: '',
   thumbnailUrl: '',
-  durationSeconds: '',
+  duration: '',
   transcript: '',
   showNotes: '',
-  pillars: [],
+  pillar: '',
   transistorEpisodeId: '',
   isMembersOnly: false,
   isPublished: false,
+  pinned: false,
 }
 
 function slugify(title: string): string {
@@ -77,6 +81,19 @@ function slugify(title: string): string {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .trim()
+}
+
+// Runtime is entered as mm:ss (or h:mm:ss) and stored as duration_seconds.
+function durationToSeconds(value: string): number | null {
+  const t = value.trim()
+  if (!t) return null
+  if (!t.includes(':')) {
+    const n = parseInt(t, 10)
+    return Number.isFinite(n) && n >= 0 ? n : null
+  }
+  const parts = t.split(':').map(p => parseInt(p, 10))
+  if (parts.some(n => !Number.isFinite(n) || n < 0)) return null
+  return parts.reduce((acc, p) => acc * 60 + p, 0)
 }
 
 function LabelledInput({
@@ -116,8 +133,9 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
   const [photoUploading, setPhotoUploading] = useState(false)
   const [photoError, setPhotoError] = useState<string | null>(null)
 
-  // Transcript generation state
-  const [audioUrl, setAudioUrl] = useState('')
+  // Transcript generation state (separate from the saved audio_url field —
+  // this is the source file fed to Whisper).
+  const [transcribeAudioUrl, setTranscribeAudioUrl] = useState('')
   const [transcribing, setTranscribing] = useState(false)
   const [transcribeError, setTranscribeError] = useState<string | null>(null)
   const [transcribeSuccess, setTranscribeSuccess] = useState(false)
@@ -141,14 +159,14 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
       setCoverError('Enter a guest name first.')
       return
     }
-    if (values.pillars.length === 0) {
-      setCoverError('Pick at least one pillar first.')
+    if (!values.pillar) {
+      setCoverError('Pick a pillar first.')
       return
     }
     setCoverLoading(true)
     try {
-      const durationSec = values.durationSeconds ? parseInt(values.durationSeconds, 10) : NaN
-      const runtime = Number.isFinite(durationSec) && durationSec > 0 ? Math.round(durationSec / 60) : undefined
+      const durationSec = durationToSeconds(values.duration)
+      const runtime = durationSec && durationSec > 0 ? Math.round(durationSec / 60) : undefined
       const res = await fetch('/api/admin/episodes/cover', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -157,7 +175,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
           guestName: values.guestName.trim(),
           guestTitle: values.guestTitle.trim() || undefined,
           runtime,
-          pillar: values.pillars[0],
+          pillar: values.pillar,
           photoUrl: values.guestImageUrl.trim(),
         }),
       })
@@ -212,9 +230,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
         ...prev,
         description: ep.description ?? prev.description,
         showNotes: merged || prev.showNotes,
-        pillars: pillarTag
-          ? Array.from(new Set([...prev.pillars, pillarTag]))
-          : prev.pillars,
+        pillar: pillarTag ?? prev.pillar,
       }))
       setAiImagePrompt(ep.image_prompt ?? null)
     } catch (err) {
@@ -243,6 +259,9 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
       const formData = new FormData()
       formData.append('file', file)
       if (episodeId) formData.append('episodeId', episodeId)
+      // Slug drives the canonical path Branding/episodes/guest-{slug}.jpg.
+      const slug = values.slug.trim() || slugify(values.title.trim())
+      if (slug) formData.append('slug', slug)
       const res = await fetch('/api/admin/upload-guest-photo', {
         method: 'POST',
         body: formData,
@@ -270,7 +289,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
       setTranscribeError('Save the episode first before generating a transcript.')
       return
     }
-    if (!audioUrl.trim()) {
+    if (!transcribeAudioUrl.trim()) {
       setTranscribeError('Enter an audio URL to generate a transcript.')
       return
     }
@@ -283,7 +302,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
       const res = await fetch('/api/admin/transcribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ episodeId, audioUrl: audioUrl.trim() }),
+        body: JSON.stringify({ episodeId, audioUrl: transcribeAudioUrl.trim() }),
       })
 
       const data = await res.json()
@@ -315,14 +334,16 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
       guest_image_url: values.guestImageUrl.trim() || null,
       mux_playback_id: values.muxPlaybackId.trim() || null,
       youtube_url: values.youtubeUrl.trim() || null,
+      audio_url: values.audioUrl.trim() || null,
       thumbnail_url: values.thumbnailUrl.trim() || null,
-      duration_seconds: values.durationSeconds ? parseInt(values.durationSeconds, 10) : null,
+      duration_seconds: durationToSeconds(values.duration),
       transcript: values.transcript.trim() || null,
       show_notes: values.showNotes.trim() || null,
-      pillars: values.pillars,
+      pillar: values.pillar || null,
       transistor_episode_id: values.transistorEpisodeId.trim() || null,
       is_members_only: values.isMembersOnly,
       is_published: values.isPublished,
+      pinned: values.pinned,
     }
 
     try {
@@ -672,6 +693,19 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
               placeholder="https://youtube.com/watch?v=..."
             />
           </LabelledInput>
+          <LabelledInput
+            label="Audio URL"
+            hint="Optional — direct link to the published audio file (MP3 / M4A) for audio-only playback."
+          >
+            <input
+              type="url"
+              value={values.audioUrl}
+              onChange={e => set('audioUrl', e.target.value)}
+              className={inputClass}
+              style={inputStyle}
+              placeholder="https://... direct link to audio file"
+            />
+          </LabelledInput>
           <ImagePicker
             label="Episode Thumbnail"
             value={values.thumbnailUrl || null}
@@ -689,7 +723,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
                   Auto Album Cover
                 </p>
                 <p className="font-condensed text-[10px]" style={{ color: '#7a8a96' }}>
-                  Generates branded key art from the guest photo + first pillar, and sets it as the thumbnail above.
+                  Generates branded key art from the guest photo + pillar, and sets it as the thumbnail above.
                 </p>
               </div>
               <button
@@ -712,17 +746,17 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
             )}
           </div>
           <LabelledInput
-            label="Duration (seconds)"
-            hint="Optional — auto-populated for Mux uploads. Enter manually for YouTube-hosted episodes."
+            label="Duration (mm:ss)"
+            hint="Enter runtime as mm:ss (or h:mm:ss). Saved as duration_seconds."
           >
             <input
-              type="number"
-              value={values.durationSeconds}
-              onChange={e => set('durationSeconds', e.target.value)}
-              min={0}
+              type="text"
+              inputMode="numeric"
+              value={values.duration}
+              onChange={e => set('duration', e.target.value)}
               className={inputClass}
               style={inputStyle}
-              placeholder="e.g. 3600 for 1 hour"
+              placeholder="e.g. 42:15"
             />
           </LabelledInput>
         </div>
@@ -750,8 +784,8 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
           <div className="flex gap-2">
             <input
               type="url"
-              value={audioUrl}
-              onChange={e => { setAudioUrl(e.target.value); setTranscribeError(null); setTranscribeSuccess(false) }}
+              value={transcribeAudioUrl}
+              onChange={e => { setTranscribeAudioUrl(e.target.value); setTranscribeError(null); setTranscribeSuccess(false) }}
               className={`flex-1 rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none transition-all`}
               style={inputStyle}
               placeholder="https://... direct link to audio file"
@@ -760,13 +794,13 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
             <button
               type="button"
               onClick={handleGenerateTranscript}
-              disabled={transcribing || !audioUrl.trim()}
+              disabled={transcribing || !transcribeAudioUrl.trim()}
               className="flex-shrink-0 font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2.5 transition-all whitespace-nowrap"
               style={{
                 backgroundColor: transcribing ? 'rgba(27,60,90,0.4)' : '#1b3c5a',
                 color: 'white',
-                opacity: !audioUrl.trim() ? 0.4 : 1,
-                cursor: transcribing || !audioUrl.trim() ? 'not-allowed' : 'pointer',
+                opacity: !transcribeAudioUrl.trim() ? 0.4 : 1,
+                cursor: transcribing || !transcribeAudioUrl.trim() ? 'not-allowed' : 'pointer',
               }}
             >
               {transcribing ? 'Generating…' : 'Generate Transcript'}
@@ -820,35 +854,19 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
         />
       </LabelledInput>
 
-      {/* Pillars */}
-      <LabelledInput label="Pillars" hint="Tag this episode with one or more EVOLVED pillars.">
-        <div className="flex flex-wrap gap-2">
-          {PILLAR_OPTIONS.map(opt => {
-            const selected = values.pillars.includes(opt.value)
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() =>
-                  set(
-                    'pillars',
-                    selected
-                      ? values.pillars.filter(p => p !== opt.value)
-                      : [...values.pillars, opt.value]
-                  )
-                }
-                className="font-condensed font-semibold uppercase tracking-wide text-[11px] rounded-full px-3 py-1.5 transition-all"
-                style={{
-                  backgroundColor: selected ? '#1b3c5a' : 'white',
-                  color: selected ? 'white' : '#1b3c5a',
-                  border: selected ? '1px solid #1b3c5a' : '1px solid rgba(27,60,90,0.2)',
-                }}
-              >
-                {opt.label}
-              </button>
-            )
-          })}
-        </div>
+      {/* Pillar */}
+      <LabelledInput label="Pillar" hint="The EVOLVED pillar this episode maps to. Shown on the public /podcast page.">
+        <select
+          value={values.pillar}
+          onChange={e => set('pillar', e.target.value as Pillar | '')}
+          className={inputClass}
+          style={inputStyle}
+        >
+          <option value="">— Select a pillar —</option>
+          {PILLAR_OPTIONS.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
       </LabelledInput>
 
       {/* Transistor episode ID */}
@@ -887,6 +905,30 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
           </span>
           <span className="font-condensed text-[10px] text-[#7a8a96]">
             If on, only VIP and Pro tiers can play this episode.
+          </span>
+        </div>
+      </div>
+
+      {/* Pinned toggle */}
+      <div className="flex items-start gap-3">
+        <button
+          type="button"
+          onClick={() => set('pinned', !values.pinned)}
+          className="relative w-10 h-5 rounded-full transition-colors flex-shrink-0 mt-0.5"
+          style={{ backgroundColor: values.pinned ? '#C9A84C' : 'rgba(27,60,90,0.15)' }}
+          aria-label="Toggle pinned"
+        >
+          <span
+            className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform"
+            style={{ transform: values.pinned ? 'translateX(22px)' : 'translateX(2px)' }}
+          />
+        </button>
+        <div>
+          <span className="font-condensed font-semibold text-[12px] text-[#1b3c5a] block">
+            Pinned ★
+          </span>
+          <span className="font-condensed text-[10px] text-[#7a8a96]">
+            Feature this episode at the top of /podcast. Pinning this one unpins any other.
           </span>
         </div>
       </div>

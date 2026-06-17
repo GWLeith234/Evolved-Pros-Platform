@@ -41,14 +41,21 @@ export async function POST(request: Request) {
     }
 
     const blob = file as Blob
-    const episodeId = formData.get('episodeId')
-    const idSegment = typeof episodeId === 'string' && episodeId.trim() ? episodeId.trim() : 'new'
-    const timestamp = Date.now()
     const fileName = 'name' in blob && typeof (blob as Record<string, unknown>).name === 'string'
       ? (blob as Record<string, unknown>).name as string
       : 'photo.jpg'
     const ext = fileName.split('.').pop()?.toLowerCase() || 'jpg'
-    const path = `episodes/guest-${idSegment}-${timestamp}.${ext}`
+
+    // Canonical path: Branding/episodes/guest-{slug}.jpg. Slug-keyed (not
+    // timestamped) so re-uploads overwrite in place instead of orphaning files.
+    // Falls back to the episode id, then 'new', when no slug is supplied.
+    const slugVal = formData.get('slug')
+    const episodeId = formData.get('episodeId')
+    const segment =
+      typeof slugVal === 'string' && slugVal.trim() ? slugVal.trim()
+      : typeof episodeId === 'string' && episodeId.trim() ? episodeId.trim()
+      : `new-${Date.now()}`
+    const path = `episodes/guest-${segment}.${ext}`
 
     const arrayBuffer = await blob.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
