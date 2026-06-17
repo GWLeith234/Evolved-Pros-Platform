@@ -26,4 +26,25 @@ export function getPillarColor(pillar: string | null): string {
   return PILLAR_CONFIG[pillar ?? '']?.color ?? '#7a8a96'
 }
 
+/**
+ * Pillar families drive the photoless cover motif:
+ *   GROUNDED (warm)  → foundation, accountability, execution
+ *   COSMIC   (cool)  → identity, mental-toughness, strategy
+ * The accent color always still comes from PILLAR_CONFIG for the specific pillar.
+ */
+export type PillarFamily = 'grounded' | 'cosmic'
+
+export const PILLAR_FAMILY: Record<string, PillarFamily> = {
+  'foundation':       'grounded',
+  'accountability':   'grounded',
+  'execution':        'grounded',
+  'identity':         'cosmic',
+  'mental-toughness': 'cosmic',
+  'strategy':         'cosmic',
+}
+
+export function getPillarFamily(pillar: string | null): PillarFamily {
+  return PILLAR_FAMILY[pillar ?? ''] ?? 'cosmic'
+}
+
 export const PILLAR_SLUGS = Object.keys(PILLAR_CONFIG)

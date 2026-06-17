@@ -19,7 +19,7 @@ import { ImageResponse } from 'next/og'
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
-import { PILLAR_CONFIG } from '@/lib/pillars'
+import { PILLAR_CONFIG, getPillarFamily } from '@/lib/pillars'
 
 // ---- Geometry (matches the existing 2:3 cover library) -------------------
 const W = 800
@@ -33,6 +33,7 @@ interface CoverBody {
   episodeNumber?: unknown
   guestName?: unknown
   guestTitle?: unknown
+  title?: unknown
   runtime?: unknown
   pillar?: unknown
   photoUrl?: unknown
@@ -93,17 +94,21 @@ export async function POST(request: Request) {
   }
 
   // ---- Validate / normalize inputs ----------------------------------------
+  // photoUrl and guestName are both OPTIONAL — a photoless episode (e.g. the
+  // Pilot) still gets a branded motif cover. Pillar remains required.
   const photoUrl = typeof body.photoUrl === 'string' ? body.photoUrl.trim() : ''
-  if (!photoUrl) return NextResponse.json({ error: 'photoUrl is required' }, { status: 422 })
-
   const guestName = typeof body.guestName === 'string' ? body.guestName.trim() : ''
-  if (!guestName) return NextResponse.json({ error: 'guestName is required' }, { status: 422 })
 
   const pillarKey = typeof body.pillar === 'string' ? body.pillar.trim() : ''
   const pillar = PILLAR_CONFIG[pillarKey]
   if (!pillar) return NextResponse.json({ error: `Unknown pillar "${pillarKey}"` }, { status: 422 })
 
+  const family = getPillarFamily(pillarKey)
   const guestTitle = typeof body.guestTitle === 'string' ? body.guestTitle.trim() : ''
+  const title = typeof body.title === 'string' ? body.title.trim() : ''
+
+  // Headline: guest name when present, else the episode title, else a safe label.
+  const headlineText = guestName || title || 'PILOT EPISODE'
 
   const epNumRaw =
     typeof body.episodeNumber === 'number'
@@ -127,24 +132,36 @@ export async function POST(request: Request) {
   const color = pillar.color
   const pillarLabel = pillar.label.toUpperCase()
 
-  // ---- Shrink the guest name to fit the bottom block width ----------------
+  // ---- Shrink the headline to fit the bottom block width ------------------
   const contentWidth = W - MARGIN * 2 // 692
-  const nameLen = Math.max(guestName.length, 1)
+  const nameLen = Math.max(headlineText.length, 1)
   // Playfair 700 averages ~0.52em advance; clamp into a sensible band.
   const nameFontSize = Math.max(36, Math.min(74, Math.floor(contentWidth / (nameLen * 0.52))))
 
-  // ---- Load assets (fonts + photo) in parallel ----------------------------
-  let photoDataUri: string
+  // ---- Photo (non-fatal): decides renderMode ------------------------------
+  // A missing photoUrl, a non-200 fetch, or any throw all degrade gracefully
+  // to the motif variant — never a 502.
+  let photoDataUri: string | null = null
+  if (photoUrl) {
+    try {
+      photoDataUri = await fetchAsDataUri(photoUrl)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      console.warn(`[episodes/cover] guest photo fetch failed — falling back to motif: ${message}`)
+    }
+  }
+  const renderMode: 'photo' | 'motif' = photoDataUri ? 'photo' : 'motif'
+
+  // ---- Load fonts (fatal) -------------------------------------------------
   let bebas: ArrayBuffer
   let barlowCond: ArrayBuffer
   let playfair: ArrayBuffer
   let barlow: ArrayBuffer
   try {
-    ;[photoDataUri, bebas, barlowCond, playfair, barlow] = await Promise.all([
-      fetchAsDataUri(photoUrl),
+    ;[bebas, barlowCond, playfair, barlow] = await Promise.all([
       loadGoogleFont('Bebas+Neue', `#THE EVOLVED PROS MIN${epNumStr}${hasRuntime ? runtimeRaw : ''}0123456789`),
       loadGoogleFont('Barlow+Condensed:wght@600', pillarLabel + SAFETY),
-      loadGoogleFont('Playfair+Display:wght@700', guestName + SAFETY),
+      loadGoogleFont('Playfair+Display:wght@700', headlineText + SAFETY),
       loadGoogleFont('Barlow:wght@500', (guestTitle || ' ') + SAFETY),
     ])
   } catch (err) {
@@ -165,18 +182,66 @@ export async function POST(request: Request) {
           backgroundColor: BASE,
         }}
       >
-        {/* Guest photo — full bleed, face biased to upper third */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={photoDataUri}
-          alt=""
-          width={W}
-          height={H}
-          style={{ position: 'absolute', top: 0, left: 0, width: W, height: H, objectFit: 'cover', objectPosition: '50% 22%' }}
-        />
+        {renderMode === 'photo' ? (
+          <>
+            {/* Guest photo — full bleed, face biased to upper third */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={photoDataUri as string}
+              alt=""
+              width={W}
+              height={H}
+              style={{ position: 'absolute', top: 0, left: 0, width: W, height: H, objectFit: 'cover', objectPosition: '50% 22%' }}
+            />
 
-        {/* Pillar-color cohesion tint (~10%) */}
-        <div style={{ position: 'absolute', top: 0, left: 0, width: W, height: H, backgroundColor: hexToRgba(color, 0.1) }} />
+            {/* Pillar-color cohesion tint (~10%) */}
+            <div style={{ position: 'absolute', top: 0, left: 0, width: W, height: H, backgroundColor: hexToRgba(color, 0.1) }} />
+          </>
+        ) : family === 'grounded' ? (
+          <>
+            {/* GROUNDED motif — warm vertical wash of the pillar accent over base */}
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: W,
+                height: H,
+                background: `linear-gradient(to bottom, ${hexToRgba(color, 0.22)} 0%, ${hexToRgba(color, 0.07)} 40%, ${BASE} 80%)`,
+              }}
+            />
+            {/* Subtle angled strata bands across the lower third */}
+            <div style={{ position: 'absolute', left: -80, bottom: 372, width: W + 160, height: 10, backgroundColor: hexToRgba(color, 0.1), transform: 'rotate(-7deg)' }} />
+            <div style={{ position: 'absolute', left: -80, bottom: 312, width: W + 160, height: 7, backgroundColor: hexToRgba(color, 0.07), transform: 'rotate(-7deg)' }} />
+            <div style={{ position: 'absolute', left: -80, bottom: 252, width: W + 160, height: 8, backgroundColor: hexToRgba(color, 0.08), transform: 'rotate(-7deg)' }} />
+            <div style={{ position: 'absolute', left: -80, bottom: 192, width: W + 160, height: 6, backgroundColor: hexToRgba(color, 0.06), transform: 'rotate(-7deg)' }} />
+          </>
+        ) : (
+          <>
+            {/* COSMIC motif — faint dot-grid + soft accent glow near top-center */}
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: W,
+                height: H,
+                backgroundImage: `radial-gradient(${hexToRgba('#FFFFFF', 0.06)} 1.5px, transparent 1.6px)`,
+                backgroundSize: '30px 30px',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: W,
+                height: H,
+                background: `radial-gradient(circle at 50% 16%, ${hexToRgba(color, 0.18)} 0%, ${hexToRgba(color, 0)} 56%)`,
+              }}
+            />
+          </>
+        )}
 
         {/* Top scrim — top 22%, dark → transparent */}
         <div
@@ -242,12 +307,12 @@ export async function POST(request: Request) {
           <div style={{ display: 'flex', fontFamily: 'Bebas Neue', fontSize: 34, letterSpacing: 6, color: GOLD }}>
             THE EVOLVED PROS
           </div>
-          {/* Guest name */}
+          {/* Headline — guest name, else episode title, else PILOT EPISODE */}
           <div style={{ display: 'flex', fontFamily: 'Playfair Display', fontWeight: 700, fontSize: nameFontSize, lineHeight: 1.05, color: '#FFFFFF', marginTop: 10 }}>
-            {guestName}
+            {headlineText}
           </div>
-          {/* Guest title */}
-          {guestTitle ? (
+          {/* Guest title — only alongside a guest name */}
+          {guestName && guestTitle ? (
             <div style={{ display: 'flex', fontFamily: 'Barlow', fontWeight: 500, fontSize: 38, color: MUTED, marginTop: 8 }}>
               {guestTitle}
             </div>

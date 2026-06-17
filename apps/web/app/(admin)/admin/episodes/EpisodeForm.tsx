@@ -151,17 +151,21 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
 
   async function handleGenerateCover() {
     setCoverError(null)
-    if (!values.guestImageUrl.trim()) {
-      setCoverError('Upload a guest photo first.')
-      return
-    }
-    if (!values.guestName.trim()) {
-      setCoverError('Enter a guest name first.')
-      return
-    }
     if (!values.pillar) {
       setCoverError('Pick a pillar first.')
       return
+    }
+    const hasPhoto = !!values.guestImageUrl.trim()
+    if (hasPhoto) {
+      // Photo variant — behaviour unchanged: a guest name is still required.
+      if (!values.guestName.trim()) {
+        setCoverError('Enter a guest name first.')
+        return
+      }
+    } else {
+      // No photo — offer the branded photoless motif instead of hard-blocking.
+      const ok = window.confirm('No guest photo set. Generate a photoless motif cover for this pillar instead?')
+      if (!ok) return
     }
     setCoverLoading(true)
     try {
@@ -172,11 +176,12 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           episodeNumber: values.episodeNumber || undefined,
-          guestName: values.guestName.trim(),
+          title: values.title.trim() || undefined,
+          guestName: values.guestName.trim() || undefined,
           guestTitle: values.guestTitle.trim() || undefined,
           runtime,
           pillar: values.pillar,
-          photoUrl: values.guestImageUrl.trim(),
+          photoUrl: hasPhoto ? values.guestImageUrl.trim() : undefined,
         }),
       })
       const data = await res.json()
