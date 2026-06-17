@@ -59,6 +59,7 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
           padding: 0,
           background: '#0A0F18',
           border: 'none',
+          borderRadius: 12,
           cursor: 'pointer',
           outline: 'none',
           overflow: 'hidden',

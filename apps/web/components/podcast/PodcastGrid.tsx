@@ -95,6 +95,7 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
       <PodcastFilterPills filter={filter} sort={sort} onFilterChange={setFilter} onSortChange={setSort} />
 
       <div
+        className="podcast-archive-grid"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
@@ -128,6 +129,7 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
             Nothing in {filter === 'all' ? 'this filter' : 'this pillar'} yet — featured episode below
           </p>
           <div
+            className="podcast-archive-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
@@ -197,6 +199,22 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
           </h3>
         </div>
       )}
+
+      {/* Archive reflow: desktop auto-fills; ≤600px drops to 2-up, then
+          1-up on the narrowest phones so nothing clips. */}
+      <style>{`
+        @media (max-width: 600px) {
+          .podcast-archive-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 24px 14px !important;
+          }
+        }
+        @media (max-width: 400px) {
+          .podcast-archive-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </section>
   )
 }
