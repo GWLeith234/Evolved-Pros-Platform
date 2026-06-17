@@ -127,6 +127,51 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
   const [aiError, setAiError] = useState<string | null>(null)
   const [aiImagePrompt, setAiImagePrompt] = useState<string | null>(null)
 
+  // Album-cover generation state
+  const [coverLoading, setCoverLoading] = useState(false)
+  const [coverError, setCoverError] = useState<string | null>(null)
+
+  async function handleGenerateCover() {
+    setCoverError(null)
+    if (!values.guestImageUrl.trim()) {
+      setCoverError('Upload a guest photo first.')
+      return
+    }
+    if (!values.guestName.trim()) {
+      setCoverError('Enter a guest name first.')
+      return
+    }
+    if (values.pillars.length === 0) {
+      setCoverError('Pick at least one pillar first.')
+      return
+    }
+    setCoverLoading(true)
+    try {
+      const durationSec = values.durationSeconds ? parseInt(values.durationSeconds, 10) : NaN
+      const runtime = Number.isFinite(durationSec) && durationSec > 0 ? Math.round(durationSec / 60) : undefined
+      const res = await fetch('/api/admin/episodes/cover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          episodeNumber: values.episodeNumber || undefined,
+          guestName: values.guestName.trim(),
+          guestTitle: values.guestTitle.trim() || undefined,
+          runtime,
+          pillar: values.pillars[0],
+          photoUrl: values.guestImageUrl.trim(),
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Could not generate cover')
+      if (!data.url) throw new Error('No cover URL returned')
+      set('thumbnailUrl', data.url)
+    } catch (e) {
+      setCoverError(e instanceof Error ? e.message : 'Could not generate cover')
+    } finally {
+      setCoverLoading(false)
+    }
+  }
+
   async function handleAIWrite() {
     const titleVal = values.title.trim()
     const guestVal = values.guestName.trim()
@@ -632,6 +677,40 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
             value={values.thumbnailUrl || null}
             onChange={url => set('thumbnailUrl', url)}
           />
+
+          {/* Auto album cover — renders branded 2:3 key art from the guest photo */}
+          <div
+            className="rounded-lg p-4"
+            style={{ backgroundColor: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.25)' }}
+          >
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-0.5" style={{ color: '#9a7d2e' }}>
+                  Auto Album Cover
+                </p>
+                <p className="font-condensed text-[10px]" style={{ color: '#7a8a96' }}>
+                  Generates branded key art from the guest photo + first pillar, and sets it as the thumbnail above.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleGenerateCover}
+                disabled={coverLoading}
+                className="flex-shrink-0 font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2 transition-all disabled:opacity-50"
+                style={{ border: '1px solid #C9A84C', color: '#9a7d2e', backgroundColor: 'transparent' }}
+              >
+                {coverLoading ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#C9A84C' }} />
+                    Rendering…
+                  </span>
+                ) : 'Generate Cover'}
+              </button>
+            </div>
+            {coverError && (
+              <p className="font-condensed text-[11px] mt-2" style={{ color: '#ef0e30' }}>{coverError}</p>
+            )}
+          </div>
           <LabelledInput
             label="Duration (seconds)"
             hint="Optional — auto-populated for Mux uploads. Enter manually for YouTube-hosted episodes."
