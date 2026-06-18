@@ -297,6 +297,33 @@ export async function fetchWeeklyLeaderboard(
   supabase: SB,
   currentUserId: string,
 ): Promise<WeeklyLeaderboardEntry[]> {
+  // Fast path: SQL aggregate (migration 048). The function name isn't in the
+  // generated types yet, so the call is cast; remove the cast after running
+  // `supabase gen types`. Falls back to in-app aggregation if the function is
+  // absent (e.g. deployed before the migration is applied).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: rpcRows, error: rpcError } = await (supabase as any)
+    .rpc('weekly_leaderboard', { p_limit: 5 })
+  if (!rpcError && Array.isArray(rpcRows)) {
+    return (rpcRows as Array<{
+      user_id: string
+      display_name: string | null
+      full_name: string | null
+      avatar_url: string | null
+      points: number | null
+      weekly_posts: number
+    }>).map((r, i) => ({
+      rank: i + 1,
+      userId: r.user_id,
+      displayName: r.display_name ?? r.full_name ?? 'Member',
+      avatarUrl: r.avatar_url ?? null,
+      points: r.points ?? 0,
+      weeklyPosts: Number(r.weekly_posts) || 0,
+      isCurrentUser: r.user_id === currentUserId,
+    }))
+  }
+
+  // Fallback: original in-app aggregation (kept until 048 is applied).
   const since = new Date(Date.now() - 7 * 86_400_000).toISOString()
 
   const { data: postRows } = await supabase
