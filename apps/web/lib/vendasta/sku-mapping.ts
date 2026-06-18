@@ -45,8 +45,10 @@ function envSkuTier(sku: string): VendastaTier | null {
   const vipAnnual  = process.env.VENDASTA_MP_VIP_Y
   const proMonthly = process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_M
   const proAnnual  = process.env.VENDASTA_MP_PRO_Y
+  const community = process.env.VENDASTA_MP_COMMUNITY
   if (sku && (sku === vipMonthly || sku === vipAnnual)) return 'vip'
   if (sku && (sku === proMonthly || sku === proAnnual)) return 'pro'
+  if (sku && sku === community) return 'community'
   return null
 }
 
