@@ -164,10 +164,11 @@ html.light-mode {
   --border-color:  rgba(27,42,74,0.12);
   --text-primary:  #1B2A4A;
   /* Reconciled to the canonical html.light-mode block in colors_and_type.css
-     (DS-TOKENS sprint). --text-secondary returns to the navy-tint token; the
-     prior #4A5868 was a WCAG-driven fork that diverged from the design system.
+     (DS-TOKENS sprint). Navy-tint token at 0.7 — ~5.4:1 on #fff and ~5.1:1 on
+     parchment, clearing WCAG AA for normal text while reading clearly lighter
+     than primary navy. (0.6 was ~3.8-4.0:1, an AA miss for body text.)
      Settings / profile form labels and helper text use these tokens. */
-  --text-secondary: rgba(27,42,74,0.6);
+  --text-secondary: rgba(27,42,74,0.7);
   --text-tertiary:  #5C6A7C;   /* 5.0:1 on #fff — AA */
 
   /* DS2 light variants (FOUNDATION-TOPNAV-V2) */

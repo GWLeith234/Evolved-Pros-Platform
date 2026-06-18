@@ -153,7 +153,7 @@ html.light-mode {
   --bg-surface:     #FFFFFF;
   --bg-elevated:    #F5F1EA;
   --text-primary:   #1B2A4A;
-  --text-secondary: rgba(27,42,74,0.6);
+  --text-secondary: rgba(27,42,74,0.7);  /* WCAG AA on white + parchment */
   --text-tertiary:  #6B7A8D;
   --border-color:   rgba(27,42,74,0.12);
   --border-emphasized: rgba(27,42,74,0.22);
