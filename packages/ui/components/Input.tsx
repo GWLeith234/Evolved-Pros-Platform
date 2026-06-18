@@ -13,7 +13,7 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 const baseInput =
   'w-full px-3 py-2.5 rounded border border-[var(--border-color)] bg-[var(--bg-elevated)] text-[var(--text-primary)] text-sm ' +
   'placeholder:text-[var(--text-tertiary)] ' +
-  'focus:outline-none focus:border-[#68a2b9] focus:ring-1 focus:ring-[rgba(104,162,185,0.2)] ' +
+  'focus:outline-none focus:border-[#68a2b9] focus:ring-2 focus:ring-[rgba(104,162,185,0.5)] ' +
   'transition-colors duration-150 ' +
   'font-body'
 

@@ -327,6 +327,14 @@ html.light-mode header a[href="/media"] {
 * { box-sizing: border-box; }
 html, body { overflow-x: hidden; }
 
+/* Keyboard focus indicator for top-nav links (inline styles can't express
+   :focus-visible). Uses the active-link token so it contrasts with the nav
+   surface in both dark and light themes. */
+.ep-topnav-link:focus-visible {
+  outline: 2px solid var(--topnav-link-active);
+  outline-offset: 2px;
+}
+
 @keyframes skeleton-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }

@@ -248,6 +248,7 @@ export function TopNav({
               <Link
                 key={item.href}
                 href={item.href}
+                className="ep-topnav-link"
                 style={{
                   position: 'relative',
                   display: 'inline-flex',

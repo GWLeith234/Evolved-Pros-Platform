@@ -87,6 +87,7 @@ export function NotifItem({ notification, variant, onRead }: NotifItemProps) {
         onClick={handleClick}
         role="button"
         tabIndex={0}
+        aria-label={`${meta.label} notification${notification.isRead ? '' : ', unread'}: ${notification.body.replace(/\*\*/g, '')}`}
         onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') void handleClick() }}
         className="px-5 py-4 cursor-pointer transition-colors"
         style={{
@@ -126,6 +127,7 @@ export function NotifItem({ notification, variant, onRead }: NotifItemProps) {
       onClick={handleClick}
       role="button"
       tabIndex={0}
+      aria-label={`${meta.label} notification${notification.isRead ? '' : ', unread'}: ${notification.title}`}
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') void handleClick() }}
       className="flex items-start gap-4 px-5 py-4 cursor-pointer rounded-lg transition-all"
       style={{
