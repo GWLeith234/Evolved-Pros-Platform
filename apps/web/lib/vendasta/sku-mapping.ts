@@ -42,9 +42,9 @@ export class UnknownSkuError extends Error {
  */
 function envSkuTier(sku: string): VendastaTier | null {
   const vipMonthly = process.env.NEXT_PUBLIC_VENDASTA_MP_VIP_M
-  const vipAnnual  = process.env.VENDASTA_VIP_ANNUAL_SKU
+  const vipAnnual  = process.env.VENDASTA_MP_VIP_Y
   const proMonthly = process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_M
-  const proAnnual  = process.env.VENDASTA_PRO_ANNUAL_SKU
+  const proAnnual  = process.env.VENDASTA_MP_PRO_Y
   if (sku && (sku === vipMonthly || sku === vipAnnual)) return 'vip'
   if (sku && (sku === proMonthly || sku === proAnnual)) return 'pro'
   return null
