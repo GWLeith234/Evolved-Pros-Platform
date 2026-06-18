@@ -1,14 +1,15 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { PodcastEpisode } from '@/lib/podcast/transforms'
 import { fmtPodcastDate, PILLAR_META } from '@/lib/podcast/transforms'
 
-const FB = 'Barlow, sans-serif'
-const FBC = 'Barlow Condensed, sans-serif'
-const FBN = 'Bebas Neue, sans-serif'
-const FP = 'Playfair Display, Georgia, serif'
+// Type tokens (PODCAST-CLEANUP S4): Bebas for display numerals, Barlow for
+// titles/body, Barlow Condensed for all-caps labels. No Playfair on platform.
+const FB = 'var(--font-barlow)'
+const FBC = 'var(--font-barlow-condensed)'
+const FBN = 'var(--font-bebas)'
 
 interface PodcastEpisodeTileProps {
   episode: PodcastEpisode
@@ -19,34 +20,23 @@ interface PodcastEpisodeTileProps {
 
 export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: PodcastEpisodeTileProps) {
   const router = useRouter()
-  const tileRef = useRef<HTMLButtonElement | null>(null)
   const [hovered, setHovered] = useState(false)
-  const [tilt, setTilt] = useState({ x: 0, y: 0 })
 
   const pillar = PILLAR_META[episode.pillar]
   const lift = focused || hovered
-  const tx = tilt.x * 6
-  const ty = tilt.y * 6
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!tileRef.current) return
-    const rect = tileRef.current.getBoundingClientRect()
-    const px = (e.clientX - rect.left) / rect.width - 0.5
-    const py = (e.clientY - rect.top) / rect.height - 0.5
-    setTilt({ x: px, y: py })
-  }
+  const isPilot = episode.episode <= 0
 
   const navigate = () => router.push(`/podcast/${episode.slug}`)
 
   return (
     <article style={{ display: 'flex', flexDirection: 'column' }}>
-      {/* POSTER — 2:3 portrait */}
+      {/* POSTER — 2:3 portrait. Flat: sharp corners, no shadow, no 3D tilt.
+          Hover lifts 4px and borders in the pillar color (PODCAST-CLEANUP S3). */}
       <button
-        ref={tileRef}
+        className="podcast-tile-cover"
         type="button"
         onMouseEnter={() => { setHovered(true); onFocus(episode.id) }}
-        onMouseLeave={() => { setHovered(false); setTilt({ x: 0, y: 0 }); onBlur() }}
-        onMouseMove={handleMouseMove}
+        onMouseLeave={() => { setHovered(false); onBlur() }}
         onFocus={() => onFocus(episode.id)}
         onBlur={onBlur}
         onClick={navigate}
@@ -57,24 +47,17 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
           width: '100%',
           aspectRatio: '2 / 3',
           padding: 0,
-          background: '#0A0F18',
-          border: 'none',
-          borderRadius: 12,
+          background: 'var(--podcast-bg-page)',
+          border: `1px solid ${lift ? pillar.color : 'var(--podcast-border-soft2)'}`,
+          borderRadius: 0,
           cursor: 'pointer',
-          outline: 'none',
           overflow: 'hidden',
-          transform: lift
-            ? `perspective(1200px) rotateY(${tx * 0.4}deg) rotateX(${-ty * 0.4}deg) translateY(-6px) scale(1.04)`
-            : 'perspective(1200px) rotateY(0) rotateX(0) translateY(0) scale(1)',
-          transition: 'transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 280ms ease',
-          boxShadow: lift
-            ? `0 24px 60px -12px rgba(0,0,0,0.7), 0 0 0 2px ${pillar.color}, 0 0 0 4px rgba(255,255,255,0.12)`
-            : '0 1px 0 rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.04)',
+          transform: lift ? 'translateY(-4px)' : 'translateY(0)',
+          transition: 'transform 200ms ease, border-color 200ms ease',
           zIndex: lift ? 2 : 1,
-          willChange: 'transform',
         }}
       >
-        {/* Cover art */}
+        {/* Cover art — subtle flat zoom on hover (no parallax/tilt) */}
         <div
           style={{
             position: 'absolute',
@@ -82,12 +65,13 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
             backgroundImage: episode.cover ? `url(${episode.cover})` : undefined,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            transform: lift ? `scale(1.08) translate(${tx * -0.6}px, ${ty * -0.6}px)` : 'scale(1) translate(0,0)',
-            transition: 'transform 380ms cubic-bezier(0.2, 0.8, 0.2, 1)',
+            transform: lift ? 'scale(1.04)' : 'scale(1)',
+            transition: 'transform 280ms ease',
           }}
         />
 
-        {/* Heavy bottom fade for poster legibility */}
+        {/* Heavy bottom fade for poster legibility — the one allowed gradient
+            (functional scrim, not decoration). */}
         <div
           style={{
             position: 'absolute',
@@ -96,19 +80,39 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
           }}
         />
 
-        {/* Pillar accent wash on hover */}
+        {/* Pillar accent wash on hover — flat tint, no gradient */}
         <div
           style={{
             position: 'absolute',
             inset: 0,
-            background: `linear-gradient(135deg, ${pillar.color}1F 0%, transparent 55%)`,
+            background: `color-mix(in srgb, ${pillar.color} 10%, transparent)`,
             opacity: lift ? 1 : 0,
             transition: 'opacity 240ms ease',
           }}
         />
 
-        {/* TOP-LEFT: episode number */}
-        {episode.episode > 0 && (
+        {/* TOP-LEFT: episode number, or PILOT chip for the pilot */}
+        {isPilot ? (
+          <span
+            style={{
+              position: 'absolute',
+              top: 14,
+              left: 16,
+              padding: '3px 7px',
+              background: 'rgba(10,15,24,0.7)',
+              color: 'var(--brand-gold)',
+              border: '1px solid color-mix(in srgb, var(--brand-gold) 45%, transparent)',
+              backdropFilter: 'blur(8px)',
+              fontFamily: FBC,
+              fontWeight: 800,
+              fontSize: 12,
+              letterSpacing: '0.22em',
+              textTransform: 'uppercase',
+            }}
+          >
+            Pilot
+          </span>
+        ) : (
           <div
             style={{
               position: 'absolute',
@@ -121,12 +125,11 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
           >
             <span
               style={{
-                fontFamily: FP,
-                fontStyle: 'italic',
-                fontWeight: 400,
+                fontFamily: FBN,
                 fontSize: 22,
-                color: '#C9A84C',
+                color: 'var(--brand-gold)',
                 lineHeight: 1,
+                letterSpacing: '0.04em',
                 textShadow: '0 1px 6px rgba(0,0,0,0.6)',
               }}
             >
@@ -164,7 +167,7 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
             <span
               style={{
                 padding: '3px 7px',
-                background: '#C9302A',
+                background: 'var(--brand-red)',
                 color: '#fff',
                 fontFamily: FBC,
                 fontWeight: 800,
@@ -181,8 +184,8 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
               style={{
                 padding: '3px 7px',
                 background: 'rgba(10,15,24,0.7)',
-                color: '#0ABFA3',
-                border: '1px solid rgba(10,191,163,0.45)',
+                color: 'var(--brand-teal)',
+                border: '1px solid color-mix(in srgb, var(--brand-teal) 45%, transparent)',
                 backdropFilter: 'blur(8px)',
                 fontFamily: FBC,
                 fontWeight: 700,
@@ -196,7 +199,7 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
           )}
         </div>
 
-        {/* CENTER: play button on hover */}
+        {/* CENTER: play button on hover — round control exception, no glow */}
         <span
           aria-hidden="true"
           style={{
@@ -208,13 +211,12 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
             width: 64,
             height: 64,
             borderRadius: '50%',
-            background: '#ef0e30',
+            background: 'var(--brand-red)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: '#fff',
-            boxShadow: '0 12px 36px rgba(239,14,48,0.5), 0 0 0 8px rgba(255,255,255,0.08)',
-            transition: 'all 240ms cubic-bezier(0.2, 0.8, 0.2, 1)',
+            transition: 'transform 240ms ease, opacity 240ms ease',
             pointerEvents: 'none',
           }}
         >
@@ -308,13 +310,13 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
       </button>
 
       {/* META BELOW POSTER (Apple TV pattern) */}
-      <div style={{ padding: '14px 2px 0' }}>
+      <div style={{ padding: '16px 2px 0' }}>
         <h3
           style={{
             margin: 0,
-            fontFamily: FP,
+            fontFamily: FB,
             fontSize: 16,
-            fontWeight: 700,
+            fontWeight: 600,
             lineHeight: 1.25,
             color: 'var(--podcast-text-strong)',
             display: '-webkit-box',

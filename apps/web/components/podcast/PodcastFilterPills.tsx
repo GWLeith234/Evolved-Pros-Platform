@@ -2,20 +2,19 @@
 
 import { useState } from 'react'
 import type { PodcastPillar } from '@/lib/podcast/transforms'
+import { PILLAR_META, PILLAR_ORDER } from '@/lib/podcast/transforms'
 
-const FBC = 'Barlow Condensed, sans-serif'
+const FBC = 'var(--font-barlow-condensed)'
 
 export type FilterKey = PodcastPillar | 'all'
 export type SortKey = 'newest' | 'oldest' | 'longest'
 
+// Filter pills read straight from the single CATEGORY → pillar token map, so
+// pill / badge / dot colors can never diverge (PODCAST-CLEANUP S2). "All" uses
+// the brand gold accent.
 const FILTERS: Array<{ key: FilterKey; label: string; color: string }> = [
-  { key: 'all',              label: 'All episodes',     color: '#C9A84C' },
-  { key: 'foundation',       label: 'Foundation',       color: '#FFA538' },
-  { key: 'identity',         label: 'Identity',         color: '#A78BFA' },
-  { key: 'mental-toughness', label: 'Mental Toughness', color: '#F87171' },
-  { key: 'strategy',         label: 'Strategy',         color: '#60A5FA' },
-  { key: 'accountability',   label: 'Accountability',   color: '#C9A84C' },
-  { key: 'execution',        label: 'Execution',        color: '#0ABFA3' },
+  { key: 'all', label: 'All episodes', color: 'var(--brand-gold)' },
+  ...PILLAR_ORDER.map(p => ({ key: p as FilterKey, label: PILLAR_META[p].label, color: PILLAR_META[p].color })),
 ]
 
 const SORTS: Array<{ key: SortKey; label: string }> = [
@@ -29,10 +28,6 @@ interface PodcastFilterPillsProps {
   sort: SortKey
   onFilterChange: (f: FilterKey) => void
   onSortChange: (s: SortKey) => void
-}
-
-function withAlpha(hex: string, alphaHex: string): string {
-  return `${hex}${alphaHex}`
 }
 
 function ChevronDown() {
@@ -80,8 +75,9 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
               alignItems: 'center',
               padding: '0 14px',
               background: active ? f.color : 'transparent',
-              color: active ? '#0A0F18' : f.color,
-              border: `1px solid ${active ? f.color : withAlpha(f.color, '66')}`,
+              color: active ? 'var(--bg-page)' : f.color,
+              border: `1px solid ${active ? f.color : `color-mix(in srgb, ${f.color} 40%, transparent)`}`,
+              borderRadius: 0,
               fontFamily: FBC,
               fontWeight: 700,
               fontSize: 12,
@@ -122,6 +118,7 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
               background: 'var(--podcast-bg-surface)',
               color: 'var(--podcast-text-strong)',
               border: '1px solid var(--podcast-border-strong)',
+              borderRadius: 0,
               fontFamily: FBC,
               fontWeight: 700,
               fontSize: 12,
@@ -149,7 +146,6 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
                 minWidth: 200,
                 background: 'var(--podcast-bg-surface)',
                 border: '1px solid var(--podcast-border-strong)',
-                boxShadow: '0 12px 32px -12px rgba(0,0,0,0.45)',
                 zIndex: 10,
               }}
             >

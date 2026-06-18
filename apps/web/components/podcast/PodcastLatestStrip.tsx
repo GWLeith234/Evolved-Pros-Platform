@@ -4,9 +4,8 @@ import { useState } from 'react'
 import type { PodcastEpisode } from '@/lib/podcast/transforms'
 import { fmtPodcastDate } from '@/lib/podcast/transforms'
 
-const FB = 'Barlow, sans-serif'
-const FBC = 'Barlow Condensed, sans-serif'
-const FP = 'Playfair Display, Georgia, serif'
+const FB = 'var(--font-barlow)'
+const FBC = 'var(--font-barlow-condensed)'
 
 interface PodcastLatestStripProps {
   episode: PodcastEpisode
@@ -32,7 +31,7 @@ export function PodcastLatestStrip({ episode }: PodcastLatestStripProps) {
       <div
         className="flex items-center px-4 sm:px-[18px] py-2 sm:py-0 text-[12px] sm:text-[12px]"
         style={{
-          background: '#C9302A',
+          background: 'var(--brand-red)',
           color: '#fff',
           fontFamily: FBC,
           fontWeight: 800,
@@ -48,8 +47,8 @@ export function PodcastLatestStrip({ episode }: PodcastLatestStripProps) {
         <span
           className="text-[14px] sm:text-base"
           style={{
-            fontFamily: FP,
-            fontWeight: 700,
+            fontFamily: FB,
+            fontWeight: 600,
             color: 'var(--podcast-text-strong)',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
@@ -74,7 +73,7 @@ export function PodcastLatestStrip({ episode }: PodcastLatestStripProps) {
         onMouseLeave={() => setHover(false)}
         className="inline-flex items-center justify-center gap-2 min-h-[44px] sm:min-h-0 px-6 sm:px-[22px] py-2 sm:py-0 text-[12px]"
         style={{
-          background: hover ? '#a8231f' : '#C9302A',
+          background: hover ? 'var(--brand-red-hover)' : 'var(--brand-red)',
           color: '#fff',
           fontFamily: FBC,
           fontWeight: 800,

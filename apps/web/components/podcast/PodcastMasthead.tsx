@@ -1,7 +1,6 @@
-const FB = 'Barlow, sans-serif'
-const FBC = 'Barlow Condensed, sans-serif'
-const FBN = 'Bebas Neue, sans-serif'
-const FP = 'Playfair Display, Georgia, serif'
+const FB = 'var(--font-barlow)'
+const FBC = 'var(--font-barlow-condensed)'
+const FBN = 'var(--font-bebas)'
 
 export function PodcastMasthead() {
   return (
@@ -40,13 +39,12 @@ export function PodcastMasthead() {
           lineHeight: 1,
         }}
       >
-        The Podcast
+        The podcast
       </h1>
       <p
         style={{
           margin: 0,
-          fontFamily: FP,
-          fontStyle: 'italic',
+          fontFamily: FB,
           fontSize: 16,
           lineHeight: 1.5,
           color: 'var(--podcast-text-2)',
