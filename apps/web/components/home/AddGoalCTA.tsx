@@ -13,7 +13,7 @@ export function AddGoalCTA({ href = '/settings#goals' }: AddGoalCTAProps) {
   return (
     <Link
       href={href}
-      className="block rounded-lg px-4 py-3 text-center transition-colors"
+      className="block px-4 py-3 text-center transition-colors"
       style={{
         border: '1px dashed rgba(27,60,90,0.25)',
         backgroundColor: 'rgba(27,60,90,0.02)',

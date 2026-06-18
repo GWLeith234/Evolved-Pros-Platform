@@ -180,7 +180,7 @@ export function ActivityFeed({ notifications, completions, posts = [] }: Activit
                     <>
                       {/* Icon tile */}
                       <div
-                        className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+                        className="flex-shrink-0 w-8 h-8 flex items-center justify-center"
                         style={{ backgroundColor: 'rgba(10,191,163,0.12)', color: '#0ABFA3', marginTop: '1px' }}
                       >
                         <PencilIcon />

@@ -24,7 +24,7 @@ const BASE_STYLE: React.CSSProperties = {
   fontWeight: 700,
   letterSpacing: '0.06em',
   textTransform: 'uppercase',
-  borderRadius: '4px',
+  borderRadius: '0',
   cursor: 'pointer',
   transition: 'opacity 0.15s, background-color 0.15s',
   display: 'inline-flex',

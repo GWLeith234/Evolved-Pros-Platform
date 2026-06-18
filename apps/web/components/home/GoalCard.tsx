@@ -97,7 +97,7 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
 
   return (
     <div
-      className="rounded-lg overflow-hidden bg-white"
+      className="overflow-hidden bg-white"
       style={{
         border: '1px solid rgba(27,60,90,0.1)',
         borderLeft: `3px solid ${accentColor}`,
@@ -109,7 +109,7 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
             {goal.title}
           </span>
           <span
-            className="font-condensed text-[12px] font-bold tracking-[0.12em] uppercase rounded px-1.5 py-0.5 shrink-0"
+            className="font-condensed text-[12px] font-bold tracking-[0.12em] uppercase px-1.5 py-0.5 shrink-0"
             style={{ color: accentColor, backgroundColor: `${accentColor}1f` }}
           >
             {goal.period}
@@ -132,11 +132,11 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
         </div>
 
         <div
-          className="w-full rounded-full overflow-hidden"
+          className="w-full overflow-hidden"
           style={{ height: 4, backgroundColor: 'rgba(27,60,90,0.08)' }}
         >
           <div
-            className="h-full rounded-full transition-all"
+            className="h-full transition-all"
             style={{ width: `${goal.progress_pct}%`, backgroundColor: accentColor }}
           />
         </div>
@@ -148,7 +148,7 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
                 threshold is crossed mid-hydration — suppress the resulting
                 #425 warning; the value re-renders correctly on first effect. */}
             <span
-              className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] px-2 py-0.5 rounded"
+              className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] px-2 py-0.5"
               style={STATUS_STYLE[pace.status]}
               suppressHydrationWarning
             >

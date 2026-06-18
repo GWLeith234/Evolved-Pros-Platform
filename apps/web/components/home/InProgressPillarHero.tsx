@@ -43,7 +43,7 @@ export function InProgressPillarHero({
 
   return (
     <div
-      className="relative rounded-lg overflow-hidden bg-white p-6"
+      className="relative overflow-hidden bg-white p-6"
       style={{ border: '1px solid rgba(27,60,90,0.1)' }}
     >
       {/* Pillar accent strip */}
@@ -55,7 +55,7 @@ export function InProgressPillarHero({
       {/* DAY N OF 21 stamp */}
       {dayOfTwentyOne !== null && (
         <span
-          className="absolute font-condensed font-bold uppercase tracking-[0.18em] text-[12px] px-2 py-1 rounded"
+          className="absolute font-condensed font-bold uppercase tracking-[0.18em] text-[12px] px-2 py-1"
           style={{
             top: 12, right: 12,
             color: cfg.color,
@@ -94,11 +94,11 @@ export function InProgressPillarHero({
       {/* Progress bar */}
       <div className="mb-1">
         <div
-          className="w-full rounded-full overflow-hidden"
+          className="w-full overflow-hidden"
           style={{ height: 6, backgroundColor: 'rgba(27,60,90,0.08)' }}
         >
           <div
-            className="h-full rounded-full transition-all"
+            className="h-full transition-all"
             style={{ width: `${pillar.progressPct}%`, backgroundColor: cfg.color }}
           />
         </div>
@@ -118,7 +118,7 @@ export function InProgressPillarHero({
       {/* NEXT UP preview */}
       {nextLessonTitle && (
         <div
-          className="mt-4 rounded p-3"
+          className="mt-4 p-3"
           style={{ background: cfg.colorMuted, border: `1px solid ${cfg.color}33` }}
         >
           <p
@@ -135,7 +135,7 @@ export function InProgressPillarHero({
 
       <Link
         href={ctaHref}
-        className="mt-4 inline-flex items-center justify-center w-full font-condensed font-bold uppercase tracking-[0.14em] text-[12px] py-2.5 rounded transition-opacity hover:opacity-90"
+        className="mt-4 inline-flex items-center justify-center w-full font-condensed font-bold uppercase tracking-[0.14em] text-[12px] py-2.5 transition-opacity hover:opacity-90"
         style={{ backgroundColor: cfg.color, color: '#fff' }}
       >
         Continue →

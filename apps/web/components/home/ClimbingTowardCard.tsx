@@ -26,7 +26,7 @@ export function ClimbingTowardCard({ pillar, courseSlug }: ClimbingTowardCardPro
   return (
     <Link
       href={`/academy/${courseSlug}`}
-      className="block rounded-lg p-5 bg-white transition-opacity hover:opacity-100"
+      className="block p-5 bg-white transition-opacity hover:opacity-100"
       style={{
         border: '1px solid rgba(27,60,90,0.08)',
         opacity: 0.85,

@@ -40,7 +40,7 @@ export function ProfileCompletePrompt({ hasAvatar, hasBio, hasTitle, hasName }: 
 
   return (
     <div
-      className="relative flex items-start gap-4 rounded-lg p-4"
+      className="relative flex items-start gap-4 p-4"
       style={{
         backgroundColor: 'rgba(104,162,185,0.08)',
         border: '1px solid rgba(104,162,185,0.2)',
@@ -48,7 +48,7 @@ export function ProfileCompletePrompt({ hasAvatar, hasBio, hasTitle, hasName }: 
     >
       {/* Icon */}
       <div
-        className="flex-shrink-0 w-8 h-8 rounded flex items-center justify-center"
+        className="flex-shrink-0 w-8 h-8 flex items-center justify-center"
         style={{ backgroundColor: 'rgba(104,162,185,0.15)' }}
       >
         <svg

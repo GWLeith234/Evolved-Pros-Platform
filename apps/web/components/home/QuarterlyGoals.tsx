@@ -80,14 +80,14 @@ export function QuarterlyGoals({ goals, editHref = '#' }: QuarterlyGoalsProps) {
               return (
                 <div
                   key={goal.id}
-                  className="rounded-lg border border-[rgba(27,60,90,0.08)] bg-white px-3 py-3"
+                  className="border border-[rgba(27,60,90,0.08)] bg-white px-3 py-3"
                 >
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <span className="font-body font-bold text-[12px] leading-snug text-[#1b3c5a]">
                       {goal.title}
                     </span>
                     <span
-                      className="font-condensed text-[12px] font-bold tracking-[0.12em] uppercase rounded px-1.5 py-0.5 shrink-0"
+                      className="font-condensed text-[12px] font-bold tracking-[0.12em] uppercase px-1.5 py-0.5 shrink-0"
                       style={{ color, backgroundColor: `${color}1f` }}
                     >
                       {goal.period}
@@ -110,11 +110,11 @@ export function QuarterlyGoals({ goals, editHref = '#' }: QuarterlyGoalsProps) {
                     )}
                   </div>
                   <div
-                    className="w-full rounded-full overflow-hidden"
+                    className="w-full overflow-hidden"
                     style={{ height: '4px', backgroundColor: 'rgba(27,60,90,0.08)' }}
                   >
                     <div
-                      className="h-full rounded-full transition-all"
+                      className="h-full transition-all"
                       style={{ width: `${goal.progress_pct}%`, backgroundColor: color }}
                     />
                   </div>

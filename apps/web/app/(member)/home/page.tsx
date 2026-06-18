@@ -844,7 +844,7 @@ export default async function MemberHomePage() {
           </p>
           {goalsForCards.length === 0 ? (
             <div
-              className="rounded-lg p-5 bg-white text-center"
+              className="p-5 bg-white text-center"
               style={{ border: '1px solid rgba(27,60,90,0.1)' }}
             >
               <p className="font-condensed text-[12px] mb-3" style={{ color: '#7a8a96' }}>

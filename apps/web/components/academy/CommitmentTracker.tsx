@@ -129,7 +129,7 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
   const hasSaved = savedCommitments.length > 0
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '20px' }}>
+    <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '0', padding: '20px' }}>
       {/* Header */}
       <div style={{ marginBottom: '16px' }}>
         <p style={{
@@ -176,7 +176,7 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
             >
               {/* Checkbox */}
               <div style={{
-                flexShrink: 0, width: '20px', height: '20px', borderRadius: '4px',
+                flexShrink: 0, width: '20px', height: '20px', borderRadius: '0',
                 backgroundColor: c.is_completed ? CRIMSON : 'transparent',
                 border: `2px solid ${c.is_completed ? CRIMSON : 'rgba(255,255,255,0.2)'}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -232,7 +232,7 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
               style={{
                 backgroundColor: 'var(--bg-elevated)',
                 border: `1px solid ${val.trim() ? CRIMSON + '55' : 'var(--border-color)'}`,
-                borderRadius: '4px', padding: '9px 12px',
+                borderRadius: '0', padding: '9px 12px',
                 color: 'var(--text-primary)', fontSize: '13px', outline: 'none',
                 fontFamily: 'inherit', transition: 'border-color 0.2s',
               }}
@@ -247,7 +247,7 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
               color: inputs.some(s => s.trim()) ? '#0A0F18' : 'rgba(255,255,255,0.2)',
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
-              padding: '10px', borderRadius: '4px', border: 'none',
+              padding: '10px', borderRadius: '0', border: 'none',
               cursor: inputs.some(s => s.trim()) ? 'pointer' : 'default',
               marginTop: '4px', transition: 'all 0.15s',
             }}

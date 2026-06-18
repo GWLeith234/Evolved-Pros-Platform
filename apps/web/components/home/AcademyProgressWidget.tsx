@@ -60,11 +60,11 @@ export function AcademyProgressWidget({ courses }: AcademyProgressWidgetProps) {
                 </div>
                 {/* Progress bar */}
                 <div
-                  className="w-full rounded-full overflow-hidden"
+                  className="w-full overflow-hidden"
                   style={{ height: '3px', backgroundColor: 'rgba(27,60,90,0.12)' }}
                 >
                   <div
-                    className="h-full rounded-full transition-all"
+                    className="h-full transition-all"
                     style={{ width: `${course.pct}%`, backgroundColor: fillColor }}
                   />
                 </div>

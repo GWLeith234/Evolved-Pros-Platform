@@ -22,7 +22,7 @@ export function PillarJourneyStrip({ pillars }: PillarJourneyStripProps) {
   const inProgress  = pillars.find(p => p.state === 'in-progress')
 
   return (
-    <div className="rounded-lg p-4 bg-white" style={{ border: '1px solid rgba(27,60,90,0.1)' }}>
+    <div className="p-4 bg-white" style={{ border: '1px solid rgba(27,60,90,0.1)' }}>
       <p
         className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] mb-3"
         style={{ color: '#7a8a96' }}
