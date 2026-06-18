@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { createHmac, timingSafeEqual } from 'crypto'
+import { timingSafeEqual } from 'crypto'
 import { adminClient } from '@/lib/supabase/admin'
 import { mapSkuToTier, UnknownSkuError, type VendastaTier } from '@/lib/vendasta/sku-mapping'
 import { sendVendastaWelcomeEmail } from '@/lib/resend/emails/vendasta-welcome'
@@ -70,21 +70,6 @@ function isDuplicateKeyError(err: unknown): boolean {
   return false
 }
 
-/** Verify the optional HMAC signature against the raw body. Returns null
- *  when verification passes (or is skipped). Returns a 401 Response when
- *  verification fails. */
-function verifyHmac(rawBody: string, signature: string | null): Response | null {
-  const secret = process.env.VENDASTA_WEBHOOK_SECRET
-  if (!secret || !signature) return null   // not configured / not provided → fall through
-
-  const expected = createHmac('sha256', secret).update(rawBody).digest('hex')
-  const a = Buffer.from(signature)
-  const b = Buffer.from(expected)
-  if (a.length !== b.length || !timingSafeEqual(a, b)) {
-    return Response.json({ error: 'Invalid signature' }, { status: 401 })
-  }
-  return null
-}
 
 // ---------------------------------------------------------------------------
 // enrichPayload — Vendasta's real automation webhooks only carry
@@ -191,16 +176,13 @@ export async function POST(request: Request) {
   // Read the raw body once — request.json() consumes the stream and we need
   // the exact bytes that were signed for HMAC verification.
   const rawBody = await request.text()
-  const sigHeader = request.headers.get('x-vendasta-signature')
-  const sigError = verifyHmac(rawBody, sigHeader)
-  if (sigError) return sigError
-
+  
   let payload: VendastaPayload
   try {
     payload = JSON.parse(rawBody) as VendastaPayload
   } catch {
     console.error('[Vendasta Webhook] Invalid JSON body')
-    return Response.json({ error: 'Invalid JSON' }, { status: 500 })
+    return Response.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
   // 1) VERIFY TOKEN — header preferred, body fallback. Always required.
