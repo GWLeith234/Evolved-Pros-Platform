@@ -134,7 +134,7 @@ export function PodcastReelTile({ episodes, latestEpisodeNumber }: PodcastReelTi
                         position: 'absolute',
                         top: -4,
                         right: -4,
-                        background: '#ef0e30',
+                        background: 'var(--brand-red-hover)',
                         color: '#fff',
                         fontFamily: '"Barlow Condensed", sans-serif',
                         fontWeight: 800,

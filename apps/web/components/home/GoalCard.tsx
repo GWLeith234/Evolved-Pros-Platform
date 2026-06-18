@@ -78,7 +78,7 @@ function computePace(period: string, progressPct: number, now: Date = new Date()
 const STATUS_STYLE: Record<PaceInfo['status'], { bg: string; color: string }> = {
   'on-track': { bg: 'rgba(34,197,94,0.10)',  color: '#15803d' },
   'ahead':    { bg: 'rgba(10,191,163,0.10)', color: '#0ABFA3' },
-  'behind':   { bg: 'rgba(239,14,48,0.08)',  color: '#ef0e30' },
+  'behind':   { bg: 'rgba(239,14,48,0.08)',  color: 'var(--brand-red-hover)' },
 }
 
 export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }: GoalCardProps) {
@@ -125,7 +125,7 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
           </span>
           <span
             className="font-condensed font-bold tracking-[0.1em] text-[12px]"
-            style={{ color: goal.weekly_delta < 0 ? '#ef0e30' : accentColor }}
+            style={{ color: goal.weekly_delta < 0 ? 'var(--brand-red-hover)' : accentColor }}
           >
             {deltaArrow} {deltaSign}{goal.weekly_delta}% wk
           </span>

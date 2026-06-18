@@ -76,13 +76,16 @@ function ClientTimeAgo({ dateStr }: { dateStr: string }) {
   return <>{ago}</>
 }
 
+// Notification dot colors resolve to palette tokens (no orphan hexes).
+// Community/system notices use the Community Pulse accent for cross-component
+// agreement; event reminders use the one urgent/live red; course unlocks gold.
 const DOT_COLORS: Record<string, string> = {
-  community_reply: '#68a2b9',
-  community_mention: '#68a2b9',
-  event_reminder: '#ef0e30',
-  course_unlock: '#c9a84c',
-  system_billing: '#68a2b9',
-  system_general: '#68a2b9',
+  community_reply: 'var(--tile-community)',
+  community_mention: 'var(--tile-community)',
+  event_reminder: 'var(--brand-red-hover)',
+  course_unlock: 'var(--brand-gold)',
+  system_billing: 'var(--tile-community)',
+  system_general: 'var(--tile-community)',
 }
 
 function buildItems(notifications: NotificationRow[], completions: CompletionRow[], posts: PostRow[]): FeedItem[] {
@@ -104,7 +107,7 @@ function buildItems(notifications: NotificationRow[], completions: CompletionRow
     items.push({
       kind: 'other',
       id: `notif-${n.id}`,
-      dotColor: DOT_COLORS[n.type] ?? '#68a2b9',
+      dotColor: DOT_COLORS[n.type] ?? 'var(--tile-community)',
       richParts: [{ label: n.body, bold: false }],
       time: n.created_at,
       actionUrl: n.action_url ?? '/home',
@@ -121,7 +124,7 @@ function buildItems(notifications: NotificationRow[], completions: CompletionRow
     items.push({
       kind: 'other',
       id: `progress-${c.lesson_id}`,
-      dotColor: '#c9a84c',
+      dotColor: 'var(--brand-gold)',
       richParts: [
         { label: 'You completed Lesson ', bold: false },
         { label: `${lessonNum}`, bold: true },

@@ -16,7 +16,8 @@ type SponsorAd = {
 }
 
 // Pillar-rotation accent palette mirrors the home SponsorRail design.
-const ACCENTS = ['#3FB8E8', '#E8B547', '#A78BFA']
+// Canonical pillar hexes: Strategy blue / Accountability gold / Identity violet.
+const ACCENTS = ['#60A5FA', '#C9A84C', '#A78BFA']
 
 export function HomeSponsorAd() {
   const [ad, setAd] = useState<SponsorAd | null>(null)

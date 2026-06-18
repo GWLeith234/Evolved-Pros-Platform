@@ -8,6 +8,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { MarvelSkyScene, type MarvelScenePeriod } from './scenes/MarvelSkyScene'
+import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
 // ── Public props (v2 shape kept; new fields optional) ──────────────────────
 
@@ -35,18 +36,19 @@ interface WelcomeBannerProps {
   now?: Date
 }
 
-// ── Architecture-column pillar palette (from welcome-banner.jsx DEFAULT_PILLARS) ──
-// These are the JSX's locked accent colors for the Architecture column. They
-// differ slightly from the project's PILLAR_CONFIG (e.g. orange #D4862B vs
-// #FFA538). Kept in sync with the JSX so the hero matches the design ref.
+// ── Architecture-column pillar labels ──
+// One color per pillar, sourced from the canonical PILLAR_CONFIG (= --pillar-N
+// tokens) for both breakpoints. The desktop palette previously forked here
+// (e.g. orange #D4862B vs the canonical #FFA538), rendering the same pillar in
+// two different hues by breakpoint — collapsed to a single source of truth.
 
-const ARCH_PILLARS: Record<1 | 2 | 3 | 4 | 5 | 6, { short: string; color: string; mobileColor: string; label: string }> = {
-  1: { short: 'Foundtn.', color: '#D4862B', mobileColor: '#FFA538', label: 'Foundation' },
-  2: { short: 'Identity', color: '#A86CFF', mobileColor: '#A78BFA', label: 'Identity' },
-  3: { short: 'Mental',   color: '#ef0e30', mobileColor: '#F87171', label: 'Mental Toughness' },
-  4: { short: 'Strategy', color: '#3FB8E8', mobileColor: '#60A5FA', label: 'Strategy' },
-  5: { short: 'Account.', color: '#E8B547', mobileColor: '#C9A84C', label: 'Accountability' },
-  6: { short: 'Exec.',    color: '#19C9A6', mobileColor: '#0ABFA3', label: 'Execution' },
+const ARCH_PILLARS: Record<1 | 2 | 3 | 4 | 5 | 6, { short: string; label: string }> = {
+  1: { short: 'Foundtn.', label: 'Foundation' },
+  2: { short: 'Identity', label: 'Identity' },
+  3: { short: 'Mental',   label: 'Mental Toughness' },
+  4: { short: 'Strategy', label: 'Strategy' },
+  5: { short: 'Account.', label: 'Accountability' },
+  6: { short: 'Exec.',    label: 'Execution' },
 }
 
 // Tier colors from welcome-banner.jsx (line 187-191).
@@ -111,13 +113,12 @@ interface ArchPillar {
   short: string
   full: string
   color: string
-  mobileColor: string
   earned: boolean
   progress: number
 }
 
 function PillarRow({ pillar }: { pillar: ArchPillar }) {
-  const { earned, color, mobileColor, num, short, full, progress } = pillar
+  const { earned, color, num, short, full, progress } = pillar
   const inProgress = !earned && progress > 0
   const size = 18
   const innerR = size / 2 - 1.5
@@ -239,8 +240,8 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
           width: 10,
           height: 10,
           borderRadius: '50%',
-          background: mobileColor,
-          boxShadow: earned ? `0 0 6px ${mobileColor}99` : 'none',
+          background: color,
+          boxShadow: earned ? `0 0 6px ${color}99` : 'none',
           opacity: earned || inProgress ? 1 : 0.4,
           flexShrink: 0,
         }}
@@ -270,7 +271,7 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
           style={{
             fontFamily: '"Bebas Neue", sans-serif',
             fontSize: 13,
-            color: mobileColor,
+            color: color,
             fontVariantNumeric: 'tabular-nums',
             flexShrink: 0,
           }}
@@ -286,7 +287,7 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
             fontSize: 11,
             letterSpacing: '0.18em',
             textTransform: 'uppercase',
-            color: mobileColor,
+            color: color,
             flexShrink: 0,
           }}
         >
@@ -478,7 +479,7 @@ export function WelcomeBanner({
         const conf = ARCH_PILLARS[num]
         const earned = src?.state === 'earned'
         const progress = src?.state === 'in-progress' ? src.progressPct ?? 0 : earned ? 100 : 0
-        return { num, short: conf.short, full: conf.label, color: conf.color, mobileColor: conf.mobileColor, earned, progress }
+        return { num, short: conf.short, full: conf.label, color: PILLAR_CONFIG[num].color, earned, progress }
       }),
     [pillars],
   )
@@ -497,7 +498,7 @@ export function WelcomeBanner({
     const ageDays = (now.getTime() - new Date(newest.earnedAt!).getTime()) / 86400000
     if (ageDays >= 7) return null
     const conf = ARCH_PILLARS[newest.number]
-    return { num: newest.number, color: conf.color, label: conf.label }
+    return { num: newest.number, color: PILLAR_CONFIG[newest.number].color, label: conf.label }
   }, [pillars, now])
 
   return (
@@ -586,7 +587,7 @@ export function WelcomeBanner({
                   width: 128,
                   height: 128,
                   borderRadius: '50%',
-                  background: '#ef0e30',
+                  background: 'var(--brand-red)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',

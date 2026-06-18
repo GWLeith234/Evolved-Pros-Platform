@@ -75,7 +75,7 @@ function EventItem({ event, userId }: { event: EventRow; userId: string }) {
         </span>
         <span
           className="font-condensed font-bold uppercase text-[12px] tracking-wide"
-          style={{ color: '#ef0e30' }}
+          style={{ color: 'var(--brand-red-hover)' }}
         >
           {month}
         </span>

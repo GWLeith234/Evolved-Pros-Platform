@@ -118,7 +118,7 @@ export function TopStoriesTile({ stories }: TopStoriesTileProps) {
                         letterSpacing: '0.22em',
                         textTransform: 'uppercase',
                         color: '#0A0F18',
-                        background: '#ef0e30',
+                        background: 'var(--brand-red-hover)',
                         padding: '1px 6px',
                       }}
                     >
