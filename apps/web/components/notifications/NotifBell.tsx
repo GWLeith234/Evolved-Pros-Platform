@@ -81,7 +81,7 @@ export function NotifBell({ initialUnreadCount, userId }: NotifBellProps) {
               minWidth: 14,
               height: 14,
               padding: '0 3px',
-              background: 'var(--brand-red-hot)',
+              background: 'var(--brand-red-hover)',
               color: '#fff',
               fontFamily: '"Barlow Condensed", sans-serif',
               fontWeight: 700,
@@ -90,7 +90,7 @@ export function NotifBell({ initialUnreadCount, userId }: NotifBellProps) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              border: '2px solid var(--bg-topnav)',
+              border: '2px solid var(--bg-nav)',
               borderRadius: 999,
             }}
           >

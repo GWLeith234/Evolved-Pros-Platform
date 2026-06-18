@@ -3,9 +3,6 @@
 @tailwind utilities;
 
 :root {
-  --navy:         #1b3c5a;
-  --navy-dark:    #112535;
-  --navy-deep:    #0d1c27;
   --red:          #ef0e30;
   --red-dark:     #c50a26;
   --teal:         #68a2b9;
@@ -28,19 +25,19 @@
   --border-color:  rgba(255,255,255,0.07);
   --text-primary:  #ffffff;
   --text-secondary: rgba(255,255,255,0.6);
-  --text-tertiary: rgba(255,255,255,0.35);
+  --text-tertiary: rgba(255,255,255,0.4);
 
   /* DS2 — TopNav v2 + brand (FOUNDATION-TOPNAV-V2) */
-  --bg-topnav:     #0D1B2A;
+  --bg-nav:        #0D1B2A;   /* canonical nav surface (was --bg-topnav) */
   --text-dim:      rgba(255,255,255,0.6);
   --text-muted:    rgba(255,255,255,0.45);
   --border-subtle: rgba(255,255,255,0.06);
   --brand-red:     #C9302A;
-  --brand-red-hot: #ef0e30;
+  --brand-red-hover: #cc0a28;   /* one hover/urgent red (merges --brand-red-hot) */
   --brand-gold:    #C9A84C;
   --brand-teal:    #0ABFA3;
   --brand-blue:    #60A5FA;
-  --brand-violet:  #A78BFA;
+  --brand-navy:    #1B2A4A;
   --pillar-1: #FFA538;
   --pillar-2: #A78BFA;
   --pillar-3: #F87171;
@@ -51,8 +48,8 @@
   /* TopNav dual-theme tokens (TOPNAV-POLISH-DUAL-THEME).
      The TopNav reads every color from these vars; light overrides live below. */
   --topnav-border:      rgba(255,255,255,0.06);
-  --topnav-link-active: #FFFFFF;
-  --topnav-link-idle:   rgba(255,255,255,0.5);
+  --topnav-link-active: var(--text-primary);   /* 1.0 */
+  --topnav-link-idle:   var(--text-secondary);  /* 0.6, was hsla 0.5 */
   --topnav-link-hover:  rgba(255,255,255,0.85);
   --topnav-divider:     rgba(255,255,255,0.08);
   --topnav-bell-icon:   rgba(255,255,255,0.65);
@@ -122,10 +119,10 @@
      accountability gold (#C9A84C) and --tile-discipline to execution
      teal (#0ABFA3) so the bottom cards match the SPRINT M design's
      violet / gold / blue / teal four-up palette. */
-  --tile-community:   #A78BFA;
-  --tile-stories:     #C9A84C;
-  --tile-podcast:     #60A5FA;
-  --tile-discipline:  #0ABFA3;
+  --tile-community:   var(--pillar-2);   /* #A78BFA */
+  --tile-stories:     var(--brand-gold); /* #C9A84C */
+  --tile-podcast:     var(--brand-blue); /* #60A5FA */
+  --tile-discipline:  var(--brand-teal); /* #0ABFA3 */
 
   /* Events tokens (EVENTS-SPRINT-1). Hero overlay gradient + format chips
      + RSVP active color. Format colors stay constant across themes —
@@ -134,7 +131,7 @@
   --events-hero-overlay-to:    rgba(10,15,24,0.92);
   --events-hero-pill-bg:       rgba(255,255,255,0.08);
   --events-hero-pill-border:   rgba(255,255,255,0.16);
-  --events-format-live:        #EF0E30;
+  --events-format-live:        var(--brand-red-hover);
   --events-format-in-person:   #E8B547;
   --events-format-podcast:     #3FB8E8;
   --events-format-replay:      #A78BFA;
@@ -163,26 +160,26 @@ html.light-mode {
 
   --bg-page:       #F5F0E8;
   --bg-surface:    #ffffff;
-  --bg-elevated:   #F0EBE3;
-  --border-color:  #E8E2D9;
-  --text-primary:  #1b3c5a;
-  /* THEME-FIX-V2: previous values failed WCAG AA on white surfaces.
-       --text-secondary: #6B7A8D     was 3.86:1 on #fff
-       --text-tertiary:  rgba(107,122,141,0.5) was ~1.7:1 — invisible
+  --bg-elevated:   #F5F1EA;
+  --border-color:  rgba(27,42,74,0.12);
+  --text-primary:  #1B2A4A;
+  /* Reconciled to the canonical html.light-mode block in colors_and_type.css
+     (DS-TOKENS sprint). --text-secondary returns to the navy-tint token; the
+     prior #4A5868 was a WCAG-driven fork that diverged from the design system.
      Settings / profile form labels and helper text use these tokens. */
-  --text-secondary: #4A5868;   /* 7.4:1 on #fff — AAA */
+  --text-secondary: rgba(27,42,74,0.6);
   --text-tertiary:  #5C6A7C;   /* 5.0:1 on #fff — AA */
 
   /* DS2 light variants (FOUNDATION-TOPNAV-V2) */
-  --bg-topnav:     #FAF7F2;
+  --bg-nav:        #FAF7F2;
   --text-dim:      rgba(27,42,74,0.6);
   --text-muted:    rgba(27,42,74,0.45);
   --border-subtle: rgba(27,42,74,0.10);
 
   /* TopNav dual-theme tokens — light overrides (TOPNAV-POLISH-DUAL-THEME) */
   --topnav-border:      rgba(27,42,74,0.10);
-  --topnav-link-active: #1B2A4A;
-  --topnav-link-idle:   rgba(27,42,74,0.55);
+  --topnav-link-active: var(--text-primary);   /* 1B2A4A */
+  --topnav-link-idle:   var(--text-secondary);  /* 0.6, was 0.55 */
   --topnav-link-hover:  #1B2A4A;
   --topnav-divider:     rgba(27,42,74,0.12);
   --topnav-bell-icon:   rgba(27,42,74,0.70);
@@ -262,12 +259,12 @@ html.light-mode {
 }
 html.light-mode body {
   background-color: #F5F0E8;
-  color: #1b3c5a;
+  color: #1B2A4A;
 }
 
 /* Sidebar */
 html.light-mode aside {
-  background-color: #1b3c5a !important;
+  background-color: #1B2A4A !important;
 }
 
 /* Main content area */
@@ -298,7 +295,7 @@ html.light-mode .bg-\[\#faf9f7\] {
 
 /* Tailwind text-white → body text color (any element, not just <main>) */
 html.light-mode .text-white {
-  color: #1b3c5a !important;
+  color: #1B2A4A !important;
 }
 
 /* Muted text — covers /20, /25, /30 in addition to /40–/70 */

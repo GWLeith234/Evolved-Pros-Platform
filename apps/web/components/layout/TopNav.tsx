@@ -193,7 +193,7 @@ export function TopNav({
           gap: 12,
           padding: '0 24px',
           height: 72,
-          background: 'var(--bg-topnav)',
+          background: 'var(--bg-nav)',
           borderBottom: '1px solid var(--topnav-border)',
         }}
       >
@@ -332,7 +332,7 @@ export function TopNav({
                   height: 28,
                   borderRadius: '50%',
                   flexShrink: 0,
-                  background: 'var(--bg-topnav)',
+                  background: 'var(--bg-nav)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -351,7 +351,7 @@ export function TopNav({
                   width: 14,
                   height: 14,
                   borderRadius: '50%',
-                  background: 'var(--bg-topnav)',
+                  background: 'var(--bg-nav)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
