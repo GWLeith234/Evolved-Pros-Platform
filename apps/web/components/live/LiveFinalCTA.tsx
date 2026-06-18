@@ -63,7 +63,7 @@ export function LiveFinalCTA() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 240 }}>
             <a
-              href="mailto:george@evolvedpros.com?subject=Booking%20request"
+              href="mailto:george@evolvex360.com?subject=Booking%20request"
               style={{
                 padding: '16px 32px',
                 background: '#ef0e30',
