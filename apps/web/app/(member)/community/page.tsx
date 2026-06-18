@@ -34,7 +34,6 @@ export default async function CommunityPage() {
 
   return (
     <>
-      {/* @ts-expect-error Async Server Component */}
       <EpisodeBanner />
       <UnifiedCommunityPageClient
       posts={postsResult.posts}

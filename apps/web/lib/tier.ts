@@ -1,4 +1,9 @@
-type Tier = 'vip' | 'community' | 'pro' | null | undefined
+// Inputs are widened to `string | null | undefined` because the values come
+// straight from DB columns typed as `string | null` (e.g. profiles.tier,
+// events.required_tier). The body already coerces any unrecognized string to
+// rank 0 via TIER_RANK[...] ?? 0, so accepting plain strings is correct and
+// avoids a cast at every call site. Body unchanged — emitted JS is identical.
+type TierInput = 'vip' | 'community' | 'pro' | string | null | undefined
 
 const TIER_RANK: Record<string, number> = {
   community: 1,
@@ -6,7 +11,7 @@ const TIER_RANK: Record<string, number> = {
   pro:       3,
 }
 
-export function hasTierAccess(userTier: Tier, requiredTier: Tier): boolean {
+export function hasTierAccess(userTier: TierInput, requiredTier: TierInput): boolean {
   if (!requiredTier) return true
   if (!userTier) return false
   const ut = userTier.toLowerCase()

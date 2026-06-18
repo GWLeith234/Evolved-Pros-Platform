@@ -102,7 +102,6 @@ export default async function EventsPage() {
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100%' }}>
-      {/* @ts-expect-error Async Server Component */}
       <EpisodeBanner />
       <EventsPageHeader />
       <CinematicHeroClient event={featured} initialIsRsvpd={initialIsRsvpd} />

@@ -54,13 +54,13 @@ async function hydratePostMeta(
 
   const [userLikesRes, bookmarksRes, allLikesRes] = await Promise.all([
     postIds.length > 0
-      ? supabase.from('post_likes').select('post_id, reaction_type').eq('user_id', userId).in('post_id', postIds) as Promise<{ data: LikeRow[] | null }>
+      ? supabase.from('post_likes').select('post_id, reaction_type').eq('user_id', userId).in('post_id', postIds) as unknown as Promise<{ data: LikeRow[] | null }>
       : Promise.resolve({ data: [] as LikeRow[] }),
     postIds.length > 0
       ? supabase.from('post_bookmarks').select('post_id').eq('user_id', userId).in('post_id', postIds)
       : Promise.resolve({ data: [] as { post_id: string }[] }),
     postIds.length > 0
-      ? adminClient.from('post_likes').select('post_id, reaction_type').in('post_id', postIds) as Promise<{ data: LikeRow[] | null }>
+      ? adminClient.from('post_likes').select('post_id, reaction_type').in('post_id', postIds) as unknown as Promise<{ data: LikeRow[] | null }>
       : Promise.resolve({ data: [] as LikeRow[] }),
   ])
 
@@ -270,7 +270,9 @@ export async function fetchActiveMembers(supabase: SB, limit = 5): Promise<Membe
     avatarUrl: u.avatar_url,
     roleTitle: u.role_title,
     location: u.location,
-    tier: u.tier,
+    // DB column is free-text string|null; assert to the MemberSummary union at
+    // this boundary (badge rendering tolerates unknown tiers).
+    tier: u.tier as 'pro' | 'vip' | 'community' | null,
     points: u.points,
   }))
 }

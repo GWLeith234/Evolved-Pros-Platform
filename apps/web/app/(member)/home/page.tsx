@@ -705,7 +705,6 @@ export default async function MemberHomePage() {
 
   return (
     <div className="px-6 pb-6 space-y-5">
-      {/* @ts-expect-error Async Server Component */}
       <EpisodeBanner />
       <WelcomeBanner
         displayName={displayName}

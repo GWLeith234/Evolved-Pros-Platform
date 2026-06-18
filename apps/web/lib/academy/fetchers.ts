@@ -193,7 +193,9 @@ export async function fetchLessonsWithProgress(
   supabase: SB,
   pillarSlug: string,
   userId: string,
-  userTier: 'community' | 'vip' | 'pro' | null | undefined,
+  // Widened to string: the value flows from DB tier columns (string|null) and
+  // is only consumed by hasTierAccess, which already tolerates any string.
+  userTier: string | null | undefined,
 ): Promise<LessonWithProgress[]> {
   // Get course
   const { data: course } = await supabase
