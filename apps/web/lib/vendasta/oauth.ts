@@ -102,7 +102,7 @@ export async function getVendastaToken(): Promise<string | null> {
     let assertion: string
     try {
       assertion = await new SignJWT({})
-        .setProtectedHeader({ alg: ALGORITHM })
+        .setProtectedHeader({ alg: ALGORITHM, kid: process.env.VENDASTA_SERVICE_ACCOUNT_KEY })
         .setIssuer(serviceAccountEmail)
         .setSubject(serviceAccountEmail)
         .setAudience(AUDIENCE)
