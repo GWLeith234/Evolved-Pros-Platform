@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, 'claude/init-evolved-pros-platform-**']
   pull_request:
-    branches: [main]
+    branches: [main, 'claude/init-evolved-pros-platform-**']
 
 jobs:
   check:
@@ -16,7 +16,11 @@ jobs:
         with: { node-version: '20', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
 
-      # type-check: non-blocking until types.ts is regenerated from the live DB
+      # type-check: runs on main/develop AND the integration branch for
+      # visibility so type debt can't silently regrow off-main. Still
+      # non-blocking until packages/db/types.ts is regenerated from the live DB
+      # and the residual count reaches 0 — at that point REMOVE
+      # `continue-on-error` below to turn this into a hard gate.
       - name: Type check
         run: pnpm type-check
         continue-on-error: true
