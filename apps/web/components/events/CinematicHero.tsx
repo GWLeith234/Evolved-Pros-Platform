@@ -17,6 +17,8 @@ export interface HeroEvent {
   event_type: string | null
   pillar: number | null
   starts_at: string
+  ends_at?: string | null
+  recording_url?: string | null
   hero_image_url: string | null
   image_url: string | null
   required_tier: string | null

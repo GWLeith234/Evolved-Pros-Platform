@@ -11,6 +11,9 @@ import type { HeroEvent } from '@/components/events/CinematicHero'
 // SSR → client diff. Loaded through ssr:false dynamic wrappers so they
 // mount post-hydration. See EventsPageClient.tsx.
 import { CinematicHeroClient, UpcomingEventsListClient } from './EventsPageClient'
+// PastEventsList is a static archive surface (no RSVP / no countdown), so it
+// renders on the server directly rather than through the ssr:false wrappers.
+import { PastEventsList } from '@/components/events/PastEventsList'
 import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
 
 export const metadata: Metadata = { title: 'Events — Evolved Pros' }
@@ -45,18 +48,36 @@ export default async function EventsPage() {
   const profile = await resolveCurrentUser(supabase)
   if (!profile) redirect('/login')
 
-  const nowIso = new Date().toISOString()
+  // AUTO-ARCHIVE: fetch every published event (REQUIREMENT 5: is_published is
+  // still the publish/hide control — unpublished events are excluded here and
+  // thus appear in neither section). The upcoming/past split below is derived
+  // purely from each row's timestamp vs now() on this render — no is_published
+  // toggling, no cron (REQUIREMENT 3).
+  const now = Date.now()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: rows } = await (adminClient as any)
     .from('events')
-    .select('id, title, description, tagline, cta_text, format, event_type, pillar, starts_at, hero_image_url, image_url, required_tier, is_featured, attending_count, host_name, host_role, host_avatar_url, price_cents, watermark')
+    .select('id, title, description, tagline, cta_text, format, event_type, pillar, starts_at, ends_at, recording_url, hero_image_url, image_url, required_tier, is_featured, attending_count, host_name, host_role, host_avatar_url, price_cents, watermark')
     .eq('is_published', true)
-    .gt('starts_at', nowIso)
-    .order('is_featured', { ascending: false })
     .order('starts_at', { ascending: true })
-    .limit(20) as { data: HeroEvent[] | null }
+    .limit(100) as { data: HeroEvent[] | null }
 
-  const allUpcoming = rows ?? []
+  const published = rows ?? []
+
+  // REQUIREMENTS 1: split by coalesce(ends_at, starts_at) vs now().
+  const effectiveTime = (e: HeroEvent) =>
+    new Date(e.ends_at ?? e.starts_at).getTime()
+
+  // Upcoming: coalesce(ends_at, starts_at) >= now() — soonest-first.
+  const allUpcoming = published
+    .filter(e => effectiveTime(e) >= now)
+    .sort((a, b) => effectiveTime(a) - effectiveTime(b))
+
+  // Past / archive: coalesce(ends_at, starts_at) < now() — most-recent-first.
+  const past = published
+    .filter(e => effectiveTime(e) < now)
+    .sort((a, b) => effectiveTime(b) - effectiveTime(a))
+
   const featured = pickFeatured(allUpcoming)
   const upcoming = featured
     ? allUpcoming.filter(e => e.id !== featured.id).slice(0, 5)
@@ -86,6 +107,9 @@ export default async function EventsPage() {
       <EventsPageHeader />
       <CinematicHeroClient event={featured} initialIsRsvpd={initialIsRsvpd} />
       <UpcomingEventsListClient events={upcoming} registeredIds={registeredIds} />
+      {/* REQUIREMENT 2 + 6: archive section below upcoming; renders nothing
+          when there are no past events. */}
+      <PastEventsList events={past} />
     </div>
   )
 }
