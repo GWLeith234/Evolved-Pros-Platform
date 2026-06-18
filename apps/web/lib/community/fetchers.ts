@@ -213,11 +213,20 @@ export async function fetchPinnedPost(
 }
 
 export async function fetchLeaderboard(supabase: SB, currentUserId: string): Promise<LeaderboardEntry[]> {
-  const { data } = await supabase
-    .from('users')
-    .select('id, display_name, full_name, avatar_url, points')
-    .order('points', { ascending: false })
-    .limit(10)
+  // Top-10 and the current user's own row don't depend on each other —
+  // fetch them in parallel so the second read isn't gated on the first.
+  const [{ data }, { data: currentUser }] = await Promise.all([
+    supabase
+      .from('users')
+      .select('id, display_name, full_name, avatar_url, points')
+      .order('points', { ascending: false })
+      .limit(10),
+    supabase
+      .from('users')
+      .select('id, display_name, full_name, avatar_url, points')
+      .eq('id', currentUserId)
+      .maybeSingle(),
+  ])
 
   const entries = (data ?? []).map((u, i) => ({
     rank: i + 1,
@@ -230,12 +239,6 @@ export async function fetchLeaderboard(supabase: SB, currentUserId: string): Pro
 
   const inList = entries.some(e => e.isCurrentUser)
   if (!inList) {
-    const { data: currentUser } = await supabase
-      .from('users')
-      .select('id, display_name, full_name, avatar_url, points')
-      .eq('id', currentUserId)
-      .maybeSingle()
-
     if (currentUser) {
       const { count } = await supabase
         .from('users')
