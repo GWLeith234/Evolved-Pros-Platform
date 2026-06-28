@@ -314,12 +314,19 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
 
 // ── Score cell (from welcome-banner.jsx ScoreCell line 850) ────────────────
 
+// A4.3: every stat renders the same anatomy — number + label + exactly one
+// sub-line. The sub-line is a status when the stat has a value, or a CTA when
+// it's empty (no bare "—" placeholder). The active-state treatment (lit accent
+// bar + accent number/label) is driven by a single `active` rule decided in the
+// banner, not by each cell's own value.
 function ScoreCell({
   href,
   label,
   value,
   accent,
   last,
+  active,
+  subline,
   zeroHint,
 }: {
   href: string
@@ -327,9 +334,15 @@ function ScoreCell({
   value: number
   accent: string
   last?: boolean
-  zeroHint?: string
+  /** True for the single stat the banner marks as active (soonest action). */
+  active?: boolean
+  /** Status sub-line shown when value > 0. */
+  subline: string
+  /** CTA sub-line shown when value === 0. */
+  zeroHint: string
 }) {
   const [hover, setHover] = useState(false)
+  const lit = active || hover
   return (
     <a
       href={href}
@@ -358,7 +371,7 @@ function ScoreCell({
           top: 0,
           height: 2,
           background: accent,
-          opacity: value > 0 ? 1 : hover ? 0.5 : 0,
+          opacity: active ? 1 : hover ? 0.5 : 0,
           transition: 'opacity 120ms ease',
         }}
       />
@@ -367,7 +380,7 @@ function ScoreCell({
           fontFamily: '"Bebas Neue", sans-serif',
           fontSize: 22,
           letterSpacing: '0.04em',
-          color: value > 0 ? '#fff' : 'rgba(255,255,255,0.45)',
+          color: lit ? '#fff' : 'rgba(255,255,255,0.45)',
           lineHeight: 1,
           fontVariantNumeric: 'tabular-nums',
         }}
@@ -382,27 +395,25 @@ function ScoreCell({
           fontSize: 10,
           letterSpacing: '0.18em',
           textTransform: 'uppercase',
-          color: value > 0 ? accent : 'rgba(255,255,255,0.45)',
+          color: lit ? accent : 'rgba(255,255,255,0.45)',
         }}
       >
         {label}
       </span>
-      {value === 0 && zeroHint && (
-        <span
-          style={{
-            marginTop: 3,
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 500,
-            fontSize: 11,
-            letterSpacing: '0.04em',
-            color: 'rgba(255,255,255,0.4)',
-            whiteSpace: 'nowrap',
-            textAlign: 'center',
-          }}
-        >
-          {zeroHint}
-        </span>
-      )}
+      <span
+        style={{
+          marginTop: 3,
+          fontFamily: '"Barlow Condensed", sans-serif',
+          fontWeight: 500,
+          fontSize: 11,
+          letterSpacing: '0.04em',
+          color: 'rgba(255,255,255,0.4)',
+          whiteSpace: 'nowrap',
+          textAlign: 'center',
+        }}
+      >
+        {value > 0 ? subline : zeroHint}
+      </span>
     </a>
   )
 }
@@ -896,11 +907,16 @@ export function WelcomeBanner({
                   backdropFilter: 'blur(6px)',
                 }}
               >
+                {/* A4.3 active-state rule: a single stat is active — the one
+                    with the soonest action. Events is the only time-bound stat
+                    (an upcoming event has a date), so it's active whenever one
+                    is scheduled; otherwise no stat is highlighted. */}
                 <ScoreCell
                   href="/community"
                   label="Posts"
                   value={scoreboard.unreadPostCount}
                   accent="#A78BFA"
+                  subline="New since last visit"
                   zeroHint="Share an update"
                 />
                 <ScoreCell
@@ -908,12 +924,16 @@ export function WelcomeBanner({
                   label="Events"
                   value={scoreboard.upcomingEventCount}
                   accent="#0ABFA3"
+                  active={scoreboard.upcomingEventCount > 0}
+                  subline="Coming up soon"
+                  zeroHint="Browse the calendar"
                 />
                 <ScoreCell
                   href="/podcast"
                   label="Podcast"
                   value={scoreboard.podcastCount}
                   accent="#60A5FA"
+                  subline="New to listen to"
                   zeroHint="Listen to an episode"
                 />
                 <ScoreCell
@@ -921,7 +941,8 @@ export function WelcomeBanner({
                   label="Stories"
                   value={scoreboard.storyCount}
                   accent="#C9A84C"
-                  zeroHint="—"
+                  subline="New to read"
+                  zeroHint="No stories yet"
                   last
                 />
               </div>

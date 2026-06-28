@@ -68,9 +68,10 @@ export function InProgressPillarHero({
       )}
 
       <div className="flex items-baseline gap-3 mb-1">
+        {/* A4.2: platform metric numeral = Bebas Neue (--font-logo), not Playfair. */}
         <span
-          className="font-display font-black leading-none"
-          style={{ fontSize: 48, color: cfg.color }}
+          className="leading-none"
+          style={{ fontFamily: '"Bebas Neue", sans-serif', letterSpacing: '0.02em', fontSize: 48, color: cfg.color }}
         >
           {pillar.number}
         </span>
@@ -106,9 +107,10 @@ export function InProgressPillarHero({
           <span className="font-condensed text-[12px]" style={{ color: '#7a8a96' }}>
             {pillar.completedLessons} of {pillar.totalLessons} lessons
           </span>
+          {/* A4.2: platform metric numeral = Bebas Neue (--font-logo), not Playfair. */}
           <span
-            className="font-display font-extrabold leading-none"
-            style={{ fontSize: 22, color: cfg.color }}
+            className="leading-none"
+            style={{ fontFamily: '"Bebas Neue", sans-serif', letterSpacing: '0.02em', fontSize: 22, color: cfg.color }}
           >
             {pillar.progressPct}%
           </span>
