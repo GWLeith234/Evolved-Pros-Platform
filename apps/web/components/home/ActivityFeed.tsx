@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Card, CardHeader, CardBody } from '@evolved-pros/ui'
 import { Button } from '@/components/ui/Button'
+import { formatRelative } from '@/lib/format'
 
 type NotificationRow = {
   id: string
@@ -59,20 +60,12 @@ type OtherFeedItem = {
 
 type FeedItem = PostFeedItem | OtherFeedItem
 
-function timeAgo(dateStr: string): string {
-  const now = Date.now()
-  const then = new Date(dateStr).getTime()
-  const diff = Math.floor((now - then) / 1000)
-  if (diff < 60) return 'just now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
-  return `${Math.floor(diff / 86400)}d ago`
-}
-
+// Wider surface → append " ago". Same unit ladder as the compact tile rows
+// (42 days reads `6w ago` here, `6w` in Community Pulse).
 // Defers Date.now() to client-only — avoids server/client mismatch (hydration error #425)
 function ClientTimeAgo({ dateStr }: { dateStr: string }) {
   const [ago, setAgo] = useState('')
-  useEffect(() => { setAgo(timeAgo(dateStr)) }, [dateStr])
+  useEffect(() => { setAgo(formatRelative(dateStr, { withAgo: true })) }, [dateStr])
   return <>{ago}</>
 }
 

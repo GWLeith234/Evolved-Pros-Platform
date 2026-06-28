@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { formatPct, formatCount } from '@/lib/format'
 
 const GOLD = '#C9A84C'
 const TEAL = '#0ABFA3'
@@ -47,7 +48,6 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
   const commitsDone = commits.filter(c => c.is_completed).length
   const totalSlots  = HABITS_TOTAL + COMMITS_TOTAL
   const totalDone   = habitsDone + commitsDone
-  const remaining   = Math.max(0, totalSlots - totalDone)
   const pct         = totalSlots ? Math.round((totalDone / totalSlots) * 100) : 0
 
   const ringColor = pct >= 100 ? GOLD : pct > 0 ? TEAL : DIM
@@ -138,13 +138,8 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
             color: 'var(--text-primary)', textTransform: 'uppercase',
           }}>Daily Pulse</h3>
         </div>
-        <span style={{
-          fontFamily: '"Barlow Condensed", sans-serif',
-          fontWeight: 700, fontSize: 11, letterSpacing: '0.18em',
-          textTransform: 'uppercase', color: 'var(--text-tertiary)',
-          padding: '2px 8px', background: 'var(--bg-elevated)',
-          border: '1px solid var(--border-color)', whiteSpace: 'nowrap',
-        }}>{totalDone}/{totalSlots}</span>
+        {/* A2.3: removed the redundant "{totalDone}/{totalSlots}" header pill —
+            the aggregate now appears once, beneath the ring as "N/M done". */}
       </header>
 
       {/* Circle progress */}
@@ -176,27 +171,24 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
               fontFamily: '"Bebas Neue", sans-serif',
               fontSize: 38, lineHeight: 1,
               color: 'var(--text-primary)', letterSpacing: '0.02em',
-            }}>{pct}</span>
-            <span style={{
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase',
-              color: 'var(--text-tertiary)',
-            }}>%</span>
+            }}>{formatPct(totalSlots ? totalDone / totalSlots : 0)}</span>
           </div>
         </div>
+        {/* A2.3: aggregate shown once beneath the ring as "N/M done"
+            (replaces the redundant "{remaining} TO GO" line). */}
         <p style={{
           margin: '8px 0 2px',
           fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
           fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase',
           color: 'var(--text-primary)',
-        }}>{remaining} TO GO</p>
+        }}>{formatCount(totalDone, totalSlots, 'done')}</p>
         <p style={{
           margin: 0,
           fontFamily: '"Barlow Condensed", sans-serif',
           fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase',
           color: 'var(--text-tertiary)',
         }}>
-          {habitsDone}/{HABITS_TOTAL} HABITS · {commitsDone}/{COMMITS_TOTAL} COMMITS
+          {formatCount(habitsDone, HABITS_TOTAL, 'habits')} · {formatCount(commitsDone, COMMITS_TOTAL, 'commits')}
         </p>
       </div>
 
