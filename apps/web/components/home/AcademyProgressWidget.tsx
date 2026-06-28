@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Card, CardBody } from '@evolved-pros/ui'
+import { formatPct } from '@/lib/format'
 
 type CourseProgress = {
   id: string
@@ -20,12 +21,16 @@ export function AcademyProgressWidget({ courses }: AcademyProgressWidgetProps) {
       <CardBody className="!px-6 !py-5 space-y-4">
         {/* Single 22px/500 uppercase headline + right-aligned action link
             (HOME-1). Replaces the previous "Your Academy" CardHeader and
-            the bottom-of-card "Continue Learning →" full-width button. */}
+            the bottom-of-card "Continue Learning →" full-width button.
+            Titled "Active courses" — NOT a second "The Path Forward" (A3.3:
+            the section eyebrow above this band already carries that heading).
+            These bars are the member's recently-active courses, a different
+            axis from the 6-pillar roadmap in the stepper above. */}
         <div className="flex items-baseline justify-between gap-3">
           <h3
             className="font-condensed text-[22px] font-medium uppercase tracking-[0.04em] text-[#1b3c5a] leading-none"
           >
-            Path Forward
+            Active courses
           </h3>
           <Link
             href="/academy"
@@ -55,7 +60,7 @@ export function AcademyProgressWidget({ courses }: AcademyProgressWidgetProps) {
                     className="font-condensed font-bold text-[12px]"
                     style={{ color: pctColor }}
                   >
-                    {course.pct}%
+                    {formatPct(course.pct / 100)}
                   </span>
                 </div>
                 {/* Progress bar */}

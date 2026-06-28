@@ -8,6 +8,8 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { MarvelSkyScene, type MarvelScenePeriod } from './scenes/MarvelSkyScene'
+import { PILLARS } from '@/lib/pillars'
+import { formatPct } from '@/lib/format'
 
 // ── Public props (v2 shape kept; new fields optional) ──────────────────────
 
@@ -36,17 +38,20 @@ interface WelcomeBannerProps {
 }
 
 // ── Architecture-column pillar palette (from welcome-banner.jsx DEFAULT_PILLARS) ──
-// These are the JSX's locked accent colors for the Architecture column. They
+// These are the JSX's locked accent COLORS for the Architecture column. They
 // differ slightly from the project's PILLAR_CONFIG (e.g. orange #D4862B vs
 // #FFA538). Kept in sync with the JSX so the hero matches the design ref.
+// Labels are NOT defined here — pillar names/abbreviations come from the single
+// `PILLARS` source (lib/pillars.ts) so the hero strip, the Path Forward stepper,
+// and the lower progress bars never drift in name, order, or abbreviation.
 
-const ARCH_PILLARS: Record<1 | 2 | 3 | 4 | 5 | 6, { short: string; color: string; mobileColor: string; label: string }> = {
-  1: { short: 'Foundtn.', color: '#D4862B', mobileColor: '#FFA538', label: 'Foundation' },
-  2: { short: 'Identity', color: '#A86CFF', mobileColor: '#A78BFA', label: 'Identity' },
-  3: { short: 'Mental',   color: '#ef0e30', mobileColor: '#F87171', label: 'Mental Toughness' },
-  4: { short: 'Strategy', color: '#3FB8E8', mobileColor: '#60A5FA', label: 'Strategy' },
-  5: { short: 'Account.', color: '#E8B547', mobileColor: '#C9A84C', label: 'Accountability' },
-  6: { short: 'Exec.',    color: '#19C9A6', mobileColor: '#0ABFA3', label: 'Execution' },
+const ARCH_COLORS: Record<1 | 2 | 3 | 4 | 5 | 6, { color: string; mobileColor: string }> = {
+  1: { color: '#D4862B', mobileColor: '#FFA538' },
+  2: { color: '#A86CFF', mobileColor: '#A78BFA' },
+  3: { color: '#ef0e30', mobileColor: '#F87171' },
+  4: { color: '#3FB8E8', mobileColor: '#60A5FA' },
+  5: { color: '#E8B547', mobileColor: '#C9A84C' },
+  6: { color: '#19C9A6', mobileColor: '#0ABFA3' },
 }
 
 // Tier colors from welcome-banner.jsx (line 187-191).
@@ -275,7 +280,7 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
             flexShrink: 0,
           }}
         >
-          {Math.round(progress)}%
+          {formatPct(progress / 100)}
         </span>
       )}
       {earned && (
@@ -473,12 +478,12 @@ export function WelcomeBanner({
   // Transform v2 pillar shape → architecture-column shape with locked colors.
   const archPillars: ArchPillar[] = useMemo(
     () =>
-      ([1, 2, 3, 4, 5, 6] as const).map(num => {
+      PILLARS.map(({ n: num, name, abbr }) => {
         const src = pillars.find(p => p.number === num)
-        const conf = ARCH_PILLARS[num]
+        const colors = ARCH_COLORS[num]
         const earned = src?.state === 'earned'
         const progress = src?.state === 'in-progress' ? src.progressPct ?? 0 : earned ? 100 : 0
-        return { num, short: conf.short, full: conf.label, color: conf.color, mobileColor: conf.mobileColor, earned, progress }
+        return { num, short: abbr, full: name, color: colors.color, mobileColor: colors.mobileColor, earned, progress }
       }),
     [pillars],
   )
@@ -496,8 +501,9 @@ export function WelcomeBanner({
     const newest = sorted[0]
     const ageDays = (now.getTime() - new Date(newest.earnedAt!).getTime()) / 86400000
     if (ageDays >= 7) return null
-    const conf = ARCH_PILLARS[newest.number]
-    return { num: newest.number, color: conf.color, label: conf.label }
+    const colors = ARCH_COLORS[newest.number]
+    const label = PILLARS.find(p => p.n === newest.number)?.name ?? newest.name
+    return { num: newest.number, color: colors.color, label }
   }, [pillars, now])
 
   return (
