@@ -6,17 +6,28 @@ import type { ReactNode } from 'react'
 interface TileCardProps {
   /** Top stripe + eyebrow color (one of --tile-* tokens). */
   accent: string
+  /** Override just the eyebrow color while keeping the stripe at `accent`.
+   *  Daily Pulse uses this so the stripe stays teal but the eyebrow flexes
+   *  with daily progress (dim → teal → gold). */
+  eyebrowColor?: string
+  /** Section name — the destination this tile links to (e.g. COMMUNITY ·
+   *  MEDIA · PODCAST · DISCIPLINE). Rendered all-caps via CSS; never a time
+   *  word. */
   eyebrow: string
+  /** Sentence-case title. */
   title: string
-  /** Optional badge in the top-right (e.g. "3 NEW", "EP 142", "MEDIA"). */
-  count?: string | null
+  /** New-since-last-visit count for the top-right status pill. The pill's
+   *  ONLY role across all four tiles: renders as "N NEW" and is hidden at
+   *  0 / null. Kind labels (MEDIA, EP 6) and progress fractions (0/5) do
+   *  NOT belong here — see A1.1. */
+  newCount?: number | null
   children: ReactNode
   footer?: ReactNode
   /** When true, slightly shorter min-height (per JSX `dense` flag). */
   dense?: boolean
 }
 
-export function TileCard({ accent, eyebrow, title, count, children, footer, dense = false }: TileCardProps) {
+export function TileCard({ accent, eyebrowColor, eyebrow, title, newCount, children, footer, dense = false }: TileCardProps) {
   return (
     <article
       style={{
@@ -60,7 +71,7 @@ export function TileCard({ accent, eyebrow, title, count, children, footer, dens
               fontSize: 9,
               letterSpacing: '0.32em',
               textTransform: 'uppercase',
-              color: accent,
+              color: eyebrowColor ?? accent,
             }}
           >
             {eyebrow}
@@ -78,7 +89,8 @@ export function TileCard({ accent, eyebrow, title, count, children, footer, dens
             {title}
           </h3>
         </div>
-        {count != null && (
+        {/* Status pill — always a "N NEW" since-last-visit count, hidden at 0. */}
+        {newCount != null && newCount > 0 && (
           <span
             style={{
               fontFamily: '"Barlow Condensed", sans-serif',
@@ -93,7 +105,8 @@ export function TileCard({ accent, eyebrow, title, count, children, footer, dens
               whiteSpace: 'nowrap',
             }}
           >
-            {count}
+            {/* TODO(format): route count through lib/format.ts */}
+            {newCount} New
           </span>
         )}
       </header>
