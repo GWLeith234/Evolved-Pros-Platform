@@ -8,6 +8,26 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { MarvelSkyScene, type MarvelScenePeriod } from './scenes/MarvelSkyScene'
+import { BRAND, AUTHOR_NAME } from '@/lib/brand'
+
+// Hero attribution (A6.1): render the quote source canonically against the
+// brand so we never double the brand token (`EVOLVED · EVOLVED`) and so the
+// author always reads as one spelling (`George Leith`). Output is one of:
+//   "EVOLVED"                  (source is the brand / "Evolved Pros")
+//   "EVOLVED · George Leith"   (source names the author)
+//   "EVOLVED · <other source>" (any other attribution)
+function formatQuoteAttribution(source: string): string {
+  const raw = source.trim()
+  const lower = raw.toLowerCase()
+  const isBrand = lower.startsWith('evolved')
+  // Does the source name the author (in any of its prior spellings)?
+  const namesAuthor = /george\s*lei|leith/i.test(lower)
+
+  if (isBrand && namesAuthor) return `${BRAND} · ${AUTHOR_NAME}`
+  if (isBrand) return BRAND
+  if (namesAuthor) return `${BRAND} · ${AUTHOR_NAME}`
+  return `${BRAND} · ${raw}`
+}
 
 // ── Public props (v2 shape kept; new fields optional) ──────────────────────
 
@@ -658,7 +678,7 @@ export function WelcomeBanner({
                       color: '#C9A84C',
                     }}
                   >
-                    — Evolved · {quote.source}
+                    — {formatQuoteAttribution(quote.source)}
                   </p>
                 )}
               </div>

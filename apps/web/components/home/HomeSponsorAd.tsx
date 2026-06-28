@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { stripTrailingArrow, truncateOnWord } from '@/lib/brand'
 
-type SponsorAd = {
+export type SponsorAd = {
   id: string
   image_url: string | null
   click_url: string | null
@@ -15,42 +16,36 @@ type SponsorAd = {
   endorsement_quote: string | null
 }
 
-// Pillar-rotation accent palette mirrors the home SponsorRail design.
-const ACCENTS = ['#3FB8E8', '#E8B547', '#A78BFA']
+export const SPONSOR_AD_COLUMNS =
+  'id, image_url, click_url, link_url, headline, tool_name, sponsor_name, cta_text, endorsement_quote'
 
-export function HomeSponsorAd() {
-  const [ad, setAd] = useState<SponsorAd | null>(null)
+// One accent rule for every sponsor placement (A6.2). Pillar-palette tokens,
+// rotated deterministically by id so the row's two cards differ but a given ad
+// always renders the same accent. Tokens mirror lib/pillar-colors.ts.
+const SPONSOR_ACCENTS = ['#3FB8E8', '#E8B547', '#A78BFA'] as const
 
-  useEffect(() => {
-    const supabase = createClient()
-    void (async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sb = supabase as any
-      const tryQuery = (q: any) => q.eq('is_active', true).order('sort_order').limit(1).maybeSingle()
-      // Prefer ads tagged for /home or 'all'; fall back to any active ad.
-      const primary = await tryQuery(
-        sb.from('platform_ads')
-          .select('id, image_url, click_url, link_url, headline, tool_name, sponsor_name, cta_text, endorsement_quote')
-          .in('placement', ['home', 'all'])
-      )
-      if (primary.data) { setAd(primary.data); return }
-      const fallback = await tryQuery(
-        sb.from('platform_ads')
-          .select('id, image_url, click_url, link_url, headline, tool_name, sponsor_name, cta_text, endorsement_quote')
-      )
-      if (fallback.data) setAd(fallback.data)
-    })()
-  }, [])
+export function sponsorAccent(id: string): string {
+  return SPONSOR_ACCENTS[(id.charCodeAt(0) || 0) % SPONSOR_ACCENTS.length]
+}
 
-  if (!ad) return null
-
+/**
+ * The single sponsor-card presentation, shared by the under-tiles row and the
+ * sidebar placement. One CTA rule (`<label> →`, single arrow — any arrow the
+ * stored label already carries is stripped first), one accent rule.
+ */
+export function SponsorAdCard({ ad, accent }: { ad: SponsorAd; accent?: string }) {
   const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
-  const accent = ACCENTS[(ad.id.charCodeAt(0) ?? 0) % ACCENTS.length]
+  const a = accent ?? sponsorAccent(ad.id)
   const name = ad.sponsor_name ?? ad.tool_name ?? 'Sponsor'
   const tagline = ad.headline ?? ad.endorsement_quote ?? name
-  const cta = ad.cta_text ?? 'Learn More'
+  // CTA: strip any arrow the stored label already contains, then append exactly
+  // one. Without the strip, a DB label ending in an arrow renders a doubled
+  // arrow in the CTA. See stripTrailingArrow in lib/brand.
+  const cta = stripTrailingArrow(ad.cta_text ?? 'Learn More')
   const initial = (name[0] ?? 'S').toUpperCase()
-  const logoText = name.toUpperCase().slice(0, 14)
+  // Word-boundary ellipsis — never mid-word ("EVOLVED — GEOR"). Uppercasing is
+  // a CSS concern (text-transform below), so truncate the cased source.
+  const logoText = truncateOnWord(name, 22)
 
   const inner = (
     <div
@@ -64,6 +59,7 @@ export function HomeSponsorAd() {
         overflow: 'hidden',
         textDecoration: 'none',
         color: 'inherit',
+        height: '100%',
       }}
     >
       <span
@@ -74,7 +70,7 @@ export function HomeSponsorAd() {
           left: 0,
           bottom: 0,
           width: 2,
-          background: accent,
+          background: a,
         }}
       />
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
@@ -87,8 +83,8 @@ export function HomeSponsorAd() {
               width: 36,
               height: 36,
               objectFit: 'cover',
-              border: `1px solid ${accent}55`,
-              background: `${accent}1a`,
+              border: `1px solid ${a}55`,
+              background: `${a}1a`,
             }}
           />
         ) : (
@@ -96,13 +92,13 @@ export function HomeSponsorAd() {
             style={{
               width: 36,
               height: 36,
-              background: `${accent}1a`,
-              border: `1px solid ${accent}55`,
-              color: accent,
+              background: `${a}1a`,
+              border: `1px solid ${a}55`,
+              color: a,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontFamily: 'Bebas Neue, sans-serif',
+              fontFamily: '"Bebas Neue", sans-serif',
               fontSize: 18,
               letterSpacing: '0.04em',
             }}
@@ -112,7 +108,7 @@ export function HomeSponsorAd() {
         )}
         <span
           style={{
-            fontFamily: 'Bebas Neue, sans-serif',
+            fontFamily: '"Bebas Neue", sans-serif',
             fontSize: 18,
             letterSpacing: '0.14em',
             color: '#fff',
@@ -120,6 +116,8 @@ export function HomeSponsorAd() {
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
+            flex: 1,
+            minWidth: 0,
           }}
         >
           {logoText}
@@ -150,9 +148,9 @@ export function HomeSponsorAd() {
           fontSize: 10,
           letterSpacing: '0.22em',
           textTransform: 'uppercase',
-          color: accent,
+          color: a,
           background: 'transparent',
-          border: `1px solid ${accent}`,
+          border: `1px solid ${a}`,
         }}
       >
         {cta}
@@ -161,40 +159,73 @@ export function HomeSponsorAd() {
     </div>
   )
 
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ display: 'block', textDecoration: 'none', height: '100%' }}
+      >
+        {inner}
+      </a>
+    )
+  }
+  return inner
+}
+
+/** Shared "Sponsored" eyebrow + divider used above each sponsor placement. */
+export function SponsoredEyebrow() {
   return (
-    <section aria-label="Sponsored">
-      <div
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+      <span
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          marginBottom: 12,
+          fontFamily: '"Barlow Condensed", sans-serif',
+          fontWeight: 700,
+          fontSize: 9,
+          letterSpacing: '0.42em',
+          textTransform: 'uppercase',
+          color: 'rgba(255,255,255,0.42)',
+          padding: '3px 8px',
+          border: '1px solid rgba(255,255,255,0.12)',
         }}
       >
-        <span
-          style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 700,
-            fontSize: 9,
-            letterSpacing: '0.42em',
-            textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.42)',
-            padding: '3px 8px',
-            border: '1px solid rgba(255,255,255,0.12)',
-          }}
-        >
-          Sponsored
-        </span>
-        <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-      </div>
+        Sponsored
+      </span>
+      <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+    </div>
+  )
+}
 
-      {href ? (
-        <a href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'block', textDecoration: 'none' }}>
-          {inner}
-        </a>
-      ) : (
-        inner
-      )}
+/**
+ * Sidebar sponsor placement: a single ad. Prefers a `sidebar`-tagged ad so it
+ * does not collide with the under-tiles row (which pulls `home`/`all`); falls
+ * back to any active ad. Renders through the shared SponsorAdCard.
+ */
+export function HomeSponsorAd() {
+  const [ad, setAd] = useState<SponsorAd | null>(null)
+
+  useEffect(() => {
+    const supabase = createClient()
+    void (async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sb = supabase as any
+      const tryQuery = (q: any) => q.eq('is_active', true).order('sort_order').limit(1).maybeSingle()
+      const primary = await tryQuery(
+        sb.from('platform_ads').select(SPONSOR_AD_COLUMNS).in('placement', ['sidebar', 'all']),
+      )
+      if (primary.data) { setAd(primary.data); return }
+      const fallback = await tryQuery(sb.from('platform_ads').select(SPONSOR_AD_COLUMNS))
+      if (fallback.data) setAd(fallback.data)
+    })()
+  }, [])
+
+  if (!ad) return null
+
+  return (
+    <section aria-label="Sponsored">
+      <SponsoredEyebrow />
+      <SponsorAdCard ad={ad} />
     </section>
   )
 }

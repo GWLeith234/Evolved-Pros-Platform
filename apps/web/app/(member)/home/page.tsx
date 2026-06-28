@@ -96,7 +96,7 @@ async function fetchRecentActivity(userId: string) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (adminClient as any)
       .from('lesson_progress')
-      .select('lesson_id, completed_at, lessons(id, title, sort_order, course_id, courses(title, slug))')
+      .select('lesson_id, completed_at, lessons(id, title, sort_order, course_id, courses(title, slug, pillar_number))')
       .eq('user_id', userId)
       .not('completed_at', 'is', null)
       .order('completed_at', { ascending: false })
