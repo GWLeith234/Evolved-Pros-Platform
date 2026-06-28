@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { formatPct } from '@/lib/format'
 
 const TAGLINES: Record<number, string> = {
   1: 'The ground every operator stands on.',
@@ -52,7 +53,10 @@ export function InProgressPillarHero({
         style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: cfg.color }}
       />
 
-      {/* DAY N OF 21 stamp */}
+      {/* Cohort-day stamp. This is a SEPARATE axis from lesson progress (the
+          21-day program cadence), explicitly labelled "Cohort day" so it does
+          not read as completion next to the "N of M lessons · NN%" headline,
+          which is the real progress metric (A3.2). */}
       {dayOfTwentyOne !== null && (
         <span
           className="absolute font-condensed font-bold uppercase tracking-[0.18em] text-[12px] px-2 py-1 rounded"
@@ -63,7 +67,7 @@ export function InProgressPillarHero({
             border: `1px solid ${cfg.color}33`,
           }}
         >
-          Day {dayOfTwentyOne} of 21
+          Cohort day {dayOfTwentyOne} of 21
         </span>
       )}
 
@@ -102,6 +106,10 @@ export function InProgressPillarHero({
             style={{ width: `${pillar.progressPct}%`, backgroundColor: cfg.color }}
           />
         </div>
+        {/* Headline progress metric: lesson completion + percent — the two
+            agree because both derive from the same course pct (A3.2). The
+            percent shown here is the SAME number as "Foundation NN%" in the
+            lower Path Forward / Active courses card (one source: course.pct). */}
         <div className="flex items-baseline justify-between mt-1">
           <span className="font-condensed text-[12px]" style={{ color: '#7a8a96' }}>
             {pillar.completedLessons} of {pillar.totalLessons} lessons
@@ -110,7 +118,7 @@ export function InProgressPillarHero({
             className="font-display font-extrabold leading-none"
             style={{ fontSize: 22, color: cfg.color }}
           >
-            {pillar.progressPct}%
+            {formatPct(pillar.progressPct / 100)}
           </span>
         </div>
       </div>
