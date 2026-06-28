@@ -26,15 +26,22 @@ export function ClimbingTowardCard({ pillar, courseSlug }: ClimbingTowardCardPro
   return (
     <Link
       href={`/academy/${courseSlug}`}
-      className="block rounded-lg p-5 bg-white transition-opacity hover:opacity-100"
+      className="relative block rounded-lg overflow-hidden p-5 transition-opacity hover:opacity-100"
       style={{
-        border: '1px solid rgba(27,60,90,0.08)',
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border-color)',
         opacity: 0.85,
       }}
     >
+      {/* Pillar accent strip — matches the active pillar card / goal cards. */}
+      <span
+        aria-hidden="true"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: cfg.color }}
+      />
+
       <p
         className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] mb-2"
-        style={{ color: '#94a3b8' }}
+        style={{ color: 'var(--text-tertiary)' }}
       >
         Climbing toward
       </p>
@@ -48,7 +55,7 @@ export function ClimbingTowardCard({ pillar, courseSlug }: ClimbingTowardCardPro
         </span>
         <span
           className="font-condensed font-bold uppercase tracking-[0.14em]"
-          style={{ fontSize: 14, color: '#1b3c5a' }}
+          style={{ fontSize: 14, color: 'var(--text-primary)' }}
         >
           {pillar.name}
         </span>
@@ -57,17 +64,17 @@ export function ClimbingTowardCard({ pillar, courseSlug }: ClimbingTowardCardPro
       {tagline && (
         <p
           className="mb-3"
-          style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 13, fontStyle: 'italic', color: '#475569' }}
+          style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 13, fontStyle: 'italic', color: 'var(--text-secondary)' }}
         >
           {tagline}
         </p>
       )}
 
-      <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px]" style={{ color: '#7a8a96' }}>
+      <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px]" style={{ color: 'var(--text-secondary)' }}>
         {pillar.totalLessons} lessons
-        <span style={{ margin: '0 6px', color: '#cbd5e1' }}>·</span>
+        <span style={{ margin: '0 6px', color: 'var(--text-tertiary)' }}>·</span>
         {pillar.name} badge
-        <span style={{ margin: '0 6px', color: '#cbd5e1' }}>·</span>
+        <span style={{ margin: '0 6px', color: 'var(--text-tertiary)' }}>·</span>
         Join the cohort
       </p>
     </Link>

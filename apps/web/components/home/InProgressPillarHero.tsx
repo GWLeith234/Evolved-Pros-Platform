@@ -44,8 +44,8 @@ export function InProgressPillarHero({
 
   return (
     <div
-      className="relative rounded-lg overflow-hidden bg-white p-6"
-      style={{ border: '1px solid rgba(27,60,90,0.1)' }}
+      className="relative rounded-lg overflow-hidden p-6"
+      style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
     >
       {/* Pillar accent strip */}
       <div
@@ -81,7 +81,7 @@ export function InProgressPillarHero({
         </span>
         <span
           className="font-condensed font-bold uppercase tracking-[0.14em]"
-          style={{ fontSize: 18, color: '#1b3c5a' }}
+          style={{ fontSize: 18, color: 'var(--text-primary)' }}
         >
           {pillar.name}
         </span>
@@ -90,7 +90,7 @@ export function InProgressPillarHero({
       {tagline && (
         <p
           className="mt-1 mb-4"
-          style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 16, fontStyle: 'italic', color: '#1b3c5a' }}
+          style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 16, fontStyle: 'italic', color: 'var(--text-secondary)' }}
         >
           {tagline}
         </p>
@@ -100,7 +100,7 @@ export function InProgressPillarHero({
       <div className="mb-1">
         <div
           className="w-full rounded-full overflow-hidden"
-          style={{ height: 6, backgroundColor: 'rgba(27,60,90,0.08)' }}
+          style={{ height: 6, backgroundColor: 'var(--bg-elevated)' }}
         >
           <div
             className="h-full rounded-full transition-all"
@@ -112,7 +112,7 @@ export function InProgressPillarHero({
             percent shown here is the SAME number as "Foundation NN%" in the
             lower Path Forward / Active courses card (one source: course.pct). */}
         <div className="flex items-baseline justify-between mt-1">
-          <span className="font-condensed text-[12px]" style={{ color: '#7a8a96' }}>
+          <span className="font-condensed text-[12px]" style={{ color: 'var(--text-secondary)' }}>
             {pillar.completedLessons} of {pillar.totalLessons} lessons
           </span>
           {/* A4.2: platform metric numeral = Bebas Neue (--font-logo), not Playfair. */}
@@ -137,7 +137,7 @@ export function InProgressPillarHero({
           >
             Next up
           </p>
-          <p className="font-body text-[13px] leading-snug" style={{ color: '#1b3c5a' }}>
+          <p className="font-body text-[13px] leading-snug" style={{ color: 'var(--text-primary)' }}>
             {nextLessonTitle}
           </p>
         </div>
