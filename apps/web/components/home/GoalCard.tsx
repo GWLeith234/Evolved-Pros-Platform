@@ -115,9 +115,11 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
         </div>
 
         <div className="flex items-baseline justify-between mb-1.5">
+          {/* A4.2: platform metric numeral = Bebas Neue (--font-logo), not
+              Playfair. Playfair is reserved for editorial copy. */}
           <span
-            className="font-display font-extrabold leading-none"
-            style={{ fontSize: 26, color: accentColor }}
+            className="leading-none"
+            style={{ fontFamily: '"Bebas Neue", sans-serif', letterSpacing: '0.02em', fontSize: 26, color: accentColor }}
           >
             {formatPct(goal.progress_pct / 100)}
           </span>

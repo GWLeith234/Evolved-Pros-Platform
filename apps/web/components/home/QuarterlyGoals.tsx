@@ -38,13 +38,13 @@ function isStreakGoal(title: string): boolean {
   return /streak/i.test(title)
 }
 
-function deltaLabel(goal: QuarterlyGoal): string | null {
+function deltaLabel(goal: QuarterlyGoal): string {
   if (isStreakGoal(goal.title)) {
     const day = Math.max(0, Math.round((goal.progress_pct / 100) * 60))
     return `↑ DAY ${day}`
   }
-  // Hide the chip entirely when flat (rather than showing "— 0% wk").
-  if (goal.weekly_delta === 0) return null
+  // A4.1: always render the chip via formatTrend — the flat case shows
+  // "— 0% wk" (em dash) rather than hiding, so every goal reads the same.
   return formatTrend(goal.weekly_delta / 100)
 }
 
@@ -95,20 +95,20 @@ export function QuarterlyGoals({ goals, editHref = '#' }: QuarterlyGoalsProps) {
                     </span>
                   </div>
                   <div className="flex items-baseline justify-between mb-1.5">
+                    {/* A4.2: platform metric numeral = Bebas Neue (--font-logo),
+                        not Playfair. Playfair is reserved for editorial copy. */}
                     <span
-                      className="font-display font-extrabold text-[22px] leading-none"
-                      style={{ color }}
+                      className="text-[26px] leading-none"
+                      style={{ fontFamily: '"Bebas Neue", sans-serif', letterSpacing: '0.02em', color }}
                     >
                       {formatPct(goal.progress_pct / 100)}
                     </span>
-                    {delta && (
-                      <span
-                        className="font-condensed text-[12px] font-bold tracking-[0.1em]"
-                        style={{ color }}
-                      >
-                        {delta}
-                      </span>
-                    )}
+                    <span
+                      className="font-condensed text-[12px] font-bold tracking-[0.1em]"
+                      style={{ color }}
+                    >
+                      {delta}
+                    </span>
                   </div>
                   <div
                     className="w-full rounded-full overflow-hidden"
