@@ -9,6 +9,7 @@
 
 import { useState } from 'react'
 import { TileCard } from './TileCard'
+import { TileRow, TileFooterLink } from './TileRow'
 
 const ACCENT = 'var(--tile-community)'
 
@@ -79,31 +80,14 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
     }
   }
 
-  const bottomLink = (
-    <a
-      href="/community"
-      style={{
-        display: 'block',
-        fontFamily: '"Barlow Condensed", sans-serif',
-        fontWeight: 700,
-        fontSize: 11,
-        letterSpacing: '0.22em',
-        textTransform: 'uppercase',
-        color: 'var(--text-secondary)',
-        textDecoration: 'none',
-        textAlign: 'right',
-      }}
-    >
-      All in Community →
-    </a>
-  )
+  const bottomLink = <TileFooterLink href="/community">All posts</TileFooterLink>
 
   return (
     <TileCard
       accent={ACCENT}
       eyebrow="Community"
       title="Community Pulse"
-      count={newCount > 0 ? `${newCount} New` : null}
+      newCount={newCount}
       footer={bottomLink}
     >
       {posts.length === 0 ? (
@@ -130,36 +114,31 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
           }}
         >
           {posts.map((p, i) => (
-            <li
+            <TileRow
               key={p.id}
-              style={{
-                display: 'flex',
-                gap: 10,
-                padding: '10px 0',
-                borderTop: i === 0 ? 'none' : '1px solid var(--border-color)',
-              }}
-            >
-              <div
-                style={{
-                  width: 28,
-                  height: 28,
-                  flexShrink: 0,
-                  borderRadius: '50%',
-                  background: tierGradient(p.tier),
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontFamily: '"Barlow Condensed", sans-serif',
-                  fontWeight: 800,
-                  fontSize: 10,
-                  letterSpacing: '0.04em',
-                  color: '#0A0F18',
-                }}
-              >
-                {p.initials}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+              isFirst={i === 0}
+              leading={
+                <div
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: '50%',
+                    background: tierGradient(p.tier),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontWeight: 800,
+                    fontSize: 10,
+                    letterSpacing: '0.04em',
+                    color: '#0A0F18',
+                  }}
+                >
+                  {p.initials}
+                </div>
+              }
+              primary={
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span
                     style={{
                       fontFamily: '"Barlow Condensed", sans-serif',
@@ -192,9 +171,12 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
                       color: 'var(--text-tertiary)',
                     }}
                   >
+                    {/* TODO(format): route relative time through lib/format.ts */}
                     {p.age}
                   </span>
                 </div>
+              }
+              meta={
                 <p
                   style={{
                     margin: 0,
@@ -210,7 +192,10 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
                 >
                   {p.preview}
                 </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 6 }}>
+              }
+              trailing={
+                // TODO(format): route reaction/comment counts through lib/format.ts
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span
                     style={{
                       display: 'inline-flex',
@@ -246,8 +231,8 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
                     {p.commentCount}
                   </span>
                 </div>
-              </div>
-            </li>
+              }
+            />
           ))}
         </ul>
       )}

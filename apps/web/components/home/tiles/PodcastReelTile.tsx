@@ -11,6 +11,7 @@
 
 import { useState } from 'react'
 import { TileCard } from './TileCard'
+import { TileRow, TileFooterLink } from './TileRow'
 
 const ACCENT = 'var(--tile-podcast)'
 
@@ -31,8 +32,10 @@ export interface PulseEpisode {
 
 interface PodcastReelTileProps {
   episodes: PulseEpisode[]
-  /** Latest episode number (drives the count chip "EP {N}"). */
-  latestEpisodeNumber: number | null
+  /** Latest episode number. No longer drives the header pill (the pill is a
+   *  "N NEW" count now, per A1.1) — the episode number lives on each row's
+   *  cover chip. Kept for the page's call site; intentionally unused. */
+  latestEpisodeNumber?: number | null
 }
 
 function guestLine(ep: PulseEpisode): string {
@@ -44,34 +47,21 @@ function guestLine(ep: PulseEpisode): string {
   return parts.join(' · ')
 }
 
-export function PodcastReelTile({ episodes, latestEpisodeNumber }: PodcastReelTileProps) {
+export function PodcastReelTile({ episodes }: PodcastReelTileProps) {
   const [playing, setPlaying] = useState<string | null>(null)
 
-  const bottomLink = (
-    <a
-      href="/podcast"
-      style={{
-        display: 'block',
-        fontFamily: '"Barlow Condensed", sans-serif',
-        fontWeight: 700,
-        fontSize: 11,
-        letterSpacing: '0.22em',
-        textTransform: 'uppercase',
-        color: 'var(--text-secondary)',
-        textDecoration: 'none',
-        textAlign: 'right',
-      }}
-    >
-      All Episodes →
-    </a>
-  )
+  // Status pill = new-since-last-visit count. Episodes < 7 days old carry
+  // the isNew flag; that's the closest available signal for "new".
+  const newCount = episodes.filter(ep => ep.isNew).length
+
+  const bottomLink = <TileFooterLink href="/podcast">All episodes</TileFooterLink>
 
   return (
     <TileCard
       accent={ACCENT}
       eyebrow="Podcast"
-      title="Latest Drops"
-      count={latestEpisodeNumber != null ? `Ep ${latestEpisodeNumber}` : null}
+      title="Latest drops"
+      newCount={newCount}
       footer={bottomLink}
     >
       {episodes.length === 0 ? (
@@ -92,63 +82,59 @@ export function PodcastReelTile({ episodes, latestEpisodeNumber }: PodcastReelTi
           {episodes.map((ep, i) => {
             const isPlaying = playing === ep.id
             return (
-              <li
+              <TileRow
                 key={ep.id}
-                style={{
-                  padding: '10px 0',
-                  borderTop: i === 0 ? 'none' : '1px solid var(--border-color)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                }}
-              >
-                <a
-                  href={`/podcast/${ep.slug}`}
-                  style={{
-                    position: 'relative',
-                    width: 44,
-                    height: 44,
-                    flexShrink: 0,
-                    background: `linear-gradient(135deg, ${ep.accent}33, ${ep.accent}11)`,
-                    border: `1px solid ${ep.accent}55`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    textDecoration: 'none',
-                  }}
-                >
-                  <span
+                isFirst={i === 0}
+                align="center"
+                leading={
+                  <a
+                    href={`/podcast/${ep.slug}`}
                     style={{
-                      fontFamily: '"Bebas Neue", sans-serif',
-                      fontSize: 18,
-                      letterSpacing: '0.04em',
-                      color: ep.accent,
-                      fontVariantNumeric: 'tabular-nums',
+                      position: 'relative',
+                      width: 44,
+                      height: 44,
+                      background: `linear-gradient(135deg, ${ep.accent}33, ${ep.accent}11)`,
+                      border: `1px solid ${ep.accent}55`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textDecoration: 'none',
                     }}
                   >
-                    {ep.episodeNumber ?? '—'}
-                  </span>
-                  {ep.isNew && (
                     <span
                       style={{
-                        position: 'absolute',
-                        top: -4,
-                        right: -4,
-                        background: '#ef0e30',
-                        color: '#fff',
-                        fontFamily: '"Barlow Condensed", sans-serif',
-                        fontWeight: 800,
-                        fontSize: 7,
-                        letterSpacing: '0.18em',
-                        textTransform: 'uppercase',
-                        padding: '1px 4px',
+                        fontFamily: '"Bebas Neue", sans-serif',
+                        fontSize: 18,
+                        letterSpacing: '0.04em',
+                        color: ep.accent,
+                        fontVariantNumeric: 'tabular-nums',
                       }}
                     >
-                      New
+                      {/* TODO(format): route episode number through lib/format.ts */}
+                      {ep.episodeNumber ?? '—'}
                     </span>
-                  )}
-                </a>
-                <div style={{ flex: 1, minWidth: 0 }}>
+                    {ep.isNew && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: -4,
+                          right: -4,
+                          background: '#ef0e30',
+                          color: '#fff',
+                          fontFamily: '"Barlow Condensed", sans-serif',
+                          fontWeight: 800,
+                          fontSize: 7,
+                          letterSpacing: '0.18em',
+                          textTransform: 'uppercase',
+                          padding: '1px 4px',
+                        }}
+                      >
+                        New
+                      </span>
+                    )}
+                  </a>
+                }
+                primary={
                   <a
                     href={`/podcast/${ep.slug}`}
                     style={{
@@ -167,9 +153,11 @@ export function PodcastReelTile({ episodes, latestEpisodeNumber }: PodcastReelTi
                   >
                     {ep.title}
                   </a>
+                }
+                meta={
                   <p
                     style={{
-                      margin: '3px 0 0',
+                      margin: 0,
                       fontFamily: '"Barlow Condensed", sans-serif',
                       fontWeight: 600,
                       fontSize: 9,
@@ -181,40 +169,42 @@ export function PodcastReelTile({ episodes, latestEpisodeNumber }: PodcastReelTi
                       textOverflow: 'ellipsis',
                     }}
                   >
+                    {/* TODO(format): route guest · role · duration through lib/format.ts */}
                     {guestLine(ep)}
                   </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setPlaying(isPlaying ? null : ep.id)}
-                  aria-label={isPlaying ? 'Pause' : 'Play'}
-                  style={{
-                    width: 32,
-                    height: 32,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: isPlaying ? ep.accent : 'transparent',
-                    color: isPlaying ? '#0A0F18' : ep.accent,
-                    border: `1px solid ${ep.accent}`,
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    flexShrink: 0,
-                    transition: 'all 120ms ease',
-                  }}
-                >
-                  {isPlaying ? (
-                    <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
-                      <rect x="2" y="2" width="3" height="8" />
-                      <rect x="7" y="2" width="3" height="8" />
-                    </svg>
-                  ) : (
-                    <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
-                      <path d="M3 2 L10 6 L3 10 Z" />
-                    </svg>
-                  )}
-                </button>
-              </li>
+                }
+                trailing={
+                  <button
+                    type="button"
+                    onClick={() => setPlaying(isPlaying ? null : ep.id)}
+                    aria-label={isPlaying ? 'Pause' : 'Play'}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: isPlaying ? ep.accent : 'transparent',
+                      color: isPlaying ? '#0A0F18' : ep.accent,
+                      border: `1px solid ${ep.accent}`,
+                      borderRadius: '50%',
+                      cursor: 'pointer',
+                      transition: 'all 120ms ease',
+                    }}
+                  >
+                    {isPlaying ? (
+                      <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                        <rect x="2" y="2" width="3" height="8" />
+                        <rect x="7" y="2" width="3" height="8" />
+                      </svg>
+                    ) : (
+                      <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                        <path d="M3 2 L10 6 L3 10 Z" />
+                      </svg>
+                    )}
+                  </button>
+                }
+              />
             )
           })}
         </ul>

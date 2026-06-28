@@ -7,6 +7,7 @@
 // out of scope).
 
 import { TileCard } from './TileCard'
+import { TileRow, TileFooterLink } from './TileRow'
 
 const ACCENT = 'var(--tile-stories)'
 
@@ -27,31 +28,13 @@ interface TopStoriesTileProps {
 }
 
 export function TopStoriesTile({ stories }: TopStoriesTileProps) {
-  const bottomLink = (
-    <a
-      href="/media"
-      style={{
-        display: 'block',
-        fontFamily: '"Barlow Condensed", sans-serif',
-        fontWeight: 700,
-        fontSize: 11,
-        letterSpacing: '0.22em',
-        textTransform: 'uppercase',
-        color: 'var(--text-secondary)',
-        textDecoration: 'none',
-        textAlign: 'right',
-      }}
-    >
-      All Stories →
-    </a>
-  )
+  const bottomLink = <TileFooterLink href="/media">All stories</TileFooterLink>
 
   return (
     <TileCard
       accent={ACCENT}
-      eyebrow="Top Stories"
-      title="Top Stories"
-      count="Media"
+      eyebrow="Media"
+      title="Top stories"
       footer={bottomLink}
     >
       {stories.length === 0 ? (
@@ -70,33 +53,45 @@ export function TopStoriesTile({ stories }: TopStoriesTileProps) {
       ) : (
         <ul style={{ margin: 0, padding: '4px 16px 0', listStyle: 'none' }}>
           {stories.map((s, i) => (
-            <li
+            <TileRow
               key={s.id}
-              style={{
-                position: 'relative',
-                padding: '12px 0',
-                borderTop: i === 0 ? 'none' : '1px solid var(--border-color)',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 12,
-              }}
-            >
-              <div
-                style={{
-                  width: 28,
-                  flexShrink: 0,
-                  fontFamily: '"Bebas Neue", sans-serif',
-                  fontSize: 22,
-                  letterSpacing: '0.02em',
-                  color: 'var(--text-tertiary)',
-                  lineHeight: 1,
-                  fontVariantNumeric: 'tabular-nums',
-                }}
-              >
-                0{i + 1}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              isFirst={i === 0}
+              leading={
+                <div
+                  style={{
+                    width: 28,
+                    textAlign: 'center',
+                    fontFamily: '"Bebas Neue", sans-serif',
+                    fontSize: 22,
+                    letterSpacing: '0.02em',
+                    color: 'var(--text-tertiary)',
+                    lineHeight: 1,
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  {/* TODO(format): route rank numeral through lib/format.ts */}
+                  0{i + 1}
+                </div>
+              }
+              primary={
+                <a
+                  href={`/media/${s.slug}`}
+                  style={{
+                    display: 'block',
+                    margin: 0,
+                    fontFamily: '"Playfair Display", Georgia, serif',
+                    fontSize: 13,
+                    lineHeight: 1.35,
+                    fontWeight: 700,
+                    color: 'var(--text-primary)',
+                    textDecoration: 'none',
+                  }}
+                >
+                  {s.title}
+                </a>
+              }
+              meta={
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span
                     style={{
                       fontFamily: '"Barlow Condensed", sans-serif',
@@ -136,26 +131,12 @@ export function TopStoriesTile({ stories }: TopStoriesTileProps) {
                       marginLeft: 'auto',
                     }}
                   >
+                    {/* TODO(format): route read time through lib/format.ts */}
                     {s.readTime}
                   </span>
                 </div>
-                <a
-                  href={`/media/${s.slug}`}
-                  style={{
-                    display: 'block',
-                    margin: 0,
-                    fontFamily: '"Playfair Display", Georgia, serif',
-                    fontSize: 13,
-                    lineHeight: 1.35,
-                    fontWeight: 700,
-                    color: 'var(--text-primary)',
-                    textDecoration: 'none',
-                  }}
-                >
-                  {s.title}
-                </a>
-              </div>
-            </li>
+              }
+            />
           ))}
         </ul>
       )}
