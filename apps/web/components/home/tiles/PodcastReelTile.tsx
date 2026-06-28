@@ -12,6 +12,7 @@
 import { useState } from 'react'
 import { TileCard } from './TileCard'
 import { TileRow, TileFooterLink } from './TileRow'
+import { formatEpisode } from '@/lib/format'
 
 const ACCENT = 'var(--tile-podcast)'
 
@@ -23,7 +24,8 @@ export interface PulseEpisode {
   guestName: string | null
   guestTitle: string | null
   guestCompany: string | null
-  durationLabel: string
+  /** Formatted duration ("12 min") or null to hide the slot — never "—". */
+  durationLabel: string | null
   /** Whether the episode is < 7 days old — drives the corner NEW badge. */
   isNew: boolean
   /** Per-episode accent (rotates through pillar palette in v1). */
@@ -43,7 +45,7 @@ function guestLine(ep: PulseEpisode): string {
   if (ep.guestName) parts.push(ep.guestName)
   const role = [ep.guestTitle, ep.guestCompany].filter(Boolean).join(', ')
   if (role) parts.push(role)
-  parts.push(ep.durationLabel)
+  if (ep.durationLabel) parts.push(ep.durationLabel) // hide the slot when empty
   return parts.join(' · ')
 }
 
@@ -110,8 +112,7 @@ export function PodcastReelTile({ episodes }: PodcastReelTileProps) {
                         fontVariantNumeric: 'tabular-nums',
                       }}
                     >
-                      {/* TODO(format): route episode number through lib/format.ts */}
-                      {ep.episodeNumber ?? '—'}
+                      {formatEpisode(ep.episodeNumber) || '—'}
                     </span>
                     {ep.isNew && (
                       <span
@@ -169,7 +170,6 @@ export function PodcastReelTile({ episodes }: PodcastReelTileProps) {
                       textOverflow: 'ellipsis',
                     }}
                   >
-                    {/* TODO(format): route guest · role · duration through lib/format.ts */}
                     {guestLine(ep)}
                   </p>
                 }

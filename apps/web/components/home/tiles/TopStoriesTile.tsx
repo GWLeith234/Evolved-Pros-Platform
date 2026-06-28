@@ -69,7 +69,6 @@ export function TopStoriesTile({ stories }: TopStoriesTileProps) {
                     fontVariantNumeric: 'tabular-nums',
                   }}
                 >
-                  {/* TODO(format): route rank numeral through lib/format.ts */}
                   0{i + 1}
                 </div>
               }
@@ -131,7 +130,6 @@ export function TopStoriesTile({ stories }: TopStoriesTileProps) {
                       marginLeft: 'auto',
                     }}
                   >
-                    {/* TODO(format): route read time through lib/format.ts */}
                     {s.readTime}
                   </span>
                 </div>

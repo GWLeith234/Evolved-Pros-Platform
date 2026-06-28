@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { formatDate, formatPct, formatTrend } from '@/lib/format'
 
 // Map AI / DB pillar slugs → numeric key used by PILLAR_CONFIG.
 const PILLAR_SLUG_TO_NUMBER: Record<string, 1 | 2 | 3 | 4 | 5 | 6> = {
@@ -69,8 +70,8 @@ function computePace(period: string, progressPct: number, now: Date = new Date()
   const label = status === 'on-track'
     ? 'On track'
     : status === 'ahead'
-      ? `Ahead by ${delta}%`
-      : `Behind by ${Math.abs(delta)}%`
+      ? `Ahead by ${formatPct(delta / 100)}`
+      : `Behind by ${formatPct(Math.abs(delta) / 100)}`
 
   return { expectedPct, status, label, daysLeft }
 }
@@ -92,9 +93,6 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
   const inProgressKey = inProgressPillarSlug ? PILLAR_SLUG_TO_NUMBER[inProgressPillarSlug.toLowerCase()] : null
   const tiedToPath = !!inProgressKey && !!pillarKey && inProgressKey === pillarKey
 
-  const deltaArrow = goal.weekly_delta > 0 ? '↑' : goal.weekly_delta < 0 ? '↓' : '·'
-  const deltaSign  = goal.weekly_delta > 0 ? '+' : ''
-
   return (
     <div
       className="rounded-lg overflow-hidden bg-white"
@@ -112,7 +110,7 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
             className="font-condensed text-[12px] font-bold tracking-[0.12em] uppercase rounded px-1.5 py-0.5 shrink-0"
             style={{ color: accentColor, backgroundColor: `${accentColor}1f` }}
           >
-            {goal.period}
+            {formatDate(goal.period, 'deadline')}
           </span>
         </div>
 
@@ -121,13 +119,13 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
             className="font-display font-extrabold leading-none"
             style={{ fontSize: 26, color: accentColor }}
           >
-            {goal.progress_pct}%
+            {formatPct(goal.progress_pct / 100)}
           </span>
           <span
             className="font-condensed font-bold tracking-[0.1em] text-[12px]"
             style={{ color: goal.weekly_delta < 0 ? '#ef0e30' : accentColor }}
           >
-            {deltaArrow} {deltaSign}{goal.weekly_delta}% wk
+            {formatTrend(goal.weekly_delta / 100)}
           </span>
         </div>
 

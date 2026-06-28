@@ -105,7 +105,6 @@ export function TileCard({ accent, eyebrowColor, eyebrow, title, newCount, child
               whiteSpace: 'nowrap',
             }}
           >
-            {/* TODO(format): route count through lib/format.ts */}
             {newCount} New
           </span>
         )}

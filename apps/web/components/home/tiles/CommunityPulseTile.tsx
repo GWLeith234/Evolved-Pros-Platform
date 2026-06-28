@@ -171,7 +171,6 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
                       color: 'var(--text-tertiary)',
                     }}
                   >
-                    {/* TODO(format): route relative time through lib/format.ts */}
                     {p.age}
                   </span>
                 </div>
@@ -194,7 +193,6 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
                 </p>
               }
               trailing={
-                // TODO(format): route reaction/comment counts through lib/format.ts
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span
                     style={{

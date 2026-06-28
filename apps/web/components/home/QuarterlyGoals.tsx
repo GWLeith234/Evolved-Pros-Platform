@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Card, CardBody } from '@evolved-pros/ui'
+import { formatDate, formatPct, formatTrend } from '@/lib/format'
 
 export type QuarterlyGoal = {
   id: string
@@ -42,9 +43,9 @@ function deltaLabel(goal: QuarterlyGoal): string | null {
     const day = Math.max(0, Math.round((goal.progress_pct / 100) * 60))
     return `↑ DAY ${day}`
   }
+  // Hide the chip entirely when flat (rather than showing "— 0% wk").
   if (goal.weekly_delta === 0) return null
-  const sign = goal.weekly_delta > 0 ? '↑ +' : '↓ '
-  return `${sign}${Math.abs(goal.weekly_delta)}% WK`
+  return formatTrend(goal.weekly_delta / 100)
 }
 
 export function QuarterlyGoals({ goals, editHref = '#' }: QuarterlyGoalsProps) {
@@ -90,7 +91,7 @@ export function QuarterlyGoals({ goals, editHref = '#' }: QuarterlyGoalsProps) {
                       className="font-condensed text-[12px] font-bold tracking-[0.12em] uppercase rounded px-1.5 py-0.5 shrink-0"
                       style={{ color, backgroundColor: `${color}1f` }}
                     >
-                      {goal.period}
+                      {formatDate(goal.period, 'deadline')}
                     </span>
                   </div>
                   <div className="flex items-baseline justify-between mb-1.5">
@@ -98,7 +99,7 @@ export function QuarterlyGoals({ goals, editHref = '#' }: QuarterlyGoalsProps) {
                       className="font-display font-extrabold text-[22px] leading-none"
                       style={{ color }}
                     >
-                      {goal.progress_pct}%
+                      {formatPct(goal.progress_pct / 100)}
                     </span>
                     {delta && (
                       <span
