@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import type { Json } from '@evolved-pros/db'
 
 export async function GET(request: Request) {
   const supabase = createClient()
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
         user_id: profile.id,
         course_id: courseId,
         domain,
-        content,
+        content: content as Json,
         status: 'active',
         updated_at: new Date().toISOString(),
       },

@@ -62,8 +62,9 @@ export default async function AdminDashboardPage() {
     .select('id, event_type, vendasta_contact_id, product_sku, processed_at, status')
     .order('processed_at', { ascending: false })
     .limit(5)
-    .then(r => r)
-    .catch(() => ({ data: null, error: null }))
+    // PostgrestFilterBuilder is a thenable, not a Promise — it has no .catch().
+    // Use the two-arg .then(onFulfilled, onRejected) to handle failures.
+    .then(r => r, () => ({ data: null, error: null }))
 
   const users = allUsers.data ?? []
   const activeUsers    = users.filter(u => u.tier_status === 'active' || u.tier_status === 'trial')
@@ -284,7 +285,7 @@ export default async function AdminDashboardPage() {
           <table className="w-full">
             <tbody>
               {rows.map((wh, i, arr) => {
-                const sc = STATUS_COLORS[wh.status] ?? STATUS_COLORS.error
+                const sc = STATUS_COLORS[wh.status ?? ''] ?? STATUS_COLORS.error
                 return (
                   <tr
                     key={wh.id}

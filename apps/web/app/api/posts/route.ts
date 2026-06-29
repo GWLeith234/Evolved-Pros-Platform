@@ -286,7 +286,7 @@ export async function POST(request: Request) {
 
   // Award 10 points for posting (fire-and-forget — never block the response)
   try {
-    const { error: rpcErr } = await supabase.rpc('increment_points', { user_id: profile.id, amount: 10 } as Record<string, unknown>)
+    const { error: rpcErr } = await supabase.rpc('increment_points', { user_id: profile.id, amount: 10 })
     if (rpcErr) console.warn('[posts] increment_points failed:', rpcErr.message)
   } catch (err) {
     console.warn('[posts] increment_points exception:', err)

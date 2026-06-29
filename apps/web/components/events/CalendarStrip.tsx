@@ -38,6 +38,10 @@ export function CalendarStrip({ events, onDayClick }: CalendarStripProps) {
     return set
   }, [events, viewDate])
 
+  // Render nothing until the client-side viewDate is set (deferred to useEffect
+  // above to avoid the #425 hydration mismatch). Guard placed after all hooks.
+  if (!viewDate) return null
+
   const year = viewDate.getFullYear()
   const month = viewDate.getMonth()
 

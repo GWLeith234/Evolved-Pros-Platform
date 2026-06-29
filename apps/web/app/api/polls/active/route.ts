@@ -33,6 +33,7 @@ export async function GET(request: Request) {
 
   const voteCounts: Record<string, number> = {}
   for (const v of votes ?? []) {
+    if (!v.option_id) continue
     voteCounts[v.option_id] = (voteCounts[v.option_id] ?? 0) + 1
   }
   const totalVotes = votes?.length ?? 0

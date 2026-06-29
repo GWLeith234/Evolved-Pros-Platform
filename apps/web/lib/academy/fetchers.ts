@@ -163,7 +163,7 @@ export async function fetchCoursesWithProgress(
       slug: course.slug,
       title: course.title,
       description: course.description,
-      requiredTier: course.required_tier,
+      requiredTier: course.required_tier as 'community' | 'vip' | 'pro',
       isPublished: course.is_published,
       sortOrder: course.sort_order,
       totalLessons: total,

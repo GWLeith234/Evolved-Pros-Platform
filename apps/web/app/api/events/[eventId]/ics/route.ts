@@ -15,7 +15,7 @@ export async function GET(_req: Request, { params }: { params: { eventId: string
   const [{ data: row }, regResult] = await Promise.all([
     supabase
       .from('events')
-      .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published')
+      .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published, image_url')
       .eq('id', params.eventId)
       .single(),
     supabase
@@ -38,6 +38,7 @@ export async function GET(_req: Request, { params }: { params: { eventId: string
     endsAt: row.ends_at,
     zoomUrl: isRegistered ? row.zoom_url : null,
     recordingUrl: row.recording_url,
+    imageUrl: row.image_url,
     requiredTier: row.required_tier as 'community' | 'vip' | 'pro' | null,
     registrationCount: row.registration_count,
     isRegistered,
