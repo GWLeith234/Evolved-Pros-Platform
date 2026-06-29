@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { formatDate, formatPct, formatTrend } from '@/lib/format'
 
 // Map AI / DB pillar slugs → numeric key used by PILLAR_CONFIG.
 const PILLAR_SLUG_TO_NUMBER: Record<string, 1 | 2 | 3 | 4 | 5 | 6> = {
@@ -69,14 +70,14 @@ function computePace(period: string, progressPct: number, now: Date = new Date()
   const label = status === 'on-track'
     ? 'On track'
     : status === 'ahead'
-      ? `Ahead by ${delta}%`
-      : `Behind by ${Math.abs(delta)}%`
+      ? `Ahead by ${formatPct(delta / 100)}`
+      : `Behind by ${formatPct(Math.abs(delta) / 100)}`
 
   return { expectedPct, status, label, daysLeft }
 }
 
 const STATUS_STYLE: Record<PaceInfo['status'], { bg: string; color: string }> = {
-  'on-track': { bg: 'rgba(34,197,94,0.10)',  color: '#15803d' },
+  'on-track': { bg: 'rgba(34,197,94,0.10)',  color: '#22c55e' },
   'ahead':    { bg: 'rgba(10,191,163,0.10)', color: '#0ABFA3' },
   'behind':   { bg: 'rgba(239,14,48,0.08)',  color: '#ef0e30' },
 }
@@ -92,48 +93,48 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
   const inProgressKey = inProgressPillarSlug ? PILLAR_SLUG_TO_NUMBER[inProgressPillarSlug.toLowerCase()] : null
   const tiedToPath = !!inProgressKey && !!pillarKey && inProgressKey === pillarKey
 
-  const deltaArrow = goal.weekly_delta > 0 ? '↑' : goal.weekly_delta < 0 ? '↓' : '·'
-  const deltaSign  = goal.weekly_delta > 0 ? '+' : ''
-
   return (
     <div
-      className="rounded-lg overflow-hidden bg-white"
+      className="rounded-lg overflow-hidden"
       style={{
-        border: '1px solid rgba(27,60,90,0.1)',
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border-color)',
         borderLeft: `3px solid ${accentColor}`,
       }}
     >
       <div className="px-4 py-3">
         <div className="flex items-start justify-between gap-2 mb-1">
-          <span className="font-body font-bold text-[13px] leading-snug text-[#1b3c5a]">
+          <span className="font-body font-bold text-[13px] leading-snug" style={{ color: 'var(--text-primary)' }}>
             {goal.title}
           </span>
           <span
             className="font-condensed text-[12px] font-bold tracking-[0.12em] uppercase rounded px-1.5 py-0.5 shrink-0"
             style={{ color: accentColor, backgroundColor: `${accentColor}1f` }}
           >
-            {goal.period}
+            {formatDate(goal.period, 'deadline')}
           </span>
         </div>
 
         <div className="flex items-baseline justify-between mb-1.5">
+          {/* A4.2: platform metric numeral = Bebas Neue (--font-logo), not
+              Playfair. Playfair is reserved for editorial copy. */}
           <span
-            className="font-display font-extrabold leading-none"
-            style={{ fontSize: 26, color: accentColor }}
+            className="leading-none"
+            style={{ fontFamily: '"Bebas Neue", sans-serif', letterSpacing: '0.02em', fontSize: 26, color: accentColor }}
           >
-            {goal.progress_pct}%
+            {formatPct(goal.progress_pct / 100)}
           </span>
           <span
             className="font-condensed font-bold tracking-[0.1em] text-[12px]"
             style={{ color: goal.weekly_delta < 0 ? '#ef0e30' : accentColor }}
           >
-            {deltaArrow} {deltaSign}{goal.weekly_delta}% wk
+            {formatTrend(goal.weekly_delta / 100)}
           </span>
         </div>
 
         <div
           className="w-full rounded-full overflow-hidden"
-          style={{ height: 4, backgroundColor: 'rgba(27,60,90,0.08)' }}
+          style={{ height: 4, backgroundColor: 'var(--bg-elevated)' }}
         >
           <div
             className="h-full rounded-full transition-all"
@@ -156,7 +157,7 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
             </span>
             <span
               className="font-condensed text-[12px]"
-              style={{ color: '#94a3b8' }}
+              style={{ color: 'var(--text-tertiary)' }}
               suppressHydrationWarning
             >
               {pace.daysLeft >= 0 ? `${pace.daysLeft} days left` : 'past due'}
@@ -168,8 +169,8 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
       {tiedToPath && inProgressContinueHref && (
         <Link
           href={inProgressContinueHref}
-          className="flex items-center justify-between px-4 py-2 transition-colors hover:bg-[rgba(27,60,90,0.03)]"
-          style={{ borderTop: '1px solid rgba(27,60,90,0.06)', backgroundColor: 'rgba(27,60,90,0.02)' }}
+          className="flex items-center justify-between px-4 py-2 transition-colors hover:bg-[rgba(255,255,255,0.03)]"
+          style={{ borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--bg-elevated)' }}
         >
           <span
             className="font-condensed font-bold uppercase tracking-[0.16em] text-[12px]"

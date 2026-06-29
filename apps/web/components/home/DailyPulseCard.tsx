@@ -2,6 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { TileCard } from './tiles/TileCard'
+import { TileRow, TileFooterLink } from './tiles/TileRow'
+import { formatPct, formatCount } from '@/lib/format'
 
 const GOLD = '#C9A84C'
 const TEAL = '#0ABFA3'
@@ -47,7 +50,6 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
   const commitsDone = commits.filter(c => c.is_completed).length
   const totalSlots  = HABITS_TOTAL + COMMITS_TOTAL
   const totalDone   = habitsDone + commitsDone
-  const remaining   = Math.max(0, totalSlots - totalDone)
   const pct         = totalSlots ? Math.round((totalDone / totalSlots) * 100) : 0
 
   const ringColor = pct >= 100 ? GOLD : pct > 0 ? TEAL : DIM
@@ -102,51 +104,21 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
     }
   }
 
+  // SPRINT 1 (A1.1): the daily-progress fraction is NOT a header badge — it
+  // lives in the body ring below. The status pill's only role across the 4-up
+  // is a "N NEW" since-last-visit count, which Daily Pulse has no source for,
+  // so the pill is omitted (newCount left undefined).
+  // SPRINT M: stripe pinned to teal so the 4-up palette stays
+  // violet / gold / blue / teal; the eyebrow still flexes with progress
+  // (dim → teal → gold) via eyebrowColor, so the card communicates state.
   return (
-    <article
-      style={{
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border-color)',
-        minHeight: 320,
-        overflow: 'hidden',
-      }}
+    <TileCard
+      accent={TEAL}
+      eyebrowColor={ringColor}
+      eyebrow="Discipline"
+      title="Daily pulse"
+      footer={<TileFooterLink href="/academy/accountability">All habits</TileFooterLink>}
     >
-      {/* SPRINT M: pin the top stripe to teal so the 4-up palette stays
-          violet / gold / blue / teal regardless of the daily-progress
-          ring color. Eyebrow continues to flex with progress (dim → teal
-          → gold), so the card still communicates state. */}
-      <span
-        aria-hidden="true"
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: TEAL }}
-      />
-
-      <header style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '16px 16px 8px', gap: 8 }}>
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <p style={{
-            margin: 0,
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 700, fontSize: 9, letterSpacing: '0.32em',
-            textTransform: 'uppercase', color: ringColor,
-          }}>TODAY</p>
-          <h3 style={{
-            margin: '4px 0 0',
-            fontFamily: '"Bebas Neue", sans-serif',
-            fontSize: 22, letterSpacing: '0.04em',
-            color: 'var(--text-primary)', textTransform: 'uppercase',
-          }}>Daily Pulse</h3>
-        </div>
-        <span style={{
-          fontFamily: '"Barlow Condensed", sans-serif',
-          fontWeight: 700, fontSize: 11, letterSpacing: '0.18em',
-          textTransform: 'uppercase', color: 'var(--text-tertiary)',
-          padding: '2px 8px', background: 'var(--bg-elevated)',
-          border: '1px solid var(--border-color)', whiteSpace: 'nowrap',
-        }}>{totalDone}/{totalSlots}</span>
-      </header>
-
       {/* Circle progress */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 16px 10px' }}>
         <div style={{ position: 'relative', width: 116, height: 116 }}>
@@ -176,31 +148,29 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
               fontFamily: '"Bebas Neue", sans-serif',
               fontSize: 38, lineHeight: 1,
               color: 'var(--text-primary)', letterSpacing: '0.02em',
-            }}>{pct}</span>
-            <span style={{
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase',
-              color: 'var(--text-tertiary)',
-            }}>%</span>
+            }}>{formatPct(totalSlots ? totalDone / totalSlots : 0)}</span>
           </div>
         </div>
+        {/* A2.3: aggregate shown once beneath the ring as "N/M done"
+            (replaces the redundant "{remaining} TO GO" line). */}
         <p style={{
           margin: '8px 0 2px',
           fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
           fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase',
           color: 'var(--text-primary)',
-        }}>{remaining} TO GO</p>
+        }}>{formatCount(totalDone, totalSlots, 'done')}</p>
         <p style={{
           margin: 0,
           fontFamily: '"Barlow Condensed", sans-serif',
           fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase',
           color: 'var(--text-tertiary)',
         }}>
-          {habitsDone}/{HABITS_TOTAL} HABITS · {commitsDone}/{COMMITS_TOTAL} COMMITS
+          {formatCount(habitsDone, HABITS_TOTAL, 'habits')} · {formatCount(commitsDone, COMMITS_TOTAL, 'commits')}
         </p>
       </div>
 
-      {/* Habits */}
+      {/* Habits — one TileRow each: checkbox (leading) · habit (primary) ·
+          no meta · streak pill (trailing). */}
       <div style={{ padding: '6px 16px 0' }}>
         <p style={{
           margin: '0 0 4px',
@@ -210,32 +180,45 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
         }}>HABITS</p>
         {habits.length === 0 ? (
           <p style={{ margin: 0, fontSize: 12, color: 'var(--text-tertiary)' }}>No habits set up yet.</p>
-        ) : habits.slice(0, 3).map(h => (
-          <button
-            key={h.id}
-            type="button"
-            onClick={() => toggleHabit(h)}
-            disabled={pendingHabit === h.id}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-              background: 'none', border: 'none', cursor: 'pointer',
-              padding: '6px 0', textAlign: 'left',
-            }}
-          >
-            <Checkbox checked={h.completedToday} color={GOLD} />
-            <span style={{
-              flex: 1, minWidth: 0, fontSize: 13, lineHeight: 1.4,
-              color: h.completedToday ? 'var(--text-tertiary)' : 'var(--text-primary)',
-              textDecoration: h.completedToday ? 'line-through' : 'none',
-              transition: 'color 0.15s',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>{h.name}</span>
-            <StreakBadge days={h.recentCount} />
-          </button>
-        ))}
+        ) : (
+          <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+            {habits.slice(0, 3).map((h, i) => (
+              <TileRow
+                key={h.id}
+                isFirst={i === 0}
+                align="center"
+                leading={
+                  <button
+                    type="button"
+                    onClick={() => toggleHabit(h)}
+                    disabled={pendingHabit === h.id}
+                    aria-label={h.completedToday ? `Mark ${h.name} incomplete` : `Mark ${h.name} complete`}
+                    style={{
+                      background: 'none', border: 'none', padding: 0,
+                      cursor: 'pointer', display: 'flex', alignItems: 'center',
+                    }}
+                  >
+                    <Checkbox checked={h.completedToday} color={GOLD} />
+                  </button>
+                }
+                primary={
+                  <span style={{
+                    display: 'block', fontSize: 13, lineHeight: 1.4,
+                    color: h.completedToday ? 'var(--text-tertiary)' : 'var(--text-primary)',
+                    textDecoration: h.completedToday ? 'line-through' : 'none',
+                    transition: 'color 0.15s',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>{h.name}</span>
+                }
+                trailing={<StreakBadge days={h.recentCount} />}
+              />
+            ))}
+          </ul>
+        )}
       </div>
 
-      {/* Commits */}
+      {/* Commits — same row template (checkbox · commitment), plus the
+          in-body "+ Add commitment" action ABOVE the footer (A1.3). */}
       <div style={{ padding: '8px 16px 14px' }}>
         <p style={{
           margin: '0 0 4px',
@@ -243,40 +226,51 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
           fontSize: 9, letterSpacing: '0.32em', textTransform: 'uppercase',
           color: 'var(--text-tertiary)',
         }}>COMMITS</p>
-        {commits.length === 0 ? (
-          <Link
-            href="/academy/accountability"
-            style={{
-              display: 'inline-block',
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase',
-              color: TEAL, textDecoration: 'none',
-            }}
-          >+ Add commitment</Link>
-        ) : commits.slice(0, COMMITS_TOTAL).map(c => (
-          <button
-            key={c.id}
-            type="button"
-            onClick={() => toggleCommit(c)}
-            disabled={pendingCommit === c.id}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-              background: 'none', border: 'none', cursor: 'pointer',
-              padding: '6px 0', textAlign: 'left',
-            }}
-          >
-            <Checkbox checked={c.is_completed} color={GOLD} />
-            <span style={{
-              flex: 1, minWidth: 0, fontSize: 13, lineHeight: 1.4,
-              color: c.is_completed ? 'var(--text-tertiary)' : 'var(--text-primary)',
-              textDecoration: c.is_completed ? 'line-through' : 'none',
-              transition: 'color 0.15s',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>{c.commitment}</span>
-          </button>
-        ))}
+        {commits.length > 0 && (
+          <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+            {commits.slice(0, COMMITS_TOTAL).map((c, i) => (
+              <TileRow
+                key={c.id}
+                isFirst={i === 0}
+                align="center"
+                leading={
+                  <button
+                    type="button"
+                    onClick={() => toggleCommit(c)}
+                    disabled={pendingCommit === c.id}
+                    aria-label={c.is_completed ? `Mark ${c.commitment} incomplete` : `Mark ${c.commitment} complete`}
+                    style={{
+                      background: 'none', border: 'none', padding: 0,
+                      cursor: 'pointer', display: 'flex', alignItems: 'center',
+                    }}
+                  >
+                    <Checkbox checked={c.is_completed} color={GOLD} />
+                  </button>
+                }
+                primary={
+                  <span style={{
+                    display: 'block', fontSize: 13, lineHeight: 1.4,
+                    color: c.is_completed ? 'var(--text-tertiary)' : 'var(--text-primary)',
+                    textDecoration: c.is_completed ? 'line-through' : 'none',
+                    transition: 'color 0.15s',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>{c.commitment}</span>
+                }
+              />
+            ))}
+          </ul>
+        )}
+        <Link
+          href="/academy/accountability"
+          style={{
+            display: 'inline-block', marginTop: commits.length > 0 ? 8 : 0,
+            fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+            fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase',
+            color: TEAL, textDecoration: 'none',
+          }}
+        >+ Add commitment</Link>
       </div>
-    </article>
+    </TileCard>
   )
 }
 

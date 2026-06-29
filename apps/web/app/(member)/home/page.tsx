@@ -25,6 +25,7 @@ import { HomeSponsorAd } from '@/components/home/HomeSponsorAd'
 import { HomeSponsorRow } from '@/components/home/HomeSponsorRow'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { hasTierAccess } from '@/lib/tier'
+import { formatRelative, formatDuration as formatMinutes, formatDate } from '@/lib/format'
 
 async function fetchCurrentUser(supabase: ReturnType<typeof createClient>, email: string) {
   const { data } = await supabase
@@ -95,7 +96,7 @@ async function fetchRecentActivity(userId: string) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (adminClient as any)
       .from('lesson_progress')
-      .select('lesson_id, completed_at, lessons(id, title, sort_order, course_id, courses(title, slug))')
+      .select('lesson_id, completed_at, lessons(id, title, sort_order, course_id, courses(title, slug, pillar_number))')
       .eq('user_id', userId)
       .not('completed_at', 'is', null)
       .order('completed_at', { ascending: false })
@@ -256,13 +257,10 @@ function getInitials(name: string | null | undefined): string {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 }
 
+// Compact relative age for tight tile rows (no " ago"). The activity feed uses
+// the same ladder with `withAgo` so 42 days reads `6w` in both places.
 function relativeAge(iso: string): string {
-  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
-  if (diff < 60) return 'now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h`
-  if (diff < 604_800) return `${Math.floor(diff / 86400)}d`
-  return `${Math.floor(diff / 604_800)}w`
+  return formatRelative(iso)
 }
 
 function dayLabelFor(iso: string): string {
@@ -272,7 +270,9 @@ function dayLabelFor(iso: string): string {
   if (diffDays === 0) return 'Today'
   if (diffDays === 1) return 'Tmrw'
   if (diffDays >= 2 && diffDays <= 6) return d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  // Calendar stamp for events more than a week out — uppercase month ("JUL 15"),
+  // never title-case "Jul 15".
+  return formatDate(iso, 'stamp')
 }
 
 function formatTimeLabel(iso: string): string {
@@ -297,19 +297,17 @@ function pillarColorFromTag(tag: string | null): string | null {
 }
 
 function readTimeForBody(body: string | null): string {
-  if (!body) return '2 min'
-  const words = body.trim().split(/\s+/).length
+  const words = body ? body.trim().split(/\s+/).length : 0
   const minutes = Math.max(1, Math.ceil(words / 220))
-  return `${minutes} min`
+  // Read time is always ≥1 min, so formatMinutes never returns null here.
+  return formatMinutes(minutes) ?? ''
 }
 
-function formatDuration(seconds: number | null): string {
-  if (!seconds || seconds <= 0) return '—'
-  const mins = Math.round(seconds / 60)
-  if (mins < 60) return `${mins}m`
-  const h = Math.floor(mins / 60)
-  const m = mins % 60
-  return m === 0 ? `${h}h` : `${h}h ${m}m`
+// Episode duration: seconds → "N min", or null so the tile hides the slot
+// (never a bare "—").
+function episodeDurationLabel(seconds: number | null): string | null {
+  if (!seconds || seconds <= 0) return null
+  return formatMinutes(Math.round(seconds / 60))
 }
 
 const TILE_PILLAR_ROTATION = [
@@ -441,7 +439,7 @@ async function fetchLatestEpisodes(limit = 3): Promise<{ episodes: PulseEpisode[
     guestName: r.guest_name,
     guestTitle: r.guest_title,
     guestCompany: r.guest_company,
-    durationLabel: formatDuration(r.duration_seconds),
+    durationLabel: episodeDurationLabel(r.duration_seconds),
     isNew: r.published_at ? new Date(r.published_at).getTime() > sevenDaysAgo : false,
     accent: TILE_PILLAR_ROTATION[i % TILE_PILLAR_ROTATION.length],
   }))
@@ -837,16 +835,16 @@ export default async function MemberHomePage() {
         <div className="space-y-3">
           <p
             className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px]"
-            style={{ color: '#7a8a96' }}
+            style={{ color: 'var(--text-tertiary)' }}
           >
             The Long Game
           </p>
           {goalsForCards.length === 0 ? (
             <div
-              className="rounded-lg p-5 bg-white text-center"
-              style={{ border: '1px solid rgba(27,60,90,0.1)' }}
+              className="rounded-lg p-5 text-center"
+              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
             >
-              <p className="font-condensed text-[12px] mb-3" style={{ color: '#7a8a96' }}>
+              <p className="font-condensed text-[12px] mb-3" style={{ color: 'var(--text-tertiary)' }}>
                 No active goals yet — set one to anchor the quarter.
               </p>
               <AddGoalCTA />

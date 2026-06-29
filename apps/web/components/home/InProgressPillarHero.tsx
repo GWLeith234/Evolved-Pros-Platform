@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { formatPct } from '@/lib/format'
 
 const TAGLINES: Record<number, string> = {
   1: 'The ground every operator stands on.',
@@ -43,8 +44,8 @@ export function InProgressPillarHero({
 
   return (
     <div
-      className="relative rounded-lg overflow-hidden bg-white p-6"
-      style={{ border: '1px solid rgba(27,60,90,0.1)' }}
+      className="relative rounded-lg overflow-hidden p-6"
+      style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
     >
       {/* Pillar accent strip */}
       <div
@@ -52,7 +53,10 @@ export function InProgressPillarHero({
         style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: cfg.color }}
       />
 
-      {/* DAY N OF 21 stamp */}
+      {/* Cohort-day stamp. This is a SEPARATE axis from lesson progress (the
+          21-day program cadence), explicitly labelled "Cohort day" so it does
+          not read as completion next to the "N of M lessons · NN%" headline,
+          which is the real progress metric (A3.2). */}
       {dayOfTwentyOne !== null && (
         <span
           className="absolute font-condensed font-bold uppercase tracking-[0.18em] text-[12px] px-2 py-1 rounded"
@@ -63,20 +67,21 @@ export function InProgressPillarHero({
             border: `1px solid ${cfg.color}33`,
           }}
         >
-          Day {dayOfTwentyOne} of 21
+          Cohort day {dayOfTwentyOne} of 21
         </span>
       )}
 
       <div className="flex items-baseline gap-3 mb-1">
+        {/* A4.2: platform metric numeral = Bebas Neue (--font-logo), not Playfair. */}
         <span
-          className="font-display font-black leading-none"
-          style={{ fontSize: 48, color: cfg.color }}
+          className="leading-none"
+          style={{ fontFamily: '"Bebas Neue", sans-serif', letterSpacing: '0.02em', fontSize: 48, color: cfg.color }}
         >
           {pillar.number}
         </span>
         <span
           className="font-condensed font-bold uppercase tracking-[0.14em]"
-          style={{ fontSize: 18, color: '#1b3c5a' }}
+          style={{ fontSize: 18, color: 'var(--text-primary)' }}
         >
           {pillar.name}
         </span>
@@ -85,7 +90,7 @@ export function InProgressPillarHero({
       {tagline && (
         <p
           className="mt-1 mb-4"
-          style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 16, fontStyle: 'italic', color: '#1b3c5a' }}
+          style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 16, fontStyle: 'italic', color: 'var(--text-secondary)' }}
         >
           {tagline}
         </p>
@@ -95,22 +100,27 @@ export function InProgressPillarHero({
       <div className="mb-1">
         <div
           className="w-full rounded-full overflow-hidden"
-          style={{ height: 6, backgroundColor: 'rgba(27,60,90,0.08)' }}
+          style={{ height: 6, backgroundColor: 'var(--bg-elevated)' }}
         >
           <div
             className="h-full rounded-full transition-all"
             style={{ width: `${pillar.progressPct}%`, backgroundColor: cfg.color }}
           />
         </div>
+        {/* Headline progress metric: lesson completion + percent — the two
+            agree because both derive from the same course pct (A3.2). The
+            percent shown here is the SAME number as "Foundation NN%" in the
+            lower Path Forward / Active courses card (one source: course.pct). */}
         <div className="flex items-baseline justify-between mt-1">
-          <span className="font-condensed text-[12px]" style={{ color: '#7a8a96' }}>
+          <span className="font-condensed text-[12px]" style={{ color: 'var(--text-secondary)' }}>
             {pillar.completedLessons} of {pillar.totalLessons} lessons
           </span>
+          {/* A4.2: platform metric numeral = Bebas Neue (--font-logo), not Playfair. */}
           <span
-            className="font-display font-extrabold leading-none"
-            style={{ fontSize: 22, color: cfg.color }}
+            className="leading-none"
+            style={{ fontFamily: '"Bebas Neue", sans-serif', letterSpacing: '0.02em', fontSize: 22, color: cfg.color }}
           >
-            {pillar.progressPct}%
+            {formatPct(pillar.progressPct / 100)}
           </span>
         </div>
       </div>
@@ -127,7 +137,7 @@ export function InProgressPillarHero({
           >
             Next up
           </p>
-          <p className="font-body text-[13px] leading-snug" style={{ color: '#1b3c5a' }}>
+          <p className="font-body text-[13px] leading-snug" style={{ color: 'var(--text-primary)' }}>
             {nextLessonTitle}
           </p>
         </div>

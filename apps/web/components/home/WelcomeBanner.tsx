@@ -8,6 +8,28 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { MarvelSkyScene, type MarvelScenePeriod } from './scenes/MarvelSkyScene'
+import { PILLARS } from '@/lib/pillars'
+import { formatPct } from '@/lib/format'
+import { BRAND, AUTHOR_NAME } from '@/lib/brand'
+
+// Hero attribution (A6.1): render the quote source canonically against the
+// brand so we never double the brand token (`EVOLVED · EVOLVED`) and so the
+// author always reads as one spelling (`George Leith`). Output is one of:
+//   "EVOLVED"                  (source is the brand / "Evolved Pros")
+//   "EVOLVED · George Leith"   (source names the author)
+//   "EVOLVED · <other source>" (any other attribution)
+function formatQuoteAttribution(source: string): string {
+  const raw = source.trim()
+  const lower = raw.toLowerCase()
+  const isBrand = lower.startsWith('evolved')
+  // Does the source name the author (in any of its prior spellings)?
+  const namesAuthor = /george\s*lei|leith/i.test(lower)
+
+  if (isBrand && namesAuthor) return `${BRAND} · ${AUTHOR_NAME}`
+  if (isBrand) return BRAND
+  if (namesAuthor) return `${BRAND} · ${AUTHOR_NAME}`
+  return `${BRAND} · ${raw}`
+}
 
 // ── Public props (v2 shape kept; new fields optional) ──────────────────────
 
@@ -36,17 +58,20 @@ interface WelcomeBannerProps {
 }
 
 // ── Architecture-column pillar palette (from welcome-banner.jsx DEFAULT_PILLARS) ──
-// These are the JSX's locked accent colors for the Architecture column. They
+// These are the JSX's locked accent COLORS for the Architecture column. They
 // differ slightly from the project's PILLAR_CONFIG (e.g. orange #D4862B vs
 // #FFA538). Kept in sync with the JSX so the hero matches the design ref.
+// Labels are NOT defined here — pillar names/abbreviations come from the single
+// `PILLARS` source (lib/pillars.ts) so the hero strip, the Path Forward stepper,
+// and the lower progress bars never drift in name, order, or abbreviation.
 
-const ARCH_PILLARS: Record<1 | 2 | 3 | 4 | 5 | 6, { short: string; color: string; mobileColor: string; label: string }> = {
-  1: { short: 'Foundtn.', color: '#D4862B', mobileColor: '#FFA538', label: 'Foundation' },
-  2: { short: 'Identity', color: '#A86CFF', mobileColor: '#A78BFA', label: 'Identity' },
-  3: { short: 'Mental',   color: '#ef0e30', mobileColor: '#F87171', label: 'Mental Toughness' },
-  4: { short: 'Strategy', color: '#3FB8E8', mobileColor: '#60A5FA', label: 'Strategy' },
-  5: { short: 'Account.', color: '#E8B547', mobileColor: '#C9A84C', label: 'Accountability' },
-  6: { short: 'Exec.',    color: '#19C9A6', mobileColor: '#0ABFA3', label: 'Execution' },
+const ARCH_COLORS: Record<1 | 2 | 3 | 4 | 5 | 6, { color: string; mobileColor: string }> = {
+  1: { color: '#D4862B', mobileColor: '#FFA538' },
+  2: { color: '#A86CFF', mobileColor: '#A78BFA' },
+  3: { color: '#ef0e30', mobileColor: '#F87171' },
+  4: { color: '#3FB8E8', mobileColor: '#60A5FA' },
+  5: { color: '#E8B547', mobileColor: '#C9A84C' },
+  6: { color: '#19C9A6', mobileColor: '#0ABFA3' },
 }
 
 // Tier colors from welcome-banner.jsx (line 187-191).
@@ -275,7 +300,7 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
             flexShrink: 0,
           }}
         >
-          {Math.round(progress)}%
+          {formatPct(progress / 100)}
         </span>
       )}
       {earned && (
@@ -314,12 +339,19 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
 
 // ── Score cell (from welcome-banner.jsx ScoreCell line 850) ────────────────
 
+// A4.3: every stat renders the same anatomy — number + label + exactly one
+// sub-line. The sub-line is a status when the stat has a value, or a CTA when
+// it's empty (no bare "—" placeholder). The active-state treatment (lit accent
+// bar + accent number/label) is driven by a single `active` rule decided in the
+// banner, not by each cell's own value.
 function ScoreCell({
   href,
   label,
   value,
   accent,
   last,
+  active,
+  subline,
   zeroHint,
 }: {
   href: string
@@ -327,9 +359,15 @@ function ScoreCell({
   value: number
   accent: string
   last?: boolean
-  zeroHint?: string
+  /** True for the single stat the banner marks as active (soonest action). */
+  active?: boolean
+  /** Status sub-line shown when value > 0. */
+  subline: string
+  /** CTA sub-line shown when value === 0. */
+  zeroHint: string
 }) {
   const [hover, setHover] = useState(false)
+  const lit = active || hover
   return (
     <a
       href={href}
@@ -358,7 +396,7 @@ function ScoreCell({
           top: 0,
           height: 2,
           background: accent,
-          opacity: value > 0 ? 1 : hover ? 0.5 : 0,
+          opacity: active ? 1 : hover ? 0.5 : 0,
           transition: 'opacity 120ms ease',
         }}
       />
@@ -367,7 +405,7 @@ function ScoreCell({
           fontFamily: '"Bebas Neue", sans-serif',
           fontSize: 22,
           letterSpacing: '0.04em',
-          color: value > 0 ? '#fff' : 'rgba(255,255,255,0.45)',
+          color: lit ? '#fff' : 'rgba(255,255,255,0.45)',
           lineHeight: 1,
           fontVariantNumeric: 'tabular-nums',
         }}
@@ -382,27 +420,25 @@ function ScoreCell({
           fontSize: 10,
           letterSpacing: '0.18em',
           textTransform: 'uppercase',
-          color: value > 0 ? accent : 'rgba(255,255,255,0.45)',
+          color: lit ? accent : 'rgba(255,255,255,0.45)',
         }}
       >
         {label}
       </span>
-      {value === 0 && zeroHint && (
-        <span
-          style={{
-            marginTop: 3,
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 500,
-            fontSize: 11,
-            letterSpacing: '0.04em',
-            color: 'rgba(255,255,255,0.4)',
-            whiteSpace: 'nowrap',
-            textAlign: 'center',
-          }}
-        >
-          {zeroHint}
-        </span>
-      )}
+      <span
+        style={{
+          marginTop: 3,
+          fontFamily: '"Barlow Condensed", sans-serif',
+          fontWeight: 500,
+          fontSize: 11,
+          letterSpacing: '0.04em',
+          color: 'rgba(255,255,255,0.4)',
+          whiteSpace: 'nowrap',
+          textAlign: 'center',
+        }}
+      >
+        {value > 0 ? subline : zeroHint}
+      </span>
     </a>
   )
 }
@@ -473,12 +509,12 @@ export function WelcomeBanner({
   // Transform v2 pillar shape → architecture-column shape with locked colors.
   const archPillars: ArchPillar[] = useMemo(
     () =>
-      ([1, 2, 3, 4, 5, 6] as const).map(num => {
+      PILLARS.map(({ n: num, name, abbr }) => {
         const src = pillars.find(p => p.number === num)
-        const conf = ARCH_PILLARS[num]
+        const colors = ARCH_COLORS[num]
         const earned = src?.state === 'earned'
         const progress = src?.state === 'in-progress' ? src.progressPct ?? 0 : earned ? 100 : 0
-        return { num, short: conf.short, full: conf.label, color: conf.color, mobileColor: conf.mobileColor, earned, progress }
+        return { num, short: abbr, full: name, color: colors.color, mobileColor: colors.mobileColor, earned, progress }
       }),
     [pillars],
   )
@@ -496,8 +532,9 @@ export function WelcomeBanner({
     const newest = sorted[0]
     const ageDays = (now.getTime() - new Date(newest.earnedAt!).getTime()) / 86400000
     if (ageDays >= 7) return null
-    const conf = ARCH_PILLARS[newest.number]
-    return { num: newest.number, color: conf.color, label: conf.label }
+    const colors = ARCH_COLORS[newest.number]
+    const label = PILLARS.find(p => p.n === newest.number)?.name ?? newest.name
+    return { num: newest.number, color: colors.color, label }
   }, [pillars, now])
 
   return (
@@ -658,7 +695,7 @@ export function WelcomeBanner({
                       color: '#C9A84C',
                     }}
                   >
-                    — Evolved · {quote.source}
+                    — {formatQuoteAttribution(quote.source)}
                   </p>
                 )}
               </div>
@@ -896,11 +933,16 @@ export function WelcomeBanner({
                   backdropFilter: 'blur(6px)',
                 }}
               >
+                {/* A4.3 active-state rule: a single stat is active — the one
+                    with the soonest action. Events is the only time-bound stat
+                    (an upcoming event has a date), so it's active whenever one
+                    is scheduled; otherwise no stat is highlighted. */}
                 <ScoreCell
                   href="/community"
                   label="Posts"
                   value={scoreboard.unreadPostCount}
                   accent="#A78BFA"
+                  subline="New since last visit"
                   zeroHint="Share an update"
                 />
                 <ScoreCell
@@ -908,12 +950,16 @@ export function WelcomeBanner({
                   label="Events"
                   value={scoreboard.upcomingEventCount}
                   accent="#0ABFA3"
+                  active={scoreboard.upcomingEventCount > 0}
+                  subline="Coming up soon"
+                  zeroHint="Browse the calendar"
                 />
                 <ScoreCell
                   href="/podcast"
                   label="Podcast"
                   value={scoreboard.podcastCount}
                   accent="#60A5FA"
+                  subline="New to listen to"
                   zeroHint="Listen to an episode"
                 />
                 <ScoreCell
@@ -921,7 +967,8 @@ export function WelcomeBanner({
                   label="Stories"
                   value={scoreboard.storyCount}
                   accent="#C9A84C"
-                  zeroHint="—"
+                  subline="New to read"
+                  zeroHint="No stories yet"
                   last
                 />
               </div>
