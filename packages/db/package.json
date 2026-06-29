@@ -6,5 +6,8 @@
   "types": "./types.ts",
   "exports": {
     ".": "./types.ts"
+  },
+  "scripts": {
+    "gen:types": "supabase gen types typescript --project-id \"$SUPABASE_PROJECT_ID\" --schema public > types.ts"
   }
 }
