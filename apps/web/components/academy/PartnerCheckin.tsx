@@ -335,6 +335,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
         {/* Partner card */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '28px', padding: '14px 16px', backgroundColor: '#0A0F18', borderRadius: '6px', border: `1px solid ${GOLD}18` }}>
           {partner.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={partner.avatar_url}
               alt={partnerDisplayName}
