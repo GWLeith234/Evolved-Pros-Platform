@@ -688,6 +688,38 @@ export type Database = {
         }
         Relationships: []
       }
+      goal_snapshots: {
+        Row: {
+          captured_at: string | null
+          goal_id: string
+          id: string
+          progress_pct: number
+          snapshot_date: string
+        }
+        Insert: {
+          captured_at?: string | null
+          goal_id: string
+          id?: string
+          progress_pct: number
+          snapshot_date: string
+        }
+        Update: {
+          captured_at?: string | null
+          goal_id?: string
+          id?: string
+          progress_pct?: number
+          snapshot_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_snapshots_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "quarterly_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       greeting_quotes: {
         Row: {
           created_at: string | null
@@ -723,7 +755,8 @@ export type Database = {
           completed_date: string
           completed_on: string
           created_at: string
-          habit_stack_id: string
+          habit_id: string | null
+          habit_stack_id: string | null
           id: string
           notes: string | null
           user_id: string
@@ -732,7 +765,8 @@ export type Database = {
           completed_date?: string
           completed_on: string
           created_at?: string
-          habit_stack_id: string
+          habit_id?: string | null
+          habit_stack_id?: string | null
           id?: string
           notes?: string | null
           user_id: string
@@ -741,12 +775,20 @@ export type Database = {
           completed_date?: string
           completed_on?: string
           created_at?: string
-          habit_stack_id?: string
+          habit_id?: string | null
+          habit_stack_id?: string | null
           id?: string
           notes?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "habit_completions_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "habit_completions_habit_stack_id_fkey"
             columns: ["habit_stack_id"]
@@ -840,6 +882,8 @@ export type Database = {
           id: string
           is_active: boolean
           leverage_score: number
+          name: string
+          pillar: string | null
           pillar_ids: string[]
           sort_order: number
           title: string
@@ -851,6 +895,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           leverage_score?: number
+          name: string
+          pillar?: string | null
           pillar_ids?: string[]
           sort_order?: number
           title: string
@@ -862,6 +908,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           leverage_score?: number
+          name?: string
+          pillar?: string | null
           pillar_ids?: string[]
           sort_order?: number
           title?: string
@@ -1362,6 +1410,7 @@ export type Database = {
       platform_ads: {
         Row: {
           ad_type: string | null
+          body_copy: string | null
           click_url: string | null
           created_at: string | null
           cta_text: string | null
@@ -1386,6 +1435,7 @@ export type Database = {
         }
         Insert: {
           ad_type?: string | null
+          body_copy?: string | null
           click_url?: string | null
           created_at?: string | null
           cta_text?: string | null
@@ -1410,6 +1460,7 @@ export type Database = {
         }
         Update: {
           ad_type?: string | null
+          body_copy?: string | null
           click_url?: string | null
           created_at?: string | null
           cta_text?: string | null
@@ -1775,38 +1826,6 @@ export type Database = {
           sort_order?: number
         }
         Relationships: []
-      }
-      goal_snapshots: {
-        Row: {
-          captured_at: string | null
-          goal_id: string
-          id: string
-          progress_pct: number
-          snapshot_date: string
-        }
-        Insert: {
-          captured_at?: string | null
-          goal_id: string
-          id?: string
-          progress_pct: number
-          snapshot_date: string
-        }
-        Update: {
-          captured_at?: string | null
-          goal_id?: string
-          id?: string
-          progress_pct?: number
-          snapshot_date?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "goal_snapshots_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "quarterly_goals"
-            referencedColumns: ["id"]
-          }
-        ]
       }
       quarterly_goals: {
         Row: {
@@ -2651,10 +2670,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      increment_discussion_like: {
+        Args: { post_id: string }
+        Returns: {
+          body: string
+          course_id: string | null
+          created_at: string
+          id: string
+          lesson_id: string | null
+          like_count: number
+          module_number: number | null
+          parent_id: string | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "discussion_posts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       increment_points: {
         Args: { amount: number; user_id: string }
         Returns: undefined
       }
+      increment_poll_vote: { Args: { p_option_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
