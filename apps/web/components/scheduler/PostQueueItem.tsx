@@ -30,7 +30,7 @@ export function PostQueueItem({ post, onAction }: Props) {
 
   const date = new Date(post.scheduled_at)
   const day = DAY_ABBR[date.getDay()] ?? '---'
-  const time = (post as Record<string, unknown>).displayTime as string ?? date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+  const time = (post as unknown as Record<string, unknown>).displayTime as string ?? date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
   const pillarColor = PILLAR_COLORS[post.pillar ?? ''] ?? '#7a8a96'
   const statusColor = post.status === 'approved' || post.status === 'published' ? '#0ABFA3' : post.status === 'scheduled' ? '#C9A84C' : '#7a8a96'
   const tierColor = post.tier === 'peak' ? '#0ABFA3' : '#C9A84C'

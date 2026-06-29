@@ -19,7 +19,7 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from('events')
-    .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published')
+    .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published, image_url')
     .eq('is_published', true)
     .order('starts_at', { ascending: upcomingOnly })
     .limit(limit + 1)
@@ -69,6 +69,7 @@ export async function GET(request: Request) {
       endsAt: e.ends_at,
       zoomUrl: isRegistered ? e.zoom_url : null,   // only expose when registered
       recordingUrl: e.recording_url,
+      imageUrl: e.image_url,
       requiredTier: e.required_tier as 'community' | 'vip' | 'pro' | null,
       registrationCount: e.registration_count,
       isRegistered,

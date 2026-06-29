@@ -17,7 +17,7 @@ export async function GET(
   const [eventResult, regResult] = await Promise.all([
     supabase
       .from('events')
-      .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published')
+      .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published, image_url')
       .eq('id', params.eventId)
       .single(),
     supabase
@@ -48,6 +48,7 @@ export async function GET(
     endsAt: e.ends_at,
     zoomUrl: isRegistered ? e.zoom_url : null,
     recordingUrl: e.recording_url,
+    imageUrl: e.image_url,
     requiredTier: e.required_tier as 'community' | 'vip' | 'pro' | null,
     registrationCount: e.registration_count,
     isRegistered,

@@ -486,7 +486,7 @@ function ZonePanel({
               startDate: editingAd.start_date ? editingAd.start_date.slice(0, 10) : '',
               endDate: editingAd.end_date ? editingAd.end_date.slice(0, 10) : '',
               isActive: editingAd.is_active,
-              placements: (editingAd as Record<string, unknown>).placements as string[] ?? ['platform'],
+              placements: (editingAd as unknown as Record<string, unknown>).placements as string[] ?? ['platform'],
             }}
             onSaved={handleSaved}
             onCancel={() => setEditingId(null)}

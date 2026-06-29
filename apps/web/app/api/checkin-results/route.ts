@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import type { Json } from '@evolved-pros/db'
 
 export async function GET(request: Request) {
   const supabase = createClient()
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
       checkin_type: checkinType,
       score,
       max_score: maxScore,
-      result_json: resultJson,
+      result_json: resultJson as Json,
     })
     .select('id, course_id, module_number, checkin_type, score, max_score, created_at')
     .single()

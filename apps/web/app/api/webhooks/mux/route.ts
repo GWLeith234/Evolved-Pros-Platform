@@ -1,6 +1,7 @@
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
+import type { Json } from '@evolved-pros/db'
 
 export const dynamic = 'force-dynamic'
 
@@ -100,7 +101,7 @@ export async function POST(req: Request) {
     event_type: payload.type,
     asset_id: payload.data.id,
     playback_id: payload.data.playback_ids?.[0]?.id ?? null,
-    payload: payload as unknown as Record<string, unknown>,
+    payload: payload as unknown as Json,
   })
 
   if (payload.type === 'video.asset.ready') {

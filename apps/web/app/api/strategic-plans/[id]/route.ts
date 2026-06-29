@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import type { Json } from '@evolved-pros/db'
 
 export async function PATCH(
   request: Request,
@@ -22,7 +23,7 @@ export async function PATCH(
 
   const { data, error } = await supabase
     .from('strategic_plans')
-    .update({ content, updated_at: new Date().toISOString() })
+    .update({ content: content as Json, updated_at: new Date().toISOString() })
     .eq('id', params.id)
     .eq('user_id', profile.id)
     .select('id, course_id, domain, content, status, updated_at')

@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import type { Json } from '@evolved-pros/db'
 
 type AssessmentType = 'PIONEER' | 'DRIVER' | 'CONNECTOR' | 'ARCHITECT'
 const VALID_TYPES: AssessmentType[] = ['PIONEER', 'DRIVER', 'CONNECTOR', 'ARCHITECT']
@@ -56,7 +57,7 @@ export async function POST(request: Request) {
       user_id: user.id,
       assessment_type: 'pioneer-driver',
       type_result: typeResult,
-      scores_json: scoresJson,
+      scores_json: scoresJson as Json,
     })
     .select('id, user_id, assessment_type, type_result, scores_json, created_at')
     .single()

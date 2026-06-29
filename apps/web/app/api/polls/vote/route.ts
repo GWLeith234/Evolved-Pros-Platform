@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   if (error) return NextResponse.json({ error: 'Failed to vote' }, { status: 500 })
 
   // Increment vote count on option
-  await supabase.rpc('increment_poll_vote', { p_option_id: optionId } as Record<string, unknown>).catch(() => {
+  await Promise.resolve(supabase.rpc('increment_poll_vote', { p_option_id: optionId })).catch(() => {
     // RPC may not exist yet — fall back silently
   })
 

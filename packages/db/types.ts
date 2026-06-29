@@ -1407,6 +1407,38 @@ export type Database = {
         }
         Relationships: []
       }
+      pipeline_stage_overrides: {
+        Row: {
+          created_at: string
+          note: string | null
+          stage: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          note?: string | null
+          stage: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          note?: string | null
+          stage?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pipeline_stage_overrides_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_ads: {
         Row: {
           ad_type: string | null
@@ -1805,25 +1837,31 @@ export type Database = {
           created_at: string | null
           id: string
           image_url: string
+          is_active: boolean
           label: string
           pillar: string | null
           sort_order: number
+          title: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           image_url: string
+          is_active?: boolean
           label: string
           pillar?: string | null
           sort_order?: number
+          title?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
           image_url?: string
+          is_active?: boolean
           label?: string
           pillar?: string | null
           sort_order?: number
+          title?: string | null
         }
         Relationships: []
       }
