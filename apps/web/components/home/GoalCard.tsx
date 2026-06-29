@@ -77,7 +77,7 @@ function computePace(period: string, progressPct: number, now: Date = new Date()
 }
 
 const STATUS_STYLE: Record<PaceInfo['status'], { bg: string; color: string }> = {
-  'on-track': { bg: 'rgba(34,197,94,0.10)',  color: '#15803d' },
+  'on-track': { bg: 'rgba(34,197,94,0.10)',  color: '#22c55e' },
   'ahead':    { bg: 'rgba(10,191,163,0.10)', color: '#0ABFA3' },
   'behind':   { bg: 'rgba(239,14,48,0.08)',  color: '#ef0e30' },
 }
@@ -95,15 +95,16 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
 
   return (
     <div
-      className="rounded-lg overflow-hidden bg-white"
+      className="rounded-lg overflow-hidden"
       style={{
-        border: '1px solid rgba(27,60,90,0.1)',
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border-color)',
         borderLeft: `3px solid ${accentColor}`,
       }}
     >
       <div className="px-4 py-3">
         <div className="flex items-start justify-between gap-2 mb-1">
-          <span className="font-body font-bold text-[13px] leading-snug text-[#1b3c5a]">
+          <span className="font-body font-bold text-[13px] leading-snug" style={{ color: 'var(--text-primary)' }}>
             {goal.title}
           </span>
           <span
@@ -133,7 +134,7 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
 
         <div
           className="w-full rounded-full overflow-hidden"
-          style={{ height: 4, backgroundColor: 'rgba(27,60,90,0.08)' }}
+          style={{ height: 4, backgroundColor: 'var(--bg-elevated)' }}
         >
           <div
             className="h-full rounded-full transition-all"
@@ -156,7 +157,7 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
             </span>
             <span
               className="font-condensed text-[12px]"
-              style={{ color: '#94a3b8' }}
+              style={{ color: 'var(--text-tertiary)' }}
               suppressHydrationWarning
             >
               {pace.daysLeft >= 0 ? `${pace.daysLeft} days left` : 'past due'}
@@ -168,8 +169,8 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
       {tiedToPath && inProgressContinueHref && (
         <Link
           href={inProgressContinueHref}
-          className="flex items-center justify-between px-4 py-2 transition-colors hover:bg-[rgba(27,60,90,0.03)]"
-          style={{ borderTop: '1px solid rgba(27,60,90,0.06)', backgroundColor: 'rgba(27,60,90,0.02)' }}
+          className="flex items-center justify-between px-4 py-2 transition-colors hover:bg-[rgba(255,255,255,0.03)]"
+          style={{ borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--bg-elevated)' }}
         >
           <span
             className="font-condensed font-bold uppercase tracking-[0.16em] text-[12px]"

@@ -28,20 +28,20 @@ export function AcademyProgressWidget({ courses }: AcademyProgressWidgetProps) {
             axis from the 6-pillar roadmap in the stepper above. */}
         <div className="flex items-baseline justify-between gap-3">
           <h3
-            className="font-condensed text-[22px] font-medium uppercase tracking-[0.04em] text-[#1b3c5a] leading-none"
+            className="font-condensed text-[22px] font-medium uppercase tracking-[0.04em] text-[color:var(--text-primary)] leading-none"
           >
             Active courses
           </h3>
           <Link
             href="/academy"
-            className="font-condensed text-[12px] tracking-[0.18em] text-[#68a2b9] hover:text-[#1b3c5a] uppercase whitespace-nowrap"
+            className="font-condensed text-[12px] tracking-[0.18em] text-[#68a2b9] hover:text-[color:var(--text-primary)] uppercase whitespace-nowrap"
           >
             Continue Learning →
           </Link>
         </div>
 
         {courses.length === 0 ? (
-          <p className="font-condensed text-xs tracking-widest text-[#7a8a96] text-center py-4">
+          <p className="font-condensed text-xs tracking-widest text-[color:var(--text-tertiary)] text-center py-4">
             No courses started yet
           </p>
         ) : (
@@ -53,7 +53,7 @@ export function AcademyProgressWidget({ courses }: AcademyProgressWidgetProps) {
             return (
               <Link key={course.id} href={`/academy/${course.slug}`} className="block group">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-body font-semibold text-[12px] text-[#1b3c5a] group-hover:text-[#68a2b9] transition-colors">
+                  <span className="font-body font-semibold text-[12px] text-[color:var(--text-primary)] group-hover:text-[#68a2b9] transition-colors">
                     {course.title}
                   </span>
                   <span
@@ -66,7 +66,7 @@ export function AcademyProgressWidget({ courses }: AcademyProgressWidgetProps) {
                 {/* Progress bar */}
                 <div
                   className="w-full rounded-full overflow-hidden"
-                  style={{ height: '3px', backgroundColor: 'rgba(27,60,90,0.12)' }}
+                  style={{ height: '3px', backgroundColor: 'var(--bg-elevated)' }}
                 >
                   <div
                     className="h-full rounded-full transition-all"

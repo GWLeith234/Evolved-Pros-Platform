@@ -835,16 +835,16 @@ export default async function MemberHomePage() {
         <div className="space-y-3">
           <p
             className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px]"
-            style={{ color: '#7a8a96' }}
+            style={{ color: 'var(--text-tertiary)' }}
           >
             The Long Game
           </p>
           {goalsForCards.length === 0 ? (
             <div
-              className="rounded-lg p-5 bg-white text-center"
-              style={{ border: '1px solid rgba(27,60,90,0.1)' }}
+              className="rounded-lg p-5 text-center"
+              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
             >
-              <p className="font-condensed text-[12px] mb-3" style={{ color: '#7a8a96' }}>
+              <p className="font-condensed text-[12px] mb-3" style={{ color: 'var(--text-tertiary)' }}>
                 No active goals yet — set one to anchor the quarter.
               </p>
               <AddGoalCTA />
