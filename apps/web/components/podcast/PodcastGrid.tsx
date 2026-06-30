@@ -2,13 +2,13 @@
 
 import { useMemo, useState } from 'react'
 import type { PodcastEpisode } from '@/lib/podcast/transforms'
+import { sortEpisodesNewest } from '@/lib/podcast/transforms'
 import { PodcastFilterPills, type FilterKey, type SortKey } from './PodcastFilterPills'
 import { PodcastEpisodeTile } from './PodcastEpisodeTile'
 
-const FB = 'Barlow, sans-serif'
-const FBC = 'Barlow Condensed, sans-serif'
-const FBN = 'Bebas Neue, sans-serif'
-const FP = 'Playfair Display, Georgia, serif'
+const FB = 'var(--font-barlow)'
+const FBC = 'var(--font-barlow-condensed)'
+const FBN = 'var(--font-bebas)'
 
 interface PodcastGridProps {
   episodes: PodcastEpisode[]
@@ -23,11 +23,21 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
 
   const filtered = useMemo(() => {
     let list = filter === 'all' ? episodes : episodes.filter(e => e.pillar === filter)
-    if (sort === 'newest') list = [...list].sort((a, b) => new Date(b.releasedAt).getTime() - new Date(a.releasedAt).getTime())
-    if (sort === 'oldest') list = [...list].sort((a, b) => new Date(a.releasedAt).getTime() - new Date(b.releasedAt).getTime())
+    // Newest uses the shared deterministic comparator (date desc, then episode
+    // number desc) so same-day episodes hold a stable order (PODCAST-CLEANUP S6).
+    if (sort === 'newest') list = sortEpisodesNewest(list)
+    if (sort === 'oldest') list = [...list].sort((a, b) => new Date(a.releasedAt).getTime() - new Date(b.releasedAt).getTime() || a.episode - b.episode)
     if (sort === 'longest') list = [...list].sort((a, b) => b.duration - a.duration)
     return list
   }, [episodes, filter, sort])
+
+  // Headline count excludes the pilot — it carries a PILOT chip, not a number,
+  // so "5 episodes + pilot" reads true (PODCAST-CLEANUP S6).
+  const numberedCount = filtered.filter(e => e.episode > 0).length
+  const pilotCount = filtered.length - numberedCount
+  const countLabel =
+    `${numberedCount} ${numberedCount === 1 ? 'episode' : 'episodes'}` +
+    (pilotCount > 0 ? ' + pilot' : '')
 
   return (
     <section
@@ -74,7 +84,7 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
               lineHeight: 1,
             }}
           >
-            All Episodes
+            All episodes
           </h2>
         </div>
         <p
@@ -88,7 +98,7 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
             color: 'var(--podcast-text-3)',
           }}
         >
-          {filtered.length} {filtered.length === 1 ? 'episode' : 'episodes'}
+          {countLabel}
         </p>
       </header>
 
@@ -114,7 +124,7 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
       </div>
 
       {filtered.length === 0 && fallbackEpisode && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <p
             style={{
               margin: 0,
@@ -190,8 +200,9 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
           <h3
             style={{
               margin: '10px 0 0',
-              fontFamily: FP,
+              fontFamily: FB,
               fontSize: 22,
+              fontWeight: 600,
               color: 'var(--podcast-text-strong)',
             }}
           >
@@ -201,8 +212,14 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
       )}
 
       {/* Archive reflow: desktop auto-fills; ≤600px drops to 2-up, then
-          1-up on the narrowest phones so nothing clips. */}
+          1-up on the narrowest phones so nothing clips. Card covers get a
+          brand-teal keyboard focus ring (PODCAST-CLEANUP S7). */}
       <style>{`
+        .podcast-tile-cover { outline: none; }
+        .podcast-tile-cover:focus-visible {
+          outline: 2px solid var(--brand-teal);
+          outline-offset: 2px;
+        }
         @media (max-width: 600px) {
           .podcast-archive-grid {
             grid-template-columns: 1fr 1fr !important;

@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
-import { dbRowToEpisode, type EpisodeRow, type ProgressRow } from '@/lib/podcast/transforms'
+import { dbRowToEpisode, assertMonotonicNumbering, type EpisodeRow, type ProgressRow } from '@/lib/podcast/transforms'
 import { PodcastPageShell } from '@/components/podcast/PodcastPageShell'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
@@ -21,7 +21,11 @@ export default async function PodcastIndexPage() {
       .from('episodes')
       .select('id, slug, episode_number, title, description, pillar, pinned, guest_name, guest_title, guest_company, guest_image_url, thumbnail_url, duration_seconds, published_at, youtube_url')
       .eq('is_published', true)
+      // Deterministic catalogue order: newest publish date first, higher
+      // episode number breaking same-day ties so the grid never flips
+      // between reloads (PODCAST-CLEANUP S6).
       .order('published_at', { ascending: false })
+      .order('episode_number', { ascending: false })
       .limit(100) as Promise<{ data: EpisodeRow[] | null }>,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (adminClient as any)
@@ -36,6 +40,9 @@ export default async function PodcastIndexPage() {
   for (const p of rawProgress ?? []) progressByEpisode.set(p.episode_id, p)
 
   const episodes = (rawEpisodes ?? []).map(row => dbRowToEpisode(row, progressByEpisode.get(row.id)))
+
+  // Dev-only sanity check: flag if episode numbering drifts from chronology.
+  assertMonotonicNumbering(episodes)
 
   return <PodcastPageShell episodes={episodes} />
 }

@@ -4,16 +4,16 @@ import { useState } from 'react'
 import type { PodcastEpisode } from '@/lib/podcast/transforms'
 import { fmtPodcastDate, PILLAR_META } from '@/lib/podcast/transforms'
 
-const FB = 'Barlow, sans-serif'
-const FBC = 'Barlow Condensed, sans-serif'
-const FP = 'Playfair Display, Georgia, serif'
+const FB = 'var(--font-barlow)'
+const FBC = 'var(--font-barlow-condensed)'
+const FBN = 'var(--font-bebas)'
 
 interface PodcastHeroProps {
   episode: PodcastEpisode
 }
 
 function formatRuntime(minutes: number): string {
-  if (minutes <= 0) return '—'
+  if (minutes <= 0) return ''
   if (minutes >= 60) {
     const h = Math.floor(minutes / 60)
     const m = minutes % 60
@@ -23,7 +23,7 @@ function formatRuntime(minutes: number): string {
 }
 
 function getInitials(name: string): string {
-  return name.split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase() || '—'
+  return name.split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase() || '?'
 }
 
 const SHARE_ICONS: Array<{ key: string; label: string; path: React.ReactNode }> = [
@@ -80,12 +80,11 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
             position: 'relative',
             width: '100%',
             aspectRatio: '2 / 3',
-            borderRadius: 16,
+            borderRadius: 0,
             overflow: 'hidden',
-            background: '#0A0F18',
+            background: 'var(--podcast-bg-page)',
             border: '1px solid var(--podcast-border-soft2)',
             borderTop: `3px solid ${pillar.color}`,
-            boxShadow: '0 24px 60px -20px rgba(0,0,0,0.55)',
           }}
         >
           {episode.cover ? (
@@ -103,8 +102,9 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontFamily: FP,
+                fontFamily: FBN,
                 fontSize: 40,
+                letterSpacing: '0.04em',
                 color: 'var(--podcast-text-5)',
               }}
             >
@@ -120,7 +120,7 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
                 top: 14,
                 left: 14,
                 padding: '4px 9px',
-                background: '#C9302A',
+                background: 'var(--brand-red)',
                 color: '#fff',
                 fontFamily: FBC,
                 fontWeight: 800,
@@ -165,17 +165,17 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
                 alignItems: 'center',
                 gap: 8,
                 padding: '4px 10px',
-                background: 'rgba(201,48,42,0.12)',
-                border: '1px solid rgba(201,48,42,0.5)',
+                background: 'color-mix(in srgb, var(--brand-red) 12%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--brand-red) 50%, transparent)',
                 fontFamily: FBC,
                 fontWeight: 800,
                 fontSize: 12,
                 letterSpacing: '0.28em',
                 textTransform: 'uppercase',
-                color: '#C9302A',
+                color: 'var(--brand-red)',
               }}
             >
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef0e30', boxShadow: '0 0 8px #ef0e30' }} />
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--brand-red)' }} />
               {episode.pinned ? 'Featured' : 'Latest episode'}
             </span>
             <span
@@ -190,11 +190,37 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
             >
               {pillar.label}
             </span>
-            {episode.episode > 0 && (
+            {episode.episode > 0 ? (
               <>
                 <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--podcast-text-5)' }} />
-                <span style={{ fontFamily: FP, fontStyle: 'italic', fontSize: 18, color: '#C9A84C' }}>
-                  Episode #{episode.episode}
+                <span
+                  style={{
+                    fontFamily: FBC,
+                    fontWeight: 700,
+                    fontSize: 13,
+                    letterSpacing: '0.22em',
+                    textTransform: 'uppercase',
+                    color: 'var(--brand-gold)',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  Episode #{String(episode.episode).padStart(2, '0')}
+                </span>
+              </>
+            ) : (
+              <>
+                <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--podcast-text-5)' }} />
+                <span
+                  style={{
+                    fontFamily: FBC,
+                    fontWeight: 800,
+                    fontSize: 13,
+                    letterSpacing: '0.22em',
+                    textTransform: 'uppercase',
+                    color: 'var(--brand-gold)',
+                  }}
+                >
+                  Pilot
                 </span>
               </>
             )}
@@ -240,10 +266,10 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
           <h1
             style={{
               margin: 0,
-              fontFamily: FP,
+              fontFamily: FB,
               fontWeight: 700,
               fontSize: 'clamp(28px, 4vw, 46px)',
-              lineHeight: 1.08,
+              lineHeight: 1.1,
               letterSpacing: '-0.015em',
               color: 'var(--podcast-text-strong)',
               overflowWrap: 'break-word',
@@ -270,7 +296,7 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
 
           {/* Guest row */}
           {episode.guest.name && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 22 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 24 }}>
               {episode.guest.photo ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -285,7 +311,7 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
                     height: 40,
                     borderRadius: '50%',
                     border: '2px solid var(--podcast-border-med2)',
-                    background: '#1b3c5a',
+                    background: 'var(--navy)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -325,7 +351,7 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
           )}
 
           {/* Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 26, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24, flexWrap: 'wrap' }}>
             <a
               href={watchUrl}
               target={watchExternal ? '_blank' : undefined}
@@ -334,9 +360,9 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
               onMouseLeave={() => setWatchHover(false)}
               style={{
                 padding: '14px 28px',
-                background: watchHover ? '#ff1a40' : '#ef0e30',
+                background: watchHover ? 'var(--brand-red-hover)' : 'var(--brand-red)',
                 color: '#fff',
-                border: '1px solid #ef0e30',
+                border: '1px solid var(--brand-red)',
                 fontFamily: FBC,
                 fontWeight: 800,
                 fontSize: 13,

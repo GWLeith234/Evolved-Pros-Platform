@@ -105,13 +105,58 @@ export function dbRowToEpisode(row: EpisodeRow, progress?: ProgressRow): Podcast
   }
 }
 
+// Single source of truth for CATEGORY → pillar token (PODCAST-CLEANUP S2).
+// `color` is a CSS custom-property reference, never a literal hex — badge,
+// dot, filter pill and card hover-border all read from here so the six
+// categories can never drift out of the brand palette again. Tints are
+// derived at the call site with color-mix() against the same token.
 export const PILLAR_META: Record<PodcastPillar, { label: string; color: string }> = {
-  foundation:         { label: 'Foundation',        color: '#FFA538' },
-  identity:           { label: 'Identity',          color: '#A78BFA' },
-  'mental-toughness': { label: 'Mental Toughness',  color: '#F87171' },
-  strategy:           { label: 'Strategy',          color: '#60A5FA' },
-  accountability:     { label: 'Accountability',    color: '#C9A84C' },
-  execution:          { label: 'Execution',         color: '#0ABFA3' },
+  foundation:         { label: 'Foundation',        color: 'var(--pillar-1)' },
+  identity:           { label: 'Identity',          color: 'var(--pillar-2)' },
+  'mental-toughness': { label: 'Mental Toughness',  color: 'var(--pillar-3)' },
+  strategy:           { label: 'Strategy',          color: 'var(--pillar-4)' },
+  accountability:     { label: 'Accountability',    color: 'var(--pillar-5)' },
+  execution:          { label: 'Execution',         color: 'var(--pillar-6)' },
+}
+
+/** Ordered pillar list — drives the filter rail without re-listing keys. */
+export const PILLAR_ORDER: PodcastPillar[] = [
+  'foundation', 'identity', 'mental-toughness', 'strategy', 'accountability', 'execution',
+]
+
+/**
+ * Deterministic catalogue order (PODCAST-CLEANUP S6): newest publish date
+ * first, with the higher episode number winning ties so same-day episodes
+ * stop flipping between reloads. Returns a new array; never mutates input.
+ */
+export function sortEpisodesNewest(episodes: PodcastEpisode[]): PodcastEpisode[] {
+  return [...episodes].sort((a, b) => {
+    const dt = new Date(b.releasedAt).getTime() - new Date(a.releasedAt).getTime()
+    return dt !== 0 ? dt : b.episode - a.episode
+  })
+}
+
+/**
+ * Lightweight build/dev guard (PODCAST-CLEANUP S6): episode numbering should
+ * be monotonic with publish date — i.e. sorting by date should yield the same
+ * order as sorting by episode number. Pilots (episode 0) are excluded since
+ * they carry a chip, not a sequence number. Warns rather than throws so live
+ * data issues never hard-break a build; surfaces the drift for content fixes.
+ */
+export function assertMonotonicNumbering(episodes: PodcastEpisode[]): void {
+  if (process.env.NODE_ENV === 'production') return
+  const numbered = episodes.filter(e => e.episode > 0)
+  const byDate = sortEpisodesNewest(numbered)
+  const byNumber = [...numbered].sort((a, b) => b.episode - a.episode)
+  const mismatch = byDate.some((e, i) => e.id !== byNumber[i]?.id)
+  if (mismatch) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[podcast] episode numbering is not monotonic with publish date — ' +
+      'newest-by-date order differs from newest-by-number. Renumber or fix ' +
+      'publish dates so #N order matches chronology.',
+    )
+  }
 }
 
 // Locale-stable, deterministic between server and client. Using

@@ -78,7 +78,7 @@ export function EpisodePlayer({ muxPlaybackId, youtubeUrl, title }: EpisodePlaye
           metadata={{ video_title: title }}
           streamType="on-demand"
           style={{ width: '100%', height: '100%' }}
-          accentColor="#ef0e30"
+          accentColor="#C9302A"
         />
       </div>
     )
