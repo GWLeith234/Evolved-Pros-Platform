@@ -27,7 +27,7 @@ const PLACEMENT_OPTIONS = [
 
 type Banner = {
   id: string
-  pillar: number | null
+  pillar: string | null
   title: string | null
   image_url: string
   sort_order: number
@@ -332,6 +332,9 @@ function AdsTab({ initialAds, settings }: { initialAds: Ad[]; settings: Record<s
     const { data } = await supabase
       .from('platform_ads')
       .insert({
+        // platform_ads.title is NOT NULL; branding ads are headline/tool-driven,
+        // so derive a title from the headline (falling back to the tool name).
+        title: newAd.headline || newAd.tool_name || 'Sponsor',
         placement: newAd.placement || 'sidebar',
         image_url: newAd.image_url || null,
         headline: newAd.headline || null,
@@ -735,8 +738,10 @@ function BannersTab({ initialBanners }: { initialBanners: Banner[] }) {
       const { data } = await supabase
         .from('profile_banners')
         .insert({
+          // label is NOT NULL (legacy column); mirror the title into it.
+          label: newTitle || '',
           title: newTitle || null,
-          pillar: newPillar ? parseInt(newPillar) : null,
+          pillar: newPillar || null,
           image_url: newImage,
           sort_order: banners.length + 1,
           is_active: true,

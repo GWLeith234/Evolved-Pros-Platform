@@ -9,10 +9,10 @@ interface Story {
   slug: string
   pillar: string | null
   story_type: string
-  is_published: boolean
-  is_featured: boolean
+  is_published: boolean | null
+  is_featured: boolean | null
   published_at: string | null
-  created_at: string
+  created_at: string | null
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -92,7 +92,7 @@ export function MediaListClient({
                 <td className="px-4 py-3">
                   <button
                     type="button"
-                    onClick={() => togglePublish(story.id, story.is_published)}
+                    onClick={() => togglePublish(story.id, story.is_published ?? false)}
                     className="font-condensed font-bold uppercase tracking-[0.12em] text-[9px] px-2 py-0.5 rounded"
                     style={{
                       backgroundColor: story.is_published ? 'rgba(10,191,163,0.1)' : 'rgba(27,60,90,0.06)',

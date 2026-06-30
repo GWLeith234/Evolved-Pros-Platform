@@ -171,10 +171,12 @@ function EventGridCard({ event, isRegistered, canRegister, onRegister, onUnregis
           <TierBadge requiredTier={event.requiredTier} />
 
           {event.hasAccess && !isPast && canRegister && (
+            // Button's onClick is typed () => void but forwards the MouseEvent at
+            // runtime, which handleAction needs for preventDefault() (the card is a Link).
             <Button
               variant={isRegistered ? 'ghost' : 'primary'}
               size="sm"
-              onClick={handleAction}
+              onClick={handleAction as unknown as () => void}
               loading={loading}
             >
               {isRegistered ? '✓ Registered' : 'Register'}

@@ -137,7 +137,7 @@ export function OnboardingPillar({ onContinue }: Props) {
       {/* Skip */}
       <button
         type="button"
-        onClick={onContinue}
+        onClick={() => onContinue()}
         style={{
           display: 'block',
           width: '100%',

@@ -35,7 +35,7 @@ interface VendastaWebhook {
 
 interface MemberDetail {
   id: string
-  email: string
+  email: string | null
   fullName: string | null
   displayName: string | null
   avatarUrl: string | null
@@ -104,7 +104,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
   const [notifSending, setNotifSending] = useState(false)
   const [notifMsg, setNotifMsg]     = useState('')
 
-  const name = member.displayName ?? member.fullName ?? member.email
+  const name = member.displayName ?? member.fullName ?? member.email ?? 'Member'
 
   async function handleSaveTier() {
     setSaving(true)

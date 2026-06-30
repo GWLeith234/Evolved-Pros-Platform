@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { adminClient } from '@/lib/supabase/admin'
+import type { TablesInsert } from '@evolved-pros/db'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Title and slug are required' }, { status: 422 })
   }
 
-  const row: Record<string, unknown> = {
+  const row = {
     title, slug, excerpt, body: articleBody, pillar, story_type,
     source_url: source_url || null,
     source_name: source_name || null,
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
 
   const { data, error } = await adminClient
     .from('media_stories')
-    .insert(row)
+    .insert(row as TablesInsert<'media_stories'>)
     .select()
     .single()
 

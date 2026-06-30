@@ -86,7 +86,7 @@ export async function POST(request: Request) {
     })
 
     let images: string[] = results
-      .filter((r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof openai.images.generate>>> => r.status === 'fulfilled')
+      .filter((r): r is PromiseFulfilledResult<OpenAI.Images.ImagesResponse> => r.status === 'fulfilled')
       .map(r => r.value.data?.[0]?.url ?? '')
       .filter(Boolean)
 
