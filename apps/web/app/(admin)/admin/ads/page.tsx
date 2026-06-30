@@ -15,7 +15,7 @@ export default async function AdminAdsPage() {
   // disabled/expired ads they need to manage.
   const { data: rows } = await adminClient
     .from('platform_ads')
-    .select('id, zone, sponsor_name, ad_type, image_url, click_url, headline, start_date, end_date, is_active, sort_order, created_at')
+    .select('id, zone, sponsor_name, ad_type, image_url, click_url, headline, body_copy, cta_text, start_date, end_date, is_active, sort_order, created_at')
     .order('zone')
     .order('sort_order')
 

@@ -16,7 +16,7 @@ export default async function AdminBrandingPage() {
     adminClient.from('platform_settings').select('key, value'),
     adminClient
       .from('platform_ads')
-      .select('id, placement, image_url, headline, cta_text, link_url, sort_order, is_active')
+      .select('id, placement, image_url, headline, tool_name, endorsement_quote, special_offer, cta_text, link_url, sort_order, is_active')
       .order('sort_order'),
     adminClient
       .from('profile_banners')

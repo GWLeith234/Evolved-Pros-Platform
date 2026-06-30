@@ -8,7 +8,7 @@ import { AdminEditProfileModal } from './AdminEditProfileModal'
 
 export interface MemberRow {
   id: string
-  email: string
+  email: string | null
   displayName: string | null
   fullName: string | null
   avatarUrl: string | null
@@ -61,12 +61,12 @@ function getInitials(name: string | null | undefined): string {
 // Prefer the full legal name when present (e.g. "Jubal Chetty") over the
 // shorter displayName ("Jubal") so the admin list shows last names that exist
 // in the DB. Falls back to displayName, then to the email local-part.
-function resolveDisplayName(m: { fullName: string | null; displayName: string | null; email: string }): string {
+function resolveDisplayName(m: { fullName: string | null; displayName: string | null; email: string | null }): string {
   const full = m.fullName?.trim()
   if (full) return full
   const display = m.displayName?.trim()
   if (display) return display
-  return m.email.split('@')[0]
+  return m.email?.split('@')[0] ?? 'Member'
 }
 
 export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }) {
@@ -82,7 +82,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
       list = list.filter(m =>
         (m.displayName ?? '').toLowerCase().includes(q) ||
         (m.fullName ?? '').toLowerCase().includes(q) ||
-        m.email.toLowerCase().includes(q),
+        (m.email ?? '').toLowerCase().includes(q),
       )
     }
     if (filter === 'Pro')  list = list.filter(m => m.tier === 'pro')

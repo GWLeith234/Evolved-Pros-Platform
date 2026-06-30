@@ -156,7 +156,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
     }
   }
 
-  const name = member.displayName ?? member.fullName ?? member.email
+  const name = member.displayName ?? member.fullName ?? member.email ?? 'Member'
 
   return (
     <div

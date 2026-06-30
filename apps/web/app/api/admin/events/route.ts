@@ -35,6 +35,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'valid event_type is required' }, { status: 422 })
   }
 
+  const startsAt = typeof body.starts_at === 'string' ? body.starts_at : ''
+  if (!startsAt) return NextResponse.json({ error: 'starts_at is required' }, { status: 422 })
+
   const tierAccess = typeof body.tier_access === 'string' && ['all', 'pro', 'vip'].includes(body.tier_access)
     ? body.tier_access
     : 'all'
@@ -54,7 +57,7 @@ export async function POST(request: Request) {
       cta_text:    typeof body.cta_text === 'string'    ? body.cta_text    : null,
       pillar,
       event_type: eventType,
-      starts_at: typeof body.starts_at === 'string' ? body.starts_at : null,
+      starts_at: startsAt,
       ends_at: typeof body.ends_at === 'string' ? body.ends_at : null,
       zoom_url: typeof body.zoom_url === 'string' ? body.zoom_url : null,
       image_url: typeof body.image_url === 'string' ? body.image_url : null,

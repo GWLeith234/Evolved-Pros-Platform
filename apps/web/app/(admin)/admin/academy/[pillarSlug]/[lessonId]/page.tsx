@@ -63,7 +63,7 @@ export default async function AdminContentBuilderPage({ params }: Props) {
         lessonId={lesson.id}
         lessonTitle={lesson.title}
         isPublished={lesson.is_published}
-        initialBlocks={Array.isArray(lesson.content_blocks) ? lesson.content_blocks : []}
+        initialBlocks={(Array.isArray(lesson.content_blocks) ? lesson.content_blocks : []) as React.ComponentProps<typeof ContentBuilder>['initialBlocks']}
         pillarSlug={params.pillarSlug}
         accentColor={config.color}
       />

@@ -64,6 +64,7 @@ export function CommunityFeed({
             id: string
             channel_id: string
             body: string
+            post_type: string | null
             pillar_tag: string | null
             is_pinned: boolean
             like_count: number
@@ -77,6 +78,7 @@ export function CommunityFeed({
             id: newRow.id,
             channelId: newRow.channel_id,
             body: newRow.body,
+            postType: (newRow.post_type ?? 'update') as Post['postType'],
             pillarTag: newRow.pillar_tag as Post['pillarTag'],
             isPinned: newRow.is_pinned,
             likeCount: newRow.like_count,
