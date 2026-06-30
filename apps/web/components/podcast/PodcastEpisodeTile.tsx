@@ -70,15 +70,9 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
           }}
         />
 
-        {/* Heavy bottom fade for poster legibility — the one allowed gradient
-            (functional scrim, not decoration). */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(180deg, rgba(10,15,24,0) 30%, rgba(10,15,24,0.45) 60%, rgba(10,15,24,0.92) 100%)',
-          }}
-        />
+        {/* Cover art is now a plain guest headshot (no baked-in text), so the
+            full-image legibility gradient was retired. Overlaid labels carry
+            their own small scrims instead (PODCAST-CLEANUP follow-up). */}
 
         {/* Pillar accent wash on hover — flat tint, no gradient */}
         <div
@@ -121,6 +115,9 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
               display: 'flex',
               alignItems: 'baseline',
               gap: 4,
+              padding: '2px 8px',
+              background: 'rgba(10,15,24,0.7)',
+              backdropFilter: 'blur(8px)',
             }}
           >
             <span
@@ -309,8 +306,30 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
         )}
       </button>
 
-      {/* META BELOW POSTER (Apple TV pattern) */}
+      {/* META BELOW POSTER (Apple TV pattern). Covers are now plain guest
+          headshots, so the guest name is the primary identifier — promoted to a
+          clear label directly under the picture, above the episode title. The
+          byline below carries the date alone (name no longer duplicated). */}
       <div style={{ padding: '16px 2px 0' }}>
+        {episode.guest.name && (
+          <p
+            style={{
+              margin: '0 0 4px',
+              fontFamily: FBC,
+              fontWeight: 700,
+              fontSize: 12,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--podcast-text-1)',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              textAlign: 'left',
+            }}
+          >
+            {episode.guest.name}
+          </p>
+        )}
         <h3
           style={{
             margin: 0,
@@ -328,7 +347,7 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
         >
           {episode.title}
         </h3>
-        {(episode.guest.name || fmtPodcastDate(episode.releasedAt)) && (
+        {fmtPodcastDate(episode.releasedAt) && (
           <p
             style={{
               margin: '6px 0 0',
@@ -341,11 +360,7 @@ export function PodcastEpisodeTile({ episode, focused, onFocus, onBlur }: Podcas
               textAlign: 'left',
             }}
           >
-            {episode.guest.name && <span>{episode.guest.name}</span>}
-            {episode.guest.name && fmtPodcastDate(episode.releasedAt) && (
-              <span style={{ color: 'var(--podcast-text-5)', margin: '0 6px' }}>·</span>
-            )}
-            {fmtPodcastDate(episode.releasedAt) && <span>{fmtPodcastDate(episode.releasedAt)}</span>}
+            {fmtPodcastDate(episode.releasedAt)}
           </p>
         )}
       </div>
