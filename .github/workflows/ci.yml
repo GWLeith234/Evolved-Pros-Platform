@@ -16,14 +16,11 @@ jobs:
         with: { node-version: '20', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
 
-      # type-check: runs on main/develop AND the integration branch for
-      # visibility so type debt can't silently regrow off-main. Still
-      # non-blocking until packages/db/types.ts is regenerated from the live DB
-      # and the residual count reaches 0 — at that point REMOVE
-      # `continue-on-error` below to turn this into a hard gate.
+      # type-check: runs on main/develop AND the integration branch. Hard gate as of
+      # 2026-07-01 — error count has been 0 since PR #17. If this ever fails,
+      # it means new type debt was introduced; fix it, don't re-add continue-on-error.
       - name: Type check
         run: pnpm type-check
-        continue-on-error: true
 
       # lint: blocking — this is the real quality gate
       - name: Lint
