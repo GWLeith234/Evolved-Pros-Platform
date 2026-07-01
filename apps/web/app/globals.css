@@ -32,6 +32,14 @@
 
   /* DS2 — TopNav v2 + brand (FOUNDATION-TOPNAV-V2) */
   --bg-topnav:     #0D1B2A;
+  /* Nav background — deliberately has no html.light-mode override. The nav
+     stays this exact dark navy permanently in both themes (design decision).
+     Was referenced by TopNav.tsx/NotifBell.tsx but never actually defined
+     anywhere — resolved to transparent, coincidentally looked dark only
+     because the page body behind it was also dark. Real risk once light
+     mode became reachable via the toggle: light page content bleeding
+     through a transparent sticky header. */
+  --bg-nav:        #0D1B2A;
   --text-dim:      rgba(255,255,255,0.6);
   --text-muted:    rgba(255,255,255,0.45);
   --border-subtle: rgba(255,255,255,0.06);

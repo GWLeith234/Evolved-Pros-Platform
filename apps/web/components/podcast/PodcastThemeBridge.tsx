@@ -7,18 +7,14 @@ interface PodcastThemeBridgeProps {
 }
 
 export function PodcastThemeBridge({ theme }: PodcastThemeBridgeProps) {
+  // Owns only body[data-theme], scoped to this podcast page. The global
+  // light-mode class on <html> belongs to ThemeProvider — this component
+  // must never add/remove it, or navigating away from /podcast would
+  // silently flip the user's app-wide theme back to dark.
   useEffect(() => {
-    const isLight = theme === 'parchment'
-    if (isLight) {
-      document.body.setAttribute('data-theme', 'light')
-      document.documentElement.classList.add('light-mode')
-    } else {
-      document.body.removeAttribute('data-theme')
-      document.documentElement.classList.remove('light-mode')
-    }
+    document.body.setAttribute('data-theme', theme)
     return () => {
       document.body.removeAttribute('data-theme')
-      document.documentElement.classList.remove('light-mode')
     }
   }, [theme])
   return null
