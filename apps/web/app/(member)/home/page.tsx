@@ -11,7 +11,6 @@ import { ActivityFeed } from '@/components/home/ActivityFeed'
 import { UpcomingEventsWidget } from '@/components/home/UpcomingEventsWidget'
 import { AcademyProgressWidget } from '@/components/home/AcademyProgressWidget'
 import { ProfileCompletePrompt } from '@/components/home/ProfileCompletePrompt'
-import type { QuarterlyGoal } from '@/components/home/QuarterlyGoals'
 import { PillarJourneyStrip, type PillarStripItem } from '@/components/home/PillarJourneyStrip'
 import { InProgressPillarHero } from '@/components/home/InProgressPillarHero'
 import { ClimbingTowardCard } from '@/components/home/ClimbingTowardCard'
@@ -576,7 +575,7 @@ export default async function MemberHomePage() {
     fetchWeekCommitments(user.id, weekStart),
   ])
 
-  const quarterlyGoals = (quarterlyGoalsResult.data ?? []) as QuarterlyGoal[]
+  const quarterlyGoals = (quarterlyGoalsResult.data ?? []) as GoalForCard[]
 
   const quotes = quotesResult.data ?? []
   const quote = quotes?.length ? quotes[dayOfYear % quotes.length] : null
