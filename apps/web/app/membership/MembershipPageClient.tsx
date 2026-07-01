@@ -18,9 +18,9 @@ const KEYNOTE_INQUIRY_URL = process.env.NEXT_PUBLIC_VENDASTA_KEYNOTE_INQUIRY_URL
 // before submitting an order to Vendasta. Monthly names match the
 // Railway-configured NEXT_PUBLIC_VENDASTA_MP_* marketplace product vars.
 const VIP_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_MP_VIP_M ?? ''
-const VIP_ANNUAL_SKU  = process.env.NEXT_PUBLIC_VENDASTA_VIP_ANNUAL_SKU  ?? ''
+const VIP_ANNUAL_SKU  = process.env.NEXT_PUBLIC_VENDASTA_MP_VIP_Y ?? ''
 const PRO_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_M ?? ''
-const PRO_ANNUAL_SKU  = process.env.NEXT_PUBLIC_VENDASTA_PRO_ANNUAL_SKU  ?? ''
+const PRO_ANNUAL_SKU  = process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_Y ?? ''
 
 function CheckIcon() {
   return (
