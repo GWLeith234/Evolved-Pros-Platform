@@ -96,6 +96,10 @@ function ClientTimeAgo({ dateStr }: { dateStr: string }) {
   return <>{ago}</>
 }
 
+// Course-unlock notifications get their own gold treatment; every other
+// notification type falls through to NEUTRAL_COLOR (see isCourseUnlock below).
+const COURSE_UNLOCK_COLOR = '#C9A84C' // brand gold — matches var(--brand-gold)
+
 function buildItems(notifications: NotificationRow[], completions: CompletionRow[], posts: PostRow[]): FeedItem[] {
   const items: FeedItem[] = []
 
@@ -113,14 +117,15 @@ function buildItems(notifications: NotificationRow[], completions: CompletionRow
     })
   }
 
-  // event → calendar glyph + red; everything else → neutral dot
+  // event → calendar glyph + red; course unlock → gold; everything else → neutral dot
   for (const n of notifications) {
     const isEvent = EVENT_NOTIF_TYPES.has(n.type)
+    const isCourseUnlock = n.type === 'course_unlock'
     items.push({
       kind: 'other',
       glyph: isEvent ? 'calendar' : 'dot',
       id: `notif-${n.id}`,
-      dotColor: isEvent ? EVENT_COLOR : NEUTRAL_COLOR,
+      dotColor: isEvent ? EVENT_COLOR : isCourseUnlock ? COURSE_UNLOCK_COLOR : NEUTRAL_COLOR,
       richParts: [{ label: n.body, bold: false }],
       time: n.created_at,
       actionUrl: n.action_url ?? '/home',

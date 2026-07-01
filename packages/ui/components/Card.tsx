@@ -20,7 +20,7 @@ interface CardBodyProps {
 export function Card({ children, className = '' }: CardProps) {
   return (
     <div
-      className={`rounded-lg overflow-hidden ${className}`}
+      className={`overflow-hidden ${className}`}
       style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
     >
       {children}

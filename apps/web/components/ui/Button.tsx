@@ -24,7 +24,7 @@ const BASE_STYLE: React.CSSProperties = {
   fontWeight: 700,
   letterSpacing: '0.06em',
   textTransform: 'uppercase',
-  borderRadius: '4px',
+  borderRadius: '0',
   cursor: 'pointer',
   transition: 'opacity 0.15s, background-color 0.15s',
   display: 'inline-flex',
@@ -39,7 +39,7 @@ const VARIANT_BASE: Record<ButtonVariant, React.CSSProperties> = {
   primary:   { backgroundColor: '#C9302A', color: '#ffffff', border: 'none' },
   secondary: { backgroundColor: 'transparent', color: '#C9A84C', border: '1px solid #C9A84C' },
   tertiary:  { backgroundColor: 'transparent', color: '#0ABFA3', border: 'none' },
-  ghost:     { backgroundColor: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.12)' },
+  ghost:     { backgroundColor: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.12)' },
 }
 
 const VARIANT_HOVER: Record<ButtonVariant, React.CSSProperties> = {
@@ -100,6 +100,7 @@ export function Button({
       type={type}
       onClick={onClick}
       disabled={isDisabled}
+      aria-busy={loading || undefined}
       style={style}
       className={className}
       onMouseEnter={() => setHovered(true)}

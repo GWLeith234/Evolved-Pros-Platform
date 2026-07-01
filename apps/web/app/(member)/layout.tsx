@@ -82,32 +82,23 @@ export default async function MemberLayout({ children }: { children: React.React
     redirect('/membership-expired?reason=expired')
   }
 
-  const [{ count: unreadCount }, { data: logoSetting }, { data: logoLightSetting }, { data: themeSetting }] = await Promise.all([
+  const [{ count: unreadCount }, { data: settingsRows }] = await Promise.all([
     supabase
       .from('notifications')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', profile.id)
       .eq('is_read', false),
+    // One round-trip for all nav settings instead of three single() reads.
     supabase
       .from('platform_settings')
-      .select('value')
-      .eq('key', 'logo_dark_url')
-      .single(),
-    supabase
-      .from('platform_settings')
-      .select('value')
-      .eq('key', 'logo_nav_light_url')
-      .single(),
-    supabase
-      .from('platform_settings')
-      .select('value')
-      .eq('key', 'members_can_toggle_theme')
-      .single(),
+      .select('key, value')
+      .in('key', ['logo_dark_url', 'logo_nav_light_url', 'members_can_toggle_theme']),
   ])
 
-  const logoUrl = logoSetting?.value || null
-  const logoLightUrl = logoLightSetting?.value || null
-  const membersCanToggleTheme = themeSetting?.value !== 'false'
+  const settings = new Map((settingsRows ?? []).map(s => [s.key, s.value]))
+  const logoUrl = settings.get('logo_dark_url') || null
+  const logoLightUrl = settings.get('logo_nav_light_url') || null
+  const membersCanToggleTheme = settings.get('members_can_toggle_theme') !== 'false'
 
   return (
     <ToastProvider>

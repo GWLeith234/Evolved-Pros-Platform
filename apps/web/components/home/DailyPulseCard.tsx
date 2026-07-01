@@ -279,7 +279,7 @@ function Checkbox({ checked, color }: { checked: boolean; color: string }) {
     <span
       aria-hidden="true"
       style={{
-        flexShrink: 0, width: 18, height: 18, borderRadius: 4,
+        flexShrink: 0, width: 18, height: 18, borderRadius: 0,
         background: checked ? color : 'transparent',
         border: `2px solid ${checked ? color : 'rgba(255,255,255,0.22)'}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -302,7 +302,7 @@ function StreakBadge({ days }: { days: number }) {
       flexShrink: 0,
       fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
       fontSize: 10, letterSpacing: '0.08em',
-      padding: '2px 7px', borderRadius: 999,
+      padding: '2px 7px', borderRadius: 0,
       background: active ? 'rgba(201,168,76,0.14)' : 'rgba(255,255,255,0.04)',
       color: active ? GOLD : 'var(--text-tertiary)',
     }}>{days}D</span>

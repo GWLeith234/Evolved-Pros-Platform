@@ -57,21 +57,21 @@ interface WelcomeBannerProps {
   now?: Date
 }
 
-// ── Architecture-column pillar palette (from welcome-banner.jsx DEFAULT_PILLARS) ──
-// These are the JSX's locked accent COLORS for the Architecture column. They
-// differ slightly from the project's PILLAR_CONFIG (e.g. orange #D4862B vs
-// #FFA538). Kept in sync with the JSX so the hero matches the design ref.
-// Labels are NOT defined here — pillar names/abbreviations come from the single
-// `PILLARS` source (lib/pillars.ts) so the hero strip, the Path Forward stepper,
-// and the lower progress bars never drift in name, order, or abbreviation.
+// ── Architecture-column pillar palette (canonical, one hue per pillar) ──
+// Desktop and mobile previously forked here (e.g. orange #D4862B vs the
+// canonical #FFA538) — collapsed to a single source of truth matching the
+// brand palette (colors_and_type.css / --pillar-N tokens). Labels are NOT
+// defined here — pillar names/abbreviations come from the single `PILLARS`
+// source (lib/pillars.ts) so the hero strip, the Path Forward stepper, and
+// the lower progress bars never drift in name, order, or abbreviation.
 
 const ARCH_COLORS: Record<1 | 2 | 3 | 4 | 5 | 6, { color: string; mobileColor: string }> = {
-  1: { color: '#D4862B', mobileColor: '#FFA538' },
-  2: { color: '#A86CFF', mobileColor: '#A78BFA' },
-  3: { color: '#ef0e30', mobileColor: '#F87171' },
-  4: { color: '#3FB8E8', mobileColor: '#60A5FA' },
-  5: { color: '#E8B547', mobileColor: '#C9A84C' },
-  6: { color: '#19C9A6', mobileColor: '#0ABFA3' },
+  1: { color: '#FFA538', mobileColor: '#FFA538' },
+  2: { color: '#A78BFA', mobileColor: '#A78BFA' },
+  3: { color: '#F87171', mobileColor: '#F87171' },
+  4: { color: '#60A5FA', mobileColor: '#60A5FA' },
+  5: { color: '#C9A84C', mobileColor: '#C9A84C' },
+  6: { color: '#0ABFA3', mobileColor: '#0ABFA3' },
 }
 
 // Tier colors from welcome-banner.jsx (line 187-191).
@@ -136,13 +136,12 @@ interface ArchPillar {
   short: string
   full: string
   color: string
-  mobileColor: string
   earned: boolean
   progress: number
 }
 
 function PillarRow({ pillar }: { pillar: ArchPillar }) {
-  const { earned, color, mobileColor, num, short, full, progress } = pillar
+  const { earned, color, num, short, full, progress } = pillar
   const inProgress = !earned && progress > 0
   const size = 18
   const innerR = size / 2 - 1.5
@@ -264,8 +263,8 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
           width: 10,
           height: 10,
           borderRadius: '50%',
-          background: mobileColor,
-          boxShadow: earned ? `0 0 6px ${mobileColor}99` : 'none',
+          background: color,
+          boxShadow: earned ? `0 0 6px ${color}99` : 'none',
           opacity: earned || inProgress ? 1 : 0.4,
           flexShrink: 0,
         }}
@@ -295,7 +294,7 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
           style={{
             fontFamily: '"Bebas Neue", sans-serif',
             fontSize: 13,
-            color: mobileColor,
+            color: color,
             fontVariantNumeric: 'tabular-nums',
             flexShrink: 0,
           }}
@@ -311,7 +310,7 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
             fontSize: 11,
             letterSpacing: '0.18em',
             textTransform: 'uppercase',
-            color: mobileColor,
+            color: color,
             flexShrink: 0,
           }}
         >
@@ -623,7 +622,7 @@ export function WelcomeBanner({
                   width: 128,
                   height: 128,
                   borderRadius: '50%',
-                  background: '#ef0e30',
+                  background: 'var(--brand-red)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',

@@ -75,7 +75,7 @@ function EventItem({ event, userId }: { event: EventRow; userId: string }) {
         </span>
         <span
           className="font-condensed font-bold uppercase text-[12px] tracking-wide"
-          style={{ color: '#ef0e30' }}
+          style={{ color: 'var(--brand-red-hover)' }}
         >
           {month}
         </span>
@@ -95,7 +95,7 @@ function EventItem({ event, userId }: { event: EventRow; userId: string }) {
       <button
         onClick={handleRegister}
         disabled={registered || loading}
-        className="flex-shrink-0 font-condensed font-semibold uppercase tracking-wide text-xs rounded px-3 py-1.5 transition-all"
+        className="flex-shrink-0 font-condensed font-semibold uppercase tracking-wide text-xs px-3 py-1.5 transition-all"
         style={registered
           ? { backgroundColor: '#68a2b9', color: 'white', border: '1px solid #68a2b9' }
           : { backgroundColor: 'transparent', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.3)' }
