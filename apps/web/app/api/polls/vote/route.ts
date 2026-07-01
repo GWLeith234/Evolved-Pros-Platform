@@ -38,10 +38,13 @@ export async function POST(request: Request) {
 
   if (error) return NextResponse.json({ error: 'Failed to vote' }, { status: 500 })
 
-  // Increment vote count on option
-  await Promise.resolve(supabase.rpc('increment_poll_vote', { p_option_id: optionId })).catch(() => {
-    // RPC may not exist yet — fall back silently
-  })
+  // Increment vote count on option. Non-blocking: the poll_votes insert above
+  // already succeeded, so a failure here shouldn't fail the request — but it
+  // must be visible in logs, not swallowed.
+  const { error: rpcError } = await supabase.rpc('increment_poll_vote', { p_option_id: optionId })
+  if (rpcError) {
+    console.error('[POST /api/polls/vote] increment_poll_vote failed', { pollId, optionId, rpcError })
+  }
 
   return NextResponse.json({ ok: true })
 }
