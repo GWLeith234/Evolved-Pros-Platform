@@ -6,16 +6,20 @@ import { PodcastLatestStrip } from './PodcastLatestStrip'
 import { PodcastMasthead } from './PodcastMasthead'
 import { PodcastHero } from './PodcastHero'
 import { PodcastGrid } from './PodcastGrid'
+import { useTheme } from '@/components/theme/ThemeProvider'
 
 interface PodcastPageShellProps {
   episodes: PodcastEpisode[]
 }
 
 export function PodcastPageShell({ episodes }: PodcastPageShellProps) {
+  const { resolvedTheme } = useTheme()
+  const podcastTheme = resolvedTheme === 'light' ? 'parchment' : 'navy'
+
   if (episodes.length === 0) {
     return (
       <div style={{ background: 'var(--podcast-bg-page)', minHeight: '100vh', color: 'var(--podcast-text-strong)' }}>
-        <PodcastThemeBridge theme="navy" />
+        <PodcastThemeBridge theme={podcastTheme} />
         <PodcastMasthead />
         <section style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 24px 96px' }}>
           <p style={{ color: 'var(--podcast-text-3)' }}>No episodes published yet.</p>
@@ -39,7 +43,7 @@ export function PodcastPageShell({ episodes }: PodcastPageShellProps) {
   // catalogue is small.
   return (
     <div style={{ background: 'var(--podcast-bg-page)', minHeight: '100vh', color: 'var(--podcast-text-strong)' }}>
-      <PodcastThemeBridge theme="navy" />
+      <PodcastThemeBridge theme={podcastTheme} />
       <PodcastLatestStrip episode={mostRecent} />
       <PodcastMasthead />
       <PodcastHero episode={latest} />
