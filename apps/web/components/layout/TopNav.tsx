@@ -7,6 +7,8 @@ import { createClient } from '@/lib/supabase/client'
 import { NotifBell } from '@/components/notifications/NotifBell'
 import { AskGeorgeDrawer } from '@/components/layout/AskGeorgeDrawer'
 import { LogoMark } from '@/components/ui/LogoMark'
+import { useTheme } from '@/components/theme/ThemeProvider'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
 const SPARKLE_PATH = 'M12 2 L13.4 9 L20 10.5 L13.4 12 L12 19 L10.6 12 L4 10.5 L10.6 9 Z'
 
@@ -68,29 +70,16 @@ function tierLabelColor(tier: string | null | undefined, isLight: boolean): stri
   return isLight ? 'rgba(27,42,74,0.5)' : 'rgba(255,255,255,0.4)'
 }
 
-// Detect whether <html> currently carries the `light-mode` class.
-// Defaults to false (dark) for SSR; updates on mount and on class mutations.
-function useIsLightMode(): boolean {
-  const [isLight, setIsLight] = useState(false)
-  useEffect(() => {
-    const update = () => setIsLight(document.documentElement.classList.contains('light-mode'))
-    update()
-    const observer = new MutationObserver(update)
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-    return () => observer.disconnect()
-  }, [])
-  return isLight
-}
-
 export function TopNav({
   profile,
   unreadCount = 0,
   logoUrl,
   logoLightUrl,
-  membersCanToggleTheme: _membersCanToggleTheme,
+  membersCanToggleTheme = true,
 }: TopNavProps) {
   const pathname = usePathname()
-  const isLight = useIsLightMode()
+  const { resolvedTheme } = useTheme()
+  const isLight = resolvedTheme === 'light'
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [aiOpen, setAiOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -406,6 +395,16 @@ export function TopNav({
 
           {/* Notification bell (visuals updated to v2 spec; preserves drawer + realtime) */}
           <NotifBell initialUnreadCount={unreadCount} userId={profile.id} />
+
+          {membersCanToggleTheme && (
+            <>
+              {/* Vertical divider */}
+              <div style={{ width: 1, height: 24, background: dividerColor }} />
+
+              {/* Theme toggle */}
+              <ThemeToggle />
+            </>
+          )}
 
           {/* Avatar + dropdown */}
           <div style={{ position: 'relative' }} ref={dropdownRef}>

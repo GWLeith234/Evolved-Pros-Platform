@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useTheme } from '@/components/theme/ThemeProvider'
 
 interface MoreDrawerProps {
   open: boolean
@@ -81,11 +81,8 @@ const LOGO_CIRCLE_LIGHT = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/o
 
 export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
   const router = useRouter()
-  const [isDark, setIsDark] = useState(true)
-
-  useEffect(() => {
-    setIsDark(!document.documentElement.classList.contains('light-mode'))
-  }, [open])
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark'
 
   async function handleSignOut() {
     const supabase = createClient()

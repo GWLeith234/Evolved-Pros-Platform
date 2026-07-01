@@ -11,6 +11,7 @@ import { MemberBadge } from '@/components/ui/MemberBadge'
 import { Tooltip } from '@/components/ui/Tooltip'
 import type { Post, Reply, PillarTag } from '@/lib/community/types'
 import { GeorgeReplyAssist } from './GeorgeReplyAssist'
+import { useTheme } from '@/components/theme/ThemeProvider'
 
 interface PostCardProps {
   post: Post & { replies?: Reply[] }
@@ -64,7 +65,8 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
   const [showReplies, setShowReplies] = useState(false)
   const [replies, setReplies] = useState<Reply[]>(post.replies ?? [])
   const [loadingReplies, setLoadingReplies] = useState(false)
-  const [isDark, setIsDark] = useState(true)
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark'
 
   // Use locally-tracked replies when present; otherwise fall back to server replyCount
   const totalReplies = replies.length > 0 ? replies.length : (post.replyCount ?? 0)
@@ -72,15 +74,6 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
   useEffect(() => {
     setShowReplies(false)
   }, [activeFilter])
-
-  useEffect(() => {
-    setIsDark(!document.documentElement.classList.contains('light-mode'))
-    const observer = new MutationObserver(() => {
-      setIsDark(!document.documentElement.classList.contains('light-mode'))
-    })
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-    return () => observer.disconnect()
-  }, [])
 
   const avatarBg = getAvatarColor(post.author.id)
 

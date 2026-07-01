@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Playfair_Display, Barlow_Condensed, Barlow, Bebas_Neue, Merriweather, Abril_Fatface } from 'next/font/google'
 import { createClient } from '@/lib/supabase/server'
 import { ThemeInit } from '@/components/ThemeInit'
+import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import './globals.css'
 
 const playfair = Playfair_Display({
@@ -103,7 +104,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         className="bg-navy-deep text-navy antialiased"
         style={{ fontFamily: 'var(--font-body)' }}
       >
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   )
