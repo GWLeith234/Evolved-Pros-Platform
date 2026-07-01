@@ -85,7 +85,13 @@ const STATUS_STYLE: Record<PaceInfo['status'], { bg: string; color: string }> = 
 export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }: GoalCardProps) {
   const pillarKey = goal.pillar ? PILLAR_SLUG_TO_NUMBER[goal.pillar.toLowerCase()] : null
   const cfg = pillarKey ? PILLAR_CONFIG[pillarKey] : null
+  // Fill/tint/border-accent base: always the raw pillar hue (matches
+  // QuarterlyGoals.tsx's PILLAR_RAW_COLOR — never the ink).
   const accentColor = cfg?.color ?? '#68a2b9'
+  // Text color: --pillar-N-ink in light mode (WCAG-checked against parchment
+  // surfaces, defined in globals.css), raw --pillar-N hue in dark mode via
+  // the var() fallback — same ink+tint split as QuarterlyGoals.tsx.
+  const textColor = pillarKey ? `var(--pillar-${pillarKey}-ink, var(--pillar-${pillarKey}))` : accentColor
 
   const pace = computePace(goal.period, goal.progress_pct)
   // Resolve both sides to the canonical numeric key so 'mental' and
@@ -109,7 +115,7 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
           </span>
           <span
             className="font-condensed text-[12px] font-bold tracking-[0.12em] uppercase rounded px-1.5 py-0.5 shrink-0"
-            style={{ color: accentColor, backgroundColor: `${accentColor}1f` }}
+            style={{ color: textColor, backgroundColor: `${accentColor}1f` }}
           >
             {formatDate(goal.period, 'deadline')}
           </span>
@@ -120,13 +126,13 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
               Playfair. Playfair is reserved for editorial copy. */}
           <span
             className="leading-none"
-            style={{ fontFamily: '"Bebas Neue", sans-serif', letterSpacing: '0.02em', fontSize: 26, color: accentColor }}
+            style={{ fontFamily: '"Bebas Neue", sans-serif', letterSpacing: '0.02em', fontSize: 26, color: textColor }}
           >
             {formatPct(goal.progress_pct / 100)}
           </span>
           <span
             className="font-condensed font-bold tracking-[0.1em] text-[12px]"
-            style={{ color: goal.weekly_delta < 0 ? '#ef0e30' : accentColor }}
+            style={{ color: goal.weekly_delta < 0 ? '#ef0e30' : textColor }}
           >
             {formatTrend(goal.weekly_delta / 100)}
           </span>
@@ -174,13 +180,13 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
         >
           <span
             className="font-condensed font-bold uppercase tracking-[0.16em] text-[12px]"
-            style={{ color: accentColor }}
+            style={{ color: textColor }}
           >
             ↳ Tied to path forward
           </span>
           <span
             className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px]"
-            style={{ color: accentColor }}
+            style={{ color: textColor }}
           >
             Continue →
           </span>
