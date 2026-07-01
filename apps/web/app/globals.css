@@ -444,7 +444,7 @@ html, body { overflow-x: hidden; }
 :root {
   --podcast-text-strong:  var(--text-primary);
   --podcast-text-1:       rgba(255,255,255,0.85);
-  --podcast-text-2:       rgba(255,255,255,0.65);
+  --podcast-text-2:       var(--text-secondary);
   --podcast-text-3:       var(--text-tertiary);
   --podcast-text-4:       rgba(255,255,255,0.45);
   --podcast-text-5:       rgba(255,255,255,0.35);
