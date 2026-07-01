@@ -142,6 +142,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
         sortOrder: l.sortOrder,
         completedAt: l.completedAt,
         durationSeconds: l.durationSeconds,
+        thumbnailUrl: l.thumbnailUrl,
       })),
     }))
 
