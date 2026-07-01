@@ -31,19 +31,13 @@ export async function POST(request: Request) {
 
   if (existing) return NextResponse.json({ error: 'Already voted' }, { status: 409 })
 
-  // Cast vote
-  const { error } = await supabase
-    .from('poll_votes')
-    .insert({ poll_id: pollId, option_id: optionId, user_id: profile.id })
-
-  if (error) return NextResponse.json({ error: 'Failed to vote' }, { status: 500 })
-
-  // Increment vote count on option. Non-blocking: the poll_votes insert above
-  // already succeeded, so a failure here shouldn't fail the request — but it
-  // must be visible in logs, not swallowed.
+  // Cast vote. increment_poll_vote() does its own INSERT into poll_votes with
+  // ON CONFLICT (poll_id, user_id) DO UPDATE — this is the sole write, and the
+  // upsert is what makes changing your vote on a poll work correctly.
   const { error: rpcError } = await supabase.rpc('increment_poll_vote', { p_option_id: optionId })
   if (rpcError) {
     console.error('[POST /api/polls/vote] increment_poll_vote failed', { pollId, optionId, rpcError })
+    return NextResponse.json({ error: 'Failed to vote' }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })
