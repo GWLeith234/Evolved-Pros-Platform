@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { formatDurationSeconds } from '@/lib/academy/types'
+import { formatDurationSeconds, formatDurationMMSS } from '@/lib/academy/types'
 import type { LessonWithProgress } from '@/lib/academy/types'
 
 interface LessonItemProps {
@@ -37,9 +37,21 @@ function LockIcon() {
   )
 }
 
+// Matches Tabler's ti-player-play glyph (icon-tabler-player-play) — no
+// icon-library dependency added, consistent with this file's other icons.
+function ThumbnailPlayIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M7 4v16l13 -8z" fill="#fff"/>
+    </svg>
+  )
+}
+
 export function LessonItem({ lesson, index, isActive, courseSlug, accentColor }: LessonItemProps) {
   const isCompleted = !!lesson.completedAt
   const duration = formatDurationSeconds(lesson.durationSeconds)
+  const thumbnailDuration = formatDurationMMSS(lesson.durationSeconds)
 
   const statusIcon = isCompleted ? (
     <div className="w-[28px] h-[28px] rounded-full flex items-center justify-center flex-shrink-0"
@@ -95,6 +107,57 @@ export function LessonItem({ lesson, index, isActive, courseSlug, accentColor }:
           {duration}
         </span>
       )}
+      <div
+        style={{
+          position: 'relative',
+          width: 96,
+          height: 64,
+          flexShrink: 0,
+          borderRadius: 6,
+          overflow: 'hidden',
+          backgroundImage: lesson.thumbnailUrl
+            ? `url(${lesson.thumbnailUrl})`
+            : `linear-gradient(135deg, ${accentColor}33 0%, ${accentColor}11 100%)`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundColor: '#0d1620',
+          opacity: lesson.isLocked ? 0.5 : 1,
+        }}
+      >
+        {!lesson.isLocked && (
+          <div
+            className="absolute flex items-center justify-center"
+            style={{
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 28,
+              height: 28,
+              borderRadius: '50%',
+              backgroundColor: 'rgba(10,15,24,0.45)',
+            }}
+          >
+            <ThumbnailPlayIcon />
+          </div>
+        )}
+        {thumbnailDuration && (
+          <span
+            className="absolute font-condensed font-bold"
+            style={{
+              bottom: 3,
+              right: 4,
+              fontSize: '10px',
+              lineHeight: '14px',
+              color: '#fff',
+              backgroundColor: 'rgba(10,15,24,0.6)',
+              padding: '0 3px',
+              borderRadius: 2,
+            }}
+          >
+            {thumbnailDuration}
+          </span>
+        )}
+      </div>
     </div>
   )
 

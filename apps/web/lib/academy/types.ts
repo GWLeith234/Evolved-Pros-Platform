@@ -28,6 +28,9 @@ export type LessonWithProgress = {
   watchTimeSeconds: number
   isLocked: boolean
   moduleNumber: number | null
+  /** Cached from HeyGen (see scripts/backfill-lesson-thumbnails.ts). Null
+   *  until backfilled, or if the lesson's HeyGen video was deleted. */
+  thumbnailUrl: string | null
 }
 
 export type LessonNotes = {
@@ -66,4 +69,12 @@ export function formatDurationSeconds(seconds: number | null): string {
 export function formatTotalDuration(lessons: { durationSeconds: number | null }[]): string {
   const total = lessons.reduce((sum, l) => sum + (l.durationSeconds ?? 0), 0)
   return formatDurationSeconds(total)
+}
+
+/** M:SS for the thumbnail duration badge — distinct from formatDurationSeconds's "12m"/"1h 5m". */
+export function formatDurationMMSS(seconds: number | null): string | null {
+  if (!seconds || seconds <= 0) return null
+  const m = Math.floor(seconds / 60)
+  const s = Math.floor(seconds % 60)
+  return `${m}:${String(s).padStart(2, '0')}`
 }

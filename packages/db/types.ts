@@ -1054,6 +1054,8 @@ export type Database = {
           mux_playback_id: string | null
           slug: string
           sort_order: number
+          thumbnail_fetched_at: string | null
+          thumbnail_url: string | null
           title: string
         }
         Insert: {
@@ -1074,6 +1076,8 @@ export type Database = {
           mux_playback_id?: string | null
           slug: string
           sort_order?: number
+          thumbnail_fetched_at?: string | null
+          thumbnail_url?: string | null
           title: string
         }
         Update: {
@@ -1094,6 +1098,8 @@ export type Database = {
           mux_playback_id?: string | null
           slug?: string
           sort_order?: number
+          thumbnail_fetched_at?: string | null
+          thumbnail_url?: string | null
           title?: string
         }
         Relationships: [
