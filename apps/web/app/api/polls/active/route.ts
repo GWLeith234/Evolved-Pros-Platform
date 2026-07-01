@@ -1,6 +1,8 @@
 export const dynamic = 'force-dynamic'
 
 import { adminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
@@ -18,11 +20,11 @@ export async function GET(request: Request) {
     .maybeSingle()
 
   if (error) {
-    return NextResponse.json({ poll: null, voteCounts: {}, totalVotes: 0 })
+    return NextResponse.json({ poll: null, voteCounts: {}, totalVotes: 0, userVoteOptionId: null })
   }
 
   if (!poll) {
-    return NextResponse.json({ poll: null, voteCounts: {}, totalVotes: 0 })
+    return NextResponse.json({ poll: null, voteCounts: {}, totalVotes: 0, userVoteOptionId: null })
   }
 
   // Count votes from poll_votes table
@@ -38,5 +40,25 @@ export async function GET(request: Request) {
   }
   const totalVotes = votes?.length ?? 0
 
-  return NextResponse.json({ poll, voteCounts, totalVotes })
+  // Server-side source of truth for "has THIS user voted, and for what".
+  // This page is public (logged-out visitors can view it), so the lookup is
+  // optional: only resolved for an authenticated caller, null otherwise —
+  // the client falls back to localStorage in that case.
+  let userVoteOptionId: string | null = null
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    const profile = await resolveCurrentUser(supabase)
+    if (profile) {
+      const { data: myVote } = await adminClient
+        .from('poll_votes')
+        .select('option_id')
+        .eq('poll_id', poll.id)
+        .eq('user_id', profile.id)
+        .maybeSingle()
+      userVoteOptionId = myVote?.option_id ?? null
+    }
+  }
+
+  return NextResponse.json({ poll, voteCounts, totalVotes, userVoteOptionId })
 }

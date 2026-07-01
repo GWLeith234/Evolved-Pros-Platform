@@ -21,6 +21,13 @@ interface ActivePollResponse {
   poll: Poll | null
   voteCounts: Record<string, number>
   totalVotes: number
+  userVoteOptionId: string | null
+}
+
+interface VoteResponse {
+  ok: true
+  optionId: string
+  status: 'voted' | 'changed' | 'unchanged'
 }
 
 function formatCountdown(closesAt: string | null, now: number): string | null {
@@ -63,10 +70,21 @@ export function PollWidget() {
           setOptions(opts)
           setVoteCounts(data.voteCounts ?? {})
           setTotalVotes(data.totalVotes ?? 0)
-          const stored = localStorage.getItem(`poll-voted-${data.poll.id}`)
-          if (stored) {
+          if (data.userVoteOptionId) {
+            // Server truth (this poll, this authenticated user) — always wins.
+            // Sync localStorage to it so a stale/mismatched local value from
+            // another device doesn't resurface next load.
             setHasVoted(true)
-            setVotedOptionId(stored)
+            setVotedOptionId(data.userVoteOptionId)
+            localStorage.setItem(`poll-voted-${data.poll.id}`, data.userVoteOptionId)
+          } else {
+            // No server-known vote — either logged out, or genuinely hasn't
+            // voted. localStorage is a fast local hint only in this case.
+            const stored = localStorage.getItem(`poll-voted-${data.poll.id}`)
+            if (stored) {
+              setHasVoted(true)
+              setVotedOptionId(stored)
+            }
           }
         }
       })
@@ -95,34 +113,54 @@ export function PollWidget() {
   if (loading) return null
   if (!poll) return null
 
-  async function handleVote() {
-    if (!selected || !poll || voting || isExpired) return
+  // Casts a first vote, or changes an existing one to a different option.
+  // Shared by the pre-vote "Vote" button and the clickable result rows below.
+  async function castVote(optionId: string) {
+    if (!poll || voting || isExpired) return
+    if (hasVoted && votedOptionId === optionId) return // already this option — no-op
+
+    const previousOptionId = votedOptionId
+    const wasAlreadyVoted = hasVoted
+
     setVoting(true)
     try {
       const res = await fetch('/api/polls/vote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ poll_id: poll.id, option_id: selected }),
+        body: JSON.stringify({ poll_id: poll.id, option_id: optionId }),
       })
-      if (res.ok || res.status === 409) {
-        localStorage.setItem(`poll-voted-${poll.id}`, selected)
-        setVotedOptionId(selected)
+      if (res.ok) {
+        const data = await res.json() as VoteResponse
+        localStorage.setItem(`poll-voted-${poll.id}`, data.optionId)
+        setVotedOptionId(data.optionId)
         setHasVoted(true)
-        confetti({
-          particleCount: 80,
-          spread: 60,
-          startVelocity: 35,
-          origin: { x: 0.5, y: 0.5 },
-          colors: ['#C9A84C', '#C9302A', '#1B2A4A'],
-          ticks: 120,
-        })
+        if (data.status !== 'unchanged') {
+          confetti({
+            particleCount: 80,
+            spread: 60,
+            startVelocity: 35,
+            origin: { x: 0.5, y: 0.5 },
+            colors: ['#C9A84C', '#C9302A', '#1B2A4A'],
+            ticks: 120,
+          })
+        }
         try {
           const refreshed = await fetch('/api/polls/active?context=media').then(r => r.json()) as ActivePollResponse
           setVoteCounts(refreshed.voteCounts ?? {})
           setTotalVotes(refreshed.totalVotes ?? 0)
         } catch {
-          setVoteCounts(prev => ({ ...prev, [selected]: (prev[selected] ?? 0) + 1 }))
-          setTotalVotes(prev => prev + 1)
+          setVoteCounts(prev => {
+            const next = { ...prev }
+            if (wasAlreadyVoted && previousOptionId && previousOptionId !== data.optionId) {
+              // Vote changed — move the tally, total voter count is unchanged.
+              next[previousOptionId] = Math.max(0, (next[previousOptionId] ?? 0) - 1)
+              next[data.optionId] = (next[data.optionId] ?? 0) + 1
+            } else if (!wasAlreadyVoted) {
+              next[data.optionId] = (next[data.optionId] ?? 0) + 1
+            }
+            return next
+          })
+          if (!wasAlreadyVoted) setTotalVotes(prev => prev + 1)
         }
       }
     } finally {
@@ -155,14 +193,23 @@ export function PollWidget() {
               const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0
               const isVoted = votedOptionId === o.id
               return (
-                <div
+                <button
                   key={o.id}
+                  type="button"
+                  onClick={() => castVote(o.id)}
+                  disabled={voting || isExpired}
                   style={{
                     position: 'relative',
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'left',
+                    font: 'inherit',
                     background: '#fff',
                     border: isVoted ? '2px solid #C9302A' : '1px solid rgba(27,42,74,0.15)',
                     padding: '8px 10px',
                     overflow: 'hidden',
+                    cursor: isExpired ? 'default' : 'pointer',
+                    opacity: voting ? 0.7 : 1,
                   }}
                 >
                   <div
@@ -189,7 +236,7 @@ export function PollWidget() {
                       {pct}% · {count}
                     </span>
                   </div>
-                </div>
+                </button>
               )
             })}
             {totalVotes > 0 && (
@@ -199,7 +246,7 @@ export function PollWidget() {
                 </span>
                 {hasVoted && (
                   <span style={{ fontFamily: 'var(--font-logo)', fontSize: 10, letterSpacing: '0.08em', color: '#C9302A' }}>
-                    YOUR VOTE LOCKED IN
+                    YOU VOTED · TAP TO CHANGE
                   </span>
                 )}
               </div>
@@ -224,7 +271,7 @@ export function PollWidget() {
             ))}
             <button
               type="button"
-              onClick={handleVote}
+              onClick={() => selected && castVote(selected)}
               disabled={!selected || voting}
               style={{
                 fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 10,
