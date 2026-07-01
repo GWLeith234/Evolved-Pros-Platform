@@ -147,6 +147,14 @@
   --events-format-podcast:     #3FB8E8;
   --events-format-replay:      #A78BFA;
   --events-rsvp-active:        #19C9A6;
+
+  /* Shared structural primitives (THEME-TOGGLE-SPRINT). Both the platform
+     light-mode surfaces and the /media editorial cream palette reference
+     these independently — never cross-alias --bg-page to --ed-bg or vice
+     versa; they're two consumers of one shared value, not aliases of
+     each other. */
+  --paper:      #F5F0E8;
+  --paper-card: #FFFFFF;
 }
 
 html {
@@ -169,8 +177,8 @@ html.light-mode {
   --card-bg:     #ffffff;
   --card-border: #E8E2D9;
 
-  --bg-page:       #F5F0E8;
-  --bg-surface:    #ffffff;
+  --bg-page:       var(--paper);
+  --bg-surface:    var(--paper-card);
   --bg-elevated:   #F0EBE3;
   --border-color:  #E8E2D9;
   --text-primary:  #1b3c5a;
@@ -254,6 +262,22 @@ html.light-mode {
   --filter-rail-bg:           #FFFFFF;
   --filter-rail-active-bg:    #F5F0E8;
   --filter-rail-border:       rgba(27,42,74,0.10);
+
+  /* Pillar ink tokens (THEME-TOGGLE-SPRINT) — light-mode-only text/border/
+     accent-bar colors for the 6 pillar categories, paired with a 12% alpha
+     tint of the raw --pillar-N hue for pill/chip fill backgrounds. Dark mode
+     keeps using the raw --pillar-N values directly; these are not defined
+     in :root. --pillar-5-ink was checked against --brand-gold-dark before
+     writing it as a literal — that token doesn't exist anywhere in this
+     codebase (only the editorial-scoped --ed-gold shares the same #8B6A00
+     value, and cross-aliasing editorial into platform tokens is exactly
+     what Step 7 above says not to do). */
+  --pillar-1-ink: #B45A00;  /* Foundation */
+  --pillar-2-ink: #7C5CE0;  /* Identity */
+  --pillar-3-ink: #D2382F;  /* Mental Toughness */
+  --pillar-4-ink: #1F6FD6;  /* Strategy */
+  --pillar-5-ink: #8B6A00;  /* Accountability */
+  --pillar-6-ink: #0A7D6A;  /* Execution */
 
   /* Events — light overrides (EVENTS-SPRINT-1). Gradient leans warm-ink
      so the cinematic hero still reads against parchment surfaces. Format
@@ -438,8 +462,8 @@ html, body { overflow-x: hidden; }
    ───────────────────────────────────────────────────────────────── */
 body[data-theme="cream"],
 html.cream-mode body {
-  --ed-bg:             #F5F0E8;
-  --ed-surface:        #FFFFFF;
+  --ed-bg:             var(--paper);
+  --ed-surface:        var(--paper-card);
   --ed-cream:          #FAF6EE;
   --ed-border:         #E0D8CC;
   --ed-border-soft:    #EAE3D5;
