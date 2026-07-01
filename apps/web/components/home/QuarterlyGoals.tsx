@@ -18,20 +18,41 @@ interface QuarterlyGoalsProps {
   editHref?: string
 }
 
-const PILLAR_COLOR: Record<string, string> = {
-  foundation: '#FFA538',
-  identity: '#A78BFA',
-  mental: '#F87171',
-  strategy: '#60A5FA',
-  accountability: '#C9A84C',
-  execution: '#0ABFA3',
+// Text/border color: --pillar-N-ink in light mode (defined in globals.css,
+// WCAG-checked against the parchment surface), raw --pillar-N in dark mode
+// (that fallback is only reached because --pillar-N-ink is intentionally
+// undefined outside html.light-mode — see globals.css THEME-TOGGLE-SPRINT).
+const PILLAR_TEXT_COLOR: Record<string, string> = {
+  foundation:     'var(--pillar-1-ink, var(--pillar-1))',
+  identity:       'var(--pillar-2-ink, var(--pillar-2))',
+  mental:         'var(--pillar-3-ink, var(--pillar-3))',
+  strategy:       'var(--pillar-4-ink, var(--pillar-4))',
+  accountability: 'var(--pillar-5-ink, var(--pillar-5))',
+  execution:      'var(--pillar-6-ink, var(--pillar-6))',
+}
+
+// Fill/tint base: always the raw pillar hue, never the ink — a 12% tint of
+// the vivid color reads fine under either the ink or the raw text color
+// layered on top of it.
+const PILLAR_RAW_COLOR: Record<string, string> = {
+  foundation:     'var(--pillar-1)',
+  identity:       'var(--pillar-2)',
+  mental:         'var(--pillar-3)',
+  strategy:       'var(--pillar-4)',
+  accountability: 'var(--pillar-5)',
+  execution:      'var(--pillar-6)',
 }
 
 const DEFAULT_COLOR = '#68a2b9'
 
-function colorFor(pillar: string | null): string {
+function textColorFor(pillar: string | null): string {
   if (!pillar) return DEFAULT_COLOR
-  return PILLAR_COLOR[pillar.toLowerCase()] ?? DEFAULT_COLOR
+  return PILLAR_TEXT_COLOR[pillar.toLowerCase()] ?? DEFAULT_COLOR
+}
+
+function rawColorFor(pillar: string | null): string {
+  if (!pillar) return DEFAULT_COLOR
+  return PILLAR_RAW_COLOR[pillar.toLowerCase()] ?? DEFAULT_COLOR
 }
 
 function isStreakGoal(title: string): boolean {
@@ -76,7 +97,9 @@ export function QuarterlyGoals({ goals, editHref = '#' }: QuarterlyGoalsProps) {
         ) : (
           <div className="space-y-3">
             {goals.map(goal => {
-              const color = colorFor(goal.pillar)
+              const textColor = textColorFor(goal.pillar)
+              const rawColor = rawColorFor(goal.pillar)
+              const tintColor = `color-mix(in srgb, ${rawColor} 12%, transparent)`
               const delta = deltaLabel(goal)
               return (
                 <div
@@ -89,7 +112,7 @@ export function QuarterlyGoals({ goals, editHref = '#' }: QuarterlyGoalsProps) {
                     </span>
                     <span
                       className="font-condensed text-[12px] font-bold tracking-[0.12em] uppercase px-1.5 py-0.5 shrink-0"
-                      style={{ color, backgroundColor: `${color}1f` }}
+                      style={{ color: textColor, backgroundColor: tintColor }}
                     >
                       {formatDate(goal.period, 'deadline')}
                     </span>
@@ -99,13 +122,13 @@ export function QuarterlyGoals({ goals, editHref = '#' }: QuarterlyGoalsProps) {
                         not Playfair. Playfair is reserved for editorial copy. */}
                     <span
                       className="text-[26px] leading-none"
-                      style={{ fontFamily: '"Bebas Neue", sans-serif', letterSpacing: '0.02em', color }}
+                      style={{ fontFamily: '"Bebas Neue", sans-serif', letterSpacing: '0.02em', color: textColor }}
                     >
                       {formatPct(goal.progress_pct / 100)}
                     </span>
                     <span
                       className="font-condensed text-[12px] font-bold tracking-[0.1em]"
-                      style={{ color }}
+                      style={{ color: textColor }}
                     >
                       {delta}
                     </span>
@@ -116,7 +139,7 @@ export function QuarterlyGoals({ goals, editHref = '#' }: QuarterlyGoalsProps) {
                   >
                     <div
                       className="h-full transition-all"
-                      style={{ width: `${goal.progress_pct}%`, backgroundColor: color }}
+                      style={{ width: `${goal.progress_pct}%`, backgroundColor: rawColor }}
                     />
                   </div>
                 </div>
