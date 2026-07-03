@@ -19,7 +19,9 @@
 import { SignJWT } from 'jose'
 import { createPrivateKey, type KeyObject } from 'crypto'
 
-const TOKEN_URL = 'https://sso-api-prod.apigateway.co/oauth2/token'
+// [diag-vendasta] TEMPORARY: exported so app/api/diag-vendasta can POST to the
+// same endpoint the production flow uses. WILL REVERT.
+export const TOKEN_URL = 'https://sso-api-prod.apigateway.co/oauth2/token'
 const AUDIENCE  = TOKEN_URL
 const ALGORITHM = 'ES256'
 
@@ -82,6 +84,32 @@ function normalizePrivateKey(raw: string | undefined): KeyObject {
   }
 }
 
+// [diag-vendasta] TEMPORARY: assertion construction extracted verbatim from
+// getVendastaToken (which now calls this same function, so production and the
+// diagnostic route exercise the identical signing path) and exported so
+// app/api/diag-vendasta can capture the real assertion. Throws on missing env
+// or key-parse/sign failure. WILL REVERT.
+export async function buildVendastaAssertion(): Promise<string> {
+  const serviceAccountEmail = process.env.VENDASTA_SERVICE_ACCOUNT_EMAIL
+  const privateKeyRaw       = process.env.VENDASTA_PRIVATE_KEY
+
+  if (!serviceAccountEmail || !privateKeyRaw) {
+    throw new Error('VENDASTA_SERVICE_ACCOUNT_EMAIL or VENDASTA_PRIVATE_KEY not set')
+  }
+
+  const privateKey = normalizePrivateKey(privateKeyRaw)
+
+  const nowSeconds = Math.floor(Date.now() / 1000)
+  return await new SignJWT({})
+    .setProtectedHeader({ alg: ALGORITHM, kid: process.env.VENDASTA_SERVICE_ACCOUNT_KEY })
+    .setIssuer(serviceAccountEmail)
+    .setSubject(serviceAccountEmail)
+    .setAudience(AUDIENCE)
+    .setIssuedAt(nowSeconds)
+    .setExpirationTime(nowSeconds + 3600)
+    .sign(privateKey)
+}
+
 export async function getVendastaToken(): Promise<string | null> {
   const serviceAccountEmail = process.env.VENDASTA_SERVICE_ACCOUNT_EMAIL
   const privateKeyRaw       = process.env.VENDASTA_PRIVATE_KEY
@@ -96,19 +124,9 @@ export async function getVendastaToken(): Promise<string | null> {
   }
 
   try {
-    const privateKey = normalizePrivateKey(privateKeyRaw)
-
-    const nowSeconds = Math.floor(Date.now() / 1000)
     let assertion: string
     try {
-      assertion = await new SignJWT({})
-        .setProtectedHeader({ alg: ALGORITHM, kid: process.env.VENDASTA_SERVICE_ACCOUNT_KEY })
-        .setIssuer(serviceAccountEmail)
-        .setSubject(serviceAccountEmail)
-        .setAudience(AUDIENCE)
-        .setIssuedAt(nowSeconds)
-        .setExpirationTime(nowSeconds + 3600)
-        .sign(privateKey)
+      assertion = await buildVendastaAssertion()
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err)
       // SAFE diagnostic: BEGIN header + reason only.
