@@ -17,6 +17,8 @@ interface LessonFormValues {
   transcriptJson: string
   /** Key Takeaways bullets; blank rows are dropped on save. */
   keyTakeaways: string[]
+  /** Per-lesson discussion prompt ('' = generic fallback on the page). */
+  discussionPrompt: string
 }
 
 interface LessonFormProps {
@@ -35,6 +37,7 @@ const DEFAULT_VALUES: LessonFormValues = {
   isPublished: false,
   transcriptJson: '',
   keyTakeaways: [],
+  discussionPrompt: '',
 }
 
 function slugify(str: string) {
@@ -103,6 +106,7 @@ export function LessonForm({ courseId, lessonId, initialValues, existingPlayback
       course_id: courseId,
       transcript: transcriptParse.segments,
       key_takeaways: takeaways.length > 0 ? takeaways : null,
+      discussion_prompt: values.discussionPrompt.trim() || null,
     }
 
     try {
@@ -249,6 +253,26 @@ export function LessonForm({ courseId, lessonId, initialValues, existingPlayback
             </p>
           </div>
         )}
+      </div>
+
+      {/* Discussion Prompt — per-lesson; blank falls back to the sitewide
+          generic prompt on the lesson page. */}
+      <div>
+        <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
+          Discussion Prompt
+        </label>
+        <textarea
+          value={values.discussionPrompt}
+          onChange={e => set('discussionPrompt', e.target.value)}
+          rows={2}
+          maxLength={500}
+          className="w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none resize-y"
+          style={{ border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }}
+          placeholder="Lesson-specific prompt, e.g. “Can you see your lag and lead measures at a glance right now? What's missing from your scoreboard?”"
+        />
+        <p className="font-condensed text-[10px] text-[#7a8a96] mt-1">
+          Blank = the lesson page shows the generic reflection prompt.
+        </p>
       </div>
 
       {/* Key Takeaways — repeatable bullets (2–4 recommended). Rendered on

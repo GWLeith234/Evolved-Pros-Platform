@@ -31,9 +31,16 @@ pipeline + admin UI + `MuxPlayer` with working `academy:seek` currentTime
 seeking already exist) — then seeking is sample-accurate with zero further
 frontend work.
 
-## FT-3 — Lesson-specific Discussion prompts
-Lesson pages show a generic discussion prompt; product wants per-lesson
-prompts. Needs a CMS field + render wiring.
+## FT-3 — RESOLVED (Sprint C, 2026-07-04)
+`lessons.discussion_prompt` text column (migration 054, applied), textarea
+on the admin lesson edit form (≤500 chars, blank = generic fallback), and
+the lesson page renders the per-lesson prompt with the old generic
+sentence kept only as fallback. All 18 lessons seeded with distinct,
+framework-specific prompts drafted from each lesson's title/description
+(e.g. Scoreboard → lag/lead measures at a glance). NOTE for content team:
+these are AI-drafted from the lesson descriptions — review/refine each in
+/admin/courses/{courseId}/lessons/{lessonId}/edit, ideally against the
+HeyGen transcripts once imported.
 
 ## FT-4 — ENGINEERING DONE (Sprint B, 2026-07-04); content entry pending
 `lessons.key_takeaways` jsonb (migration 053, applied) with a repeatable

@@ -165,6 +165,7 @@ export default async function LessonPage({ params }: Props) {
           // back to the "Transcript coming soon" empty state.
           transcript: asTranscriptSegments(lessonRow.transcript),
           keyTakeaways: asKeyTakeaways(lessonRow.key_takeaways),
+          discussionPrompt: lessonRow.discussion_prompt?.trim() || null,
         }}
         course={{ slug: course.slug, title: course.title }}
         pillar={{

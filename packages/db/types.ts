@@ -1042,6 +1042,7 @@ export type Database = {
           course_id: string
           created_at: string
           description: string | null
+          discussion_prompt: string | null
           duration_minutes: number | null
           duration_seconds: number | null
           embed_url: string | null
@@ -1066,6 +1067,7 @@ export type Database = {
           course_id: string
           created_at?: string
           description?: string | null
+          discussion_prompt?: string | null
           duration_minutes?: number | null
           duration_seconds?: number | null
           embed_url?: string | null
@@ -1090,6 +1092,7 @@ export type Database = {
           course_id?: string
           created_at?: string
           description?: string | null
+          discussion_prompt?: string | null
           duration_minutes?: number | null
           duration_seconds?: number | null
           embed_url?: string | null

@@ -20,6 +20,7 @@ export async function POST(req: Request) {
     is_published?: boolean
     transcript?: unknown
     key_takeaways?: unknown
+    discussion_prompt?: unknown
   }
 
   if (!body.course_id || !body.title?.trim() || !body.slug?.trim()) {
@@ -42,6 +43,16 @@ export async function POST(req: Request) {
     )
   }
 
+  if (body.discussion_prompt != null && (typeof body.discussion_prompt !== 'string' || body.discussion_prompt.length > 500)) {
+    return NextResponse.json(
+      { error: 'discussion_prompt must be null or a string of ≤500 chars' },
+      { status: 422 },
+    )
+  }
+  const discussionPrompt = typeof body.discussion_prompt === 'string'
+    ? body.discussion_prompt.trim() || null
+    : null
+
   // RLS-FIX: adminClient bypasses the lessons RLS admin-role check that
   // breaks for users where auth.uid() ≠ public.users.id.
   const { data, error } = await adminClient
@@ -56,6 +67,7 @@ export async function POST(req: Request) {
       is_published: body.is_published ?? false,
       transcript,
       key_takeaways: keyTakeaways,
+      discussion_prompt: discussionPrompt,
     })
     .select('*')
     .single()

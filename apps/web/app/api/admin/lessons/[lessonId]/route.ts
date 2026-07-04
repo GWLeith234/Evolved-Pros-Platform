@@ -53,7 +53,18 @@ export async function PATCH(
     body.key_takeaways = takeaways
   }
 
-  const allowed = ['title', 'slug', 'description', 'sort_order', 'duration_seconds', 'is_published', 'mux_asset_id', 'mux_playback_id', 'transcript', 'key_takeaways'] as const
+  // discussion_prompt: plain text; null clears, blank coerced to null.
+  if ('discussion_prompt' in body && body.discussion_prompt !== null) {
+    if (typeof body.discussion_prompt !== 'string' || body.discussion_prompt.length > 500) {
+      return NextResponse.json(
+        { error: 'discussion_prompt must be null or a string of ≤500 chars' },
+        { status: 422 },
+      )
+    }
+    body.discussion_prompt = body.discussion_prompt.trim() || null
+  }
+
+  const allowed = ['title', 'slug', 'description', 'sort_order', 'duration_seconds', 'is_published', 'mux_asset_id', 'mux_playback_id', 'transcript', 'key_takeaways', 'discussion_prompt'] as const
   type AllowedKey = typeof allowed[number]
   const update = Object.fromEntries(
     allowed

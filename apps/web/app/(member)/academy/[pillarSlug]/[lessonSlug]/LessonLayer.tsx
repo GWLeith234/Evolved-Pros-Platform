@@ -17,6 +17,9 @@ interface LessonLayerProps {
     /** Author-written bullets from lessons.key_takeaways. Null/empty falls
      *  back to the legacy description-derived bullets. */
     keyTakeaways: string[] | null
+    /** Per-lesson prompt from lessons.discussion_prompt; null falls back
+     *  to the generic sitewide reflection prompt. */
+    discussionPrompt: string | null
   }
   course: {
     slug: string
@@ -478,8 +481,8 @@ export function LessonLayer({
             <strong style={{ color: TOKENS.amber, fontStyle: 'normal', marginRight: 6 }}>
               This week&rsquo;s prompt:
             </strong>
-            What is one place this lesson contradicts how you currently operate, and what would
-            change next week if you took it seriously?
+            {lesson.discussionPrompt ??
+              'What is one place this lesson contradicts how you currently operate, and what would change next week if you took it seriously?'}
           </p>
         </div>
         <textarea
