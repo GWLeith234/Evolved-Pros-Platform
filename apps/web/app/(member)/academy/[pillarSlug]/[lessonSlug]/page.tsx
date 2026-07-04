@@ -15,6 +15,7 @@ import {
 } from '@/lib/academy/fetchers'
 import { hasTierAccess } from '@/lib/tier'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { asTranscriptSegments } from '@/lib/academy/transcript'
 
 export const dynamic = 'force-dynamic'
 
@@ -159,8 +160,9 @@ export default async function LessonPage({ params }: Props) {
           title: lessonRow.title,
           description: lessonRow.description,
           durationSeconds: lessonRow.duration_seconds,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          transcript: (lessonRow as any).transcript ?? null,
+          // jsonb segments imported from HeyGen; null (or malformed) falls
+          // back to the "Transcript coming soon" empty state.
+          transcript: asTranscriptSegments(lessonRow.transcript),
         }}
         course={{ slug: course.slug, title: course.title }}
         pillar={{

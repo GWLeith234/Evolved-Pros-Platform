@@ -18,7 +18,7 @@ export default async function EditLessonPage({ params }: Props) {
   type LessonData = {
     id: string; title: string; slug: string; description: string | null
     duration_seconds: number | null; sort_order: number; is_published: boolean
-    mux_playback_id: string | null
+    mux_playback_id: string | null; transcript: unknown
   }
 
   // RLS-FIX: adminClient — courses/lessons SELECT policies filter drafts,
@@ -26,7 +26,7 @@ export default async function EditLessonPage({ params }: Props) {
   const [{ data: courseRaw }, { data: lessonRaw }] = await Promise.all([
     adminClient.from('courses').select('id, title').eq('id', params.courseId).single(),
     adminClient.from('lessons')
-      .select('id, title, slug, description, duration_seconds, sort_order, is_published, mux_playback_id')
+      .select('id, title, slug, description, duration_seconds, sort_order, is_published, mux_playback_id, transcript')
       .eq('id', params.lessonId).eq('course_id', params.courseId).single(),
   ])
 
@@ -57,6 +57,7 @@ export default async function EditLessonPage({ params }: Props) {
           sortOrder: lesson.sort_order,
           durationSeconds: lesson.duration_seconds ?? '',
           isPublished: lesson.is_published,
+          transcriptJson: lesson.transcript ? JSON.stringify(lesson.transcript, null, 2) : '',
         }}
       />
     </div>

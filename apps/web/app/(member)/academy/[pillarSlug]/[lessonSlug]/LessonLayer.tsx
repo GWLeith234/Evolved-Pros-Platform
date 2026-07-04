@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import type { TranscriptSegment } from '@/lib/academy/transcript'
 
 interface LessonLayerProps {
   lesson: {
@@ -10,7 +11,9 @@ interface LessonLayerProps {
     title: string
     description: string | null
     durationSeconds: number | null
-    transcript: string | null
+    /** Structured segments from lessons.transcript (HeyGen import); a raw
+     *  string is still accepted and parsed for backwards compatibility. */
+    transcript: TranscriptSegment[] | string | null
   }
   course: {
     slug: string
@@ -186,10 +189,16 @@ export function LessonLayer({
     () => deriveTakeaways(lesson.description, lesson.title),
     [lesson.description, lesson.title],
   )
-  const transcriptLines = useMemo(
-    () => parseTranscript(lesson.transcript),
-    [lesson.transcript],
-  )
+  const transcriptLines = useMemo<TranscriptLine[]>(() => {
+    if (Array.isArray(lesson.transcript)) {
+      return lesson.transcript.map(seg => ({
+        seconds: seg.seconds,
+        timestampLabel: seg.timestamp,
+        text: seg.text,
+      }))
+    }
+    return parseTranscript(lesson.transcript)
+  }, [lesson.transcript])
 
   return (
     <div

@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MuxUploader } from '@/components/admin/MuxUploader'
+import { parseTranscriptJson } from '@/lib/academy/transcript'
 
 interface LessonFormValues {
   title: string
@@ -11,6 +12,8 @@ interface LessonFormValues {
   sortOrder: number
   durationSeconds: number | ''
   isPublished: boolean
+  /** Raw JSON pasted into the Transcript box ('' = no transcript). */
+  transcriptJson: string
 }
 
 interface LessonFormProps {
@@ -27,6 +30,7 @@ const DEFAULT_VALUES: LessonFormValues = {
   sortOrder: 1,
   durationSeconds: '',
   isPublished: false,
+  transcriptJson: '',
 }
 
 function slugify(str: string) {
@@ -66,10 +70,22 @@ export function LessonForm({ courseId, lessonId, initialValues, existingPlayback
     }
   }
 
+  // Live-parse the pasted transcript JSON for the preview + save payload.
+  const transcriptParse = useMemo(
+    () => parseTranscriptJson(values.transcriptJson),
+    [values.transcriptJson],
+  )
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
     setError(null)
+
+    if (!transcriptParse.ok) {
+      setError(`Transcript JSON: ${transcriptParse.error}`)
+      setSaving(false)
+      return
+    }
 
     const payload = {
       title: values.title.trim(),
@@ -79,6 +95,7 @@ export function LessonForm({ courseId, lessonId, initialValues, existingPlayback
       duration_seconds: values.durationSeconds === '' ? null : Number(values.durationSeconds),
       is_published: values.isPublished,
       course_id: courseId,
+      transcript: transcriptParse.segments,
     }
 
     try {
@@ -223,6 +240,55 @@ export function LessonForm({ courseId, lessonId, initialValues, existingPlayback
             <p className="font-condensed text-[11px] text-[#7a8a96]">
               Save the lesson first, then you can upload a video.
             </p>
+          </div>
+        )}
+      </div>
+
+      {/* Transcript — paste JSON exported by scripts/heygen-extract-transcripts.ts */}
+      <div>
+        <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
+          Transcript (JSON)
+        </label>
+        <textarea
+          value={values.transcriptJson}
+          onChange={e => set('transcriptJson', e.target.value)}
+          rows={6}
+          spellCheck={false}
+          className="w-full rounded px-3 py-2.5 text-[12px] text-[#1b3c5a] outline-none resize-y"
+          style={{
+            border: `1px solid ${values.transcriptJson && !transcriptParse.ok ? 'rgba(239,14,48,0.5)' : 'rgba(27,60,90,0.2)'}`,
+            backgroundColor: 'white',
+            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+          }}
+          placeholder='Paste segments JSON: [{"timestamp":"0:00","seconds":0,"text":"…"}] or the extractor file {"lessonSlug":"…","segments":[…]}. Leave empty for no transcript.'
+        />
+        {values.transcriptJson.trim() === '' ? (
+          <p className="font-condensed text-[10px] text-[#7a8a96] mt-1">
+            Empty — the lesson page will show &ldquo;Transcript coming soon&rdquo;.
+          </p>
+        ) : !transcriptParse.ok ? (
+          <p className="font-condensed text-[11px] mt-1" style={{ color: '#ef0e30' }}>
+            {transcriptParse.error}
+          </p>
+        ) : (
+          <div
+            className="mt-2 rounded overflow-y-auto"
+            style={{ maxHeight: 180, border: '1px solid rgba(27,60,90,0.12)', backgroundColor: 'rgba(27,60,90,0.02)' }}
+          >
+            <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] px-3 pt-2">
+              Preview — {transcriptParse.segments?.length ?? 0} segments
+            </p>
+            {(transcriptParse.segments ?? []).map((seg, i) => (
+              <div key={i} className="flex items-baseline gap-3 px-3 py-1.5">
+                <span
+                  className="flex-shrink-0 text-[10px]"
+                  style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', color: '#68a2b9', width: 48 }}
+                >
+                  {seg.timestamp}
+                </span>
+                <span className="font-body text-[12px] text-[#1b3c5a] leading-relaxed">{seg.text}</span>
+              </div>
+            ))}
           </div>
         )}
       </div>

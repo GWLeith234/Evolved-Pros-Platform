@@ -1057,6 +1057,7 @@ export type Database = {
           thumbnail_fetched_at: string | null
           thumbnail_url: string | null
           title: string
+          transcript: Json | null
         }
         Insert: {
           checkin_type?: string | null
@@ -1079,6 +1080,7 @@ export type Database = {
           thumbnail_fetched_at?: string | null
           thumbnail_url?: string | null
           title: string
+          transcript?: Json | null
         }
         Update: {
           checkin_type?: string | null
@@ -1101,6 +1103,7 @@ export type Database = {
           thumbnail_fetched_at?: string | null
           thumbnail_url?: string | null
           title?: string
+          transcript?: Json | null
         }
         Relationships: [
           {

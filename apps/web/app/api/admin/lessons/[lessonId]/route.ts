@@ -2,6 +2,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { mux } from '@/lib/mux/client'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { asTranscriptSegments } from '@/lib/academy/transcript'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,7 +28,19 @@ export async function PATCH(
     delete body.muxUploadId
   }
 
-  const allowed = ['title', 'slug', 'description', 'sort_order', 'duration_seconds', 'is_published', 'mux_asset_id', 'mux_playback_id'] as const
+  // transcript: null clears it; otherwise must be a valid segments array.
+  if ('transcript' in body && body.transcript !== null) {
+    const segments = asTranscriptSegments(body.transcript)
+    if (!segments) {
+      return NextResponse.json(
+        { error: 'transcript must be null or an array of { timestamp, seconds, text } segments' },
+        { status: 422 },
+      )
+    }
+    body.transcript = segments
+  }
+
+  const allowed = ['title', 'slug', 'description', 'sort_order', 'duration_seconds', 'is_published', 'mux_asset_id', 'mux_playback_id', 'transcript'] as const
   type AllowedKey = typeof allowed[number]
   const update = Object.fromEntries(
     allowed
