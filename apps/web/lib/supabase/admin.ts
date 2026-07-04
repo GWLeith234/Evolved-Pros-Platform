@@ -9,5 +9,3 @@ export const adminClient = createClient<Database>(
   serviceRoleKey!,
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
-
-export const hasServiceRoleKey = Boolean(serviceRoleKey)

@@ -4,12 +4,11 @@ import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 
 // Re-export utils so existing server-side imports don't break.
-export type { EngagementLevel } from './utils'
+// (EngagementLevel / getVendastaCrmUrl consumers import from './utils' directly.)
 export {
   getEngagementLevel,
   getEngagementScore,
   getTierMrr,
-  getVendastaCrmUrl,
 } from './utils'
 
 // Server-side admin check — call at the top of API routes.

@@ -37,24 +37,6 @@ const cardStyle: React.CSSProperties = {
   border:          '1px solid var(--border-color, rgba(27,60,90,0.10))',
 }
 
-export function StatCardSkeleton() {
-  return (
-    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' as const }}>
-      {[0, 1, 2, 3].map(i => (
-        <div key={i} style={{
-          ...cardStyle,
-          flex:         '1 1 140px',
-          borderRadius: 8,
-          padding:      '16px 20px',
-        }}>
-          <Skeleton height={10} width={60} className="mb-2" />
-          <Skeleton height={28} width={80} />
-        </div>
-      ))}
-    </div>
-  )
-}
-
 export function PostSkeleton() {
   return (
     <div style={{
@@ -74,25 +56,6 @@ export function PostSkeleton() {
       </div>
       <Skeleton height={14} width="90%" className="mb-1.5" />
       <Skeleton height={14} width="70%" />
-    </div>
-  )
-}
-
-export function CourseCardSkeleton() {
-  return (
-    <div style={{
-      ...cardStyle,
-      borderRadius: 8,
-      overflow:     'hidden',
-      marginBottom: 8,
-      display:      'flex',
-    }}>
-      <Skeleton width={72} height={88} />
-      <div style={{ flex: 1, padding: '14px 16px' }}>
-        <Skeleton height={10} width={60} className="mb-2" />
-        <Skeleton height={16} width="75%" className="mb-2" />
-        <Skeleton height={4} width="100%" />
-      </div>
     </div>
   )
 }

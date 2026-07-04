@@ -49,21 +49,6 @@ export async function notifyReply(params: {
   })
 }
 
-export async function notifyMention(params: {
-  mentionedUserId: string
-  mentionerName: string
-  channelSlug: string
-  postId: string
-}) {
-  await createNotification({
-    userId:    params.mentionedUserId,
-    type:      'community_mention',
-    title:     'You were mentioned',
-    body:      `**${params.mentionerName}** mentioned you in **#${params.channelSlug}**`,
-    actionUrl: `/community/${params.channelSlug}?post=${params.postId}`,
-  })
-}
-
 export async function notifyEventReminder(params: {
   userId: string
   eventTitle: string
@@ -93,22 +78,6 @@ export async function notifyCourseUnlock(params: {
     title:     'New lesson unlocked',
     body:      `New lesson unlocked: **${params.lessonTitle}**. Your P${params.pillarNumber} progress unlocked the next track.`,
     actionUrl: `/academy/${params.courseSlug}`,
-  })
-}
-
-export async function notifyBilling(params: {
-  userId: string
-  renewalDate: Date
-}) {
-  const dateStr = params.renewalDate.toLocaleDateString('en-US', {
-    month: 'long', day: 'numeric', year: 'numeric',
-  })
-  await createNotification({
-    userId:    params.userId,
-    type:      'system_billing',
-    title:     'Membership renewal',
-    body:      `Your membership renews **${dateStr}**. Billing managed through Vendasta.`,
-    actionUrl: undefined,
   })
 }
 
@@ -143,22 +112,4 @@ export async function notifyNewDm(params: {
     body:      `**${params.senderName}** sent you a direct message`,
     actionUrl: `/messages?c=${params.conversationId}`,
   })
-}
-
-export async function notifyNewMember(params: {
-  adminUserIds: string[]
-  newMemberName: string
-  newMemberTier: string
-}) {
-  await Promise.all(
-    params.adminUserIds.map(adminId =>
-      createNotification({
-        userId:    adminId,
-        type:      'system_general',
-        title:     'New member joined',
-        body:      `**${params.newMemberName}** joined as a **${params.newMemberTier}** member.`,
-        actionUrl: `/admin/members`,
-      })
-    )
-  )
 }

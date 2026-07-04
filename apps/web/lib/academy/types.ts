@@ -33,11 +33,6 @@ export type LessonWithProgress = {
   thumbnailUrl: string | null
 }
 
-export type LessonNotes = {
-  notes: string
-  updatedAt: string
-}
-
 // Pillar thumbnail gradients
 export const PILLAR_GRADIENTS: Record<number, string> = {
   1: 'linear-gradient(135deg, #112535 0%, #1b3c5a 100%)',
@@ -64,11 +59,6 @@ export function formatDurationSeconds(seconds: number | null): string {
   const h = Math.floor(m / 60)
   const rem = m % 60
   return rem > 0 ? `${h}h ${rem}m` : `${h}h`
-}
-
-export function formatTotalDuration(lessons: { durationSeconds: number | null }[]): string {
-  const total = lessons.reduce((sum, l) => sum + (l.durationSeconds ?? 0), 0)
-  return formatDurationSeconds(total)
 }
 
 /** M:SS for the thumbnail duration badge — distinct from formatDurationSeconds's "12m"/"1h 5m". */

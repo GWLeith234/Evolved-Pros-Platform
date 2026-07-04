@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
 import { adminClient } from '@/lib/supabase/admin'
-import type { Channel, Post, LeaderboardEntry, MemberSummary, CommunityAd, EpisodeSummary, WeeklyLeaderboardEntry } from './types'
+import type { Channel, Post, LeaderboardEntry, MemberSummary, CommunityAd, WeeklyLeaderboardEntry } from './types'
 
 type SB = SupabaseClient<Database>
 
@@ -365,16 +365,4 @@ export async function fetchWeeklyLeaderboard(
       isCurrentUser: id === currentUserId,
     }
   })
-}
-
-export async function fetchLatestPodcastEpisode(): Promise<EpisodeSummary | null> {
-  const { data } = await adminClient
-    .from('episodes')
-    .select('id, episode_number, title, slug, guest_name, guest_title, guest_company, guest_image_url, thumbnail_url, duration_seconds, published_at')
-    .eq('is_published', true)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data as any) ?? null
 }
