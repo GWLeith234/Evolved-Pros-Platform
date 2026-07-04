@@ -280,11 +280,16 @@ export async function fetchLessonBySlug(
 
   if (!course) return null
 
+  // Published-only: every list/count surface already filters drafts, but
+  // without this a member could still open a draft by typing its URL
+  // (found while auditing the "A5 QA Test Lesson" count discrepancy).
+  // Admin views query lessons directly and are unaffected.
   const { data: lesson } = await supabase
     .from('lessons')
     .select('*')
     .eq('course_id', course.id)
     .eq('slug', lessonSlug)
+    .eq('is_published', true)
     .maybeSingle()
 
   return lesson ?? null

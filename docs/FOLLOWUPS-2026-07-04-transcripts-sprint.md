@@ -3,13 +3,20 @@
 Logged during the transcript-import sprint. None of these were fixed in the
 sprint — they are intentionally deferred.
 
-## FT-1 — Public Academy hub says "4 lessons" for Foundation (3 published)
-`apps/web/app/(public)/media/academy/page.tsx` (lesson-count query around
-line 88) counts ALL `lessons` rows per course with no `is_published = true`
-filter, so Foundation's intentional draft lesson inflates the label to
-"4 lessons". Same class of bug as the Academy-grid % fixed in `938ebae` —
-one-line filter on the count query. (Member-side grid/pillar/rollup are
-already published-only.)
+## FT-1 — RESOLVED (lesson-count cleanup sprint, 2026-07-04)
+Original ticket claimed the public hub count lacked an `is_published`
+filter — on inspection that was wrong: `(public)/media/academy/page.tsx`
+filters published in both its featured-lesson and count queries, and every
+member-facing count path has been published-only since `938ebae`. The "4
+lessons / 75%" display was driven by a QA-debris draft row, now deleted:
+
+- Deleted `lessons` row (full backup for recreation if ever needed):
+  `{"id":"1191620a-1a92-4cb9-be86-52e2dbe474c2","course_id":"8e1f199f-077a-45eb-9c25-38c9b98d1adb","slug":"a5-qa-test-lesson","title":"A5 QA Test Lesson","description":null,"mux_asset_id":null,"mux_playback_id":null,"duration_seconds":null,"sort_order":1,"is_published":false,"created_at":"2026-03-31T00:21:30.449322+00:00","module_number":null,"lesson_type":"video","duration_minutes":null,"checkin_type":null,"event_id":null,"content_blocks":null,"embed_url":null,"thumbnail_url":null,"thumbnail_fetched_at":null,"transcript":null}`
+- Evidence it was debris: QA-named, zero content fields, zero
+  lesson_progress rows, created a month before the real Foundation
+  lessons, duplicate sort_order 1.
+- Hardening added in the same sprint: `fetchLessonBySlug` now filters
+  `is_published = true`, closing the member deep-link path to drafts.
 
 ## FT-2 — Precise timestamp seek requires Mux playback (HeyGen embeds have no seek API)
 All 18 lesson videos play through `https://app.heygen.com/embeds/{id}`
