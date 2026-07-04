@@ -14,6 +14,8 @@ const ACCENT = 'var(--tile-stories)'
 export interface PulseStory {
   id: string
   slug: string
+  /** Raw pillar slug for the /media/[pillar]/[slug] URL; null → 'general'. */
+  pillar: string | null
   category: string
   /** Hex color for the category eyebrow; null falls back to text-secondary. */
   categoryColor: string | null
@@ -74,7 +76,10 @@ export function TopStoriesTile({ stories }: TopStoriesTileProps) {
               }
               primary={
                 <a
-                  href={`/media/${s.slug}`}
+                  // Story detail route is /media/[pillar]/[slug] — same
+                  // pattern as the media category pages. A single-segment
+                  // /media/{slug} 404'd every story click.
+                  href={`/media/${s.pillar ?? 'general'}/${s.slug}`}
                   style={{
                     display: 'block',
                     margin: 0,

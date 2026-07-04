@@ -15,7 +15,6 @@ import { PillarJourneyStrip, type PillarStripItem } from '@/components/home/Pill
 import { InProgressPillarHero } from '@/components/home/InProgressPillarHero'
 import { ClimbingTowardCard } from '@/components/home/ClimbingTowardCard'
 import { GoalCard, type GoalForCard } from '@/components/home/GoalCard'
-import { AddGoalCTA } from '@/components/home/AddGoalCTA'
 import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
 import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStoriesTile'
 import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
@@ -343,7 +342,7 @@ async function fetchLatestPulsePosts(limit = 3): Promise<PulsePost[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: rows } = await (adminClient as any)
     .from('posts')
-    .select('id, body, pillar, pillar_tag, like_count, reply_count, created_at, users!posts_author_id_fkey(display_name, full_name, tier)')
+    .select('id, body, pillar, pillar_tag, like_count, reply_count, created_at, users!posts_author_id_fkey(display_name, full_name, tier), channels(slug)')
     .eq('is_pinned', false)
     .order('created_at', { ascending: false })
     .limit(limit) as { data: Array<{
@@ -355,6 +354,7 @@ async function fetchLatestPulsePosts(limit = 3): Promise<PulsePost[]> {
       reply_count: number
       created_at: string
       users: { display_name: string | null; full_name: string | null; tier: string | null } | null
+      channels: { slug: string | null } | null
     }> | null }
 
   return (rows ?? []).map(r => {
@@ -362,8 +362,14 @@ async function fetchLatestPulsePosts(limit = 3): Promise<PulsePost[]> {
     const pillarColor = r.pillar
       ? pillarColorFromTag(String(r.pillar))
       : pillarColorFromTag(r.pillar_tag)
+    // Same post permalink the notification system emits
+    // (lib/notifications/create.ts): /community/{channelSlug}?post={id}.
+    const href = r.channels?.slug
+      ? `/community/${r.channels.slug}?post=${r.id}`
+      : '/community'
     return {
       id: r.id,
+      href,
       authorName: name,
       initials: getInitials(name),
       tier: r.users?.tier ?? null,
@@ -430,6 +436,7 @@ async function fetchTopStories(limit = 3): Promise<PulseStory[]> {
     return {
       id: r.id,
       slug: r.slug,
+      pillar: r.pillar ?? null,
       category: r.pillar ?? 'Story',
       categoryColor: pillarColor,
       title: r.title,
@@ -789,7 +796,7 @@ export default async function MemberHomePage() {
           posts={activity.posts}
         />
         <div className="space-y-5 lg:self-start">
-          <UpcomingEventsWidget events={events} userId={profile.id} />
+          <UpcomingEventsWidget events={events} />
           {/* SPRINT J — sidebar sponsor ad. Pulls a single active row from
               platform_ads (prefers placement IN ['home','all'], falls back to
               any active ad). Positioned below the main sidebar content. */}
@@ -856,28 +863,28 @@ export default async function MemberHomePage() {
           >
             The Long Game
           </p>
+          {/* "+ Add Goal" CTA removed: it pointed at /settings#goals, but
+              Settings has no Goals section and no goal-creation UI exists
+              anywhere yet (quarterly_goals has no write surface). Restore a
+              CTA when goal management ships. */}
           {goalsForCards.length === 0 ? (
             <div
               className="rounded-lg p-5 text-center"
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
             >
-              <p className="font-condensed text-[12px] mb-3" style={{ color: 'var(--text-tertiary)' }}>
-                No active goals yet — set one to anchor the quarter.
+              <p className="font-condensed text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
+                No active goals yet.
               </p>
-              <AddGoalCTA />
             </div>
           ) : (
-            <>
-              {goalsForCards.map(g => (
-                <GoalCard
-                  key={g.id}
-                  goal={g}
-                  inProgressPillarSlug={inProgressPillarSlug}
-                  inProgressContinueHref={inProgressContinueHref}
-                />
-              ))}
-              <AddGoalCTA />
-            </>
+            goalsForCards.map(g => (
+              <GoalCard
+                key={g.id}
+                goal={g}
+                inProgressPillarSlug={inProgressPillarSlug}
+                inProgressContinueHref={inProgressContinueHref}
+              />
+            ))
           )}
         </div>
       </div>

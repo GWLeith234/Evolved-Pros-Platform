@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import Link from 'next/link'
 import { Card, CardHeader, CardBody } from '@evolved-pros/ui'
 import { Button } from '@/components/ui/Button'
 
@@ -19,7 +19,6 @@ type EventRow = {
 
 interface UpcomingEventsWidgetProps {
   events: EventRow[]
-  userId: string
 }
 
 const MONTH_ABBR = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC']
@@ -35,9 +34,10 @@ function formatDuration(starts: string, ends: string | null): string {
   return `${timeStr} · ${Math.round(mins / 60)}h`
 }
 
-function EventItem({ event, userId }: { event: EventRow; userId: string }) {
+function EventItem({ event }: { event: EventRow }) {
   const [registered, setRegistered] = useState(event.isRegistered)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   // Defer toLocaleTimeString to client-only — timeZoneName: 'short' produces different output
   // on server (UTC → "12:00 PM UTC") vs browser (local tz → "8:00 AM EDT") — hydration error #425
   const [durationStr, setDurationStr] = useState('')
@@ -55,41 +55,63 @@ function EventItem({ event, userId }: { event: EventRow; userId: string }) {
   async function handleRegister() {
     if (registered) return
     setLoading(true)
-    const supabase = createClient()
-    const { error } = await supabase
-      .from('event_registrations')
-      .insert({ event_id: event.id, user_id: userId })
-    if (!error) setRegistered(true)
+    setError(null)
+    // Same registration flow the /events page uses. The previous direct
+    // browser-client insert into event_registrations was silently rejected
+    // by RLS (auth.uid() ≠ public.users.id) — a dead button. The API route
+    // resolves the public id by email and handles tier gating, counts,
+    // points, the reminder notification, and the confirmation email.
+    try {
+      const res = await fetch(`/api/events/${event.id}/register`, { method: 'POST' })
+      if (res.ok) {
+        setRegistered(true)
+      } else {
+        const data = (await res.json().catch(() => ({}))) as { error?: string }
+        setError(data.error ?? 'Registration failed')
+      }
+    } catch {
+      setError('Network error — try again')
+    }
     setLoading(false)
   }
 
   return (
     <div className="flex items-start gap-4 py-4">
-      {/* Date block */}
-      <div className="flex-shrink-0 flex flex-col items-center w-10">
-        <span
-          className="font-display font-black leading-none text-[26px]"
-          style={{ color: '#112535' }}
-        >
-          {day}
-        </span>
-        <span
-          className="font-condensed font-bold uppercase text-[12px] tracking-wide"
-          style={{ color: 'var(--brand-red-hover)' }}
-        >
-          {month}
-        </span>
-      </div>
+      {/* Date block + event info — real link to the event detail page. */}
+      <Link
+        href={`/events/${event.id}`}
+        className="flex items-start gap-4 flex-1 min-w-0"
+        style={{ textDecoration: 'none' }}
+      >
+        <div className="flex-shrink-0 flex flex-col items-center w-10">
+          <span
+            className="font-display font-black leading-none text-[26px]"
+            style={{ color: '#112535' }}
+          >
+            {day}
+          </span>
+          <span
+            className="font-condensed font-bold uppercase text-[12px] tracking-wide"
+            style={{ color: 'var(--brand-red-hover)' }}
+          >
+            {month}
+          </span>
+        </div>
 
-      {/* Event info */}
-      <div className="flex-1 min-w-0">
-        <p className="font-body font-semibold text-[13px] text-[#1b3c5a] leading-tight mb-0.5">
-          {event.title}
-        </p>
-        <p className="font-condensed text-[12px] font-medium text-[#7a8a96]">
-          {durationStr} · {platform}
-        </p>
-      </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-body font-semibold text-[13px] text-[#1b3c5a] leading-tight mb-0.5">
+            {event.title}
+          </p>
+          <p className="font-condensed text-[12px] font-medium text-[#7a8a96]">
+            {durationStr} · {platform}
+          </p>
+          {error && (
+            <p className="font-condensed text-[11px] font-medium" style={{ color: '#ef0e30' }}>
+              {error}
+            </p>
+          )}
+        </div>
+      </Link>
 
       {/* Action */}
       <button
@@ -107,7 +129,7 @@ function EventItem({ event, userId }: { event: EventRow; userId: string }) {
   )
 }
 
-export function UpcomingEventsWidget({ events, userId }: UpcomingEventsWidgetProps) {
+export function UpcomingEventsWidget({ events }: UpcomingEventsWidgetProps) {
   return (
     <Card>
       <CardHeader
@@ -131,7 +153,7 @@ export function UpcomingEventsWidget({ events, userId }: UpcomingEventsWidgetPro
               key={event.id}
               style={{ borderBottom: i < events.length - 1 ? '1px solid rgba(27,60,90,0.08)' : undefined }}
             >
-              <EventItem event={event} userId={userId} />
+              <EventItem event={event} />
             </div>
           ))
         )}

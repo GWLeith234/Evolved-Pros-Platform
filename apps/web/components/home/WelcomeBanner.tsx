@@ -709,7 +709,10 @@ export function WelcomeBanner({
         {/* JustEarned callout — fires when newest earn < 7 days */}
         {recentEarn && (
           <a
-            href="/profile/me/badges"
+            // /profile/me resolves (redirect to the member's own profile,
+            // where earned badges render). A /profile/me/badges route does
+            // not exist — linking it 404'd this callout.
+            href="/profile/me"
             style={{
               display: 'inline-flex',
               alignItems: 'center',

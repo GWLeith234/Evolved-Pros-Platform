@@ -15,6 +15,9 @@ const ACCENT = 'var(--tile-community)'
 
 export interface PulsePost {
   id: string
+  /** Post permalink — /community/{channelSlug}?post={id} (same destination
+   *  the notification system uses), or /community when channel is unknown. */
+  href: string
   authorName: string
   initials: string
   tier: 'pro' | 'vip' | 'community' | string | null
@@ -117,6 +120,7 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
             <TileRow
               key={p.id}
               isFirst={i === 0}
+              href={p.href}
               leading={
                 <div
                   style={{

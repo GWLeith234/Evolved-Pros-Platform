@@ -22,9 +22,19 @@ interface TileRowProps {
   /** Vertical-center the leading/trailing tokens (single-line rows) vs.
    *  top-align them (multi-line rows like Community / Top Stories). */
   align?: 'start' | 'center'
+  /** When set, the primary+meta stack renders inside a real anchor
+   *  (keyboard-focusable). Rows whose primary slot already contains its
+   *  own <a> must NOT pass href — nested anchors are invalid HTML. */
+  href?: string
 }
 
-export function TileRow({ leading, primary, meta, trailing, isFirst = false, align = 'start' }: TileRowProps) {
+export function TileRow({ leading, primary, meta, trailing, isFirst = false, align = 'start', href }: TileRowProps) {
+  const stack = (
+    <>
+      {primary}
+      {meta != null && <div style={{ marginTop: 3 }}>{meta}</div>}
+    </>
+  )
   return (
     <li
       style={{
@@ -40,11 +50,14 @@ export function TileRow({ leading, primary, meta, trailing, isFirst = false, ali
         {leading}
       </div>
 
-      {/* Primary + meta stack. */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {primary}
-        {meta != null && <div style={{ marginTop: 3 }}>{meta}</div>}
-      </div>
+      {/* Primary + meta stack — a real link when the row has a destination. */}
+      {href ? (
+        <a href={href} style={{ flex: 1, minWidth: 0, display: 'block', textDecoration: 'none', color: 'inherit' }}>
+          {stack}
+        </a>
+      ) : (
+        <div style={{ flex: 1, minWidth: 0 }}>{stack}</div>
+      )}
 
       {/* Trailing column — single right rail across all tiles. */}
       {trailing != null && (
