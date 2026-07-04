@@ -28,7 +28,7 @@
  * redesign, the SELECTORS block below is the only thing to adjust.
  */
 
-import { chromium, type Page } from 'playwright'
+import { chromium, type Page, type Locator } from 'playwright'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as readline from 'readline'
@@ -63,11 +63,49 @@ const LESSONS: Array<{ slug: string; title: string }> = [
 
 // Centralised so a HeyGen redesign is a one-block fix.
 const SELECTORS = {
+  // HeyGen's Projects search is COLLAPSED by default: the input exists in the
+  // DOM but is hidden (tabindex="-1", not visible) until its icon/button is
+  // clicked. openSearch() below clicks searchTrigger first, then types into
+  // projectSearch. Trigger candidates are broad (aria-label / testid / an
+  // icon button sitting next to the input) since HeyGen ships no stable hook.
+  searchTrigger:  'button[aria-label*="search" i], [data-testid*="search" i], [class*="search" i] button, button:has(svg[class*="search" i])',
   projectSearch:  'input[placeholder*="Search" i]',
   projectCard:    (title: string) => `a:has-text("${title}"), div[role="link"]:has-text("${title}")`,
   transcriptTab:  'button:has-text("Transcript"), [role="tab"]:has-text("Transcript")',
   copyAllButton:  'button:has-text("Copy all"), button:has-text("Copy All")',
   transcriptPane: '[class*="transcript" i]',
+}
+
+// HeyGen's Projects search is collapsed-by-default — the matching <input>
+// renders hidden (tabindex="-1") until you click the search icon to expand
+// it. Reveal it, then hand back the now-editable input. Resilient: if the
+// input is already visible we skip the click; if a trigger is needed we try
+// each candidate until the input becomes visible.
+async function openSearch(page: Page): Promise<Locator> {
+  const input = page.locator(SELECTORS.projectSearch).first()
+
+  // Already expanded? Nothing to click.
+  if (await input.isVisible().catch(() => false)) return input
+
+  // Click each trigger candidate; stop as soon as the input reveals.
+  const triggers = page.locator(SELECTORS.searchTrigger)
+  const count = await triggers.count().catch(() => 0)
+  for (let i = 0; i < count; i++) {
+    try {
+      await triggers.nth(i).click({ timeout: 3_000 })
+    } catch {
+      continue // not clickable / detached — try the next candidate
+    }
+    if (await input.isVisible({ timeout: 2_000 }).catch(() => false)) return input
+  }
+
+  // Last resort: force-click the input's own box in case the expand handler
+  // lives on the (width-collapsed) input itself rather than a sibling icon.
+  await input.click({ force: true, timeout: 3_000 }).catch(() => {})
+
+  // Surface a clear error if it's still hidden (fill() would otherwise hang).
+  await input.waitFor({ state: 'visible', timeout: 20_000 })
+  return input
 }
 
 interface Segment { timestamp: string; seconds: number; text: string }
@@ -122,10 +160,10 @@ async function loginFlow(): Promise<void> {
 }
 
 async function extractLesson(page: Page, lesson: { slug: string; title: string }): Promise<Segment[]> {
-  // 1. Find the project via search.
+  // 1. Find the project via search. HeyGen's search is collapsed by default,
+  //    so expand it before typing; .fill() then auto-waits for editable.
   await page.goto(`${BASE}/projects`, { waitUntil: 'domcontentloaded' })
-  const search = page.locator(SELECTORS.projectSearch).first()
-  await search.waitFor({ timeout: 20_000 })
+  const search = await openSearch(page)
   await search.fill(lesson.title)
   await page.waitForTimeout(1_500) // debounce
 
