@@ -35,10 +35,14 @@ frontend work.
 Lesson pages show a generic discussion prompt; product wants per-lesson
 prompts. Needs a CMS field + render wiring.
 
-## FT-4 — Key Takeaways as a real CMS field
-`LessonLayer.deriveTakeaways()` fabricates takeaways from the description
-text (first sentences) with generic fallbacks. Should be an editable
-`lessons` column managed in the admin form, like transcript now is.
+## FT-4 — ENGINEERING DONE (Sprint B, 2026-07-04); content entry pending
+`lessons.key_takeaways` jsonb (migration 053, applied) with a repeatable
+add/remove/reorder bullet editor on the admin lesson form, validated
+server-side (1–8 bullets, ≤300 chars). The lesson page renders authored
+bullets and falls back to the legacy description-derived ones only when
+the field is empty. REMAINING (content team): author 2–4 real takeaways
+per lesson from the HeyGen transcripts and enter them for all 18 lessons
+via /admin/courses/{courseId}/lessons/{lessonId}/edit.
 
 ## FT-5 — Housekeeping from the dead-code purge (5a7a117)
 `components/academy/LessonNotes.tsx` (orphaned when LessonTabs was deleted)

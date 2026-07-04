@@ -14,6 +14,9 @@ interface LessonLayerProps {
     /** Structured segments from lessons.transcript (HeyGen import); a raw
      *  string is still accepted and parsed for backwards compatibility. */
     transcript: TranscriptSegment[] | string | null
+    /** Author-written bullets from lessons.key_takeaways. Null/empty falls
+     *  back to the legacy description-derived bullets. */
+    keyTakeaways: string[] | null
   }
   course: {
     slug: string
@@ -185,9 +188,13 @@ export function LessonLayer({
     }
   }
 
+  // Real authored bullets win; the description-derived fallback only covers
+  // lessons whose key_takeaways haven't been entered yet.
   const takeaways = useMemo(
-    () => deriveTakeaways(lesson.description, lesson.title),
-    [lesson.description, lesson.title],
+    () => (lesson.keyTakeaways && lesson.keyTakeaways.length > 0
+      ? lesson.keyTakeaways
+      : deriveTakeaways(lesson.description, lesson.title)),
+    [lesson.keyTakeaways, lesson.description, lesson.title],
   )
   const transcriptLines = useMemo<TranscriptLine[]>(() => {
     if (Array.isArray(lesson.transcript)) {

@@ -3,6 +3,7 @@ import { mux } from '@/lib/mux/client'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { asTranscriptSegments } from '@/lib/academy/transcript'
+import { asKeyTakeaways } from '@/lib/academy/takeaways'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,7 +41,19 @@ export async function PATCH(
     body.transcript = segments
   }
 
-  const allowed = ['title', 'slug', 'description', 'sort_order', 'duration_seconds', 'is_published', 'mux_asset_id', 'mux_playback_id', 'transcript'] as const
+  // key_takeaways: null clears it; otherwise a non-empty array of strings.
+  if ('key_takeaways' in body && body.key_takeaways !== null) {
+    const takeaways = asKeyTakeaways(body.key_takeaways)
+    if (!takeaways) {
+      return NextResponse.json(
+        { error: 'key_takeaways must be null or an array of 1-8 non-empty strings (≤300 chars each)' },
+        { status: 422 },
+      )
+    }
+    body.key_takeaways = takeaways
+  }
+
+  const allowed = ['title', 'slug', 'description', 'sort_order', 'duration_seconds', 'is_published', 'mux_asset_id', 'mux_playback_id', 'transcript', 'key_takeaways'] as const
   type AllowedKey = typeof allowed[number]
   const update = Object.fromEntries(
     allowed

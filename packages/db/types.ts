@@ -1048,6 +1048,7 @@ export type Database = {
           event_id: string | null
           id: string
           is_published: boolean
+          key_takeaways: Json | null
           lesson_type: string | null
           module_number: number | null
           mux_asset_id: string | null
@@ -1071,6 +1072,7 @@ export type Database = {
           event_id?: string | null
           id?: string
           is_published?: boolean
+          key_takeaways?: Json | null
           lesson_type?: string | null
           module_number?: number | null
           mux_asset_id?: string | null
@@ -1094,6 +1096,7 @@ export type Database = {
           event_id?: string | null
           id?: string
           is_published?: boolean
+          key_takeaways?: Json | null
           lesson_type?: string | null
           module_number?: number | null
           mux_asset_id?: string | null

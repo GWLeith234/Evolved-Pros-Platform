@@ -16,6 +16,7 @@ import {
 import { hasTierAccess } from '@/lib/tier'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { asTranscriptSegments } from '@/lib/academy/transcript'
+import { asKeyTakeaways } from '@/lib/academy/takeaways'
 
 export const dynamic = 'force-dynamic'
 
@@ -163,6 +164,7 @@ export default async function LessonPage({ params }: Props) {
           // jsonb segments imported from HeyGen; null (or malformed) falls
           // back to the "Transcript coming soon" empty state.
           transcript: asTranscriptSegments(lessonRow.transcript),
+          keyTakeaways: asKeyTakeaways(lessonRow.key_takeaways),
         }}
         course={{ slug: course.slug, title: course.title }}
         pillar={{

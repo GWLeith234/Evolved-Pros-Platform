@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { LessonForm } from '../../../LessonForm'
+import { asKeyTakeaways } from '@/lib/academy/takeaways'
 
 interface Props {
   params: { courseId: string; lessonId: string }
@@ -18,7 +19,7 @@ export default async function EditLessonPage({ params }: Props) {
   type LessonData = {
     id: string; title: string; slug: string; description: string | null
     duration_seconds: number | null; sort_order: number; is_published: boolean
-    mux_playback_id: string | null; transcript: unknown
+    mux_playback_id: string | null; transcript: unknown; key_takeaways: unknown
   }
 
   // RLS-FIX: adminClient — courses/lessons SELECT policies filter drafts,
@@ -26,7 +27,7 @@ export default async function EditLessonPage({ params }: Props) {
   const [{ data: courseRaw }, { data: lessonRaw }] = await Promise.all([
     adminClient.from('courses').select('id, title').eq('id', params.courseId).single(),
     adminClient.from('lessons')
-      .select('id, title, slug, description, duration_seconds, sort_order, is_published, mux_playback_id, transcript')
+      .select('id, title, slug, description, duration_seconds, sort_order, is_published, mux_playback_id, transcript, key_takeaways')
       .eq('id', params.lessonId).eq('course_id', params.courseId).single(),
   ])
 
@@ -58,6 +59,7 @@ export default async function EditLessonPage({ params }: Props) {
           durationSeconds: lesson.duration_seconds ?? '',
           isPublished: lesson.is_published,
           transcriptJson: lesson.transcript ? JSON.stringify(lesson.transcript, null, 2) : '',
+          keyTakeaways: asKeyTakeaways(lesson.key_takeaways) ?? [],
         }}
       />
     </div>

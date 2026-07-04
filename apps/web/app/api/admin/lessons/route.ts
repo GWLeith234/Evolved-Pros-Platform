@@ -2,6 +2,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { asTranscriptSegments } from '@/lib/academy/transcript'
+import { asKeyTakeaways } from '@/lib/academy/takeaways'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,6 +19,7 @@ export async function POST(req: Request) {
     duration_seconds?: number | null
     is_published?: boolean
     transcript?: unknown
+    key_takeaways?: unknown
   }
 
   if (!body.course_id || !body.title?.trim() || !body.slug?.trim()) {
@@ -28,6 +30,14 @@ export async function POST(req: Request) {
   if (body.transcript != null && !transcript) {
     return NextResponse.json(
       { error: 'transcript must be null or an array of { timestamp, seconds, text } segments' },
+      { status: 422 },
+    )
+  }
+
+  const keyTakeaways = body.key_takeaways != null ? asKeyTakeaways(body.key_takeaways) : null
+  if (body.key_takeaways != null && !keyTakeaways) {
+    return NextResponse.json(
+      { error: 'key_takeaways must be null or an array of 1-8 non-empty strings (≤300 chars each)' },
       { status: 422 },
     )
   }
@@ -45,6 +55,7 @@ export async function POST(req: Request) {
       duration_seconds: body.duration_seconds ?? null,
       is_published: body.is_published ?? false,
       transcript,
+      key_takeaways: keyTakeaways,
     })
     .select('*')
     .single()
