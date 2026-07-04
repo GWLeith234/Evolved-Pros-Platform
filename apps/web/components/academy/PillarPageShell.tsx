@@ -115,9 +115,12 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
 
   const isCourseLocked = !!(course as Record<string, unknown>).is_locked
 
+  // lesson_progress is keyed on public.users.id (profile.id, resolved by
+  // email in fetchUserProfile) — the auth uid returns 0 completions for
+  // accounts where the two UUIDs diverge, flattening the pillar % to 0.
   const lessons = isCourseLocked
     ? []
-    : await fetchLessonsWithProgress(supabase, (course as Record<string, unknown>).slug as string, user.id, profile?.tier)
+    : await fetchLessonsWithProgress(supabase, (course as Record<string, unknown>).slug as string, profile?.id ?? user.id, profile?.tier)
 
   const completedCount = lessons.filter(l => l.completedAt).length
   const progressPct = lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0

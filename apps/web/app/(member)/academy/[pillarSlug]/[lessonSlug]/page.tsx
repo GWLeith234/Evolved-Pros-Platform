@@ -42,10 +42,13 @@ export default async function LessonPage({ params }: Props) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const profileTier = profile?.tier as any
+  // lesson_progress is keyed on public.users.id (profile.id, resolved by
+  // email in fetchUserProfile), not the auth session uid.
+  const memberId = profile?.id ?? user.id
   const [lessons, progress, allCourses] = await Promise.all([
-    fetchLessonsWithProgress(supabase, params.pillarSlug, user.id, profileTier),
-    fetchLessonProgress(supabase, user.id, lessonRow.id),
-    fetchCoursesWithProgress(supabase, user.id, profileTier),
+    fetchLessonsWithProgress(supabase, params.pillarSlug, memberId, profileTier),
+    fetchLessonProgress(supabase, memberId, lessonRow.id),
+    fetchCoursesWithProgress(supabase, memberId, profileTier),
   ])
 
   const muxToken = lessonRow.mux_playback_id
@@ -79,7 +82,7 @@ export default async function LessonPage({ params }: Props) {
           courseSlug={course.slug}
           memberName={profile?.display_name ?? profile?.full_name ?? 'Member'}
           completedAt={new Date().toISOString()}
-          userId={user.id}
+          userId={memberId}
           nextCourseSlug={nextCourse?.hasAccess ? nextCourse.slug : undefined}
         />
       </div>

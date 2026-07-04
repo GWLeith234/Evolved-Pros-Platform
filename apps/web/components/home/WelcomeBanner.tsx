@@ -39,9 +39,13 @@ interface WelcomeBannerProps {
   avatarUrl: string | null
   quote: { quote_text: string; source: string | null } | null
   scoreboard: {
-    unreadPostCount: number
+    /** Posts the member authored (posts.author_id = public.users.id). */
+    postCount: number
+    /** Upcoming published events the member hasn't registered for yet. */
     upcomingEventCount: number
+    /** Episodes the member has played (user_episode_progress rows). */
     podcastCount: number
+    /** Comments the member left on stories (story_comments rows). */
     storyCount: number
   }
   pillars: Array<{
@@ -920,7 +924,7 @@ export function WelcomeBanner({
                   paddingRight: 2,
                 }}
               >
-                This week
+                Your scoreboard
               </span>
               <div
                 className="welcome-banner-scoreboard"
@@ -939,9 +943,9 @@ export function WelcomeBanner({
                 <ScoreCell
                   href="/community"
                   label="Posts"
-                  value={scoreboard.unreadPostCount}
+                  value={scoreboard.postCount}
                   accent="#A78BFA"
-                  subline="New since last visit"
+                  subline="Shared with the community"
                   zeroHint="Share an update"
                 />
                 <ScoreCell
@@ -958,7 +962,7 @@ export function WelcomeBanner({
                   label="Podcast"
                   value={scoreboard.podcastCount}
                   accent="#60A5FA"
-                  subline="New to listen to"
+                  subline="Episodes you've played"
                   zeroHint="Listen to an episode"
                 />
                 <ScoreCell
@@ -966,8 +970,8 @@ export function WelcomeBanner({
                   label="Stories"
                   value={scoreboard.storyCount}
                   accent="#C9A84C"
-                  subline="New to read"
-                  zeroHint="No stories yet"
+                  subline="Comments on stories"
+                  zeroHint="Read a story"
                   last
                 />
               </div>

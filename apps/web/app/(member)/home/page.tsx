@@ -226,13 +226,31 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
   })
 }
 
-async function fetchUnreadCount(supabase: ReturnType<typeof createClient>, userId: string) {
-  const { count } = await supabase
-    .from('notifications')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .eq('is_read', false)
-  return count ?? 0
+// Scoreboard counts — all keyed on public.users.id (profile.id, resolved by
+// email in fetchCurrentUser) and read via adminClient, because every one of
+// these tables now FKs public.users(id) while RLS still gates on auth.uid().
+// The Posts cell previously counted unread notifications (wrong table) and
+// Podcast/Stories were hardcoded 0 — a member with 38 posts saw "Posts 0".
+async function fetchScoreboardCounts(userId: string) {
+  const [posts, episodes, storyComments] = await Promise.all([
+    adminClient
+      .from('posts')
+      .select('id', { count: 'exact', head: true })
+      .eq('author_id', userId),
+    adminClient
+      .from('user_episode_progress')
+      .select('episode_id', { count: 'exact', head: true })
+      .eq('user_id', userId),
+    adminClient
+      .from('story_comments')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId),
+  ])
+  return {
+    postCount: posts.count ?? 0,
+    podcastCount: episodes.count ?? 0,
+    storyCount: storyComments.count ?? 0,
+  }
 }
 
 function getCurrentMonday(): string {
@@ -533,7 +551,7 @@ export default async function MemberHomePage() {
     activity,
     events,
     courseProgress,
-    unreadCount,
+    scoreboardCounts,
     quotesResult,
     badgeData,
     // HOME-4UP-TILES fetchers
@@ -555,7 +573,7 @@ export default async function MemberHomePage() {
     fetchRecentActivity(profile.id),
     fetchUpcomingEvents(supabase, profile.id),
     fetchCourseProgress(supabase, profile.id),
-    fetchUnreadCount(supabase, profile.id),
+    fetchScoreboardCounts(profile.id),
     // Use adminClient to bypass RLS — greeting_quotes is a public table but anon key may be blocked
     adminClient.from('greeting_quotes').select('quote_text, source').order('day_number'),
     supabase.from('member_badges').select('pillar_number, awarded_at').eq('user_id', profile.id),
@@ -709,10 +727,10 @@ export default async function MemberHomePage() {
         avatarUrl={profile.avatar_url}
         quote={quote}
         scoreboard={{
-          unreadPostCount: unreadCount,
+          postCount: scoreboardCounts.postCount,
           upcomingEventCount,
-          podcastCount: 0,
-          storyCount: 0,
+          podcastCount: scoreboardCounts.podcastCount,
+          storyCount: scoreboardCounts.storyCount,
         }}
         pillars={pillars}
       />

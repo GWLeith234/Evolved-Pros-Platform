@@ -215,8 +215,13 @@ export async function fetchLessonsWithProgress(
 
   if (!lessons?.length) return []
 
+  // adminClient: lesson_progress.user_id stores public.users.id, but the RLS
+  // policy is `auth.uid() = user_id` — the SSR client silently returns [] for
+  // accounts where the two diverge, zeroing every pillar's completion state.
+  // Same pattern as fetchCoursesWithProgress above. Callers must pass the
+  // public.users.id (profile.id), not the auth session uid.
   const lessonIds = lessons.map(l => l.id)
-  const { data: progress } = await supabase
+  const { data: progress } = await adminClient
     .from('lesson_progress')
     .select('lesson_id, completed_at, watch_time_seconds')
     .eq('user_id', userId)
@@ -282,13 +287,15 @@ export async function fetchLessonBySlug(
   return lesson ?? null
 }
 
+// adminClient for the same auth.uid() ≠ public.users.id reason as the
+// progress reads above — userId is the public.users.id.
 export async function fetchLessonProgress(
   supabase: SB,
   userId: string,
   lessonId: string | undefined,
 ): Promise<Database['public']['Tables']['lesson_progress']['Row'] | null> {
   if (!lessonId) return null
-  const { data } = await supabase
+  const { data } = await adminClient
     .from('lesson_progress')
     .select('*')
     .eq('user_id', userId)
@@ -303,7 +310,7 @@ export async function fetchLessonNotes(
   lessonId: string | undefined,
 ): Promise<string | null> {
   if (!lessonId) return null
-  const { data } = await supabase
+  const { data } = await adminClient
     .from('lesson_progress')
     .select('notes')
     .eq('user_id', userId)

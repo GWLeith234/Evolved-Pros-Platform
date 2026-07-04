@@ -23,7 +23,10 @@ export default async function AcademyPage() {
 
   // All tiers can view Academy — per-pillar lock UI handles gating
 
-  const courses = await fetchCoursesWithProgress(supabase, user.id, profile?.tier as 'community' | 'vip' | 'pro' | null | undefined)
+  // lesson_progress rows are keyed on public.users.id (profile.id, resolved
+  // by email above), NOT the auth session uid — passing user.id here zeroed
+  // every pillar % for accounts where the two UUIDs diverge.
+  const courses = await fetchCoursesWithProgress(supabase, profile?.id ?? user.id, profile?.tier as 'community' | 'vip' | 'pro' | null | undefined)
 
   const totalLessons = courses.reduce((s, c) => s + (c.totalLessons ?? 0), 0)
   const completedLessons = courses.reduce((s, c) => s + c.completedLessons, 0)
