@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const BLUE = '#60A5FA'
 const GOLD = '#C9A84C'
@@ -251,6 +251,7 @@ function WizardForm({ domain, wizard: w, prompts, saving, saveError, isEditing, 
           canAdvance={w.to.trim().length > 0}
           onNext={() => onGoToStep(3)}
           onBack={() => onGoToStep(1)}
+          focusOnMount
         />
       )}
       {w.step === 3 && (
@@ -312,22 +313,31 @@ function WizardForm({ domain, wizard: w, prompts, saving, saveError, isEditing, 
   )
 }
 
-function StepInput({ label, sublabel, placeholder, value, onChange, color, canAdvance, onNext, onBack }: {
+function StepInput({ label, sublabel, placeholder, value, onChange, color, canAdvance, onNext, onBack, focusOnMount = false }: {
   label: string; sublabel: string; placeholder: string; value: string
   onChange: (v: string) => void; color: string; canAdvance: boolean
   onNext: () => void; onBack?: () => void
+  /** Focus the input when this step mounts. Off for step 1 — a bare
+   *  autoFocus made the browser scroll the Strategy pillar page down to
+   *  the wizard on initial page load. Steps reached by clicking Next may
+   *  focus (preventScroll) since the user is already at the wizard. */
+  focusOnMount?: boolean
 }) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (focusOnMount) inputRef.current?.focus({ preventScroll: true })
+  }, [focusOnMount])
   return (
     <div>
       <p style={{ color: '#faf9f7', fontSize: '15px', fontWeight: 600, margin: '0 0 4px' }}>{label}</p>
       <p style={{ color: 'rgba(250,249,247,0.4)', fontSize: '13px', margin: '0 0 16px' }}>{sublabel}</p>
       <input
+        ref={inputRef}
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter' && canAdvance) onNext() }}
         placeholder={placeholder}
-        autoFocus
         style={{
           width: '100%', backgroundColor: 'rgba(255,255,255,0.04)',
           border: `1px solid ${canAdvance ? color + '44' : 'rgba(255,255,255,0.1)'}`,

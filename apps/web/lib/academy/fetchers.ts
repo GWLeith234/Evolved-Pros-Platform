@@ -79,17 +79,17 @@ export async function fetchCoursesWithProgress(
   // Fetch lesson counts per course via adminClient (bypasses the
   // `auth.role() = 'authenticated' AND is_published = TRUE` lessons RLS).
   //
-  // No is_published filter on the count: the course-level is_published
-  // flag above already controls whether a course shows up in the
-  // catalog. Counting only published lessons hid every course whose
-  // rows had is_published=false in the live DB — the academy grid then
-  // rendered "Lessons coming soon" everywhere even when lessons existed.
-  // Per-lesson access is still gated on the lesson detail page (which
-  // applies its own filter), so unpublished rows don't leak through.
+  // Published-only, in BOTH numerator and denominator. This must match the
+  // pillar detail page (fetchLessonsWithProgress filters is_published=true):
+  // a draft lesson made the grid card read 3/4 = 75% while the pillar page
+  // read 3/3 = 100%, and the mobile "My Progress" rollup inherited the bad
+  // denominator. A course whose lessons are ALL drafts correctly shows
+  // "Lessons coming soon" (total = 0).
   const lessonsResult = await adminClient
     .from('lessons')
     .select('id, course_id')
     .in('course_id', courseIds)
+    .eq('is_published', true)
 
   // We need to distinguish "fetch failed / RLS shadow / missing service
   // key" from "course has zero lessons." The card fallback should only
@@ -112,10 +112,13 @@ export async function fetchCoursesWithProgress(
     // a real "no lessons yet" state. If it returns rows, adminClient
     // hit a service-role config issue and we should mark the count
     // null per-course.
+    // (RLS already restricts the SSR client to published lessons; the
+    // explicit filter keeps this probe aligned with the primary query.)
     const fallback = await supabase
       .from('lessons')
       .select('id, course_id')
       .in('course_id', courseIds)
+      .eq('is_published', true)
     if ((fallback.data?.length ?? 0) > 0) {
       console.warn(
         '[academy.fetchCoursesWithProgress] adminClient returned 0 but SSR client returned rows. Check SUPABASE_SERVICE_ROLE_KEY.',
