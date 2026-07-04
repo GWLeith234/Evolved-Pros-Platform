@@ -15,7 +15,8 @@ export async function GET() {
       serviceRole:  !!process.env.SUPABASE_SERVICE_ROLE_KEY,
       resend:       !!process.env.RESEND_API_KEY,
       mux:          !!process.env.MUX_TOKEN_ID,
-      vendasta:     !!process.env.VENDASTA_WEBHOOK_SECRET,
+      // The webhook's actual gate — there is no HMAC secret scheme.
+      vendasta:     !!process.env.VENDASTA_VERIFIER_TOKEN,
     },
   }
 

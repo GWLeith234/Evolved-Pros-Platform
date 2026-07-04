@@ -41,10 +41,14 @@ export class UnknownSkuError extends Error {
  * with process.env writes between test cases.
  */
 function envSkuTier(sku: string): VendastaTier | null {
+  // One NEXT_PUBLIC_ var per plan, shared by client (pricing/membership
+  // pages), checkout allowlist, and this mapper — annual used to live in a
+  // separate server-only VENDASTA_MP_*_Y var that had to be kept manually in
+  // sync with the client's NEXT_PUBLIC_ copy or annual checkout broke.
   const vipMonthly = process.env.NEXT_PUBLIC_VENDASTA_MP_VIP_M
-  const vipAnnual  = process.env.VENDASTA_MP_VIP_Y
+  const vipAnnual  = process.env.NEXT_PUBLIC_VENDASTA_MP_VIP_Y
   const proMonthly = process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_M
-  const proAnnual  = process.env.VENDASTA_MP_PRO_Y
+  const proAnnual  = process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_Y
   const community = process.env.VENDASTA_MP_COMMUNITY
   if (sku && (sku === vipMonthly || sku === vipAnnual)) return 'vip'
   if (sku && (sku === proMonthly || sku === proAnnual)) return 'pro'

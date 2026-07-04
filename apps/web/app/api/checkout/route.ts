@@ -42,8 +42,8 @@ function skuCatalog(): Record<string, SkuConfig> {
       tier:        'vip',
     },
     vip_annual: {
-      envVar:      'VENDASTA_MP_VIP_Y',
-      sku:         process.env.VENDASTA_MP_VIP_Y,
+      envVar:      'NEXT_PUBLIC_VENDASTA_MP_VIP_Y',
+      sku:         process.env.NEXT_PUBLIC_VENDASTA_MP_VIP_Y,
       amountCents: 79000,
       interval:    'YEARLY',
       tier:        'vip',
@@ -56,8 +56,8 @@ function skuCatalog(): Record<string, SkuConfig> {
       tier:        'pro',
     },
     pro_annual: {
-      envVar:      'VENDASTA_MP_PRO_Y',
-      sku:         process.env.VENDASTA_MP_PRO_Y,
+      envVar:      'NEXT_PUBLIC_VENDASTA_MP_PRO_Y',
+      sku:         process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_Y,
       amountCents: 249000,
       interval:    'YEARLY',
       tier:        'pro',
