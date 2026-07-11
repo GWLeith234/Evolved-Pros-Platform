@@ -8,6 +8,7 @@ import {
   premiumPartnerKind,
   type PremiumPartnerKind,
 } from '@/lib/sponsors/partners'
+import { VendastaAvatarStack } from '@/components/sponsors/VendastaAvatarStack'
 
 export type SponsorAd = {
   id: string
@@ -162,9 +163,37 @@ function PremiumPartnerCard({
         Evolution Partner
       </div>
 
-      {/* Hero */}
+      {/* Hero — Vendasta uses 4 Supabase avatars (AI workforce faces) */}
       <div className="relative h-[132px] w-full shrink-0 overflow-hidden">
-        {cfg.heroImage ? (
+        {kind === 'vendasta' ? (
+          <div
+            className="relative flex h-full w-full items-end justify-between px-5 pb-10 pt-6"
+            style={{
+              background:
+                'linear-gradient(135deg, #0A2F38 0%, #0D3D48 40%, #124A52 70%, #0A2530 100%)',
+            }}
+          >
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-40"
+              style={{
+                background:
+                  'radial-gradient(ellipse 80% 60% at 70% 40%, rgba(0,200,150,0.25), transparent 60%)',
+              }}
+            />
+            <VendastaAvatarStack size={52} className="relative z-[1]" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={cfg.logoSrc}
+              alt={cfg.logoAlt}
+              width={160}
+              height={28}
+              loading="lazy"
+              decoding="async"
+              className="relative z-[1] h-6 w-auto max-w-[45%] object-contain object-right drop-shadow-md"
+            />
+          </div>
+        ) : cfg.heroImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={cfg.heroImage}
@@ -204,23 +233,25 @@ function PremiumPartnerCard({
             </svg>
           </div>
         )}
-        {cfg.heroImage && (
+        {cfg.heroImage && kind !== 'vendasta' && (
           <div
             aria-hidden
             className="absolute inset-0"
             style={{ background: cfg.heroGradient }}
           />
         )}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={cfg.logoSrc}
-          alt={cfg.logoAlt}
-          width={200}
-          height={30}
-          loading="lazy"
-          decoding="async"
-          className="absolute bottom-4 left-5 h-6 sm:h-7 w-auto max-w-[min(200px,70%)] object-contain object-left drop-shadow-md"
-        />
+        {kind !== 'vendasta' && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={cfg.logoSrc}
+            alt={cfg.logoAlt}
+            width={200}
+            height={30}
+            loading="lazy"
+            decoding="async"
+            className="absolute bottom-4 left-5 h-6 sm:h-7 w-auto max-w-[min(200px,70%)] object-contain object-left drop-shadow-md"
+          />
+        )}
         <span
           aria-hidden
           className="absolute bottom-0 left-0 right-0 h-[3px]"

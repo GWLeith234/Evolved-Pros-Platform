@@ -37,7 +37,7 @@ async function fetchLiveSponsors(): Promise<SponsorAd[]> {
       .order('sort_order')
       .limit(12)
     const all = (rows ?? []) as SponsorAd[]
-    if (all.length === 0) return DEFAULT_ACADEMY_SPONSORS
+    if (all.length === 0) return pickAcademySponsors(DEFAULT_ACADEMY_SPONSORS, 2)
     return pickAcademySponsors(all, 2)
   } catch {
     return DEFAULT_ACADEMY_SPONSORS

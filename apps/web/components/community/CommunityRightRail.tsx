@@ -7,7 +7,7 @@
  *  1. Active / upcoming poll (interaction)
  *  2. Latest podcast (content consumption)
  *  3. Academy continue learning (content)
- *  4. Evolution Partner (value / rotation)
+ *  4. Evolution Partner (rotating, deduped)
  *  5. Weekly leaderboard (competition)
  */
 
@@ -120,11 +120,13 @@ function PodcastPromoCard({ episode }: { episode: RailPodcastEpisode | null }) {
         )}
         <Link
           href={href}
+          className="ep-pressable"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: 6,
             marginTop: 12,
+            minHeight: 40,
             fontFamily: '"Barlow Condensed", sans-serif',
             fontWeight: 800,
             fontSize: 11,
@@ -200,11 +202,13 @@ function AcademyPromoCard({ academyContinue }: { academyContinue: RailAcademyCon
         )}
         <Link
           href={href}
+          className="ep-pressable"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: 6,
             marginTop: 12,
+            minHeight: 40,
             fontFamily: '"Barlow Condensed", sans-serif',
             fontWeight: 800,
             fontSize: 11,
@@ -224,14 +228,23 @@ function AcademyPromoCard({ academyContinue }: { academyContinue: RailAcademyCon
   )
 }
 
+/** Rotating Evolution Partner — random start + interval cycle. */
 function SponsorPromoCard({ sponsors }: { sponsors: SponsorAd[] }) {
+  // Random start index after mount so SSR stays stable
   const [idx, setIdx] = useState(0)
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    if (sponsors.length === 0) return
+    setIdx(Math.floor(Math.random() * sponsors.length))
+    setReady(true)
+  }, [sponsors.length])
 
   useEffect(() => {
     if (sponsors.length <= 1) return
     const id = setInterval(() => {
       setIdx(i => (i + 1) % sponsors.length)
-    }, 12_000)
+    }, 10_000)
     return () => clearInterval(id)
   }, [sponsors.length])
 
@@ -250,7 +263,7 @@ function SponsorPromoCard({ sponsors }: { sponsors: SponsorAd[] }) {
           marginBottom: 8,
         }}
       >
-        <RailEyebrow accent="var(--brand-gold, #C9A84C)">Partner</RailEyebrow>
+        <RailEyebrow accent="var(--brand-gold, #C9A84C)">Sponsors</RailEyebrow>
         {sponsors.length > 1 && (
           <div style={{ display: 'flex', gap: 5 }} aria-hidden>
             {sponsors.map((s, i) => (
@@ -260,14 +273,16 @@ function SponsorPromoCard({ sponsors }: { sponsors: SponsorAd[] }) {
                 onClick={() => setIdx(i)}
                 aria-label={`Show ${s.sponsor_name ?? 'partner'}`}
                 style={{
-                  width: 6,
-                  height: 6,
+                  width: 8,
+                  height: 8,
                   borderRadius: '50%',
                   border: 'none',
                   padding: 0,
                   cursor: 'pointer',
+                  minWidth: 8,
+                  minHeight: 8,
                   background:
-                    i === idx % sponsors.length
+                    ready && i === idx % sponsors.length
                       ? 'var(--brand-red, #C9302A)'
                       : 'var(--border-color)',
                 }}
@@ -384,23 +399,27 @@ function StickyRailBody({
 export function CommunityRightRail(props: CommunityRightRailProps) {
   return (
     <>
-      {/* Desktop sticky rail */}
+      {/* Desktop sticky rail — sticks within .ep-main-scroll */}
       <aside
         className="hidden lg:block"
         style={{ minWidth: 0 }}
         aria-label="Community engagement"
       >
         <div
+          className="community-sticky-rail"
           style={{
             position: 'sticky',
-            top: 88,
+            /* main is the scrollport; topnav is outside it — small offset only */
+            top: 12,
             display: 'flex',
             flexDirection: 'column',
             gap: 14,
-            maxHeight: 'calc(100vh - 104px)',
+            maxHeight: 'calc(100dvh - 96px)',
             overflowY: 'auto',
-            paddingBottom: 24,
+            overscrollBehavior: 'contain',
+            paddingBottom: 32,
             scrollbarWidth: 'thin',
+            WebkitOverflowScrolling: 'touch',
           }}
         >
           <StickyRailBody {...props} />
@@ -411,8 +430,8 @@ export function CommunityRightRail(props: CommunityRightRailProps) {
 }
 
 /**
- * Mobile-only engagement chips — render inside the main feed column so
- * members still get DAU loops without a tall stacked sidebar.
+ * Mobile-only engagement — poll + chips; sponsors stay on desktop rail
+ * to avoid double-serving the same partner cards in the feed.
  */
 export function CommunityMobileEngagement({
   latestEpisode,

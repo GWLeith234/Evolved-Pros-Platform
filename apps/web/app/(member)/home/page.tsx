@@ -30,10 +30,8 @@ import {
 import {
   DEFAULT_HOME_SPONSORS,
   pickHomeSponsors,
-  isAdCellerantAd,
-  isEvolveX360Ad,
-  isVendastaAd,
-  isXprMediaAd,
+  pickSidebarSponsor,
+  ensureFlagshipSponsors,
 } from '@/lib/sponsors/partners'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { hasTierAccess } from '@/lib/tier'
@@ -560,7 +558,7 @@ async function fetchWeekCommitments(profileId: string, weekStart: string): Promi
  * bypasses RLS so members always see active placements.
  */
 async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: SponsorAd | null }> {
-  // Main row: exactly 2 Evolution Partners. Sidebar: one different partner.
+  // Main row: 2 rotated partners. Sidebar: 1 different partner (no dups).
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = adminClient as any
@@ -573,9 +571,10 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: Sponso
 
     const all = (rows ?? []) as Array<SponsorAd & { placement?: string | null }>
     if (all.length === 0) {
+      const home = pickHomeSponsors(DEFAULT_HOME_SPONSORS)
       return {
-        home: DEFAULT_HOME_SPONSORS.slice(0, 2),
-        sidebar: DEFAULT_HOME_SPONSORS[1] ?? DEFAULT_HOME_SPONSORS[0],
+        home,
+        sidebar: pickSidebarSponsor(DEFAULT_HOME_SPONSORS, home),
       }
     }
 
@@ -583,33 +582,23 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: Sponso
       const p = (a.placement ?? 'all').toLowerCase()
       return p === 'home' || p === 'all'
     })
-    const homeBase: SponsorAd[] = []
-    for (const ad of homePool.length ? homePool : all) {
-      if (!homeBase.some(h => h.id === ad.id)) homeBase.push(ad)
-    }
-    const home = pickHomeSponsors(homeBase)
-
-    const homeIds = new Set(home.map(a => a.id))
+    const pool = ensureFlagshipSponsors(homePool.length ? homePool : all)
+    const home = pickHomeSponsors(pool)
     const sidebarPool = all.filter(a => {
       const p = (a.placement ?? 'all').toLowerCase()
       return p === 'sidebar' || p === 'all'
     })
     const sidebar =
-      sidebarPool.find(a => !homeIds.has(a.id)) ??
-      all.find(a => !homeIds.has(a.id)) ??
-      home.find(a => isVendastaAd(a)) ??
-      home.find(a => isEvolveX360Ad(a)) ??
-      home.find(a => isXprMediaAd(a)) ??
-      home.find(a => isAdCellerantAd(a)) ??
-      home[0] ??
-      DEFAULT_HOME_SPONSORS[0]
+      pickSidebarSponsor(sidebarPool.length ? sidebarPool : all, home) ??
+      pickSidebarSponsor(pool, home)
 
     return { home, sidebar }
   } catch (err) {
     console.error('[home.fetchHomeSponsors] failed:', err instanceof Error ? err.message : err)
+    const home = pickHomeSponsors(DEFAULT_HOME_SPONSORS)
     return {
-      home: DEFAULT_HOME_SPONSORS.slice(0, 2),
-      sidebar: DEFAULT_HOME_SPONSORS[1] ?? DEFAULT_HOME_SPONSORS[0],
+      home,
+      sidebar: pickSidebarSponsor(DEFAULT_HOME_SPONSORS, home),
     }
   }
 }

@@ -254,6 +254,16 @@ export function UnifiedCommunityPage({
   // post matches.
   const hasMoreVisible = filtered.length > 0 && (filtered.length > visibleCount || hasMore)
 
+  // Dedupe: never inject a feed ad for a partner already featured on the rail
+  const railIds = useMemo(
+    () => new Set(railSponsors.map(s => s.id).filter(Boolean)),
+    [railSponsors],
+  )
+  const feedAds = useMemo(
+    () => ads.filter(a => !railIds.has(a.id)),
+    [ads, railIds],
+  )
+
   return (
     /* SCROLL-FIX: grow with content; let .ep-main-scroll own vertical scroll.
        Nested height:100% + overflow-y-auto trapped the feed when the shell broke. */
@@ -385,9 +395,9 @@ export function UnifiedCommunityPage({
                       )}
                     </div>
                   )}
-                  {/* Inject ad after every 3rd post */}
-                  {(index + 1) % 3 === 0 && ads.length > 0 && (
-                    <FeedAdUnit ad={ads[Math.floor(index / 3) % ads.length]} />
+                  {/* Inject compact feed ad after every 3rd post — never a rail partner */}
+                  {(index + 1) % 3 === 0 && feedAds.length > 0 && (
+                    <FeedAdUnit ad={feedAds[Math.floor(index / 3) % feedAds.length]} />
                   )}
                 </React.Fragment>
               ))}

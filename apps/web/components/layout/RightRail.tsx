@@ -29,15 +29,29 @@ export function RightRail() {
         .select('id, image_url, click_url, link_url, headline, sponsor_name, zone')
         .eq('zone', 'A')
         .eq('is_active', true)
-      if (primary.data?.length) {
-        setAds(primary.data)
-        return
+      let list = primary.data ?? []
+      if (!list.length) {
+        const fallback = await supabase
+          .from('platform_ads')
+          .select('id, image_url, click_url, link_url, headline, sponsor_name, zone')
+          .eq('is_active', true)
+        list = fallback.data ?? []
       }
-      const fallback = await supabase
-        .from('platform_ads')
-        .select('id, image_url, click_url, link_url, headline, sponsor_name, zone')
-        .eq('is_active', true)
-      if (fallback.data?.length) setAds(fallback.data)
+      // Dedupe by id, then shuffle for rotation
+      const seen = new Set<string>()
+      const unique = list.filter(a => {
+        if (!a.id || seen.has(a.id)) return false
+        seen.add(a.id)
+        return true
+      })
+      for (let i = unique.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1))
+        ;[unique[i], unique[j]] = [unique[j], unique[i]]
+      }
+      if (unique.length) {
+        setAds(unique)
+        setIdx(Math.floor(Math.random() * unique.length))
+      }
     })()
   }, [])
 
@@ -51,7 +65,7 @@ export function RightRail() {
 
   if (!ads.length) return null
 
-  const ad = ads[idx]
+  const ad = ads[idx % ads.length]
   if (!ad) return null
 
   // Filter out '#', empty strings, and null — only use real URLs

@@ -5,7 +5,10 @@ import { redirect } from 'next/navigation'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { UnifiedCommunityPageClient } from './UnifiedCommunityPageClient'
 import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
-import { ALL_FLAGSHIP_SPONSORS } from '@/lib/sponsors/partners'
+import {
+  ALL_FLAGSHIP_SPONSORS,
+  pickCommunityRailSponsors,
+} from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import type { RailAcademyContinue, RailPodcastEpisode } from '@/components/community/CommunityRightRail'
 
@@ -94,7 +97,7 @@ async function fetchAcademyContinue(userId: string): Promise<RailAcademyContinue
 function railSponsorsFromAds(
   communityAds: { id: string; image_url: string | null; headline: string | null; tool_name: string | null; cta_text: string | null; link_url: string | null; click_url: string | null; sponsor_name: string | null; body_copy?: string | null }[],
 ): SponsorAd[] {
-  const fromDb: SponsorAd[] = communityAds.slice(0, 4).map(a => ({
+  const fromDb: SponsorAd[] = communityAds.map(a => ({
     id: a.id,
     image_url: a.image_url,
     click_url: a.click_url,
@@ -105,9 +108,9 @@ function railSponsorsFromAds(
     cta_text: a.cta_text,
     endorsement_quote: a.body_copy ?? null,
   }))
-  // Prefer flagship Evolution Partners when community ads are sparse
-  if (fromDb.length === 0) return ALL_FLAGSHIP_SPONSORS
-  return [...fromDb, ...ALL_FLAGSHIP_SPONSORS.filter(s => !fromDb.some(d => d.id === s.id))].slice(0, 4)
+  // Daily-rotated unique partners for the sticky rail (max 4)
+  if (fromDb.length === 0) return pickCommunityRailSponsors(ALL_FLAGSHIP_SPONSORS, 4)
+  return pickCommunityRailSponsors(fromDb, 4)
 }
 
 export default async function CommunityPage() {

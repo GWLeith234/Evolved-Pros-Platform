@@ -6,8 +6,10 @@ import {
   ADCELLERANT_URL,
   isAdCellerantAd,
 } from './adcellerant'
+import { dedupeSponsors, pickRotatedSponsors, sponsorKey } from './rotate'
 
 export { ADCELLERANT_AD_ID, ADCELLERANT_ASSETS, ADCELLERANT_SPONSOR_AD, ADCELLERANT_URL, isAdCellerantAd }
+export { dedupeSponsors, pickRotatedSponsors, shuffleSponsors, sponsorKey, dailySeed } from './rotate'
 
 /** Fixed UUID for XPR Media seed + static fallback. */
 export const XPR_MEDIA_AD_ID = 'b2c3d4e5-f6a7-8901-bcde-f12345678901'
@@ -45,6 +47,10 @@ export const VENDASTA_AD_ID = 'c3d4e5f6-a7b8-9012-cdef-123456789012'
  * logo-white.svg: green leaf + white wordmark for dark heroes/cards.
  * logo-white.png / logo-wordmark.png: hi-res raster fallbacks.
  */
+const SUPABASE_PUBLIC =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ??
+  'https://udbwrapkshfjkctylbmm.supabase.co'
+
 export const VENDASTA_ASSETS = {
   logoWhite: '/sponsors/vendasta/logo-white.svg',
   logoWhitePng: '/sponsors/vendasta/logo-white.png',
@@ -52,6 +58,14 @@ export const VENDASTA_ASSETS = {
   hero: '/sponsors/vendasta/hero-ai-workforce.svg',
   icon: '/sponsors/vendasta/icon.png',
   wordmark: '/sponsors/vendasta/logo-wordmark.png',
+  /**
+   * Avatar 1–4 from Supabase Branding bucket — used in the Vendasta
+   * Evolution Partner creative (AI workforce faces).
+   */
+  avatars: [1, 2, 3, 4].map(
+    n =>
+      `${SUPABASE_PUBLIC}/storage/v1/object/public/Branding/Avatar%20${n}.png`,
+  ),
 } as const
 
 export const VENDASTA_URL = 'https://www.vendasta.com/'
@@ -148,8 +162,8 @@ export const DEFAULT_ACADEMY_SPONSORS: SponsorAd[] = [
 ]
 
 /**
- * Ensure flagship Evolution Partners lead a sponsor list.
- * Order: AdCellerant → Vendasta → EvolveX360 → XPR Media → others.
+ * Ensure flagship Evolution Partners are present in the pool (deduped).
+ * Does not force a fixed display order — use pickRotatedSponsors for that.
  */
 export function ensureFlagshipSponsors(list: SponsorAd[]): SponsorAd[] {
   const byId = new Map(list.map(a => [a.id, a]))
@@ -160,17 +174,37 @@ export function ensureFlagshipSponsors(list: SponsorAd[]): SponsorAd[] {
   const rest = list.filter(
     a => !isAdCellerantAd(a) && !isVendastaAd(a) && !isEvolveX360Ad(a) && !isXprMediaAd(a),
   )
-  return [adc, ven, ex, xpr, ...rest]
+  return dedupeSponsors([adc, ven, ex, xpr, ...rest])
 }
 
-/** Exactly two sponsors for /home main row. */
+/** Exactly two sponsors for /home main row — daily rotation, no dups. */
 export function pickHomeSponsors(list: SponsorAd[]): SponsorAd[] {
-  return ensureFlagshipSponsors(list).slice(0, 2)
+  return pickRotatedSponsors(ensureFlagshipSponsors(list), 2, { salt: 11 })
 }
 
-/** One or two sponsors for Academy lesson pages. */
+/** One or two sponsors for Academy lesson pages — rotated. */
 export function pickAcademySponsors(list: SponsorAd[], count = 2): SponsorAd[] {
   const n = Math.min(2, Math.max(1, count))
-  const flagged = ensureFlagshipSponsors(list)
-  return flagged.slice(0, n)
+  return pickRotatedSponsors(ensureFlagshipSponsors(list), n, { salt: 23 })
+}
+
+/** Community rail partners — up to 4, rotated, unique. */
+export function pickCommunityRailSponsors(list: SponsorAd[], count = 4): SponsorAd[] {
+  const n = Math.min(4, Math.max(1, count))
+  const pool = list.length ? ensureFlagshipSponsors(list) : ALL_FLAGSHIP_SPONSORS
+  return pickRotatedSponsors(pool, n, { salt: 41 })
+}
+
+/**
+ * Pick a sidebar / secondary ad that does not duplicate primary placements.
+ */
+export function pickSidebarSponsor(
+  list: SponsorAd[],
+  exclude: SponsorAd[],
+): SponsorAd | null {
+  const picked = pickRotatedSponsors(ensureFlagshipSponsors(list), 1, {
+    exclude: exclude.map(sponsorKey),
+    salt: 59,
+  })
+  return picked[0] ?? null
 }
