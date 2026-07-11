@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="36" viewBox="0 0 200 36" fill="none" role="img" aria-label="Vendasta">
+  <!-- Leaf / V mark -->
+  <path d="M10 28 C10 14 18 6 28 4 C24 12 24 18 28 28 C22 28 16 28 10 28Z" fill="#0ABFA3"/>
+  <path d="M28 4 C36 10 40 18 40 28 C34 28 30 26 28 20 C26 14 26 8 28 4Z" fill="#FFFFFF" opacity="0.9"/>
+  <text x="50" y="25" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="0.04em" fill="#FFFFFF">vendasta</text>
+</svg>

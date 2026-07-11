@@ -1,6 +1,7 @@
 import { stripTrailingArrow } from '@/lib/brand'
 import {
   ADCELLERANT_ASSETS,
+  VENDASTA_ASSETS,
   XPR_MEDIA_ASSETS,
   premiumPartnerKind,
   type PremiumPartnerKind,
@@ -78,6 +79,19 @@ const PREMIUM: Record<Exclude<PremiumPartnerKind, null>, PremiumConfig> = {
     heroImage: ADCELLERANT_ASSETS.skyline,
     heroGradient:
       'linear-gradient(180deg, rgba(10,15,24,0.15) 0%, rgba(10,15,24,0.55) 70%, rgba(10,15,24,0.92) 100%)',
+  },
+  vendasta: {
+    brand: 'Vendasta',
+    fallbackHref: 'https://www.vendasta.com/',
+    fallbackHeadline: 'Meet the AI Workforce for local businesses',
+    fallbackSub:
+      'Boost more traffic, capture more leads, and grow revenue with AI employees that work 24/7.',
+    fallbackCta: 'Get a demo',
+    logoSrc: VENDASTA_ASSETS.logoWhite,
+    logoAlt: 'Vendasta',
+    heroImage: VENDASTA_ASSETS.hero,
+    heroGradient:
+      'linear-gradient(180deg, rgba(10,47,56,0.2) 0%, rgba(10,37,48,0.55) 65%, rgba(10,37,48,0.92) 100%)',
   },
   xpr: {
     brand: 'XPR Media',
@@ -451,7 +465,7 @@ export function HomeSponsorRow({ ads }: { ads: SponsorAd[] }) {
     <section aria-label="Sponsored">
       <SponsoredEyebrow />
       <div
-        className="grid grid-cols-1 gap-6 md:grid-cols-2"
+        className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
         style={{ width: '100%', maxWidth: 1440, margin: '0 auto', paddingTop: 4 }}
       >
         {ads.map(ad => (

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="792" height="264" viewBox="0 0 792 264" fill="none" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="vg" x1="0" y1="0" x2="792" y2="264" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0A2F38"/>
+      <stop offset="45%" stop-color="#0D3D48"/>
+      <stop offset="100%" stop-color="#0A2530"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="70%" cy="40%" r="45%">
+      <stop offset="0%" stop-color="#0ABFA3" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#0ABFA3" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="c1"><circle cx="620" cy="120" r="28"/></clipPath>
+    <clipPath id="c2"><circle cx="668" cy="120" r="28"/></clipPath>
+    <clipPath id="c3"><circle cx="716" cy="120" r="28"/></clipPath>
+  </defs>
+  <rect width="792" height="264" fill="url(#vg)"/>
+  <rect width="792" height="264" fill="url(#glow)"/>
+  <!-- soft dots -->
+  <circle cx="120" cy="40" r="2" fill="#0ABFA3" opacity="0.4"/>
+  <circle cx="200" cy="200" r="1.5" fill="#fff" opacity="0.25"/>
+  <circle cx="480" cy="50" r="2" fill="#fff" opacity="0.2"/>
+  <!-- sparkle -->
+  <g transform="translate(560 48)" fill="#0ABFA3">
+    <path d="M12 0 L13.6 8.4 L22 10 L13.6 11.6 L12 20 L10.4 11.6 L2 10 L10.4 8.4 Z" opacity="0.95"/>
+  </g>
+  <g transform="translate(740 168)" fill="#FFFFFF" opacity="0.55">
+    <path d="M8 0 L8.9 5 L14 6 L8.9 7 L8 12 L7.1 7 L2 6 L7.1 5 Z"/>
+  </g>
+  <!-- people circles -->
+  <g>
+    <circle cx="620" cy="120" r="30" fill="#0ABFA3" opacity="0.25"/>
+    <circle cx="620" cy="120" r="28" fill="#134E5A" stroke="#0ABFA3" stroke-width="2"/>
+    <circle cx="620" cy="112" r="10" fill="#A8D5DE"/>
+    <ellipse cx="620" cy="136" rx="14" ry="10" fill="#A8D5DE"/>
+  </g>
+  <g>
+    <circle cx="668" cy="120" r="30" fill="#0ABFA3" opacity="0.25"/>
+    <circle cx="668" cy="120" r="28" fill="#1A5C6A" stroke="#0ABFA3" stroke-width="2"/>
+    <circle cx="668" cy="112" r="10" fill="#C5E4EA"/>
+    <ellipse cx="668" cy="136" rx="14" ry="10" fill="#C5E4EA"/>
+  </g>
+  <g>
+    <circle cx="716" cy="120" r="30" fill="#0ABFA3" opacity="0.25"/>
+    <circle cx="716" cy="120" r="28" fill="#0F4550" stroke="#0ABFA3" stroke-width="2"/>
+    <circle cx="716" cy="112" r="10" fill="#D4EEF2"/>
+    <ellipse cx="716" cy="136" rx="14" ry="10" fill="#D4EEF2"/>
+  </g>
+  <!-- accent arc -->
+  <path d="M560 200 Q 640 160 740 190" stroke="#0ABFA3" stroke-width="1.5" fill="none" opacity="0.35"/>
+</svg>

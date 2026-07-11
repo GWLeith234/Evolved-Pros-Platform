@@ -29,6 +29,7 @@ import {
   DEFAULT_HOME_SPONSORS,
   ensureFlagshipSponsors,
   isAdCellerantAd,
+  isVendastaAd,
   isXprMediaAd,
 } from '@/lib/sponsors/partners'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
@@ -555,7 +556,7 @@ async function fetchWeekCommitments(authUserId: string, weekStart: string): Prom
  * bypasses RLS so members always see active placements.
  */
 async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: SponsorAd | null }> {
-  // Flagship pair: AdCellerant + XPR Media (static fallback if seeds not applied).
+  // Flagship trio: AdCellerant + Vendasta + XPR Media (static fallback if seeds not applied).
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = adminClient as any
@@ -570,7 +571,7 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: Sponso
     if (all.length === 0) {
       return {
         home: DEFAULT_HOME_SPONSORS,
-        sidebar: DEFAULT_HOME_SPONSORS[1] ?? DEFAULT_HOME_SPONSORS[0],
+        sidebar: DEFAULT_HOME_SPONSORS.find(isVendastaAd) ?? DEFAULT_HOME_SPONSORS[0],
       }
     }
 
@@ -582,17 +583,18 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: Sponso
     for (const ad of homePool.length ? homePool : all) {
       if (!homeBase.some(h => h.id === ad.id)) homeBase.push(ad)
     }
-    const home = ensureFlagshipSponsors(homeBase).slice(0, 2)
+    const home = ensureFlagshipSponsors(homeBase).slice(0, 3)
 
     const homeIds = new Set(home.map(a => a.id))
     const sidebarPool = all.filter(a => {
       const p = (a.placement ?? 'all').toLowerCase()
       return p === 'sidebar' || p === 'all'
     })
-    // Sidebar: prefer a flagship not already doubled on the row, else XPR, else AdCellerant
+    // Sidebar: prefer Vendasta (AI Workforce) when not already alone on the row
     const sidebar =
       sidebarPool.find(a => !homeIds.has(a.id)) ??
       all.find(a => !homeIds.has(a.id)) ??
+      home.find(a => isVendastaAd(a)) ??
       home.find(a => isXprMediaAd(a)) ??
       home.find(a => isAdCellerantAd(a)) ??
       home[0] ??
@@ -603,7 +605,7 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: Sponso
     console.error('[home.fetchHomeSponsors] failed:', err instanceof Error ? err.message : err)
     return {
       home: DEFAULT_HOME_SPONSORS,
-      sidebar: DEFAULT_HOME_SPONSORS[1] ?? DEFAULT_HOME_SPONSORS[0],
+      sidebar: DEFAULT_HOME_SPONSORS.find(isVendastaAd) ?? DEFAULT_HOME_SPONSORS[0],
     }
   }
 }
