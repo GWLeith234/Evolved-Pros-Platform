@@ -63,11 +63,13 @@
      The TopNav reads every color from these vars; light overrides live below. */
   --topnav-border:      rgba(255,255,255,0.06);
   --topnav-link-active: #FFFFFF;
-  --topnav-link-idle:   rgba(255,255,255,0.5);
-  --topnav-link-hover:  rgba(255,255,255,0.85);
+  --topnav-link-idle:   rgba(255,255,255,0.62);
+  --topnav-link-hover:  rgba(255,255,255,0.92);
   --topnav-divider:     rgba(255,255,255,0.08);
-  --topnav-bell-icon:   rgba(255,255,255,0.65);
+  --topnav-bell-icon:   rgba(255,255,255,0.72);
   --topnav-ring-bg:     #0D1B2A;
+  /* Media / featured nav link — gold on dark, darker gold on light parchment */
+  --topnav-highlight:   #C9A84C;
 
   /* Episode banner tokens (EPISODEBANNER-THEME) */
   --episode-banner-bg:       #111926;
@@ -235,11 +237,13 @@ html.light-mode {
      nav item is clearly legible; active/hover stay solid navy (~11:1). */
   --topnav-border:      rgba(27,42,74,0.14);
   --topnav-link-active: #1B2A4A;
-  --topnav-link-idle:   rgba(27,42,74,0.72);
+  --topnav-link-idle:   rgba(27,42,74,0.78);
   --topnav-link-hover:  #1B2A4A;
   --topnav-divider:     rgba(27,42,74,0.16);
   --topnav-bell-icon:   rgba(27,42,74,0.78);
   --topnav-ring-bg:     #FAF7F2;
+  /* Gold #C9A84C fails WCAG on parchment (~2.6:1); use dark gold for light nav */
+  --topnav-highlight:   #8B6A00;
 
   /* Skeleton — light parchment (SPRINT-1) */
   --skeleton-base:      rgba(27,42,74,0.06);
@@ -391,12 +395,10 @@ html.light-mode main .border-white\/\[0\.06\] {
   border-color: #E8E2D9 !important;
 }
 
-/* THEME-FIX-V2: TopNav Media link "highlight" — gold #C9A84C on cream
-   #FAF7F2 is ~2.59:1 (WCAG AA fail). The color is set inline by TopNav.tsx,
-   so target the link structurally and swap to the darker --ed-gold (#8B6A00,
-   ~5.6:1) in light mode only. Dark-mode rendering is unchanged. */
+/* Media highlight is now --topnav-highlight (theme token). Keep a structural
+   fallback so any residual inline gold still reads in light mode. */
 html.light-mode header a[href="/media"] {
-  color: #8B6A00 !important;
+  color: var(--topnav-highlight) !important;
 }
 
 /* ── Typography utilities (SPRINT-1) ─────────────────────────────────────

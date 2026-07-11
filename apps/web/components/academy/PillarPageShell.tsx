@@ -14,6 +14,13 @@ import { DynamicReflectionPrompt } from '@/components/academy/DynamicReflectionP
 import { DynamicPillarAudit } from '@/components/academy/DynamicPillarAudit'
 import { adminClient } from '@/lib/supabase/admin'
 import { ProfileAdUnit } from '@/components/profile/ProfileAdUnit'
+import { AcademyLessonSponsors } from '@/components/academy/AcademyLessonSponsors'
+import {
+  DEFAULT_ACADEMY_SPONSORS,
+  pickAcademySponsors,
+} from '@/lib/sponsors/partners'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
 
 interface Props {
   pillarNumber?: number
@@ -161,6 +168,22 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
     .maybeSingle()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pillarAd = (pillarAdData as any) ?? null
+
+  // 1–2 Evolution Partners for course footer (lesson pages use the same catalog)
+  let courseSponsors: SponsorAd[] = DEFAULT_ACADEMY_SPONSORS
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: sponsorRows } = await (adminClient as any)
+      .from('platform_ads')
+      .select(SPONSOR_AD_COLUMNS + ', placement')
+      .eq('is_active', true)
+      .order('sort_order')
+      .limit(12)
+    const all = (sponsorRows ?? []) as SponsorAd[]
+    if (all.length > 0) courseSponsors = pickAcademySponsors(all, 2)
+  } catch {
+    /* static fallback */
+  }
 
   return (
     <main style={{ position: 'relative', zIndex: 1, backgroundColor: '#0A0F18', minHeight: '100vh', color: '#faf9f7' }}>
@@ -351,6 +374,10 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
               courseSlug={courseSlug}
               pillarColor={config.color}
             />
+            {/* Evolution Partners — after modules, before reflection / audit */}
+            <div style={{ marginTop: 32 }}>
+              <AcademyLessonSponsors ads={courseSponsors} />
+            </div>
           </div>
         </section>
       )}

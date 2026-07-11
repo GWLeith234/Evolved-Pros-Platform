@@ -81,11 +81,11 @@ interface TabItem {
 }
 
 const TABS: TabItem[] = [
-  { label: 'Home',      href: '/home',      match: /^\/home$/,     icon: <HomeIcon /> },
-  { label: 'Community', href: '/community', match: /^\/community/, icon: <UsersIcon /> },
-  { label: 'Events',    href: '/events',    match: /^\/events/,    icon: <CalendarIcon /> },
-  { label: 'Academy',   href: '/academy',   match: /^\/academy/,   icon: <BookIcon /> },
-  { label: 'Podcast',   href: '/podcast',   match: /^\/podcast/,   icon: <MicIcon /> },
+  { label: 'Home',    href: '/home',      match: /^\/home$/,     icon: <HomeIcon /> },
+  { label: 'Feed',    href: '/community', match: /^\/community/, icon: <UsersIcon /> },
+  { label: 'Events',  href: '/events',    match: /^\/events/,    icon: <CalendarIcon /> },
+  { label: 'Learn',   href: '/academy',   match: /^\/academy/,   icon: <BookIcon /> },
+  { label: 'Podcast', href: '/podcast',   match: /^\/podcast/,   icon: <MicIcon /> },
 ]
 
 export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTabBarProps) {

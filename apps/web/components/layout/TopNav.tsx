@@ -34,14 +34,15 @@ interface TopNavProps {
 
 interface NavItem { label: string; href: string; minTier?: 'vip' | 'pro'; highlight?: boolean }
 
+// Short, adoption-friendly labels. Order prioritizes daily loops
+// (home → community → learn) then discovery (events, podcast, media).
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Home',       href: '/home' },
-  { label: 'Community',  href: '/community' },
-  { label: 'Events',     href: '/events' },
-  { label: 'Academy',    href: '/academy',  minTier: 'vip' },
-  { label: 'Podcast',    href: '/podcast' },
-  { label: 'Live',       href: '/live' },
-  { label: 'Media',      href: '/media',    highlight: true },
+  { label: 'Home',    href: '/home' },
+  { label: 'Feed',    href: '/community' },
+  { label: 'Learn',   href: '/academy',  minTier: 'vip' },
+  { label: 'Events',  href: '/events' },
+  { label: 'Podcast', href: '/podcast' },
+  { label: 'Media',   href: '/media',    highlight: true },
 ]
 
 const TIER_RANK: Record<string, number> = { community: 1, vip: 2, pro: 3 }
@@ -122,7 +123,6 @@ export function TopNav({
   const linkIdle     = 'var(--topnav-link-idle)'
   const linkHover    = 'var(--topnav-link-hover)'
   const dividerColor = 'var(--topnav-divider)'
-  const subtleText   = 'var(--topnav-link-idle)'
   const aiLabelColor = 'var(--topnav-link-active)'
 
   return (
@@ -221,7 +221,10 @@ export function TopNav({
         >
           {NAV_ITEMS.filter(item => canAccess(profile.tier, item.minTier)).map(item => {
             const active = pathname.startsWith(item.href)
-            const color = item.highlight ? '#C9A84C' : (active ? linkActive : linkIdle)
+            // Highlight items use a theme token so gold stays readable on parchment.
+            const color = item.highlight
+              ? 'var(--topnav-highlight)'
+              : (active ? linkActive : linkIdle)
             return (
               <Link
                 key={item.href}
@@ -232,7 +235,7 @@ export function TopNav({
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: 4,
-                  padding: '8px 10px',
+                  padding: '8px 12px',
                   flexShrink: 0,
                   whiteSpace: 'nowrap',
                   fontFamily: 'var(--font-bebas), "Bebas Neue", sans-serif',
@@ -242,7 +245,7 @@ export function TopNav({
                   color,
                   textDecoration: 'none',
                   borderBottom: active
-                    ? `2px solid ${item.highlight ? '#C9A84C' : '#C9302A'}`
+                    ? `2px solid ${item.highlight ? 'var(--topnav-highlight)' : 'var(--brand-red, #C9302A)'}`
                     : '2px solid transparent',
                   marginBottom: -1,
                   transition: 'color 120ms ease',
@@ -262,17 +265,18 @@ export function TopNav({
 
         {/* Right cluster */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-          {/* AI George — pill variant */}
+          {/* Ask George — compact AI entry (single label for adoption) */}
           <button
             type="button"
             onClick={() => setAiOpen(o => !o)}
-            aria-label="AI George"
+            aria-label="Ask George"
+            title="Ask George"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: 8,
               height: 40,
-              padding: '0 14px 0 4px',
+              padding: '0 12px 0 4px',
               background: aiOpen ? 'rgba(167,139,250,0.18)' : 'rgba(167,139,250,0.10)',
               border: `1px solid ${aiOpen ? '#A78BFA' : 'rgba(167,139,250,0.45)'}`,
               color: aiLabelColor,
@@ -342,40 +346,17 @@ export function TopNav({
               </span>
             </span>
 
-            {/* Stacked label */}
             <span
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                lineHeight: 1,
+                fontFamily: '"Barlow Condensed", sans-serif',
+                fontWeight: 800,
+                fontSize: 13,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: '#A78BFA',
               }}
             >
-              <span
-                style={{
-                  fontFamily: '"Barlow Condensed", sans-serif',
-                  fontWeight: 800,
-                  fontSize: 13,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  color: '#A78BFA',
-                }}
-              >
-                AI
-              </span>
-              <span
-                style={{
-                  fontFamily: '"Barlow Condensed", sans-serif',
-                  fontWeight: 700,
-                  fontSize: 12,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  color: subtleText,
-                  marginTop: 1,
-                }}
-              >
-                George
-              </span>
+              Ask
             </span>
           </button>
 
@@ -536,7 +517,7 @@ export function TopNav({
 
                 {/* Links */}
                 {[
-                  { label: 'My profile', href: '/profile/me' },
+                  { label: 'Profile',    href: '/profile/me' },
                   { label: 'Settings',   href: '/settings' },
                   { label: 'Membership', href: '/membership' },
                 ].map(item => (
