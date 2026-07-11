@@ -9,14 +9,7 @@ export function LiveTestimonials() {
   return (
     <section style={{ maxWidth: 1280, margin: '72px auto 0', padding: '0 24px' }}>
       <LiveSectionHeader eyebrow="From the Hosts" title="What organizers say" />
-      <div
-        style={{
-          marginTop: 24,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 24,
-        }}
-      >
+      <div className="live-testimonial-grid" style={{ marginTop: 24 }}>
         {LIVE_TESTIMONIALS.map((t, i) => (
           <div
             key={`${t.author}-${i}`}

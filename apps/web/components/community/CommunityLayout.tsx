@@ -72,24 +72,24 @@ export function CommunityLayout({
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#faf9f7]">
         {/* Mobile channel pills — hidden on desktop */}
         <div
-          className="md:hidden overflow-x-auto flex gap-2 px-4 py-2 flex-shrink-0"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', backgroundColor: '#112535' }}
+          className="ep-scroll-x md:hidden flex gap-2 px-4 py-2.5 flex-shrink-0"
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', backgroundColor: 'var(--bg-nav, #112535)' }}
         >
           {channels.map(ch => {
             const active = ch.slug === currentChannelSlug
             return (
               <button
                 key={ch.slug}
+                type="button"
                 onClick={() => handleMobileChannelClick(ch.slug)}
-                className="flex-shrink-0 font-condensed font-semibold uppercase tracking-wide"
+                className="community-channel-pill flex-shrink-0 font-condensed font-semibold uppercase tracking-wide ep-pressable"
                 style={{
-                  fontSize: '12px',
-                  padding: '6px 12px',
                   borderRadius: '9999px',
                   backgroundColor: active ? 'rgba(104,162,185,0.2)' : 'rgba(255,255,255,0.06)',
-                  color: active ? '#68a2b9' : 'rgba(255,255,255,0.5)',
+                  color: active ? '#68a2b9' : 'rgba(255,255,255,0.55)',
                   border: `1px solid ${active ? 'rgba(104,162,185,0.3)' : 'rgba(255,255,255,0.08)'}`,
                   whiteSpace: 'nowrap',
+                  cursor: 'pointer',
                 }}
               >
                 {ch.name}

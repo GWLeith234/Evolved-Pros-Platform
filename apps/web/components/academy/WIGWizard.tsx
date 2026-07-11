@@ -370,7 +370,7 @@ function SavedCard({ wig, onEdit, color }: { wig: SavedWIG; onEdit: () => void; 
         </button>
       </div>
       <p style={{ color: '#faf9f7', fontSize: '16px', fontWeight: 600, lineHeight: 1.55, margin: '0 0 16px' }}>{c.statement}</p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+      <div className="academy-tool-grid-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
         {[['FROM', c.from], ['TO', c.to], ['BY', c.by ? formatDate(c.by) : '—']].map(([k, v]) => (
           <div key={k}>
             <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color, margin: '0 0 4px' }}>{k}</p>

@@ -51,13 +51,12 @@ function BookIcon() {
   )
 }
 
-function MicIcon() {
+function TargetIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-      <line x1="12" y1="19" x2="12" y2="23" />
-      <line x1="8" y1="23" x2="16" y2="23" />
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" />
     </svg>
   )
 }
@@ -80,33 +79,37 @@ interface TabItem {
   icon: React.ReactNode
 }
 
+// Primary DAU loops on the thumb bar (incl. Goals hub). Podcast under More.
 const TABS: TabItem[] = [
-  { label: 'Home',      href: '/home',      match: /^\/home$/,     icon: <HomeIcon /> },
-  { label: 'Community', href: '/community', match: /^\/community/, icon: <UsersIcon /> },
-  { label: 'Live',      href: '/live',      match: /^\/live/,      icon: <CalendarIcon /> },
-  { label: 'Academy',   href: '/academy',   match: /^\/academy/,   icon: <BookIcon /> },
-  { label: 'Podcast',   href: '/podcast',   match: /^\/podcast/,   icon: <MicIcon /> },
+  { label: 'Home',      href: '/home',       match: /^\/home$/,      icon: <HomeIcon /> },
+  { label: 'Community', href: '/community',  match: /^\/community/,  icon: <UsersIcon /> },
+  { label: 'Academy',   href: '/academy',    match: /^\/academy/,    icon: <BookIcon /> },
+  { label: 'Goals',     href: '/scoreboard', match: /^\/scoreboard/, icon: <TargetIcon /> },
+  { label: 'Live',      href: '/live',       match: /^\/live/,       icon: <CalendarIcon /> },
 ]
 
 export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTabBarProps) {
   const pathname = usePathname()
   const [moreOpen, setMoreOpen] = useState(false)
 
-  const isMoreActive = /^\/(messages|profile|settings|admin|scoreboard|leaderboard)/.test(pathname)
+  const isMoreActive = /^\/(messages|profile|settings|admin|leaderboard|membership|podcast)/.test(pathname)
 
   return (
     <>
       <nav
-        className="lg:hidden flex items-stretch fixed bottom-0 left-0 right-0 z-50"
+        className="ep-bottom-tabs lg:hidden flex items-stretch fixed bottom-0 left-0 right-0 z-50"
         style={{
-          backgroundColor: '#112535',
+          backgroundColor: 'var(--bg-nav, #112535)',
           borderTop: '1px solid rgba(255,255,255,0.08)',
-          height: '64px',
+          /* Backdrop blur for iOS over-scroll under the bar */
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
         }}
+        aria-label="Primary"
       >
         <div
-          className="flex items-center w-full"
-          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+          className="flex items-stretch w-full"
+          style={{ height: 56 }}
         >
           {TABS.map(tab => {
             const active = tab.match.test(pathname)
@@ -115,8 +118,11 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
               <Link
                 key={tab.href}
                 href={tab.href}
-                className="flex-1 flex flex-col items-center justify-center gap-0.5 relative min-h-[44px]"
-                style={{ color: active ? '#68a2b9' : 'rgba(255,255,255,0.4)' }}
+                className="flex-1 flex flex-col items-center justify-center gap-0.5 relative"
+                style={{
+                  color: active ? '#68a2b9' : 'rgba(255,255,255,0.45)',
+                  background: active ? 'rgba(104,162,185,0.08)' : 'transparent',
+                }}
               >
                 <span className="relative">
                   {tab.icon}
@@ -129,7 +135,7 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
                 </span>
                 <span
                   className="font-condensed font-semibold uppercase tracking-wide"
-                  style={{ fontSize: '8px' }}
+                  style={{ fontSize: '9px', letterSpacing: '0.06em' }}
                 >
                   {tab.label}
                 </span>
@@ -141,8 +147,11 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
           <button
             type="button"
             onClick={() => setMoreOpen(true)}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 relative min-h-[44px]"
-            style={{ color: isMoreActive ? '#68a2b9' : 'rgba(255,255,255,0.4)' }}
+            className="flex-1 flex flex-col items-center justify-center gap-0.5 relative"
+            style={{
+              color: isMoreActive ? '#68a2b9' : 'rgba(255,255,255,0.45)',
+              background: isMoreActive ? 'rgba(104,162,185,0.08)' : 'transparent',
+            }}
           >
             <span className="relative">
               <GridIcon />
@@ -155,7 +164,7 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
             </span>
             <span
               className="font-condensed font-semibold uppercase tracking-wide"
-              style={{ fontSize: '8px' }}
+              style={{ fontSize: '9px', letterSpacing: '0.06em' }}
             >
               More
             </span>

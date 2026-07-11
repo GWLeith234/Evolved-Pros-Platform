@@ -95,7 +95,7 @@ export function HonestLedger({ courseId }: Props) {
           Loading…
         </p>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        <div className="academy-tool-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
           <LedgerColumn
             label="What I've Built"
             subLabel="Relationships · Reputation · Skills · Wins"

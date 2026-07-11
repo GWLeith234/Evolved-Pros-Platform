@@ -28,10 +28,10 @@ export function LiveMasthead() {
         Evolved Pros
       </p>
       <h1
+        className="live-masthead-title"
         style={{
           margin: '6px 0 8px',
           fontFamily: FBN,
-          fontSize: 96,
           letterSpacing: '0.06em',
           color: 'var(--text-strong)',
           textTransform: 'uppercase',

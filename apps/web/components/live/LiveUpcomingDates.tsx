@@ -18,11 +18,8 @@ export function LiveUpcomingDates() {
         {UPCOMING_DATES.map((d, i) => (
           <div
             key={`${d.event}-${i}`}
+            className="live-upcoming-row"
             style={{
-              display: 'grid',
-              gridTemplateColumns: '120px 1fr 140px',
-              alignItems: 'start',
-              gap: 24,
               padding: '24px',
               borderTop: i === 0 ? 'none' : '1px solid var(--border-soft)',
               background: i % 2 === 0 ? 'var(--bg-surface)' : 'transparent',

@@ -262,7 +262,7 @@ export function UnifiedCommunityPage({
       {/* Feed (left) + weekly leaderboard rail (right) */}
       <div className="flex-1 overflow-y-auto" style={{ background: 'var(--community-page-bg)' }}>
         <div
-          className="w-full mx-auto px-4 md:px-6 py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(280px,35fr)] gap-6"
+          className="w-full mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(280px,35fr)] gap-4 sm:gap-6"
           style={{ maxWidth: 1280 }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
@@ -355,10 +355,10 @@ export function UnifiedCommunityPage({
                       PostCardV2 so the card stays presentational. */}
                   {expandedPostId === post.id && (
                     <div
+                      className="px-3 sm:px-6 pb-5"
                       style={{
                         background: 'var(--bg-surface)',
                         borderBottom: '1px solid var(--border-color)',
-                        padding: '0 24px 20px',
                       }}
                     >
                       {loadingRepliesFor === post.id && repliesByPost[post.id] === undefined ? (

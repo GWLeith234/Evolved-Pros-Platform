@@ -481,6 +481,247 @@ html.light-mode header a[href="/media"] {
 * { box-sizing: border-box; }
 html, body { overflow-x: hidden; }
 
+/* ── Mobile web polish (iOS / Android) ───────────────────────────────────
+   Touch targets ≥44px, safe-area insets, no 300ms tap lag, scroll feel. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  -webkit-tap-highlight-color: rgba(201, 48, 42, 0.12);
+  overscroll-behavior-y: contain;
+}
+button,
+a,
+[role="button"],
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+/* Finger-friendly interactive floor on coarse pointers (phones/tablets). */
+@media (pointer: coarse) {
+  button:not(.ep-icon-btn-sm),
+  a.ep-touch-target,
+  .ep-touch-target {
+    min-height: 44px;
+  }
+}
+
+/* Member chrome: fixed top nav + bottom tabs + home-indicator safe areas.
+   TopNav is dynamic(ssr:false) — main padding-top reserves its slot so SSR
+   and CSR paint the same content offset (no jump when chrome mounts). */
+.ep-topnav {
+  padding-left: max(12px, env(safe-area-inset-left, 0px));
+  padding-right: max(12px, env(safe-area-inset-right, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  height: calc(72px + env(safe-area-inset-top, 0px)) !important;
+  box-sizing: border-box;
+}
+.ep-main-scroll {
+  /* Match fixed header (72 + safe-area). Narrow phones use 60px bar. */
+  padding-top: calc(72px + env(safe-area-inset-top, 0px));
+  /* Bottom tabs (56) + home indicator — content never sits under the bar */
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+}
+@media (max-width: 639px) {
+  .ep-topnav {
+    height: calc(60px + env(safe-area-inset-top, 0px)) !important;
+  }
+  .ep-main-scroll {
+    padding-top: calc(60px + env(safe-area-inset-top, 0px));
+  }
+}
+@media (min-width: 1024px) {
+  .ep-main-scroll {
+    padding-bottom: 0;
+  }
+}
+.ep-bottom-tabs {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* Total height = bar + home indicator so content isn't covered */
+  min-height: calc(56px + env(safe-area-inset-bottom, 0px));
+}
+.ep-bottom-tabs a,
+.ep-bottom-tabs button {
+  min-height: 48px;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 120ms ease, background-color 120ms ease, transform 80ms ease;
+}
+.ep-bottom-tabs a:active,
+.ep-bottom-tabs button:active {
+  transform: scale(0.96);
+  opacity: 0.92;
+}
+
+/* Compact top nav on small phones */
+@media (max-width: 639px) {
+  .ep-topnav {
+    height: 60px !important;
+    gap: 8px !important;
+    padding-left: max(10px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(10px, env(safe-area-inset-right, 0px)) !important;
+  }
+  .ep-topnav-logo img {
+    height: 32px !important;
+    width: auto !important;
+  }
+  .ep-ask-label {
+    display: none !important;
+  }
+  .ep-ask-btn {
+    padding: 0 6px 0 4px !important;
+    height: 40px !important;
+    min-width: 44px;
+  }
+  .ep-topnav-cluster {
+    gap: 6px !important;
+  }
+  .ep-topnav-divider {
+    display: none !important;
+  }
+}
+
+/* Horizontal scroll rows — momentum + no scrollbar chrome on mobile */
+.ep-scroll-x {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  max-width: 100%;
+}
+.ep-scroll-x::-webkit-scrollbar {
+  display: none;
+}
+
+/* LIVE page responsive grids */
+.live-split-hero-grid {
+  display: grid;
+  grid-template-columns: 6fr 6fr;
+}
+.live-split-hero-photo {
+  position: relative;
+  min-height: 520px;
+  background: #0A0F18;
+}
+.live-upcoming-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 140px;
+  align-items: start;
+  gap: 24px;
+}
+.live-pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.live-testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.live-final-cta-inner {
+  padding: 56px 48px;
+}
+.live-final-cta-copy {
+  flex: 1;
+  min-width: min(100%, 280px);
+}
+.live-masthead-title {
+  font-size: clamp(56px, 18vw, 96px);
+}
+@media (max-width: 900px) {
+  .live-split-hero-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .live-split-hero-photo {
+    min-height: 280px !important;
+    order: -1;
+  }
+  .live-split-hero-copy {
+    padding: 28px 20px !important;
+  }
+  .live-upcoming-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    padding: 18px 16px !important;
+  }
+  .live-pillar-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .live-testimonial-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .live-final-cta-inner {
+    padding: 32px 20px !important;
+  }
+}
+@media (min-width: 640px) and (max-width: 900px) {
+  .live-pillar-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Academy course / lesson mobile */
+.academy-hero {
+  min-height: min(65vh, 560px);
+}
+@media (max-width: 639px) {
+  .academy-hero {
+    min-height: 48vh !important;
+  }
+  .academy-hero-cta {
+    width: 100%;
+    justify-content: center;
+    min-height: 48px;
+  }
+  .academy-lesson-pad {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  .academy-tool-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+  .academy-tool-grid-3 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Community mobile channel pills + engagement */
+.community-channel-pill {
+  min-height: 40px;
+  padding: 10px 16px !important;
+  font-size: 13px !important;
+  -webkit-tap-highlight-color: transparent;
+}
+.community-mobile-chip {
+  min-height: 52px;
+  min-width: 132px;
+  padding: 12px 16px !important;
+}
+
+/* Page gutters — home / scoreboard feel less cramped on phones */
+@media (max-width: 639px) {
+  .ep-page-gutter {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  .hub-root .hub-overview-grid {
+    gap: 12px !important;
+    padding: 14px 14px !important;
+  }
+}
+
+/* Instant press feedback for primary CTAs (loading feel) */
+.ep-pressable {
+  transition: transform 100ms ease, opacity 100ms ease;
+}
+.ep-pressable:active {
+  transform: scale(0.98);
+  opacity: 0.92;
+}
+
 @keyframes skeleton-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }

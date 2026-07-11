@@ -189,7 +189,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
     <main style={{ position: 'relative', zIndex: 1, backgroundColor: '#0A0F18', minHeight: '100vh', color: '#faf9f7' }}>
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
-      <section style={{ position: 'relative', minHeight: '65vh', display: 'flex', alignItems: 'flex-end' }}>
+      <section className="academy-hero" style={{ position: 'relative', display: 'flex', alignItems: 'flex-end' }}>
         {/* Background image + color fallback */}
         <div
           style={{
@@ -207,7 +207,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
           }}
         />
         {/* Content */}
-        <div style={{ position: 'relative', zIndex: 1, width: '100%', padding: '0 clamp(24px, 8vw, 96px) 72px' }}>
+        <div className="academy-lesson-pad" style={{ position: 'relative', zIndex: 1, width: '100%', padding: '0 clamp(16px, 8vw, 96px) clamp(40px, 8vw, 72px)' }}>
           <p
             style={{
               color: config.color, fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
@@ -261,12 +261,13 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
           {!isCourseLocked && firstLesson && (
             <a
               href={`/academy/${courseSlug}/${firstLesson.slug}`}
+              className="academy-hero-cta ep-pressable ep-touch-target"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '8px',
                 backgroundColor: config.color, color: '#0A0F18',
                 fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
                 fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase',
-                padding: '14px 28px', borderRadius: '4px', textDecoration: 'none',
+                padding: '14px 28px', minHeight: 48, borderRadius: '4px', textDecoration: 'none',
               }}
             >
               {progressPct > 0 && !isAllComplete ? `Continue ${config.label}` : `Start ${config.label}`} →

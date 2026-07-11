@@ -44,8 +44,10 @@ export function NotifBell({ initialUnreadCount, userId }: NotifBellProps) {
         aria-label="Notifications"
         style={{
           position: 'relative',
-          width: 36,
-          height: 36,
+          width: 44,
+          height: 44,
+          minWidth: 44,
+          minHeight: 44,
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -54,6 +56,7 @@ export function NotifBell({ initialUnreadCount, userId }: NotifBellProps) {
           cursor: 'pointer',
           color: 'var(--topnav-bell-icon)',
           transition: 'color 120ms ease',
+          WebkitTapHighlightColor: 'transparent',
         }}
         onMouseEnter={e => { e.currentTarget.style.color = 'var(--topnav-link-active)' }}
         onMouseLeave={e => { e.currentTarget.style.color = 'var(--topnav-bell-icon)' }}

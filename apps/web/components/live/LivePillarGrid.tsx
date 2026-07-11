@@ -115,14 +115,7 @@ export function LivePillarGrid() {
         title="What George speaks on"
         kicker="Pick one as a keynote. Combine two or three for a half-day workshop. All six for the full EVOLVED Architecture™ mainstage."
       />
-      <div
-        style={{
-          marginTop: 28,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 16,
-        }}
-      >
+      <div className="live-pillar-grid" style={{ marginTop: 28 }}>
         {PILLAR_TALKS.map(talk => (
           <PillarCard key={talk.num} talk={talk} />
         ))}

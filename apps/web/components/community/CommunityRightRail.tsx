@@ -289,44 +289,50 @@ function MobileEngagementStrip({
   latestEpisode: RailPodcastEpisode | null
   academyContinue: RailAcademyContinue
 }) {
-  const chips: { href: string; label: string; sub: string }[] = [
+  const chips: { href: string; label: string; sub: string; accent: string }[] = [
     {
       href: academyContinue?.href ?? '/academy',
       label: 'Learn',
       sub: academyContinue ? 'Continue' : 'Academy',
+      accent: 'var(--brand-red, #C9302A)',
+    },
+    {
+      href: '/scoreboard',
+      label: 'Goals',
+      sub: 'Scoreboard',
+      accent: 'var(--brand-gold, #C9A84C)',
     },
     {
       href: latestEpisode?.slug ? `/podcast/${latestEpisode.slug}` : '/podcast',
       label: 'Listen',
       sub: latestEpisode ? 'Podcast' : 'Episodes',
+      accent: 'var(--brand-teal, #0ABFA3)',
     },
   ]
 
   return (
     <div
-      className="lg:hidden"
+      className="ep-scroll-x lg:hidden"
       style={{
         display: 'flex',
         gap: 8,
-        overflowX: 'auto',
         paddingBottom: 2,
-        WebkitOverflowScrolling: 'touch',
-        scrollbarWidth: 'none',
       }}
     >
       {chips.map(c => (
         <Link
           key={c.href + c.label}
           href={c.href}
+          className="community-mobile-chip ep-pressable ep-touch-target"
           style={{
             flex: '0 0 auto',
             display: 'flex',
             flexDirection: 'column',
+            justifyContent: 'center',
             gap: 2,
-            minWidth: 120,
-            padding: '10px 14px',
             background: 'var(--bg-surface)',
             border: '1px solid var(--border-color)',
+            borderLeft: `3px solid ${c.accent}`,
             textDecoration: 'none',
           }}
         >
@@ -337,7 +343,7 @@ function MobileEngagementStrip({
               fontSize: 10,
               letterSpacing: '0.16em',
               textTransform: 'uppercase',
-              color: 'var(--brand-red, #C9302A)',
+              color: c.accent,
             }}
           >
             {c.label}

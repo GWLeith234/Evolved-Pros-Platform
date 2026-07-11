@@ -84,15 +84,20 @@ export function TopNav({
 
   const displayName = profile.display_name ?? profile.full_name ?? ''
 
-  // Close dropdown when clicking outside (preserved from v1)
+  // Close dropdown when clicking / tapping outside (touch-friendly on mobile)
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+    function handlePointerOutside(e: MouseEvent | TouchEvent) {
+      const target = e.target as Node | null
+      if (dropdownRef.current && target && !dropdownRef.current.contains(target)) {
         setDropdownOpen(false)
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('mousedown', handlePointerOutside)
+    document.addEventListener('touchstart', handlePointerOutside, { passive: true })
+    return () => {
+      document.removeEventListener('mousedown', handlePointerOutside)
+      document.removeEventListener('touchstart', handlePointerOutside)
+    }
   }, [])
 
   async function handleSignOut() {
@@ -168,9 +173,14 @@ export function TopNav({
       )}
 
       <header
+        className="ep-topnav"
         style={{
-          position: 'sticky',
+          /* fixed: TopNav is dynamic({ ssr:false }) so main reserves space via
+             .ep-main-scroll padding-top — sticky-in-flow would double the gap. */
+          position: 'fixed',
           top: 0,
+          left: 0,
+          right: 0,
           zIndex: 40,
           display: 'flex',
           alignItems: 'center',
@@ -189,12 +199,14 @@ export function TopNav({
         <Link
           href="/home"
           aria-label="Evolved Pros — home"
+          className="ep-topnav-logo ep-touch-target"
           style={{
             display: 'flex',
             alignItems: 'center',
             flexShrink: 0,
             height: '100%',
             textDecoration: 'none',
+            minWidth: 44,
           }}
         >
           <LogoMark variant={isLight ? 'dark' : 'light'} height={44} />
@@ -265,18 +277,21 @@ export function TopNav({
         </nav>
 
         {/* Right cluster */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+        <div className="ep-topnav-cluster" style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, marginLeft: 'auto' }}>
           {/* Ask George — compact AI entry (single label for adoption) */}
           <button
             type="button"
             onClick={() => setAiOpen(o => !o)}
             aria-label="Ask George"
             title="Ask George"
+            className="ep-ask-btn ep-pressable"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: 8,
               height: 40,
+              minHeight: 40,
+              minWidth: 40,
               padding: '0 12px 0 4px',
               background: aiOpen ? 'rgba(167,139,250,0.18)' : 'rgba(167,139,250,0.10)',
               border: `1px solid ${aiOpen ? '#A78BFA' : 'rgba(167,139,250,0.45)'}`,
@@ -348,6 +363,7 @@ export function TopNav({
             </span>
 
             <span
+              className="ep-ask-label"
               style={{
                 fontFamily: '"Barlow Condensed", sans-serif',
                 fontWeight: 800,
@@ -362,7 +378,7 @@ export function TopNav({
           </button>
 
           {/* Vertical divider */}
-          <div style={{ width: 1, height: 24, background: dividerColor }} />
+          <div className="ep-topnav-divider" style={{ width: 1, height: 24, background: dividerColor }} />
 
           {/* Notification bell (visuals updated to v2 spec; preserves drawer + realtime) */}
           <NotifBell initialUnreadCount={unreadCount} userId={profile.id} />
@@ -370,7 +386,7 @@ export function TopNav({
           {membersCanToggleTheme && (
             <>
               {/* Vertical divider */}
-              <div style={{ width: 1, height: 24, background: dividerColor }} />
+              <div className="ep-topnav-divider" style={{ width: 1, height: 24, background: dividerColor }} />
 
               {/* Theme toggle */}
               <ThemeToggle />
@@ -383,10 +399,13 @@ export function TopNav({
               type="button"
               onClick={() => setDropdownOpen(o => !o)}
               aria-label="Account menu"
+              className="ep-pressable"
               style={{
                 position: 'relative',
-                width: 36,
-                height: 36,
+                width: 40,
+                height: 40,
+                minWidth: 40,
+                minHeight: 40,
                 borderRadius: '50%',
                 padding: 0,
                 border: 'none',
@@ -518,6 +537,7 @@ export function TopNav({
 
                 {/* Links */}
                 {[
+                  { label: 'Goals',      href: '/scoreboard' },
                   { label: 'Profile',    href: '/profile/me' },
                   { label: 'Settings',   href: '/settings' },
                   { label: 'Membership', href: '/membership' },
@@ -526,9 +546,12 @@ export function TopNav({
                     key={item.href}
                     href={item.href}
                     onClick={() => setDropdownOpen(false)}
+                    className="ep-touch-target"
                     style={{
-                      display: 'block',
-                      padding: '10px 16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      minHeight: 44,
+                      padding: '12px 16px',
                       fontFamily: '"Barlow", sans-serif',
                       fontSize: 13,
                       color: isLight ? 'rgba(27,42,74,0.85)' : 'rgba(255,255,255,0.8)',
@@ -558,7 +581,8 @@ export function TopNav({
                     style={{
                       width: '100%',
                       textAlign: 'left',
-                      padding: '10px 16px',
+                      minHeight: 44,
+                      padding: '12px 16px',
                       fontFamily: '"Barlow", sans-serif',
                       fontSize: 13,
                       color: '#ef6075',

@@ -1,5 +1,5 @@
 // cache-bust: 2026-03-25
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Playfair_Display, Barlow_Condensed, Barlow, Bebas_Neue, Merriweather, Abril_Fatface } from 'next/font/google'
 import { createClient } from '@/lib/supabase/server'
 import { ThemeInit } from '@/components/ThemeInit'
@@ -65,6 +65,26 @@ export const metadata: Metadata = {
     title:       'Evolved Pros',
     description: 'The platform for high performers.',
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Evolved Pros',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+}
+
+/** iOS/Android web: device-width + safe-area (viewport-fit=cover). */
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#0A0F18' },
+    { media: '(prefers-color-scheme: light)', color: '#FAF9F7' },
+  ],
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

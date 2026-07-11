@@ -22,18 +22,18 @@ export function LiveSplitHero({ photo = '/live/george-stage-blue-jacket.jpg' }: 
       }}
     >
       <div
+        className="live-split-hero-grid"
         style={{
-          display: 'grid',
-          gridTemplateColumns: '6fr 6fr',
           background: 'var(--bg-surface)',
           border: '1px solid var(--border-soft2)',
           borderTop: '3px solid #C9A84C',
-          minHeight: 520,
+          minHeight: 0,
           overflow: 'hidden',
         }}
       >
         {/* LEFT — copy */}
         <div
+          className="live-split-hero-copy"
           style={{
             padding: '44px 44px',
             display: 'flex',
@@ -128,8 +128,10 @@ export function LiveSplitHero({ photo = '/live/george-stage-blue-jacket.jpg' }: 
               href="mailto:george@evolvex360.com?subject=Keynote%20Speaking%20Inquiry"
               target="_blank"
               rel="noopener noreferrer"
+              className="ep-pressable ep-touch-target"
               style={{
                 padding: '14px 28px',
+                minHeight: 48,
                 background: '#ef0e30',
                 color: '#fff',
                 border: '1px solid #ef0e30',
@@ -140,7 +142,9 @@ export function LiveSplitHero({ photo = '/live/george-stage-blue-jacket.jpg' }: 
                 textTransform: 'uppercase',
                 textDecoration: 'none',
                 cursor: 'pointer',
-                display: 'inline-block',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               Inquire about booking
@@ -149,7 +153,7 @@ export function LiveSplitHero({ photo = '/live/george-stage-blue-jacket.jpg' }: 
         </div>
 
         {/* RIGHT — photo */}
-        <div style={{ position: 'relative', minHeight: 520, background: '#0A0F18' }}>
+        <div className="live-split-hero-photo">
           <div
             style={{
               position: 'absolute',

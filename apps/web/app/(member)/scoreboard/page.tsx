@@ -215,7 +215,7 @@ export default async function ScoreboardPage() {
   }))
 
   return (
-    <div className="px-6 pb-10 space-y-6" style={{ maxWidth: 1440, margin: '0 auto' }}>
+    <div className="ep-page-gutter px-6 pb-10 space-y-6" style={{ maxWidth: 1440, margin: '0 auto' }}>
       {/* Breadcrumb / context */}
       <div
         style={{

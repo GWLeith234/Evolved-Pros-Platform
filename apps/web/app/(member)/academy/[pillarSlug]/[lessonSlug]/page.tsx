@@ -131,10 +131,11 @@ export default async function LessonPage({ params }: Props) {
       {/* Breadcrumb — replaces the persistent left sidebar */}
       <nav
         aria-label="Breadcrumb"
+        className="academy-lesson-pad"
         style={{
           maxWidth: 1280,
           margin: '0 auto',
-          padding: '20px 24px 12px',
+          padding: '16px 24px 12px',
           fontFamily: '"Barlow Condensed", sans-serif',
           fontSize: 11,
           fontWeight: 600,
@@ -145,6 +146,7 @@ export default async function LessonPage({ params }: Props) {
           alignItems: 'center',
           gap: 8,
           flexWrap: 'wrap',
+          rowGap: 6,
         }}
       >
         <Link href="/academy" style={{ color: '#B4B0A8', textDecoration: 'none' }}>

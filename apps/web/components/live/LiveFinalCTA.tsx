@@ -6,10 +6,10 @@ export function LiveFinalCTA() {
   return (
     <section style={{ maxWidth: 1280, margin: '72px auto 80px', padding: '0 24px' }}>
       <div
+        className="live-final-cta-inner"
         style={{
           background: 'linear-gradient(135deg, #1A2332 0%, #0D1B2A 100%)',
           border: '1px solid rgba(201,168,76,0.3)',
-          padding: '56px 48px',
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -21,7 +21,7 @@ export function LiveFinalCTA() {
         <span style={{ position: 'absolute', bottom: 0, right: 0, width: 3, height: 80, background: '#C9A84C' }} />
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 32, flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: 320 }}>
+          <div className="live-final-cta-copy">
             <p
               style={{
                 margin: 0,
@@ -61,11 +61,16 @@ export function LiveFinalCTA() {
               Tell us about the room, the audience, and what you need them to walk out with. We&apos;ll come back within 48 hours.
             </p>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 240 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 320 }}>
             <a
               href="mailto:george@evolvex360.com?subject=Booking%20request"
+              className="ep-pressable ep-touch-target"
               style={{
                 padding: '16px 32px',
+                minHeight: 48,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 background: '#ef0e30',
                 color: '#fff',
                 border: '1px solid #ef0e30',
@@ -86,8 +91,13 @@ export function LiveFinalCTA() {
               download="George-Leith-Media-Kit-2026.pdf"
               target="_blank"
               rel="noopener noreferrer"
+              className="ep-pressable ep-touch-target"
               style={{
                 padding: '16px 32px',
+                minHeight: 48,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 background: 'transparent',
                 color: '#C9A84C',
                 border: '1px solid rgba(201,168,76,0.5)',

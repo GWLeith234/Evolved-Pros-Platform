@@ -866,7 +866,7 @@ export default async function MemberHomePage() {
   ]
 
   return (
-    <div className="px-6 pb-6 space-y-5">
+    <div className="ep-page-gutter px-6 pb-6 space-y-5">
       <EpisodeBanner />
       <WelcomeBanner
         displayName={displayName}

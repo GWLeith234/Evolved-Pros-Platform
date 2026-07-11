@@ -679,12 +679,18 @@ export function AccountabilityHub({
                           ? `Mark ${h.name} incomplete`
                           : `Mark ${h.name} complete`
                       }
+                      className="ep-pressable"
                       style={{
                         background: 'none',
                         border: 'none',
-                        padding: 0,
+                        padding: 10,
+                        margin: -10,
                         cursor: 'pointer',
                         display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: 44,
+                        minHeight: 44,
                       }}
                     >
                       <Checkbox checked={h.completedToday} color={GOLD} />
@@ -758,12 +764,18 @@ export function AccountabilityHub({
                             ? `Mark ${c.commitment} incomplete`
                             : `Mark ${c.commitment} complete`
                         }
+                        className="ep-pressable"
                         style={{
                           background: 'none',
                           border: 'none',
-                          padding: 0,
+                          padding: 10,
+                          margin: -10,
                           cursor: 'pointer',
                           display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          minWidth: 44,
+                          minHeight: 44,
                         }}
                       >
                         <Checkbox checked={c.is_completed} color={TEAL} />

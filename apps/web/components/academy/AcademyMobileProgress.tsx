@@ -51,8 +51,8 @@ export function AcademyMobileProgress({ courses, userTier, overallPct }: Academy
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-4 py-3"
-        style={{ color: 'rgba(255,255,255,0.8)' }}
+        className="w-full flex items-center justify-between px-4 py-3 ep-pressable"
+        style={{ color: 'rgba(255,255,255,0.8)', minHeight: 48 }}
       >
         <span className="font-condensed font-semibold uppercase tracking-wide text-sm flex items-center gap-2">
           My Progress
@@ -82,8 +82,8 @@ export function AcademyMobileProgress({ courses, userTier, overallPct }: Academy
           {/* All Courses link */}
           <Link
             href="/academy"
-            className="block py-2 font-condensed font-semibold uppercase tracking-wide text-[12px] mb-1"
-            style={{ color: 'rgba(255,255,255,0.7)' }}
+            className="ep-touch-target flex items-center py-3 font-condensed font-semibold uppercase tracking-wide text-[12px] mb-1"
+            style={{ color: 'rgba(255,255,255,0.7)', minHeight: 44 }}
           >
             All Courses
           </Link>
@@ -94,11 +94,11 @@ export function AcademyMobileProgress({ courses, userTier, overallPct }: Academy
             const badgeLabel = course.requiredTier === 'pro' ? 'Pro' : 'VIP'
             const label = `0${course.pillarNumber} — ${SIDEBAR_SHORT_NAMES[course.pillarNumber] ?? course.title}`
             return (
-              <div key={course.id} className="mb-2">
+              <div key={course.id} className="mb-1">
                 {locked ? (
                   <div
-                    className="flex items-center justify-between py-1.5"
-                    style={{ color: 'rgba(255,255,255,0.3)' }}
+                    className="flex items-center justify-between py-2.5"
+                    style={{ color: 'rgba(255,255,255,0.3)', minHeight: 44 }}
                   >
                     <span className="font-condensed font-semibold text-[12px] uppercase tracking-wide">{label}</span>
                     <span
@@ -111,8 +111,8 @@ export function AcademyMobileProgress({ courses, userTier, overallPct }: Academy
                 ) : (
                   <Link
                     href={`/academy/${course.slug}`}
-                    className="flex items-center justify-between py-1.5"
-                    style={{ color: 'rgba(255,255,255,0.7)' }}
+                    className="ep-touch-target flex items-center justify-between py-2.5"
+                    style={{ color: 'rgba(255,255,255,0.7)', minHeight: 44 }}
                   >
                     <span className="font-condensed font-semibold text-[12px] uppercase tracking-wide">{label}</span>
                     <span className="font-condensed font-bold text-[12px]" style={{ color: '#68a2b9' }}>

@@ -46,7 +46,7 @@ export default async function MemberLayout({ children }: { children: React.React
             <TopNavClient profile={profile} unreadCount={0} />
             <NextEventBannerClient />
             <div className="flex flex-1 min-h-0">
-              <main className="flex-1 min-w-0 overflow-y-auto pt-[72px] pb-16 lg:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>{children}</main>
+              <main className="ep-main-scroll flex-1 min-w-0 overflow-y-auto lg:pb-0" style={{ backgroundColor: 'var(--bg-page)', WebkitOverflowScrolling: 'touch' }}>{children}</main>
               <RightRailClient />
             </div>
             <BottomTabBarClient role={profile.role} unreadCount={0} dmUnreadCount={0} />
@@ -126,8 +126,10 @@ export default async function MemberLayout({ children }: { children: React.React
               wrapper then becomes a programmatically-scrollable container,
               and the browser's focus-into-view side-effect on tab clicks
               scrolls it ~42px. */}
-          <main className="flex-1 min-w-0 overflow-y-auto pt-[72px] pb-16 lg:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>
-
+          <main
+            className="ep-main-scroll flex-1 min-w-0 overflow-y-auto lg:pb-0"
+            style={{ backgroundColor: 'var(--bg-page)', WebkitOverflowScrolling: 'touch' }}
+          >
             {children}
           </main>
           <RightRailClient />

@@ -85,6 +85,8 @@ export function FilterRail({
           scrollbar-width: none;
           -ms-overflow-style: none;
           max-width: 100%;
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior-x: contain;
         }
         .filter-rail-scroll-row::-webkit-scrollbar { display: none; }
         .filter-rail-scroll-row > * { flex-shrink: 0; }
@@ -265,9 +267,10 @@ export function FilterRail({
           value={sortBy}
           onChange={e => onChangeSort(e.target.value as SortBy)}
           style={{
-            padding: '6px 10px',
+            minHeight: 44,
+            padding: '8px 12px',
             fontFamily: '"Barlow", sans-serif',
-            fontSize: 12,
+            fontSize: 14,
             background: 'transparent',
             color: 'var(--text-primary)',
             border: '1px solid var(--filter-rail-border)',

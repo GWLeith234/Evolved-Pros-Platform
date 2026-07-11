@@ -55,12 +55,28 @@ export default async function LivePage() {
   const sponsors = await fetchLiveSponsors()
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-page)', color: 'var(--text-strong)' }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: 'var(--bg-page)',
+        color: 'var(--text-strong)',
+        /* When members arrive via bottom tab they still need bottom inset room */
+        paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))',
+      }}
+    >
       {user && (
         <Link
           href="/home"
           aria-label="Back to platform"
-          className="absolute top-4 right-4 z-50 text-sm text-white/70 hover:text-white transition bg-black/40 px-3 py-2 rounded backdrop-blur-sm"
+          className="ep-pressable ep-touch-target absolute z-50 text-sm text-white/70 hover:text-white transition bg-black/40 rounded backdrop-blur-sm"
+          style={{
+            top: 'max(16px, env(safe-area-inset-top, 0px))',
+            right: 'max(16px, env(safe-area-inset-right, 0px))',
+            minHeight: 44,
+            padding: '10px 14px',
+            display: 'inline-flex',
+            alignItems: 'center',
+          }}
         >
           ← Platform
         </Link>
