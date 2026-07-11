@@ -1,6 +1,7 @@
 'use client'
 
 import type { PodcastEpisode } from '@/lib/podcast/transforms'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { PodcastThemeBridge } from './PodcastThemeBridge'
 import { PodcastLatestStrip } from './PodcastLatestStrip'
 import { PodcastMasthead } from './PodcastMasthead'
@@ -10,9 +11,10 @@ import { useTheme } from '@/components/theme/ThemeProvider'
 
 interface PodcastPageShellProps {
   episodes: PodcastEpisode[]
+  sponsorAds?: SponsorAd[]
 }
 
-export function PodcastPageShell({ episodes }: PodcastPageShellProps) {
+export function PodcastPageShell({ episodes, sponsorAds = [] }: PodcastPageShellProps) {
   const { resolvedTheme } = useTheme()
   const podcastTheme = resolvedTheme === 'light' ? 'parchment' : 'navy'
 
@@ -47,7 +49,7 @@ export function PodcastPageShell({ episodes }: PodcastPageShellProps) {
       <PodcastLatestStrip episode={mostRecent} />
       <PodcastMasthead />
       <PodcastHero episode={latest} />
-      <PodcastGrid episodes={episodes} fallbackEpisode={latest} />
+      <PodcastGrid episodes={episodes} fallbackEpisode={latest} sponsorAds={sponsorAds} />
     </div>
   )
 }
