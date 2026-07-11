@@ -1,22 +1,30 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import type { PodcastEpisode } from '@/lib/podcast/transforms'
 import { sortEpisodesNewest } from '@/lib/podcast/transforms'
 import { PodcastFilterPills, type FilterKey, type SortKey } from './PodcastFilterPills'
 import { PodcastEpisodeTile } from './PodcastEpisodeTile'
+import { SponsorAdCard, type SponsorAd } from '@/components/home/HomeSponsorAd'
 
 const FB = 'var(--font-barlow)'
 const FBC = 'var(--font-barlow-condensed)'
 const FBN = 'var(--font-bebas)'
 
+// 0-based tile positions to drop an Evolution Partner card BEFORE, so the ads
+// sit between episode cards rather than at the ends. Extra ads (or ads that
+// have no slot because the filtered list is short) are appended after the grid.
+const AD_SLOTS = [4, 12]
+
 interface PodcastGridProps {
   episodes: PodcastEpisode[]
   /** Shown as a single card when the active filter returns nothing. */
   fallbackEpisode?: PodcastEpisode
+  /** Up to 2 Evolution Partner ads to interleave between episode cards. */
+  sponsorAds?: SponsorAd[]
 }
 
-export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
+export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: PodcastGridProps) {
   const [filter, setFilter] = useState<FilterKey>('all')
   const [sort, setSort] = useState<SortKey>('newest')
   const [focused, setFocused] = useState<string | null>(null)
@@ -30,6 +38,37 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
     if (sort === 'longest') list = [...list].sort((a, b) => b.duration - a.duration)
     return list
   }, [episodes, filter, sort])
+
+  // Interleave the Evolution Partner sponsor cards into the episode stream.
+  // An ad slot spans two grid columns so the wider SponsorAdCard keeps its
+  // proportions next to the square episode covers.
+  const gridChildren = useMemo(() => {
+    const nodes: ReactNode[] = []
+    let adIdx = 0
+    const pushAd = () => {
+      const ad = sponsorAds[adIdx++]
+      nodes.push(
+        <div key={`sponsor-${ad.id}`} className="podcast-sponsor-slot" style={{ gridColumn: 'span 2' }}>
+          <SponsorAdCard ad={ad} />
+        </div>,
+      )
+    }
+    filtered.forEach((ep, i) => {
+      if (adIdx < sponsorAds.length && AD_SLOTS.includes(i)) pushAd()
+      nodes.push(
+        <PodcastEpisodeTile
+          key={ep.id}
+          episode={ep}
+          focused={focused === ep.id}
+          onFocus={setFocused}
+          onBlur={() => setFocused(null)}
+        />,
+      )
+    })
+    // Any ads that didn't land on a slot (short list) go after the last card.
+    while (adIdx < sponsorAds.length) pushAd()
+    return nodes
+  }, [filtered, sponsorAds, focused])
 
   // Headline count excludes the pilot — it carries a PILOT chip, not a number,
   // so "5 episodes + pilot" reads true (PODCAST-CLEANUP S6).
@@ -112,15 +151,7 @@ export function PodcastGrid({ episodes, fallbackEpisode }: PodcastGridProps) {
           gap: '32px 22px',
         }}
       >
-        {filtered.map(ep => (
-          <PodcastEpisodeTile
-            key={ep.id}
-            episode={ep}
-            focused={focused === ep.id}
-            onFocus={setFocused}
-            onBlur={() => setFocused(null)}
-          />
-        ))}
+        {gridChildren}
       </div>
 
       {filtered.length === 0 && fallbackEpisode && (

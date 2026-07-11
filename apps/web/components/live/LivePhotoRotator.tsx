@@ -86,6 +86,24 @@ export function LivePhotoRotator() {
               }}
             >
               {ROTATOR_PHOTOS[idx].caption}
+              {ROTATOR_PHOTOS[idx].city && (
+                // Location appended as "— City, Country". Kept in a lighter,
+                // gold, condensed span so it reads as a subordinate location
+                // tag; `white-space: nowrap` keeps the dash + place together so
+                // it wraps to its own line as one unit on narrow screens.
+                <span
+                  style={{
+                    fontFamily: FBC,
+                    fontWeight: 600,
+                    fontSize: '0.5em',
+                    letterSpacing: '0.04em',
+                    color: '#C9A84C',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {` — ${ROTATOR_PHOTOS[idx].city}, ${ROTATOR_PHOTOS[idx].country}`}
+                </span>
+              )}
             </p>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
