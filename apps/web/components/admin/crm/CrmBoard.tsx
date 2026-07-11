@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
   CRM_COLUMNS,
@@ -8,6 +8,8 @@ import {
   followUpLabel,
   formatMoney,
   formatShortDate,
+  parseProspectsCsv,
+  prospectsToCsv,
   prospectValue,
   relativeContact,
   type CrmProspect,
@@ -19,6 +21,37 @@ import { CrmProspectModal, type CrmSavePayload } from './CrmProspectModal'
 
 type BoardData = Record<CrmStage, CrmProspect[]>
 type ViewMode = 'board' | 'table'
+type FollowFilter = 'all' | 'overdue' | 'today' | 'week'
+
+const FOLLOW_FILTERS: { key: FollowFilter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'overdue', label: 'Overdue' },
+  { key: 'today', label: 'Due today' },
+  { key: 'week', label: 'This week' },
+]
+
+/** Bucket a follow-up date relative to the start of today. */
+function followBucket(iso: string | null): 'none' | 'overdue' | 'today' | 'soon' {
+  if (!iso) return 'none'
+  const t = new Date(iso).getTime()
+  if (Number.isNaN(t)) return 'none'
+  const start = new Date()
+  start.setHours(0, 0, 0, 0)
+  const days = Math.ceil((t - start.getTime()) / 86_400_000)
+  if (days < 0) return 'overdue'
+  if (days === 0) return 'today'
+  if (days <= 7) return 'soon'
+  return 'none'
+}
+
+function matchesFollowFilter(p: CrmProspect, f: FollowFilter): boolean {
+  if (f === 'all') return true
+  const b = followBucket(p.next_follow_up_at)
+  if (f === 'overdue') return b === 'overdue'
+  if (f === 'today') return b === 'today'
+  // "This week" = anything needing attention now through the next 7 days.
+  return b === 'overdue' || b === 'today' || b === 'soon'
+}
 
 function groupByStage(list: CrmProspect[]): BoardData {
   const empty: BoardData = {
@@ -49,18 +82,23 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
   const [flash, setFlash] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [view, setView] = useState<ViewMode>('board')
+  const [followFilter, setFollowFilter] = useState<FollowFilter>('all')
+  const [importing, setImporting] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return prospects
-    return prospects.filter(
-      p =>
+    return prospects.filter(p => {
+      if (!matchesFollowFilter(p, followFilter)) return false
+      if (!q) return true
+      return (
         p.full_name.toLowerCase().includes(q) ||
         p.email.toLowerCase().includes(q) ||
         (p.company ?? '').toLowerCase().includes(q) ||
-        (p.notes ?? '').toLowerCase().includes(q),
-    )
-  }, [prospects, query])
+        (p.notes ?? '').toLowerCase().includes(q)
+      )
+    })
+  }, [prospects, query, followFilter])
 
   const board = useMemo(() => groupByStage(filtered), [filtered])
 
@@ -71,9 +109,67 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
     }, 0)
   }, [prospects])
 
+  // Count of prospects needing follow-up attention now (overdue + due today) —
+  // powers the "Overdue" chip badge so the admin sees the daily work at a glance.
+  const followCounts = useMemo(() => {
+    let overdue = 0, today = 0
+    for (const p of prospects) {
+      const b = followBucket(p.next_follow_up_at)
+      if (b === 'overdue') overdue++
+      else if (b === 'today') today++
+    }
+    return { overdue, today }
+  }, [prospects])
+
   const showFlash = (msg: string) => {
     setFlash(msg)
-    window.setTimeout(() => setFlash(null), 2000)
+    window.setTimeout(() => setFlash(null), 3000)
+  }
+
+  function handleExportCsv() {
+    const csv = prospectsToCsv(prospects)
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `evolved-pros-crm-${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+    showFlash(`Exported ${prospects.length} prospect${prospects.length === 1 ? '' : 's'}`)
+  }
+
+  async function handleImportCsv(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-importing the same filename
+    if (!file) return
+    setImporting(true)
+    try {
+      const text = await file.text()
+      const { rows, skipped, error } = parseProspectsCsv(text)
+      if (error) { showFlash(error); return }
+      if (rows.length === 0) { showFlash(`No valid rows found${skipped ? ` (${skipped} skipped)` : ''}`); return }
+      const res = await fetch('/api/admin/crm/prospects/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rows }),
+      })
+      const json = (await res.json().catch(() => ({}))) as {
+        inserted?: number; skipped?: number; prospects?: CrmProspect[]; error?: string
+      }
+      if (!res.ok) { showFlash(json.error ?? 'Import failed'); return }
+      if (json.prospects?.length) setProspects(list => [...json.prospects!, ...list])
+      const totalSkipped = skipped + (json.skipped ?? 0)
+      showFlash(
+        `Imported ${json.inserted ?? 0} lead${json.inserted === 1 ? '' : 's'}` +
+          (totalSkipped ? ` · ${totalSkipped} skipped` : ''),
+      )
+    } catch {
+      showFlash('Import error — check the CSV format')
+    } finally {
+      setImporting(false)
+    }
   }
 
   const patchProspect = useCallback(
@@ -294,6 +390,46 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
               color: 'var(--text-primary, #1b3c5a)',
             }}
           />
+          {/* CSV export + import (import loads rows into the Lead stage) */}
+          <button
+            type="button"
+            onClick={handleExportCsv}
+            className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] rounded px-3 py-2 transition-all"
+            style={{
+              background: 'var(--bg-surface, #fff)',
+              color: '#1b3c5a',
+              border: '1px solid rgba(27,60,90,0.22)',
+              minHeight: 40,
+            }}
+            title="Download all prospects as CSV"
+          >
+            ↓ Export
+          </button>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importing}
+            className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] rounded px-3 py-2 transition-all"
+            style={{
+              background: 'var(--bg-surface, #fff)',
+              color: '#0ABFA3',
+              border: '1px solid rgba(10,191,163,0.4)',
+              minHeight: 40,
+              cursor: importing ? 'wait' : 'pointer',
+              opacity: importing ? 0.6 : 1,
+            }}
+            title="Import a CSV of leads (name, email required) into the Lead stage"
+          >
+            {importing ? 'Importing…' : '↑ Import CSV → Lead'}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            onChange={handleImportCsv}
+            style={{ display: 'none' }}
+            aria-hidden="true"
+          />
           <button
             type="button"
             onClick={() => {
@@ -306,6 +442,48 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
             + Add Prospect
           </button>
         </div>
+      </div>
+
+      {/* Follow-up quick-filters — triage the pipeline by what needs attention. */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <span
+          className="font-condensed font-bold uppercase tracking-[0.16em] text-[10px]"
+          style={{ color: 'var(--text-tertiary, #7a8a96)' }}
+        >
+          Follow-up
+        </span>
+        {FOLLOW_FILTERS.map(f => {
+          const active = followFilter === f.key
+          const badge = f.key === 'overdue' ? followCounts.overdue : f.key === 'today' ? followCounts.today : 0
+          return (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => setFollowFilter(f.key)}
+              className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] rounded-full px-3 py-1.5 transition-all inline-flex items-center gap-1.5"
+              style={{
+                background: active ? '#1b3c5a' : 'var(--bg-surface, #fff)',
+                color: active ? '#fff' : 'var(--text-secondary, #5a6a76)',
+                border: `1px solid ${active ? '#1b3c5a' : 'rgba(27,60,90,0.18)'}`,
+                cursor: 'pointer',
+                minHeight: 32,
+              }}
+            >
+              {f.label}
+              {badge > 0 && (
+                <span
+                  className="text-[10px] rounded-full px-1.5"
+                  style={{
+                    background: active ? 'rgba(255,255,255,0.22)' : 'rgba(239,14,48,0.12)',
+                    color: active ? '#fff' : '#ef0e30',
+                  }}
+                >
+                  {badge}
+                </span>
+              )}
+            </button>
+          )
+        })}
       </div>
 
       {view === 'board' ? (
@@ -362,7 +540,13 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                       style={{ color: 'var(--text-tertiary, #7a8a96)', margin: 0 }}
                     >
                       {col.desc}
-                      {colValue > 0 ? ` · $${colValue}/mo` : ''}
+                    </p>
+                    {/* Per-column pipeline stat: value/mo · deal count */}
+                    <p
+                      className="font-condensed font-bold text-[11px] mt-1"
+                      style={{ color: colValue > 0 ? '#c9a84c' : 'var(--text-tertiary, #7a8a96)', margin: 0 }}
+                    >
+                      {colValue > 0 ? `$${colValue}/mo · ` : ''}{cards.length} deal{cards.length === 1 ? '' : 's'}
                     </p>
                   </div>
                   <span
