@@ -13,8 +13,8 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
     <div
       style={{
         position: 'relative',
-        backgroundColor: '#111926',
-        border: '1px solid rgba(255,255,255,0.07)',
+        backgroundColor: 'var(--bg-surface)',
+        border: '1px solid var(--border-color)',
         borderRadius: '10px',
         padding: '12px 16px',
         display: 'flex',
@@ -33,7 +33,7 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
           fontSize: '8px',
           letterSpacing: '0.1em',
           textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.2)',
+          color: 'var(--text-tertiary)',
         }}
       >
         Sponsored
@@ -66,11 +66,11 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
 
       {/* Text */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '13px', color: 'white', lineHeight: 1.2, marginBottom: '1px' }}>
+        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '13px', color: 'var(--text-primary)', lineHeight: 1.2, marginBottom: '1px' }}>
           {label}
         </p>
         {ad.sponsor_name && ad.headline && (
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.2 }}>
+          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', color: 'var(--text-tertiary)', lineHeight: 1.2 }}>
             {ad.sponsor_name}
           </p>
         )}

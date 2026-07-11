@@ -62,7 +62,7 @@ export function CompletionClient({ displayName, completedAt, alumniAwardedAt, pi
   }
 
   return (
-    <div style={{ backgroundColor: '#0A0F18', minHeight: '100vh', padding: '40px 20px' }}>
+    <div className="ep-academy-navy" style={{ backgroundColor: '#0A0F18', minHeight: '100vh', padding: '40px 20px' }}>
       <div style={{ maxWidth: 720, margin: '0 auto' }}>
 
         {/* Hero */}

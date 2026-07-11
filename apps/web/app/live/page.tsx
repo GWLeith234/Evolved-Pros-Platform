@@ -56,6 +56,13 @@ export default async function LivePage() {
 
   return (
     <div
+      /* ep-live-navy: /live is a cinematic navy marketing page. Its editorial
+         tokens (--text-strong, --text-1..5, --border-soft*) are white-only with
+         no light-mode override, but --bg-page flips to parchment in light mode —
+         which rendered white text on cream. Lock the whole surface to the dark
+         editorial palette in both themes (see globals.css) so it stays premium
+         and readable regardless of the member's theme choice. */
+      className="ep-live-navy"
       style={{
         minHeight: '100vh',
         background: 'var(--bg-page)',
