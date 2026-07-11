@@ -1,7 +1,15 @@
 'use client'
 
 import type { CrmProspect, CrmStage } from '@/lib/admin/crm'
-import { CRM_STAGE_META, nextUpgradeStage } from '@/lib/admin/crm'
+import {
+  CRM_STAGE_META,
+  communityUpgradeTargets,
+  followUpLabel,
+  formatMoney,
+  nextUpgradeStage,
+  prospectValue,
+  relativeContact,
+} from '@/lib/admin/crm'
 
 export type { CrmProspect }
 
@@ -13,17 +21,6 @@ interface CrmCardProps {
   busy?: boolean
 }
 
-function relativeContact(iso: string | null): string {
-  if (!iso) return 'Never contacted'
-  const t = new Date(iso).getTime()
-  if (Number.isNaN(t)) return 'Never contacted'
-  const days = Math.floor((Date.now() - t) / 86_400_000)
-  if (days <= 0) return 'Contacted today'
-  if (days === 1) return 'Contacted yesterday'
-  if (days < 14) return `Contacted ${days}d ago`
-  return `Contacted ${new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-}
-
 export function CrmCard({
   prospect,
   onMarkContacted,
@@ -32,7 +29,12 @@ export function CrmCard({
   busy = false,
 }: CrmCardProps) {
   const meta = CRM_STAGE_META[prospect.stage]
-  const upgradeTo = nextUpgradeStage(prospect.stage)
+  const value = prospectValue(prospect)
+  const follow = followUpLabel(prospect.next_follow_up_at)
+  const genericUpgrade = nextUpgradeStage(prospect.stage)
+  const communityUpgrades =
+    prospect.stage === 'community' ? communityUpgradeTargets() : []
+
   const mailto = `mailto:${encodeURIComponent(prospect.email)}?subject=${encodeURIComponent(
     `Evolved Pros — following up with ${prospect.full_name.split(' ')[0] ?? ''}`,
   )}`
@@ -74,10 +76,7 @@ export function CrmCard({
           {prospect.status !== 'active' && (
             <span
               className="font-condensed font-bold uppercase text-[9px] tracking-wider px-1.5 py-0.5 rounded shrink-0"
-              style={{
-                background: meta.accentSoft,
-                color: meta.accent,
-              }}
+              style={{ background: meta.accentSoft, color: meta.accent }}
             >
               {prospect.status}
             </span>
@@ -86,12 +85,35 @@ export function CrmCard({
 
         <a
           href={mailto}
-          className="font-condensed text-[12px] block truncate mb-1.5 hover:underline"
+          className="font-condensed text-[12px] block truncate mb-2 hover:underline"
           style={{ color: 'var(--text-secondary, #5a6a76)' }}
           onClick={e => e.stopPropagation()}
         >
           {prospect.email}
         </a>
+
+        {/* Field grid: Stage · Value · Last Contacted · Next Follow-up */}
+        <div
+          className="grid grid-cols-2 gap-x-2 gap-y-1.5 mb-2"
+          style={{
+            padding: '8px 0',
+            borderTop: '1px solid var(--border-color, rgba(27,60,90,0.08))',
+            borderBottom: '1px solid var(--border-color, rgba(27,60,90,0.08))',
+          }}
+        >
+          <Field label="Stage" value={meta.label} color={meta.accent} />
+          <Field
+            label="Value"
+            value={value === 0 ? 'Free' : `${formatMoney(value)}/mo`}
+            color={value > 0 ? '#C9A84C' : undefined}
+          />
+          <Field label="Last contacted" value={relativeContact(prospect.last_contacted_at)} />
+          <Field
+            label="Next follow-up"
+            value={follow.text}
+            color={follow.overdue ? '#ef0e30' : undefined}
+          />
+        </div>
 
         {prospect.notes && (
           <p
@@ -102,26 +124,13 @@ export function CrmCard({
           </p>
         )}
 
-        <p
-          className="font-condensed text-[10px] uppercase tracking-wider mb-2"
-          style={{ color: 'var(--text-tertiary, #7a8a96)', margin: '0 0 8px' }}
-        >
-          {relativeContact(prospect.last_contacted_at)}
-        </p>
-
         {/* Quick actions */}
         <div
-          className="flex flex-wrap gap-1.5 pt-2"
-          style={{ borderTop: '1px solid var(--border-color, rgba(27,60,90,0.08))' }}
+          className="flex flex-wrap gap-1.5"
           onClick={e => e.stopPropagation()}
           onPointerDown={e => e.stopPropagation()}
         >
-          <a
-            href={mailto}
-            className="crm-qa"
-            style={qaStyle(meta.accent)}
-            title="Send email"
-          >
+          <a href={mailto} className="crm-qa" style={qaStyle(meta.accent)} title="Send email">
             Email
           </a>
           <button
@@ -134,21 +143,74 @@ export function CrmCard({
           >
             Contacted
           </button>
-          {upgradeTo && (
-            <button
-              type="button"
-              className="crm-qa"
-              style={qaStyle('#C9A84C')}
-              disabled={busy}
-              onClick={() => onUpgrade(prospect.id, upgradeTo)}
-              title={`Move to ${CRM_STAGE_META[upgradeTo].label}`}
-            >
-              Upgrade
-            </button>
+
+          {/* Community → VIP / Professional quick upgrades */}
+          {communityUpgrades.length > 0 ? (
+            communityUpgrades.map(to => (
+              <button
+                key={to}
+                type="button"
+                className="crm-qa"
+                style={qaStyle(CRM_STAGE_META[to].accent)}
+                disabled={busy}
+                onClick={() => onUpgrade(prospect.id, to)}
+                title={`Upgrade to ${CRM_STAGE_META[to].label} (${CRM_STAGE_META[to].desc})`}
+              >
+                → {CRM_STAGE_META[to].label}
+              </button>
+            ))
+          ) : (
+            genericUpgrade && (
+              <button
+                type="button"
+                className="crm-qa"
+                style={qaStyle('#C9A84C')}
+                disabled={busy}
+                onClick={() => onUpgrade(prospect.id, genericUpgrade)}
+                title={`Move to ${CRM_STAGE_META[genericUpgrade].label}`}
+              >
+                Upgrade
+              </button>
+            )
           )}
         </div>
       </div>
     </article>
+  )
+}
+
+function Field({
+  label,
+  value,
+  color,
+}: {
+  label: string
+  value: string
+  color?: string
+}) {
+  return (
+    <div style={{ minWidth: 0 }}>
+      <p
+        className="font-condensed font-bold uppercase tracking-[0.12em]"
+        style={{
+          margin: 0,
+          fontSize: 9,
+          color: 'var(--text-tertiary, #7a8a96)',
+        }}
+      >
+        {label}
+      </p>
+      <p
+        className="font-condensed font-semibold truncate"
+        style={{
+          margin: '2px 0 0',
+          fontSize: 12,
+          color: color ?? 'var(--text-primary, #1b3c5a)',
+        }}
+      >
+        {value}
+      </p>
+    </div>
   )
 }
 

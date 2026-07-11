@@ -333,6 +333,7 @@ export type Database = {
           full_name: string
           id: string
           last_contacted_at: string | null
+          next_follow_up_at: string | null
           notes: string | null
           phone: string | null
           source: string | null
@@ -340,6 +341,7 @@ export type Database = {
           status: string
           updated_at: string
           user_id: string | null
+          value_monthly: number | null
         }
         Insert: {
           company?: string | null
@@ -349,6 +351,7 @@ export type Database = {
           full_name: string
           id?: string
           last_contacted_at?: string | null
+          next_follow_up_at?: string | null
           notes?: string | null
           phone?: string | null
           source?: string | null
@@ -356,6 +359,7 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string | null
+          value_monthly?: number | null
         }
         Update: {
           company?: string | null
@@ -365,6 +369,7 @@ export type Database = {
           full_name?: string
           id?: string
           last_contacted_at?: string | null
+          next_follow_up_at?: string | null
           notes?: string | null
           phone?: string | null
           source?: string | null
@@ -372,6 +377,7 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string | null
+          value_monthly?: number | null
         }
         Relationships: [
           {

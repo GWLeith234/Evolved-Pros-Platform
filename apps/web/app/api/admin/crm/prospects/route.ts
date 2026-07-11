@@ -3,10 +3,13 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
-import { isCrmStage, isCrmStatus, type CrmStage } from '@/lib/admin/crm'
-
-const SELECT_COLS =
-  'id, full_name, email, phone, company, notes, stage, status, source, last_contacted_at, user_id, created_by, created_at, updated_at'
+import {
+  CRM_SELECT_COLS,
+  CRM_STAGE_META,
+  isCrmStage,
+  isCrmStatus,
+  type CrmStage,
+} from '@/lib/admin/crm'
 
 /** GET /api/admin/crm/prospects — list all prospects (optional ?stage=) */
 export async function GET(request: Request) {
@@ -19,7 +22,7 @@ export async function GET(request: Request) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (adminClient as any)
     .from('crm_prospects')
-    .select(SELECT_COLS)
+    .select(CRM_SELECT_COLS)
     .order('updated_at', { ascending: false })
 
   if (stageParam && isCrmStage(stageParam)) {
@@ -61,6 +64,27 @@ export async function POST(request: Request) {
   const status =
     typeof body.status === 'string' && isCrmStatus(body.status) ? body.status : 'active'
 
+  let valueMonthly: number | null = null
+  if (body.value_monthly !== undefined && body.value_monthly !== null && body.value_monthly !== '') {
+    const n = Number(body.value_monthly)
+    if (!Number.isFinite(n) || n < 0) {
+      return NextResponse.json({ error: 'value_monthly must be a non-negative number' }, { status: 422 })
+    }
+    valueMonthly = n
+  } else {
+    // Default value from stage catalog
+    valueMonthly = CRM_STAGE_META[stage].mrr
+  }
+
+  let nextFollowUp: string | null = null
+  if (typeof body.next_follow_up_at === 'string' && body.next_follow_up_at.trim()) {
+    const d = new Date(body.next_follow_up_at)
+    if (Number.isNaN(d.getTime())) {
+      return NextResponse.json({ error: 'Invalid next_follow_up_at' }, { status: 422 })
+    }
+    nextFollowUp = d.toISOString()
+  }
+
   const row = {
     full_name: fullName,
     email,
@@ -70,6 +94,8 @@ export async function POST(request: Request) {
     source: typeof body.source === 'string' ? body.source.trim() || null : null,
     stage,
     status,
+    value_monthly: valueMonthly,
+    next_follow_up_at: nextFollowUp,
     created_by: auth.userId,
     updated_at: new Date().toISOString(),
   }
@@ -78,7 +104,7 @@ export async function POST(request: Request) {
   const { data, error } = await (adminClient as any)
     .from('crm_prospects')
     .insert(row)
-    .select(SELECT_COLS)
+    .select(CRM_SELECT_COLS)
     .single()
 
   if (error) {

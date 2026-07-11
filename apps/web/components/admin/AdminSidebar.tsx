@@ -22,6 +22,7 @@ const SECTIONS: ReadonlyArray<SidebarSectionData> = [
       { label: 'All Members', href: '/admin/members',  match: /^\/admin\/members/ },
       { label: 'Revenue',     href: '/admin/revenue',  match: /^\/admin\/revenue/ },
       { label: 'Prospects CRM', href: '/admin/crm',    match: /^\/admin\/crm/ },
+      { label: 'Products',    href: '/admin/products', match: /^\/admin\/products/ },
       { label: 'Pipeline',    href: '/admin/pipeline', match: /^\/admin\/pipeline/ },
       { label: 'Broadcast',   href: '/admin/broadcast', match: /^\/admin\/broadcast/ },
     ],

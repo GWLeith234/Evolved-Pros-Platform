@@ -3,10 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
-import { isCrmStage, isCrmStatus } from '@/lib/admin/crm'
-
-const SELECT_COLS =
-  'id, full_name, email, phone, company, notes, stage, status, source, last_contacted_at, user_id, created_by, created_at, updated_at'
+import { CRM_SELECT_COLS, CRM_STAGE_META, isCrmStage, isCrmStatus } from '@/lib/admin/crm'
 
 type RouteCtx = { params: { id: string } }
 
@@ -49,9 +46,35 @@ export async function PATCH(request: Request, { params }: RouteCtx) {
   }
   if (typeof body.stage === 'string' && isCrmStage(body.stage)) {
     patch.stage = body.stage
+    // When stage changes without an explicit value, align value to catalog default
+    if (body.value_monthly === undefined) {
+      patch.value_monthly = CRM_STAGE_META[body.stage].mrr
+    }
   }
   if (typeof body.status === 'string' && isCrmStatus(body.status)) {
     patch.status = body.status
+  }
+  if (body.value_monthly !== undefined) {
+    if (body.value_monthly === null || body.value_monthly === '') {
+      patch.value_monthly = null
+    } else {
+      const n = Number(body.value_monthly)
+      if (!Number.isFinite(n) || n < 0) {
+        return NextResponse.json({ error: 'value_monthly must be a non-negative number' }, { status: 422 })
+      }
+      patch.value_monthly = n
+    }
+  }
+  if (body.next_follow_up_at !== undefined) {
+    if (body.next_follow_up_at === null || body.next_follow_up_at === '') {
+      patch.next_follow_up_at = null
+    } else if (typeof body.next_follow_up_at === 'string') {
+      const d = new Date(body.next_follow_up_at)
+      if (Number.isNaN(d.getTime())) {
+        return NextResponse.json({ error: 'Invalid next_follow_up_at' }, { status: 422 })
+      }
+      patch.next_follow_up_at = d.toISOString()
+    }
   }
 
   // Quick action: mark contacted
@@ -65,11 +88,18 @@ export async function PATCH(request: Request, { params }: RouteCtx) {
     .from('crm_prospects')
     .update(patch)
     .eq('id', id)
-    .select(SELECT_COLS)
+    .select(CRM_SELECT_COLS)
     .maybeSingle()
 
   if (error) {
     console.error('[PATCH /api/admin/crm/prospects/[id]]', error)
+    // Graceful message if migration 061 not applied yet
+    if (error.message?.includes('value_monthly') || error.message?.includes('next_follow_up')) {
+      return NextResponse.json(
+        { error: 'Run migration 061_crm_prospects_value_followup.sql then retry.' },
+        { status: 500 },
+      )
+    }
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
   if (!data) {

@@ -9,7 +9,7 @@ import {
   type CrmStatus,
 } from '@/lib/admin/crm'
 
-interface SavePayload {
+export interface CrmSavePayload {
   id?: string
   full_name: string
   email: string
@@ -19,13 +19,15 @@ interface SavePayload {
   source?: string
   stage: CrmStage
   status: CrmStatus
+  value_monthly?: number | null
+  next_follow_up_at?: string | null
 }
 
 interface CrmProspectModalProps {
   prospect: CrmProspect | null
   busy?: boolean
   onClose: () => void
-  onSave: (payload: SavePayload) => void | Promise<void>
+  onSave: (payload: CrmSavePayload) => void | Promise<void>
   onDelete?: () => void | Promise<void>
 }
 
@@ -53,6 +55,16 @@ const labelStyle: React.CSSProperties = {
   marginBottom: 6,
 }
 
+function toDateInput(iso: string | null): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
 export function CrmProspectModal({
   prospect,
   busy = false,
@@ -69,6 +81,10 @@ export function CrmProspectModal({
   const [source, setSource] = useState(prospect?.source ?? '')
   const [stage, setStage] = useState<CrmStage>(prospect?.stage ?? 'lead')
   const [status, setStatus] = useState<CrmStatus>(prospect?.status ?? 'active')
+  const [valueMonthly, setValueMonthly] = useState(
+    prospect?.value_monthly != null ? String(prospect.value_monthly) : '',
+  )
+  const [followUp, setFollowUp] = useState(toDateInput(prospect?.next_follow_up_at ?? null))
   const [error, setError] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
@@ -82,6 +98,17 @@ export function CrmProspectModal({
       setError('Valid email is required.')
       return
     }
+    let value: number | null | undefined
+    if (valueMonthly.trim() === '') {
+      value = null
+    } else {
+      const n = Number(valueMonthly)
+      if (!Number.isFinite(n) || n < 0) {
+        setError('Value must be a non-negative number.')
+        return
+      }
+      value = n
+    }
     setError(null)
     await onSave({
       id: prospect?.id,
@@ -93,6 +120,8 @@ export function CrmProspectModal({
       source: source.trim() || undefined,
       stage,
       status,
+      value_monthly: value,
+      next_follow_up_at: followUp ? new Date(followUp + 'T12:00:00').toISOString() : null,
     })
   }
 
@@ -119,7 +148,7 @@ export function CrmProspectModal({
           background: '#fff',
           borderRadius: 8,
           width: '100%',
-          maxWidth: 480,
+          maxWidth: 500,
           maxHeight: '90vh',
           overflowY: 'auto',
           padding: 24,
@@ -162,95 +191,68 @@ export function CrmProspectModal({
 
         <form onSubmit={e => void submit(e)} className="space-y-3">
           <div>
-            <label style={labelStyle} htmlFor="crm-name">
-              Full name
-            </label>
-            <input
-              id="crm-name"
-              value={fullName}
-              onChange={e => setFullName(e.target.value)}
-              style={inputStyle}
-              required
-              autoFocus
-            />
+            <label style={labelStyle} htmlFor="crm-name">Full name</label>
+            <input id="crm-name" value={fullName} onChange={e => setFullName(e.target.value)} style={inputStyle} required autoFocus />
           </div>
           <div>
-            <label style={labelStyle} htmlFor="crm-email">
-              Email
-            </label>
-            <input
-              id="crm-email"
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              style={inputStyle}
-              required
-            />
+            <label style={labelStyle} htmlFor="crm-email">Email</label>
+            <input id="crm-email" type="email" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} required />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label style={labelStyle} htmlFor="crm-phone">
-                Phone
-              </label>
-              <input
-                id="crm-phone"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                style={inputStyle}
-              />
+              <label style={labelStyle} htmlFor="crm-phone">Phone</label>
+              <input id="crm-phone" value={phone} onChange={e => setPhone(e.target.value)} style={inputStyle} />
             </div>
             <div>
-              <label style={labelStyle} htmlFor="crm-company">
-                Company
-              </label>
-              <input
-                id="crm-company"
-                value={company}
-                onChange={e => setCompany(e.target.value)}
-                style={inputStyle}
-              />
+              <label style={labelStyle} htmlFor="crm-company">Company</label>
+              <input id="crm-company" value={company} onChange={e => setCompany(e.target.value)} style={inputStyle} />
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label style={labelStyle} htmlFor="crm-stage">
-                Stage
-              </label>
-              <select
-                id="crm-stage"
-                value={stage}
-                onChange={e => setStage(e.target.value as CrmStage)}
-                style={inputStyle}
-              >
+              <label style={labelStyle} htmlFor="crm-stage">Stage</label>
+              <select id="crm-stage" value={stage} onChange={e => setStage(e.target.value as CrmStage)} style={inputStyle}>
                 {CRM_COLUMNS.map(c => (
-                  <option key={c.stage} value={c.stage}>
-                    {c.label} — {c.desc}
-                  </option>
+                  <option key={c.stage} value={c.stage}>{c.label} — {c.desc}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label style={labelStyle} htmlFor="crm-status">
-                Status
-              </label>
-              <select
-                id="crm-status"
-                value={status}
-                onChange={e => setStatus(e.target.value as CrmStatus)}
-                style={inputStyle}
-              >
+              <label style={labelStyle} htmlFor="crm-status">Status</label>
+              <select id="crm-status" value={status} onChange={e => setStatus(e.target.value as CrmStatus)} style={inputStyle}>
                 {CRM_STATUSES.map(s => (
-                  <option key={s} value={s}>
-                    {s.charAt(0).toUpperCase() + s.slice(1)}
-                  </option>
+                  <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
                 ))}
               </select>
             </div>
           </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label style={labelStyle} htmlFor="crm-value">Value ($/mo)</label>
+              <input
+                id="crm-value"
+                type="number"
+                min={0}
+                step={1}
+                value={valueMonthly}
+                onChange={e => setValueMonthly(e.target.value)}
+                placeholder="Stage default if blank"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label style={labelStyle} htmlFor="crm-followup">Next follow-up</label>
+              <input
+                id="crm-followup"
+                type="date"
+                value={followUp}
+                onChange={e => setFollowUp(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+          </div>
           <div>
-            <label style={labelStyle} htmlFor="crm-source">
-              Source
-            </label>
+            <label style={labelStyle} htmlFor="crm-source">Source</label>
             <input
               id="crm-source"
               value={source}
@@ -260,9 +262,7 @@ export function CrmProspectModal({
             />
           </div>
           <div>
-            <label style={labelStyle} htmlFor="crm-notes">
-              Notes
-            </label>
+            <label style={labelStyle} htmlFor="crm-notes">Notes</label>
             <textarea
               id="crm-notes"
               value={notes}
@@ -274,9 +274,7 @@ export function CrmProspectModal({
           </div>
 
           {error && (
-            <p className="font-body text-[13px]" style={{ color: '#ef0e30', margin: 0 }}>
-              {error}
-            </p>
+            <p className="font-body text-[13px]" style={{ color: '#ef0e30', margin: 0 }}>{error}</p>
           )}
 
           <div className="flex flex-wrap items-center justify-between gap-2 pt-2">

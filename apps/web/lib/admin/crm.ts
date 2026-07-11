@@ -24,12 +24,13 @@ export interface CrmStageMeta {
   stage: CrmStage
   label: string
   desc: string
-  /** Monthly value estimate for pipeline MRR display */
+  /** Default monthly value ($) for pipeline estimates */
   mrr: number
   accent: string
   accentSoft: string
 }
 
+/** Catalog prices used by CRM + Products admin (user-facing membership ladder). */
 export const CRM_STAGE_META: Record<CrmStage, CrmStageMeta> = {
   lead: {
     stage: 'lead',
@@ -75,6 +76,9 @@ export const CRM_STAGE_META: Record<CrmStage, CrmStageMeta> = {
 
 export const CRM_COLUMNS: CrmStageMeta[] = CRM_STAGES.map(s => CRM_STAGE_META[s])
 
+export const CRM_SELECT_COLS =
+  'id, full_name, email, phone, company, notes, stage, status, source, last_contacted_at, next_follow_up_at, value_monthly, user_id, created_by, created_at, updated_at'
+
 export interface CrmProspect {
   id: string
   full_name: string
@@ -86,6 +90,9 @@ export interface CrmProspect {
   status: CrmStatus
   source: string | null
   last_contacted_at: string | null
+  next_follow_up_at: string | null
+  /** Explicit deal value; falls back to stage default when null */
+  value_monthly: number | null
   user_id: string | null
   created_by: string | null
   created_at: string
@@ -100,10 +107,89 @@ export function isCrmStatus(v: unknown): v is CrmStatus {
   return typeof v === 'string' && (CRM_STATUSES as readonly string[]).includes(v)
 }
 
-/** Next paid stage for the "Upgrade" quick action. */
+/** Effective monthly value for a prospect. */
+export function prospectValue(p: Pick<CrmProspect, 'value_monthly' | 'stage'>): number {
+  if (typeof p.value_monthly === 'number' && Number.isFinite(p.value_monthly)) {
+    return p.value_monthly
+  }
+  return CRM_STAGE_META[p.stage]?.mrr ?? 0
+}
+
+export function formatMoney(n: number): string {
+  if (n === 0) return 'Free'
+  return `$${n.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
+}
+
+export function formatShortDate(iso: string | null): string {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+export function relativeContact(iso: string | null): string {
+  if (!iso) return 'Never'
+  const t = new Date(iso).getTime()
+  if (Number.isNaN(t)) return 'Never'
+  const days = Math.floor((Date.now() - t) / 86_400_000)
+  if (days <= 0) return 'Today'
+  if (days === 1) return 'Yesterday'
+  if (days < 14) return `${days}d ago`
+  return formatShortDate(iso)
+}
+
+export function followUpLabel(iso: string | null): { text: string; overdue: boolean } {
+  if (!iso) return { text: 'Not set', overdue: false }
+  const t = new Date(iso).getTime()
+  if (Number.isNaN(t)) return { text: 'Not set', overdue: false }
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
+  const days = Math.ceil((t - startOfToday.getTime()) / 86_400_000)
+  if (days < 0) return { text: `${Math.abs(days)}d overdue`, overdue: true }
+  if (days === 0) return { text: 'Due today', overdue: true }
+  if (days === 1) return { text: 'Tomorrow', overdue: false }
+  if (days < 14) return { text: `In ${days}d`, overdue: false }
+  return { text: formatShortDate(iso), overdue: false }
+}
+
+/** Next paid stage for generic Upgrade. */
 export function nextUpgradeStage(stage: CrmStage): CrmStage | null {
   if (stage === 'lead' || stage === 'prospect') return 'community'
   if (stage === 'community') return 'vip'
   if (stage === 'vip') return 'professional'
   return null
+}
+
+/** Paid upgrade targets from Community (VIP + Professional). */
+export function communityUpgradeTargets(): CrmStage[] {
+  return ['vip', 'professional']
+}
+
+export function parseCrmProspect(r: Record<string, unknown>): CrmProspect | null {
+  if (typeof r.id !== 'string' || typeof r.email !== 'string') return null
+  const valueRaw = r.value_monthly
+  const value =
+    typeof valueRaw === 'number'
+      ? valueRaw
+      : typeof valueRaw === 'string' && valueRaw !== ''
+        ? Number(valueRaw)
+        : null
+  return {
+    id: r.id,
+    full_name: String(r.full_name ?? ''),
+    email: String(r.email ?? ''),
+    phone: (r.phone as string | null) ?? null,
+    company: (r.company as string | null) ?? null,
+    notes: (r.notes as string | null) ?? null,
+    stage: isCrmStage(r.stage) ? r.stage : 'lead',
+    status: isCrmStatus(r.status) ? r.status : 'active',
+    source: (r.source as string | null) ?? null,
+    last_contacted_at: (r.last_contacted_at as string | null) ?? null,
+    next_follow_up_at: (r.next_follow_up_at as string | null) ?? null,
+    value_monthly: value != null && Number.isFinite(value) ? value : null,
+    user_id: (r.user_id as string | null) ?? null,
+    created_by: (r.created_by as string | null) ?? null,
+    created_at: String(r.created_at ?? new Date().toISOString()),
+    updated_at: String(r.updated_at ?? new Date().toISOString()),
+  }
 }
