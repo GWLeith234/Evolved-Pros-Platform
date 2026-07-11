@@ -10,8 +10,12 @@ import { Composer } from './Composer'
 import { FilterRail } from './FilterRail'
 import type { KindFilter, Pillar, SortBy } from './FilterRail'
 import type { Post, Reply, CommunityAd, WeeklyLeaderboardEntry } from '@/lib/community/types'
-import { WeeklyLeaderboardRail } from './WeeklyLeaderboardRail'
-import { HomeSponsorAdClient } from '@/components/home/HomeSponsorAdClient'
+import {
+  CommunityRightRail,
+  type RailAcademyContinue,
+  type RailPodcastEpisode,
+} from './CommunityRightRail'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 function getInitials(name: string | null | undefined): string {
   if (!name) return '?'
@@ -35,6 +39,9 @@ interface UnifiedCommunityPageProps {
   }
   defaultChannelId: string
   weeklyLeaderboard: WeeklyLeaderboardEntry[]
+  latestEpisode?: RailPodcastEpisode | null
+  academyContinue?: RailAcademyContinue
+  railSponsors?: SponsorAd[]
 }
 
 export function UnifiedCommunityPage({
@@ -46,6 +53,9 @@ export function UnifiedCommunityPage({
   currentUser,
   defaultChannelId,
   weeklyLeaderboard,
+  latestEpisode = null,
+  academyContinue = null,
+  railSponsors = [],
 }: UnifiedCommunityPageProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts)
   const [cursor, setCursor] = useState<string | null>(initialCursor)
@@ -415,26 +425,13 @@ export function UnifiedCommunityPage({
           )}
           </div>
 
-          {/* Right rail — weekly leaderboard + sponsor ad (SPRINT-K) */}
-          <div style={{ minWidth: 0 }}>
-            <div
-              style={{
-                position: 'sticky',
-                top: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 16,
-              }}
-            >
-              <WeeklyLeaderboardRail entries={weeklyLeaderboard} />
-              {/* Sidebar sponsor — picks the last ad so it differs from the
-                  first in-feed slot when fetchCommunityAds returns >1 row. */}
-              {ads.length > 0 && <FeedAdUnit ad={ads[ads.length - 1]} />}
-              {/* SPRINT P1 — book ad. Client fallback fetch of platform_ads
-                  (home SSR path passes preloaded ads; community stays client). */}
-              <HomeSponsorAdClient />
-            </div>
-          </div>
+          {/* Right rail — polls / podcast / academy / sponsors / leaderboard */}
+          <CommunityRightRail
+            weeklyLeaderboard={weeklyLeaderboard}
+            latestEpisode={latestEpisode}
+            academyContinue={academyContinue}
+            sponsors={railSponsors}
+          />
         </div>
       </div>
     </div>

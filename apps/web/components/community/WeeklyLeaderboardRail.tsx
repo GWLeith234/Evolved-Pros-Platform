@@ -13,12 +13,14 @@ const FB = 'Barlow, sans-serif'
 const FBC = 'Barlow Condensed, sans-serif'
 const FBN = 'Bebas Neue, sans-serif'
 
-const SURFACE = '#111926'
-const BORDER = '#1E2535'
-const GOLD = '#C9A84C'
-const TEAL = '#0ABFA3'
-const TEXT = 'rgba(255,255,255,0.85)'
-const MUTED = 'rgba(255,255,255,0.45)'
+// Theme-aware tokens (community right rail dual-theme)
+const SURFACE = 'var(--bg-surface, #111926)'
+const BORDER = 'var(--border-color, #1E2535)'
+const GOLD = 'var(--brand-gold, #C9A84C)'
+const TEAL = 'var(--brand-teal, #0ABFA3)'
+const TEXT = 'var(--text-primary, rgba(255,255,255,0.85))'
+const MUTED = 'var(--text-tertiary, rgba(255,255,255,0.45))'
+const TITLE = 'var(--text-primary, #fff)'
 
 function getInitials(name: string): string {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() || '?'
@@ -73,7 +75,7 @@ export function WeeklyLeaderboardRail({ entries }: WeeklyLeaderboardRailProps) {
               fontSize: 22,
               letterSpacing: '0.04em',
               textTransform: 'uppercase',
-              color: '#fff',
+              color: TITLE,
               lineHeight: 1,
             }}
           >
