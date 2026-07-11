@@ -1,8 +1,10 @@
 import { stripTrailingArrow } from '@/lib/brand'
 import {
   ADCELLERANT_ASSETS,
-  isAdCellerantAd,
-} from '@/lib/sponsors/adcellerant'
+  XPR_MEDIA_ASSETS,
+  premiumPartnerKind,
+  type PremiumPartnerKind,
+} from '@/lib/sponsors/partners'
 
 export type SponsorAd = {
   id: string
@@ -22,9 +24,6 @@ export const SPONSOR_AD_COLUMNS =
 /** Brand-red accent for Evolution Partner cards. */
 export const SPONSOR_RED = '#C9302A'
 
-/**
- * Red microphone disc — brand glyph fallback when a partner has no image.
- */
 function MicGlyph() {
   return (
     <span
@@ -54,25 +53,72 @@ function MicGlyph() {
   )
 }
 
+type PremiumConfig = {
+  brand: string
+  fallbackHref: string
+  fallbackHeadline: string
+  fallbackSub: string
+  fallbackCta: string
+  logoSrc: string
+  logoAlt: string
+  /** Photo hero (AdCellerant) or null for gradient hero (XPR). */
+  heroImage: string | null
+  heroGradient: string
+}
+
+const PREMIUM: Record<Exclude<PremiumPartnerKind, null>, PremiumConfig> = {
+  adcellerant: {
+    brand: 'AdCellerant',
+    fallbackHref: 'https://www.adcellerant.com/',
+    fallbackHeadline: '#1 Largest Advertising Agency in Denver',
+    fallbackSub: 'Recognized by the Denver Business Journal',
+    fallbackCta: 'Partner with Us',
+    logoSrc: ADCELLERANT_ASSETS.logoWhite,
+    logoAlt: 'AdCellerant',
+    heroImage: ADCELLERANT_ASSETS.skyline,
+    heroGradient:
+      'linear-gradient(180deg, rgba(10,15,24,0.15) 0%, rgba(10,15,24,0.55) 70%, rgba(10,15,24,0.92) 100%)',
+  },
+  xpr: {
+    brand: 'XPR Media',
+    fallbackHref: 'https://www.xpr.media/',
+    fallbackHeadline: 'Amplify Your Story Across 1,000+ Premium Sites',
+    fallbackSub:
+      'Content syndication that puts PR, publishers, and brands in front of the right audience — at scale.',
+    fallbackCta: 'Expand Your Reach',
+    logoSrc: XPR_MEDIA_ASSETS.logo,
+    logoAlt: 'XPR Media',
+    heroImage: null,
+    heroGradient:
+      'linear-gradient(135deg, #0A0F18 0%, #1A2332 42%, #2A1A1A 72%, #C9302A 140%)',
+  },
+}
+
 /**
- * Premium AdCellerant Evolution Partner card — Denver skyline hero,
- * white logo, #1 DBJ claim, theme-aware body, red accents.
+ * Shared premium Evolution Partner shell — skyline or gradient hero,
+ * brand logo, strong headline, tagline, red CTA. Theme-aware body.
  * Pure presentation (no hooks / event handlers).
  */
-function AdCellerantPremiumCard({ ad }: { ad: SponsorAd }) {
-  const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? 'https://www.adcellerant.com/'
-  const headline = ad.headline ?? '#1 Largest Advertising Agency in Denver'
-  const subtext = ad.endorsement_quote ?? 'Recognized by the Denver Business Journal'
-  const cta = stripTrailingArrow(ad.cta_text ?? 'Partner with Us')
+function PremiumPartnerCard({
+  ad,
+  kind,
+}: {
+  ad: SponsorAd
+  kind: Exclude<PremiumPartnerKind, null>
+}) {
+  const cfg = PREMIUM[kind]
+  const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? cfg.fallbackHref
+  const headline = ad.headline ?? cfg.fallbackHeadline
+  const subtext = ad.endorsement_quote ?? cfg.fallbackSub
+  const cta = stripTrailingArrow(ad.cta_text ?? cfg.fallbackCta)
 
   const card = (
-    <div className="ep-sponsor-card ep-adcellerant-card relative flex h-full flex-col overflow-hidden rounded-2xl border transition-[transform,box-shadow,border-color] duration-300 ease-out will-change-transform group-hover:scale-[1.015] group-hover:shadow-[0_14px_40px_rgba(201,48,42,0.18)]">
+    <div className="ep-sponsor-card ep-premium-partner-card relative flex h-full flex-col overflow-hidden rounded-2xl border transition-[transform,box-shadow,border-color] duration-300 ease-out will-change-transform group-hover:scale-[1.015] group-hover:shadow-[0_14px_40px_rgba(201,48,42,0.18)]">
       <span
         aria-hidden
         className="ep-sponsor-wash pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
       />
 
-      {/* Badge */}
       <div
         className="absolute right-5 top-3 z-[2] rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] text-white shadow-sm"
         style={{
@@ -84,39 +130,65 @@ function AdCellerantPremiumCard({ ad }: { ad: SponsorAd }) {
         Evolution Partner
       </div>
 
-      {/* Skyline hero */}
+      {/* Hero */}
       <div className="relative h-[132px] w-full shrink-0 overflow-hidden">
+        {cfg.heroImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={cfg.heroImage}
+            alt=""
+            aria-hidden
+            width={792}
+            height={198}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+          />
+        ) : (
+          <div
+            aria-hidden
+            className="h-full w-full transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+            style={{ background: cfg.heroGradient }}
+          >
+            {/* Subtle network grid for XPR */}
+            <svg
+              className="absolute inset-0 h-full w-full opacity-25"
+              xmlns="http://www.w3.org/2000/svg"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <pattern id="xpr-grid" width="28" height="28" patternUnits="userSpaceOnUse">
+                  <path d="M28 0H0V28" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="0.5" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#xpr-grid)" />
+              <circle cx="18%" cy="40%" r="3" fill="#C9302A" opacity="0.7" />
+              <circle cx="42%" cy="28%" r="2" fill="#fff" opacity="0.35" />
+              <circle cx="68%" cy="55%" r="2.5" fill="#C9302A" opacity="0.55" />
+              <circle cx="82%" cy="32%" r="2" fill="#fff" opacity="0.3" />
+              <line x1="18%" y1="40%" x2="42%" y2="28%" stroke="rgba(255,255,255,0.25)" strokeWidth="1" />
+              <line x1="42%" y1="28%" x2="68%" y2="55%" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+              <line x1="68%" y1="55%" x2="82%" y2="32%" stroke="rgba(201,48,42,0.45)" strokeWidth="1" />
+            </svg>
+          </div>
+        )}
+        {cfg.heroImage && (
+          <div
+            aria-hidden
+            className="absolute inset-0"
+            style={{ background: cfg.heroGradient }}
+          />
+        )}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={ADCELLERANT_ASSETS.skyline}
-          alt=""
-          aria-hidden
-          width={792}
-          height={198}
+          src={cfg.logoSrc}
+          alt={cfg.logoAlt}
+          width={180}
+          height={34}
           loading="lazy"
           decoding="async"
-          className="h-full w-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+          className="absolute bottom-4 left-5 h-7 w-auto max-w-[180px] object-contain drop-shadow-md"
         />
-        <div
-          aria-hidden
-          className="absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(10,15,24,0.15) 0%, rgba(10,15,24,0.55) 70%, rgba(10,15,24,0.92) 100%)',
-          }}
-        />
-        {/* White logo over skyline */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={ADCELLERANT_ASSETS.logoWhite}
-          alt="AdCellerant"
-          width={160}
-          height={30}
-          loading="lazy"
-          decoding="async"
-          className="absolute bottom-4 left-5 h-7 w-auto max-w-[160px] object-contain drop-shadow-md"
-        />
-        {/* Red accent bar at hero base */}
         <span
           aria-hidden
           className="absolute bottom-0 left-0 right-0 h-[3px]"
@@ -124,7 +196,6 @@ function AdCellerantPremiumCard({ ad }: { ad: SponsorAd }) {
         />
       </div>
 
-      {/* Copy + CTA — theme-aware surface */}
       <div className="relative z-[1] flex flex-1 flex-col gap-4 p-5 pt-4">
         <div className="ep-evolve-bars" aria-hidden style={{ left: 20, bottom: 72 }}>
           <span />
@@ -140,7 +211,7 @@ function AdCellerantPremiumCard({ ad }: { ad: SponsorAd }) {
               color: SPONSOR_RED,
             }}
           >
-            AdCellerant
+            {cfg.brand}
           </p>
           <h4
             className="mt-1.5 m-0 text-[1.15rem] font-bold leading-[1.25]"
@@ -188,7 +259,7 @@ function AdCellerantPremiumCard({ ad }: { ad: SponsorAd }) {
       target="_blank"
       rel="noopener noreferrer sponsored"
       className="group block h-full pt-3 no-underline"
-      aria-label={`${headline} — AdCellerant Evolution Partner`}
+      aria-label={`${headline} — ${cfg.brand} Evolution Partner`}
     >
       {card}
     </a>
@@ -196,16 +267,13 @@ function AdCellerantPremiumCard({ ad }: { ad: SponsorAd }) {
 }
 
 /**
- * Centered premium Evolution Partner card.
- * - Dual-theme via CSS vars / ep-sponsor-card
- * - CSS-only hover (no React state) + evolution bars micro-animation
- * - Server-component safe (no hooks)
- * - AdCellerant ads render the skyline premium layout automatically
+ * Evolution Partner card router.
+ * Flagship partners (AdCellerant, XPR Media) get the premium hero layout;
+ * other ads use the centered logo + tagline card.
  */
 export function SponsorAdCard({ ad }: { ad: SponsorAd }) {
-  if (isAdCellerantAd(ad)) {
-    return <AdCellerantPremiumCard ad={ad} />
-  }
+  const kind = premiumPartnerKind(ad)
+  if (kind) return <PremiumPartnerCard ad={ad} kind={kind} />
 
   const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
   const name = ad.sponsor_name ?? ad.tool_name ?? 'Evolution Partner'
@@ -314,7 +382,6 @@ export function SponsorAdCard({ ad }: { ad: SponsorAd }) {
   return <div className="group h-full pt-3">{card}</div>
 }
 
-/** Shared "Sponsored" eyebrow + divider used above each sponsor placement. */
 export function SponsoredEyebrow() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
@@ -355,10 +422,6 @@ export function SponsoredEyebrow() {
   )
 }
 
-/**
- * Sidebar sponsor — pure presentation. Pass `ad` from a server fetch on /home
- * (preferred) or from HomeSponsorAdClient when a client fallback is needed.
- */
 export function HomeSponsorAd({ ad }: { ad: SponsorAd | null }) {
   if (!ad) return null
 
@@ -370,10 +433,6 @@ export function HomeSponsorAd({ ad }: { ad: SponsorAd | null }) {
   )
 }
 
-/**
- * Two-up (or single) sponsor row. Pure presentation — data should be
- * server-fetched and passed in to avoid client waterfalls on /home.
- */
 export function HomeSponsorRow({ ads }: { ads: SponsorAd[] }) {
   if (!ads.length) return null
 
