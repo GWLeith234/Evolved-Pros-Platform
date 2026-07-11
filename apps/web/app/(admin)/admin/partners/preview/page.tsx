@@ -8,6 +8,11 @@ import type { Sponsor } from '@/components/sponsors/types'
 
 export const metadata: Metadata = { title: 'Partners — Card preview' }
 
+// Opt out of static generation: this admin-only card gallery renders client
+// sponsor components and has no need to be prerendered — forcing dynamic
+// rendering avoids the build-time static-generation timeout.
+export const dynamic = 'force-dynamic'
+
 const NOW = '2026-05-05T00:00:00.000Z'
 
 const MOCK: Sponsor = {

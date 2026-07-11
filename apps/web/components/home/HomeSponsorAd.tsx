@@ -47,33 +47,24 @@ function MicGlyph() {
 /**
  * Centered premium Evolution Partner card — shared by the under-tiles row and
  * the sidebar placement. Red badge, red mic glyph, red CTA, and a soft
- * scale + red-glow hover. Every surface/text color binds to a theme token so
- * the card reads identically in dark and light modes (SPRINT-1); the red
- * accents are the only fixed brand colors, so they stand out without
- * overwhelming the neutral card body.
+ * scale + red-glow hover driven ENTIRELY by Tailwind `group-hover` utilities
+ * (no onMouseEnter/onMouseLeave, no local state), so the card is purely
+ * presentational and safe to render from Server Components / during static
+ * generation — passing event handlers to a client-component boundary is what
+ * tripped the "Event handlers cannot be passed to Client Component props"
+ * build error. Every surface/text color binds to a theme token so the card
+ * reads identically in dark and light modes (SPRINT-1); the red accents are
+ * the only fixed brand colors, so they stand out without overwhelming the
+ * neutral card body.
  */
 export function SponsorAdCard({ ad }: { ad: SponsorAd; accent?: string }) {
-  const [hover, setHover] = useState(false)
   const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
   const name = ad.sponsor_name ?? ad.tool_name ?? 'Evolution Partner'
   const tagline = ad.headline ?? ad.endorsement_quote ?? name
   const cta = stripTrailingArrow(ad.cta_text ?? 'Learn More')
 
   const card = (
-    <div
-      className="relative flex h-full flex-col rounded-2xl border p-6 pt-8"
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        background: 'var(--bg-surface)',
-        borderColor: hover ? 'rgba(201,48,42,0.55)' : 'rgba(201,48,42,0.28)',
-        transform: hover ? 'scale(1.02)' : 'scale(1)',
-        boxShadow: hover
-          ? '0 18px 40px -12px rgba(201,48,42,0.28)'
-          : '0 1px 2px rgba(0,0,0,0.04)',
-        transition: 'transform 300ms ease, box-shadow 300ms ease, border-color 300ms ease',
-      }}
-    >
+    <div className="relative flex h-full flex-col rounded-2xl border border-red/30 bg-surface p-6 pt-8 shadow-sm transition-all duration-300 group-hover:scale-[1.02] group-hover:border-red/60 group-hover:shadow-2xl group-hover:shadow-red/20">
       {/* Evolution Partner Badge */}
       <div
         className="absolute -top-3 right-6 rounded-full px-3 py-1 text-xs text-white"
@@ -94,8 +85,7 @@ export function SponsorAdCard({ ad }: { ad: SponsorAd; accent?: string }) {
           <img
             src={ad.image_url}
             alt={name}
-            className="h-20 w-auto object-contain transition-opacity"
-            style={{ opacity: hover ? 1 : 0.9 }}
+            className="h-20 w-auto object-contain opacity-90 transition-opacity group-hover:opacity-100"
           />
         ) : (
           <MicGlyph />
@@ -103,18 +93,14 @@ export function SponsorAdCard({ ad }: { ad: SponsorAd; accent?: string }) {
 
         <div>
           <h4
-            className="text-xl font-semibold"
-            style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
-              letterSpacing: '0.04em',
-              color: 'var(--text-primary)',
-            }}
+            className="text-xl font-semibold text-primary"
+            style={{ fontFamily: '"Barlow Condensed", sans-serif', letterSpacing: '0.04em' }}
           >
             {name}
           </h4>
           <p
-            className="mt-2 text-sm leading-relaxed"
-            style={{ fontFamily: '"Barlow", sans-serif', color: 'var(--text-secondary)' }}
+            className="mt-2 text-sm leading-relaxed text-secondary"
+            style={{ fontFamily: '"Barlow", sans-serif' }}
           >
             {tagline}
           </p>
@@ -123,14 +109,12 @@ export function SponsorAdCard({ ad }: { ad: SponsorAd; accent?: string }) {
 
       <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--border-color)' }}>
         <div
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm text-white"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red px-6 py-3 text-sm text-white transition-colors group-hover:bg-[#b12923]"
           style={{
-            backgroundColor: hover ? '#B12923' : SPONSOR_RED,
             fontFamily: '"Barlow Condensed", sans-serif',
             fontWeight: 800,
             letterSpacing: '0.14em',
             textTransform: 'uppercase',
-            transition: 'background-color 200ms ease',
           }}
         >
           {cta}
@@ -146,14 +130,14 @@ export function SponsorAdCard({ ad }: { ad: SponsorAd; accent?: string }) {
         href={href}
         target="_blank"
         rel="noopener noreferrer sponsored"
-        className="block h-full pt-3 no-underline"
+        className="group block h-full pt-3 no-underline"
       >
         {card}
       </a>
     )
   }
 
-  return <div className="h-full pt-3">{card}</div>
+  return <div className="group h-full pt-3">{card}</div>
 }
 
 /** Shared "Sponsored" eyebrow + divider used above each sponsor placement. */
