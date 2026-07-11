@@ -1,6 +1,8 @@
 import { stripTrailingArrow } from '@/lib/brand'
 import {
   ADCELLERANT_ASSETS,
+  EVOLVEX360_ASSETS,
+  EVOLVEX360_LOCATIONS,
   VENDASTA_ASSETS,
   XPR_MEDIA_ASSETS,
   premiumPartnerKind,
@@ -62,9 +64,11 @@ type PremiumConfig = {
   fallbackCta: string
   logoSrc: string
   logoAlt: string
-  /** Photo hero (AdCellerant) or null for gradient hero (XPR). */
+  /** Photo/SVG hero or null for CSS gradient hero (XPR). */
   heroImage: string | null
   heroGradient: string
+  /** Optional locations / meta line under the tagline. */
+  footerNote?: string
 }
 
 const PREMIUM: Record<Exclude<PremiumPartnerKind, null>, PremiumConfig> = {
@@ -92,6 +96,20 @@ const PREMIUM: Record<Exclude<PremiumPartnerKind, null>, PremiumConfig> = {
     heroImage: VENDASTA_ASSETS.hero,
     heroGradient:
       'linear-gradient(180deg, rgba(10,47,56,0.2) 0%, rgba(10,37,48,0.55) 65%, rgba(10,37,48,0.92) 100%)',
+  },
+  evolvex360: {
+    brand: 'EvolveX360',
+    fallbackHref: 'https://www.evolvex360.com/',
+    fallbackHeadline: 'Unlock the Future with AI Solutions from EvolveX360',
+    fallbackSub:
+      'AI-powered business efficiency and growth — strategy, media, and execution that open new markets worldwide.',
+    fallbackCta: 'Unlock AI Growth',
+    logoSrc: EVOLVEX360_ASSETS.logoWhite,
+    logoAlt: 'EvolveX360',
+    heroImage: EVOLVEX360_ASSETS.hero,
+    heroGradient:
+      'linear-gradient(180deg, rgba(14,12,42,0.15) 0%, rgba(14,12,42,0.55) 65%, rgba(10,15,24,0.92) 100%)',
+    footerNote: EVOLVEX360_LOCATIONS,
   },
   xpr: {
     brand: 'XPR Media',
@@ -246,6 +264,17 @@ function PremiumPartnerCard({
           >
             {subtext}
           </p>
+          {cfg.footerNote && (
+            <p
+              className="mt-3 m-0 text-[10px] font-semibold uppercase leading-snug tracking-[0.06em]"
+              style={{
+                fontFamily: '"Barlow Condensed", sans-serif',
+                color: 'var(--text-tertiary, rgba(255,255,255,0.4))',
+              }}
+            >
+              {cfg.footerNote}
+            </p>
+          )}
         </div>
 
         <div
@@ -465,7 +494,7 @@ export function HomeSponsorRow({ ads }: { ads: SponsorAd[] }) {
     <section aria-label="Sponsored">
       <SponsoredEyebrow />
       <div
-        className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3"
+        className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4"
         style={{ width: '100%', maxWidth: 1440, margin: '0 auto', paddingTop: 4 }}
       >
         {ads.map(ad => (

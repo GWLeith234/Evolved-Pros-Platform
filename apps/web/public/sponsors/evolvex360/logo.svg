@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="EvolveX360">
+  <title>EvolveX360</title>
+
+  <defs>
+    <!-- Background gradient — deep navy with a subtle violet wash -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e0c2a"/>
+      <stop offset="100%" stop-color="#15103a"/>
+    </linearGradient>
+
+    <!-- Center glow behind the E, pulled high so the wordmark stays clean -->
+    <radialGradient id="glow" cx="50%" cy="35%" r="55%">
+      <stop offset="0%" stop-color="#6a2bd9" stop-opacity="0.55"/>
+      <stop offset="60%" stop-color="#6a2bd9" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#6a2bd9" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Orbital ring sweep — cyan ↔ violet ↔ cyan for that brand-family feel -->
+    <linearGradient id="orbit" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#0ab5dc"/>
+      <stop offset="50%" stop-color="#a370ff"/>
+      <stop offset="100%" stop-color="#0ab5dc"/>
+    </linearGradient>
+
+    <!-- E fill — top-down purple ramp gives the chunky 3D feel -->
+    <linearGradient id="eFill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a14eff"/>
+      <stop offset="60%" stop-color="#6a2bd9"/>
+      <stop offset="100%" stop-color="#34007c"/>
+    </linearGradient>
+
+    <!-- E top highlight — narrow band of white at the very top edge -->
+    <linearGradient id="eHi" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.45"/>
+      <stop offset="40%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Pink-violet edge stroke that traces the E's outline -->
+    <linearGradient id="eStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+
+    <!-- Soft drop-shadow filter for the E -->
+    <filter id="eShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="3" result="offsetblur"/>
+      <feFlood flood-color="#000" flood-opacity="0.45"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Rounded-square background -->
+  <rect x="0" y="0" width="320" height="320" rx="42" fill="url(#bg)"/>
+
+  <!-- Glow plate behind the E -->
+  <rect x="0" y="0" width="320" height="320" fill="url(#glow)"/>
+
+  <!-- Orbital ring — drawn before the E so the E sits on top -->
+  <g transform="rotate(-22 160 130)" opacity="0.95">
+    <ellipse cx="160" cy="130" rx="125" ry="38"
+             fill="none" stroke="url(#orbit)" stroke-width="5"
+             stroke-linecap="round"/>
+    <!-- Tiny accent dot on the right end of the orbit -->
+    <circle cx="285" cy="130" r="3.5" fill="#0ab5dc"/>
+  </g>
+
+  <!-- The chunky E (three arms, sharp corners, slight tilt feel via gradient) -->
+  <g filter="url(#eShadow)">
+    <path d="M 95 55
+             L 235 55
+             L 235 88
+             L 132 88
+             L 132 113
+             L 218 113
+             L 218 144
+             L 132 144
+             L 132 173
+             L 235 173
+             L 235 210
+             L 95 210 Z"
+          fill="url(#eFill)"
+          stroke="url(#eStroke)"
+          stroke-width="2.5"
+          stroke-linejoin="round"/>
+    <!-- Top edge highlight overlay -->
+    <path d="M 97 57 L 233 57 L 233 70 L 97 70 Z" fill="url(#eHi)" opacity="0.7"/>
+  </g>
+
+  <!-- EVOLVEX360 wordmark — letter-spaced, white, bold sans-serif -->
+  <text x="160" y="266"
+        font-family="'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif"
+        font-size="38"
+        font-weight="800"
+        letter-spacing="-1.2"
+        text-anchor="middle"
+        fill="#ffffff">EVOLVEX360</text>
+</svg>

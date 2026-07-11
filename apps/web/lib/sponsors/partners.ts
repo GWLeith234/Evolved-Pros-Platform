@@ -49,10 +49,6 @@ export const VENDASTA_ASSETS = {
 
 export const VENDASTA_URL = 'https://www.vendasta.com/'
 
-/**
- * Vendasta — AI Workforce for local businesses.
- * Copy mirrors the official AI Workforce creative tone.
- */
 export const VENDASTA_SPONSOR_AD: SponsorAd = {
   id: VENDASTA_AD_ID,
   sponsor_name: 'Vendasta',
@@ -72,14 +68,52 @@ export function isVendastaAd(ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_n
   return name.includes('vendasta')
 }
 
-export type PremiumPartnerKind = 'adcellerant' | 'xpr' | 'vendasta' | null
+/** Fixed UUID for EvolveX360 seed + static fallback. */
+export const EVOLVEX360_AD_ID = 'd4e5f6a7-b8c9-0123-def0-234567890123'
+
+export const EVOLVEX360_ASSETS = {
+  logoWhite: '/sponsors/evolvex360/logo-white.svg',
+  logo: '/sponsors/evolvex360/logo.svg',
+  icon: '/sponsors/evolvex360/icon.png',
+  hero: '/sponsors/evolvex360/hero-unlock.svg',
+} as const
+
+export const EVOLVEX360_URL = 'https://www.evolvex360.com/'
+
+export const EVOLVEX360_LOCATIONS =
+  'Reykjavik, Iceland · Denver, CO USA · Saskatoon & Regina, SK Canada · Durban, SA'
+
+/**
+ * EvolveX360 — AI solutions for business efficiency and growth.
+ */
+export const EVOLVEX360_SPONSOR_AD: SponsorAd = {
+  id: EVOLVEX360_AD_ID,
+  sponsor_name: 'EvolveX360',
+  tool_name: 'EvolveX360',
+  headline: 'Unlock the Future with AI Solutions from EvolveX360',
+  endorsement_quote:
+    'AI-powered business efficiency and growth — strategy, media, and execution that open new markets worldwide.',
+  cta_text: 'Unlock AI Growth',
+  image_url: EVOLVEX360_ASSETS.logoWhite,
+  click_url: EVOLVEX360_URL,
+  link_url: EVOLVEX360_URL,
+}
+
+export function isEvolveX360Ad(ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_name'>): boolean {
+  if (ad.id === EVOLVEX360_AD_ID) return true
+  const name = `${ad.sponsor_name ?? ''} ${ad.tool_name ?? ''}`.toLowerCase().replace(/\s+/g, '')
+  return name.includes('evolvex360') || name.includes('evolvex')
+}
+
+export type PremiumPartnerKind = 'adcellerant' | 'xpr' | 'vendasta' | 'evolvex360' | null
 
 export function premiumPartnerKind(
   ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_name'>,
 ): PremiumPartnerKind {
   if (isAdCellerantAd(ad)) return 'adcellerant'
-  if (isXprMediaAd(ad)) return 'xpr'
   if (isVendastaAd(ad)) return 'vendasta'
+  if (isEvolveX360Ad(ad)) return 'evolvex360'
+  if (isXprMediaAd(ad)) return 'xpr'
   return null
 }
 
@@ -87,18 +121,22 @@ export function premiumPartnerKind(
 export const DEFAULT_HOME_SPONSORS: SponsorAd[] = [
   ADCELLERANT_SPONSOR_AD,
   VENDASTA_SPONSOR_AD,
+  EVOLVEX360_SPONSOR_AD,
   XPR_MEDIA_SPONSOR_AD,
 ]
 
 /**
  * Ensure flagship Evolution Partners lead the home row.
- * Order: AdCellerant → Vendasta → XPR Media → other active ads.
+ * Order: AdCellerant → Vendasta → EvolveX360 → XPR Media → others.
  */
 export function ensureFlagshipSponsors(list: SponsorAd[]): SponsorAd[] {
   const byId = new Map(list.map(a => [a.id, a]))
   const adc = list.find(isAdCellerantAd) ?? byId.get(ADCELLERANT_AD_ID) ?? ADCELLERANT_SPONSOR_AD
   const ven = list.find(isVendastaAd) ?? byId.get(VENDASTA_AD_ID) ?? VENDASTA_SPONSOR_AD
+  const ex = list.find(isEvolveX360Ad) ?? byId.get(EVOLVEX360_AD_ID) ?? EVOLVEX360_SPONSOR_AD
   const xpr = list.find(isXprMediaAd) ?? byId.get(XPR_MEDIA_AD_ID) ?? XPR_MEDIA_SPONSOR_AD
-  const rest = list.filter(a => !isAdCellerantAd(a) && !isVendastaAd(a) && !isXprMediaAd(a))
-  return [adc, ven, xpr, ...rest]
+  const rest = list.filter(
+    a => !isAdCellerantAd(a) && !isVendastaAd(a) && !isEvolveX360Ad(a) && !isXprMediaAd(a),
+  )
+  return [adc, ven, ex, xpr, ...rest]
 }
