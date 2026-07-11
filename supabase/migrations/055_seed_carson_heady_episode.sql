@@ -22,16 +22,12 @@ SELECT
   'Carson Heady',
   'Director @ Microsoft · #1 Social Seller',
   'Host, Salesman on Fire',
-  -- Headshot intentionally left NULL: the supplied LinkedIn URL
-  -- (media.licdn.com) is blocked by the site CSP img-src allowlist and is a
-  -- signed URL that expires, so it cannot render on the live site. Backfill
-  -- once the image is hosted on an allowed origin (Supabase `Branding` bucket
-  -- -> https://<project>.supabase.co/storage/v1/object/public/Branding/...):
-  --   UPDATE public.episodes
-  --     SET guest_image_url = '<supabase-url>', thumbnail_url = '<supabase-url>'
-  --   WHERE slug = 'salesman-on-fire-carson-heady';
-  NULL,
-  NULL,
+  -- Headshot hosted in the Supabase `Branding` bucket (an allowed CSP img-src
+  -- origin — *.supabase.co — and a stable, non-expiring URL, unlike the
+  -- original LinkedIn link which was CSP-blocked and signed). Used both as the
+  -- guest photo and the grid/hero cover.
+  'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/Ep7-Carson-Heady.png',
+  'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/Ep7-Carson-Heady.png',
   'https://youtu.be/V3S05gWEpK0',
   'execution',
   true,
