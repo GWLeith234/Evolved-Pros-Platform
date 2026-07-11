@@ -102,13 +102,13 @@ export default async function EpisodePage({ params }: Props) {
     .join(' · ')
 
   return (
-    <main className="flex-1 overflow-y-auto" style={{ backgroundColor: '#0d1c27', minHeight: '100%' }}>
+    <main className="flex-1 overflow-y-auto" style={{ backgroundColor: 'var(--bg-page)', minHeight: '100%' }}>
       <div className="px-4 md:px-8 py-6 max-w-5xl mx-auto">
         {/* Back link */}
         <Link
           href="/podcast"
           className="inline-flex items-center gap-1.5 font-condensed font-semibold uppercase tracking-[0.14em] text-[11px] mb-6 transition-colors hover:opacity-80"
-          style={{ color: 'rgba(255,255,255,0.4)' }}
+          style={{ color: 'var(--text-tertiary)' }}
         >
           ← Back to The Evolved Pros Podcast
         </Link>
@@ -134,7 +134,7 @@ export default async function EpisodePage({ params }: Props) {
             )}
             <h1
               className="font-display font-black leading-tight mb-3"
-              style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', color: 'white' }}
+              style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', color: 'var(--text-primary)' }}
             >
               {ep.title}
             </h1>
@@ -142,14 +142,14 @@ export default async function EpisodePage({ params }: Props) {
             {/* Meta row */}
             <div className="flex items-center gap-3 flex-wrap mb-6">
               {date && (
-                <span className="font-condensed text-[12px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                <span className="font-condensed text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
                   {date}
                 </span>
               )}
               {duration && (
                 <>
-                  <span style={{ color: 'rgba(255,255,255,0.2)' }}>·</span>
-                  <span className="font-condensed text-[12px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  <span style={{ color: 'var(--text-tertiary)' }}>·</span>
+                  <span className="font-condensed text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
                     {duration}
                   </span>
                 </>
@@ -161,13 +161,13 @@ export default async function EpisodePage({ params }: Props) {
               <div>
                 <p
                   className="font-condensed font-bold uppercase tracking-[0.16em] text-[9px] mb-2"
-                  style={{ color: 'rgba(255,255,255,0.3)' }}
+                  style={{ color: 'var(--text-tertiary)' }}
                 >
                   About This Episode
                 </p>
                 <p
                   className="font-body text-[14px] leading-[1.8] whitespace-pre-wrap"
-                  style={{ color: 'rgba(255,255,255,0.6)' }}
+                  style={{ color: 'var(--text-secondary)' }}
                 >
                   {ep.description}
                 </p>
@@ -181,13 +181,13 @@ export default async function EpisodePage({ params }: Props) {
               <div
                 className="rounded-xl p-5"
                 style={{
-                  backgroundColor: '#112535',
-                  border: '1px solid rgba(255,255,255,0.07)',
+                  backgroundColor: 'var(--bg-surface)',
+                  border: '1px solid var(--border-color)',
                 }}
               >
                 <p
                   className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-4"
-                  style={{ color: 'rgba(255,255,255,0.3)' }}
+                  style={{ color: 'var(--text-tertiary)' }}
                 >
                   Featured Guest
                 </p>

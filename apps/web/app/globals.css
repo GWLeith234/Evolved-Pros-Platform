@@ -1010,6 +1010,41 @@ html.light-mode .ep-loader-logo--light { display: block; }
   --border-strong: rgba(255,255,255,0.15);
 }
 
+/* THEME-QA: /live is a cinematic navy marketing surface, and Academy is a
+   dark "focus mode" learning surface (its lesson/tool components are built
+   with a hardcoded dark palette). Both re-assert the dark token set scoped to
+   their root so they render as an intentional, consistent premium-dark surface
+   in BOTH themes — never a half-flipped parchment island. Pure CSS → no flash,
+   no client JS. Academy also needs the `main` override below because the
+   generic `html.light-mode main { … !important }` rule would otherwise flip
+   the shell background to parchment behind the dark sections. */
+.ep-live-navy,
+.ep-academy-navy {
+  --bg-page:       #0A0F18;
+  --bg-surface:    #111926;
+  --bg-elevated:   #1A2332;
+  --border-color:  rgba(255,255,255,0.08);
+  --text-primary:  #ffffff;
+  --text-secondary: rgba(255,255,255,0.65);
+  --text-tertiary: rgba(255,255,255,0.45);
+  --text-strong:   #fff;
+  --text-1:        rgba(255,255,255,0.85);
+  --text-2:        rgba(255,255,255,0.65);
+  --text-3:        rgba(255,255,255,0.55);
+  --text-4:        rgba(255,255,255,0.45);
+  --text-5:        rgba(255,255,255,0.35);
+  --border-soft:   rgba(255,255,255,0.05);
+  --border-soft2:  rgba(255,255,255,0.08);
+  --border-med:    rgba(255,255,255,0.10);
+  --border-med2:   rgba(255,255,255,0.12);
+  --border-strong: rgba(255,255,255,0.15);
+  background-color: #0A0F18;
+  color: #fff;
+}
+/* Academy shell is a <main>; beat the generic light-mode main flip so the
+   dark focus-mode surface stays dark (no parchment showing through gaps). */
+html.light-mode main.ep-academy-navy { background-color: #0A0F18 !important; }
+
 /* ─────────────────────────────────────────────────────────────────
    Podcast redesign tokens (DESIGN-REF-PODCAST, PODCAST-CLEANUP S1)
    The page-scoped --podcast-* aliases now point at the canonical DS

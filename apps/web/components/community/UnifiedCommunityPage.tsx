@@ -290,8 +290,8 @@ export function UnifiedCommunityPage({
             <div
               className="rounded-lg"
               style={{
-                backgroundColor: '#112535',
-                border: '1px solid rgba(255,255,255,0.08)',
+                backgroundColor: 'var(--bg-surface)',
+                border: '1px solid var(--border-color)',
                 padding: '16px 20px',
               }}
             >
@@ -303,7 +303,7 @@ export function UnifiedCommunityPage({
               </p>
               <p
                 className="font-body text-[13px] leading-[1.55]"
-                style={{ color: 'rgba(255,255,255,0.8)' }}
+                style={{ color: 'var(--text-primary)' }}
                 dangerouslySetInnerHTML={{ __html: pinnedPost.body.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
               />
             </div>

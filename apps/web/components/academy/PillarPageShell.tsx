@@ -186,7 +186,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
   }
 
   return (
-    <main style={{ position: 'relative', zIndex: 1, backgroundColor: '#0A0F18', minHeight: '100vh', color: '#faf9f7' }}>
+    <main className="ep-academy-navy" style={{ position: 'relative', zIndex: 1, backgroundColor: '#0A0F18', minHeight: '100vh', color: '#faf9f7' }}>
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section className="academy-hero" style={{ position: 'relative', display: 'flex', alignItems: 'flex-end' }}>

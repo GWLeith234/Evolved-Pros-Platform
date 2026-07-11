@@ -33,7 +33,7 @@ export default async function AcademyPage() {
   const overallPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
 
   return (
-    <div className="w-full" style={{ backgroundColor: '#0A0F18', minHeight: '100%' }}>
+    <div className="w-full ep-academy-navy" style={{ backgroundColor: '#0A0F18', minHeight: '100%' }}>
       {/* Page header */}
       <div
         className="px-4 md:px-8 py-6"
