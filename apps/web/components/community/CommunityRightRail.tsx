@@ -1,14 +1,14 @@
 'use client'
 
 /**
- * Sticky community right rail — DAU / engagement surfaces:
- *  1. Active poll (interaction)
- *  2. Latest podcast promo (content)
- *  3. Academy continue CTA (content)
- *  4. Evolution Partner sponsor (value)
- *  5. Weekly leaderboard (competition)
+ * Community engagement rail — sticky on desktop, compact strip on mobile.
  *
- * Theme-aware via CSS vars; non-intrusive compact cards.
+ * Order optimized for DAU:
+ *  1. Active / upcoming poll (interaction)
+ *  2. Latest podcast (content consumption)
+ *  3. Academy continue learning (content)
+ *  4. Evolution Partner (value / rotation)
+ *  5. Weekly leaderboard (competition)
  */
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
@@ -64,41 +64,60 @@ function RailEyebrow({ children, accent }: { children: ReactNode; accent?: strin
   )
 }
 
-function PodcastPromoCard({ episode }: { episode: RailPodcastEpisode }) {
-  const href = episode.slug ? `/podcast/${episode.slug}` : '/podcast'
+function PodcastPromoCard({ episode }: { episode: RailPodcastEpisode | null }) {
+  const href = episode?.slug ? `/podcast/${episode.slug}` : '/podcast'
   const epLabel =
-    episode.episode_number != null ? `Ep ${episode.episode_number}` : 'Latest episode'
+    episode?.episode_number != null
+      ? `Ep ${episode.episode_number}`
+      : 'Latest episode'
 
   return (
     <section aria-label="Latest podcast episode" style={cardShell}>
       <div style={{ padding: '14px 14px 16px' }}>
         <RailEyebrow accent="var(--brand-gold, #C9A84C)">Podcast</RailEyebrow>
-        <p
-          style={{
-            margin: '6px 0 0',
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 700,
-            fontSize: 10,
-            letterSpacing: '0.16em',
-            textTransform: 'uppercase',
-            color: 'var(--text-tertiary)',
-          }}
-        >
-          {epLabel}
-          {episode.guest_name ? ` · ${episode.guest_name}` : ''}
-        </p>
-        <h3
-          style={{
-            margin: '8px 0 0',
-            fontFamily: '"Playfair Display", Georgia, serif',
-            fontWeight: 700,
-            fontSize: 15,
-            lineHeight: 1.3,
-            color: 'var(--text-primary)',
-          }}
-        >
-          {episode.title}
-        </h3>
+        {episode ? (
+          <>
+            <p
+              style={{
+                margin: '6px 0 0',
+                fontFamily: '"Barlow Condensed", sans-serif',
+                fontWeight: 700,
+                fontSize: 10,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                color: 'var(--text-tertiary)',
+              }}
+            >
+              {epLabel}
+              {episode.guest_name ? ` · ${episode.guest_name}` : ''}
+            </p>
+            <h3
+              style={{
+                margin: '8px 0 0',
+                fontFamily: '"Playfair Display", Georgia, serif',
+                fontWeight: 700,
+                fontSize: 15,
+                lineHeight: 1.3,
+                color: 'var(--text-primary)',
+              }}
+            >
+              {episode.title}
+            </h3>
+          </>
+        ) : (
+          <h3
+            style={{
+              margin: '8px 0 0',
+              fontFamily: '"Playfair Display", Georgia, serif',
+              fontWeight: 700,
+              fontSize: 15,
+              lineHeight: 1.3,
+              color: 'var(--text-primary)',
+            }}
+          >
+            The Evolved Pros Podcast
+          </h3>
+        )}
         <Link
           href={href}
           style={{
@@ -117,7 +136,7 @@ function PodcastPromoCard({ episode }: { episode: RailPodcastEpisode }) {
             textDecoration: 'none',
           }}
         >
-          Listen now
+          {episode ? 'Listen now' : 'Browse episodes'}
           <span aria-hidden>→</span>
         </Link>
       </div>
@@ -131,7 +150,7 @@ function AcademyPromoCard({ academyContinue }: { academyContinue: RailAcademyCon
   const pct = academyContinue?.progressPct
 
   return (
-    <section aria-label="Academy" style={cardShell}>
+    <section aria-label="Continue learning" style={cardShell}>
       <div style={{ padding: '14px 14px 16px' }}>
         <RailEyebrow>Academy</RailEyebrow>
         <h3
@@ -145,7 +164,7 @@ function AcademyPromoCard({ academyContinue }: { academyContinue: RailAcademyCon
             textTransform: 'uppercase',
           }}
         >
-          Continue your evolution
+          Continue Learning
         </h3>
         <p
           style={{
@@ -222,74 +241,187 @@ function SponsorPromoCard({ sponsors }: { sponsors: SponsorAd[] }) {
 
   return (
     <section aria-label="Evolution Partner">
-      <div style={{ marginBottom: 8 }}>
-        <RailEyebrow accent="var(--brand-gold, #C9A84C)">Evolution Partner</RailEyebrow>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 8,
+          marginBottom: 8,
+        }}
+      >
+        <RailEyebrow accent="var(--brand-gold, #C9A84C)">Partner</RailEyebrow>
+        {sponsors.length > 1 && (
+          <div style={{ display: 'flex', gap: 5 }} aria-hidden>
+            {sponsors.map((s, i) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setIdx(i)}
+                aria-label={`Show ${s.sponsor_name ?? 'partner'}`}
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                  background:
+                    i === idx % sponsors.length
+                      ? 'var(--brand-red, #C9302A)'
+                      : 'var(--border-color)',
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
       <SponsorAdCard ad={ad} />
-      {sponsors.length > 1 && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: 6,
-            marginTop: 8,
-          }}
-          aria-hidden
-        >
-          {sponsors.map((s, i) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => setIdx(i)}
-              aria-label={`Show ${s.sponsor_name ?? 'partner'}`}
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: '50%',
-                border: 'none',
-                padding: 0,
-                cursor: 'pointer',
-                background:
-                  i === idx % sponsors.length
-                    ? 'var(--brand-red, #C9302A)'
-                    : 'var(--border-color)',
-              }}
-            />
-          ))}
-        </div>
-      )}
     </section>
   )
 }
 
-export function CommunityRightRail({
+/** Compact horizontal CTAs for mobile — non-intrusive, one-tap. */
+function MobileEngagementStrip({
+  latestEpisode,
+  academyContinue,
+}: {
+  latestEpisode: RailPodcastEpisode | null
+  academyContinue: RailAcademyContinue
+}) {
+  const chips: { href: string; label: string; sub: string }[] = [
+    {
+      href: academyContinue?.href ?? '/academy',
+      label: 'Learn',
+      sub: academyContinue ? 'Continue' : 'Academy',
+    },
+    {
+      href: latestEpisode?.slug ? `/podcast/${latestEpisode.slug}` : '/podcast',
+      label: 'Listen',
+      sub: latestEpisode ? 'Podcast' : 'Episodes',
+    },
+  ]
+
+  return (
+    <div
+      className="lg:hidden"
+      style={{
+        display: 'flex',
+        gap: 8,
+        overflowX: 'auto',
+        paddingBottom: 2,
+        WebkitOverflowScrolling: 'touch',
+        scrollbarWidth: 'none',
+      }}
+    >
+      {chips.map(c => (
+        <Link
+          key={c.href + c.label}
+          href={c.href}
+          style={{
+            flex: '0 0 auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            minWidth: 120,
+            padding: '10px 14px',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-color)',
+            textDecoration: 'none',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: '"Barlow Condensed", sans-serif',
+              fontWeight: 800,
+              fontSize: 10,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: 'var(--brand-red, #C9302A)',
+            }}
+          >
+            {c.label}
+          </span>
+          <span
+            style={{
+              fontFamily: '"Barlow", sans-serif',
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+            }}
+          >
+            {c.sub}
+          </span>
+        </Link>
+      ))}
+    </div>
+  )
+}
+
+function StickyRailBody({
   weeklyLeaderboard,
   latestEpisode,
   academyContinue,
   sponsors,
 }: CommunityRightRailProps) {
   return (
-    <div style={{ minWidth: 0 }}>
-      <div
-        style={{
-          position: 'sticky',
-          top: 88,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 14,
-          maxHeight: 'calc(100vh - 104px)',
-          overflowY: 'auto',
-          paddingBottom: 24,
-          // hide scrollbar chrome without killing scroll
-          scrollbarWidth: 'thin',
-        }}
+    <>
+      <CommunityPollCard />
+      <PodcastPromoCard episode={latestEpisode} />
+      <AcademyPromoCard academyContinue={academyContinue} />
+      <SponsorPromoCard sponsors={sponsors} />
+      <WeeklyLeaderboardRail entries={weeklyLeaderboard} />
+    </>
+  )
+}
+
+export function CommunityRightRail(props: CommunityRightRailProps) {
+  return (
+    <>
+      {/* Desktop sticky rail */}
+      <aside
+        className="hidden lg:block"
+        style={{ minWidth: 0 }}
+        aria-label="Community engagement"
       >
-        <CommunityPollCard />
-        {latestEpisode && <PodcastPromoCard episode={latestEpisode} />}
-        <AcademyPromoCard academyContinue={academyContinue} />
-        <SponsorPromoCard sponsors={sponsors} />
-        <WeeklyLeaderboardRail entries={weeklyLeaderboard} />
-      </div>
+        <div
+          style={{
+            position: 'sticky',
+            top: 88,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 14,
+            maxHeight: 'calc(100vh - 104px)',
+            overflowY: 'auto',
+            paddingBottom: 24,
+            scrollbarWidth: 'thin',
+          }}
+        >
+          <StickyRailBody {...props} />
+        </div>
+      </aside>
+    </>
+  )
+}
+
+/**
+ * Mobile-only engagement chips — render inside the main feed column so
+ * members still get DAU loops without a tall stacked sidebar.
+ */
+export function CommunityMobileEngagement({
+  latestEpisode,
+  academyContinue,
+}: {
+  latestEpisode: RailPodcastEpisode | null
+  academyContinue: RailAcademyContinue
+}) {
+  return (
+    <div className="lg:hidden" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <CommunityPollCard />
+      <MobileEngagementStrip
+        latestEpisode={latestEpisode}
+        academyContinue={academyContinue}
+      />
     </div>
   )
 }

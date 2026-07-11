@@ -111,6 +111,45 @@ export function CommunityPollCard() {
     [poll, voting, hasVoted],
   )
 
+  // Soft empty state — keeps the rail slot reserved for upcoming polls
+  if (!loading && !poll) {
+    return (
+      <section
+        aria-label="Polls"
+        style={{
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-color)',
+          padding: '14px',
+        }}
+      >
+        <p
+          style={{
+            margin: 0,
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontWeight: 800,
+            fontSize: 11,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: 'var(--brand-red, #C9302A)',
+          }}
+        >
+          Polls
+        </p>
+        <p
+          style={{
+            margin: '8px 0 0',
+            fontFamily: '"Barlow", sans-serif',
+            fontSize: 13,
+            lineHeight: 1.4,
+            color: 'var(--text-secondary)',
+          }}
+        >
+          Next poll drops soon. Check back to cast your vote.
+        </p>
+      </section>
+    )
+  }
+
   if (loading || !poll) return null
 
   const showResults = hasVoted

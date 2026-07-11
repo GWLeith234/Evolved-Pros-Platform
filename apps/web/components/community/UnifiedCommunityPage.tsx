@@ -12,6 +12,7 @@ import type { KindFilter, Pillar, SortBy } from './FilterRail'
 import type { Post, Reply, CommunityAd, WeeklyLeaderboardEntry } from '@/lib/community/types'
 import {
   CommunityRightRail,
+  CommunityMobileEngagement,
   type RailAcademyContinue,
   type RailPodcastEpisode,
 } from './CommunityRightRail'
@@ -265,6 +266,12 @@ export function UnifiedCommunityPage({
           style={{ maxWidth: 1280 }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
+
+          {/* Mobile engagement: poll + compact Learn/Listen chips */}
+          <CommunityMobileEngagement
+            latestEpisode={latestEpisode}
+            academyContinue={academyContinue}
+          />
 
           {/* Pinned announcement */}
           {pinnedPost && (
