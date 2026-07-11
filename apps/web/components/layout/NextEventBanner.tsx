@@ -43,21 +43,21 @@ export function NextEventBanner() {
   const label = `NEXT EVENT · ${event.title} · ${formatDate(event.starts_at)}`
 
   return (
-    <div className="md:hidden flex-shrink-0 flex justify-center w-full" style={{ backgroundColor: '#0d1c27' }}>
+    <div className="md:hidden flex-shrink-0 flex justify-center w-full" style={{ backgroundColor: 'var(--bg-page)' }}>
       <button
         type="button"
         onClick={() => router.push('/events')}
         className="flex items-center justify-between gap-3 w-full max-w-[320px] px-4"
         style={{
           height: '50px',
-          backgroundColor: '#112535',
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
+          backgroundColor: 'var(--bg-surface)',
+          borderBottom: '1px solid var(--border-color)',
         }}
         aria-label={label}
       >
         <span
-          className="font-condensed font-semibold text-white truncate"
-          style={{ fontSize: '12px', letterSpacing: '0.06em' }}
+          className="font-condensed font-semibold truncate"
+          style={{ fontSize: '12px', letterSpacing: '0.06em', color: 'var(--text-primary)' }}
         >
           <span style={{ color: '#ef0e30', fontWeight: 700 }}>NEXT EVENT</span>
           {' · '}

@@ -207,7 +207,11 @@ html.light-mode {
   --bg-page:       var(--paper);
   --bg-surface:    var(--paper-card);
   --bg-elevated:   #F0EBE3;
-  --border-color:  #E8E2D9;
+  /* THEME-CONSISTENCY: #E8E2D9 was too close to the parchment page bg, so white
+     cards read as edgeless. A navy-tinted alpha border gives cards a crisp but
+     soft edge in light mode (and reads consistently over both #FFFFFF surfaces
+     and the #F5F0E8 page). */
+  --border-color:  rgba(27,42,74,0.14);
   --text-primary:  #1b3c5a;
   /* THEME-FIX-V2: previous values failed WCAG AA on white surfaces.
        --text-secondary: #6B7A8D     was 3.86:1 on #fff
@@ -219,17 +223,22 @@ html.light-mode {
   /* DS2 light variants (FOUNDATION-TOPNAV-V2 + SPRINT-1 nav contrast) */
   --bg-topnav:     #FAF7F2;
   --bg-nav:        #FAF7F2; /* light parchment — dark titles stay readable */
-  --text-dim:      rgba(27,42,74,0.6);
-  --text-muted:    rgba(27,42,74,0.45);
-  --border-subtle: rgba(27,42,74,0.10);
+  --text-dim:      rgba(27,42,74,0.68);
+  /* Bumped 0.45 → 0.60: secondary nav text (AI George label, meta) was too
+     faint on parchment (THEME-CONSISTENCY). */
+  --text-muted:    rgba(27,42,74,0.60);
+  --border-subtle: rgba(27,42,74,0.12);
 
-  /* TopNav dual-theme tokens — light overrides (TOPNAV-POLISH-DUAL-THEME) */
-  --topnav-border:      rgba(27,42,74,0.10);
+  /* TopNav dual-theme tokens — light overrides (TOPNAV-POLISH-DUAL-THEME +
+     THEME-CONSISTENCY). Idle links were rgba(...,0.55) → ~2.8:1 on the #FAF7F2
+     parchment nav, which fails WCAG AA. Bumped to 0.72 (~4.6:1, AA) so every
+     nav item is clearly legible; active/hover stay solid navy (~11:1). */
+  --topnav-border:      rgba(27,42,74,0.14);
   --topnav-link-active: #1B2A4A;
-  --topnav-link-idle:   rgba(27,42,74,0.55);
+  --topnav-link-idle:   rgba(27,42,74,0.72);
   --topnav-link-hover:  #1B2A4A;
-  --topnav-divider:     rgba(27,42,74,0.12);
-  --topnav-bell-icon:   rgba(27,42,74,0.70);
+  --topnav-divider:     rgba(27,42,74,0.16);
+  --topnav-bell-icon:   rgba(27,42,74,0.78);
   --topnav-ring-bg:     #FAF7F2;
 
   /* Skeleton — light parchment (SPRINT-1) */

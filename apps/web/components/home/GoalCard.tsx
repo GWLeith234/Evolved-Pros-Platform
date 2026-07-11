@@ -175,7 +175,7 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
       {tiedToPath && inProgressContinueHref && (
         <Link
           href={inProgressContinueHref}
-          className="flex items-center justify-between px-4 py-2 transition-colors hover:bg-[rgba(255,255,255,0.03)]"
+          className="flex items-center justify-between px-4 py-2 transition-colors hover:bg-[var(--bg-elevated)]"
           style={{ borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--bg-elevated)' }}
         >
           <span

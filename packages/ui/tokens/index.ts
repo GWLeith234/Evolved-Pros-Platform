@@ -46,6 +46,11 @@ export const themes = {
     topnavLinkIdle: 'rgba(255,255,255,0.50)',
     topnavLinkHover: 'rgba(255,255,255,0.85)',
   },
+  // Light theme values are WCAG-AA-tuned against the parchment surfaces:
+  // textSecondary #4A5868 ≈ 7.4:1 (AAA) on #FFFFFF, textTertiary #5C6A7C ≈
+  // 5.0:1 (AA). topnavLinkIdle raised 0.55 → 0.72 (~2.8:1 → ~4.6:1) so idle
+  // nav links clear AA; border raised 0.12 → 0.14 for card definition on the
+  // low-contrast parchment page (THEME-CONSISTENCY). Mirrored in globals.css.
   light: {
     bgPage: '#F5F0E8',
     bgSurface: '#FFFFFF',
@@ -54,12 +59,12 @@ export const themes = {
     textPrimary: '#1B2A4A',
     textSecondary: '#4A5868',
     textTertiary: '#5C6A7C',
-    border: 'rgba(27,42,74,0.12)',
-    borderEmphasized: 'rgba(27,42,74,0.22)',
+    border: 'rgba(27,42,74,0.14)',
+    borderEmphasized: 'rgba(27,42,74,0.24)',
     skeletonBase: 'rgba(27,42,74,0.06)',
     skeletonHighlight: 'rgba(27,42,74,0.12)',
     topnavLinkActive: '#1B2A4A',
-    topnavLinkIdle: 'rgba(27,42,74,0.55)',
+    topnavLinkIdle: 'rgba(27,42,74,0.72)',
     topnavLinkHover: '#1B2A4A',
   },
 } as const

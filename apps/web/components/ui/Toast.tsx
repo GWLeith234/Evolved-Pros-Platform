@@ -28,7 +28,8 @@ export function ToastItem({ toast, onDismiss }: ToastItemProps) {
     <div
       className="pointer-events-auto flex items-start gap-3 rounded-lg px-4 py-3 shadow-xl"
       style={{
-        backgroundColor: '#111926',
+        backgroundColor: 'var(--bg-surface)',
+        border: '1px solid var(--border-color)',
         borderLeft: `3px solid ${border}`,
         minWidth: '260px',
         maxWidth: '360px',
@@ -47,7 +48,7 @@ export function ToastItem({ toast, onDismiss }: ToastItemProps) {
       </span>
 
       {/* Message */}
-      <p className="flex-1 font-body text-sm leading-snug" style={{ color: 'rgba(255,255,255,0.9)' }}>
+      <p className="flex-1 font-body text-sm leading-snug" style={{ color: 'var(--text-primary)' }}>
         {toast.message}
       </p>
 
@@ -56,9 +57,9 @@ export function ToastItem({ toast, onDismiss }: ToastItemProps) {
         type="button"
         onClick={() => onDismiss(toast.id)}
         className="flex-shrink-0 transition-colors leading-none"
-        style={{ color: 'rgba(255,255,255,0.35)', fontSize: '14px' }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.75)' }}
-        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.35)' }}
+        style={{ color: 'var(--text-tertiary)', fontSize: '14px' }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)' }}
         aria-label="Dismiss"
       >
         ×

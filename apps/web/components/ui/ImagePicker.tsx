@@ -199,11 +199,11 @@ export function ImagePicker({
   return (
     <div
       className="rounded-lg overflow-hidden"
-      style={{ backgroundColor: '#111926', border: '1px solid rgba(255,255,255,0.08)' }}
+      style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
     >
       {/* Tab bar */}
       {tabs.length > 1 && (
-        <div className="flex" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <div className="flex" style={{ borderBottom: '1px solid var(--border-color)' }}>
           {tabs.map(tab => (
             <button
               key={tab}
@@ -211,8 +211,8 @@ export function ImagePicker({
               onClick={() => { handleSelectTab(tab); setError(null) }}
               className="flex-1 py-2.5 font-condensed font-semibold uppercase tracking-[0.12em] text-[12px] transition-colors"
               style={{
-                color: activeTab === tab ? '#fff' : 'rgba(255,255,255,0.4)',
-                backgroundColor: activeTab === tab ? 'rgba(255,255,255,0.07)' : 'transparent',
+                color: activeTab === tab ? 'var(--text-primary)' : 'var(--text-tertiary)',
+                backgroundColor: activeTab === tab ? 'var(--bg-elevated)' : 'transparent',
                 borderBottom: activeTab === tab ? `2px solid ${tab === 'ai' ? PURPLE : GOLD}` : '2px solid transparent',
               }}
             >
@@ -232,11 +232,11 @@ export function ImagePicker({
           <>
             {photosLoading ? (
               <div className="flex items-center justify-center py-12">
-                <span className="font-condensed text-[12px]" style={{ color: 'rgba(255,255,255,0.3)' }}>Loading photos...</span>
+                <span className="font-condensed text-[12px]" style={{ color: 'var(--text-tertiary)' }}>Loading photos...</span>
               </div>
             ) : !unsplashLoaded ? (
               <div className="flex flex-col items-center gap-2 py-12">
-                <p className="font-condensed text-[12px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                <p className="font-condensed text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
                   Browse stock photos for: {aiPrompt || 'professional business sales'}
                 </p>
                 <button
@@ -263,7 +263,7 @@ export function ImagePicker({
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={p.thumb} alt={p.credit} className="w-full h-full object-cover" />
-                    <p className="font-condensed text-[8px] px-1 py-0.5 truncate" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                    <p className="font-condensed text-[8px] px-1 py-0.5 truncate" style={{ color: 'var(--text-tertiary)' }}>
                       {p.credit}
                     </p>
                   </button>
@@ -282,7 +282,7 @@ export function ImagePicker({
               rows={2}
               placeholder="Describe the image you want..."
               className="w-full rounded px-3 py-2 text-[13px] font-body resize-none focus:outline-none mb-3"
-              style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
+              style={{ backgroundColor: 'var(--bg-page)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
             />
             <div className="flex flex-wrap gap-1.5 mb-3">
               {STYLES.map(s => (
@@ -292,9 +292,9 @@ export function ImagePicker({
                   onClick={() => setAiStyle(s)}
                   className="font-condensed font-semibold uppercase tracking-[0.1em] text-[12px] px-3 py-1 rounded-full transition-all"
                   style={{
-                    backgroundColor: aiStyle === s ? `${PURPLE}25` : 'rgba(255,255,255,0.04)',
-                    color: aiStyle === s ? PURPLE : 'rgba(255,255,255,0.4)',
-                    border: `1px solid ${aiStyle === s ? PURPLE : 'rgba(255,255,255,0.08)'}`,
+                    backgroundColor: aiStyle === s ? `${PURPLE}25` : 'var(--bg-elevated)',
+                    color: aiStyle === s ? PURPLE : 'var(--text-tertiary)',
+                    border: `1px solid ${aiStyle === s ? PURPLE : 'var(--border-color)'}`,
                   }}
                 >
                   {s}
@@ -350,23 +350,23 @@ export function ImagePicker({
             onClick={() => fileRef.current?.click()}
             className="flex flex-col items-center justify-center gap-2 rounded-lg cursor-pointer py-10 transition-colors"
             style={{
-              border: '2px dashed rgba(255,255,255,0.12)',
-              backgroundColor: uploading ? 'rgba(255,255,255,0.03)' : 'transparent',
+              border: '2px dashed var(--border-color)',
+              backgroundColor: uploading ? 'var(--bg-elevated)' : 'transparent',
             }}
           >
             {uploading ? (
-              <span className="font-condensed text-[12px]" style={{ color: 'rgba(255,255,255,0.4)' }}>Uploading...</span>
+              <span className="font-condensed text-[12px]" style={{ color: 'var(--text-tertiary)' }}>Uploading...</span>
             ) : (
               <>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="17 8 12 3 7 8" />
                   <line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
-                <span className="font-condensed font-semibold text-[12px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                <span className="font-condensed font-semibold text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
                   {mode === 'avatar' ? 'Upload avatar' : 'Drop image here or click to browse'}
                 </span>
-                <span className="font-condensed text-[12px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                <span className="font-condensed text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
                   JPG, PNG, WebP &middot; Max 10 MB
                 </span>
               </>

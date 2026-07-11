@@ -104,7 +104,8 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
       <div
         className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl"
         style={{
-          backgroundColor: '#112535',
+          backgroundColor: 'var(--bg-surface)',
+          borderTop: '1px solid var(--border-color)',
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
@@ -112,7 +113,7 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
         <div className="flex flex-col items-center pt-3 pb-2 gap-2">
           <div
             className="rounded-full"
-            style={{ width: '32px', height: '4px', backgroundColor: 'rgba(255,255,255,0.2)' }}
+            style={{ width: '32px', height: '4px', backgroundColor: 'var(--text-tertiary)' }}
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -127,7 +128,7 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
           href="/messages"
           onClick={onClose}
           className={linkClass}
-          style={{ color: 'rgba(255,255,255,0.85)' }}
+          style={{ color: 'var(--text-primary)' }}
         >
           <MessageIcon />
           Messages
@@ -137,7 +138,7 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
           href="/profile/me"
           onClick={onClose}
           className={linkClass}
-          style={{ color: 'rgba(255,255,255,0.85)' }}
+          style={{ color: 'var(--text-primary)' }}
         >
           <PersonIcon />
           My Profile
@@ -147,7 +148,7 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
           href="/membership"
           onClick={onClose}
           className={linkClass}
-          style={{ color: 'rgba(255,255,255,0.85)' }}
+          style={{ color: 'var(--text-primary)' }}
         >
           <CreditCardIcon />
           Membership
@@ -157,7 +158,7 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
           href="/profile/me"
           onClick={onClose}
           className={linkClass}
-          style={{ color: 'rgba(255,255,255,0.85)' }}
+          style={{ color: 'var(--text-primary)' }}
         >
           <GearIcon />
           Settings
@@ -169,7 +170,7 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
               href="/admin"
               onClick={onClose}
               className={linkClass}
-              style={{ color: 'rgba(255,255,255,0.85)' }}
+              style={{ color: 'var(--text-primary)' }}
             >
               <BarChartIcon />
               Admin Dashboard
@@ -179,7 +180,7 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
               href="/admin/branding"
               onClick={onClose}
               className={linkClass}
-              style={{ color: 'rgba(255,255,255,0.85)' }}
+              style={{ color: 'var(--text-primary)' }}
             >
               <BrushIcon />
               Branding
@@ -190,7 +191,7 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
         {/* Divider */}
         <div
           className="mx-6 my-1"
-          style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.08)' }}
+          style={{ height: '1px', backgroundColor: 'var(--border-color)' }}
         />
 
         {/* Sign Out */}

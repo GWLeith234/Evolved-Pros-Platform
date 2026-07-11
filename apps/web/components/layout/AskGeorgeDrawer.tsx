@@ -28,7 +28,7 @@ function TypingDots() {
             width: '6px',
             height: '6px',
             borderRadius: '50%',
-            backgroundColor: 'rgba(255,255,255,0.4)',
+            backgroundColor: 'var(--text-tertiary)',
             animation: `george-dot-bounce 1.2s ease-in-out ${i * 0.2}s infinite`,
           }}
         />
@@ -166,8 +166,8 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
           'md:w-[400px] md:top-0 md:h-screen',
         ].join(' ')}
         style={{
-          backgroundColor: '#0A0F18',
-          borderLeft: '1px solid rgba(255,255,255,0.08)',
+          backgroundColor: 'var(--bg-page)',
+          borderLeft: '1px solid var(--border-color)',
           boxShadow: '-8px 0 32px rgba(13,28,39,0.4)',
           transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
           transition: 'transform 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -180,8 +180,8 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
         <div
           className="flex items-center justify-between px-5 py-4 flex-shrink-0"
           style={{
-            backgroundColor: '#111926',
-            borderBottom: '1px solid rgba(255,255,255,0.07)',
+            backgroundColor: 'var(--bg-surface)',
+            borderBottom: '1px solid var(--border-color)',
           }}
         >
           <div className="flex flex-col gap-0.5">
@@ -191,7 +191,7 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
                   fontFamily: '"Barlow Condensed", sans-serif',
                   fontWeight: 700,
                   fontSize: '18px',
-                  color: 'white',
+                  color: 'var(--text-primary)',
                   letterSpacing: '0.04em',
                 }}
               >
@@ -218,7 +218,7 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
               style={{
                 fontFamily: '"Barlow Condensed", sans-serif',
                 fontSize: '12px',
-                color: 'rgba(255,255,255,0.35)',
+                color: 'var(--text-tertiary)',
                 letterSpacing: '0.02em',
               }}
             >
@@ -229,9 +229,9 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
             onClick={onClose}
             aria-label="Close Ask George"
             className="w-8 h-8 flex items-center justify-center rounded flex-shrink-0"
-            style={{ color: 'rgba(255,255,255,0.4)' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.9)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
+            style={{ color: 'var(--text-tertiary)' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-tertiary)')}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 6L6 18M6 6l12 12" />
@@ -243,7 +243,7 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
         <div
           ref={chatRef}
           className="flex-1 min-h-0 overflow-y-auto"
-          style={{ backgroundColor: '#0A0F18' }}
+          style={{ backgroundColor: 'var(--bg-page)' }}
         >
           {!hasMessages ? (
             /* Empty state */
@@ -266,7 +266,7 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
                     fontFamily: '"Arial Black", Arial, sans-serif',
                     fontWeight: 900,
                     fontSize: '20px',
-                    color: 'white',
+                    color: 'var(--text-primary)',
                     margin: 0,
                   }}
                 >
@@ -276,7 +276,7 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
                   style={{
                     fontFamily: '"Barlow Condensed", sans-serif',
                     fontSize: '13px',
-                    color: 'rgba(255,255,255,0.4)',
+                    color: 'var(--text-tertiary)',
                     lineHeight: 1.4,
                     maxWidth: '260px',
                     margin: 0,
@@ -294,16 +294,16 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
                     style={{
                       fontFamily: '"Barlow Condensed", sans-serif',
                       fontSize: '12px',
-                      border: '1px solid rgba(255,255,255,0.12)',
+                      border: '1px solid var(--border-color)',
                       borderRadius: '20px',
                       padding: '5px 12px',
-                      background: 'rgba(255,255,255,0.04)',
-                      color: 'rgba(255,255,255,0.6)',
+                      background: 'var(--bg-elevated)',
+                      color: 'var(--text-secondary)',
                       cursor: 'pointer',
                       transition: 'background 0.15s',
                     }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--border-color)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-elevated)')}
                   >
                     {s}
                   </button>
@@ -345,9 +345,9 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
                       maxWidth: msg.role === 'user' ? '75%' : '85%',
                       padding: '8px 12px',
                       borderRadius: msg.role === 'user' ? '14px 14px 2px 14px' : '2px 14px 14px 14px',
-                      backgroundColor: msg.role === 'user' ? '#C9302A' : '#1a2535',
-                      color: msg.role === 'user' ? 'white' : 'rgba(255,255,255,0.85)',
-                      border: msg.role === 'assistant' ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                      backgroundColor: msg.role === 'user' ? '#C9302A' : 'var(--bg-elevated)',
+                      color: msg.role === 'user' ? 'white' : 'var(--text-primary)',
+                      border: msg.role === 'assistant' ? '1px solid var(--border-color)' : 'none',
                       fontFamily: '"Barlow", sans-serif',
                       fontSize: '12px',
                       lineHeight: 1.55,
@@ -380,8 +380,8 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
                   </div>
                   <div
                     style={{
-                      backgroundColor: '#1a2535',
-                      border: '1px solid rgba(255,255,255,0.06)',
+                      backgroundColor: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-color)',
                       borderRadius: '2px 14px 14px 14px',
                     }}
                   >
@@ -396,8 +396,8 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
         {/* Input row */}
         <div
           style={{
-            backgroundColor: '#111926',
-            borderTop: '1px solid rgba(255,255,255,0.07)',
+            backgroundColor: 'var(--bg-surface)',
+            borderTop: '1px solid var(--border-color)',
             padding: '10px 12px',
             display: 'flex',
             alignItems: 'center',
@@ -415,18 +415,18 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
             disabled={loading}
             style={{
               flex: 1,
-              backgroundColor: '#0A0F18',
-              border: '1px solid rgba(255,255,255,0.1)',
+              backgroundColor: 'var(--bg-page)',
+              border: '1px solid var(--border-color)',
               borderRadius: '20px',
               padding: '9px 14px',
-              color: 'rgba(255,255,255,0.7)',
+              color: 'var(--text-primary)',
               fontSize: '12px',
               fontFamily: '"Barlow", sans-serif',
               outline: 'none',
               minWidth: 0,
             }}
-            onFocus={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)')}
-            onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}
+            onFocus={e => (e.currentTarget.style.borderColor = 'var(--text-tertiary)')}
+            onBlur={e => (e.currentTarget.style.borderColor = 'var(--border-color)')}
           />
           <button
             type="button"

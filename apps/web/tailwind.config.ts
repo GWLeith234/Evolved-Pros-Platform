@@ -6,6 +6,19 @@ const config: Config = {
     './components/**/*.{ts,tsx}',
     '../../packages/ui/**/*.{ts,tsx}',
   ],
+  // Theme strategy (THEME-CONSISTENCY): the app is DARK BY DEFAULT. Light mode
+  // is opted into by adding `.light-mode` to <html> (see ThemeProvider /
+  // ThemeInit). Tailwind's `dark:` variant defaults to prefers-color-scheme,
+  // which is disconnected from that class toggle — so we bind it to the real
+  // theme model here. `dark:` now means "dark theme is active" (i.e. <html>
+  // does NOT have .light-mode), making class-based dark overrides consistent
+  // with the CSS-variable tokens rather than tracking the OS setting.
+  //
+  // Preferred approach for cross-theme color is still the semantic token
+  // utilities (bg-page / bg-surface / text-primary / text-secondary /
+  // border-color), which resolve per theme via CSS vars in globals.css — reach
+  // for `dark:` only for one-off overrides a token can't express.
+  darkMode: ['variant', ['&:where(html:not(.light-mode)) &', '&:where(html:not(.light-mode))']],
   theme: {
     extend: {
       colors: {

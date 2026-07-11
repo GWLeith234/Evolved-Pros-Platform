@@ -8,7 +8,7 @@ import { formatPct, formatCount } from '@/lib/format'
 
 const GOLD = '#C9A84C'
 const TEAL = '#0ABFA3'
-const DIM  = 'rgba(255,255,255,0.18)'
+const DIM  = 'var(--text-tertiary)'
 
 export interface DailyPulseHabit {
   id: string
@@ -123,7 +123,7 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 16px 10px' }}>
         <div style={{ position: 'relative', width: 116, height: 116 }}>
           <svg width="116" height="116" viewBox="0 0 120 120" style={{ transform: 'rotate(-90deg)' }}>
-            <circle cx="60" cy="60" r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+            <circle cx="60" cy="60" r={radius} fill="none" stroke="var(--border-color)" strokeWidth="8" />
             {/* strokeDashoffset is derived from completion state. The
                 value is float-precision (circumference × (1 - pct/100))
                 and used to surface as a hydration mismatch (#425) when
@@ -281,7 +281,7 @@ function Checkbox({ checked, color }: { checked: boolean; color: string }) {
       style={{
         flexShrink: 0, width: 18, height: 18, borderRadius: 0,
         background: checked ? color : 'transparent',
-        border: `2px solid ${checked ? color : 'rgba(255,255,255,0.22)'}`,
+        border: `2px solid ${checked ? color : 'var(--text-tertiary)'}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         transition: 'all 0.15s',
       }}
@@ -303,7 +303,7 @@ function StreakBadge({ days }: { days: number }) {
       fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
       fontSize: 10, letterSpacing: '0.08em',
       padding: '2px 7px', borderRadius: 0,
-      background: active ? 'rgba(201,168,76,0.14)' : 'rgba(255,255,255,0.04)',
+      background: active ? 'rgba(201,168,76,0.14)' : 'var(--bg-elevated)',
       color: active ? GOLD : 'var(--text-tertiary)',
     }}>{days}D</span>
   )
