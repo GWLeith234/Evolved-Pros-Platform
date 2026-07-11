@@ -753,10 +753,11 @@ export default async function MemberHomePage() {
         <DailyPulseCard habits={dailyHabits} commitments={weekCommitments} />
       </div>
 
-      {/* SPRINT M — two-card sponsor row directly under the 4-up tile grid.
-          Teal + gold 4px left accents; pulls up to two active rows from
-          platform_ads (placement IN ['home','all'] preferred). Mount-gated
-          inside the component so SSR + first hydration always agree. */}
+      {/* SPRINT-1 — Evolution Partner sponsor row directly under the 4-up tile
+          grid. Premium red-accented cards (badge + mic glyph + red CTA) that
+          adapt to both themes; pulls up to two active rows from platform_ads
+          (placement IN ['home','all'] preferred). Mount-gated inside the
+          component so SSR + first hydration always agree. */}
       <HomeSponsorRow />
 
       <ProfileCompletePrompt

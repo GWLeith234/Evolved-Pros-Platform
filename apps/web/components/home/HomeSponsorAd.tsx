@@ -23,33 +23,66 @@ export const SPONSOR_AD_COLUMNS =
 export const SPONSOR_RED = '#C9302A'
 
 /**
+ * Red microphone disc — the Evolved Pros brand glyph. Used as the logo
+ * fallback when a partner has no image, so the placement still reads as an
+ * Evolution Partner card rather than a bare initial.
+ */
+function MicGlyph() {
+  return (
+    <span
+      className="flex h-20 w-20 items-center justify-center rounded-2xl"
+      style={{ backgroundColor: 'rgba(201,48,42,0.10)' }}
+      aria-hidden
+    >
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke={SPONSOR_RED} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+        <rect x="9" y="2" width="6" height="12" rx="3" fill={SPONSOR_RED} stroke="none" />
+        <path d="M5 10a7 7 0 0 0 14 0" />
+        <line x1="12" y1="17" x2="12" y2="21" />
+        <line x1="8" y1="21" x2="16" y2="21" />
+      </svg>
+    </span>
+  )
+}
+
+/**
  * Centered premium Evolution Partner card — shared by the under-tiles row and
- * the sidebar placement. Red badge, red CTA, soft scale hover.
+ * the sidebar placement. Red badge, red mic glyph, red CTA, and a soft
+ * scale + red-glow hover. Every surface/text color binds to a theme token so
+ * the card reads identically in dark and light modes (SPRINT-1); the red
+ * accents are the only fixed brand colors, so they stand out without
+ * overwhelming the neutral card body.
  */
 export function SponsorAdCard({ ad }: { ad: SponsorAd; accent?: string }) {
+  const [hover, setHover] = useState(false)
   const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
   const name = ad.sponsor_name ?? ad.tool_name ?? 'Evolution Partner'
   const tagline = ad.headline ?? ad.endorsement_quote ?? name
   const cta = stripTrailingArrow(ad.cta_text ?? 'Learn More')
-  const initial = (name[0] ?? 'E').toUpperCase()
 
   const card = (
     <div
-      className="relative flex h-full flex-col rounded-2xl border border-red/30 bg-zinc-900 p-6 pt-8 transition-all duration-300 group-hover:scale-[1.02] group-hover:border-red/50 group-hover:shadow-2xl group-hover:shadow-red/10"
+      className="relative flex h-full flex-col rounded-2xl border p-6 pt-8"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
       style={{
-        // Brand red (#C9302A) for border tokens that Tailwind red/* can't hit exactly
-        borderColor: 'rgba(201,48,42,0.30)',
-        background: '#111926',
+        background: 'var(--bg-surface)',
+        borderColor: hover ? 'rgba(201,48,42,0.55)' : 'rgba(201,48,42,0.28)',
+        transform: hover ? 'scale(1.02)' : 'scale(1)',
+        boxShadow: hover
+          ? '0 18px 40px -12px rgba(201,48,42,0.28)'
+          : '0 1px 2px rgba(0,0,0,0.04)',
+        transition: 'transform 300ms ease, box-shadow 300ms ease, border-color 300ms ease',
       }}
     >
       {/* Evolution Partner Badge */}
       <div
-        className="absolute -top-3 right-6 rounded-full px-3 py-1 text-xs font-medium tracking-widest text-white"
+        className="absolute -top-3 right-6 rounded-full px-3 py-1 text-xs text-white"
         style={{
           backgroundColor: SPONSOR_RED,
           fontFamily: '"Barlow Condensed", sans-serif',
           fontWeight: 800,
           letterSpacing: '0.18em',
+          boxShadow: '0 2px 8px rgba(201,48,42,0.35)',
         }}
       >
         EVOLUTION PARTNER
@@ -61,46 +94,43 @@ export function SponsorAdCard({ ad }: { ad: SponsorAd; accent?: string }) {
           <img
             src={ad.image_url}
             alt={name}
-            className="h-20 w-auto object-contain opacity-90 transition-opacity group-hover:opacity-100"
+            className="h-20 w-auto object-contain transition-opacity"
+            style={{ opacity: hover ? 1 : 0.9 }}
           />
         ) : (
-          <div
-            className="flex h-20 w-20 items-center justify-center rounded-xl text-4xl"
-            style={{
-              backgroundColor: 'rgba(201,48,42,0.10)',
-              color: SPONSOR_RED,
-              fontFamily: '"Bebas Neue", sans-serif',
-            }}
-          >
-            {initial}
-          </div>
+          <MicGlyph />
         )}
 
         <div>
           <h4
-            className="text-xl font-semibold text-white"
-            style={{ fontFamily: '"Barlow Condensed", sans-serif', letterSpacing: '0.04em' }}
+            className="text-xl font-semibold"
+            style={{
+              fontFamily: '"Barlow Condensed", sans-serif',
+              letterSpacing: '0.04em',
+              color: 'var(--text-primary)',
+            }}
           >
             {name}
           </h4>
           <p
-            className="mt-2 text-sm leading-relaxed text-zinc-400"
-            style={{ fontFamily: '"Barlow", sans-serif' }}
+            className="mt-2 text-sm leading-relaxed"
+            style={{ fontFamily: '"Barlow", sans-serif', color: 'var(--text-secondary)' }}
           >
             {tagline}
           </p>
         </div>
       </div>
 
-      <div className="mt-6 border-t border-white/10 pt-6">
+      <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--border-color)' }}>
         <div
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-medium text-white transition-colors"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm text-white"
           style={{
-            backgroundColor: SPONSOR_RED,
+            backgroundColor: hover ? '#B12923' : SPONSOR_RED,
             fontFamily: '"Barlow Condensed", sans-serif',
             fontWeight: 800,
             letterSpacing: '0.14em',
             textTransform: 'uppercase',
+            transition: 'background-color 200ms ease',
           }}
         >
           {cta}
@@ -116,14 +146,14 @@ export function SponsorAdCard({ ad }: { ad: SponsorAd; accent?: string }) {
         href={href}
         target="_blank"
         rel="noopener noreferrer sponsored"
-        className="group block h-full pt-3 no-underline"
+        className="block h-full pt-3 no-underline"
       >
         {card}
       </a>
     )
   }
 
-  return <div className="group h-full pt-3">{card}</div>
+  return <div className="h-full pt-3">{card}</div>
 }
 
 /** Shared "Sponsored" eyebrow + divider used above each sponsor placement. */
