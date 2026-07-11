@@ -34,11 +34,13 @@ interface TopNavProps {
 
 interface NavItem { label: string; href: string; minTier?: 'vip' | 'pro'; highlight?: boolean }
 
-// Core loops first; Events consolidated under LIVE.
+// Core loops first; Goals = Accountability Hub (daily habit driver).
+// Events consolidated under LIVE.
 const NAV_ITEMS: NavItem[] = [
   { label: 'Home',      href: '/home' },
   { label: 'Community', href: '/community' },
   { label: 'Academy',   href: '/academy',  minTier: 'vip' },
+  { label: 'Goals',     href: '/scoreboard' },
   { label: 'Live',      href: '/live' },
   { label: 'Podcast',   href: '/podcast' },
   { label: 'Media',     href: '/media',    highlight: true },

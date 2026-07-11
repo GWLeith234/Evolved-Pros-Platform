@@ -117,7 +117,7 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
       eyebrowColor={ringColor}
       eyebrow="Discipline"
       title="Daily pulse"
-      footer={<TileFooterLink href="/academy/accountability">All habits</TileFooterLink>}
+      footer={<TileFooterLink href="/scoreboard">Open scoreboard</TileFooterLink>}
     >
       {/* Circle progress */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 16px 10px' }}>

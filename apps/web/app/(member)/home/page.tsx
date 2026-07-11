@@ -16,6 +16,7 @@ import { PillarJourneyStrip, type PillarStripItem } from '@/components/home/Pill
 import { InProgressPillarHero } from '@/components/home/InProgressPillarHero'
 import { ClimbingTowardCard } from '@/components/home/ClimbingTowardCard'
 import { GoalCard, type GoalForCard } from '@/components/home/GoalCard'
+import { AccountabilityHub } from '@/components/home/AccountabilityHub'
 import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
 import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStoriesTile'
 import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
@@ -532,15 +533,16 @@ async function fetchTodaysHabits(authUserId: string): Promise<DailyPulseHabit[]>
   }
 }
 
-async function fetchWeekCommitments(authUserId: string, weekStart: string): Promise<DailyPulseCommitment[]> {
+/** weekly_commitments.user_id stores public.users.id (profile.id), not auth.uid(). */
+async function fetchWeekCommitments(profileId: string, weekStart: string): Promise<DailyPulseCommitment[]> {
   try {
     const { data } = await adminClient
       .from('weekly_commitments')
       .select('id, commitment, is_completed, week_start, created_at')
-      .eq('user_id', authUserId)
+      .eq('user_id', profileId)
       .eq('week_start', weekStart)
       .order('created_at', { ascending: true })
-      .limit(2)
+      .limit(5)
     return (data ?? []).map(c => ({
       id: c.id,
       commitment: c.commitment,
@@ -669,9 +671,9 @@ export default async function MemberHomePage() {
       .eq('is_active', true)
       .order('created_at', { ascending: true })
       .limit(5),
-    // HOME-DAILY-PULSE — habits FK to auth.users(id), so key on user.id.
+    // HOME-DAILY-PULSE — habits FK to auth.users(id); commitments FK to profile.id.
     fetchTodaysHabits(user.id),
-    fetchWeekCommitments(user.id, weekStart),
+    fetchWeekCommitments(profile.id, weekStart),
     // Sponsor ads SSR — avoids client waterfall after paint
     fetchHomeSponsors(),
   ])
@@ -835,8 +837,8 @@ export default async function MemberHomePage() {
       description: weekCommitments.length
         ? 'Check off what you said you’d do — scoreboard stays honest.'
         : 'Write 1–2 weekly commitments and hold the line.',
-      href: '/home#daily-practice',
-      cta: 'Open check-in',
+      href: '/scoreboard',
+      cta: 'Open scoreboard',
       accent: '#C9A84C',
     },
     {
@@ -846,10 +848,10 @@ export default async function MemberHomePage() {
         ? `${habitsDone}/${dailyHabits.length} habits today`
         : 'Build your habit stack',
       description: dailyHabits.length
-        ? 'Tap habits in Daily Pulse to log today’s work.'
+        ? 'Tap habits in the Accountability Hub to log today’s work.'
         : 'Three daily habits. Compound quiet excellence.',
-      href: '/academy',
-      cta: dailyHabits.length ? 'Log habits' : 'Explore pillars',
+      href: '/home#accountability-hub',
+      cta: dailyHabits.length ? 'Log habits' : 'Open hub',
       accent: '#0ABFA3',
     },
     {
@@ -882,6 +884,16 @@ export default async function MemberHomePage() {
 
       {/* Today's Evolution — primary DAU loop, one-click actions */}
       <TodaysEvolution actions={todaysActions} />
+
+      {/* Accountability Hub — central daily habit driver (goals + pulse + CTAs) */}
+      <AccountabilityHub
+        variant="compact"
+        habits={dailyHabits}
+        commitments={weekCommitments}
+        goals={goalsForCards}
+        courseHref={courseHref}
+        courseLabel={inProgressData ? `Continue ${inProgressData.name}` : 'Start Foundation'}
+      />
 
       {/* HOME tiles — Community Pulse / Top Stories / Latest Drops / Daily Pulse */}
       <div
@@ -994,12 +1006,21 @@ export default async function MemberHomePage() {
 
         {/* Long Game */}
         <div className="space-y-3">
-          <p
-            className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px]"
-            style={{ color: 'var(--text-tertiary)' }}
-          >
-            The Long Game
-          </p>
+          <div className="flex items-center justify-between gap-2">
+            <p
+              className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px]"
+              style={{ color: 'var(--text-tertiary)' }}
+            >
+              The Long Game
+            </p>
+            <a
+              href="/scoreboard"
+              className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px]"
+              style={{ color: '#C9A84C', textDecoration: 'none' }}
+            >
+              Scoreboard →
+            </a>
+          </div>
           {/* "+ Add Goal" CTA removed: it pointed at /settings#goals, but
               Settings has no Goals section and no goal-creation UI exists
               anywhere yet (quarterly_goals has no write surface). Restore a

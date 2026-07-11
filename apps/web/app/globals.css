@@ -633,6 +633,25 @@ html.light-mode .ep-loader-logo--light { display: block; }
   .home-4up-grid { grid-template-columns: 1fr !important; }
 }
 
+/* Accountability Hub — daily/weekly progress micro-animations */
+@keyframes hub-flash-in {
+  0%   { opacity: 0; transform: translateY(4px); }
+  15%  { opacity: 1; transform: translateY(0); }
+  85%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+.hub-flash {
+  animation: hub-flash-in 1.8s ease forwards;
+}
+@media (max-width: 720px) {
+  .hub-overview-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .hub-body-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /* ─────────────────────────────────────────────────────────────────
    Shared design-system tokens used by editorial pages (/live, etc).
    /live is navy-only (no theme toggle) so these values are constant.
