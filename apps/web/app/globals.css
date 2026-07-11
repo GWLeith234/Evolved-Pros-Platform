@@ -722,6 +722,29 @@ textarea {
   opacity: 0.92;
 }
 
+/* Admin Prospects CRM kanban */
+.crm-board-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(200px, 1fr));
+  gap: 12px;
+}
+@media (max-width: 1200px) {
+  .crm-board-grid {
+    grid-auto-flow: column;
+    grid-template-columns: repeat(5, minmax(220px, 1fr));
+  }
+}
+.crm-qa:hover {
+  filter: brightness(0.95);
+  background: rgba(27, 60, 90, 0.04) !important;
+}
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 @keyframes skeleton-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
