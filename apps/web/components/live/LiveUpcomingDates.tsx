@@ -11,8 +11,8 @@ export function LiveUpcomingDates() {
     <section style={{ maxWidth: 1280, margin: '64px auto 0', padding: '0 24px' }}>
       <LiveSectionHeader
         eyebrow="Where He's Headed"
-        title="Upcoming dates"
-        kicker="The 2026 calendar. Confirmed dates, plus a few holds."
+        title="Upcoming speaking events"
+        kicker="Confirmed dates and holds — city and country on every row."
       />
       <div style={{ marginTop: 24, border: '1px solid var(--border-soft2)' }}>
         {UPCOMING_DATES.map((d, i) => (

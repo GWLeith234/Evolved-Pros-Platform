@@ -34,15 +34,14 @@ interface TopNavProps {
 
 interface NavItem { label: string; href: string; minTier?: 'vip' | 'pro'; highlight?: boolean }
 
-// Short, adoption-friendly labels. Order prioritizes daily loops
-// (home → community → learn) then discovery (events, podcast, media).
+// Core loops first; Events consolidated under LIVE.
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Home',    href: '/home' },
-  { label: 'Feed',    href: '/community' },
-  { label: 'Learn',   href: '/academy',  minTier: 'vip' },
-  { label: 'Events',  href: '/events' },
-  { label: 'Podcast', href: '/podcast' },
-  { label: 'Media',   href: '/media',    highlight: true },
+  { label: 'Home',      href: '/home' },
+  { label: 'Community', href: '/community' },
+  { label: 'Academy',   href: '/academy',  minTier: 'vip' },
+  { label: 'Live',      href: '/live' },
+  { label: 'Podcast',   href: '/podcast' },
+  { label: 'Media',     href: '/media',    highlight: true },
 ]
 
 const TIER_RANK: Record<string, number> = { community: 1, vip: 2, pro: 3 }
