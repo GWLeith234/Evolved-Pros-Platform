@@ -148,7 +148,7 @@ export function InProgressPillarHero({
         className="mt-4 inline-flex items-center justify-center w-full font-condensed font-bold uppercase tracking-[0.14em] text-[12px] py-2.5 rounded transition-opacity hover:opacity-90"
         style={{ backgroundColor: cfg.color, color: '#fff' }}
       >
-        Continue →
+        {nextLessonTitle ? 'Continue lesson →' : 'Open course →'}
       </Link>
     </div>
   )

@@ -42,7 +42,7 @@ export function OnboardingPillar({ onContinue }: Props) {
         Where do you need the most work?
       </h2>
       <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '13px', color: 'rgba(250,249,247,0.45)', lineHeight: 1.55, margin: '0 0 24px' }}>
-        Pick your biggest growth area. You&apos;ll still start with Foundation — it&apos;s the base everything else builds on.
+        Pick your biggest growth area. Everyone starts with Foundation — it unlocks the rest.
       </p>
 
       {/* Pillar grid */}

@@ -8,22 +8,30 @@ interface Props {
 
 const TEAL = '#0ABFA3'
 
+// Land members in Foundation immediately — first lesson of first course.
+const FIRST_COURSE_HREF = '/academy/foundation'
+
 async function finish(destination: string) {
   await fetch('/api/onboarding/complete', { method: 'PATCH' })
   window.location.href = destination
 }
 
 export function OnboardingComplete({ displayName }: Props) {
-  const [loading, setLoading] = useState<'academy' | 'community' | null>(null)
+  const [loading, setLoading] = useState<'academy' | 'community' | 'home' | null>(null)
 
   async function handleAcademy() {
     setLoading('academy')
-    await finish('/academy')
+    await finish(FIRST_COURSE_HREF)
   }
 
   async function handleCommunity() {
     setLoading('community')
     await finish('/community')
+  }
+
+  async function handleHome() {
+    setLoading('home')
+    await finish('/home')
   }
 
   return (
@@ -90,21 +98,20 @@ export function OnboardingComplete({ displayName }: Props) {
         </p>
       )}
 
-      {/* Subtext */}
       <p style={{
         fontFamily: 'Barlow, sans-serif',
         fontSize: '14px',
         color: 'rgba(250,249,247,0.5)',
         lineHeight: 1.6,
-        margin: '0 0 36px',
+        margin: '0 0 28px',
         maxWidth: '340px',
         marginLeft: 'auto',
         marginRight: 'auto',
       }}>
-        Welcome to Evolved Pros. Your journey to becoming an elite sales professional starts now.
+        Your first course is ready. Foundation is the base everything else builds on.
       </p>
 
-      {/* Primary CTA — Academy */}
+      {/* Primary — straight into Foundation */}
       <button
         type="button"
         onClick={handleAcademy}
@@ -112,8 +119,8 @@ export function OnboardingComplete({ displayName }: Props) {
         style={{
           width: '100%',
           padding: '16px 24px',
-          backgroundColor: '#C9A84C',
-          color: '#0A0F18',
+          backgroundColor: '#C9302A',
+          color: '#fff',
           fontFamily: '"Barlow Condensed", sans-serif',
           fontWeight: 900,
           fontSize: '15px',
@@ -122,23 +129,22 @@ export function OnboardingComplete({ displayName }: Props) {
           border: 'none',
           borderRadius: '6px',
           cursor: loading ? 'not-allowed' : 'pointer',
-          opacity: loading === 'community' ? 0.5 : 1,
+          opacity: loading && loading !== 'academy' ? 0.5 : 1,
           marginBottom: '10px',
         }}
       >
-        {loading === 'academy' ? 'Loading…' : 'Start Academy →'}
+        {loading === 'academy' ? 'Loading…' : 'Start Foundation →'}
       </button>
 
-      {/* Secondary CTA — Community */}
       <button
         type="button"
-        onClick={handleCommunity}
+        onClick={handleHome}
         disabled={!!loading}
         style={{
           width: '100%',
           padding: '14px 24px',
           backgroundColor: 'rgba(255,255,255,0.05)',
-          color: 'rgba(255,255,255,0.7)',
+          color: 'rgba(255,255,255,0.75)',
           fontFamily: '"Barlow Condensed", sans-serif',
           fontWeight: 700,
           fontSize: '14px',
@@ -147,10 +153,32 @@ export function OnboardingComplete({ displayName }: Props) {
           border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: '6px',
           cursor: loading ? 'not-allowed' : 'pointer',
-          opacity: loading === 'academy' ? 0.5 : 1,
+          opacity: loading && loading !== 'home' ? 0.5 : 1,
+          marginBottom: '8px',
         }}
       >
-        {loading === 'community' ? 'Loading…' : 'Go to Community'}
+        {loading === 'home' ? 'Loading…' : 'Go to Home'}
+      </button>
+
+      <button
+        type="button"
+        onClick={handleCommunity}
+        disabled={!!loading}
+        style={{
+          width: '100%',
+          padding: '12px 24px',
+          background: 'none',
+          color: 'rgba(255,255,255,0.4)',
+          fontFamily: '"Barlow Condensed", sans-serif',
+          fontWeight: 700,
+          fontSize: '12px',
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          border: 'none',
+          cursor: loading ? 'not-allowed' : 'pointer',
+        }}
+      >
+        {loading === 'community' ? 'Loading…' : 'Or join the community first'}
       </button>
     </div>
   )

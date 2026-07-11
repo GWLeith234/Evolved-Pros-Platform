@@ -7,6 +7,7 @@ import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
 
 export const metadata: Metadata = { title: 'Home — Evolved Pros' }
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
+import { TodaysEvolution, type TodaysEvolutionAction } from '@/components/home/TodaysEvolution'
 import { ActivityFeed } from '@/components/home/ActivityFeed'
 import { UpcomingEventsWidget } from '@/components/home/UpcomingEventsWidget'
 import { AcademyProgressWidget } from '@/components/home/AcademyProgressWidget'
@@ -800,6 +801,68 @@ export default async function MemberHomePage() {
     pillar: g.pillar,
   }))
 
+  // Today's Evolution — one-click DAU loop (course, accountability, community)
+  const habitsDone = dailyHabits.filter(h => h.completedToday).length
+  const commitsDone = weekCommitments.filter(c => c.is_completed).length
+  const courseHref = inProgressData
+    ? (inProgressData.nextLessonSlug
+        ? `/academy/${inProgressData.courseSlug}/${inProgressData.nextLessonSlug}`
+        : `/academy/${inProgressData.courseSlug}`)
+    : '/academy/foundation'
+  const todaysActions: TodaysEvolutionAction[] = [
+    {
+      id: 'learn',
+      eyebrow: 'Learn',
+      title: inProgressData
+        ? `Continue ${inProgressData.name}`
+        : 'Start Foundation',
+      description: inProgressData?.nextLessonTitle
+        ? `Next: ${inProgressData.nextLessonTitle}`
+        : inProgressData
+          ? `${inProgressData.progressPct}% complete — keep the streak.`
+          : 'Lesson 1 of the 6-pillar system. Begin now.',
+      href: courseHref,
+      cta: inProgressData ? 'Resume lesson' : 'Open Foundation',
+      accent: '#C9302A',
+      primary: true,
+    },
+    {
+      id: 'accountability',
+      eyebrow: 'Accountability',
+      title: commitsDone > 0 || weekCommitments.length > 0
+        ? `${commitsDone}/${Math.max(weekCommitments.length, 1)} commitments`
+        : 'Set this week’s commitments',
+      description: weekCommitments.length
+        ? 'Check off what you said you’d do — scoreboard stays honest.'
+        : 'Write 1–2 weekly commitments and hold the line.',
+      href: '/home#daily-practice',
+      cta: 'Open check-in',
+      accent: '#C9A84C',
+    },
+    {
+      id: 'habits',
+      eyebrow: 'Daily pulse',
+      title: dailyHabits.length
+        ? `${habitsDone}/${dailyHabits.length} habits today`
+        : 'Build your habit stack',
+      description: dailyHabits.length
+        ? 'Tap habits in Daily Pulse to log today’s work.'
+        : 'Three daily habits. Compound quiet excellence.',
+      href: '/academy',
+      cta: dailyHabits.length ? 'Log habits' : 'Explore pillars',
+      accent: '#0ABFA3',
+    },
+    {
+      id: 'community',
+      eyebrow: 'Community',
+      title: 'Show up in the feed',
+      description: 'Post a win, ask a hard question, or vote on today’s poll.',
+      href: '/community',
+      cta: 'Open feed',
+      accent: '#A78BFA',
+    },
+  ]
+
   return (
     <div className="px-6 pb-6 space-y-5">
       <EpisodeBanner />
@@ -816,6 +879,9 @@ export default async function MemberHomePage() {
         }}
         pillars={pillars}
       />
+
+      {/* Today's Evolution — primary DAU loop, one-click actions */}
+      <TodaysEvolution actions={todaysActions} />
 
       {/* HOME tiles — Community Pulse / Top Stories / Latest Drops / Daily Pulse */}
       <div
@@ -838,11 +904,12 @@ export default async function MemberHomePage() {
         hasName={Boolean(profile.display_name || profile.full_name)}
       />
 
-      {/* SPRINT J — Section divider: "The Daily Practice" (matches the
-          standalone Home design). Sits above the Activity/Events row to
-          create visible rhythm between the 4-up tiles and the rest of
-          the page. */}
-      <div className="flex items-center gap-4 pt-3" style={{ margin: '12px 0 4px' }}>
+      {/* Daily Practice — habits / commitments / activity */}
+      <div
+        id="daily-practice"
+        className="flex items-center gap-4 pt-3"
+        style={{ margin: '12px 0 4px' }}
+      >
         <span style={{ width: 28, height: 1, background: 'rgba(201,168,76,0.5)' }} />
         <span
           className="font-condensed font-bold uppercase"
