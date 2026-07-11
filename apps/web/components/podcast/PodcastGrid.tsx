@@ -11,10 +11,8 @@ const FB = 'var(--font-barlow)'
 const FBC = 'var(--font-barlow-condensed)'
 const FBN = 'var(--font-bebas)'
 
-// 0-based tile positions to drop an Evolution Partner card BEFORE, so the ads
-// sit between episode cards rather than at the ends. Extra ads (or ads that
-// have no slot because the filtered list is short) are appended after the grid.
-const AD_SLOTS = [4, 12]
+/** Insert a unique ad after every Nth episode (0-based before index). */
+const AD_EVERY_N = 6
 
 interface PodcastGridProps {
   episodes: PodcastEpisode[]
@@ -39,22 +37,24 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
     return list
   }, [episodes, filter, sort])
 
-  // Interleave the Evolution Partner sponsor cards into the episode stream.
-  // An ad slot spans two grid columns so the wider SponsorAdCard keeps its
-  // proportions next to the square episode covers.
+  // Interleave unique Evolution Partner cards between episodes (never back-to-back).
+  // Desktop: ad spans 2 cols; mobile: full width (see CSS below).
   const gridChildren = useMemo(() => {
     const nodes: ReactNode[] = []
     let adIdx = 0
+    const ads = sponsorAds.slice(0, 2)
     const pushAd = () => {
-      const ad = sponsorAds[adIdx++]
+      if (adIdx >= ads.length) return
+      const ad = ads[adIdx++]
       nodes.push(
-        <div key={`sponsor-${ad.id}`} className="podcast-sponsor-slot" style={{ gridColumn: 'span 2' }}>
+        <div key={`sponsor-${ad.id}`} className="podcast-sponsor-slot">
           <SponsorAdCard ad={ad} />
         </div>,
       )
     }
     filtered.forEach((ep, i) => {
-      if (adIdx < sponsorAds.length && AD_SLOTS.includes(i)) pushAd()
+      // After episodes 6, 12, … (i is 0-based → insert before index 6, 12)
+      if (adIdx < ads.length && i > 0 && i % AD_EVERY_N === 0) pushAd()
       nodes.push(
         <PodcastEpisodeTile
           key={ep.id}
@@ -65,8 +65,8 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
         />,
       )
     })
-    // Any ads that didn't land on a slot (short list) go after the last card.
-    while (adIdx < sponsorAds.length) pushAd()
+    // Short catalogues: still show remaining partners once at the end
+    while (adIdx < ads.length) pushAd()
     return nodes
   }, [filtered, sponsorAds, focused])
 
@@ -251,10 +251,17 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
           outline: 2px solid var(--brand-teal);
           outline-offset: 2px;
         }
+        .podcast-sponsor-slot {
+          grid-column: span 2;
+          min-width: 0;
+        }
         @media (max-width: 600px) {
           .podcast-archive-grid {
             grid-template-columns: 1fr 1fr !important;
             gap: 24px 14px !important;
+          }
+          .podcast-sponsor-slot {
+            grid-column: 1 / -1 !important;
           }
         }
         @media (max-width: 400px) {

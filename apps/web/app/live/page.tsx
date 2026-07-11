@@ -40,7 +40,7 @@ async function fetchLiveSponsors(): Promise<SponsorAd[]> {
     if (all.length === 0) return pickAcademySponsors(DEFAULT_ACADEMY_SPONSORS, 2)
     return pickAcademySponsors(all, 2)
   } catch {
-    return DEFAULT_ACADEMY_SPONSORS
+    return pickAcademySponsors(DEFAULT_ACADEMY_SPONSORS, 2)
   }
 }
 

@@ -3,8 +3,8 @@ import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { LiveSectionHeader } from './LiveSectionHeader'
 
 /**
- * 1–2 Evolution Partner cards on the LIVE page — reuses AcademyLessonSponsors
- * / SponsorAdCard for a consistent premium treatment.
+ * 1–2 Evolution Partner cards on the LIVE page.
+ * Section header lives here once — AcademyLessonSponsors is body-only.
  */
 export function LiveSponsors({ ads }: { ads: SponsorAd[] }) {
   if (!ads.length) return null
@@ -16,7 +16,7 @@ export function LiveSponsors({ ads }: { ads: SponsorAd[] }) {
         kicker="Brands that back the operators on this stage."
       />
       <div style={{ marginTop: 8 }}>
-        <AcademyLessonSponsors ads={ads.slice(0, 2)} />
+        <AcademyLessonSponsors ads={ads.slice(0, 2)} hideHeader />
       </div>
     </section>
   )

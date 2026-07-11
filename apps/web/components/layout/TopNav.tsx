@@ -41,7 +41,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Community', href: '/community' },
   { label: 'Academy',   href: '/academy',  minTier: 'vip' },
   { label: 'Goals',     href: '/scoreboard' },
-  { label: 'Live',      href: '/live' },
+  { label: 'LIVE',      href: '/live' },
   { label: 'Podcast',   href: '/podcast' },
   { label: 'Media',     href: '/media',    highlight: true },
 ]

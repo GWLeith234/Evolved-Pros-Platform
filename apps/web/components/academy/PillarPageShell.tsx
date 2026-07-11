@@ -170,7 +170,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
   const pillarAd = (pillarAdData as any) ?? null
 
   // 1–2 Evolution Partners for course footer (lesson pages use the same catalog)
-  let courseSponsors: SponsorAd[] = DEFAULT_ACADEMY_SPONSORS
+  let courseSponsors: SponsorAd[] = pickAcademySponsors(DEFAULT_ACADEMY_SPONSORS, 2)
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: sponsorRows } = await (adminClient as any)
@@ -182,7 +182,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
     const all = (sponsorRows ?? []) as SponsorAd[]
     if (all.length > 0) courseSponsors = pickAcademySponsors(all, 2)
   } catch {
-    /* static fallback */
+    /* rotated static fallback already set */
   }
 
   return (

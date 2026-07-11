@@ -5,6 +5,11 @@ import { dbRowToEpisode, assertMonotonicNumbering, type EpisodeRow, type Progres
 import { PodcastPageShell } from '@/components/podcast/PodcastPageShell'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { SPONSOR_AD_COLUMNS, type SponsorAd } from '@/components/home/HomeSponsorAd'
+import {
+  ALL_FLAGSHIP_SPONSORS,
+  ensureFlagshipSponsors,
+  pickRotatedSponsors,
+} from '@/lib/sponsors/partners'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'The Evolved Pros Podcast | Evolved Pros' }
@@ -55,28 +60,36 @@ export default async function PodcastIndexPage() {
 }
 
 async function fetchPodcastSponsorAds(): Promise<SponsorAd[]> {
+  // Rotated + deduped Evolution Partners (includes Vendasta avatars creative).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = adminClient as any
-  const primary = await sb
-    .from('platform_ads')
-    .select(SPONSOR_AD_COLUMNS)
-    .eq('is_active', true)
-    .in('placement', ['podcast', 'all'])
-    .order('sort_order')
-    .limit(2)
-  const rows = (primary.data ?? []) as SponsorAd[]
-  if (rows.length < 2) {
-    const fallback = await sb
+  try {
+    const primary = await sb
       .from('platform_ads')
       .select(SPONSOR_AD_COLUMNS)
       .eq('is_active', true)
+      .in('placement', ['podcast', 'all'])
       .order('sort_order')
-      .limit(2)
-    const seen = new Set(rows.map(r => r.id))
-    for (const r of (fallback.data ?? []) as SponsorAd[]) {
-      if (rows.length >= 2) break
-      if (!seen.has(r.id)) rows.push(r) // distinct ads only
+      .limit(12)
+    let rows = (primary.data ?? []) as SponsorAd[]
+    if (rows.length < 2) {
+      const fallback = await sb
+        .from('platform_ads')
+        .select(SPONSOR_AD_COLUMNS)
+        .eq('is_active', true)
+        .order('sort_order')
+        .limit(12)
+      const seen = new Set(rows.map(r => r.id))
+      for (const r of (fallback.data ?? []) as SponsorAd[]) {
+        if (!seen.has(r.id)) {
+          seen.add(r.id)
+          rows.push(r)
+        }
+      }
     }
+    const pool = rows.length ? ensureFlagshipSponsors(rows) : ALL_FLAGSHIP_SPONSORS
+    return pickRotatedSponsors(pool, 2, { salt: 71 })
+  } catch {
+    return pickRotatedSponsors(ALL_FLAGSHIP_SPONSORS, 2, { salt: 71 })
   }
-  return rows.slice(0, 2)
 }

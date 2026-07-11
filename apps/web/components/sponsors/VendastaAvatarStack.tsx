@@ -47,7 +47,15 @@ function AvatarFace({
   size: number
   label: string
 }) {
-  const [failed, setFailed] = useState(false)
+  // Try .png first (canonical Supabase Branding/Avatar N.png), then .jpg
+  const [srcIdx, setSrcIdx] = useState(0)
+  const candidates = [
+    src,
+    src.replace(/\.png$/i, '.jpg'),
+    src.replace(/Avatar%20/g, 'Avatar%20').replace(/\.png$/i, '.webp'),
+  ]
+  const current = candidates[Math.min(srcIdx, candidates.length - 1)]
+  const failed = srcIdx >= candidates.length
   const overlap = Math.round(size * 0.28)
   const ring = '2px solid rgba(255,255,255,0.85)'
 
@@ -73,13 +81,13 @@ function AvatarFace({
       {!failed ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={src}
+          src={current}
           alt=""
           width={size}
           height={size}
           loading="lazy"
           decoding="async"
-          onError={() => setFailed(true)}
+          onError={() => setSrcIdx(i => i + 1)}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
       ) : (

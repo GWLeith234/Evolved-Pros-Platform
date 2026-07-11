@@ -38,7 +38,7 @@ async function fetchAcademyLessonSponsors(): Promise<SponsorAd[]> {
       .order('sort_order')
       .limit(12)
     const all = (rows ?? []) as Array<SponsorAd & { placement?: string | null }>
-    if (all.length === 0) return DEFAULT_ACADEMY_SPONSORS
+    if (all.length === 0) return pickAcademySponsors(DEFAULT_ACADEMY_SPONSORS, 2)
     // Prefer academy/all placements when present
     const preferred = all.filter(a => {
       const p = (a.placement ?? 'all').toLowerCase()
@@ -46,7 +46,7 @@ async function fetchAcademyLessonSponsors(): Promise<SponsorAd[]> {
     })
     return pickAcademySponsors(preferred.length ? preferred : all, 2)
   } catch {
-    return DEFAULT_ACADEMY_SPONSORS
+    return pickAcademySponsors(DEFAULT_ACADEMY_SPONSORS, 2)
   }
 }
 

@@ -508,14 +508,21 @@ export function HomeSponsorAd({ ad }: { ad: SponsorAd | null }) {
 }
 
 export function HomeSponsorRow({ ads }: { ads: SponsorAd[] }) {
-  if (!ads.length) return null
+  // Never render the same partner twice in one row
+  const seen = new Set<string>()
+  const unique = ads.filter(ad => {
+    if (!ad?.id || seen.has(ad.id)) return false
+    seen.add(ad.id)
+    return true
+  })
+  if (!unique.length) return null
 
-  if (ads.length === 1) {
+  if (unique.length === 1) {
     return (
       <section aria-label="Sponsored">
         <SponsoredEyebrow />
         <div style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }}>
-          <SponsorAdCard ad={ads[0]} />
+          <SponsorAdCard ad={unique[0]} />
         </div>
       </section>
     )
@@ -528,7 +535,7 @@ export function HomeSponsorRow({ ads }: { ads: SponsorAd[] }) {
         className="grid grid-cols-1 gap-6 md:grid-cols-2"
         style={{ width: '100%', maxWidth: 1440, margin: '0 auto', paddingTop: 4 }}
       >
-        {ads.map(ad => (
+        {unique.map(ad => (
           <SponsorAdCard key={ad.id} ad={ad} />
         ))}
       </div>

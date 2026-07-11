@@ -85,7 +85,7 @@ const TABS: TabItem[] = [
   { label: 'Community', href: '/community',  match: /^\/community/,  icon: <UsersIcon /> },
   { label: 'Academy',   href: '/academy',    match: /^\/academy/,    icon: <BookIcon /> },
   { label: 'Goals',     href: '/scoreboard', match: /^\/scoreboard/, icon: <TargetIcon /> },
-  { label: 'Live',      href: '/live',       match: /^\/live/,       icon: <CalendarIcon /> },
+  { label: 'LIVE',      href: '/live',       match: /^\/live/,       icon: <CalendarIcon /> },
 ]
 
 export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTabBarProps) {
