@@ -2,27 +2,14 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
-import { CommitmentTracker } from '@/components/academy/CommitmentTracker'
 import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
-
-export const metadata: Metadata = { title: 'Home — Evolved Pros' }
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
-import { TodaysEvolution, type TodaysEvolutionAction } from '@/components/home/TodaysEvolution'
-import { ActivityFeed } from '@/components/home/ActivityFeed'
-import { UpcomingEventsWidget } from '@/components/home/UpcomingEventsWidget'
-import { AcademyProgressWidget } from '@/components/home/AcademyProgressWidget'
+import { TodaysEvolution } from '@/components/home/TodaysEvolution'
 import { ProfileCompletePrompt } from '@/components/home/ProfileCompletePrompt'
-import { PillarJourneyStrip, type PillarStripItem } from '@/components/home/PillarJourneyStrip'
-import { InProgressPillarHero } from '@/components/home/InProgressPillarHero'
-import { ClimbingTowardCard } from '@/components/home/ClimbingTowardCard'
-import { GoalCard, type GoalForCard } from '@/components/home/GoalCard'
-import { AccountabilityHub } from '@/components/home/AccountabilityHub'
-import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
-import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStoriesTile'
-import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
-import { DailyPulseCard, type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/DailyPulseCard'
+import type { GoalForCard } from '@/components/home/GoalCard'
+import type { DailyPulseHabit, DailyPulseCommitment } from '@/components/home/DailyPulseCard'
+import type { TimeBlock } from '@/components/home/TimeBlocks'
 import {
-  HomeSponsorAd,
   HomeSponsorRow,
   SPONSOR_AD_COLUMNS,
   type SponsorAd,
@@ -35,7 +22,8 @@ import {
 } from '@/lib/sponsors/partners'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { hasTierAccess } from '@/lib/tier'
-import { formatRelative, formatDuration as formatMinutes, formatDate } from '@/lib/format'
+
+export const metadata: Metadata = { title: 'Home — Evolved Pros' }
 
 async function fetchCurrentUser(supabase: ReturnType<typeof createClient>, email: string) {
   const { data } = await supabase
@@ -44,87 +32,6 @@ async function fetchCurrentUser(supabase: ReturnType<typeof createClient>, email
     .eq('email', email)
     .single()
   return data
-}
-
-async function fetchDashboardStats(supabase: ReturnType<typeof createClient>, userId: string, userTier: string | null, userPoints: number) {
-  const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-
-  const [memberCount, newMembers, courses, allLessons, completions, rankCount] = await Promise.all([
-    supabase.from('users').select('id', { count: 'exact', head: true }).eq('tier_status', 'active'),
-    supabase.from('users').select('id', { count: 'exact', head: true }).eq('tier_status', 'active').gte('created_at', oneWeekAgo),
-    supabase.from('courses').select('id, required_tier').eq('is_published', true),
-    supabase.from('lessons').select('id, course_id').eq('is_published', true),
-    // lesson_progress.user_id stores public.users.id (the value passed in here),
-    // NOT auth.uid(). The RLS policy is `auth.uid() = user_id`, which silently
-    // filters every row when those two diverge. Use adminClient to bypass it.
-    adminClient.from('lesson_progress').select('lesson_id, completed_at').eq('user_id', userId).not('completed_at', 'is', null),
-    supabase.from('users').select('id', { count: 'exact', head: true }).gt('points', userPoints),
-  ])
-
-  const allCourses = courses.data ?? []
-  const accessible = allCourses.filter(c => hasTierAccess(userTier as 'community' | 'vip' | 'pro' | null, c.required_tier as 'community' | 'vip' | 'pro' | null))
-  const pillarsUnlocked = accessible.length
-  const pillarsTotal = allCourses.length
-
-  const lessonsByCourse: Record<string, string[]> = {}
-  for (const l of allLessons.data ?? []) {
-    if (!lessonsByCourse[l.course_id]) lessonsByCourse[l.course_id] = []
-    lessonsByCourse[l.course_id].push(l.id)
-  }
-  const completed = new Set((completions.data ?? []).map(p => p.lesson_id))
-  let totalPct = 0, count = 0
-  for (const c of accessible) {
-    const total = lessonsByCourse[c.id]?.length ?? 0
-    if (total === 0) continue
-    const done = (lessonsByCourse[c.id] ?? []).filter(id => completed.has(id)).length
-    totalPct += done / total
-    count++
-  }
-  const academyProgressPct = count > 0 ? Math.round((totalPct / count) * 100) : 0
-  const leaderboardRank = (rankCount.count ?? 0) + 1
-
-  return {
-    communityMemberCount: memberCount.count ?? 0,
-    newMembersThisWeek: newMembers.count ?? 0,
-    pillarsUnlocked,
-    pillarsTotal,
-    academyProgressPct,
-    leaderboardRank,
-  }
-}
-
-async function fetchRecentActivity(userId: string) {
-  // Use adminClient to bypass RLS so activity always loads regardless of policy gaps.
-  // userId here is profile.id — the public users UUID confirmed by the already-fetched profile.
-  const [notifications, completions, posts] = await Promise.all([
-    adminClient
-      .from('notifications')
-      .select('id, type, title, body, action_url, created_at')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(10),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (adminClient as any)
-      .from('lesson_progress')
-      .select('lesson_id, completed_at, lessons(id, title, sort_order, course_id, courses(title, slug, pillar_number))')
-      .eq('user_id', userId)
-      .not('completed_at', 'is', null)
-      .order('completed_at', { ascending: false })
-      .limit(5),
-    // Posts the user authored — author_id stores the auth UUID
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (adminClient as any)
-      .from('posts')
-      .select('id, body, created_at')
-      .eq('author_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(5),
-  ])
-  return {
-    notifications: notifications.data ?? [],
-    completions: completions.data ?? [],
-    posts: (posts.data ?? []) as { id: string; body: string; created_at: string }[],
-  }
 }
 
 async function fetchUpcomingEvents(supabase: ReturnType<typeof createClient>, userId: string) {
@@ -278,211 +185,6 @@ function getCurrentMonday(): string {
   return monday.toISOString().split('T')[0]
 }
 
-// HOME-4UP-TILES helpers ────────────────────────────────────────────────
-
-function getInitials(name: string | null | undefined): string {
-  if (!name) return '?'
-  return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
-}
-
-// Compact relative age for tight tile rows (no " ago"). The activity feed uses
-// the same ladder with `withAgo` so 42 days reads `6w` in both places.
-function relativeAge(iso: string): string {
-  return formatRelative(iso)
-}
-
-function dayLabelFor(iso: string): string {
-  const d = new Date(iso)
-  const today = new Date()
-  const diffDays = Math.floor((d.getTime() - new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()) / 86_400_000)
-  if (diffDays === 0) return 'Today'
-  if (diffDays === 1) return 'Tmrw'
-  if (diffDays >= 2 && diffDays <= 6) return d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()
-  // Calendar stamp for events more than a week out — uppercase month ("JUL 15"),
-  // never title-case "Jul 15".
-  return formatDate(iso, 'stamp')
-}
-
-function formatTimeLabel(iso: string): string {
-  return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })
-}
-
-function pillarColorFromTag(tag: string | null): string | null {
-  if (!tag) return null
-  // pillar can be 'p1'..'p6' (legacy) or '1'..'6' or a name
-  if (tag.startsWith('p')) {
-    const n = parseInt(tag.slice(1), 10)
-    return n in PILLAR_CONFIG ? PILLAR_CONFIG[n as 1 | 2 | 3 | 4 | 5 | 6].color : null
-  }
-  const n = parseInt(tag, 10)
-  if (!Number.isNaN(n) && n in PILLAR_CONFIG) return PILLAR_CONFIG[n as 1 | 2 | 3 | 4 | 5 | 6].color
-  // Match by label (case-insensitive)
-  const lower = tag.toLowerCase()
-  for (const k of [1, 2, 3, 4, 5, 6] as const) {
-    if (PILLAR_CONFIG[k].label.toLowerCase() === lower) return PILLAR_CONFIG[k].color
-  }
-  return null
-}
-
-function readTimeForBody(body: string | null): string {
-  const words = body ? body.trim().split(/\s+/).length : 0
-  const minutes = Math.max(1, Math.ceil(words / 220))
-  // Read time is always ≥1 min, so formatMinutes never returns null here.
-  return formatMinutes(minutes) ?? ''
-}
-
-// Episode duration: seconds → "N min", or null so the tile hides the slot
-// (never a bare "—").
-function episodeDurationLabel(seconds: number | null): string | null {
-  if (!seconds || seconds <= 0) return null
-  return formatMinutes(Math.round(seconds / 60))
-}
-
-const TILE_PILLAR_ROTATION = [
-  PILLAR_CONFIG[4].color, // strategy blue
-  PILLAR_CONFIG[2].color, // identity violet
-  PILLAR_CONFIG[6].color, // execution teal
-  PILLAR_CONFIG[5].color, // accountability gold
-  PILLAR_CONFIG[1].color, // foundation orange
-  PILLAR_CONFIG[3].color, // mental toughness red
-]
-
-// HOME-4UP-TILES fetchers — adminClient reads (RLS pattern, public ISR
-// rule). Each returns the tile's own prop shape so the page just plumbs.
-
-async function fetchLatestPulsePosts(limit = 3): Promise<PulsePost[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: rows } = await (adminClient as any)
-    .from('posts')
-    .select('id, body, pillar, pillar_tag, like_count, reply_count, created_at, users!posts_author_id_fkey(display_name, full_name, tier), channels(slug)')
-    .eq('is_pinned', false)
-    .order('created_at', { ascending: false })
-    .limit(limit) as { data: Array<{
-      id: string
-      body: string
-      pillar: number | null
-      pillar_tag: string | null
-      like_count: number
-      reply_count: number
-      created_at: string
-      users: { display_name: string | null; full_name: string | null; tier: string | null } | null
-      channels: { slug: string | null } | null
-    }> | null }
-
-  return (rows ?? []).map(r => {
-    const name = r.users?.full_name ?? r.users?.display_name ?? 'Member'
-    const pillarColor = r.pillar
-      ? pillarColorFromTag(String(r.pillar))
-      : pillarColorFromTag(r.pillar_tag)
-    // Same post permalink the notification system emits
-    // (lib/notifications/create.ts): /community/{channelSlug}?post={id}.
-    const href = r.channels?.slug
-      ? `/community/${r.channels.slug}?post=${r.id}`
-      : '/community'
-    return {
-      id: r.id,
-      href,
-      authorName: name,
-      initials: getInitials(name),
-      tier: r.users?.tier ?? null,
-      pillarColor,
-      age: relativeAge(r.created_at),
-      preview: (r.body ?? '').replace(/\s+/g, ' ').trim().slice(0, 200),
-      reactionCount: r.like_count ?? 0,
-      commentCount: r.reply_count ?? 0,
-    }
-  })
-}
-
-async function fetchPinnedLiveEvent(userId: string | null): Promise<PulseEvent | null> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: row } = await (adminClient as any)
-    .from('events')
-    .select('id, title, format, starts_at, attending_count')
-    .eq('is_published', true)
-    .gt('starts_at', new Date().toISOString())
-    .order('starts_at', { ascending: true })
-    .limit(1)
-    .maybeSingle() as { data: {
-      id: string
-      title: string
-      format: string | null
-      starts_at: string
-      attending_count: number | null
-    } | null }
-  if (!row) return null
-
-  let initiallyRsvpd = false
-  if (userId) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: rsvp } = await (adminClient as any)
-      .from('event_rsvps')
-      .select('user_id')
-      .eq('event_id', row.id)
-      .eq('user_id', userId)
-      .maybeSingle()
-    initiallyRsvpd = Boolean(rsvp)
-  }
-
-  return {
-    id: row.id,
-    title: row.title,
-    dayLabel: dayLabelFor(row.starts_at),
-    timeLabel: formatTimeLabel(row.starts_at),
-    attendingCount: row.attending_count ?? 0,
-    initiallyRsvpd,
-  }
-}
-
-async function fetchTopStories(limit = 3): Promise<PulseStory[]> {
-  const { data: rows } = await adminClient
-    .from('media_stories')
-    .select('id, slug, title, body, pillar, views, is_featured, published_at')
-    .eq('is_published', true)
-    .order('views', { ascending: false, nullsFirst: false })
-    .order('published_at', { ascending: false, nullsFirst: false })
-    .limit(limit)
-
-  return (rows ?? []).map(r => {
-    const pillarColor = pillarColorFromTag(r.pillar)
-    return {
-      id: r.id,
-      slug: r.slug,
-      pillar: r.pillar ?? null,
-      category: r.pillar ?? 'Story',
-      categoryColor: pillarColor,
-      title: r.title,
-      readTime: readTimeForBody(r.body),
-      isHot: Boolean(r.is_featured) || (r.views ?? 0) >= 500,
-    }
-  })
-}
-
-async function fetchLatestEpisodes(limit = 3): Promise<{ episodes: PulseEpisode[]; latestNumber: number | null }> {
-  const { data: rows } = await adminClient
-    .from('episodes')
-    .select('id, slug, title, episode_number, guest_name, guest_title, guest_company, duration_seconds, is_published, published_at')
-    .eq('is_published', true)
-    .order('published_at', { ascending: false, nullsFirst: false })
-    .limit(limit)
-
-  const sevenDaysAgo = Date.now() - 7 * 86_400_000
-  const eps = (rows ?? []).map((r, i) => ({
-    id: r.id,
-    slug: r.slug,
-    episodeNumber: r.episode_number,
-    title: r.title,
-    guestName: r.guest_name,
-    guestTitle: r.guest_title,
-    guestCompany: r.guest_company,
-    durationLabel: episodeDurationLabel(r.duration_seconds),
-    isNew: r.published_at ? new Date(r.published_at).getTime() > sevenDaysAgo : false,
-    accent: TILE_PILLAR_ROTATION[i % TILE_PILLAR_ROTATION.length],
-  }))
-  const latestNumber = eps[0]?.episodeNumber ?? null
-  return { episodes: eps, latestNumber }
-}
-
 // HOME-DAILY-PULSE fetchers — habits and habit_completions both FK to
 // auth.users(id), so reads key on user.id (auth UID), not profile.id.
 
@@ -603,6 +305,22 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: Sponso
   }
 }
 
+async function fetchTodayTimeBlocks(authUserId: string): Promise<TimeBlock[]> {
+  try {
+    const today = new Date().toISOString().split('T')[0]
+    const { data } = await (adminClient as any)
+      .from('daily_time_blocks')
+      .select('id, block_date, start_time, end_time, label, category, completed, sort_order')
+      .eq('user_id', authUserId)
+      .eq('block_date', today)
+      .order('start_time', { ascending: true })
+    return (data ?? []) as TimeBlock[]
+  } catch (err) {
+    console.error('[home.fetchTodayTimeBlocks]', err instanceof Error ? err.message : err)
+    return []
+  }
+}
+
 export default async function MemberHomePage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -618,41 +336,24 @@ export default async function MemberHomePage() {
   const weekStart = getCurrentMonday()
 
   const [
-    stats,
-    activity,
     events,
     courseProgress,
     scoreboardCounts,
     quotesResult,
     badgeData,
-    // HOME-4UP-TILES fetchers
-    pulsePosts,
-    pinnedLiveEvent,
-    topStories,
-    latestEpisodesResult,
     quarterlyGoalsResult,
     // HOME-DAILY-PULSE fetchers
     dailyHabits,
     weekCommitments,
+    timeBlocks,
     sponsors,
   ] = await Promise.all([
-    // MR-HOME-1: lesson_progress / member_badges store rows under
-    // public.users.id, NOT auth.uid(). Pass profile.id (resolved via
-    // email in fetchCurrentUser) so the queries actually return data
-    // for accounts where auth.uid() ≠ public.users.id. Same root cause
-    // as B1 / B2 / UI-3.
-    fetchDashboardStats(supabase, profile.id, profile.tier, profile.points),
-    fetchRecentActivity(profile.id),
     fetchUpcomingEvents(supabase, profile.id),
     fetchCourseProgress(supabase, profile.id),
     fetchScoreboardCounts(profile.id),
     // Use adminClient to bypass RLS — greeting_quotes is a public table but anon key may be blocked
     adminClient.from('greeting_quotes').select('quote_text, source').order('day_number'),
     supabase.from('member_badges').select('pillar_number, awarded_at').eq('user_id', profile.id),
-    fetchLatestPulsePosts(3),
-    fetchPinnedLiveEvent(profile.id),
-    fetchTopStories(3),
-    fetchLatestEpisodes(3),
     supabase
       .from('quarterly_goals')
       .select('id, title, period, progress_pct, weekly_delta, pillar')
@@ -663,6 +364,7 @@ export default async function MemberHomePage() {
     // HOME-DAILY-PULSE — habits FK to auth.users(id); commitments FK to profile.id.
     fetchTodaysHabits(user.id),
     fetchWeekCommitments(profile.id, weekStart),
+    fetchTodayTimeBlocks(user.id),
     // Sponsor ads SSR — avoids client waterfall after paint
     fetchHomeSponsors(),
   ])
@@ -708,81 +410,7 @@ export default async function MemberHomePage() {
     return { number: n, name, state: 'locked' as const }
   })
 
-  // Top-N active courses for the AcademyProgressWidget. "Active" = the
-  // member touched at least one lesson (lastActivity present) or made
-  // any completion progress (pct > 0). Sorted by recency.
-  const activeCourses = [...courseProgress]
-    .filter(c => c.lastActivity !== null || c.pct > 0)
-    .sort((a, b) => {
-      if (!a.lastActivity) return 1
-      if (!b.lastActivity) return -1
-      return new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()
-    })
-    .slice(0, 3)
 
-  // ── Path Forward + Long Game (HOME-2) ───────────────────────────────
-  // Derive the in-progress and "climbing toward" pillars from the same
-  // pillar state the WelcomeBanner uses, then attach the per-course
-  // metadata each card needs (slug, lesson counts, next lesson, etc).
-  const PILLAR_NUM_TO_SLUG: Record<number, string> = {
-    1: 'foundation',
-    2: 'identity',
-    3: 'mental-toughness',
-    4: 'strategy',
-    5: 'accountability',
-    6: 'execution',
-  }
-
-  const stripPillars: PillarStripItem[] = pillars.map(p => ({
-    number: p.number,
-    name: p.name,
-    state: p.state,
-    progressPct: p.state === 'in-progress' ? p.progressPct : undefined,
-  }))
-
-  const inProgressEntry = pillars.find(p => p.state === 'in-progress')
-  const inProgressCourse = inProgressEntry ? courseByPillar.get(inProgressEntry.number) : null
-  const inProgressData = inProgressEntry && inProgressCourse
-    ? {
-        number: inProgressEntry.number,
-        name:   inProgressEntry.name,
-        progressPct:      inProgressCourse.pct,
-        completedLessons: inProgressCourse.completed,
-        totalLessons:     inProgressCourse.total,
-        courseSlug:       inProgressCourse.slug ?? PILLAR_NUM_TO_SLUG[inProgressEntry.number],
-        nextLessonTitle:  inProgressCourse.nextLessonTitle,
-        nextLessonSlug:   inProgressCourse.nextLessonSlug,
-        // DAY N OF 21 — earliest progress on this course's lessons. The
-        // schema has updated_at (touched-at proxy); good enough for a
-        // motivational counter, capped at the 21-day program cadence.
-        dayOfTwentyOne: inProgressCourse.firstActivity
-          ? Math.min(21, Math.max(1,
-              Math.ceil((Date.now() - new Date(inProgressCourse.firstActivity).getTime()) / 86_400_000),
-            ))
-          : null,
-      }
-    : null
-
-  const climbingEntry = pillars.find(p => p.state === 'locked')
-  const climbingCourse = climbingEntry ? courseByPillar.get(climbingEntry.number) : null
-  const climbingData = climbingEntry
-    ? {
-        number: climbingEntry.number,
-        name:   climbingEntry.name,
-        totalLessons: climbingCourse?.total ?? 0,
-        courseSlug:   climbingCourse?.slug ?? PILLAR_NUM_TO_SLUG[climbingEntry.number],
-      }
-    : null
-
-  // The accountability mirror: a goal whose pillar slug matches the
-  // in-progress pillar gets a "↳ TIED TO PATH FORWARD" footer linking
-  // to the same lesson the InProgressPillarHero CTA points at.
-  const inProgressPillarSlug = inProgressData?.courseSlug ?? null
-  const inProgressContinueHref = inProgressData
-    ? (inProgressData.nextLessonSlug
-        ? `/academy/${inProgressData.courseSlug}/${inProgressData.nextLessonSlug}`
-        : `/academy/${inProgressData.courseSlug}`)
-    : null
   const goalsForCards: GoalForCard[] = quarterlyGoals.map(g => ({
     id: g.id,
     title: g.title,
@@ -791,68 +419,6 @@ export default async function MemberHomePage() {
     weekly_delta: g.weekly_delta,
     pillar: g.pillar,
   }))
-
-  // Today's Evolution — one-click DAU loop (course, accountability, community)
-  const habitsDone = dailyHabits.filter(h => h.completedToday).length
-  const commitsDone = weekCommitments.filter(c => c.is_completed).length
-  const courseHref = inProgressData
-    ? (inProgressData.nextLessonSlug
-        ? `/academy/${inProgressData.courseSlug}/${inProgressData.nextLessonSlug}`
-        : `/academy/${inProgressData.courseSlug}`)
-    : '/academy/foundation'
-  const todaysActions: TodaysEvolutionAction[] = [
-    {
-      id: 'learn',
-      eyebrow: 'Learn',
-      title: inProgressData
-        ? `Continue ${inProgressData.name}`
-        : 'Start Foundation',
-      description: inProgressData?.nextLessonTitle
-        ? `Next: ${inProgressData.nextLessonTitle}`
-        : inProgressData
-          ? `${inProgressData.progressPct}% complete — keep the streak.`
-          : 'Lesson 1 of the 6-pillar system. Begin now.',
-      href: courseHref,
-      cta: inProgressData ? 'Resume lesson' : 'Open Foundation',
-      accent: '#C9302A',
-      primary: true,
-    },
-    {
-      id: 'accountability',
-      eyebrow: 'Accountability',
-      title: commitsDone > 0 || weekCommitments.length > 0
-        ? `${commitsDone}/${Math.max(weekCommitments.length, 1)} commitments`
-        : 'Set this week’s commitments',
-      description: weekCommitments.length
-        ? 'Check off what you said you’d do — scoreboard stays honest.'
-        : 'Write 1–2 weekly commitments and hold the line.',
-      href: '/scoreboard',
-      cta: 'Open scoreboard',
-      accent: '#C9A84C',
-    },
-    {
-      id: 'habits',
-      eyebrow: 'Daily pulse',
-      title: dailyHabits.length
-        ? `${habitsDone}/${dailyHabits.length} habits today`
-        : 'Build your habit stack',
-      description: dailyHabits.length
-        ? 'Tap habits in the Accountability Hub to log today’s work.'
-        : 'Three daily habits. Compound quiet excellence.',
-      href: '/home#accountability-hub',
-      cta: dailyHabits.length ? 'Log habits' : 'Open hub',
-      accent: '#0ABFA3',
-    },
-    {
-      id: 'community',
-      eyebrow: 'Community',
-      title: 'Show up in the feed',
-      description: 'Post a win, ask a hard question, or vote on today’s poll.',
-      href: '/community',
-      cta: 'Open feed',
-      accent: '#A78BFA',
-    },
-  ]
 
   return (
     <div className="ep-page-gutter px-6 pb-6 space-y-5">
@@ -871,33 +437,6 @@ export default async function MemberHomePage() {
         pillars={pillars}
       />
 
-      {/* Today's Evolution — primary DAU loop, one-click actions */}
-      <TodaysEvolution actions={todaysActions} />
-
-      {/* Accountability Hub — central daily habit driver (goals + pulse + CTAs) */}
-      <AccountabilityHub
-        variant="compact"
-        habits={dailyHabits}
-        commitments={weekCommitments}
-        goals={goalsForCards}
-        courseHref={courseHref}
-        courseLabel={inProgressData ? `Continue ${inProgressData.name}` : 'Start Foundation'}
-      />
-
-      {/* HOME tiles — Community Pulse / Top Stories / Latest Drops / Daily Pulse */}
-      <div
-        className="home-4up-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4"
-        style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }}
-      >
-        <CommunityPulseTile posts={pulsePosts} pinnedEvent={pinnedLiveEvent} />
-        <TopStoriesTile stories={topStories} />
-        <PodcastReelTile episodes={latestEpisodesResult.episodes} latestEpisodeNumber={latestEpisodesResult.latestNumber} />
-        <DailyPulseCard habits={dailyHabits} commitments={weekCommitments} />
-      </div>
-
-      {/* Evolution Partner row — SSR-fetched platform_ads (no client waterfall). */}
-      <HomeSponsorRow ads={sponsors.home} />
-
       <ProfileCompletePrompt
         hasAvatar={Boolean(profile.avatar_url)}
         hasBio={Boolean(profile.bio)}
@@ -905,144 +444,17 @@ export default async function MemberHomePage() {
         hasName={Boolean(profile.display_name || profile.full_name)}
       />
 
-      {/* Daily Practice — habits / commitments / activity */}
-      <div
-        id="daily-practice"
-        className="flex items-center gap-4 pt-3"
-        style={{ margin: '12px 0 4px' }}
-      >
-        <span style={{ width: 28, height: 1, background: 'rgba(201,168,76,0.5)' }} />
-        <span
-          className="font-condensed font-bold uppercase"
-          style={{
-            fontSize: 10,
-            letterSpacing: '0.42em',
-            color: 'rgba(201,168,76,0.85)',
-          }}
-        >
-          The Daily Practice
-        </span>
-        <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-      </div>
+      {/* Primary daily dashboard: lead measures + lag measures + time blocking. */}
+      <TodaysEvolution
+        displayName={displayName}
+        habits={dailyHabits}
+        commitments={weekCommitments}
+        goals={goalsForCards}
+        timeBlocks={timeBlocks}
+      />
 
-      {/* SPRINT J — Activity (2fr) + Events sidebar (1fr) with sponsor ad
-          tucked under the Events card. Was 7fr/5fr with AcademyProgressWidget
-          on the right; AcademyProgressWidget moved into "The Path Forward"
-          row below per the design. */}
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 items-start">
-        <ActivityFeed
-          notifications={activity.notifications}
-          completions={activity.completions}
-          posts={activity.posts}
-        />
-        <div className="space-y-5 lg:self-start">
-          <UpcomingEventsWidget events={events} />
-          {/* Sidebar Evolution Partner — SSR-fetched, de-duped from home row. */}
-          <HomeSponsorAd ad={sponsors.sidebar} />
-        </div>
-      </div>
-
-      {/* SPRINT J — Section divider: "The Path Forward". */}
-      <div className="flex items-center gap-4 pt-3" style={{ margin: '12px 0 4px' }}>
-        <span style={{ width: 28, height: 1, background: 'rgba(201,168,76,0.5)' }} />
-        <span
-          className="font-condensed font-bold uppercase"
-          style={{
-            fontSize: 10,
-            letterSpacing: '0.42em',
-            color: 'rgba(201,168,76,0.85)',
-          }}
-        >
-          The Path Forward
-        </span>
-        <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-      </div>
-
-      {/* HOME-2 — Path Forward (left) + Long Game (right). SPRINT J: AcademyProgressWidget
-          moved into the left column (after the Climbing card) to match the design's
-          "Your Academy (2fr) | Goals (1fr)" lower row. Grid widened to 2fr/1fr. */}
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 items-start">
-        {/* Path Forward */}
-        <div className="space-y-4">
-          <PillarJourneyStrip pillars={stripPillars} />
-          {inProgressData && (
-            <InProgressPillarHero
-              pillar={{
-                number: inProgressData.number,
-                name: inProgressData.name,
-                progressPct: inProgressData.progressPct,
-                completedLessons: inProgressData.completedLessons,
-                totalLessons: inProgressData.totalLessons,
-              }}
-              courseSlug={inProgressData.courseSlug}
-              dayOfTwentyOne={inProgressData.dayOfTwentyOne}
-              nextLessonTitle={inProgressData.nextLessonTitle}
-              nextLessonSlug={inProgressData.nextLessonSlug}
-            />
-          )}
-          {climbingData && (
-            <ClimbingTowardCard
-              pillar={{
-                number: climbingData.number,
-                name: climbingData.name,
-                totalLessons: climbingData.totalLessons,
-              }}
-              courseSlug={climbingData.courseSlug}
-            />
-          )}
-          <AcademyProgressWidget courses={activeCourses} />
-        </div>
-
-        {/* Long Game */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <p
-              className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px]"
-              style={{ color: 'var(--text-tertiary)' }}
-            >
-              The Long Game
-            </p>
-            <a
-              href="/scoreboard"
-              className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px]"
-              style={{ color: '#C9A84C', textDecoration: 'none' }}
-            >
-              Scoreboard →
-            </a>
-          </div>
-          {/* "+ Add Goal" CTA removed: it pointed at /settings#goals, but
-              Settings has no Goals section and no goal-creation UI exists
-              anywhere yet (quarterly_goals has no write surface). Restore a
-              CTA when goal management ships. */}
-          {goalsForCards.length === 0 ? (
-            <div
-              className="rounded-lg p-5 text-center"
-              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
-            >
-              <p className="font-condensed text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
-                No active goals yet.
-              </p>
-            </div>
-          ) : (
-            goalsForCards.map(g => (
-              <GoalCard
-                key={g.id}
-                goal={g}
-                inProgressPillarSlug={inProgressPillarSlug}
-                inProgressContinueHref={inProgressContinueHref}
-              />
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* CommitmentTracker — full-width row below the activity grid so the
-          right column doesn't leave a tall empty gap to the right of
-          ActivityFeed (which is consistently the tallest left-column child).
-          weekStart is a hint; the component derives the user's local Monday
-          on mount (server is UTC and would otherwise hand a stale week to
-          TZ-behind users on Sunday evening). */}
-      <CommitmentTracker weekStart={getCurrentMonday()} />
+      {/* Exactly two rotating Evolution Partner cards. */}
+      <HomeSponsorRow ads={sponsors.home} />
     </div>
   )
 }

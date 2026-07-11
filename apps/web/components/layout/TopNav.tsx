@@ -37,10 +37,9 @@ interface NavItem { label: string; href: string; minTier?: 'vip' | 'pro'; highli
 // Core loops first; Goals = Accountability Hub (daily habit driver).
 // Events consolidated under LIVE.
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Home',      href: '/home' },
+  { label: 'Today',     href: '/home' },
   { label: 'Community', href: '/community' },
   { label: 'Academy',   href: '/academy',  minTier: 'vip' },
-  { label: 'Goals',     href: '/scoreboard' },
   { label: 'LIVE',      href: '/live' },
   { label: 'Podcast',   href: '/podcast' },
   { label: 'Media',     href: '/media',    highlight: true },
@@ -538,7 +537,7 @@ export function TopNav({
 
                 {/* Links */}
                 {[
-                  { label: 'Goals',      href: '/scoreboard' },
+                  { label: 'Today',      href: '/home#today' },
                   { label: 'Profile',    href: '/profile/me' },
                   { label: 'Settings',   href: '/settings' },
                   { label: 'Membership', href: '/membership' },
