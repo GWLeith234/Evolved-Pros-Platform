@@ -479,17 +479,23 @@ html.light-mode header a[href="/media"] {
 }
 
 * { box-sizing: border-box; }
-html, body { overflow-x: hidden; }
 
-/* ── Mobile web polish (iOS / Android) ───────────────────────────────────
-   Touch targets ≥44px, safe-area insets, no 300ms tap lag, scroll feel. */
+/* ── Global document scroll (public pages, login, LIVE, etc.) ────────────
+   Explicit overflow-y: auto so overflow-x: hidden does not trap vertical
+   scroll (CSS: non-visible overflow-x can force overflow-y to auto/clip). */
 html {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
 body {
+  min-height: 100%;
+  margin: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
   -webkit-tap-highlight-color: rgba(201, 48, 42, 0.12);
-  overscroll-behavior-y: contain;
 }
 button,
 a,
@@ -508,29 +514,54 @@ textarea {
   }
 }
 
-/* Member chrome: fixed top nav + bottom tabs + home-indicator safe areas.
-   TopNav is dynamic(ssr:false) — main padding-top reserves its slot so SSR
-   and CSR paint the same content offset (no jump when chrome mounts). */
+/* ── Member app shell (SCROLL-FIX) ───────────────────────────────────────
+   Bound the chrome to the viewport. TopNav is sticky/in-flow. Main is the
+   single vertical scroll container. Without a max height on the shell,
+   overflow-y:auto on main never engages and the page appears frozen. */
+.ep-member-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  /* contain horizontal bleed from drawers without blocking main scroll */
+  width: 100%;
+}
+@supports not (height: 100dvh) {
+  .ep-member-shell {
+    height: 100vh;
+    max-height: 100vh;
+  }
+}
+.ep-member-body {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
 .ep-topnav {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
   padding-left: max(12px, env(safe-area-inset-left, 0px));
   padding-right: max(12px, env(safe-area-inset-right, 0px));
+  /* Safe-area for notched phones; keep content row ≥72px */
   padding-top: env(safe-area-inset-top, 0px);
-  height: calc(72px + env(safe-area-inset-top, 0px)) !important;
+  min-height: calc(72px + env(safe-area-inset-top, 0px));
+  height: auto !important;
   box-sizing: border-box;
 }
 .ep-main-scroll {
-  /* Match fixed header (72 + safe-area). Narrow phones use 60px bar. */
-  padding-top: calc(72px + env(safe-area-inset-top, 0px));
-  /* Bottom tabs (56) + home indicator — content never sits under the bar */
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  /* Bottom tabs (fixed) + home indicator — content never sits under the bar */
   padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
-}
-@media (max-width: 639px) {
-  .ep-topnav {
-    height: calc(60px + env(safe-area-inset-top, 0px)) !important;
-  }
-  .ep-main-scroll {
-    padding-top: calc(60px + env(safe-area-inset-top, 0px));
-  }
 }
 @media (min-width: 1024px) {
   .ep-main-scroll {
@@ -539,7 +570,6 @@ textarea {
 }
 .ep-bottom-tabs {
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  /* Total height = bar + home indicator so content isn't covered */
   min-height: calc(56px + env(safe-area-inset-bottom, 0px));
 }
 .ep-bottom-tabs a,
@@ -557,7 +587,7 @@ textarea {
 /* Compact top nav on small phones */
 @media (max-width: 639px) {
   .ep-topnav {
-    height: 60px !important;
+    min-height: calc(60px + env(safe-area-inset-top, 0px));
     gap: 8px !important;
     padding-left: max(10px, env(safe-area-inset-left, 0px)) !important;
     padding-right: max(10px, env(safe-area-inset-right, 0px)) !important;

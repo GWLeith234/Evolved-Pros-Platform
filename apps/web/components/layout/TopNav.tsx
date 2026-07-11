@@ -175,18 +175,19 @@ export function TopNav({
       <header
         className="ep-topnav"
         style={{
-          /* fixed: TopNav is dynamic({ ssr:false }) so main reserves space via
-             .ep-main-scroll padding-top — sticky-in-flow would double the gap. */
-          position: 'fixed',
+          /* sticky in normal flow inside .ep-member-shell — fixed positioning
+             broke the flex height chain and killed page scrolling. */
+          position: 'sticky',
           top: 0,
-          left: 0,
-          right: 0,
           zIndex: 40,
           display: 'flex',
           alignItems: 'center',
           gap: 12,
-          padding: '0 24px',
-          height: 72,
+          paddingLeft: 24,
+          paddingRight: 24,
+          /* height from .ep-topnav (min-height + safe-area); avoid fixed 72
+             that fights padding-top on notched devices */
+          flexShrink: 0,
           background: 'var(--bg-nav)',
           borderBottom: '1px solid var(--topnav-border)',
         }}

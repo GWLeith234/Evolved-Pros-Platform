@@ -255,12 +255,14 @@ export function UnifiedCommunityPage({
   const hasMoreVisible = filtered.length > 0 && (filtered.length > visibleCount || hasMore)
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 overflow-x-hidden" style={{ height: '100%', background: 'var(--community-page-bg)' }}>
+    /* SCROLL-FIX: grow with content; let .ep-main-scroll own vertical scroll.
+       Nested height:100% + overflow-y-auto trapped the feed when the shell broke. */
+    <div className="flex flex-col w-full" style={{ background: 'var(--community-page-bg)' }}>
       {/* Editorial header (COMMUNITY-SPRINT-1) */}
       <CommunityPageHeader />
 
       {/* Feed (left) + weekly leaderboard rail (right) */}
-      <div className="flex-1 overflow-y-auto" style={{ background: 'var(--community-page-bg)' }}>
+      <div style={{ background: 'var(--community-page-bg)' }}>
         <div
           className="w-full mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(280px,35fr)] gap-4 sm:gap-6"
           style={{ maxWidth: 1280 }}

@@ -42,11 +42,15 @@ export default async function MemberLayout({ children }: { children: React.React
       }
       return (
         <ToastProvider>
-          <div className="flex flex-col min-h-screen overflow-x-hidden">
+          {/* ep-member-shell: fixed viewport height so main's overflow-y-auto
+              has a real max-height and page content can scroll again. */}
+          <div className="ep-member-shell">
             <TopNavClient profile={profile} unreadCount={0} />
             <NextEventBannerClient />
-            <div className="flex flex-1 min-h-0">
-              <main className="ep-main-scroll flex-1 min-w-0 overflow-y-auto lg:pb-0" style={{ backgroundColor: 'var(--bg-page)', WebkitOverflowScrolling: 'touch' }}>{children}</main>
+            <div className="ep-member-body">
+              <main className="ep-main-scroll" style={{ backgroundColor: 'var(--bg-page)' }}>
+                {children}
+              </main>
               <RightRailClient />
             </div>
             <BottomTabBarClient role={profile.role} unreadCount={0} dmUnreadCount={0} />
@@ -102,34 +106,20 @@ export default async function MemberLayout({ children }: { children: React.React
 
   return (
     <ToastProvider>
-      {/* overflow-x-hidden contains off-canvas drawers (NotifDrawer,
-          AskGeorgeDrawer) whose translateX(100%) state otherwise inflates
-          body.scrollWidth on mobile. Stays at the wrapper level so modals
-          and the page's own vertical scroll keep working. */}
-      <div className="flex flex-col min-h-screen overflow-x-hidden">
+      {/* SCROLL-FIX: member chrome is a fixed viewport shell (100dvh).
+          TopNav sits in normal flow (sticky). Main is the only vertical
+          scroller (overflow-y: auto + min-height: 0). Using min-h-screen
+          + fixed nav + overflow-y-auto on main left main unbounded so
+          nothing scrolled after the mobile polish sprint. */}
+      <div className="ep-member-shell">
         <TopNavClient profile={profile} unreadCount={unreadCount ?? 0} membersCanToggleTheme={membersCanToggleTheme} />
         {/* SPRINT N-3: <EpisodeBanner /> moved out of the layout into each
-            page (home/community/events). HideOnPodcast was a client wrapper
-            and could not conditionally render the async server component
-            at runtime — Next collapsed it into an empty banner everywhere
-            and the page-level <PodcastLatestStrip/> was the only thing
-            that worked. /podcast routes intentionally don't import it. */}
+            page (home/community/events). */}
         <NextEventBannerClient />
-        <div className="flex flex-1 min-h-0">
-          {/* NAV-OVERLAP-FIX: pt-[72px] reserves space for the 72px sticky
-              TopNav so page content can never slide under it at 800–1440px
-              viewports where main is the body-scroll container.
-              SETTINGS-MEMBERSHIP-SHIFT: min-w-0 lets main shrink below its
-              min-content. Without it, a child with intrinsic min-width >
-              viewport (e.g. the settings tab strip's nowrap buttons) forces
-              main wider than its flex parent. The outer overflow-x-hidden
-              wrapper then becomes a programmatically-scrollable container,
-              and the browser's focus-into-view side-effect on tab clicks
-              scrolls it ~42px. */}
-          <main
-            className="ep-main-scroll flex-1 min-w-0 overflow-y-auto lg:pb-0"
-            style={{ backgroundColor: 'var(--bg-page)', WebkitOverflowScrolling: 'touch' }}
-          >
+        <div className="ep-member-body">
+          {/* min-w-0: prevent wide children from expanding past the flex parent
+              (settings tab strip, etc.). Scroll lives on .ep-main-scroll. */}
+          <main className="ep-main-scroll" style={{ backgroundColor: 'var(--bg-page)' }}>
             {children}
           </main>
           <RightRailClient />

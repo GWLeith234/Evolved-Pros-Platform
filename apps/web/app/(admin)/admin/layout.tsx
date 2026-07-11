@@ -25,11 +25,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       const profile = JSON.parse(devSession) as { role: string; display_name: string; full_name: string }
       if (profile.role !== 'admin') redirect('/home')
       return (
-        <div className="flex flex-col min-h-screen">
+        <div className="ep-member-shell">
           <AdminTopNav profile={profile} />
-          <div className="flex flex-1 min-h-0">
+          <div className="ep-member-body">
             <AdminSidebar />
-            <main className="flex-1 bg-[#faf9f7] overflow-y-auto">{children}</main>
+            <main className="ep-main-scroll bg-[#faf9f7]" style={{ paddingBottom: 0 }}>{children}</main>
           </div>
         </div>
       )
