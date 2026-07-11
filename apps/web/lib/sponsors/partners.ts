@@ -40,8 +40,15 @@ export function isXprMediaAd(ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_n
 /** Fixed UUID for Vendasta seed + static fallback. */
 export const VENDASTA_AD_ID = 'c3d4e5f6-a7b8-9012-cdef-123456789012'
 
+/**
+ * Official Vendasta branding (vendasta.com media logo SVG).
+ * logo-white.svg: green leaf + white wordmark for dark heroes/cards.
+ * logo-white.png / logo-wordmark.png: hi-res raster fallbacks.
+ */
 export const VENDASTA_ASSETS = {
   logoWhite: '/sponsors/vendasta/logo-white.svg',
+  logoWhitePng: '/sponsors/vendasta/logo-white.png',
+  logo: '/sponsors/vendasta/logo.svg',
   hero: '/sponsors/vendasta/hero-ai-workforce.svg',
   icon: '/sponsors/vendasta/icon.png',
   wordmark: '/sponsors/vendasta/logo-wordmark.png',

@@ -215,11 +215,11 @@ function PremiumPartnerCard({
         <img
           src={cfg.logoSrc}
           alt={cfg.logoAlt}
-          width={180}
-          height={34}
+          width={200}
+          height={30}
           loading="lazy"
           decoding="async"
-          className="absolute bottom-4 left-5 h-7 w-auto max-w-[180px] object-contain drop-shadow-md"
+          className="absolute bottom-4 left-5 h-6 sm:h-7 w-auto max-w-[min(200px,70%)] object-contain object-left drop-shadow-md"
         />
         <span
           aria-hidden
