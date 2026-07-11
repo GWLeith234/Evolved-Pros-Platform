@@ -549,6 +549,51 @@ html.light-mode .ep-loader-logo--light { display: block; }
   100% { transform: translateX(350%);  }
 }
 
+/* GOALS-MICRO: subtle, delightful accountability micro-interactions. All are
+   theme-agnostic (accent color is passed in via the --ep-glow custom property
+   or a brand hue) and automatically neutralised by the prefers-reduced-motion
+   block at the bottom of this file, so they stay lightweight and accessible. */
+
+/* Checkbox "pop" + soft glow ring when a habit/commit is checked. */
+@keyframes ep-check-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.28); }
+  100% { transform: scale(1); }
+}
+@keyframes ep-check-glow {
+  0%   { box-shadow: 0 0 0 0 var(--ep-glow, rgba(201,168,76,0.55)); }
+  100% { box-shadow: 0 0 0 10px rgba(201,168,76,0); }
+}
+
+/* Streak badge bump when the streak increments. */
+@keyframes ep-streak-pop {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.22) translateY(-1px); }
+  100% { transform: scale(1); }
+}
+
+/* Progress ring celebratory glow when a daily card hits 100%. */
+@keyframes ep-ring-glow {
+  0%, 100% { filter: drop-shadow(0 0 2px rgba(201,168,76,0.45)); }
+  50%      { filter: drop-shadow(0 0 8px rgba(201,168,76,0.95)); }
+}
+
+/* Progress-bar fill reveal: grows from the left on mount. The fill element
+   keeps its real width:% inline, so if motion is reduced (animation disabled)
+   it simply renders at full width — never stuck at zero. */
+.ep-progress-fill {
+  transform-origin: left center;
+  animation: ep-progress-grow 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes ep-progress-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+/* Completed bars get a soft accent glow (accent passed via --ep-glow). */
+.ep-progress-fill--done {
+  box-shadow: 0 0 8px var(--ep-glow, rgba(34,197,94,0.7));
+}
+
 /* HOME-4UP-TILES responsive grid breakpoints. */
 @media (max-width: 1100px) {
   .home-4up-grid { grid-template-columns: repeat(2, 1fr) !important; }

@@ -1,10 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { TileCard } from './tiles/TileCard'
 import { TileRow, TileFooterLink } from './tiles/TileRow'
+import { ConfettiBlast } from '@/components/ui/ConfettiBlast'
 import { formatPct, formatCount } from '@/lib/format'
+
+// Brand palette for the all-done confetti burst (theme-invariant accents).
+const CELEBRATE_COLORS = ['#C9A84C', '#0ABFA3', '#C9302A', '#A78BFA', '#60A5FA']
 
 const GOLD = '#C9A84C'
 const TEAL = '#0ABFA3'
@@ -45,6 +49,10 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
   const [commits, setCommits] = useState(safeInitialCommits)
   const [pendingHabit, setPendingHabit] = useState<string | null>(null)
   const [pendingCommit, setPendingCommit] = useState<string | null>(null)
+  // Micro-interactions: id of the row just checked (drives the checkbox pop +
+  // streak bump), and a one-shot celebration when the card reaches 100%.
+  const [justChecked, setJustChecked] = useState<string | null>(null)
+  const [celebrate, setCelebrate] = useState(false)
 
   const habitsDone  = habits.filter(h => h.completedToday).length
   const commitsDone = commits.filter(c => c.is_completed).length
@@ -53,6 +61,22 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
   const pct         = totalSlots ? Math.round((totalDone / totalSlots) * 100) : 0
 
   const ringColor = pct >= 100 ? GOLD : pct > 0 ? TEAL : DIM
+  const allDone   = totalSlots > 0 && totalDone === totalSlots
+
+  // Fire the confetti burst only on the transition INTO all-done, never on
+  // every re-render while complete (which would loop) or on initial mount.
+  const wasAllDone = useRef(allDone)
+  useEffect(() => {
+    if (allDone && !wasAllDone.current) setCelebrate(true)
+    wasAllDone.current = allDone
+  }, [allDone])
+
+  // Flag a row as "just checked" for ~600ms so its checkbox pops + glows and
+  // its streak badge bumps, then clears so the animation can retrigger later.
+  function flashCheck(id: string) {
+    setJustChecked(id)
+    setTimeout(() => setJustChecked(prev => (prev === id ? null : prev)), 600)
+  }
 
   // SVG ring math (r=46, viewbox=120)
   const radius = 46
@@ -64,6 +88,7 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
     setPendingHabit(h.id)
     const previous = habits
     const next = !h.completedToday
+    if (next) flashCheck(h.id)
     setHabits(previous.map(x => x.id === h.id
       ? { ...x, completedToday: next, recentCount: Math.max(0, x.recentCount + (next ? 1 : -1)) }
       : x))
@@ -89,6 +114,7 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
     setPendingCommit(c.id)
     const previous = commits
     const next = !c.is_completed
+    if (next) flashCheck(c.id)
     setCommits(previous.map(x => x.id === c.id ? { ...x, is_completed: next } : x))
     try {
       const res = await fetch(`/api/commitments/${c.id}`, {
@@ -119,6 +145,9 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
       title="Daily pulse"
       footer={<TileFooterLink href="/academy/accountability">All habits</TileFooterLink>}
     >
+      {/* All-day-complete celebration — reuses the shared reduced-motion-aware
+          confetti; onComplete resets so it can fire again tomorrow. */}
+      <ConfettiBlast active={celebrate} colors={CELEBRATE_COLORS} onComplete={() => setCelebrate(false)} />
       {/* Circle progress */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '6px 16px 10px' }}>
         <div style={{ position: 'relative', width: 116, height: 116 }}>
@@ -136,7 +165,12 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
               stroke={ringColor} strokeWidth="8" strokeLinecap="round"
               strokeDasharray={circumference}
               strokeDashoffset={offset}
-              style={{ transition: 'stroke-dashoffset 0.4s ease, stroke 0.2s' }}
+              style={{
+                transition: 'stroke-dashoffset 0.4s ease, stroke 0.2s',
+                // Celebratory glow the moment every slot is complete.
+                animation: allDone ? 'ep-ring-glow 1.6s ease-in-out 2' : undefined,
+                filter: allDone ? 'drop-shadow(0 0 4px rgba(201,168,76,0.7))' : undefined,
+              }}
             />
           </svg>
           <div style={{
@@ -198,7 +232,7 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
                       cursor: 'pointer', display: 'flex', alignItems: 'center',
                     }}
                   >
-                    <Checkbox checked={h.completedToday} color={GOLD} />
+                    <Checkbox checked={h.completedToday} color={GOLD} pop={justChecked === h.id} />
                   </button>
                 }
                 primary={
@@ -210,7 +244,7 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>{h.name}</span>
                 }
-                trailing={<StreakBadge days={h.recentCount} />}
+                trailing={<StreakBadge days={h.recentCount} bump={justChecked === h.id} />}
               />
             ))}
           </ul>
@@ -244,7 +278,7 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
                       cursor: 'pointer', display: 'flex', alignItems: 'center',
                     }}
                   >
-                    <Checkbox checked={c.is_completed} color={GOLD} />
+                    <Checkbox checked={c.is_completed} color={GOLD} pop={justChecked === c.id} />
                   </button>
                 }
                 primary={
@@ -274,7 +308,7 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
   )
 }
 
-function Checkbox({ checked, color }: { checked: boolean; color: string }) {
+function Checkbox({ checked, color, pop }: { checked: boolean; color: string; pop?: boolean }) {
   return (
     <span
       aria-hidden="true"
@@ -284,6 +318,10 @@ function Checkbox({ checked, color }: { checked: boolean; color: string }) {
         border: `2px solid ${checked ? color : 'var(--text-tertiary)'}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         transition: 'all 0.15s',
+        // Satisfying pop + accent glow the moment it's checked.
+        animation: pop ? 'ep-check-pop 0.4s ease, ep-check-glow 0.6s ease' : undefined,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...( { ['--ep-glow']: 'rgba(201,168,76,0.55)' } as any ),
       }}
     >
       {checked && (
@@ -295,16 +333,22 @@ function Checkbox({ checked, color }: { checked: boolean; color: string }) {
   )
 }
 
-function StreakBadge({ days }: { days: number }) {
+function StreakBadge({ days, bump }: { days: number; bump?: boolean }) {
   const active = days > 0
   return (
     <span style={{
       flexShrink: 0,
+      display: 'inline-flex', alignItems: 'center', gap: 3,
       fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
       fontSize: 10, letterSpacing: '0.08em',
       padding: '2px 7px', borderRadius: 0,
       background: active ? 'rgba(201,168,76,0.14)' : 'var(--bg-elevated)',
       color: active ? GOLD : 'var(--text-tertiary)',
-    }}>{days}D</span>
+      // Bump when the streak ticks up on check.
+      animation: bump ? 'ep-streak-pop 0.5s ease' : undefined,
+    }}>
+      {active && <span aria-hidden="true" style={{ fontSize: 9, lineHeight: 1 }}>🔥</span>}
+      {days}D
+    </span>
   )
 }

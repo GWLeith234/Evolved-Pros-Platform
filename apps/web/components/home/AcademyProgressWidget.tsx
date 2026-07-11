@@ -69,8 +69,13 @@ export function AcademyProgressWidget({ courses }: AcademyProgressWidgetProps) {
                   style={{ height: '3px', backgroundColor: 'var(--bg-elevated)' }}
                 >
                   <div
-                    className="h-full rounded-full transition-all"
-                    style={{ width: `${course.pct}%`, backgroundColor: fillColor }}
+                    className={`h-full rounded-full ep-progress-fill${isDone ? ' ep-progress-fill--done' : ''}`}
+                    style={{
+                      width: `${course.pct}%`,
+                      backgroundColor: fillColor,
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      ...({ ['--ep-glow']: 'rgba(34,197,94,0.7)' } as any),
+                    }}
                   />
                 </div>
               </Link>
