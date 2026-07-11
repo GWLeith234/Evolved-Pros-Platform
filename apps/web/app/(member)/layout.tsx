@@ -89,15 +89,15 @@ export default async function MemberLayout({ children }: { children: React.React
       .eq('user_id', profile.id)
       .eq('is_read', false),
     // One round-trip for all nav settings instead of three single() reads.
+    // The nav logo is no longer admin-configurable — TopNav renders the
+    // canonical LogoMark directly — so we only read the theme-toggle flag.
     supabase
       .from('platform_settings')
       .select('key, value')
-      .in('key', ['logo_dark_url', 'logo_nav_light_url', 'members_can_toggle_theme']),
+      .in('key', ['members_can_toggle_theme']),
   ])
 
   const settings = new Map((settingsRows ?? []).map(s => [s.key, s.value]))
-  const logoUrl = settings.get('logo_dark_url') || null
-  const logoLightUrl = settings.get('logo_nav_light_url') || null
   const membersCanToggleTheme = settings.get('members_can_toggle_theme') !== 'false'
 
   return (
@@ -107,7 +107,7 @@ export default async function MemberLayout({ children }: { children: React.React
           body.scrollWidth on mobile. Stays at the wrapper level so modals
           and the page's own vertical scroll keep working. */}
       <div className="flex flex-col min-h-screen overflow-x-hidden">
-        <TopNavClient profile={profile} unreadCount={unreadCount ?? 0} logoUrl={logoUrl} logoLightUrl={logoLightUrl} membersCanToggleTheme={membersCanToggleTheme} />
+        <TopNavClient profile={profile} unreadCount={unreadCount ?? 0} membersCanToggleTheme={membersCanToggleTheme} />
         {/* SPRINT N-3: <EpisodeBanner /> moved out of the layout into each
             page (home/community/events). HideOnPodcast was a client wrapper
             and could not conditionally render the async server component

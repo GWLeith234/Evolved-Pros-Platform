@@ -1,6 +1,9 @@
 // Shared branded full-screen loading state used by route segment
-// loading.tsx files. Dark surface, pulsing horizontal EVOLVED PROS
-// logo with red mic, kills the white-flash transitions.
+// loading.tsx files. Theme-aware "Evolution" loader: the horizontal
+// EVOLVED PROS wordmark (navy on light, white on dark) breathing over a
+// slim indeterminate red progress bar — subtle, fast, modern (Vendasta
+// style). Renders as a server component; the light/dark logo swap is done
+// purely in CSS (html.light-mode) so there's no theme flash or client JS.
 export function BrandedLoading() {
   return (
     <div
@@ -17,35 +20,36 @@ export function BrandedLoading() {
         width: '100%',
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18 }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/logo_horizontal_dark.png"
-          alt=""
-          aria-hidden="true"
-          width={200}
-          height={40}
-          style={{
-            width: 200,
-            height: 'auto',
-            objectFit: 'contain',
-            animation: 'brand-loading-pulse 1.5s ease-in-out infinite',
-            willChange: 'transform, opacity',
-          }}
-        />
-        <p
-          style={{
-            margin: 0,
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 700,
-            fontSize: 11,
-            letterSpacing: '0.4em',
-            textTransform: 'uppercase',
-            color: 'var(--text-tertiary, rgba(255,255,255,0.55))',
-          }}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+        <div
+          style={{ animation: 'brand-loading-pulse 1.5s ease-in-out infinite', willChange: 'transform, opacity' }}
         >
-          Evolved Pros
-        </p>
+          {/* Dark nav → white wordmark; light nav → navy wordmark. Only one is
+              shown at a time via the ep-loader-logo--{dark,light} CSS toggle. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo_horizontal_dark.png"
+            alt=""
+            aria-hidden="true"
+            width={200}
+            height={40}
+            className="ep-loader-logo--dark"
+            style={{ width: 200, height: 'auto', objectFit: 'contain' }}
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo_horizontal_navy.png"
+            alt=""
+            aria-hidden="true"
+            width={200}
+            height={40}
+            className="ep-loader-logo--light"
+            style={{ width: 200, height: 'auto', objectFit: 'contain' }}
+          />
+        </div>
+
+        {/* Slim indeterminate progress bar with a sweeping brand-red segment. */}
+        <div className="ep-loader-track" aria-hidden="true" />
       </div>
     </div>
   )

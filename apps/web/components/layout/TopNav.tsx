@@ -29,8 +29,6 @@ interface TopNavProps {
     points?: number | null
   }
   unreadCount?: number
-  logoUrl?: string | null
-  logoLightUrl?: string | null
   membersCanToggleTheme?: boolean
 }
 
@@ -73,8 +71,6 @@ function tierLabelColor(tier: string | null | undefined, isLight: boolean): stri
 export function TopNav({
   profile,
   unreadCount = 0,
-  logoUrl,
-  logoLightUrl,
   membersCanToggleTheme = true,
 }: TopNavProps) {
   const pathname = usePathname()
@@ -128,8 +124,6 @@ export function TopNav({
   const dividerColor = 'var(--topnav-divider)'
   const subtleText   = 'var(--topnav-link-idle)'
   const aiLabelColor = 'var(--topnav-link-active)'
-
-  const activeLogoUrl = isLight ? logoLightUrl : logoUrl
 
   return (
     <>
@@ -186,10 +180,14 @@ export function TopNav({
           borderBottom: '1px solid var(--topnav-border)',
         }}
       >
-        {/* Logo (left) — actual brand mark from Branding bucket.
-           Falls back to LogoMark component if URL is missing for the active theme. */}
+        {/* Logo (left) — canonical EVOLVED PROS horizontal wordmark with the red
+           microphone (LogoMark). Rendered directly (not from an admin-set URL)
+           so the brand mark is identical across every surface and can't drift to
+           a stale asset. `dark` variant = navy wordmark for the light parchment
+           nav; `light` variant = white wordmark for the dark nav. */}
         <Link
           href="/home"
+          aria-label="Evolved Pros — home"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -198,16 +196,7 @@ export function TopNav({
             textDecoration: 'none',
           }}
         >
-          {activeLogoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={activeLogoUrl}
-              alt="Evolved Pros"
-              style={{ height: 44, width: 'auto', display: 'block' }}
-            />
-          ) : (
-            <LogoMark variant={isLight ? 'dark' : 'light'} height={44} />
-          )}
+          <LogoMark variant={isLight ? 'dark' : 'light'} height={44} />
         </Link>
 
         {/* Nav — flex-grow centred. `flex: 1 / minWidth: 0 / overflow: hidden`
