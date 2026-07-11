@@ -5,6 +5,11 @@ const nextConfig = {
   // partial selects. Runtime is correct — suppress to keep builds green.
   typescript: { ignoreBuildErrors: true },
   images: {
+    // Modern formats cut payload size for avatars, covers, and partner logos.
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60 * 60 * 24 * 7, // 7 days
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
     remotePatterns: [
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: 'image.mux.com' },
@@ -44,6 +49,25 @@ const nextConfig = {
               "font-src 'self' https://fonts.gstatic.com",
             ].join('; '),
           },
+        ],
+      },
+      // Long-cache immutable brand / partner static assets for snappy nav.
+      {
+        source: '/sponsors/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/logo_:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/live/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },
         ],
       },
     ]

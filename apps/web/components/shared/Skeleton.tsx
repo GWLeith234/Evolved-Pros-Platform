@@ -40,7 +40,6 @@ export function Skeleton({
 }
 
 // ── Preset composite skeletons ─────────────────────────────────────────────
-// All cards use var(--bg-surface) so they sit correctly on every theme.
 
 const cardStyle: React.CSSProperties = {
   background: 'var(--bg-surface, #fff)',
@@ -135,6 +134,78 @@ export function CardSkeleton({ height = 160 }: { height?: number }) {
       <Skeleton height={12} width="60%" />
       <div style={{ marginTop: 'auto' }}>
         <Skeleton height={28} width={110} />
+      </div>
+    </div>
+  )
+}
+
+/** Compact action card for Today's Evolution strip. */
+export function ActionCardSkeleton() {
+  return (
+    <div
+      style={{
+        ...cardStyle,
+        padding: '16px',
+        minHeight: 140,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+      }}
+    >
+      <Skeleton height={10} width={64} />
+      <Skeleton height={16} width="75%" />
+      <Skeleton height={12} width="90%" />
+      <div style={{ marginTop: 'auto' }}>
+        <Skeleton height={28} width={100} />
+      </div>
+    </div>
+  )
+}
+
+/** Right-rail compact card (poll / podcast / academy). */
+export function RailCardSkeleton({ height = 120 }: { height?: number }) {
+  return (
+    <div style={{ ...cardStyle, padding: 14, height }}>
+      <Skeleton height={10} width={72} className="mb-3" />
+      <Skeleton height={14} width="90%" className="mb-2" />
+      <Skeleton height={12} width="70%" className="mb-3" />
+      <Skeleton height={28} width={96} />
+    </div>
+  )
+}
+
+/** Academy course card in the pillar grid. */
+export function CourseCardSkeleton() {
+  return (
+    <div style={{ ...cardStyle, overflow: 'hidden' }}>
+      <Skeleton height={140} width="100%" radius={0} />
+      <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <Skeleton height={10} width={80} />
+        <Skeleton height={22} width="70%" />
+        <Skeleton height={12} width="95%" />
+        <Skeleton height={6} width="100%" />
+      </div>
+    </div>
+  )
+}
+
+/** Lesson player + content chrome. */
+export function LessonPageSkeleton() {
+  return (
+    <div style={{ background: 'var(--bg-page)', minHeight: '100%' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 12px' }}>
+        <Skeleton height={12} width={280} />
+      </div>
+      <Skeleton height={360} width="100%" radius={0} />
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
+        <Skeleton height={28} width="70%" className="mb-4" />
+        <Skeleton height={14} width="100%" className="mb-2" />
+        <Skeleton height={14} width="92%" className="mb-2" />
+        <Skeleton height={14} width="85%" className="mb-8" />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <CardSkeleton height={200} />
+          <CardSkeleton height={200} />
+        </div>
       </div>
     </div>
   )
