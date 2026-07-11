@@ -1,4 +1,8 @@
 import { stripTrailingArrow } from '@/lib/brand'
+import {
+  ADCELLERANT_ASSETS,
+  isAdCellerantAd,
+} from '@/lib/sponsors/adcellerant'
 
 export type SponsorAd = {
   id: string
@@ -51,12 +55,158 @@ function MicGlyph() {
 }
 
 /**
+ * Premium AdCellerant Evolution Partner card — Denver skyline hero,
+ * white logo, #1 DBJ claim, theme-aware body, red accents.
+ * Pure presentation (no hooks / event handlers).
+ */
+function AdCellerantPremiumCard({ ad }: { ad: SponsorAd }) {
+  const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? 'https://www.adcellerant.com/'
+  const headline = ad.headline ?? '#1 Largest Advertising Agency in Denver'
+  const subtext = ad.endorsement_quote ?? 'Recognized by the Denver Business Journal'
+  const cta = stripTrailingArrow(ad.cta_text ?? 'Partner with Us')
+
+  const card = (
+    <div className="ep-sponsor-card ep-adcellerant-card relative flex h-full flex-col overflow-hidden rounded-2xl border transition-[transform,box-shadow,border-color] duration-300 ease-out will-change-transform group-hover:scale-[1.015] group-hover:shadow-[0_14px_40px_rgba(201,48,42,0.18)]">
+      <span
+        aria-hidden
+        className="ep-sponsor-wash pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+      />
+
+      {/* Badge */}
+      <div
+        className="absolute right-5 top-3 z-[2] rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] text-white shadow-sm"
+        style={{
+          backgroundColor: SPONSOR_RED,
+          fontFamily: '"Barlow Condensed", sans-serif',
+          boxShadow: '0 2px 8px rgba(201,48,42,0.35)',
+        }}
+      >
+        Evolution Partner
+      </div>
+
+      {/* Skyline hero */}
+      <div className="relative h-[132px] w-full shrink-0 overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={ADCELLERANT_ASSETS.skyline}
+          alt=""
+          aria-hidden
+          width={792}
+          height={198}
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(10,15,24,0.15) 0%, rgba(10,15,24,0.55) 70%, rgba(10,15,24,0.92) 100%)',
+          }}
+        />
+        {/* White logo over skyline */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={ADCELLERANT_ASSETS.logoWhite}
+          alt="AdCellerant"
+          width={160}
+          height={30}
+          loading="lazy"
+          decoding="async"
+          className="absolute bottom-4 left-5 h-7 w-auto max-w-[160px] object-contain drop-shadow-md"
+        />
+        {/* Red accent bar at hero base */}
+        <span
+          aria-hidden
+          className="absolute bottom-0 left-0 right-0 h-[3px]"
+          style={{ backgroundColor: SPONSOR_RED }}
+        />
+      </div>
+
+      {/* Copy + CTA — theme-aware surface */}
+      <div className="relative z-[1] flex flex-1 flex-col gap-4 p-5 pt-4">
+        <div className="ep-evolve-bars" aria-hidden style={{ left: 20, bottom: 72 }}>
+          <span />
+          <span />
+          <span />
+        </div>
+
+        <div>
+          <p
+            className="m-0 text-[11px] font-bold uppercase tracking-[0.2em]"
+            style={{
+              fontFamily: '"Barlow Condensed", sans-serif',
+              color: SPONSOR_RED,
+            }}
+          >
+            AdCellerant
+          </p>
+          <h4
+            className="mt-1.5 m-0 text-[1.15rem] font-bold leading-[1.25]"
+            style={{
+              fontFamily: '"Barlow Condensed", sans-serif',
+              color: 'var(--text-primary, #fff)',
+              letterSpacing: '0.01em',
+            }}
+          >
+            {headline}
+          </h4>
+          <p
+            className="mt-2 m-0 text-sm leading-relaxed"
+            style={{
+              fontFamily: '"Barlow", sans-serif',
+              color: 'var(--text-secondary, rgba(255,255,255,0.55))',
+            }}
+          >
+            {subtext}
+          </p>
+        </div>
+
+        <div
+          className="ep-sponsor-cta mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-extrabold uppercase tracking-[0.14em] text-white transition-[background-color,transform] duration-200"
+          style={{
+            backgroundColor: SPONSOR_RED,
+            fontFamily: '"Barlow Condensed", sans-serif',
+          }}
+        >
+          {cta}
+          <span
+            aria-hidden
+            className="inline-block transition-transform duration-200 group-hover:translate-x-1"
+          >
+            →
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+      className="group block h-full pt-3 no-underline"
+      aria-label={`${headline} — AdCellerant Evolution Partner`}
+    >
+      {card}
+    </a>
+  )
+}
+
+/**
  * Centered premium Evolution Partner card.
  * - Dual-theme via CSS vars / ep-sponsor-card
  * - CSS-only hover (no React state) + evolution bars micro-animation
- * - Server-component safe (no hooks / event handlers)
+ * - Server-component safe (no hooks)
+ * - AdCellerant ads render the skyline premium layout automatically
  */
 export function SponsorAdCard({ ad }: { ad: SponsorAd }) {
+  if (isAdCellerantAd(ad)) {
+    return <AdCellerantPremiumCard ad={ad} />
+  }
+
   const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
   const name = ad.sponsor_name ?? ad.tool_name ?? 'Evolution Partner'
   const tagline = ad.headline ?? ad.endorsement_quote ?? name
@@ -80,7 +230,6 @@ export function SponsorAdCard({ ad }: { ad: SponsorAd }) {
         Evolution Partner
       </div>
 
-      {/* Rising evolution bars — CSS-only on group hover */}
       <div className="ep-evolve-bars" aria-hidden>
         <span />
         <span />

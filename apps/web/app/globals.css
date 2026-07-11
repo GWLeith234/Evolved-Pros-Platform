@@ -548,6 +548,13 @@ html.light-mode .ep-sponsor-card {
 html.light-mode .group:hover .ep-sponsor-card {
   box-shadow: 0 12px 32px rgba(201, 48, 42, 0.12);
 }
+/* AdCellerant premium card — no extra top padding for floating badge */
+.ep-adcellerant-card {
+  border-color: rgba(201, 48, 42, 0.32);
+}
+html.light-mode .ep-adcellerant-card {
+  border-color: rgba(201, 48, 42, 0.28);
+}
 
 /* EVENTS-SPRINT-1: pulsing red dot for "live now / starting soon" indicator. */
 @keyframes events-live-pulse {

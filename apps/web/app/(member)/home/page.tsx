@@ -25,6 +25,11 @@ import {
   SPONSOR_AD_COLUMNS,
   type SponsorAd,
 } from '@/components/home/HomeSponsorAd'
+import {
+  ADCELLERANT_AD_ID,
+  ADCELLERANT_SPONSOR_AD,
+  isAdCellerantAd,
+} from '@/lib/sponsors/adcellerant'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { hasTierAccess } from '@/lib/tier'
 import { formatRelative, formatDuration as formatMinutes, formatDate } from '@/lib/format'
@@ -549,6 +554,13 @@ async function fetchWeekCommitments(authUserId: string, weekStart: string): Prom
  * bypasses RLS so members always see active placements.
  */
 async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: SponsorAd | null }> {
+  // Always surface AdCellerant as the lead Evolution Partner (static fallback
+  // when the 055 seed has not been applied yet).
+  const ensureAdCellerant = (list: SponsorAd[]): SponsorAd[] => {
+    if (list.some(isAdCellerantAd)) return list
+    return [ADCELLERANT_SPONSOR_AD, ...list]
+  }
+
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = adminClient as any
@@ -560,17 +572,25 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: Sponso
       .limit(12)
 
     const all = (rows ?? []) as Array<SponsorAd & { placement?: string | null }>
-    if (all.length === 0) return { home: [], sidebar: null }
+    if (all.length === 0) {
+      return { home: [ADCELLERANT_SPONSOR_AD], sidebar: ADCELLERANT_SPONSOR_AD }
+    }
 
     const homePool = all.filter(a => {
       const p = (a.placement ?? 'all').toLowerCase()
       return p === 'home' || p === 'all'
     })
-    const home: SponsorAd[] = []
+    let home: SponsorAd[] = []
     for (const ad of homePool.length ? homePool : all) {
       if (home.length >= 2) break
       if (!home.some(h => h.id === ad.id)) home.push(ad)
     }
+    home = ensureAdCellerant(home).slice(0, 2)
+    // Prefer AdCellerant first in the two-up when present
+    home = [
+      ...home.filter(a => a.id === ADCELLERANT_AD_ID || isAdCellerantAd(a)),
+      ...home.filter(a => a.id !== ADCELLERANT_AD_ID && !isAdCellerantAd(a)),
+    ].slice(0, 2)
 
     const homeIds = new Set(home.map(a => a.id))
     const sidebarPool = all.filter(a => {
@@ -580,13 +600,14 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: Sponso
     const sidebar =
       sidebarPool.find(a => !homeIds.has(a.id)) ??
       all.find(a => !homeIds.has(a.id)) ??
+      home.find(a => !isAdCellerantAd(a)) ??
       home[0] ??
-      null
+      ADCELLERANT_SPONSOR_AD
 
     return { home, sidebar }
   } catch (err) {
     console.error('[home.fetchHomeSponsors] failed:', err instanceof Error ? err.message : err)
-    return { home: [], sidebar: null }
+    return { home: [ADCELLERANT_SPONSOR_AD], sidebar: ADCELLERANT_SPONSOR_AD }
   }
 }
 
