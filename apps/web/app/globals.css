@@ -484,6 +484,71 @@ html, body { overflow-x: hidden; }
   100% { background-position: -200% 0; }
 }
 
+/* ── Evolution Partner sponsor card (SPRINT-1 polish) ───────────────────
+   Dual-theme surfaces + CSS-only hover evolution micro-animation.
+   prefers-reduced-motion is handled by the global reduce block below. */
+.ep-sponsor-card {
+  background: var(--bg-surface, #111926);
+  border-color: rgba(201, 48, 42, 0.30);
+  box-shadow: 0 0 0 transparent;
+}
+.ep-sponsor-card:hover,
+.group:hover .ep-sponsor-card {
+  border-color: rgba(201, 48, 42, 0.55);
+}
+.ep-sponsor-wash {
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(201, 48, 42, 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(201, 48, 42, 0.04), transparent 40%);
+}
+.ep-sponsor-cta:hover {
+  background-color: #a82622 !important;
+}
+/* Three rising bars — "evolution" micro-motion on card hover only */
+.ep-evolve-bars {
+  position: absolute;
+  left: 16px;
+  bottom: 18px;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 18px;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+  z-index: 1;
+}
+.group:hover .ep-evolve-bars {
+  opacity: 0.9;
+}
+.ep-evolve-bars span {
+  display: block;
+  width: 3px;
+  border-radius: 1px;
+  background: #C9302A;
+  transform-origin: bottom center;
+  opacity: 0.55;
+}
+.ep-evolve-bars span:nth-child(1) { height: 6px; }
+.ep-evolve-bars span:nth-child(2) { height: 11px; }
+.ep-evolve-bars span:nth-child(3) { height: 16px; }
+.group:hover .ep-evolve-bars span {
+  animation: ep-evolve-rise 1.05s ease-in-out infinite;
+}
+.group:hover .ep-evolve-bars span:nth-child(2) { animation-delay: 0.12s; }
+.group:hover .ep-evolve-bars span:nth-child(3) { animation-delay: 0.24s; }
+@keyframes ep-evolve-rise {
+  0%, 100% { transform: scaleY(0.55); opacity: 0.4; }
+  50%      { transform: scaleY(1);    opacity: 1; }
+}
+html.light-mode .ep-sponsor-card {
+  background: var(--bg-surface, #FFFFFF);
+  box-shadow: 0 1px 0 rgba(27, 42, 74, 0.04);
+}
+html.light-mode .group:hover .ep-sponsor-card {
+  box-shadow: 0 12px 32px rgba(201, 48, 42, 0.12);
+}
+
 /* EVENTS-SPRINT-1: pulsing red dot for "live now / starting soon" indicator. */
 @keyframes events-live-pulse {
   0%, 100% { opacity: 1;   transform: scale(1); }

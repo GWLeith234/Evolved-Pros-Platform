@@ -11,7 +11,7 @@ import { FilterRail } from './FilterRail'
 import type { KindFilter, Pillar, SortBy } from './FilterRail'
 import type { Post, Reply, CommunityAd, WeeklyLeaderboardEntry } from '@/lib/community/types'
 import { WeeklyLeaderboardRail } from './WeeklyLeaderboardRail'
-import { HomeSponsorAd } from '@/components/home/HomeSponsorAd'
+import { HomeSponsorAdClient } from '@/components/home/HomeSponsorAdClient'
 
 function getInitials(name: string | null | undefined): string {
   if (!name) return '?'
@@ -430,11 +430,9 @@ export function UnifiedCommunityPage({
               {/* Sidebar sponsor — picks the last ad so it differs from the
                   first in-feed slot when fetchCommunityAds returns >1 row. */}
               {ads.length > 0 && <FeedAdUnit ad={ads[ads.length - 1]} />}
-              {/* SPRINT P1 — book ad. Reuses /home's HomeSponsorAd, which
-                  reads from platform_ads (placement IN 'home','all'). The
-                  pre-order row inserted in the same sprint has placement='all'
-                  so it lands here on both surfaces without duplication. */}
-              <HomeSponsorAd />
+              {/* SPRINT P1 — book ad. Client fallback fetch of platform_ads
+                  (home SSR path passes preloaded ads; community stays client). */}
+              <HomeSponsorAdClient />
             </div>
           </div>
         </div>

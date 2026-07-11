@@ -2,15 +2,13 @@ import { Skeleton, CardSkeleton } from '@/components/shared/Skeleton'
 
 // Theme-aware /home skeleton. Mirrors the real page rhythm (welcome banner →
 // 4-up tile grid → Evolution Partner sponsor row) so the layout doesn't shift
-// when content arrives. All surfaces bind to --bg-page / --bg-surface, so it
-// reads correctly in both dark and light themes (the old version hardcoded
-// dark hex and flashed a dark screen in light mode).
+// when content arrives. All surfaces bind to --bg-page / --bg-surface.
 export default function HomeLoading() {
   return (
     <div
       role="status"
       aria-label="Loading home"
-      className="px-6 pb-6 space-y-5"
+      className="space-y-5 px-6 pb-6"
       style={{ background: 'var(--bg-page)', minHeight: '100vh' }}
     >
       <div style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }} className="space-y-5 pt-2">
@@ -30,14 +28,14 @@ export default function HomeLoading() {
         </div>
 
         {/* 4-up tile grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <CardSkeleton key={i} height={200} />
           ))}
         </div>
 
         {/* Evolution Partner sponsor row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {Array.from({ length: 2 }).map((_, i) => (
             <CardSkeleton key={i} height={220} />
           ))}

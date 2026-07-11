@@ -19,8 +19,12 @@ import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/component
 import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStoriesTile'
 import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
 import { DailyPulseCard, type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/DailyPulseCard'
-import { HomeSponsorAd } from '@/components/home/HomeSponsorAd'
-import { HomeSponsorRow } from '@/components/home/HomeSponsorRow'
+import {
+  HomeSponsorAd,
+  HomeSponsorRow,
+  SPONSOR_AD_COLUMNS,
+  type SponsorAd,
+} from '@/components/home/HomeSponsorAd'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { hasTierAccess } from '@/lib/tier'
 import { formatRelative, formatDuration as formatMinutes, formatDate } from '@/lib/format'
@@ -539,6 +543,53 @@ async function fetchWeekCommitments(authUserId: string, weekStart: string): Prom
   }
 }
 
+/**
+ * Server-fetch Evolution Partner ads so /home doesn't pay a client
+ * waterfall + mount gate for the sponsor row and sidebar. adminClient
+ * bypasses RLS so members always see active placements.
+ */
+async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: SponsorAd | null }> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = adminClient as any
+    const { data: rows } = await sb
+      .from('platform_ads')
+      .select(SPONSOR_AD_COLUMNS + ', placement')
+      .eq('is_active', true)
+      .order('sort_order')
+      .limit(12)
+
+    const all = (rows ?? []) as Array<SponsorAd & { placement?: string | null }>
+    if (all.length === 0) return { home: [], sidebar: null }
+
+    const homePool = all.filter(a => {
+      const p = (a.placement ?? 'all').toLowerCase()
+      return p === 'home' || p === 'all'
+    })
+    const home: SponsorAd[] = []
+    for (const ad of homePool.length ? homePool : all) {
+      if (home.length >= 2) break
+      if (!home.some(h => h.id === ad.id)) home.push(ad)
+    }
+
+    const homeIds = new Set(home.map(a => a.id))
+    const sidebarPool = all.filter(a => {
+      const p = (a.placement ?? 'all').toLowerCase()
+      return p === 'sidebar' || p === 'all'
+    })
+    const sidebar =
+      sidebarPool.find(a => !homeIds.has(a.id)) ??
+      all.find(a => !homeIds.has(a.id)) ??
+      home[0] ??
+      null
+
+    return { home, sidebar }
+  } catch (err) {
+    console.error('[home.fetchHomeSponsors] failed:', err instanceof Error ? err.message : err)
+    return { home: [], sidebar: null }
+  }
+}
+
 export default async function MemberHomePage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -570,6 +621,7 @@ export default async function MemberHomePage() {
     // HOME-DAILY-PULSE fetchers
     dailyHabits,
     weekCommitments,
+    sponsors,
   ] = await Promise.all([
     // MR-HOME-1: lesson_progress / member_badges store rows under
     // public.users.id, NOT auth.uid(). Pass profile.id (resolved via
@@ -598,6 +650,8 @@ export default async function MemberHomePage() {
     // HOME-DAILY-PULSE — habits FK to auth.users(id), so key on user.id.
     fetchTodaysHabits(user.id),
     fetchWeekCommitments(user.id, weekStart),
+    // Sponsor ads SSR — avoids client waterfall after paint
+    fetchHomeSponsors(),
   ])
 
   const quarterlyGoals = (quarterlyGoalsResult.data ?? []) as GoalForCard[]
@@ -753,12 +807,8 @@ export default async function MemberHomePage() {
         <DailyPulseCard habits={dailyHabits} commitments={weekCommitments} />
       </div>
 
-      {/* SPRINT-1 — Evolution Partner sponsor row directly under the 4-up tile
-          grid. Premium red-accented cards (badge + mic glyph + red CTA) that
-          adapt to both themes; pulls up to two active rows from platform_ads
-          (placement IN ['home','all'] preferred). Mount-gated inside the
-          component so SSR + first hydration always agree. */}
-      <HomeSponsorRow />
+      {/* Evolution Partner row — SSR-fetched platform_ads (no client waterfall). */}
+      <HomeSponsorRow ads={sponsors.home} />
 
       <ProfileCompletePrompt
         hasAvatar={Boolean(profile.avatar_url)}
@@ -798,10 +848,8 @@ export default async function MemberHomePage() {
         />
         <div className="space-y-5 lg:self-start">
           <UpcomingEventsWidget events={events} />
-          {/* SPRINT J — sidebar sponsor ad. Pulls a single active row from
-              platform_ads (prefers placement IN ['home','all'], falls back to
-              any active ad). Positioned below the main sidebar content. */}
-          <HomeSponsorAd />
+          {/* Sidebar Evolution Partner — SSR-fetched, de-duped from home row. */}
+          <HomeSponsorAd ad={sponsors.sidebar} />
         </div>
       </div>
 
