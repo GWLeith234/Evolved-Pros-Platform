@@ -494,7 +494,7 @@ export function HomeSponsorRow({ ads }: { ads: SponsorAd[] }) {
     <section aria-label="Sponsored">
       <SponsoredEyebrow />
       <div
-        className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4"
+        className="grid grid-cols-1 gap-6 md:grid-cols-2"
         style={{ width: '100%', maxWidth: 1440, margin: '0 auto', paddingTop: 4 }}
       >
         {ads.map(ad => (

@@ -27,7 +27,7 @@ import {
 } from '@/components/home/HomeSponsorAd'
 import {
   DEFAULT_HOME_SPONSORS,
-  ensureFlagshipSponsors,
+  pickHomeSponsors,
   isAdCellerantAd,
   isEvolveX360Ad,
   isVendastaAd,
@@ -557,8 +557,7 @@ async function fetchWeekCommitments(authUserId: string, weekStart: string): Prom
  * bypasses RLS so members always see active placements.
  */
 async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: SponsorAd | null }> {
-  // Flagship quartet: AdCellerant + Vendasta + EvolveX360 + XPR Media
-  // (static fallback if seeds not applied).
+  // Main row: exactly 2 Evolution Partners. Sidebar: one different partner.
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = adminClient as any
@@ -572,8 +571,8 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: Sponso
     const all = (rows ?? []) as Array<SponsorAd & { placement?: string | null }>
     if (all.length === 0) {
       return {
-        home: DEFAULT_HOME_SPONSORS,
-        sidebar: DEFAULT_HOME_SPONSORS.find(isEvolveX360Ad) ?? DEFAULT_HOME_SPONSORS[0],
+        home: DEFAULT_HOME_SPONSORS.slice(0, 2),
+        sidebar: DEFAULT_HOME_SPONSORS[1] ?? DEFAULT_HOME_SPONSORS[0],
       }
     }
 
@@ -585,7 +584,7 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: Sponso
     for (const ad of homePool.length ? homePool : all) {
       if (!homeBase.some(h => h.id === ad.id)) homeBase.push(ad)
     }
-    const home = ensureFlagshipSponsors(homeBase).slice(0, 4)
+    const home = pickHomeSponsors(homeBase)
 
     const homeIds = new Set(home.map(a => a.id))
     const sidebarPool = all.filter(a => {
@@ -595,8 +594,8 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: Sponso
     const sidebar =
       sidebarPool.find(a => !homeIds.has(a.id)) ??
       all.find(a => !homeIds.has(a.id)) ??
-      home.find(a => isEvolveX360Ad(a)) ??
       home.find(a => isVendastaAd(a)) ??
+      home.find(a => isEvolveX360Ad(a)) ??
       home.find(a => isXprMediaAd(a)) ??
       home.find(a => isAdCellerantAd(a)) ??
       home[0] ??
@@ -606,8 +605,8 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: Sponso
   } catch (err) {
     console.error('[home.fetchHomeSponsors] failed:', err instanceof Error ? err.message : err)
     return {
-      home: DEFAULT_HOME_SPONSORS,
-      sidebar: DEFAULT_HOME_SPONSORS.find(isEvolveX360Ad) ?? DEFAULT_HOME_SPONSORS[0],
+      home: DEFAULT_HOME_SPONSORS.slice(0, 2),
+      sidebar: DEFAULT_HOME_SPONSORS[1] ?? DEFAULT_HOME_SPONSORS[0],
     }
   }
 }

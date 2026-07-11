@@ -117,16 +117,31 @@ export function premiumPartnerKind(
   return null
 }
 
-/** Default flagship row when DB has no active ads. */
-export const DEFAULT_HOME_SPONSORS: SponsorAd[] = [
+/**
+ * Full flagship catalog (community rail, academy, etc.).
+ * Home main row uses `DEFAULT_HOME_SPONSORS` (exactly 2).
+ */
+export const ALL_FLAGSHIP_SPONSORS: SponsorAd[] = [
   ADCELLERANT_SPONSOR_AD,
   VENDASTA_SPONSOR_AD,
   EVOLVEX360_SPONSOR_AD,
   XPR_MEDIA_SPONSOR_AD,
 ]
 
+/** Exactly two Evolution Partners for the /home main sponsor row. */
+export const DEFAULT_HOME_SPONSORS: SponsorAd[] = [
+  ADCELLERANT_SPONSOR_AD,
+  VENDASTA_SPONSOR_AD,
+]
+
+/** 1–2 sponsors for Academy lesson footers (static fallback). */
+export const DEFAULT_ACADEMY_SPONSORS: SponsorAd[] = [
+  ADCELLERANT_SPONSOR_AD,
+  EVOLVEX360_SPONSOR_AD,
+]
+
 /**
- * Ensure flagship Evolution Partners lead the home row.
+ * Ensure flagship Evolution Partners lead a sponsor list.
  * Order: AdCellerant → Vendasta → EvolveX360 → XPR Media → others.
  */
 export function ensureFlagshipSponsors(list: SponsorAd[]): SponsorAd[] {
@@ -139,4 +154,16 @@ export function ensureFlagshipSponsors(list: SponsorAd[]): SponsorAd[] {
     a => !isAdCellerantAd(a) && !isVendastaAd(a) && !isEvolveX360Ad(a) && !isXprMediaAd(a),
   )
   return [adc, ven, ex, xpr, ...rest]
+}
+
+/** Exactly two sponsors for /home main row. */
+export function pickHomeSponsors(list: SponsorAd[]): SponsorAd[] {
+  return ensureFlagshipSponsors(list).slice(0, 2)
+}
+
+/** One or two sponsors for Academy lesson pages. */
+export function pickAcademySponsors(list: SponsorAd[], count = 2): SponsorAd[] {
+  const n = Math.min(2, Math.max(1, count))
+  const flagged = ensureFlagshipSponsors(list)
+  return flagged.slice(0, n)
 }

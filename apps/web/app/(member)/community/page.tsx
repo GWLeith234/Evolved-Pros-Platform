@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { UnifiedCommunityPageClient } from './UnifiedCommunityPageClient'
 import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
-import { DEFAULT_HOME_SPONSORS } from '@/lib/sponsors/partners'
+import { ALL_FLAGSHIP_SPONSORS } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import type { RailAcademyContinue, RailPodcastEpisode } from '@/components/community/CommunityRightRail'
 
@@ -106,8 +106,8 @@ function railSponsorsFromAds(
     endorsement_quote: a.body_copy ?? null,
   }))
   // Prefer flagship Evolution Partners when community ads are sparse
-  if (fromDb.length === 0) return DEFAULT_HOME_SPONSORS
-  return [...fromDb, ...DEFAULT_HOME_SPONSORS.filter(s => !fromDb.some(d => d.id === s.id))].slice(0, 4)
+  if (fromDb.length === 0) return ALL_FLAGSHIP_SPONSORS
+  return [...fromDb, ...ALL_FLAGSHIP_SPONSORS.filter(s => !fromDb.some(d => d.id === s.id))].slice(0, 4)
 }
 
 export default async function CommunityPage() {

@@ -17,8 +17,38 @@ import { hasTierAccess } from '@/lib/tier'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { asTranscriptSegments } from '@/lib/academy/transcript'
 import { asKeyTakeaways } from '@/lib/academy/takeaways'
+import { adminClient } from '@/lib/supabase/admin'
+import {
+  DEFAULT_ACADEMY_SPONSORS,
+  pickAcademySponsors,
+} from '@/lib/sponsors/partners'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
 
 export const dynamic = 'force-dynamic'
+
+async function fetchAcademyLessonSponsors(): Promise<SponsorAd[]> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = adminClient as any
+    const { data: rows } = await sb
+      .from('platform_ads')
+      .select(SPONSOR_AD_COLUMNS + ', placement')
+      .eq('is_active', true)
+      .order('sort_order')
+      .limit(12)
+    const all = (rows ?? []) as Array<SponsorAd & { placement?: string | null }>
+    if (all.length === 0) return DEFAULT_ACADEMY_SPONSORS
+    // Prefer academy/all placements when present
+    const preferred = all.filter(a => {
+      const p = (a.placement ?? 'all').toLowerCase()
+      return p === 'academy' || p === 'all'
+    })
+    return pickAcademySponsors(preferred.length ? preferred : all, 2)
+  } catch {
+    return DEFAULT_ACADEMY_SPONSORS
+  }
+}
 
 interface Props {
   params: { pillarSlug: string; lessonSlug: string }
@@ -47,10 +77,11 @@ export default async function LessonPage({ params }: Props) {
   // lesson_progress is keyed on public.users.id (profile.id, resolved by
   // email in fetchUserProfile), not the auth session uid.
   const memberId = profile?.id ?? user.id
-  const [lessons, progress, allCourses] = await Promise.all([
+  const [lessons, progress, allCourses, sponsorAds] = await Promise.all([
     fetchLessonsWithProgress(supabase, params.pillarSlug, memberId, profileTier),
     fetchLessonProgress(supabase, memberId, lessonRow.id),
     fetchCoursesWithProgress(supabase, memberId, profileTier),
+    fetchAcademyLessonSponsors(),
   ])
 
   const muxToken = lessonRow.mux_playback_id
@@ -185,6 +216,7 @@ export default async function LessonPage({ params }: Props) {
               }
             : null
         }
+        sponsorAds={sponsorAds}
       />
     </div>
   )

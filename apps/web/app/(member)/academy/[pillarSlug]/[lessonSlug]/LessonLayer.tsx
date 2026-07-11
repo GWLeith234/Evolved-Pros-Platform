@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { TranscriptSegment } from '@/lib/academy/transcript'
+import { AcademyLessonSponsors } from '@/components/academy/AcademyLessonSponsors'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 interface LessonLayerProps {
   lesson: {
@@ -38,6 +40,8 @@ interface LessonLayerProps {
     durationSeconds: number | null
     isLocked: boolean
   } | null
+  /** Evolution Partner ads — after content, before discussion. */
+  sponsorAds?: SponsorAd[]
 }
 
 interface TranscriptLine {
@@ -138,6 +142,7 @@ export function LessonLayer({
   author,
   isCompleted,
   nextLesson,
+  sponsorAds = [],
 }: LessonLayerProps) {
   const router = useRouter()
   const draftKey = `ep:lesson-notes:${lesson.id}`
@@ -464,6 +469,9 @@ export function LessonLayer({
           )}
         </div>
       </section>
+
+      {/* Evolution Partners — after content, before discussion */}
+      {sponsorAds.length > 0 && <AcademyLessonSponsors ads={sponsorAds} />}
 
       {/* SECTION 5 — DISCUSSION */}
       <section style={{ marginBottom: 40 }}>
