@@ -68,8 +68,8 @@ export function HomeSponsorRow() {
     <section aria-label="Sponsored">
       <SponsoredEyebrow />
       <div
-        className="grid grid-cols-1 md:grid-cols-2 gap-4"
-        style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }}
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        style={{ width: '100%', maxWidth: 1440, margin: '0 auto', paddingTop: 4 }}
       >
         {ads.map(ad => (
           <SponsorAdCard key={ad.id} ad={ad} />

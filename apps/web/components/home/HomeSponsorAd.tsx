@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { stripTrailingArrow, truncateOnWord } from '@/lib/brand'
+import { stripTrailingArrow } from '@/lib/brand'
 
 export type SponsorAd = {
   id: string
@@ -23,201 +23,89 @@ export const SPONSOR_AD_COLUMNS =
 export const SPONSOR_RED = '#C9302A'
 
 /**
- * The single sponsor-card presentation, shared by the under-tiles row and the
- * sidebar placement. Red left accent, EVOLUTION PARTNER badge, premium hover.
+ * Centered premium Evolution Partner card — shared by the under-tiles row and
+ * the sidebar placement. Red badge, red CTA, soft scale hover.
  */
 export function SponsorAdCard({ ad }: { ad: SponsorAd; accent?: string }) {
   const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
-  const a = SPONSOR_RED
-  const name = ad.sponsor_name ?? ad.tool_name ?? 'Sponsor'
+  const name = ad.sponsor_name ?? ad.tool_name ?? 'Evolution Partner'
   const tagline = ad.headline ?? ad.endorsement_quote ?? name
   const cta = stripTrailingArrow(ad.cta_text ?? 'Learn More')
-  const initial = (name[0] ?? 'S').toUpperCase()
-  const logoText = truncateOnWord(name, 22)
+  const initial = (name[0] ?? 'E').toUpperCase()
 
-  const [hover, setHover] = useState(false)
-
-  const inner = (
+  const card = (
     <div
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
+      className="relative flex h-full flex-col rounded-2xl border border-red/30 bg-zinc-900 p-6 pt-8 transition-all duration-300 group-hover:scale-[1.02] group-hover:border-red/50 group-hover:shadow-2xl group-hover:shadow-red/10"
       style={{
-        position: 'relative',
-        background: 'var(--bg-surface, #111926)',
-        border: `1px solid ${hover ? `${a}66` : 'var(--border-color, rgba(255,255,255,0.06))'}`,
-        boxShadow: hover
-          ? `0 8px 28px rgba(201,48,42,0.14), 0 0 0 1px ${a}22`
-          : '0 0 0 transparent',
-        padding: '20px 20px 18px',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        textDecoration: 'none',
-        color: 'inherit',
-        height: '100%',
-        transition: 'border-color 180ms ease, box-shadow 180ms ease, background 180ms ease, transform 180ms ease',
-        transform: hover ? 'translateY(-2px)' : 'translateY(0)',
+        // Brand red (#C9302A) for border tokens that Tailwind red/* can't hit exactly
+        borderColor: 'rgba(201,48,42,0.30)',
+        background: '#111926',
       }}
     >
-      {/* Red accent stripe */}
-      <span
-        aria-hidden
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          bottom: 0,
-          width: 3,
-          background: a,
-        }}
-      />
-
-      {/* Corner sparkle line on hover */}
-      <span
-        aria-hidden
-        style={{
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          width: hover ? 96 : 0,
-          height: 2,
-          background: `linear-gradient(90deg, transparent, ${a})`,
-          transition: 'width 220ms ease',
-        }}
-      />
-
-      {/* EVOLUTION PARTNER badge */}
+      {/* Evolution Partner Badge */}
       <div
+        className="absolute -top-3 right-6 rounded-full px-3 py-1 text-xs font-medium tracking-widest text-white"
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: 14,
-          gap: 8,
+          backgroundColor: SPONSOR_RED,
+          fontFamily: '"Barlow Condensed", sans-serif',
+          fontWeight: 800,
+          letterSpacing: '0.18em',
         }}
       >
-        <span
-          style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 800,
-            fontSize: 9,
-            letterSpacing: '0.22em',
-            textTransform: 'uppercase',
-            color: a,
-            background: hover ? 'rgba(201,48,42,0.14)' : 'rgba(201,48,42,0.08)',
-            border: `1px solid ${hover ? 'rgba(201,48,42,0.45)' : 'rgba(201,48,42,0.28)'}`,
-            padding: '3px 8px',
-            transition: 'background 160ms ease, border-color 160ms ease',
-          }}
-        >
-          Evolution Partner
-        </span>
-        <span
-          style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 700,
-            fontSize: 8,
-            letterSpacing: '0.16em',
-            textTransform: 'uppercase',
-            color: 'var(--text-tertiary, rgba(255,255,255,0.35))',
-          }}
-        >
-          Sponsored
-        </span>
+        EVOLUTION PARTNER
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+      <div className="flex flex-1 flex-col items-center justify-center space-y-6 text-center">
         {ad.image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={ad.image_url}
             alt={name}
-            style={{
-              width: 36,
-              height: 36,
-              objectFit: 'cover',
-              border: `1px solid ${a}55`,
-              background: `${a}1a`,
-            }}
+            className="h-20 w-auto object-contain opacity-90 transition-opacity group-hover:opacity-100"
           />
         ) : (
           <div
+            className="flex h-20 w-20 items-center justify-center rounded-xl text-4xl"
             style={{
-              width: 36,
-              height: 36,
-              background: `${a}1a`,
-              border: `1px solid ${a}55`,
-              color: a,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              backgroundColor: 'rgba(201,48,42,0.10)',
+              color: SPONSOR_RED,
               fontFamily: '"Bebas Neue", sans-serif',
-              fontSize: 18,
-              letterSpacing: '0.04em',
             }}
           >
             {initial}
           </div>
         )}
-        <span
-          style={{
-            fontFamily: '"Bebas Neue", sans-serif',
-            fontSize: 18,
-            letterSpacing: '0.14em',
-            color: 'var(--text-primary, #fff)',
-            textTransform: 'uppercase',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            flex: 1,
-            minWidth: 0,
-          }}
-        >
-          {logoText}
-        </span>
+
+        <div>
+          <h4
+            className="text-xl font-semibold text-white"
+            style={{ fontFamily: '"Barlow Condensed", sans-serif', letterSpacing: '0.04em' }}
+          >
+            {name}
+          </h4>
+          <p
+            className="mt-2 text-sm leading-relaxed text-zinc-400"
+            style={{ fontFamily: '"Barlow", sans-serif' }}
+          >
+            {tagline}
+          </p>
+        </div>
       </div>
-      <p
-        style={{
-          margin: 0,
-          fontFamily: '"Playfair Display", Georgia, serif',
-          fontSize: 16,
-          lineHeight: 1.3,
-          fontWeight: 700,
-          color: 'var(--text-primary, rgba(255,255,255,0.95))',
-        }}
-      >
-        {tagline}
-      </p>
-      <div
-        style={{
-          marginTop: 14,
-          alignSelf: 'flex-start',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          padding: '7px 14px',
-          fontFamily: '"Barlow Condensed", sans-serif',
-          fontWeight: 800,
-          fontSize: 10,
-          letterSpacing: '0.22em',
-          textTransform: 'uppercase',
-          color: hover ? '#FFFFFF' : a,
-          background: hover ? a : 'transparent',
-          border: `1px solid ${a}`,
-          transition: 'color 160ms ease, background 160ms ease',
-        }}
-      >
-        {cta}
-        <span
-          aria-hidden
+
+      <div className="mt-6 border-t border-white/10 pt-6">
+        <div
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-medium text-white transition-colors"
           style={{
-            display: 'inline-block',
-            transform: hover ? 'translateX(3px)' : 'translateX(0)',
-            transition: 'transform 160ms ease',
+            backgroundColor: SPONSOR_RED,
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontWeight: 800,
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
           }}
         >
-          →
-        </span>
+          {cta}
+          <span aria-hidden>→</span>
+        </div>
       </div>
     </div>
   )
@@ -228,13 +116,14 @@ export function SponsorAdCard({ ad }: { ad: SponsorAd; accent?: string }) {
         href={href}
         target="_blank"
         rel="noopener noreferrer sponsored"
-        style={{ display: 'block', textDecoration: 'none', height: '100%' }}
+        className="group block h-full pt-3 no-underline"
       >
-        {inner}
+        {card}
       </a>
     )
   }
-  return inner
+
+  return <div className="group h-full pt-3">{card}</div>
 }
 
 /** Shared "Sponsored" eyebrow + divider used above each sponsor placement. */
