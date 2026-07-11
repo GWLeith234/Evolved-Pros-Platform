@@ -16,7 +16,7 @@ export function SponsorCardRail({ sponsor }: { sponsor: Sponsor }) {
       style={{
         backgroundColor: SPONSOR_BG,
         color: SPONSOR_TEXT,
-        borderTop: `2px solid ${color}`,
+        borderTop: '2px solid #C9302A',
         borderRight: `1px solid ${SPONSOR_BORDER}`,
         borderBottom: `1px solid ${SPONSOR_BORDER}`,
         borderLeft: `1px solid ${SPONSOR_BORDER}`,
@@ -26,21 +26,33 @@ export function SponsorCardRail({ sponsor }: { sponsor: Sponsor }) {
         flexDirection: 'column',
         gap: 10,
         width: 230,
+        transition: 'box-shadow 160ms ease, transform 160ms ease',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.boxShadow = '0 6px 20px rgba(201,48,42,0.14)'
+        e.currentTarget.style.transform = 'translateY(-1px)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.boxShadow = 'none'
+        e.currentTarget.style.transform = 'translateY(0)'
       }}
     >
-      {/* Eyebrow row */}
+      {/* Eyebrow row — Evolution Partner badge */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 700,
+            fontWeight: 800,
             fontSize: 9,
-            letterSpacing: '0.22em',
+            letterSpacing: '0.18em',
             textTransform: 'uppercase',
-            color,
+            color: '#C9302A',
+            background: 'rgba(201,48,42,0.10)',
+            border: '1px solid rgba(201,48,42,0.35)',
+            padding: '2px 6px',
           }}
         >
-          Partner
+          Evolution Partner
         </span>
         <span
           style={{

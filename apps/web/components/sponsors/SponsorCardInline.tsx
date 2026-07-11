@@ -20,7 +20,7 @@ export function SponsorCardInline({ sponsor }: { sponsor: Sponsor }) {
         borderTop: `1px solid ${SPONSOR_BORDER}`,
         borderRight: `1px solid ${SPONSOR_BORDER}`,
         borderBottom: `1px solid ${SPONSOR_BORDER}`,
-        borderLeft: `3px solid ${color}`,
+        borderLeft: '3px solid #C9302A',
         borderRadius: 0,
         height: 64,
         width: '100%',
@@ -28,21 +28,31 @@ export function SponsorCardInline({ sponsor }: { sponsor: Sponsor }) {
         alignItems: 'center',
         gap: 14,
         padding: '0 16px',
+        transition: 'box-shadow 160ms ease',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.boxShadow = '0 4px 16px rgba(201,48,42,0.12)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.boxShadow = 'none'
       }}
     >
       {/* Eyebrow */}
       <span
         style={{
           fontFamily: '"Barlow Condensed", sans-serif',
-          fontWeight: 700,
-          fontSize: 10,
-          letterSpacing: '0.22em',
+          fontWeight: 800,
+          fontSize: 9,
+          letterSpacing: '0.18em',
           textTransform: 'uppercase',
-          color,
+          color: '#C9302A',
+          background: 'rgba(201,48,42,0.10)',
+          border: '1px solid rgba(201,48,42,0.35)',
+          padding: '2px 6px',
           flexShrink: 0,
         }}
       >
-        Partner
+        Evolution Partner
       </span>
 
       {/* Logo + brand */}

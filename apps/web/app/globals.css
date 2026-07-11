@@ -32,13 +32,8 @@
 
   /* DS2 — TopNav v2 + brand (FOUNDATION-TOPNAV-V2) */
   --bg-topnav:     #0D1B2A;
-  /* Nav background — deliberately has no html.light-mode override. The nav
-     stays this exact dark navy permanently in both themes (design decision).
-     Was referenced by TopNav.tsx/NotifBell.tsx but never actually defined
-     anywhere — resolved to transparent, coincidentally looked dark only
-     because the page body behind it was also dark. Real risk once light
-     mode became reachable via the toggle: light page content bleeding
-     through a transparent sticky header. */
+  /* Nav background — dark by default; light mode flips to parchment so
+     dark link titles remain WCAG-readable (SPRINT-1 UI polish). */
   --bg-nav:        #0D1B2A;
   --text-dim:      rgba(255,255,255,0.6);
   --text-muted:    rgba(255,255,255,0.45);
@@ -163,6 +158,30 @@
      each other. */
   --paper:      #F5F0E8;
   --paper-card: #FFFFFF;
+
+  /* Skeleton loaders (SPRINT-1) — theme-aware shimmer base/highlight */
+  --skeleton-base:      rgba(255,255,255,0.06);
+  --skeleton-highlight: rgba(255,255,255,0.12);
+
+  /* Typography scale (SPRINT-1) — paired with packages/ui/tokens typography */
+  --type-display-size: clamp(2.75rem, 9vw, 5.5rem);
+  --type-display-lh:   0.95;
+  --type-h1-size:      1.75rem;
+  --type-h1-lh:        1.2;
+  --type-h2-size:      1.25rem;
+  --type-h2-lh:        1.25;
+  --type-h3-size:      1rem;
+  --type-h3-lh:        1.3;
+  --type-body-size:    0.9375rem;
+  --type-body-lh:      1.6;
+  --type-body-sm-size: 0.8125rem;
+  --type-body-sm-lh:   1.5;
+  --type-eyebrow-size: 0.6875rem;
+  --type-eyebrow-track: 0.14em;
+  --type-label-size:   0.625rem;
+  --type-label-track:  0.18em;
+  --type-nav-size:     1rem;
+  --type-nav-track:    0.08em;
 }
 
 html {
@@ -197,8 +216,9 @@ html.light-mode {
   --text-secondary: #4A5868;   /* 7.4:1 on #fff — AAA */
   --text-tertiary:  #5C6A7C;   /* 5.0:1 on #fff — AA */
 
-  /* DS2 light variants (FOUNDATION-TOPNAV-V2) */
+  /* DS2 light variants (FOUNDATION-TOPNAV-V2 + SPRINT-1 nav contrast) */
   --bg-topnav:     #FAF7F2;
+  --bg-nav:        #FAF7F2; /* light parchment — dark titles stay readable */
   --text-dim:      rgba(27,42,74,0.6);
   --text-muted:    rgba(27,42,74,0.45);
   --border-subtle: rgba(27,42,74,0.10);
@@ -211,6 +231,10 @@ html.light-mode {
   --topnav-divider:     rgba(27,42,74,0.12);
   --topnav-bell-icon:   rgba(27,42,74,0.70);
   --topnav-ring-bg:     #FAF7F2;
+
+  /* Skeleton — light parchment (SPRINT-1) */
+  --skeleton-base:      rgba(27,42,74,0.06);
+  --skeleton-highlight: rgba(27,42,74,0.12);
 
   /* Episode banner — light overrides (EPISODEBANNER-THEME).
      Banner bg sits a hair darker than topnav parchment so it reads as a
@@ -364,6 +388,83 @@ html.light-mode main .border-white\/\[0\.06\] {
    ~5.6:1) in light mode only. Dark-mode rendering is unchanged. */
 html.light-mode header a[href="/media"] {
   color: #8B6A00 !important;
+}
+
+/* ── Typography utilities (SPRINT-1) ─────────────────────────────────────
+   Semantic type scale. Colors bind to --text-primary / --text-secondary so
+   contrast is correct in both themes without per-component overrides. */
+.ep-type-display {
+  font-family: var(--font-bebas);
+  font-weight: 400;
+  font-size: var(--type-display-size);
+  line-height: var(--type-display-lh);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+.ep-type-h1 {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: var(--type-h1-size);
+  line-height: var(--type-h1-lh);
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+.ep-type-h2 {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: var(--type-h2-size);
+  line-height: var(--type-h2-lh);
+  color: var(--text-primary);
+}
+.ep-type-h3 {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 600;
+  font-size: var(--type-h3-size);
+  line-height: var(--type-h3-lh);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+.ep-type-body {
+  font-family: var(--font-barlow), "Barlow", sans-serif;
+  font-weight: 400;
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+  color: var(--text-primary);
+}
+.ep-type-body-sm {
+  font-family: var(--font-barlow), "Barlow", sans-serif;
+  font-weight: 400;
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+  color: var(--text-secondary);
+}
+.ep-type-eyebrow {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 600;
+  font-size: var(--type-eyebrow-size);
+  line-height: 1.2;
+  letter-spacing: var(--type-eyebrow-track);
+  text-transform: uppercase;
+  color: var(--brand-gold);
+}
+.ep-type-label {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: var(--type-label-size);
+  line-height: 1.2;
+  letter-spacing: var(--type-label-track);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.ep-type-nav {
+  font-family: var(--font-bebas);
+  font-weight: 400;
+  font-size: var(--type-nav-size);
+  line-height: 1;
+  letter-spacing: var(--type-nav-track);
+  text-transform: uppercase;
 }
 
 * { box-sizing: border-box; }

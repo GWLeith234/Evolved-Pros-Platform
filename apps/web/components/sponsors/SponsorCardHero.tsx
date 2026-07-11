@@ -17,7 +17,7 @@ export function SponsorCardHero({ sponsor }: { sponsor: Sponsor }) {
       style={{
         backgroundColor: SPONSOR_BG,
         color: SPONSOR_TEXT,
-        borderTop: `2px solid ${color}`,
+        borderTop: '2px solid #C9302A',
         borderRight: `1px solid ${SPONSOR_BORDER}`,
         borderBottom: `1px solid ${SPONSOR_BORDER}`,
         borderLeft: `1px solid ${SPONSOR_BORDER}`,
@@ -27,21 +27,35 @@ export function SponsorCardHero({ sponsor }: { sponsor: Sponsor }) {
         flexDirection: 'column',
         gap: 12,
         width: '100%',
+        transition: 'border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.boxShadow = '0 8px 28px rgba(201,48,42,0.14)'
+        e.currentTarget.style.transform = 'translateY(-2px)'
+        e.currentTarget.style.borderColor = 'rgba(201,48,42,0.45)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.boxShadow = 'none'
+        e.currentTarget.style.transform = 'translateY(0)'
+        e.currentTarget.style.borderColor = SPONSOR_BORDER
       }}
     >
-      {/* Eyebrow row */}
+      {/* Eyebrow row — Evolution Partner badge + sponsored disclosure */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 700,
+            fontWeight: 800,
             fontSize: 10,
             letterSpacing: '0.22em',
             textTransform: 'uppercase',
-            color,
+            color: '#C9302A',
+            background: 'rgba(201,48,42,0.10)',
+            border: '1px solid rgba(201,48,42,0.35)',
+            padding: '3px 8px',
           }}
         >
-          Partner
+          Evolution Partner
         </span>
         <span
           style={{

@@ -1,6 +1,6 @@
 // Shared branded full-screen loading state used by route segment
-// loading.tsx files. Dark surface, pulsing logo mark, "EVOLVED PROS"
-// wordmark — kills the white-flash transitions.
+// loading.tsx files. Dark surface, pulsing horizontal EVOLVED PROS
+// logo with red mic, kills the white-flash transitions.
 export function BrandedLoading() {
   return (
     <div
@@ -12,7 +12,7 @@ export function BrandedLoading() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#0A0F18',
+        background: 'var(--bg-page, #0A0F18)',
         minHeight: '100%',
         width: '100%',
       }}
@@ -20,13 +20,13 @@ export function BrandedLoading() {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/logo_nav_dark.png"
+          src="/logo_horizontal_dark.png"
           alt=""
           aria-hidden="true"
-          width={120}
-          height={120}
+          width={200}
+          height={40}
           style={{
-            width: 120,
+            width: 200,
             height: 'auto',
             objectFit: 'contain',
             animation: 'brand-loading-pulse 1.5s ease-in-out infinite',
@@ -41,7 +41,7 @@ export function BrandedLoading() {
             fontSize: 11,
             letterSpacing: '0.4em',
             textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.55)',
+            color: 'var(--text-tertiary, rgba(255,255,255,0.55))',
           }}
         >
           Evolved Pros

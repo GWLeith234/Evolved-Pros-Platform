@@ -5,4 +5,12 @@ export { Badge }                          from './components/Badge'
 export { Avatar }                         from './components/Avatar'
 export { Input, Textarea }                from './components/Input'
 export { SidebarItem }                    from './components/SidebarItem'
-export { colors, tiers, pillars }         from './tokens/index'
+export {
+  colors,
+  themes,
+  typography,
+  skeleton,
+  tiers,
+  pillars,
+  logos,
+} from './tokens/index'

@@ -37,7 +37,10 @@ export function CardHeader({ title, eyebrow, action, className = '' }: CardHeade
             {eyebrow}
           </p>
         )}
-        <h3 className="font-condensed font-semibold text-white text-base uppercase tracking-wide">
+        <h3
+          className="font-condensed font-semibold text-base uppercase tracking-wide"
+          style={{ color: 'var(--text-primary, #fff)' }}
+        >
           {title}
         </h3>
       </div>

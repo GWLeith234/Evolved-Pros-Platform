@@ -19,40 +19,35 @@ export type SponsorAd = {
 export const SPONSOR_AD_COLUMNS =
   'id, image_url, click_url, link_url, headline, tool_name, sponsor_name, cta_text, endorsement_quote'
 
-// One accent rule for every sponsor placement (A6.2). Pillar-palette tokens,
-// rotated deterministically by id so the row's two cards differ but a given ad
-// always renders the same accent. Tokens mirror lib/pillar-colors.ts.
-const SPONSOR_ACCENTS = ['#3FB8E8', '#E8B547', '#A78BFA'] as const
-
-export function sponsorAccent(id: string): string {
-  return SPONSOR_ACCENTS[(id.charCodeAt(0) || 0) % SPONSOR_ACCENTS.length]
-}
+/** Brand-red accent for Evolution Partner cards (SPRINT-1). */
+export const SPONSOR_RED = '#C9302A'
 
 /**
  * The single sponsor-card presentation, shared by the under-tiles row and the
- * sidebar placement. One CTA rule (`<label> →`, single arrow — any arrow the
- * stored label already carries is stripped first), one accent rule.
+ * sidebar placement. Red left accent, EVOLUTION PARTNER badge, premium hover.
  */
-export function SponsorAdCard({ ad, accent }: { ad: SponsorAd; accent?: string }) {
+export function SponsorAdCard({ ad }: { ad: SponsorAd; accent?: string }) {
   const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
-  const a = accent ?? sponsorAccent(ad.id)
+  const a = SPONSOR_RED
   const name = ad.sponsor_name ?? ad.tool_name ?? 'Sponsor'
   const tagline = ad.headline ?? ad.endorsement_quote ?? name
-  // CTA: strip any arrow the stored label already contains, then append exactly
-  // one. Without the strip, a DB label ending in an arrow renders a doubled
-  // arrow in the CTA. See stripTrailingArrow in lib/brand.
   const cta = stripTrailingArrow(ad.cta_text ?? 'Learn More')
   const initial = (name[0] ?? 'S').toUpperCase()
-  // Word-boundary ellipsis — never mid-word ("EVOLVED — GEOR"). Uppercasing is
-  // a CSS concern (text-transform below), so truncate the cased source.
   const logoText = truncateOnWord(name, 22)
+
+  const [hover, setHover] = useState(false)
 
   const inner = (
     <div
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
       style={{
         position: 'relative',
-        background: '#111926',
-        border: '1px solid rgba(255,255,255,0.06)',
+        background: 'var(--bg-surface, #111926)',
+        border: `1px solid ${hover ? `${a}66` : 'var(--border-color, rgba(255,255,255,0.06))'}`,
+        boxShadow: hover
+          ? `0 8px 28px rgba(201,48,42,0.14), 0 0 0 1px ${a}22`
+          : '0 0 0 transparent',
         padding: '20px 20px 18px',
         display: 'flex',
         flexDirection: 'column',
@@ -60,8 +55,11 @@ export function SponsorAdCard({ ad, accent }: { ad: SponsorAd; accent?: string }
         textDecoration: 'none',
         color: 'inherit',
         height: '100%',
+        transition: 'border-color 180ms ease, box-shadow 180ms ease, background 180ms ease, transform 180ms ease',
+        transform: hover ? 'translateY(-2px)' : 'translateY(0)',
       }}
     >
+      {/* Red accent stripe */}
       <span
         aria-hidden
         style={{
@@ -69,10 +67,65 @@ export function SponsorAdCard({ ad, accent }: { ad: SponsorAd; accent?: string }
           top: 0,
           left: 0,
           bottom: 0,
-          width: 2,
+          width: 3,
           background: a,
         }}
       />
+
+      {/* Corner sparkle line on hover */}
+      <span
+        aria-hidden
+        style={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          width: hover ? 96 : 0,
+          height: 2,
+          background: `linear-gradient(90deg, transparent, ${a})`,
+          transition: 'width 220ms ease',
+        }}
+      />
+
+      {/* EVOLUTION PARTNER badge */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: 14,
+          gap: 8,
+        }}
+      >
+        <span
+          style={{
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontWeight: 800,
+            fontSize: 9,
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+            color: a,
+            background: hover ? 'rgba(201,48,42,0.14)' : 'rgba(201,48,42,0.08)',
+            border: `1px solid ${hover ? 'rgba(201,48,42,0.45)' : 'rgba(201,48,42,0.28)'}`,
+            padding: '3px 8px',
+            transition: 'background 160ms ease, border-color 160ms ease',
+          }}
+        >
+          Evolution Partner
+        </span>
+        <span
+          style={{
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontWeight: 700,
+            fontSize: 8,
+            letterSpacing: '0.16em',
+            textTransform: 'uppercase',
+            color: 'var(--text-tertiary, rgba(255,255,255,0.35))',
+          }}
+        >
+          Sponsored
+        </span>
+      </div>
+
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
         {ad.image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -111,7 +164,7 @@ export function SponsorAdCard({ ad, accent }: { ad: SponsorAd; accent?: string }
             fontFamily: '"Bebas Neue", sans-serif',
             fontSize: 18,
             letterSpacing: '0.14em',
-            color: '#fff',
+            color: 'var(--text-primary, #fff)',
             textTransform: 'uppercase',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
@@ -130,7 +183,7 @@ export function SponsorAdCard({ ad, accent }: { ad: SponsorAd; accent?: string }
           fontSize: 16,
           lineHeight: 1.3,
           fontWeight: 700,
-          color: 'rgba(255,255,255,0.95)',
+          color: 'var(--text-primary, rgba(255,255,255,0.95))',
         }}
       >
         {tagline}
@@ -148,13 +201,23 @@ export function SponsorAdCard({ ad, accent }: { ad: SponsorAd; accent?: string }
           fontSize: 10,
           letterSpacing: '0.22em',
           textTransform: 'uppercase',
-          color: a,
-          background: 'transparent',
+          color: hover ? '#FFFFFF' : a,
+          background: hover ? a : 'transparent',
           border: `1px solid ${a}`,
+          transition: 'color 160ms ease, background 160ms ease',
         }}
       >
         {cta}
-        <span aria-hidden>→</span>
+        <span
+          aria-hidden
+          style={{
+            display: 'inline-block',
+            transform: hover ? 'translateX(3px)' : 'translateX(0)',
+            transition: 'transform 160ms ease',
+          }}
+        >
+          →
+        </span>
       </div>
     </div>
   )
@@ -164,7 +227,7 @@ export function SponsorAdCard({ ad, accent }: { ad: SponsorAd; accent?: string }
       <a
         href={href}
         target="_blank"
-        rel="noopener noreferrer"
+        rel="noopener noreferrer sponsored"
         style={{ display: 'block', textDecoration: 'none', height: '100%' }}
       >
         {inner}
@@ -185,14 +248,32 @@ export function SponsoredEyebrow() {
           fontSize: 9,
           letterSpacing: '0.42em',
           textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.42)',
+          color: 'var(--text-tertiary, rgba(255,255,255,0.42))',
           padding: '3px 8px',
-          border: '1px solid rgba(255,255,255,0.12)',
+          border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
         }}
       >
         Sponsored
       </span>
-      <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+      <span
+        style={{
+          flex: 1,
+          height: 1,
+          background: 'var(--border-color, rgba(255,255,255,0.06))',
+        }}
+      />
+      <span
+        style={{
+          fontFamily: '"Barlow Condensed", sans-serif',
+          fontWeight: 600,
+          fontSize: 9,
+          letterSpacing: '0.22em',
+          textTransform: 'uppercase',
+          color: 'var(--text-tertiary, rgba(255,255,255,0.3))',
+        }}
+      >
+        Evolution Partners
+      </span>
     </div>
   )
 }

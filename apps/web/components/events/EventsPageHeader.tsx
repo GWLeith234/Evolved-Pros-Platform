@@ -24,14 +24,10 @@ export function EventsPageHeader() {
         Evolved Pros
       </p>
       <h1
+        className="ep-type-display"
         style={{
           margin: '8px 0 0',
-          fontFamily: '"Bebas Neue", sans-serif',
-          fontSize: 'clamp(64px, 9vw, 88px)',
-          lineHeight: 0.95,
-          letterSpacing: '0.02em',
           color: 'var(--text-primary)',
-          textTransform: 'uppercase',
         }}
       >
         Events

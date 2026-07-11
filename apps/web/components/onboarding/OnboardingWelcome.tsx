@@ -1,5 +1,3 @@
-const LOGO = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_nav_light.png'
-
 interface Props {
   displayName: string
   onContinue: () => void
@@ -10,12 +8,12 @@ export function OnboardingWelcome({ displayName, onContinue }: Props) {
 
   return (
     <div style={{ textAlign: 'center' }}>
-      {/* Logo */}
+      {/* Horizontal EVOLVED PROS wordmark with red mic (dark surface → white mark) */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={LOGO}
+        src="/logo_horizontal_dark.png"
         alt="Evolved Pros"
-        style={{ height: 32, marginBottom: 28, opacity: 0.9 }}
+        style={{ height: 36, width: 'auto', marginBottom: 28, opacity: 0.95 }}
       />
 
       {/* Heading */}

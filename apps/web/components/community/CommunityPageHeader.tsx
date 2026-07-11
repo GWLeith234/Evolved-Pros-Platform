@@ -17,14 +17,10 @@ export function CommunityPageHeader() {
         Evolved Pros
       </p>
       <h1
+        className="ep-type-display"
         style={{
           margin: '8px 0 0',
-          fontFamily: '"Bebas Neue", sans-serif',
-          fontSize: 'clamp(44px, 12vw, 88px)',
-          lineHeight: 0.95,
-          letterSpacing: '0.02em',
           color: 'var(--community-header-title)',
-          textTransform: 'uppercase',
           overflowWrap: 'break-word',
           wordBreak: 'break-word',
         }}
@@ -37,7 +33,7 @@ export function CommunityPageHeader() {
           maxWidth: 520,
           fontFamily: '"Playfair Display", serif',
           fontStyle: 'italic',
-          fontSize: 16,
+          fontSize: 'var(--type-body-size, 16px)',
           lineHeight: 1.4,
           color: 'var(--community-header-tagline)',
         }}
