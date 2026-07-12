@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { MuxUploader } from '@/components/admin/MuxUploader'
 import { parseTranscriptJson } from '@/lib/academy/transcript'
 import { MAX_TAKEAWAYS, MAX_TAKEAWAY_LENGTH } from '@/lib/academy/takeaways'
-import { ContentBlocksEditor, type ContentBlock } from './ContentBlocksEditor'
 
 interface LessonFormValues {
   title: string
@@ -20,8 +19,6 @@ interface LessonFormValues {
   keyTakeaways: string[]
   /** Per-lesson discussion prompt ('' = generic fallback on the page). */
   discussionPrompt: string
-  /** Written content blocks (formerly the academy Content Builder). */
-  contentBlocks: ContentBlock[]
 }
 
 interface LessonFormProps {
@@ -29,8 +26,6 @@ interface LessonFormProps {
   lessonId?: string
   initialValues?: Partial<LessonFormValues>
   existingPlaybackId?: string | null
-  /** Pillar accent color for the content-block type badges. */
-  accentColor?: string
 }
 
 const DEFAULT_VALUES: LessonFormValues = {
@@ -43,14 +38,13 @@ const DEFAULT_VALUES: LessonFormValues = {
   transcriptJson: '',
   keyTakeaways: [],
   discussionPrompt: '',
-  contentBlocks: [],
 }
 
 function slugify(str: string) {
   return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
-export function LessonForm({ courseId, lessonId, initialValues, existingPlaybackId, accentColor = '#68a2b9' }: LessonFormProps) {
+export function LessonForm({ courseId, lessonId, initialValues, existingPlaybackId }: LessonFormProps) {
   const router = useRouter()
   const [values, setValues] = useState<LessonFormValues>({ ...DEFAULT_VALUES, ...initialValues })
   const [saving, setSaving] = useState(false)
@@ -113,7 +107,6 @@ export function LessonForm({ courseId, lessonId, initialValues, existingPlayback
       transcript: transcriptParse.segments,
       key_takeaways: takeaways.length > 0 ? takeaways : null,
       discussion_prompt: values.discussionPrompt.trim() || null,
-      content_blocks: values.contentBlocks,
     }
 
     try {
@@ -409,20 +402,6 @@ export function LessonForm({ courseId, lessonId, initialValues, existingPlayback
             ))}
           </div>
         )}
-      </div>
-
-      {/* Content Blocks — written lesson content (video/text/pullquote/
-          exercise/quiz). Merged in from the former academy Content Builder so
-          a single save persists both the video/meta above and these blocks. */}
-      <div>
-        <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
-          Content Blocks
-        </label>
-        <ContentBlocksEditor
-          blocks={values.contentBlocks}
-          onChange={b => set('contentBlocks', b)}
-          accentColor={accentColor}
-        />
       </div>
 
       {/* Published */}

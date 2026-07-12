@@ -3,7 +3,6 @@ import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { LessonForm } from '../../LessonForm'
-import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
 interface Props {
   params: { courseId: string }
@@ -49,7 +48,6 @@ export default async function NewLessonPage({ params }: Props) {
       <h1 className="font-display font-black text-[28px] text-[#112535] mb-6">Add Lesson</h1>
       <LessonForm
         courseId={params.courseId}
-        accentColor={PILLAR_CONFIG[course.pillar_number]?.color ?? '#68a2b9'}
         initialValues={{ sortOrder: nextOrder }}
       />
     </div>
