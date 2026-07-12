@@ -45,6 +45,7 @@ export const themes = {
     topnavLinkActive: '#FFFFFF',
     topnavLinkIdle: 'rgba(255,255,255,0.50)',
     topnavLinkHover: 'rgba(255,255,255,0.85)',
+    shadowMd: '0 4px 12px rgba(0,0,0,0.40)',
   },
   // Light theme values are WCAG-AA-tuned against the parchment surfaces:
   // textSecondary #4A5868 ≈ 7.4:1 (AAA) on #FFFFFF, textTertiary #5C6A7C ≈
@@ -66,6 +67,7 @@ export const themes = {
     topnavLinkActive: '#1B2A4A',
     topnavLinkIdle: 'rgba(27,42,74,0.72)',
     topnavLinkHover: '#1B2A4A',
+    shadowMd: '0 4px 12px rgba(27,42,74,0.10)',
   },
 } as const
 
@@ -144,3 +146,62 @@ export const logos = {
   /** Legacy alias used by loading screens / email */
   navDark: '/logo_nav_dark.png',
 } as const
+
+// ── Spacing / radii / shadows (mirror tailwind.config `ep-*` + globals.css) ──
+/** 4px base scale. Values in px; use for gaps/padding when not using Tailwind. */
+export const spacing = {
+  1: '4px',
+  2: '8px',
+  3: '12px',
+  4: '16px',
+  5: '20px',
+  6: '24px',
+  8: '32px',
+  10: '40px',
+  12: '48px',
+  16: '64px',
+} as const
+
+export const radii = {
+  none: '0px',
+  sm: '2px',
+  md: '4px',
+  lg: '8px',
+  pill: '9999px',
+} as const
+
+/** Reference the CSS custom properties defined in globals.css. */
+export const shadows = {
+  sm: 'var(--shadow-sm)',
+  md: 'var(--shadow-md)',
+  lg: 'var(--shadow-lg)',
+  glowRed: 'var(--shadow-glow-red)',
+  glowGold: 'var(--shadow-glow-gold)',
+  glowTeal: 'var(--shadow-glow-teal)',
+} as const
+
+export const gradients = {
+  primary: 'linear-gradient(135deg, #ef0e30 0%, #c50a26 100%)',
+  success: 'linear-gradient(135deg, #0ABFA3 0%, #0A9980 100%)',
+  gold: 'linear-gradient(135deg, #C9A84C 0%, #8B6A00 100%)',
+  navy: 'linear-gradient(135deg, #1B2A4A 0%, #0d1c27 100%)',
+} as const
+
+// ── Pillar colors (1–6) ─────────────────────────────────────────────────────
+// Canonical pillar accent colors, mirrored in apps/web/lib/pillar-colors.ts.
+export const pillarColors: Record<number, { color: string; colorMuted: string; label: string }> = {
+  1: { color: '#FFA538', colorMuted: 'rgba(255,165,56,0.12)',  label: 'Foundation' },
+  2: { color: '#A78BFA', colorMuted: 'rgba(167,139,250,0.12)', label: 'Identity' },
+  3: { color: '#F87171', colorMuted: 'rgba(248,113,113,0.12)', label: 'Mental Toughness' },
+  4: { color: '#60A5FA', colorMuted: 'rgba(96,165,250,0.12)',  label: 'Strategy' },
+  5: { color: '#C9A84C', colorMuted: 'rgba(201,168,76,0.12)',  label: 'Accountability' },
+  6: { color: '#0ABFA3', colorMuted: 'rgba(10,191,163,0.12)',  label: 'Execution' },
+}
+
+/** Resolve a pillar number (or numeric string) to its accent color; falls back
+ *  to the neutral muted color for null/undefined/unknown pillars. */
+export function getPillarColor(pillar?: number | string | null): string {
+  if (pillar == null) return colors.muted
+  const n = typeof pillar === 'number' ? pillar : parseInt(String(pillar), 10)
+  return pillarColors[n]?.color ?? colors.muted
+}
