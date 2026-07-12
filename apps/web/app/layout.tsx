@@ -121,8 +121,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ThemeInit defaultTheme={defaultTheme} />
       </head>
       <body
-        className="bg-navy-deep text-navy antialiased"
-        style={{ fontFamily: 'var(--font-body)' }}
+        className="antialiased"
+        style={{
+          fontFamily: 'var(--font-body)',
+          backgroundColor: 'var(--bg-page)',
+          color: 'var(--text-primary)',
+        }}
       >
         <ThemeProvider>{children}</ThemeProvider>
       </body>

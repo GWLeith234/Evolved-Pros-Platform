@@ -15,7 +15,7 @@ export function LivePhotoRotator() {
   }, [])
 
   return (
-    <section style={{ maxWidth: 1280, margin: '72px auto 0', padding: '0 24px' }}>
+    <section className="live-section-pad" style={{ margin: '72px auto 0' }}>
       <div
         style={{
           position: 'relative',

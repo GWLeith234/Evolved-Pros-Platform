@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 
 type NextEvent = { id: string; title: string; starts_at: string } | null
 
@@ -24,18 +23,24 @@ export function NextEventBanner() {
   const router = useRouter()
 
   useEffect(() => {
-    const supabase = createClient()
-    supabase
-      .from('events')
-      .select('id, title, starts_at')
-      .eq('is_published', true)
-      .gt('starts_at', new Date().toISOString())
-      .order('starts_at', { ascending: true })
-      .limit(1)
-      .single()
-      .then(({ data }) => {
-        if (data) setEvent(data)
-      })
+    let cancelled = false
+    void (async () => {
+      // Defer supabase client so this module can SSR without realtime-js eval.
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('events')
+        .select('id, title, starts_at')
+        .eq('is_published', true)
+        .gt('starts_at', new Date().toISOString())
+        .order('starts_at', { ascending: true })
+        .limit(1)
+        .maybeSingle()
+      if (!cancelled && data) setEvent(data)
+    })()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   if (!event) return null

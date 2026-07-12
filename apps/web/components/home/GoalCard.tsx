@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ProgressBar } from '@evolved-pros/ui'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { formatDate, formatPct, formatTrend } from '@/lib/format'
 
@@ -138,20 +139,13 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
           </span>
         </div>
 
-        <div
-          className="w-full rounded-full overflow-hidden"
-          style={{ height: 4, backgroundColor: 'var(--bg-elevated)' }}
-        >
-          <div
-            className={`h-full rounded-full ep-progress-fill${goal.progress_pct >= 100 ? ' ep-progress-fill--done' : ''}`}
-            style={{
-              width: `${goal.progress_pct}%`,
-              backgroundColor: accentColor,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              ...({ ['--ep-glow']: `${accentColor}b3` } as any),
-            }}
-          />
-        </div>
+        <ProgressBar
+          value={goal.progress_pct}
+          pillar={pillarKey ?? undefined}
+          color={accentColor}
+          size="sm"
+          showPercent={false}
+        />
 
         {pace && (
           <div className="flex items-center justify-between mt-2">

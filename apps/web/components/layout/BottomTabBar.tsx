@@ -99,8 +99,8 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
       <nav
         className="ep-bottom-tabs lg:hidden flex items-stretch fixed bottom-0 left-0 right-0 z-50"
         style={{
-          backgroundColor: 'var(--bg-nav, #112535)',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
+          backgroundColor: 'var(--bg-nav)',
+          borderTop: '1px solid var(--border-color)',
           /* Backdrop blur for iOS over-scroll under the bar */
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
@@ -118,21 +118,27 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
               <Link
                 key={tab.href}
                 href={tab.href}
-                className="flex-1 flex flex-col items-center justify-center gap-0.5 relative"
+                className="flex-1 flex flex-col items-center justify-center gap-0.5 relative ep-touch-target"
+                aria-current={active ? 'page' : undefined}
                 style={{
-                  color: active ? '#68a2b9' : 'rgba(255,255,255,0.45)',
-                  background: active ? 'rgba(104,162,185,0.08)' : 'transparent',
+                  color: active ? 'var(--brand-teal, #0ABFA3)' : 'var(--text-tertiary)',
+                  background: active ? 'rgba(10,191,163,0.10)' : 'transparent',
+                  minHeight: 48,
                 }}
               >
-                <span className="relative">
+                <span className="relative" aria-hidden="true">
                   {tab.icon}
                   {isCommunity && unreadCount > 0 && (
                     <span
                       className="absolute -top-0.5 -right-0.5 w-[6px] h-[6px] rounded-full"
-                      style={{ backgroundColor: '#ef0e30' }}
+                      style={{ backgroundColor: 'var(--brand-red-hot, #ef0e30)' }}
+                      aria-hidden="true"
                     />
                   )}
                 </span>
+                {isCommunity && unreadCount > 0 && (
+                  <span className="sr-only">{unreadCount} unread notifications</span>
+                )}
                 <span
                   className="font-condensed font-semibold uppercase tracking-wide"
                   style={{ fontSize: '9px', letterSpacing: '0.06em' }}
@@ -147,21 +153,28 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
           <button
             type="button"
             onClick={() => setMoreOpen(true)}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 relative"
+            className="flex-1 flex flex-col items-center justify-center gap-0.5 relative ep-touch-target"
+            aria-expanded={moreOpen}
+            aria-haspopup="dialog"
+            aria-label="More navigation"
             style={{
-              color: isMoreActive ? '#68a2b9' : 'rgba(255,255,255,0.45)',
-              background: isMoreActive ? 'rgba(104,162,185,0.08)' : 'transparent',
+              color: isMoreActive ? 'var(--brand-teal, #0ABFA3)' : 'var(--text-tertiary)',
+              background: isMoreActive ? 'rgba(10,191,163,0.10)' : 'transparent',
+              minHeight: 48,
             }}
           >
-            <span className="relative">
+            <span className="relative" aria-hidden="true">
               <GridIcon />
               {dmUnreadCount > 0 && (
                 <span
                   className="absolute -top-0.5 -right-0.5 w-[6px] h-[6px] rounded-full"
-                  style={{ backgroundColor: '#ef0e30' }}
+                  style={{ backgroundColor: 'var(--brand-red-hot, #ef0e30)' }}
                 />
               )}
             </span>
+            {dmUnreadCount > 0 && (
+              <span className="sr-only">{dmUnreadCount} unread messages</span>
+            )}
             <span
               className="font-condensed font-semibold uppercase tracking-wide"
               style={{ fontSize: '9px', letterSpacing: '0.06em' }}

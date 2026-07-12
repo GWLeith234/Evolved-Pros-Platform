@@ -9,7 +9,7 @@ import { LiveSectionHeader } from './LiveSectionHeader'
 export function LiveSponsors({ ads }: { ads: SponsorAd[] }) {
   if (!ads.length) return null
   return (
-    <section style={{ maxWidth: 1280, margin: '56px auto 0', padding: '0 24px' }}>
+    <section className="live-section-pad" style={{ margin: '56px auto 0' }}>
       <LiveSectionHeader
         eyebrow="Partners"
         title="Evolution Partners"

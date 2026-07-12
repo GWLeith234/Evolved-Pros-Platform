@@ -1,7 +1,13 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { NotifDrawer } from './NotifDrawer'
+import dynamic from 'next/dynamic'
+
+// NotifDrawer imports @supabase/client — load only when the drawer opens path is needed.
+const NotifDrawer = dynamic(
+  () => import('./NotifDrawer').then(m => m.NotifDrawer),
+  { ssr: false },
+)
 
 interface NotifBellProps {
   initialUnreadCount: number

@@ -70,7 +70,7 @@ export function LivePastSpeaking() {
   const totalCountries = SPEAKING_STATS.countries
 
   return (
-    <section style={{ maxWidth: 1280, margin: '64px auto 0', padding: '0 24px' }}>
+    <section className="live-section-pad" style={{ margin: '64px auto 0' }}>
       <LiveSectionHeader
         eyebrow="The Archive"
         title="Past speaking events"

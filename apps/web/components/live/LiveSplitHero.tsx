@@ -14,11 +14,12 @@ const STATS = [
 export function LiveSplitHero({ photo = '/live/george-stage-blue-jacket.jpg' }: { photo?: string }) {
   return (
     <section
+      className="live-section-pad"
       style={{
         position: 'relative',
-        maxWidth: 1280,
         margin: '0 auto',
-        padding: '32px 24px 0',
+        paddingTop: 32,
+        paddingBottom: 0,
       }}
     >
       <div

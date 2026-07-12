@@ -6,10 +6,11 @@ const FP = 'Playfair Display, Georgia, serif'
 export function LiveMasthead() {
   return (
     <header
+      className="live-section-pad"
       style={{
-        maxWidth: 1280,
         margin: '0 auto',
-        padding: '32px 24px 20px',
+        paddingTop: 32,
+        paddingBottom: 20,
         borderBottom: '1px solid var(--border-soft2)',
         fontFamily: FB,
       }}

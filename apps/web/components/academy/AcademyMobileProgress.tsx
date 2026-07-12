@@ -30,6 +30,7 @@ function ChevronIcon({ rotated }: { rotated: boolean }) {
       strokeWidth="2.5"
       strokeLinecap="round"
       strokeLinejoin="round"
+      aria-hidden="true"
       style={{
         transform: rotated ? 'rotate(180deg)' : 'rotate(0deg)',
         transition: 'transform 0.2s',
@@ -40,25 +41,35 @@ function ChevronIcon({ rotated }: { rotated: boolean }) {
   )
 }
 
+/** Collapsible overall progress — phone/tablet only (Sprint 4A theme tokens). */
 export function AcademyMobileProgress({ courses, userTier, overallPct }: AcademyMobileProgressProps) {
   const [open, setOpen] = useState(false)
+  void userTier
 
   return (
     <div
       className="md:hidden flex-shrink-0"
-      style={{ backgroundColor: '#112535', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+      style={{
+        backgroundColor: 'var(--bg-surface)',
+        borderBottom: '1px solid var(--border-color)',
+      }}
     >
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 ep-pressable"
-        style={{ color: 'rgba(255,255,255,0.8)', minHeight: 48 }}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between px-4 py-3 ep-pressable ep-touch-target"
+        style={{ color: 'var(--text-primary)', minHeight: 48 }}
       >
         <span className="font-condensed font-semibold uppercase tracking-wide text-sm flex items-center gap-2">
           My Progress
           <span
-            className="font-display font-black"
-            style={{ fontSize: '18px', color: '#68a2b9' }}
+            className="leading-none"
+            style={{
+              fontFamily: '"Bebas Neue", sans-serif',
+              fontSize: 18,
+              color: 'var(--brand-teal, #0ABFA3)',
+            }}
           >
             {overallPct}%
           </span>
@@ -68,27 +79,29 @@ export function AcademyMobileProgress({ courses, userTier, overallPct }: Academy
 
       {open && (
         <div className="px-4 pb-4">
-          {/* Progress bar */}
           <div
             className="h-[3px] rounded-full overflow-hidden mb-4"
-            style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
+            style={{ backgroundColor: 'var(--bg-elevated)' }}
+            role="progressbar"
+            aria-valuenow={overallPct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Overall academy progress"
           >
             <div
               className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${overallPct}%`, backgroundColor: '#68a2b9' }}
+              style={{ width: `${overallPct}%`, backgroundColor: 'var(--brand-teal, #0ABFA3)' }}
             />
           </div>
 
-          {/* All Courses link */}
           <Link
             href="/academy"
             className="ep-touch-target flex items-center py-3 font-condensed font-semibold uppercase tracking-wide text-[12px] mb-1"
-            style={{ color: 'rgba(255,255,255,0.7)', minHeight: 44 }}
+            style={{ color: 'var(--text-secondary)', minHeight: 44 }}
           >
             All Courses
           </Link>
 
-          {/* Per-course progress */}
           {courses.map(course => {
             const locked = !course.hasAccess
             const badgeLabel = course.requiredTier === 'pro' ? 'Pro' : 'VIP'
@@ -98,12 +111,18 @@ export function AcademyMobileProgress({ courses, userTier, overallPct }: Academy
                 {locked ? (
                   <div
                     className="flex items-center justify-between py-2.5"
-                    style={{ color: 'rgba(255,255,255,0.3)', minHeight: 44 }}
+                    style={{ color: 'var(--text-tertiary)', minHeight: 44 }}
                   >
-                    <span className="font-condensed font-semibold text-[12px] uppercase tracking-wide">{label}</span>
+                    <span className="font-condensed font-semibold text-[12px] uppercase tracking-wide">
+                      {label}
+                    </span>
                     <span
-                      className="font-condensed font-bold uppercase text-[8px] rounded px-1.5 py-0.5"
-                      style={{ color: '#ef0e30', backgroundColor: 'rgba(239,14,48,0.12)', border: '1px solid rgba(239,14,48,0.2)' }}
+                      className="font-condensed font-bold uppercase text-[8px] px-1.5 py-0.5"
+                      style={{
+                        color: 'var(--brand-red, #C9302A)',
+                        backgroundColor: 'rgba(201,48,42,0.12)',
+                        border: '1px solid rgba(201,48,42,0.25)',
+                      }}
                     >
                       {badgeLabel}
                     </span>
@@ -112,10 +131,15 @@ export function AcademyMobileProgress({ courses, userTier, overallPct }: Academy
                   <Link
                     href={`/academy/${course.slug}`}
                     className="ep-touch-target flex items-center justify-between py-2.5"
-                    style={{ color: 'rgba(255,255,255,0.7)', minHeight: 44 }}
+                    style={{ color: 'var(--text-secondary)', minHeight: 44 }}
                   >
-                    <span className="font-condensed font-semibold text-[12px] uppercase tracking-wide">{label}</span>
-                    <span className="font-condensed font-bold text-[12px]" style={{ color: '#68a2b9' }}>
+                    <span className="font-condensed font-semibold text-[12px] uppercase tracking-wide">
+                      {label}
+                    </span>
+                    <span
+                      className="font-condensed font-bold text-[12px]"
+                      style={{ color: 'var(--brand-teal, #0ABFA3)' }}
+                    >
                       {course.progressPct}%
                     </span>
                   </Link>

@@ -7,6 +7,7 @@ import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
 
 export const metadata: Metadata = { title: 'Home — Evolved Pros' }
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
+import { HomeMetricsStrip } from '@/components/home/HomeMetricsStrip'
 import { TodaysEvolution, type TodaysEvolutionAction } from '@/components/home/TodaysEvolution'
 import { ActivityFeed } from '@/components/home/ActivityFeed'
 import { UpcomingEventsWidget } from '@/components/home/UpcomingEventsWidget'
@@ -855,7 +856,7 @@ export default async function MemberHomePage() {
   ]
 
   return (
-    <div className="ep-page-gutter px-6 pb-6 space-y-5">
+    <div className="ep-page-gutter ep-surface-mobile pb-6 space-y-4 sm:space-y-5">
       <EpisodeBanner />
       <WelcomeBanner
         displayName={displayName}
@@ -870,6 +871,9 @@ export default async function MemberHomePage() {
         }}
         pillars={pillars}
       />
+
+      {/* Sprint 2 — personal scoreboard metrics (uses fetched dashboard stats) */}
+      <HomeMetricsStrip stats={stats} />
 
       {/* Today's Evolution — primary DAU loop, one-click actions */}
       <TodaysEvolution actions={todaysActions} />
@@ -906,23 +910,10 @@ export default async function MemberHomePage() {
       />
 
       {/* Daily Practice — habits / commitments / activity */}
-      <div
-        id="daily-practice"
-        className="flex items-center gap-4 pt-3"
-        style={{ margin: '12px 0 4px' }}
-      >
-        <span style={{ width: 28, height: 1, background: 'rgba(201,168,76,0.5)' }} />
-        <span
-          className="font-condensed font-bold uppercase"
-          style={{
-            fontSize: 10,
-            letterSpacing: '0.42em',
-            color: 'rgba(201,168,76,0.85)',
-          }}
-        >
-          The Daily Practice
-        </span>
-        <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+      <div id="daily-practice" className="ep-section-eyebrow pt-3">
+        <span className="ep-section-eyebrow__rule" aria-hidden />
+        <span className="ep-section-eyebrow__label">The Daily Practice</span>
+        <span className="ep-section-eyebrow__grow" aria-hidden />
       </div>
 
       {/* SPRINT J — Activity (2fr) + Events sidebar (1fr) with sponsor ad
@@ -943,19 +934,10 @@ export default async function MemberHomePage() {
       </div>
 
       {/* SPRINT J — Section divider: "The Path Forward". */}
-      <div className="flex items-center gap-4 pt-3" style={{ margin: '12px 0 4px' }}>
-        <span style={{ width: 28, height: 1, background: 'rgba(201,168,76,0.5)' }} />
-        <span
-          className="font-condensed font-bold uppercase"
-          style={{
-            fontSize: 10,
-            letterSpacing: '0.42em',
-            color: 'rgba(201,168,76,0.85)',
-          }}
-        >
-          The Path Forward
-        </span>
-        <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+      <div className="ep-section-eyebrow pt-3">
+        <span className="ep-section-eyebrow__rule" aria-hidden />
+        <span className="ep-section-eyebrow__label">The Path Forward</span>
+        <span className="ep-section-eyebrow__grow" aria-hidden />
       </div>
 
       {/* HOME-2 — Path Forward (left) + Long Game (right). SPRINT J: AcademyProgressWidget
@@ -1004,8 +986,8 @@ export default async function MemberHomePage() {
             </p>
             <a
               href="/scoreboard"
-              className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px]"
-              style={{ color: '#C9A84C', textDecoration: 'none' }}
+              className="ep-btn ep-btn--tertiary font-condensed font-bold uppercase tracking-[0.14em] text-[10px]"
+              style={{ color: 'var(--brand-gold, #C9A84C)', textDecoration: 'none' }}
             >
               Scoreboard →
             </a>

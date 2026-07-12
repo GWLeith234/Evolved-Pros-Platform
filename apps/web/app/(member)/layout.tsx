@@ -14,6 +14,8 @@ import {
   RightRailClient,
 } from '@/components/layout/MemberChromeClient'
 import { ToastProvider } from '@/lib/toast'
+import { SkipToContent } from '@/components/a11y/SkipToContent'
+import { LiveAnnouncerProvider } from '@/components/a11y/LiveAnnouncer'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export default async function MemberLayout({ children }: { children: React.ReactNode }) {
@@ -42,19 +44,27 @@ export default async function MemberLayout({ children }: { children: React.React
       }
       return (
         <ToastProvider>
-          {/* ep-member-shell: fixed viewport height so main's overflow-y-auto
-              has a real max-height and page content can scroll again. */}
-          <div className="ep-member-shell">
-            <TopNavClient profile={profile} unreadCount={0} />
-            <NextEventBannerClient />
-            <div className="ep-member-body">
-              <main className="ep-main-scroll" style={{ backgroundColor: 'var(--bg-page)' }}>
-                {children}
-              </main>
-              <RightRailClient />
+          <LiveAnnouncerProvider>
+            <SkipToContent />
+            {/* ep-member-shell: fixed viewport height so main's overflow-y-auto
+                has a real max-height and page content can scroll again. */}
+            <div className="ep-member-shell">
+              <TopNavClient profile={profile} unreadCount={0} />
+              <NextEventBannerClient />
+              <div className="ep-member-body">
+                <main
+                  id="main-content"
+                  tabIndex={-1}
+                  className="ep-main-scroll"
+                  style={{ backgroundColor: 'var(--bg-page)' }}
+                >
+                  {children}
+                </main>
+                <RightRailClient />
+              </div>
+              <BottomTabBarClient role={profile.role} unreadCount={0} dmUnreadCount={0} />
             </div>
-            <BottomTabBarClient role={profile.role} unreadCount={0} dmUnreadCount={0} />
-          </div>
+          </LiveAnnouncerProvider>
         </ToastProvider>
       )
     }
@@ -106,26 +116,34 @@ export default async function MemberLayout({ children }: { children: React.React
 
   return (
     <ToastProvider>
-      {/* SCROLL-FIX: member chrome is a fixed viewport shell (100dvh).
-          TopNav sits in normal flow (sticky). Main is the only vertical
-          scroller (overflow-y: auto + min-height: 0). Using min-h-screen
-          + fixed nav + overflow-y-auto on main left main unbounded so
-          nothing scrolled after the mobile polish sprint. */}
-      <div className="ep-member-shell">
-        <TopNavClient profile={profile} unreadCount={unreadCount ?? 0} membersCanToggleTheme={membersCanToggleTheme} />
-        {/* SPRINT N-3: <EpisodeBanner /> moved out of the layout into each
-            page (home/community/events). */}
-        <NextEventBannerClient />
-        <div className="ep-member-body">
-          {/* min-w-0: prevent wide children from expanding past the flex parent
-              (settings tab strip, etc.). Scroll lives on .ep-main-scroll. */}
-          <main className="ep-main-scroll" style={{ backgroundColor: 'var(--bg-page)' }}>
-            {children}
-          </main>
-          <RightRailClient />
+      <LiveAnnouncerProvider>
+        <SkipToContent />
+        {/* SCROLL-FIX: member chrome is a fixed viewport shell (100dvh).
+            TopNav sits in normal flow (sticky). Main is the only vertical
+            scroller (overflow-y: auto + min-height: 0). Using min-h-screen
+            + fixed nav + overflow-y-auto on main left main unbounded so
+            nothing scrolled after the mobile polish sprint. */}
+        <div className="ep-member-shell">
+          <TopNavClient profile={profile} unreadCount={unreadCount ?? 0} membersCanToggleTheme={membersCanToggleTheme} />
+          {/* SPRINT N-3: <EpisodeBanner /> moved out of the layout into each
+              page (home/community/events). */}
+          <NextEventBannerClient />
+          <div className="ep-member-body">
+            {/* min-w-0: prevent wide children from expanding past the flex parent
+                (settings tab strip, etc.). Scroll lives on .ep-main-scroll. */}
+            <main
+              id="main-content"
+              tabIndex={-1}
+              className="ep-main-scroll"
+              style={{ backgroundColor: 'var(--bg-page)' }}
+            >
+              {children}
+            </main>
+            <RightRailClient />
+          </div>
+          <BottomTabBarClient role={profile.role} unreadCount={unreadCount ?? 0} dmUnreadCount={0} />
         </div>
-        <BottomTabBarClient role={profile.role} unreadCount={unreadCount ?? 0} dmUnreadCount={0} />
-      </div>
+      </LiveAnnouncerProvider>
     </ToastProvider>
   )
 }

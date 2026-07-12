@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { gradients } from '@evolved-pros/ui'
 
 export type TodaysEvolutionAction = {
   id: string
@@ -19,6 +20,7 @@ interface TodaysEvolutionProps {
 /**
  * One-glance daily loop for DAU — clear CTAs into course, accountability,
  * and community. Theme-aware via CSS vars; pure server component.
+ * Sprint 2: CTAs use shared Button variants for premium consistency.
  */
 export function TodaysEvolution({ actions }: TodaysEvolutionProps) {
   if (!actions.length) return null
@@ -67,13 +69,12 @@ export function TodaysEvolution({ actions }: TodaysEvolutionProps) {
         </div>
       </div>
 
-      <div
-        className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3"
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         {actions.map(a => (
           <Link
             key={a.id}
             href={a.href}
+            className="ep-surface-card group"
             style={{
               position: 'relative',
               display: 'flex',
@@ -85,7 +86,7 @@ export function TodaysEvolution({ actions }: TodaysEvolutionProps) {
               textDecoration: 'none',
               overflow: 'hidden',
               minHeight: 148,
-              transition: 'border-color 140ms ease, transform 140ms ease',
+              transition: 'border-color 140ms ease, transform 140ms ease, box-shadow 140ms ease',
             }}
           >
             <span
@@ -137,26 +138,31 @@ export function TodaysEvolution({ actions }: TodaysEvolutionProps) {
             >
               {a.description}
             </p>
+            {/* Button chrome (Sprint 1 tokens) — parent Link owns navigation */}
             <span
+              aria-hidden
+              className={a.primary ? 'ep-btn ep-btn--primary' : 'ep-btn ep-btn--secondary'}
               style={{
                 alignSelf: 'flex-start',
+                marginTop: 4,
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 6,
-                marginTop: 4,
+                padding: '6px 12px',
+                minHeight: 32,
                 fontFamily: '"Barlow Condensed", sans-serif',
-                fontWeight: 800,
+                fontWeight: 700,
                 fontSize: 11,
                 letterSpacing: '0.14em',
                 textTransform: 'uppercase',
-                color: a.primary ? '#fff' : a.accent,
-                background: a.primary ? a.accent : 'transparent',
-                border: `1px solid ${a.accent}`,
-                padding: a.primary ? '7px 12px' : '6px 10px',
+                borderRadius: 0,
+                border: a.primary ? '1px solid transparent' : '1px solid var(--brand-gold, #C9A84C)',
+                background: a.primary ? gradients.primary : 'transparent',
+                color: a.primary ? '#FFFFFF' : 'var(--brand-gold, #C9A84C)',
               }}
             >
               {a.cta}
-              <span aria-hidden>→</span>
+              <span>→</span>
             </span>
           </Link>
         ))}

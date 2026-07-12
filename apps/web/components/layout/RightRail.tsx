@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { createClient } from '@/lib/supabase/client'
 
 interface Ad {
   id: string
@@ -18,12 +17,14 @@ export function RightRail() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    const supabase = createClient()
     // Prefer zone='A' (the right-rail-canonical zone) but fall back to any
     // active ad if zone A has no rows. Fixes MR-HOME-2 GAP 1: members were
     // seeing an empty rail because all active ads in the live DB were in
     // zones other than A.
+    // Dynamic import keeps @supabase/client off the SSR module graph.
     void (async () => {
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const primary = await supabase
         .from('platform_ads')
         .select('id, image_url, click_url, link_url, headline, sponsor_name, zone')

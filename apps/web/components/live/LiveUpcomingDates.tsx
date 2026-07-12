@@ -8,7 +8,7 @@ const FP = 'Playfair Display, Georgia, serif'
 
 export function LiveUpcomingDates() {
   return (
-    <section style={{ maxWidth: 1280, margin: '64px auto 0', padding: '0 24px' }}>
+    <section className="live-section-pad" style={{ margin: '64px auto 0' }}>
       <LiveSectionHeader
         eyebrow="Where He's Headed"
         title="Upcoming speaking events"

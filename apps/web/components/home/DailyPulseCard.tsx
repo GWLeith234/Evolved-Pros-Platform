@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { TileCard } from './tiles/TileCard'
 import { TileRow, TileFooterLink } from './tiles/TileRow'
 import { ConfettiBlast } from '@/components/ui/ConfettiBlast'
+import { StreakBadge } from '@/components/ui/StreakBadge'
+import { useToast } from '@/lib/toast'
 import { formatPct, formatCount } from '@/lib/format'
 
 // Brand palette for the all-done confetti burst (theme-invariant accents).
@@ -53,6 +55,7 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
   // streak bump), and a one-shot celebration when the card reaches 100%.
   const [justChecked, setJustChecked] = useState<string | null>(null)
   const [celebrate, setCelebrate] = useState(false)
+  const { showToast } = useToast()
 
   const habitsDone  = habits.filter(h => h.completedToday).length
   const commitsDone = commits.filter(c => c.is_completed).length
@@ -63,13 +66,21 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
   const ringColor = pct >= 100 ? GOLD : pct > 0 ? TEAL : DIM
   const allDone   = totalSlots > 0 && totalDone === totalSlots
 
-  // Fire the confetti burst only on the transition INTO all-done, never on
+  // Fire confetti + toast only on the transition INTO all-done, never on
   // every re-render while complete (which would loop) or on initial mount.
   const wasAllDone = useRef(allDone)
   useEffect(() => {
-    if (allDone && !wasAllDone.current) setCelebrate(true)
+    if (allDone && !wasAllDone.current) {
+      setCelebrate(true)
+      showToast({
+        title: 'Daily pulse complete',
+        message: 'All habits and commits checked — streak protected.',
+        variant: 'success',
+        duration: 3800,
+      })
+    }
     wasAllDone.current = allDone
-  }, [allDone])
+  }, [allDone, showToast])
 
   // Flag a row as "just checked" for ~600ms so its checkbox pops + glows and
   // its streak badge bumps, then clears so the animation can retrigger later.
@@ -333,22 +344,4 @@ function Checkbox({ checked, color, pop }: { checked: boolean; color: string; po
   )
 }
 
-function StreakBadge({ days, bump }: { days: number; bump?: boolean }) {
-  const active = days > 0
-  return (
-    <span style={{
-      flexShrink: 0,
-      display: 'inline-flex', alignItems: 'center', gap: 3,
-      fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-      fontSize: 10, letterSpacing: '0.08em',
-      padding: '2px 7px', borderRadius: 0,
-      background: active ? 'rgba(201,168,76,0.14)' : 'var(--bg-elevated)',
-      color: active ? GOLD : 'var(--text-tertiary)',
-      // Bump when the streak ticks up on check.
-      animation: bump ? 'ep-streak-pop 0.5s ease' : undefined,
-    }}>
-      {active && <span aria-hidden="true" style={{ fontSize: 9, lineHeight: 1 }}>🔥</span>}
-      {days}D
-    </span>
-  )
-}
+// StreakBadge extracted to @/components/ui/StreakBadge (Sprint 3 shared micro-interaction).

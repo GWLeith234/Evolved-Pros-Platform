@@ -71,7 +71,7 @@ async function fetchPodcastSponsorAds(): Promise<SponsorAd[]> {
       .in('placement', ['podcast', 'all'])
       .order('sort_order')
       .limit(12)
-    let rows = (primary.data ?? []) as SponsorAd[]
+    const rows = (primary.data ?? []) as SponsorAd[]
     if (rows.length < 2) {
       const fallback = await sb
         .from('platform_ads')

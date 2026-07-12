@@ -7,7 +7,7 @@ const FP = 'Playfair Display, Georgia, serif'
 
 export function LiveTestimonials() {
   return (
-    <section style={{ maxWidth: 1280, margin: '72px auto 0', padding: '0 24px' }}>
+    <section className="live-section-pad" style={{ margin: '72px auto 0' }}>
       <LiveSectionHeader eyebrow="From the Hosts" title="What organizers say" />
       <div className="live-testimonial-grid" style={{ marginTop: 24 }}>
         {LIVE_TESTIMONIALS.map((t, i) => (

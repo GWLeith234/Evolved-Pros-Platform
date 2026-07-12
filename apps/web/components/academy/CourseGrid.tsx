@@ -8,7 +8,7 @@ interface CourseGridProps {
 
 export function CourseGrid({ courses, userTier }: CourseGridProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="academy-course-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
       {courses.map(course => (
         <CourseCard key={course.id} course={course} isLocked={!course.hasAccess} userTier={userTier} />
       ))}

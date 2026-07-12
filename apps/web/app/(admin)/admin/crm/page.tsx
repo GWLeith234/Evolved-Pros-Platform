@@ -62,16 +62,26 @@ export default async function AdminCrmPage() {
           <p className="font-condensed font-bold uppercase text-[11px] tracking-wider m-0 mb-1">
             Migration required
           </p>
-          <p className="font-body text-[13px] m-0">
+          <p className="font-body text-[13px] m-0 mb-2">
             {tableMissing ? (
               <>
-                Run <code>060_crm_prospects.sql</code> against Supabase.
+                Table <code>crm_prospects</code> is missing. Run{' '}
+                <code>supabase/migrations/060_crm_prospects.sql</code> then{' '}
+                <code>061_crm_prospects_value_followup.sql</code> in the Supabase SQL Editor.
               </>
             ) : (
               <>
-                Run <code>061_crm_prospects_value_followup.sql</code> to enable Value and Next Follow-up columns.
+                Run <code>supabase/migrations/061_crm_prospects_value_followup.sql</code> to enable
+                Value and Next Follow-up columns.
               </>
             )}
+          </p>
+          <p className="font-condensed text-[11px] m-0" style={{ color: '#8B6A00' }}>
+            Status API: <code>GET /api/admin/crm/bootstrap</code>
+            {' · '}
+            With <code>DATABASE_URL</code> set:{' '}
+            <code>POST /api/admin/crm/bootstrap</code> or{' '}
+            <code>node scripts/apply-crm-migrations.mjs</code>
           </p>
         </div>
       )}

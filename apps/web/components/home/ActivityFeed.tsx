@@ -195,7 +195,7 @@ export function ActivityFeed({ notifications, completions, posts = [] }: Activit
       <CardBody className="!px-0 !py-0">
         {items.length === 0 ? (
           <div className="px-6 py-8 text-center">
-            <p className="font-condensed text-xs tracking-widest text-[#7a8a96]">
+            <p className="font-condensed text-xs tracking-widest" style={{ color: 'var(--text-tertiary)' }}>
               No recent activity
             </p>
           </div>
@@ -205,8 +205,8 @@ export function ActivityFeed({ notifications, completions, posts = [] }: Activit
               <li key={item.id}>
                 <Link
                   href={item.actionUrl}
-                  className="flex items-start gap-3 px-6 py-3.5 hover:bg-[rgba(27,60,90,0.03)] transition-colors"
-                  style={{ borderBottom: i < items.length - 1 ? '1px solid rgba(27,60,90,0.08)' : undefined }}
+                  className="flex items-start gap-3 px-6 py-3.5 transition-colors hover:bg-[var(--bg-elevated)]"
+                  style={{ borderBottom: i < items.length - 1 ? '1px solid var(--border-color)' : undefined }}
                 >
                   {item.kind === 'post' ? (
                     <>
@@ -222,17 +222,17 @@ export function ActivityFeed({ notifications, completions, posts = [] }: Activit
                       <div className="flex-1 min-w-0">
                         <p
                           className="font-body font-semibold text-[13px] leading-[1.4] truncate"
-                          style={{ color: '#1b3c5a' }}
+                          style={{ color: 'var(--text-primary)' }}
                         >
                           &ldquo;{item.preview}&rdquo;
                         </p>
-                        <p className="font-condensed text-[12px] mt-0.5" style={{ color: '#7a8a96' }}>
+                        <p className="font-condensed text-[12px] mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
                           Posted in #{item.channelSlug}
                         </p>
                       </div>
 
                       {/* Time */}
-                      <span className="font-condensed text-[12px] text-[#7a8a96] flex-shrink-0 mt-0.5">
+                      <span className="font-condensed text-[12px] flex-shrink-0 mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
                         <ClientTimeAgo dateStr={item.time} />
                       </span>
                     </>
@@ -254,14 +254,14 @@ export function ActivityFeed({ notifications, completions, posts = [] }: Activit
                       )}
 
                       {/* Text */}
-                      <p className="flex-1 text-[13px] text-[#1b3c5a] leading-[1.5]">
+                      <p className="flex-1 text-[13px] leading-[1.5]" style={{ color: 'var(--text-primary)' }}>
                         {item.richParts.map((part, j) =>
                           part.bold ? <strong key={j}>{part.label}</strong> : part.label
                         )}
                       </p>
 
                       {/* Time */}
-                      <span className="font-condensed text-[12px] text-[#7a8a96] flex-shrink-0 mt-0.5">
+                      <span className="font-condensed text-[12px] flex-shrink-0 mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
                         <ClientTimeAgo dateStr={item.time} />
                       </span>
                     </>

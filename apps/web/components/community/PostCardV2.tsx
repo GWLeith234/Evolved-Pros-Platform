@@ -149,6 +149,10 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
   const [bursts, setBursts] = useState<Array<{ id: number; particles: Array<{ dx: number; dy: number; rot: number; glyph: string }> }>>([])
 
   function fireHeartConfetti() {
+    // Honor reduced motion — skip particle burst.
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return
+    }
     const id = Date.now() + Math.random()
     const glyphs = ['💛', '✦', '•', '💛', '✦', '•', '💛']
     const particles = Array.from({ length: 7 }, (_, i) => {
@@ -206,12 +210,18 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
 
   return (
     <article
+      className="ep-post-card"
       style={{
         width: '100%',
+        maxWidth: '100%',
+        boxSizing: 'border-box',
         background: 'var(--bg-surface)',
         borderRadius: 0,
+        border: '1px solid var(--border-color)',
         borderBottom: '1px solid var(--border-color)',
-        padding: 24,
+        padding: '18px 16px 16px',
+        marginBottom: 10,
+        transition: 'border-color 140ms ease, box-shadow 140ms ease',
       }}
     >
       {/* Header */}
@@ -358,16 +368,17 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
         </div>
       )}
 
-      {/* Reaction row */}
+      {/* Reaction row — uniform chip anatomy (Sprint 2) */}
       <div
+        className="ep-reaction-row"
         style={{
-          marginTop: 16,
-          paddingTop: 16,
+          marginTop: 14,
+          paddingTop: 14,
           borderTop: '1px solid var(--border-color)',
           display: 'flex',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: 6,
+          gap: 8,
         }}
       >
         {EMOJI_ORDER.map(emoji => {
@@ -379,6 +390,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
             <button
               key={emoji}
               type="button"
+              className={`ep-reaction-chip${active ? ' ep-reaction-chip--active' : ''}`}
               onClick={() => handleReact(emoji)}
               aria-pressed={active}
               aria-label={`React with ${emoji}`}
@@ -388,11 +400,11 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 6,
-                minHeight: 44,
-                minWidth: 44,
-                padding: '6px 12px',
-                background: active ? v.bg : 'transparent',
-                border: `1px solid ${active ? v.color : 'transparent'}`,
+                minHeight: 40,
+                minWidth: 40,
+                padding: '6px 11px',
+                background: active ? v.bg : 'var(--bg-elevated)',
+                border: `1px solid ${active ? v.color : 'var(--border-color)'}`,
                 color: active ? v.color : 'var(--text-secondary)',
                 cursor: 'pointer',
                 borderRadius: 0,
@@ -400,7 +412,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
                 fontSize: 12,
                 fontWeight: 700,
                 letterSpacing: '0.08em',
-                transition: 'all 120ms ease',
+                transition: 'background 120ms ease, border-color 120ms ease, color 120ms ease, transform 100ms ease',
               }}
               onMouseEnter={e => {
                 if (!active) {
@@ -411,9 +423,9 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
               }}
               onMouseLeave={e => {
                 if (!active) {
-                  e.currentTarget.style.background = 'transparent'
+                  e.currentTarget.style.background = 'var(--bg-elevated)'
                   e.currentTarget.style.color = 'var(--text-secondary)'
-                  e.currentTarget.style.borderColor = 'transparent'
+                  e.currentTarget.style.borderColor = 'var(--border-color)'
                 }
               }}
             >

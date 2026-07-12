@@ -4,10 +4,17 @@ const nextConfig = {
   // supabase-js@2.100.0 (postgrest-js v2) broke type inference for inline
   // partial selects. Runtime is correct — suppress to keep builds green.
   typescript: { ignoreBuildErrors: true },
+
+  // Sprint 4C — tree-shake barrel imports from the design system.
+  experimental: {
+    optimizePackageImports: ['@evolved-pros/ui'],
+  },
+
   images: {
     // Modern formats cut payload size for avatars, covers, and partner logos.
     formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 60 * 60 * 24 * 7, // 7 days
+    // Longer CDN cache for remote brand assets (LCP-friendly after first hit).
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
     remotePatterns: [
@@ -17,6 +24,16 @@ const nextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com' },
     ],
   },
+
+  // Prefer modern JS for smaller client bundles when browsers support it.
+  compiler: {
+    // Strip console.* in production except error/warn (noise reduction + bytes).
+    removeConsole:
+      process.env.NODE_ENV === 'production'
+        ? { exclude: ['error', 'warn'] }
+        : false,
+  },
+
   async rewrites() {
     return {
       beforeFiles: [
@@ -70,8 +87,30 @@ const nextConfig = {
           { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },
         ],
       },
+      // Static Next assets — aggressive cache (hashed filenames).
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
     ]
   },
 }
 
-export default nextConfig
+// Optional bundle analysis: ANALYZE=true pnpm --filter web build
+let config = nextConfig
+if (process.env.ANALYZE === 'true') {
+  try {
+    const withBundleAnalyzer = (await import('@next/bundle-analyzer')).default({
+      enabled: true,
+    })
+    config = withBundleAnalyzer(nextConfig)
+  } catch {
+    console.warn(
+      '[next.config] @next/bundle-analyzer not installed — run: pnpm add -D @next/bundle-analyzer -w',
+    )
+  }
+}
+
+export default config

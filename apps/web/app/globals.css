@@ -184,6 +184,44 @@
   --type-label-track:  0.18em;
   --type-nav-size:     1rem;
   --type-nav-track:    0.08em;
+
+  /* Spacing scale (SPRINT-1 foundation) — 4px base */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radii — sharp editorial default; pill only for CTAs / tracks */
+  --radius-none: 0px;
+  --radius-sm:   2px;
+  --radius-md:   4px;
+  --radius-lg:   8px;
+  --radius-pill: 9999px;
+
+  /* Shadows (dark default; light overrides below) */
+  --shadow-sm:        0 1px 2px rgba(0,0,0,0.35);
+  --shadow-md:        0 8px 24px rgba(0,0,0,0.40);
+  --shadow-lg:        0 16px 48px rgba(0,0,0,0.50);
+  --shadow-glow-red:  0 0 24px rgba(201,48,42,0.35);
+  --shadow-glow-gold: 0 0 24px rgba(201,168,76,0.30);
+  --shadow-glow-teal: 0 0 24px rgba(10,191,163,0.30);
+
+  /* Button ghost surface (theme-aware) */
+  --btn-ghost-bg:     rgba(255,255,255,0.06);
+  --btn-ghost-hover:  rgba(255,255,255,0.12);
+  --btn-focus-ring:   rgba(10,191,163,0.55);
+
+  /* Brand gradients (mirrored from packages/ui/tokens) */
+  --gradient-primary: linear-gradient(135deg, #EF0E30 0%, #C9302A 55%, #A8201C 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #FF1A3A 0%, #D4342E 55%, #B82420 100%);
+  --gradient-success: linear-gradient(135deg, #0ABFA3 0%, #0A9980 100%);
+  --gradient-gold: linear-gradient(135deg, #C9A84C 0%, #8B7332 100%);
 }
 
 html {
@@ -331,6 +369,17 @@ html.light-mode {
   --events-hero-overlay-to:    rgba(35,28,18,0.85);
   --events-hero-pill-bg:       rgba(255,255,255,0.10);
   --events-hero-pill-border:   rgba(255,255,255,0.20);
+
+  /* SPRINT-1 foundation — light shadows + ghost buttons */
+  --shadow-sm:        0 1px 2px rgba(27,42,74,0.08);
+  --shadow-md:        0 8px 24px rgba(27,42,74,0.10);
+  --shadow-lg:        0 16px 48px rgba(27,42,74,0.14);
+  --shadow-glow-red:  0 0 20px rgba(201,48,42,0.18);
+  --shadow-glow-gold: 0 0 20px rgba(139,106,0,0.16);
+  --shadow-glow-teal: 0 0 20px rgba(10,153,128,0.16);
+  --btn-ghost-bg:     rgba(27,42,74,0.04);
+  --btn-ghost-hover:  rgba(27,42,74,0.08);
+  --btn-focus-ring:   rgba(10,153,128,0.45);
 }
 
 /* Page background + body text */
@@ -959,9 +1008,96 @@ html.light-mode .ep-loader-logo--light { display: block; }
   from { transform: scaleX(0); }
   to   { transform: scaleX(1); }
 }
-/* Completed bars get a soft accent glow (accent passed via --ep-glow). */
+/* Completed bars get a soft accent glow (accent passed via --ep-glow)
+   plus a brief celebrate pulse (Sprint 3). */
 .ep-progress-fill--done {
   box-shadow: 0 0 8px var(--ep-glow, rgba(34,197,94,0.7));
+  animation: ep-progress-grow 0.9s cubic-bezier(0.22, 1, 0.36, 1) both,
+             ep-progress-celebrate 1.2s ease 0.3s 1;
+}
+
+/* ── SPRINT-1 Component Library — Button interactions ─────────────────────
+   Surfaces are mostly inline (so they work in isolation), but hover / active /
+   focus live here so we don't need React hover state. */
+.ep-btn:focus-visible {
+  outline: 2px solid var(--btn-focus-ring, rgba(10,191,163,0.55));
+  outline-offset: 2px;
+}
+.ep-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.ep-btn--primary:hover:not(:disabled),
+.ep-btn--pill:hover:not(:disabled) {
+  background: var(--gradient-primary-hover) !important;
+  filter: brightness(1.05);
+}
+.ep-btn--secondary:hover:not(:disabled) {
+  background: rgba(201,168,76,0.10) !important;
+}
+.ep-btn--success:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.ep-btn--ghost:hover:not(:disabled) {
+  background: var(--btn-ghost-hover) !important;
+  color: var(--text-primary) !important;
+}
+.ep-btn--tertiary:hover:not(:disabled) {
+  opacity: 0.85;
+}
+.ep-btn-spinner {
+  animation: ep-btn-spin 0.7s linear infinite;
+}
+@keyframes ep-btn-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes ep-achievement-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ep-achievement-banner {
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── SPRINT-2 surface polish ─────────────────────────────────────────────── */
+.ep-surface-card {
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+.ep-surface-card:hover {
+  border-color: var(--border-emphasized, rgba(255,255,255,0.15));
+  box-shadow: var(--shadow-md);
+}
+
+.ep-post-card:hover {
+  border-color: var(--border-emphasized, rgba(255,255,255,0.15));
+  box-shadow: var(--shadow-sm);
+}
+
+.ep-reaction-chip:active {
+  transform: scale(0.96);
+}
+
+.ep-course-card {
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+.ep-course-card:not(.ep-course-card--locked):hover {
+  transform: translateY(-3px) scale(1.015);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(201,48,42,0.45) !important;
+}
+.ep-course-card:not(.ep-course-card--locked):hover .ep-course-card__media {
+  transform: scale(1.04);
+}
+.ep-course-card__media {
+  transition: transform 280ms ease;
+}
+.ep-course-card--done:not(.ep-course-card--locked):hover {
+  border-color: rgba(201,168,76,0.55) !important;
+  box-shadow: var(--shadow-glow-gold);
+}
+
+.ep-sponsor-inline:hover {
+  border-color: rgba(201,48,42,0.40);
+  box-shadow: var(--shadow-glow-red);
 }
 
 /* HOME-4UP-TILES responsive grid breakpoints. */
@@ -1067,9 +1203,8 @@ html.cream-mode body {
 }
 
 /* prefers-reduced-motion safety net — neutralise decorative animations and
-   transitions for OS-configured users. Components that need motion to
-   express state (e.g. loading spinners) opt out via the useReducedMotion()
-   hook explicitly. */
+   transitions for OS-configured users. Loading spinners keep spinning so
+   busy state remains visible. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration:        0.001ms !important;
@@ -1077,4 +1212,571 @@ html.cream-mode body {
     transition-duration:       0.001ms !important;
     scroll-behavior:           auto    !important;
   }
+  .ep-btn-spinner,
+  .ep-toast__timer,
+  [class*='animate-spin'] {
+    animation-duration: 0.7s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
+/* ── SPRINT-3: Skip link, focus rings, toasts, micro-interactions ───────── */
+.ep-skip-link {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 10000;
+  padding: 10px 16px;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #fff;
+  background: var(--brand-red, #C9302A);
+  border: 2px solid transparent;
+  transform: translateY(-200%);
+  transition: transform 120ms ease;
+}
+.ep-skip-link:focus,
+.ep-skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid var(--btn-focus-ring, rgba(10,191,163,0.55));
+  outline-offset: 2px;
+}
+
+/* Screen-reader only (matches Tailwind sr-only; available without TW utilities) */
+.ep-sr-only,
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Main landmark: remove default focus ring when skip-link lands, keep keyboard ring */
+#main-content:focus {
+  outline: none;
+}
+#main-content:focus-visible {
+  outline: 2px solid var(--btn-focus-ring, rgba(10,191,163,0.55));
+  outline-offset: -2px;
+}
+
+/* Global keyboard focus — mouse users keep clean UI via :focus-visible */
+:where(a, button, input, textarea, select, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--btn-focus-ring, rgba(10,191,163,0.55));
+  outline-offset: 2px;
+}
+
+/* Toast viewport — above bottom tabs on mobile, safe-area aware */
+.ep-toast-viewport {
+  position: fixed;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  /* Desktop: bottom-right */
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: max(24px, env(safe-area-inset-bottom, 0px));
+  left: auto;
+  width: min(380px, calc(100vw - 24px));
+  max-width: 100%;
+}
+@media (max-width: 1023px) {
+  .ep-toast-viewport {
+    /* Sit above the fixed bottom tab bar (56px + safe area) */
+    left: 12px;
+    right: 12px;
+    width: auto;
+    bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+    align-items: stretch;
+  }
+}
+
+.ep-toast {
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px 14px;
+  border-radius: 0;
+  min-width: 0;
+  overflow: hidden;
+  transform: translateY(12px) scale(0.98);
+  opacity: 0;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease;
+}
+.ep-toast--in {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+.ep-toast--out {
+  transform: translateY(8px) scale(0.98);
+  opacity: 0;
+}
+.ep-toast__icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  line-height: 1;
+  margin-top: 1px;
+}
+.ep-toast__body {
+  flex: 1;
+  min-width: 0;
+}
+.ep-toast__title {
+  margin: 0 0 2px;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.ep-toast__message {
+  margin: 0;
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.ep-toast__action {
+  margin-top: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.ep-toast__dismiss {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: -4px -4px 0 0;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+}
+.ep-toast__dismiss:hover {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+.ep-toast__timer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  transform-origin: left center;
+  animation: ep-toast-timer var(--toast-ms, 3200ms) linear forwards;
+}
+@keyframes ep-toast-timer {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+.ep-toast:hover .ep-toast__timer,
+.ep-toast:focus-within .ep-toast__timer {
+  animation-play-state: paused;
+}
+
+/* Streak micro-interaction */
+.ep-streak-badge--bump {
+  animation: ep-streak-pop 0.5s ease;
+}
+
+/* Progress success flash (100%) */
+@keyframes ep-progress-celebrate {
+  0%, 100% { filter: brightness(1); }
+  40%      { filter: brightness(1.25); }
+}
+
+/* Mobile: denser home metric grid + 4-up stack already handled; tighten spacing */
+@media (max-width: 639px) {
+  .ep-page-gutter {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+  .home-4up-grid {
+    gap: 12px !important;
+  }
+  .ep-stat-card .ep-stat-value {
+    font-size: 1.65rem !important;
+  }
+}
+
+/* Light mode: body + bottom tab chrome tokens */
+html.light-mode body {
+  background-color: var(--bg-page, #F5F0E8);
+  color: var(--text-primary, #1B2A4A);
+}
+html.light-mode .ep-bottom-tabs {
+  border-top-color: var(--border-color) !important;
+  background-color: var(--bg-nav) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SPRINT 4A — Mobile / tablet responsiveness system
+   Breakpoints (canonical):
+     phone     ≤ 639px   (Tailwind sm starts at 640)
+     tablet    640–1023  (Bottom tabs until 1024; TopNav links at lg)
+     desktop   ≥ 1024px  (lg)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Hard guarantee: no horizontal document scroll on any member surface */
+.ep-member-shell,
+.ep-main-scroll,
+.ep-page-gutter,
+.ep-surface-mobile {
+  max-width: 100%;
+  min-width: 0;
+}
+.ep-page-gutter {
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: max(24px, env(safe-area-inset-left, 0px));
+  padding-right: max(24px, env(safe-area-inset-right, 0px));
+}
+.ep-no-x-scroll {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Fluid type for section titles on small screens */
+.ep-fluid-title {
+  font-size: clamp(1.35rem, 4.5vw, 2rem);
+  line-height: 1.15;
+  word-break: break-word;
+}
+.ep-fluid-display {
+  font-size: clamp(1.75rem, 7vw, 3rem);
+  line-height: 0.95;
+}
+
+/* Coarse-pointer (phones/tablets): premium tap targets for design-system controls */
+@media (pointer: coarse) {
+  .ep-btn {
+    min-height: 44px !important;
+  }
+  .ep-btn[data-size='sm'] {
+    min-height: 40px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+  .ep-btn[data-size='lg'] {
+    min-height: 52px !important;
+  }
+  .ep-reaction-chip {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  .ep-course-card {
+    min-height: 220px;
+  }
+  .ep-post-card {
+    padding: 16px 14px 14px !important;
+  }
+  .ep-toast {
+    min-height: 48px;
+  }
+  /* Press feedback for cards that navigate */
+  .ep-surface-card:active,
+  .ep-course-card:not(.ep-course-card--locked):active {
+    transform: scale(0.985);
+  }
+}
+
+/* Phone layout densification */
+@media (max-width: 639px) {
+  .ep-page-gutter {
+    padding-left: max(14px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(14px, env(safe-area-inset-right, 0px)) !important;
+  }
+
+  /* Home: stack metric strip 2×2 already via grid; tighten section rhythm */
+  .ep-page-gutter > * + * {
+    /* children own spacing via space-y; ensure no bleed */
+    max-width: 100%;
+  }
+
+  /* Welcome banner scoreboard already has inline media; reinforce no overflow */
+  .welcome-banner-inner,
+  .welcome-banner-scoreboard,
+  .welcome-banner-architecture {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Academy index hero copy */
+  .academy-page-header h1 {
+    font-size: clamp(26px, 8vw, 32px) !important;
+  }
+  .academy-page-header p {
+    font-size: 13px !important;
+  }
+
+  /* Community compose / filter stickiness under topnav */
+  .filter-rail-mobile {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    gap: 10px !important;
+  }
+
+  /* Live: reduce side padding */
+  .live-section-pad {
+    padding-left: max(16px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(16px, env(safe-area-inset-right, 0px)) !important;
+  }
+  .live-masthead-title {
+    font-size: clamp(42px, 14vw, 72px) !important;
+  }
+
+  /* Bottom tabs: slightly larger labels for thumb readability */
+  .ep-bottom-tabs .font-condensed {
+    font-size: 10px !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  /* Course cards fill width; reduce fixed height slightly for small viewports */
+  .ep-course-card {
+    height: auto !important;
+    min-height: 200px;
+    aspect-ratio: 16 / 11;
+  }
+
+  /* Prevent long unbroken URLs/words from blowing layout */
+  .ep-post-card p,
+  .ep-main-scroll p,
+  .ep-main-scroll h1,
+  .ep-main-scroll h2,
+  .ep-main-scroll h3 {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Tablet: 2-up pillars + keep bottom tabs (nav links still hidden until lg) */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .ep-page-gutter {
+    padding-left: max(20px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(20px, env(safe-area-inset-right, 0px)) !important;
+  }
+  .home-4up-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+  .academy-course-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .live-pillar-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  /* Welcome scoreboard: 4-across on tablet is tight — keep 2×2 */
+  .welcome-banner-scoreboard {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* Community feed: prevent rail/filter from forcing horizontal page scroll */
+.community-feed-col {
+  min-width: 0;
+  max-width: 100%;
+}
+.community-pinned {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary);
+}
+.community-pinned .community-pinned-label {
+  color: var(--brand-gold, #C9A84C) !important;
+}
+.community-pinned .community-pinned-body {
+  color: var(--text-secondary) !important;
+}
+
+/* Academy page surfaces — dual-theme (was hardcoded #0A0F18) */
+.academy-page {
+  background-color: var(--bg-page) !important;
+  min-height: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.academy-page-header {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+.academy-page-header h1 {
+  color: var(--text-primary) !important;
+}
+.academy-page-header .academy-lede {
+  color: var(--text-secondary) !important;
+}
+
+/* Horizontal momentum rows (filter pillars, chips) — shared utility */
+.ep-h-scroll {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  max-width: 100%;
+  /* Edge fade hint on mobile */
+  mask-image: linear-gradient(to right, #000 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, #000 92%, transparent 100%);
+}
+.ep-h-scroll::-webkit-scrollbar {
+  display: none;
+}
+.ep-h-scroll > * {
+  flex-shrink: 0;
+}
+@media (min-width: 1024px) {
+  .ep-h-scroll {
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+}
+
+/* Live page responsive section padding */
+.live-section-pad {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: max(24px, env(safe-area-inset-left, 0px));
+  padding-right: max(24px, env(safe-area-inset-right, 0px));
+}
+
+/* Landscape phones: keep bottom tabs usable; reduce main bottom pad slightly */
+@media (max-height: 480px) and (orientation: landscape) {
+  .ep-main-scroll {
+    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+  }
+  .ep-bottom-tabs {
+    min-height: calc(48px + env(safe-area-inset-bottom, 0px));
+  }
+  .ep-bottom-tabs a,
+  .ep-bottom-tabs button {
+    min-height: 44px;
+  }
+}
+
+/* ── SPRINT 4C — Scoreboard micro-interactions ─────────────────────────── */
+@keyframes scoreboard-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0); }
+  40% { box-shadow: 0 0 0 6px rgba(201,168,76,0.18); }
+}
+.scoreboard-hero--pulse {
+  animation: scoreboard-pulse 1.2s ease 1;
+}
+@media (max-width: 639px) {
+  .scoreboard-hero .ep-progress-circle {
+    /* rings stay readable on narrow screens */
+    transform: scale(0.92);
+    transform-origin: center center;
+  }
+}
+
+/* ── SPRINT 5 — Final visual polish ─────────────────────────────────────── */
+/* Consistent section eyebrow used across home / scoreboard / academy */
+.ep-section-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 12px 0 4px;
+}
+.ep-section-eyebrow__rule {
+  width: 28px;
+  height: 1px;
+  background: rgba(201, 168, 76, 0.5);
+  flex-shrink: 0;
+}
+.ep-section-eyebrow__label {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: rgba(201, 168, 76, 0.85);
+  white-space: nowrap;
+}
+.ep-section-eyebrow__grow {
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
+  min-width: 12px;
+}
+html.light-mode .ep-section-eyebrow__label {
+  color: var(--brand-gold, #8B6A00);
+}
+html.light-mode .ep-section-eyebrow__rule {
+  background: rgba(139, 106, 0, 0.45);
+}
+
+/* Uniform interactive surface hover (cards, list rows) */
+.ep-interactive-surface {
+  transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+.ep-interactive-surface:hover {
+  border-color: var(--border-emphasized, rgba(255, 255, 255, 0.15));
+  box-shadow: var(--shadow-sm);
+}
+html.light-mode .ep-interactive-surface:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Link polish — keyboard + pointer */
+a.ep-text-link {
+  color: var(--brand-teal, #0ABFA3);
+  text-decoration: none;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 12px;
+  transition: color 120ms ease, opacity 120ms ease;
+}
+a.ep-text-link:hover {
+  opacity: 0.85;
+}
+a.ep-text-link:focus-visible {
+  outline: 2px solid var(--btn-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Empty states — readable in both themes */
+.ep-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-tertiary);
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }

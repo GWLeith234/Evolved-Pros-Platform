@@ -274,10 +274,10 @@ export function UnifiedCommunityPage({
       {/* Feed (left) + weekly leaderboard rail (right) */}
       <div style={{ background: 'var(--community-page-bg)' }}>
         <div
-          className="w-full mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(280px,35fr)] gap-4 sm:gap-6"
+          className="w-full mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(280px,35fr)] gap-4 sm:gap-6 ep-no-x-scroll"
           style={{ maxWidth: 1280 }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
+          <div className="community-feed-col" style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
 
           {/* Mobile engagement: poll + compact Learn/Listen chips */}
           <CommunityMobileEngagement
@@ -285,25 +285,19 @@ export function UnifiedCommunityPage({
             academyContinue={academyContinue}
           />
 
-          {/* Pinned announcement */}
+          {/* Pinned announcement — theme tokens (Sprint 4A) */}
           {pinnedPost && (
             <div
-              className="rounded-lg"
-              style={{
-                backgroundColor: '#112535',
-                border: '1px solid rgba(255,255,255,0.08)',
-                padding: '16px 20px',
-              }}
+              className="community-pinned"
+              style={{ padding: '14px 16px' }}
             >
               <p
-                className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] sm:text-[12px] mb-2"
-                style={{ color: '#C9A84C' }}
+                className="community-pinned-label font-condensed font-bold uppercase tracking-[0.18em] text-[12px] mb-2"
               >
                 📌 {pinnedPost.label}
               </p>
               <p
-                className="font-body text-[13px] leading-[1.55]"
-                style={{ color: 'rgba(255,255,255,0.8)' }}
+                className="community-pinned-body font-body text-[13px] leading-[1.55]"
                 dangerouslySetInnerHTML={{ __html: pinnedPost.body.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
               />
             </div>

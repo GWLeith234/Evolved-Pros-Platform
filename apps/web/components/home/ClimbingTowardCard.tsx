@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { Button } from '@evolved-pros/ui'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
 const TAGLINES: Record<number, string> = {
@@ -24,16 +24,14 @@ export function ClimbingTowardCard({ pillar, courseSlug }: ClimbingTowardCardPro
   const tagline = TAGLINES[pillar.number] ?? ''
 
   return (
-    <Link
-      href={`/academy/${courseSlug}`}
-      className="relative block rounded-lg overflow-hidden p-5 transition-opacity hover:opacity-100"
+    <div
+      className="ep-surface-card relative overflow-hidden p-5"
       style={{
         background: 'var(--bg-surface)',
         border: '1px solid var(--border-color)',
-        opacity: 0.85,
+        borderRadius: 0,
       }}
     >
-      {/* Pillar accent strip — matches the active pillar card / goal cards. */}
       <span
         aria-hidden="true"
         style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: cfg.color }}
@@ -48,8 +46,13 @@ export function ClimbingTowardCard({ pillar, courseSlug }: ClimbingTowardCardPro
 
       <div className="flex items-baseline gap-2 mb-1">
         <span
-          className="font-display font-black leading-none"
-          style={{ fontSize: 28, color: cfg.color }}
+          className="leading-none"
+          style={{
+            fontFamily: '"Bebas Neue", sans-serif',
+            fontSize: 28,
+            letterSpacing: '0.02em',
+            color: cfg.color,
+          }}
         >
           {pillar.number}
         </span>
@@ -64,19 +67,31 @@ export function ClimbingTowardCard({ pillar, courseSlug }: ClimbingTowardCardPro
       {tagline && (
         <p
           className="mb-3"
-          style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 13, fontStyle: 'italic', color: 'var(--text-secondary)' }}
+          style={{
+            fontFamily: '"Playfair Display", Georgia, serif',
+            fontSize: 13,
+            fontStyle: 'italic',
+            color: 'var(--text-secondary)',
+          }}
         >
           {tagline}
         </p>
       )}
 
-      <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px]" style={{ color: 'var(--text-secondary)' }}>
+      <p
+        className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] mb-4"
+        style={{ color: 'var(--text-secondary)' }}
+      >
         {pillar.totalLessons} lessons
         <span style={{ margin: '0 6px', color: 'var(--text-tertiary)' }}>·</span>
         {pillar.name} badge
         <span style={{ margin: '0 6px', color: 'var(--text-tertiary)' }}>·</span>
         Join the cohort
       </p>
-    </Link>
+
+      <Button variant="secondary" size="sm" href={`/academy/${courseSlug}`}>
+        Start pillar
+      </Button>
+    </div>
   )
 }

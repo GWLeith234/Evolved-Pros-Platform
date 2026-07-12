@@ -1,28 +1,48 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import nextDynamic from 'next/dynamic'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
-import {
-  AccountabilityHub,
-} from '@/components/home/AccountabilityHub'
+import { AccountabilityHub } from '@/components/home/AccountabilityHub'
 import type { GoalForCard } from '@/components/home/GoalCard'
 import type {
   DailyPulseHabit,
   DailyPulseCommitment,
 } from '@/components/home/DailyPulseCard'
-import { CommitmentTracker } from '@/components/academy/CommitmentTracker'
 import { GoalCard } from '@/components/home/GoalCard'
+import { ScoreboardHero } from '@/components/scoreboard/ScoreboardHero'
+import { fetchPillarProgress } from '@/lib/scoreboard/fetchPillarProgress'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
-import Link from 'next/link'
+import { Button } from '@evolved-pros/ui'
 
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Goals & Accountability — Evolved Pros',
   description:
-    'Daily scoreboard, weekly commitments, and quarterly goals — the Accountability Hub.',
+    'Enhanced scoreboard: streaks, pillar progress, daily pulse, and quarterly goals.',
 }
+
+// Sprint 4C — defer commitment writer below the fold (code-split).
+// Named nextDynamic so it doesn't collide with route segment `export const dynamic`.
+const CommitmentTracker = nextDynamic(
+  () =>
+    import('@/components/academy/CommitmentTracker').then(m => m.CommitmentTracker),
+  {
+    loading: () => (
+      <div
+        style={{
+          minHeight: 160,
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-color)',
+        }}
+        aria-hidden
+      />
+    ),
+  },
+)
 
 function getCurrentMonday(): string {
   const now = new Date()
@@ -191,8 +211,12 @@ export default async function ScoreboardPage() {
   if (!profile) redirect('/login')
 
   const weekStart = getCurrentMonday()
+  const displayName =
+    (profile.full_name ? profile.full_name.split(' ')[0] : null) ??
+    profile.display_name ??
+    undefined
 
-  const [dailyHabits, weekCommitments, goalsResult, course] = await Promise.all([
+  const [dailyHabits, weekCommitments, goalsResult, course, pillars] = await Promise.all([
     fetchTodaysHabits(user.id),
     fetchWeekCommitments(profile.id, weekStart),
     adminClient
@@ -203,6 +227,7 @@ export default async function ScoreboardPage() {
       .order('created_at', { ascending: true })
       .limit(10),
     fetchInProgressCourse(profile.id),
+    fetchPillarProgress(profile.id),
   ])
 
   const goals: GoalForCard[] = (goalsResult.data ?? []).map(g => ({
@@ -215,8 +240,10 @@ export default async function ScoreboardPage() {
   }))
 
   return (
-    <div className="ep-page-gutter px-6 pb-10 space-y-6" style={{ maxWidth: 1440, margin: '0 auto' }}>
-      {/* Breadcrumb / context */}
+    <div
+      className="ep-page-gutter ep-surface-mobile pb-10 space-y-6"
+      style={{ maxWidth: 1440, margin: '0 auto' }}
+    >
       <div
         style={{
           display: 'flex',
@@ -226,7 +253,7 @@ export default async function ScoreboardPage() {
           paddingTop: 8,
         }}
       >
-        <div>
+        <div style={{ minWidth: 0 }}>
           <p
             style={{
               margin: 0,
@@ -241,10 +268,10 @@ export default async function ScoreboardPage() {
             Member scoreboard
           </p>
           <h1
+            className="ep-fluid-display"
             style={{
               margin: '4px 0 0',
               fontFamily: '"Bebas Neue", sans-serif',
-              fontSize: 40,
               letterSpacing: '0.04em',
               lineHeight: 1,
               color: 'var(--text-primary)',
@@ -263,12 +290,13 @@ export default async function ScoreboardPage() {
               lineHeight: 1.45,
             }}
           >
-            Your central daily habit driver — log habits, check commitments, update
-            quarterly goals, and jump straight into the next lesson.
+            Streaks, six pillars, daily pulse, and quarterly goals — the habit system that
+            keeps high performers honest.
           </p>
         </div>
         <Link
           href="/home"
+          className="ep-touch-target"
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',
             fontWeight: 700,
@@ -278,11 +306,25 @@ export default async function ScoreboardPage() {
             color: 'var(--text-tertiary)',
             textDecoration: 'none',
             whiteSpace: 'nowrap',
+            display: 'inline-flex',
+            alignItems: 'center',
+            minHeight: 44,
           }}
         >
           ← Home
         </Link>
       </div>
+
+      {/* Sprint 4C feature increment */}
+      <ScoreboardHero
+        habits={dailyHabits}
+        commitments={weekCommitments}
+        goals={goals}
+        pillars={pillars}
+        courseHref={course.href}
+        courseLabel={course.label}
+        displayName={displayName}
+      />
 
       <AccountabilityHub
         variant="full"
@@ -294,25 +336,12 @@ export default async function ScoreboardPage() {
         weekLabel={formatWeekLabel(weekStart)}
       />
 
-      {/* Expanded goal cards with path-forward ties */}
       {goals.length > 0 && (
         <section aria-label="Goal detail cards">
-          <div
-            className="flex items-center gap-4"
-            style={{ margin: '8px 0 12px' }}
-          >
-            <span style={{ width: 28, height: 1, background: 'rgba(201,168,76,0.5)' }} />
-            <span
-              className="font-condensed font-bold uppercase"
-              style={{
-                fontSize: 10,
-                letterSpacing: '0.42em',
-                color: 'rgba(201,168,76,0.85)',
-              }}
-            >
-              Goal detail
-            </span>
-            <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+          <div className="ep-section-eyebrow" style={{ margin: '8px 0 12px' }}>
+            <span className="ep-section-eyebrow__rule" aria-hidden />
+            <span className="ep-section-eyebrow__label">Goal detail</span>
+            <span className="ep-section-eyebrow__grow" aria-hidden />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {goals.map(g => (
@@ -327,29 +356,15 @@ export default async function ScoreboardPage() {
         </section>
       )}
 
-      {/* Weekly commitment writer */}
       <section aria-label="Weekly commitments">
-        <div
-          className="flex items-center gap-4"
-          style={{ margin: '8px 0 12px' }}
-        >
-          <span style={{ width: 28, height: 1, background: 'rgba(201,168,76,0.5)' }} />
-          <span
-            className="font-condensed font-bold uppercase"
-            style={{
-              fontSize: 10,
-              letterSpacing: '0.42em',
-              color: 'rgba(201,168,76,0.85)',
-            }}
-          >
-            Set this week
-          </span>
-          <span style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+        <div className="ep-section-eyebrow" style={{ margin: '8px 0 12px' }}>
+          <span className="ep-section-eyebrow__rule" aria-hidden />
+          <span className="ep-section-eyebrow__label">Set this week</span>
+          <span className="ep-section-eyebrow__grow" aria-hidden />
         </div>
         <CommitmentTracker weekStart={weekStart} />
       </section>
 
-      {/* Academy deep link */}
       <div
         style={{
           display: 'flex',
@@ -358,50 +373,18 @@ export default async function ScoreboardPage() {
           padding: '16px 18px',
           background: 'var(--bg-surface)',
           border: '1px solid var(--border-color)',
+          alignItems: 'center',
         }}
       >
-        <Link
-          href="/academy/accountability"
-          style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 800,
-            fontSize: 12,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-            color: '#C9A84C',
-            textDecoration: 'none',
-          }}
-        >
-          Pillar 5 · Accountability course →
-        </Link>
-        <Link
-          href="/academy"
-          style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 800,
-            fontSize: 12,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-            color: 'var(--text-secondary)',
-            textDecoration: 'none',
-          }}
-        >
-          All pillars →
-        </Link>
-        <Link
-          href="/leaderboard"
-          style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 800,
-            fontSize: 12,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-            color: 'var(--text-secondary)',
-            textDecoration: 'none',
-          }}
-        >
-          Community leaderboard →
-        </Link>
+        <Button variant="secondary" size="sm" href="/academy/accountability">
+          Pillar 5 · Accountability
+        </Button>
+        <Button variant="ghost" size="sm" href="/academy">
+          All pillars
+        </Button>
+        <Button variant="ghost" size="sm" href="/leaderboard">
+          Leaderboard
+        </Button>
       </div>
     </div>
   )

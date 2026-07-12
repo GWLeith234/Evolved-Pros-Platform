@@ -1,6 +1,5 @@
 import Link from 'next/link'
-import { Card, CardBody } from '@evolved-pros/ui'
-import { formatPct } from '@/lib/format'
+import { Card, CardBody, ProgressBar, Button } from '@evolved-pros/ui'
 
 type CourseProgress = {
   id: string
@@ -9,6 +8,7 @@ type CourseProgress = {
   total: number
   completed: number
   pct: number
+  pillar_number?: number | null
 }
 
 interface AcademyProgressWidgetProps {
@@ -19,25 +19,15 @@ export function AcademyProgressWidget({ courses }: AcademyProgressWidgetProps) {
   return (
     <Card>
       <CardBody className="!px-6 !py-5 space-y-4">
-        {/* Single 22px/500 uppercase headline + right-aligned action link
-            (HOME-1). Replaces the previous "Your Academy" CardHeader and
-            the bottom-of-card "Continue Learning →" full-width button.
-            Titled "Active courses" — NOT a second "The Path Forward" (A3.3:
-            the section eyebrow above this band already carries that heading).
-            These bars are the member's recently-active courses, a different
-            axis from the 6-pillar roadmap in the stepper above. */}
         <div className="flex items-baseline justify-between gap-3">
           <h3
             className="font-condensed text-[22px] font-medium uppercase tracking-[0.04em] text-[color:var(--text-primary)] leading-none"
           >
             Active courses
           </h3>
-          <Link
-            href="/academy"
-            className="font-condensed text-[12px] tracking-[0.18em] text-[#68a2b9] hover:text-[color:var(--text-primary)] uppercase whitespace-nowrap"
-          >
-            Continue Learning →
-          </Link>
+          <Button variant="tertiary" size="sm" href="/academy">
+            Continue Learning
+          </Button>
         </div>
 
         {courses.length === 0 ? (
@@ -46,38 +36,25 @@ export function AcademyProgressWidget({ courses }: AcademyProgressWidgetProps) {
           </p>
         ) : (
           courses.map(course => {
-            const isDone = course.pct === 100
-            const fillColor = isDone ? '#22c55e' : '#68a2b9'
-            const pctColor = isDone ? '#22c55e' : '#68a2b9'
+            const pillar =
+              course.pillar_number != null && course.pillar_number >= 1 && course.pillar_number <= 6
+                ? (course.pillar_number as 1 | 2 | 3 | 4 | 5 | 6)
+                : undefined
 
             return (
-              <Link key={course.id} href={`/academy/${course.slug}`} className="block group">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-body font-semibold text-[12px] text-[color:var(--text-primary)] group-hover:text-[#68a2b9] transition-colors">
-                    {course.title}
-                  </span>
-                  <span
-                    className="font-condensed font-bold text-[12px]"
-                    style={{ color: pctColor }}
-                  >
-                    {formatPct(course.pct / 100)}
-                  </span>
-                </div>
-                {/* Progress bar */}
-                <div
-                  className="w-full rounded-full overflow-hidden"
-                  style={{ height: '3px', backgroundColor: 'var(--bg-elevated)' }}
-                >
-                  <div
-                    className={`h-full rounded-full ep-progress-fill${isDone ? ' ep-progress-fill--done' : ''}`}
-                    style={{
-                      width: `${course.pct}%`,
-                      backgroundColor: fillColor,
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      ...({ ['--ep-glow']: 'rgba(34,197,94,0.7)' } as any),
-                    }}
-                  />
-                </div>
+              <Link
+                key={course.id}
+                href={`/academy/${course.slug}`}
+                className="block group"
+                style={{ textDecoration: 'none' }}
+              >
+                <ProgressBar
+                  label={course.title}
+                  value={course.pct}
+                  pillar={pillar}
+                  size="sm"
+                  meta={`${course.completed}/${course.total}`}
+                />
               </Link>
             )
           })

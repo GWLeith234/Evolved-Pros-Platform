@@ -5,7 +5,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { LiveMasthead } from '@/components/live/LiveMasthead'
 import { LiveSplitHero } from '@/components/live/LiveSplitHero'
 import { LiveSectionHeader } from '@/components/live/LiveSectionHeader'
-import { LiveGlobe } from '@/components/live/LiveGlobe'
+import { LiveGlobeLazy } from './LiveGlobeLazy'
 import { LiveUpcomingDates } from '@/components/live/LiveUpcomingDates'
 import { LivePastSpeaking } from '@/components/live/LivePastSpeaking'
 import { LiveSponsors } from '@/components/live/LiveSponsors'
@@ -87,7 +87,7 @@ export default async function LivePage() {
       <LiveSplitHero />
 
       {/* Globe — tour overview */}
-      <section style={{ maxWidth: 1280, margin: '56px auto 0', padding: '0 24px' }}>
+      <section className="live-section-pad" style={{ marginTop: 56 }}>
         <LiveSectionHeader
           eyebrow="The Tour"
           title={tourTitle}
@@ -103,7 +103,7 @@ export default async function LivePage() {
             overflow: 'hidden',
           }}
         >
-          <LiveGlobe />
+          <LiveGlobeLazy />
         </div>
         <p style={{ position: 'absolute', left: -9999, width: 1, height: 1, overflow: 'hidden' }}>
           Countries on tour: {Array.from(new Set(SPEAKING_PINS.map(p => p.country))).join(', ')}.

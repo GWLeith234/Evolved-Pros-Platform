@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, type CSSProperties } from 'react'
+import { gradients } from '@evolved-pros/ui'
+import { stripTrailingArrow } from '@/lib/brand'
 
 type SponsorAd = {
   id: string
@@ -20,8 +22,9 @@ interface SponsorCardProps {
 
 const RED = '#C9302A'
 
+/** Evolution Partner card — uniform shell + Sprint 1 button chrome (Sprint 2). */
 export function SponsorCard({ ad, variant }: SponsorCardProps) {
-  const ctaText = ad.cta_text || 'Learn More →'
+  const ctaText = stripTrailingArrow(ad.cta_text || 'Learn More')
   const [hover, setHover] = useState(false)
 
   const badge = (
@@ -77,16 +80,14 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
     overflow: 'hidden',
     padding: 16,
     paddingLeft: 18,
-    border: `1px solid ${hover ? `${RED}55` : 'var(--border-color, rgba(255,255,255,0.08))'}`,
-    background: 'var(--bg-surface, #111926)',
-    boxShadow: hover ? `0 8px 24px rgba(201,48,42,0.12)` : 'none',
+    border: `1px solid ${hover ? `${RED}55` : 'var(--border-color)'}`,
+    background: 'var(--bg-surface)',
+    boxShadow: hover ? 'var(--shadow-glow-red)' : 'var(--shadow-sm)',
     transform: hover ? 'translateY(-1px)' : 'none',
     transition: 'border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease',
+    borderRadius: 0,
     ...extra,
   })
-
-  const nameColor = 'var(--text-primary, #fff)'
-  const quoteColor = 'var(--text-secondary, rgba(255,255,255,0.6))'
 
   const content = (
     <div className="flex gap-3">
@@ -95,13 +96,13 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
         {ad.tool_name && (
           <p
             className="font-condensed font-bold"
-            style={{ color: nameColor, fontSize: variant === 'events' ? 16 : 14 }}
+            style={{ color: 'var(--text-primary)', fontSize: variant === 'events' ? 16 : 14 }}
           >
             {ad.tool_name}
           </p>
         )}
         {ad.endorsement_quote && (
-          <p className="font-body italic mt-1" style={{ color: quoteColor, fontSize: 12 }}>
+          <p className="font-body italic mt-1" style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
             &ldquo;{ad.endorsement_quote}&rdquo;
           </p>
         )}
@@ -120,18 +121,25 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
             {ad.special_offer}
           </span>
         )}
-        <div className="mt-2">
+        <div className="mt-3">
           <span
-            className="font-condensed font-bold uppercase"
+            className="ep-btn ep-btn--primary"
             style={{
-              color: hover ? '#FFFFFF' : RED,
-              background: hover ? RED : 'transparent',
-              border: `1px solid ${RED}`,
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding: '6px 12px',
+              minHeight: 32,
+              fontFamily: '"Barlow Condensed", sans-serif',
+              fontWeight: 700,
               fontSize: 11,
               letterSpacing: '0.14em',
-              padding: '4px 10px',
-              display: 'inline-block',
-              transition: 'color 160ms ease, background 160ms ease',
+              textTransform: 'uppercase',
+              background: hover ? 'var(--gradient-primary-hover)' : gradients.primary,
+              color: '#FFFFFF',
+              border: '1px solid transparent',
+              borderRadius: 0,
+              transition: 'filter 160ms ease',
+              filter: hover ? 'brightness(1.05)' : undefined,
             }}
           >
             {ctaText}
@@ -155,8 +163,6 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
     </div>
   )
 
-  // All three variants share the same Evolution Partner treatment (red accent + badge + hover).
-  // `variant` is kept for API compatibility with call sites.
   void variant
 
   const inner = (

@@ -188,12 +188,14 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
         flexDirection: 'column',
       }}
     >
-      {/* Tabs */}
+      {/* Tabs — horizontal scroll on narrow phones (Sprint 4A) */}
       <div
         role="tablist"
+        className="ep-h-scroll"
         style={{
           display: 'flex',
           borderBottom: '1px solid var(--composer-border)',
+          maxWidth: '100%',
         }}
       >
         {TABS.map(tab => {
@@ -215,7 +217,9 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 6,
-                padding: '14px 20px',
+                padding: '14px 16px',
+                minHeight: 48,
+                flexShrink: 0,
                 fontFamily: '"Bebas Neue", sans-serif',
                 fontSize: 13,
                 letterSpacing: '0.16em',

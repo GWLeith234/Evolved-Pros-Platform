@@ -21,8 +21,6 @@ export default async function AcademyPage() {
 
   const profile = await fetchUserProfile(supabase, user.id)
 
-  // All tiers can view Academy — per-pillar lock UI handles gating
-
   // lesson_progress rows are keyed on public.users.id (profile.id, resolved
   // by email above), NOT the auth session uid — passing user.id here zeroed
   // every pillar % for accounts where the two UUIDs diverge.
@@ -33,22 +31,18 @@ export default async function AcademyPage() {
   const overallPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
 
   return (
-    <div className="w-full" style={{ backgroundColor: '#0A0F18', minHeight: '100%' }}>
-      {/* Page header */}
-      <div
-        className="px-4 md:px-8 py-6"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
-      >
-        <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-1" style={{ color: '#0ABFA3' }}>
+    <div className="academy-page ep-surface-mobile">
+      <div className="academy-page-header px-4 md:px-8 py-5 sm:py-6">
+        <p
+          className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-1"
+          style={{ color: 'var(--brand-teal, #0ABFA3)' }}
+        >
           The Evolved Architecture™
         </p>
-        <h1
-          className="font-display font-black leading-tight"
-          style={{ fontSize: '32px', color: '#ffffff' }}
-        >
+        <h1 className="font-display font-black leading-tight ep-fluid-title">
           The Academy
         </h1>
-        <p className="font-body text-[14px] mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
+        <p className="academy-lede font-body text-[14px] mt-1">
           A 6-pillar professional development framework designed to transform how you work, think, and lead.
         </p>
       </div>
@@ -60,7 +54,7 @@ export default async function AcademyPage() {
         overallPct={overallPct}
       />
 
-      <div className="px-4 md:px-8 py-6">
+      <div className="px-4 md:px-8 py-5 sm:py-6">
         <CourseGrid courses={courses} userTier={profile?.tier ?? null} />
         {!hasTierAccess(profile?.tier, 'pro') && <UpgradePrompt />}
       </div>

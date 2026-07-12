@@ -17,7 +17,7 @@ async function finish(destination: string) {
 }
 
 export function OnboardingComplete({ displayName }: Props) {
-  const [loading, setLoading] = useState<'academy' | 'community' | 'home' | null>(null)
+  const [loading, setLoading] = useState<'academy' | 'community' | 'home' | 'scoreboard' | null>(null)
 
   async function handleAcademy() {
     setLoading('academy')
@@ -32,6 +32,12 @@ export function OnboardingComplete({ displayName }: Props) {
   async function handleHome() {
     setLoading('home')
     await finish('/home')
+  }
+
+  /** Sprint 4C stretch — land on scoreboard / Daily Pulse after pillars intro */
+  async function handleScoreboard() {
+    setLoading('scoreboard')
+    await finish('/scoreboard')
   }
 
   return (
@@ -103,12 +109,24 @@ export function OnboardingComplete({ displayName }: Props) {
         fontSize: '14px',
         color: 'rgba(250,249,247,0.5)',
         lineHeight: 1.6,
-        margin: '0 0 28px',
-        maxWidth: '340px',
+        margin: '0 0 12px',
+        maxWidth: '360px',
         marginLeft: 'auto',
         marginRight: 'auto',
       }}>
-        Your first course is ready. Foundation is the base everything else builds on.
+        Six pillars. One daily pulse. Foundation is the base everything else builds on —
+        open the scoreboard anytime to track streaks and goals.
+      </p>
+      <p style={{
+        fontFamily: '"Barlow Condensed", sans-serif',
+        fontWeight: 700,
+        fontSize: 11,
+        letterSpacing: '0.14em',
+        textTransform: 'uppercase',
+        color: 'rgba(201,168,76,0.85)',
+        margin: '0 0 24px',
+      }}>
+        Foundation · Identity · Mental · Strategy · Accountability · Execution
       </p>
 
       {/* Primary — straight into Foundation */}
@@ -158,6 +176,30 @@ export function OnboardingComplete({ displayName }: Props) {
         }}
       >
         {loading === 'home' ? 'Loading…' : 'Go to Home'}
+      </button>
+
+      <button
+        type="button"
+        onClick={handleScoreboard}
+        disabled={!!loading}
+        style={{
+          width: '100%',
+          padding: '14px 24px',
+          backgroundColor: 'rgba(201,168,76,0.12)',
+          color: '#C9A84C',
+          fontFamily: '"Barlow Condensed", sans-serif',
+          fontWeight: 800,
+          fontSize: '13px',
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          border: '1px solid rgba(201,168,76,0.35)',
+          borderRadius: '6px',
+          cursor: loading ? 'not-allowed' : 'pointer',
+          opacity: loading && loading !== 'scoreboard' ? 0.5 : 1,
+          marginBottom: '8px',
+        }}
+      >
+        {loading === 'scoreboard' ? 'Loading…' : 'Open Scoreboard & Daily Pulse →'}
       </button>
 
       <button

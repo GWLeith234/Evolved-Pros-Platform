@@ -8,33 +8,56 @@ interface ThemeContextValue {
   theme: ResolvedTheme
   resolvedTheme: ResolvedTheme
   setTheme: (next: ResolvedTheme) => void
+  toggleTheme: () => void
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
+const THEME_META: Record<ResolvedTheme, string> = {
+  dark: '#0A0F18',
+  light: '#F5F0E8',
+}
+
+function applyThemeToDocument(next: ResolvedTheme) {
+  document.documentElement.classList.toggle('light-mode', next === 'light')
+  // Keep browser chrome (iOS status bar / Android toolbar) in sync.
+  const meta = document.querySelector('meta[name="theme-color"]')
+  if (meta) meta.setAttribute('content', THEME_META[next])
+  // Also set color-scheme so native form controls match.
+  document.documentElement.style.colorScheme = next
+}
+
 /**
  * Wraps ThemeInit's inline pre-paint script (which already applied the
  * correct `light-mode` class before hydration) with a React-visible context.
- * Reads DOM state once on mount rather than re-deriving from localStorage /
- * matchMedia independently — ThemeInit already resolved 'system' if that was
- * the stored preference, so by the time this mounts there's nothing left to
- * resolve, only to read.
  */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('dark')
 
   useEffect(() => {
-    setResolvedTheme(document.documentElement.classList.contains('light-mode') ? 'light' : 'dark')
+    const initial = document.documentElement.classList.contains('light-mode') ? 'light' : 'dark'
+    setResolvedTheme(initial)
+    applyThemeToDocument(initial)
   }, [])
 
   const setTheme = useCallback((next: ResolvedTheme) => {
     localStorage.setItem('ep_theme', next)
-    document.documentElement.classList.toggle('light-mode', next === 'light')
+    applyThemeToDocument(next)
     setResolvedTheme(next)
+    // Best-effort server persistence (settings API may no-op when unauthenticated).
+    void fetch('/api/settings/theme', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ theme: next }),
+    }).catch(() => {})
   }, [])
 
+  const toggleTheme = useCallback(() => {
+    setTheme(resolvedTheme === 'light' ? 'dark' : 'light')
+  }, [resolvedTheme, setTheme])
+
   return (
-    <ThemeContext.Provider value={{ theme: resolvedTheme, resolvedTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme: resolvedTheme, resolvedTheme, setTheme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   )

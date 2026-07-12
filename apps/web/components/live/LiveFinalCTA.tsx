@@ -4,7 +4,7 @@ const FBN = 'Bebas Neue, sans-serif'
 
 export function LiveFinalCTA() {
   return (
-    <section style={{ maxWidth: 1280, margin: '72px auto 80px', padding: '0 24px' }}>
+    <section className="live-section-pad" style={{ margin: '72px auto 80px' }}>
       <div
         className="live-final-cta-inner"
         style={{

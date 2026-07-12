@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ProgressBar, Button } from '@evolved-pros/ui'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { formatPct } from '@/lib/format'
 
@@ -41,11 +42,16 @@ export function InProgressPillarHero({
   const ctaHref = nextLessonSlug
     ? `/academy/${courseSlug}/${nextLessonSlug}`
     : `/academy/${courseSlug}`
+  const isDone = pillar.progressPct >= 100
 
   return (
     <div
-      className="relative rounded-lg overflow-hidden p-6"
-      style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+      className="ep-surface-card relative overflow-hidden p-6"
+      style={{
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border-color)',
+        borderRadius: 0,
+      }}
     >
       {/* Pillar accent strip */}
       <div
@@ -53,15 +59,12 @@ export function InProgressPillarHero({
         style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: cfg.color }}
       />
 
-      {/* Cohort-day stamp. This is a SEPARATE axis from lesson progress (the
-          21-day program cadence), explicitly labelled "Cohort day" so it does
-          not read as completion next to the "N of M lessons · NN%" headline,
-          which is the real progress metric (A3.2). */}
       {dayOfTwentyOne !== null && (
         <span
-          className="absolute font-condensed font-bold uppercase tracking-[0.18em] text-[12px] px-2 py-1 rounded"
+          className="absolute font-condensed font-bold uppercase tracking-[0.18em] text-[12px] px-2 py-1"
           style={{
-            top: 12, right: 12,
+            top: 12,
+            right: 12,
             color: cfg.color,
             backgroundColor: cfg.colorMuted,
             border: `1px solid ${cfg.color}33`,
@@ -72,10 +75,14 @@ export function InProgressPillarHero({
       )}
 
       <div className="flex items-baseline gap-3 mb-1">
-        {/* A4.2: platform metric numeral = Bebas Neue (--font-logo), not Playfair. */}
         <span
           className="leading-none"
-          style={{ fontFamily: '"Bebas Neue", sans-serif', letterSpacing: '0.02em', fontSize: 48, color: cfg.color }}
+          style={{
+            fontFamily: '"Bebas Neue", sans-serif',
+            letterSpacing: '0.02em',
+            fontSize: 48,
+            color: cfg.color,
+          }}
         >
           {pillar.number}
         </span>
@@ -85,50 +92,46 @@ export function InProgressPillarHero({
         >
           {pillar.name}
         </span>
+        {isDone && (
+          <span
+            className="font-condensed font-bold uppercase tracking-[0.14em] text-[11px] px-2 py-0.5"
+            style={{
+              color: '#0A0F18',
+              background: 'var(--brand-gold, #C9A84C)',
+            }}
+          >
+            Done
+          </span>
+        )}
       </div>
 
       {tagline && (
         <p
           className="mt-1 mb-4"
-          style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: 16, fontStyle: 'italic', color: 'var(--text-secondary)' }}
+          style={{
+            fontFamily: '"Playfair Display", Georgia, serif',
+            fontSize: 16,
+            fontStyle: 'italic',
+            color: 'var(--text-secondary)',
+          }}
         >
           {tagline}
         </p>
       )}
 
-      {/* Progress bar */}
       <div className="mb-1">
-        <div
-          className="w-full rounded-full overflow-hidden"
-          style={{ height: 6, backgroundColor: 'var(--bg-elevated)' }}
-        >
-          <div
-            className="h-full rounded-full transition-all"
-            style={{ width: `${pillar.progressPct}%`, backgroundColor: cfg.color }}
-          />
-        </div>
-        {/* Headline progress metric: lesson completion + percent — the two
-            agree because both derive from the same course pct (A3.2). The
-            percent shown here is the SAME number as "Foundation NN%" in the
-            lower Path Forward / Active courses card (one source: course.pct). */}
-        <div className="flex items-baseline justify-between mt-1">
-          <span className="font-condensed text-[12px]" style={{ color: 'var(--text-secondary)' }}>
-            {pillar.completedLessons} of {pillar.totalLessons} lessons
-          </span>
-          {/* A4.2: platform metric numeral = Bebas Neue (--font-logo), not Playfair. */}
-          <span
-            className="leading-none"
-            style={{ fontFamily: '"Bebas Neue", sans-serif', letterSpacing: '0.02em', fontSize: 22, color: cfg.color }}
-          >
-            {formatPct(pillar.progressPct / 100)}
-          </span>
-        </div>
+        <ProgressBar
+          value={pillar.progressPct}
+          pillar={pillar.number}
+          size="md"
+          meta={`${pillar.completedLessons} of ${pillar.totalLessons} · ${formatPct(pillar.progressPct / 100)}`}
+          showPercent={false}
+        />
       </div>
 
-      {/* NEXT UP preview */}
       {nextLessonTitle && (
         <div
-          className="mt-4 rounded p-3"
+          className="mt-4 p-3"
           style={{ background: cfg.colorMuted, border: `1px solid ${cfg.color}33` }}
         >
           <p
@@ -143,13 +146,16 @@ export function InProgressPillarHero({
         </div>
       )}
 
-      <Link
-        href={ctaHref}
-        className="mt-4 inline-flex items-center justify-center w-full font-condensed font-bold uppercase tracking-[0.14em] text-[12px] py-2.5 rounded transition-opacity hover:opacity-90"
-        style={{ backgroundColor: cfg.color, color: '#fff' }}
-      >
-        {nextLessonTitle ? 'Continue lesson →' : 'Open course →'}
-      </Link>
+      <div className="mt-4">
+        <Button
+          variant={isDone ? 'success' : 'primary'}
+          size="md"
+          href={ctaHref}
+          fullWidth
+        >
+          {nextLessonTitle ? 'Continue lesson' : isDone ? 'Review course' : 'Open course'}
+        </Button>
+      </div>
     </div>
   )
 }

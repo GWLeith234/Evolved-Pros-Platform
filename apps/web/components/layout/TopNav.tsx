@@ -3,12 +3,26 @@
 import Link from 'next/link'
 import { useState, useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { NotifBell } from '@/components/notifications/NotifBell'
+import dynamic from 'next/dynamic'
 import { AskGeorgeDrawer } from '@/components/layout/AskGeorgeDrawer'
 import { LogoMark } from '@/components/ui/LogoMark'
 import { useTheme } from '@/components/theme/ThemeProvider'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
+
+// NotifDrawer pulls @supabase/client (realtime-js). Load the bell after paint
+// so TopNav can SSR without empty chrome flash / hydration #425.
+const NotifBell = dynamic(
+  () => import('@/components/notifications/NotifBell').then(m => m.NotifBell),
+  {
+    ssr: false,
+    loading: () => (
+      <span
+        aria-hidden
+        style={{ width: 44, height: 44, display: 'inline-block', flexShrink: 0 }}
+      />
+    ),
+  },
+)
 
 const SPARKLE_PATH = 'M12 2 L13.4 9 L20 10.5 L13.4 12 L12 19 L10.6 12 L4 10.5 L10.6 9 Z'
 
@@ -101,6 +115,8 @@ export function TopNav({
   }, [])
 
   async function handleSignOut() {
+    // Dynamic import keeps @supabase/client off the TopNav SSR module graph.
+    const { createClient } = await import('@/lib/supabase/client')
     const supabase = createClient()
     await supabase.auth.signOut()
     window.location.href = '/login'

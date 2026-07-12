@@ -61,6 +61,7 @@ export function FilterRail({
 
   return (
     <div
+      className="filter-rail-mobile"
       style={{
         position: 'sticky',
         // top:0 because the rail lives inside <main className="overflow-y-auto"> —
@@ -76,6 +77,8 @@ export function FilterRail({
         alignItems: 'center',
         gap: 16,
         flexWrap: 'wrap',
+        maxWidth: '100%',
+        minWidth: 0,
       }}
     >
       <style>{`

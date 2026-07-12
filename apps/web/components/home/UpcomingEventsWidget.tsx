@@ -85,24 +85,34 @@ function EventItem({ event }: { event: EventRow }) {
       >
         <div className="flex-shrink-0 flex flex-col items-center w-10">
           <span
-            className="font-display font-black leading-none text-[26px]"
-            style={{ color: '#112535' }}
+            className="leading-none text-[26px]"
+            style={{
+              fontFamily: '"Bebas Neue", sans-serif',
+              letterSpacing: '0.02em',
+              color: 'var(--text-primary)',
+            }}
           >
             {day}
           </span>
           <span
             className="font-condensed font-bold uppercase text-[12px] tracking-wide"
-            style={{ color: 'var(--brand-red-hover)' }}
+            style={{ color: 'var(--brand-red, #C9302A)' }}
           >
             {month}
           </span>
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="font-body font-semibold text-[13px] text-[#1b3c5a] leading-tight mb-0.5">
+          <p
+            className="font-body font-semibold text-[13px] leading-tight mb-0.5"
+            style={{ color: 'var(--text-primary)' }}
+          >
             {event.title}
           </p>
-          <p className="font-condensed text-[12px] font-medium text-[#7a8a96]">
+          <p
+            className="font-condensed text-[12px] font-medium"
+            style={{ color: 'var(--text-tertiary)' }}
+          >
             {durationStr} · {platform}
           </p>
           {error && (
@@ -113,18 +123,17 @@ function EventItem({ event }: { event: EventRow }) {
         </div>
       </Link>
 
-      {/* Action */}
-      <button
+      {/* Action — Sprint 1 Button variants */}
+      <Button
+        variant={registered ? 'success' : 'secondary'}
+        size="sm"
+        loading={loading}
+        disabled={registered}
         onClick={handleRegister}
-        disabled={registered || loading}
-        className="flex-shrink-0 font-condensed font-semibold uppercase tracking-wide text-xs px-3 py-1.5 transition-all"
-        style={registered
-          ? { backgroundColor: '#68a2b9', color: 'white', border: '1px solid #68a2b9' }
-          : { backgroundColor: 'transparent', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.3)' }
-        }
+        className="flex-shrink-0"
       >
-        {loading ? '...' : registered ? 'Registered' : 'Register'}
-      </button>
+        {registered ? 'Registered' : 'Register'}
+      </Button>
     </div>
   )
 }
@@ -143,7 +152,10 @@ export function UpcomingEventsWidget({ events }: UpcomingEventsWidgetProps) {
       <CardBody className="!px-6 !py-0">
         {events.length === 0 ? (
           <div className="py-8 text-center">
-            <p className="font-condensed text-xs tracking-widest text-[#7a8a96]">
+            <p
+              className="font-condensed text-xs tracking-widest"
+              style={{ color: 'var(--text-tertiary)' }}
+            >
               No upcoming events
             </p>
           </div>
@@ -151,7 +163,10 @@ export function UpcomingEventsWidget({ events }: UpcomingEventsWidgetProps) {
           events.map((event, i) => (
             <div
               key={event.id}
-              style={{ borderBottom: i < events.length - 1 ? '1px solid rgba(27,60,90,0.08)' : undefined }}
+              style={{
+                borderBottom:
+                  i < events.length - 1 ? '1px solid var(--border-color)' : undefined,
+              }}
             >
               <EventItem event={event} />
             </div>
