@@ -1,16 +1,27 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 
-type VideoBlock     = { type: 'video';     url: string; title: string; duration: string }
-type PullquoteBlock = { type: 'pullquote'; text: string; source: string }
-type TextBlock      = { type: 'text';      content: string }
-type ExerciseBlock  = { type: 'exercise';  question: string; options: string[]; correct: number; open_ended: boolean }
-type QuizBlock      = { type: 'quiz';      question: string; options: string[]; correct: number }
+// Content-block shapes — kept byte-identical to the former academy
+// ContentBuilder so persisted lessons.content_blocks need no migration.
+export type VideoBlock     = { type: 'video';     url: string; title: string; duration: string }
+export type PullquoteBlock = { type: 'pullquote'; text: string; source: string }
+export type TextBlock      = { type: 'text';      content: string }
+export type ExerciseBlock  = { type: 'exercise';  question: string; options: string[]; correct: number; open_ended: boolean }
+export type QuizBlock      = { type: 'quiz';      question: string; options: string[]; correct: number }
 
-type ContentBlock = VideoBlock | PullquoteBlock | TextBlock | ExerciseBlock | QuizBlock
+export type ContentBlock = VideoBlock | PullquoteBlock | TextBlock | ExerciseBlock | QuizBlock
 type BlockType = ContentBlock['type']
+
+/** Coerce arbitrary jsonb into a typed block list, dropping anything unknown. */
+export function asContentBlocks(value: unknown): ContentBlock[] {
+  if (!Array.isArray(value)) return []
+  const valid: BlockType[] = ['video', 'pullquote', 'text', 'exercise', 'quiz']
+  return value.filter(
+    (b): b is ContentBlock =>
+      !!b && typeof b === 'object' && valid.includes((b as { type?: unknown }).type as BlockType),
+  )
+}
 
 function defaultBlock(type: BlockType): ContentBlock {
   switch (type) {
@@ -143,35 +154,29 @@ const TYPE_LABELS: Record<BlockType, string> = {
   quiz: 'QUIZ',
 }
 
-interface ContentBuilderProps {
-  lessonId: string
-  lessonTitle: string
-  isPublished: boolean
-  initialBlocks: ContentBlock[]
-  pillarSlug: string
-  accentColor: string
-}
-
-export function ContentBuilder({
-  lessonId,
-  isPublished: initialPublished,
-  initialBlocks,
+/**
+ * Controlled content-block editor. Owns no persistence — the parent form holds
+ * the block array and includes it in its own save payload. This is the former
+ * academy ContentBuilder's editing surface, minus the standalone publish/save
+ * controls (the merged lesson editor owns those now).
+ */
+export function ContentBlocksEditor({
+  blocks,
+  onChange,
   accentColor,
-}: ContentBuilderProps) {
-  const router = useRouter()
-  const [blocks, setBlocks] = useState<ContentBlock[]>(initialBlocks)
-  const [isPublished, setIsPublished] = useState(initialPublished)
+}: {
+  blocks: ContentBlock[]
+  onChange: (blocks: ContentBlock[]) => void
+  accentColor: string
+}) {
   const [addType, setAddType] = useState<BlockType>('text')
-  const [saving, setSaving] = useState(false)
-  const [toggling, setToggling] = useState(false)
-  const [saveMsg, setSaveMsg] = useState<string | null>(null)
 
   function updateBlock(i: number, b: ContentBlock) {
-    setBlocks(prev => prev.map((x, idx) => idx === i ? b : x))
+    onChange(blocks.map((x, idx) => idx === i ? b : x))
   }
 
   function deleteBlock(i: number) {
-    setBlocks(prev => prev.filter((_, idx) => idx !== i))
+    onChange(blocks.filter((_, idx) => idx !== i))
   }
 
   function moveBlock(i: number, dir: -1 | 1) {
@@ -179,81 +184,14 @@ export function ContentBuilder({
     if (j < 0 || j >= blocks.length) return
     const next = [...blocks]
     ;[next[i], next[j]] = [next[j], next[i]]
-    setBlocks(next)
-  }
-
-  async function handleSave() {
-    setSaving(true)
-    setSaveMsg(null)
-    try {
-      const res = await fetch(`/api/admin/lessons/${lessonId}/content`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content_blocks: blocks }),
-      })
-      if (!res.ok) {
-        const data = await res.json()
-        setSaveMsg(`Error: ${data.error ?? 'Save failed'}`)
-      } else {
-        setSaveMsg('Saved ✓')
-        router.refresh()
-      }
-    } catch {
-      setSaveMsg('Network error')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  async function handleTogglePublish() {
-    setToggling(true)
-    try {
-      const res = await fetch(`/api/admin/lessons/${lessonId}/publish`, { method: 'PATCH' })
-      if (res.ok) {
-        const data = await res.json()
-        setIsPublished(data.isPublished)
-      }
-    } finally {
-      setToggling(false)
-    }
+    onChange(next)
   }
 
   return (
-    <div className="space-y-5">
-      <div
-        className="flex items-center justify-between rounded-lg px-5 py-4"
-        style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.1)' }}
-      >
-        <div>
-          <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] mb-0.5">Status</p>
-          <span
-            className="font-condensed font-bold uppercase text-[11px] rounded px-2 py-0.5"
-            style={{
-              color: isPublished ? '#1b3c5a' : '#7a8a96',
-              backgroundColor: isPublished ? 'rgba(27,60,90,0.06)' : 'rgba(122,138,150,0.08)',
-              border: isPublished ? '1px solid rgba(27,60,90,0.15)' : '1px solid rgba(122,138,150,0.2)',
-            }}
-          >
-            {isPublished ? 'Published' : 'Draft'}
-          </span>
-        </div>
-        <button
-          onClick={handleTogglePublish}
-          disabled={toggling}
-          className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2 transition-all disabled:opacity-50"
-          style={{
-            backgroundColor: isPublished ? 'rgba(239,14,48,0.08)' : 'rgba(27,60,90,0.08)',
-            color: isPublished ? '#ef0e30' : '#1b3c5a',
-            border: isPublished ? '1px solid rgba(239,14,48,0.2)' : '1px solid rgba(27,60,90,0.2)',
-          }}
-        >
-          {toggling ? '...' : isPublished ? 'Unpublish' : 'Publish'}
-        </button>
-      </div>
-
+    <div className="space-y-3">
       {blocks.length === 0 ? (
         <div
-          className="rounded-lg px-5 py-10 text-center"
+          className="rounded-lg px-5 py-8 text-center"
           style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.1)' }}
         >
           <p className="font-condensed text-[12px] text-[#7a8a96]">No content blocks yet. Add one below.</p>
@@ -277,9 +215,9 @@ export function ContentBuilder({
                   {TYPE_LABELS[block.type]}
                 </span>
                 <div className="flex items-center gap-3">
-                  <button onClick={() => moveBlock(i, -1)} disabled={i === 0} className="font-condensed text-[12px] text-[#7a8a96] hover:text-[#1b3c5a] disabled:opacity-30 transition-colors">↑</button>
-                  <button onClick={() => moveBlock(i, 1)} disabled={i === blocks.length - 1} className="font-condensed text-[12px] text-[#7a8a96] hover:text-[#1b3c5a] disabled:opacity-30 transition-colors">↓</button>
-                  <button onClick={() => deleteBlock(i)} className="font-condensed font-semibold text-[11px] text-[#ef0e30] hover:opacity-70 transition-opacity">Remove</button>
+                  <button type="button" onClick={() => moveBlock(i, -1)} disabled={i === 0} className="font-condensed text-[12px] text-[#7a8a96] hover:text-[#1b3c5a] disabled:opacity-30 transition-colors">↑</button>
+                  <button type="button" onClick={() => moveBlock(i, 1)} disabled={i === blocks.length - 1} className="font-condensed text-[12px] text-[#7a8a96] hover:text-[#1b3c5a] disabled:opacity-30 transition-colors">↓</button>
+                  <button type="button" onClick={() => deleteBlock(i)} className="font-condensed font-semibold text-[11px] text-[#ef0e30] hover:opacity-70 transition-opacity">Remove</button>
                 </div>
               </div>
               <div className="px-5 py-4">
@@ -312,27 +250,12 @@ export function ContentBuilder({
           <option value="quiz">Quiz</option>
         </select>
         <button
-          onClick={() => setBlocks(prev => [...prev, defaultBlock(addType)])}
+          type="button"
+          onClick={() => onChange([...blocks, defaultBlock(addType)])}
           className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2 flex-shrink-0 transition-all"
           style={{ backgroundColor: '#1b3c5a', color: 'white' }}
         >
           + Add
-        </button>
-      </div>
-
-      <div className="flex items-center justify-between">
-        {saveMsg && (
-          <p className="font-condensed text-[12px]" style={{ color: saveMsg.startsWith('Error') ? '#ef0e30' : '#22c55e' }}>
-            {saveMsg}
-          </p>
-        )}
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-6 py-2.5 transition-all disabled:opacity-50 ml-auto"
-          style={{ backgroundColor: accentColor, color: '#ffffff' }}
-        >
-          {saving ? 'Saving…' : `Save ${blocks.length} Block${blocks.length !== 1 ? 's' : ''}`}
         </button>
       </div>
     </div>
