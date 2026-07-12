@@ -211,13 +211,13 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
         <div>
           <h1
             className="font-display font-black text-[28px]"
-            style={{ color: 'var(--text-primary, #112535)', margin: 0 }}
+            style={{ color: '#112535', margin: 0 }}
           >
             Prospects CRM
           </h1>
           <p
             className="font-condensed text-[12px] mt-0.5"
-            style={{ color: 'var(--text-tertiary, #7a8a96)', margin: 0 }}
+            style={{ color: '#7a8a96', margin: 0 }}
           >
             Lead → Prospect → Community → VIP ($9) → Professional ($49) · drag to move stages
           </p>
@@ -247,7 +247,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
           <div className="text-right hidden sm:block">
             <p
               className="font-condensed font-bold text-[10px] uppercase tracking-[0.16em]"
-              style={{ color: 'var(--text-tertiary, #7a8a96)', margin: 0 }}
+              style={{ color: '#7a8a96', margin: 0 }}
             >
               Pipeline value
             </p>
@@ -290,8 +290,8 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
               minWidth: 180,
               minHeight: 40,
               border: '1px solid var(--border-color, rgba(27,60,90,0.14))',
-              background: 'var(--bg-surface, #fff)',
-              color: 'var(--text-primary, #1b3c5a)',
+              background: '#fff',
+              color: '#1b3c5a',
             }}
           />
           <button
@@ -331,7 +331,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                 className="flex flex-col rounded-lg overflow-hidden min-w-[210px]"
                 style={{
                   border: `1px solid ${isDropTarget ? col.accent : 'var(--border-color, rgba(27,60,90,0.10))'}`,
-                  background: 'var(--bg-elevated, rgba(27,60,90,0.02))',
+                  background: 'rgba(27,60,90,0.02)',
                   transition: 'border-color 120ms ease, background 120ms ease',
                 }}
                 onDragOver={e => {
@@ -359,7 +359,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                     </p>
                     <p
                       className="font-condensed text-[11px] mt-0.5"
-                      style={{ color: 'var(--text-tertiary, #7a8a96)', margin: 0 }}
+                      style={{ color: '#7a8a96', margin: 0 }}
                     >
                       {col.desc}
                       {colValue > 0 ? ` · $${colValue}/mo` : ''}
@@ -368,7 +368,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                   <span
                     className="font-condensed font-bold text-[11px] px-2 py-0.5 rounded min-w-[24px] text-center shrink-0"
                     style={{
-                      background: 'var(--bg-surface, #fff)',
+                      background: '#fff',
                       color: col.accent,
                       border: `1px solid ${col.accent}33`,
                     }}
@@ -388,7 +388,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                   {cards.length === 0 ? (
                     <p
                       className="font-condensed text-[11px] text-center mt-6"
-                      style={{ color: 'var(--text-tertiary, #7a8a96)' }}
+                      style={{ color: '#7a8a96' }}
                     >
                       Drop cards here
                     </p>
