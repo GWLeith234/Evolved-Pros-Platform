@@ -10,14 +10,10 @@ export default async function AdminBrandingPage() {
     return null
   }
 
-  // RLS-FIX: adminClient — platform_ads filters is_active=true for non-admins,
-  // and banner/settings reads are admin-managed; bypass RLS for consistency.
-  const [{ data: settings }, { data: ads }, { data: banners }] = await Promise.all([
+  // RLS-FIX: adminClient — banner/settings reads are admin-managed; bypass RLS
+  // for consistency. Ad management now lives entirely under /admin/ads.
+  const [{ data: settings }, { data: banners }] = await Promise.all([
     adminClient.from('platform_settings').select('key, value'),
-    adminClient
-      .from('platform_ads')
-      .select('id, placement, image_url, headline, tool_name, endorsement_quote, special_offer, cta_text, link_url, sort_order, is_active')
-      .order('sort_order'),
     adminClient
       .from('profile_banners')
       .select('id, pillar, title, image_url, sort_order, is_active')
@@ -32,7 +28,6 @@ export default async function AdminBrandingPage() {
   return (
     <BrandingPortalClient
       initialSettings={settingsMap}
-      initialAds={ads ?? []}
       initialBanners={banners ?? []}
     />
   )
