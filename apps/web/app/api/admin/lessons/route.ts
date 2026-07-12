@@ -21,11 +21,17 @@ export async function POST(req: Request) {
     transcript?: unknown
     key_takeaways?: unknown
     discussion_prompt?: unknown
+    content_blocks?: unknown
   }
 
   if (!body.course_id || !body.title?.trim() || !body.slug?.trim()) {
     return NextResponse.json({ error: 'course_id, title, and slug are required' }, { status: 400 })
   }
+
+  if (body.content_blocks != null && !Array.isArray(body.content_blocks)) {
+    return NextResponse.json({ error: 'content_blocks must be an array' }, { status: 422 })
+  }
+  const contentBlocks = Array.isArray(body.content_blocks) ? body.content_blocks : []
 
   const transcript = body.transcript != null ? asTranscriptSegments(body.transcript) : null
   if (body.transcript != null && !transcript) {
@@ -68,6 +74,7 @@ export async function POST(req: Request) {
       transcript,
       key_takeaways: keyTakeaways,
       discussion_prompt: discussionPrompt,
+      content_blocks: contentBlocks,
     })
     .select('*')
     .single()

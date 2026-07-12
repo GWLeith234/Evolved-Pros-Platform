@@ -3,7 +3,9 @@ import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { LessonForm } from '../../../LessonForm'
+import { asContentBlocks } from '../../../ContentBlocksEditor'
 import { asKeyTakeaways } from '@/lib/academy/takeaways'
+import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
 interface Props {
   params: { courseId: string; lessonId: string }
@@ -15,20 +17,20 @@ export default async function EditLessonPage({ params }: Props) {
     return null
   }
 
-  type CourseData = { id: string; title: string }
+  type CourseData = { id: string; title: string; pillar_number: number }
   type LessonData = {
     id: string; title: string; slug: string; description: string | null
     duration_seconds: number | null; sort_order: number; is_published: boolean
     mux_playback_id: string | null; transcript: unknown; key_takeaways: unknown
-    discussion_prompt: string | null
+    discussion_prompt: string | null; content_blocks: unknown
   }
 
   // RLS-FIX: adminClient — courses/lessons SELECT policies filter drafts,
   // causing false 404s when an admin opens an unpublished lesson.
   const [{ data: courseRaw }, { data: lessonRaw }] = await Promise.all([
-    adminClient.from('courses').select('id, title').eq('id', params.courseId).single(),
+    adminClient.from('courses').select('id, title, pillar_number').eq('id', params.courseId).single(),
     adminClient.from('lessons')
-      .select('id, title, slug, description, duration_seconds, sort_order, is_published, mux_playback_id, transcript, key_takeaways, discussion_prompt')
+      .select('id, title, slug, description, duration_seconds, sort_order, is_published, mux_playback_id, transcript, key_takeaways, discussion_prompt, content_blocks')
       .eq('id', params.lessonId).eq('course_id', params.courseId).single(),
   ])
 
@@ -52,6 +54,7 @@ export default async function EditLessonPage({ params }: Props) {
         courseId={params.courseId}
         lessonId={params.lessonId}
         existingPlaybackId={lesson.mux_playback_id}
+        accentColor={PILLAR_CONFIG[course.pillar_number]?.color ?? '#68a2b9'}
         initialValues={{
           title: lesson.title,
           description: lesson.description ?? '',
@@ -62,6 +65,7 @@ export default async function EditLessonPage({ params }: Props) {
           transcriptJson: lesson.transcript ? JSON.stringify(lesson.transcript, null, 2) : '',
           keyTakeaways: asKeyTakeaways(lesson.key_takeaways) ?? [],
           discussionPrompt: lesson.discussion_prompt ?? '',
+          contentBlocks: asContentBlocks(lesson.content_blocks),
         }}
       />
     </div>

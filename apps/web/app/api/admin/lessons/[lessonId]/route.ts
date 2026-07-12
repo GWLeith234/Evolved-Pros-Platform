@@ -64,7 +64,16 @@ export async function PATCH(
     body.discussion_prompt = body.discussion_prompt.trim() || null
   }
 
-  const allowed = ['title', 'slug', 'description', 'sort_order', 'duration_seconds', 'is_published', 'mux_asset_id', 'mux_playback_id', 'transcript', 'key_takeaways', 'discussion_prompt'] as const
+  // content_blocks: written lesson content (merged in from the academy
+  // Content Builder). Must be an array when present.
+  if ('content_blocks' in body && !Array.isArray(body.content_blocks)) {
+    return NextResponse.json(
+      { error: 'content_blocks must be an array' },
+      { status: 422 },
+    )
+  }
+
+  const allowed = ['title', 'slug', 'description', 'sort_order', 'duration_seconds', 'is_published', 'mux_asset_id', 'mux_playback_id', 'transcript', 'key_takeaways', 'discussion_prompt', 'content_blocks'] as const
   type AllowedKey = typeof allowed[number]
   const update = Object.fromEntries(
     allowed
