@@ -43,7 +43,7 @@ export function CrmCard({
     <article
       className="rounded-md mb-2 transition-shadow"
       style={{
-        background: 'var(--bg-surface, #fff)',
+        background: '#fff',
         border: '1px solid var(--border-color, rgba(27,60,90,0.10))',
         borderLeft: `3px solid ${meta.accent}`,
         opacity: busy ? 0.55 : 1,
@@ -60,14 +60,14 @@ export function CrmCard({
           >
             <p
               className="font-body font-semibold text-[13px] leading-snug truncate"
-              style={{ color: 'var(--text-primary, #1b3c5a)', margin: 0 }}
+              style={{ color: '#1b3c5a', margin: 0 }}
             >
               {prospect.full_name}
             </p>
             {prospect.company && (
               <p
                 className="font-condensed text-[11px] truncate mt-0.5"
-                style={{ color: 'var(--text-tertiary, #7a8a96)', margin: 0 }}
+                style={{ color: '#7a8a96', margin: 0 }}
               >
                 {prospect.company}
               </p>
@@ -86,7 +86,7 @@ export function CrmCard({
         <a
           href={mailto}
           className="font-condensed text-[12px] block truncate mb-2 hover:underline"
-          style={{ color: 'var(--text-secondary, #5a6a76)' }}
+          style={{ color: '#5a6a76' }}
           onClick={e => e.stopPropagation()}
         >
           {prospect.email}
@@ -118,7 +118,7 @@ export function CrmCard({
         {prospect.notes && (
           <p
             className="font-body text-[12px] leading-snug mb-2 line-clamp-2"
-            style={{ color: 'var(--text-tertiary, #7a8a96)', margin: '0 0 8px' }}
+            style={{ color: '#7a8a96', margin: '0 0 8px' }}
           >
             {prospect.notes}
           </p>
@@ -195,7 +195,7 @@ function Field({
         style={{
           margin: 0,
           fontSize: 9,
-          color: 'var(--text-tertiary, #7a8a96)',
+          color: '#7a8a96',
         }}
       >
         {label}
@@ -205,7 +205,7 @@ function Field({
         style={{
           margin: '2px 0 0',
           fontSize: 12,
-          color: color ?? 'var(--text-primary, #1b3c5a)',
+          color: color ?? '#1b3c5a',
         }}
       >
         {value}
