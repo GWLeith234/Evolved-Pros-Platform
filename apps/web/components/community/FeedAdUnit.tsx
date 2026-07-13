@@ -116,7 +116,7 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
           fontSize: 11,
           letterSpacing: '0.14em',
           textTransform: 'uppercase',
-          background: gradients.primary,
+          background: gradients?.primary ?? 'linear-gradient(135deg, #ef0e30 0%, #c50a26 100%)',
           color: '#FFFFFF',
           border: '1px solid transparent',
           borderRadius: 0,

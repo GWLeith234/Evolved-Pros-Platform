@@ -157,7 +157,7 @@ export function TodaysEvolution({ actions }: TodaysEvolutionProps) {
                 textTransform: 'uppercase',
                 borderRadius: 0,
                 border: a.primary ? '1px solid transparent' : '1px solid var(--brand-gold, #C9A84C)',
-                background: a.primary ? gradients.primary : 'transparent',
+                background: a.primary ? (gradients?.primary ?? 'linear-gradient(135deg, #ef0e30 0%, #c50a26 100%)') : 'transparent',
                 color: a.primary ? '#FFFFFF' : 'var(--brand-gold, #C9A84C)',
               }}
             >
