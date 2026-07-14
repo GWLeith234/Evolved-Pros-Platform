@@ -18,6 +18,7 @@ import { InProgressPillarHero } from '@/components/home/InProgressPillarHero'
 import { ClimbingTowardCard } from '@/components/home/ClimbingTowardCard'
 import { GoalCard, type GoalForCard } from '@/components/home/GoalCard'
 import { AccountabilityHub } from '@/components/home/AccountabilityHub'
+import { ScoreboardHero } from '@/components/scoreboard/ScoreboardHero'
 import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
 import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStoriesTile'
 import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
@@ -35,6 +36,7 @@ import {
   ensureFlagshipSponsors,
 } from '@/lib/sponsors/partners'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { fetchPillarProgress } from '@/lib/scoreboard/fetchPillarProgress'
 import { hasTierAccess } from '@/lib/tier'
 import { formatRelative, formatDuration as formatMinutes, formatDate } from '@/lib/format'
 
@@ -638,6 +640,7 @@ export default async function MemberHomePage() {
     dailyHabits,
     weekCommitments,
     sponsors,
+    pillarProgress,
   ] = await Promise.all([
     // MR-HOME-1: lesson_progress / member_badges store rows under
     // public.users.id, NOT auth.uid(). Pass profile.id (resolved via
@@ -669,6 +672,9 @@ export default async function MemberHomePage() {
     fetchWeekCommitments(profile.id, weekStart),
     // Sponsor ads SSR — avoids client waterfall after paint
     fetchHomeSponsors(),
+    // SPRINT-1 GOALS-ON-HOME — pillar progress for the Enhanced Scoreboard,
+    // keyed on the email-resolved profile.id (same fetcher /scoreboard uses).
+    fetchPillarProgress(profile.id),
   ])
 
   const quarterlyGoals = (quarterlyGoalsResult.data ?? []) as GoalForCard[]
@@ -1028,6 +1034,22 @@ export default async function MemberHomePage() {
           on mount (server is UTC and would otherwise hand a stale week to
           TZ-behind users on Sunday evening). */}
       <CommitmentTracker weekStart={getCurrentMonday()} />
+
+      {/* SPRINT-1 GOALS-ON-HOME — Enhanced Scoreboard (4-KPI strip, rings, Pace
+          Read, Pillar Overview) lifted from /scoreboard, below the fold. Reuses
+          the same ScoreboardHero component and the same email-resolved data
+          (profile.id); /scoreboard stays live and unchanged. */}
+      <section aria-label="Goals & accountability">
+        <ScoreboardHero
+          habits={dailyHabits}
+          commitments={weekCommitments}
+          goals={goalsForCards}
+          pillars={pillarProgress}
+          courseHref={courseHref}
+          courseLabel={inProgressData ? `Continue ${inProgressData.name}` : 'Start Foundation'}
+          displayName={displayName}
+        />
+      </section>
     </div>
   )
 }
