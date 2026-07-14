@@ -69,7 +69,7 @@ function formatWeekLabel(weekStart: string): string {
   })
 }
 
-async function fetchTodaysHabits(authUserId: string): Promise<DailyPulseHabit[]> {
+async function fetchTodaysHabits(profileId: string): Promise<DailyPulseHabit[]> {
   try {
     const today = new Date().toISOString().split('T')[0]
     const sixtyDaysAgo = new Date(Date.now() - 60 * 86_400_000).toISOString().split('T')[0]
@@ -77,13 +77,13 @@ async function fetchTodaysHabits(authUserId: string): Promise<DailyPulseHabit[]>
       adminClient
         .from('habits')
         .select('id, name, pillar, sort_order')
-        .eq('user_id', authUserId)
+        .eq('user_id', profileId)
         .eq('is_active', true)
         .order('sort_order', { ascending: true }),
       adminClient
         .from('habit_completions')
         .select('habit_id, completed_date')
-        .eq('user_id', authUserId)
+        .eq('user_id', profileId)
         .gte('completed_date', sixtyDaysAgo)
         .not('habit_id', 'is', null),
     ])
@@ -217,7 +217,7 @@ export default async function ScoreboardPage() {
     undefined
 
   const [dailyHabits, weekCommitments, goalsResult, course, pillars] = await Promise.all([
-    fetchTodaysHabits(user.id),
+    fetchTodaysHabits(profile.id),
     fetchWeekCommitments(profile.id, weekStart),
     adminClient
       .from('quarterly_goals')

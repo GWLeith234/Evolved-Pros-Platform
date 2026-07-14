@@ -3,13 +3,17 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
 export async function POST(request: Request) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // habits / habit_completions FK their user_id to public.users.id, so key on
+  // the email-resolved profile id — not the raw auth UID (auth.uid() ===
+  // public.users.id is not guaranteed for future Vendasta signups).
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   let body: Record<string, unknown>
   try { body = await request.json() } catch {
@@ -21,13 +25,13 @@ export async function POST(request: Request) {
   const date = DATE_RE.test(dateRaw) ? dateRaw : new Date().toISOString().split('T')[0]
   if (!habitId) return NextResponse.json({ error: 'habit_id is required' }, { status: 422 })
 
-  // Ownership guard: habits.user_id is auth.users.id, so user.id matches directly.
+  // Ownership guard: habits.user_id is public.users.id, so match on profile.id.
   const { data: habit } = await adminClient
     .from('habits')
     .select('id, user_id')
     .eq('id', habitId)
     .maybeSingle()
-  if (!habit || habit.user_id !== user.id) {
+  if (!habit || habit.user_id !== profile.id) {
     return NextResponse.json({ error: 'Habit not found' }, { status: 404 })
   }
 
@@ -56,7 +60,7 @@ export async function POST(request: Request) {
     .from('habit_completions')
     .insert({
       habit_id: habitId,
-      user_id: user.id,
+      user_id: profile.id,
       completed_date: date,
       completed_on: date,
     })

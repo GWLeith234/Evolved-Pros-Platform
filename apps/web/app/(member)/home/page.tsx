@@ -484,10 +484,12 @@ async function fetchLatestEpisodes(limit = 3): Promise<{ episodes: PulseEpisode[
   return { episodes: eps, latestNumber }
 }
 
-// HOME-DAILY-PULSE fetchers — habits and habit_completions both FK to
-// auth.users(id), so reads key on user.id (auth UID), not profile.id.
+// HOME-DAILY-PULSE fetchers — habits and habit_completions FK their user_id to
+// public.users.id, so reads key on profile.id (resolved by email), NOT the raw
+// auth UID. auth.uid() === public.users.id is not guaranteed for future
+// Vendasta-provisioned signups.
 
-async function fetchTodaysHabits(authUserId: string): Promise<DailyPulseHabit[]> {
+async function fetchTodaysHabits(profileId: string): Promise<DailyPulseHabit[]> {
   // Wrapped in try/catch so a transient network blip or unexpected RLS
   // change returns [] instead of bubbling up. An undefined return here
   // used to trip the Daily Pulse card's Suspense boundary (#422) and
@@ -500,13 +502,13 @@ async function fetchTodaysHabits(authUserId: string): Promise<DailyPulseHabit[]>
       adminClient
         .from('habits')
         .select('id, name, pillar, sort_order')
-        .eq('user_id', authUserId)
+        .eq('user_id', profileId)
         .eq('is_active', true)
         .order('sort_order', { ascending: true }),
       adminClient
         .from('habit_completions')
         .select('habit_id, completed_date')
-        .eq('user_id', authUserId)
+        .eq('user_id', profileId)
         .gte('completed_date', sixtyDaysAgo)
         .not('habit_id', 'is', null),
     ])
@@ -661,8 +663,9 @@ export default async function MemberHomePage() {
       .eq('is_active', true)
       .order('created_at', { ascending: true })
       .limit(5),
-    // HOME-DAILY-PULSE — habits FK to auth.users(id); commitments FK to profile.id.
-    fetchTodaysHabits(user.id),
+    // HOME-DAILY-PULSE — habits, habit_completions, and weekly_commitments all
+    // FK their user_id to public.users.id, so key on profile.id (email-resolved).
+    fetchTodaysHabits(profile.id),
     fetchWeekCommitments(profile.id, weekStart),
     // Sponsor ads SSR — avoids client waterfall after paint
     fetchHomeSponsors(),
