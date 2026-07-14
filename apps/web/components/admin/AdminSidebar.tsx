@@ -28,6 +28,12 @@ const SECTIONS: ReadonlyArray<SidebarSectionData> = [
     ],
   },
   {
+    title: 'Beta',
+    items: [
+      { label: 'Friends of George', href: '/admin/friends', match: /^\/admin\/friends/ },
+    ],
+  },
+  {
     title: 'Vendasta CRM',
     items: [
       { label: 'Contacts',      href: 'https://business.vendasta.com/crm/contacts',     match: /^$/ },
