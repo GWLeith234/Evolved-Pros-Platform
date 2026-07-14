@@ -479,7 +479,7 @@ export function AccountabilityHub({
             )}
             {!isFull && (
               <Link
-                href="/scoreboard"
+                href="/home"
                 style={{
                   fontFamily: '"Barlow Condensed", sans-serif',
                   fontWeight: 800,
@@ -626,7 +626,7 @@ export function AccountabilityHub({
             </button>
           )}
           {!isFull && (
-            <Link href="/scoreboard" style={quickBtnStyle(DIM, false)}>
+            <Link href="/home" style={quickBtnStyle(DIM, false)}>
               Full scoreboard
             </Link>
           )}

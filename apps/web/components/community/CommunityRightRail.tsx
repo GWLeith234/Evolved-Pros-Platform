@@ -312,7 +312,7 @@ function MobileEngagementStrip({
       accent: 'var(--brand-red, #C9302A)',
     },
     {
-      href: '/scoreboard',
+      href: '/home',
       label: 'Goals',
       sub: 'Scoreboard',
       accent: 'var(--brand-gold, #C9A84C)',

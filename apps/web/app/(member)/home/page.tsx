@@ -836,7 +836,7 @@ export default async function MemberHomePage() {
       description: weekCommitments.length
         ? 'Check off what you said you’d do — scoreboard stays honest.'
         : 'Write 1–2 weekly commitments and hold the line.',
-      href: '/scoreboard',
+      href: '/home',
       cta: 'Open scoreboard',
       accent: '#C9A84C',
     },
@@ -929,7 +929,7 @@ export default async function MemberHomePage() {
             The Long Game
           </p>
           <a
-            href="/scoreboard"
+            href="/home"
             className="ep-btn ep-btn--tertiary font-condensed font-bold uppercase tracking-[0.14em] text-[10px]"
             style={{ color: 'var(--brand-gold, #C9A84C)', textDecoration: 'none' }}
           >

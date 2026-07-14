@@ -191,16 +191,6 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
 
         {/* Links */}
         <Link
-          href="/scoreboard"
-          onClick={onClose}
-          className={linkClass}
-          style={{ color: 'var(--text-primary)', minHeight: 52 }}
-        >
-          <BarChartIcon />
-          Goals & Scoreboard
-        </Link>
-
-        <Link
           href="/podcast"
           onClick={onClose}
           className={linkClass}

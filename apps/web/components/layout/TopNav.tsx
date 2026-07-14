@@ -48,13 +48,12 @@ interface TopNavProps {
 
 interface NavItem { label: string; href: string; minTier?: 'vip' | 'pro'; highlight?: boolean }
 
-// Core loops first; Goals = Accountability Hub (daily habit driver).
-// Events consolidated under LIVE.
+// Core loops first. Goals/Scoreboard folded into Home (daily accountability
+// block lives on /home). Events consolidated under LIVE.
 const NAV_ITEMS: NavItem[] = [
   { label: 'Home',      href: '/home' },
   { label: 'Community', href: '/community' },
   { label: 'Academy',   href: '/academy',  minTier: 'vip' },
-  { label: 'Goals',     href: '/scoreboard' },
   { label: 'LIVE',      href: '/live' },
   { label: 'Podcast',   href: '/podcast' },
   { label: 'Media',     href: '/media',    highlight: true },
@@ -554,7 +553,6 @@ export function TopNav({
 
                 {/* Links */}
                 {[
-                  { label: 'Goals',      href: '/scoreboard' },
                   { label: 'Profile',    href: '/profile/me' },
                   { label: 'Settings',   href: '/settings' },
                   { label: 'Membership', href: '/membership' },

@@ -47,6 +47,14 @@ const nextConfig = {
       fallback: [],
     }
   },
+  async redirects() {
+    return [
+      // /scoreboard was folded into /home (Goals → Home consolidation).
+      // Permanent 308 so bookmarks, shared links, and old in-app buttons land
+      // on the Home dashboard that now hosts the scoreboard.
+      { source: '/scoreboard', destination: '/home', permanent: true },
+    ]
+  },
   async headers() {
     return [
       {

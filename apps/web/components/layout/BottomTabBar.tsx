@@ -79,12 +79,12 @@ interface TabItem {
   icon: React.ReactNode
 }
 
-// Primary DAU loops on the thumb bar (incl. Goals hub). Podcast under More.
+// Primary DAU loops on the thumb bar. Goals folded into Home; Podcast/Media
+// under More.
 const TABS: TabItem[] = [
   { label: 'Home',      href: '/home',       match: /^\/home$/,      icon: <HomeIcon /> },
   { label: 'Community', href: '/community',  match: /^\/community/,  icon: <UsersIcon /> },
   { label: 'Academy',   href: '/academy',    match: /^\/academy/,    icon: <BookIcon /> },
-  { label: 'Goals',     href: '/scoreboard', match: /^\/scoreboard/, icon: <TargetIcon /> },
   { label: 'LIVE',      href: '/live',       match: /^\/live/,       icon: <CalendarIcon /> },
 ]
 

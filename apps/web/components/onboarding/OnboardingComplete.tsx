@@ -34,10 +34,10 @@ export function OnboardingComplete({ displayName }: Props) {
     await finish('/home')
   }
 
-  /** Sprint 4C stretch — land on scoreboard / Daily Pulse after pillars intro */
+  /** Scoreboard / Daily Pulse now lives on Home (Goals → Home consolidation). */
   async function handleScoreboard() {
     setLoading('scoreboard')
-    await finish('/scoreboard')
+    await finish('/home')
   }
 
   return (
