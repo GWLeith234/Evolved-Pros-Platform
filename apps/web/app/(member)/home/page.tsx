@@ -7,18 +7,14 @@ import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
 
 export const metadata: Metadata = { title: 'Home — Evolved Pros' }
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
-import { HomeMetricsStrip } from '@/components/home/HomeMetricsStrip'
 import { TodaysEvolution, type TodaysEvolutionAction } from '@/components/home/TodaysEvolution'
-import { ActivityFeed } from '@/components/home/ActivityFeed'
 import { UpcomingEventsWidget } from '@/components/home/UpcomingEventsWidget'
 import { AcademyProgressWidget } from '@/components/home/AcademyProgressWidget'
 import { ProfileCompletePrompt } from '@/components/home/ProfileCompletePrompt'
-import { PillarJourneyStrip, type PillarStripItem } from '@/components/home/PillarJourneyStrip'
 import { InProgressPillarHero } from '@/components/home/InProgressPillarHero'
 import { ClimbingTowardCard } from '@/components/home/ClimbingTowardCard'
 import { GoalCard, type GoalForCard } from '@/components/home/GoalCard'
 import { AccountabilityHub } from '@/components/home/AccountabilityHub'
-import { ScoreboardHero } from '@/components/scoreboard/ScoreboardHero'
 import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
 import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStoriesTile'
 import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
@@ -36,8 +32,6 @@ import {
   ensureFlagshipSponsors,
 } from '@/lib/sponsors/partners'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
-import { fetchPillarProgress } from '@/lib/scoreboard/fetchPillarProgress'
-import { hasTierAccess } from '@/lib/tier'
 import { formatRelative, formatDuration as formatMinutes, formatDate } from '@/lib/format'
 
 async function fetchCurrentUser(supabase: ReturnType<typeof createClient>, email: string) {
@@ -47,87 +41,6 @@ async function fetchCurrentUser(supabase: ReturnType<typeof createClient>, email
     .eq('email', email)
     .single()
   return data
-}
-
-async function fetchDashboardStats(supabase: ReturnType<typeof createClient>, userId: string, userTier: string | null, userPoints: number) {
-  const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-
-  const [memberCount, newMembers, courses, allLessons, completions, rankCount] = await Promise.all([
-    supabase.from('users').select('id', { count: 'exact', head: true }).eq('tier_status', 'active'),
-    supabase.from('users').select('id', { count: 'exact', head: true }).eq('tier_status', 'active').gte('created_at', oneWeekAgo),
-    supabase.from('courses').select('id, required_tier').eq('is_published', true),
-    supabase.from('lessons').select('id, course_id').eq('is_published', true),
-    // lesson_progress.user_id stores public.users.id (the value passed in here),
-    // NOT auth.uid(). The RLS policy is `auth.uid() = user_id`, which silently
-    // filters every row when those two diverge. Use adminClient to bypass it.
-    adminClient.from('lesson_progress').select('lesson_id, completed_at').eq('user_id', userId).not('completed_at', 'is', null),
-    supabase.from('users').select('id', { count: 'exact', head: true }).gt('points', userPoints),
-  ])
-
-  const allCourses = courses.data ?? []
-  const accessible = allCourses.filter(c => hasTierAccess(userTier as 'community' | 'vip' | 'pro' | null, c.required_tier as 'community' | 'vip' | 'pro' | null))
-  const pillarsUnlocked = accessible.length
-  const pillarsTotal = allCourses.length
-
-  const lessonsByCourse: Record<string, string[]> = {}
-  for (const l of allLessons.data ?? []) {
-    if (!lessonsByCourse[l.course_id]) lessonsByCourse[l.course_id] = []
-    lessonsByCourse[l.course_id].push(l.id)
-  }
-  const completed = new Set((completions.data ?? []).map(p => p.lesson_id))
-  let totalPct = 0, count = 0
-  for (const c of accessible) {
-    const total = lessonsByCourse[c.id]?.length ?? 0
-    if (total === 0) continue
-    const done = (lessonsByCourse[c.id] ?? []).filter(id => completed.has(id)).length
-    totalPct += done / total
-    count++
-  }
-  const academyProgressPct = count > 0 ? Math.round((totalPct / count) * 100) : 0
-  const leaderboardRank = (rankCount.count ?? 0) + 1
-
-  return {
-    communityMemberCount: memberCount.count ?? 0,
-    newMembersThisWeek: newMembers.count ?? 0,
-    pillarsUnlocked,
-    pillarsTotal,
-    academyProgressPct,
-    leaderboardRank,
-  }
-}
-
-async function fetchRecentActivity(userId: string) {
-  // Use adminClient to bypass RLS so activity always loads regardless of policy gaps.
-  // userId here is profile.id — the public users UUID confirmed by the already-fetched profile.
-  const [notifications, completions, posts] = await Promise.all([
-    adminClient
-      .from('notifications')
-      .select('id, type, title, body, action_url, created_at')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(10),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (adminClient as any)
-      .from('lesson_progress')
-      .select('lesson_id, completed_at, lessons(id, title, sort_order, course_id, courses(title, slug, pillar_number))')
-      .eq('user_id', userId)
-      .not('completed_at', 'is', null)
-      .order('completed_at', { ascending: false })
-      .limit(5),
-    // Posts the user authored — author_id stores the auth UUID
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (adminClient as any)
-      .from('posts')
-      .select('id, body, created_at')
-      .eq('author_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(5),
-  ])
-  return {
-    notifications: notifications.data ?? [],
-    completions: completions.data ?? [],
-    posts: (posts.data ?? []) as { id: string; body: string; created_at: string }[],
-  }
 }
 
 async function fetchUpcomingEvents(supabase: ReturnType<typeof createClient>, userId: string) {
@@ -623,8 +536,6 @@ export default async function MemberHomePage() {
   const weekStart = getCurrentMonday()
 
   const [
-    stats,
-    activity,
     events,
     courseProgress,
     scoreboardCounts,
@@ -640,15 +551,10 @@ export default async function MemberHomePage() {
     dailyHabits,
     weekCommitments,
     sponsors,
-    pillarProgress,
   ] = await Promise.all([
-    // MR-HOME-1: lesson_progress / member_badges store rows under
-    // public.users.id, NOT auth.uid(). Pass profile.id (resolved via
-    // email in fetchCurrentUser) so the queries actually return data
-    // for accounts where auth.uid() ≠ public.users.id. Same root cause
-    // as B1 / B2 / UI-3.
-    fetchDashboardStats(supabase, profile.id, profile.tier, profile.points),
-    fetchRecentActivity(profile.id),
+    // MR-HOME-1: member_badges / lesson-derived queries store rows under
+    // public.users.id, NOT auth.uid(). Pass profile.id so they return data for
+    // accounts where auth.uid() ≠ public.users.id.
     fetchUpcomingEvents(supabase, profile.id),
     fetchCourseProgress(supabase, profile.id),
     fetchScoreboardCounts(profile.id),
@@ -672,9 +578,6 @@ export default async function MemberHomePage() {
     fetchWeekCommitments(profile.id, weekStart),
     // Sponsor ads SSR — avoids client waterfall after paint
     fetchHomeSponsors(),
-    // SPRINT-1 GOALS-ON-HOME — pillar progress for the Enhanced Scoreboard,
-    // keyed on the email-resolved profile.id (same fetcher /scoreboard uses).
-    fetchPillarProgress(profile.id),
   ])
 
   const quarterlyGoals = (quarterlyGoalsResult.data ?? []) as GoalForCard[]
@@ -743,13 +646,6 @@ export default async function MemberHomePage() {
     6: 'execution',
   }
 
-  const stripPillars: PillarStripItem[] = pillars.map(p => ({
-    number: p.number,
-    name: p.name,
-    state: p.state,
-    progressPct: p.state === 'in-progress' ? p.progressPct : undefined,
-  }))
-
   const inProgressEntry = pillars.find(p => p.state === 'in-progress')
   const inProgressCourse = inProgressEntry ? courseByPillar.get(inProgressEntry.number) : null
   const inProgressData = inProgressEntry && inProgressCourse
@@ -805,54 +701,26 @@ export default async function MemberHomePage() {
   // Today's Evolution — one-click DAU loop (course, accountability, community)
   const habitsDone = dailyHabits.filter(h => h.completedToday).length
   const commitsDone = weekCommitments.filter(c => c.is_completed).length
+  // Academy CTA state: a member mid-course continues; a member who has
+  // finished at least one pillar (and has nothing in progress) reviews rather
+  // than "starting" — only a member with no progress at all sees Start.
+  const anyPillarEarned = pillars.some(p => p.state === 'earned')
   const courseHref = inProgressData
     ? (inProgressData.nextLessonSlug
         ? `/academy/${inProgressData.courseSlug}/${inProgressData.nextLessonSlug}`
         : `/academy/${inProgressData.courseSlug}`)
-    : '/academy/foundation'
+    : anyPillarEarned
+      ? '/academy'
+      : '/academy/foundation'
+  const courseLabel = inProgressData
+    ? `Continue ${inProgressData.name}`
+    : anyPillarEarned
+      ? 'Review Academy'
+      : 'Start Foundation'
+  // SPRINT M: one engagement nudge only. The Learn / Accountability / Daily
+  // Pulse cards each restated a metric already shown in the Accountability Hub
+  // (habits, commitments, course progress), so they were dropped.
   const todaysActions: TodaysEvolutionAction[] = [
-    {
-      id: 'learn',
-      eyebrow: 'Learn',
-      title: inProgressData
-        ? `Continue ${inProgressData.name}`
-        : 'Start Foundation',
-      description: inProgressData?.nextLessonTitle
-        ? `Next: ${inProgressData.nextLessonTitle}`
-        : inProgressData
-          ? `${inProgressData.progressPct}% complete — keep the streak.`
-          : 'Lesson 1 of the 6-pillar system. Begin now.',
-      href: courseHref,
-      cta: inProgressData ? 'Resume lesson' : 'Open Foundation',
-      accent: '#C9302A',
-      primary: true,
-    },
-    {
-      id: 'accountability',
-      eyebrow: 'Accountability',
-      title: commitsDone > 0 || weekCommitments.length > 0
-        ? `${commitsDone}/${Math.max(weekCommitments.length, 1)} commitments`
-        : 'Set this week’s commitments',
-      description: weekCommitments.length
-        ? 'Check off what you said you’d do — your daily scoreboard stays honest.'
-        : 'Write 1–2 weekly commitments and hold the line.',
-      href: '/home',
-      cta: 'Own the day',
-      accent: '#C9A84C',
-    },
-    {
-      id: 'habits',
-      eyebrow: 'Daily pulse',
-      title: dailyHabits.length
-        ? `${habitsDone}/${dailyHabits.length} habits today`
-        : 'Build your habit stack',
-      description: dailyHabits.length
-        ? 'Tap habits in the Accountability Hub to log today’s work.'
-        : 'Three daily habits. Compound quiet excellence.',
-      href: '/home#accountability-hub',
-      cta: dailyHabits.length ? 'Log habits' : 'Open hub',
-      accent: '#0ABFA3',
-    },
     {
       id: 'community',
       eyebrow: 'Community',
@@ -861,6 +729,7 @@ export default async function MemberHomePage() {
       href: '/community',
       cta: 'Open feed',
       accent: '#A78BFA',
+      primary: true,
     },
   ]
 
@@ -892,7 +761,7 @@ export default async function MemberHomePage() {
         commitments={weekCommitments}
         goals={goalsForCards}
         courseHref={courseHref}
-        courseLabel={inProgressData ? `Continue ${inProgressData.name}` : 'Start Foundation'}
+        courseLabel={courseLabel}
         // Single source of truth on Home: the standalone CommitmentTracker owns
         // weekly commitments and the GoalCard grid owns goals. The hub keeps the
         // rings, KPI summary, and today's checkable habits only.
@@ -900,31 +769,15 @@ export default async function MemberHomePage() {
         showGoalsList={false}
       />
 
-      {/* BELOW THE FOLD — accountability reinforcement in SPRINT 2 order:
-          (1) KPI strip + Pace Read → (2) weekly commitments → (3) long game →
-          (4) Pillar Overview. These reuse ScoreboardHero (rings suppressed here
-          since the above-fold block owns them) and email-resolved data. */}
+      {/* BELOW THE FOLD — commitments + goals only. SPRINT M removed the
+          duplicate KPI/scoreboard strip and the pillar-overview: the daily
+          metrics (pulse %, streak, habits/commits/goals) live only in the hub
+          above, and the six-pillar list only in "The Architecture" hero. */}
 
-      {/* (1) Enhanced Scoreboard — KPI strip + Pace Read */}
-      <section aria-label="Scoreboard summary">
-        <ScoreboardHero
-          habits={dailyHabits}
-          commitments={weekCommitments}
-          goals={goalsForCards}
-          pillars={pillarProgress}
-          courseHref={courseHref}
-          courseLabel={inProgressData ? `Continue ${inProgressData.name}` : 'Start Foundation'}
-          displayName={displayName}
-          showHeader={false}
-          showRings={false}
-          showPillars={false}
-        />
-      </section>
-
-      {/* (2) Weekly commitments + editor */}
+      {/* Weekly commitments + editor */}
       <CommitmentTracker weekStart={getCurrentMonday()} />
 
-      {/* (3) The Long Game — quarterly goals */}
+      {/* The Long Game — quarterly goals (the single goals module) */}
       <section aria-label="Quarterly goals" className="space-y-3">
         <div className="flex items-center justify-between gap-2">
           <p
@@ -964,30 +817,11 @@ export default async function MemberHomePage() {
         )}
       </section>
 
-      {/* (4) Pillar Overview */}
-      <section aria-label="Pillar overview">
-        <ScoreboardHero
-          habits={dailyHabits}
-          commitments={weekCommitments}
-          goals={goalsForCards}
-          pillars={pillarProgress}
-          courseHref={courseHref}
-          courseLabel={inProgressData ? `Continue ${inProgressData.name}` : 'Start Foundation'}
-          displayName={displayName}
-          showHeader={false}
-          showKpi={false}
-          showRings={false}
-          showPace={false}
-        />
-      </section>
+      {/* ——— The rest: one-click nudge, community & media ——— */}
 
-      {/* ——— The rest: one-click actions, personal metrics, community & media ——— */}
-
-      {/* Today's Evolution — one-click actions */}
+      {/* Today's Evolution — a single engagement nudge (SPRINT M: the metric
+          cards were dropped; habit/commit/goal progress lives in the hub). */}
       <TodaysEvolution actions={todaysActions} />
-
-      {/* Personal scoreboard metrics */}
-      <HomeMetricsStrip stats={stats} />
 
       {/* HOME tiles — Community Pulse / Top Stories / Latest Drops. The Daily
           Pulse tile was removed: AccountabilityHub up top is the single daily
@@ -1013,28 +847,19 @@ export default async function MemberHomePage() {
         hasName={Boolean(profile.display_name || profile.full_name)}
       />
 
-      {/* Daily Practice — habits / commitments / activity */}
-      <div id="daily-practice" className="ep-section-eyebrow pt-3">
+      {/* What's Next — upcoming events + sponsor. SPRINT M: the "Recent
+          Activity" feed was removed (it showed the same posts as the Community
+          Pulse tile above). */}
+      <div id="whats-next" className="ep-section-eyebrow pt-3">
         <span className="ep-section-eyebrow__rule" aria-hidden />
-        <span className="ep-section-eyebrow__label">The Daily Practice</span>
+        <span className="ep-section-eyebrow__label">What&apos;s Next</span>
         <span className="ep-section-eyebrow__grow" aria-hidden />
       </div>
 
-      {/* SPRINT J — Activity (2fr) + Events sidebar (1fr) with sponsor ad
-          tucked under the Events card. Was 7fr/5fr with AcademyProgressWidget
-          on the right; AcademyProgressWidget moved into "The Path Forward"
-          row below per the design. */}
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 items-start">
-        <ActivityFeed
-          notifications={activity.notifications}
-          completions={activity.completions}
-          posts={activity.posts}
-        />
-        <div className="space-y-5 lg:self-start">
-          <UpcomingEventsWidget events={events} />
-          {/* Sidebar Evolution Partner — SSR-fetched, de-duped from home row. */}
-          <HomeSponsorAd ad={sponsors.sidebar} />
-        </div>
+        <UpcomingEventsWidget events={events} />
+        {/* Sidebar Evolution Partner — SSR-fetched, de-duped from home row. */}
+        <HomeSponsorAd ad={sponsors.sidebar} />
       </div>
 
       {/* SPRINT J — Section divider: "The Path Forward". */}
@@ -1047,10 +872,10 @@ export default async function MemberHomePage() {
       {/* HOME-2 — Path Forward (left) + Long Game (right). SPRINT J: AcademyProgressWidget
           moved into the left column (after the Climbing card) to match the design's
           "Your Academy (2fr) | Goals (1fr)" lower row. Grid widened to 2fr/1fr. */}
-      {/* Path Forward — single column. The Long Game / quarterly goals moved
-          into the accountability cluster above the fold (SPRINT 2). */}
+      {/* Path Forward — the "continue learning" actions. SPRINT M: the
+          PillarJourneyStrip ("N of 6 pillars earned") was removed — the six
+          pillars already render once in "The Architecture" hero. */}
       <div className="space-y-4">
-        <PillarJourneyStrip pillars={stripPillars} />
         {inProgressData && (
           <InProgressPillarHero
             pillar={{

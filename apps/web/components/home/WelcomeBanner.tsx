@@ -340,6 +340,12 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
   )
 }
 
+// Count-noun label: singular when the value is exactly 1 ("1 Event", not
+// "1 Events"). Irregular plurals pass an explicit plural form.
+function pluralLabel(count: number, singular: string, plural: string): string {
+  return count === 1 ? singular : plural
+}
+
 // ── Score cell (from welcome-banner.jsx ScoreCell line 850) ────────────────
 
 // A4.3: every stat renders the same anatomy — number + label + exactly one
@@ -945,7 +951,7 @@ export function WelcomeBanner({
                     is scheduled; otherwise no stat is highlighted. */}
                 <ScoreCell
                   href="/community"
-                  label="Posts"
+                  label={pluralLabel(scoreboard.postCount, 'Post', 'Posts')}
                   value={scoreboard.postCount}
                   accent="#A78BFA"
                   subline="Shared with the community"
@@ -953,7 +959,7 @@ export function WelcomeBanner({
                 />
                 <ScoreCell
                   href="/events"
-                  label="Events"
+                  label={pluralLabel(scoreboard.upcomingEventCount, 'Event', 'Events')}
                   value={scoreboard.upcomingEventCount}
                   accent="#0ABFA3"
                   active={scoreboard.upcomingEventCount > 0}
@@ -970,7 +976,7 @@ export function WelcomeBanner({
                 />
                 <ScoreCell
                   href="/media"
-                  label="Stories"
+                  label={pluralLabel(scoreboard.storyCount, 'Story', 'Stories')}
                   value={scoreboard.storyCount}
                   accent="#C9A84C"
                   subline="Comments on stories"

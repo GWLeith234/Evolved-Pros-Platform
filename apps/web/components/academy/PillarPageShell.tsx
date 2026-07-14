@@ -270,7 +270,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
                 padding: '14px 28px', minHeight: 48, borderRadius: '4px', textDecoration: 'none',
               }}
             >
-              {progressPct > 0 && !isAllComplete ? `Continue ${config.label}` : `Start ${config.label}`} →
+              {isAllComplete ? `Review ${config.label}` : progressPct > 0 ? `Continue ${config.label}` : `Start ${config.label}`} →
             </a>
           )}
         </div>
