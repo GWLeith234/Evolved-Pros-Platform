@@ -154,7 +154,7 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
       eyebrowColor={ringColor}
       eyebrow="Discipline"
       title="Daily pulse"
-      footer={<TileFooterLink href="/home">Open scoreboard</TileFooterLink>}
+      footer={<TileFooterLink href="/home">Own the day</TileFooterLink>}
     >
       {/* All-day-complete celebration — reuses the shared reduced-motion-aware
           confetti; onComplete resets so it can fire again tomorrow. */}

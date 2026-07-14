@@ -22,7 +22,7 @@ import { ScoreboardHero } from '@/components/scoreboard/ScoreboardHero'
 import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
 import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStoriesTile'
 import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
-import { DailyPulseCard, type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/DailyPulseCard'
+import { type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/DailyPulseCard'
 import {
   HomeSponsorAd,
   HomeSponsorRow,
@@ -834,10 +834,10 @@ export default async function MemberHomePage() {
         ? `${commitsDone}/${Math.max(weekCommitments.length, 1)} commitments`
         : 'Set this week’s commitments',
       description: weekCommitments.length
-        ? 'Check off what you said you’d do — scoreboard stays honest.'
+        ? 'Check off what you said you’d do — your daily scoreboard stays honest.'
         : 'Write 1–2 weekly commitments and hold the line.',
       href: '/home',
-      cta: 'Open scoreboard',
+      cta: 'Own the day',
       accent: '#C9A84C',
     },
     {
@@ -893,6 +893,11 @@ export default async function MemberHomePage() {
         goals={goalsForCards}
         courseHref={courseHref}
         courseLabel={inProgressData ? `Continue ${inProgressData.name}` : 'Start Foundation'}
+        // Single source of truth on Home: the standalone CommitmentTracker owns
+        // weekly commitments and the GoalCard grid owns goals. The hub keeps the
+        // rings, KPI summary, and today's checkable habits only.
+        showCommitmentsList={false}
+        showGoalsList={false}
       />
 
       {/* BELOW THE FOLD — accountability reinforcement in SPRINT 2 order:
@@ -984,15 +989,18 @@ export default async function MemberHomePage() {
       {/* Personal scoreboard metrics */}
       <HomeMetricsStrip stats={stats} />
 
-      {/* HOME tiles — Community Pulse / Top Stories / Latest Drops / Daily Pulse */}
+      {/* HOME tiles — Community Pulse / Top Stories / Latest Drops. The Daily
+          Pulse tile was removed: AccountabilityHub up top is the single daily
+          driver (rings + habit toggles), so the tile was a duplicate habit +
+          commitment mark-complete surface. (.home-4up-grid class kept as the
+          shared CSS hook; now a 3-up row.) */}
       <div
-        className="home-4up-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4"
+        className="home-4up-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
         style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }}
       >
         <CommunityPulseTile posts={pulsePosts} pinnedEvent={pinnedLiveEvent} />
         <TopStoriesTile stories={topStories} />
         <PodcastReelTile episodes={latestEpisodesResult.episodes} latestEpisodeNumber={latestEpisodesResult.latestNumber} />
-        <DailyPulseCard habits={dailyHabits} commitments={weekCommitments} />
       </div>
 
       {/* Evolution Partner row — SSR-fetched platform_ads (no client waterfall). */}

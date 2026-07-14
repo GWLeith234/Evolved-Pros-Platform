@@ -19,9 +19,15 @@ export interface AccountabilityHubProps {
   /** Continue / start course deep link */
   courseHref: string
   courseLabel: string
-  /** compact = home strip; full = /scoreboard page */
+  /** compact = home strip; full = legacy scoreboard layout */
   variant?: 'compact' | 'full'
   weekLabel?: string
+  /** Render the inline "This week · Commits" list. Default true; Home passes
+   *  false so the standalone CommitmentTracker is the single source of truth. */
+  showCommitmentsList?: boolean
+  /** Render the inline "The long game · Goals" list. Default true; Home passes
+   *  false so the standalone GoalCard grid is the single source of truth. */
+  showGoalsList?: boolean
 }
 
 function clampPct(n: number) {
@@ -239,6 +245,8 @@ export function AccountabilityHub({
   courseHref,
   courseLabel,
   variant = 'compact',
+  showCommitmentsList = true,
+  showGoalsList = true,
   weekLabel,
 }: AccountabilityHubProps) {
   const safeHabits = Array.isArray(initialHabits) ? initialHabits : []
@@ -625,11 +633,6 @@ export function AccountabilityHub({
               Update goal
             </button>
           )}
-          {!isFull && (
-            <Link href="/home" style={quickBtnStyle(DIM, false)}>
-              Full scoreboard
-            </Link>
-          )}
         </div>
 
         {/* Body: habits + commits + goals */}
@@ -733,6 +736,7 @@ export function AccountabilityHub({
               </ul>
             )}
 
+            {showCommitmentsList && (
             <div style={{ marginTop: 16 }}>
               <SectionLabel>This week · Commits</SectionLabel>
               {commitSlice.length === 0 ? (
@@ -802,9 +806,11 @@ export function AccountabilityHub({
                 </ul>
               )}
             </div>
+            )}
           </div>
 
           {/* Right / below: goals */}
+          {showGoalsList && (
           <div
             id="hub-goals"
             style={{
@@ -976,6 +982,7 @@ export function AccountabilityHub({
               </ul>
             )}
           </div>
+          )}
         </div>
       </div>
 
