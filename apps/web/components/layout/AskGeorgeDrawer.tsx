@@ -1,79 +1,28 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
-
-interface Message {
-  role: 'user' | 'assistant'
-  content: string
-}
+import { useEffect, useState } from 'react'
+import Script from 'next/script'
 
 interface AskGeorgeDrawerProps {
   isOpen: boolean
   onClose: () => void
 }
 
-const SUGGESTIONS = [
-  'How do I build a WIG?',
-  "What's my Pioneer type?",
-  "I'm stuck on prospecting",
-]
-
-function TypingDots() {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '10px 12px' }}>
-      {[0, 1, 2].map(i => (
-        <div
-          key={i}
-          style={{
-            width: '6px',
-            height: '6px',
-            borderRadius: '50%',
-            backgroundColor: 'var(--text-tertiary)',
-            animation: `george-dot-bounce 1.2s ease-in-out ${i * 0.2}s infinite`,
-          }}
-        />
-      ))}
-    </div>
-  )
-}
-
-function GlAvatar({ size = 36 }: { size?: number }) {
-  return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        borderRadius: '50%',
-        background: 'linear-gradient(135deg, #C9302A, #a02020)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-        boxShadow: size > 24 ? '0 4px 16px rgba(201,48,42,0.3)' : undefined,
-      }}
-    >
-      <span
-        style={{
-          fontFamily: '"Arial Black", Arial, sans-serif',
-          fontWeight: 900,
-          fontSize: size > 24 ? '14px' : '8px',
-          color: 'white',
-          letterSpacing: '-0.02em',
-          userSelect: 'none',
-        }}
-      >
-        GL
-      </span>
-    </div>
-  )
-}
+// Vendasta apigateway webchat SDK (George's embedded assistant). The SDK is
+// served from cdn.apigateway.co (already CSP-allowed) and renders the widget
+// into the element whose id matches data-embed-target.
+const WEBCHAT_SDK_SRC = 'https://cdn.apigateway.co/webchat-client..prod/sdk.js'
+const WEBCHAT_WIDGET_ID = '96dd7dbb-2a14-11f1-93eb-72103b668f62'
+const WEBCHAT_CONTAINER_ID = 'ask-george-webchat'
 
 export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const chatRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  // Lazy-mount the SDK + container on first open so the third-party webchat
+  // script isn't loaded for members who never open the panel.
+  const [hasOpened, setHasOpened] = useState(false)
+
+  useEffect(() => {
+    if (isOpen) setHasOpened(true)
+  }, [isOpen])
 
   // Escape key close
   useEffect(() => {
@@ -85,66 +34,8 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [isOpen, onClose])
 
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    if (chatRef.current) {
-      chatRef.current.scrollTop = chatRef.current.scrollHeight
-    }
-  }, [messages, loading])
-
-  // Focus input when drawer opens
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 300)
-    }
-  }, [isOpen])
-
-  const sendMessage = useCallback(async (text: string) => {
-    const trimmed = text.trim()
-    if (!trimmed || loading) return
-
-    const userMsg: Message = { role: 'user', content: trimmed }
-    setMessages(prev => [...prev, userMsg])
-    setInput('')
-    setLoading(true)
-
-    try {
-      const res = await fetch('/api/ask-george', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: trimmed,
-          history: messages,
-        }),
-      })
-      const data = await res.json() as { reply?: string; error?: string }
-      const reply = data.reply ?? data.error ?? 'Sorry, something went wrong. Please try again.'
-      setMessages(prev => [...prev, { role: 'assistant', content: reply }])
-    } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Unable to reach George right now. Please try again.' }])
-    } finally {
-      setLoading(false)
-    }
-  }, [loading, messages])
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage(input)
-    }
-  }
-
-  const hasMessages = messages.length > 0
-
   return (
     <>
-      <style>{`
-        @keyframes george-dot-bounce {
-          0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-          30% { transform: translateY(-5px); opacity: 1; }
-        }
-      `}</style>
-
       {/* Backdrop — mobile only */}
       {isOpen && (
         <div
@@ -239,220 +130,29 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
           </button>
         </div>
 
-        {/* Chat area */}
+        {/* Body — George's embedded webchat widget fills the panel. */}
         <div
-          ref={chatRef}
-          className="flex-1 min-h-0 overflow-y-auto"
+          className="flex-1 min-h-0 overflow-hidden"
           style={{ backgroundColor: 'var(--bg-page)' }}
         >
-          {!hasMessages ? (
-            /* Empty state */
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%',
-                padding: '32px 24px',
-                textAlign: 'center',
-                gap: '16px',
-              }}
-            >
-              <GlAvatar size={52} />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <p
-                  style={{
-                    fontFamily: '"Arial Black", Arial, sans-serif',
-                    fontWeight: 900,
-                    fontSize: '20px',
-                    color: 'var(--text-primary)',
-                    margin: 0,
-                  }}
-                >
-                  Ask me anything.
-                </p>
-                <p
-                  style={{
-                    fontFamily: '"Barlow Condensed", sans-serif',
-                    fontSize: '13px',
-                    color: 'var(--text-tertiary)',
-                    lineHeight: 1.4,
-                    maxWidth: '260px',
-                    margin: 0,
-                  }}
-                >
-                  Sales strategy, the EVOLVED framework, your pillars, lead measures — anything.
-                </p>
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
-                {SUGGESTIONS.map(s => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => setInput(s)}
-                    style={{
-                      fontFamily: '"Barlow Condensed", sans-serif',
-                      fontSize: '12px',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: '20px',
-                      padding: '5px 12px',
-                      background: 'var(--bg-elevated)',
-                      color: 'var(--text-secondary)',
-                      cursor: 'pointer',
-                      transition: 'background 0.15s',
-                    }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--border-color)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'var(--bg-elevated)')}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : (
-            /* Message list */
-            <div style={{ padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                    gap: '4px',
-                  }}
-                >
-                  {msg.role === 'assistant' && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', paddingLeft: '2px' }}>
-                      <GlAvatar size={18} />
-                      <span
-                        style={{
-                          fontFamily: '"Barlow Condensed", sans-serif',
-                          fontWeight: 700,
-                          fontSize: '12px',
-                          color: '#C9A84C',
-                          letterSpacing: '0.06em',
-                          textTransform: 'uppercase',
-                        }}
-                      >
-                        George
-                      </span>
-                    </div>
-                  )}
-                  <div
-                    style={{
-                      maxWidth: msg.role === 'user' ? '75%' : '85%',
-                      padding: '8px 12px',
-                      borderRadius: msg.role === 'user' ? '14px 14px 2px 14px' : '2px 14px 14px 14px',
-                      backgroundColor: msg.role === 'user' ? '#C9302A' : 'var(--bg-elevated)',
-                      color: msg.role === 'user' ? 'white' : 'var(--text-primary)',
-                      border: msg.role === 'assistant' ? '1px solid var(--border-color)' : 'none',
-                      fontFamily: '"Barlow", sans-serif',
-                      fontSize: '12px',
-                      lineHeight: 1.55,
-                      whiteSpace: 'pre-wrap',
-                      wordBreak: 'break-word',
-                    }}
-                  >
-                    {msg.content}
-                  </div>
-                </div>
-              ))}
-
-              {/* Typing indicator */}
-              {loading && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', paddingLeft: '2px' }}>
-                    <GlAvatar size={18} />
-                    <span
-                      style={{
-                        fontFamily: '"Barlow Condensed", sans-serif',
-                        fontWeight: 700,
-                        fontSize: '12px',
-                        color: '#C9A84C',
-                        letterSpacing: '0.06em',
-                        textTransform: 'uppercase',
-                      }}
-                    >
-                      George
-                    </span>
-                  </div>
-                  <div
-                    style={{
-                      backgroundColor: 'var(--bg-elevated)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: '2px 14px 14px 14px',
-                    }}
-                  >
-                    <TypingDots />
-                  </div>
-                </div>
-              )}
-            </div>
+          {hasOpened && (
+            <div id={WEBCHAT_CONTAINER_ID} style={{ height: '100%', width: '100%' }} />
           )}
         </div>
-
-        {/* Input row */}
-        <div
-          style={{
-            backgroundColor: 'var(--bg-surface)',
-            borderTop: '1px solid var(--border-color)',
-            padding: '10px 12px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            flexShrink: 0,
-          }}
-        >
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask George anything…"
-            disabled={loading}
-            style={{
-              flex: 1,
-              backgroundColor: 'var(--bg-page)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '20px',
-              padding: '9px 14px',
-              color: 'var(--text-primary)',
-              fontSize: '12px',
-              fontFamily: '"Barlow", sans-serif',
-              outline: 'none',
-              minWidth: 0,
-            }}
-            onFocus={e => (e.currentTarget.style.borderColor = 'var(--text-tertiary)')}
-            onBlur={e => (e.currentTarget.style.borderColor = 'var(--border-color)')}
-          />
-          <button
-            type="button"
-            onClick={() => sendMessage(input)}
-            disabled={loading || !input.trim()}
-            aria-label="Send message"
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              backgroundColor: loading || !input.trim() ? 'rgba(201,48,42,0.4)' : '#C9302A',
-              border: 'none',
-              cursor: loading || !input.trim() ? 'default' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              transition: 'background-color 0.15s',
-            }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
       </div>
+
+      {/* Load the webchat SDK once the panel has been opened. next/script
+          forwards the data-* attributes to the injected <script>; the SDK reads
+          them to render the widget into #ask-george-webchat. */}
+      {hasOpened && (
+        <Script
+          src={WEBCHAT_SDK_SRC}
+          strategy="afterInteractive"
+          data-widget-id={WEBCHAT_WIDGET_ID}
+          data-embed-mode="embedded"
+          data-embed-target={WEBCHAT_CONTAINER_ID}
+        />
+      )}
     </>
   )
 }
