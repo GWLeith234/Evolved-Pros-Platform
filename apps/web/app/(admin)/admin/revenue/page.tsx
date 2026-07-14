@@ -1,6 +1,6 @@
 import { adminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
-import { getTierMrr } from '@/lib/admin/helpers'
+import { computeMrr, normalizeTierKey, TIERS } from '@/lib/pricing'
 import { RevenueChart } from '@/components/admin/RevenueChart'
 
 export const dynamic = 'force-dynamic'
@@ -28,10 +28,17 @@ export default async function AdminRevenuePage() {
   ])
 
   const memberList = membersResult.data ?? []
-  const proCount       = memberList.filter(m => m.tier === 'pro'       && m.tier_status === 'active').length
-  const vipCount       = memberList.filter(m => m.tier === 'vip'       && m.tier_status === 'active').length
-  const communityCount = memberList.filter(m => m.tier === 'community' && m.tier_status === 'active').length
-  const currentMrr     = memberList.reduce((sum, m) => sum + getTierMrr(m.tier, m.tier_status), 0)
+  // Count members whose subscription contributes MRR — same gating as
+  // computeMrr — so the per-tier cards sum exactly to Total MRR.
+  const isLive = (s: string | null) => !!s && s !== 'cancelled' && s !== 'expired'
+  const communityCount = memberList.filter(m => isLive(m.tier_status) && normalizeTierKey(m.tier) === 'community').length
+  const vipCount       = memberList.filter(m => isLive(m.tier_status) && normalizeTierKey(m.tier) === 'vip').length
+  const proCount       = memberList.filter(m => isLive(m.tier_status) && normalizeTierKey(m.tier) === 'professional').length
+  const communityMrr   = communityCount * TIERS.community.monthly
+  const vipMrr         = vipCount * TIERS.vip.monthly
+  const proMrr         = proCount * TIERS.professional.monthly
+  // computeMrr over the full list == communityMrr + vipMrr + proMrr by construction.
+  const currentMrr     = computeMrr(memberList)
 
   // Build 6-month bars
   const months = Array.from({ length: 6 }, (_, i) => {
@@ -60,10 +67,12 @@ export default async function AdminRevenuePage() {
       <RevenueChart
         months={months}
         currentMrr={currentMrr}
-        proCount={proCount}
         communityCount={communityCount}
-        proMrr={proCount * 79}
-        communityMrr={communityCount * 39}
+        vipCount={vipCount}
+        proCount={proCount}
+        communityMrr={communityMrr}
+        vipMrr={vipMrr}
+        proMrr={proMrr}
         churnThisMonth={churnThisMonth}
       />
     </div>

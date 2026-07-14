@@ -1,7 +1,10 @@
 /**
  * Membership product catalog for admin Products page.
  * Display prices + Vendasta SKU wiring (env + optional platform_settings overrides).
+ * Base prices come from lib/pricing (the single source of truth).
  */
+
+import { TIERS } from '@/lib/pricing'
 
 export type MembershipTierKey = 'community' | 'vip' | 'pro'
 
@@ -48,8 +51,8 @@ export const DEFAULT_MEMBERSHIP_PRODUCTS: Omit<
     crmStage: 'vip',
     label: 'VIP',
     tagline: 'Core membership',
-    priceMonthly: 9,
-    priceAnnual: 90,
+    priceMonthly: TIERS.vip.monthly,
+    priceAnnual: TIERS.vip.annual,
     accent: '#C9A84C',
     features: [
       'Full Academy pillars (VIP)',
@@ -62,8 +65,8 @@ export const DEFAULT_MEMBERSHIP_PRODUCTS: Omit<
     crmStage: 'professional',
     label: 'Professional',
     tagline: 'Full system access',
-    priceMonthly: 49,
-    priceAnnual: 490,
+    priceMonthly: TIERS.professional.monthly,
+    priceAnnual: TIERS.professional.annual,
     accent: '#C9302A',
     features: [
       'All VIP features',
@@ -131,7 +134,7 @@ export function buildMembershipProducts(
       return {
         ...base,
         priceMonthly: num(PRODUCT_SETTING_KEYS.vipPrice, base.priceMonthly),
-        priceAnnual: num(PRODUCT_SETTING_KEYS.vipAnnual, base.priceAnnual ?? 90),
+        priceAnnual: num(PRODUCT_SETTING_KEYS.vipAnnual, base.priceAnnual ?? TIERS.vip.annual),
         skuMonthly: skuM,
         skuAnnual: skuY,
         vendastaUrl: skuM
@@ -145,7 +148,7 @@ export function buildMembershipProducts(
     return {
       ...base,
       priceMonthly: num(PRODUCT_SETTING_KEYS.proPrice, base.priceMonthly),
-      priceAnnual: num(PRODUCT_SETTING_KEYS.proAnnual, base.priceAnnual ?? 490),
+      priceAnnual: num(PRODUCT_SETTING_KEYS.proAnnual, base.priceAnnual ?? TIERS.professional.annual),
       skuMonthly: skuM,
       skuAnnual: skuY,
       vendastaUrl: skuM

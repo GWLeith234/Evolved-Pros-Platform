@@ -1,5 +1,7 @@
 /** Shared CRM stage definitions for Prospects lifecycle board. */
 
+import { TIERS } from '@/lib/pricing'
+
 export const CRM_STAGES = [
   'lead',
   'prospect',
@@ -59,16 +61,16 @@ export const CRM_STAGE_META: Record<CrmStage, CrmStageMeta> = {
   vip: {
     stage: 'vip',
     label: 'VIP',
-    desc: '$9/mo',
-    mrr: 9,
+    desc: `$${TIERS.vip.monthly}/mo`,
+    mrr: TIERS.vip.monthly,
     accent: '#C9A84C',
     accentSoft: 'rgba(201,168,76,0.14)',
   },
   professional: {
     stage: 'professional',
     label: 'Professional',
-    desc: '$49/mo',
-    mrr: 49,
+    desc: `$${TIERS.professional.monthly}/mo`,
+    mrr: TIERS.professional.monthly,
     accent: '#C9302A',
     accentSoft: 'rgba(201,48,42,0.12)',
   },

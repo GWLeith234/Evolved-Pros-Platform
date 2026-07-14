@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { adminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
 import Link from 'next/link'
+import { computeMrr } from '@/lib/pricing'
 import { InviteMemberButton } from './InviteMemberButton'
 
 export const metadata: Metadata = { title: 'Admin — Evolved Pros' }
@@ -79,7 +80,9 @@ export default async function AdminDashboardPage() {
   // /admin/members's count and looked like a bug to QA — relabel + sub-label
   // so the filter is explicit on screen.
   const activeMembers = activeUsers.length
-  const mrr           = proUsers.length * 79 + vipUsers.length * 39
+  // Canonical MRR — same computeMrr + same non-admin member scope as
+  // /admin/revenue, so the dashboard and revenue always report the same total.
+  const mrr           = computeMrr(users)
   const proMembers    = proUsers.length
   const proLastMo     = proLastMonth.count ?? 0
   const totalEver     = activeUsers.length + cancelledUsers.length

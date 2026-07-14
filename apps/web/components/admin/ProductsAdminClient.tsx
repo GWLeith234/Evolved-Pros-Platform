@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import type { MembershipProduct } from '@/lib/admin/products'
 import { PRODUCT_SETTING_KEYS } from '@/lib/admin/products'
+import { TIERS } from '@/lib/pricing'
 
 interface ProductsAdminClientProps {
   initialProducts: MembershipProduct[]
@@ -22,10 +23,10 @@ export function ProductsAdminClient({
 }: ProductsAdminClientProps) {
   const [products, setProducts] = useState(initialProducts)
   const [vipPrice, setVipPrice] = useState(
-    initialSettings[PRODUCT_SETTING_KEYS.vipPrice] ?? String(initialProducts.find(p => p.key === 'vip')?.priceMonthly ?? 9),
+    initialSettings[PRODUCT_SETTING_KEYS.vipPrice] ?? String(initialProducts.find(p => p.key === 'vip')?.priceMonthly ?? TIERS.vip.monthly),
   )
   const [proPrice, setProPrice] = useState(
-    initialSettings[PRODUCT_SETTING_KEYS.proPrice] ?? String(initialProducts.find(p => p.key === 'pro')?.priceMonthly ?? 49),
+    initialSettings[PRODUCT_SETTING_KEYS.proPrice] ?? String(initialProducts.find(p => p.key === 'pro')?.priceMonthly ?? TIERS.professional.monthly),
   )
   const [vipSkuM, setVipSkuM] = useState(
     initialSettings[PRODUCT_SETTING_KEYS.vipSkuM] ?? initialProducts.find(p => p.key === 'vip')?.skuMonthly ?? '',
@@ -91,7 +92,7 @@ export function ProductsAdminClient({
             Products & Membership
           </h1>
           <p className="font-condensed text-[12px] mt-0.5" style={{ color: '#7a8a96', margin: 0 }}>
-            Community FREE · VIP $9/mo · Professional $49/mo — linked to Vendasta SKUs
+            Community FREE · VIP ${TIERS.vip.monthly}/mo · Professional ${TIERS.professional.monthly}/mo — linked to Vendasta SKUs
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

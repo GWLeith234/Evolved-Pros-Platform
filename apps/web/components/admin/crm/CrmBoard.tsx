@@ -219,7 +219,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
             className="font-condensed text-[12px] mt-0.5"
             style={{ color: '#7a8a96', margin: 0 }}
           >
-            Lead → Prospect → Community → VIP ($9) → Professional ($49) · drag to move stages
+            Lead → Prospect → Community → VIP (${CRM_STAGE_META.vip.mrr}) → Professional (${CRM_STAGE_META.professional.mrr}) · drag to move stages
           </p>
           <p className="mt-1">
             <Link

@@ -1,5 +1,7 @@
 // Pure utility functions — no server-only, safe to import in client components.
 
+import { tierMonthlyPrice } from '@/lib/pricing'
+
 export type EngagementLevel = 'High' | 'Med' | 'Low'
 
 export function getEngagementLevel(postsLast30: number, lessonsLast30: number): EngagementLevel {
@@ -13,12 +15,14 @@ export function getEngagementScore(postsLast30: number, lessonsLast30: number): 
   return postsLast30 * 2 + lessonsLast30
 }
 
+/**
+ * Per-member monthly MRR. Delegates to the canonical price table in
+ * lib/pricing so tier prices live in exactly one place (fixes the old
+ * hardcoded VIP=$79). Kept as a thin wrapper because many admin routes/pages
+ * import it directly.
+ */
 export function getTierMrr(tier: string | null, tierStatus: string | null): number {
-  if (!tierStatus || tierStatus === 'cancelled' || tierStatus === 'expired') return 0
-  if (tier === 'pro') return 249
-  if (tier === 'vip') return 79
-  if (tier === 'community') return 0 // free tier
-  return 0
+  return tierMonthlyPrice(tier, tierStatus)
 }
 
 export function getVendastaCrmUrl(contactId: string): string {

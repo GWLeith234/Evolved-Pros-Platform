@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PricingCtaButton } from './PricingCtaButton'
+import { TIERS as PRICING, ANNUAL_FREE_MONTHS } from '@/lib/pricing'
 
 export const metadata: Metadata = {
   title: 'Pricing — Evolved Pros',
@@ -21,6 +22,8 @@ interface Tier {
   name: string
   price: string
   period?: string
+  /** Annual pricing sub-line, e.g. "$490/yr · 2 months free". */
+  annualNote?: string
   badge: string
   badgeColor: string
   featured?: boolean
@@ -53,8 +56,9 @@ const TIERS: Tier[] = [
   },
   {
     name: 'VIP',
-    price: '$79',
+    price: `$${PRICING.vip.monthly}`,
     period: '/month',
+    annualNote: `$${PRICING.vip.annual.toLocaleString('en-US')}/yr · ${ANNUAL_FREE_MONTHS} months free`,
     badge: 'VIP',
     badgeColor: '#C9A84C',
     features: [
@@ -70,8 +74,9 @@ const TIERS: Tier[] = [
   },
   {
     name: 'Professional',
-    price: '$249',
+    price: `$${PRICING.professional.monthly}`,
     period: '/month',
+    annualNote: `$${PRICING.professional.annual.toLocaleString('en-US')}/yr · ${ANNUAL_FREE_MONTHS} months free`,
     badge: 'Professional',
     badgeColor: '#C9302A',
     featured: true,
@@ -211,6 +216,11 @@ export default function PricingPage() {
                   <span className="font-body text-sm ml-1" style={{ color: 'rgba(245,240,232,0.4)' }}>
                     {tier.period}
                   </span>
+                )}
+                {tier.annualNote && (
+                  <p className="font-condensed uppercase tracking-[0.1em] text-[11px] mt-1.5" style={{ color: '#0ABFA3' }}>
+                    {tier.annualNote}
+                  </p>
                 )}
               </div>
 

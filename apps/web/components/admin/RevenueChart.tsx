@@ -1,3 +1,5 @@
+import { TIERS } from '@/lib/pricing'
+
 interface MonthBar {
   label: string
   mrr: number
@@ -7,29 +9,36 @@ interface MonthBar {
 interface RevenueChartProps {
   months: MonthBar[]
   currentMrr: number
-  proCount: number
   communityCount: number
-  proMrr: number
+  vipCount: number
+  proCount: number
   communityMrr: number
+  vipMrr: number
+  proMrr: number
   churnThisMonth: number
 }
 
 export function RevenueChart({
   months,
   currentMrr,
-  proCount,
   communityCount,
-  proMrr,
+  vipCount,
+  proCount,
   communityMrr,
+  vipMrr,
+  proMrr,
   churnThisMonth,
 }: RevenueChartProps) {
   const maxMrr = Math.max(...months.map(m => m.mrr), 1)
 
+  // Prices come from lib/pricing so the card labels can't drift from the
+  // canonical table. Total MRR = Community + VIP + Pro card MRRs.
   const stats = [
-    { label: 'Total MRR',       value: `$${currentMrr.toLocaleString('en-US')}`,     color: '#68a2b9' },
-    { label: `Pro × $79`,       value: `$${proMrr.toLocaleString('en-US')} / ${proCount} members`,  color: '#c9a84c' },
-    { label: `Community × $39`, value: `$${communityMrr.toLocaleString('en-US')} / ${communityCount} members`, color: '#1b3c5a' },
-    { label: 'Churn (month)',   value: `${churnThisMonth} cancelled`,           color: '#ef0e30' },
+    { label: 'Total MRR',                    value: `$${currentMrr.toLocaleString('en-US')}`, color: '#68a2b9' },
+    { label: `VIP × $${TIERS.vip.monthly}`,          value: `$${vipMrr.toLocaleString('en-US')} / ${vipCount} members`,             color: '#c9a84c' },
+    { label: `Pro × $${TIERS.professional.monthly}`, value: `$${proMrr.toLocaleString('en-US')} / ${proCount} members`,             color: '#C9302A' },
+    { label: 'Community (Free)',             value: `$${communityMrr.toLocaleString('en-US')} / ${communityCount} members`, color: '#1b3c5a' },
+    { label: 'Churn (month)',                value: `${churnThisMonth} cancelled`,            color: '#ef0e30' },
   ]
 
   return (
@@ -72,7 +81,7 @@ export function RevenueChart({
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {stats.map(s => (
           <div
             key={s.label}
