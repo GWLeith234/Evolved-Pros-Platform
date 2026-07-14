@@ -40,6 +40,15 @@ export interface ScoreboardHeroProps {
   courseHref: string
   courseLabel: string
   displayName?: string
+  // Section visibility — all default true so /scoreboard renders the full hero
+  // unchanged. Home passes subsets to place KPI/Pace and Pillar Overview into
+  // its own below-the-fold order without duplicating the daily rings that its
+  // above-the-fold accountability block already shows.
+  showHeader?: boolean
+  showKpi?: boolean
+  showRings?: boolean
+  showPace?: boolean
+  showPillars?: boolean
 }
 
 function predictPace(goals: GoalForCard[]): string {
@@ -64,6 +73,11 @@ export function ScoreboardHero({
   courseHref,
   courseLabel,
   displayName,
+  showHeader = true,
+  showKpi = true,
+  showRings = true,
+  showPace = true,
+  showPillars = true,
 }: ScoreboardHeroProps) {
   const { showToast } = useToast()
   const reduced = useReducedMotion()
@@ -99,6 +113,9 @@ export function ScoreboardHero({
   // One-shot welcome toast for strong streaks (not on every visit after dismiss key)
   useEffect(() => {
     if (celebrated.current) return
+    // Only the header instance owns the streak-celebration toast, so rendering
+    // KPI/Pillar slices elsewhere on a page can't double-fire it.
+    if (!showHeader) return
     if (bestStreak < 7) return
     const key = `ep_scoreboard_streak_toast_${new Date().toISOString().slice(0, 10)}`
     try {
@@ -114,7 +131,7 @@ export function ScoreboardHero({
       variant: 'success',
       duration: 4200,
     })
-  }, [bestStreak, showToast])
+  }, [bestStreak, showToast, showHeader])
 
   const [pulse, setPulse] = useState(false)
   useEffect(() => {
@@ -135,6 +152,7 @@ export function ScoreboardHero({
       }}
     >
       {/* Intro row */}
+      {showHeader && (
       <div
         style={{
           display: 'flex',
@@ -191,8 +209,10 @@ export function ScoreboardHero({
           </Button>
         </div>
       </div>
+      )}
 
       {/* Metric strip */}
+      {showKpi && (
       <div
         className="grid grid-cols-2 lg:grid-cols-4 gap-3"
         style={{ width: '100%' }}
@@ -239,12 +259,19 @@ export function ScoreboardHero({
           pillar={pillars.find(p => p.state === 'active')?.number}
         />
       </div>
+      )}
 
       {/* Rings + insight + pillars */}
+      {(showRings || showPace || showPillars) && (
       <div
-        className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-4"
+        className={
+          showRings && (showPace || showPillars)
+            ? 'grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-4'
+            : 'flex flex-col gap-4'
+        }
         style={{ alignItems: 'stretch' }}
       >
+        {showRings && (
         <div
           className="ep-surface-card"
           style={{
@@ -323,9 +350,12 @@ export function ScoreboardHero({
             </p>
           </div>
         </div>
+        )}
 
+        {(showPace || showPillars) && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
           {/* Predictive insight */}
+          {showPace && (
           <div
             className={`ep-surface-card${pulse ? ' scoreboard-hero--pulse' : ''}`}
             role="status"
@@ -361,8 +391,10 @@ export function ScoreboardHero({
               {insight}
             </p>
           </div>
+          )}
 
           {/* Pillar overview */}
+          {showPillars && (
           <div
             className="ep-surface-card"
             style={{
@@ -438,8 +470,11 @@ export function ScoreboardHero({
               })}
             </div>
           </div>
+          )}
         </div>
+        )}
       </div>
+      )}
     </section>
   )
 }

@@ -881,13 +881,11 @@ export default async function MemberHomePage() {
         pillars={pillars}
       />
 
-      {/* Sprint 2 — personal scoreboard metrics (uses fetched dashboard stats) */}
-      <HomeMetricsStrip stats={stats} />
-
-      {/* Today's Evolution — primary DAU loop, one-click actions */}
-      <TodaysEvolution actions={todaysActions} />
-
-      {/* Accountability Hub — central daily habit driver (goals + pulse + CTAs) */}
+      {/* ABOVE THE FOLD — the single canonical daily accountability block, and
+          the first interactive thing a returning member sees: current streak,
+          today's habits (n/N) + log, today's Daily Pulse ring, today's
+          commitment. SPRINT 2: deduped to one instance; the daily rings live
+          only here. */}
       <AccountabilityHub
         variant="compact"
         habits={dailyHabits}
@@ -896,6 +894,95 @@ export default async function MemberHomePage() {
         courseHref={courseHref}
         courseLabel={inProgressData ? `Continue ${inProgressData.name}` : 'Start Foundation'}
       />
+
+      {/* BELOW THE FOLD — accountability reinforcement in SPRINT 2 order:
+          (1) KPI strip + Pace Read → (2) weekly commitments → (3) long game →
+          (4) Pillar Overview. These reuse ScoreboardHero (rings suppressed here
+          since the above-fold block owns them) and email-resolved data. */}
+
+      {/* (1) Enhanced Scoreboard — KPI strip + Pace Read */}
+      <section aria-label="Scoreboard summary">
+        <ScoreboardHero
+          habits={dailyHabits}
+          commitments={weekCommitments}
+          goals={goalsForCards}
+          pillars={pillarProgress}
+          courseHref={courseHref}
+          courseLabel={inProgressData ? `Continue ${inProgressData.name}` : 'Start Foundation'}
+          displayName={displayName}
+          showHeader={false}
+          showRings={false}
+          showPillars={false}
+        />
+      </section>
+
+      {/* (2) Weekly commitments + editor */}
+      <CommitmentTracker weekStart={getCurrentMonday()} />
+
+      {/* (3) The Long Game — quarterly goals */}
+      <section aria-label="Quarterly goals" className="space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <p
+            className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px]"
+            style={{ color: 'var(--text-tertiary)' }}
+          >
+            The Long Game
+          </p>
+          <a
+            href="/scoreboard"
+            className="ep-btn ep-btn--tertiary font-condensed font-bold uppercase tracking-[0.14em] text-[10px]"
+            style={{ color: 'var(--brand-gold, #C9A84C)', textDecoration: 'none' }}
+          >
+            Scoreboard →
+          </a>
+        </div>
+        {goalsForCards.length === 0 ? (
+          <div
+            className="rounded-lg p-5 text-center"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
+          >
+            <p className="font-condensed text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
+              No active goals yet.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {goalsForCards.map(g => (
+              <GoalCard
+                key={g.id}
+                goal={g}
+                inProgressPillarSlug={inProgressPillarSlug}
+                inProgressContinueHref={inProgressContinueHref}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* (4) Pillar Overview */}
+      <section aria-label="Pillar overview">
+        <ScoreboardHero
+          habits={dailyHabits}
+          commitments={weekCommitments}
+          goals={goalsForCards}
+          pillars={pillarProgress}
+          courseHref={courseHref}
+          courseLabel={inProgressData ? `Continue ${inProgressData.name}` : 'Start Foundation'}
+          displayName={displayName}
+          showHeader={false}
+          showKpi={false}
+          showRings={false}
+          showPace={false}
+        />
+      </section>
+
+      {/* ——— The rest: one-click actions, personal metrics, community & media ——— */}
+
+      {/* Today's Evolution — one-click actions */}
+      <TodaysEvolution actions={todaysActions} />
+
+      {/* Personal scoreboard metrics */}
+      <HomeMetricsStrip stats={stats} />
 
       {/* HOME tiles — Community Pulse / Top Stories / Latest Drops / Daily Pulse */}
       <div
@@ -952,104 +1039,38 @@ export default async function MemberHomePage() {
       {/* HOME-2 — Path Forward (left) + Long Game (right). SPRINT J: AcademyProgressWidget
           moved into the left column (after the Climbing card) to match the design's
           "Your Academy (2fr) | Goals (1fr)" lower row. Grid widened to 2fr/1fr. */}
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 items-start">
-        {/* Path Forward */}
-        <div className="space-y-4">
-          <PillarJourneyStrip pillars={stripPillars} />
-          {inProgressData && (
-            <InProgressPillarHero
-              pillar={{
-                number: inProgressData.number,
-                name: inProgressData.name,
-                progressPct: inProgressData.progressPct,
-                completedLessons: inProgressData.completedLessons,
-                totalLessons: inProgressData.totalLessons,
-              }}
-              courseSlug={inProgressData.courseSlug}
-              dayOfTwentyOne={inProgressData.dayOfTwentyOne}
-              nextLessonTitle={inProgressData.nextLessonTitle}
-              nextLessonSlug={inProgressData.nextLessonSlug}
-            />
-          )}
-          {climbingData && (
-            <ClimbingTowardCard
-              pillar={{
-                number: climbingData.number,
-                name: climbingData.name,
-                totalLessons: climbingData.totalLessons,
-              }}
-              courseSlug={climbingData.courseSlug}
-            />
-          )}
-          <AcademyProgressWidget courses={activeCourses} />
-        </div>
-
-        {/* Long Game */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <p
-              className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px]"
-              style={{ color: 'var(--text-tertiary)' }}
-            >
-              The Long Game
-            </p>
-            <a
-              href="/scoreboard"
-              className="ep-btn ep-btn--tertiary font-condensed font-bold uppercase tracking-[0.14em] text-[10px]"
-              style={{ color: 'var(--brand-gold, #C9A84C)', textDecoration: 'none' }}
-            >
-              Scoreboard →
-            </a>
-          </div>
-          {/* "+ Add Goal" CTA removed: it pointed at /settings#goals, but
-              Settings has no Goals section and no goal-creation UI exists
-              anywhere yet (quarterly_goals has no write surface). Restore a
-              CTA when goal management ships. */}
-          {goalsForCards.length === 0 ? (
-            <div
-              className="rounded-lg p-5 text-center"
-              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
-            >
-              <p className="font-condensed text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
-                No active goals yet.
-              </p>
-            </div>
-          ) : (
-            goalsForCards.map(g => (
-              <GoalCard
-                key={g.id}
-                goal={g}
-                inProgressPillarSlug={inProgressPillarSlug}
-                inProgressContinueHref={inProgressContinueHref}
-              />
-            ))
-          )}
-        </div>
+      {/* Path Forward — single column. The Long Game / quarterly goals moved
+          into the accountability cluster above the fold (SPRINT 2). */}
+      <div className="space-y-4">
+        <PillarJourneyStrip pillars={stripPillars} />
+        {inProgressData && (
+          <InProgressPillarHero
+            pillar={{
+              number: inProgressData.number,
+              name: inProgressData.name,
+              progressPct: inProgressData.progressPct,
+              completedLessons: inProgressData.completedLessons,
+              totalLessons: inProgressData.totalLessons,
+            }}
+            courseSlug={inProgressData.courseSlug}
+            dayOfTwentyOne={inProgressData.dayOfTwentyOne}
+            nextLessonTitle={inProgressData.nextLessonTitle}
+            nextLessonSlug={inProgressData.nextLessonSlug}
+          />
+        )}
+        {climbingData && (
+          <ClimbingTowardCard
+            pillar={{
+              number: climbingData.number,
+              name: climbingData.name,
+              totalLessons: climbingData.totalLessons,
+            }}
+            courseSlug={climbingData.courseSlug}
+          />
+        )}
+        <AcademyProgressWidget courses={activeCourses} />
       </div>
 
-      {/* CommitmentTracker — full-width row below the activity grid so the
-          right column doesn't leave a tall empty gap to the right of
-          ActivityFeed (which is consistently the tallest left-column child).
-          weekStart is a hint; the component derives the user's local Monday
-          on mount (server is UTC and would otherwise hand a stale week to
-          TZ-behind users on Sunday evening). */}
-      <CommitmentTracker weekStart={getCurrentMonday()} />
-
-      {/* SPRINT-1 GOALS-ON-HOME — Enhanced Scoreboard (4-KPI strip, rings, Pace
-          Read, Pillar Overview) lifted from /scoreboard, below the fold. Reuses
-          the same ScoreboardHero component and the same email-resolved data
-          (profile.id); /scoreboard stays live and unchanged. */}
-      <section aria-label="Goals & accountability">
-        <ScoreboardHero
-          habits={dailyHabits}
-          commitments={weekCommitments}
-          goals={goalsForCards}
-          pillars={pillarProgress}
-          courseHref={courseHref}
-          courseLabel={inProgressData ? `Continue ${inProgressData.name}` : 'Start Foundation'}
-          displayName={displayName}
-        />
-      </section>
     </div>
   )
 }
