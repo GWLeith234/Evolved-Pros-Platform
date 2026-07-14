@@ -21,8 +21,12 @@ export function getEngagementScore(postsLast30: number, lessonsLast30: number): 
  * hardcoded VIP=$79). Kept as a thin wrapper because many admin routes/pages
  * import it directly.
  */
-export function getTierMrr(tier: string | null, tierStatus: string | null): number {
-  return tierMonthlyPrice(tier, tierStatus)
+export function getTierMrr(
+  tier: string | null,
+  tierStatus: string | null,
+  isComped?: boolean,
+): number {
+  return tierMonthlyPrice(tier, tierStatus, isComped)
 }
 
 export function getVendastaCrmUrl(contactId: string): string {

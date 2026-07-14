@@ -18,7 +18,7 @@ export async function GET(
   const [userResult, postsResult, progressResult] = await Promise.all([
     adminClient
       .from('users')
-      .select('id, email, full_name, display_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, vendasta_contact_id, points, created_at, updated_at, company, linkedin_url, website_url, twitter_handle, phone, phone_visible, current_pillar, goal_90day, goal_visible')
+      .select('id, email, full_name, display_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, comp_promo_code_id, vendasta_contact_id, points, created_at, updated_at, company, linkedin_url, website_url, twitter_handle, phone, phone_visible, current_pillar, goal_90day, goal_visible')
       .eq('id', params.userId)
       .maybeSingle(),
     adminClient
@@ -75,7 +75,7 @@ export async function GET(
     currentPillar:     user.current_pillar,
     goal90day:         user.goal_90day,
     goalVisible:       user.goal_visible,
-    mrr:               getTierMrr(user.tier, user.tier_status),
+    mrr:               getTierMrr(user.tier, user.tier_status, Boolean(user.comp_promo_code_id)),
     engagementLevel:   getEngagementLevel(postsLast30, lessonsLast30),
     engagementScore:   getEngagementScore(postsLast30, lessonsLast30),
     postsLast30,

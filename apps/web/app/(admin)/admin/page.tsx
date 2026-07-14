@@ -41,7 +41,7 @@ export default async function AdminDashboardPage() {
     postsCount,
     episodesCount,
   ] = await Promise.all([
-    adminClient.from('users').select('id, tier, tier_status').neq('role', 'admin'),
+    adminClient.from('users').select('id, tier, tier_status, comp_promo_code_id').neq('role', 'admin'),
     adminClient.from('users').select('id', { count: 'exact', head: true })
       .neq('role', 'admin').gte('created_at', oneWeekAgo),
     adminClient.from('users')

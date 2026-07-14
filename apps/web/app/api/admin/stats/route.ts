@@ -16,7 +16,7 @@ export async function GET() {
   const twoMonthsAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString()
 
   const [allMembers, newThisWeek, cancelledCount, proLastMonth, allLastMonth] = await Promise.all([
-    supabase.from('users').select('id, tier, tier_status').neq('role', 'admin'),
+    supabase.from('users').select('id, tier, tier_status, comp_promo_code_id').neq('role', 'admin'),
     supabase.from('users').select('id', { count: 'exact', head: true })
       .neq('role', 'admin')
       .gte('created_at', oneWeekAgo),
@@ -35,7 +35,8 @@ export async function GET() {
   const activeMembers = members.filter(m => m.tier_status === 'active' || m.tier_status === 'trial')
   const proMembers    = members.filter(m => m.tier === 'pro' && m.tier_status === 'active')
 
-  const mrr         = members.reduce((sum, m) => sum + getTierMrr(m.tier, m.tier_status), 0)
+  // Comps have full access but $0 MRR — exclude via the comp flag.
+  const mrr         = members.reduce((sum, m) => sum + getTierMrr(m.tier, m.tier_status, Boolean(m.comp_promo_code_id)), 0)
   const totalCount  = members.length
   const cancelled   = cancelledCount.count ?? 0
   const retentionRate = totalCount > 0

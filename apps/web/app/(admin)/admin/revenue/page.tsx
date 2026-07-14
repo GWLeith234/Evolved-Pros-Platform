@@ -18,7 +18,7 @@ export default async function AdminRevenuePage() {
   const [membersResult, webhooksResult] = await Promise.all([
     adminClient
       .from('users')
-      .select('tier, tier_status')
+      .select('tier, tier_status, comp_promo_code_id')
       .neq('role', 'admin'),
     adminClient
       .from('vendasta_webhooks')
@@ -29,11 +29,14 @@ export default async function AdminRevenuePage() {
 
   const memberList = membersResult.data ?? []
   // Count members whose subscription contributes MRR — same gating as
-  // computeMrr — so the per-tier cards sum exactly to Total MRR.
+  // computeMrr (live status AND not comped) — so the per-tier cards sum
+  // exactly to Total MRR. Comped members are full-access but $0 revenue.
   const isLive = (s: string | null) => !!s && s !== 'cancelled' && s !== 'expired'
-  const communityCount = memberList.filter(m => isLive(m.tier_status) && normalizeTierKey(m.tier) === 'community').length
-  const vipCount       = memberList.filter(m => isLive(m.tier_status) && normalizeTierKey(m.tier) === 'vip').length
-  const proCount       = memberList.filter(m => isLive(m.tier_status) && normalizeTierKey(m.tier) === 'professional').length
+  const paysMrr = (m: { tier_status: string | null; comp_promo_code_id: string | null }) =>
+    isLive(m.tier_status) && !m.comp_promo_code_id
+  const communityCount = memberList.filter(m => paysMrr(m) && normalizeTierKey(m.tier) === 'community').length
+  const vipCount       = memberList.filter(m => paysMrr(m) && normalizeTierKey(m.tier) === 'vip').length
+  const proCount       = memberList.filter(m => paysMrr(m) && normalizeTierKey(m.tier) === 'professional').length
   const communityMrr   = communityCount * TIERS.community.monthly
   const vipMrr         = vipCount * TIERS.vip.monthly
   const proMrr         = proCount * TIERS.professional.monthly

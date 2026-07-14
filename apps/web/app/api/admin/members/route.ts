@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from('users')
-    .select('id, email, full_name, display_name, avatar_url, tier, tier_status, vendasta_contact_id, points, created_at', { count: 'exact' })
+    .select('id, email, full_name, display_name, avatar_url, tier, tier_status, comp_promo_code_id, vendasta_contact_id, points, created_at', { count: 'exact' })
     .order('created_at', { ascending: false })
     .limit(limit)
 
@@ -75,7 +75,7 @@ export async function GET(request: Request) {
       vendastaContactId:  u.vendasta_contact_id,
       points:             u.points,
       joinedAt:           u.created_at,
-      mrr:                getTierMrr(u.tier, u.tier_status),
+      mrr:                getTierMrr(u.tier, u.tier_status, Boolean(u.comp_promo_code_id)),
       engagementLevel:    getEngagementLevel(postsLast30, lessonsLast30),
       engagementScore:    getEngagementScore(postsLast30, lessonsLast30),
       postsLast30,

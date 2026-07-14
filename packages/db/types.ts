@@ -2535,6 +2535,7 @@ export type Database = {
           banner_url: string | null
           bio: string | null
           company: string | null
+          comp_promo_code_id: string | null
           courses_completed: number | null
           created_at: string
           current_pillar: string | null
@@ -2584,6 +2585,7 @@ export type Database = {
           banner_url?: string | null
           bio?: string | null
           company?: string | null
+          comp_promo_code_id?: string | null
           courses_completed?: number | null
           created_at?: string
           current_pillar?: string | null
@@ -2633,6 +2635,7 @@ export type Database = {
           banner_url?: string | null
           bio?: string | null
           company?: string | null
+          comp_promo_code_id?: string | null
           courses_completed?: number | null
           created_at?: string
           current_pillar?: string | null

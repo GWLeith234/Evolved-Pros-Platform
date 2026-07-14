@@ -14,15 +14,17 @@ export async function GET() {
   // Get current tier distribution
   const { data: members } = await supabase
     .from('users')
-    .select('tier, tier_status, created_at')
+    .select('tier, tier_status, created_at, comp_promo_code_id')
     .neq('role', 'admin')
 
   const memberList = members ?? []
 
-  const proCount       = memberList.filter(m => m.tier === 'pro'       && m.tier_status === 'active').length
-  const vipCount       = memberList.filter(m => m.tier === 'vip'       && m.tier_status === 'active').length
-  const communityCount = memberList.filter(m => m.tier === 'community' && m.tier_status === 'active').length
-  const currentMrr     = memberList.reduce((sum, m) => sum + getTierMrr(m.tier, m.tier_status), 0)
+  // Comped members (comp_promo_code_id set) have full tier access but $0 MRR,
+  // so they're excluded from the revenue-contributing counts and total.
+  const proCount       = memberList.filter(m => m.tier === 'pro'       && m.tier_status === 'active' && !m.comp_promo_code_id).length
+  const vipCount       = memberList.filter(m => m.tier === 'vip'       && m.tier_status === 'active' && !m.comp_promo_code_id).length
+  const communityCount = memberList.filter(m => m.tier === 'community' && m.tier_status === 'active' && !m.comp_promo_code_id).length
+  const currentMrr     = memberList.reduce((sum, m) => sum + getTierMrr(m.tier, m.tier_status, Boolean(m.comp_promo_code_id)), 0)
 
   // Build 6-month MRR bars using webhook order history
   const { data: webhooks } = await supabase

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PricingCtaButton } from './PricingCtaButton'
+import { RedeemCodeForm } from './RedeemCodeForm'
 import { TIERS as PRICING, ANNUAL_FREE_MONTHS } from '@/lib/pricing'
 
 export const metadata: Metadata = {
@@ -267,6 +268,11 @@ export default function PricingPage() {
               />
             </div>
           ))}
+        </div>
+
+        {/* Have a code? — comp / access-code redemption (Friends of George). */}
+        <div className="max-w-2xl mx-auto mb-20">
+          <RedeemCodeForm />
         </div>
 
         {/* Comparison table */}

@@ -29,7 +29,7 @@ export default async function AdminMemberDetailPage({ params }: Props) {
   const [userResult, postsResult, progressResult] = await Promise.all([
     adminClient
       .from('users')
-      .select('id, email, full_name, display_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, vendasta_contact_id, points, created_at, updated_at')
+      .select('id, email, full_name, display_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, comp_promo_code_id, vendasta_contact_id, points, created_at, updated_at')
       .eq('id', params.userId)
       .limit(1)
       .maybeSingle(),
@@ -79,7 +79,7 @@ export default async function AdminMemberDetailPage({ params }: Props) {
     points:            user.points,
     joinedAt:          user.created_at,
     lastActive:        user.updated_at,
-    mrr:               getTierMrr(user.tier, user.tier_status),
+    mrr:               getTierMrr(user.tier, user.tier_status, Boolean(user.comp_promo_code_id)),
     engagementLevel:   getEngagementLevel(p30, l30),
     engagementScore:   getEngagementScore(p30, l30),
     postsLast30:       p30,
