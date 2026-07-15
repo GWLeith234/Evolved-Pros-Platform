@@ -18,6 +18,7 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { getStripe, isPlanKey, priceIdForPlan, PLAN_CATALOG, stripeConfigured } from '@/lib/stripe/config'
+import { resolveStripePriceId } from '@/lib/commerce/catalogue'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://platform.evolvedpros.com'
 
@@ -46,9 +47,12 @@ export async function POST(request: Request) {
   }
   const plan = body.plan
 
-  const priceId = priceIdForPlan(plan)
+  // Source of truth is our catalogue (prices.stripe_price_id); env vars are a
+  // backward-compat fallback until every price is mirrored to Stripe.
+  const { tier, interval } = PLAN_CATALOG[plan]
+  const priceId = (await resolveStripePriceId(tier, interval)) ?? priceIdForPlan(plan)
   if (!priceId) {
-    console.warn('[Stripe Checkout] price env not set for plan', plan)
+    console.warn('[Stripe Checkout] no Stripe price for plan (catalogue + env empty)', plan)
     return NextResponse.json({ error: 'This plan is not available.' }, { status: 503 })
   }
 

@@ -23,6 +23,7 @@ export const dynamic = 'force-dynamic'
 import type Stripe from 'stripe'
 import { adminClient } from '@/lib/supabase/admin'
 import { getStripe, tierForPriceId, type Tier } from '@/lib/stripe/config'
+import { tierForStripePriceId } from '@/lib/commerce/catalogue'
 
 type UserRow = { id: string; tier: string | null }
 
@@ -68,10 +69,12 @@ async function findUserBySubscription(sub: Stripe.Subscription): Promise<UserRow
   return (byCustomer.data as UserRow | null) ?? null
 }
 
-function tierFromSubscription(sub: Stripe.Subscription): Tier | null {
+// Catalogue (prices.stripe_price_id → product.tier) is the source of truth;
+// env config is the fallback until every price is mirrored to Stripe.
+async function tierFromSubscription(sub: Stripe.Subscription): Promise<Tier | null> {
   const priceId = sub.items?.data?.[0]?.price?.id
   if (!priceId) return null
-  return tierForPriceId(priceId)
+  return (await tierForStripePriceId(priceId)) ?? tierForPriceId(priceId)
 }
 
 function currentPeriodEndIso(sub: Stripe.Subscription): string | null {
@@ -101,7 +104,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   // Retrieve the subscription so tier comes from the real price, not just
   // the (client-supplied) session metadata.
   const sub = await getStripe().subscriptions.retrieve(subscriptionId)
-  const tier = tierFromSubscription(sub) ?? (session.metadata?.tier as Tier | undefined) ?? null
+  const tier = (await tierFromSubscription(sub)) ?? (session.metadata?.tier as Tier | undefined) ?? null
   if (!tier) {
     console.error('[Stripe Webhook] could not resolve tier for subscription', subscriptionId)
     return
@@ -135,7 +138,7 @@ async function handleSubscriptionUpdated(sub: Stripe.Subscription): Promise<void
     console.warn('[Stripe Webhook] subscription.updated for unknown user', sub.id)
     return
   }
-  const tier = tierFromSubscription(sub)
+  const tier = await tierFromSubscription(sub)
   if (!tier) {
     console.warn('[Stripe Webhook] subscription.updated with unmapped price', sub.id)
     return
