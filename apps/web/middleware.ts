@@ -12,6 +12,9 @@ const PUBLIC_ROUTES = [
   '/api/dev-login',
   '/pricing',
   '/media',
+  // Closed-beta lockout screen — must be reachable by suspended members, so it
+  // is never gated (also absent from the matcher below, belt-and-suspenders).
+  '/beta-paused',
 ]
 
 // Routes that are publicly accessible but still need session refresh
@@ -142,7 +145,7 @@ export async function middleware(request: NextRequest) {
     )
     const { data: profile } = await adminClient
       .from('users')
-      .select('role, onboarding_completed')
+      .select('role, onboarding_completed, access_status, comp_promo_code_id')
       .eq('email', user.email!)
       .single()
 
@@ -152,6 +155,19 @@ export async function middleware(request: NextRequest) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       return NextResponse.redirect(new URL('/home', request.url))
+    }
+
+    // Beta gate (SPRINT Q): pause non-admin, non-comped members during the
+    // closed beta. Admins and comped Friends of George (comp_promo_code_id set)
+    // always pass. Reversible — flip access_status back to 'active' to restore.
+    // Keyed on comp_promo_code_id, NOT tier_status, so comped Pros aren't paused.
+    if (
+      isMemberRoute &&
+      profile?.role !== 'admin' &&
+      profile?.access_status === 'suspended' &&
+      !profile?.comp_promo_code_id
+    ) {
+      return NextResponse.redirect(new URL('/beta-paused', request.url))
     }
 
     // Onboarding gate: redirect new members to /onboarding until they complete the flow

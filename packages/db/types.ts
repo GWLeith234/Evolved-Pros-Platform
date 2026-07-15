@@ -2531,6 +2531,7 @@ export type Database = {
         Row: {
           academy_completed_at: string | null
           academy_started_at: string | null
+          access_status: string
           avatar_url: string | null
           banner_url: string | null
           bio: string | null
@@ -2581,6 +2582,7 @@ export type Database = {
         Insert: {
           academy_completed_at?: string | null
           academy_started_at?: string | null
+          access_status?: string
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
@@ -2631,6 +2633,7 @@ export type Database = {
         Update: {
           academy_completed_at?: string | null
           academy_started_at?: string | null
+          access_status?: string
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
