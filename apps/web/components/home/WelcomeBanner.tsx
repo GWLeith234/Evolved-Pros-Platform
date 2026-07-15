@@ -580,11 +580,11 @@ export function WelcomeBanner({
           .welcome-banner-daterow { gap: 8px !important; }
           .welcome-banner-right { width: 100%; gap: 16px !important; }
           .welcome-banner-right > div { width: 100%; }
+          /* Two tiles (Posts + Stories) — a single row of two, no second-row
+             borders. Divider between them only. */
           .welcome-banner-scoreboard { display: grid !important; grid-template-columns: 1fr 1fr; }
-          .welcome-banner-scoreboard > a { min-width: 0 !important; border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.08); }
-          .welcome-banner-scoreboard > a:nth-child(2) { border-bottom: 1px solid rgba(255,255,255,0.08); }
-          .welcome-banner-scoreboard > a:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.08) !important; }
-          .welcome-banner-scoreboard > a:nth-child(n+3) { border-bottom: none; }
+          .welcome-banner-scoreboard > a { min-width: 0 !important; border-right: none !important; border-bottom: none !important; }
+          .welcome-banner-scoreboard > a:first-child { border-right: 1px solid rgba(255,255,255,0.08) !important; }
           /* Architecture column — swap to full-width mobile rows */
           .welcome-banner-architecture { width: 100% !important; }
           .welcome-banner-architecture > a { width: 100% !important; align-items: stretch !important; padding: 4px 12px !important; gap: 0 !important; }
@@ -948,10 +948,8 @@ export function WelcomeBanner({
                   backdropFilter: 'blur(6px)',
                 }}
               >
-                {/* A4.3 active-state rule: a single stat is active — the one
-                    with the soonest action. Events is the only time-bound stat
-                    (an upcoming event has a date), so it's active whenever one
-                    is scheduled; otherwise no stat is highlighted. */}
+                {/* Scoreboard tiles. Events + Podcast were removed (their counts
+                    were wrong and the surfaces are reachable from the nav). */}
                 <ScoreCell
                   href="/community"
                   label={pluralLabel(scoreboard.postCount, 'Post', 'Posts')}
@@ -959,23 +957,6 @@ export function WelcomeBanner({
                   accent="#A78BFA"
                   subline="Shared with the community"
                   zeroHint="Share an update"
-                />
-                <ScoreCell
-                  href="/events"
-                  label={pluralLabel(scoreboard.upcomingEventCount, 'Event', 'Events')}
-                  value={scoreboard.upcomingEventCount}
-                  accent="#0ABFA3"
-                  active={scoreboard.upcomingEventCount > 0}
-                  subline="Coming up soon"
-                  zeroHint="Browse the calendar"
-                />
-                <ScoreCell
-                  href="/podcast"
-                  label="Podcast"
-                  value={scoreboard.podcastCount}
-                  accent="#60A5FA"
-                  subline="Episodes you've played"
-                  zeroHint="Listen to an episode"
                 />
                 <ScoreCell
                   href="/media"
