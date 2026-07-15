@@ -147,7 +147,7 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
             <span style={{
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase',
-              color: completedCount === savedCommitments.length ? CRIMSON : 'rgba(250,249,247,0.3)',
+              color: completedCount === savedCommitments.length ? CRIMSON : 'var(--text-tertiary)',
             }}>
               {completedCount} / {savedCommitments.length}
             </span>
@@ -178,7 +178,7 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
               <div style={{
                 flexShrink: 0, width: '20px', height: '20px', borderRadius: '0',
                 backgroundColor: c.is_completed ? CRIMSON : 'transparent',
-                border: `2px solid ${c.is_completed ? CRIMSON : 'rgba(255,255,255,0.2)'}`,
+                border: `2px solid ${c.is_completed ? CRIMSON : 'var(--border-color)'}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 transition: 'all 0.15s',
               }}>
@@ -243,8 +243,8 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
             onClick={handleSave}
             disabled={!inputs.some(s => s.trim()) || saving}
             style={{
-              backgroundColor: inputs.some(s => s.trim()) ? GOLD : 'rgba(255,255,255,0.05)',
-              color: inputs.some(s => s.trim()) ? '#0A0F18' : 'rgba(255,255,255,0.2)',
+              backgroundColor: inputs.some(s => s.trim()) ? GOLD : 'var(--bg-elevated)',
+              color: inputs.some(s => s.trim()) ? '#0A0F18' : 'var(--text-tertiary)',
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
               padding: '10px', borderRadius: '0', border: 'none',

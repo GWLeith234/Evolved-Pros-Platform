@@ -136,7 +136,7 @@ export function CourseCard({ course, isLocked, userTier }: CourseCardProps) {
           {PILLAR_CONFIG[course.pillarNumber]?.label ?? course.title}
         </p>
 
-        <p className="font-condensed font-bold uppercase text-[14px] text-white leading-tight mb-3">
+        <p className="font-condensed font-bold uppercase text-[14px] text-[#F5F0E8] leading-tight mb-3">
           {course.title}
         </p>
 

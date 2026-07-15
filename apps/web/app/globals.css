@@ -1203,6 +1203,22 @@ html.light-mode .ep-loader-logo--light { display: block; }
   --podcast-border-strong: rgba(255,255,255,0.15);
 }
 
+/* SPRINT N.3 — podcast in LIGHT theme renders on cream (--podcast-bg-* alias
+   var(--bg-*)). The white-alpha text/border tiers above don't flip, so they
+   were invisible on cream. Re-map them to navy-alpha (#1B2A4A) in light mode so
+   the podcast page is legible when the app theme is light. text-strong/2/3
+   already flip via the canonical --text-* tokens. */
+html.light-mode {
+  --podcast-text-1:        rgba(27,42,74,0.90);
+  --podcast-text-4:        rgba(27,42,74,0.60);
+  --podcast-text-5:        rgba(27,42,74,0.48);
+  --podcast-text-6:        rgba(27,42,74,0.34);
+  --podcast-border-soft:   rgba(27,42,74,0.08);
+  --podcast-border-med:    rgba(27,42,74,0.12);
+  --podcast-border-med2:   rgba(27,42,74,0.14);
+  --podcast-border-strong: rgba(27,42,74,0.18);
+}
+
 /* ─────────────────────────────────────────────────────────────────
    Editorial cream-paper tokens (DESIGN-REF-PLATFORM-HANDOFF, MR1).
    Ported verbatim from _design_refs/platform-handoff-2026-04-29/

@@ -313,14 +313,14 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
               <h2 style={{
                 fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900,
                 fontSize: 'clamp(24px, 4vw, 32px)', textTransform: 'uppercase',
-                color: '#faf9f7', margin: 0, letterSpacing: '0.04em',
+                color: 'var(--text-primary)', margin: 0, letterSpacing: '0.04em',
               }}>
                 This Pillar is Locked
               </h2>
 
               {/* Subtext */}
-              <p style={{ color: 'rgba(250,249,247,0.45)', fontSize: '15px', lineHeight: 1.65, margin: 0 }}>
-                Complete <strong style={{ color: 'rgba(250,249,247,0.75)', fontWeight: 600 }}>{prevLabel}</strong> to unlock {config.label}.
+              <p style={{ color: 'var(--text-secondary)', fontSize: '15px', lineHeight: 1.65, margin: 0 }}>
+                Complete <strong style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{prevLabel}</strong> to unlock {config.label}.
                 Pillars unlock in sequence as you complete each capstone.
               </p>
 
@@ -345,7 +345,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
               <a
                 href="/academy"
                 style={{
-                  color: 'rgba(250,249,247,0.25)', fontFamily: '"Barlow Condensed", sans-serif',
+                  color: 'var(--text-tertiary)', fontFamily: '"Barlow Condensed", sans-serif',
                   fontWeight: 700, fontSize: '12px', letterSpacing: '0.15em',
                   textTransform: 'uppercase', textDecoration: 'none',
                 }}
@@ -385,7 +385,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
 
       {!isCourseLocked && lessons.length === 0 && (
         <section style={{ backgroundColor: 'var(--bg-surface)', padding: '56px clamp(24px, 8vw, 96px)', textAlign: 'center' }}>
-          <p style={{ color: 'rgba(250,249,247,0.3)', fontFamily: '"Barlow Condensed", sans-serif', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <p style={{ color: 'var(--text-tertiary)', fontFamily: '"Barlow Condensed", sans-serif', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             Lessons coming soon
           </p>
         </section>
@@ -480,12 +480,12 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
             <h2
               style={{
                 fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900,
-                fontSize: '36px', textTransform: 'uppercase', color: '#faf9f7', margin: '0 0 12px',
+                fontSize: '36px', textTransform: 'uppercase', color: 'var(--text-primary)', margin: '0 0 12px',
               }}
             >
               {config.label} Complete
             </h2>
-            <p style={{ color: 'rgba(250,249,247,0.45)', fontSize: '15px', lineHeight: 1.6, margin: '0 0 36px' }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '15px', lineHeight: 1.6, margin: '0 0 36px' }}>
               You&apos;ve finished all lessons in this pillar. On to the next.
             </p>
             <a
