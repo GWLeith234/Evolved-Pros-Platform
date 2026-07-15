@@ -67,7 +67,13 @@ export async function POST(request: Request) {
     email,
     options: { redirectTo: `${APP_URL}/auth/callback?next=%2Fhome` },
   })
-  if (linkErr || !linkData?.user || !linkData.properties?.action_link) {
+  // We use the hashed_token (NOT the action_link): the action_link's verify step
+  // redirects with the session in the URL *fragment* (implicit flow), which the
+  // server-side /auth/callback can't read — that was the auth_failed bug. Passing
+  // token_hash to the callback uses its verifyOtp path, which runs server-side and
+  // sets the session cookies on a real top-level navigation.
+  const hashedToken = linkData?.properties?.hashed_token
+  if (linkErr || !linkData?.user || !hashedToken) {
     return NextResponse.json({ error: 'Could not start your session.' }, { status: 500 })
   }
   const authUserId = linkData.user.id
@@ -102,10 +108,13 @@ export async function POST(request: Request) {
     .eq('id', invite.invite_id)
     .neq('status', 'revoked')
 
-  // 7. Hand back the login link; the client redirects the browser to it.
+  // 7. Hand back a callback URL carrying the token_hash. The client navigates
+  //    to it (top-level GET); /auth/callback verifyOtp's it into a session and
+  //    lands the invitee on /home, now logged in with their new Pro access.
+  const loginUrl = `${APP_URL}/auth/callback?token_hash=${encodeURIComponent(hashedToken)}&type=magiclink&next=${encodeURIComponent('/home')}`
   return NextResponse.json({
     ok: true,
     tier: result.grantsTier,
-    loginUrl: linkData.properties.action_link,
+    loginUrl,
   })
 }
