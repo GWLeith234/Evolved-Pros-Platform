@@ -49,24 +49,36 @@ async function logTierChange(
   if (error) console.error('[Stripe Webhook] tier_change_log insert failed:', error.message)
 }
 
-// Resolve our user row from a subscription: by stripe_subscription_id first,
-// then by stripe_customer_id.
-async function findUserBySubscription(sub: Stripe.Subscription): Promise<UserRow | null> {
-  const bySub = await (adminClient as any)
-    .from('users')
-    .select('id, tier')
-    .eq('stripe_subscription_id', sub.id)
-    .maybeSingle()
-  if (bySub.data) return bySub.data as UserRow
+// Resolve our user row by stripe_subscription_id first, then stripe_customer_id.
+async function findUserByIds(
+  subscriptionId: string | null,
+  customerId: string | null,
+): Promise<UserRow | null> {
+  if (subscriptionId) {
+    const bySub = await (adminClient as any)
+      .from('users')
+      .select('id, tier')
+      .eq('stripe_subscription_id', subscriptionId)
+      .maybeSingle()
+    if (bySub.data) return bySub.data as UserRow
+  }
+  if (customerId) {
+    const byCustomer = await (adminClient as any)
+      .from('users')
+      .select('id, tier')
+      .eq('stripe_customer_id', customerId)
+      .maybeSingle()
+    if (byCustomer.data) return byCustomer.data as UserRow
+  }
+  return null
+}
 
-  const customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer?.id
-  if (!customerId) return null
-  const byCustomer = await (adminClient as any)
-    .from('users')
-    .select('id, tier')
-    .eq('stripe_customer_id', customerId)
-    .maybeSingle()
-  return (byCustomer.data as UserRow | null) ?? null
+function subCustomerId(sub: Stripe.Subscription): string | null {
+  return typeof sub.customer === 'string' ? sub.customer : sub.customer?.id ?? null
+}
+
+function findUserBySubscription(sub: Stripe.Subscription): Promise<UserRow | null> {
+  return findUserByIds(sub.id, subCustomerId(sub))
 }
 
 // Catalogue (prices.stripe_price_id → product.tier) is the source of truth;
@@ -171,15 +183,43 @@ async function handleSubscriptionDeleted(sub: Stripe.Subscription): Promise<void
     console.warn('[Stripe Webhook] subscription.deleted for unknown user', sub.id)
     return
   }
-  // Preserve the tier until tier_expires_at fires (same as Vendasta cancel).
+  // Subscription has fully ended → downgrade to the free Community tier and
+  // detach the subscription id (per the Stripe integration plan).
   const { error } = await (adminClient as any)
     .from('users')
     .update({
+      tier: 'community',
       tier_status: 'cancelled',
-      tier_expires_at: currentPeriodEndIso(sub),
+      tier_expires_at: null,
+      stripe_subscription_id: null,
     })
     .eq('id', user.id)
   if (error) throw new Error(`users update (sub.deleted) failed: ${error.message}`)
+
+  await logTierChange(user.id, user.tier, 'community', 'stripe_subscription_deleted')
+}
+
+async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
+  const subscriptionId =
+    typeof (invoice as unknown as { subscription?: unknown }).subscription === 'string'
+      ? ((invoice as unknown as { subscription: string }).subscription)
+      : null
+  const customerId = typeof invoice.customer === 'string' ? invoice.customer : null
+  const user = await findUserByIds(subscriptionId, customerId)
+  if (!user) {
+    console.warn('[Stripe Webhook] invoice.payment_failed for unknown user', invoice.id)
+    return
+  }
+  // Grace: flag past_due but keep the tier (access) until Stripe finally
+  // cancels the subscription (→ subscription.deleted downgrades to community).
+  const { error } = await (adminClient as any)
+    .from('users')
+    .update({ tier_status: 'past_due' })
+    .eq('id', user.id)
+  if (error) throw new Error(`users update (invoice.payment_failed) failed: ${error.message}`)
+  // NOTE: member notification email for past_due is a follow-up (needs a
+  // dedicated Resend template); logging for now.
+  console.info('[Stripe Webhook] tier_status → past_due for user', user.id)
 }
 
 // --- entrypoint -----------------------------------------------------------
@@ -204,6 +244,16 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
+  // Idempotency: skip events we've already applied (Stripe retries deliveries).
+  const seen = await (adminClient as any)
+    .from('billing_events')
+    .select('stripe_event_id')
+    .eq('stripe_event_id', event.id)
+    .maybeSingle()
+  if (seen.data) {
+    return Response.json({ received: true, duplicate: true })
+  }
+
   try {
     switch (event.type) {
       case 'checkout.session.completed':
@@ -215,6 +265,9 @@ export async function POST(request: Request) {
       case 'customer.subscription.deleted':
         await handleSubscriptionDeleted(event.data.object as Stripe.Subscription)
         break
+      case 'invoice.payment_failed':
+        await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice)
+        break
       default:
         // Unhandled event types are acknowledged so Stripe stops retrying.
         break
@@ -222,9 +275,19 @@ export async function POST(request: Request) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'handler error'
     console.error('[Stripe Webhook]', event.type, msg)
-    // 5xx so Stripe retries — our updates are replay-safe.
+    // 5xx so Stripe retries — our updates are replay-safe. Not recorded in
+    // billing_events, so the retry reprocesses.
     return Response.json({ error: msg }, { status: 500 })
   }
+
+  // Record the applied event so retries are deduped. ignoreDuplicates guards
+  // the rare concurrent-delivery race.
+  await (adminClient as any)
+    .from('billing_events')
+    .upsert({ stripe_event_id: event.id, type: event.type }, {
+      onConflict: 'stripe_event_id',
+      ignoreDuplicates: true,
+    })
 
   return Response.json({ received: true })
 }

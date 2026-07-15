@@ -46,9 +46,9 @@ interface PlanDef {
 // value is a Stripe (test-mode) price id.
 export const PLAN_CATALOG: Record<PlanKey, PlanDef> = {
   vip_monthly: { tier: 'vip', interval: 'month', priceEnvVar: 'STRIPE_PRICE_VIP_MONTHLY' },
-  vip_annual:  { tier: 'vip', interval: 'year',  priceEnvVar: 'STRIPE_PRICE_VIP_YEARLY' },
+  vip_annual:  { tier: 'vip', interval: 'year',  priceEnvVar: 'STRIPE_PRICE_VIP_ANNUAL' },
   pro_monthly: { tier: 'pro', interval: 'month', priceEnvVar: 'STRIPE_PRICE_PRO_MONTHLY' },
-  pro_annual:  { tier: 'pro', interval: 'year',  priceEnvVar: 'STRIPE_PRICE_PRO_YEARLY' },
+  pro_annual:  { tier: 'pro', interval: 'year',  priceEnvVar: 'STRIPE_PRICE_PRO_ANNUAL' },
 }
 
 export function isPlanKey(v: unknown): v is PlanKey {
