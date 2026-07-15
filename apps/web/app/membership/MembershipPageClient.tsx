@@ -22,6 +22,12 @@ const VIP_ANNUAL_SKU  = process.env.NEXT_PUBLIC_VENDASTA_MP_VIP_Y ?? ''
 const PRO_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_M ?? ''
 const PRO_ANNUAL_SKU  = process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_Y ?? ''
 
+// SPRINT I Phase 1 — payments provider switch. Defaults to the legacy Vendasta
+// checkout; set NEXT_PUBLIC_PAYMENTS_PROVIDER='stripe' to route the upgrade CTA
+// through Stripe Checkout (/api/stripe/checkout with a plan key) instead.
+const PAYMENTS_PROVIDER = process.env.NEXT_PUBLIC_PAYMENTS_PROVIDER ?? 'vendasta'
+const USE_STRIPE = PAYMENTS_PROVIDER === 'stripe'
+
 function CheckIcon() {
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -45,15 +51,21 @@ function StarIcon() {
 
 interface CtaButtonProps {
   sku: string
+  /** Stripe plan key (used when NEXT_PUBLIC_PAYMENTS_PROVIDER === 'stripe'). */
+  plan: 'vip_monthly' | 'vip_annual' | 'pro_monthly' | 'pro_annual'
   accent: string
   featured?: boolean
   isCurrent?: boolean
   label?: string
 }
 
-function CtaButton({ sku, accent, featured = false, isCurrent = false, label }: CtaButtonProps) {
+function CtaButton({ sku, plan, accent, featured = false, isCurrent = false, label }: CtaButtonProps) {
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState<string | null>(null)
+
+  // Under Stripe we always have a valid plan key; under Vendasta we need a
+  // configured SKU. Only fall back to "Coming Soon" when neither is available.
+  const canCheckout = USE_STRIPE || Boolean(sku)
 
   if (isCurrent) {
     return (
@@ -74,9 +86,9 @@ function CtaButton({ sku, accent, featured = false, isCurrent = false, label }: 
     )
   }
 
-  if (!sku) {
+  if (!canCheckout) {
     return (
-      <Tooltip content="Checkout powered by Vendasta — launching soon">
+      <Tooltip content="Checkout launching soon">
         <button
           type="button"
           disabled
@@ -99,21 +111,24 @@ function CtaButton({ sku, accent, featured = false, isCurrent = false, label }: 
     setError(null)
     setLoading(true)
     try {
-      const res = await fetch('/api/checkout', {
+      const res = await fetch(USE_STRIPE ? '/api/stripe/checkout' : '/api/checkout', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ sku }),
+        body:    JSON.stringify(USE_STRIPE ? { plan } : { sku }),
       })
       const data = (await res.json().catch(() => ({}))) as {
+        // Stripe returns { url }; Vendasta returns { paymentUrl }.
+        url?:        string
         paymentUrl?: string
         error?:      string
       }
-      if (!res.ok || !data.paymentUrl) {
+      const redirectUrl = data.url ?? data.paymentUrl
+      if (!res.ok || !redirectUrl) {
         setError(data.error ?? 'Checkout failed — please try again')
         setLoading(false)
         return
       }
-      window.location.href = data.paymentUrl
+      window.location.href = redirectUrl
     } catch {
       setError('Network error — please try again')
       setLoading(false)
@@ -342,6 +357,7 @@ export function MembershipPageClient({ userTier, keynoteAccess, isLoggedIn }: Me
 
             <CtaButton
               sku={isAnnual ? VIP_ANNUAL_SKU : VIP_MONTHLY_SKU}
+              plan={isAnnual ? 'vip_annual' : 'vip_monthly'}
               accent="#C9A84C"
               label="Get VIP"
               isCurrent={userTier === 'vip'}
@@ -418,6 +434,7 @@ export function MembershipPageClient({ userTier, keynoteAccess, isLoggedIn }: Me
 
             <CtaButton
               sku={isAnnual ? PRO_ANNUAL_SKU : PRO_MONTHLY_SKU}
+              plan={isAnnual ? 'pro_annual' : 'pro_monthly'}
               accent="#C9302A"
               featured
               label="Get Professional"

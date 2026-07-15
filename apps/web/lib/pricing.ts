@@ -51,6 +51,10 @@ export function tierMonthlyPrice(
   tier: string | null | undefined,
   tierStatus?: string | null,
   isComped?: boolean,
+  // Optional monthly-dollars-by-tier override. When supplied (e.g. from the
+  // catalogue via getMrrMonthlyByTierKey), it wins over the TIERS constants so
+  // MRR reflects live admin price edits. Falls back to TIERS per tier.
+  monthlyByKey?: Partial<Record<TierKey, number>>,
 ): number {
   // Comped members (e.g. "Friends of George") have full tier access but pay
   // $0, so a comp must never contribute to MRR regardless of tier/status.
@@ -59,7 +63,8 @@ export function tierMonthlyPrice(
     if (!tierStatus || tierStatus === 'cancelled' || tierStatus === 'expired') return 0
   }
   const key = normalizeTierKey(tier)
-  return key ? TIERS[key].monthly : 0
+  if (!key) return 0
+  return monthlyByKey?.[key] ?? TIERS[key].monthly
 }
 
 export interface MrrMember {
@@ -72,10 +77,17 @@ export interface MrrMember {
   comp_promo_code_id?: string | null
 }
 
-/** Total monthly recurring revenue across a member list (active/trial, comps excluded). */
-export function computeMrr(members: MrrMember[]): number {
+/**
+ * Total monthly recurring revenue across a member list (active/trial, comps
+ * excluded). Pass `monthlyByKey` (from the catalogue) to price off the live
+ * catalogue rather than the TIERS constants.
+ */
+export function computeMrr(
+  members: MrrMember[],
+  monthlyByKey?: Partial<Record<TierKey, number>>,
+): number {
   return members.reduce(
-    (sum, m) => sum + tierMonthlyPrice(m.tier, m.tier_status, Boolean(m.comp_promo_code_id)),
+    (sum, m) => sum + tierMonthlyPrice(m.tier, m.tier_status, Boolean(m.comp_promo_code_id), monthlyByKey),
     0,
   )
 }

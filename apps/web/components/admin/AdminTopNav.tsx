@@ -1,18 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { Modal } from '@/components/ui/Modal'
 import { AdminSidebarNav } from './AdminSidebar'
 import { useTheme } from '@/components/theme/ThemeProvider'
-
-const NAV_TABS = [
-  { label: 'Members',      href: '/admin/members',  match: /^\/admin\/members/ },
-  { label: 'Revenue',      href: '/admin/revenue',  match: /^\/admin\/revenue/ },
-  { label: 'Pipeline',     href: '/admin/pipeline', match: /^\/admin\/pipeline/ },
-  { label: 'Vendasta CRM', href: 'https://business.vendasta.com/crm/contacts', match: /^$/ },
-]
 
 interface AdminTopNavProps {
   profile: {
@@ -27,7 +19,6 @@ function getInitials(name: string | null | undefined): string {
 }
 
 export function AdminTopNav({ profile }: AdminTopNavProps) {
-  const pathname = usePathname()
   const displayName = profile.display_name ?? profile.full_name ?? ''
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   // Admins can toggle the whole app theme from the admin shell. The topnav is
@@ -97,39 +88,13 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
         <AdminSidebarNav onSelect={() => setMobileMenuOpen(false)} />
       </Modal>
 
-      {/* Nav tabs */}
-      <nav className="hidden md:flex items-end h-full gap-1">
-        {NAV_TABS.map(tab => {
-          const isActive = tab.match.test(pathname)
-          const isExternal = tab.href.startsWith('http')
-          return (
-            <Link
-              key={tab.label}
-              href={tab.href}
-              target={isExternal ? '_blank' : undefined}
-              rel={isExternal ? 'noopener noreferrer' : undefined}
-              className="relative h-full flex items-center px-4 font-condensed font-semibold uppercase tracking-[0.12em] text-[12px] transition-colors duration-150"
-              style={{ color: isActive ? '#a8cdd9' : 'rgba(255,255,255,0.45)' }}
-              onMouseEnter={e => {
-                if (!isActive) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.8)'
-              }}
-              onMouseLeave={e => {
-                if (!isActive) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)'
-              }}
-            >
-              {tab.label}
-              {isActive && (
-                <span
-                  className="absolute bottom-0 left-0 right-0 h-0.5"
-                  style={{ backgroundColor: '#68a2b9' }}
-                />
-              )}
-            </Link>
-          )
-        })}
-      </nav>
+      {/* Nav lives in the left rail (AdminSidebar) — the top bar carries only
+          brand, platform link, theme toggle, and avatar. The former duplicate
+          top-bar tabs and the "Vendasta Sync" badge were removed in the nav
+          dedup; anything still Vendasta now lives under the rail's clearly
+          labelled "Legacy (Vendasta)" section until Sprint I removes it. */}
 
-      {/* Right: Back to platform + Vendasta Sync badge + avatar */}
+      {/* Right: Back to platform + theme toggle + avatar */}
       <div className="flex items-center gap-3">
         <Link
           href="/home"
@@ -145,16 +110,6 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
         >
           ← Platform
         </Link>
-        <span
-          className="hidden sm:inline-block font-condensed font-bold uppercase tracking-[0.14em] text-[12px] px-2.5 py-1 rounded"
-          style={{
-            color: '#68a2b9',
-            backgroundColor: 'rgba(104,162,185,0.1)',
-            border: '1px solid rgba(104,162,185,0.25)',
-          }}
-        >
-          Vendasta Sync
-        </span>
 
         <button
           type="button"

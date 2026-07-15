@@ -1,5 +1,3 @@
-import { TIERS } from '@/lib/pricing'
-
 interface MonthBar {
   label: string
   mrr: number
@@ -15,6 +13,10 @@ interface RevenueChartProps {
   communityMrr: number
   vipMrr: number
   proMrr: number
+  /** Monthly price per tier (whole dollars) — from the catalogue via the
+   *  revenue page, so labels can't drift from the live prices. */
+  vipMonthly: number
+  proMonthly: number
   churnThisMonth: number
 }
 
@@ -27,16 +29,18 @@ export function RevenueChart({
   communityMrr,
   vipMrr,
   proMrr,
+  vipMonthly,
+  proMonthly,
   churnThisMonth,
 }: RevenueChartProps) {
   const maxMrr = Math.max(...months.map(m => m.mrr), 1)
 
-  // Prices come from lib/pricing so the card labels can't drift from the
-  // canonical table. Total MRR = Community + VIP + Pro card MRRs.
+  // Prices come from the catalogue (via props) so the card labels can't drift
+  // from the live prices. Total MRR = Community + VIP + Pro card MRRs.
   const stats = [
     { label: 'Total MRR',                    value: `$${currentMrr.toLocaleString('en-US')}`, color: '#68a2b9' },
-    { label: `VIP × $${TIERS.vip.monthly}`,          value: `$${vipMrr.toLocaleString('en-US')} / ${vipCount} members`,             color: '#c9a84c' },
-    { label: `Pro × $${TIERS.professional.monthly}`, value: `$${proMrr.toLocaleString('en-US')} / ${proCount} members`,             color: '#C9302A' },
+    { label: `VIP × $${vipMonthly}`,          value: `$${vipMrr.toLocaleString('en-US')} / ${vipCount} members`,             color: '#c9a84c' },
+    { label: `Pro × $${proMonthly}`,          value: `$${proMrr.toLocaleString('en-US')} / ${proCount} members`,             color: '#C9302A' },
     { label: 'Community (Free)',             value: `$${communityMrr.toLocaleString('en-US')} / ${communityCount} members`, color: 'var(--admin-text)' },
     { label: 'Churn (month)',                value: `${churnThisMonth} cancelled`,            color: '#ef0e30' },
   ]

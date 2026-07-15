@@ -1,6 +1,7 @@
 import { adminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
-import { computeMrr, normalizeTierKey, TIERS } from '@/lib/pricing'
+import { computeMrr, normalizeTierKey } from '@/lib/pricing'
+import { getMrrMonthlyByTierKey } from '@/lib/commerce/catalogue'
 import { RevenueChart } from '@/components/admin/RevenueChart'
 
 export const dynamic = 'force-dynamic'
@@ -37,11 +38,14 @@ export default async function AdminRevenuePage() {
   const communityCount = memberList.filter(m => paysMrr(m) && normalizeTierKey(m.tier) === 'community').length
   const vipCount       = memberList.filter(m => paysMrr(m) && normalizeTierKey(m.tier) === 'vip').length
   const proCount       = memberList.filter(m => paysMrr(m) && normalizeTierKey(m.tier) === 'professional').length
-  const communityMrr   = communityCount * TIERS.community.monthly
-  const vipMrr         = vipCount * TIERS.vip.monthly
-  const proMrr         = proCount * TIERS.professional.monthly
+  // Prices come from the catalogue (source of truth) so MRR reflects admin
+  // price edits; TIERS constants are the per-tier fallback inside the helper.
+  const monthlyByTier  = await getMrrMonthlyByTierKey()
+  const communityMrr   = communityCount * monthlyByTier.community
+  const vipMrr         = vipCount * monthlyByTier.vip
+  const proMrr         = proCount * monthlyByTier.professional
   // computeMrr over the full list == communityMrr + vipMrr + proMrr by construction.
-  const currentMrr     = computeMrr(memberList)
+  const currentMrr     = computeMrr(memberList, monthlyByTier)
 
   // Build 6-month bars
   const months = Array.from({ length: 6 }, (_, i) => {
@@ -76,6 +80,8 @@ export default async function AdminRevenuePage() {
         communityMrr={communityMrr}
         vipMrr={vipMrr}
         proMrr={proMrr}
+        vipMonthly={monthlyByTier.vip}
+        proMonthly={monthlyByTier.professional}
         churnThisMonth={churnThisMonth}
       />
     </div>
