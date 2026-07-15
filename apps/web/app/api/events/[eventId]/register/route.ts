@@ -30,7 +30,7 @@ export async function POST(
       .eq('id', params.eventId)
       .single(),
     adminClient
-      .from('event_registrations')
+      .from('event_rsvps')
       .select('event_id')
       .eq('event_id', params.eventId)
       .eq('user_id', userId)
@@ -54,7 +54,7 @@ export async function POST(
 
   // Register
   const { error: regError } = await adminClient
-    .from('event_registrations')
+    .from('event_rsvps')
     .insert({ event_id: params.eventId, user_id: userId } as never)
 
   if (regError) return NextResponse.json({ error: 'Registration failed' }, { status: 500 })
@@ -131,7 +131,7 @@ export async function DELETE(
   if (!event) return NextResponse.json({ error: 'Event not found' }, { status: 404 })
 
   const { error } = await adminClient
-    .from('event_registrations')
+    .from('event_rsvps')
     .delete()
     .eq('event_id', params.eventId)
     .eq('user_id', userId)

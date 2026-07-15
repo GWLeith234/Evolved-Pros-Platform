@@ -52,16 +52,23 @@ async function hydratePostMeta(
   const page = rows.slice(0, limit)
   const postIds = page.map(r => r.id)
 
-  const [userLikesRes, bookmarksRes, allLikesRes] = await Promise.all([
+  // SPRINT D — reactions live in post_reactions and comments in replies; the
+  // old post_likes table and the denormalized posts.like_count/reply_count are
+  // dead (0). Count live rows so Community (and Home, which reads the same
+  // tables) show real numbers.
+  const [userLikesRes, bookmarksRes, allLikesRes, repliesRes] = await Promise.all([
     postIds.length > 0
-      ? supabase.from('post_likes').select('post_id, reaction_type').eq('user_id', userId).in('post_id', postIds) as unknown as Promise<{ data: LikeRow[] | null }>
+      ? supabase.from('post_reactions').select('post_id, reaction_type').eq('user_id', userId).in('post_id', postIds) as unknown as Promise<{ data: LikeRow[] | null }>
       : Promise.resolve({ data: [] as LikeRow[] }),
     postIds.length > 0
       ? supabase.from('post_bookmarks').select('post_id').eq('user_id', userId).in('post_id', postIds)
       : Promise.resolve({ data: [] as { post_id: string }[] }),
     postIds.length > 0
-      ? adminClient.from('post_likes').select('post_id, reaction_type').in('post_id', postIds) as unknown as Promise<{ data: LikeRow[] | null }>
+      ? adminClient.from('post_reactions').select('post_id, reaction_type').in('post_id', postIds) as unknown as Promise<{ data: LikeRow[] | null }>
       : Promise.resolve({ data: [] as LikeRow[] }),
+    postIds.length > 0
+      ? adminClient.from('replies').select('post_id').in('post_id', postIds) as unknown as Promise<{ data: { post_id: string }[] | null }>
+      : Promise.resolve({ data: [] as { post_id: string }[] }),
   ])
 
   const myReactionMap = new Map<string, string>(
@@ -77,6 +84,11 @@ async function hydratePostMeta(
     m.set(type, (m.get(type) ?? 0) + 1)
   }
 
+  const replyCountByPost = new Map<string, number>()
+  for (const r of repliesRes.data ?? []) {
+    replyCountByPost.set(r.post_id, (replyCountByPost.get(r.post_id) ?? 0) + 1)
+  }
+
   return page.map(row => {
     const author = row.users
     const reactionMap = reactionCountsByPost.get(row.id)
@@ -90,8 +102,8 @@ async function hydratePostMeta(
       pillarTag: row.pillar_tag as Post['pillarTag'],
       postType: (row.post_type ?? 'update') as Post['postType'],
       isPinned: row.is_pinned,
-      likeCount: row.like_count,
-      replyCount: row.reply_count,
+      likeCount: reactions.reduce((s, r) => s + r.count, 0),
+      replyCount: replyCountByPost.get(row.id) ?? 0,
       createdAt: row.created_at,
       author: {
         id: author?.id ?? '',
