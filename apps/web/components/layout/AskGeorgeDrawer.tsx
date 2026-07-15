@@ -24,6 +24,15 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
     if (isOpen) setHasOpened(true)
   }, [isOpen])
 
+  // While open, hide the fixed bottom tab bar (.ep-bottom-tabs, <lg only) so
+  // the chat input + Send aren't clipped behind it. A body class keeps this in
+  // one place and avoids fragile safe-area height math on notched phones.
+  useEffect(() => {
+    if (!isOpen) return
+    document.body.classList.add('ask-george-open')
+    return () => document.body.classList.remove('ask-george-open')
+  }, [isOpen])
+
   // Escape key close
   useEffect(() => {
     if (!isOpen) return
@@ -36,25 +45,30 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
 
   return (
     <>
-      {/* Backdrop — mobile only */}
+      {/* Backdrop — full viewport at every breakpoint. Sits below the drawer
+          (z-40 < z-50) and above the page, so clicking outside closes the drawer
+          and pointer events never reach page content (no accidental navigation). */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 md:hidden"
-          style={{ backgroundColor: 'rgba(13,28,39,0.7)' }}
+          className="fixed inset-0 z-40"
+          style={{ backgroundColor: 'rgba(10,15,24,0.5)' }}
           onClick={onClose}
           aria-hidden="true"
         />
       )}
 
       {/*
-        Mobile (<md):  full 100vw, starts below TopNav (top-14 = 56px), fills remaining height
-        Desktop (md+): 400px wide, anchored top-0, full 100vh
+        Mobile (<md):  full 100vw, starts below TopNav (top-14 = 56px), fills to the
+                       viewport bottom. The bottom tab bar is hidden while open (see
+                       the body-class effect), so nothing clips the input.
+        Desktop (md+): 400px wide, anchored top-0, full height.
+        100dvh (not 100vh) so mobile browser chrome is accounted for.
       */}
       <div
         className={[
           'fixed right-0 z-50 flex flex-col',
-          'w-full top-14 h-[calc(100vh-56px)]',
-          'md:w-[400px] md:top-0 md:h-screen',
+          'w-full top-14 h-[calc(100dvh-56px)]',
+          'md:w-[400px] md:top-0 md:h-[100dvh]',
         ].join(' ')}
         style={{
           backgroundColor: 'var(--bg-page)',

@@ -621,6 +621,12 @@ textarea {
   padding-bottom: env(safe-area-inset-bottom, 0px);
   min-height: calc(56px + env(safe-area-inset-bottom, 0px));
 }
+/* Ask George drawer open: hide the fixed bottom tab bar so the chat input +
+   Send aren't clipped behind it on <lg viewports (the drawer sets this class
+   on <body> while open). */
+body.ask-george-open .ep-bottom-tabs {
+  display: none !important;
+}
 .ep-bottom-tabs a,
 .ep-bottom-tabs button {
   min-height: 48px;
