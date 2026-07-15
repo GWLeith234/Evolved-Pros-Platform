@@ -129,12 +129,21 @@ export function CourseCard({ course, isLocked, userTier }: CourseCardProps) {
 
       {/* Bottom content */}
       <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 z-[1]">
-        <p
-          className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] mb-1"
-          style={{ color: pillarColor }}
-        >
-          {PILLAR_CONFIG[course.pillarNumber]?.label ?? course.title}
-        </p>
+        {/* Eyebrow = pillar label. Suppress when it duplicates the title
+            (e.g. a course literally titled "Foundation") so the card doesn't
+            render "FOUNDATION / FOUNDATION". */}
+        {(() => {
+          const eyebrow = PILLAR_CONFIG[course.pillarNumber]?.label
+          if (!eyebrow || eyebrow.trim().toLowerCase() === course.title.trim().toLowerCase()) return null
+          return (
+            <p
+              className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] mb-1"
+              style={{ color: pillarColor }}
+            >
+              {eyebrow}
+            </p>
+          )
+        })()}
 
         <p className="font-condensed font-bold uppercase text-[14px] text-[#F5F0E8] leading-tight mb-3">
           {course.title}

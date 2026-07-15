@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { ProfileView } from '@/components/profile/ProfileView'
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm'
+import { countUserPosts } from '@/lib/community/postCount'
 
 export async function generateMetadata({ params }: { params: { userId: string } }): Promise<Metadata> {
   const { data } = await adminClient
@@ -48,11 +49,10 @@ export default async function MemberProfilePage({
   }
   const isSelf = selfId !== null && selfId === profile.id
 
-  const [postCountResult, badgesResult, lessonsResult] = await Promise.all([
-    adminClient
-      .from('posts')
-      .select('id', { count: 'exact', head: true })
-      .eq('author_id', profile.id),
+  // Post count comes from the shared source of truth (lib/community/postCount)
+  // so Profile and the Home scoreboard can't drift on the same number.
+  const [postCount, badgesResult, lessonsResult] = await Promise.all([
+    countUserPosts(adminClient, profile.id),
     adminClient
       .from('member_badges')
       .select('pillar_number')
@@ -65,7 +65,7 @@ export default async function MemberProfilePage({
   ])
 
   const stats = {
-    posts: postCountResult.count ?? 0,
+    posts: postCount,
     badges: (badgesResult.data ?? []).map(b => b.pillar_number),
     lessons: lessonsResult.count ?? 0,
   }

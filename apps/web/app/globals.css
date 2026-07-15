@@ -32,6 +32,20 @@
   --text-secondary: rgba(255,255,255,0.7);
   --text-tertiary: rgba(255,255,255,0.5);
 
+  /* SPRINT F — notification feed. Type-accent colors used for the eyebrow
+     label, unread dot, and card left-border. Dark defaults (accents on the
+     #111926 surface all clear AA); light overrides live in the light-mode
+     block and are darkened so the small-caps label text passes WCAG AA on a
+     white card. Surface/border/text bind to the shared DS tokens so the feed
+     flips cleanly with the theme. */
+  --notif-community: #79b0c6;  /* teal   — ~5.6:1 on #111926 */
+  --notif-event:     #ff2d4a;  /* red    — ~5.1:1 on #111926 */
+  --notif-academy:   #d4b45f;  /* gold   — ~7.2:1 on #111926 */
+  --notif-system:    #9FB2C2;  /* slate  — ~7.4:1 on #111926 */
+  --notif-card-bg:      var(--bg-surface);
+  --notif-card-border:  var(--border-color);
+  --notif-unread-wash:  rgba(121,176,198,0.10);
+
   /* SPRINT N — admin dual-theme tokens. Admin was a fixed light palette built
      from hardcoded hex; these neutral tokens let it follow the global theme.
      Dark defaults here; light values in the html.light-mode block below.
@@ -369,6 +383,17 @@ html.light-mode {
   --filter-rail-bg:           #FFFFFF;
   --filter-rail-active-bg:    #F5F0E8;
   --filter-rail-border:       rgba(27,42,74,0.10);
+
+  /* SPRINT F — notification accents darkened for AA. Read items are
+     transparent, so the label sits on the #F5F0E8 parchment page bg (not pure
+     white); these inks are tuned to clear 4.5:1 on parchment (the harder of
+     the two light surfaces). community 4.85:1 · event 4.69:1 · academy 5.0:1
+     · system 4.86:1 on #F5F0E8. */
+  --notif-community: #2C7186;
+  --notif-event:     #C9302A;
+  --notif-academy:   #7A6420;
+  --notif-system:    #5C6A7C;
+  --notif-unread-wash:  rgba(44,113,134,0.08);
 
   /* Pillar ink tokens (THEME-TOGGLE-SPRINT) — light-mode-only text/border/
      accent-bar colors for the 6 pillar categories, paired with a 12% alpha

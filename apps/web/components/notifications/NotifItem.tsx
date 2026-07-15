@@ -17,18 +17,19 @@ export interface NotifItemData {
 
 interface NotifItemProps {
   notification: NotifItemData
-  variant: 'dark' | 'light'
   onRead?: () => void
 }
 
-// Type metadata
-const TYPE_META: Record<NotifType, { label: string; color: string; bg: string; border: string }> = {
-  community_reply:   { label: 'Community',  color: '#68a2b9', bg: 'rgba(104,162,185,0.1)', border: '#68a2b9' },
-  community_mention: { label: 'Community',  color: '#68a2b9', bg: 'rgba(104,162,185,0.1)', border: '#68a2b9' },
-  event_reminder:    { label: 'Event',       color: '#ef0e30', bg: 'rgba(239,14,48,0.1)',   border: '#ef0e30' },
-  course_unlock:     { label: 'Academy',     color: '#c9a84c', bg: 'rgba(201,168,76,0.1)',  border: '#c9a84c' },
-  system_billing:    { label: 'System',      color: '#7a8a96', bg: 'rgba(122,138,150,0.08)', border: '#7a8a96' },
-  system_general:    { label: 'System',      color: '#7a8a96', bg: 'rgba(122,138,150,0.08)', border: '#7a8a96' },
+// Type metadata. `accent` is a theme-aware CSS variable so the eyebrow label,
+// unread dot, and left border all pass WCAG AA in both light and dark (the raw
+// brand hues fail on a white card — see the --notif-* tokens in globals.css).
+const TYPE_META: Record<NotifType, { label: string; accent: string }> = {
+  community_reply:   { label: 'Community', accent: 'var(--notif-community)' },
+  community_mention: { label: 'Community', accent: 'var(--notif-community)' },
+  event_reminder:    { label: 'Event',     accent: 'var(--notif-event)' },
+  course_unlock:     { label: 'Academy',   accent: 'var(--notif-academy)' },
+  system_billing:    { label: 'System',    accent: 'var(--notif-system)' },
+  system_general:    { label: 'System',    accent: 'var(--notif-system)' },
 }
 
 function formatRelativeTime(iso: string): string {
@@ -43,15 +44,14 @@ function formatRelativeTime(iso: string): string {
 }
 
 /** Render **bold** markers as <strong> spans */
-function RichBody({ text, dark }: { text: string; dark: boolean }) {
+function RichBody({ text }: { text: string }) {
   const parts = text.split(/(\*\*[^*]+\*\*)/)
-  const baseColor = dark ? 'rgba(250,249,247,0.72)' : '#1b3c5a'
   return (
-    <span style={{ color: baseColor, fontSize: '13px', lineHeight: 1.5 }}>
+    <span style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: 1.5 }}>
       {parts.map((part, i) => {
         if (part.startsWith('**') && part.endsWith('**')) {
           return (
-            <strong key={i} style={{ fontWeight: 600, color: dark ? '#faf9f7' : '#112535' }}>
+            <strong key={i} style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
               {part.slice(2, -2)}
             </strong>
           )
@@ -62,10 +62,9 @@ function RichBody({ text, dark }: { text: string; dark: boolean }) {
   )
 }
 
-export function NotifItem({ notification, variant, onRead }: NotifItemProps) {
+export function NotifItem({ notification, onRead }: NotifItemProps) {
   const router = useRouter()
   const meta = TYPE_META[notification.type]
-  const isDark = variant === 'dark'
 
   async function handleClick() {
     if (!notification.isRead) {
@@ -81,47 +80,6 @@ export function NotifItem({ notification, variant, onRead }: NotifItemProps) {
     }
   }
 
-  if (isDark) {
-    return (
-      <div
-        onClick={handleClick}
-        role="button"
-        tabIndex={0}
-        aria-label={`${meta.label} notification${notification.isRead ? '' : ', unread'}: ${notification.body.replace(/\*\*/g, '')}`}
-        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') void handleClick() }}
-        className="px-5 py-4 cursor-pointer transition-colors"
-        style={{
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
-          backgroundColor: !notification.isRead ? 'rgba(104,162,185,0.06)' : 'transparent',
-          opacity: notification.isRead ? 0.72 : 1,
-        }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(255,255,255,0.03)' }}
-        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = !notification.isRead ? 'rgba(104,162,185,0.06)' : 'transparent' }}
-      >
-        <div className="flex items-center gap-2 mb-1">
-          {!notification.isRead && (
-            <span className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ backgroundColor: meta.color }} />
-          )}
-          <span
-            className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px]"
-            style={{ color: meta.color }}
-          >
-            {meta.label}
-          </span>
-          <span
-            suppressHydrationWarning
-            className="font-condensed text-[12px] ml-auto"
-            style={{ color: 'rgba(255,255,255,0.25)' }}
-          >
-            {formatRelativeTime(notification.createdAt)}
-          </span>
-        </div>
-        <RichBody text={notification.body} dark={true} />
-      </div>
-    )
-  }
-
-  // Light variant (notification center page)
   return (
     <div
       onClick={handleClick}
@@ -131,40 +89,47 @@ export function NotifItem({ notification, variant, onRead }: NotifItemProps) {
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') void handleClick() }}
       className="flex items-start gap-4 px-5 py-4 cursor-pointer rounded-lg transition-all"
       style={{
-        backgroundColor: 'white',
-        border: '1px solid rgba(27,60,90,0.08)',
-        borderLeft: `3px solid ${notification.isRead ? 'rgba(27,60,90,0.08)' : meta.border}`,
+        backgroundColor: notification.isRead ? 'transparent' : 'var(--notif-unread-wash)',
+        border: '1px solid var(--notif-card-border)',
+        borderLeft: `3px solid ${notification.isRead ? 'var(--notif-card-border)' : meta.accent}`,
         opacity: notification.isRead ? 0.75 : 1,
       }}
     >
       {/* Icon */}
       <div
         className="w-9 h-9 rounded flex items-center justify-center flex-shrink-0 mt-0.5"
-        style={{ backgroundColor: meta.bg }}
+        style={{ backgroundColor: 'var(--btn-ghost-bg)' }}
       >
-        <TypeIcon type={notification.type} color={meta.color} />
+        <TypeIcon type={notification.type} color={meta.accent} />
       </div>
 
       {/* Body */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
+          {!notification.isRead && (
+            <span className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ backgroundColor: meta.accent }} />
+          )}
           <span
             className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px]"
-            style={{ color: meta.color }}
+            style={{ color: meta.accent }}
           >
             {meta.label}
           </span>
           <span
             suppressHydrationWarning
             className="font-condensed text-[12px] ml-auto flex-shrink-0"
-            style={{ color: '#7a8a96' }}
+            style={{ color: 'var(--text-tertiary)' }}
           >
             {formatRelativeTime(notification.createdAt)}
           </span>
         </div>
-        <p className="font-body font-semibold text-[13px] text-[#112535] mb-0.5">{notification.title}</p>
+        {notification.title && (
+          <p className="font-body font-semibold text-[13px] mb-0.5" style={{ color: 'var(--text-primary)' }}>
+            {notification.title}
+          </p>
+        )}
         <div className="font-body text-[13px]">
-          <RichBody text={notification.body} dark={false} />
+          <RichBody text={notification.body} />
         </div>
       </div>
 
@@ -172,7 +137,7 @@ export function NotifItem({ notification, variant, onRead }: NotifItemProps) {
       {notification.actionUrl && (
         <span
           className="flex-shrink-0 font-condensed font-semibold uppercase tracking-wide text-[12px] rounded px-3 py-1.5 self-center"
-          style={{ color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'transparent' }}
+          style={{ color: 'var(--text-primary)', border: '1px solid var(--notif-card-border)', backgroundColor: 'transparent' }}
         >
           View →
         </span>

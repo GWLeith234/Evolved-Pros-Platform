@@ -9,8 +9,9 @@ import { LogoMark } from '@/components/ui/LogoMark'
 import { useTheme } from '@/components/theme/ThemeProvider'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
-// NotifDrawer pulls @supabase/client (realtime-js). Load the bell after paint
-// so TopNav can SSR without empty chrome flash / hydration #425.
+// The bell links straight to the /notifications feed (single destination —
+// no in-nav drawer). Loaded after paint so TopNav can SSR without an empty
+// chrome flash / hydration #425.
 const NotifBell = dynamic(
   () => import('@/components/notifications/NotifBell').then(m => m.NotifBell),
   {

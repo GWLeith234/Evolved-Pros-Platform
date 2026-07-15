@@ -303,7 +303,9 @@ export function UnifiedCommunityPage({
             </div>
           )}
 
-          {/* Compose (COMMUNITY-SPRINT-1) */}
+          {/* Compose (COMMUNITY-SPRINT-1) — anchor target for the mobile
+              "Start a post" quick-action (SPRINT E). */}
+          <div id="community-composer" style={{ scrollMarginTop: 88 }}>
           <Composer
             channelId={defaultChannelId}
             currentUser={{
@@ -314,6 +316,7 @@ export function UnifiedCommunityPage({
             }}
             onPostCreated={handleNewComposerPost}
           />
+          </div>
 
           {/* Filter rail — sits inside the main column between composer and
               feed so the right rail can extend full-height (matches

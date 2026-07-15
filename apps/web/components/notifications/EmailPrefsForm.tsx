@@ -102,14 +102,14 @@ export function EmailPrefsForm({ initialPrefs }: EmailPrefsFormProps) {
     return (
       <div
         className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-0 py-3 px-4"
-        style={{ borderBottom: '1px solid rgba(27,60,90,0.06)' }}
+        style={{ borderBottom: '1px solid var(--notif-card-border)' }}
       >
         <div className="flex items-center gap-2">
-          <span className="font-body font-medium text-[13px] text-[#1b3c5a]">{label}</span>
+          <span className="font-body font-medium text-[13px]" style={{ color: 'var(--text-primary)' }}>{label}</span>
           {isSaving && (
             <span
-              className="inline-block rounded-full border-2 border-[#1b3c5a] border-t-transparent animate-spin"
-              style={{ width: 12, height: 12 }}
+              className="inline-block rounded-full border-2 border-t-transparent animate-spin"
+              style={{ width: 12, height: 12, borderColor: 'var(--text-primary)', borderTopColor: 'transparent' }}
               aria-label="Saving"
             />
           )}
@@ -127,9 +127,9 @@ export function EmailPrefsForm({ initialPrefs }: EmailPrefsFormProps) {
               onClick={() => onChange(opt.value)}
               className="font-condensed font-semibold uppercase text-[12px] rounded px-3 py-1.5 transition-all w-full sm:w-auto"
               style={{
-                backgroundColor: value === opt.value ? '#1b3c5a' : 'transparent',
-                color: value === opt.value ? 'white' : '#7a8a96',
-                border: value === opt.value ? '1px solid #1b3c5a' : '1px solid rgba(27,60,90,0.15)',
+                backgroundColor: value === opt.value ? 'var(--text-primary)' : 'transparent',
+                color: value === opt.value ? 'var(--bg-page)' : 'var(--text-secondary)',
+                border: `1px solid ${value === opt.value ? 'var(--text-primary)' : 'var(--notif-card-border)'}`,
                 opacity: disabled ? 0.6 : 1,
                 cursor: disabled ? 'default' : 'pointer',
               }}
@@ -146,14 +146,14 @@ export function EmailPrefsForm({ initialPrefs }: EmailPrefsFormProps) {
     <div>
       <div
         className="rounded-lg overflow-hidden mb-2"
-        style={{ border: '1px solid rgba(27,60,90,0.1)' }}
+        style={{ border: '1px solid var(--notif-card-border)' }}
       >
-        <div style={{ backgroundColor: 'rgba(27,60,90,0.03)' }}>
+        <div style={{ backgroundColor: 'var(--btn-ghost-bg)' }}>
           <div className="grid grid-cols-[1fr_auto] px-4 py-2">
-            <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96]">
+            <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
               Notification Type
             </span>
-            <span className="hidden sm:inline font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96]">
+            <span className="hidden sm:inline font-condensed font-bold uppercase tracking-[0.18em] text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
               Frequency
             </span>
           </div>
@@ -197,7 +197,7 @@ export function EmailPrefsForm({ initialPrefs }: EmailPrefsFormProps) {
         />
       </div>
 
-      <p className="font-condensed text-[12px] text-[#7a8a96]">
+      <p className="font-condensed text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
         Changes save automatically.
       </p>
     </div>

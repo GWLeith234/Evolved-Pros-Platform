@@ -12,7 +12,7 @@
  * That eliminates the empty-nav flash on cold load while keeping realtime off
  * the initial server module graph for the shell.
  *
- * NotifBell still uses ssr:false for its drawer (see TopNav) — a tiny placeholder
+ * NotifBell still loads via ssr:false (see TopNav) — a tiny placeholder
  * reserves the bell slot so layout does not jump.
  */
 
