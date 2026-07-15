@@ -5,14 +5,15 @@ import type { PodcastEpisode } from '@/lib/podcast/transforms'
 import { sortEpisodesNewest } from '@/lib/podcast/transforms'
 import { PodcastFilterPills, type FilterKey, type SortKey } from './PodcastFilterPills'
 import { PodcastEpisodeTile } from './PodcastEpisodeTile'
-import { SponsorAdCard, type SponsorAd } from '@/components/home/HomeSponsorAd'
+import { RotatingSponsorCard } from './PodcastSponsorCard'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 const FB = 'var(--font-barlow)'
 const FBC = 'var(--font-barlow-condensed)'
 const FBN = 'var(--font-bebas)'
 
-/** Insert a unique ad after every Nth episode (0-based before index). */
-const AD_EVERY_N = 6
+/** One rotating sponsor card after every Nth episode (album-cover ratio 3:1). */
+const AD_EVERY_N = 3
 
 interface PodcastGridProps {
   episodes: PodcastEpisode[]
@@ -37,24 +38,15 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
     return list
   }, [episodes, filter, sort])
 
-  // Interleave unique Evolution Partner cards between episodes (never back-to-back).
-  // Desktop: ad spans 2 cols; mobile: full width (see CSS below).
+  // Interleave one album-cover-sized sponsor unit after every 3rd episode.
+  // Each slot is a single grid cell (same footprint as an episode tile) that
+  // rotates through the full active/in-date pool, honoring rotation_interval.
+  // Slots are staggered so adjacent cards don't show the same partner, and the
+  // rotation self-cycles so a short pool never leaves a gap.
   const gridChildren = useMemo(() => {
     const nodes: ReactNode[] = []
-    let adIdx = 0
-    const ads = sponsorAds.slice(0, 2)
-    const pushAd = () => {
-      if (adIdx >= ads.length) return
-      const ad = ads[adIdx++]
-      nodes.push(
-        <div key={`sponsor-${ad.id}`} className="podcast-sponsor-slot">
-          <SponsorAdCard ad={ad} />
-        </div>,
-      )
-    }
+    let slot = 0
     filtered.forEach((ep, i) => {
-      // After episodes 6, 12, … (i is 0-based → insert before index 6, 12)
-      if (adIdx < ads.length && i > 0 && i % AD_EVERY_N === 0) pushAd()
       nodes.push(
         <PodcastEpisodeTile
           key={ep.id}
@@ -64,9 +56,16 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
           onBlur={() => setFocused(null)}
         />,
       )
+      // After every 3rd episode (1-based), drop in a rotating sponsor cell.
+      if (sponsorAds.length > 0 && (i + 1) % AD_EVERY_N === 0) {
+        const startIndex = slot++
+        nodes.push(
+          <div key={`sponsor-slot-${startIndex}`} className="podcast-sponsor-slot">
+            <RotatingSponsorCard pool={sponsorAds} startIndex={startIndex} />
+          </div>,
+        )
+      }
     })
-    // Short catalogues: still show remaining partners once at the end
-    while (adIdx < ads.length) pushAd()
     return nodes
   }, [filtered, sponsorAds, focused])
 
@@ -252,16 +251,12 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
           outline-offset: 2px;
         }
         .podcast-sponsor-slot {
-          grid-column: span 2;
           min-width: 0;
         }
         @media (max-width: 600px) {
           .podcast-archive-grid {
             grid-template-columns: 1fr 1fr !important;
             gap: 24px 14px !important;
-          }
-          .podcast-sponsor-slot {
-            grid-column: 1 / -1 !important;
           }
         }
         @media (max-width: 400px) {

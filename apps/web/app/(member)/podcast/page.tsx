@@ -8,8 +8,8 @@ import { SPONSOR_AD_COLUMNS, type SponsorAd } from '@/components/home/HomeSponso
 import {
   ALL_FLAGSHIP_SPONSORS,
   ensureFlagshipSponsors,
-  pickRotatedSponsors,
 } from '@/lib/sponsors/partners'
+import { dedupeSponsors } from '@/lib/sponsors/rotate'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'The Evolved Pros Podcast | Evolved Pros' }
@@ -50,35 +50,35 @@ export default async function PodcastIndexPage() {
   // Dev-only sanity check: flag if episode numbering drifts from chronology.
   assertMonotonicNumbering(episodes)
 
-  // Evolution Partner sponsor placements interleaved into the archive grid.
-  // Mirrors HomeSponsorRow: prefer podcast/all-tagged active ads, then fall
-  // back to any active ad so the slot is never empty when inventory exists.
-  // De-duped by id — never the same ad twice.
+  // Evolution Partner pool interleaved into the archive grid at 3:1. Each grid
+  // slot rotates client-side through this whole pool honoring rotation_interval,
+  // so we hand down the full active/in-date set (not a pre-sliced pair). Prefer
+  // podcast/all-placed ads, then fall back to any active ad, then flagship
+  // partners so a slot is never empty.
   const sponsorAds = await fetchPodcastSponsorAds()
 
   return <PodcastPageShell episodes={episodes} sponsorAds={sponsorAds} />
 }
 
 async function fetchPodcastSponsorAds(): Promise<SponsorAd[]> {
-  // Rotated + deduped Evolution Partners (includes Vendasta avatars creative).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = adminClient as any
-  try {
-    const primary = await sb
-      .from('platform_ads')
-      .select(SPONSOR_AD_COLUMNS)
+  const nowIso = new Date().toISOString()
+  // Only active, in-date inventory: null start/end = always-on flight window.
+  const inDate = (q: any) =>
+    q
       .eq('is_active', true)
-      .in('placement', ['podcast', 'all'])
+      .or(`start_date.is.null,start_date.lte.${nowIso}`)
+      .or(`end_date.is.null,end_date.gte.${nowIso}`)
       .order('sort_order')
-      .limit(12)
+      .limit(24)
+  try {
+    const primary = await inDate(
+      sb.from('platform_ads').select(SPONSOR_AD_COLUMNS).in('placement', ['podcast', 'all']),
+    )
     const rows = (primary.data ?? []) as SponsorAd[]
     if (rows.length < 2) {
-      const fallback = await sb
-        .from('platform_ads')
-        .select(SPONSOR_AD_COLUMNS)
-        .eq('is_active', true)
-        .order('sort_order')
-        .limit(12)
+      const fallback = await inDate(sb.from('platform_ads').select(SPONSOR_AD_COLUMNS))
       const seen = new Set(rows.map(r => r.id))
       for (const r of (fallback.data ?? []) as SponsorAd[]) {
         if (!seen.has(r.id)) {
@@ -87,9 +87,11 @@ async function fetchPodcastSponsorAds(): Promise<SponsorAd[]> {
         }
       }
     }
+    // Guarantee the flagship partners are present, then de-dupe. Full pool is
+    // returned; the grid's rotating slots cycle through it.
     const pool = rows.length ? ensureFlagshipSponsors(rows) : ALL_FLAGSHIP_SPONSORS
-    return pickRotatedSponsors(pool, 2, { salt: 71 })
+    return dedupeSponsors(pool)
   } catch {
-    return pickRotatedSponsors(ALL_FLAGSHIP_SPONSORS, 2, { salt: 71 })
+    return dedupeSponsors(ALL_FLAGSHIP_SPONSORS)
   }
 }
