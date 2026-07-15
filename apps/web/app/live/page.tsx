@@ -60,6 +60,7 @@ export default async function LivePage() {
 
   return (
     <div
+      className="live-force-dark"
       style={{
         minHeight: '100vh',
         background: 'var(--bg-page)',

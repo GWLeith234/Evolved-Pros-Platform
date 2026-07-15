@@ -201,7 +201,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
               {member.tier && (
                 <span
                   className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
-                  style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: 'var(--admin-text)', border: '1px solid rgba(27,60,90,0.15)' }}
+                  style={{ backgroundColor: 'var(--admin-subtle)', color: 'var(--admin-text)', border: '1px solid var(--admin-border)' }}
                 >
                   {member.tier.toUpperCase()}
                 </span>

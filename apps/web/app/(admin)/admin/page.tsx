@@ -227,7 +227,7 @@ export default async function AdminDashboardPage() {
                   <td className="px-5 py-3"><p className="font-condensed text-[11px] text-[color:var(--admin-text-2)]">{m.email ?? '—'}</p></td>
                   <td className="px-5 py-3">
                     {m.tier ? (
-                      <span className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded" style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: 'var(--admin-text)', border: '1px solid rgba(27,60,90,0.12)' }}>
+                      <span className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--admin-subtle)', color: 'var(--admin-text)', border: '1px solid var(--admin-border)' }}>
                         {m.tier}
                       </span>
                     ) : (
@@ -297,7 +297,7 @@ export default async function AdminDashboardPage() {
                     <td className="px-5 py-3">
                       <span
                         className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded"
-                        style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: 'var(--admin-text)', border: '1px solid rgba(27,60,90,0.12)' }}
+                        style={{ backgroundColor: 'var(--admin-subtle)', color: 'var(--admin-text)', border: '1px solid var(--admin-border)' }}
                       >
                         {wh.event_type}
                       </span>

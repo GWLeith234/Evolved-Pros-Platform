@@ -49,7 +49,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
   const tierColor = tierBadgeColor(profile.tier)
 
   return (
-    <div style={{ backgroundColor: '#0A0F18', minHeight: '100%' }}>
+    <div style={{ backgroundColor: 'var(--bg-page)', minHeight: '100%' }}>
       {/* Banner */}
       <div
         style={{
@@ -87,7 +87,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
               width: '128px',
               height: '128px',
               borderRadius: '50%',
-              border: '4px solid #0A0F18',
+              border: '4px solid var(--bg-page)',
               backgroundColor: '#C9A84C',
               flexShrink: 0,
               overflow: 'hidden',
@@ -124,7 +124,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
                   fontFamily: '"Playfair Display", Georgia, serif',
                   fontWeight: 700,
                   fontSize: '32px',
-                  color: '#F5F0E8',
+                  color: 'var(--text-primary)',
                   margin: 0,
                   lineHeight: 1.15,
                 }}
@@ -158,7 +158,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
                   fontFamily: '"Barlow Condensed", sans-serif',
                   fontWeight: 600,
                   fontSize: '14px',
-                  color: '#7a8a96',
+                  color: 'var(--text-tertiary)',
                   textTransform: 'uppercase',
                   letterSpacing: '0.12em',
                   margin: '4px 0 0',
@@ -221,7 +221,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
               fontFamily: 'Inter, sans-serif',
               fontWeight: 400,
               fontSize: '15px',
-              color: '#D6D0C4',
+              color: 'var(--text-secondary)',
               lineHeight: 1.6,
             }}
           >
@@ -235,10 +235,10 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
               fontFamily: 'Inter, sans-serif',
               fontStyle: 'italic',
               fontSize: '14px',
-              color: '#7a8a96',
+              color: 'var(--text-tertiary)',
             }}
           >
-            <a href={`/profile/${profile.id}?edit=1`} style={{ color: '#7a8a96', textDecoration: 'underline' }}>
+            <a href={`/profile/${profile.id}?edit=1`} style={{ color: 'var(--text-tertiary)', textDecoration: 'underline' }}>
               Add a bio →
             </a>
           </p>

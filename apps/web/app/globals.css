@@ -1490,9 +1490,31 @@ html.light-mode .ep-bottom-tabs {
   padding-right: max(24px, env(safe-area-inset-right, 0px));
 }
 .ep-no-x-scroll {
-  overflow-x: hidden;
+  /* clip (not hidden) prevents horizontal scroll without establishing a scroll
+     container. hidden computes overflow-y to auto, which breaks descendant
+     position:sticky (the community right rail). */
+  overflow-x: clip;
   max-width: 100%;
 }
+
+/* SPRINT N.1 — /live is a navy-only single-theme shell. In light mode its page
+   background was flipping to cream while its hardcoded white text stayed white.
+   Re-declare the global surface and text tokens to their dark values on the
+   /live wrapper so light-mode has no effect inside it (the /live-specific text
+   and border tokens are already theme-constant). */
+html.light-mode .live-force-dark {
+  --bg-page:        #0A0F18;
+  --bg-surface:     #111926;
+  --bg-elevated:    #1A2332;
+  --border-color:   rgba(255,255,255,0.07);
+  --text-primary:   #ffffff;
+  --text-secondary: rgba(255,255,255,0.6);
+  --text-tertiary:  rgba(255,255,255,0.35);
+  --page-bg:        #0d1c27;
+  --card-bg:        #111926;
+  --card-border:    rgba(255,255,255,0.07);
+}
+
 
 /* Fluid type for section titles on small screens */
 .ep-fluid-title {

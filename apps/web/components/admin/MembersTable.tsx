@@ -246,8 +246,8 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                     style={isActions ? {
                       position: 'sticky',
                       right: 0,
-                      backgroundColor: 'rgb(247,248,249)',
-                      boxShadow: 'inset 1px 0 0 rgba(27,60,90,0.06)',
+                      backgroundColor: 'var(--admin-card)',
+                      boxShadow: 'inset 1px 0 0 var(--admin-border)',
                     } : undefined}
                   >
                     {h}
