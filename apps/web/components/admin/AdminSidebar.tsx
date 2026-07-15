@@ -34,7 +34,9 @@ const SECTIONS: ReadonlyArray<SidebarSectionData> = [
     ],
   },
   {
-    title: 'Vendasta CRM',
+    // Legacy Vendasta surfaces — folded behind one clearly-labelled section
+    // until Sprint I (own CRM/catalogue/payments) removes Vendasta entirely.
+    title: 'Legacy (Vendasta)',
     items: [
       { label: 'Contacts',      href: 'https://business.vendasta.com/crm/contacts',     match: /^$/ },
       { label: 'Opportunities', href: 'https://business.vendasta.com/crm/opportunities', match: /^$/ },

@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { Modal } from '@/components/ui/Modal'
 
 export interface FriendInvite {
   id: string
@@ -82,6 +83,9 @@ export function FriendsClient({
 
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [revokingId, setRevokingId] = useState<string | null>(null)
+  // Row awaiting revoke confirmation. Drives a non-blocking in-app modal —
+  // replaces the native confirm() that froze the tab for 30s+ (Sprint K).
+  const [pendingRevoke, setPendingRevoke] = useState<FriendInvite | null>(null)
 
   const stats = useMemo(() => {
     const invited = invites.length
@@ -168,13 +172,16 @@ export function FriendsClient({
     }
   }
 
-  async function revoke(row: FriendInvite) {
+  // Open the confirmation modal — no blocking native dialog (Sprint K fix).
+  function requestRevoke(row: FriendInvite) {
     if (revokingId) return
-    const warn =
-      row.status === 'redeemed'
-        ? `Revoke ${row.email}? This removes their Professional access immediately.`
-        : `Revoke the invite for ${row.email}?`
-    if (!window.confirm(warn)) return
+    setPendingRevoke(row)
+  }
+
+  async function confirmRevoke() {
+    const row = pendingRevoke
+    if (!row || revokingId) return
+    setPendingRevoke(null)
     setRevokingId(row.id)
     try {
       const res = await fetch('/api/admin/friends/revoke', {
@@ -318,7 +325,7 @@ export function FriendsClient({
                         {row.status !== 'revoked' && (
                           <button
                             type="button"
-                            onClick={() => revoke(row)}
+                            onClick={() => requestRevoke(row)}
                             disabled={revokingId === row.id}
                             className={btnBase}
                             style={{ border: '1px solid rgba(239,14,48,0.3)', color: RED, opacity: revokingId === row.id ? 0.5 : 1 }}
@@ -335,6 +342,49 @@ export function FriendsClient({
           </table>
         </div>
       </div>
+
+      {/* Revoke confirmation — in-app modal, non-blocking (Sprint K). */}
+      <Modal
+        open={pendingRevoke != null}
+        onClose={() => setPendingRevoke(null)}
+        title="Revoke access?"
+        ariaLabel="Confirm revoke"
+        maxWidth={420}
+      >
+        <div className="p-5">
+          <p className="font-body text-[14px]" style={{ color: NAVY }}>
+            {pendingRevoke?.status === 'redeemed' ? (
+              <>
+                Revoke <strong>{pendingRevoke?.email}</strong>? This removes their Professional
+                access immediately and reverts them to Community.
+              </>
+            ) : (
+              <>
+                Revoke the invite for <strong>{pendingRevoke?.email}</strong>? They won’t be able
+                to redeem this link.
+              </>
+            )}
+          </p>
+          <div className="flex items-center justify-end gap-2 mt-5">
+            <button
+              type="button"
+              onClick={() => setPendingRevoke(null)}
+              className={btnBase}
+              style={{ border: '1px solid var(--admin-border)', color: SLATE }}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={confirmRevoke}
+              className={btnBase}
+              style={{ backgroundColor: RED, color: 'white' }}
+            >
+              Revoke
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }
