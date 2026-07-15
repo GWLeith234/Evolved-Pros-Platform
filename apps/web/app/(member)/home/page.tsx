@@ -7,12 +7,7 @@ import { HomeContextStrip } from '@/components/home/HomeContextStrip'
 
 export const metadata: Metadata = { title: 'Home — Evolved Pros' }
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
-import { TodaysEvolution, type TodaysEvolutionAction } from '@/components/home/TodaysEvolution'
-import { UpcomingEventsWidget } from '@/components/home/UpcomingEventsWidget'
-import { AcademyProgressWidget } from '@/components/home/AcademyProgressWidget'
 import { ProfileCompletePrompt } from '@/components/home/ProfileCompletePrompt'
-import { InProgressPillarHero } from '@/components/home/InProgressPillarHero'
-import { ClimbingTowardCard } from '@/components/home/ClimbingTowardCard'
 import { GoalCard, type GoalForCard } from '@/components/home/GoalCard'
 import { AccountabilityHub } from '@/components/home/AccountabilityHub'
 import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
@@ -20,7 +15,6 @@ import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStor
 import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
 import { type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/DailyPulseCard'
 import {
-  HomeSponsorAd,
   HomeSponsorRow,
   SPONSOR_AD_COLUMNS,
   type SponsorAd,
@@ -28,7 +22,6 @@ import {
 import {
   DEFAULT_HOME_SPONSORS,
   pickHomeSponsors,
-  pickSidebarSponsor,
   ensureFlagshipSponsors,
 } from '@/lib/sponsors/partners'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
@@ -119,9 +112,9 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
     progressByLesson[p.lesson_id] = { completed_at: p.completed_at, updated_at: p.updated_at }
   }
 
-  // Return ALL published courses with their progress. Caller filters/slices for
-  // the AcademyProgressWidget (top-N active) and uses the full list to derive
-  // per-pillar Architecture-column state in the WelcomeBanner.
+  // Return ALL published courses with their progress. Caller derives the
+  // in-progress pillar (AccountabilityHub CTA + goal "tied to path" footer)
+  // and per-pillar Architecture-column state in the WelcomeBanner.
   return (courses.data ?? []).map(c => {
     const courseLesson = lessonsByCourse[c.id] ?? []
     const total = courseLesson.length
@@ -139,7 +132,7 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
     const firstActivity    = updatedAts.length > 0 ? updatedAts[0] : null
     const lastCompletedAt  = completedAts.length > 0 ? completedAts[completedAts.length - 1] : null
     // First uncompleted lesson by sort_order — the "Next up" target for the
-    // InProgressPillarHero CTA and the GoalCard's tied-to-path mirror.
+    // AccountabilityHub CTA and the GoalCard's tied-to-path mirror.
     const nextLesson = courseLesson.find(l => !progressByLesson[l.id]?.completed_at) ?? null
     return {
       ...c,
@@ -494,11 +487,11 @@ async function fetchWeekCommitments(profileId: string, weekStart: string): Promi
 
 /**
  * Server-fetch Evolution Partner ads so /home doesn't pay a client
- * waterfall + mount gate for the sponsor row and sidebar. adminClient
- * bypasses RLS so members always see active placements.
+ * waterfall + mount gate for the sponsor row. adminClient bypasses RLS so
+ * members always see active placements.
  */
-async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: SponsorAd | null }> {
-  // Main row: 2 rotated partners. Sidebar: 1 different partner (no dups).
+async function fetchHomeSponsors(): Promise<SponsorAd[]> {
+  // Main row: 2 rotated partners.
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = adminClient as any
@@ -510,36 +503,17 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: Sponso
       .limit(12)
 
     const all = (rows ?? []) as Array<SponsorAd & { placement?: string | null }>
-    if (all.length === 0) {
-      const home = pickHomeSponsors(DEFAULT_HOME_SPONSORS)
-      return {
-        home,
-        sidebar: pickSidebarSponsor(DEFAULT_HOME_SPONSORS, home),
-      }
-    }
+    if (all.length === 0) return pickHomeSponsors(DEFAULT_HOME_SPONSORS)
 
     const homePool = all.filter(a => {
       const p = (a.placement ?? 'all').toLowerCase()
       return p === 'home' || p === 'all'
     })
     const pool = ensureFlagshipSponsors(homePool.length ? homePool : all)
-    const home = pickHomeSponsors(pool)
-    const sidebarPool = all.filter(a => {
-      const p = (a.placement ?? 'all').toLowerCase()
-      return p === 'sidebar' || p === 'all'
-    })
-    const sidebar =
-      pickSidebarSponsor(sidebarPool.length ? sidebarPool : all, home) ??
-      pickSidebarSponsor(pool, home)
-
-    return { home, sidebar }
+    return pickHomeSponsors(pool)
   } catch (err) {
     console.error('[home.fetchHomeSponsors] failed:', err instanceof Error ? err.message : err)
-    const home = pickHomeSponsors(DEFAULT_HOME_SPONSORS)
-    return {
-      home,
-      sidebar: pickSidebarSponsor(DEFAULT_HOME_SPONSORS, home),
-    }
+    return pickHomeSponsors(DEFAULT_HOME_SPONSORS)
   }
 }
 
@@ -659,22 +633,10 @@ export default async function MemberHomePage() {
     return { number: n, name, state: 'locked' as const }
   })
 
-  // Top-N active courses for the AcademyProgressWidget. "Active" = the
-  // member touched at least one lesson (lastActivity present) or made
-  // any completion progress (pct > 0). Sorted by recency.
-  const activeCourses = [...courseProgress]
-    .filter(c => c.lastActivity !== null || c.pct > 0)
-    .sort((a, b) => {
-      if (!a.lastActivity) return 1
-      if (!b.lastActivity) return -1
-      return new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()
-    })
-    .slice(0, 3)
-
-  // ── Path Forward + Long Game (HOME-2) ───────────────────────────────
-  // Derive the in-progress and "climbing toward" pillars from the same
-  // pillar state the WelcomeBanner uses, then attach the per-course
-  // metadata each card needs (slug, lesson counts, next lesson, etc).
+  // ── In-progress pillar (HOME-2) ─────────────────────────────────────
+  // Derive the in-progress pillar from the same pillar state the
+  // WelcomeBanner uses, then attach the per-course metadata the
+  // AccountabilityHub CTA and the goal "tied to path" footer need.
   const PILLAR_NUM_TO_SLUG: Record<number, string> = {
     1: 'foundation',
     2: 'identity',
@@ -707,20 +669,9 @@ export default async function MemberHomePage() {
       }
     : null
 
-  const climbingEntry = pillars.find(p => p.state === 'locked')
-  const climbingCourse = climbingEntry ? courseByPillar.get(climbingEntry.number) : null
-  const climbingData = climbingEntry
-    ? {
-        number: climbingEntry.number,
-        name:   climbingEntry.name,
-        totalLessons: climbingCourse?.total ?? 0,
-        courseSlug:   climbingCourse?.slug ?? PILLAR_NUM_TO_SLUG[climbingEntry.number],
-      }
-    : null
-
   // The accountability mirror: a goal whose pillar slug matches the
-  // in-progress pillar gets a "↳ TIED TO PATH FORWARD" footer linking
-  // to the same lesson the InProgressPillarHero CTA points at.
+  // in-progress pillar gets a "tied to path" footer (GoalCard) linking
+  // to that course's next uncompleted lesson.
   const inProgressPillarSlug = inProgressData?.courseSlug ?? null
   const inProgressContinueHref = inProgressData
     ? (inProgressData.nextLessonSlug
@@ -736,12 +687,10 @@ export default async function MemberHomePage() {
     pillar: g.pillar,
   }))
 
-  // Today's Evolution — one-click DAU loop (course, accountability, community)
-  const habitsDone = dailyHabits.filter(h => h.completedToday).length
-  const commitsDone = weekCommitments.filter(c => c.is_completed).length
-  // Academy CTA state: a member mid-course continues; a member who has
-  // finished at least one pillar (and has nothing in progress) reviews rather
-  // than "starting" — only a member with no progress at all sees Start.
+  // Academy CTA state (AccountabilityHub): a member mid-course continues; a
+  // member who has finished at least one pillar (and has nothing in progress)
+  // reviews rather than "starting" — only a member with no progress at all
+  // sees Start.
   const anyPillarEarned = pillars.some(p => p.state === 'earned')
   const courseHref = inProgressData
     ? (inProgressData.nextLessonSlug
@@ -755,21 +704,6 @@ export default async function MemberHomePage() {
     : anyPillarEarned
       ? 'Review Academy'
       : 'Start Foundation'
-  // SPRINT M: one engagement nudge only. The Learn / Accountability / Daily
-  // Pulse cards each restated a metric already shown in the Accountability Hub
-  // (habits, commitments, course progress), so they were dropped.
-  const todaysActions: TodaysEvolutionAction[] = [
-    {
-      id: 'community',
-      eyebrow: 'Community',
-      title: 'Show up in the feed',
-      description: 'Post a win, ask a hard question, or vote on today’s poll.',
-      href: '/community',
-      cta: 'Open feed',
-      accent: '#A78BFA',
-      primary: true,
-    },
-  ]
 
   return (
     <div className="ep-page-gutter ep-surface-mobile pb-6 space-y-4 sm:space-y-5">
@@ -859,11 +793,7 @@ export default async function MemberHomePage() {
         )}
       </section>
 
-      {/* ——— The rest: one-click nudge, community & media ——— */}
-
-      {/* Today's Evolution — a single engagement nudge (SPRINT M: the metric
-          cards were dropped; habit/commit/goal progress lives in the hub). */}
-      <TodaysEvolution actions={todaysActions} />
+      {/* ——— Community & media ——— */}
 
       {/* HOME tiles — Community Pulse / Top Stories / Latest Drops. The Daily
           Pulse tile was removed: AccountabilityHub up top is the single daily
@@ -880,7 +810,7 @@ export default async function MemberHomePage() {
       </div>
 
       {/* Evolution Partner row — SSR-fetched platform_ads (no client waterfall). */}
-      <HomeSponsorRow ads={sponsors.home} />
+      <HomeSponsorRow ads={sponsors} />
 
       <ProfileCompletePrompt
         hasAvatar={Boolean(profile.avatar_url)}
@@ -888,64 +818,6 @@ export default async function MemberHomePage() {
         hasTitle={Boolean(profile.role_title)}
         hasName={Boolean(profile.display_name || profile.full_name)}
       />
-
-      {/* What's Next — upcoming events + sponsor. SPRINT M: the "Recent
-          Activity" feed was removed (it showed the same posts as the Community
-          Pulse tile above). */}
-      <div id="whats-next" className="ep-section-eyebrow pt-3">
-        <span className="ep-section-eyebrow__rule" aria-hidden />
-        <span className="ep-section-eyebrow__label">What&apos;s Next</span>
-        <span className="ep-section-eyebrow__grow" aria-hidden />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 items-start">
-        <UpcomingEventsWidget events={events} />
-        {/* Sidebar Evolution Partner — SSR-fetched, de-duped from home row. */}
-        <HomeSponsorAd ad={sponsors.sidebar} />
-      </div>
-
-      {/* SPRINT J — Section divider: "The Path Forward". */}
-      <div className="ep-section-eyebrow pt-3">
-        <span className="ep-section-eyebrow__rule" aria-hidden />
-        <span className="ep-section-eyebrow__label">The Path Forward</span>
-        <span className="ep-section-eyebrow__grow" aria-hidden />
-      </div>
-
-      {/* HOME-2 — Path Forward (left) + Long Game (right). SPRINT J: AcademyProgressWidget
-          moved into the left column (after the Climbing card) to match the design's
-          "Your Academy (2fr) | Goals (1fr)" lower row. Grid widened to 2fr/1fr. */}
-      {/* Path Forward — the "continue learning" actions. SPRINT M: the
-          PillarJourneyStrip ("N of 6 pillars earned") was removed — the six
-          pillars already render once in "The Architecture" hero. */}
-      <div className="space-y-4">
-        {inProgressData && (
-          <InProgressPillarHero
-            pillar={{
-              number: inProgressData.number,
-              name: inProgressData.name,
-              progressPct: inProgressData.progressPct,
-              completedLessons: inProgressData.completedLessons,
-              totalLessons: inProgressData.totalLessons,
-            }}
-            courseSlug={inProgressData.courseSlug}
-            dayOfTwentyOne={inProgressData.dayOfTwentyOne}
-            nextLessonTitle={inProgressData.nextLessonTitle}
-            nextLessonSlug={inProgressData.nextLessonSlug}
-          />
-        )}
-        {climbingData && (
-          <ClimbingTowardCard
-            pillar={{
-              number: climbingData.number,
-              name: climbingData.name,
-              totalLessons: climbingData.totalLessons,
-            }}
-            courseSlug={climbingData.courseSlug}
-          />
-        )}
-        <AcademyProgressWidget courses={activeCourses} />
-      </div>
-
     </div>
   )
 }
