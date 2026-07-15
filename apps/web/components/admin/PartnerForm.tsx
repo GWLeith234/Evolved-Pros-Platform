@@ -36,7 +36,7 @@ const EMPTY: PartnerFormValues = {
   name: '',
   url: '',
   logo_url: '',
-  brand_color: '#1b3c5a',
+  brand_color: 'var(--admin-text)',
   type: 'sponsor',
   tagline: '',
   body_copy: '',
@@ -51,9 +51,9 @@ const EMPTY: PartnerFormValues = {
   surfaces: ['home'],
 }
 
-const inputClass = 'w-full rounded px-3 py-2 font-body text-[13px] text-[#1b3c5a] outline-none transition-all'
-const inputStyle: React.CSSProperties = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }
-const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96] mb-1.5'
+const inputClass = 'w-full rounded px-3 py-2 font-body text-[13px] text-[color:var(--admin-text)] outline-none transition-all'
+const inputStyle: React.CSSProperties = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'var(--admin-card)' }
+const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[color:var(--admin-text-2)] mb-1.5'
 
 export function PartnerForm({ initial }: { initial?: Partial<PartnerFormValues> & { id?: string } }) {
   const router = useRouter()
@@ -248,7 +248,7 @@ export function PartnerForm({ initial }: { initial?: Partial<PartnerFormValues> 
                 type="color"
                 value={values.brand_color || '#1b3c5a'}
                 onChange={e => set('brand_color', e.target.value)}
-                style={{ width: 44, height: 38, padding: 0, border: '1px solid rgba(27,60,90,0.2)', background: 'white', borderRadius: 4 }}
+                style={{ width: 44, height: 38, padding: 0, border: '1px solid rgba(27,60,90,0.2)', background: 'var(--admin-card)', borderRadius: 4 }}
               />
               <input
                 type="text"
@@ -313,7 +313,7 @@ export function PartnerForm({ initial }: { initial?: Partial<PartnerFormValues> 
             />
           </div>
           <div>
-            <label className={labelClass}>CTA URL <span className="text-[#7a8a96]">(falls back to URL)</span></label>
+            <label className={labelClass}>CTA URL <span className="text-[color:var(--admin-text-2)]">(falls back to URL)</span></label>
             <input
               type="url"
               value={values.cta_url}
@@ -391,7 +391,7 @@ export function PartnerForm({ initial }: { initial?: Partial<PartnerFormValues> 
             className="rounded-lg p-4 space-y-3"
             style={{ backgroundColor: 'rgba(27,60,90,0.04)', border: '1px solid rgba(27,60,90,0.12)' }}
           >
-            <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px]" style={{ color: '#1b3c5a' }}>
+            <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px]" style={{ color: 'var(--admin-text)' }}>
               Sponsor contract
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -477,7 +477,7 @@ export function PartnerForm({ initial }: { initial?: Partial<PartnerFormValues> 
           <div className="flex items-center gap-3">
             <a
               href="/admin/partners"
-              className="font-condensed font-semibold uppercase tracking-wide text-[12px] text-[#7a8a96] hover:text-[#1b3c5a]"
+              className="font-condensed font-semibold uppercase tracking-wide text-[12px] text-[color:var(--admin-text-2)] hover:text-[color:var(--admin-text)]"
             >
               Cancel
             </a>
@@ -522,7 +522,7 @@ function PartnerPreview({ values }: { values: PartnerFormValues }) {
             <img
               src={values.logo_url}
               alt={values.name}
-              style={{ width: 40, height: 40, objectFit: 'contain', background: '#fff', borderRadius: 4 }}
+              style={{ width: 40, height: 40, objectFit: 'contain', background: 'var(--admin-card)', borderRadius: 4 }}
             />
           ) : (
             <div

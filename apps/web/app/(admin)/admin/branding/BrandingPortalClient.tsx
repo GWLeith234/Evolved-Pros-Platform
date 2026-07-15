@@ -41,11 +41,11 @@ function TabButton({ label, active, onClick }: { label: string; active: boolean;
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div
-      className="bg-white rounded-lg overflow-hidden mb-6"
+      className="bg-[var(--admin-card)] rounded-lg overflow-hidden mb-6"
       style={{ border: '1px solid rgba(27,60,90,0.1)', boxShadow: '0 1px 3px rgba(27,60,90,0.06)' }}
     >
       <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}>
-        <h2 className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]" style={{ color: '#1b3c5a' }}>
+        <h2 className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]" style={{ color: 'var(--admin-text)' }}>
           {title}
         </h2>
       </div>
@@ -110,7 +110,7 @@ function IdentityTab({ settings }: { settings: Record<string, string> }) {
         <div className="flex gap-8 mb-5">
           {/* Dark logo */}
           <div>
-            <p className="font-condensed font-semibold uppercase text-[11px] tracking-wide mb-2" style={{ color: '#7a8a96' }}>Dark Logo (nav/dark bg)</p>
+            <p className="font-condensed font-semibold uppercase text-[11px] tracking-wide mb-2" style={{ color: 'var(--admin-text-2)' }}>Dark Logo (nav/dark bg)</p>
             <div className="rounded flex items-center justify-center mb-2" style={{ backgroundColor: '#112535', width: '180px', height: '60px' }}>
               {logoDark ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -119,7 +119,7 @@ function IdentityTab({ settings }: { settings: Record<string, string> }) {
                 <span className="font-condensed font-bold text-white text-sm tracking-[0.14em]">EVOLVED·PROS</span>
               )}
             </div>
-            <label className="cursor-pointer rounded px-3 py-1.5 font-condensed font-semibold uppercase text-[11px] tracking-wide inline-flex" style={{ border: '1px solid rgba(27,60,90,0.2)', color: '#1b3c5a' }}>
+            <label className="cursor-pointer rounded px-3 py-1.5 font-condensed font-semibold uppercase text-[11px] tracking-wide inline-flex" style={{ border: '1px solid rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}>
               Upload Dark Logo
               <input type="file" accept="image/*" className="hidden" onChange={async e => {
                 const f = e.target.files?.[0]; if (f) { try { await uploadLogo(f, 'logo_dark_url', setLogoDark) } catch { alert('Upload failed') } }
@@ -129,16 +129,16 @@ function IdentityTab({ settings }: { settings: Record<string, string> }) {
 
           {/* Light logo */}
           <div>
-            <p className="font-condensed font-semibold uppercase text-[11px] tracking-wide mb-2" style={{ color: '#7a8a96' }}>Light Logo (light backgrounds)</p>
+            <p className="font-condensed font-semibold uppercase text-[11px] tracking-wide mb-2" style={{ color: 'var(--admin-text-2)' }}>Light Logo (light backgrounds)</p>
             <div className="rounded flex items-center justify-center mb-2" style={{ backgroundColor: '#f0f4f7', width: '180px', height: '60px', border: '1px solid rgba(27,60,90,0.1)' }}>
               {logoLight ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={logoLight} alt="Light logo" style={{ height: '36px', width: 'auto', maxWidth: '160px', objectFit: 'contain' }} />
               ) : (
-                <span className="font-condensed font-bold text-[#112535] text-sm tracking-[0.14em]">EVOLVED·PROS</span>
+                <span className="font-condensed font-bold text-[color:var(--admin-text-strong)] text-sm tracking-[0.14em]">EVOLVED·PROS</span>
               )}
             </div>
-            <label className="cursor-pointer rounded px-3 py-1.5 font-condensed font-semibold uppercase text-[11px] tracking-wide inline-flex" style={{ border: '1px solid rgba(27,60,90,0.2)', color: '#1b3c5a' }}>
+            <label className="cursor-pointer rounded px-3 py-1.5 font-condensed font-semibold uppercase text-[11px] tracking-wide inline-flex" style={{ border: '1px solid rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}>
               Upload Light Logo
               <input type="file" accept="image/*" className="hidden" onChange={async e => {
                 const f = e.target.files?.[0]; if (f) { try { await uploadLogo(f, 'logo_light_url', setLogoLight) } catch { alert('Upload failed') } }
@@ -156,7 +156,7 @@ function IdentityTab({ settings }: { settings: Record<string, string> }) {
             onChange={e => setPlatformName(e.target.value)}
             maxLength={60}
             className="border rounded px-3 py-2 font-body text-[14px] w-64"
-            style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+            style={{ borderColor: 'rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}
           />
           <SaveButton loading={saving} onClick={handleSave} />
           {toast && <span className="font-condensed text-[12px]" style={{ color: '#22c55e' }}>{toast}</span>}
@@ -194,7 +194,7 @@ function ColorsTab({ settings }: { settings: Record<string, string> }) {
       <SectionCard title="Brand Colors">
         <div className="flex gap-8 mb-5">
           <div>
-            <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-2" style={{ color: '#7a8a96' }}>
+            <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-2" style={{ color: 'var(--admin-text-2)' }}>
               Primary (nav background)
             </label>
             <div className="flex items-center gap-2">
@@ -205,12 +205,12 @@ function ColorsTab({ settings }: { settings: Record<string, string> }) {
                 onChange={e => setPrimary(e.target.value)}
                 maxLength={7}
                 className="border rounded px-2 py-1.5 font-condensed text-[13px] w-24"
-                style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+                style={{ borderColor: 'rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}
               />
             </div>
           </div>
           <div>
-            <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-2" style={{ color: '#7a8a96' }}>
+            <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-2" style={{ color: 'var(--admin-text-2)' }}>
               Accent (buttons, highlights)
             </label>
             <div className="flex items-center gap-2">
@@ -221,7 +221,7 @@ function ColorsTab({ settings }: { settings: Record<string, string> }) {
                 onChange={e => setAccent(e.target.value)}
                 maxLength={7}
                 className="border rounded px-2 py-1.5 font-condensed text-[13px] w-24"
-                style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+                style={{ borderColor: 'rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}
               />
             </div>
           </div>
@@ -229,7 +229,7 @@ function ColorsTab({ settings }: { settings: Record<string, string> }) {
 
         {/* Live preview */}
         <div className="mb-5">
-          <p className="font-condensed font-semibold uppercase text-[11px] tracking-wide mb-2" style={{ color: '#7a8a96' }}>Live Preview</p>
+          <p className="font-condensed font-semibold uppercase text-[11px] tracking-wide mb-2" style={{ color: 'var(--admin-text-2)' }}>Live Preview</p>
           <div
             className="rounded overflow-hidden flex items-center justify-between px-5 h-12"
             style={{ backgroundColor: primary, width: '300px', border: '1px solid rgba(255,255,255,0.1)' }}
@@ -245,7 +245,7 @@ function ColorsTab({ settings }: { settings: Record<string, string> }) {
           </div>
         </div>
 
-        <p className="font-body text-[12px] mb-4" style={{ color: '#7a8a96' }}>
+        <p className="font-body text-[12px] mb-4" style={{ color: 'var(--admin-text-2)' }}>
           Color changes apply on next page load for all members.
         </p>
 
@@ -285,8 +285,8 @@ function AppearanceTab({ settings }: { settings: Record<string, string> }) {
     <SectionCard title="Theme Settings">
       <div className="space-y-5">
         <div>
-          <p className="font-condensed font-bold uppercase text-[11px] tracking-wide mb-2" style={{ color: '#7a8a96' }}>Default Theme</p>
-          <p className="font-body text-[12px] mb-3" style={{ color: '#7a8a96' }}>Applied when members first visit or have no saved preference.</p>
+          <p className="font-condensed font-bold uppercase text-[11px] tracking-wide mb-2" style={{ color: 'var(--admin-text-2)' }}>Default Theme</p>
+          <p className="font-body text-[12px] mb-3" style={{ color: 'var(--admin-text-2)' }}>Applied when members first visit or have no saved preference.</p>
           <div className="flex gap-4">
             {['dark', 'light'].map(t => (
               <label key={t} className="flex items-center gap-2 cursor-pointer">
@@ -297,7 +297,7 @@ function AppearanceTab({ settings }: { settings: Record<string, string> }) {
                   checked={defaultTheme === t}
                   onChange={() => setDefaultTheme(t)}
                 />
-                <span className="font-condensed font-semibold uppercase text-[12px]" style={{ color: '#1b3c5a' }}>
+                <span className="font-condensed font-semibold uppercase text-[12px]" style={{ color: 'var(--admin-text)' }}>
                   {t === 'dark' ? 'Dark' : 'Light'}
                 </span>
               </label>
@@ -306,8 +306,8 @@ function AppearanceTab({ settings }: { settings: Record<string, string> }) {
         </div>
 
         <div>
-          <p className="font-condensed font-bold uppercase text-[11px] tracking-wide mb-2" style={{ color: '#7a8a96' }}>Members Can Change Theme</p>
-          <p className="font-body text-[12px] mb-3" style={{ color: '#7a8a96' }}>If disabled, the theme toggle in the top nav is hidden for all members.</p>
+          <p className="font-condensed font-bold uppercase text-[11px] tracking-wide mb-2" style={{ color: 'var(--admin-text-2)' }}>Members Can Change Theme</p>
+          <p className="font-body text-[12px] mb-3" style={{ color: 'var(--admin-text-2)' }}>If disabled, the theme toggle in the top nav is hidden for all members.</p>
           <label className="flex items-center gap-3 cursor-pointer">
             <button
               type="button"
@@ -330,12 +330,12 @@ function AppearanceTab({ settings }: { settings: Record<string, string> }) {
                   width: '20px',
                   height: '20px',
                   borderRadius: '50%',
-                  backgroundColor: 'white',
+                  backgroundColor: 'var(--admin-card)',
                   transition: 'left 0.15s',
                 }}
               />
             </button>
-            <span className="font-body text-[13px]" style={{ color: '#1b3c5a' }}>
+            <span className="font-body text-[13px]" style={{ color: 'var(--admin-text)' }}>
               {canToggle ? 'Enabled' : 'Disabled'}
             </span>
           </label>
@@ -414,9 +414,9 @@ function BannersTab({ initialBanners }: { initialBanners: Banner[] }) {
             <div className="px-3 py-2 flex items-center justify-between">
               <div>
                 {banner.pillar && <p className="font-condensed font-bold text-[10px] uppercase tracking-wide" style={{ color: '#68a2b9' }}>Pillar {banner.pillar}</p>}
-                <p className="font-body text-[12px]" style={{ color: '#1b3c5a' }}>{banner.title ?? 'Untitled'}</p>
+                <p className="font-body text-[12px]" style={{ color: 'var(--admin-text)' }}>{banner.title ?? 'Untitled'}</p>
               </div>
-              <label className="cursor-pointer rounded px-2 py-1 font-condensed text-[11px] uppercase tracking-wide" style={{ border: '1px solid rgba(27,60,90,0.15)', color: '#7a8a96', fontSize: '11px' }}>
+              <label className="cursor-pointer rounded px-2 py-1 font-condensed text-[11px] uppercase tracking-wide" style={{ border: '1px solid rgba(27,60,90,0.15)', color: 'var(--admin-text-2)', fontSize: '11px' }}>
                 {uploading === banner.id ? 'Uploading…' : 'Replace'}
                 <input type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleReplaceImage(banner.id, f) }} />
               </label>
@@ -427,22 +427,22 @@ function BannersTab({ initialBanners }: { initialBanners: Banner[] }) {
 
       {/* Add custom banner */}
       <div style={{ borderTop: '1px solid rgba(27,60,90,0.08)', paddingTop: '16px' }}>
-        <p className="font-condensed font-bold uppercase text-[12px] tracking-wide mb-3" style={{ color: '#1b3c5a' }}>Add Custom Banner</p>
+        <p className="font-condensed font-bold uppercase text-[12px] tracking-wide mb-3" style={{ color: 'var(--admin-text)' }}>Add Custom Banner</p>
         <div className="space-y-3">
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>Title</label>
+              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: 'var(--admin-text-2)' }}>Title</label>
               <input
                 type="text"
                 value={newTitle}
                 onChange={e => setNewTitle(e.target.value)}
                 placeholder="Banner title"
                 className="border rounded px-3 py-1.5 font-body text-[13px] w-full"
-                style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+                style={{ borderColor: 'rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}
               />
             </div>
             <div style={{ width: '100px' }}>
-              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>Pillar #</label>
+              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: 'var(--admin-text-2)' }}>Pillar #</label>
               <input
                 type="number"
                 min="1" max="6"
@@ -450,15 +450,15 @@ function BannersTab({ initialBanners }: { initialBanners: Banner[] }) {
                 onChange={e => setNewPillar(e.target.value)}
                 placeholder="1–6"
                 className="border rounded px-3 py-1.5 font-body text-[13px] w-full"
-                style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+                style={{ borderColor: 'rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}
               />
             </div>
           </div>
           <div>
-            <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>
+            <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: 'var(--admin-text-2)' }}>
               Image {addUploading ? '(Uploading…)' : ''}
             </label>
-            <label className="cursor-pointer inline-flex items-center gap-2 rounded px-3 py-1.5 font-condensed text-[12px]" style={{ border: '1px solid rgba(27,60,90,0.2)', color: '#1b3c5a' }}>
+            <label className="cursor-pointer inline-flex items-center gap-2 rounded px-3 py-1.5 font-condensed text-[12px]" style={{ border: '1px solid rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}>
               Choose Image
               <input type="file" accept="image/*" className="hidden" onChange={async e => {
                 const file = e.target.files?.[0]; if (!file) return
@@ -505,10 +505,10 @@ export function BrandingPortalClient({ initialSettings, initialBanners }: Props)
         <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-1" style={{ color: '#68a2b9' }}>
           Platform
         </p>
-        <h1 className="font-display font-black" style={{ fontSize: '28px', color: '#112535' }}>
+        <h1 className="font-display font-black" style={{ fontSize: '28px', color: 'var(--admin-text-strong)' }}>
           Branding
         </h1>
-        <p className="font-body text-[14px] mt-1" style={{ color: '#7a8a96' }}>
+        <p className="font-body text-[14px] mt-1" style={{ color: 'var(--admin-text-2)' }}>
           Manage logos, colors, and member-facing appearance.
         </p>
       </div>

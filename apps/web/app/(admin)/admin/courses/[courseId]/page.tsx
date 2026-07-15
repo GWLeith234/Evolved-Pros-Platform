@@ -41,7 +41,7 @@ export default async function AdminCourseDetailPage({ params }: Props) {
         <div className="mb-2">
           <Link
             href="/admin/courses"
-            className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a] transition-colors"
+            className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[color:var(--admin-text-2)] hover:text-[color:var(--admin-text)] transition-colors"
           >
             ← Back to Courses
           </Link>
@@ -54,8 +54,8 @@ export default async function AdminCourseDetailPage({ params }: Props) {
             >
               {PILLAR_CONFIG[course.pillar_number]?.label ?? `Pillar ${course.pillar_number}`}
             </p>
-            <h1 className="font-display font-black text-[28px] text-[#112535]">{course.title}</h1>
-            <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
+            <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)]">{course.title}</h1>
+            <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mt-0.5">
               {(lessons ?? []).length} lessons · {course.required_tier} tier
             </p>
           </div>

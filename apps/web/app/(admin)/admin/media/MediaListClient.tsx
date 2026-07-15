@@ -58,7 +58,7 @@ export function MediaListClient({
         <thead>
           <tr style={{ backgroundColor: 'rgba(27,60,90,0.03)', borderBottom: '1px solid rgba(27,60,90,0.08)' }}>
             {['Title', 'Pillar', 'Type', 'Status', 'Featured', 'Published', 'Actions'].map(h => (
-              <th key={h} className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] px-4 py-3">
+              <th key={h} className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[color:var(--admin-text-2)] px-4 py-3">
                 {h}
               </th>
             ))}
@@ -67,7 +67,7 @@ export function MediaListClient({
         <tbody>
           {stories.length === 0 ? (
             <tr>
-              <td colSpan={7} className="px-4 py-12 text-center font-condensed text-[13px] text-[#7a8a96]">
+              <td colSpan={7} className="px-4 py-12 text-center font-condensed text-[13px] text-[color:var(--admin-text-2)]">
                 No stories yet. Click &quot;+ New Story&quot; to create one.
               </td>
             </tr>
@@ -80,13 +80,13 @@ export function MediaListClient({
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.02)')}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
               >
-                <td className="px-4 py-3 font-body text-[13px] text-[#1b3c5a] font-semibold max-w-[250px] truncate">
+                <td className="px-4 py-3 font-body text-[13px] text-[color:var(--admin-text)] font-semibold max-w-[250px] truncate">
                   {story.title}
                 </td>
-                <td className="px-4 py-3 font-condensed text-[12px] text-[#7a8a96]">
+                <td className="px-4 py-3 font-condensed text-[12px] text-[color:var(--admin-text-2)]">
                   {story.pillar ? pillarLabels[story.pillar] ?? story.pillar : '\u2014'}
                 </td>
-                <td className="px-4 py-3 font-condensed text-[12px] text-[#7a8a96]">
+                <td className="px-4 py-3 font-condensed text-[12px] text-[color:var(--admin-text-2)]">
                   {TYPE_LABELS[story.story_type] ?? story.story_type}
                 </td>
                 <td className="px-4 py-3">
@@ -103,10 +103,10 @@ export function MediaListClient({
                     {story.is_published ? 'Published' : 'Draft'}
                   </button>
                 </td>
-                <td className="px-4 py-3 font-condensed text-[12px] text-[#7a8a96]">
+                <td className="px-4 py-3 font-condensed text-[12px] text-[color:var(--admin-text-2)]">
                   {story.is_featured ? '\u2605' : '\u2014'}
                 </td>
-                <td className="px-4 py-3 font-condensed text-[12px] text-[#7a8a96]">
+                <td className="px-4 py-3 font-condensed text-[12px] text-[color:var(--admin-text-2)]">
                   {formatDate(story.published_at)}
                 </td>
                 <td className="px-4 py-3">

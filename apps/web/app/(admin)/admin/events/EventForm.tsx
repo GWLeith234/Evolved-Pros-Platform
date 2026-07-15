@@ -180,9 +180,9 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
     }
   }
 
-  const inputStyle = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }
-  const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5'
-  const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none transition-all'
+  const inputStyle = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'var(--admin-card)' }
+  const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)] mb-1.5'
+  const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[color:var(--admin-text)] outline-none transition-all'
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -236,10 +236,10 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
           <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-1" style={{ color: '#0ABFA3' }}>
             AI image prompt
           </p>
-          <p className="font-body text-[12px] leading-relaxed" style={{ color: '#1b3c5a' }}>
+          <p className="font-body text-[12px] leading-relaxed" style={{ color: 'var(--admin-text)' }}>
             {aiImagePrompt}
           </p>
-          <p className="font-condensed text-[10px] mt-1" style={{ color: '#7a8a96' }}>
+          <p className="font-condensed text-[10px] mt-1" style={{ color: 'var(--admin-text-2)' }}>
             Tagline, CTA, description and pillar were filled in below — this prompt is for the image generator.
           </p>
         </div>
@@ -362,7 +362,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
           style={inputStyle}
           placeholder="https://zoom.us/j/..."
         />
-        <p className="font-condensed text-[10px] text-[#7a8a96] mt-1">Only shown to registered members</p>
+        <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] mt-1">Only shown to registered members</p>
       </div>
 
       {/* Recording URL */}
@@ -451,7 +451,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
         <div className="flex items-center gap-3">
           <a
             href="/admin/events"
-            className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a] transition-colors"
+            className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[color:var(--admin-text-2)] hover:text-[color:var(--admin-text)] transition-colors"
           >
             Cancel
           </a>
@@ -464,7 +464,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
             className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-5 py-2.5 transition-all"
             style={{
               backgroundColor: 'transparent',
-              color: '#1b3c5a',
+              color: 'var(--admin-text)',
               border: '1px solid rgba(27,60,90,0.25)',
               opacity: saving || !values.title.trim() || !values.startsAt ? 0.5 : 1,
             }}

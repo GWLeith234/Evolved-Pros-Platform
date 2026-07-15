@@ -72,7 +72,7 @@ export function MuxUploader({ lessonId: _lessonId, existingPlaybackId, onUploadC
           >
             {existingPlaybackId ? 'Replace Video' : 'Upload Video'}
           </button>
-          <p className="font-condensed text-[12px] mt-2" style={{ color: '#7a8a96' }}>
+          <p className="font-condensed text-[12px] mt-2" style={{ color: 'var(--admin-text-2)' }}>
             MP4, MOV, or MKV · Max 10 GB
           </p>
           {errorMsg && (
@@ -85,7 +85,7 @@ export function MuxUploader({ lessonId: _lessonId, existingPlaybackId, onUploadC
 
       {status === 'uploading' && (
         <div>
-          <div className="font-condensed text-[12px] mb-2" style={{ color: '#1b3c5a' }}>
+          <div className="font-condensed text-[12px] mb-2" style={{ color: 'var(--admin-text)' }}>
             Uploading… {progress}%
           </div>
           <div style={{ height: 4, background: 'rgba(27,60,90,0.1)', borderRadius: 2 }}>

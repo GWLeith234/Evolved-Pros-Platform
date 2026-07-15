@@ -80,7 +80,7 @@ export function AdsTabsShell({
           )
         })}
       </div>
-      <p className="font-body text-[13px] mb-6" style={{ color: '#7a8a96' }}>
+      <p className="font-body text-[13px] mb-6" style={{ color: 'var(--admin-text-2)' }}>
         {activeBlurb}
       </p>
 

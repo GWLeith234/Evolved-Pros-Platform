@@ -114,7 +114,7 @@ export default async function AdminDashboardPage() {
       value:    `${retention}%`,
       delta:    'active vs total ever',
       deltaPos: retention >= 80,
-      color:    '#1b3c5a',
+      color:    'var(--admin-text)',
       bg:       'rgba(27,60,90,0.06)',
     },
     {
@@ -147,8 +147,8 @@ export default async function AdminDashboardPage() {
     <div className="px-4 sm:px-8 py-6 max-w-5xl">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div>
-          <h1 className="font-display font-black text-[28px] text-[#112535]">Dashboard</h1>
-          <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5" suppressHydrationWarning>
+          <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)]">Dashboard</h1>
+          <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mt-0.5" suppressHydrationWarning>
             Platform overview — {now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </div>
@@ -167,7 +167,7 @@ export default async function AdminDashboardPage() {
             <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[9px] mb-2" style={{ color: s.color }}>
               {s.label}
             </p>
-            <p className="font-display font-black text-[28px] leading-none mb-1" style={{ color: '#112535' }}>
+            <p className="font-display font-black text-[28px] leading-none mb-1" style={{ color: 'var(--admin-text-strong)' }}>
               {s.value}
             </p>
             <p className="font-condensed text-[10px]" style={{ color: s.deltaPos ? '#16a34a' : '#ef0e30' }}>
@@ -187,32 +187,32 @@ export default async function AdminDashboardPage() {
           <Link
             key={l.href}
             href={l.href}
-            className="block rounded-lg p-4 cursor-pointer transition-all bg-white hover:bg-[#f3f7fa] border border-[#1b3c5a1a] hover:border-[#1b3c5a33] hover:shadow-sm"
+            className="block rounded-lg p-4 cursor-pointer transition-all bg-[var(--admin-card)] hover:bg-[#f3f7fa] border border-[#1b3c5a1a] hover:border-[#1b3c5a33] hover:shadow-sm"
           >
-            <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[11px] text-[#1b3c5a] mb-1">{l.label} →</p>
-            <p className="font-condensed text-[11px] text-[#7a8a96]">{l.desc}</p>
+            <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[11px] text-[color:var(--admin-text)] mb-1">{l.label} →</p>
+            <p className="font-condensed text-[11px] text-[color:var(--admin-text-2)]">{l.desc}</p>
           </Link>
         ))}
       </div>
 
       {/* Recent signups */}
-      <div className="rounded-lg overflow-x-auto mb-6" style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.1)' }}>
+      <div className="rounded-lg overflow-x-auto mb-6" style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)' }}>
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}>
-          <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[10px] text-[#1b3c5a]">Recent Signups</p>
-          <Link href="/admin/members" className="font-condensed text-[10px] text-[#68a2b9] hover:text-[#1b3c5a] transition-colors">
+          <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[10px] text-[color:var(--admin-text)]">Recent Signups</p>
+          <Link href="/admin/members" className="font-condensed text-[10px] text-[#68a2b9] hover:text-[color:var(--admin-text)] transition-colors">
             All members →
           </Link>
         </div>
         {(recentMembers.data ?? []).length === 0 ? (
           <div className="px-5 py-8 text-center">
-            <p className="font-condensed text-[12px] text-[#7a8a96]">No members yet.</p>
+            <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">No members yet.</p>
           </div>
         ) : (
           <table className="w-full min-w-[520px]">
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.06)' }}>
                 {['Name', 'Email', 'Tier', 'Joined'].map(h => (
-                  <th key={h} className="px-5 py-2 text-left font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96]">{h}</th>
+                  <th key={h} className="px-5 py-2 text-left font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[color:var(--admin-text-2)]">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -220,21 +220,21 @@ export default async function AdminDashboardPage() {
               {(recentMembers.data ?? []).map((m, i, arr) => (
                 <tr key={m.id} style={{ borderBottom: i === arr.length - 1 ? 'none' : '1px solid rgba(27,60,90,0.06)' }}>
                   <td className="px-5 py-3">
-                    <Link href={`/admin/members/${m.id}`} className="font-condensed text-[11px] text-[#1b3c5a] hover:text-[#ef0e30] transition-colors">
+                    <Link href={`/admin/members/${m.id}`} className="font-condensed text-[11px] text-[color:var(--admin-text)] hover:text-[#ef0e30] transition-colors">
                       {m.full_name ?? m.display_name ?? '—'}
                     </Link>
                   </td>
-                  <td className="px-5 py-3"><p className="font-condensed text-[11px] text-[#7a8a96]">{m.email ?? '—'}</p></td>
+                  <td className="px-5 py-3"><p className="font-condensed text-[11px] text-[color:var(--admin-text-2)]">{m.email ?? '—'}</p></td>
                   <td className="px-5 py-3">
                     {m.tier ? (
-                      <span className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded" style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.12)' }}>
+                      <span className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded" style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: 'var(--admin-text)', border: '1px solid rgba(27,60,90,0.12)' }}>
                         {m.tier}
                       </span>
                     ) : (
-                      <span className="font-condensed text-[11px] text-[#7a8a96]">—</span>
+                      <span className="font-condensed text-[11px] text-[color:var(--admin-text-2)]">—</span>
                     )}
                   </td>
-                  <td className="px-5 py-3"><p className="font-condensed text-[11px] text-[#7a8a96]">{fmtDate(m.created_at)}</p></td>
+                  <td className="px-5 py-3"><p className="font-condensed text-[11px] text-[color:var(--admin-text-2)]">{fmtDate(m.created_at)}</p></td>
                 </tr>
               ))}
             </tbody>
@@ -243,19 +243,19 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Recent Vendasta webhooks */}
-      <div className="rounded-lg overflow-hidden" style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.1)' }}>
+      <div className="rounded-lg overflow-hidden" style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)' }}>
         <div
           className="flex items-center justify-between px-5 py-3"
           style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}
         >
-          <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[10px] text-[#1b3c5a]">
+          <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[10px] text-[color:var(--admin-text)]">
             Recent Vendasta Activity
           </p>
           <a
             href="https://business.vendasta.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-condensed text-[10px] text-[#68a2b9] hover:text-[#1b3c5a] transition-colors"
+            className="font-condensed text-[10px] text-[#68a2b9] hover:text-[color:var(--admin-text)] transition-colors"
           >
             Open Vendasta →
           </a>
@@ -272,12 +272,12 @@ export default async function AdminDashboardPage() {
           if (rows.length === 0) {
             return (
               <div className="px-5 py-8 text-center space-y-2">
-                <p className="font-condensed text-[12px] text-[#7a8a96]">No recent Vendasta activity.</p>
+                <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">No recent Vendasta activity.</p>
                 <a
                   href="https://business.vendasta.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block font-condensed text-[11px] text-[#68a2b9] hover:text-[#1b3c5a] underline transition-colors"
+                  className="inline-block font-condensed text-[11px] text-[#68a2b9] hover:text-[color:var(--admin-text)] underline transition-colors"
                 >
                   Connect Vendasta to see member events here.
                 </a>
@@ -297,23 +297,23 @@ export default async function AdminDashboardPage() {
                     <td className="px-5 py-3">
                       <span
                         className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded"
-                        style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.12)' }}
+                        style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: 'var(--admin-text)', border: '1px solid rgba(27,60,90,0.12)' }}
                       >
                         {wh.event_type}
                       </span>
                     </td>
                     <td className="px-5 py-3">
-                      <p className="font-condensed text-[11px] text-[#7a8a96]">
+                      <p className="font-condensed text-[11px] text-[color:var(--admin-text-2)]">
                         {wh.vendasta_contact_id ?? '—'}
                       </p>
                     </td>
                     <td className="px-5 py-3">
-                      <p className="font-condensed text-[11px] text-[#7a8a96]">
+                      <p className="font-condensed text-[11px] text-[color:var(--admin-text-2)]">
                         {wh.product_sku ?? '—'}
                       </p>
                     </td>
                     <td className="px-5 py-3">
-                      <p className="font-condensed text-[11px] text-[#7a8a96]">{fmtDate(wh.processed_at)}</p>
+                      <p className="font-condensed text-[11px] text-[color:var(--admin-text-2)]">{fmtDate(wh.processed_at)}</p>
                     </td>
                     <td className="px-5 py-3 text-right">
                       <span

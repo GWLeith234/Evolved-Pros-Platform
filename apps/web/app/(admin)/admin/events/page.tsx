@@ -25,8 +25,8 @@ export default async function AdminEventsPage() {
     <div className="px-8 py-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="font-display font-black text-[28px] text-[#112535]">Events</h1>
-          <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
+          <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)]">Events</h1>
+          <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mt-0.5">
             {events.length} total · {events.filter(e => e.is_published).length} published
           </p>
         </div>

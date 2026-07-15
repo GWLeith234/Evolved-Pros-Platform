@@ -58,18 +58,18 @@ export function AdminLessonsTable({ lessons: initial, courseId }: AdminLessonsTa
       <table className="w-full">
         <thead>
           <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.03)' }}>
-            <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">#</th>
-            <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">Title</th>
-            <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">Duration</th>
-            <th className="px-5 py-3 text-center font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">Video</th>
-            <th className="px-5 py-3 text-center font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">Status</th>
+            <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)]">#</th>
+            <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)]">Title</th>
+            <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)]">Duration</th>
+            <th className="px-5 py-3 text-center font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)]">Video</th>
+            <th className="px-5 py-3 text-center font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)]">Status</th>
             <th className="px-5 py-3"></th>
           </tr>
         </thead>
         <tbody>
           {lessons.length === 0 ? (
             <tr>
-              <td colSpan={6} className="px-5 py-10 text-center font-condensed text-[12px] text-[#7a8a96]">
+              <td colSpan={6} className="px-5 py-10 text-center font-condensed text-[12px] text-[color:var(--admin-text-2)]">
                 No lessons yet.
               </td>
             </tr>
@@ -79,20 +79,20 @@ export function AdminLessonsTable({ lessons: initial, courseId }: AdminLessonsTa
                 key={lesson.id}
                 style={{
                   borderBottom: i === lessons.length - 1 ? 'none' : '1px solid rgba(27,60,90,0.06)',
-                  backgroundColor: 'white',
+                  backgroundColor: 'var(--admin-card)',
                 }}
               >
                 <td className="px-5 py-3">
-                  <span className="font-condensed font-bold text-[11px] text-[#7a8a96]">
+                  <span className="font-condensed font-bold text-[11px] text-[color:var(--admin-text-2)]">
                     {String(lesson.sort_order).padStart(2, '0')}
                   </span>
                 </td>
                 <td className="px-5 py-3">
-                  <p className="font-body font-semibold text-[13px] text-[#1b3c5a] truncate max-w-[280px]">{lesson.title}</p>
-                  <p className="font-condensed text-[10px] text-[#7a8a96]">{lesson.slug}</p>
+                  <p className="font-body font-semibold text-[13px] text-[color:var(--admin-text)] truncate max-w-[280px]">{lesson.title}</p>
+                  <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)]">{lesson.slug}</p>
                 </td>
                 <td className="px-5 py-3">
-                  <span className="font-condensed text-[12px] text-[#1b3c5a]">
+                  <span className="font-condensed text-[12px] text-[color:var(--admin-text)]">
                     {formatDurationSeconds(lesson.duration_seconds) || '—'}
                   </span>
                 </td>
@@ -132,7 +132,7 @@ export function AdminLessonsTable({ lessons: initial, courseId }: AdminLessonsTa
                     </button>
                     <Link
                       href={`/admin/courses/${courseId}/lessons/${lesson.id}/edit`}
-                      className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#68a2b9] hover:text-[#1b3c5a] transition-colors"
+                      className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#68a2b9] hover:text-[color:var(--admin-text)] transition-colors"
                     >
                       Edit
                     </Link>

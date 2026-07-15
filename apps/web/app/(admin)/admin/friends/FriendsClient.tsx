@@ -21,8 +21,9 @@ export interface CompCode {
   max_redemptions: number | null
 }
 
-const NAVY = '#112535'
-const SLATE = '#7a8a96'
+// Neutral text follows the theme; TEAL/BLUE/RED stay as accent/fill constants.
+const NAVY = 'var(--admin-text-strong)'
+const SLATE = 'var(--admin-text-2)'
 const TEAL = '#68a2b9'
 const BLUE = '#1b3c5a'
 const RED = '#ef0e30'
@@ -36,7 +37,7 @@ function fmtDate(iso: string | null): string {
 
 function StatusPill({ status }: { status: FriendInvite['status'] }) {
   const map = {
-    invited: { bg: 'rgba(104,162,185,0.12)', fg: BLUE, label: 'Invited' },
+    invited: { bg: 'rgba(104,162,185,0.12)', fg: TEAL, label: 'Invited' },
     redeemed: { bg: 'rgba(34,197,94,0.1)', fg: '#15803d', label: 'Redeemed' },
     revoked: { bg: 'rgba(239,14,48,0.08)', fg: RED, label: 'Revoked' },
   }[status]
@@ -52,7 +53,7 @@ function StatusPill({ status }: { status: FriendInvite['status'] }) {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-lg px-5 py-4 bg-white" style={{ border: '1px solid rgba(17,37,53,0.08)' }}>
+    <div className="rounded-lg px-5 py-4 bg-[var(--admin-card)]" style={{ border: '1px solid var(--admin-border)' }}>
       <p className="font-display font-black text-[26px]" style={{ color: NAVY }}>{value}</p>
       <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mt-0.5" style={{ color: SLATE }}>
         {label}
@@ -197,7 +198,7 @@ export function FriendsClient({
     <div className="space-y-6">
       {/* Code panel + stats */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-4">
-        <div className="rounded-lg p-5 bg-white" style={{ border: '1px solid rgba(17,37,53,0.08)' }}>
+        <div className="rounded-lg p-5 bg-[var(--admin-card)]" style={{ border: '1px solid var(--admin-border)' }}>
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px]" style={{ color: SLATE }}>
@@ -226,7 +227,7 @@ export function FriendsClient({
               {code?.active ? '● Active' : '○ Inactive'}
             </button>
           </div>
-          <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(17,37,53,0.08)' }}>
+          <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--admin-border)' }}>
             <span className="font-display font-black text-[26px]" style={{ color: NAVY }}>
               {code?.redemption_count ?? 0}
             </span>
@@ -244,7 +245,7 @@ export function FriendsClient({
       </div>
 
       {/* Invite composer */}
-      <div className="rounded-lg p-5 bg-white" style={{ border: '1px solid rgba(17,37,53,0.08)' }}>
+      <div className="rounded-lg p-5 bg-[var(--admin-card)]" style={{ border: '1px solid var(--admin-border)' }}>
         <p className="font-display font-bold text-[16px]" style={{ color: NAVY }}>Invite friends</p>
         <p className="font-condensed text-[12px] mt-0.5 mb-3" style={{ color: SLATE }}>
           One or more emails, separated by commas or new lines. We’ll email a magic link and
@@ -274,11 +275,11 @@ export function FriendsClient({
       </div>
 
       {/* Tracking table */}
-      <div className="rounded-lg bg-white overflow-hidden" style={{ border: '1px solid rgba(17,37,53,0.08)' }}>
+      <div className="rounded-lg bg-[var(--admin-card)] overflow-hidden" style={{ border: '1px solid var(--admin-border)' }}>
         <div className="overflow-x-auto">
           <table className="w-full" style={{ borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid rgba(17,37,53,0.08)' }}>
+              <tr style={{ borderBottom: '1px solid var(--admin-border)' }}>
                 {['Email', 'Status', 'Sent', 'Redeemed', ''].map((h, i) => (
                   <th
                     key={h || 'actions'}
@@ -299,7 +300,7 @@ export function FriendsClient({
                 </tr>
               ) : (
                 invites.map(row => (
-                  <tr key={row.id} style={{ borderBottom: '1px solid rgba(17,37,53,0.05)' }}>
+                  <tr key={row.id} style={{ borderBottom: '1px solid var(--admin-border)' }}>
                     <td className="px-4 py-3 font-body text-[13px]" style={{ color: NAVY }}>{row.email}</td>
                     <td className="px-4 py-3"><StatusPill status={row.status} /></td>
                     <td className="px-4 py-3 font-condensed text-[12px]" style={{ color: SLATE }}>{fmtDate(row.sent_at)}</td>
@@ -310,7 +311,7 @@ export function FriendsClient({
                           type="button"
                           onClick={() => copyLink(row)}
                           className={btnBase}
-                          style={{ border: `1px solid ${TEAL}`, color: BLUE }}
+                          style={{ border: `1px solid ${TEAL}`, color: TEAL }}
                         >
                           {copiedId === row.id ? '✓ Copied' : 'Copy link'}
                         </button>

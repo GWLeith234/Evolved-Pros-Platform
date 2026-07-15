@@ -73,7 +73,7 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          background: 'white',
+          background: 'var(--admin-card)',
           borderRadius: 8,
           width: '100%',
           maxWidth: 440,
@@ -83,8 +83,8 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
       >
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h2 className="font-display font-bold text-[20px] text-[#112535]">Invite member</h2>
-            <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
+            <h2 className="font-display font-bold text-[20px] text-[color:var(--admin-text-strong)]">Invite member</h2>
+            <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mt-0.5">
               We&rsquo;ll email a magic-link sign-in.
             </p>
           </div>
@@ -92,7 +92,7 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="text-[#7a8a96] hover:text-[#112535] text-2xl leading-none"
+            className="text-[color:var(--admin-text-2)] hover:text-[color:var(--admin-text-strong)] text-2xl leading-none"
           >
             ×
           </button>
@@ -112,7 +112,7 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={() => setSentTo(null)}
                 className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-4 py-2 transition-all"
-                style={{ border: '1px solid rgba(27,60,90,0.25)', color: '#1b3c5a' }}
+                style={{ border: '1px solid rgba(27,60,90,0.25)', color: 'var(--admin-text)' }}
               >
                 Send another
               </button>
@@ -129,7 +129,7 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
         ) : (
           <div className="space-y-3">
             <div>
-              <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96] mb-1.5">
+              <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[color:var(--admin-text-2)] mb-1.5">
                 Full name
               </label>
               <input
@@ -138,11 +138,11 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
                 onChange={e => setFullName(e.target.value)}
                 placeholder="Jane Doe"
                 className="w-full rounded px-3 py-2 font-body text-[13px] outline-none"
-                style={{ border: '1px solid rgba(27,60,90,0.2)', color: '#112535' }}
+                style={{ border: '1px solid rgba(27,60,90,0.2)', color: 'var(--admin-text-strong)' }}
               />
             </div>
             <div>
-              <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96] mb-1.5">
+              <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[color:var(--admin-text-2)] mb-1.5">
                 Email
               </label>
               <input
@@ -151,11 +151,11 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="jane@company.com"
                 className="w-full rounded px-3 py-2 font-body text-[13px] outline-none"
-                style={{ border: '1px solid rgba(27,60,90,0.2)', color: '#112535' }}
+                style={{ border: '1px solid rgba(27,60,90,0.2)', color: 'var(--admin-text-strong)' }}
               />
             </div>
             <div>
-              <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96] mb-1.5">
+              <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[color:var(--admin-text-2)] mb-1.5">
                 Tier
               </label>
               <div className="flex gap-2">
@@ -194,7 +194,7 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
                 onClick={onClose}
                 disabled={busy}
                 className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-4 py-2"
-                style={{ color: '#7a8a96' }}
+                style={{ color: 'var(--admin-text-2)' }}
               >
                 Cancel
               </button>

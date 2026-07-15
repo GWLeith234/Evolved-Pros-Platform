@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { Modal } from '@/components/ui/Modal'
 import { AdminSidebarNav } from './AdminSidebar'
+import { useTheme } from '@/components/theme/ThemeProvider'
 
 const NAV_TABS = [
   { label: 'Members',      href: '/admin/members',  match: /^\/admin\/members/ },
@@ -29,6 +30,10 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
   const pathname = usePathname()
   const displayName = profile.display_name ?? profile.full_name ?? ''
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  // Admins can toggle the whole app theme from the admin shell. The topnav is
+  // always dark chrome, so the icon keeps a fixed light color (a theme-driven
+  // token would go navy-on-navy in light mode).
+  const { resolvedTheme, toggleTheme } = useTheme()
 
   return (
     <header
@@ -150,6 +155,30 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
         >
           Vendasta Sync
         </span>
+
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          className="w-8 h-8 flex items-center justify-center rounded flex-shrink-0 transition-colors"
+          style={{ color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.12)' }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.95)'}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.6)'}
+        >
+          {resolvedTheme === 'dark' ? (
+            // Sun — click to go light
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+            </svg>
+          ) : (
+            // Moon — click to go dark
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          )}
+        </button>
 
         <div
           className="w-8 h-8 flex items-center justify-center rounded flex-shrink-0"

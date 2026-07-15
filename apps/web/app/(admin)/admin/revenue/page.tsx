@@ -61,8 +61,8 @@ export default async function AdminRevenuePage() {
   return (
     <div className="px-8 py-6 max-w-4xl">
       <div className="mb-6">
-        <h1 className="font-display font-black text-[28px] text-[#112535]">Revenue</h1>
-        <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
+        <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)]">Revenue</h1>
+        <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mt-0.5">
           MRR based on active tier counts × price — Vendasta is billing source of truth
         </p>
       </div>

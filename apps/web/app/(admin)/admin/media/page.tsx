@@ -28,7 +28,7 @@ export default async function AdminMediaPage() {
           <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-1" style={{ color: '#68a2b9' }}>
             Content
           </p>
-          <h1 className="font-display font-bold text-xl" style={{ color: '#1b3c5a' }}>
+          <h1 className="font-display font-bold text-xl" style={{ color: 'var(--admin-text)' }}>
             Evolved Media
           </h1>
         </div>

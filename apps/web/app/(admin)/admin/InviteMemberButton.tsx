@@ -75,9 +75,9 @@ export function InviteMemberButton() {
     borderRadius: '6px',
     fontSize: '13px',
     fontFamily: 'var(--font-body)',
-    color: '#112535',
+    color: 'var(--admin-text-strong)',
     outline: 'none',
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--admin-card)',
   }
 
   const labelStyle: React.CSSProperties = {
@@ -87,7 +87,7 @@ export function InviteMemberButton() {
     fontSize: '10px',
     letterSpacing: '0.12em',
     textTransform: 'uppercase',
-    color: '#7a8a96',
+    color: 'var(--admin-text-2)',
     marginBottom: '5px',
   }
 
@@ -117,7 +117,7 @@ export function InviteMemberButton() {
         >
           <div
             className="w-full max-w-md rounded-xl shadow-2xl"
-            style={{ backgroundColor: '#fff', border: '1px solid rgba(27,60,90,0.1)' }}
+            style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)' }}
           >
             {/* Header */}
             <div
@@ -125,10 +125,10 @@ export function InviteMemberButton() {
               style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}
             >
               <div>
-                <h2 className="font-display font-black text-[18px]" style={{ color: '#112535' }}>
+                <h2 className="font-display font-black text-[18px]" style={{ color: 'var(--admin-text-strong)' }}>
                   Invite Member
                 </h2>
-                <p className="font-condensed text-[11px] mt-0.5" style={{ color: '#7a8a96' }}>
+                <p className="font-condensed text-[11px] mt-0.5" style={{ color: 'var(--admin-text-2)' }}>
                   They'll receive an email with a sign-in link.
                 </p>
               </div>
@@ -156,18 +156,18 @@ export function InviteMemberButton() {
                       <polyline points="20 6 9 17 4 12"/>
                     </svg>
                   </div>
-                  <p className="font-condensed font-bold text-[14px]" style={{ color: '#112535' }}>
+                  <p className="font-condensed font-bold text-[14px]" style={{ color: 'var(--admin-text-strong)' }}>
                     Invite sent to {email}
                   </p>
-                  <p className="font-condensed text-[11px] mt-1 mb-5" style={{ color: '#7a8a96' }}>
+                  <p className="font-condensed text-[11px] mt-1 mb-5" style={{ color: 'var(--admin-text-2)' }}>
                     They'll get a sign-in link. Their tier is set to{' '}
-                    <span style={{ color: '#1b3c5a', fontWeight: 700 }}>{TIER_LABEL[tier]}</span>.
+                    <span style={{ color: 'var(--admin-text)', fontWeight: 700 }}>{TIER_LABEL[tier]}</span>.
                   </p>
                   <div className="flex gap-3 justify-center">
                     <button
                       onClick={reset}
                       className="font-condensed font-bold uppercase tracking-[0.12em] text-[11px] px-4 py-2 rounded transition-colors"
-                      style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: '#1b3c5a' }}
+                      style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: 'var(--admin-text)' }}
                       onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.1)')}
                       onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.06)')}
                     >

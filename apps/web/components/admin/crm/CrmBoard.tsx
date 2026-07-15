@@ -211,13 +211,13 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
         <div>
           <h1
             className="font-display font-black text-[28px]"
-            style={{ color: '#112535', margin: 0 }}
+            style={{ color: 'var(--admin-text-strong)', margin: 0 }}
           >
             Prospects CRM
           </h1>
           <p
             className="font-condensed text-[12px] mt-0.5"
-            style={{ color: '#7a8a96', margin: 0 }}
+            style={{ color: 'var(--admin-text-2)', margin: 0 }}
           >
             Lead → Prospect → Community → VIP (${CRM_STAGE_META.vip.mrr}) → Professional (${CRM_STAGE_META.professional.mrr}) · drag to move stages
           </p>
@@ -247,7 +247,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
           <div className="text-right hidden sm:block">
             <p
               className="font-condensed font-bold text-[10px] uppercase tracking-[0.16em]"
-              style={{ color: '#7a8a96', margin: 0 }}
+              style={{ color: 'var(--admin-text-2)', margin: 0 }}
             >
               Pipeline value
             </p>
@@ -290,8 +290,8 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
               minWidth: 180,
               minHeight: 40,
               border: '1px solid var(--border-color, rgba(27,60,90,0.14))',
-              background: '#fff',
-              color: '#1b3c5a',
+              background: 'var(--admin-card)',
+              color: 'var(--admin-text)',
             }}
           />
           <button
@@ -359,7 +359,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                     </p>
                     <p
                       className="font-condensed text-[11px] mt-0.5"
-                      style={{ color: '#7a8a96', margin: 0 }}
+                      style={{ color: 'var(--admin-text-2)', margin: 0 }}
                     >
                       {col.desc}
                       {colValue > 0 ? ` · $${colValue}/mo` : ''}
@@ -368,7 +368,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                   <span
                     className="font-condensed font-bold text-[11px] px-2 py-0.5 rounded min-w-[24px] text-center shrink-0"
                     style={{
-                      background: '#fff',
+                      background: 'var(--admin-card)',
                       color: col.accent,
                       border: `1px solid ${col.accent}33`,
                     }}
@@ -388,7 +388,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                   {cards.length === 0 ? (
                     <p
                       className="font-condensed text-[11px] text-center mt-6"
-                      style={{ color: '#7a8a96' }}
+                      style={{ color: 'var(--admin-text-2)' }}
                     >
                       Drop cards here
                     </p>
@@ -426,7 +426,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
         /* Table view with Stage · Value · Last Contacted · Next Follow-up columns */
         <div
           className="rounded-lg overflow-x-auto"
-          style={{ background: '#fff', border: '1px solid rgba(27,60,90,0.10)' }}
+          style={{ background: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.10)' }}
         >
           <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 820 }}>
             <thead>
@@ -435,7 +435,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                   <th
                     key={h}
                     className="font-condensed font-bold uppercase tracking-[0.12em] text-[10px] text-left px-3 py-3"
-                    style={{ color: '#7a8a96', borderBottom: '1px solid rgba(27,60,90,0.08)' }}
+                    style={{ color: 'var(--admin-text-2)', borderBottom: '1px solid rgba(27,60,90,0.08)' }}
                   >
                     {h}
                   </th>
@@ -445,7 +445,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-3 py-8 text-center font-condensed text-[12px]" style={{ color: '#7a8a96' }}>
+                  <td colSpan={7} className="px-3 py-8 text-center font-condensed text-[12px]" style={{ color: 'var(--admin-text-2)' }}>
                     No prospects match.
                   </td>
                 </tr>
@@ -464,12 +464,12 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                             setModalOpen(true)
                           }}
                           className="font-body font-semibold text-[13px] text-left"
-                          style={{ background: 'none', border: 'none', color: '#1b3c5a', cursor: 'pointer', padding: 0 }}
+                          style={{ background: 'none', border: 'none', color: 'var(--admin-text)', cursor: 'pointer', padding: 0 }}
                         >
                           {p.full_name}
                         </button>
                         {p.company && (
-                          <p className="font-condensed text-[11px] m-0" style={{ color: '#7a8a96' }}>{p.company}</p>
+                          <p className="font-condensed text-[11px] m-0" style={{ color: 'var(--admin-text-2)' }}>{p.company}</p>
                         )}
                       </td>
                       <td className="px-3 py-2.5 font-condensed text-[12px]" style={{ borderBottom: '1px solid rgba(27,60,90,0.06)', color: '#5a6a76' }}>
@@ -489,7 +489,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                       <td className="px-3 py-2.5 font-condensed text-[12px]" style={{ borderBottom: '1px solid rgba(27,60,90,0.06)', color: '#5a6a76' }}>
                         {relativeContact(p.last_contacted_at)}
                         {p.last_contacted_at && (
-                          <span className="block text-[10px]" style={{ color: '#7a8a96' }}>{formatShortDate(p.last_contacted_at)}</span>
+                          <span className="block text-[10px]" style={{ color: 'var(--admin-text-2)' }}>{formatShortDate(p.last_contacted_at)}</span>
                         )}
                       </td>
                       <td className="px-3 py-2.5 font-condensed text-[12px]" style={{ borderBottom: '1px solid rgba(27,60,90,0.06)', color: follow.overdue ? '#ef0e30' : '#5a6a76' }}>

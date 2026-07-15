@@ -29,7 +29,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <AdminTopNav profile={profile} />
           <div className="ep-member-body">
             <AdminSidebar />
-            <main className="ep-main-scroll bg-[#faf9f7]" style={{ paddingBottom: 0 }}>{children}</main>
+            <main className="ep-main-scroll bg-[var(--admin-page)]" style={{ paddingBottom: 0 }}>{children}</main>
           </div>
         </div>
       )
@@ -55,7 +55,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <AdminTopNav profile={profile} />
       <div className="ep-member-body">
         <AdminSidebar />
-        <main className="ep-main-scroll bg-[#faf9f7]" style={{ paddingBottom: 0 }}>
+        <main className="ep-main-scroll bg-[var(--admin-page)]" style={{ paddingBottom: 0 }}>
           {children}
         </main>
       </div>

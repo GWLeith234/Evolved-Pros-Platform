@@ -50,19 +50,19 @@ export function AdminEventsTable({ events: initialEvents }: AdminEventsTableProp
       <table className="w-full">
         <thead>
           <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.03)' }}>
-            <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">Title</th>
-            <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">Date</th>
-            <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">Type</th>
-            <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">Tier</th>
-            <th className="px-5 py-3 text-right font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">Registered</th>
-            <th className="px-5 py-3 text-center font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">Status</th>
+            <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)]">Title</th>
+            <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)]">Date</th>
+            <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)]">Type</th>
+            <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)]">Tier</th>
+            <th className="px-5 py-3 text-right font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)]">Registered</th>
+            <th className="px-5 py-3 text-center font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)]">Status</th>
             <th className="px-5 py-3"></th>
           </tr>
         </thead>
         <tbody>
           {events.length === 0 ? (
             <tr>
-              <td colSpan={7} className="px-5 py-10 text-center font-condensed text-[12px] text-[#7a8a96]">
+              <td colSpan={7} className="px-5 py-10 text-center font-condensed text-[12px] text-[color:var(--admin-text-2)]">
                 No events yet. Create your first event.
               </td>
             </tr>
@@ -75,28 +75,28 @@ export function AdminEventsTable({ events: initialEvents }: AdminEventsTableProp
                   key={event.id}
                   style={{
                     borderBottom: i === events.length - 1 ? 'none' : '1px solid rgba(27,60,90,0.06)',
-                    backgroundColor: 'white',
+                    backgroundColor: 'var(--admin-card)',
                   }}
                 >
                   <td className="px-5 py-3">
-                    <p className="font-body font-semibold text-[13px] text-[#1b3c5a] truncate max-w-[260px]">{event.title}</p>
+                    <p className="font-body font-semibold text-[13px] text-[color:var(--admin-text)] truncate max-w-[260px]">{event.title}</p>
                   </td>
                   <td className="px-5 py-3">
-                    <p className="font-condensed text-[12px] text-[#1b3c5a]">{formatDate(event.starts_at)}</p>
-                    {isPast && <p className="font-condensed text-[10px] text-[#7a8a96]">Past</p>}
+                    <p className="font-condensed text-[12px] text-[color:var(--admin-text)]">{formatDate(event.starts_at)}</p>
+                    {isPast && <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)]">Past</p>}
                   </td>
                   <td className="px-5 py-3">
-                    <span className="font-condensed text-[11px] text-[#1b3c5a]">
+                    <span className="font-condensed text-[11px] text-[color:var(--admin-text)]">
                       {EVENT_TYPE_LABELS[event.event_type as EventType]}
                     </span>
                   </td>
                   <td className="px-5 py-3">
-                    <span className="font-condensed text-[11px] text-[#1b3c5a] capitalize">
+                    <span className="font-condensed text-[11px] text-[color:var(--admin-text)] capitalize">
                       {event.required_tier ?? 'Any'}
                     </span>
                   </td>
                   <td className="px-5 py-3 text-right">
-                    <span className="font-condensed font-bold text-[13px] text-[#1b3c5a]">{event.registration_count}</span>
+                    <span className="font-condensed font-bold text-[13px] text-[color:var(--admin-text)]">{event.registration_count}</span>
                   </td>
                   <td className="px-5 py-3 text-center">
                     <span
@@ -122,7 +122,7 @@ export function AdminEventsTable({ events: initialEvents }: AdminEventsTableProp
                       </button>
                       <Link
                         href={`/admin/events/${event.id}/edit`}
-                        className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#68a2b9] hover:text-[#1b3c5a] transition-colors"
+                        className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#68a2b9] hover:text-[color:var(--admin-text)] transition-colors"
                       >
                         Edit
                       </Link>

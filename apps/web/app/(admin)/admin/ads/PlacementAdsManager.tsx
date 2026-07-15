@@ -32,11 +32,11 @@ const PLACEMENT_OPTIONS = [
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div
-      className="bg-white rounded-lg overflow-hidden mb-6"
+      className="bg-[var(--admin-card)] rounded-lg overflow-hidden mb-6"
       style={{ border: '1px solid rgba(27,60,90,0.1)', boxShadow: '0 1px 3px rgba(27,60,90,0.06)' }}
     >
       <div className="px-6 py-4" style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}>
-        <h2 className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]" style={{ color: '#1b3c5a' }}>
+        <h2 className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]" style={{ color: 'var(--admin-text)' }}>
           {title}
         </h2>
       </div>
@@ -128,14 +128,14 @@ export function PlacementAdsManager({
       <SectionCard title="Sponsored Ads">
         {/* Rotation interval */}
         <div className="flex items-center gap-3 mb-5">
-          <label className="font-condensed font-semibold uppercase text-[11px] tracking-wide" style={{ color: '#7a8a96' }}>
+          <label className="font-condensed font-semibold uppercase text-[11px] tracking-wide" style={{ color: 'var(--admin-text-2)' }}>
             Rotation Interval
           </label>
           <select
             value={interval}
             onChange={e => setInterval(e.target.value)}
             className="border rounded px-3 py-1.5 font-condensed text-[13px]"
-            style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+            style={{ borderColor: 'rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}
           >
             <option value="5">5 seconds</option>
             <option value="10">10 seconds</option>
@@ -170,8 +170,8 @@ export function PlacementAdsManager({
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-body text-[13px] font-medium truncate" style={{ color: '#1b3c5a' }}>{ad.tool_name ?? ad.headline ?? '(No headline)'}</p>
-                  <p className="font-condensed text-[11px] truncate" style={{ color: '#7a8a96' }}>
+                  <p className="font-body text-[13px] font-medium truncate" style={{ color: 'var(--admin-text)' }}>{ad.tool_name ?? ad.headline ?? '(No headline)'}</p>
+                  <p className="font-condensed text-[11px] truncate" style={{ color: 'var(--admin-text-2)' }}>
                     {PLACEMENT_OPTIONS.find(o => o.value === ad.placement)?.label ?? ad.placement}
                     {ad.link_url ? ` · ${ad.link_url}` : ''}
                   </p>
@@ -196,7 +196,7 @@ export function PlacementAdsManager({
                       width: '16px',
                       height: '16px',
                       borderRadius: '50%',
-                      backgroundColor: 'white',
+                      backgroundColor: 'var(--admin-card)',
                       transition: 'left 0.15s',
                     }}
                   />
@@ -218,14 +218,14 @@ export function PlacementAdsManager({
         {showAddForm ? (
           <div className="rounded p-4 space-y-3" style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: '#fafafa' }}>
             <div>
-              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>
+              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: 'var(--admin-text-2)' }}>
                 Placement
               </label>
               <select
                 value={newAd.placement}
                 onChange={e => setNewAd(p => ({ ...p, placement: e.target.value }))}
                 className="border rounded px-3 py-1.5 font-condensed text-[13px] w-full"
-                style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+                style={{ borderColor: 'rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}
               >
                 {PLACEMENT_OPTIONS.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -233,10 +233,10 @@ export function PlacementAdsManager({
               </select>
             </div>
             <div>
-              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>
+              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: 'var(--admin-text-2)' }}>
                 Image {uploading ? '(Uploading…)' : ''}
               </label>
-              <label className="cursor-pointer inline-flex items-center gap-2 rounded px-3 py-1.5 font-condensed text-[12px]" style={{ border: '1px solid rgba(27,60,90,0.2)', color: '#1b3c5a' }}>
+              <label className="cursor-pointer inline-flex items-center gap-2 rounded px-3 py-1.5 font-condensed text-[12px]" style={{ border: '1px solid rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}>
                 Choose Image
                 <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
               </label>
@@ -246,7 +246,7 @@ export function PlacementAdsManager({
               )}
             </div>
             <div>
-              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>
+              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: 'var(--admin-text-2)' }}>
                 Tool / Sponsor Name
               </label>
               <input
@@ -255,11 +255,11 @@ export function PlacementAdsManager({
                 onChange={e => setNewAd(p => ({ ...p, tool_name: e.target.value }))}
                 placeholder="e.g. HubSpot"
                 className="border rounded px-3 py-1.5 font-body text-[13px] w-full"
-                style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+                style={{ borderColor: 'rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}
               />
             </div>
             <div>
-              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>
+              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: 'var(--admin-text-2)' }}>
                 Headline ({newAd.headline.length}/40)
               </label>
               <input
@@ -268,11 +268,11 @@ export function PlacementAdsManager({
                 onChange={e => setNewAd(p => ({ ...p, headline: e.target.value.slice(0, 40) }))}
                 placeholder="Ad headline"
                 className="border rounded px-3 py-1.5 font-body text-[13px] w-full"
-                style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+                style={{ borderColor: 'rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}
               />
             </div>
             <div>
-              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>
+              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: 'var(--admin-text-2)' }}>
                 George&apos;s Endorsement Quote (optional)
               </label>
               <textarea
@@ -281,11 +281,11 @@ export function PlacementAdsManager({
                 placeholder="Why I use and recommend this tool..."
                 rows={3}
                 className="border rounded px-3 py-1.5 font-body text-[13px] w-full resize-none"
-                style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+                style={{ borderColor: 'rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}
               />
             </div>
             <div>
-              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>
+              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: 'var(--admin-text-2)' }}>
                 Special Offer Text (optional)
               </label>
               <input
@@ -294,11 +294,11 @@ export function PlacementAdsManager({
                 onChange={e => setNewAd(p => ({ ...p, special_offer: e.target.value }))}
                 placeholder="e.g. 20% off for Evolved Pros members"
                 className="border rounded px-3 py-1.5 font-body text-[13px] w-full"
-                style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+                style={{ borderColor: 'rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}
               />
             </div>
             <div>
-              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>
+              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: 'var(--admin-text-2)' }}>
                 CTA Text ({newAd.cta_text.length}/20)
               </label>
               <input
@@ -307,11 +307,11 @@ export function PlacementAdsManager({
                 onChange={e => setNewAd(p => ({ ...p, cta_text: e.target.value.slice(0, 20) }))}
                 placeholder="Learn More"
                 className="border rounded px-3 py-1.5 font-body text-[13px] w-full"
-                style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+                style={{ borderColor: 'rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}
               />
             </div>
             <div>
-              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>
+              <label className="block font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: 'var(--admin-text-2)' }}>
                 Link URL
               </label>
               <input
@@ -320,7 +320,7 @@ export function PlacementAdsManager({
                 onChange={e => setNewAd(p => ({ ...p, link_url: e.target.value }))}
                 placeholder="https://..."
                 className="border rounded px-3 py-1.5 font-body text-[13px] w-full"
-                style={{ borderColor: 'rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+                style={{ borderColor: 'rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}
               />
             </div>
             <div className="flex gap-2">
@@ -336,7 +336,7 @@ export function PlacementAdsManager({
                 type="button"
                 onClick={() => setShowAddForm(false)}
                 className="rounded px-4 py-2 font-condensed font-bold uppercase text-[12px] tracking-wide"
-                style={{ border: '1px solid rgba(27,60,90,0.2)', color: '#7a8a96' }}
+                style={{ border: '1px solid rgba(27,60,90,0.2)', color: 'var(--admin-text-2)' }}
               >
                 Cancel
               </button>
@@ -356,8 +356,8 @@ export function PlacementAdsManager({
 
       <SectionCard title="Top Nav Event Card">
         <div className="rounded p-4 mb-4" style={{ backgroundColor: '#f0f4f7', border: '1px solid rgba(27,60,90,0.08)' }}>
-          <p className="font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: '#7a8a96' }}>Auto-populated</p>
-          <p className="font-body text-[13px]" style={{ color: '#1b3c5a' }}>
+          <p className="font-condensed font-semibold uppercase text-[11px] tracking-wide mb-1" style={{ color: 'var(--admin-text-2)' }}>Auto-populated</p>
+          <p className="font-body text-[13px]" style={{ color: 'var(--admin-text)' }}>
             The top nav event card automatically shows the next upcoming published event. No configuration needed — it updates in real-time as events are created.
           </p>
         </div>

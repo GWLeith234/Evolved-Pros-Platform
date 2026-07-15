@@ -29,13 +29,13 @@ function getInitials(name: string | null | undefined) {
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '8px 12px',
   border: '1px solid rgba(27,60,90,0.18)', borderRadius: '6px',
-  fontSize: '13px', fontFamily: 'var(--font-body)', color: '#112535',
-  outline: 'none', backgroundColor: '#fff',
+  fontSize: '13px', fontFamily: 'var(--font-body)', color: 'var(--admin-text-strong)',
+  outline: 'none', backgroundColor: 'var(--admin-card)',
 }
 const labelStyle: React.CSSProperties = {
   display: 'block', fontFamily: 'var(--font-condensed)', fontWeight: 700,
   fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
-  color: '#7a8a96', marginBottom: '5px',
+  color: 'var(--admin-text-2)', marginBottom: '5px',
 }
 
 export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
@@ -166,18 +166,18 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
     >
       <div
         className="w-full max-w-lg rounded-xl shadow-2xl overflow-hidden"
-        style={{ backgroundColor: '#fff', border: '1px solid rgba(27,60,90,0.1)', maxHeight: '90vh', overflowY: 'auto' }}
+        style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)', maxHeight: '90vh', overflowY: 'auto' }}
       >
         {/* Header */}
         <div
-          className="flex items-center justify-between px-6 py-4 sticky top-0 bg-white"
+          className="flex items-center justify-between px-6 py-4 sticky top-0 bg-[var(--admin-card)]"
           style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}
         >
           <div>
-            <h2 className="font-display font-black text-[18px]" style={{ color: '#112535' }}>
+            <h2 className="font-display font-black text-[18px]" style={{ color: 'var(--admin-text-strong)' }}>
               Edit Profile
             </h2>
-            <p className="font-condensed text-[12px] mt-0.5" style={{ color: '#7a8a96' }}>
+            <p className="font-condensed text-[12px] mt-0.5" style={{ color: 'var(--admin-text-2)' }}>
               {name} · {member.email}
             </p>
           </div>
@@ -212,7 +212,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                 <div className="flex-1">
                   <label
                     className="inline-flex items-center gap-1.5 font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-3 py-2 rounded cursor-pointer transition-colors"
-                    style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.15)' }}
+                    style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: 'var(--admin-text)', border: '1px solid rgba(27,60,90,0.15)' }}
                     onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.1)')}
                     onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.06)')}
                   >
@@ -244,7 +244,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
               )}
               <label
                 className="inline-flex items-center gap-1.5 font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-3 py-2 rounded cursor-pointer transition-colors"
-                style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.15)' }}
+                style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: 'var(--admin-text)', border: '1px solid rgba(27,60,90,0.15)' }}
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.1)')}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.06)')}
               >
@@ -323,7 +323,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
 
             {/* Professional section header */}
             <div style={{ borderTop: '1px solid rgba(27,60,90,0.08)', paddingTop: '16px' }}>
-              <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a8a96', marginBottom: '12px' }}>
+              <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--admin-text-2)', marginBottom: '12px' }}>
                 Professional
               </p>
 
@@ -385,7 +385,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                     type="checkbox" checked={phoneVisible} onChange={e => setPhoneVisible(e.target.checked)}
                     style={{ width: '14px', height: '14px', accentColor: '#1b3c5a', cursor: 'pointer' }}
                   />
-                  <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a8a96' }}>
+                  <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--admin-text-2)' }}>
                     Visible to members
                   </span>
                 </label>
@@ -434,7 +434,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                     type="checkbox" checked={goalVisible} onChange={e => setGoalVisible(e.target.checked)}
                     style={{ width: '14px', height: '14px', accentColor: '#1b3c5a', cursor: 'pointer' }}
                   />
-                  <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a8a96' }}>
+                  <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--admin-text-2)' }}>
                     Make this public
                   </span>
                 </label>
@@ -454,13 +454,13 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
 
           {/* Footer */}
           <div
-            className="flex items-center justify-end gap-3 px-6 py-4 sticky bottom-0 bg-white"
+            className="flex items-center justify-end gap-3 px-6 py-4 sticky bottom-0 bg-[var(--admin-card)]"
             style={{ borderTop: '1px solid rgba(27,60,90,0.08)' }}
           >
             <button
               type="button" onClick={onClose}
               className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-4 py-2 rounded transition-colors"
-              style={{ backgroundColor: 'rgba(27,60,90,0.05)', color: '#7a8a96', border: '1px solid rgba(27,60,90,0.12)' }}
+              style={{ backgroundColor: 'rgba(27,60,90,0.05)', color: 'var(--admin-text-2)', border: '1px solid rgba(27,60,90,0.12)' }}
             >
               Cancel
             </button>

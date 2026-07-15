@@ -32,7 +32,7 @@ const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
   active:    { bg: 'rgba(34,197,94,0.08)',  color: '#15803d' },
   trial:     { bg: 'rgba(201,168,76,0.08)', color: '#92660b' },
   cancelled: { bg: 'rgba(239,14,48,0.08)',  color: '#ef0e30' },
-  expired:   { bg: 'rgba(122,138,150,0.08)',color: '#7a8a96' },
+  expired:   { bg: 'rgba(122,138,150,0.08)',color: 'var(--admin-text-2)' },
 }
 const ENG_COLORS: Record<EngagementLevel, { bar: string; text: string }> = {
   High: { bar: '#68a2b9', text: '#1b3c5a' },
@@ -104,9 +104,9 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
           className="font-condensed text-[13px] rounded px-3 py-2 outline-none transition-all"
           style={{
             width: '260px',
-            backgroundColor: 'white',
+            backgroundColor: 'var(--admin-card)',
             border: '1px solid rgba(27,60,90,0.18)',
-            color: '#112535',
+            color: 'var(--admin-text-strong)',
           }}
           onFocus={e => (e.currentTarget.style.borderColor = '#68a2b9')}
           onBlur={e => (e.currentTarget.style.borderColor = 'rgba(27,60,90,0.18)')}
@@ -127,7 +127,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
             </button>
           ))}
         </div>
-        <span className="font-condensed text-[12px] text-[#7a8a96] ml-auto">
+        <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)] ml-auto">
           {filtered.length} of {initialMembers.length}
         </span>
       </div>
@@ -135,9 +135,9 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
       {/* Mobile: stacked card list (<768px). Desktop table below is hidden
           at that breakpoint. Keeps every column's data visible without
           horizontal scrolling on a 375px viewport. */}
-      <div className="md:hidden rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'white' }}>
+      <div className="md:hidden rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'var(--admin-card)' }}>
         {filtered.length === 0 ? (
-          <p className="px-4 py-10 text-center font-condensed text-[12px] text-[#7a8a96]">No members found.</p>
+          <p className="px-4 py-10 text-center font-condensed text-[12px] text-[color:var(--admin-text-2)]">No members found.</p>
         ) : (
           filtered.map((m, i) => {
             const name = resolveDisplayName(m)
@@ -163,8 +163,8 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                     ) : getInitials(name)}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-body font-semibold text-[14px] text-[#112535] leading-tight truncate">{name}</p>
-                    <p className="font-condensed text-[12px] text-[#7a8a96] truncate">{m.email}</p>
+                    <p className="font-body font-semibold text-[14px] text-[color:var(--admin-text-strong)] leading-tight truncate">{name}</p>
+                    <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] truncate">{m.email}</p>
                   </div>
                 </div>
 
@@ -184,12 +184,12 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                   >
                     {(m.tierStatus ?? 'unknown').toUpperCase()}
                   </span>
-                  <span className="font-condensed text-[12px] text-[#7a8a96] ml-auto">{fmtDate(m.joinedAt)}</span>
+                  <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)] ml-auto">{fmtDate(m.joinedAt)}</span>
                 </div>
 
                 {/* Row 3: MRR + Engagement */}
                 <div className="flex items-center justify-between gap-3">
-                  <span className="font-condensed font-bold text-[14px] text-[#1b3c5a]">
+                  <span className="font-condensed font-bold text-[14px] text-[color:var(--admin-text)]">
                     {m.mrr > 0 ? `$${m.mrr} MRR` : 'No MRR'}
                   </span>
                   <div className="flex items-center gap-2">
@@ -220,7 +220,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                   <Link
                     href={`/admin/members/${m.id}`}
                     className="font-condensed font-semibold uppercase tracking-wide text-[13px] px-3 py-2 rounded transition-all inline-flex items-center justify-center"
-                    style={{ minHeight: 44, color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.25)' }}
+                    style={{ minHeight: 44, color: 'var(--admin-text)', border: '1px solid rgba(27,60,90,0.25)' }}
                   >
                     View →
                   </Link>
@@ -232,7 +232,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
       </div>
 
       {/* Desktop table (≥768px) */}
-      <div className="hidden md:block rounded-lg overflow-x-auto" style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'white' }}>
+      <div className="hidden md:block rounded-lg overflow-x-auto" style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'var(--admin-card)' }}>
         <table className="w-full min-w-[820px]">
           <thead>
             <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.03)' }}>
@@ -242,7 +242,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                 return (
                   <th
                     key={h}
-                    className={`${isEngagement ? 'px-2' : 'px-4'} py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96]`}
+                    className={`${isEngagement ? 'px-2' : 'px-4'} py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[color:var(--admin-text-2)]`}
                     style={isActions ? {
                       position: 'sticky',
                       right: 0,
@@ -259,7 +259,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-4 py-10 text-center font-condensed text-[12px] text-[#7a8a96]">
+                <td colSpan={8} className="px-4 py-10 text-center font-condensed text-[12px] text-[color:var(--admin-text-2)]">
                   No members found.
                 </td>
               </tr>
@@ -289,8 +289,8 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                           ) : getInitials(name)}
                         </div>
                         <div>
-                          <p className="font-body font-semibold text-[12px] text-[#112535] leading-tight">{name}</p>
-                          <p className="font-condensed text-[12px] text-[#7a8a96]">{m.email}</p>
+                          <p className="font-body font-semibold text-[12px] text-[color:var(--admin-text-strong)] leading-tight">{name}</p>
+                          <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">{m.email}</p>
                         </div>
                       </div>
                     </td>
@@ -305,7 +305,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                           {m.tier.toUpperCase()}
                         </span>
                       ) : (
-                        <span className="font-condensed text-[12px] text-[#7a8a96]">—</span>
+                        <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">—</span>
                       )}
                     </td>
 
@@ -321,12 +321,12 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
 
                     {/* Joined */}
                     <td className="px-4 py-3">
-                      <span className="font-condensed text-[12px] text-[#7a8a96]">{fmtDate(m.joinedAt)}</span>
+                      <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">{fmtDate(m.joinedAt)}</span>
                     </td>
 
                     {/* MRR */}
                     <td className="px-4 py-3">
-                      <span className="font-condensed font-bold text-[13px] text-[#1b3c5a]">
+                      <span className="font-condensed font-bold text-[13px] text-[color:var(--admin-text)]">
                         {m.mrr > 0 ? `$${m.mrr}` : '—'}
                       </span>
                     </td>
@@ -367,7 +367,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                           {m.vendastaContactId.slice(0, 10)}…
                         </a>
                       ) : (
-                        <span className="font-condensed text-[12px] text-[#7a8a96]">Not linked</span>
+                        <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">Not linked</span>
                       )}
                     </td>
 
@@ -377,7 +377,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                       style={{
                         position: 'sticky',
                         right: 0,
-                        backgroundColor: 'white',
+                        backgroundColor: 'var(--admin-card)',
                         boxShadow: 'inset 1px 0 0 rgba(27,60,90,0.06)',
                       }}
                     >
@@ -394,7 +394,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                         <Link
                           href={`/admin/members/${m.id}`}
                           className="font-condensed font-semibold uppercase tracking-wide text-[12px] px-3 py-1.5 rounded transition-all"
-                          style={{ color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.25)' }}
+                          style={{ color: 'var(--admin-text)', border: '1px solid rgba(27,60,90,0.25)' }}
                         >
                           View →
                         </Link>

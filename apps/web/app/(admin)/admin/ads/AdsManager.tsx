@@ -82,8 +82,8 @@ function StatusBadge({ status }: { status: ReturnType<typeof adStatus> }) {
   const styles: Record<typeof status, React.CSSProperties> = {
     active:    { backgroundColor: 'rgba(0,200,100,0.15)', color: '#00c864' },
     scheduled: { backgroundColor: 'rgba(201,168,76,0.12)', color: '#C9A84C' },
-    expired:   { backgroundColor: 'rgba(27,60,90,0.08)',   color: '#7a8a96' },
-    inactive:  { backgroundColor: 'transparent',           color: '#7a8a96', border: '1px solid rgba(122,138,150,0.4)' },
+    expired:   { backgroundColor: 'rgba(27,60,90,0.08)',   color: 'var(--admin-text-2)' },
+    inactive:  { backgroundColor: 'transparent',           color: 'var(--admin-text-2)', border: '1px solid rgba(122,138,150,0.4)' },
   }
   return (
     <span
@@ -100,9 +100,9 @@ function formatDate(iso: string | null): string {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none transition-all'
-const inputStyle: React.CSSProperties = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }
-const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5'
+const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[color:var(--admin-text)] outline-none transition-all'
+const inputStyle: React.CSSProperties = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'var(--admin-card)' }
+const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)] mb-1.5'
 
 function AdForm({
   initialValues,
@@ -221,7 +221,7 @@ function AdForm({
           placeholder="Supporting sentence under the headline"
           maxLength={120}
         />
-        <p className="font-condensed text-[10px] text-[#7a8a96] mt-1">{values.bodyCopy.length}/120</p>
+        <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] mt-1">{values.bodyCopy.length}/120</p>
       </div>
 
       {/* CTA text */}
@@ -243,8 +243,8 @@ function AdForm({
         <div>
           <label className={labelClass}>Zone</label>
           <div
-            className="rounded px-3 py-2.5 font-body text-[13px] text-[#7a8a96]"
-            style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: '#f5f7f9' }}
+            className="rounded px-3 py-2.5 font-body text-[13px] text-[color:var(--admin-text-2)]"
+            style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'var(--admin-subtle)' }}
           >
             Zone {values.zone} — {ZONE_DESCRIPTIONS[values.zone]}
           </div>
@@ -302,7 +302,7 @@ function AdForm({
             className={inputClass}
             style={inputStyle}
           />
-          <p className="font-condensed text-[10px] text-[#7a8a96] mt-1">Leave blank = always active</p>
+          <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] mt-1">Leave blank = always active</p>
         </div>
         <div>
           <label className={labelClass}>End Date (optional)</label>
@@ -313,7 +313,7 @@ function AdForm({
             className={inputClass}
             style={inputStyle}
           />
-          <p className="font-condensed text-[10px] text-[#7a8a96] mt-1">Leave blank = no expiry</p>
+          <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] mt-1">Leave blank = no expiry</p>
         </div>
       </div>
 
@@ -326,11 +326,11 @@ function AdForm({
           style={{ backgroundColor: values.isActive ? '#68a2b9' : 'rgba(27,60,90,0.15)' }}
         >
           <span
-            className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform"
+            className="absolute top-0.5 w-4 h-4 rounded-full bg-[var(--admin-card)] transition-transform"
             style={{ transform: values.isActive ? 'translateX(22px)' : 'translateX(2px)' }}
           />
         </button>
-        <span className="font-condensed font-semibold text-[12px] text-[#1b3c5a]">
+        <span className="font-condensed font-semibold text-[12px] text-[color:var(--admin-text)]">
           {values.isActive ? 'Active' : 'Inactive (paused)'}
         </span>
       </div>
@@ -354,7 +354,7 @@ function AdForm({
                   }}
                   className="accent-[#68a2b9]"
                 />
-                <span className="font-condensed font-semibold text-[12px] text-[#1b3c5a] capitalize">{p}</span>
+                <span className="font-condensed font-semibold text-[12px] text-[color:var(--admin-text)] capitalize">{p}</span>
               </label>
             )
           })}
@@ -366,7 +366,7 @@ function AdForm({
         <button
           type="button"
           onClick={onCancel}
-          className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a] transition-colors"
+          className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[color:var(--admin-text-2)] hover:text-[color:var(--admin-text)] transition-colors"
         >
           Cancel
         </button>
@@ -431,7 +431,7 @@ function ZonePanel({
     <div className="space-y-4">
       {/* Zone description pill */}
       <div className="flex items-center justify-between">
-        <span className="font-condensed text-[11px]" style={{ color: '#7a8a96' }}>
+        <span className="font-condensed text-[11px]" style={{ color: 'var(--admin-text-2)' }}>
           {ZONE_DESCRIPTIONS[zone]} · {zoneAds.length} ad{zoneAds.length !== 1 ? 's' : ''}
         </span>
         {!showForm && !editingId && (
@@ -449,9 +449,9 @@ function ZonePanel({
       {showForm && (
         <div
           className="rounded-lg p-5"
-          style={{ backgroundColor: '#f5f7f9', border: '1px solid rgba(27,60,90,0.1)' }}
+          style={{ backgroundColor: 'var(--admin-subtle)', border: '1px solid rgba(27,60,90,0.1)' }}
         >
-          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-[#1b3c5a] mb-4">
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-[color:var(--admin-text)] mb-4">
             New Ad — Zone {zone}
           </p>
           <AdForm
@@ -466,9 +466,9 @@ function ZonePanel({
       {editingId && editingAd && (
         <div
           className="rounded-lg p-5"
-          style={{ backgroundColor: '#f5f7f9', border: '1px solid rgba(27,60,90,0.1)' }}
+          style={{ backgroundColor: 'var(--admin-subtle)', border: '1px solid rgba(27,60,90,0.1)' }}
         >
-          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-[#1b3c5a] mb-4">
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-[color:var(--admin-text)] mb-4">
             Edit Ad
           </p>
           <AdForm
@@ -500,10 +500,10 @@ function ZonePanel({
           className="rounded-lg px-8 py-10 text-center"
           style={{ border: '1px dashed rgba(27,60,90,0.15)' }}
         >
-          <p className="font-condensed font-bold uppercase tracking-widest text-[10px] text-[#7a8a96]">
+          <p className="font-condensed font-bold uppercase tracking-widest text-[10px] text-[color:var(--admin-text-2)]">
             No ads in Zone {zone}
           </p>
-          <p className="font-body text-[12px] text-[#7a8a96] mt-1">
+          <p className="font-body text-[12px] text-[color:var(--admin-text-2)] mt-1">
             Click "+ New Ad" to create one.
           </p>
         </div>
@@ -511,11 +511,11 @@ function ZonePanel({
         <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.1)' }}>
           <table className="w-full">
             <thead>
-              <tr style={{ backgroundColor: '#f5f7f9', borderBottom: '1px solid rgba(27,60,90,0.1)' }}>
-                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96]">Sponsor</th>
-                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96] hidden md:table-cell">Type</th>
-                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96] hidden lg:table-cell">Dates</th>
-                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96]">Status</th>
+              <tr style={{ backgroundColor: 'var(--admin-subtle)', borderBottom: '1px solid rgba(27,60,90,0.1)' }}>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[color:var(--admin-text-2)]">Sponsor</th>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[color:var(--admin-text-2)] hidden md:table-cell">Type</th>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[color:var(--admin-text-2)] hidden lg:table-cell">Dates</th>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[color:var(--admin-text-2)]">Status</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -527,7 +527,7 @@ function ZonePanel({
                     key={ad.id}
                     style={{
                       borderBottom: i < zoneAds.length - 1 ? '1px solid rgba(27,60,90,0.06)' : 'none',
-                      backgroundColor: 'white',
+                      backgroundColor: 'var(--admin-card)',
                     }}
                   >
                     <td className="px-4 py-3">
@@ -541,22 +541,22 @@ function ZonePanel({
                           />
                         )}
                         <div>
-                          <p className="font-body font-semibold text-[13px] text-[#1b3c5a]">
-                            {ad.sponsor_name ?? <span className="text-[#7a8a96]">—</span>}
+                          <p className="font-body font-semibold text-[13px] text-[color:var(--admin-text)]">
+                            {ad.sponsor_name ?? <span className="text-[color:var(--admin-text-2)]">—</span>}
                           </p>
                           {ad.headline && (
-                            <p className="font-condensed text-[10px] text-[#7a8a96] truncate max-w-[180px]">{ad.headline}</p>
+                            <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] truncate max-w-[180px]">{ad.headline}</p>
                           )}
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#7a8a96] capitalize">
+                      <span className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[color:var(--admin-text-2)] capitalize">
                         {ad.ad_type ?? 'image'}
                       </span>
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell">
-                      <span className="font-condensed text-[11px] text-[#7a8a96]">
+                      <span className="font-condensed text-[11px] text-[color:var(--admin-text-2)]">
                         {ad.start_date || ad.end_date
                           ? `${formatDate(ad.start_date)} → ${formatDate(ad.end_date)}`
                           : 'Always active'}
@@ -569,7 +569,7 @@ function ZonePanel({
                       <div className="flex items-center justify-end gap-3">
                         <button
                           onClick={() => { setEditingId(ad.id); setShowForm(false) }}
-                          className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#68a2b9] hover:text-[#1b3c5a] transition-colors"
+                          className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#68a2b9] hover:text-[color:var(--admin-text)] transition-colors"
                         >
                           Edit
                         </button>
@@ -605,7 +605,7 @@ export function AdsManager({ initialAds }: { initialAds: Ad[] }) {
   return (
     <div>
       {/* Reactive count — updates immediately after any create/delete */}
-      <p className="font-condensed text-[12px] text-[#7a8a96] mb-6">
+      <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mb-6">
         {ads.length} total · {activeCount} active · 4 IAB zones
       </p>
       {/* Zone tabs */}
@@ -646,7 +646,7 @@ export function AdsManager({ initialAds }: { initialAds: Ad[] }) {
 
       {/* Active zone label */}
       <div className="mb-4">
-        <h2 className="font-display font-black text-[18px] text-[#112535]">
+        <h2 className="font-display font-black text-[18px] text-[color:var(--admin-text-strong)]">
           {ZONE_LABELS[activeZone]}
         </h2>
       </div>

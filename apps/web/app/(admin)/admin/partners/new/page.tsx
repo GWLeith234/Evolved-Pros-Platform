@@ -6,11 +6,11 @@ export default function NewPartnerPage() {
     <div className="px-8 py-6">
       <Link
         href="/admin/partners"
-        className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a]"
+        className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[color:var(--admin-text-2)] hover:text-[color:var(--admin-text)]"
       >
         ← All partners
       </Link>
-      <h1 className="font-display font-black text-[28px] text-[#112535] mt-2 mb-6">New partner</h1>
+      <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)] mt-2 mb-6">New partner</h1>
       <PartnerForm />
     </div>
   )

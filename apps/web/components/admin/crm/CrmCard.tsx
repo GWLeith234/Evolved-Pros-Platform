@@ -43,7 +43,7 @@ export function CrmCard({
     <article
       className="rounded-md mb-2 transition-shadow"
       style={{
-        background: '#fff',
+        background: 'var(--admin-card)',
         border: '1px solid var(--border-color, rgba(27,60,90,0.10))',
         borderLeft: `3px solid ${meta.accent}`,
         opacity: busy ? 0.55 : 1,
@@ -60,14 +60,14 @@ export function CrmCard({
           >
             <p
               className="font-body font-semibold text-[13px] leading-snug truncate"
-              style={{ color: '#1b3c5a', margin: 0 }}
+              style={{ color: 'var(--admin-text)', margin: 0 }}
             >
               {prospect.full_name}
             </p>
             {prospect.company && (
               <p
                 className="font-condensed text-[11px] truncate mt-0.5"
-                style={{ color: '#7a8a96', margin: 0 }}
+                style={{ color: 'var(--admin-text-2)', margin: 0 }}
               >
                 {prospect.company}
               </p>
@@ -118,7 +118,7 @@ export function CrmCard({
         {prospect.notes && (
           <p
             className="font-body text-[12px] leading-snug mb-2 line-clamp-2"
-            style={{ color: '#7a8a96', margin: '0 0 8px' }}
+            style={{ color: 'var(--admin-text-2)', margin: '0 0 8px' }}
           >
             {prospect.notes}
           </p>
@@ -195,7 +195,7 @@ function Field({
         style={{
           margin: 0,
           fontSize: 9,
-          color: '#7a8a96',
+          color: 'var(--admin-text-2)',
         }}
       >
         {label}

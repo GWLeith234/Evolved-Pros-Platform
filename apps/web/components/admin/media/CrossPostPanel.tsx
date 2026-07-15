@@ -78,7 +78,7 @@ export function CrossPostPanel({ title, body, slug, pillar }: CrossPostPanelProp
           <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px]" style={{ color: '#C9A84C' }}>
             Cross-Post Kit
           </p>
-          <p className="font-condensed text-[12px]" style={{ color: '#7a8a96' }}>
+          <p className="font-condensed text-[12px]" style={{ color: 'var(--admin-text-2)' }}>
             Generate LinkedIn, X, and email content from this article
           </p>
         </div>
@@ -121,7 +121,7 @@ export function CrossPostPanel({ title, body, slug, pillar }: CrossPostPanelProp
           {activeTab === 'email' && (
             <div style={{ marginBottom: 8 }}>
               <label
-                style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7a8a96', display: 'block', marginBottom: 4 }}
+                style={{ fontSize: 10, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--admin-text-2)', display: 'block', marginBottom: 4 }}
                 className="font-condensed"
               >
                 Subject line
@@ -130,12 +130,12 @@ export function CrossPostPanel({ title, body, slug, pillar }: CrossPostPanelProp
                 type="text"
                 value={emailSubject}
                 onChange={e => setEmailSubject(e.target.value)}
-                style={{ width: '100%', backgroundColor: '#fff', border: '1px solid rgba(27,60,90,0.15)', borderRadius: 6, padding: '8px 12px', fontSize: 12, color: '#1b3c5a', outline: 'none' }}
+                style={{ width: '100%', backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.15)', borderRadius: 6, padding: '8px 12px', fontSize: 12, color: 'var(--admin-text)', outline: 'none' }}
                 className="font-body"
                 placeholder="Email subject line..."
                 maxLength={60}
               />
-              <div style={{ fontSize: 10, color: '#7a8a96', textAlign: 'right', marginTop: 2 }} className="font-condensed">
+              <div style={{ fontSize: 10, color: 'var(--admin-text-2)', textAlign: 'right', marginTop: 2 }} className="font-condensed">
                 {emailSubject.length}/50
               </div>
             </div>
@@ -146,13 +146,13 @@ export function CrossPostPanel({ title, body, slug, pillar }: CrossPostPanelProp
             value={currentContent}
             readOnly
             rows={10}
-            className="w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] resize-y outline-none"
-            style={{ border: '1px solid rgba(27,60,90,0.15)', backgroundColor: '#fff', lineHeight: '1.6' }}
+            className="w-full rounded px-3 py-2.5 font-body text-[13px] text-[color:var(--admin-text)] resize-y outline-none"
+            style={{ border: '1px solid rgba(27,60,90,0.15)', backgroundColor: 'var(--admin-card)', lineHeight: '1.6' }}
           />
 
           {/* Char count + Copy */}
           <div className="flex items-center justify-between mt-2">
-            <div className="font-condensed text-[12px]" style={{ color: '#7a8a96' }}>
+            <div className="font-condensed text-[12px]" style={{ color: 'var(--admin-text-2)' }}>
               {activeTab === 'linkedin' && `${linkedin.length}/1300 chars`}
               {activeTab === 'thread' && thread.map((t, i) => (
                 <span key={i} style={{ marginRight: 8, color: t.length > 280 ? '#ef0e30' : '#7a8a96' }}>

@@ -39,8 +39,8 @@ const inputStyle: React.CSSProperties = {
   fontSize: 13,
   border: '1px solid rgba(27,60,90,0.14)',
   borderRadius: 4,
-  background: '#fff',
-  color: '#1b3c5a',
+  background: 'var(--admin-card)',
+  color: 'var(--admin-text)',
   boxSizing: 'border-box',
 }
 
@@ -51,7 +51,7 @@ const labelStyle: React.CSSProperties = {
   fontSize: 10,
   letterSpacing: '0.16em',
   textTransform: 'uppercase',
-  color: '#7a8a96',
+  color: 'var(--admin-text-2)',
   marginBottom: 6,
 }
 
@@ -145,7 +145,7 @@ export function CrmProspectModal({
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          background: '#fff',
+          background: 'var(--admin-card)',
           borderRadius: 8,
           width: '100%',
           maxWidth: 500,
@@ -165,7 +165,7 @@ export function CrmProspectModal({
             </p>
             <h2
               className="font-display font-black text-[22px]"
-              style={{ color: '#112535', margin: '4px 0 0' }}
+              style={{ color: 'var(--admin-text-strong)', margin: '4px 0 0' }}
             >
               {isEdit ? 'Edit prospect' : 'Add prospect'}
             </h2>
@@ -179,7 +179,7 @@ export function CrmProspectModal({
               border: 'none',
               fontSize: 22,
               lineHeight: 1,
-              color: '#7a8a96',
+              color: 'var(--admin-text-2)',
               cursor: 'pointer',
               minWidth: 36,
               minHeight: 36,
@@ -295,7 +295,7 @@ export function CrmProspectModal({
                       type="button"
                       onClick={() => setConfirmDelete(false)}
                       className="font-condensed text-[11px]"
-                      style={{ background: 'none', border: 'none', color: '#7a8a96', cursor: 'pointer' }}
+                      style={{ background: 'none', border: 'none', color: 'var(--admin-text-2)', cursor: 'pointer' }}
                     >
                       Cancel
                     </button>
@@ -320,7 +320,7 @@ export function CrmProspectModal({
                 style={{
                   background: 'transparent',
                   border: '1px solid rgba(27,60,90,0.14)',
-                  color: '#1b3c5a',
+                  color: 'var(--admin-text)',
                   cursor: 'pointer',
                   minHeight: 40,
                 }}

@@ -70,7 +70,7 @@ export default function AdminPollsPage() {
   return (
     <div style={{ padding: '24px 32px', maxWidth: 960 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 className="font-condensed font-bold text-[22px]" style={{ color: '#1b3c5a' }}>Polls</h1>
+        <h1 className="font-condensed font-bold text-[22px]" style={{ color: 'var(--admin-text)' }}>Polls</h1>
         <button
           type="button"
           onClick={() => setEditing({ question: '', context: 'community', options: ['', ''], closes_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16), status: 'active' })}
@@ -83,8 +83,8 @@ export default function AdminPollsPage() {
 
       {/* Form */}
       {editing && (
-        <div style={{ backgroundColor: '#fff', border: '1px solid rgba(27,60,90,0.1)', borderRadius: 6, padding: 20, marginBottom: 20 }}>
-          <h2 className="font-condensed font-bold text-[14px] mb-3" style={{ color: '#1b3c5a' }}>
+        <div style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)', borderRadius: 6, padding: 20, marginBottom: 20 }}>
+          <h2 className="font-condensed font-bold text-[14px] mb-3" style={{ color: 'var(--admin-text)' }}>
             {editing.id ? 'Edit Poll' : 'New Poll'}
           </h2>
           {error && <p className="text-[12px] mb-2" style={{ color: '#ef0e30' }}>{error}</p>}
@@ -145,7 +145,7 @@ export default function AdminPollsPage() {
       ) : polls.length === 0 ? (
         <p className="font-condensed text-[12px]" style={{ color: 'rgba(27,60,90,0.4)' }}>No polls yet.</p>
       ) : (
-        <div style={{ backgroundColor: '#fff', border: '1px solid rgba(27,60,90,0.1)', borderRadius: 6, overflow: 'hidden' }}>
+        <div style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)', borderRadius: 6, overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.02)' }}>
@@ -159,7 +159,7 @@ export default function AdminPollsPage() {
                 const totalVotes = (p.poll_options ?? []).reduce((s, o) => s + (o.vote_count ?? 0), 0)
                 return (
                   <tr key={p.id} style={{ borderBottom: '1px solid rgba(27,60,90,0.06)' }}>
-                    <td style={{ padding: '8px 10px', fontWeight: 600, color: '#1b3c5a', maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.question}</td>
+                    <td style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--admin-text)', maxWidth: 250, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.question}</td>
                     <td style={{ padding: '8px 10px', color: 'rgba(27,60,90,0.5)' }}>{p.context}</td>
                     <td style={{ padding: '8px 10px' }}>
                       <span style={{ fontSize: 9, fontWeight: 700, fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', padding: '2px 6px', borderRadius: 2, backgroundColor: p.status === 'active' ? 'rgba(10,191,163,0.12)' : p.status === 'draft' ? 'rgba(201,168,76,0.12)' : 'rgba(27,60,90,0.06)', color: p.status === 'active' ? '#0F6E56' : p.status === 'draft' ? '#AA8C3C' : 'rgba(27,60,90,0.4)' }}>

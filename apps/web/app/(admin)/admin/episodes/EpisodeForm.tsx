@@ -107,17 +107,17 @@ function LabelledInput({
 }) {
   return (
     <div>
-      <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
+      <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)] mb-1.5">
         {label}
       </label>
       {children}
-      {hint && <p className="font-condensed text-[10px] text-[#7a8a96] mt-1">{hint}</p>}
+      {hint && <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] mt-1">{hint}</p>}
     </div>
   )
 }
 
-const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none transition-all'
-const inputStyle = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }
+const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[color:var(--admin-text)] outline-none transition-all'
+const inputStyle = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'var(--admin-card)' }
 
 export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
   const router = useRouter()
@@ -479,10 +479,10 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
             <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-1" style={{ color: '#0ABFA3' }}>
               AI image prompt
             </p>
-            <p className="font-body text-[12px] leading-relaxed" style={{ color: '#1b3c5a' }}>
+            <p className="font-body text-[12px] leading-relaxed" style={{ color: 'var(--admin-text)' }}>
               {aiImagePrompt}
             </p>
-            <p className="font-condensed text-[10px] mt-1" style={{ color: '#7a8a96' }}>
+            <p className="font-condensed text-[10px] mt-1" style={{ color: 'var(--admin-text-2)' }}>
               Use this prompt in the image generator below.
             </p>
           </div>
@@ -542,7 +542,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
 
       {/* Guest info */}
       <div>
-        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-3">
+        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)] mb-3">
           Guest Info
         </p>
         <div className="space-y-4">
@@ -589,7 +589,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
           >
             <div
               className="rounded-lg p-4"
-              style={{ backgroundColor: '#f5f7f9', border: '1px solid rgba(27,60,90,0.1)' }}
+              style={{ backgroundColor: 'var(--admin-subtle)', border: '1px solid rgba(27,60,90,0.1)' }}
             >
               {/* Preview */}
               {values.guestImageUrl && (
@@ -602,10 +602,10 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
                     style={{ border: '1px solid rgba(27,60,90,0.15)' }}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="font-condensed text-[10px] text-[#7a8a96] mb-2 truncate">{values.guestImageUrl}</p>
+                    <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] mb-2 truncate">{values.guestImageUrl}</p>
                     <label
                       className="font-condensed font-bold uppercase tracking-wide text-[10px] rounded px-3 py-1.5 cursor-pointer transition-all inline-block"
-                      style={{ backgroundColor: 'transparent', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.2)' }}
+                      style={{ backgroundColor: 'transparent', color: 'var(--admin-text)', border: '1px solid rgba(27,60,90,0.2)' }}
                     >
                       Replace
                       <input
@@ -631,7 +631,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
                   }}
                 >
                   {photoUploading ? (
-                    <span className="font-condensed text-[12px]" style={{ color: '#7a8a96' }}>Uploading…</span>
+                    <span className="font-condensed text-[12px]" style={{ color: 'var(--admin-text-2)' }}>Uploading…</span>
                   ) : (
                     <>
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(27,60,90,0.3)" strokeWidth="1.5">
@@ -639,7 +639,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
                         <polyline points="17 8 12 3 7 8"/>
                         <line x1="12" y1="3" x2="12" y2="15"/>
                       </svg>
-                      <span className="font-condensed font-semibold text-[11px]" style={{ color: '#7a8a96' }}>
+                      <span className="font-condensed font-semibold text-[11px]" style={{ color: 'var(--admin-text-2)' }}>
                         Click to upload guest photo
                       </span>
                     </>
@@ -664,10 +664,10 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
 
       {/* Media */}
       <div>
-        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1">
+        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)] mb-1">
           Media
         </p>
-        <p className="font-condensed text-[11px] text-[#7a8a96] mb-3 leading-relaxed">
+        <p className="font-condensed text-[11px] text-[color:var(--admin-text-2)] mb-3 leading-relaxed">
           Provide a Mux Playback ID for native player playback, or a YouTube URL for YouTube-hosted episodes. Either is fine — both fields are optional, and an episode can be published with only one (or, for audio-only episodes, neither).
         </p>
         <div className="space-y-4">
@@ -727,7 +727,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
                 <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-0.5" style={{ color: '#9a7d2e' }}>
                   Auto Album Cover
                 </p>
-                <p className="font-condensed text-[10px]" style={{ color: '#7a8a96' }}>
+                <p className="font-condensed text-[10px]" style={{ color: 'var(--admin-text-2)' }}>
                   Generates branded key art from the guest photo + pillar, and sets it as the thumbnail above.
                 </p>
               </div>
@@ -770,20 +770,20 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
       {/* Transcript */}
       <div
         className="rounded-lg p-5 space-y-4"
-        style={{ backgroundColor: '#f5f7f9', border: '1px solid rgba(27,60,90,0.1)' }}
+        style={{ backgroundColor: 'var(--admin-subtle)', border: '1px solid rgba(27,60,90,0.1)' }}
       >
         <div>
-          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-0.5">
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)] mb-0.5">
             Transcript
           </p>
-          <p className="font-condensed text-[10px] text-[#7a8a96]">
+          <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)]">
             Paste a transcript manually, or generate one from an audio file using Whisper.
           </p>
         </div>
 
         {/* Audio URL + Generate button */}
         <div>
-          <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
+          <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)] mb-1.5">
             Audio URL (MP3 / M4A)
           </label>
           <div className="flex gap-2">
@@ -791,7 +791,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
               type="url"
               value={transcribeAudioUrl}
               onChange={e => { setTranscribeAudioUrl(e.target.value); setTranscribeError(null); setTranscribeSuccess(false) }}
-              className={`flex-1 rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none transition-all`}
+              className={`flex-1 rounded px-3 py-2.5 font-body text-[13px] text-[color:var(--admin-text)] outline-none transition-all`}
               style={inputStyle}
               placeholder="https://... direct link to audio file"
               disabled={transcribing}
@@ -900,15 +900,15 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
           aria-label="Toggle members-only"
         >
           <span
-            className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform"
+            className="absolute top-0.5 w-4 h-4 rounded-full bg-[var(--admin-card)] transition-transform"
             style={{ transform: values.isMembersOnly ? 'translateX(22px)' : 'translateX(2px)' }}
           />
         </button>
         <div>
-          <span className="font-condensed font-semibold text-[12px] text-[#1b3c5a] block">
+          <span className="font-condensed font-semibold text-[12px] text-[color:var(--admin-text)] block">
             Members only
           </span>
-          <span className="font-condensed text-[10px] text-[#7a8a96]">
+          <span className="font-condensed text-[10px] text-[color:var(--admin-text-2)]">
             If on, only VIP and Pro tiers can play this episode.
           </span>
         </div>
@@ -924,15 +924,15 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
           aria-label="Toggle pinned"
         >
           <span
-            className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform"
+            className="absolute top-0.5 w-4 h-4 rounded-full bg-[var(--admin-card)] transition-transform"
             style={{ transform: values.pinned ? 'translateX(22px)' : 'translateX(2px)' }}
           />
         </button>
         <div>
-          <span className="font-condensed font-semibold text-[12px] text-[#1b3c5a] block">
+          <span className="font-condensed font-semibold text-[12px] text-[color:var(--admin-text)] block">
             Pinned ★
           </span>
-          <span className="font-condensed text-[10px] text-[#7a8a96]">
+          <span className="font-condensed text-[10px] text-[color:var(--admin-text-2)]">
             Feature this episode at the top of /podcast. Pinning this one unpins any other.
           </span>
         </div>
@@ -947,11 +947,11 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
           style={{ backgroundColor: values.isPublished ? '#68a2b9' : 'rgba(27,60,90,0.15)' }}
         >
           <span
-            className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform"
+            className="absolute top-0.5 w-4 h-4 rounded-full bg-[var(--admin-card)] transition-transform"
             style={{ transform: values.isPublished ? 'translateX(22px)' : 'translateX(2px)' }}
           />
         </button>
-        <span className="font-condensed font-semibold text-[12px] text-[#1b3c5a]">
+        <span className="font-condensed font-semibold text-[12px] text-[color:var(--admin-text)]">
           {values.isPublished ? 'Published (visible to members)' : 'Draft (hidden from members)'}
         </span>
       </div>
@@ -974,7 +974,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
         <div className="flex items-center gap-3">
           <a
             href="/admin/episodes"
-            className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a] transition-colors"
+            className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[color:var(--admin-text-2)] hover:text-[color:var(--admin-text)] transition-colors"
           >
             Cancel
           </a>

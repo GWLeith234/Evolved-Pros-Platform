@@ -21,7 +21,7 @@ export function PinnedPost({ label, body }: PinnedPostProps) {
         📌 {label}
       </p>
       <p
-        className="text-[13px] leading-[1.55] text-[#1b3c5a]"
+        className="text-[13px] leading-[1.55] text-primary"
         dangerouslySetInnerHTML={{ __html: body.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
       />
     </div>

@@ -64,8 +64,8 @@ export default async function EditEpisodePage({ params }: Props) {
   return (
     <div className="px-8 py-6">
       <div className="mb-6">
-        <h1 className="font-display font-black text-[28px] text-[#112535]">Edit Episode</h1>
-        <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
+        <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)]">Edit Episode</h1>
+        <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mt-0.5">
           {ep.title}
         </p>
       </div>

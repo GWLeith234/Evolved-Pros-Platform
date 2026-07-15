@@ -207,7 +207,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
           value={body}
           onChange={e => { setBody(e.target.value); if (error) setError('') }}
           placeholder={activePlaceholder}
-          className="flex-1 resize-none rounded border font-body text-[14px] text-[#1b3c5a] placeholder:text-[#7a8a96] focus:outline-none transition-colors duration-150 px-3 py-2"
+          className="flex-1 resize-none rounded border font-body text-[14px] text-primary placeholder:text-tertiary focus:outline-none transition-colors duration-150 px-3 py-2"
           style={{
             minHeight: '72px',
             borderColor: 'rgba(27,60,90,0.18)',
@@ -235,7 +235,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
                 }}
                 placeholder={`Option ${i + 1}`}
                 maxLength={100}
-                className="flex-1 rounded border font-body text-[13px] text-[#1b3c5a] placeholder:text-[#7a8a96] focus:outline-none px-3 py-1.5"
+                className="flex-1 rounded border font-body text-[13px] text-primary placeholder:text-tertiary focus:outline-none px-3 py-1.5"
                 style={{ borderColor: 'rgba(27,60,90,0.18)' }}
               />
               {pollOptions.length > 2 && (
@@ -268,7 +268,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
               type="date"
               value={pollClosesAt}
               onChange={e => setPollClosesAt(e.target.value)}
-              className="block mt-1 rounded border font-body text-[12px] text-[#1b3c5a] focus:outline-none px-3 py-1.5"
+              className="block mt-1 rounded border font-body text-[12px] text-primary focus:outline-none px-3 py-1.5"
               style={{ borderColor: 'rgba(27,60,90,0.18)' }}
             />
           </div>
@@ -305,7 +305,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
             )
           })}
         </div>
-        <p className="font-condensed text-[12px] text-[#7a8a96] mb-2">(Optional) Tag your post to a pillar</p>
+        <p className="font-condensed text-[12px] text-tertiary mb-2">(Optional) Tag your post to a pillar</p>
         <div className="flex justify-end">
           <Button
             variant="primary"

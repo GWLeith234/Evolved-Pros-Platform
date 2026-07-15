@@ -96,11 +96,11 @@ export default async function AdminMemberDetailPage({ params }: Props) {
       <div className="px-8 pt-6 pb-0">
         <Link
           href="/admin/members"
-          className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a] transition-colors"
+          className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[color:var(--admin-text-2)] hover:text-[color:var(--admin-text)] transition-colors"
         >
           ← All Members
         </Link>
-        <h1 className="font-display font-black text-[28px] text-[#112535] mt-2">{displayName}</h1>
+        <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)] mt-2">{displayName}</h1>
       </div>
       <MemberDetailClient member={member} />
     </div>

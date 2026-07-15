@@ -88,10 +88,10 @@ export function ProductsAdminClient({
     <div>
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
-          <h1 className="font-display font-black text-[28px]" style={{ color: '#112535', margin: 0 }}>
+          <h1 className="font-display font-black text-[28px]" style={{ color: 'var(--admin-text-strong)', margin: 0 }}>
             Products & Membership
           </h1>
-          <p className="font-condensed text-[12px] mt-0.5" style={{ color: '#7a8a96', margin: 0 }}>
+          <p className="font-condensed text-[12px] mt-0.5" style={{ color: 'var(--admin-text-2)', margin: 0 }}>
             Community FREE · VIP ${TIERS.vip.monthly}/mo · Professional ${TIERS.professional.monthly}/mo — linked to Vendasta SKUs
           </p>
         </div>
@@ -109,7 +109,7 @@ export function ProductsAdminClient({
             target="_blank"
             rel="noopener noreferrer"
             className="font-condensed font-bold uppercase text-[11px] tracking-wider px-3 py-2 rounded"
-            style={{ border: '1px solid rgba(27,60,90,0.14)', color: '#1b3c5a', textDecoration: 'none', minHeight: 40, display: 'inline-flex', alignItems: 'center' }}
+            style={{ border: '1px solid rgba(27,60,90,0.14)', color: 'var(--admin-text)', textDecoration: 'none', minHeight: 40, display: 'inline-flex', alignItems: 'center' }}
           >
             Vendasta marketplace ↗
           </a>
@@ -118,7 +118,7 @@ export function ProductsAdminClient({
             target="_blank"
             rel="noopener noreferrer"
             className="font-condensed font-bold uppercase text-[11px] tracking-wider px-3 py-2 rounded"
-            style={{ border: '1px solid rgba(27,60,90,0.14)', color: '#1b3c5a', textDecoration: 'none', minHeight: 40, display: 'inline-flex', alignItems: 'center' }}
+            style={{ border: '1px solid rgba(27,60,90,0.14)', color: 'var(--admin-text)', textDecoration: 'none', minHeight: 40, display: 'inline-flex', alignItems: 'center' }}
           >
             Vendasta CRM ↗
           </a>
@@ -141,7 +141,7 @@ export function ProductsAdminClient({
               key={p.key}
               className="rounded-lg overflow-hidden"
               style={{
-                background: '#fff',
+                background: 'var(--admin-card)',
                 border: '1px solid rgba(27,60,90,0.10)',
                 borderTop: `3px solid ${p.accent}`,
               }}
@@ -155,7 +155,7 @@ export function ProductsAdminClient({
                     >
                       {p.label}
                     </p>
-                    <p className="font-body text-[13px]" style={{ color: '#7a8a96', margin: '4px 0 0' }}>
+                    <p className="font-body text-[13px]" style={{ color: 'var(--admin-text-2)', margin: '4px 0 0' }}>
                       {p.tagline}
                     </p>
                   </div>
@@ -166,20 +166,20 @@ export function ProductsAdminClient({
                     {count} members
                   </span>
                 </div>
-                <p className="font-display font-black text-[36px] leading-none" style={{ color: '#112535', margin: '12px 0 4px' }}>
+                <p className="font-display font-black text-[36px] leading-none" style={{ color: 'var(--admin-text-strong)', margin: '12px 0 4px' }}>
                   {p.priceMonthly === 0 ? 'Free' : `$${p.priceMonthly}`}
                   {p.priceMonthly > 0 && (
-                    <span className="font-condensed font-bold text-[12px] tracking-wider" style={{ color: '#7a8a96' }}>/mo</span>
+                    <span className="font-condensed font-bold text-[12px] tracking-wider" style={{ color: 'var(--admin-text-2)' }}>/mo</span>
                   )}
                 </p>
                 {p.priceAnnual != null && p.priceAnnual > 0 && (
-                  <p className="font-condensed text-[11px]" style={{ color: '#7a8a96', margin: '0 0 12px' }}>
+                  <p className="font-condensed text-[11px]" style={{ color: 'var(--admin-text-2)', margin: '0 0 12px' }}>
                     Annual option: ${p.priceAnnual}/yr
                   </p>
                 )}
                 <ul className="mb-4" style={{ margin: '0 0 16px', padding: '0 0 0 16px' }}>
                   {p.features.map(f => (
-                    <li key={f} className="font-body text-[13px]" style={{ color: '#1b3c5a', marginBottom: 4 }}>
+                    <li key={f} className="font-body text-[13px]" style={{ color: 'var(--admin-text)', marginBottom: 4 }}>
                       {f}
                     </li>
                   ))}
@@ -188,15 +188,15 @@ export function ProductsAdminClient({
                   className="pt-3"
                   style={{ borderTop: '1px solid rgba(27,60,90,0.08)' }}
                 >
-                  <p className="font-condensed font-bold uppercase tracking-[0.12em] text-[10px]" style={{ color: '#7a8a96', margin: '0 0 6px' }}>
+                  <p className="font-condensed font-bold uppercase tracking-[0.12em] text-[10px]" style={{ color: 'var(--admin-text-2)', margin: '0 0 6px' }}>
                     Vendasta SKUs
                   </p>
-                  <p className="font-condensed text-[12px] break-all" style={{ color: '#1b3c5a', margin: 0 }}>
-                    Monthly: {p.skuMonthly || <em style={{ color: '#7a8a96' }}>not configured</em>}
+                  <p className="font-condensed text-[12px] break-all" style={{ color: 'var(--admin-text)', margin: 0 }}>
+                    Monthly: {p.skuMonthly || <em style={{ color: 'var(--admin-text-2)' }}>not configured</em>}
                   </p>
                   {p.key !== 'community' && (
-                    <p className="font-condensed text-[12px] break-all" style={{ color: '#1b3c5a', margin: '4px 0 0' }}>
-                      Annual: {p.skuAnnual || <em style={{ color: '#7a8a96' }}>not configured</em>}
+                    <p className="font-condensed text-[12px] break-all" style={{ color: 'var(--admin-text)', margin: '4px 0 0' }}>
+                      Annual: {p.skuAnnual || <em style={{ color: 'var(--admin-text-2)' }}>not configured</em>}
                     </p>
                   )}
                   <a
@@ -218,12 +218,12 @@ export function ProductsAdminClient({
       {/* Edit form */}
       <div
         className="rounded-lg p-5"
-        style={{ background: '#fff', border: '1px solid rgba(27,60,90,0.10)' }}
+        style={{ background: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.10)' }}
       >
-        <h2 className="font-display font-black text-[20px]" style={{ color: '#112535', margin: '0 0 4px' }}>
+        <h2 className="font-display font-black text-[20px]" style={{ color: 'var(--admin-text-strong)', margin: '0 0 4px' }}>
           Manage pricing & SKUs
         </h2>
-        <p className="font-body text-[13px]" style={{ color: '#7a8a96', margin: '0 0 16px' }}>
+        <p className="font-body text-[13px]" style={{ color: 'var(--admin-text-2)', margin: '0 0 16px' }}>
           Overrides save to <code>platform_settings</code>. Empty SKU fields fall back to Railway env vars
           (<code>NEXT_PUBLIC_VENDASTA_MP_*</code>).
         </p>
@@ -281,7 +281,7 @@ function Field({
     <div>
       <label
         className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] block mb-1.5"
-        style={{ color: '#7a8a96' }}
+        style={{ color: 'var(--admin-text-2)' }}
       >
         {label}
       </label>
@@ -295,8 +295,8 @@ function Field({
         style={{
           minHeight: 40,
           border: '1px solid rgba(27,60,90,0.14)',
-          color: '#1b3c5a',
-          background: '#fff',
+          color: 'var(--admin-text)',
+          background: 'var(--admin-card)',
         }}
       />
     </div>

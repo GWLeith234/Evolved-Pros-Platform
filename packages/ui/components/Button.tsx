@@ -25,8 +25,10 @@ const variantStyles: Record<ButtonVariant, string> = {
   primary:   'bg-[#ef0e30] hover:bg-[#c50a26] text-white border border-[#ef0e30] hover:border-[#c50a26]',
   secondary: 'bg-[#1b3c5a] hover:bg-[#112535] text-white border border-[#1b3c5a] hover:border-[#112535]',
   tertiary:  'bg-transparent hover:bg-[rgba(104,162,185,0.12)] text-[#68a2b9] border border-transparent',
-  outline:   'bg-transparent hover:bg-[rgba(27,60,90,0.06)] text-[#1b3c5a] border border-[#1b3c5a]',
-  ghost:     'bg-transparent hover:bg-[rgba(255,255,255,0.08)] text-white border border-[rgba(255,255,255,0.2)]',
+  // outline + ghost carry neutral text/border, so they must follow the theme
+  // (navy-on-dark / white-on-light were the dark-on-dark offenders). Tokenized.
+  outline:   'bg-transparent hover:bg-[var(--bg-elevated)] text-primary border border-[color:var(--border-color)]',
+  ghost:     'bg-transparent hover:bg-[var(--bg-elevated)] text-primary border border-[color:var(--border-color)]',
   teal:      'bg-[#68a2b9] hover:bg-[#5a8fa4] text-white border border-[#68a2b9] hover:border-[#5a8fa4]',
   success:   'bg-[#0ABFA3] hover:bg-[#0A9980] text-white border border-[#0ABFA3] hover:border-[#0A9980]',
 }

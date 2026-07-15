@@ -89,7 +89,7 @@ export default function AdminCareersPage() {
   return (
     <div style={{ padding: '24px 32px', maxWidth: 960 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h1 className="font-condensed font-bold text-[22px]" style={{ color: '#1b3c5a' }}>Job Listings</h1>
+        <h1 className="font-condensed font-bold text-[22px]" style={{ color: 'var(--admin-text)' }}>Job Listings</h1>
         <button
           type="button"
           onClick={() => setEditing({ ...EMPTY })}
@@ -102,8 +102,8 @@ export default function AdminCareersPage() {
 
       {/* Form */}
       {editing && (
-        <div style={{ backgroundColor: '#fff', border: '1px solid rgba(27,60,90,0.1)', borderRadius: 6, padding: 20, marginBottom: 20 }}>
-          <h2 className="font-condensed font-bold text-[14px] mb-3" style={{ color: '#1b3c5a' }}>
+        <div style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)', borderRadius: 6, padding: 20, marginBottom: 20 }}>
+          <h2 className="font-condensed font-bold text-[14px] mb-3" style={{ color: 'var(--admin-text)' }}>
             {editing.id ? 'Edit Listing' : 'New Listing'}
           </h2>
           {error && <p className="text-[12px] mb-2" style={{ color: '#ef0e30' }}>{error}</p>}
@@ -153,7 +153,7 @@ export default function AdminCareersPage() {
             <textarea style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }} value={editing.description ?? ''} onChange={e => setEditing(p => ({ ...p, description: e.target.value }))} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#1b3c5a' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--admin-text)' }}>
               <input type="checkbox" checked={editing.is_featured ?? false} onChange={e => setEditing(p => ({ ...p, is_featured: e.target.checked }))} />
               Featured
             </label>
@@ -178,7 +178,7 @@ export default function AdminCareersPage() {
       ) : jobs.length === 0 ? (
         <p className="font-condensed text-[12px]" style={{ color: 'rgba(27,60,90,0.4)' }}>No job listings yet.</p>
       ) : (
-        <div style={{ backgroundColor: '#fff', border: '1px solid rgba(27,60,90,0.1)', borderRadius: 6, overflow: 'hidden' }}>
+        <div style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)', borderRadius: 6, overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.02)' }}>
@@ -190,7 +190,7 @@ export default function AdminCareersPage() {
             <tbody>
               {jobs.map(j => (
                 <tr key={j.id} style={{ borderBottom: '1px solid rgba(27,60,90,0.06)' }}>
-                  <td style={{ padding: '8px 10px', fontWeight: 600, color: '#1b3c5a' }}>{j.title}</td>
+                  <td style={{ padding: '8px 10px', fontWeight: 600, color: 'var(--admin-text)' }}>{j.title}</td>
                   <td style={{ padding: '8px 10px', color: 'rgba(27,60,90,0.6)' }}>{j.company}</td>
                   <td style={{ padding: '8px 10px', color: 'rgba(27,60,90,0.5)' }}>{j.location ?? '—'}</td>
                   <td style={{ padding: '8px 10px', color: 'rgba(27,60,90,0.5)' }}>{j.job_type ?? '—'}</td>

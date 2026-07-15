@@ -26,8 +26,8 @@ const accentColors: Record<Accent, string> = {
 }
 
 const deltaBadgeStyles: Record<DeltaType, string> = {
-  up:      'bg-emerald-50 text-emerald-700',
-  neutral: 'bg-[rgba(27,60,90,0.06)] text-[#7a8a96]',
+  up:      'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+  neutral: 'bg-[var(--bg-elevated)] text-tertiary',
 }
 
 const deltaIcons: Record<DeltaType, string> = {
@@ -56,11 +56,11 @@ export function StatCard({
         <p className="font-display text-3xl font-black leading-none" style={{ color: 'var(--text-primary)' }}>
           {value}
         </p>
-        <p className="font-condensed font-semibold uppercase tracking-widest text-xs text-[#7a8a96] mt-1">
+        <p className="font-condensed font-semibold uppercase tracking-widest text-xs text-tertiary mt-1">
           {label}
         </p>
         {hint && (
-          <p className="font-condensed text-[10px] uppercase tracking-widest text-[#7a8a96] opacity-70 mt-0.5">
+          <p className="font-condensed text-[10px] uppercase tracking-widest text-tertiary opacity-70 mt-0.5">
             {hint}
           </p>
         )}

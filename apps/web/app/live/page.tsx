@@ -1,3 +1,7 @@
+// SPRINT N — THEME DECISION: /live is a standalone navy-only studio/marketing
+// shell (constant dark editorial palette, its own --text-*/--border-* tokens in
+// globals.css). It is intentionally NOT wired to the app light/dark toggle and
+// is out of scope for the member/admin light-dark work by design.
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'

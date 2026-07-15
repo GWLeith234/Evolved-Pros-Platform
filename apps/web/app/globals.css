@@ -30,6 +30,19 @@
   --text-secondary: rgba(255,255,255,0.6);
   --text-tertiary: rgba(255,255,255,0.35);
 
+  /* SPRINT N — admin dual-theme tokens. Admin was a fixed light palette built
+     from hardcoded hex; these neutral tokens let it follow the global theme.
+     Dark defaults here; light values in the html.light-mode block below.
+     Accent/brand colors (red/teal/gold/green) stay constant and are NOT
+     tokenized — only neutrals (page/card/surface/text/border) flip. */
+  --admin-page:        #0F1720;
+  --admin-card:        #182233;
+  --admin-subtle:      #202C3D;
+  --admin-text:        #E6EDF3;
+  --admin-text-strong: #FFFFFF;
+  --admin-text-2:      #9FB2C2;
+  --admin-border:      rgba(255,255,255,0.09);
+
   /* DS2 — TopNav v2 + brand (FOUNDATION-TOPNAV-V2) */
   --bg-topnav:     #0D1B2A;
   /* Nav background — dark by default; light mode flips to parchment so
@@ -259,6 +272,15 @@ html.light-mode {
      Settings / profile form labels and helper text use these tokens. */
   --text-secondary: #4A5868;   /* 7.4:1 on #fff — AAA */
   --text-tertiary:  #5C6A7C;   /* 5.0:1 on #fff — AA */
+
+  /* SPRINT N — admin light palette (the original fixed admin colors). */
+  --admin-page:        #faf9f7;
+  --admin-card:        #ffffff;
+  --admin-subtle:      #f5f7f9;
+  --admin-text:        #1b3c5a;
+  --admin-text-strong: #112535;
+  --admin-text-2:      #7a8a96;
+  --admin-border:      rgba(17,37,53,0.10);
 
   /* DS2 light variants (FOUNDATION-TOPNAV-V2 + SPRINT-1 nav contrast) */
   --bg-topnav:     #FAF7F2;
