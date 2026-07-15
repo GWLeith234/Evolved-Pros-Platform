@@ -20,11 +20,12 @@ function href(ad: SponsorAd): string | null {
 }
 
 /**
- * A single Evolution Partner unit sized to match an episode album-cover tile:
- * one grid cell wide, 1:1 square poster, sharp corners + soft border, meta
- * below. Uploaded square creatives render full-bleed (cover); known flagship
- * partners (wordmark logos) get a designed square — logo contained on a brand
- * gradient — so a banner-shaped logo never crops badly.
+ * A single Evolution Partner unit sized to match a PodcastEpisodeTile exactly:
+ * one grid cell wide, 2:3 portrait poster, sharp corners + soft border, meta
+ * below (with the same reserved title height) so sponsor and episode cells are
+ * visually identical in the grid. Uploaded creatives render full-bleed (cover);
+ * known flagship partners (wordmark logos) get a designed poster — logo
+ * contained on a brand gradient — so a banner-shaped logo never crops badly.
  */
 export function SquareSponsorCard({ ad }: { ad: SponsorAd }) {
   const [hovered, setHovered] = useState(false)
@@ -40,7 +41,8 @@ export function SquareSponsorCard({ ad }: { ad: SponsorAd }) {
         position: 'relative',
         display: 'block',
         width: '100%',
-        aspectRatio: '1 / 1',
+        // 2:3 portrait — identical footprint to a PodcastEpisodeTile poster.
+        aspectRatio: '2 / 3',
         overflow: 'hidden',
         borderRadius: 0,
         border: `1px solid ${hovered ? 'var(--brand-gold)' : 'var(--podcast-border-soft2)'}`,
@@ -73,7 +75,7 @@ export function SquareSponsorCard({ ad }: { ad: SponsorAd }) {
             }}
           />
         ) : (
-          // Square album creative — full-bleed cover per the supplied spec.
+          // Uploaded creative — full-bleed cover, cropped to the 2:3 tile.
           <div
             style={{
               position: 'absolute',
@@ -146,24 +148,26 @@ export function SquareSponsorCard({ ad }: { ad: SponsorAd }) {
       >
         {name}
       </p>
-      {tagline && (
-        <p
-          style={{
-            margin: 0,
-            fontFamily: FB,
-            fontSize: 15,
-            fontWeight: 600,
-            lineHeight: 1.25,
-            color: 'var(--podcast-text-strong)',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}
-        >
-          {tagline}
-        </p>
-      )}
+      {/* Mirrors the episode tile's title block (size, clamp, reserved
+          minHeight) so the meta area — and thus the whole card — matches an
+          episode cell's height even when the tagline is short/absent. */}
+      <p
+        style={{
+          margin: 0,
+          fontFamily: FB,
+          fontSize: 16,
+          fontWeight: 600,
+          lineHeight: 1.25,
+          color: 'var(--podcast-text-strong)',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          minHeight: '2.5em',
+        }}
+      >
+        {tagline}
+      </p>
       <p
         style={{
           margin: '6px 0 0',
