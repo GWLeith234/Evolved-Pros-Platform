@@ -45,14 +45,14 @@ export function SponsorCardInline({ sponsor }: { sponsor: Sponsor }) {
           fontSize: 9,
           letterSpacing: '0.18em',
           textTransform: 'uppercase',
-          color: '#C9302A',
-          background: 'rgba(201,48,42,0.10)',
-          border: '1px solid rgba(201,48,42,0.35)',
+          color: '#0A0F18',
+            background: 'var(--brand-gold, #C9A84C)',
+            border: 'none',
           padding: '2px 6px',
           flexShrink: 0,
         }}
       >
-        Evolution Partner
+        Partner
       </span>
 
       {/* Logo + brand */}

@@ -590,12 +590,10 @@ export function AccountabilityHub({
               accent={TEAL}
               hint="this week"
             />
-            <StatChip
-              label="Goals"
-              value={goals.length ? formatPct(avgGoalPct / 100) : '—'}
-              accent={RED}
-              hint={goals.length ? 'avg progress' : 'add goals'}
-            />
+            {/* SPRINT M.1: the Goals % chip duplicated the Goals ring above (same
+                56% avg, two treatments back-to-back). The ring is the single Goals
+                treatment in the hub; the chips now show only the daily-actionable
+                metrics (habits + commits). */}
           </div>
         </div>
 

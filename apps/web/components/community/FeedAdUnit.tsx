@@ -39,10 +39,13 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
           fontSize: 9,
           letterSpacing: '0.18em',
           textTransform: 'uppercase',
-          color: 'var(--brand-red, #C9302A)',
+          color: '#0A0F18',
+          background: 'var(--brand-gold, #C9A84C)',
+          padding: '3px 8px',
+          borderRadius: 3,
         }}
       >
-        Evolution Partner
+        Partner
       </span>
 
       <div

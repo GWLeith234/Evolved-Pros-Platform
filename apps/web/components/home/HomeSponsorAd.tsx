@@ -153,14 +153,14 @@ function PremiumPartnerCard({
       />
 
       <div
-        className="absolute right-5 top-3 z-[2] rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] text-white shadow-sm"
+        className="absolute right-5 top-3 z-[2] rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#0A0F18] shadow-sm"
         style={{
-          backgroundColor: SPONSOR_RED,
+          backgroundColor: 'var(--brand-gold, #C9A84C)',
           fontFamily: '"Barlow Condensed", sans-serif',
-          boxShadow: '0 2px 8px rgba(201,48,42,0.35)',
+          boxShadow: '0 2px 8px rgba(201,168,76,0.35)',
         }}
       >
-        Evolution Partner
+        Partner
       </div>
 
       {/* Hero — Vendasta uses 4 Supabase avatars (AI workforce faces) */}
@@ -362,14 +362,14 @@ export function SponsorAdCard({ ad }: { ad: SponsorAd }) {
       />
 
       <div
-        className="absolute -top-3 right-6 z-[1] rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] text-white shadow-sm"
+        className="absolute -top-3 right-6 z-[1] rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#0A0F18] shadow-sm"
         style={{
-          backgroundColor: SPONSOR_RED,
+          backgroundColor: 'var(--brand-gold, #C9A84C)',
           fontFamily: '"Barlow Condensed", sans-serif',
-          boxShadow: '0 2px 8px rgba(201,48,42,0.35)',
+          boxShadow: '0 2px 8px rgba(201,168,76,0.35)',
         }}
       >
-        Evolution Partner
+        Partner
       </div>
 
       <div className="ep-evolve-bars" aria-hidden>

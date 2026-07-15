@@ -27,8 +27,10 @@
   --bg-elevated:   #1A2332;
   --border-color:  rgba(255,255,255,0.07);
   --text-primary:  #ffffff;
-  --text-secondary: rgba(255,255,255,0.6);
-  --text-tertiary: rgba(255,255,255,0.35);
+  /* SPRINT N.2 — dark-mode legibility bump. Secondary/tertiary were faint
+     (0.6 / 0.35); raised for readable labels and meta text on dark surfaces. */
+  --text-secondary: rgba(255,255,255,0.7);
+  --text-tertiary: rgba(255,255,255,0.5);
 
   /* SPRINT N — admin dual-theme tokens. Admin was a fixed light palette built
      from hardcoded hex; these neutral tokens let it follow the global theme.
