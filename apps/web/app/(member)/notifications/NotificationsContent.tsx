@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { NotifFilter } from '@/components/notifications/NotifFilter'
 import { NotifItem } from '@/components/notifications/NotifItem'
+import { NotifLessonGroup } from '@/components/notifications/NotifLessonGroup'
 import type { NotifItemData } from '@/components/notifications/NotifItem'
 import type { Database } from '@evolved-pros/db'
 
@@ -60,6 +61,38 @@ export function NotificationsContent({
     }
   }
 
+  /**
+   * Render a section's items, collapsing a burst of Academy lesson unlocks
+   * (`course_unlock`) into one "N new lessons" row so replies/events aren't
+   * buried. The collapsed group takes the position of the first lesson;
+   * everything else keeps chronological order. A lone lesson renders inline.
+   */
+  function renderList(list: NotifItemData[], keyPrefix: string) {
+    const lessons = list.filter(n => n.type === 'course_unlock')
+    const collapse = lessons.length >= 2
+    let groupRendered = false
+    return list.map(n => {
+      if (n.type === 'course_unlock' && collapse) {
+        if (groupRendered) return null
+        groupRendered = true
+        return (
+          <NotifLessonGroup
+            key={`${keyPrefix}-lesson-group`}
+            items={lessons}
+            onRead={handleItemRead}
+          />
+        )
+      }
+      return (
+        <NotifItem
+          key={n.id}
+          notification={n}
+          onRead={() => handleItemRead(n.id)}
+        />
+      )
+    })
+  }
+
   return (
     <div className="flex flex-col md:flex-row" style={{ minHeight: '100%' }}>
       {/* Desktop sidebar — hidden on mobile */}
@@ -91,9 +124,9 @@ export function NotificationsContent({
               className="px-3 py-1.5 rounded-full text-xs font-condensed font-semibold uppercase tracking-wider whitespace-nowrap border transition-colors flex-shrink-0"
               style={{
                 scrollSnapAlign: 'start',
-                backgroundColor: isActive ? 'rgba(255,255,255,0.1)' : 'transparent',
-                borderColor: isActive ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)',
-                color: isActive ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.5)',
+                backgroundColor: isActive ? 'var(--btn-ghost-bg)' : 'transparent',
+                borderColor: 'var(--notif-card-border)',
+                color: isActive ? 'var(--text-primary)' : 'var(--text-tertiary)',
               }}
             >
               {f.label}
@@ -107,12 +140,13 @@ export function NotificationsContent({
             title at 375px instead of clipping the H1 / subtitle. */}
         <div
           className="px-4 md:px-8 py-5 flex items-start justify-between gap-3 flex-wrap"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+          style={{ borderBottom: '1px solid var(--notif-card-border)' }}
         >
           <div className="min-w-0 max-w-full">
             <h1
-              className="font-display font-black text-white"
+              className="font-display font-black"
               style={{
+                color: 'var(--text-primary)',
                 fontSize: 'clamp(1.5rem, 6vw, 1.75rem)',
                 lineHeight: 1.1,
                 overflowWrap: 'break-word',
@@ -124,7 +158,7 @@ export function NotificationsContent({
             <p
               className="font-condensed text-[12px] mt-0.5"
               style={{
-                color: 'rgba(255,255,255,0.4)',
+                color: 'var(--text-tertiary)',
                 whiteSpace: 'normal',
                 maxWidth: '100%',
                 overflow: 'visible',
@@ -138,7 +172,7 @@ export function NotificationsContent({
               onClick={handleMarkAllRead}
               disabled={markingAll}
               className="font-condensed font-semibold uppercase tracking-wide text-[11px] rounded px-4 py-2 transition-all flex-shrink-0"
-              style={{ color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.12)', backgroundColor: 'transparent', opacity: markingAll ? 0.6 : 1 }}
+              style={{ color: 'var(--text-secondary)', border: '1px solid var(--notif-card-border)', backgroundColor: 'transparent', opacity: markingAll ? 0.6 : 1 }}
             >
               {markingAll ? 'Marking...' : 'Mark All Read'}
             </button>
@@ -151,17 +185,17 @@ export function NotificationsContent({
             <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
               <div
                 className="w-14 h-14 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                style={{ backgroundColor: 'var(--btn-ghost-bg)', border: '1px solid var(--notif-card-border)' }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                   <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                 </svg>
               </div>
-              <p className="font-condensed text-sm uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              <p className="font-condensed text-sm uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>
                 You&apos;re all caught up
               </p>
-              <p className="text-xs leading-relaxed max-w-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              <p className="text-xs leading-relaxed max-w-xs" style={{ color: 'var(--text-tertiary)' }}>
                 Activity from the community, academy progress, and events will appear here.
               </p>
             </div>
@@ -170,42 +204,28 @@ export function NotificationsContent({
               {/* Unread section */}
               {unread.length > 0 && (
                 <>
-                  <p className="font-condensed font-bold uppercase tracking-[0.2em] text-[9px] pb-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                  <p className="font-condensed font-bold uppercase tracking-[0.2em] text-[9px] pb-1" style={{ color: 'var(--text-tertiary)' }}>
                     Unread
                   </p>
                   <div className="space-y-1">
-                    {unread.map(n => (
-                      <NotifItem
-                        key={n.id}
-                        notification={n}
-                        variant="dark"
-                        onRead={() => handleItemRead(n.id)}
-                      />
-                    ))}
+                    {renderList(unread, 'unread')}
                   </div>
                 </>
               )}
 
               {/* Divider */}
               {unread.length > 0 && read.length > 0 && (
-                <div className="py-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }} />
+                <div className="py-2" style={{ borderBottom: '1px solid var(--notif-card-border)' }} />
               )}
 
               {/* Earlier section */}
               {read.length > 0 && (
                 <>
-                  <p className="font-condensed font-bold uppercase tracking-[0.2em] text-[9px] pb-1 pt-2" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                  <p className="font-condensed font-bold uppercase tracking-[0.2em] text-[9px] pb-1 pt-2" style={{ color: 'var(--text-tertiary)' }}>
                     Earlier
                   </p>
                   <div className="space-y-1">
-                    {read.map(n => (
-                      <NotifItem
-                        key={n.id}
-                        notification={n}
-                        variant="dark"
-                        onRead={() => handleItemRead(n.id)}
-                      />
-                    ))}
+                    {renderList(read, 'read')}
                   </div>
                 </>
               )}

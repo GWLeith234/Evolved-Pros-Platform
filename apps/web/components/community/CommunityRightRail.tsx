@@ -312,9 +312,9 @@ function MobileEngagementStrip({
       accent: 'var(--brand-red, #C9302A)',
     },
     {
-      href: '/home',
-      label: 'Goals',
-      sub: 'Scoreboard',
+      href: '#community-composer',
+      label: 'Post',
+      sub: 'Start a post',
       accent: 'var(--brand-gold, #C9A84C)',
     },
     {

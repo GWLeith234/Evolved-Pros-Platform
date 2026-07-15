@@ -124,9 +124,41 @@ export function SettingsClient({
       </div>
 
       {activeTab === 'profile' && <ProfileTab userId={userId} />}
-      {activeTab === 'notifications' && <EmailPrefsForm initialPrefs={initialPrefs} />}
+      {activeTab === 'notifications' && <NotificationsTab initialPrefs={initialPrefs} />}
       {activeTab === 'membership' && <MembershipTab tier={tier} createdAt={createdAt} />}
       {activeTab === 'account' && <AccountTab userId={userId} email={email} fullName={fullName} />}
+    </div>
+  )
+}
+
+function NotificationsTab({ initialPrefs }: { initialPrefs: Prefs }) {
+  // This tab is PREFERENCES only — the notification feed lives at /notifications
+  // (one destination, reached from the bell). Label it clearly so it doesn't
+  // read as a second feed.
+  return (
+    <div className="space-y-4">
+      <div
+        className="rounded-lg p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        style={{ border: '1px solid var(--notif-card-border)', backgroundColor: 'var(--btn-ghost-bg)' }}
+      >
+        <div>
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] mb-1" style={{ color: 'var(--text-tertiary)' }}>
+            Notification Preferences
+          </p>
+          <p className="font-body text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+            Choose how and when Evolved Pros emails you. To read your notifications, open the feed.
+          </p>
+        </div>
+        <Link
+          href="/notifications"
+          className="inline-flex items-center justify-center flex-shrink-0 font-condensed font-semibold uppercase tracking-wide text-[12px] rounded px-5 py-2.5 transition-all"
+          style={{ border: '1px solid var(--notif-card-border)', color: 'var(--text-primary)' }}
+        >
+          View Feed →
+        </Link>
+      </div>
+
+      <EmailPrefsForm initialPrefs={initialPrefs} />
     </div>
   )
 }
