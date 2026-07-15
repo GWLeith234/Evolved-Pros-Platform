@@ -3,6 +3,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { computeMrr } from '@/lib/pricing'
+import { getMrrMonthlyByTierKey } from '@/lib/commerce/catalogue'
 import { InviteMemberButton } from './InviteMemberButton'
 
 export const metadata: Metadata = { title: 'Admin — Evolved Pros' }
@@ -81,8 +82,9 @@ export default async function AdminDashboardPage() {
   // so the filter is explicit on screen.
   const activeMembers = activeUsers.length
   // Canonical MRR — same computeMrr + same non-admin member scope as
-  // /admin/revenue, so the dashboard and revenue always report the same total.
-  const mrr           = computeMrr(users)
+  // /admin/revenue, priced off the catalogue so both always agree.
+  const monthlyByTier = await getMrrMonthlyByTierKey()
+  const mrr           = computeMrr(users, monthlyByTier)
   const proMembers    = proUsers.length
   const proLastMo     = proLastMonth.count ?? 0
   const totalEver     = activeUsers.length + cancelledUsers.length

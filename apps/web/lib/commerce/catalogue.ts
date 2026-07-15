@@ -1,5 +1,6 @@
 import 'server-only'
 import { adminClient } from '@/lib/supabase/admin'
+import { TIERS, type TierKey } from '@/lib/pricing'
 
 // ---------------------------------------------------------------------------
 // Commerce catalogue — SPRINT I Phase 2.
@@ -113,4 +114,33 @@ export async function tierForStripePriceId(priceId: string): Promise<MembershipT
     .maybeSingle()
   const tier = (data?.products as { tier?: MembershipTier } | undefined)?.tier
   return tier ?? null
+}
+
+/**
+ * Monthly membership prices (whole dollars) keyed by the lib/pricing TierKey,
+ * sourced from the catalogue's active monthly prices — so MRR reflects any
+ * admin price edit. Falls back to the lib/pricing constants per tier when the
+ * catalogue lacks an active monthly price. This is the single price source for
+ * MRR (dashboard + revenue).
+ */
+export async function getMrrMonthlyByTierKey(): Promise<Record<TierKey, number>> {
+  const map: Record<TierKey, number> = {
+    community: TIERS.community.monthly,
+    vip: TIERS.vip.monthly,
+    professional: TIERS.professional.monthly,
+  }
+  const { data } = await (adminClient as any)
+    .from('prices')
+    .select('unit_amount, active, interval, products!inner(tier)')
+    .eq('interval', 'month')
+    .eq('active', true)
+
+  for (const row of (data ?? []) as Array<{ unit_amount: number; products: { tier: MembershipTier | null } }>) {
+    const tier = row.products?.tier
+    const dollars = row.unit_amount / 100
+    if (tier === 'vip') map.vip = dollars
+    else if (tier === 'pro') map.professional = dollars
+    else if (tier === 'community') map.community = dollars
+  }
+  return map
 }
