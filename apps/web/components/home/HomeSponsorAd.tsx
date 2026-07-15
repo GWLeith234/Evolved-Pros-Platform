@@ -20,10 +20,13 @@ export type SponsorAd = {
   sponsor_name: string | null
   cta_text: string | null
   endorsement_quote: string | null
+  /** Seconds each rotating slot holds this ad before advancing. Optional —
+   *  flagship fallback partners omit it and inherit a sensible default. */
+  rotation_interval?: number | null
 }
 
 export const SPONSOR_AD_COLUMNS =
-  'id, image_url, click_url, link_url, headline, tool_name, sponsor_name, cta_text, endorsement_quote'
+  'id, image_url, click_url, link_url, headline, tool_name, sponsor_name, cta_text, endorsement_quote, rotation_interval'
 
 /** Brand-red accent for Evolution Partner cards. */
 export const SPONSOR_RED = '#C9302A'
