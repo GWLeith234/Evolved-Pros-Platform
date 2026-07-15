@@ -569,11 +569,14 @@ export function WelcomeBanner({
           contents are never user-visible text. */}
       <style suppressHydrationWarning>{`
         @media (max-width: 639px) {
-          .welcome-banner-inner { padding: 20px 16px 16px !important; }
-          .welcome-banner-top { gap: 16px !important; }
-          .welcome-banner-avatar { width: 88px !important; height: 88px !important; }
-          .welcome-banner-top h1 { font-size: 26px !important; }
-          .welcome-banner-bottom { gap: 16px !important; margin-top: 20px !important; }
+          /* SPRINT A — compress the hero vertically so the AccountabilityHub
+             rings + a habit toggle clear the fold at 390x844. Overrides the
+             inline min-height:260 and tightens padding/gaps (mobile only). */
+          .welcome-banner-inner { padding: 14px 16px 12px !important; min-height: 0 !important; }
+          .welcome-banner-top { gap: 14px !important; }
+          .welcome-banner-avatar { width: 72px !important; height: 72px !important; }
+          .welcome-banner-top h1 { font-size: 24px !important; }
+          .welcome-banner-bottom { gap: 12px !important; margin-top: 14px !important; }
           .welcome-banner-daterow { gap: 8px !important; }
           .welcome-banner-right { width: 100%; gap: 16px !important; }
           .welcome-banner-right > div { width: 100%; }

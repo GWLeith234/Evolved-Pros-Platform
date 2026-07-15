@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { CommitmentTracker } from '@/components/academy/CommitmentTracker'
-import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
+import { HomeContextStrip } from '@/components/home/HomeContextStrip'
 
 export const metadata: Metadata = { title: 'Home — Evolved Pros' }
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
@@ -52,8 +52,10 @@ async function fetchUpcomingEvents(supabase: ReturnType<typeof createClient>, us
       .gt('starts_at', new Date().toISOString())
       .order('starts_at', { ascending: true })
       .limit(2),
+    // SPRINT B — event RSVPs live in event_rsvps (event_registrations is the
+    // legacy table, left in place for the Admin lane's migration queue).
     supabase
-      .from('event_registrations')
+      .from('event_rsvps')
       .select('event_id')
       .eq('user_id', userId),
   ])
@@ -270,7 +272,7 @@ async function fetchLatestPulsePosts(limit = 3): Promise<PulsePost[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: rows } = await (adminClient as any)
     .from('posts')
-    .select('id, body, pillar, pillar_tag, like_count, reply_count, created_at, users!posts_author_id_fkey(display_name, full_name, tier), channels(slug)')
+    .select('id, body, pillar, pillar_tag, created_at, users!posts_author_id_fkey(display_name, full_name, tier), channels(slug)')
     .eq('is_pinned', false)
     .order('created_at', { ascending: false })
     .limit(limit) as { data: Array<{
@@ -278,14 +280,34 @@ async function fetchLatestPulsePosts(limit = 3): Promise<PulsePost[]> {
       body: string
       pillar: number | null
       pillar_tag: string | null
-      like_count: number
-      reply_count: number
       created_at: string
       users: { display_name: string | null; full_name: string | null; tier: string | null } | null
       channels: { slug: string | null } | null
     }> | null }
 
-  return (rows ?? []).map(r => {
+  const posts = rows ?? []
+  const ids = posts.map(p => p.id)
+
+  // SPRINT D — the denormalized posts.like_count / reply_count columns are dead
+  // (the old post_likes counter is no longer maintained, so every post read 0).
+  // Count live rows from post_reactions + replies — the SAME tables Community
+  // reads — so Home pulse counts match Community exactly.
+  const reactionsByPost = new Map<string, number>()
+  const repliesByPost = new Map<string, number>()
+  if (ids.length) {
+    const [reactionRows, replyRows] = await Promise.all([
+      (adminClient as any).from('post_reactions').select('post_id').in('post_id', ids),
+      (adminClient as any).from('replies').select('post_id').in('post_id', ids),
+    ])
+    for (const row of (reactionRows.data ?? []) as { post_id: string }[]) {
+      reactionsByPost.set(row.post_id, (reactionsByPost.get(row.post_id) ?? 0) + 1)
+    }
+    for (const row of (replyRows.data ?? []) as { post_id: string }[]) {
+      repliesByPost.set(row.post_id, (repliesByPost.get(row.post_id) ?? 0) + 1)
+    }
+  }
+
+  return posts.map(r => {
     const name = r.users?.full_name ?? r.users?.display_name ?? 'Member'
     const pillarColor = r.pillar
       ? pillarColorFromTag(String(r.pillar))
@@ -304,8 +326,8 @@ async function fetchLatestPulsePosts(limit = 3): Promise<PulsePost[]> {
       pillarColor,
       age: relativeAge(r.created_at),
       preview: (r.body ?? '').replace(/\s+/g, ' ').trim().slice(0, 200),
-      reactionCount: r.like_count ?? 0,
-      commentCount: r.reply_count ?? 0,
+      reactionCount: reactionsByPost.get(r.id) ?? 0,
+      commentCount: repliesByPost.get(r.id) ?? 0,
     }
   })
 }
@@ -592,6 +614,22 @@ export default async function MemberHomePage() {
   const displayName = (profile.full_name ? profile.full_name.split(' ')[0] : null) ?? profile.display_name ?? 'Member'
   const upcomingEventCount = events.filter(e => !e.isRegistered).length
 
+  // SPRINT A — single Home context strip (event + episode) from data already
+  // fetched above; no new queries.
+  const nextEvent = events[0] ?? null
+  const latestEp = latestEpisodesResult.episodes[0] ?? null
+  const homeContextEvent = nextEvent
+    ? {
+        title: nextEvent.title,
+        dateLabel: new Date(nextEvent.starts_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }),
+        href: `/events/${nextEvent.id}`,
+      }
+    : null
+  const homeContextEpisode = latestEp
+    ? { title: latestEp.title, href: `/podcast/${latestEp.slug}` }
+    : null
+  const homeContextSignature = `${nextEvent?.id ?? 'none'}:${latestEp?.id ?? 'none'}`
+
   const earnedSet = new Set(earnedBadges)
 
   // Index courses by pillar_number so the Architecture column can read
@@ -735,7 +773,11 @@ export default async function MemberHomePage() {
 
   return (
     <div className="ep-page-gutter ep-surface-mobile pb-6 space-y-4 sm:space-y-5">
-      <EpisodeBanner />
+      <HomeContextStrip
+        event={homeContextEvent}
+        episode={homeContextEpisode}
+        signature={homeContextSignature}
+      />
       <WelcomeBanner
         displayName={displayName}
         tier={profile.tier}

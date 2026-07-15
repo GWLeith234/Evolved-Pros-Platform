@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 type NextEvent = { id: string; title: string; starts_at: string } | null
 
@@ -21,8 +21,13 @@ function formatDate(iso: string): string {
 export function NextEventBanner() {
   const [event, setEvent] = useState<NextEvent>(null)
   const router = useRouter()
+  const pathname = usePathname()
+  // SPRINT A — Home renders its own combined context strip (event + episode),
+  // so this layout-level bar is suppressed there to avoid a double promo bar.
+  const suppressed = pathname === '/home'
 
   useEffect(() => {
+    if (suppressed) return
     let cancelled = false
     void (async () => {
       // Defer supabase client so this module can SSR without realtime-js eval.
@@ -41,9 +46,9 @@ export function NextEventBanner() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [suppressed])
 
-  if (!event) return null
+  if (suppressed || !event) return null
 
   const label = `NEXT EVENT · ${event.title} · ${formatDate(event.starts_at)}`
 
