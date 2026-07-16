@@ -4,6 +4,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { CommitmentTracker } from '@/components/academy/CommitmentTracker'
 import { HomeContextStrip } from '@/components/home/HomeContextStrip'
+import { countUserPosts } from '@/lib/community/postCount'
 
 export const metadata: Metadata = { title: 'Home — Evolved Pros' }
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
@@ -161,11 +162,11 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
 // The Posts cell previously counted unread notifications (wrong table) and
 // Podcast/Stories were hardcoded 0 — a member with 38 posts saw "Posts 0".
 async function fetchScoreboardCounts(userId: string) {
-  const [posts, episodes, storyComments] = await Promise.all([
-    adminClient
-      .from('posts')
-      .select('id', { count: 'exact', head: true })
-      .eq('author_id', userId),
+  const [postCount, episodes, storyComments] = await Promise.all([
+    // Post count goes through the shared countUserPosts helper — the exact rule
+    // the Profile uses (excludes `rejected`), so Home's inline count and the
+    // Profile count land on the same number for a given user.
+    countUserPosts(adminClient, userId),
     adminClient
       .from('user_episode_progress')
       .select('episode_id', { count: 'exact', head: true })
@@ -176,7 +177,7 @@ async function fetchScoreboardCounts(userId: string) {
       .eq('user_id', userId),
   ])
   return {
-    postCount: posts.count ?? 0,
+    postCount,
     podcastCount: episodes.count ?? 0,
     storyCount: storyComments.count ?? 0,
   }

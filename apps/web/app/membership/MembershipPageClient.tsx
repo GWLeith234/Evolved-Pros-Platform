@@ -3,6 +3,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Tooltip } from '@/components/ui/Tooltip'
+import { TIERS } from '@/lib/pricing'
+
+// Canonical monthly-billed-annually display ($/mo when paying for a year).
+const VIP_ANNUAL_PER_MONTH = (TIERS.vip.annual / 12).toFixed(2)
+const PRO_ANNUAL_PER_MONTH = (TIERS.professional.annual / 12).toFixed(2)
 
 interface MembershipPageClientProps {
   userTier: string | null
@@ -329,7 +334,7 @@ export function MembershipPageClient({ userTier, keynoteAccess, isLoggedIn }: Me
               </div>
               <div className="flex items-end gap-1.5">
                 <span className="font-display font-black text-white" style={{ fontSize: '36px', lineHeight: 1 }}>
-                  {isAnnual ? '$390' : '$39'}
+                  {isAnnual ? `$${TIERS.vip.annual.toLocaleString('en-US')}` : `$${TIERS.vip.monthly}`}
                 </span>
                 <span className="font-condensed text-[13px] mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
                   {isAnnual ? '/ yr' : '/ mo'}
@@ -337,7 +342,7 @@ export function MembershipPageClient({ userTier, keynoteAccess, isLoggedIn }: Me
               </div>
               {isAnnual && (
                 <p className="font-condensed text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                  $32.50 / mo billed annually
+                  ${VIP_ANNUAL_PER_MONTH} / mo billed annually
                 </p>
               )}
             </div>
@@ -396,7 +401,7 @@ export function MembershipPageClient({ userTier, keynoteAccess, isLoggedIn }: Me
               </div>
               <div className="flex items-end gap-1.5">
                 <span className="font-display font-black text-white" style={{ fontSize: '36px', lineHeight: 1 }}>
-                  {isAnnual ? '$790' : '$79'}
+                  {isAnnual ? `$${TIERS.professional.annual.toLocaleString('en-US')}` : `$${TIERS.professional.monthly}`}
                 </span>
                 <span className="font-condensed text-[13px] mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
                   {isAnnual ? '/ yr' : '/ mo'}
@@ -404,7 +409,7 @@ export function MembershipPageClient({ userTier, keynoteAccess, isLoggedIn }: Me
               </div>
               {isAnnual && (
                 <p className="font-condensed text-[11px] mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                  $65.83 / mo billed annually
+                  ${PRO_ANNUAL_PER_MONTH} / mo billed annually
                 </p>
               )}
             </div>

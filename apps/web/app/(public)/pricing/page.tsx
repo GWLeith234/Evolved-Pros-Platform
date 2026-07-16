@@ -1,114 +1,23 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { PricingCtaButton } from './PricingCtaButton'
 import { RedeemCodeForm } from './RedeemCodeForm'
-import { TIERS as PRICING, ANNUAL_FREE_MONTHS } from '@/lib/pricing'
+import { PricingTierCards } from './PricingTierCards'
+import { getMembershipPricing } from '@/lib/commerce/catalogue'
 
 export const metadata: Metadata = {
   title: 'Pricing — Evolved Pros',
   description: 'Community, VIP, Professional, and Keynote tiers for high performers.',
 }
 
+// Amounts are read live from the products + prices catalogue at request time
+// (single source of truth), so a price edit reflects without a redeploy.
+export const dynamic = 'force-dynamic'
+
 // SPRINT V-CHECKOUT — SKUs surfaced to the client; server validates against
 // the matching NEXT_PUBLIC_VENDASTA_MP_* env var in /api/checkout before
 // submitting. Names match the Railway-configured marketplace product vars.
 const VIP_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_MP_VIP_M ?? ''
 const PRO_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_M ?? ''
-
-// ── Tier data ────────────────────────────────────────────────────────────────────
-
-interface Feature { text: string; locked?: boolean }
-
-interface Tier {
-  name: string
-  price: string
-  period?: string
-  /** Annual pricing sub-line, e.g. "$490/yr · 2 months free". */
-  annualNote?: string
-  badge: string
-  badgeColor: string
-  featured?: boolean
-  popular?: boolean
-  keynote?: boolean
-  features: Feature[]
-  callout?: string
-  cta: string
-  ctaHref?: string
-  ctaSku?: string
-}
-
-const TIERS: Tier[] = [
-  {
-    name: 'Community',
-    price: 'Free',
-    period: 'forever',
-    badge: 'Community',
-    badgeColor: '#60A5FA',
-    features: [
-      { text: 'Community feed' },
-      { text: 'Podcast library' },
-      { text: 'Event discovery' },
-      { text: 'Academy', locked: true },
-      { text: 'Own the Day', locked: true },
-      { text: 'Home dashboard', locked: true },
-    ],
-    cta: 'Join free',
-    ctaHref: '/login?mode=signup',
-  },
-  {
-    name: 'VIP',
-    price: `$${PRICING.vip.monthly}`,
-    period: '/month',
-    annualNote: `$${PRICING.vip.annual.toLocaleString('en-US')}/yr · ${ANNUAL_FREE_MONTHS} months free`,
-    badge: 'VIP',
-    badgeColor: '#C9A84C',
-    features: [
-      { text: 'Everything in Community' },
-      { text: 'Event registration' },
-      { text: 'Academy Pillars 1\u20133' },
-      { text: 'Own the Day' },
-      { text: 'Accountability (your #1 goal)', locked: true },
-      { text: 'Academy Pillars 4\u20136', locked: true },
-    ],
-    cta: 'Start VIP',
-    ctaSku: VIP_MONTHLY_SKU,
-  },
-  {
-    name: 'Professional',
-    price: `$${PRICING.professional.monthly}`,
-    period: '/month',
-    annualNote: `$${PRICING.professional.annual.toLocaleString('en-US')}/yr · ${ANNUAL_FREE_MONTHS} months free`,
-    badge: 'Professional',
-    badgeColor: '#C9302A',
-    featured: true,
-    popular: true,
-    features: [
-      { text: 'Everything in VIP' },
-      { text: 'Full 6-Pillar Academy' },
-      { text: 'Accountability system' },
-      { text: 'Priority events' },
-    ],
-    callout: 'Bi-weekly 1hr mastermind with George. Topics rotate through all 6 EVOLVED pillars.',
-    cta: 'Go Professional',
-    ctaSku: PRO_MONTHLY_SKU,
-  },
-  {
-    name: 'Keynotes',
-    price: 'Inquire',
-    period: 'for fee',
-    badge: 'Keynotes',
-    badgeColor: '#C9A84C',
-    keynote: true,
-    features: [
-      { text: 'Custom keynote' },
-      { text: 'EVOLVED Architecture talks' },
-      { text: 'Half-day & full-day formats' },
-      { text: 'Virtual or in-person' },
-    ],
-    cta: 'Book George',
-    ctaHref: '/live',
-  },
-]
 
 // ── Comparison table ─────────────────────────────────────────────────────────────
 
@@ -140,7 +49,11 @@ function SymbolCell({ value }: { value: TierSymbol }) {
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  // Amounts sourced from the products + prices catalogue (single source of
+  // truth). getMembershipPricing falls back to the canonical lib/pricing
+  // constants per amount if the catalogue query fails or is empty.
+  const { tiers } = await getMembershipPricing()
   return (
     <div style={{ backgroundColor: '#0A0F18', minHeight: '100vh' }}>
       {/* Header */}
@@ -174,101 +87,8 @@ export default function PricingPage() {
           </p>
         </div>
 
-        {/* Tier cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-20">
-          {TIERS.map(tier => (
-            <div
-              key={tier.name}
-              className="rounded-xl p-6 flex flex-col"
-              style={{
-                backgroundColor: '#111926',
-                border: tier.featured
-                  ? '1.5px solid #C9302A'
-                  : tier.keynote
-                  ? '1.5px dashed rgba(201,168,76,0.4)'
-                  : '1px solid rgba(245,240,232,0.06)',
-              }}
-            >
-              {/* Badge */}
-              <div className="mb-4 flex items-center gap-2">
-                <span
-                  className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] px-2.5 py-1 rounded"
-                  style={{
-                    backgroundColor: `${tier.badgeColor}18`,
-                    color: tier.badgeColor,
-                    border: `1px solid ${tier.badgeColor}30`,
-                  }}
-                >
-                  {tier.badge}
-                </span>
-                {tier.popular && (
-                  <span className="font-condensed font-bold uppercase tracking-[0.1em] text-[8px] px-2 py-0.5 rounded" style={{ backgroundColor: 'rgba(201,48,42,.1)', color: '#C9302A' }}>
-                    Most popular
-                  </span>
-                )}
-              </div>
-
-              {/* Price */}
-              <div className="mb-5">
-                <span className="font-display font-bold text-3xl" style={{ color: '#F5F0E8' }}>
-                  {tier.price}
-                </span>
-                {tier.period && (
-                  <span className="font-body text-sm ml-1" style={{ color: 'rgba(245,240,232,0.4)' }}>
-                    {tier.period}
-                  </span>
-                )}
-                {tier.annualNote && (
-                  <p className="font-condensed uppercase tracking-[0.1em] text-[11px] mt-1.5" style={{ color: '#0ABFA3' }}>
-                    {tier.annualNote}
-                  </p>
-                )}
-              </div>
-
-              {/* Features */}
-              <ul className="space-y-2.5 mb-6 flex-1">
-                {tier.features.map(f => (
-                  <li key={f.text} className="flex items-start gap-2 text-[13px] font-body" style={{ color: f.locked ? 'rgba(245,240,232,0.25)' : 'rgba(245,240,232,0.7)' }}>
-                    <span className="mt-0.5 flex-shrink-0" style={{ color: f.locked ? 'rgba(245,240,232,0.15)' : '#0ABFA3' }}>
-                      {f.locked ? (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                      ) : (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      )}
-                    </span>
-                    {f.text}
-                  </li>
-                ))}
-              </ul>
-
-              {/* Mastermind callout */}
-              {tier.callout && (
-                <div
-                  className="rounded-lg p-4 mb-6"
-                  style={{
-                    backgroundColor: 'rgba(201,48,42,0.08)',
-                    border: '1px solid rgba(201,48,42,0.15)',
-                  }}
-                >
-                  <p className="font-condensed font-bold uppercase tracking-[0.12em] text-[9px] mb-1.5" style={{ color: '#C9302A' }}>
-                    Mastermind
-                  </p>
-                  <p className="font-body text-[12px] leading-relaxed" style={{ color: 'rgba(245,240,232,0.6)' }}>
-                    {tier.callout}
-                  </p>
-                </div>
-              )}
-
-              {/* CTA */}
-              <PricingCtaButton
-                label={tier.cta}
-                href={tier.ctaHref}
-                sku={tier.ctaSku}
-                featured={!!tier.featured}
-              />
-            </div>
-          ))}
-        </div>
+        {/* Tier cards + monthly/annual toggle — amounts from the catalogue. */}
+        <PricingTierCards pricing={tiers} vipSku={VIP_MONTHLY_SKU} proSku={PRO_MONTHLY_SKU} />
 
         {/* Have a code? — comp / access-code redemption (Friends of George). */}
         <div className="max-w-2xl mx-auto mb-20">

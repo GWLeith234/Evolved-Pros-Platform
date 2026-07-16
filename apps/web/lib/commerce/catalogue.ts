@@ -1,6 +1,6 @@
 import 'server-only'
 import { adminClient } from '@/lib/supabase/admin'
-import { TIERS, type TierKey } from '@/lib/pricing'
+import { TIERS, type TierKey, type TierPrice } from '@/lib/pricing'
 
 // ---------------------------------------------------------------------------
 // Commerce catalogue — SPRINT I Phase 2.
@@ -114,6 +114,65 @@ export async function tierForStripePriceId(priceId: string): Promise<MembershipT
     .maybeSingle()
   const tier = (data?.products as { tier?: MembershipTier } | undefined)?.tier
   return tier ?? null
+}
+
+/** Catalogue tier value → lib/pricing TierKey (DB stores pro as `pro`). */
+const CATALOGUE_TIER_TO_KEY: Record<MembershipTier, TierKey> = {
+  community: 'community',
+  vip: 'vip',
+  pro: 'professional',
+}
+
+export interface MembershipPricing {
+  /** Whole-dollar monthly + annual amounts per tier. */
+  tiers: Record<TierKey, TierPrice>
+  /**
+   * True when any displayed amount fell back to the lib/pricing constants
+   * (catalogue query failed or a paid tier lacked an active price row). Lets
+   * callers know the page is not currently reading a live catalogue value.
+   */
+  usedFallback: boolean
+}
+
+/**
+ * Single source of truth for the user-facing membership ladder (Community /
+ * VIP / Professional), in whole dollars, sourced from the products + prices
+ * catalogue. Each amount falls back to the canonical lib/pricing constant when
+ * the catalogue lacks an active price for that tier+interval, so a display page
+ * never blanks. Used by the public /pricing page and the in-app membership view
+ * so both render the exact same numbers from the exact same place.
+ */
+export async function getMembershipPricing(): Promise<MembershipPricing> {
+  // Canonical constants are the per-amount fallback.
+  const tiers: Record<TierKey, TierPrice> = {
+    community: { ...TIERS.community },
+    vip: { ...TIERS.vip },
+    professional: { ...TIERS.professional },
+  }
+
+  let catalogue: CatalogueProduct[]
+  try {
+    catalogue = await getCatalogue()
+  } catch {
+    return { tiers, usedFallback: true }
+  }
+
+  let usedFallback = false
+  for (const key of ['vip', 'professional'] as const) {
+    // Community is free with no price rows — its $0 constant stands, and it is
+    // never a fallback (no catalogue price is expected).
+    const product = catalogue.find(
+      p => p.tier && CATALOGUE_TIER_TO_KEY[p.tier] === key && p.active,
+    )
+    const monthCents = product?.prices.find(pr => pr.interval === 'month' && pr.active)?.unit_amount
+    const yearCents = product?.prices.find(pr => pr.interval === 'year' && pr.active)?.unit_amount
+    if (typeof monthCents === 'number') tiers[key].monthly = monthCents / 100
+    else usedFallback = true
+    if (typeof yearCents === 'number') tiers[key].annual = yearCents / 100
+    else usedFallback = true
+  }
+
+  return { tiers, usedFallback }
 }
 
 /**
