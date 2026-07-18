@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Barlow:wght@400;500;600;700&display=swap">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 728px; height: 90px; overflow: hidden; }
+  .ad { position: relative; width: 728px; height: 90px; display: flex; align-items: center; gap: 18px;
+    background: linear-gradient(135deg, #24242a 0%, #17171b 55%, #0d0d10 100%);
+    padding: 0 22px 0 16px; font-family: "Barlow", sans-serif; }
+  .cover { height: 74px; width: auto; border-radius: 2px; box-shadow: 0 4px 14px rgba(0,0,0,.55);
+    flex-shrink: 0; }
+  .title { font-family: "Montserrat", sans-serif; font-weight: 900; font-size: 30px; letter-spacing: -0.5px;
+    background: linear-gradient(180deg,#E1BC5B,#C89A3C); -webkit-background-clip: text;
+    background-clip: text; color: transparent; flex-shrink: 0; }
+  .mid { display: flex; flex-direction: column; flex-shrink: 0; }
+  .launch { font-family: "Barlow", sans-serif; font-weight: 600; font-size: 17px; color: #F3EEE4;
+    line-height: 1.05; white-space: nowrap; }
+  .byline { font-family: "Barlow", sans-serif; font-weight: 500; font-size: 12px;
+    letter-spacing: .04em; color: rgba(243,238,228,.55); margin-top: 3px; white-space: nowrap; }
+  .spacer { flex: 1; }
+  .cta { flex-shrink: 0; font-family: "Barlow", sans-serif; font-weight: 700; font-size: 13px;
+    letter-spacing: .14em; text-transform: uppercase; color: #17171b;
+    background: linear-gradient(180deg,#E1BC5B,#C89A3C); padding: 11px 22px; border-radius: 6px;
+    box-shadow: 0 6px 16px -6px rgba(200,154,60,.6); }
+</style></head>
+<body>
+  <div class="ad">
+    <img class="cover" src="book-cover.png" alt="EVOLVED by George Leith">
+    <div class="title">EVOLVED</div>
+    <div class="mid">
+      <div class="launch">Launches August 15</div>
+      <div class="byline">George Leith</div>
+    </div>
+    <div class="spacer"></div>
+    <div class="cta">Pre-Order</div>
+  </div>
+</body></html>

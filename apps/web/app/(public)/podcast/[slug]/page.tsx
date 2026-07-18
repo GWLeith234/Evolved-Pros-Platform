@@ -2,11 +2,14 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { YouTubeFacade } from '@/components/podcast/public/YouTubeFacade'
+import { RotatingSponsorCard } from '@/components/podcast/PodcastSponsorCard'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import {
   SITE_URL,
   SERIES_NAME,
   getEpisodeBySlug,
   getPublishedEpisodes,
+  getPodcastSponsorPool,
   relatedEpisodes,
   episodeUrl,
   ytThumb,
@@ -123,7 +126,7 @@ export default async function PublicEpisodePage({ params }: Props) {
   const ep = await getEpisodeBySlug(params.slug)
   if (!ep) notFound()
 
-  const all = await getPublishedEpisodes()
+  const [all, sponsors] = await Promise.all([getPublishedEpisodes(), getPodcastSponsorPool()])
   const related = relatedEpisodes(ep, all, 4)
   const paragraphs = transcriptParagraphs(ep)
   const segments = ep.transcript_segments
@@ -175,6 +178,9 @@ export default async function PublicEpisodePage({ params }: Props) {
             {ep.apple_url && <ListenLink href={ep.apple_url} label="Listen on Apple Podcasts" />}
           </div>
         )}
+
+        {/* Sponsor — top slot */}
+        <SponsorSlot pool={sponsors} startIndex={0} />
 
         {/* Summary */}
         {summaryText(ep) && (
@@ -237,6 +243,9 @@ export default async function PublicEpisodePage({ params }: Props) {
           </section>
         )}
 
+        {/* Sponsor — mid slot */}
+        <SponsorSlot pool={sponsors} startIndex={1} />
+
         {/* Transcript */}
         <section className="mb-12" aria-labelledby="transcript-heading">
           <h2 id="transcript-heading" className="mb-4 font-condensed text-[13px] font-bold uppercase tracking-[0.2em]" style={{ color: '#ef0e30' }}>
@@ -272,6 +281,9 @@ export default async function PublicEpisodePage({ params }: Props) {
           )}
         </section>
 
+        {/* Sponsor — bottom slot */}
+        <SponsorSlot pool={sponsors} startIndex={2} />
+
         {/* Guest block */}
         {ep.guest_name && ep.guest_bio && (
           <section className="mb-12 rounded-xl p-6" style={{ background: '#111926', border: '1px solid rgba(245,240,232,0.08)' }} aria-labelledby="guest-heading">
@@ -306,6 +318,26 @@ export default async function PublicEpisodePage({ params }: Props) {
             </ul>
           </section>
         )}
+      </div>
+    </div>
+  )
+}
+
+function SponsorSlot({ pool, startIndex }: { pool: SponsorAd[]; startIndex: number }) {
+  if (!pool.length) return null
+  return (
+    <div className="my-10">
+      <div className="mb-3 flex items-center gap-3">
+        <span className="font-condensed text-[10px] font-bold uppercase tracking-[0.28em]" style={{ color: DIMMER }}>
+          Sponsored
+        </span>
+        <span className="h-px flex-1" style={{ background: 'rgba(245,240,232,0.08)' }} />
+        <span className="font-condensed text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'rgba(201,168,76,0.75)' }}>
+          Evolution Partner
+        </span>
+      </div>
+      <div className="mx-auto max-w-[300px]">
+        <RotatingSponsorCard pool={pool} startIndex={startIndex} />
       </div>
     </div>
   )

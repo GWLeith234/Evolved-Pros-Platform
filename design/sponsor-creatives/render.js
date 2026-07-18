@@ -1,10 +1,10 @@
 const { chromium } = require('playwright')
 const path = require('path')
 
-const JOBS = [
+const JOBS = (process.env.ONLY ? JSON.parse(process.env.ONLY) : [
   { html: 'academy-300x250.html', out: 'academy-300x250.png', w: 300, h: 250 },
   { html: 'academy-728x90.html',  out: 'academy-728x90.png',  w: 728, h: 90 },
-]
+])
 
 ;(async () => {
   const browser = await chromium.launch({

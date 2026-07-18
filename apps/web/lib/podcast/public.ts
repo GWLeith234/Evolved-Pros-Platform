@@ -1,5 +1,8 @@
 import 'server-only'
 import { adminClient } from '@/lib/supabase/admin'
+import { SPONSOR_AD_COLUMNS, type SponsorAd } from '@/components/home/HomeSponsorAd'
+import { ALL_FLAGSHIP_SPONSORS, ensureFlagshipSponsors } from '@/lib/sponsors/partners'
+import { dedupeSponsors } from '@/lib/sponsors/rotate'
 
 // ---------------------------------------------------------------------------
 // Public podcast data + SEO helpers (SPRINT — Public SEO Podcast Pages).
@@ -189,4 +192,41 @@ export function formatTimestamp(ts: number): string {
 export function youtubeTimestampUrl(youtubeId: string | null, ts: number): string | null {
   if (!youtubeId) return null
   return `https://youtu.be/${youtubeId}?t=${ts}`
+}
+
+/**
+ * Evolution Partner pool for the podcast surfaces (index + episode pages).
+ * Active + in-date ads placed `podcast`/`all`, then any active ad, then the
+ * flagship partners so a rotating slot is never empty. Shared by the index grid
+ * and the episode-page sponsor slots so both rotate through the same inventory.
+ */
+export async function getPodcastSponsorPool(): Promise<SponsorAd[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sb = adminClient as any
+  const nowIso = new Date().toISOString()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const inDate = (q: any) =>
+    q
+      .eq('is_active', true)
+      .or(`start_date.is.null,start_date.lte.${nowIso}`)
+      .or(`end_date.is.null,end_date.gte.${nowIso}`)
+      .order('sort_order')
+      .limit(24)
+  try {
+    const primary = await inDate(
+      sb.from('platform_ads').select(SPONSOR_AD_COLUMNS).in('placement', ['podcast', 'all']),
+    )
+    const rows = (primary.data ?? []) as SponsorAd[]
+    if (rows.length < 2) {
+      const fallback = await inDate(sb.from('platform_ads').select(SPONSOR_AD_COLUMNS))
+      const seen = new Set(rows.map(r => r.id))
+      for (const r of (fallback.data ?? []) as SponsorAd[]) {
+        if (!seen.has(r.id)) { seen.add(r.id); rows.push(r) }
+      }
+    }
+    const pool = rows.length ? ensureFlagshipSponsors(rows) : ALL_FLAGSHIP_SPONSORS
+    return dedupeSponsors(pool)
+  } catch {
+    return dedupeSponsors(ALL_FLAGSHIP_SPONSORS)
+  }
 }

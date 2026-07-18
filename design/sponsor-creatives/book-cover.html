@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Barlow:wght@400;500&display=swap">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 600px; height: 960px; overflow: hidden; }
+  .cover { position: relative; width: 600px; height: 960px; background: #2a2a30;
+    font-family: "Montserrat", sans-serif; }
+  .title { position: absolute; top: 92px; left: 0; right: 0; text-align: center;
+    font-weight: 900; font-size: 112px; line-height: .9; letter-spacing: -1px;
+    background: linear-gradient(180deg, #E1BC5B 0%, #C89A3C 55%, #B4842A 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .figs { position: absolute; left: 44px; right: 44px; top: 548px; height: 240px;
+    display: flex; align-items: flex-end; justify-content: space-between; }
+  .figs svg { width: 120px; height: 240px; }
+  .rule { position: absolute; left: 44px; right: 44px; top: 792px; height: 3px; background: #B4842A; }
+  .byline { position: absolute; left: 0; right: 0; top: 862px; text-align: center;
+    font-family: "Barlow", sans-serif; font-weight: 500; font-size: 42px; letter-spacing: 10px;
+    color: #EDEDED; }
+</style></head>
+<body>
+  <div class="cover">
+    <div class="title">EVOLVED</div>
+    <div class="figs">
+      <svg viewBox="0 0 100 200"><circle cx="50" cy="30" r="29" fill="#55555b"/><path fill="#55555b" d="M50 58 C18 58 8 84 8 116 C8 150 14 176 22 196 L38 196 L42 168 L50 166 L58 168 L62 196 L78 196 C86 176 92 150 92 116 C92 84 82 58 50 58 Z"/></svg>
+      <svg viewBox="0 0 100 200"><circle cx="50" cy="31" r="27" fill="#5b5b61"/><path fill="#5b5b61" d="M50 60 C23 60 14 86 14 118 C14 150 19 176 26 196 L40 196 L44 166 L50 164 L56 166 L60 196 L74 196 C81 176 86 150 86 118 C86 86 77 60 50 60 Z"/></svg>
+      <svg viewBox="0 0 100 200"><circle cx="50" cy="32" r="25" fill="#616167"/><path fill="#616167" d="M50 62 C29 62 21 88 21 120 C21 150 25 176 32 196 L43 196 L47 162 L50 160 L53 162 L57 196 L68 196 C75 176 79 150 79 120 C79 88 71 62 50 62 Z"/></svg>
+      <svg viewBox="0 0 100 200"><circle cx="50" cy="30" r="23" fill="#C89A3C"/><path fill="#C89A3C" d="M50 56 C37 56 31 74 31 98 C31 130 33 160 36 196 L45 196 L49 150 L50 148 L51 150 L55 196 L64 196 C67 160 69 130 69 98 C69 74 63 56 50 56 Z"/><path fill="#F3EEE4" d="M50 56 L45 72 L50 108 L55 72 Z"/></svg>
+    </div>
+    <div class="rule"></div>
+    <div class="byline">George Leith</div>
+  </div>
+</body></html>
