@@ -12,6 +12,9 @@ const PUBLIC_ROUTES = [
   '/api/dev-login',
   '/pricing',
   '/media',
+  // Public SEO podcast section (index, episode pages, RSS) — must be reachable
+  // by logged-out visitors and crawlers. Also removed from the matcher below.
+  '/podcast',
   // Closed-beta lockout screen — must be reachable by suspended members, so it
   // is never gated (also absent from the matcher below, belt-and-suspenders).
   '/beta-paused',
@@ -192,8 +195,9 @@ export const config = {
     '/events/:path*',
     '/academy',
     '/academy/:path*',
-    '/podcast',
-    '/podcast/:path*',
+    // NOTE: /podcast is intentionally NOT matched — it is a public SEO section
+    // (see PUBLIC_ROUTES). Middleware must not run on it so logged-out visitors
+    // and crawlers get the server-rendered page instead of an auth redirect.
     '/live',
     '/live/:path*',
     '/profile/:path*',
