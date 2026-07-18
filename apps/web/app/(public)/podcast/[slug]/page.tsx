@@ -130,7 +130,7 @@ export default async function PublicEpisodePage({ params }: Props) {
   const showSegments = hasSegments(ep)
 
   return (
-    <div style={{ backgroundColor: '#0A0F18', minHeight: '100vh', color: IVORY }}>
+    <div style={{ background: '#0A0F18', minHeight: '100%', color: IVORY }}>
       {/* JSON-LD: PodcastEpisode + VideoObject + BreadcrumbList */}
       <script
         type="application/ld+json"
@@ -138,9 +138,7 @@ export default async function PublicEpisodePage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(ep)) }}
       />
 
-      <PublicHeader />
-
-      <main id="main-content" className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
         {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-6 font-condensed text-[12px] uppercase tracking-[0.14em]" style={{ color: DIMMER }}>
           <Link href="/podcast" style={{ color: '#ef0e30', textDecoration: 'none' }}>Podcast</Link>
@@ -308,7 +306,7 @@ export default async function PublicEpisodePage({ params }: Props) {
             </ul>
           </section>
         )}
-      </main>
+      </div>
     </div>
   )
 }
@@ -324,18 +322,5 @@ function ListenLink({ href, label }: { href: string; label: string }) {
     >
       {label}
     </a>
-  )
-}
-
-function PublicHeader() {
-  return (
-    <header className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid rgba(245,240,232,0.06)' }}>
-      <Link href="/podcast" className="font-condensed text-[14px] font-bold tracking-[0.18em]" style={{ color: IVORY, textDecoration: 'none' }}>
-        EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS
-      </Link>
-      <Link href="/login" className="rounded px-4 py-2 font-condensed text-[11px] font-bold uppercase tracking-[0.1em] transition-opacity hover:opacity-80" style={{ color: IVORY, border: '1px solid rgba(245,240,232,0.15)', textDecoration: 'none' }}>
-        Sign in
-      </Link>
-    </header>
   )
 }
