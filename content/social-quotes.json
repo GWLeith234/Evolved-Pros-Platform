@@ -1,0 +1,40 @@
+{
+  "_note": "One card per entry. The batch script (pnpm social:gen) renders each at both sizes via /api/social/<template>. episodeSlug pulls title/ep#/pillar/guest/thumbnail from the episodes table; quote/attribution/attributionRole override. Templates: text | guest | faceoff. George's team edits/extends this file; nothing auto-posts.",
+  "cards": [
+    {
+      "episodeSlug": "dennis-yu-authority-content",
+      "template": "guest",
+      "quote": "One or two key decisions or realizations is all it takes to make a whole week of productivity.",
+      "attribution": "Dennis Yu",
+      "attributionRole": "Digital Marketing Pioneer"
+    },
+    {
+      "episodeSlug": "dennis-yu-authority-content",
+      "template": "faceoff",
+      "quote": "",
+      "attribution": "Dennis Yu",
+      "attributionRole": "Digital Marketing Pioneer"
+    },
+    {
+      "episodeSlug": "fitness-nutrition-evolved-pros-carson-teagarden",
+      "template": "text",
+      "quote": "You don't get a six-pack the first day of training. It's that consistency.",
+      "attribution": "Carson Teagarden",
+      "attributionRole": "Calisthenics Coach"
+    },
+    {
+      "episodeSlug": "reinvention-partnerships-long-game-martin-scholz",
+      "template": "guest",
+      "quote": "Nobody closes better than partner-sourced leads.",
+      "attribution": "Martin Scholz",
+      "attributionRole": "Partnerships Advisor"
+    },
+    {
+      "episodeSlug": "trust-credibility-cold-calling-jim-thompson",
+      "template": "text",
+      "quote": "What unlocks word of mouth is trust — and storytelling builds trust.",
+      "attribution": "Jim Thompson",
+      "attributionRole": "Storytelling Coach"
+    }
+  ]
+}

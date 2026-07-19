@@ -10,7 +10,8 @@
     "backfill:lesson-thumbnails": "ts-node --project tsconfig.scripts.json scripts/backfill-lesson-thumbnails.ts",
     "transcripts:extract": "ts-node --project tsconfig.scripts.json scripts/heygen-extract-transcripts.ts",
     "transcripts:import": "ts-node --project tsconfig.scripts.json scripts/import-transcripts.ts",
-    "episodes:seed": "ts-node --project tsconfig.scripts.json scripts/seed-episode.ts"
+    "episodes:seed": "ts-node --project tsconfig.scripts.json scripts/seed-episode.ts",
+    "social:gen": "ts-node --project tsconfig.scripts.json scripts/gen-social.ts"
   },
   "devDependencies": {
     "@supabase/supabase-js": "^2.43.0",
