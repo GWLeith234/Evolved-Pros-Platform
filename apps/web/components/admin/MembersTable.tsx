@@ -14,6 +14,7 @@ export interface MemberRow {
   avatarUrl: string | null
   tier: string | null
   tierStatus: string | null
+  role: string | null
   vendastaContactId: string | null
   points: number
   joinedAt: string
@@ -40,8 +41,12 @@ const ENG_COLORS: Record<EngagementLevel, { bar: string; text: string }> = {
   Low:  { bar: '#cbd5e1', text: '#7a8a96' },
 }
 
-const FILTERS = ['All', 'Pro', 'VIP', 'Trial', 'Cancelled'] as const
+const FILTERS = ['All', 'Pro', 'VIP', 'Guest', 'Trial', 'Cancelled'] as const
 type Filter = typeof FILTERS[number]
+
+// Guest persona badge (comped Pro access, no revenue) — visually distinct from
+// the paid tier pills so admins can tell a guest apart at a glance.
+const GUEST_BADGE = { bg: 'rgba(27,60,90,0.12)', color: '#1b3c5a', border: 'rgba(27,60,90,0.35)' }
 
 // Hydration-safe UTC formatter. toLocaleDateString() depends on the runtime's
 // ICU data and timezone — Node and the browser disagreed on borderline rows
@@ -85,8 +90,9 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
         (m.email ?? '').toLowerCase().includes(q),
       )
     }
-    if (filter === 'Pro')  list = list.filter(m => m.tier === 'pro')
+    if (filter === 'Pro')  list = list.filter(m => m.tier === 'pro' && m.role !== 'guest')
     if (filter === 'VIP')  list = list.filter(m => m.tier === 'vip')
+    if (filter === 'Guest')      list = list.filter(m => m.role === 'guest')
     if (filter === 'Trial')      list = list.filter(m => m.tierStatus === 'trial')
     if (filter === 'Cancelled')  list = list.filter(m => m.tierStatus === 'cancelled' || m.tierStatus === 'expired')
     return list
@@ -170,6 +176,14 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
 
                 {/* Row 2: Plan + Status + Joined */}
                 <div className="flex items-center gap-2 flex-wrap">
+                  {m.role === 'guest' ? (
+                    <span
+                      className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
+                      style={{ backgroundColor: GUEST_BADGE.bg, color: GUEST_BADGE.color, border: `1px solid ${GUEST_BADGE.border}` }}
+                    >
+                      GUEST
+                    </span>
+                  ) : null}
                   {m.tier ? (
                     <span
                       className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
@@ -297,16 +311,26 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
 
                     {/* Plan */}
                     <td className="px-4 py-3">
-                      {m.tier ? (
-                        <span
-                          className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
-                          style={{ backgroundColor: tierStyle.bg, color: tierStyle.color, border: `1px solid ${tierStyle.border}` }}
-                        >
-                          {m.tier.toUpperCase()}
-                        </span>
-                      ) : (
-                        <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">—</span>
-                      )}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {m.role === 'guest' ? (
+                          <span
+                            className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
+                            style={{ backgroundColor: GUEST_BADGE.bg, color: GUEST_BADGE.color, border: `1px solid ${GUEST_BADGE.border}` }}
+                          >
+                            GUEST
+                          </span>
+                        ) : null}
+                        {m.tier ? (
+                          <span
+                            className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
+                            style={{ backgroundColor: tierStyle.bg, color: tierStyle.color, border: `1px solid ${tierStyle.border}` }}
+                          >
+                            {m.tier.toUpperCase()}
+                          </span>
+                        ) : (!m.role || m.role !== 'guest') ? (
+                          <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">—</span>
+                        ) : null}
+                      </div>
                     </td>
 
                     {/* Status */}

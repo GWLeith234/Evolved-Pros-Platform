@@ -43,9 +43,29 @@ export function normalizeTierKey(tier: string | null | undefined): TierKey | nul
 }
 
 /**
+ * tier_status values that represent a NON-paying grant, i.e. access without
+ * revenue. 'comp' is the guest persona (comped Professional access, no Stripe
+ * subscription); 'cancelled'/'expired' are lapsed subscriptions. Anything here
+ * contributes $0 to MRR.
+ */
+export const NON_REVENUE_TIER_STATUSES: ReadonlySet<string> = new Set([
+  'cancelled',
+  'expired',
+  'comp',
+])
+
+/**
  * Monthly revenue contribution of a single member. Mirrors the prior
  * getTierMrr gating: a subscription only counts when it has a live status
- * (anything other than missing / cancelled / expired).
+ * (anything other than missing / cancelled / expired / comp).
+ *
+ * REVENUE HYGIENE: the guest persona is tier='pro', tier_status='comp' with no
+ * Stripe subscription. Because 'comp' is in NON_REVENUE_TIER_STATUSES, a guest
+ * always returns 0 here — which propagates to computeMrr, getTierMrr and every
+ * admin revenue/stats surface built on them. The canonical "actually paying"
+ * predicate as Stripe rolls out is `stripe_subscription_id IS NOT NULL` (see
+ * isRevenueMember); today no rows carry a subscription id yet, so MRR still
+ * prices off tier — the comp/guest exclusions are what protect the numbers.
  */
 export function tierMonthlyPrice(
   tier: string | null | undefined,
@@ -56,11 +76,11 @@ export function tierMonthlyPrice(
   // MRR reflects live admin price edits. Falls back to TIERS per tier.
   monthlyByKey?: Partial<Record<TierKey, number>>,
 ): number {
-  // Comped members (e.g. "Friends of George") have full tier access but pay
-  // $0, so a comp must never contribute to MRR regardless of tier/status.
+  // Comped members (e.g. "Friends of George", guests) have full tier access but
+  // pay $0, so a comp must never contribute to MRR regardless of tier/status.
   if (isComped) return 0
   if (tierStatus !== undefined) {
-    if (!tierStatus || tierStatus === 'cancelled' || tierStatus === 'expired') return 0
+    if (!tierStatus || NON_REVENUE_TIER_STATUSES.has(tierStatus)) return 0
   }
   const key = normalizeTierKey(tier)
   if (!key) return 0
@@ -75,19 +95,45 @@ export interface MrrMember {
    * MRR — a comped Pro is full-access but $0 revenue.
    */
   comp_promo_code_id?: string | null
+  /**
+   * Persona. A 'guest' is comped Professional access (podcast/keynote guest)
+   * and never contributes revenue, independent of tier/tier_status.
+   */
+  role?: string | null
+  /**
+   * Live Stripe subscription id. The forward-looking canonical "is paying"
+   * signal — a guest/comp never has one. See isRevenueMember.
+   */
+  stripe_subscription_id?: string | null
 }
 
 /**
- * Total monthly recurring revenue across a member list (active/trial, comps
- * excluded). Pass `monthlyByKey` (from the catalogue) to price off the live
- * catalogue rather than the TIERS constants.
+ * Whether a member should be counted as paying revenue. Guests and comps are
+ * excluded regardless of tier. Once every paying member carries a Stripe
+ * subscription this can tighten to simply `Boolean(m.stripe_subscription_id)`;
+ * until then we exclude the known non-revenue personas (guest / comp / lapsed).
+ */
+export function isRevenueMember(m: MrrMember): boolean {
+  if ((m.role ?? '').toLowerCase() === 'guest') return false
+  if (m.comp_promo_code_id) return false
+  const s = m.tier_status
+  if (!s || NON_REVENUE_TIER_STATUSES.has(s)) return false
+  return normalizeTierKey(m.tier) !== null
+}
+
+/**
+ * Total monthly recurring revenue across a member list (active/trial, comps and
+ * guests excluded). Pass `monthlyByKey` (from the catalogue) to price off the
+ * live catalogue rather than the TIERS constants.
  */
 export function computeMrr(
   members: MrrMember[],
   monthlyByKey?: Partial<Record<TierKey, number>>,
 ): number {
-  return members.reduce(
-    (sum, m) => sum + tierMonthlyPrice(m.tier, m.tier_status, Boolean(m.comp_promo_code_id), monthlyByKey),
-    0,
-  )
+  return members.reduce((sum, m) => {
+    // Guests are comped Professional — never revenue, even if a future
+    // tier_status slips past the tierMonthlyPrice gate.
+    if ((m.role ?? '').toLowerCase() === 'guest') return sum
+    return sum + tierMonthlyPrice(m.tier, m.tier_status, Boolean(m.comp_promo_code_id), monthlyByKey)
+  }, 0)
 }

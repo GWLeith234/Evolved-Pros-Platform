@@ -33,6 +33,24 @@ interface VendastaWebhook {
   error_message: string | null
 }
 
+interface GuestEngagement {
+  id: string
+  episode_id: string | null
+  status: string
+  token_expires_at: string | null
+  one_liner: string | null
+  short_bio: string | null
+  headshot_url: string | null
+  topics: unknown
+  links: unknown
+  av_notes: string | null
+  tee_size: string | null
+  consent_release: boolean
+  submitted_at: string | null
+  created_at: string
+  episodes: { title: string | null; slug: string | null } | null
+}
+
 interface MemberDetail {
   id: string
   email: string | null
@@ -45,6 +63,8 @@ interface MemberDetail {
   tier: string | null
   tierStatus: string | null
   tierExpiresAt: string | null
+  role: string | null
+  guestEngagements: GuestEngagement[]
   vendastaContactId: string | null
   points: number
   joinedAt: string
@@ -59,7 +79,7 @@ interface MemberDetail {
   vendastaWebhooks: VendastaWebhook[]
 }
 
-type Tab = 'overview' | 'activity' | 'progress' | 'vendasta'
+type Tab = 'overview' | 'activity' | 'progress' | 'guest' | 'vendasta'
 
 // Hydration-safe UTC formatters — toLocaleDateString depended on the runtime
 // timezone / ICU data and threw React #418/#425 hydration warnings.
@@ -90,6 +110,23 @@ function fmtDatetime(iso: string): string {
 const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
   success: { bg: 'rgba(34,197,94,0.1)',  color: '#15803d' },
   error:   { bg: 'rgba(239,14,48,0.1)',  color: '#ef0e30' },
+}
+
+const GUEST_STATUS_COLORS: Record<string, { bg: string; color: string }> = {
+  invited:   { bg: 'rgba(201,168,76,0.12)', color: '#92660b' },
+  viewed:    { bg: 'rgba(104,162,185,0.12)', color: '#1b3c5a' },
+  submitted: { bg: 'rgba(34,197,94,0.1)',  color: '#15803d' },
+  confirmed: { bg: 'rgba(34,197,94,0.14)', color: '#15803d' },
+  revoked:   { bg: 'rgba(239,14,48,0.1)',  color: '#ef0e30' },
+}
+
+function GuestField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded px-3 py-2" style={{ backgroundColor: 'rgba(27,60,90,0.03)', border: '1px solid rgba(27,60,90,0.08)' }}>
+      <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[11px] text-[color:var(--admin-text-2)] mb-1">{label}</p>
+      {children}
+    </div>
+  )
 }
 
 export function MemberDetailClient({ member }: { member: MemberDetail }) {
@@ -168,10 +205,12 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
     progressByCourse[courseId].lessons.push(lp)
   }
 
+  const isGuest = member.role === 'guest' || (member.guestEngagements?.length ?? 0) > 0
   const TABS: { id: Tab; label: string }[] = [
     { id: 'overview',  label: 'Overview'  },
     { id: 'activity',  label: 'Activity'  },
     { id: 'progress',  label: 'Progress'  },
+    ...(isGuest ? [{ id: 'guest' as Tab, label: 'Guest' }] : []),
     { id: 'vendasta',  label: 'Vendasta'  },
   ]
 
@@ -198,6 +237,15 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
             )}
             <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">{member.email}</p>
             <div className="flex items-center gap-2 mt-1">
+              {member.role === 'guest' && (
+                <span
+                  className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
+                  style={{ backgroundColor: 'rgba(27,60,90,0.12)', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.35)' }}
+                  title="Podcast/keynote guest — comped Professional access, excluded from MRR"
+                >
+                  GUEST
+                </span>
+              )}
               {member.tier && (
                 <span
                   className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
@@ -438,6 +486,120 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
           })}
           {Object.keys(progressByCourse).length === 0 && (
             <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">No lesson progress recorded.</p>
+          )}
+        </div>
+      )}
+
+      {tab === 'guest' && (
+        <div className="space-y-4">
+          {member.guestEngagements.length === 0 ? (
+            <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">
+              No guest engagements for this member.
+            </p>
+          ) : (
+            member.guestEngagements.map(g => {
+              const topics = Array.isArray(g.topics) ? (g.topics as unknown[]) : []
+              const links = Array.isArray(g.links) ? (g.links as unknown[]) : []
+              const expired = g.token_expires_at ? new Date(g.token_expires_at).getTime() < Date.now() : false
+              const badge = GUEST_STATUS_COLORS[g.status] ?? { bg: 'rgba(27,60,90,0.08)', color: 'var(--admin-text-2)' }
+              return (
+                <div
+                  key={g.id}
+                  className="rounded-lg p-5"
+                  style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)' }}
+                >
+                  <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
+                        style={{ backgroundColor: badge.bg, color: badge.color }}
+                      >
+                        {g.status}
+                      </span>
+                      {g.episodes?.title && (
+                        <span className="font-condensed text-[12px] text-[color:var(--admin-text)]">
+                          {g.episodes.title}
+                        </span>
+                      )}
+                      {expired && (
+                        <span className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
+                          style={{ backgroundColor: 'rgba(239,14,48,0.08)', color: '#ef0e30' }}>
+                          link expired
+                        </span>
+                      )}
+                    </div>
+                    <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">
+                      {g.submitted_at ? `Submitted ${fmtDate(g.submitted_at)}` : `Invited ${fmtDate(g.created_at)}`}
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    {g.headshot_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={g.headshot_url} alt="Guest headshot" className="w-16 h-16 rounded object-cover flex-shrink-0"
+                        style={{ border: '1px solid rgba(27,60,90,0.15)' }} />
+                    )}
+                    <div className="min-w-0 flex-1 space-y-2">
+                      {g.one_liner && (
+                        <p className="font-body text-[13px] text-[color:var(--admin-text-strong)] italic">&ldquo;{g.one_liner}&rdquo;</p>
+                      )}
+                      {g.short_bio && (
+                        <p className="font-body text-[13px] text-[color:var(--admin-text-2)] line-clamp-4">{g.short_bio}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {(topics.length > 0 || links.length > 0 || g.tee_size || g.av_notes) && (
+                    <div className="grid grid-cols-2 gap-3 mt-4">
+                      {topics.length > 0 && (
+                        <GuestField label="Topics">
+                          <div className="flex flex-wrap gap-1">
+                            {topics.map((t, i) => (
+                              <span key={i} className="font-condensed text-[12px] px-2 py-0.5 rounded"
+                                style={{ backgroundColor: 'rgba(104,162,185,0.1)', color: '#1b3c5a' }}>
+                                {String(t)}
+                              </span>
+                            ))}
+                          </div>
+                        </GuestField>
+                      )}
+                      {links.length > 0 && (
+                        <GuestField label="Links">
+                          <div className="flex flex-col gap-0.5">
+                            {links.map((l, i) => {
+                              const url = typeof l === 'string' ? l : String((l as any)?.url ?? '')
+                              const label = typeof l === 'string' ? l : String((l as any)?.label || url)
+                              if (!url) return null
+                              return (
+                                <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                                  className="font-condensed text-[12px] text-[#68a2b9] truncate">
+                                  {label}
+                                </a>
+                              )
+                            })}
+                          </div>
+                        </GuestField>
+                      )}
+                      {g.tee_size && (
+                        <GuestField label="Tee size">
+                          <span className="font-condensed text-[13px] text-[color:var(--admin-text-strong)]">{g.tee_size}</span>
+                        </GuestField>
+                      )}
+                      {g.av_notes && (
+                        <GuestField label="A/V notes">
+                          <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">{g.av_notes}</span>
+                        </GuestField>
+                      )}
+                      <GuestField label="Recording release">
+                        <span className="font-condensed text-[13px]" style={{ color: g.consent_release ? '#15803d' : '#ef0e30' }}>
+                          {g.consent_release ? 'Consented' : 'Not yet'}
+                        </span>
+                      </GuestField>
+                    </div>
+                  )}
+                </div>
+              )
+            })
           )}
         </div>
       )}

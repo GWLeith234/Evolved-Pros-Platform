@@ -22,8 +22,12 @@ export async function GET() {
       .gte('created_at', oneWeekAgo),
     supabase.from('users').select('id', { count: 'exact', head: true })
       .eq('tier_status', 'cancelled'),
+    // Last-month paying-Pro baseline for the delta — exclude comped guests
+    // (role='guest' / tier_status='comp'); they hold Pro access but are $0 MRR.
     supabase.from('users').select('id', { count: 'exact', head: true })
       .eq('tier', 'pro')
+      .neq('role', 'guest')
+      .neq('tier_status', 'comp')
       .gte('created_at', twoMonthsAgo)
       .lte('created_at', oneMonthAgo),
     supabase.from('users').select('id', { count: 'exact', head: true })
