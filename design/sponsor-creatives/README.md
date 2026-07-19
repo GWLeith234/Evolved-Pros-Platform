@@ -35,11 +35,19 @@ rule, real EP logo (`logo_horizontal_dark.png` — white wordmark), Playfair
 headline "Six Pillars. No Ceiling.", Barlow sub, the six pillar colors (ascending
 bars on 300×250, a full-width bottom spectrum on 728×90), gold "LEARN MORE" CTA.
 
-## Creative 2 — EVOLVED book launch ⛔ blocked
+## Creative 2 — EVOLVED book launch
 
-Not produced here. The current cover art lives only in Supabase Storage
-(`Branding/events/1775189542095-Evolved_V2 - Kindle eBook Cover .jpg`), and this
-environment's egress proxy denies (403) all connections to the Supabase host, so
-the cover bytes can't be fetched to composite into a raster creative — and the
-brief says do NOT approximate the cover. To unblock: attach the cover PNG in
-chat (then these templates can composite it), or render/upload externally.
+`book-300x250.html` / `book-728x90.html` (cover left + "EVOLVED / Launches
+August 15" / George Leith / Pre-order, black+gold) and the portrait cover for
+the podcast slot.
+
+Real cover: `Branding/Evolved%20Book%20Cover.jpg` (Supabase Storage, public).
+The banner HTML `<img class="cover">` now points at that URL — spaces MUST stay
+percent-encoded (`%20`) or Storage 404s.
+
+- **Podcast slot** renders the cover as a live `image_url` (platform_ads row
+  `134800d3`), so it already uses the real cover on the server.
+- **Baked banners** (`book-300x250.png`, `book-728x90.png`) still contain the
+  earlier *reconstruction* — the build sandbox can't reach Storage, so re-run
+  `render.js` from an env that can (a normal dev machine) to bake the real cover
+  into the PNGs, then commit them.

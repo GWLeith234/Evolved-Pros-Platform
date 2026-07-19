@@ -25,7 +25,10 @@
 </style></head>
 <body>
   <div class="ad">
-    <img class="cover" src="book-cover.png" alt="EVOLVED by George Leith">
+    <!-- Real cover in Supabase Storage (%20 must stay encoded). Re-render this
+         banner from an env that can reach Storage; the local build sandbox
+         cannot fetch it. -->
+    <img class="cover" src="https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/Evolved%20Book%20Cover.jpg" alt="EVOLVED by George Leith">
     <div class="title">EVOLVED</div>
     <div class="mid">
       <div class="launch">Launches August 15</div>
