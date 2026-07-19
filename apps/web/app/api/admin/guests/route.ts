@@ -41,11 +41,39 @@ export async function POST(request: Request) {
     : null
 
   // 1. Reuse an existing user by email, else create the guest persona row.
-  const { data: existing } = await adminClient
+  // Cast: stripe_subscription_id is not in the generated Database types yet
+  // (added by migration 065), so a typed select would raise SelectQueryError.
+  const { data: existing } = await (adminClient as any)
     .from('users')
-    .select('id')
+    .select('id, role, tier_status, stripe_subscription_id')
     .eq('email', email)
     .maybeSingle()
+
+  // Guard: never silently convert a real account into a comped guest. A guest is
+  // role='guest' + tier_status='comp' with no Stripe subscription; anything else
+  // that already owns this email (an admin, a paying/comped member, or an
+  // anomalous "guest" carrying a paid status/subscription) must be refused BEFORE
+  // any overwrite or engagement is minted — otherwise the grant here (and the
+  // sticky re-assertion in ensureGuestPersona on every /guest view) would strip
+  // an admin's role or drop a paying member out of MRR. Re-inviting a genuine
+  // existing guest is still allowed.
+  if (existing?.id) {
+    const existingRole   = String(existing.role ?? '').toLowerCase()
+    const existingStatus = String(existing.tier_status ?? '').toLowerCase()
+    const hasPaidSub     = Boolean(existing.stripe_subscription_id)
+    if (existingRole === 'admin') {
+      return NextResponse.json(
+        { error: `${email} belongs to an admin account, which can't be converted to a guest.` },
+        { status: 409 },
+      )
+    }
+    if (existingRole !== 'guest' || existingStatus !== 'comp' || hasPaidSub) {
+      return NextResponse.json(
+        { error: `${email} already belongs to an existing member account; refusing to convert a real member into a comped guest.` },
+        { status: 409 },
+      )
+    }
+  }
 
   let userId: string
   if (existing?.id) {
