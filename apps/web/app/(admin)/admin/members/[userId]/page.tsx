@@ -26,10 +26,10 @@ export default async function AdminMemberDetailPage({ params }: Props) {
   // lesson_progress / vendasta_webhooks rows.
   // maybeSingle() returns null on no-match instead of throwing PGRST116, so a
   // stale /admin/members/[userId] link falls through to notFound() cleanly.
-  const [userResult, postsResult, progressResult] = await Promise.all([
+  const [userResult, postsResult, progressResult, guestResult] = await Promise.all([
     adminClient
       .from('users')
-      .select('id, email, full_name, display_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, comp_promo_code_id, vendasta_contact_id, points, created_at, updated_at')
+      .select('id, email, full_name, display_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, role, comp_promo_code_id, vendasta_contact_id, points, created_at, updated_at')
       .eq('id', params.userId)
       .limit(1)
       .maybeSingle(),
@@ -44,6 +44,12 @@ export default async function AdminMemberDetailPage({ params }: Props) {
       .select('lesson_id, completed_at, watch_time_seconds, updated_at, lessons(title, course_id, courses(title, pillar_number))')
       .eq('user_id', params.userId)
       .order('updated_at', { ascending: false }),
+    // Guest persona: intake + booking rows (new table — not yet in generated types).
+    (adminClient as any)
+      .from('guest_engagements')
+      .select('id, episode_id, status, token_expires_at, one_liner, short_bio, headshot_url, topics, links, av_notes, tee_size, consent_release, submitted_at, created_at, episodes(title, slug)')
+      .eq('user_id', params.userId)
+      .order('created_at', { ascending: false }),
   ])
 
   if (!userResult.data) notFound()
@@ -75,6 +81,8 @@ export default async function AdminMemberDetailPage({ params }: Props) {
     tier:              user.tier,
     tierStatus:        user.tier_status,
     tierExpiresAt:     user.tier_expires_at,
+    role:              (user as { role?: string | null }).role ?? null,
+    guestEngagements:  (guestResult?.data ?? []) as Parameters<typeof MemberDetailClient>[0]['member']['guestEngagements'],
     vendastaContactId: user.vendasta_contact_id,
     points:            user.points,
     joinedAt:          user.created_at,

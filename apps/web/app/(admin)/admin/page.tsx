@@ -42,15 +42,19 @@ export default async function AdminDashboardPage() {
     postsCount,
     episodesCount,
   ] = await Promise.all([
-    adminClient.from('users').select('id, tier, tier_status, comp_promo_code_id').neq('role', 'admin'),
+    adminClient.from('users').select('id, tier, tier_status, comp_promo_code_id, role').neq('role', 'admin'),
     adminClient.from('users').select('id', { count: 'exact', head: true })
       .neq('role', 'admin').gte('created_at', oneWeekAgo),
     adminClient.from('users')
       .select('id, full_name, display_name, email, tier, created_at')
       .order('created_at', { ascending: false })
       .limit(5),
+    // Pro members created last month for the delta — exclude comped guests
+    // (role='guest' / tier_status='comp'): they hold Pro access but are not
+    // revenue, so they must not inflate the paying-Pro baseline.
     adminClient.from('users').select('id', { count: 'exact', head: true })
-      .eq('tier', 'pro').gte('created_at', twoMonthsAgo).lte('created_at', oneMonthAgo),
+      .eq('tier', 'pro').neq('role', 'guest').neq('tier_status', 'comp')
+      .gte('created_at', twoMonthsAgo).lte('created_at', oneMonthAgo),
     // Total posts across the platform — no status filter, the count is the
     // raw signal (admins will look at the community page for breakdowns).
     adminClient.from('posts').select('id', { count: 'exact', head: true }),

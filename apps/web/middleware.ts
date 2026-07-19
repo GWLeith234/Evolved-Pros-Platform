@@ -18,6 +18,12 @@ const PUBLIC_ROUTES = [
   // Closed-beta lockout screen — must be reachable by suspended members, so it
   // is never gated (also absent from the matcher below, belt-and-suspenders).
   '/beta-paused',
+  // Guest intake — /guest/[token] and its API are reached by an anonymous
+  // invited guest via a signed token, so they must be public (also absent from
+  // the matcher below). The token is the credential; writes go through the
+  // service role after token + signature + expiry validation.
+  '/guest',
+  '/api/guest',
 ]
 
 // Routes that are publicly accessible but still need session refresh
