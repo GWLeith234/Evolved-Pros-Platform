@@ -533,7 +533,7 @@ export function MembershipPageClient({ userTier, keynoteAccess, isLoggedIn }: Me
             </p>
           </div>
           <div className="flex-shrink-0 w-full sm:w-auto">
-            <Tooltip content="Checkout powered by Vendasta — launching soon">
+            <Tooltip content="Secure checkout — launching soon">
               <button
                 type="button"
                 disabled
