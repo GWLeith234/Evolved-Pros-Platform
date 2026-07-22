@@ -9,8 +9,6 @@ import { countUserPosts } from '@/lib/community/postCount'
 export const metadata: Metadata = { title: 'Home — Evolved Pros' }
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
 import { TodaysEvolution, type TodaysEvolutionAction } from '@/components/home/TodaysEvolution'
-import { UpcomingEventsWidget } from '@/components/home/UpcomingEventsWidget'
-import { AcademyProgressWidget } from '@/components/home/AcademyProgressWidget'
 import { ProfileCompletePrompt } from '@/components/home/ProfileCompletePrompt'
 import { InProgressPillarHero } from '@/components/home/InProgressPillarHero'
 import { ClimbingTowardCard } from '@/components/home/ClimbingTowardCard'
@@ -21,7 +19,6 @@ import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStor
 import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
 import { type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/DailyPulseCard'
 import {
-  HomeSponsorAd,
   HomeSponsorRow,
   SPONSOR_AD_COLUMNS,
   type SponsorAd,
@@ -29,7 +26,6 @@ import {
 import {
   DEFAULT_HOME_SPONSORS,
   pickHomeSponsors,
-  pickSidebarSponsor,
   ensureFlagshipSponsors,
 } from '@/lib/sponsors/partners'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
@@ -120,9 +116,9 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
     progressByLesson[p.lesson_id] = { completed_at: p.completed_at, updated_at: p.updated_at }
   }
 
-  // Return ALL published courses with their progress. Caller filters/slices for
-  // the AcademyProgressWidget (top-N active) and uses the full list to derive
-  // per-pillar Architecture-column state in the WelcomeBanner.
+  // Return ALL published courses with their progress. Caller uses the full
+  // list to derive per-pillar Architecture-column state in the WelcomeBanner
+  // and the Path Forward in-progress / climbing pillars.
   return (courses.data ?? []).map(c => {
     const courseLesson = lessonsByCourse[c.id] ?? []
     const total = courseLesson.length
@@ -498,8 +494,8 @@ async function fetchWeekCommitments(profileId: string, weekStart: string): Promi
  * waterfall + mount gate for the sponsor row and sidebar. adminClient
  * bypasses RLS so members always see active placements.
  */
-async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: SponsorAd | null }> {
-  // Main row: 2 rotated partners. Sidebar: 1 different partner (no dups).
+async function fetchHomeSponsors(): Promise<{ home: SponsorAd[] }> {
+  // Main row: 2 rotated partners.
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = adminClient as any
@@ -512,11 +508,7 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: Sponso
 
     const all = (rows ?? []) as Array<SponsorAd & { placement?: string | null }>
     if (all.length === 0) {
-      const home = pickHomeSponsors(DEFAULT_HOME_SPONSORS)
-      return {
-        home,
-        sidebar: pickSidebarSponsor(DEFAULT_HOME_SPONSORS, home),
-      }
+      return { home: pickHomeSponsors(DEFAULT_HOME_SPONSORS) }
     }
 
     const homePool = all.filter(a => {
@@ -524,23 +516,10 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; sidebar: Sponso
       return p === 'home' || p === 'all'
     })
     const pool = ensureFlagshipSponsors(homePool.length ? homePool : all)
-    const home = pickHomeSponsors(pool)
-    const sidebarPool = all.filter(a => {
-      const p = (a.placement ?? 'all').toLowerCase()
-      return p === 'sidebar' || p === 'all'
-    })
-    const sidebar =
-      pickSidebarSponsor(sidebarPool.length ? sidebarPool : all, home) ??
-      pickSidebarSponsor(pool, home)
-
-    return { home, sidebar }
+    return { home: pickHomeSponsors(pool) }
   } catch (err) {
     console.error('[home.fetchHomeSponsors] failed:', err instanceof Error ? err.message : err)
-    const home = pickHomeSponsors(DEFAULT_HOME_SPONSORS)
-    return {
-      home,
-      sidebar: pickSidebarSponsor(DEFAULT_HOME_SPONSORS, home),
-    }
+    return { home: pickHomeSponsors(DEFAULT_HOME_SPONSORS) }
   }
 }
 
@@ -659,18 +638,6 @@ export default async function MemberHomePage() {
     }
     return { number: n, name, state: 'locked' as const }
   })
-
-  // Top-N active courses for the AcademyProgressWidget. "Active" = the
-  // member touched at least one lesson (lastActivity present) or made
-  // any completion progress (pct > 0). Sorted by recency.
-  const activeCourses = [...courseProgress]
-    .filter(c => c.lastActivity !== null || c.pct > 0)
-    .sort((a, b) => {
-      if (!a.lastActivity) return 1
-      if (!b.lastActivity) return -1
-      return new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()
-    })
-    .slice(0, 3)
 
   // ── Path Forward + Long Game (HOME-2) ───────────────────────────────
   // Derive the in-progress and "climbing toward" pillars from the same
@@ -890,21 +857,6 @@ export default async function MemberHomePage() {
         hasName={Boolean(profile.display_name || profile.full_name)}
       />
 
-      {/* What's Next — upcoming events + sponsor. SPRINT M: the "Recent
-          Activity" feed was removed (it showed the same posts as the Community
-          Pulse tile above). */}
-      <div id="whats-next" className="ep-section-eyebrow pt-3">
-        <span className="ep-section-eyebrow__rule" aria-hidden />
-        <span className="ep-section-eyebrow__label">What&apos;s Next</span>
-        <span className="ep-section-eyebrow__grow" aria-hidden />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 items-start">
-        <UpcomingEventsWidget events={events} />
-        {/* Sidebar Evolution Partner — SSR-fetched, de-duped from home row. */}
-        <HomeSponsorAd ad={sponsors.sidebar} />
-      </div>
-
       {/* SPRINT J — Section divider: "The Path Forward". */}
       <div className="ep-section-eyebrow pt-3">
         <span className="ep-section-eyebrow__rule" aria-hidden />
@@ -912,9 +864,6 @@ export default async function MemberHomePage() {
         <span className="ep-section-eyebrow__grow" aria-hidden />
       </div>
 
-      {/* HOME-2 — Path Forward (left) + Long Game (right). SPRINT J: AcademyProgressWidget
-          moved into the left column (after the Climbing card) to match the design's
-          "Your Academy (2fr) | Goals (1fr)" lower row. Grid widened to 2fr/1fr. */}
       {/* Path Forward — the "continue learning" actions. SPRINT M: the
           PillarJourneyStrip ("N of 6 pillars earned") was removed — the six
           pillars already render once in "The Architecture" hero. */}
@@ -944,7 +893,6 @@ export default async function MemberHomePage() {
             courseSlug={climbingData.courseSlug}
           />
         )}
-        <AcademyProgressWidget courses={activeCourses} />
       </div>
 
     </div>
