@@ -424,8 +424,8 @@ async function fetchLatestEpisodes(limit = 3): Promise<{ episodes: PulseEpisode[
 
 // HOME-DAILY-PULSE fetchers — habits and habit_completions FK their user_id to
 // public.users.id, so reads key on profile.id (resolved by email), NOT the raw
-// auth UID. auth.uid() === public.users.id is not guaranteed for future
-// Vendasta-provisioned signups.
+// auth UID. auth.uid() === public.users.id is not guaranteed for accounts
+// provisioned by billing webhooks.
 
 async function fetchTodaysHabits(profileId: string): Promise<DailyPulseHabit[]> {
   // Wrapped in try/catch so a transient network blip or unexpected RLS

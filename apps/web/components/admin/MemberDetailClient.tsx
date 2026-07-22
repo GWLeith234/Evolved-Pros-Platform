@@ -211,7 +211,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
     { id: 'activity',  label: 'Activity'  },
     { id: 'progress',  label: 'Progress'  },
     ...(isGuest ? [{ id: 'guest' as Tab, label: 'Guest' }] : []),
-    { id: 'vendasta',  label: 'Vendasta'  },
+    { id: 'vendasta',  label: 'Billing'   },
   ]
 
   return (
@@ -275,7 +275,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
             className="font-condensed font-semibold uppercase tracking-wide text-[12px] px-3 py-2 rounded transition-all"
             style={{ color: '#68a2b9', border: '1px solid rgba(104,162,185,0.3)' }}
           >
-            View in Vendasta CRM →
+            View in CRM →
           </a>
         )}
       </div>
@@ -611,7 +611,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
               Contact ID: <span className="text-[color:var(--admin-text)] font-bold">{member.vendastaContactId}</span>
             </p>
           ) : (
-            <p className="font-condensed text-[12px] text-[#ef0e30] mb-4">No Vendasta contact linked.</p>
+            <p className="font-condensed text-[12px] text-[#ef0e30] mb-4">No CRM contact linked.</p>
           )}
           {member.vendastaWebhooks.length === 0 ? (
             <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">No webhook events found.</p>

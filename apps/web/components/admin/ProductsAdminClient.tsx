@@ -5,7 +5,7 @@ import type { CatalogueProduct } from '@/lib/commerce/catalogue'
 
 // SPRINT I Phase 2 — admin Products screen driven by our own products/prices
 // catalogue (source of truth). Edit amounts / active / Stripe price-id links,
-// then mirror the catalogue to Stripe. No Vendasta.
+// then mirror the catalogue to Stripe. No legacy-vendor coupling.
 
 interface ProductsAdminClientProps {
   initialProducts: CatalogueProduct[]

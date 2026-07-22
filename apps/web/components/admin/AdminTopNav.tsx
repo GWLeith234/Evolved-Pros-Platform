@@ -90,9 +90,9 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
 
       {/* Nav lives in the left rail (AdminSidebar) — the top bar carries only
           brand, platform link, theme toggle, and avatar. The former duplicate
-          top-bar tabs and the "Vendasta Sync" badge were removed in the nav
-          dedup; anything still Vendasta now lives under the rail's clearly
-          labelled "Legacy (Vendasta)" section until Sprint I removes it. */}
+          top-bar tabs and sync badge were removed in the nav dedup; remaining
+          legacy CRM links live under the rail's "Legacy CRM" section until
+          the in-house migration removes them. */}
 
       {/* Right: Back to platform + theme toggle + avatar */}
       <div className="flex items-center gap-3">

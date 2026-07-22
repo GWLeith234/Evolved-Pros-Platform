@@ -1,8 +1,7 @@
 // Shared branded full-screen loading state used by route segment
 // loading.tsx files. Theme-aware "Evolution" loader: the horizontal
 // EVOLVED PROS wordmark (navy on light, white on dark) breathing over a
-// slim indeterminate red progress bar — subtle, fast, modern (Vendasta
-// style). Renders as a server component; the light/dark logo swap is done
+// slim indeterminate red progress bar — subtle, fast, modern. Renders as a server component; the light/dark logo swap is done
 // purely in CSS (html.light-mode) so there's no theme flash or client JS.
 export function BrandedLoading() {
   return (

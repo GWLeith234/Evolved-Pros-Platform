@@ -248,14 +248,14 @@ export default async function AdminDashboardPage() {
         )}
       </div>
 
-      {/* Recent Vendasta webhooks */}
+      {/* Recent billing webhooks (rows from vendasta_webhooks) */}
       <div className="rounded-lg overflow-hidden" style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)' }}>
         <div
           className="flex items-center justify-between px-5 py-3"
           style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}
         >
           <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[10px] text-[color:var(--admin-text)]">
-            Recent Vendasta Activity
+            Recent Billing Activity
           </p>
           <a
             href="https://business.vendasta.com"
@@ -263,7 +263,7 @@ export default async function AdminDashboardPage() {
             rel="noopener noreferrer"
             className="font-condensed text-[10px] text-[#68a2b9] hover:text-[color:var(--admin-text)] transition-colors"
           >
-            Open Vendasta →
+            Open CRM →
           </a>
         </div>
 
@@ -278,14 +278,14 @@ export default async function AdminDashboardPage() {
           if (rows.length === 0) {
             return (
               <div className="px-5 py-8 text-center space-y-2">
-                <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">No recent Vendasta activity.</p>
+                <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">No recent billing activity.</p>
                 <a
                   href="https://business.vendasta.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-block font-condensed text-[11px] text-[#68a2b9] hover:text-[color:var(--admin-text)] underline transition-colors"
                 >
-                  Connect Vendasta to see member events here.
+                  Connect the CRM to see member events here.
                 </a>
               </div>
             )

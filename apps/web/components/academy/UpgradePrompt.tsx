@@ -12,9 +12,9 @@ export function UpgradePrompt() {
           Pillars 4–6 — Strategy, Accountability, and Execution — are unlocked with a Pro membership.
         </p>
       </div>
-      {/* SPRINT B: retired the legacy vendor-hosted storefront override
-          (NEXT_PUBLIC_VENDASTA_CHECKOUT_URL) — superseded by the in-app
-          /membership flow (see api/checkout). Members never leave the app. */}
+      {/* SPRINT B: retired the legacy vendor-hosted storefront override —
+          superseded by the in-app /membership flow (see api/checkout).
+          Members never leave the app. */}
       <a
         href="/membership"
         className="flex-shrink-0 font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-5 py-2.5 transition-all"

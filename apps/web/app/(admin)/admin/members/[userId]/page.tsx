@@ -55,7 +55,7 @@ export default async function AdminMemberDetailPage({ params }: Props) {
   if (!userResult.data) notFound()
   const user = userResult.data
 
-  // Fetch Vendasta webhooks if contact linked
+  // Fetch billing webhooks (vendasta_webhooks) if a CRM contact is linked
   const webhooksResult = user.vendasta_contact_id
     ? await adminClient
         .from('vendasta_webhooks')

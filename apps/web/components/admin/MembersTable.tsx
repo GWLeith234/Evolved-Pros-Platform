@@ -250,7 +250,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
         <table className="w-full min-w-[820px]">
           <thead>
             <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.03)' }}>
-              {['Member', 'Plan', 'Status', 'Joined', 'MRR', 'Engagement', 'Vendasta', ''].map(h => {
+              {['Member', 'Plan', 'Status', 'Joined', 'MRR', 'Engagement', 'CRM ref', ''].map(h => {
                 const isActions = h === ''
                 const isEngagement = h === 'Engagement'
                 return (
@@ -356,7 +356,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                     </td>
 
                     {/* Engagement — narrower bar + compact padding to free up
-                        room for the Vendasta + Actions columns on 1280-1440px desktops. */}
+                        room for the CRM ref + Actions columns on 1280-1440px desktops. */}
                     <td className="px-2 py-3">
                       <div className="flex items-center gap-2">
                         <div
@@ -374,7 +374,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                       </div>
                     </td>
 
-                    {/* Vendasta */}
+                    {/* CRM ref — external contact link (reads vendastaContactId) */}
                     <td className="px-4 py-3">
                       {m.vendastaContactId ? (
                         <a

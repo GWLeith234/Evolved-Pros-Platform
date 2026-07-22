@@ -8,7 +8,7 @@ interface AskGeorgeDrawerProps {
   onClose: () => void
 }
 
-// Vendasta apigateway webchat SDK (George's embedded assistant). The SDK is
+// Third-party apigateway webchat SDK (George's embedded assistant). The SDK is
 // served from cdn.apigateway.co (already CSP-allowed) and renders the widget
 // into the element whose id matches data-embed-target.
 const WEBCHAT_SDK_SRC = 'https://cdn.apigateway.co/webchat-client..prod/sdk.js'
