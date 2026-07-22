@@ -468,10 +468,11 @@ html.light-mode body {
   color: #1b3c5a;
 }
 
-/* Sidebar */
-html.light-mode aside {
-  background-color: #1b3c5a !important;
-}
+/* Sidebar — the old blanket `aside { background: #1b3c5a !important }` shim
+   is gone: it forced EVERY aside (notif filter, channel rail, leaderboard,
+   community right rail) to stay navy in light mode and defeated their
+   token-driven backgrounds. Rails now style themselves via --bg-surface /
+   --card-bg; always-dark chrome (AdminSidebar) carries its own fixed color. */
 
 /* Main content area */
 html.light-mode main {

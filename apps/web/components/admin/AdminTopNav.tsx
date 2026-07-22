@@ -51,9 +51,12 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
             <line x1="4" y1="18" x2="20" y2="18" />
           </svg>
         </button>
+        {/* Inline #fff, not .text-white: the light-mode compat shim repaints
+            .text-white navy, which vanished on this always-dark chrome. */}
         <Link
           href="/admin"
-          className="font-condensed font-bold text-white tracking-[0.14em] text-base select-none"
+          className="font-condensed font-bold tracking-[0.14em] text-base select-none"
+          style={{ color: '#fff' }}
         >
           EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS
         </Link>
@@ -137,9 +140,9 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
 
         <div
           className="w-8 h-8 flex items-center justify-center rounded flex-shrink-0"
-          style={{ backgroundColor: '#1b3c5a' }}
+          style={{ backgroundColor: '#1b3c5a', border: '1px solid rgba(255,255,255,0.15)' }}
         >
-          <span className="font-condensed font-bold text-white text-xs">
+          <span className="font-condensed font-bold text-xs" style={{ color: '#fff' }}>
             {getInitials(displayName)}
           </span>
         </div>

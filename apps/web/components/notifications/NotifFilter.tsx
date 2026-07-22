@@ -29,11 +29,11 @@ export function NotifFilter({ active, counts, onChange }: NotifFilterProps) {
   return (
     <aside
       className="w-[220px] flex-shrink-0 flex flex-col pt-5 pb-4"
-      style={{ backgroundColor: '#112535', borderRight: '1px solid rgba(255,255,255,0.06)' }}
+      style={{ backgroundColor: 'var(--bg-surface)', borderRight: '1px solid var(--border-color)' }}
     >
       <p
         className="px-5 mb-1 font-condensed font-bold uppercase tracking-[0.2em] text-[12px]"
-        style={{ color: 'rgba(255,255,255,0.25)' }}
+        style={{ color: 'var(--text-tertiary)' }}
       >
         Filter
       </p>
@@ -47,9 +47,9 @@ export function NotifFilter({ active, counts, onChange }: NotifFilterProps) {
             onClick={() => onChange(f.value)}
             className="relative w-full flex items-center justify-between py-[9px] px-5 transition-all duration-150 text-left"
             style={{
-              color: isActive ? '#68a2b9' : 'rgba(255,255,255,0.5)',
-              backgroundColor: isActive ? 'rgba(255,255,255,0.06)' : 'transparent',
-              borderLeft: isActive ? '2px solid #68a2b9' : '2px solid transparent',
+              color: isActive ? 'var(--notif-community)' : 'var(--text-secondary)',
+              backgroundColor: isActive ? 'var(--notif-unread-wash)' : 'transparent',
+              borderLeft: isActive ? '2px solid var(--notif-community)' : '2px solid transparent',
               paddingLeft: isActive ? '18px' : '20px',
             }}
           >
@@ -70,14 +70,14 @@ export function NotifFilter({ active, counts, onChange }: NotifFilterProps) {
 
       <div
         className="mt-auto mx-4 pt-4"
-        style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+        style={{ borderTop: '1px solid var(--border-color)' }}
       >
         <a
           href="/notifications/preferences"
           className="font-condensed text-[12px] tracking-wide transition-colors"
-          style={{ color: 'rgba(255,255,255,0.3)' }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.7)' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.3)' }}
+          style={{ color: 'var(--text-tertiary)' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)' }}
         >
           Email Preferences →
         </a>

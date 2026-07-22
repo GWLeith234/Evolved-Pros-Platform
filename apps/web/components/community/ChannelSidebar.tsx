@@ -37,7 +37,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <p
       className="px-4 mt-5 mb-1 font-condensed font-bold uppercase tracking-[0.22em] text-[12px] sm:text-[12px]"
-      style={{ color: 'rgba(255,255,255,0.2)' }}
+      style={{ color: 'var(--text-tertiary)' }}
     >
       {children}
     </p>
@@ -63,23 +63,23 @@ function ChannelItem({
       href={slug === 'general' ? '/community' : `/community/${slug}`}
       className="flex items-center gap-2.5 px-4 py-[9px] transition-all duration-150 w-full"
       style={{
-        color: active ? '#68a2b9' : 'rgba(255,255,255,0.5)',
-        backgroundColor: active ? 'rgba(255,255,255,0.06)' : 'transparent',
-        borderLeft: active ? '2px solid #68a2b9' : '2px solid transparent',
+        color: active ? 'var(--notif-community)' : 'var(--text-secondary)',
+        backgroundColor: active ? 'var(--notif-unread-wash)' : 'transparent',
+        borderLeft: active ? '2px solid var(--notif-community)' : '2px solid transparent',
         paddingLeft: active ? '14px' : '16px',
       }}
       onMouseEnter={e => {
         if (!active) {
           const el = e.currentTarget as HTMLElement
-          el.style.backgroundColor = 'rgba(255,255,255,0.04)'
-          el.style.color = 'rgba(255,255,255,0.8)'
+          el.style.backgroundColor = 'var(--btn-ghost-bg)'
+          el.style.color = 'var(--text-primary)'
         }
       }}
       onMouseLeave={e => {
         if (!active) {
           const el = e.currentTarget as HTMLElement
           el.style.backgroundColor = 'transparent'
-          el.style.color = 'rgba(255,255,255,0.5)'
+          el.style.color = 'var(--text-secondary)'
         }
       }}
     >
@@ -108,8 +108,8 @@ export function ChannelSidebar({ channels, currentSlug, unreadCounts }: ChannelS
         className="flex flex-col py-3 overflow-y-auto flex-shrink-0"
         style={{
           width: '200px',
-          backgroundColor: '#112535',
-          borderRight: '1px solid rgba(255,255,255,0.06)',
+          backgroundColor: 'var(--bg-surface)',
+          borderRight: '1px solid var(--border-color)',
         }}
       >
         <SectionLabel>Channels</SectionLabel>
@@ -128,14 +128,14 @@ export function ChannelSidebar({ channels, currentSlug, unreadCounts }: ChannelS
         <button
           onClick={() => setDirectoryOpen(true)}
           className="flex items-center gap-2.5 px-4 py-[9px] transition-all duration-150 w-full text-left"
-          style={{ color: 'rgba(255,255,255,0.5)' }}
+          style={{ color: 'var(--text-secondary)' }}
           onMouseEnter={e => {
-            ;(e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(255,255,255,0.04)'
-            ;(e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.8)'
+            ;(e.currentTarget as HTMLElement).style.backgroundColor = 'var(--btn-ghost-bg)'
+            ;(e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'
           }}
           onMouseLeave={e => {
             ;(e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'
-            ;(e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.5)'
+            ;(e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'
           }}
         >
           <span style={{ opacity: 0.6 }}><UsersIcon /></span>

@@ -184,6 +184,7 @@ export function LoginForm() {
                       onChange={e => setEmail(e.target.value)}
                       required
                       className="w-full min-h-[44px] border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 text-sm text-[color:var(--navy)] focus:outline-none focus:border-teal-legacy"
+                      style={{ backgroundColor: '#fff', colorScheme: 'light' }}
                     />
                   </div>
                   <div>
@@ -198,6 +199,7 @@ export function LoginForm() {
                         onChange={e => setPassword(e.target.value)}
                         required
                         className="w-full min-h-[44px] border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 pr-10 text-sm text-[color:var(--navy)] focus:outline-none focus:border-teal-legacy"
+                        style={{ backgroundColor: '#fff', colorScheme: 'light' }}
                       />
                       <button
                         type="button"
@@ -274,6 +276,7 @@ export function LoginForm() {
                       onChange={e => setEmail(e.target.value)}
                       required
                       className="w-full min-h-[44px] border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 text-sm text-[color:var(--navy)] focus:outline-none focus:border-teal-legacy"
+                      style={{ backgroundColor: '#fff', colorScheme: 'light' }}
                     />
                   </div>
                   <button
