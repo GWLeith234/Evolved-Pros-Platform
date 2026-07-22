@@ -62,27 +62,27 @@ interface WelcomeBannerProps {
 }
 
 // ── Architecture-column pillar palette (canonical, one hue per pillar) ──
-// Desktop and mobile previously forked here (e.g. orange #D4862B vs the
-// canonical #FFA538) — collapsed to a single source of truth matching the
+// Desktop and mobile previously forked here (a legacy muddier orange vs
+// the canonical pillar amber) — collapsed to a single source of truth matching the
 // brand palette (colors_and_type.css / --pillar-N tokens). Labels are NOT
 // defined here — pillar names/abbreviations come from the single `PILLARS`
 // source (lib/pillars.ts) so the hero strip, the Path Forward stepper, and
 // the lower progress bars never drift in name, order, or abbreviation.
 
 const ARCH_COLORS: Record<1 | 2 | 3 | 4 | 5 | 6, { color: string; mobileColor: string }> = {
-  1: { color: '#FFA538', mobileColor: '#FFA538' },
-  2: { color: '#A78BFA', mobileColor: '#A78BFA' },
-  3: { color: '#F87171', mobileColor: '#F87171' },
-  4: { color: '#60A5FA', mobileColor: '#60A5FA' },
-  5: { color: '#C9A84C', mobileColor: '#C9A84C' },
-  6: { color: '#0ABFA3', mobileColor: '#0ABFA3' },
+  1: { color: 'var(--pillar-1)', mobileColor: 'var(--pillar-1)' },
+  2: { color: 'var(--pillar-2)', mobileColor: 'var(--pillar-2)' },
+  3: { color: 'var(--pillar-3)', mobileColor: 'var(--pillar-3)' },
+  4: { color: 'var(--pillar-4)', mobileColor: 'var(--pillar-4)' },
+  5: { color: 'var(--pillar-5)', mobileColor: 'var(--pillar-5)' },
+  6: { color: 'var(--pillar-6)', mobileColor: 'var(--pillar-6)' },
 }
 
 // Tier colors from welcome-banner.jsx (line 187-191).
 const TIER_COLORS: Record<string, { bg: string; fg: string; label: string }> = {
-  pro:       { bg: '#C9A84C', fg: '#0A0F18', label: 'Pro' },
-  vip:       { bg: '#0ABFA3', fg: '#0A0F18', label: 'VIP' },
-  community: { bg: '#60A5FA', fg: '#0A0F18', label: 'Community' },
+  pro:       { bg: 'var(--brand-gold)', fg: 'var(--navy-abyss)', label: 'Pro' },
+  vip:       { bg: 'var(--brand-teal)', fg: 'var(--navy-abyss)', label: 'VIP' },
+  community: { bg: 'var(--brand-blue)', fg: 'var(--navy-abyss)', label: 'Community' },
 }
 
 // Greeting copy by period (from welcome-banner.jsx line 514-521).
@@ -165,16 +165,16 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
           alignItems: 'center',
           justifyContent: 'center',
           background: earned
-            ? `radial-gradient(circle at 35% 30%, ${color}, ${color}99)`
+            ? `radial-gradient(circle at 35% 30%, ${color}, color-mix(in srgb, ${color} 60%, transparent))`
             : inProgress
-              ? `radial-gradient(circle at 35% 30%, ${color}55, ${color}22)`
+              ? `radial-gradient(circle at 35% 30%, color-mix(in srgb, ${color} 33%, transparent), color-mix(in srgb, ${color} 13%, transparent))`
               : 'rgba(10,15,24,0.4)',
           border: earned
             ? `1.5px solid ${color}`
             : inProgress
-              ? `1px solid ${color}99`
+              ? `1px solid color-mix(in srgb, ${color} 60%, transparent)`
               : '1px solid rgba(255,255,255,0.18)',
-          boxShadow: earned ? `0 0 6px ${color}55` : 'none',
+          boxShadow: earned ? `0 0 6px color-mix(in srgb, ${color} 33%, transparent)` : 'none',
           flexShrink: 0,
         }}
       >
@@ -202,7 +202,7 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
             fontFamily: '"Bebas Neue", sans-serif',
             fontSize: 10,
             color: earned
-              ? '#0A0F18'
+              ? 'var(--navy-abyss)'
               : inProgress
                 ? color
                 : 'rgba(255,255,255,0.4)',
@@ -268,7 +268,7 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
           height: 10,
           borderRadius: '50%',
           background: color,
-          boxShadow: earned ? `0 0 6px ${color}99` : 'none',
+          boxShadow: earned ? `0 0 6px color-mix(in srgb, ${color} 60%, transparent)` : 'none',
           opacity: earned || inProgress ? 1 : 0.4,
           flexShrink: 0,
         }}
@@ -552,7 +552,7 @@ export function WelcomeBanner({
         position: 'relative',
         overflow: 'hidden',
         minHeight: 260,
-        background: '#0A0F18',
+        background: 'var(--navy-abyss)',
       }}
     >
       <MarvelSkyScene period={period} />
@@ -704,7 +704,7 @@ export function WelcomeBanner({
                       fontSize: 11,
                       letterSpacing: '0.18em',
                       textTransform: 'uppercase',
-                      color: '#C9A84C',
+                      color: 'var(--brand-gold)',
                     }}
                   >
                     — {formatQuoteAttribution(quote.source)}
@@ -729,8 +729,8 @@ export function WelcomeBanner({
               alignSelf: 'flex-start',
               marginTop: 14,
               padding: '6px 14px 6px 8px',
-              background: `${recentEarn.color}1F`,
-              border: `1px solid ${recentEarn.color}66`,
+              background: `color-mix(in srgb, ${recentEarn.color} 12%, transparent)`,
+              border: `1px solid color-mix(in srgb, ${recentEarn.color} 40%, transparent)`,
               textDecoration: 'none',
               animation: 'earnedPulse 2.6s ease-in-out infinite',
             }}
@@ -740,15 +740,15 @@ export function WelcomeBanner({
                 width: 22,
                 height: 22,
                 borderRadius: '50%',
-                background: `radial-gradient(circle at 35% 30%, ${recentEarn.color}, ${recentEarn.color}aa)`,
+                background: `radial-gradient(circle at 35% 30%, ${recentEarn.color}, color-mix(in srgb, ${recentEarn.color} 67%, transparent))`,
                 border: `1.5px solid ${recentEarn.color}`,
-                boxShadow: `0 0 10px ${recentEarn.color}99`,
+                boxShadow: `0 0 10px color-mix(in srgb, ${recentEarn.color} 60%, transparent)`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontFamily: '"Bebas Neue", sans-serif',
                 fontSize: 12,
-                color: '#0A0F18',
+                color: 'var(--navy-abyss)',
                 flexShrink: 0,
               }}
             >
@@ -777,7 +777,7 @@ export function WelcomeBanner({
                 letterSpacing: '0.2em',
                 textTransform: 'uppercase',
                 color: recentEarn.color,
-                borderLeft: `1px solid ${recentEarn.color}55`,
+                borderLeft: `1px solid color-mix(in srgb, ${recentEarn.color} 33%, transparent)`,
                 paddingLeft: 10,
               }}
             >
@@ -868,7 +868,7 @@ export function WelcomeBanner({
                   fontSize: 11,
                   letterSpacing: '0.18em',
                   textTransform: 'uppercase',
-                  color: '#C9A84C',
+                  color: 'var(--brand-gold)',
                   whiteSpace: 'nowrap',
                 }}
               >
@@ -890,7 +890,7 @@ export function WelcomeBanner({
                     top: 0,
                     bottom: 0,
                     width: `${yearPct}%`,
-                    background: '#C9A84C',
+                    background: 'var(--brand-gold)',
                   }}
                 />
               </span>
@@ -954,7 +954,7 @@ export function WelcomeBanner({
                   href="/community"
                   label={pluralLabel(scoreboard.postCount, 'Post', 'Posts')}
                   value={scoreboard.postCount}
-                  accent="#A78BFA"
+                  accent="var(--brand-violet)"
                   subline="Shared with the community"
                   zeroHint="Share an update"
                 />
@@ -962,7 +962,7 @@ export function WelcomeBanner({
                   href="/media"
                   label={pluralLabel(scoreboard.storyCount, 'Story', 'Stories')}
                   value={scoreboard.storyCount}
-                  accent="#C9A84C"
+                  accent="var(--brand-gold)"
                   subline="Comments on stories"
                   zeroHint="Read a story"
                   last

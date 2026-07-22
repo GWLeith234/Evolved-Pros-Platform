@@ -146,7 +146,7 @@ export default async function StoryPage({
   const html = story.body ? await marked.parse(story.body) : ''
   const isOriginal = !story.pillar
   const pLabel = isOriginal ? 'Original' : getPillarLabel(story.pillar)
-  const pColor = isOriginal ? '#C9A84C' : getPillarColor(story.pillar)
+  const pColor = isOriginal ? 'var(--brand-gold)' : getPillarColor(story.pillar)
   const articleUrl = `https://platform.evolvedpros.com/media/${params.pillar}/${params.slug}`
 
   // Look up author avatar by full_name (media_stories.author is a plain
@@ -219,9 +219,9 @@ export default async function StoryPage({
       {/* 1. Breadcrumb */}
       <nav className="media-detail-breadcrumb" style={{ padding: '8px 24px', fontFamily: 'var(--font-condensed)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'rgba(43,58,90,0.45)' }}>
         <Link href="/media" style={{ color: 'rgba(43,58,90,0.45)', textDecoration: 'none' }}>Evolved Media</Link>
-        <span style={{ margin: '0 6px', color: '#2B3A5A' }}>/</span>
+        <span style={{ margin: '0 6px', color: 'var(--media-ink)' }}>/</span>
         <Link href={`/media?pillar=${params.pillar}`} style={{ color: pColor, textDecoration: 'none' }}>{pLabel}</Link>
-        <span style={{ margin: '0 6px', color: '#2B3A5A' }}>/</span>
+        <span style={{ margin: '0 6px', color: 'var(--media-ink)' }}>/</span>
         <span style={{ color: 'rgba(43,58,90,0.6)' }}>{story.title.length > 40 ? story.title.slice(0, 40) + '...' : story.title}</span>
       </nav>
 
@@ -237,7 +237,7 @@ export default async function StoryPage({
           maxHeight: 380,
           backgroundImage: story.featured_image_url
             ? `url(${story.featured_image_url})`
-            : 'linear-gradient(135deg, #1e3060, #2B3A5A)',
+            : 'linear-gradient(135deg, var(--media-hero-blue), var(--media-ink))',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           overflow: 'hidden',
@@ -249,9 +249,9 @@ export default async function StoryPage({
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
             {!isOriginal && (
-              <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#C9A84C', display: 'inline-block' }} />
+              <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: 'var(--brand-gold)', display: 'inline-block' }} />
             )}
-            <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: 'var(--brand-gold)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               {isOriginal ? 'Original' : pLabel}
             </span>
           </div>
@@ -262,7 +262,7 @@ export default async function StoryPage({
             {authorAvatar ? (
               <Image src={authorAvatar} alt={story.author ?? 'George Leith'} width={28} height={28} className="rounded-full object-cover" style={{ flexShrink: 0 }} />
             ) : (
-              <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 700, fontFamily: 'var(--font-condensed)', flexShrink: 0 }}>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: 'var(--media-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#fff', fontWeight: 700, fontFamily: 'var(--font-condensed)', flexShrink: 0 }}>
                 {(story.author ?? 'GL').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
               </div>
             )}
@@ -324,13 +324,13 @@ export default async function StoryPage({
           {/* Author card */}
           <div style={{ backgroundColor: '#fff', border: '1px solid rgba(43,58,90,0.1)', borderRadius: 2, padding: 14, textAlign: 'center', marginBottom: 16 }}>
             {authorAvatar ? (
-              <Image src={authorAvatar} alt={story.author ?? 'George Leith'} width={80} height={80} className="rounded-full object-cover" style={{ margin: '0 auto 8px', display: 'block', border: '2px solid #E0D8CC', backgroundColor: '#F5F0E8' }} />
+              <Image src={authorAvatar} alt={story.author ?? 'George Leith'} width={80} height={80} className="rounded-full object-cover" style={{ margin: '0 auto 8px', display: 'block', border: '2px solid var(--paper-line)', backgroundColor: 'var(--paper)' }} />
             ) : (
-              <div style={{ width: 80, height: 80, borderRadius: '50%', backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', fontSize: 24, color: '#fff', fontWeight: 700, fontFamily: 'var(--font-condensed)' }}>
+              <div style={{ width: 80, height: 80, borderRadius: '50%', backgroundColor: 'var(--media-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', fontSize: 24, color: '#fff', fontWeight: 700, fontFamily: 'var(--font-condensed)' }}>
                 {(story.author ?? 'GL').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
               </div>
             )}
-            <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 16, color: '#2B3A5A', margin: '0 0 2px' }}>
+            <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 16, color: 'var(--media-ink)', margin: '0 0 2px' }}>
               {story.author ?? 'George Leith'}
             </p>
             <p style={{ fontSize: 11, color: 'rgba(43,58,90,0.5)', fontFamily: 'var(--font-body)', margin: '0 0 8px' }}>
@@ -341,7 +341,7 @@ export default async function StoryPage({
             </p>
             <Link
               href="/pricing"
-              style={{ display: 'block', width: '100%', textAlign: 'center', padding: '8px 0', backgroundColor: '#C9302A', color: '#fff', fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.04em', borderRadius: 2, textDecoration: 'none' }}
+              style={{ display: 'block', width: '100%', textAlign: 'center', padding: '8px 0', backgroundColor: 'var(--brand-red)', color: '#fff', fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.04em', borderRadius: 2, textDecoration: 'none' }}
             >
               Join Evolved Pros →
             </Link>
@@ -350,7 +350,7 @@ export default async function StoryPage({
           {/* Latest Podcast */}
           {episodes.length > 0 && (
             <div style={{ marginBottom: 16 }}>
-              <div style={{ backgroundColor: '#2B3A5A', padding: '7px 10px' }}>
+              <div style={{ backgroundColor: 'var(--media-ink)', padding: '7px 10px' }}>
                 <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   Latest Podcast
                 </span>
@@ -358,15 +358,15 @@ export default async function StoryPage({
               <div style={{ backgroundColor: '#fff', border: '0.5px solid rgba(43,58,90,0.1)', borderTop: 'none' }}>
                 {episodes.map(ep => (
                   <div key={ep.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderBottom: '0.5px solid rgba(43,58,90,0.06)' }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 4, backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', flexShrink: 0 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 4, backgroundColor: 'var(--media-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', flexShrink: 0 }}>
                       <span style={{ fontSize: 18 }}>🎙</span>
-                      <span style={{ position: 'absolute', bottom: -2, right: -2, fontSize: 7, fontWeight: 700, fontFamily: 'var(--font-condensed)', backgroundColor: '#C9302A', color: '#fff', padding: '1px 4px', borderRadius: 2, textTransform: 'uppercase' }}>EP</span>
+                      <span style={{ position: 'absolute', bottom: -2, right: -2, fontSize: 7, fontWeight: 700, fontFamily: 'var(--font-condensed)', backgroundColor: 'var(--brand-red)', color: '#fff', padding: '1px 4px', borderRadius: 2, textTransform: 'uppercase' }}>EP</span>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontSize: 9, color: 'rgba(43,58,90,0.45)', fontFamily: 'var(--font-condensed)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>
                         Episode {ep.episode_number}
                       </p>
-                      <p style={{ fontSize: 11, color: '#2B3A5A', fontWeight: 600, fontFamily: 'var(--font-body)', lineHeight: 1.3, margin: '1px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <p style={{ fontSize: 11, color: 'var(--media-ink)', fontWeight: 600, fontFamily: 'var(--font-body)', lineHeight: 1.3, margin: '1px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {ep.title}
                       </p>
                       {ep.duration_seconds && (
@@ -374,7 +374,7 @@ export default async function StoryPage({
                       )}
                     </div>
                     <Link href={`/podcast/${ep.slug ?? ''}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
-                      <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: '#C9302A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: 'var(--brand-red)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <div style={{ width: 0, height: 0, borderLeft: '8px solid #fff', borderTop: '5px solid transparent', borderBottom: '5px solid transparent', marginLeft: 2 }} />
                       </div>
                     </Link>
@@ -394,7 +394,7 @@ export default async function StoryPage({
                 {(story.tags ?? []).map(tag => (
                   <span
                     key={tag}
-                    style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 10, padding: '4px 10px', borderRadius: 2, border: '1px solid rgba(43,58,90,0.15)', color: '#2B3A5A', textTransform: 'uppercase', letterSpacing: '0.04em' }}
+                    style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 10, padding: '4px 10px', borderRadius: 2, border: '1px solid rgba(43,58,90,0.15)', color: 'var(--media-ink)', textTransform: 'uppercase', letterSpacing: '0.04em' }}
                   >
                     {tag}
                   </span>
@@ -416,8 +416,8 @@ export default async function StoryPage({
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 40px' }}>
           {/* Section head */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-            <div style={{ width: 40, height: 2, backgroundColor: '#2B3A5A', flexShrink: 0 }} />
-            <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 13, color: '#2B3A5A', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
+            <div style={{ width: 40, height: 2, backgroundColor: 'var(--media-ink)', flexShrink: 0 }} />
+            <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 13, color: 'var(--media-ink)', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
               More in {pLabel}
             </span>
             <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(43,58,90,0.15)' }} />
@@ -426,18 +426,18 @@ export default async function StoryPage({
           <div className="media-related-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
             {(related ?? []).map((r: RelatedStory) => (
               <Link key={r.id} href={`/media/${r.pillar}/${r.slug}`} style={{ textDecoration: 'none', display: 'block', backgroundColor: '#fff', border: '0.5px solid rgba(43,58,90,0.1)', borderRadius: 2, overflow: 'hidden' }}>
-                <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: '#2B3A5A', overflow: 'hidden' }}>
+                <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: 'var(--media-ink)', overflow: 'hidden' }}>
                   {r.featured_image_url ? (
                     <Image src={r.featured_image_url} alt="" fill sizes="(max-width: 767px) 100vw, 360px" className="object-cover" />
                   ) : (
-                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1a2540)' }} />
+                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--media-ink), var(--media-ink-deep))' }} />
                   )}
                 </div>
                 <div style={{ padding: '10px 12px 12px' }}>
                   <p style={{ fontSize: 9, textTransform: 'uppercase', fontWeight: 700, fontFamily: 'var(--font-condensed)', color: pColor, letterSpacing: '0.06em', marginBottom: 4 }}>
                     {pLabel}
                   </p>
-                  <h3 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 15, color: '#2B3A5A', lineHeight: 1.3, margin: '0 0 4px' }}>
+                  <h3 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 15, color: 'var(--media-ink)', lineHeight: 1.3, margin: '0 0 4px' }}>
                     {r.title}
                   </h3>
                   <span style={{ fontSize: 10, color: 'rgba(43,58,90,0.4)', fontFamily: 'var(--font-body)' }}>
@@ -456,7 +456,7 @@ export default async function StoryPage({
           font-family: var(--font-serif);
           font-size: 16px;
           line-height: 1.85;
-          color: #1A1A1A;
+          color: var(--media-body-ink);
           margin-top: 20px;
         }
         @media (max-width: 767px) {
@@ -468,7 +468,7 @@ export default async function StoryPage({
           font-family: var(--font-condensed);
           font-weight: 800;
           font-size: 22px;
-          color: #2B3A5A;
+          color: var(--media-ink);
           text-transform: uppercase;
           margin: 24px 0 10px;
           line-height: 1.2;
@@ -477,17 +477,17 @@ export default async function StoryPage({
           font-family: var(--font-condensed);
           font-weight: 700;
           font-size: 18px;
-          color: #2B3A5A;
+          color: var(--media-ink);
           margin: 20px 0 8px;
         }
         .media-prose p {
           margin-bottom: 18px;
-          color: #1A1A1A;
+          color: var(--media-body-ink);
         }
         .media-prose blockquote {
-          border-left: 4px solid #C9302A;
+          border-left: 4px solid var(--brand-red);
           padding: 12px 16px;
-          background: #F9F6F1;
+          background: var(--media-cream-tint);
           font-style: italic;
           font-size: 15px;
           margin: 20px 0;
@@ -500,7 +500,7 @@ export default async function StoryPage({
           margin-bottom: 6px;
         }
         .media-prose a {
-          color: #C9302A;
+          color: var(--brand-red);
           text-decoration: underline;
         }
         .media-prose img {

@@ -79,8 +79,8 @@ function tierRingColor(tier: string | null | undefined): string {
 }
 
 function tierLabelColor(tier: string | null | undefined, isLight: boolean): string {
-  if (tier === 'pro') return '#C9302A'
-  if (tier === 'vip') return '#C9A84C'
+  if (tier === 'pro') return 'var(--brand-red)'
+  if (tier === 'vip') return 'var(--brand-gold)'
   return isLight ? 'rgba(27,42,74,0.5)' : 'rgba(255,255,255,0.4)'
 }
 
@@ -162,7 +162,7 @@ export function TopNav({
             fontSize: 12,
             fontFamily: '"Barlow", sans-serif',
             background: daysUntilExpiry <= 7 ? 'rgba(239,14,48,0.08)' : 'rgba(201,168,76,0.1)',
-            color: daysUntilExpiry <= 7 ? '#ef6075' : 'var(--brand-gold)',
+            color: daysUntilExpiry <= 7 ? 'var(--red-soft)' : 'var(--brand-gold)',
             borderBottom: '1px solid var(--topnav-border)',
           }}
         >
@@ -179,7 +179,7 @@ export function TopNav({
               fontSize: 10,
               padding: '4px 10px',
               textDecoration: 'none',
-              background: daysUntilExpiry <= 7 ? '#ef0e30' : '#C9A84C',
+              background: daysUntilExpiry <= 7 ? 'var(--brand-red-hot)' : 'var(--brand-gold)',
               color: '#fff',
             }}
           >
@@ -275,7 +275,7 @@ export function TopNav({
                   color,
                   textDecoration: 'none',
                   borderBottom: active
-                    ? `2px solid ${item.highlight ? 'var(--topnav-highlight)' : 'var(--brand-red, #C9302A)'}`
+                    ? `2px solid ${item.highlight ? 'var(--topnav-highlight)' : 'var(--brand-red)'}`
                     : '2px solid transparent',
                   marginBottom: -1,
                   transition: 'color 120ms ease',
@@ -311,14 +311,14 @@ export function TopNav({
               minWidth: 40,
               padding: '0 12px 0 4px',
               background: aiOpen ? 'rgba(167,139,250,0.18)' : 'rgba(167,139,250,0.10)',
-              border: `1px solid ${aiOpen ? '#A78BFA' : 'rgba(167,139,250,0.45)'}`,
+              border: `1px solid ${aiOpen ? 'var(--brand-violet)' : 'rgba(167,139,250,0.45)'}`,
               color: aiLabelColor,
               cursor: 'pointer',
               transition: 'all 140ms ease',
             }}
             onMouseEnter={e => {
               e.currentTarget.style.background = 'rgba(167,139,250,0.18)'
-              e.currentTarget.style.borderColor = '#A78BFA'
+              e.currentTarget.style.borderColor = 'var(--brand-violet)'
             }}
             onMouseLeave={e => {
               if (aiOpen) return
@@ -335,7 +335,7 @@ export function TopNav({
                 height: 32,
                 borderRadius: '50%',
                 padding: 2,
-                background: 'conic-gradient(from 200deg, #A78BFA, #C9A4FF, #A78BFA, #8B6FE8, #A78BFA)',
+                background: 'conic-gradient(from 200deg, var(--brand-violet), var(--violet-light), var(--brand-violet), var(--violet-deep), var(--brand-violet))',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -354,7 +354,7 @@ export function TopNav({
                   justifyContent: 'center',
                 }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="#A78BFA" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--brand-violet)" aria-hidden="true">
                   <path d={SPARKLE_PATH} />
                 </svg>
               </span>
@@ -373,7 +373,7 @@ export function TopNav({
                   justifyContent: 'center',
                 }}
               >
-                <svg width="9" height="9" viewBox="0 0 24 24" fill="#A78BFA" aria-hidden="true">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="var(--brand-violet)" aria-hidden="true">
                   <path d={SPARKLE_PATH} />
                 </svg>
               </span>
@@ -387,7 +387,7 @@ export function TopNav({
                 fontSize: 13,
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
-                color: '#A78BFA',
+                color: 'var(--brand-violet)',
               }}
             >
               Ask
@@ -427,7 +427,7 @@ export function TopNav({
                 padding: 0,
                 border: 'none',
                 cursor: 'pointer',
-                background: profile.avatar_url ? '#1A2332' : '#ef0e30',
+                background: profile.avatar_url ? 'var(--bg-elevated)' : 'var(--brand-red-hot)',
                 boxShadow: `0 0 0 2px ${tierRingColor(profile.tier)}, 0 0 0 3px var(--topnav-ring-bg)`,
                 overflow: 'hidden',
                 transition: 'transform 120ms ease',
@@ -468,8 +468,8 @@ export function TopNav({
                   top: 'calc(100% + 8px)',
                   right: 0,
                   width: 240,
-                  background: isLight ? '#FFFFFF' : '#111926',
-                  border: isLight ? '1px solid #E0D8CC' : '1px solid rgba(255,255,255,0.08)',
+                  background: 'var(--bg-surface)',
+                  border: isLight ? '1px solid var(--paper-line)' : '1px solid rgba(255,255,255,0.08)',
                   zIndex: 50,
                   overflow: 'hidden',
                 }}
@@ -478,7 +478,7 @@ export function TopNav({
                 <div
                   style={{
                     padding: '14px 16px',
-                    borderBottom: isLight ? '1px solid #E0D8CC' : '1px solid rgba(255,255,255,0.06)',
+                    borderBottom: isLight ? '1px solid var(--paper-line)' : '1px solid rgba(255,255,255,0.06)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 12,
@@ -489,7 +489,7 @@ export function TopNav({
                       width: 40,
                       height: 40,
                       borderRadius: '50%',
-                      background: profile.avatar_url ? 'transparent' : '#ef0e30',
+                      background: profile.avatar_url ? 'transparent' : 'var(--brand-red-hot)',
                       overflow: 'hidden',
                       boxShadow: `0 0 0 2px ${tierRingColor(profile.tier)}`,
                       flexShrink: 0,
@@ -527,7 +527,7 @@ export function TopNav({
                         fontFamily: '"Barlow Condensed", sans-serif',
                         fontWeight: 700,
                         fontSize: 13,
-                        color: isLight ? '#1B2A4A' : '#fff',
+                        color: 'var(--text-primary)',
                         letterSpacing: '0.04em',
                         whiteSpace: 'nowrap',
                         overflow: 'hidden',
@@ -588,7 +588,7 @@ export function TopNav({
                 {/* Sign out */}
                 <div
                   style={{
-                    borderTop: isLight ? '1px solid #E0D8CC' : '1px solid rgba(255,255,255,0.06)',
+                    borderTop: isLight ? '1px solid var(--paper-line)' : '1px solid rgba(255,255,255,0.06)',
                   }}
                 >
                   <button
@@ -601,7 +601,7 @@ export function TopNav({
                       padding: '12px 16px',
                       fontFamily: '"Barlow", sans-serif',
                       fontSize: 13,
-                      color: '#ef6075',
+                      color: 'var(--red-soft)',
                       background: 'none',
                       border: 'none',
                       cursor: 'pointer',

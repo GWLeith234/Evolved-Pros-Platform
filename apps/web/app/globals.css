@@ -81,6 +81,34 @@
   --pillar-5: #C9A84C;
   --pillar-6: #0ABFA3;
 
+  /* SPRINT-S (style lockdown) — fixed structural inks. These do NOT flip with
+     the theme: always-dark heroes (WelcomeBanner), the /media editorial cream
+     chrome, and fixed-light cards (login) reference them so components carry
+     zero raw hex. Themed neutrals live in the semantic tokens above. */
+  --white:            #FFFFFF;
+  --navy-abyss:       #0A0F18;  /* always-dark hero/page ink (= dark --bg-page) */
+  --brand-navy:       #1B2A4A;
+  --red-soft:         #ef6075;  /* expiry / soft-warning red on dark nav */
+  --success-green:    #3a8a5a;
+  --violet-light:     #C9A4FF;  /* AI-button conic gradient stops */
+  --violet-deep:      #8B6FE8;
+  --paper-line:       #E0D8CC;  /* cream hairline (media chrome, light dropdown) */
+  --paper-line-soft:  #E5E0D8;
+  --media-ink:        #2B3A5A;  /* editorial navy-slate ink family (/media) */
+  --media-ink-deep:   #1A2540;
+  --media-ink-soft:   #6B7280;
+  --media-ink-slate:  #3a4a56;
+  --media-body-ink:   #1A1A1A;
+  --media-cream-tint: #F9F6F1;
+  --media-hero-blue:  #1E3060;
+  /* /media academy pillar-card gradients (P1-P6) */
+  --media-grad-1: linear-gradient(135deg,#3a2a1a,#7a5a3a);
+  --media-grad-2: linear-gradient(135deg,#2a1a3a,#5a2d7a);
+  --media-grad-3: linear-gradient(135deg,#3a1a1a,#7a2d2d);
+  --media-grad-4: linear-gradient(135deg,#1a2a4a,#2d4a7a);
+  --media-grad-5: linear-gradient(135deg,#3a3a1a,#7a7a2a);
+  --media-grad-6: linear-gradient(135deg,#1a3a3a,#2d7a7a);
+
   /* Font-family aliases (PODCAST-CLEANUP S4). next/font exposes Bebas Neue as
      --font-logo and Barlow as --font-body; these friendlier aliases let
      components reference the design-system intent rather than the loader name. */

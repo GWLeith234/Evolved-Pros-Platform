@@ -40,9 +40,9 @@ function isTabKey(value: string | null): value is TabKey {
 
 function tierBadge(tier: string | null): { label: string; color: string } {
   const t = tier?.toLowerCase()
-  if (t === 'vip') return { label: 'VIP', color: '#C9A84C' }
-  if (t === 'pro' || t === 'professional') return { label: 'Pro', color: '#C9302A' }
-  return { label: 'Member', color: '#7a8a96' }
+  if (t === 'vip') return { label: 'VIP', color: 'var(--brand-gold)' }
+  if (t === 'pro' || t === 'professional') return { label: 'Pro', color: 'var(--brand-red)' }
+  return { label: 'Member', color: 'var(--muted)' }
 }
 
 function formatDate(value: string | null): string {
@@ -83,8 +83,8 @@ export function SettingsClient({
   return (
     <div className="px-6 md:px-8 py-6 max-w-3xl">
       <div className="mb-6">
-        <h1 className="font-display font-medium text-[28px] text-[#F5F0E8] tracking-widest">SETTINGS</h1>
-        <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
+        <h1 className="font-display font-medium text-[28px] text-primary tracking-widest">SETTINGS</h1>
+        <p className="font-condensed text-[12px] text-muted mt-0.5">
           Manage your profile, notifications, membership, and account.
         </p>
       </div>
@@ -101,8 +101,8 @@ export function SettingsClient({
               onClick={() => selectTab(t.key)}
               className="px-4 py-2.5 font-condensed font-semibold uppercase tracking-wide text-xs transition-colors border-b-2 -mb-px whitespace-nowrap snap-start"
               style={{
-                color: activeTab === t.key ? '#68a2b9' : '#7a8a96',
-                borderColor: activeTab === t.key ? '#68a2b9' : 'transparent',
+                color: activeTab === t.key ? 'var(--teal)' : 'var(--muted)',
+                borderColor: activeTab === t.key ? 'var(--teal)' : 'transparent',
                 background: 'none',
                 cursor: 'pointer',
               }}
@@ -169,16 +169,16 @@ function ProfileTab({ userId }: { userId: string }) {
       className="rounded-lg p-6"
       style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.02)' }}
     >
-      <h2 className="font-condensed font-bold uppercase tracking-widest text-xs text-[#1b3c5a] mb-2">
+      <h2 className="font-condensed font-bold uppercase tracking-widest text-xs text-primary mb-2">
         Profile Details
       </h2>
-      <p className="font-body text-[14px] text-[#7a8a96] mb-4 leading-relaxed">
+      <p className="font-body text-[14px] text-muted mb-4 leading-relaxed">
         Your name, photo, bio, pillar, and 90-day goal are edited on your profile page.
       </p>
       <Link
         href={`/profile/${userId}?edit=1`}
         className="inline-block font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-6 py-2.5 transition-all"
-        style={{ backgroundColor: '#1b3c5a', color: 'white' }}
+        style={{ backgroundColor: 'var(--navy)', color: 'var(--white)' }}
       >
         Edit Profile
       </Link>
@@ -199,7 +199,7 @@ function MembershipTab({ tier, createdAt }: { tier: string | null; createdAt: st
       >
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-[#7a8a96] mb-1">
+            <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-muted mb-1">
               Current Tier
             </p>
             <span
@@ -210,10 +210,10 @@ function MembershipTab({ tier, createdAt }: { tier: string | null; createdAt: st
             </span>
           </div>
           <div className="text-right">
-            <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-[#7a8a96] mb-1">
+            <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-muted mb-1">
               Member Since
             </p>
-            <p className="font-body text-[14px] text-[#1b3c5a]">{formatDate(createdAt)}</p>
+            <p className="font-body text-[14px] text-primary">{formatDate(createdAt)}</p>
           </div>
         </div>
 
@@ -222,7 +222,7 @@ function MembershipTab({ tier, createdAt }: { tier: string | null; createdAt: st
             <Link
               href="/pricing"
               className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-5 py-2.5 transition-all"
-              style={{ backgroundColor: '#1b3c5a', color: 'white' }}
+              style={{ backgroundColor: 'var(--navy)', color: 'var(--white)' }}
             >
               Upgrade to Pro
             </Link>
@@ -230,7 +230,7 @@ function MembershipTab({ tier, createdAt }: { tier: string | null; createdAt: st
           <Link
             href="/pricing"
             className="font-condensed font-semibold uppercase tracking-wide text-[12px] rounded px-5 py-2.5 transition-all"
-            style={{ border: '1px solid rgba(27,60,90,0.2)', color: '#1b3c5a' }}
+            style={{ border: '1px solid rgba(27,60,90,0.2)', color: 'var(--navy)' }}
           >
             Manage Billing
           </Link>
@@ -307,7 +307,7 @@ function AccountTab({ userId, email, fullName }: { userId: string; email: string
         style={{ border: '1px solid rgba(27,60,90,0.1)' }}
       >
         <label className="block">
-          <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-[#7a8a96] mb-2 block">
+          <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-muted mb-2 block">
             Full Name
           </span>
           <input
@@ -315,15 +315,15 @@ function AccountTab({ userId, email, fullName }: { userId: string; email: string
             value={name}
             onChange={e => setName(e.target.value)}
             maxLength={100}
-            className="w-full px-3 py-2 rounded font-body text-[14px] text-[#1b3c5a] focus:outline-none"
+            className="w-full px-3 py-2 rounded font-body text-[14px] text-[color:var(--navy)] focus:outline-none"
             style={{ border: '1px solid rgba(27,60,90,0.18)', backgroundColor: 'white' }}
           />
-          <p className="font-condensed text-[11px] text-[#7a8a96] mt-1.5">
+          <p className="font-condensed text-[11px] text-muted mt-1.5">
             This is your real name shown in admin and billing.
           </p>
         </label>
         {nameError && (
-          <p className="font-condensed text-[11px] text-[#ef0e30] mt-2">{nameError}</p>
+          <p className="font-condensed text-[11px] text-red-hot mt-2">{nameError}</p>
         )}
         <div className="flex items-center gap-4 mt-3">
           <button
@@ -332,7 +332,7 @@ function AccountTab({ userId, email, fullName }: { userId: string; email: string
             disabled={savingName || name === fullName}
             className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-5 py-2 transition-all"
             style={{
-              backgroundColor: '#1b3c5a',
+              backgroundColor: 'var(--navy)',
               color: 'white',
               opacity: savingName || name === fullName ? 0.5 : 1,
               cursor: savingName || name === fullName ? 'default' : 'pointer',
@@ -341,7 +341,7 @@ function AccountTab({ userId, email, fullName }: { userId: string; email: string
             {savingName ? 'Saving...' : 'Save Name'}
           </button>
           {nameSaved && (
-            <span className="font-condensed text-[11px]" style={{ color: '#68a2b9' }}>
+            <span className="font-condensed text-[11px]" style={{ color: 'var(--teal)' }}>
               Saved ✓
             </span>
           )}
@@ -352,7 +352,7 @@ function AccountTab({ userId, email, fullName }: { userId: string; email: string
         className="rounded-lg p-5"
         style={{ border: '1px solid rgba(27,60,90,0.1)' }}
       >
-        <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-[#7a8a96] mb-2 block">
+        <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-muted mb-2 block">
           Email
         </span>
         <input
@@ -364,11 +364,11 @@ function AccountTab({ userId, email, fullName }: { userId: string; email: string
           style={{
             border: '1px solid rgba(27,60,90,0.1)',
             backgroundColor: 'rgba(27,60,90,0.04)',
-            color: '#7a8a96',
+            color: 'var(--muted)',
             cursor: 'not-allowed',
           }}
         />
-        <p className="font-condensed text-[11px] text-[#7a8a96] mt-2">
+        <p className="font-condensed text-[11px] text-muted mt-2">
           Contact support to change the email on your account.
         </p>
       </div>
@@ -377,10 +377,10 @@ function AccountTab({ userId, email, fullName }: { userId: string; email: string
         className="rounded-lg p-5"
         style={{ border: '1px solid rgba(27,60,90,0.1)' }}
       >
-        <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-[#7a8a96] mb-1 block">
+        <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-muted mb-1 block">
           Password
         </span>
-        <p className="font-body text-[14px] text-[#7a8a96] mb-3">
+        <p className="font-body text-[14px] text-muted mb-3">
           We&apos;ll email you a secure link to set a new password.
         </p>
         <button
@@ -389,7 +389,7 @@ function AccountTab({ userId, email, fullName }: { userId: string; email: string
           disabled={resetting}
           className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-5 py-2 transition-all"
           style={{
-            backgroundColor: '#1b3c5a',
+            backgroundColor: 'var(--navy)',
             color: 'white',
             opacity: resetting ? 0.7 : 1,
             cursor: resetting ? 'default' : 'pointer',
@@ -411,10 +411,10 @@ function ComingSoonCard({ message }: { message: string }) {
         backgroundColor: 'rgba(27,60,90,0.02)',
       }}
     >
-      <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-[#7a8a96] mb-1">
+      <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-muted mb-1">
         Coming Soon
       </p>
-      <p className="font-body text-[13px] text-[#7a8a96] leading-relaxed">{message}</p>
+      <p className="font-body text-[13px] text-muted leading-relaxed">{message}</p>
     </div>
   )
 }

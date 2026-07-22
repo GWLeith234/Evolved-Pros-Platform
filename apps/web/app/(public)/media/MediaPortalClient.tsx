@@ -48,14 +48,14 @@ const ALL_LABEL = 'All'
  *  Accountability/Execution use the brief's spec; everything else (null,
  *  story-type only, future "revenue"/"ai" sections) falls back to red. */
 const PILLAR_TAG_COLORS: Record<string, string> = {
-  foundation:         '#FFA538',
-  identity:           '#A78BFA',
-  'mental-toughness': '#F87171',
-  strategy:           '#60A5FA',
-  accountability:     '#C9A84C',
-  execution:          '#0ABFA3',
+  foundation:         'var(--pillar-1)',
+  identity:           'var(--pillar-2)',
+  'mental-toughness': 'var(--pillar-3)',
+  strategy:           'var(--pillar-4)',
+  accountability:     'var(--pillar-5)',
+  execution:          'var(--pillar-6)',
 }
-const FALLBACK_TAG_COLOR = '#C9302A'
+const FALLBACK_TAG_COLOR = 'var(--brand-red)'
 
 function tagColorForStory(story: MediaStory): string {
   return PILLAR_TAG_COLORS[story.pillar ?? ''] ?? FALLBACK_TAG_COLOR
@@ -130,9 +130,9 @@ function PillarTag({
         border: `1px solid ${color}`,
       }
     : {
-        backgroundColor: `${color}1A`,   // ~10%
+        backgroundColor: `color-mix(in srgb, ${color} 10%, transparent)`,
         color,
-        border: `1px solid ${color}4D`,  // ~30%
+        border: `1px solid color-mix(in srgb, ${color} 30%, transparent)`,
       }
   return (
     <span
@@ -166,7 +166,7 @@ function FeaturedCard({ story }: { story: MediaStory }) {
         aspectRatio: '16/9',
         borderRadius: 4,
         overflow: 'hidden',
-        background: '#1B2A4A',
+        background: 'var(--brand-navy)',
       }}
     >
       {story.featured_image_url ? (
@@ -177,7 +177,7 @@ function FeaturedCard({ story }: { story: MediaStory }) {
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
       ) : (
-        <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1A2540)' }} />
+        <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--media-ink), var(--media-ink-deep))' }} />
       )}
 
       {/* Pillar tag — top-left */}
@@ -259,15 +259,15 @@ function ArticleCard({ story }: { story: MediaStory }) {
       style={{
         display: 'block',
         textDecoration: 'none',
-        background: '#FFFFFF',
-        border: '1px solid #E5E0D8',
+        background: 'var(--paper-card)',
+        border: '1px solid var(--paper-line-soft)',
         borderRadius: 4,
         overflow: 'hidden',
         transition: 'transform 160ms ease, box-shadow 160ms ease',
       }}
     >
       {/* Image — 4:3 */}
-      <div style={{ aspectRatio: '4/3', background: '#112535', overflow: 'hidden' }}>
+      <div style={{ aspectRatio: '4/3', background: 'var(--navy-dark)', overflow: 'hidden' }}>
         {story.featured_image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -278,7 +278,7 @@ function ArticleCard({ story }: { story: MediaStory }) {
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
         ) : (
-          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1A2540)' }} />
+          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--media-ink), var(--media-ink-deep))' }} />
         )}
       </div>
 
@@ -291,7 +291,7 @@ function ArticleCard({ story }: { story: MediaStory }) {
             fontWeight: 700,
             fontSize: 16,
             lineHeight: 1.3,
-            color: '#112535',
+            color: 'var(--navy-dark)',
             display: '-webkit-box',
             WebkitBoxOrient: 'vertical',
             WebkitLineClamp: 2,
@@ -305,7 +305,7 @@ function ArticleCard({ story }: { story: MediaStory }) {
           style={{
             margin: 0,
             fontSize: 11,
-            color: '#6B7280',
+            color: 'var(--media-ink-soft)',
             fontFamily: 'var(--font-body)',
           }}
         >
@@ -364,15 +364,15 @@ export function MediaPortalClient({
               <div
                 style={{
                   aspectRatio: '16/9',
-                  border: '1px dashed #E5E0D8',
+                  border: '1px dashed var(--paper-line-soft)',
                   borderRadius: 4,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: '#6B7280',
+                  color: 'var(--media-ink-soft)',
                   fontSize: 13,
                   fontFamily: 'var(--font-body)',
-                  background: '#FFFFFF',
+                  background: 'var(--paper-card)',
                 }}
               >
                 {isEditorialCategory(activeCategory)
@@ -386,34 +386,34 @@ export function MediaPortalClient({
           <aside>
             {/* Latest Podcast */}
             {episodes.length > 0 && (
-              <div className="ed-rail-card" style={{ marginBottom: 16, maxWidth: '100%', overflow: 'hidden', background: '#FFFFFF', border: '1px solid #E5E0D8' }}>
-                <div style={{ background: '#FFFFFF', padding: '10px 12px', borderBottom: '2px solid #C9A84C' }}>
-                  <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 12, color: '#112535', textTransform: 'uppercase', letterSpacing: '0.14em' }}>
+              <div className="ed-rail-card" style={{ marginBottom: 16, maxWidth: '100%', overflow: 'hidden', background: 'var(--paper-card)', border: '1px solid var(--paper-line-soft)' }}>
+                <div style={{ background: 'var(--paper-card)', padding: '10px 12px', borderBottom: '2px solid var(--brand-gold)' }}>
+                  <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 12, color: 'var(--navy-dark)', textTransform: 'uppercase', letterSpacing: '0.14em' }}>
                     Latest Podcast
                   </span>
                 </div>
-                <div className="ed-rail-card-body" style={{ background: '#FFFFFF' }}>
+                <div className="ed-rail-card-body" style={{ background: 'var(--paper-card)' }}>
                   {episodes.map(ep => (
-                    <div key={ep.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderBottom: '1px solid #E5E0D8' }}>
-                      <div style={{ width: 44, height: 44, borderRadius: 4, background: '#112535', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', flexShrink: 0 }}>
+                    <div key={ep.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderBottom: '1px solid var(--paper-line-soft)' }}>
+                      <div style={{ width: 44, height: 44, borderRadius: 4, background: 'var(--navy-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', flexShrink: 0 }}>
                         <span style={{ fontSize: 18 }}>🎙</span>
-                        <span style={{ position: 'absolute', bottom: -2, right: -2, fontSize: 7, fontWeight: 700, fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: '#C9302A', color: '#FFFFFF', padding: '1px 4px', borderRadius: 2, textTransform: 'uppercase' }}>
+                        <span style={{ position: 'absolute', bottom: -2, right: -2, fontSize: 7, fontWeight: 700, fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: 'var(--brand-red)', color: 'var(--white)', padding: '1px 4px', borderRadius: 2, textTransform: 'uppercase' }}>
                           EP
                         </span>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 9, color: '#6B7280', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>
+                        <p style={{ fontSize: 9, color: 'var(--media-ink-soft)', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>
                           Episode {ep.episode_number}
                         </p>
-                        <p style={{ fontSize: 12, color: '#112535', fontWeight: 600, fontFamily: 'var(--font-body)', lineHeight: 1.3, margin: '1px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <p style={{ fontSize: 12, color: 'var(--navy-dark)', fontWeight: 600, fontFamily: 'var(--font-body)', lineHeight: 1.3, margin: '1px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {ep.title}
                         </p>
-                        <p style={{ fontSize: 10, color: '#6B7280', fontFamily: 'var(--font-body)', margin: 0 }}>
+                        <p style={{ fontSize: 10, color: 'var(--media-ink-soft)', fontFamily: 'var(--font-body)', margin: 0 }}>
                           {formatDuration(ep.duration_seconds)}
                         </p>
                       </div>
                       <Link href={`/podcast/${ep.slug ?? ''}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
-                        <span style={{ width: 28, height: 28, borderRadius: '50%', background: '#C9302A', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand-red)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                           <span aria-hidden="true" style={{ width: 0, height: 0, borderLeft: '8px solid #fff', borderTop: '5px solid transparent', borderBottom: '5px solid transparent', marginLeft: 2 }} />
                         </span>
                       </Link>
@@ -425,30 +425,30 @@ export function MediaPortalClient({
 
             {/* Latest Stories — always unfiltered so the rail stays useful */}
             {sidebarStories.length > 0 && (
-              <div className="ed-rail-card" style={{ marginBottom: 16, maxWidth: '100%', overflow: 'hidden', background: '#FFFFFF', border: '1px solid #E5E0D8' }}>
-                <div style={{ background: '#FFFFFF', padding: '10px 12px', borderBottom: '2px solid #C9A84C' }}>
-                  <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 12, color: '#112535', textTransform: 'uppercase', letterSpacing: '0.14em' }}>
+              <div className="ed-rail-card" style={{ marginBottom: 16, maxWidth: '100%', overflow: 'hidden', background: 'var(--paper-card)', border: '1px solid var(--paper-line-soft)' }}>
+                <div style={{ background: 'var(--paper-card)', padding: '10px 12px', borderBottom: '2px solid var(--brand-gold)' }}>
+                  <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 12, color: 'var(--navy-dark)', textTransform: 'uppercase', letterSpacing: '0.14em' }}>
                     Latest Stories
                   </span>
                 </div>
-                <div className="ed-rail-card-body" style={{ background: '#FFFFFF' }}>
+                <div className="ed-rail-card-body" style={{ background: 'var(--paper-card)' }}>
                   {sidebarStories.map(s => (
-                    <Link key={s.id} href={storyUrl(s)} style={{ display: 'flex', alignItems: 'start', gap: 10, padding: '10px 12px', borderBottom: '1px solid #E5E0D8', textDecoration: 'none' }}>
-                      <div style={{ position: 'relative', width: 64, height: 48, borderRadius: 2, background: '#112535', overflow: 'hidden', flexShrink: 0 }}>
+                    <Link key={s.id} href={storyUrl(s)} style={{ display: 'flex', alignItems: 'start', gap: 10, padding: '10px 12px', borderBottom: '1px solid var(--paper-line-soft)', textDecoration: 'none' }}>
+                      <div style={{ position: 'relative', width: 64, height: 48, borderRadius: 2, background: 'var(--navy-dark)', overflow: 'hidden', flexShrink: 0 }}>
                         {s.featured_image_url ? (
                           <Image src={s.featured_image_url} alt="" fill loading="lazy" sizes="64px" className="object-cover" />
                         ) : (
-                          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1A2540)' }} />
+                          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--media-ink), var(--media-ink-deep))' }} />
                         )}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ fontSize: 9, textTransform: 'uppercase', fontWeight: 700, fontFamily: '"Barlow Condensed", sans-serif', color: tagColorForStory(s), letterSpacing: '0.10em', margin: '0 0 3px' }}>
                           {tagLabelForStory(s)}
                         </p>
-                        <p style={{ fontSize: 12, fontWeight: 600, color: '#112535', lineHeight: 1.3, fontFamily: 'var(--font-body)', margin: '0 0 3px' }}>
+                        <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--navy-dark)', lineHeight: 1.3, fontFamily: 'var(--font-body)', margin: '0 0 3px' }}>
                           {s.title}
                         </p>
-                        <p suppressHydrationWarning style={{ fontSize: 10, color: '#6B7280', fontFamily: 'var(--font-body)', margin: 0 }}>
+                        <p suppressHydrationWarning style={{ fontSize: 10, color: 'var(--media-ink-soft)', fontFamily: 'var(--font-body)', margin: 0 }}>
                           {formatDate(s.published_at)} · {readTime(s.body)} read
                         </p>
                       </div>
@@ -474,11 +474,11 @@ export function MediaPortalClient({
       {/* ── Section 2: "More from Evolved Media" divider ── */}
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 40, height: 2, background: '#C9A84C' }} />
-          <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 12, color: '#112535', textTransform: 'uppercase', letterSpacing: '0.14em', whiteSpace: 'nowrap' }}>
+          <div style={{ width: 40, height: 2, background: 'var(--brand-gold)' }} />
+          <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 12, color: 'var(--navy-dark)', textTransform: 'uppercase', letterSpacing: '0.14em', whiteSpace: 'nowrap' }}>
             {activeCategory === ALL_LABEL ? 'More from Evolved Media' : `More in ${activeCategory}`}
           </span>
-          <div style={{ flex: 1, height: 1, background: '#E5E0D8' }} />
+          <div style={{ flex: 1, height: 1, background: 'var(--paper-line-soft)' }} />
         </div>
       </div>
 
@@ -492,7 +492,7 @@ export function MediaPortalClient({
           </div>
         ) : filteredStories.length === 0 && isEditorialCategory(activeCategory) ? null : (
           <div style={{ padding: '40px 0', textAlign: 'center' }}>
-            <span style={{ fontSize: 13, color: '#6B7280', fontFamily: 'var(--font-body)' }}>
+            <span style={{ fontSize: 13, color: 'var(--media-ink-soft)', fontFamily: 'var(--font-body)' }}>
               {filteredStories.length === 0
                 ? 'No published stories in this category yet.'
                 : 'That’s the only story in this category right now.'}

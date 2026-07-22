@@ -31,6 +31,16 @@ const config: Config = {
         paper:     { DEFAULT: '#F5F0E8', card: '#FFFFFF' },
         'off-white': '#faf9f7',
         muted:     '#7a8a96',
+        // Pillar colors (STYLEGUIDE §1) — P1..P6, resolve via globals.css vars
+        pillar: {
+          1: 'var(--pillar-1)',
+          2: 'var(--pillar-2)',
+          3: 'var(--pillar-3)',
+          4: 'var(--pillar-4)',
+          5: 'var(--pillar-5)',
+          6: 'var(--pillar-6)',
+        },
+        success: 'var(--success-green)',
         // Semantic theme tokens — resolve via CSS vars for dual-theme support
         page:      'var(--bg-page)',
         surface:   'var(--bg-surface)',

@@ -26,6 +26,12 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      # hex ratchet (STYLEGUIDE.md §4): raw hex in apps/web UI code may only
+      # go down. Blocking — adding raw hex fails the build; converting hex to
+      # tokens requires lowering .hex-baseline in the same commit.
+      - name: Hex ratchet
+        run: bash scripts/check-hex-ratchet.sh
+
       # build: non-blocking — next/font/google may fail to fetch fonts on
       # GitHub runners. The production build on Railway always succeeds.
       - name: Build

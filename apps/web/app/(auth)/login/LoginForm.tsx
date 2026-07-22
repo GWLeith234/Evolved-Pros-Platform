@@ -108,10 +108,10 @@ export function LoginForm() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-4"
-      style={{ backgroundColor: '#112535' }}
+      style={{ backgroundColor: 'var(--navy-dark)' }}
     >
       <div className="w-full max-w-[400px] bg-white rounded-lg overflow-hidden shadow-2xl">
-        <div className="h-1 bg-[#ef0e30]" />
+        <div className="h-1 bg-red-hot" />
         <div className="px-8 py-10">
           <div className="mb-8 flex justify-center">
             <LogoMark variant="dark" height={56} />
@@ -119,15 +119,15 @@ export function LoginForm() {
 
           {sent ? (
             <div className="text-center py-4">
-              <h2 className="text-[#1b3c5a] text-2xl mb-3" style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700 }}>
+              <h2 className="text-[color:var(--navy)] text-2xl mb-3" style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700 }}>
                 Check your inbox.
               </h2>
-              <p className="text-[#7a8a96] text-sm">A login link is on its way to {email}</p>
+              <p className="text-muted text-sm">A login link is on its way to {email}</p>
             </div>
           ) : (
             <>
               <h2
-                className="text-[#112535] text-3xl font-bold mb-6"
+                className="text-navy-dark text-3xl font-bold mb-6"
                 style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
               >
                 {isSignup ? 'Let\u2019s get started.' : 'Welcome back.'}
@@ -141,8 +141,8 @@ export function LoginForm() {
                   className="flex-1 min-h-[44px] py-2 text-xs font-bold tracking-wider transition-colors"
                   style={{
                     fontFamily: '"Barlow Condensed", sans-serif',
-                    backgroundColor: tab === 'password' ? '#1b3c5a' : 'transparent',
-                    color: tab === 'password' ? '#fff' : '#7a8a96',
+                    backgroundColor: tab === 'password' ? 'var(--navy)' : 'transparent',
+                    color: tab === 'password' ? 'var(--white)' : 'var(--muted)',
                   }}
                 >
                   PASSWORD
@@ -153,8 +153,8 @@ export function LoginForm() {
                   className="flex-1 min-h-[44px] py-2 text-xs font-bold tracking-wider transition-colors"
                   style={{
                     fontFamily: '"Barlow Condensed", sans-serif',
-                    backgroundColor: tab === 'magic' ? '#1b3c5a' : 'transparent',
-                    color: tab === 'magic' ? '#fff' : '#7a8a96',
+                    backgroundColor: tab === 'magic' ? 'var(--navy)' : 'transparent',
+                    color: tab === 'magic' ? 'var(--white)' : 'var(--muted)',
                   }}
                 >
                   MAGIC LINK
@@ -165,7 +165,7 @@ export function LoginForm() {
                 <p
                   role="alert"
                   aria-live="polite"
-                  className="text-[#ef0e30] text-sm rounded bg-[rgba(239,14,48,0.06)] px-3 py-2 border border-[rgba(239,14,48,0.15)] mb-4"
+                  className="text-red-hot text-sm rounded bg-[rgba(239,14,48,0.06)] px-3 py-2 border border-[rgba(239,14,48,0.15)] mb-4"
                 >
                   {error}
                 </p>
@@ -174,7 +174,7 @@ export function LoginForm() {
               {tab === 'password' ? (
                 <form onSubmit={handlePassword} className="space-y-4">
                   <div>
-                    <label className="block text-[#1b3c5a] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
+                    <label className="block text-[color:var(--navy)] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
                       EMAIL ADDRESS
                     </label>
                     <input
@@ -183,11 +183,11 @@ export function LoginForm() {
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       required
-                      className="w-full min-h-[44px] border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 text-sm text-[#1b3c5a] focus:outline-none focus:border-[#68a2b9]"
+                      className="w-full min-h-[44px] border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 text-sm text-[color:var(--navy)] focus:outline-none focus:border-teal-legacy"
                     />
                   </div>
                   <div>
-                    <label className="block text-[#1b3c5a] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
+                    <label className="block text-[color:var(--navy)] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
                       PASSWORD
                     </label>
                     <div className="relative">
@@ -197,16 +197,16 @@ export function LoginForm() {
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                         required
-                        className="w-full min-h-[44px] border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 pr-10 text-sm text-[#1b3c5a] focus:outline-none focus:border-[#68a2b9]"
+                        className="w-full min-h-[44px] border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 pr-10 text-sm text-[color:var(--navy)] focus:outline-none focus:border-teal-legacy"
                       />
                       <button
                         type="button"
                         tabIndex={-1}
                         onClick={() => setShowPassword(v => !v)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                        style={{ color: '#7a8a96' }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#1b3c5a' }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#7a8a96' }}
+                        style={{ color: 'var(--muted)' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--navy)' }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--muted)' }}
                         aria-label={showPassword ? 'Hide password' : 'Show password'}
                       >
                         {showPassword ? (
@@ -227,12 +227,12 @@ export function LoginForm() {
                     <div className="mt-1.5 flex items-center justify-between">
                       <div>
                         {forgotSent && (
-                          <p className="text-[10px]" style={{ color: '#3a8a5a' }}>
+                          <p className="text-[10px]" style={{ color: 'var(--success-green)' }}>
                             Password reset email sent. Check your inbox.
                           </p>
                         )}
                         {forgotError && (
-                          <p className="text-[10px]" style={{ color: '#ef0e30' }}>
+                          <p className="text-[10px]" style={{ color: 'var(--brand-red-hot)' }}>
                             {forgotError}
                           </p>
                         )}
@@ -254,7 +254,7 @@ export function LoginForm() {
                     disabled={loading}
                     aria-busy={loading}
                     className={`w-full py-3 rounded font-bold uppercase tracking-wider text-sm text-white transition-all disabled:opacity-50 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: '#ef0e30' }}
+                    style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: 'var(--brand-red-hot)' }}
                   >
                     {loading ? (<><Spinner />Signing in…</>) : 'Sign In →'}
                   </button>
@@ -265,7 +265,7 @@ export function LoginForm() {
                     We&apos;ll email you a one-click login link. No password needed.
                   </p>
                   <div>
-                    <label className="block text-[#1b3c5a] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
+                    <label className="block text-[color:var(--navy)] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
                       EMAIL ADDRESS
                     </label>
                     <input
@@ -273,7 +273,7 @@ export function LoginForm() {
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       required
-                      className="w-full min-h-[44px] border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 text-sm text-[#1b3c5a] focus:outline-none focus:border-[#68a2b9]"
+                      className="w-full min-h-[44px] border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 text-sm text-[color:var(--navy)] focus:outline-none focus:border-teal-legacy"
                     />
                   </div>
                   <button
@@ -281,7 +281,7 @@ export function LoginForm() {
                     disabled={loading}
                     aria-busy={loading}
                     className={`w-full py-3 rounded font-bold uppercase tracking-wider text-sm text-white transition-all disabled:opacity-50 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: '#ef0e30' }}
+                    style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: 'var(--brand-red-hot)' }}
                   >
                     {loading ? (<><Spinner />Sending…</>) : 'Send Login Link →'}
                   </button>
@@ -291,9 +291,9 @@ export function LoginForm() {
           )}
         </div>
         <div className="px-8 py-4 border-t text-center" style={{ borderColor: 'rgba(27,60,90,0.08)', backgroundColor: 'rgba(27,60,90,0.02)' }}>
-          <p className="text-xs text-[#7a8a96]">
+          <p className="text-xs text-muted">
             Access is granted through your Evolved Pros membership.{' '}
-            <a href="/pricing" className="underline hover:text-[#1b3c5a] transition-colors">View pricing</a>
+            <a href="/pricing" className="underline hover:text-[color:var(--navy)] transition-colors">View pricing</a>
           </p>
         </div>
       </div>

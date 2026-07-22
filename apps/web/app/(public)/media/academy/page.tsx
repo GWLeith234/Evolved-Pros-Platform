@@ -39,17 +39,17 @@ function pillarName(num: number | null): string {
 }
 
 function pillarColor(num: number | null): string {
-  if (!num) return '#7a8a96'
-  return PILLAR_CONFIG[num]?.color ?? '#7a8a96'
+  if (!num) return 'var(--muted)'
+  return PILLAR_CONFIG[num]?.color ?? 'var(--muted)'
 }
 
 const PILLAR_GRADIENTS: Record<number, string> = {
-  1: 'linear-gradient(135deg,#3a2a1a,#7a5a3a)',
-  2: 'linear-gradient(135deg,#2a1a3a,#5a2d7a)',
-  3: 'linear-gradient(135deg,#3a1a1a,#7a2d2d)',
-  4: 'linear-gradient(135deg,#1a2a4a,#2d4a7a)',
-  5: 'linear-gradient(135deg,#3a3a1a,#7a7a2a)',
-  6: 'linear-gradient(135deg,#1a3a3a,#2d7a7a)',
+  1: 'var(--media-grad-1)',
+  2: 'var(--media-grad-2)',
+  3: 'var(--media-grad-3)',
+  4: 'var(--media-grad-4)',
+  5: 'var(--media-grad-5)',
+  6: 'var(--media-grad-6)',
 }
 
 function stripMarkdown(md: string): string {
@@ -104,23 +104,23 @@ export default async function MediaAcademyPage() {
     <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 24px 0' }}>
       {/* Section header */}
       <div style={{ marginBottom: 16 }}>
-        <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 10, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>
+        <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 10, color: 'var(--brand-gold)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>
           This week&apos;s free lesson
         </p>
-        <h1 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 28, color: '#2B3A5A', textTransform: 'uppercase', lineHeight: 1.1, margin: 0 }}>
+        <h1 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 28, color: 'var(--media-ink)', textTransform: 'uppercase', lineHeight: 1.1, margin: 0 }}>
           {featured?.title ?? 'Academy Preview'}
         </h1>
       </div>
 
       {/* Lesson teaser card */}
       {featured && (
-        <div style={{ border: '1px solid #E0D8CC', borderRadius: 4, overflow: 'hidden', marginBottom: 24 }}>
+        <div style={{ border: '1px solid var(--paper-line)', borderRadius: 4, overflow: 'hidden', marginBottom: 24 }}>
           {/* Header bar */}
-          <div style={{ backgroundColor: '#2B3A5A', padding: '8px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ backgroundColor: 'var(--media-ink)', padding: '8px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 10, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Academy Preview · {pillarName(coursePillar)} Pillar
             </span>
-            <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 9, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.06em', backgroundColor: 'rgba(201,168,76,0.15)', padding: '2px 8px', borderRadius: 2 }}>
+            <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 9, color: 'var(--brand-gold)', textTransform: 'uppercase', letterSpacing: '0.06em', backgroundColor: 'rgba(201,168,76,0.15)', padding: '2px 8px', borderRadius: 2 }}>
               Free this week
             </span>
           </div>
@@ -130,19 +130,19 @@ export default async function MediaAcademyPage() {
             <p style={{ fontSize: 9, color: 'rgba(43,58,90,0.45)', fontFamily: 'var(--font-condensed)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 4px' }}>
               {courseTitle} · Lesson {featured.sort_order}
             </p>
-            <h2 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 18, color: '#2B3A5A', margin: '0 0 10px', lineHeight: 1.2 }}>
+            <h2 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 18, color: 'var(--media-ink)', margin: '0 0 10px', lineHeight: 1.2 }}>
               {featured.title}
             </h2>
             {previewText && (
-              <p style={{ fontFamily: 'var(--font-serif)', fontSize: 12, lineHeight: 1.75, color: '#3a4a56', margin: '0 0 16px' }}>
+              <p style={{ fontFamily: 'var(--font-serif)', fontSize: 12, lineHeight: 1.75, color: 'var(--media-ink-slate)', margin: '0 0 16px' }}>
                 {previewText}{previewText.length >= 400 ? '...' : ''}
               </p>
             )}
 
             {/* Lock wall */}
-            <div style={{ backgroundColor: '#F9F6F1', border: '1px solid #E0D8CC', borderRadius: 4, padding: 14, textAlign: 'center' }}>
+            <div style={{ backgroundColor: 'var(--media-cream-tint)', border: '1px solid var(--paper-line)', borderRadius: 4, padding: 14, textAlign: 'center' }}>
               <div style={{ fontSize: 18, marginBottom: 6 }}>🔒</div>
-              <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 14, color: '#2B3A5A', margin: '0 0 4px' }}>
+              <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 14, color: 'var(--media-ink)', margin: '0 0 4px' }}>
                 Lesson continues inside
               </p>
               <p style={{ fontSize: 11, color: 'rgba(43,58,90,0.5)', fontFamily: 'var(--font-body)', lineHeight: 1.5, margin: '0 0 12px' }}>
@@ -150,7 +150,7 @@ export default async function MediaAcademyPage() {
               </p>
               <Link
                 href="/pricing"
-                style={{ display: 'inline-block', fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 12, color: '#fff', backgroundColor: '#C9302A', padding: '8px 20px', borderRadius: 3, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em' }}
+                style={{ display: 'inline-block', fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 12, color: '#fff', backgroundColor: 'var(--brand-red)', padding: '8px 20px', borderRadius: 3, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em' }}
               >
                 Unlock full lesson →
               </Link>
@@ -161,8 +161,8 @@ export default async function MediaAcademyPage() {
 
       {/* Section divider */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-        <div style={{ width: 40, height: 2, backgroundColor: '#2B3A5A', flexShrink: 0 }} />
-        <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 13, color: '#2B3A5A', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
+        <div style={{ width: 40, height: 2, backgroundColor: 'var(--media-ink)', flexShrink: 0 }} />
+        <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 13, color: 'var(--media-ink)', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
           What&apos;s inside the Academy
         </span>
         <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(43,58,90,0.15)' }} />
@@ -176,13 +176,13 @@ export default async function MediaAcademyPage() {
             const gradient = PILLAR_GRADIENTS[pNum] ?? PILLAR_GRADIENTS[1]
             const lessonCount = countMap.get(c.id) ?? 0
             return (
-              <div key={c.id} style={{ backgroundColor: '#fff', border: '1px solid #E0D8CC', borderRadius: 4, overflow: 'hidden' }}>
+              <div key={c.id} style={{ backgroundColor: '#fff', border: '1px solid var(--paper-line)', borderRadius: 4, overflow: 'hidden' }}>
                 <div style={{ aspectRatio: '16/9', background: gradient }} />
                 <div style={{ padding: '9px 10px 11px' }}>
                   <p style={{ fontSize: 8, fontWeight: 700, fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em', color: pillarColor(c.pillar_number), marginBottom: 3 }}>
                     {pillarName(c.pillar_number)} · {lessonCount} {lessonCount === 1 ? 'lesson' : 'lessons'}
                   </p>
-                  <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 14, color: '#2B3A5A', lineHeight: 1.25, margin: '0 0 6px' }}>
+                  <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 14, color: 'var(--media-ink)', lineHeight: 1.25, margin: '0 0 6px' }}>
                     {c.title}
                   </p>
                   <span style={{ fontSize: 8, fontWeight: 700, fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'rgba(43,58,90,0.35)', backgroundColor: 'rgba(43,58,90,0.06)', padding: '2px 6px', borderRadius: 2 }}>
@@ -200,7 +200,7 @@ export default async function MediaAcademyPage() {
       )}
 
       {/* Bottom CTA */}
-      <div style={{ backgroundColor: '#2B3A5A', borderRadius: 4, padding: 20, textAlign: 'center', marginBottom: 40 }}>
+      <div style={{ backgroundColor: 'var(--media-ink)', borderRadius: 4, padding: 20, textAlign: 'center', marginBottom: 40 }}>
         <h2 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 20, color: '#fff', textTransform: 'uppercase', lineHeight: 1.15, margin: '0 0 6px' }}>
           Ready to accelerate your sales career?
         </h2>
@@ -209,7 +209,7 @@ export default async function MediaAcademyPage() {
         </p>
         <Link
           href="/pricing"
-          style={{ display: 'inline-block', fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 13, color: '#2B3A5A', backgroundColor: '#C9A84C', padding: '10px 24px', borderRadius: 3, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em' }}
+          style={{ display: 'inline-block', fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 13, color: 'var(--media-ink)', backgroundColor: 'var(--brand-gold)', padding: '10px 24px', borderRadius: 3, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em' }}
         >
           Start your journey →
         </Link>
