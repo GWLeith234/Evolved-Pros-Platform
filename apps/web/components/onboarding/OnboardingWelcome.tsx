@@ -8,10 +8,10 @@ export function OnboardingWelcome({ displayName, onContinue }: Props) {
 
   return (
     <div style={{ textAlign: 'center' }}>
-      {/* Horizontal EVOLVED PROS wordmark with red mic (dark surface → white mark) */}
+      {/* Horizontal EVOLVED PROS wordmark with red mic — navy mark for the white card */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/logo_horizontal_dark.png"
+        src="/logo_horizontal_navy.png"
         alt="Evolved Pros"
         style={{ height: 36, width: 'auto', marginBottom: 28, opacity: 0.95 }}
       />
@@ -36,7 +36,7 @@ export function OnboardingWelcome({ displayName, onContinue }: Props) {
         style={{
           fontFamily: 'Barlow, sans-serif',
           fontSize: '16px',
-          color: 'rgba(250,249,247,0.55)',
+          color: 'var(--media-ink-soft)',
           lineHeight: 1.6,
           margin: '0 0 32px',
           maxWidth: '420px',
@@ -76,7 +76,7 @@ export function OnboardingWelcome({ displayName, onContinue }: Props) {
               fontSize: '14px',
               fontWeight: 600,
               letterSpacing: '0.03em',
-              color: 'rgba(250,249,247,0.85)',
+              color: 'var(--media-ink)',
             }}
           >
             <span

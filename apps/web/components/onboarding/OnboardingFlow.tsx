@@ -152,8 +152,8 @@ export function OnboardingFlow({ initialStep, userId, displayName }: Props) {
 
       <div
         style={{
-          backgroundColor: 'var(--bg-surface, #111926)',
-          border: '1px solid var(--border-color, rgba(255,255,255,0.07))',
+          backgroundColor: 'var(--paper-card)',
+          border: '1px solid var(--paper-line)',
           borderRadius: '12px',
           padding: '36px 32px',
           position: 'relative',

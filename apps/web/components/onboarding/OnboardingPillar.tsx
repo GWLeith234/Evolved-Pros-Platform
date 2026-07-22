@@ -38,10 +38,10 @@ export function OnboardingPillar({ onContinue }: Props) {
   return (
     <div>
       {/* Heading */}
-      <h2 style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900, fontSize: '26px', color: '#faf9f7', margin: '0 0 8px' }}>
+      <h2 style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900, fontSize: '26px', color: 'var(--media-ink)', margin: '0 0 8px' }}>
         Where do you need the most work?
       </h2>
-      <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '13px', color: 'rgba(250,249,247,0.45)', lineHeight: 1.55, margin: '0 0 24px' }}>
+      <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '13px', color: 'var(--media-ink-soft)', lineHeight: 1.55, margin: '0 0 24px' }}>
         Pick your biggest growth area. Everyone starts with Foundation — it unlocks the rest.
       </p>
 
@@ -58,8 +58,8 @@ export function OnboardingPillar({ onContinue }: Props) {
                 position: 'relative',
                 padding: '14px 12px',
                 borderRadius: '8px',
-                border: `2px solid ${isSelected ? pillar.color : 'rgba(255,255,255,0.07)'}`,
-                backgroundColor: isSelected ? pillar.color : 'rgba(255,255,255,0.02)',
+                border: `2px solid ${isSelected ? pillar.color : 'var(--paper-line)'}`,
+                backgroundColor: isSelected ? pillar.color : 'var(--media-cream-tint)',
                 cursor: 'pointer',
                 textAlign: 'left',
                 transition: 'all 0.15s',
@@ -80,7 +80,7 @@ export function OnboardingPillar({ onContinue }: Props) {
                 fontSize: '8px',
                 letterSpacing: '0.16em',
                 textTransform: 'uppercase',
-                color: isSelected ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.3)',
+                color: isSelected ? 'rgba(255,255,255,0.7)' : 'var(--media-ink-soft)',
                 margin: '0 0 3px',
               }}>
                 Pillar {pillar.number}
@@ -89,7 +89,7 @@ export function OnboardingPillar({ onContinue }: Props) {
                 fontFamily: '"Barlow Condensed", sans-serif',
                 fontWeight: 700,
                 fontSize: '13px',
-                color: isSelected ? 'white' : '#faf9f7',
+                color: isSelected ? 'white' : 'var(--media-ink)',
                 margin: '0 0 4px',
                 lineHeight: 1.1,
               }}>
@@ -98,7 +98,7 @@ export function OnboardingPillar({ onContinue }: Props) {
               <p style={{
                 fontFamily: 'Barlow, sans-serif',
                 fontSize: '12px',
-                color: isSelected ? 'rgba(255,255,255,0.75)' : 'rgba(250,249,247,0.35)',
+                color: isSelected ? 'rgba(255,255,255,0.75)' : 'var(--media-ink-soft)',
                 margin: 0,
                 lineHeight: 1.4,
               }}>
@@ -150,7 +150,7 @@ export function OnboardingPillar({ onContinue }: Props) {
           fontSize: '12px',
           letterSpacing: '0.1em',
           textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.2)',
+          color: 'var(--media-ink-soft)',
           textAlign: 'center',
         }}
       >

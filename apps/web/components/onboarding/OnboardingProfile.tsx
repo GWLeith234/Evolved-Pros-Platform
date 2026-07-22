@@ -12,11 +12,11 @@ const GOLD = '#C9A84C'
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
-  backgroundColor: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.1)',
+  backgroundColor: 'var(--media-cream-tint)',
+  border: '1px solid var(--paper-line)',
   borderRadius: '6px',
   padding: '10px 12px',
-  color: '#faf9f7',
+  color: 'var(--media-ink)',
   fontSize: '14px',
   fontFamily: 'Barlow, sans-serif',
   outline: 'none',
@@ -29,7 +29,7 @@ const labelStyle: React.CSSProperties = {
   fontSize: '12px',
   letterSpacing: '0.18em',
   textTransform: 'uppercase',
-  color: 'rgba(255,255,255,0.35)',
+  color: 'var(--media-ink-soft)',
   display: 'block',
   marginBottom: '6px',
 }
@@ -93,10 +93,10 @@ export function OnboardingProfile({ userId, onContinue }: Props) {
   return (
     <div>
       {/* Heading */}
-      <h2 style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900, fontSize: '26px', color: '#faf9f7', margin: '0 0 4px' }}>
+      <h2 style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900, fontSize: '26px', color: 'var(--media-ink)', margin: '0 0 4px' }}>
         Set up your profile
       </h2>
-      <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '14px', color: 'rgba(250,249,247,0.45)', margin: '0 0 28px' }}>
+      <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '14px', color: 'var(--media-ink-soft)', margin: '0 0 28px' }}>
         Help your peers know who you are.
       </p>
 
@@ -131,7 +131,7 @@ export function OnboardingProfile({ userId, onContinue }: Props) {
             </svg>
           )}
         </button>
-        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: uploading ? GOLD : 'rgba(255,255,255,0.3)', marginTop: '8px' }}>
+        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: uploading ? GOLD : 'var(--media-ink-soft)', marginTop: '8px' }}>
           {uploading ? 'Uploading…' : avatarUrl ? 'Tap to change' : 'Add a photo'}
         </p>
         {uploadError && (
