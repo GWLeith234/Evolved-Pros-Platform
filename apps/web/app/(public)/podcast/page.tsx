@@ -30,20 +30,34 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function PublicPodcastIndex() {
+interface PageProps {
+  searchParams?: { tag?: string | string[] }
+}
+
+export default async function PublicPodcastIndex({ searchParams }: PageProps) {
   const supabase = createClient()
   // Public page: resolve the member (for "watched" progress) but NEVER redirect.
   const profile = await resolveCurrentUser(supabase).catch(() => null)
 
-  const [episodesRes, progressRes] = await Promise.all([
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (adminClient as any)
-      .from('episodes')
-      .select('id, slug, episode_number, title, description, pillar, pinned, guest_name, guest_title, guest_company, guest_image_url, thumbnail_url, duration_seconds, published_at, youtube_url')
-      .eq('is_published', true)
-      .order('published_at', { ascending: false })
-      .order('episode_number', { ascending: false })
-      .limit(100) as Promise<{ data: EpisodeRow[] | null }>,
+  // Crawlable topic filter (SPRINT L, Task 2): ?tag=<slug> narrows the catalogue
+  // via the array `contains` operator. Normalise to a single trimmed value so a
+  // repeated ?tag=a&tag=b or an empty ?tag= can't break the query.
+  const rawTag = Array.isArray(searchParams?.tag) ? searchParams?.tag[0] : searchParams?.tag
+  const activeTag = rawTag?.trim() ? rawTag.trim() : null
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let episodesQuery = (adminClient as any)
+    .from('episodes')
+    .select('id, slug, episode_number, title, description, pillar, pinned, guest_name, guest_title, guest_company, guest_image_url, thumbnail_url, duration_seconds, published_at, youtube_url')
+    .eq('is_published', true)
+  if (activeTag) episodesQuery = episodesQuery.contains('tags', [activeTag])
+  episodesQuery = episodesQuery
+    .order('published_at', { ascending: false })
+    .order('episode_number', { ascending: false })
+    .limit(100)
+
+  const [episodesRes, progressRes, tagsRes] = await Promise.all([
+    episodesQuery as Promise<{ data: EpisodeRow[] | null }>,
     profile
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ? ((adminClient as any)
@@ -51,13 +65,27 @@ export default async function PublicPodcastIndex() {
           .select('episode_id, progress')
           .eq('user_id', profile.id) as Promise<{ data: ProgressRow[] | null }>)
       : Promise.resolve({ data: [] as ProgressRow[] }),
+    // Full tag universe across ALL published episodes — independent of the
+    // active filter — so the crawlable tag list is always complete.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (adminClient as any)
+      .from('episodes')
+      .select('tags')
+      .eq('is_published', true)
+      .limit(1000) as Promise<{ data: { tags: string[] | null }[] | null }>,
   ])
 
   const progressByEpisode = new Map<string, ProgressRow>()
   for (const p of progressRes.data ?? []) progressByEpisode.set(p.episode_id, p)
 
+  const allTags = Array.from(
+    new Set((tagsRes.data ?? []).flatMap(r => r.tags ?? [])),
+  ).sort((a, b) => a.localeCompare(b))
+
   const episodes = (episodesRes.data ?? []).map(row => dbRowToEpisode(row, progressByEpisode.get(row.id)))
-  assertMonotonicNumbering(episodes)
+  // Skip the dev-only monotonic-numbering check when filtering — a tag subset is
+  // intentionally non-contiguous and would emit a spurious warning.
+  if (!activeTag) assertMonotonicNumbering(episodes)
 
   const sponsorAds = await fetchPodcastSponsorAds()
 
@@ -77,7 +105,7 @@ export default async function PublicPodcastIndex() {
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <PodcastPageShell episodes={episodes} sponsorAds={sponsorAds} />
+      <PodcastPageShell episodes={episodes} sponsorAds={sponsorAds} allTags={allTags} activeTag={activeTag} />
     </>
   )
 }
