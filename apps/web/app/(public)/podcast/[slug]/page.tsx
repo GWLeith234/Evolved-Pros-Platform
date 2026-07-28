@@ -88,6 +88,17 @@ function jsonLd(ep: PublicEpisode) {
           },
         }
       : {}),
+    // The guest, as a Person, so the episode's subject is machine-readable.
+    ...(ep.guest_name
+      ? {
+          about: {
+            '@type': 'Person',
+            name: ep.guest_name,
+            ...(ep.guest_title ? { jobTitle: ep.guest_title } : {}),
+            ...(ep.guest_bio ? { description: ep.guest_bio } : {}),
+          },
+        }
+      : {}),
   }
 
   const video = ep.youtube_id
@@ -101,6 +112,7 @@ function jsonLd(ep: PublicEpisode) {
         duration,
         embedUrl: `https://www.youtube-nocookie.com/embed/${ep.youtube_id}`,
         contentUrl: `https://www.youtube.com/watch?v=${ep.youtube_id}`,
+        ...(ep.guest_name ? { actor: { '@type': 'Person', name: ep.guest_name } } : {}),
         ...(ep.transcript_text && transcriptParagraphs(ep).length ? { transcript: ep.transcript_text } : {}),
       }
     : null

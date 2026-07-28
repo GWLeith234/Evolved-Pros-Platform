@@ -2,6 +2,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Playfair_Display, Barlow_Condensed, Barlow, Bebas_Neue, Merriweather, Abril_Fatface } from 'next/font/google'
 import { createClient } from '@/lib/supabase/server'
+import { siteUrl } from '@/lib/site'
 import { ThemeInit } from '@/components/ThemeInit'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import './globals.css'
@@ -47,6 +48,9 @@ const merriweather = Merriweather({
 const LOGO_CIRCLE_DARK = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Branding/logo_circle_dark.png`
 
 export const metadata: Metadata = {
+  // Canonical brand origin for resolving relative canonical/OG URLs. Uses the
+  // SEO-only siteUrl (lib/site.ts), never the auth host.
+  metadataBase: new URL(siteUrl),
   title:       'Evolved Pros — The Platform for High Performers',
   description: 'Community, academy, and accountability for professionals who operate at the highest level.',
   icons: {

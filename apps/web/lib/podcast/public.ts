@@ -1,4 +1,5 @@
 import 'server-only'
+import { siteUrl } from '@/lib/site'
 import { adminClient } from '@/lib/supabase/admin'
 import { SPONSOR_AD_COLUMNS, type SponsorAd } from '@/components/home/HomeSponsorAd'
 import { ALL_FLAGSHIP_SPONSORS, ensureFlagshipSponsors } from '@/lib/sponsors/partners'
@@ -14,9 +15,11 @@ import { dedupeSponsors } from '@/lib/sponsors/rotate'
 // server-side (no cookie coupling, works during ISR/build).
 // ---------------------------------------------------------------------------
 
-/** Brand domain for canonical / OG / sitemap / RSS URLs. Set NEXT_PUBLIC_SITE_URL
- *  in Railway to the real brand domain — never the *.up.railway.app host. */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://evolvedpros.com').replace(/\/+$/, '')
+/** Brand domain for canonical / OG / sitemap / RSS URLs. Single source of truth
+ *  is lib/site.ts (its own NEXT_PUBLIC_CANONICAL_URL var — NOT the auth host and
+ *  NOT NEXT_PUBLIC_SITE_URL, which is load-bearing for auth). Re-exported as
+ *  SITE_URL so existing SEO importers keep working unchanged. */
+export const SITE_URL = siteUrl
 
 export const SERIES_NAME = 'The Evolved Pros Podcast'
 
@@ -30,11 +33,13 @@ export interface PublicEpisode {
   episode_number: number | null
   title: string
   guest_name: string | null
+  guest_title: string | null
   guest_bio: string | null
   published_at: string | null
   youtube_id: string | null
   spotify_url: string | null
   apple_url: string | null
+  audio_url: string | null
   duration_seconds: number | null
   location: string | null
   summary: string | null
@@ -46,8 +51,8 @@ export interface PublicEpisode {
 }
 
 const SELECT_COLS =
-  'id, slug, episode_number, title, guest_name, guest_bio, published_at, ' +
-  'youtube_id, youtube_url, spotify_url, apple_url, duration_seconds, location, ' +
+  'id, slug, episode_number, title, guest_name, guest_title, guest_bio, published_at, ' +
+  'youtube_id, youtube_url, spotify_url, apple_url, audio_url, duration_seconds, location, ' +
   'summary, description, tags, chapters, pull_quotes, transcript_text, transcript, transcript_segments'
 
 const YT_ID_RE = /^[A-Za-z0-9_-]{8,15}$/
@@ -93,11 +98,13 @@ function normalize(row: any): PublicEpisode {
     episode_number: row.episode_number ?? null,
     title: row.title,
     guest_name: row.guest_name ?? null,
+    guest_title: row.guest_title ?? null,
     guest_bio: row.guest_bio ?? null,
     published_at: row.published_at ?? null,
     youtube_id: parseYouTubeId(row.youtube_id ?? row.youtube_url),
     spotify_url: row.spotify_url ?? null,
     apple_url: row.apple_url ?? null,
+    audio_url: row.audio_url ?? null,
     duration_seconds: row.duration_seconds ?? null,
     location: row.location ?? null,
     summary: row.summary ?? row.description ?? null,
