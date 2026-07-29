@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { RedeemCodeForm } from './RedeemCodeForm'
 import { PricingTierCards } from './PricingTierCards'
 import { getMembershipPricing } from '@/lib/commerce/catalogue'
+import { LogoMark } from '@/components/ui/LogoMark'
 
 export const metadata: Metadata = {
   title: 'Pricing — Evolved Pros',
@@ -61,8 +62,12 @@ export default async function PricingPage() {
         className="flex items-center justify-between px-6 py-4"
         style={{ borderBottom: '1px solid rgba(245,240,232,0.06)' }}
       >
-        <Link href="/" className="font-condensed font-bold tracking-[0.18em] text-[14px]" style={{ color: '#F5F0E8', textDecoration: 'none' }}>
-          EVOLVED<span style={{ color: '#C9302A' }}>&middot;</span>PROS
+        {/* Canonical EVOLVED PROS wordmark + red mic — same LogoMark source the
+           authenticated TopNav uses (repo asset, height-constrained). This
+           public surface is dark-only (see the hard-navy page background), so
+           the white `light` variant is correct; no light-mode swap this sprint. */}
+        <Link href="/" aria-label="Evolved Pros — home" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+          <LogoMark variant="light" height={32} alt="Evolved Pros" />
         </Link>
         <Link
           href="/login"
