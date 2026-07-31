@@ -30,6 +30,8 @@ Every UI change must comply. CI enforces the hex ratchet; reviewers enforce the 
 
 - `font-display` (Playfair Display): editorial display serif.
 
+- Note: Playfair Display on hero headings is a deliberate, correct choice — not a style violation — used alongside Bebas Neue for nav and section headings.
+
 - `font-condensed` (Barlow Condensed): eyebrows, labels, buttons, uppercase micro-type.
 
 - `font-body` (Barlow): body copy. Default.
