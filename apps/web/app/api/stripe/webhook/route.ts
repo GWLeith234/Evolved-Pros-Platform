@@ -239,8 +239,10 @@ export async function POST(request: Request) {
   const sigHeaderPresent = Boolean(sigHeader)
 
   // Single exit for verification failures: log one diagnosable line and return
-  // a short, non-sensitive machine-readable reason code. HTTP 400 (unchanged).
-  const fail = (reason: string) => {
+  // a short, non-sensitive machine-readable reason code. Defaults to HTTP 400
+  // (a bad request), except missing_secret_env, which is a server
+  // misconfiguration and returns 500 (see the caller below).
+  const fail = (reason: string, status = 400) => {
     console.warn(
       `[Stripe Webhook] verification failed: reason=${reason} ` +
         `secret_present=${secretPresent} secret_len=${secretLen} ` +
@@ -248,12 +250,14 @@ export async function POST(request: Request) {
     )
     return Response.json(
       { error: 'webhook_verification_failed', reason },
-      { status: 400 },
+      { status },
     )
   }
 
   if (!sigHeader) return fail('missing_signature_header')
-  if (!secret) return fail('missing_secret_env')
+  // Server misconfiguration, not a bad request → 500 (the other four reasons
+  // stay 400). Reason body and log line are unchanged.
+  if (!secret) return fail('missing_secret_env', 500)
 
   let rawBody: string
   try {
