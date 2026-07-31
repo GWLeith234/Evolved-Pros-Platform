@@ -2,6 +2,7 @@ import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
 import { adminClient } from '@/lib/supabase/admin'
+import { effectiveTier } from '@/lib/tier'
 
 export type CurrentUserProfile = Database['public']['Tables']['users']['Row']
 
@@ -42,6 +43,16 @@ export async function resolveCurrentUser(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
+  // Member access gate: a dead subscription (tier_status unpaid/canceled/
+  // cancelled) drops the caller to community-tier access. Applied here so the
+  // whole member session sees the effective tier through one resolver — every
+  // downstream hasTierAccess(profile.tier, …) check inherits it, with no extra
+  // query (the row is already selected). Fails open on every other status.
+  const withEffectiveTier = (row: CurrentUserProfile): CurrentUserProfile => {
+    row.tier = effectiveTier(row.tier, row.tier_status)
+    return row
+  }
+
   // Try id-match first via adminClient (RLS-bypass). Works for new
   // accounts where auth.uid() === public.users.id.
   const { data: byId } = await adminClient
@@ -49,7 +60,7 @@ export async function resolveCurrentUser(
     .select('*')
     .eq('id', user.id)
     .maybeSingle()
-  if (byId) return byId
+  if (byId) return withEffectiveTier(byId)
 
   if (!user.email) return null
 
@@ -60,5 +71,5 @@ export async function resolveCurrentUser(
     .select('*')
     .eq('email', user.email)
     .maybeSingle()
-  return byEmail ?? null
+  return byEmail ? withEffectiveTier(byEmail) : null
 }

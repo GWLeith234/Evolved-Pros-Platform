@@ -2,7 +2,7 @@ import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
 import type { CourseWithProgress, LessonWithProgress } from './types'
-import { hasTierAccess } from '@/lib/tier'
+import { hasTierAccess, effectiveTier } from '@/lib/tier'
 import { adminClient } from '@/lib/supabase/admin'
 
 type SB = SupabaseClient<Database>
@@ -326,12 +326,22 @@ export async function fetchUserProfile(
   supabase: SB,
   userId: string,
 ): Promise<Database['public']['Tables']['users']['Row'] | null> {
+  type Row = Database['public']['Tables']['users']['Row']
+  // Member access gate: a dead subscription (tier_status unpaid/canceled/
+  // cancelled) drops the caller to community-tier access, so every academy
+  // hasTierAccess(profile.tier, …) check inherits it. Fails open otherwise.
+  // No extra query — the row is already selected.
+  const withEffectiveTier = (row: Row): Row => {
+    row.tier = effectiveTier(row.tier, row.tier_status)
+    return row
+  }
+
   const { data: byId } = await adminClient
     .from('users')
     .select('*')
     .eq('id', userId)
     .maybeSingle()
-  if (byId) return byId
+  if (byId) return withEffectiveTier(byId)
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user?.email) return null
@@ -341,5 +351,5 @@ export async function fetchUserProfile(
     .select('*')
     .eq('email', user.email)
     .maybeSingle()
-  return byEmail ?? null
+  return byEmail ? withEffectiveTier(byEmail) : null
 }

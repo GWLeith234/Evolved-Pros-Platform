@@ -18,3 +18,33 @@ export function hasTierAccess(userTier: TierInput, requiredTier: TierInput): boo
   const rt = requiredTier.toLowerCase()
   return (TIER_RANK[ut] ?? 0) >= (TIER_RANK[rt] ?? 0)
 }
+
+// tier_status values (case-insensitive) that mean the paid subscription is
+// DEAD, so the member drops to community-tier access. The column carries a
+// MIXED vocabulary — Stripe statuses (active, past_due, unpaid, canceled,
+// incomplete, trialing) AND legacy Vendasta values ('expired') — so this is an
+// explicit allow-list of "deny" statuses, never a catch-all.
+//
+// Both 'canceled' (Stripe's US spelling) and 'cancelled' (UK) are listed
+// because we do not assume which Stripe emits.
+const DEAD_SUBSCRIPTION_STATUSES = new Set(['unpaid', 'canceled', 'cancelled'])
+
+/**
+ * The tier a member is actually entitled to right now, given their raw tier and
+ * subscription status. Returns 'community' when tier_status marks the paid
+ * subscription dead; otherwise returns the tier unchanged.
+ *
+ * FAILS OPEN on everything else, by design — NULL, 'active', 'expired' (legacy
+ * Vendasta, deliberately NOT denied), 'past_due' (grace window), and any
+ * unrecognised value all keep the member's tier. Locking out a real member is
+ * strictly worse than a short window of unpaid access, so an unknown or missing
+ * status must never remove access.
+ */
+export function effectiveTier(
+  tier: string | null | undefined,
+  tierStatus: string | null | undefined,
+): string | null {
+  const status = tierStatus?.toLowerCase()
+  if (status && DEAD_SUBSCRIPTION_STATUSES.has(status)) return 'community'
+  return tier ?? null
+}
