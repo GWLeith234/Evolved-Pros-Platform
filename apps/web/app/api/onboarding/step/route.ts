@@ -15,12 +15,17 @@ export async function PATCH(req: Request) {
 
   // UPSERT (was UPDATE): same stranded-row defect as /complete — an UPDATE on a
   // missing public.users row writes nothing but returns success. Conflict on
-  // `email` (the app's key for public.users). Onboarding owns only
-  // onboarding_step here; no tier/billing columns are ever touched.
+  // `email`. We also set id = user.id (auth.uid()) so an INSERTed row satisfies
+  // the RLS policies that key on auth.uid() = id (public.users.id = auth.uid(),
+  // NOT an independent uuid); without it the insert would fall back to
+  // uuid_generate_v4() and strand the row behind its own RLS. On the UPDATE
+  // path it is a no-op — the conflicting row is this user's own, whose id
+  // already equals user.id. Onboarding owns only onboarding_step here; no
+  // tier/billing columns are ever touched.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (adminClient as any)
     .from('users')
-    .upsert({ email: user.email, onboarding_step: step }, { onConflict: 'email' })
+    .upsert({ id: user.id, email: user.email, onboarding_step: step }, { onConflict: 'email' })
     .select('id')
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   if (!data || data.length === 0) {

@@ -31,8 +31,10 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid watchTimeSeconds' }, { status: 400 })
   }
 
-  // RLS-FIX: lesson_progress.user_id and users.id-targeted updates need
-  // public.users.id, not auth.uid().
+  // public.users.id equals auth.uid() (every row has public.users.id =
+  // auth.users.id, and the RLS policies on public.users key on auth.uid() = id).
+  // So this lookup and the `?? user.id` fallback resolve to the same uuid; the
+  // fallback simply covers a not-yet-provisioned public.users row.
   const { data: profile } = await adminClient
     .from('users')
     .select('id')
