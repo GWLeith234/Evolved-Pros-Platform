@@ -225,23 +225,58 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void
 // --- entrypoint -----------------------------------------------------------
 
 export async function POST(request: Request) {
-  const secret = process.env.STRIPE_WEBHOOK_SECRET
-  if (!secret) {
-    console.error('[Stripe Webhook] STRIPE_WEBHOOK_SECRET is not set')
-    return Response.json({ error: 'Server misconfiguration' }, { status: 500 })
+  const sigHeader = request.headers.get('stripe-signature')
+  // FIX 1 (hardening, not root cause): dashboard copy-paste of the signing
+  // secret routinely appends a trailing newline; trim it so a structurally
+  // valid-but-whitespace-padded secret still verifies.
+  const secret = process.env.STRIPE_WEBHOOK_SECRET?.trim()
+
+  // Presence/length flags for diagnostics. SECURITY: we log the LENGTH of the
+  // secret and boolean presence only — never the secret, any fragment of it,
+  // the signature header value, or the request body.
+  const secretPresent = Boolean(secret)
+  const secretLen = secret ? secret.length : 0
+  const sigHeaderPresent = Boolean(sigHeader)
+
+  // Single exit for verification failures: log one diagnosable line and return
+  // a short, non-sensitive machine-readable reason code. HTTP 400 (unchanged).
+  const fail = (reason: string) => {
+    console.warn(
+      `[Stripe Webhook] verification failed: reason=${reason} ` +
+        `secret_present=${secretPresent} secret_len=${secretLen} ` +
+        `sig_header_present=${sigHeaderPresent}`,
+    )
+    return Response.json(
+      { error: 'webhook_verification_failed', reason },
+      { status: 400 },
+    )
   }
 
-  const sig = request.headers.get('stripe-signature')
-  if (!sig) return Response.json({ error: 'Missing signature' }, { status: 400 })
+  if (!sigHeader) return fail('missing_signature_header')
+  if (!secret) return fail('missing_secret_env')
 
-  const rawBody = await request.text()
+  let rawBody: string
+  try {
+    rawBody = await request.text()
+  } catch {
+    return fail('body_read_error')
+  }
+
   let event: Stripe.Event
   try {
-    event = getStripe().webhooks.constructEvent(rawBody, sig, secret)
+    event = getStripe().webhooks.constructEvent(rawBody, sigHeader, secret)
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'verify error'
-    console.warn('[Stripe Webhook] signature verification failed:', msg)
-    return Response.json({ error: 'Invalid signature' }, { status: 400 })
+    // Stripe throws StripeSignatureVerificationError for BOTH a stale timestamp
+    // and a non-matching signature. The SDK exposes no discriminating field, so
+    // the only clean signal is its own error message. The SDK checks signature
+    // presence *before* the timestamp tolerance, so a "timestamp" message means
+    // the signature actually matched — hence the distinction is trustworthy.
+    // Any unrecognised verification error falls back to signature_mismatch.
+    const msg = err instanceof Error ? err.message : ''
+    const reason = /timestamp outside the tolerance zone/i.test(msg)
+      ? 'timestamp_out_of_tolerance'
+      : 'signature_mismatch'
+    return fail(reason)
   }
 
   // Idempotency: skip events we've already applied (Stripe retries deliveries).
