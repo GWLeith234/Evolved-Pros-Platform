@@ -105,6 +105,26 @@ export function dbRowToEpisode(row: EpisodeRow, progress?: ProgressRow): Podcast
   }
 }
 
+/**
+ * Display-only title cleanup (SPRINT B). Episode titles frequently repeat the
+ * guest as a trailing " with <guest>" or " — with <guest>". On the cover card
+ * the guest name is already the headline, so strip that suffix at DISPLAY TIME
+ * — this NEVER mutates the stored title. No-op when the title carries no such
+ * suffix (e.g. Ep06 "Leading a Digital Evolution at Salem Media") or when there
+ * is no guest (the pilot).
+ */
+export function displayEpisodeTitle(
+  title: string,
+  guestName: string | null | undefined,
+): string {
+  const g = (guestName ?? '').trim()
+  if (!g || !title) return title
+  const escaped = g.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  // Optional em-dash / en-dash / hyphen separator before "with <guest>" at end.
+  const re = new RegExp(`\\s*(?:[—–-]\\s*)?with\\s+${escaped}\\s*$`, 'i')
+  return title.replace(re, '').trim()
+}
+
 // Single source of truth for CATEGORY → pillar token (PODCAST-CLEANUP S2).
 // `color` is a CSS custom-property reference, never a literal hex — badge,
 // dot, filter pill and card hover-border all read from here so the six

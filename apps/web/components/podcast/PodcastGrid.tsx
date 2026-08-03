@@ -4,7 +4,7 @@ import { useMemo, useState, type ReactNode } from 'react'
 import type { PodcastEpisode } from '@/lib/podcast/transforms'
 import { sortEpisodesNewest } from '@/lib/podcast/transforms'
 import { PodcastFilterPills, type FilterKey, type SortKey } from './PodcastFilterPills'
-import { PodcastEpisodeTile } from './PodcastEpisodeTile'
+import { PodcastCoverCard } from './PodcastCoverCard'
 import { RotatingSponsorCard } from './PodcastSponsorCard'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
@@ -26,7 +26,6 @@ interface PodcastGridProps {
 export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: PodcastGridProps) {
   const [filter, setFilter] = useState<FilterKey>('all')
   const [sort, setSort] = useState<SortKey>('newest')
-  const [focused, setFocused] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
     let list = filter === 'all' ? episodes : episodes.filter(e => e.pillar === filter)
@@ -47,15 +46,7 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
     const nodes: ReactNode[] = []
     let slot = 0
     filtered.forEach((ep, i) => {
-      nodes.push(
-        <PodcastEpisodeTile
-          key={ep.id}
-          episode={ep}
-          focused={focused === ep.id}
-          onFocus={setFocused}
-          onBlur={() => setFocused(null)}
-        />,
-      )
+      nodes.push(<PodcastCoverCard key={ep.id} episode={ep} />)
       // After every 3rd episode (1-based), drop in a rotating sponsor cell.
       if (sponsorAds.length > 0 && (i + 1) % AD_EVERY_N === 0) {
         const startIndex = slot++
@@ -67,7 +58,7 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
       }
     })
     return nodes
-  }, [filtered, sponsorAds, focused])
+  }, [filtered, sponsorAds])
 
   // Headline count excludes the pilot — it carries a PILOT chip, not a number,
   // so "5 episodes + pilot" reads true (PODCAST-CLEANUP S6).
@@ -176,12 +167,7 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
               gap: '32px 22px',
             }}
           >
-            <PodcastEpisodeTile
-              episode={fallbackEpisode}
-              focused={focused === fallbackEpisode.id}
-              onFocus={setFocused}
-              onBlur={() => setFocused(null)}
-            />
+            <PodcastCoverCard episode={fallbackEpisode} />
           </div>
           <button
             type="button"

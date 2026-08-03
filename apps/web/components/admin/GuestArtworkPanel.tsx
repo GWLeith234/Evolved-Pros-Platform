@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { PodcastEpisodeTile } from '@/components/podcast/PodcastEpisodeTile'
+import { PodcastCoverCard } from '@/components/podcast/PodcastCoverCard'
 import type { PodcastEpisode } from '@/lib/podcast/transforms'
 
 interface Candidate {
@@ -335,16 +335,13 @@ export function GuestArtworkPanel({
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
             {candidates.map((c) => (
               <div key={c.path} style={{ width: CARD_WIDTH }}>
-                {/* Capture-phase stop neutralises the tile's click-to-navigate
-                    without modifying the production component. */}
-                <div onClickCapture={(e) => e.stopPropagation()}>
-                  <PodcastEpisodeTile
-                    episode={{ ...previewEpisode, cover: c.url }}
-                    focused={false}
-                    onFocus={() => {}}
-                    onBlur={() => {}}
-                  />
-                </div>
+                {/* The REAL production cover card, inert (no navigation), with
+                    the candidate as the art layer (guest.photo = guest_image_url)
+                    so the preview cannot drift from what publishes. */}
+                <PodcastCoverCard
+                  episode={{ ...previewEpisode, guest: { ...previewEpisode.guest, photo: c.url } }}
+                  interactive={false}
+                />
                 <button
                   type="button"
                   onClick={() => publishCandidate(c)}
