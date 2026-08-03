@@ -1,6 +1,8 @@
 import { adminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import { EpisodeForm, type Pillar } from '../../EpisodeForm'
+import { GuestArtworkPanel } from '@/components/admin/GuestArtworkPanel'
+import { dbRowToEpisode, type EpisodeRow } from '@/lib/podcast/transforms'
 
 export const dynamic = 'force-dynamic'
 
@@ -70,6 +72,16 @@ export default async function EditEpisodePage({ params }: Props) {
         </p>
       </div>
       <EpisodeForm initialValues={initialValues} episodeId={params.episodeId} />
+
+      {/* Guest Artwork Studio — restyle a reference photo into the house
+          watercolour and publish it to guest_image_url. Preview reuses the
+          real cover card (dbRowToEpisode built server-side to avoid a
+          hydration mismatch from Date.now in the transform). */}
+      <GuestArtworkPanel
+        episodeId={params.episodeId}
+        previewEpisode={dbRowToEpisode(ep as unknown as EpisodeRow)}
+        initialGuestImageUrl={ep.guest_image_url ?? null}
+      />
     </div>
   )
 }
