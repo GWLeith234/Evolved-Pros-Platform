@@ -88,6 +88,10 @@
   --white:            #FFFFFF;
   --navy-abyss:       #0A0F18;  /* always-dark hero/page ink (= dark --bg-page) */
   --brand-navy:       #1B2A4A;
+  /* Podcast cover-card "physical object" inks (SPRINT C) — a cream sleeve with a
+     navy plate. Constant by design: the card does NOT flip with the app theme. */
+  --podcast-card-cream: #FAF6EE;
+  --podcast-card-navy:  #0F1724;
   --red-soft:         #ef6075;  /* expiry / soft-warning red on dark nav */
   --success-green:    #3a8a5a;
   --violet-light:     #C9A4FF;  /* AI-button conic gradient stops */
