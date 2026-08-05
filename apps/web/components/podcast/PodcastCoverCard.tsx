@@ -6,10 +6,11 @@ import { PILLAR_META, displayEpisodeTitle } from '@/lib/podcast/transforms'
 
 // SPRINT B — the 9:16 cover card. This is a constant "physical" object: a cream
 // sleeve with a navy plate. Its colours DO NOT flip with the app theme (only the
-// surrounding page chrome does), so the hardcoded cream/navy/white below are
-// intentional and per-spec, not a theme bug.
-const CREAM = '#FAF6EE'
-const NAVY = '#0F1724'
+// surrounding page chrome does). The cream/navy inks resolve to constant design
+// tokens (SPRINT C) that are NOT redefined in light mode, so the card stays
+// theme-invariant and per-spec while carrying zero raw hex.
+const CREAM = 'var(--podcast-card-cream)'
+const NAVY = 'var(--podcast-card-navy)'
 const WHITE_56 = 'rgba(255,255,255,0.56)'
 const DIVIDER = 'rgba(255,255,255,0.16)'
 
@@ -17,14 +18,17 @@ const FBN = 'var(--font-bebas)'
 const FBC = 'var(--font-barlow-condensed)'
 const FPI = 'var(--font-display)' // Playfair Display
 
-// Exact pillar accent hexes for this card (SPRINT B spec).
+// Pillar accent tokens for this card (SPRINT B spec, tokenized SPRINT C).
+// These reference the constant --pillar-N tokens (globals.css), which carry the
+// exact per-spec hues and are not flipped in light mode — so the card's accents
+// stay theme-invariant.
 const PILLAR_HEX: Record<PodcastPillar, string> = {
-  foundation: '#FFA538',
-  identity: '#A78BFA',
-  'mental-toughness': '#F87171',
-  strategy: '#60A5FA',
-  accountability: '#C9A84C',
-  execution: '#0ABFA3',
+  foundation: 'var(--pillar-1)',
+  identity: 'var(--pillar-2)',
+  'mental-toughness': 'var(--pillar-3)',
+  strategy: 'var(--pillar-4)',
+  accountability: 'var(--pillar-5)',
+  execution: 'var(--pillar-6)',
 }
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
