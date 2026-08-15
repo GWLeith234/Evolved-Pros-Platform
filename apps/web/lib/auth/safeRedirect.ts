@@ -7,57 +7,51 @@
  * string, so a crafted link controls them: they must never be trusted as a
  * redirect target. Only same-origin relative paths survive.
  *
- * WHY THIS PARSES INSTEAD OF PREFIX-MATCHING. The obvious guard —
- * `raw.startsWith('/') && !raw.startsWith('//')` — is not sufficient, because
- * it does not agree with the URL parser that ultimately resolves the value.
- * The parser treats a backslash as an authority separator and strips tab / LF /
- * CR before parsing, so all of these pass a prefix check and then resolve
- * off-origin:
- *
- *     '/\evil.com'    -> https://evil.com/
- *     '/\/evil.com'   -> https://evil.com/
- *     '/<TAB>/evil.com'  -> https://evil.com/
- *     '/<CR>//evil.com'  -> https://evil.com/
- *
- * So we resolve against a throwaway probe origin using the SAME parser that
- * will resolve it downstream, and require the origin to come back unchanged.
- * Anything that reaches for an authority — however it spells it — changes the
- * origin and is rejected. The return value is the reparsed path, so callers
- * get a normalized same-origin path rather than the raw input.
- *
- * Used by both redirect paths, which is deliberate — there is one definition
- * of "safe return path" in this codebase, not one per call site:
- *   - (auth)/auth/callback  — sanitizes ?next= before new URL(next, baseUrl).
+ * Scope note — this is the ONE definition of a safe return path in this
+ * codebase. Both redirect paths call it, for different reasons:
+ *   - (auth)/auth/callback — sanitizes ?next= before new URL(next, baseUrl).
  *     Every LoginForm path funnels through here, which is why LoginForm itself
- *     passes ?redirect= through untouched.
- *   - (auth)/login/page     — its already-signed-in branch calls
- *     next/navigation's redirect() directly, never reaching the callback.
- *     redirect() honours absolute URLs, so this is that path's only guard.
+ *     passes ?redirect= through untouched: one guard, at the choke point.
+ *   - (auth)/login/page — its already-signed-in branch calls next/navigation's
+ *     redirect() directly, so the callback never sees the value and there is no
+ *     downstream guard. redirect() honours absolute URLs, so this is that
+ *     path's only guard.
+ * Keep it that way. The callback used to carry its own inline copy, and that
+ * copy is what shipped the backslash escape below while this file was already
+ * being treated as the guard.
+ *
+ * Implementation note — do NOT reduce this to string prefix checks. The obvious
+ * `startsWith('/') && !startsWith('//')` pair looks sufficient and is not:
+ * browsers normalise '\' to '/' when resolving special-scheme URLs, and strip
+ * TAB / LF / CR before parsing, so all of these pass both checks and then
+ * resolve to https://evil.com/ —
+ *
+ *     '/\evil.com'   '/\/evil.com'   '/<TAB>/evil.com'   '/<CR>//evil.com'
+ *
+ * Verified against the WHATWG URL parser, which is the same parser the browser
+ * uses. Resolving against a sentinel origin and requiring the origin to survive
+ * delegates the decision to that parser, so this cannot drift from real browser
+ * behaviour the way a hand-rolled prefix test does.
+ *
+ * Rejected: absolute URLs ('https://evil.com'), protocol-relative ('//evil.com'),
+ * backslash and whitespace variants ('/\evil.com'), scheme payloads
+ * ('javascript:…', 'data:…'), non-strings (Next hands searchParams a string[]
+ * when a key repeats), and ''.
  */
-
-// Not a real origin — only ever used as a parse base, never fetched.
-const PROBE_ORIGIN = 'https://redirect-probe.invalid'
+const SENTINEL_ORIGIN = 'https://safe-redirect.invalid'
 
 export function safeRedirectPath(raw: unknown, fallback = '/home'): string {
-  // `unknown`, not `string | null`, on purpose. A repeated query param
-  // (/login?redirect=/a&redirect=/b) reaches a Next page's searchParams prop as
-  // a string[], not a string — so a string-typed parameter here is a lie the
-  // compiler happily accepts and the runtime does not. Anything that isn't a
-  // string falls back instead of throwing on .startsWith.
-  if (typeof raw !== 'string') return fallback
-  if (!raw) return fallback
-  // Must be rooted: bare 'evil.com' would otherwise resolve same-origin and be
-  // returned as '/evil.com', silently rewriting the caller's intent.
-  if (!raw.startsWith('/')) return fallback
+  if (typeof raw !== 'string' || raw === '') return fallback
 
   let url: URL
   try {
-    url = new URL(raw, PROBE_ORIGIN)
+    url = new URL(raw, SENTINEL_ORIGIN)
   } catch {
     return fallback
   }
-  // Any attempt to reach another host changes the origin.
-  if (url.origin !== PROBE_ORIGIN) return fallback
+  // Anything that escaped the sentinel origin — absolute, protocol-relative,
+  // backslash-normalised, or a non-http scheme — is off-origin. Refuse it.
+  if (url.origin !== SENTINEL_ORIGIN) return fallback
 
   return url.pathname + url.search + url.hash
 }

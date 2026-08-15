@@ -12,9 +12,10 @@ export async function GET(request: Request) {
   const code       = searchParams.get('code')
   const token_hash = searchParams.get('token_hash')
   const type       = searchParams.get('type') as EmailOtpType | null
-  // Sanitize before this value ever reaches new URL(next, baseUrl). A prefix
-  // check is NOT enough here: '/\evil.com' and '/<TAB>/evil.com' both look
-  // relative but resolve off-origin. See lib/auth/safeRedirect.
+  // Sanitize: only same-origin relative paths survive. Now shares ONE
+  // implementation with the login page's guard. The previous inline prefix
+  // test ("startsWith('/') && !startsWith('//')") let '/\evil.com' through,
+  // which browsers normalise to '//evil.com' and resolve off-origin.
   const next       = safeRedirectPath(searchParams.get('next'))
 
   // Use forwarded headers to get the real public URL (request.url is the
