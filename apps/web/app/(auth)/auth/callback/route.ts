@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
+import { safeRedirectPath } from '@/lib/auth/safeRedirect'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,9 +12,10 @@ export async function GET(request: Request) {
   const code       = searchParams.get('code')
   const token_hash = searchParams.get('token_hash')
   const type       = searchParams.get('type') as EmailOtpType | null
-  const rawNext    = searchParams.get('next') ?? '/home'
-  // Sanitize: only allow relative paths — block protocol schemes (javascript:, data:, etc.)
-  const next       = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/home'
+  // Sanitize before this value ever reaches new URL(next, baseUrl). A prefix
+  // check is NOT enough here: '/\evil.com' and '/<TAB>/evil.com' both look
+  // relative but resolve off-origin. See lib/auth/safeRedirect.
+  const next       = safeRedirectPath(searchParams.get('next'))
 
   // Use forwarded headers to get the real public URL (request.url is the
   // internal Railway address, e.g. http://localhost:8080/...)
