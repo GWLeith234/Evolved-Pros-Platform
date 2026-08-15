@@ -38,7 +38,13 @@
 // Not a real origin — only ever used as a parse base, never fetched.
 const PROBE_ORIGIN = 'https://redirect-probe.invalid'
 
-export function safeRedirectPath(raw: string | null | undefined, fallback = '/home'): string {
+export function safeRedirectPath(raw: unknown, fallback = '/home'): string {
+  // `unknown`, not `string | null`, on purpose. A repeated query param
+  // (/login?redirect=/a&redirect=/b) reaches a Next page's searchParams prop as
+  // a string[], not a string — so a string-typed parameter here is a lie the
+  // compiler happily accepts and the runtime does not. Anything that isn't a
+  // string falls back instead of throwing on .startsWith.
+  if (typeof raw !== 'string') return fallback
   if (!raw) return fallback
   // Must be rooted: bare 'evil.com' would otherwise resolve same-origin and be
   // returned as '/evil.com', silently rewriting the caller's intent.

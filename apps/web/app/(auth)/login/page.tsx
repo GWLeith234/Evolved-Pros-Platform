@@ -10,7 +10,9 @@ export const metadata: Metadata = { title: 'Sign In — Evolved Pros' }
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { redirect?: string }
+  // Next's real runtime shape — a repeated ?redirect= arrives as string[].
+  // Typing it as plain string compiles fine and then throws at request time.
+  searchParams: { redirect?: string | string[] }
 }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
