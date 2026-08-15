@@ -6,10 +6,14 @@ import { PILLAR_META, displayEpisodeTitle } from '@/lib/podcast/transforms'
 
 // SPRINT B — the 9:16 cover card. This is a constant "physical" object: a cream
 // sleeve with a navy plate. Its colours DO NOT flip with the app theme (only the
-// surrounding page chrome does), so the hardcoded cream/navy/white below are
-// intentional and per-spec, not a theme bug.
-const CREAM = '#FAF6EE'
-const NAVY = '#0F1724'
+// surrounding page chrome does). SPRINT C moved those literals into FIXED
+// structural tokens in globals.css — defined in :root only and never redefined
+// under html.light-mode / cream-mode — so the card carries zero raw hex while
+// staying theme-invariant. Do not swap --pod-cream for the identical-looking
+// --ed-cream: that one IS theme-scoped.
+const CREAM = 'var(--pod-cream)'
+const NAVY = 'var(--pod-navy)'
+const WHITE = 'var(--white)'
 const WHITE_56 = 'rgba(255,255,255,0.56)'
 const DIVIDER = 'rgba(255,255,255,0.16)'
 
@@ -17,14 +21,16 @@ const FBN = 'var(--font-bebas)'
 const FBC = 'var(--font-barlow-condensed)'
 const FPI = 'var(--font-display)' // Playfair Display
 
-// Exact pillar accent hexes for this card (SPRINT B spec).
+// Pillar accents for this card (SPRINT B spec). These reuse the existing
+// --pillar-1..6 tokens — byte-identical values to the Sprint B literals, and
+// already theme-invariant — rather than minting card-scoped duplicates.
 const PILLAR_HEX: Record<PodcastPillar, string> = {
-  foundation: '#FFA538',
-  identity: '#A78BFA',
-  'mental-toughness': '#F87171',
-  strategy: '#60A5FA',
-  accountability: '#C9A84C',
-  execution: '#0ABFA3',
+  foundation: 'var(--pillar-1)',
+  identity: 'var(--pillar-2)',
+  'mental-toughness': 'var(--pillar-3)',
+  strategy: 'var(--pillar-4)',
+  accountability: 'var(--pillar-5)',
+  execution: 'var(--pillar-6)',
 }
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
@@ -136,7 +142,7 @@ export function PodcastCoverCard({ episode, interactive = true }: PodcastCoverCa
         style={{
           flex: '1 1 auto',
           background: NAVY,
-          color: '#fff',
+          color: WHITE,
           padding: '16px 16px 15px',
           display: 'flex',
           flexDirection: 'column',
@@ -168,7 +174,7 @@ export function PodcastCoverCard({ episode, interactive = true }: PodcastCoverCa
             fontSize: isPilot ? 26 : 31,
             lineHeight: 0.93,
             letterSpacing: '0.01em',
-            color: '#fff',
+            color: WHITE,
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',

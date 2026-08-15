@@ -109,6 +109,18 @@
   --media-grad-5: linear-gradient(135deg,#3a3a1a,#7a7a2a);
   --media-grad-6: linear-gradient(135deg,#1a3a3a,#2d7a7a);
 
+  /* Podcast cover card (SPRINT B / SPRINT C). The 9:16 card is a constant
+     "physical" object — a cream sleeve with a navy plate — so these are FIXED
+     structural inks like the block above: they must NOT be redefined under
+     html.light-mode / cream-mode, or the card would start flipping with the
+     app theme. Deliberately NOT aliased to --ed-cream, which looks identical
+     but is scoped to the cream editorial theme (cross-aliasing editorial into
+     platform tokens is what the pillar-ink note below warns against).
+     The card's 6 pillar accents reuse --pillar-1..6 directly — same values,
+     already theme-invariant. */
+  --pod-cream: #FAF6EE;
+  --pod-navy:  #0F1724;
+
   /* Font-family aliases (PODCAST-CLEANUP S4). next/font exposes Bebas Neue as
      --font-logo and Barlow as --font-body; these friendlier aliases let
      components reference the design-system intent rather than the loader name. */
