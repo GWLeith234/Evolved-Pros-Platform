@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { safeRedirectPath } from '@/lib/auth/safeRedirect'
 import { LogoMark } from '@/components/ui/LogoMark'
 
 // Map raw Supabase auth errors into copy that doesn't sound like a stack trace.
@@ -39,7 +40,13 @@ function Spinner() {
 }
 
 export function LoginForm() {
-  const isSignup = useSearchParams().get('mode') === 'signup'
+  const searchParams = useSearchParams()
+  const isSignup = searchParams.get('mode') === 'signup'
+  // SPRINT I-2b — a gated CTA that got a 401 sends us here as
+  // /login?redirect=<path> (e.g. the public /pricing checkout buttons). Carry
+  // it into the callback's ?next= so the member lands back where they were
+  // instead of being dumped on /home with their intent lost.
+  const nextPath = safeRedirectPath(searchParams.get('redirect'))
   const [tab, setTab] = useState<'password' | 'magic'>('password')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -65,7 +72,7 @@ export function LoginForm() {
       setError(humanizeAuthError(err.message))
       return
     }
-    window.location.href = '/auth/callback?next=/home'
+    window.location.href = `/auth/callback?next=${encodeURIComponent(nextPath)}`
   }
 
   async function handleMagicLink(e: React.FormEvent) {
@@ -77,7 +84,7 @@ export function LoginForm() {
     const { error: err } = await supabase.auth.signInWithOtp({
       email: email.trim().toLowerCase(),
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
         shouldCreateUser: true,
       },
     })
