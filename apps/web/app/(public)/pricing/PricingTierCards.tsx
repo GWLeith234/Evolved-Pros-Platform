@@ -33,6 +33,8 @@ interface TierDef {
   cta: string
   ctaHref?: string
   ctaSku?: string
+  /** Stripe plan family; combined with the billing toggle into a plan key. */
+  ctaPlanBase?: 'vip' | 'pro'
 }
 
 export function PricingTierCards({
@@ -80,6 +82,7 @@ export function PricingTierCards({
       ],
       cta: 'Start VIP',
       ctaSku: vipSku,
+      ctaPlanBase: 'vip',
     },
     {
       name: 'Professional',
@@ -97,6 +100,7 @@ export function PricingTierCards({
       callout: 'Bi-weekly 1hr mastermind with George. Topics rotate through all 6 EVOLVED pillars.',
       cta: 'Go Professional',
       ctaSku: proSku,
+      ctaPlanBase: 'pro',
     },
     {
       name: 'Keynotes',
@@ -271,6 +275,11 @@ export function PricingTierCards({
                 label={tier.cta}
                 href={tier.ctaHref}
                 sku={tier.ctaSku}
+                plan={
+                  tier.ctaPlanBase
+                    ? (`${tier.ctaPlanBase}_${isAnnual ? 'annual' : 'monthly'}` as const)
+                    : undefined
+                }
                 featured={!!tier.featured}
               />
             </div>
