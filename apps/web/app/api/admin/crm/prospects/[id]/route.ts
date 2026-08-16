@@ -165,7 +165,8 @@ export async function PATCH(request: Request, { params }: RouteCtx) {
     .maybeSingle()
 
   if (error) {
-    console.error('[PATCH /api/admin/crm/prospects/[id]]', error)
+    // Code only — a unique-violation message embeds the conflicting email.
+    console.error('[PATCH /api/admin/crm/prospects/[id]]', error.code ?? 'unknown')
     // uq_crm_prospects_email (076) — email collides with another prospect.
     if (error.code === PG_UNIQUE_VIOLATION) {
       return NextResponse.json(
@@ -201,7 +202,7 @@ export async function DELETE(_request: Request, { params }: RouteCtx) {
   const { error } = await (adminClient as any).from('crm_prospects').delete().eq('id', id)
 
   if (error) {
-    console.error('[DELETE /api/admin/crm/prospects/[id]]', error)
+    console.error('[DELETE /api/admin/crm/prospects/[id]]', error.code ?? 'unknown')
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 

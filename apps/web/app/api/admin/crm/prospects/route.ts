@@ -43,7 +43,9 @@ export async function GET(request: Request) {
 
   const { data, error } = await query
   if (error) {
-    console.error('[GET /api/admin/crm/prospects]', error)
+    // Code only — Postgres error messages can embed row values (a
+    // unique-violation names the conflicting email address).
+    console.error('[GET /api/admin/crm/prospects]', error.code ?? 'unknown')
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
@@ -147,7 +149,7 @@ export async function POST(request: Request) {
     .single()
 
   if (error) {
-    console.error('[POST /api/admin/crm/prospects]', error)
+    console.error('[POST /api/admin/crm/prospects]', error.code ?? 'unknown')
     // uq_crm_prospects_email (076) — one prospect per email, case-insensitive.
     if (error.code === PG_UNIQUE_VIOLATION) {
       return NextResponse.json(
