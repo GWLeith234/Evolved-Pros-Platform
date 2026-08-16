@@ -111,7 +111,7 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
                 className="flex-1 flex flex-col items-center justify-center gap-0.5 relative ep-touch-target"
                 aria-current={active ? 'page' : undefined}
                 style={{
-                  color: active ? 'var(--brand-teal, #0ABFA3)' : 'var(--text-tertiary)',
+                  color: active ? 'var(--brand-teal)' : 'var(--text-tertiary)',
                   background: active ? 'rgba(10,191,163,0.10)' : 'transparent',
                   minHeight: 48,
                 }}
@@ -121,7 +121,7 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
                   {isCommunity && unreadCount > 0 && (
                     <span
                       className="absolute -top-0.5 -right-0.5 w-[6px] h-[6px] rounded-full"
-                      style={{ backgroundColor: 'var(--brand-red-hot, #ef0e30)' }}
+                      style={{ backgroundColor: 'var(--brand-red-hot)' }}
                       aria-hidden="true"
                     />
                   )}
@@ -148,7 +148,7 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
             aria-haspopup="dialog"
             aria-label="More navigation"
             style={{
-              color: isMoreActive ? 'var(--brand-teal, #0ABFA3)' : 'var(--text-tertiary)',
+              color: isMoreActive ? 'var(--brand-teal)' : 'var(--text-tertiary)',
               background: isMoreActive ? 'rgba(10,191,163,0.10)' : 'transparent',
               minHeight: 48,
             }}
@@ -158,7 +158,7 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
               {dmUnreadCount > 0 && (
                 <span
                   className="absolute -top-0.5 -right-0.5 w-[6px] h-[6px] rounded-full"
-                  style={{ backgroundColor: 'var(--brand-red-hot, #ef0e30)' }}
+                  style={{ backgroundColor: 'var(--brand-red-hot)' }}
                 />
               )}
             </span>

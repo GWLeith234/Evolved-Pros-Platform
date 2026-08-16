@@ -296,7 +296,7 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
           type="button"
           onClick={handleSignOut}
           className={linkClass}
-          style={{ color: '#ef0e30' }}
+          style={{ color: 'var(--brand-red-hot)' }}
         >
           <LogOutIcon />
           Sign Out

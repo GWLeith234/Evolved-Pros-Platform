@@ -109,7 +109,7 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
                   fontSize: '12px',
                   letterSpacing: '0.1em',
                   textTransform: 'uppercase',
-                  color: '#A78BFA',
+                  color: 'var(--pillar-2)',
                   backgroundColor: 'rgba(167,139,250,0.12)',
                   border: '1px solid rgba(167,139,250,0.3)',
                   padding: '2px 6px',
