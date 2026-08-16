@@ -2,12 +2,17 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import {
+  isPastSpeakingDate,
   newSpeakingDateId,
+  sanitizeSpeakingLinkUrl,
   type UpcomingDateStored,
 } from '@/lib/live/upcoming-dates-shared'
 import { newPinId, type SpeakingPinStored } from '@/lib/live/speaking-pins-shared'
 
 type Tab = 'dates' | 'pins'
+
+/** Draft pin uses NaN lat/lon until the admin enters coords (avoids Null Island). */
+type PinDraft = Omit<SpeakingPinStored, 'lat' | 'lon'> & { lat: number; lon: number }
 
 const EMPTY_DATE = (): UpcomingDateStored => ({
   id: newSpeakingDateId(),
@@ -21,12 +26,12 @@ const EMPTY_DATE = (): UpcomingDateStored => ({
   linkUrl: '',
 })
 
-const EMPTY_PIN = (): SpeakingPinStored => ({
+const EMPTY_PIN = (): PinDraft => ({
   id: newPinId(),
   city: '',
   country: '',
-  lat: 0,
-  lon: 0,
+  lat: Number.NaN,
+  lon: Number.NaN,
   featured: false,
 })
 
@@ -49,7 +54,7 @@ export default function AdminSpeakingPage() {
   const [pins, setPins] = useState<SpeakingPinStored[]>([])
   const [loading, setLoading] = useState(true)
   const [editingDate, setEditingDate] = useState<UpcomingDateStored | null>(null)
-  const [editingPin, setEditingPin] = useState<SpeakingPinStored | null>(null)
+  const [editingPin, setEditingPin] = useState<PinDraft | null>(null)
   const [isNew, setIsNew] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -125,9 +130,15 @@ export default function AdminSpeakingPage() {
   }
 
   async function handleSaveDate() {
-    if (!editingDate) return
+    if (!editingDate || saving) return
     if (!editingDate.event.trim() || !editingDate.city.trim() || !editingDate.date.trim()) {
       setError('Event, city, and date are required')
+      return
+    }
+    const linkRaw = editingDate.linkUrl?.trim() || ''
+    const linkUrl = linkRaw ? sanitizeSpeakingLinkUrl(linkRaw) : undefined
+    if (linkRaw && !linkUrl) {
+      setError('Link must be http(s) or a path starting with /')
       return
     }
     const row: UpcomingDateStored = {
@@ -137,7 +148,7 @@ export default function AdminSpeakingPage() {
       country: editingDate.country.trim(),
       detail: editingDate.detail?.trim() || undefined,
       linkLabel: editingDate.linkLabel?.trim() || undefined,
-      linkUrl: editingDate.linkUrl?.trim() || undefined,
+      linkUrl,
     }
     const ok = await persistDates([...dates.filter(d => d.id !== row.id), row])
     if (ok) {
@@ -147,7 +158,7 @@ export default function AdminSpeakingPage() {
   }
 
   async function handleSavePin() {
-    if (!editingPin) return
+    if (!editingPin || saving) return
     if (!editingPin.city.trim() || !editingPin.country.trim()) {
       setError('City and country are required')
       return
@@ -156,10 +167,16 @@ export default function AdminSpeakingPage() {
       setError('Valid lat / lon are required')
       return
     }
+    if (editingPin.lat === 0 && editingPin.lon === 0) {
+      setError('Lat/lon (0,0) is not allowed — enter real coordinates')
+      return
+    }
     const row: SpeakingPinStored = {
       ...editingPin,
       city: editingPin.city.trim(),
       country: editingPin.country.trim(),
+      lat: editingPin.lat,
+      lon: editingPin.lon,
     }
     const ok = await persistPins([...pins.filter(p => p.id !== row.id), row])
     if (ok) {
@@ -168,13 +185,8 @@ export default function AdminSpeakingPage() {
     }
   }
 
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
   function isPast(iso: string): boolean {
-    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso)
-    if (!m) return false
-    const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
-    return d.getTime() < today.getTime()
+    return isPastSpeakingDate(iso)
   }
 
   return (
@@ -185,6 +197,7 @@ export default function AdminSpeakingPage() {
         </h1>
         <button
           type="button"
+          disabled={saving}
           onClick={() => {
             setError('')
             setNotice('')
@@ -422,8 +435,13 @@ export default function AdminSpeakingPage() {
                 type="number"
                 step="any"
                 style={inputStyle}
-                value={editingPin.lat}
-                onChange={e => setEditingPin(p => (p ? { ...p, lat: Number(e.target.value) } : p))}
+                value={Number.isFinite(editingPin.lat) ? editingPin.lat : ''}
+                onChange={e => {
+                  const v = e.target.value
+                  setEditingPin(p =>
+                    p ? { ...p, lat: v === '' ? Number.NaN : Number(v) } : p,
+                  )
+                }}
               />
             </div>
             <div>
@@ -434,8 +452,13 @@ export default function AdminSpeakingPage() {
                 type="number"
                 step="any"
                 style={inputStyle}
-                value={editingPin.lon}
-                onChange={e => setEditingPin(p => (p ? { ...p, lon: Number(e.target.value) } : p))}
+                value={Number.isFinite(editingPin.lon) ? editingPin.lon : ''}
+                onChange={e => {
+                  const v = e.target.value
+                  setEditingPin(p =>
+                    p ? { ...p, lon: v === '' ? Number.NaN : Number(v) } : p,
+                  )
+                }}
               />
             </div>
           </div>
@@ -519,19 +542,21 @@ export default function AdminSpeakingPage() {
                         <td style={{ padding: '8px 10px' }}>
                           <button
                             type="button"
+                            disabled={saving}
                             onClick={() => {
                               setEditingDate({ ...d })
                               setIsNew(false)
                               setError('')
                             }}
-                            style={{ fontSize: 10, color: 'var(--teal)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600, marginRight: 6 }}
+                            style={{ fontSize: 10, color: 'var(--teal)', background: 'none', border: 'none', cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600, marginRight: 6, opacity: saving ? 0.5 : 1 }}
                           >
                             Edit
                           </button>
                           <button
                             type="button"
+                            disabled={saving}
                             onClick={() => void persistDates(dates.filter(x => x.id !== d.id))}
-                            style={{ fontSize: 10, color: 'var(--brand-red-hot)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600 }}
+                            style={{ fontSize: 10, color: 'var(--brand-red-hot)', background: 'none', border: 'none', cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600, opacity: saving ? 0.5 : 1 }}
                           >
                             Del
                           </button>
@@ -570,19 +595,21 @@ export default function AdminSpeakingPage() {
                   <td style={{ padding: '8px 10px' }}>
                     <button
                       type="button"
+                      disabled={saving}
                       onClick={() => {
                         setEditingPin({ ...p })
                         setIsNew(false)
                         setError('')
                       }}
-                      style={{ fontSize: 10, color: 'var(--teal)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600, marginRight: 6 }}
+                      style={{ fontSize: 10, color: 'var(--teal)', background: 'none', border: 'none', cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600, marginRight: 6, opacity: saving ? 0.5 : 1 }}
                     >
                       Edit
                     </button>
                     <button
                       type="button"
+                      disabled={saving}
                       onClick={() => void persistPins(pins.filter(x => x.id !== p.id))}
-                      style={{ fontSize: 10, color: 'var(--brand-red-hot)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600 }}
+                      style={{ fontSize: 10, color: 'var(--brand-red-hot)', background: 'none', border: 'none', cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600, opacity: saving ? 0.5 : 1 }}
                     >
                       Del
                     </button>

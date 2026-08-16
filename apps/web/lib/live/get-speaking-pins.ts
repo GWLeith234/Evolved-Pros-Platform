@@ -31,12 +31,16 @@ export async function getSpeakingPins(): Promise<SpeakingPin[]> {
     byKey.set(`${p.city.toLowerCase()}|${p.country.toLowerCase()}`, p)
   }
   for (const e of extras) {
-    byKey.set(`${e.city.toLowerCase()}|${e.country.toLowerCase()}`, {
+    const key = `${e.city.toLowerCase()}|${e.country.toLowerCase()}`
+    const base = byKey.get(key)
+    byKey.set(key, {
       city: e.city,
       country: e.country,
       lat: e.lat,
       lon: e.lon,
-      featured: e.featured || undefined,
+      // Explicit featured:true wins; otherwise keep catalogue featured pulse
+      // so a coords-only override does not silently drop Fripp/Saskatoon.
+      featured: e.featured ? true : base?.featured || undefined,
     })
   }
   return Array.from(byKey.values())

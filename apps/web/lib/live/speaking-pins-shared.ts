@@ -66,6 +66,10 @@ export function validatePinStored(
   if (!Number.isFinite(lon) || lon < -180 || lon > 180) {
     return { ok: false, error: 'Longitude must be between -180 and 180' }
   }
+  // Reject accidental Null Island pins from empty number inputs.
+  if (lat === 0 && lon === 0) {
+    return { ok: false, error: 'Lat/lon (0,0) is not allowed — enter real coordinates' }
+  }
   return {
     ok: true,
     value: {

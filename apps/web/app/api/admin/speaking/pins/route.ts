@@ -61,11 +61,16 @@ export async function PUT(request: Request) {
     pins.push(result.value)
   }
 
+  // Last-wins by id, then by city|country so duplicate cities cannot stack.
   const byId = new Map<string, SpeakingPinStored>()
   for (const p of pins) byId.set(p.id, p)
+  const byCity = new Map<string, SpeakingPinStored>()
+  for (const p of byId.values()) {
+    byCity.set(`${p.city.toLowerCase()}|${p.country.toLowerCase()}`, p)
+  }
 
   try {
-    const next = Array.from(byId.values())
+    const next = Array.from(byCity.values())
     await savePins(next)
     return NextResponse.json({ pins: next })
   } catch {

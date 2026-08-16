@@ -1,4 +1,5 @@
 import { getUpcomingSpeakingDates, type UpcomingDate } from '@/lib/live/upcoming-dates'
+import { sanitizeSpeakingLinkUrl } from '@/lib/live/upcoming-dates-shared'
 import { LiveSectionHeader } from './LiveSectionHeader'
 
 const FB = 'Barlow, sans-serif'
@@ -30,7 +31,8 @@ function DateRow({ d, index }: { d: UpcomingDate; index: number }) {
             color: 'var(--brand-gold)',
           }}
         >
-          {d.date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()} {d.date.getDate()}
+          {d.date.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }).toUpperCase()}{' '}
+          {d.date.getUTCDate()}
         </p>
         <p
           style={{
@@ -43,7 +45,7 @@ function DateRow({ d, index }: { d: UpcomingDate; index: number }) {
             color: 'var(--text-3)',
           }}
         >
-          {d.date.getFullYear()}
+          {d.date.getUTCFullYear()}
         </p>
       </div>
       <div>
@@ -86,9 +88,12 @@ function DateRow({ d, index }: { d: UpcomingDate; index: number }) {
             {d.detail}
           </p>
         )}
-        {d.linkUrl && (
+        {(() => {
+          const safeHref = sanitizeSpeakingLinkUrl(d.linkUrl)
+          if (!safeHref) return null
+          return (
           <a
-            href={d.linkUrl}
+            href={safeHref}
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -107,7 +112,8 @@ function DateRow({ d, index }: { d: UpcomingDate; index: number }) {
           >
             {d.linkLabel ?? 'Details'} →
           </a>
-        )}
+          )
+        })()}
       </div>
       <div style={{ justifySelf: 'end' }}>
         <span
