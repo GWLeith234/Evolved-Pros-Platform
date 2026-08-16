@@ -20,8 +20,9 @@ import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { getStripe, isPlanKey, priceIdForPlan, PLAN_CATALOG, stripeConfigured } from '@/lib/stripe/config'
 import { alreadyEntitledTo } from '@/lib/stripe/purchaseGuard'
 import { resolveStripePriceId } from '@/lib/commerce/catalogue'
+import { getAppUrl } from '@/lib/urls'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://platform.evolvedpros.com'
+const APP_URL = getAppUrl()
 
 export async function POST(request: Request) {
   // 1. Auth gate

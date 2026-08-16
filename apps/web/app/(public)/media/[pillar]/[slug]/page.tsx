@@ -4,6 +4,7 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 import { marked } from 'marked'
 import { adminClient } from '@/lib/supabase/admin'
+import { resolveAuthorProfile } from '@/lib/media/resolveAuthorProfile'
 import { getPillarLabel, getPillarColor } from '@/lib/pillars'
 import { mediaStoryHref } from '@/lib/media/paths'
 import { StoryCommentsClient as StoryComments, MediaAdZoneClient as MediaAdZone } from '../../MediaClientShims'
@@ -149,25 +150,10 @@ export default async function StoryPage({
   const pColor = isOriginal ? 'var(--brand-gold)' : getPillarColor(story.pillar)
   const articleUrl = canonicalUrl(`/media/${params.pillar}/${params.slug}`)
 
-  // Look up author avatar by full_name (media_stories.author is a plain
-  // string not an FK — match on users.full_name).
-  let authorUser: { full_name: string | null; avatar_url: string | null; role: string | null; current_pillar: string | null } | null = null
-  if (story.author) {
-    // Defensive: order by created_at to make the result deterministic
-    // if duplicate full_name rows ever exist again. .limit(1) ensures
-    // PostgREST returns at most 1 row so .maybeSingle() can't 406.
-    const { data: profile } = await adminClient
-      .from('users')
-      .select('full_name, avatar_url, role, current_pillar')
-      .eq('full_name', story.author)
-      .order('created_at', { ascending: true })
-      .limit(1)
-      .maybeSingle()
-    authorUser = profile ?? null
-    if (!authorUser) {
-      console.warn('[author-photo] no user match for', story.author)
-    }
-  }
+  // media_stories.author is a byline string, not an FK. Resolve against
+  // public.users by name (full_name / display_name / first+last). A miss is
+  // fine — the photo is optional and the UI falls back to initials.
+  const authorUser = await resolveAuthorProfile(story.author)
   const authorAvatar = authorUser?.avatar_url ?? null
 
   // Related stories: same pillar, exclude current
