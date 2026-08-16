@@ -10,7 +10,6 @@ const PUBLIC_ROUTES = [
   '/api/cron',
   '/dev-login',
   '/api/dev-login',
-  '/pricing',
   '/media',
   // Public SEO podcast section (index, episode pages, RSS) — must be reachable
   // by logged-out visitors and crawlers. Also removed from the matcher below.
@@ -26,9 +25,12 @@ const PUBLIC_ROUTES = [
   '/api/guest',
 ]
 
-// Routes that are publicly accessible but still need session refresh
-// so server components can read the user's auth state.
-const SESSION_OPTIONAL_ROUTES = ['/membership']
+// Routes that are publicly accessible but still need session refresh so server
+// components can read the user's auth state. These are NEVER gated — not by
+// auth, not by the beta gate, not by the onboarding gate (see the early return
+// below). /pricing is the only checkout surface, so it has to stay reachable
+// for anonymous visitors AND for signed-in members mid-onboarding.
+const SESSION_OPTIONAL_ROUTES = ['/membership', '/pricing']
 const ADMIN_ROUTES = ['/admin', '/api/admin']
 
 export async function middleware(request: NextRequest) {
@@ -110,12 +112,20 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Session-optional routes: the session has been refreshed above, so server
+  // components can read auth state — and that is ALL middleware does here.
+  //
+  // This check sits OUTSIDE the `if (!user)` block on purpose. Inside it, only
+  // anonymous visitors were let through; a signed-in user fell past it into the
+  // member-route gates below and would be redirected to /onboarding (or
+  // /beta-paused) instead of seeing the page. That is fine for a member surface
+  // and wrong for /pricing, which is the only checkout surface: a half-onboarded
+  // member must still be able to buy.
+  if (SESSION_OPTIONAL_ROUTES.some(r => pathname.startsWith(r))) {
+    return supabaseResponse
+  }
+
   if (!user) {
-    // Session-optional routes (e.g. /membership): let them through without auth.
-    // Session was still refreshed above so server components can call getUser().
-    if (SESSION_OPTIONAL_ROUTES.some(r => pathname.startsWith(r))) {
-      return supabaseResponse
-    }
     // /api/* paths are programmatic — return JSON 401 instead of a 307 redirect
     // to /login (which would leak HTML to a fetch() caller).
     if (pathname.startsWith('/api/')) {
@@ -214,6 +224,7 @@ export const config = {
     '/notifications',
     '/notifications/:path*',
     '/membership',
+    '/pricing',
     '/onboarding',
     '/onboarding/:path*',
     '/admin',

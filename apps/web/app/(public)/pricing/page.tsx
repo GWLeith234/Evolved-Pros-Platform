@@ -2,6 +2,9 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { RedeemCodeForm } from './RedeemCodeForm'
 import { PricingTierCards } from './PricingTierCards'
+import { ManageSubscriptionButton } from './ManageSubscriptionButton'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { effectiveTier, hasTierAccess } from '@/lib/tier'
 import { getMembershipPricing } from '@/lib/commerce/catalogue'
 import { LogoMark } from '@/components/ui/LogoMark'
 import { tierPlanName } from '@/lib/academy/gating'
@@ -139,6 +142,24 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
   // constants per amount if the catalogue query fails or is empty.
   const { tiers } = await getMembershipPricing()
   const hero = contextualHero(searchParams ?? {})
+
+  // SPRINT PRICE-1 — who is looking at this page?
+  //
+  // This page stays PUBLIC: resolveCurrentUser returns null for an anonymous
+  // visitor and we render the logged-out state. It must never redirect. The
+  // session is refreshed by middleware (/pricing is in SESSION_OPTIONAL_ROUTES
+  // and in config.matcher), so a member with a stale access token still reads
+  // as signed in rather than being shown a buy button for a plan they own.
+  const profile = await resolveCurrentUser()
+  const signedIn = !!profile
+  const currentTier = profile
+    ? effectiveTier(
+        (profile as unknown as { tier?: string | null }).tier,
+        (profile as unknown as { tier_status?: string | null }).tier_status,
+      )
+    : null
+  // Only a live paid subscription has anything to manage in the portal.
+  const hasPaidPlan = hasTierAccess(currentTier, 'vip')
   return (
     <div style={{ backgroundColor: '#0A0F18', minHeight: '100vh' }}>
       {/* Header */}
@@ -153,13 +174,26 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
         <Link href="/" aria-label="Evolved Pros — home" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
           <LogoMark variant="light" height={32} alt="Evolved Pros" />
         </Link>
-        <Link
-          href="/login"
-          className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] px-4 py-2 rounded transition-opacity hover:opacity-80"
-          style={{ color: '#F5F0E8', border: '1px solid rgba(245,240,232,0.15)' }}
-        >
-          Sign in
-        </Link>
+        {signedIn ? (
+          <div className="flex items-center gap-3">
+            {hasPaidPlan && <ManageSubscriptionButton />}
+            <Link
+              href="/profile/me"
+              className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] px-4 py-2 rounded transition-opacity hover:opacity-80"
+              style={{ color: 'var(--white)', border: '1px solid rgba(245,240,232,0.15)' }}
+            >
+              My account
+            </Link>
+          </div>
+        ) : (
+          <Link
+            href="/login"
+            className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] px-4 py-2 rounded transition-opacity hover:opacity-80"
+            style={{ color: '#F5F0E8', border: '1px solid rgba(245,240,232,0.15)' }}
+          >
+            Sign in
+          </Link>
+        )}
       </header>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16">
@@ -177,7 +211,12 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
         </div>
 
         {/* Tier cards + monthly/annual toggle — amounts from the catalogue. */}
-        <PricingTierCards pricing={tiers} vipSku={VIP_MONTHLY_SKU} proSku={PRO_MONTHLY_SKU} />
+        <PricingTierCards
+          pricing={tiers}
+          vipSku={VIP_MONTHLY_SKU}
+          proSku={PRO_MONTHLY_SKU}
+          currentTier={currentTier}
+        />
 
         {/* Have a code? — comp / access-code redemption (Friends of George). */}
         <div className="max-w-2xl mx-auto mb-20">

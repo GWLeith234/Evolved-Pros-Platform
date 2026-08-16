@@ -2,7 +2,14 @@
 
 import { useState } from 'react'
 import { PricingCtaButton } from './PricingCtaButton'
-import { ANNUAL_FREE_MONTHS, type TierKey, type TierPrice } from '@/lib/pricing'
+import {
+  ANNUAL_FREE_MONTHS,
+  pricingLadderState,
+  type LadderTier,
+  type TierKey,
+  type TierPrice,
+} from '@/lib/pricing'
+import { hasTierAccess } from '@/lib/tier'
 
 // Tier presentation is static; only the amounts come from the catalogue
 // (passed in as `pricing`). The monthly/annual toggle switches which amount the
@@ -37,16 +44,29 @@ interface TierDef {
   ctaSku?: string
   /** Stripe plan family; combined with the billing toggle into a plan key. */
   ctaPlanBase?: 'vip' | 'pro'
+  /**
+   * Where this card sits on the entitlement ladder. Omitted for Keynotes, which
+   * is an inquiry rather than a subscription and is never "owned".
+   */
+  tierKey?: LadderTier
 }
 
 export function PricingTierCards({
   pricing,
   vipSku,
   proSku,
+  currentTier = null,
 }: {
   pricing: Record<TierKey, TierPrice>
   vipSku: string
   proSku: string
+  /**
+   * The viewer's EFFECTIVE tier (already run through effectiveTier by the
+   * page), or null when anonymous / free. Drives current-plan marking so an
+   * existing subscriber is never shown a buy button for a plan they own —
+   * clicking one opened a second Stripe subscription against the same customer.
+   */
+  currentTier?: string | null
 }) {
   const [billing, setBilling] = useState<Billing>('monthly')
   const isAnnual = billing === 'annual'
@@ -74,6 +94,7 @@ export function PricingTierCards({
       ],
       cta: 'Join free',
       ctaHref: '/login?mode=signup',
+      tierKey: 'community',
     },
     {
       name: 'VIP',
@@ -93,6 +114,7 @@ export function PricingTierCards({
       cta: 'Start VIP',
       ctaSku: vipSku,
       ctaPlanBase: 'vip',
+      tierKey: 'vip',
     },
     {
       name: 'Professional',
@@ -113,6 +135,7 @@ export function PricingTierCards({
       cta: 'Go Professional',
       ctaSku: proSku,
       ctaPlanBase: 'pro',
+      tierKey: 'pro',
     },
     {
       name: 'Keynotes',
@@ -131,6 +154,19 @@ export function PricingTierCards({
       ctaHref: '/live',
     },
   ]
+
+  /**
+   * Where a card sits relative to the viewer, using ONLY hasTierAccess — never
+   * a string compare, so 'pro' outranking 'vip' is decided by the shared rank
+   * table rather than by this component.
+   *
+   *   owned  — this is exactly the viewer's tier → "Current plan", inert CTA
+   *   below  — the viewer already outranks it   → "Included", no buy CTA
+   *   null   — anonymous, or an upgrade         → normal live CTA
+   */
+  function ladderState(t: TierDef): 'owned' | 'below' | null {
+    return pricingLadderState(currentTier, t.tierKey, hasTierAccess)
+  }
 
   function priceParts(t: TierDef): { price: string; period?: string; note?: string } {
     if (t.fixedPrice) return { price: t.fixedPrice, period: t.fixedPeriod }
@@ -183,6 +219,7 @@ export function PricingTierCards({
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-20">
         {tiers.map(tier => {
           const { price, period, note } = priceParts(tier)
+          const state = ladderState(tier)
           return (
             <div
               key={tier.name}
@@ -292,18 +329,35 @@ export function PricingTierCards({
                 </div>
               )}
 
-              {/* CTA */}
-              <PricingCtaButton
-                label={tier.cta}
-                href={tier.ctaHref}
-                sku={tier.ctaSku}
-                plan={
-                  tier.ctaPlanBase
-                    ? (`${tier.ctaPlanBase}_${isAnnual ? 'annual' : 'monthly'}` as const)
-                    : undefined
-                }
-                featured={!!tier.featured}
-              />
+              {/* CTA — a plan the viewer already holds never gets a buy button.
+                  The server enforces this too (/api/stripe/checkout returns 409);
+                  this is the half that stops them clicking in the first place. */}
+              {state ? (
+                <div
+                  aria-disabled="true"
+                  className="block w-full py-3 rounded-lg font-condensed font-bold uppercase tracking-[0.1em] text-[12px] text-center"
+                  style={{
+                    backgroundColor: 'rgba(10,191,163,0.10)',
+                    color: 'var(--brand-teal)',
+                    border: '1px solid rgba(10,191,163,0.32)',
+                    cursor: 'default',
+                  }}
+                >
+                  {state === 'owned' ? 'Current plan' : 'Included'}
+                </div>
+              ) : (
+                <PricingCtaButton
+                  label={tier.cta}
+                  href={tier.ctaHref}
+                  sku={tier.ctaSku}
+                  plan={
+                    tier.ctaPlanBase
+                      ? (`${tier.ctaPlanBase}_${isAnnual ? 'annual' : 'monthly'}` as const)
+                      : undefined
+                  }
+                  featured={!!tier.featured}
+                />
+              )}
             </div>
           )
         })}

@@ -18,6 +18,7 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { getStripe, isPlanKey, priceIdForPlan, PLAN_CATALOG, stripeConfigured } from '@/lib/stripe/config'
+import { alreadyEntitledTo } from '@/lib/stripe/purchaseGuard'
 import { resolveStripePriceId } from '@/lib/commerce/catalogue'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://platform.evolvedpros.com'
@@ -46,6 +47,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid plan' }, { status: 422 })
   }
   const plan = body.plan
+
+  // 4. Repurchase guard (SPRINT PRICE-1). THIS is the check that prevents
+  //    double billing — the /pricing UI can be bypassed by posting here
+  //    directly, so the server must refuse independently.
+  //
+  //    Goes through effectiveTier() so a dead subscription (canceled/unpaid)
+  //    correctly does NOT block re-purchasing the same tier, and through
+  //    hasTierAccess() so a Pro blocks a VIP purchase by rank rather than by
+  //    string equality. Same-tier on a different interval is also refused: a
+  //    monthly→annual switch is a plan change and belongs in the billing
+  //    portal, not a second subscription.
+  const profileTier = (profile as unknown as { tier?: string | null }).tier
+  const profileTierStatus = (profile as unknown as { tier_status?: string | null }).tier_status
+  if (alreadyEntitledTo(profileTier, profileTierStatus, plan)) {
+    return NextResponse.json({ error: 'You already have this plan.' }, { status: 409 })
+  }
 
   // Source of truth is our catalogue (prices.stripe_price_id); env vars are a
   // backward-compat fallback until every price is mirrored to Stripe.

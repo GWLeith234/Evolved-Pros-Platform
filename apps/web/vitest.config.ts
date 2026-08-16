@@ -11,6 +11,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('.', import.meta.url)).replace(/\/$/, ''),
+      // `server-only` is a build-time marker with no runtime entry point; stub
+      // it so server-side lib modules can be unit-tested.
+      'server-only': fileURLToPath(new URL('./test/stubs/server-only.ts', import.meta.url)),
     },
   },
   // tsconfig sets jsx:"preserve" for Next's compiler, which leaves esbuild

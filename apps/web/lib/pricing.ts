@@ -137,3 +137,42 @@ export function computeMrr(
     return sum + tierMonthlyPrice(m.tier, m.tier_status, Boolean(m.comp_promo_code_id), monthlyByKey)
   }, 0)
 }
+
+// ── Current-plan marking on /pricing (SPRINT PRICE-1) ───────────────────────
+
+/**
+ * The entitlement ladder, low to high. These are lib/tier's TIER_RANK keys
+ * ('pro'), not the catalogue's TierKey ('professional') — the two vocabularies
+ * differ and this one is the access-control one.
+ */
+export const TIER_LADDER = ['community', 'vip', 'pro'] as const
+
+export type LadderTier = (typeof TIER_LADDER)[number]
+
+/**
+ * Where a pricing card sits relative to the viewer.
+ *
+ *   'owned' — exactly the viewer's tier → render "Current plan", no buy CTA
+ *   'below' — the viewer already outranks it → render "Included", no buy CTA
+ *   null    — anonymous, or a genuine upgrade → render the live buy CTA
+ *
+ * `currentTier` must already be the EFFECTIVE tier (run through effectiveTier),
+ * so a churned member sees live CTAs again.
+ *
+ * Comparison is delegated entirely to hasTierAccess: 'pro' outranks 'vip'
+ * because of the shared rank table, never because the strings differ. This is
+ * the UI half of the double-billing fix; /api/stripe/checkout enforces the same
+ * rule server-side and is the authoritative one.
+ */
+export function pricingLadderState(
+  currentTier: string | null | undefined,
+  cardTier: LadderTier | null | undefined,
+  hasAccess: (userTier: string | null | undefined, requiredTier: string) => boolean,
+): 'owned' | 'below' | null {
+  if (!cardTier || !currentTier) return null
+  if (!hasAccess(currentTier, cardTier)) return null
+  const nextUp = TIER_LADDER[TIER_LADDER.indexOf(cardTier) + 1]
+  // Nothing above 'pro', so at-or-above there means owned.
+  const outranksThisCard = nextUp ? hasAccess(currentTier, nextUp) : false
+  return outranksThisCard ? 'below' : 'owned'
+}
