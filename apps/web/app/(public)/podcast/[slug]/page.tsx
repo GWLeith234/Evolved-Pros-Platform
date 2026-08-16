@@ -20,6 +20,7 @@ import {
   formatDate,
   formatTimestamp,
   youtubeTimestampUrl,
+  episodePosterUrl,
   type PublicEpisode,
 } from '@/lib/podcast/public'
 
@@ -164,7 +165,12 @@ export default async function PublicEpisodePage({ params }: Props) {
         {/* Player */}
         {ep.youtube_id ? (
           <div className="mb-6">
-            <YouTubeFacade youtubeId={ep.youtube_id} title={ep.title} />
+            <YouTubeFacade
+              key={ep.youtube_id}
+              youtubeId={ep.youtube_id}
+              title={ep.title}
+              posterUrl={episodePosterUrl(ep)}
+            />
           </div>
         ) : null}
 

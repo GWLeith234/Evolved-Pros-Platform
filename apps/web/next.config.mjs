@@ -72,7 +72,7 @@ const nextConfig = {
               // the reply listener can't connect ("Could not reach Cloud Firestore").
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.apigateway.co https://*.apigateway.co wss://*.apigateway.co https://stream.mux.com https://*.mux.com https://*.googleapis.com wss://*.googleapis.com https://firestore.googleapis.com https://firebaseinstallations.googleapis.com https://www.google.com https://*.firebaseio.com wss://*.firebaseio.com",
               "frame-src 'self' https://cdn.apigateway.co https://*.apigateway.co https://www.youtube.com https://www.youtube-nocookie.com https://*.heygen.com",
-              "img-src 'self' data: blob: https://*.supabase.co https://image.mux.com https://images.unsplash.com https://*.apigateway.co https://www.google.com",
+              "img-src 'self' data: blob: https://*.supabase.co https://image.mux.com https://images.unsplash.com https://*.apigateway.co https://www.google.com https://i.ytimg.com https://img.youtube.com",
               "media-src 'self' https://stream.mux.com https://*.mux.com blob:",
               "worker-src 'self' blob:",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.apigateway.co",
