@@ -27,7 +27,7 @@ function DateRow({ d, index }: { d: UpcomingDate; index: number }) {
             fontSize: 28,
             lineHeight: 1,
             letterSpacing: '0.04em',
-            color: '#C9A84C',
+            color: 'var(--brand-gold)',
           }}
         >
           {d.date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()} {d.date.getDate()}
@@ -67,7 +67,7 @@ function DateRow({ d, index }: { d: UpcomingDate; index: number }) {
             fontSize: 11,
             letterSpacing: '0.28em',
             textTransform: 'uppercase',
-            color: '#C9A84C',
+            color: 'var(--brand-gold)',
           }}
         >
           {d.country ? `${d.city} · ${d.country}` : d.city}
@@ -99,7 +99,7 @@ function DateRow({ d, index }: { d: UpcomingDate; index: number }) {
               fontSize: 11,
               letterSpacing: '0.24em',
               textTransform: 'uppercase',
-              color: '#C9A84C',
+              color: 'var(--brand-gold)',
               textDecoration: 'none',
               borderBottom: '1px solid rgba(201,168,76,0.4)',
               paddingBottom: 2,
@@ -122,7 +122,7 @@ function DateRow({ d, index }: { d: UpcomingDate; index: number }) {
             fontSize: 10,
             letterSpacing: '0.28em',
             textTransform: 'uppercase',
-            color: d.tag === 'CONFIRMED' ? '#0ABFA3' : '#C9A84C',
+            color: d.tag === 'CONFIRMED' ? 'var(--brand-teal)' : 'var(--brand-gold)',
           }}
         >
           {d.tag}
@@ -168,7 +168,7 @@ export async function LiveUpcomingDates() {
           style={{
             marginTop: 24,
             border: '1px solid var(--border-soft2)',
-            borderLeft: '3px solid #C9A84C',
+            borderLeft: '3px solid var(--brand-gold)',
             background: 'var(--bg-surface)',
             padding: '28px 24px',
             display: 'flex',
@@ -213,9 +213,9 @@ export async function LiveUpcomingDates() {
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: '#ef0e30',
-              color: '#fff',
-              border: '1px solid #ef0e30',
+              background: 'var(--brand-red-hot)',
+              color: 'var(--white)',
+              border: '1px solid var(--brand-red-hot)',
               fontFamily: FBC,
               fontWeight: 800,
               fontSize: 12,
@@ -254,7 +254,7 @@ export async function LiveUpcomingDates() {
                   fontSize: 12,
                   letterSpacing: '0.28em',
                   textTransform: 'uppercase',
-                  color: '#C9A84C',
+                  color: 'var(--brand-gold)',
                 }}
               >
                 On hold

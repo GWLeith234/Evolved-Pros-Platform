@@ -35,7 +35,7 @@ export function LiveProductMilestones() {
                   fontFamily: FBN,
                   fontSize: 18,
                   letterSpacing: '0.04em',
-                  color: '#C9A84C',
+                  color: 'var(--brand-gold)',
                   whiteSpace: 'nowrap',
                 }}
               >
@@ -78,7 +78,7 @@ export function LiveProductMilestones() {
                     fontSize: 11,
                     letterSpacing: '0.18em',
                     textTransform: 'uppercase',
-                    color: '#C9A84C',
+                    color: 'var(--brand-gold)',
                     flexShrink: 0,
                   }}
                 >

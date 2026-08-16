@@ -90,7 +90,7 @@ export function LivePastSpeaking({ pins }: { pins: SpeakingPin[] }) {
               style={{
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border-color, var(--border-soft2))',
-                borderLeft: '3px solid var(--brand-gold, #C9A84C)',
+                borderLeft: '3px solid var(--brand-gold)',
                 padding: '18px 20px 16px',
               }}
             >
@@ -142,7 +142,7 @@ export function LivePastSpeaking({ pins }: { pins: SpeakingPin[] }) {
                         fontSize: 11,
                         letterSpacing: '0.16em',
                         textTransform: 'uppercase',
-                        color: 'var(--brand-gold, #C9A84C)',
+                        color: 'var(--brand-gold)',
                       }}
                     >
                       {country}

@@ -198,7 +198,7 @@ export default function AdminSpeakingPage() {
             setIsNew(true)
           }}
           className="font-condensed font-bold uppercase tracking-wide text-[11px] px-4 py-2 rounded"
-          style={{ backgroundColor: '#C9A84C', color: '#0A0F18' }}
+          style={{ backgroundColor: 'var(--brand-gold)', color: 'var(--navy-abyss)' }}
         >
           {tab === 'dates' ? 'Add date' : 'Add pin'}
         </button>
@@ -239,12 +239,12 @@ export default function AdminSpeakingPage() {
       </div>
 
       {notice && (
-        <p className="text-[12px] mb-3" style={{ color: '#0F6E56' }}>
+        <p className="text-[12px] mb-3" style={{ color: 'var(--brand-teal)' }}>
           {notice}
         </p>
       )}
       {error && !editingDate && !editingPin && (
-        <p className="text-[12px] mb-3" style={{ color: '#ef0e30' }}>
+        <p className="text-[12px] mb-3" style={{ color: 'var(--brand-red-hot)' }}>
           {error}
         </p>
       )}
@@ -263,7 +263,7 @@ export default function AdminSpeakingPage() {
             {isNew ? 'New speaking date' : 'Edit speaking date'}
           </h2>
           {error && (
-            <p className="text-[12px] mb-2" style={{ color: '#ef0e30' }}>
+            <p className="text-[12px] mb-2" style={{ color: 'var(--brand-red-hot)' }}>
               {error}
             </p>
           )}
@@ -366,7 +366,7 @@ export default function AdminSpeakingPage() {
               onClick={() => void handleSaveDate()}
               disabled={saving}
               className="font-condensed font-bold uppercase tracking-wide text-[11px] px-5 py-2 rounded"
-              style={{ backgroundColor: '#C9A84C', color: '#0A0F18', opacity: saving ? 0.5 : 1 }}
+              style={{ backgroundColor: 'var(--brand-gold)', color: 'var(--navy-abyss)', opacity: saving ? 0.5 : 1 }}
             >
               {saving ? 'Saving…' : 'Save'}
             </button>
@@ -388,7 +388,7 @@ export default function AdminSpeakingPage() {
             {isNew ? 'Add globe pin' : 'Edit globe pin'}
           </h2>
           {error && (
-            <p className="text-[12px] mb-2" style={{ color: '#ef0e30' }}>
+            <p className="text-[12px] mb-2" style={{ color: 'var(--brand-red-hot)' }}>
               {error}
             </p>
           )}
@@ -456,7 +456,7 @@ export default function AdminSpeakingPage() {
               onClick={() => void handleSavePin()}
               disabled={saving}
               className="font-condensed font-bold uppercase tracking-wide text-[11px] px-5 py-2 rounded"
-              style={{ backgroundColor: '#C9A84C', color: '#0A0F18', opacity: saving ? 0.5 : 1 }}
+              style={{ backgroundColor: 'var(--brand-gold)', color: 'var(--navy-abyss)', opacity: saving ? 0.5 : 1 }}
             >
               {saving ? 'Saving…' : 'Save'}
             </button>
@@ -507,13 +507,13 @@ export default function AdminSpeakingPage() {
                               padding: '2px 6px',
                               backgroundColor:
                                 d.tag === 'CONFIRMED' ? 'rgba(10,191,163,0.12)' : 'rgba(201,168,76,0.15)',
-                              color: d.tag === 'CONFIRMED' ? '#0F6E56' : '#8B6A00',
+                              color: d.tag === 'CONFIRMED' ? 'var(--brand-teal)' : 'var(--pillar-5-ink)',
                             }}
                           >
                             {d.tag}
                           </span>
                         </td>
-                        <td style={{ padding: '8px 10px', color: past ? 'rgba(27,60,90,0.4)' : '#0F6E56', fontSize: 11 }}>
+                        <td style={{ padding: '8px 10px', color: past ? 'rgba(27,60,90,0.4)' : 'var(--brand-teal)', fontSize: 11 }}>
                           {past ? 'Hidden (past)' : 'Showing'}
                         </td>
                         <td style={{ padding: '8px 10px' }}>
@@ -524,14 +524,14 @@ export default function AdminSpeakingPage() {
                               setIsNew(false)
                               setError('')
                             }}
-                            style={{ fontSize: 10, color: '#68a2b9', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600, marginRight: 6 }}
+                            style={{ fontSize: 10, color: 'var(--teal)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600, marginRight: 6 }}
                           >
                             Edit
                           </button>
                           <button
                             type="button"
                             onClick={() => void persistDates(dates.filter(x => x.id !== d.id))}
-                            style={{ fontSize: 10, color: '#ef0e30', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600 }}
+                            style={{ fontSize: 10, color: 'var(--brand-red-hot)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600 }}
                           >
                             Del
                           </button>
@@ -575,14 +575,14 @@ export default function AdminSpeakingPage() {
                         setIsNew(false)
                         setError('')
                       }}
-                      style={{ fontSize: 10, color: '#68a2b9', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600, marginRight: 6 }}
+                      style={{ fontSize: 10, color: 'var(--teal)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600, marginRight: 6 }}
                     >
                       Edit
                     </button>
                     <button
                       type="button"
                       onClick={() => void persistPins(pins.filter(x => x.id !== p.id))}
-                      style={{ fontSize: 10, color: '#ef0e30', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600 }}
+                      style={{ fontSize: 10, color: 'var(--brand-red-hot)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600 }}
                     >
                       Del
                     </button>
