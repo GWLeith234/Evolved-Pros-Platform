@@ -19,4 +19,6 @@
 export { TopNav as TopNavClient } from './TopNav'
 export { BottomTabBar as BottomTabBarClient } from './BottomTabBar'
 export { NextEventBanner as NextEventBannerClient } from './NextEventBanner'
+// RightRail is retired (was CSS-hidden but still fetching). Export kept as a
+// no-op for any stale imports; member layout no longer mounts it.
 export { RightRail as RightRailClient } from './RightRail'

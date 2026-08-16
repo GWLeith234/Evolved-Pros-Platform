@@ -18,6 +18,11 @@ function formatDate(iso: string): string {
   })
 }
 
+function isMobileViewport(): boolean {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia('(max-width: 767px)').matches
+}
+
 export function NextEventBanner() {
   const [event, setEvent] = useState<NextEvent>(null)
   const router = useRouter()
@@ -28,6 +33,9 @@ export function NextEventBanner() {
 
   useEffect(() => {
     if (suppressed) return
+    // Banner is md:hidden — skip the network round-trip on desktop.
+    if (!isMobileViewport()) return
+
     let cancelled = false
     void (async () => {
       // Defer supabase client so this module can SSR without realtime-js eval.

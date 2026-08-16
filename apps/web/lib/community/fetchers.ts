@@ -293,15 +293,20 @@ export async function fetchActiveMembers(supabase: SB, limit = 5): Promise<Membe
 }
 
 export async function fetchCommunityAds(): Promise<CommunityAd[]> {
-  // Pull a wider pool so rotation can diversify rail vs feed placements.
-  const { data } = await adminClient
-    .from('platform_ads')
-    .select('id, image_url, headline, body_copy, tool_name, cta_text, link_url, click_url, sponsor_name')
-    .eq('is_active', true)
-    .order('sort_order')
-    .limit(12)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data ?? []) as any[]
+  // Cached active-ads catalogue (2 min) — filter columns for the rail/feed.
+  const { getActivePlatformAds } = await import('@/lib/cache/shared')
+  const rows = await getActivePlatformAds()
+  return rows.slice(0, 12).map(a => ({
+    id: a.id,
+    image_url: a.image_url,
+    headline: a.headline,
+    body_copy: a.body_copy,
+    tool_name: a.tool_name,
+    cta_text: a.cta_text,
+    link_url: a.link_url,
+    click_url: a.click_url,
+    sponsor_name: a.sponsor_name,
+  })) as CommunityAd[]
 }
 
 // MR1: weekly leaderboard. No points-history table exists, so we rank by
