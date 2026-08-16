@@ -580,7 +580,10 @@ export default async function MemberHomePage() {
   const homeContextEvent = nextEvent
     ? {
         title: nextEvent.title,
-        dateLabel: new Date(nextEvent.starts_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }),
+        dateLabel: new Date(nextEvent.starts_at).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        }),
         href: `/events/${nextEvent.id}`,
       }
     : null
@@ -626,7 +629,7 @@ export default async function MemberHomePage() {
     1: 'foundation',
     2: 'identity',
     3: 'mental-toughness',
-    4: 'strategy',
+    4: 'strategic-approach',
     5: 'accountability',
     6: 'execution',
   }
@@ -776,7 +779,7 @@ export default async function MemberHomePage() {
             The Long Game
           </p>
           <a
-            href="/home"
+            href="/leaderboard"
             className="ep-btn ep-btn--tertiary font-condensed font-bold uppercase tracking-[0.14em] text-[10px]"
             style={{ color: 'var(--brand-gold, #C9A84C)', textDecoration: 'none' }}
           >

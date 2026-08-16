@@ -485,23 +485,6 @@ export function AccountabilityHub({
                 {flash}
               </span>
             )}
-            {!isFull && (
-              <Link
-                href="/home"
-                style={{
-                  fontFamily: '"Barlow Condensed", sans-serif',
-                  fontWeight: 800,
-                  fontSize: 11,
-                  letterSpacing: '0.14em',
-                  textTransform: 'uppercase',
-                  color: GOLD,
-                  textDecoration: 'none',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                Open hub →
-              </Link>
-            )}
           </div>
         </div>
 

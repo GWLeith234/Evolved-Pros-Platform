@@ -285,7 +285,8 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
             </div>
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p
+            <a
+              href={`/events/${event.id}`}
               style={{
                 margin: 0,
                 fontFamily: '"Barlow", sans-serif',
@@ -295,10 +296,12 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
+                textDecoration: 'none',
+                display: 'block',
               }}
             >
               {event.title}
-            </p>
+            </a>
             <p
               style={{
                 margin: '2px 0 0',

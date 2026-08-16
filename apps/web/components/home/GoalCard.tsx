@@ -10,6 +10,7 @@ const PILLAR_SLUG_TO_NUMBER: Record<string, 1 | 2 | 3 | 4 | 5 | 6> = {
   mental:            3,
   'mental-toughness': 3,
   strategy:          4,
+  'strategic-approach': 4,
   accountability:    5,
   execution:         6,
 }

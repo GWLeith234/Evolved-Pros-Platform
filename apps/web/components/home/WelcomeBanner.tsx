@@ -90,7 +90,8 @@ const GREETING_BY_PERIOD: Record<MarvelScenePeriod, string> = {
   'early-morning': 'Early start, ',
   'mid-morning':   'Good morning, ',
   'midday':        'Good afternoon, ',
-  'early-evening': 'Good evening, ',
+  // 14:00–17:00 still uses the early-evening scene art, but copy stays afternoon.
+  'early-evening': 'Good afternoon, ',
   'evening':       'Good evening, ',
   'night':         'Burning the midnight oil, ',
 }
@@ -486,34 +487,29 @@ export function WelcomeBanner({
   const period: MarvelScenePeriod = periodOverride ?? (now ? periodForHour(now.getHours()) : 'evening')
   const greet = GREETING_BY_PERIOD[period]
 
-  // Year-countdown math — JSX line 552-559 (year-based, not quarter-based;
-  // the Q label + bar both reflect year progress and quarter is just a label).
-  // Everything below must be `now`-gated. Previously `let year = new Date()`
-  // ran ungated at render scope; harmless most of the time but a #425 landmine
-  // around year-boundary clock skew.
+  // Quarter countdown — label is Q{n} · year, so days/% must match quarter end
+  // (was year-remaining, which showed "Q3 · 139d left" in mid-August).
   const dateStr = now
     ? now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
     : ''
   const timeStr = now
     ? now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
     : ''
+  const quarter = now ? Math.floor(now.getMonth() / 3) + 1 : 0
+  const year = now ? now.getFullYear() : 0
+  const quarterStartMonth = (quarter - 1) * 3
+  const quarterStartMs = now ? new Date(year, quarterStartMonth, 1).getTime() : 0
+  const quarterEndMs = now
+    ? new Date(year, quarterStartMonth + 3, 0, 23, 59, 59).getTime()
+    : 0
+  const quarterTotalMs = Math.max(1, quarterEndMs - quarterStartMs)
   const yearPct = now
     ? Math.min(
         100,
-        Math.max(
-          0,
-          ((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) /
-            (new Date(now.getFullYear() + 1, 0, 1).getTime() -
-              new Date(now.getFullYear(), 0, 1).getTime())) *
-            100,
-        ),
+        Math.max(0, ((now.getTime() - quarterStartMs) / quarterTotalMs) * 100),
       )
     : 0
-  const daysLeft = now
-    ? Math.ceil((new Date(now.getFullYear() + 1, 0, 1).getTime() - now.getTime()) / 86400000)
-    : 0
-  const quarter = now ? Math.floor(now.getMonth() / 3) + 1 : 0
-  const year = now ? now.getFullYear() : 0
+  const daysLeft = now ? Math.max(0, Math.ceil((quarterEndMs - now.getTime()) / 86400000)) : 0
 
   // Transform v2 pillar shape → architecture-column shape with locked colors.
   const archPillars: ArchPillar[] = useMemo(
@@ -580,7 +576,7 @@ export function WelcomeBanner({
           .welcome-banner-daterow { gap: 8px !important; }
           .welcome-banner-right { width: 100%; gap: 16px !important; }
           .welcome-banner-right > div { width: 100%; }
-          /* Two tiles (Posts + Stories) — a single row of two, no second-row
+          /* Two tiles (Posts + Comments) — a single row of two, no second-row
              borders. Divider between them only. */
           .welcome-banner-scoreboard { display: grid !important; grid-template-columns: 1fr 1fr; }
           .welcome-banner-scoreboard > a { min-width: 0 !important; border-right: none !important; border-bottom: none !important; }
@@ -960,11 +956,11 @@ export function WelcomeBanner({
                 />
                 <ScoreCell
                   href="/media"
-                  label={pluralLabel(scoreboard.storyCount, 'Story', 'Stories')}
+                  label={pluralLabel(scoreboard.storyCount, 'Comment', 'Comments')}
                   value={scoreboard.storyCount}
                   accent="var(--brand-gold)"
-                  subline="Comments on stories"
-                  zeroHint="Read a story"
+                  subline="On media stories"
+                  zeroHint="Comment on a story"
                   last
                 />
               </div>
