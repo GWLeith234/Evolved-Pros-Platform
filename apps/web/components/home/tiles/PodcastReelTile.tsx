@@ -1,15 +1,8 @@
 // HOME-4UP-TILES: ports PodcastReelCard from home-tiles.jsx (lines 350-440).
 // 3 latest episodes with square cover (gradient + episode number),
-// title, guest · role · duration, and a play/pause toggle button.
+// title, guest · role · duration, and a play control that opens the episode.
 // Bottom link to /podcast.
-//
-// 'use client' — play/pause toggle uses local state. Actual audio
-// playback wiring is out of scope for this sprint; the button is a
-// visual affordance that links to the episode page.
 
-'use client'
-
-import { useState } from 'react'
 import { TileCard } from './TileCard'
 import { TileRow, TileFooterLink } from './TileRow'
 import { formatEpisode } from '@/lib/format'
@@ -45,15 +38,11 @@ function guestLine(ep: PulseEpisode): string {
   if (ep.guestName) parts.push(ep.guestName)
   const role = [ep.guestTitle, ep.guestCompany].filter(Boolean).join(', ')
   if (role) parts.push(role)
-  if (ep.durationLabel) parts.push(ep.durationLabel) // hide the slot when empty
+  if (ep.durationLabel) parts.push(ep.durationLabel)
   return parts.join(' · ')
 }
 
 export function PodcastReelTile({ episodes }: PodcastReelTileProps) {
-  const [playing, setPlaying] = useState<string | null>(null)
-
-  // Status pill = new-since-last-visit count. Episodes < 7 days old carry
-  // the isNew flag; that's the closest available signal for "new".
   const newCount = episodes.filter(ep => ep.isNew).length
 
   const bottomLink = <TileFooterLink href="/podcast">All episodes</TileFooterLink>
@@ -82,7 +71,7 @@ export function PodcastReelTile({ episodes }: PodcastReelTileProps) {
       ) : (
         <ul style={{ margin: 0, padding: '4px 16px 0', listStyle: 'none' }}>
           {episodes.map((ep, i) => {
-            const isPlaying = playing === ep.id
+            const episodeHref = `/podcast/${ep.slug}`
             return (
               <TileRow
                 key={ep.id}
@@ -90,7 +79,7 @@ export function PodcastReelTile({ episodes }: PodcastReelTileProps) {
                 align="center"
                 leading={
                   <a
-                    href={`/podcast/${ep.slug}`}
+                    href={episodeHref}
                     style={{
                       position: 'relative',
                       width: 44,
@@ -137,7 +126,7 @@ export function PodcastReelTile({ episodes }: PodcastReelTileProps) {
                 }
                 primary={
                   <a
-                    href={`/podcast/${ep.slug}`}
+                    href={episodeHref}
                     style={{
                       display: 'block',
                       margin: 0,
@@ -174,35 +163,27 @@ export function PodcastReelTile({ episodes }: PodcastReelTileProps) {
                   </p>
                 }
                 trailing={
-                  <button
-                    type="button"
-                    onClick={() => setPlaying(isPlaying ? null : ep.id)}
-                    aria-label={isPlaying ? 'Pause' : 'Play'}
+                  <a
+                    href={episodeHref}
+                    aria-label={`Play ${ep.title}`}
                     style={{
                       width: 32,
                       height: 32,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      background: isPlaying ? ep.accent : 'transparent',
-                      color: isPlaying ? '#0A0F18' : ep.accent,
+                      background: 'transparent',
+                      color: ep.accent,
                       border: `1px solid ${ep.accent}`,
                       borderRadius: '50%',
-                      cursor: 'pointer',
+                      textDecoration: 'none',
                       transition: 'all 120ms ease',
                     }}
                   >
-                    {isPlaying ? (
-                      <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
-                        <rect x="2" y="2" width="3" height="8" />
-                        <rect x="7" y="2" width="3" height="8" />
-                      </svg>
-                    ) : (
-                      <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
-                        <path d="M3 2 L10 6 L3 10 Z" />
-                      </svg>
-                    )}
-                  </button>
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                      <path d="M3 2 L10 6 L3 10 Z" />
+                    </svg>
+                  </a>
                 }
               />
             )

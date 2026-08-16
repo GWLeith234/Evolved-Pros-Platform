@@ -64,7 +64,7 @@ export function NextEventBanner() {
     <div className="md:hidden flex-shrink-0 flex justify-center w-full" style={{ backgroundColor: 'var(--bg-page)' }}>
       <button
         type="button"
-        onClick={() => router.push('/live')}
+        onClick={() => router.push(`/events/${event.id}`)}
         className="flex items-center justify-between gap-3 w-full max-w-[320px] px-4"
         style={{
           height: '50px',

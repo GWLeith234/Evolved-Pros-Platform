@@ -380,21 +380,33 @@ export function SponsorAdCard({ ad }: { ad: SponsorAd }) {
         className="relative z-[1] mt-6 pt-6"
         style={{ borderTop: '1px solid var(--border-color, rgba(255,255,255,0.10))' }}
       >
-        <div
-          className="ep-sponsor-cta inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-extrabold uppercase tracking-[0.14em] text-white transition-[background-color,transform] duration-200"
-          style={{
-            backgroundColor: SPONSOR_RED,
-            fontFamily: '"Barlow Condensed", sans-serif',
-          }}
-        >
-          {cta}
-          <span
-            aria-hidden
-            className="inline-block transition-transform duration-200 group-hover:translate-x-1"
+        {href ? (
+          <div
+            className="ep-sponsor-cta inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-extrabold uppercase tracking-[0.14em] text-white transition-[background-color,transform] duration-200"
+            style={{
+              backgroundColor: SPONSOR_RED,
+              fontFamily: '"Barlow Condensed", sans-serif',
+            }}
           >
-            →
-          </span>
-        </div>
+            {cta}
+            <span
+              aria-hidden
+              className="inline-block transition-transform duration-200 group-hover:translate-x-1"
+            >
+              →
+            </span>
+          </div>
+        ) : (
+          <p
+            className="m-0 text-center text-[11px] font-bold uppercase tracking-[0.18em]"
+            style={{
+              fontFamily: '"Barlow Condensed", sans-serif',
+              color: 'var(--text-tertiary, rgba(255,255,255,0.45))',
+            }}
+          >
+            Evolution Partner
+          </p>
+        )}
       </div>
     </div>
   )
