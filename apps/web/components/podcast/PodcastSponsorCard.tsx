@@ -26,7 +26,14 @@ function href(ad: SponsorAd): string | null {
  * partners (wordmark logos) get a designed square — logo contained on a brand
  * gradient — so a banner-shaped logo never crops badly.
  */
-export function SquareSponsorCard({ ad }: { ad: SponsorAd }) {
+export function SquareSponsorCard({
+  ad,
+  showDisclosure = true,
+}: {
+  ad: SponsorAd
+  /** When false, parent already shows Sponsored / Evolution Partner labels. */
+  showDisclosure?: boolean
+}) {
   const [hovered, setHovered] = useState(false)
   const link = href(ad)
   const name = ad.sponsor_name ?? ad.tool_name ?? 'Evolution Partner'
@@ -66,7 +73,9 @@ export function SquareSponsorCard({ ad }: { ad: SponsorAd }) {
               width: '100%',
               height: '100%',
               objectFit: 'contain',
-              padding: '20%',
+              // Keep breathing room so wordmarks don't crop, but fill the
+              // square enough that logos don't look stranded in empty space.
+              padding: '10%',
               transform: hovered ? 'scale(1.04)' : 'scale(1)',
               transition: 'transform 280ms ease',
               filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.4))',
@@ -128,6 +137,8 @@ export function SquareSponsorCard({ ad }: { ad: SponsorAd }) {
     </div>
   )
 
+  // Meta sits on the page surface (cream listing OR forced-dark episode shell).
+  // Fallbacks stay ivory so a missing theme token never drops to navy-on-navy.
   const meta = (
     <div style={{ padding: '16px 2px 0', textAlign: 'left' }}>
       <p
@@ -135,10 +146,10 @@ export function SquareSponsorCard({ ad }: { ad: SponsorAd }) {
           margin: '0 0 4px',
           fontFamily: FBC,
           fontWeight: 700,
-          fontSize: 12,
+          fontSize: 13,
           letterSpacing: '0.14em',
           textTransform: 'uppercase',
-          color: 'var(--podcast-text-1)',
+          color: 'var(--podcast-text-strong, #F5F0E8)',
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -154,7 +165,7 @@ export function SquareSponsorCard({ ad }: { ad: SponsorAd }) {
             fontSize: 15,
             fontWeight: 600,
             lineHeight: 1.25,
-            color: 'var(--podcast-text-strong)',
+            color: 'var(--podcast-text-1, rgba(245,240,232,0.88))',
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
@@ -164,19 +175,21 @@ export function SquareSponsorCard({ ad }: { ad: SponsorAd }) {
           {tagline}
         </p>
       )}
-      <p
-        style={{
-          margin: '6px 0 0',
-          fontFamily: FBC,
-          fontWeight: 700,
-          fontSize: 10,
-          letterSpacing: '0.28em',
-          textTransform: 'uppercase',
-          color: 'rgba(201,168,76,0.85)',
-        }}
-      >
-        Sponsored · Evolution Partner
-      </p>
+      {showDisclosure && (
+        <p
+          style={{
+            margin: '8px 0 0',
+            fontFamily: FBC,
+            fontWeight: 700,
+            fontSize: 11,
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+            color: 'var(--brand-gold, #C9A84C)',
+          }}
+        >
+          Sponsored · Evolution Partner
+        </p>
+      )}
     </div>
   )
 
@@ -219,9 +232,11 @@ export function SquareSponsorCard({ ad }: { ad: SponsorAd }) {
 export function RotatingSponsorCard({
   pool,
   startIndex = 0,
+  showDisclosure = true,
 }: {
   pool: SponsorAd[]
   startIndex?: number
+  showDisclosure?: boolean
 }) {
   const len = pool.length
   const [index, setIndex] = useState(len ? startIndex % len : 0)
@@ -235,5 +250,5 @@ export function RotatingSponsorCard({
   }, [index, len, pool])
 
   if (!len) return null
-  return <SquareSponsorCard ad={pool[index % len]} />
+  return <SquareSponsorCard ad={pool[index % len]} showDisclosure={showDisclosure} />
 }

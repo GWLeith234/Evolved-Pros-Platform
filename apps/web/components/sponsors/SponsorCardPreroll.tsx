@@ -27,7 +27,7 @@ export function SponsorCardPreroll({ sponsor }: { sponsor: Sponsor }) {
       }}
     >
       {/* Logo */}
-      <SponsorLogo sponsor={sponsor} size={32} color={color} />
+      <SponsorLogo sponsor={sponsor} size={40} color={color} />
 
       {/* Eyebrow + brand + tagline + body */}
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>

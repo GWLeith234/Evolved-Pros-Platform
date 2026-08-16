@@ -75,7 +75,7 @@ export function SponsorCardHero({ sponsor }: { sponsor: Sponsor }) {
 
       {/* Logo + brand row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <SponsorLogo sponsor={sponsor} size={40} color={color} />
+        <SponsorLogo sponsor={sponsor} size={48} color={color} />
         <span
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',

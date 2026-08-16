@@ -1599,6 +1599,28 @@ html.light-mode .live-force-dark {
   --card-border:    rgba(255,255,255,0.07);
 }
 
+/* Public podcast episode pages hardcode a navy shell (#0A0F18). In light mode
+   --podcast-text-* flip to navy-alpha for the cream listing page — which made
+   sponsor meta (and any other podcast-token text) unreadable on the dark
+   episode surface. Re-pin tokens to ivory inside the episode shell. */
+html.light-mode .podcast-force-dark {
+  --podcast-text-strong:  #F5F0E8;
+  --podcast-text-1:       rgba(245, 240, 232, 0.88);
+  --podcast-text-2:       rgba(245, 240, 232, 0.72);
+  --podcast-text-3:       rgba(245, 240, 232, 0.58);
+  --podcast-text-4:       rgba(245, 240, 232, 0.48);
+  --podcast-text-5:       rgba(245, 240, 232, 0.38);
+  --podcast-text-6:       rgba(245, 240, 232, 0.28);
+  --podcast-border-soft:  rgba(255, 255, 255, 0.05);
+  --podcast-border-soft2: rgba(255, 255, 255, 0.08);
+  --podcast-border-med:   rgba(255, 255, 255, 0.10);
+  --podcast-border-med2:  rgba(255, 255, 255, 0.12);
+  --podcast-border-strong: rgba(255, 255, 255, 0.15);
+  --text-primary:   #F5F0E8;
+  --text-secondary: rgba(245, 240, 232, 0.72);
+  --text-tertiary:  rgba(245, 240, 232, 0.48);
+}
+
 
 /* Fluid type for section titles on small screens */
 .ep-fluid-title {

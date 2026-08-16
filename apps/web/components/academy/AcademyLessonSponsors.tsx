@@ -65,7 +65,7 @@ export function AcademyLessonSponsors({
               fontSize: 10,
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
-              color: 'var(--text-tertiary, rgba(255,255,255,0.35))',
+              color: 'var(--text-secondary, rgba(255,255,255,0.55))',
             }}
           >
             Hand-picked tools

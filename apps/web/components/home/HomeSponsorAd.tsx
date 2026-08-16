@@ -204,11 +204,11 @@ function PremiumPartnerCard({
         <img
           src={cfg.logoSrc}
           alt={cfg.logoAlt}
-          width={200}
-          height={30}
+          width={240}
+          height={40}
           loading="lazy"
           decoding="async"
-          className="absolute bottom-4 left-5 h-6 sm:h-7 w-auto max-w-[min(200px,70%)] object-contain object-left drop-shadow-md"
+          className="absolute bottom-4 left-5 h-8 sm:h-9 w-auto max-w-[min(240px,78%)] object-contain object-left drop-shadow-md"
         />
 
         <span
@@ -227,7 +227,7 @@ function PremiumPartnerCard({
 
         <div>
           <p
-            className="m-0 text-[11px] font-bold uppercase tracking-[0.2em]"
+            className="m-0 text-[12px] font-bold uppercase tracking-[0.2em]"
             style={{
               fontFamily: '"Barlow Condensed", sans-serif',
               color: SPONSOR_RED,
@@ -343,11 +343,11 @@ export function SponsorAdCard({ ad }: { ad: SponsorAd }) {
           <img
             src={ad.image_url}
             alt={name}
-            width={160}
-            height={80}
+            width={200}
+            height={96}
             loading="lazy"
             decoding="async"
-            className="h-20 w-auto max-w-[160px] object-contain opacity-90 transition-opacity duration-300 group-hover:opacity-100"
+            className="h-24 w-auto max-w-[200px] object-contain opacity-95 transition-opacity duration-300 group-hover:opacity-100"
           />
         ) : (
           <MicGlyph />
@@ -425,7 +425,7 @@ export function SponsoredEyebrow() {
           fontSize: 9,
           letterSpacing: '0.42em',
           textTransform: 'uppercase',
-          color: 'var(--text-tertiary, rgba(255,255,255,0.42))',
+          color: 'var(--text-secondary, rgba(255,255,255,0.65))',
           padding: '3px 8px',
           border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
         }}
@@ -446,7 +446,7 @@ export function SponsoredEyebrow() {
           fontSize: 9,
           letterSpacing: '0.22em',
           textTransform: 'uppercase',
-          color: 'var(--text-tertiary, rgba(255,255,255,0.3))',
+          color: 'var(--text-secondary, rgba(255,255,255,0.55))',
         }}
       >
         Evolution Partners

@@ -57,7 +57,7 @@ export function SponsorCardInline({ sponsor }: { sponsor: Sponsor }) {
 
       {/* Logo + brand */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        <SponsorLogo sponsor={sponsor} size={28} color={color} />
+        <SponsorLogo sponsor={sponsor} size={36} color={color} />
         <span
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',
