@@ -3,7 +3,11 @@
 import { useState } from 'react'
 import {
   CRM_COLUMNS,
+  CRM_CONSENT_BASES,
   CRM_STATUSES,
+  isHttpUrl,
+  parseTagInput,
+  type CrmConsentBasis,
   type CrmProspect,
   type CrmStage,
   type CrmStatus,
@@ -21,6 +25,21 @@ export interface CrmSavePayload {
   status: CrmStatus
   value_monthly?: number | null
   next_follow_up_at?: string | null
+  // Enrichment fields (migration 076)
+  title?: string
+  linkedin_url?: string | null
+  avatar_url?: string | null
+  location?: string
+  tags?: string[]
+  consent_basis?: CrmConsentBasis
+  keynote_interest?: boolean
+  unsubscribed_at?: string | null
+}
+
+const CONSENT_LABELS: Record<CrmConsentBasis, string> = {
+  express: 'Express — explicitly opted in',
+  implied: 'Implied — existing business relationship',
+  unknown: 'Unknown — not established',
 }
 
 interface CrmProspectModalProps {
@@ -85,6 +104,19 @@ export function CrmProspectModal({
     prospect?.value_monthly != null ? String(prospect.value_monthly) : '',
   )
   const [followUp, setFollowUp] = useState(toDateInput(prospect?.next_follow_up_at ?? null))
+  // Enrichment fields (migration 076). Manual adds default to 'implied' —
+  // someone typed into the CRM because a real conversation happened; the
+  // 'unknown' DB default is for rows arriving from imports/enrichment.
+  const [title, setTitle] = useState(prospect?.title ?? '')
+  const [linkedinUrl, setLinkedinUrl] = useState(prospect?.linkedin_url ?? '')
+  const [avatarUrl, setAvatarUrl] = useState(prospect?.avatar_url ?? '')
+  const [location, setLocation] = useState(prospect?.location ?? '')
+  const [tagsInput, setTagsInput] = useState((prospect?.tags ?? []).join(', '))
+  const [consentBasis, setConsentBasis] = useState<CrmConsentBasis>(
+    prospect?.consent_basis ?? 'implied',
+  )
+  const [keynoteInterest, setKeynoteInterest] = useState(prospect?.keynote_interest ?? false)
+  const [unsubscribed, setUnsubscribed] = useState(!!prospect?.unsubscribed_at)
   const [error, setError] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
@@ -109,6 +141,17 @@ export function CrmProspectModal({
       }
       value = n
     }
+    // Mirror the API's URL rule so the user sees the problem inline instead of
+    // as a 422 toast after the round trip.
+    for (const [label, v] of [
+      ['LinkedIn URL', linkedinUrl],
+      ['Avatar URL', avatarUrl],
+    ] as const) {
+      if (v.trim() && !isHttpUrl(v)) {
+        setError(`${label} must start with http:// or https://`)
+        return
+      }
+    }
     setError(null)
     await onSave({
       id: prospect?.id,
@@ -122,6 +165,22 @@ export function CrmProspectModal({
       status,
       value_monthly: value,
       next_follow_up_at: followUp ? new Date(followUp + 'T12:00:00').toISOString() : null,
+      title: title.trim() || undefined,
+      linkedin_url: linkedinUrl.trim() || null,
+      avatar_url: avatarUrl.trim() || null,
+      location: location.trim() || undefined,
+      tags: parseTagInput(tagsInput),
+      consent_basis: consentBasis,
+      keynote_interest: keynoteInterest,
+      // Only meaningful on edit — a brand-new prospect is never suppressed.
+      // Preserve the original timestamp when the box is left ticked.
+      ...(isEdit
+        ? {
+            unsubscribed_at: unsubscribed
+              ? (prospect?.unsubscribed_at ?? new Date().toISOString())
+              : null,
+          }
+        : {}),
     })
   }
 
@@ -206,6 +265,106 @@ export function CrmProspectModal({
             <div>
               <label style={labelStyle} htmlFor="crm-company">Company</label>
               <input id="crm-company" value={company} onChange={e => setCompany(e.target.value)} style={inputStyle} />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label style={labelStyle} htmlFor="crm-title">Title</label>
+              <input
+                id="crm-title"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="e.g. VP Sales"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label style={labelStyle} htmlFor="crm-location">Location</label>
+              <input
+                id="crm-location"
+                value={location}
+                onChange={e => setLocation(e.target.value)}
+                placeholder="e.g. Saskatoon, SK"
+                style={inputStyle}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label style={labelStyle} htmlFor="crm-linkedin">LinkedIn URL</label>
+              <input
+                id="crm-linkedin"
+                type="url"
+                value={linkedinUrl}
+                onChange={e => setLinkedinUrl(e.target.value)}
+                placeholder="https://linkedin.com/in/…"
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label style={labelStyle} htmlFor="crm-avatar">Avatar URL</label>
+              <input
+                id="crm-avatar"
+                type="url"
+                value={avatarUrl}
+                onChange={e => setAvatarUrl(e.target.value)}
+                placeholder="https://… (initials shown if blank)"
+                style={inputStyle}
+              />
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle} htmlFor="crm-tags">Tags</label>
+            <input
+              id="crm-tags"
+              value={tagsInput}
+              onChange={e => setTagsInput(e.target.value)}
+              placeholder="Comma-separated — e.g. keynote, saskatoon, warm"
+              style={inputStyle}
+            />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label style={labelStyle} htmlFor="crm-consent">Consent basis (CASL)</label>
+              <select
+                id="crm-consent"
+                value={consentBasis}
+                onChange={e => setConsentBasis(e.target.value as CrmConsentBasis)}
+                style={inputStyle}
+              >
+                {CRM_CONSENT_BASES.map(c => (
+                  <option key={c} value={c}>{CONSENT_LABELS[c]}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col justify-end gap-2 pb-1">
+              <label
+                className="flex items-center gap-2 cursor-pointer"
+                style={{ color: 'var(--admin-text)', fontFamily: '"Barlow", sans-serif', fontSize: 13 }}
+              >
+                <input
+                  type="checkbox"
+                  checked={keynoteInterest}
+                  onChange={e => setKeynoteInterest(e.target.checked)}
+                  style={{ width: 16, height: 16, cursor: 'pointer' }}
+                />
+                Interested in a keynote
+              </label>
+              {isEdit && (
+                <label
+                  className="flex items-center gap-2 cursor-pointer"
+                  style={{ color: 'var(--admin-text-2)', fontFamily: '"Barlow", sans-serif', fontSize: 13 }}
+                  title="Suppression — when set, never email this prospect"
+                >
+                  <input
+                    type="checkbox"
+                    checked={unsubscribed}
+                    onChange={e => setUnsubscribed(e.target.checked)}
+                    style={{ width: 16, height: 16, cursor: 'pointer' }}
+                  />
+                  Unsubscribed
+                </label>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

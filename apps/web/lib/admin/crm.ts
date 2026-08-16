@@ -22,6 +22,19 @@ export const CRM_STATUSES = [
 
 export type CrmStatus = (typeof CRM_STATUSES)[number]
 
+/** CASL consent basis (migration 076). */
+export const CRM_CONSENT_BASES = ['express', 'implied', 'unknown'] as const
+
+export type CrmConsentBasis = (typeof CRM_CONSENT_BASES)[number]
+
+/** Automated enrichment job lifecycle (migration 076). */
+export const CRM_ENRICHMENT_STATUSES = ['none', 'pending', 'enriched', 'failed'] as const
+
+export type CrmEnrichmentStatus = (typeof CRM_ENRICHMENT_STATUSES)[number]
+
+/** Max tag chips rendered on a card before collapsing into a +N counter. */
+export const CRM_TAG_DISPLAY_LIMIT = 3
+
 export interface CrmStageMeta {
   stage: CrmStage
   label: string
@@ -79,7 +92,8 @@ export const CRM_STAGE_META: Record<CrmStage, CrmStageMeta> = {
 export const CRM_COLUMNS: CrmStageMeta[] = CRM_STAGES.map(s => CRM_STAGE_META[s])
 
 export const CRM_SELECT_COLS =
-  'id, full_name, email, phone, company, notes, stage, status, source, last_contacted_at, next_follow_up_at, value_monthly, user_id, created_by, created_at, updated_at'
+  'id, full_name, email, phone, company, notes, stage, status, source, last_contacted_at, next_follow_up_at, value_monthly, user_id, created_by, created_at, updated_at, ' +
+  'title, linkedin_url, avatar_url, location, tags, consent_basis, keynote_interest, enrichment_status, enriched_at, unsubscribed_at'
 
 export interface CrmProspect {
   id: string
@@ -99,6 +113,19 @@ export interface CrmProspect {
   created_by: string | null
   created_at: string
   updated_at: string
+  // ── Enrichment fields (migration 076) ──────────────────────────────────
+  title: string | null
+  linkedin_url: string | null
+  avatar_url: string | null
+  location: string | null
+  /** Never null — the column is NOT NULL DEFAULT '{}'. */
+  tags: string[]
+  consent_basis: CrmConsentBasis
+  keynote_interest: boolean
+  enrichment_status: CrmEnrichmentStatus
+  enriched_at: string | null
+  /** When set, this prospect is suppressed — never email them. */
+  unsubscribed_at: string | null
 }
 
 export function isCrmStage(v: unknown): v is CrmStage {
@@ -107,6 +134,62 @@ export function isCrmStage(v: unknown): v is CrmStage {
 
 export function isCrmStatus(v: unknown): v is CrmStatus {
   return typeof v === 'string' && (CRM_STATUSES as readonly string[]).includes(v)
+}
+
+export function isConsentBasis(v: unknown): v is CrmConsentBasis {
+  return typeof v === 'string' && (CRM_CONSENT_BASES as readonly string[]).includes(v)
+}
+
+export function isEnrichmentStatus(v: unknown): v is CrmEnrichmentStatus {
+  return typeof v === 'string' && (CRM_ENRICHMENT_STATUSES as readonly string[]).includes(v)
+}
+
+/**
+ * Normalize a free-form tag list: trim, drop blanks, lowercase, dedupe, and
+ * preserve first-seen order. Shared by the API layer and the edit form so a
+ * round-trip through the modal can't silently reorder or duplicate tags.
+ */
+export function normalizeTags(input: unknown): string[] {
+  if (!Array.isArray(input)) return []
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const raw of input) {
+    if (typeof raw !== 'string') continue
+    const t = raw.trim().toLowerCase()
+    if (!t || seen.has(t)) continue
+    seen.add(t)
+    out.push(t)
+  }
+  return out
+}
+
+/** Split the comma-separated tag input used by the prospect form. */
+export function parseTagInput(value: string): string[] {
+  return normalizeTags(value.split(','))
+}
+
+/** Initials fallback for a prospect with no avatar_url. */
+export function prospectInitials(fullName: string): string {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '?'
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
+/**
+ * Only http(s) URLs are usable as an <img src> or an outbound link. Rejecting
+ * everything else here keeps 'javascript:' / 'data:' payloads out of the DOM
+ * as well as out of the database.
+ */
+export function isHttpUrl(v: unknown): v is string {
+  if (typeof v !== 'string' || !v.trim()) return false
+  let u: URL
+  try {
+    u = new URL(v.trim())
+  } catch {
+    return false
+  }
+  return u.protocol === 'http:' || u.protocol === 'https:'
 }
 
 /** Effective monthly value for a prospect. */
@@ -193,5 +276,17 @@ export function parseCrmProspect(r: Record<string, unknown>): CrmProspect | null
     created_by: (r.created_by as string | null) ?? null,
     created_at: String(r.created_at ?? new Date().toISOString()),
     updated_at: String(r.updated_at ?? new Date().toISOString()),
+    // Enrichment fields default to the pre-076 shape so a row read back before
+    // the migration lands still parses instead of dropping the whole prospect.
+    title: (r.title as string | null) ?? null,
+    linkedin_url: (r.linkedin_url as string | null) ?? null,
+    avatar_url: (r.avatar_url as string | null) ?? null,
+    location: (r.location as string | null) ?? null,
+    tags: normalizeTags(r.tags),
+    consent_basis: isConsentBasis(r.consent_basis) ? r.consent_basis : 'unknown',
+    keynote_interest: r.keynote_interest === true,
+    enrichment_status: isEnrichmentStatus(r.enrichment_status) ? r.enrichment_status : 'none',
+    enriched_at: (r.enriched_at as string | null) ?? null,
+    unsubscribed_at: (r.unsubscribed_at as string | null) ?? null,
   }
 }

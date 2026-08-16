@@ -6,10 +6,16 @@ import { requireAdminApi } from '@/lib/admin/helpers'
 import {
   CRM_SELECT_COLS,
   CRM_STAGE_META,
+  isConsentBasis,
   isCrmStage,
   isCrmStatus,
+  isHttpUrl,
+  normalizeTags,
   type CrmStage,
 } from '@/lib/admin/crm'
+
+/** Postgres unique_violation — the uq_crm_prospects_email index from 076. */
+const PG_UNIQUE_VIOLATION = '23505'
 
 /** GET /api/admin/crm/prospects — list all prospects (optional ?stage=) */
 export async function GET(request: Request) {
@@ -85,6 +91,26 @@ export async function POST(request: Request) {
     nextFollowUp = d.toISOString()
   }
 
+  // ── Enrichment fields (migration 076), all optional on create ────────────
+  if (body.consent_basis !== undefined && !isConsentBasis(body.consent_basis)) {
+    return NextResponse.json(
+      { error: "consent_basis must be one of: express, implied, unknown" },
+      { status: 422 },
+    )
+  }
+  if (body.tags !== undefined && !Array.isArray(body.tags)) {
+    return NextResponse.json({ error: 'tags must be an array of strings' }, { status: 422 })
+  }
+  for (const field of ['linkedin_url', 'avatar_url'] as const) {
+    const v = body[field]
+    if (v !== undefined && v !== null && v !== '' && !isHttpUrl(v)) {
+      return NextResponse.json(
+        { error: `${field} must be an http(s) URL` },
+        { status: 422 },
+      )
+    }
+  }
+
   const row = {
     full_name: fullName,
     email,
@@ -96,6 +122,13 @@ export async function POST(request: Request) {
     status,
     value_monthly: valueMonthly,
     next_follow_up_at: nextFollowUp,
+    title: typeof body.title === 'string' ? body.title.trim() || null : null,
+    linkedin_url: isHttpUrl(body.linkedin_url) ? body.linkedin_url.trim() : null,
+    avatar_url: isHttpUrl(body.avatar_url) ? body.avatar_url.trim() : null,
+    location: typeof body.location === 'string' ? body.location.trim() || null : null,
+    tags: normalizeTags(body.tags),
+    consent_basis: isConsentBasis(body.consent_basis) ? body.consent_basis : 'unknown',
+    keynote_interest: body.keynote_interest === true,
     created_by: auth.userId,
     updated_at: new Date().toISOString(),
   }
@@ -109,6 +142,13 @@ export async function POST(request: Request) {
 
   if (error) {
     console.error('[POST /api/admin/crm/prospects]', error)
+    // uq_crm_prospects_email (076) — one prospect per email, case-insensitive.
+    if (error.code === PG_UNIQUE_VIOLATION) {
+      return NextResponse.json(
+        { error: `A prospect with the email ${email} already exists.` },
+        { status: 409 },
+      )
+    }
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
