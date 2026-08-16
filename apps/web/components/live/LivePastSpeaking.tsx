@@ -1,4 +1,5 @@
-import { SPEAKING_PINS, SPEAKING_STATS } from '@/lib/live/speaking-pins'
+import type { SpeakingPin } from '@/lib/live/speaking-pins'
+import { SPEAKING_STATS } from '@/lib/live/speaking-pins'
 import { LiveSectionHeader } from './LiveSectionHeader'
 
 const FB = 'Barlow, sans-serif'
@@ -40,11 +41,10 @@ function sortCities(cities: string[]): string[] {
 
 /**
  * Past stages as cities only — same pin set as the globe above.
- * No event write-ups; when a date passes, the city stays on the map + here.
  */
-export function LivePastSpeaking() {
+export function LivePastSpeaking({ pins }: { pins: SpeakingPin[] }) {
   const byCountry = new Map<string, string[]>()
-  for (const pin of SPEAKING_PINS) {
+  for (const pin of pins) {
     const list = byCountry.get(pin.country) ?? []
     if (!list.includes(pin.city)) list.push(pin.city)
     byCountry.set(pin.country, list)
@@ -60,8 +60,8 @@ export function LivePastSpeaking() {
     rows.sort((a, b) => b.cities.length - a.cities.length || a.country.localeCompare(b.country))
   }
 
-  const totalCities = SPEAKING_STATS.cities
-  const totalCountries = SPEAKING_STATS.countries
+  const totalCities = new Set(pins.map(p => p.city)).size
+  const totalCountries = new Set(pins.map(p => p.country)).size
 
   return (
     <section className="live-section-pad" style={{ margin: '48px auto 0' }}>
@@ -175,6 +175,20 @@ export function LivePastSpeaking() {
           )
         })}
       </div>
+
+      <p
+        style={{
+          margin: '14px 0 0',
+          fontFamily: FBC,
+          fontWeight: 600,
+          fontSize: 11,
+          letterSpacing: '0.14em',
+          textTransform: 'uppercase',
+          color: 'var(--text-3)',
+        }}
+      >
+        {SPEAKING_STATS.talks}+ talks · {SPEAKING_STATS.yearsActive} years on stage
+      </p>
     </section>
   )
 }

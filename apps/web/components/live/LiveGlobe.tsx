@@ -82,9 +82,9 @@ function buildPathD(
   return d
 }
 
-export function LiveGlobe() {
+export function LiveGlobe({ pins = SPEAKING_PINS }: { pins?: SpeakingPin[] }) {
   const pinData = useMemo<PinSphereData[]>(() => {
-    return SPEAKING_PINS.map(pin => {
+    return pins.map(pin => {
       const phi = (pin.lat * Math.PI) / 180
       return {
         pin,
@@ -93,7 +93,7 @@ export function LiveGlobe() {
         lonRad: (pin.lon * Math.PI) / 180,
       }
     })
-  }, [])
+  }, [pins])
 
   const coastlineData = useMemo<CoastlineSphereData[]>(() => {
     return COASTLINES.map(line => ({
@@ -250,7 +250,7 @@ export function LiveGlobe() {
 
   // Initial-frame projection so SSR / first paint shows pins in place.
   const initialPinPositions = useMemo(() => {
-    return SPEAKING_PINS.map(pin => {
+    return pins.map(pin => {
       const p = project(pin.lat, pin.lon, STATIC_LON0)
       return {
         x: CX + p.x * R,
@@ -258,7 +258,12 @@ export function LiveGlobe() {
         visible: p.z >= 0,
       }
     })
-  }, [])
+  }, [pins])
+
+  const countryCount = useMemo(
+    () => new Set(pins.map(p => p.country)).size,
+    [pins],
+  )
 
   const initialCoastlinePaths = useMemo(() => {
     const lon0Rad = (STATIC_LON0 * Math.PI) / 180
@@ -292,7 +297,7 @@ export function LiveGlobe() {
       >
         <title id="live-globe-title">Map of speaking engagements</title>
         <desc id="live-globe-desc">
-          Animated globe showing {SPEAKING_STATS.talks}+ stages George Leith has spoken at across {SPEAKING_STATS.countries} countries. Featured stages in Saskatoon, Canada and Fripp Island, USA pulse in red; the remaining gold pins mark talks delivered worldwide.
+          Animated globe showing {SPEAKING_STATS.talks}+ stages George Leith has spoken at across {countryCount} countries. Featured stages in Saskatoon, Canada and Fripp Island, USA pulse in red; the remaining gold pins mark talks delivered worldwide.
         </desc>
         <defs>
           <radialGradient id="liveSphereGrad" cx="40%" cy="35%" r="65%">
@@ -350,7 +355,7 @@ export function LiveGlobe() {
 
         {/* Pin halos */}
         <g pointerEvents="none">
-          {SPEAKING_PINS.map((pin, i) => (
+          {pins.map((pin, i) => (
             <circle
               key={`halo-${pin.city}-${pin.country}-${i}`}
               ref={(el: SVGCircleElement | null) => {
@@ -373,7 +378,7 @@ export function LiveGlobe() {
 
         {/* Pin cores */}
         <g>
-          {SPEAKING_PINS.map((pin, i) => (
+          {pins.map((pin, i) => (
             <circle
               key={`core-${pin.city}-${pin.country}-${i}`}
               ref={(el: SVGCircleElement | null) => {
@@ -410,7 +415,7 @@ export function LiveGlobe() {
             color: '#E8B547',
           }}
         >
-          {SPEAKING_PINS.length}
+          {pins.length}
         </p>
         <p
           style={{
@@ -423,7 +428,7 @@ export function LiveGlobe() {
             color: 'rgba(255,255,255,0.55)',
           }}
         >
-          Stages mapped · {SPEAKING_STATS.countries} countries
+          Stages mapped · {countryCount} countries
         </p>
       </div>
     </div>

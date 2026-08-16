@@ -1,11 +1,13 @@
 'use client'
 
 /**
- * Sprint 4C — code-split the WebGL/canvas globe off the LIVE critical path.
+ * Code-split the globe off the LIVE critical path. Pins come from the server
+ * (base catalogue + admin extras).
  */
 import nextDynamic from 'next/dynamic'
+import type { SpeakingPin } from '@/lib/live/speaking-pins'
 
-export const LiveGlobeLazy = nextDynamic(
+const Globe = nextDynamic(
   () => import('@/components/live/LiveGlobe').then(m => m.LiveGlobe),
   {
     ssr: false,
@@ -30,3 +32,7 @@ export const LiveGlobeLazy = nextDynamic(
     ),
   },
 )
+
+export function LiveGlobeLazy({ pins }: { pins: SpeakingPin[] }) {
+  return <Globe pins={pins} />
+}
