@@ -145,7 +145,7 @@ function PremiumPartnerCard({
       <div
         className="absolute right-5 top-3 z-[2] rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#0A0F18] shadow-sm"
         style={{
-          backgroundColor: 'var(--brand-gold, #C9A84C)',
+          backgroundColor: 'var(--brand-gold)',
           fontFamily: '"Barlow Condensed", sans-serif',
           boxShadow: '0 2px 8px rgba(201,168,76,0.35)',
         }}
