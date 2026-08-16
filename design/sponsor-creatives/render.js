@@ -4,12 +4,13 @@ const path = require('path')
 const JOBS = (process.env.ONLY ? JSON.parse(process.env.ONLY) : [
   { html: 'academy-300x250.html', out: 'academy-300x250.png', w: 300, h: 250 },
   { html: 'academy-728x90.html',  out: 'academy-728x90.png',  w: 728, h: 90 },
+  { html: 'academy-portrait.html', out: 'academy-portrait.png', w: 600, h: 900 },
 ])
 
 ;(async () => {
   const browser = await chromium.launch({
     headless: true,
-    executablePath: '/opt/pw-browsers/chromium',
+    executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   })
   for (const j of JOBS) {

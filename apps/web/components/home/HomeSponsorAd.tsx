@@ -4,9 +4,11 @@ import {
   EVOLVEX360_ASSETS,
   EVOLVEX360_LOCATIONS,
   XPR_MEDIA_ASSETS,
+  isAcademyAd,
   premiumPartnerKind,
   type PremiumPartnerKind,
 } from '@/lib/sponsors/partners'
+import { AcademyArchitectureCard } from '@/components/academy/AcademyArchitectureCard'
 
 export type SponsorAd = {
   id: string
@@ -300,11 +302,13 @@ function PremiumPartnerCard({
 }
 
 /**
- * Evolution Partner card router.
- * Flagship partners (AdCellerant, XPR Media) get the premium hero layout;
- * other ads use the centered logo + tagline card.
+ * Evolution Partner / Academy card router.
+ * Academy self-promo → product architecture card (never a Partner badge).
+ * Flagship partners → premium hero layout; others → logo + tagline.
  */
 export function SponsorAdCard({ ad }: { ad: SponsorAd }) {
+  if (isAcademyAd(ad)) return <AcademyArchitectureCard ad={ad} className="pt-3" />
+
   const kind = premiumPartnerKind(ad)
   if (kind) return <PremiumPartnerCard ad={ad} kind={kind} />
 

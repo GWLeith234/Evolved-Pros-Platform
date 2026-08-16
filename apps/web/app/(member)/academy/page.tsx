@@ -5,12 +5,13 @@ import { AcademyMobileProgress } from '@/components/academy/AcademyMobileProgres
 
 export const metadata: Metadata = { title: 'Academy — Evolved Pros' }
 import { CourseGrid } from '@/components/academy/CourseGrid'
-import { UpgradePrompt } from '@/components/academy/UpgradePrompt'
+import { AcademyArchitectureCard } from '@/components/academy/AcademyArchitectureCard'
 import {
   fetchCoursesWithProgress,
   fetchUserProfile,
 } from '@/lib/academy/fetchers'
 import { hasTierAccess } from '@/lib/tier'
+import { ACADEMY_UPGRADE_AD } from '@/lib/sponsors/partners'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,6 +30,7 @@ export default async function AcademyPage() {
   const totalLessons = courses.reduce((s, c) => s + (c.totalLessons ?? 0), 0)
   const completedLessons = courses.reduce((s, c) => s + c.completedLessons, 0)
   const overallPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
+  const showUpgrade = !hasTierAccess(profile?.tier, 'pro')
 
   return (
     <div className="academy-page ep-surface-mobile">
@@ -56,7 +58,11 @@ export default async function AcademyPage() {
 
       <div className="px-4 md:px-8 py-5 sm:py-6">
         <CourseGrid courses={courses} userTier={profile?.tier ?? null} />
-        {!hasTierAccess(profile?.tier, 'pro') && <UpgradePrompt />}
+        {showUpgrade && (
+          <div className="mt-8 max-w-xl">
+            <AcademyArchitectureCard ad={ACADEMY_UPGRADE_AD} href="/membership" />
+          </div>
+        )}
       </div>
     </div>
   )

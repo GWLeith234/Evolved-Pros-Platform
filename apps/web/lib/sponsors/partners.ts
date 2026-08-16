@@ -84,9 +84,49 @@ function isRetiredPartnerAd(ad: Pick<SponsorAd, 'sponsor_name' | 'tool_name'>): 
 
 export type PremiumPartnerKind = 'adcellerant' | 'xpr' | 'evolvex360' | null
 
+/** Fixed UUID for Evolved Pros Academy self-promo (not a partner). */
+export const ACADEMY_AD_ID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+
+export const ACADEMY_SPONSOR_AD: SponsorAd = {
+  id: ACADEMY_AD_ID,
+  sponsor_name: 'Evolved Pros Academy',
+  tool_name: 'Academy',
+  headline: 'Stop collecting tips. Build the system.',
+  endorsement_quote:
+    'Six pillars. One architecture. The framework operators use to make excellence inevitable.',
+  cta_text: 'Enter the Academy',
+  image_url: '/ads/academy-portrait.png',
+  click_url: '/academy',
+  link_url: '/academy',
+}
+
+/** Upgrade-focused Academy promo (membership CTA). */
+export const ACADEMY_UPGRADE_AD: SponsorAd = {
+  id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567891',
+  sponsor_name: 'Evolved Pros Academy',
+  tool_name: 'Academy',
+  headline: 'Unlock the pillars that change how you operate.',
+  endorsement_quote:
+    'Strategy, Accountability, and Execution are Pro. Build the full architecture — not half of it.',
+  cta_text: 'Upgrade to Pro',
+  image_url: '/ads/academy-portrait.png',
+  click_url: '/membership',
+  link_url: '/membership',
+}
+
+export function isAcademyAd(ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_name' | 'image_url'>): boolean {
+  if (ad.id === ACADEMY_AD_ID || ad.id === ACADEMY_UPGRADE_AD.id) return true
+  const name = `${ad.sponsor_name ?? ''} ${ad.tool_name ?? ''}`.toLowerCase()
+  if (name.includes('evolved pros academy') || name === 'academy') return true
+  const img = (ad.image_url ?? '').toLowerCase()
+  return img.includes('/ads/academy') || img.includes('academy-300') || img.includes('academy-portrait')
+}
+
+/** Flagship Evolution Partners only — never Academy self-promo. */
 export function premiumPartnerKind(
-  ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_name'>,
+  ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_name' | 'image_url'>,
 ): PremiumPartnerKind {
+  if (isAcademyAd(ad)) return null
   if (isAdCellerantAd(ad)) return 'adcellerant'
   if (isEvolveX360Ad(ad)) return 'evolvex360'
   if (isXprMediaAd(ad)) return 'xpr'
@@ -111,48 +151,58 @@ export const DEFAULT_HOME_SPONSORS: SponsorAd[] = [
   EVOLVEX360_SPONSOR_AD,
 ]
 
-/** 1–2 sponsors for Academy lesson footers (static fallback). */
+/** 1–2 sponsors for Academy lesson footers — Academy promo first, then a partner. */
 export const DEFAULT_ACADEMY_SPONSORS: SponsorAd[] = [
-  ADCELLERANT_SPONSOR_AD,
+  ACADEMY_SPONSOR_AD,
   EVOLVEX360_SPONSOR_AD,
 ]
 
 /**
  * Ensure flagship Evolution Partners are present in the pool (deduped).
- * Does not force a fixed display order — use pickRotatedSponsors for that.
+ * Academy self-promo is never injected here — use pickAcademySponsors for that.
  */
 export function ensureFlagshipSponsors(list: SponsorAd[]): SponsorAd[] {
   const byId = new Map(list.map(a => [a.id, a]))
   const adc = list.find(isAdCellerantAd) ?? byId.get(ADCELLERANT_AD_ID) ?? ADCELLERANT_SPONSOR_AD
   const ex = list.find(isEvolveX360Ad) ?? byId.get(EVOLVEX360_AD_ID) ?? EVOLVEX360_SPONSOR_AD
   const xpr = list.find(isXprMediaAd) ?? byId.get(XPR_MEDIA_AD_ID) ?? XPR_MEDIA_SPONSOR_AD
-  // Retired partners are excluded even if a stale platform_ads row is still
-  // active — the rotation must never surface them.
+  // Retired partners + Academy self-promo stay out of the partner pool.
   const rest = list.filter(
     a =>
       !isAdCellerantAd(a) &&
       !isEvolveX360Ad(a) &&
       !isXprMediaAd(a) &&
+      !isAcademyAd(a) &&
       !isRetiredPartnerAd(a),
   )
   return dedupeSponsors([adc, ex, xpr, ...rest])
 }
 
-/** Exactly two sponsors for /home main row — daily rotation, no dups. */
+/** Exactly two sponsors for /home main row — daily rotation, no dups.
+ *  Home stays Evolution Partners only (no Academy self-promo in that row). */
 export function pickHomeSponsors(list: SponsorAd[]): SponsorAd[] {
-  return pickRotatedSponsors(ensureFlagshipSponsors(list), 2, { salt: 11 })
+  const partnersOnly = list.filter(a => !isAcademyAd(a))
+  return pickRotatedSponsors(ensureFlagshipSponsors(partnersOnly), 2, {
+    salt: 11,
+  })
 }
 
-/** One or two sponsors for Academy lesson pages — rotated. */
+/** One or two slots for Academy / LIVE — Academy promo first, then a partner. */
 export function pickAcademySponsors(list: SponsorAd[], count = 2): SponsorAd[] {
   const n = Math.min(2, Math.max(1, count))
-  return pickRotatedSponsors(ensureFlagshipSponsors(list), n, { salt: 23 })
+  const source = list.length ? list : DEFAULT_ACADEMY_SPONSORS
+  const academy = source.find(isAcademyAd) ?? ACADEMY_SPONSOR_AD
+  const partners = ensureFlagshipSponsors(source.filter(a => !isAcademyAd(a)))
+  const partnerPick = pickRotatedSponsors(partners, Math.max(0, n - 1), { salt: 23 })
+  return dedupeSponsors([academy, ...partnerPick]).slice(0, n)
 }
 
-/** Community rail partners — up to 4, rotated, unique. */
+/** Community rail partners — up to 4, rotated, unique. Partners only. */
 export function pickCommunityRailSponsors(list: SponsorAd[], count = 4): SponsorAd[] {
   const n = Math.min(4, Math.max(1, count))
-  const pool = list.length ? ensureFlagshipSponsors(list) : ALL_FLAGSHIP_SPONSORS
+  const pool = list.length
+    ? ensureFlagshipSponsors(list.filter(a => !isAcademyAd(a)))
+    : ALL_FLAGSHIP_SPONSORS
   return pickRotatedSponsors(pool, n, { salt: 41 })
 }
 
@@ -163,7 +213,8 @@ export function pickSidebarSponsor(
   list: SponsorAd[],
   exclude: SponsorAd[],
 ): SponsorAd | null {
-  const picked = pickRotatedSponsors(ensureFlagshipSponsors(list), 1, {
+  const partners = ensureFlagshipSponsors(list.filter(a => !isAcademyAd(a)))
+  const picked = pickRotatedSponsors(partners, 1, {
     exclude: exclude.map(sponsorKey),
     salt: 59,
   })
