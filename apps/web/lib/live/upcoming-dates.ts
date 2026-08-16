@@ -1,55 +1,38 @@
 /**
- * Upcoming *speaking* dates for /live.
- *
- * Rules:
- * - Only real stage / conference / workshop dates belong here.
- * - Product launches (podcast, platform, book) do NOT — they are not speaking events.
- * - Past dates are filtered out at render time; when a speaking date passes, add
- *   its city to `speaking-pins.ts` (if missing) so it stays on the globe + archive.
- *
- * To add a date: push a row with city, country, event title, and CONFIRMED | HOLD.
+ * Server loaders for /live upcoming speaking dates.
+ * Source of truth: `platform_settings.live_upcoming_speaking` (Admin → Speaking).
  */
 
-export interface UpcomingDate {
-  date: Date
-  city: string
-  country: string
-  event: string
-  tag: 'CONFIRMED' | 'HOLD'
-  detail?: string
-  linkLabel?: string
-  linkUrl?: string
+import 'server-only'
+import { getPlatformSetting } from '@/lib/cache/shared'
+import {
+  LIVE_UPCOMING_SETTING_KEY,
+  filterUpcoming,
+  parseUpcomingSpeakingJson,
+  type UpcomingDate,
+  type UpcomingDateStored,
+} from './upcoming-dates-shared'
+
+export {
+  LIVE_UPCOMING_SETTING_KEY,
+  type UpcomingDate,
+  type UpcomingDateStored,
+  startOfToday,
+  newSpeakingDateId,
+  parseUpcomingSpeakingJson,
+  validateStoredRow,
+  fromStored,
+  filterUpcoming,
+} from './upcoming-dates-shared'
+
+/** All stored rows (including past) — for admin. */
+export async function loadUpcomingSpeakingStored(): Promise<UpcomingDateStored[]> {
+  const raw = await getPlatformSetting(LIVE_UPCOMING_SETTING_KEY, '[]')
+  return parseUpcomingSpeakingJson(raw)
 }
 
-/**
- * Editable calendar. Keep this list short and current — the UI auto-hides
- * anything before today so stale rows never show as "upcoming."
- *
- * (Cleared Aug 2026: Apr 28 podcast launch, May 15 platform launch, May 20
- * TVOT Montreal, and Jul 15 book launch were all past and/or not speaking.)
- */
-export const UPCOMING_DATES: UpcomingDate[] = [
-  // Example (uncomment / replace when a date is locked):
-  // {
-  //   date: new Date(2026, 9, 14),
-  //   city: 'Chicago',
-  //   country: 'USA',
-  //   event: 'Revenue Leadership Summit',
-  //   tag: 'CONFIRMED',
-  //   detail: 'Keynote on the EVOLVED Architecture™ for sales leaders.',
-  // },
-]
-
-/** Start of local calendar day — dates on/after this count as upcoming. */
-export function startOfToday(): Date {
-  const d = new Date()
-  d.setHours(0, 0, 0, 0)
-  return d
-}
-
-/** Upcoming speaking rows only (date ≥ today), soonest first. */
-export function getUpcomingSpeakingDates(now = startOfToday()): UpcomingDate[] {
-  return UPCOMING_DATES.filter(d => d.date.getTime() >= now.getTime()).sort(
-    (a, b) => a.date.getTime() - b.date.getTime(),
-  )
+/** Upcoming speaking rows only (date ≥ today), soonest first — for /live. */
+export async function getUpcomingSpeakingDates(): Promise<UpcomingDate[]> {
+  const stored = await loadUpcomingSpeakingStored()
+  return filterUpcoming(stored)
 }
