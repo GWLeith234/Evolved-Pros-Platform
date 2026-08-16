@@ -37,11 +37,19 @@ type PostRow = {
   is_pinned: boolean
   like_count: number
   reply_count: number
+  reaction_count?: number | null
   created_at: string
   users: { id: string; display_name: string | null; full_name: string | null; avatar_url: string | null; tier?: string | null } | null
 }
 
 type LikeRow = { post_id: string; reaction_type: string | null }
+
+type MetaCountRow = {
+  post_id: string
+  reaction_count: number
+  reply_count: number
+  reactions: Record<string, number> | null
+}
 
 async function hydratePostMeta(
   supabase: SB,
@@ -52,11 +60,7 @@ async function hydratePostMeta(
   const page = rows.slice(0, limit)
   const postIds = page.map(r => r.id)
 
-  // SPRINT D — reactions live in post_reactions and comments in replies; the
-  // old post_likes table and the denormalized posts.like_count/reply_count are
-  // dead (0). Count live rows so Community (and Home, which reads the same
-  // tables) show real numbers.
-  const [userLikesRes, bookmarksRes, allLikesRes, repliesRes] = await Promise.all([
+  const [userLikesRes, bookmarksRes, metaRes] = await Promise.all([
     postIds.length > 0
       ? supabase.from('post_reactions').select('post_id, reaction_type').eq('user_id', userId).in('post_id', postIds) as unknown as Promise<{ data: LikeRow[] | null }>
       : Promise.resolve({ data: [] as LikeRow[] }),
@@ -64,29 +68,50 @@ async function hydratePostMeta(
       ? supabase.from('post_bookmarks').select('post_id').eq('user_id', userId).in('post_id', postIds)
       : Promise.resolve({ data: [] as { post_id: string }[] }),
     postIds.length > 0
-      ? adminClient.from('post_reactions').select('post_id, reaction_type').in('post_id', postIds) as unknown as Promise<{ data: LikeRow[] | null }>
-      : Promise.resolve({ data: [] as LikeRow[] }),
-    postIds.length > 0
-      ? adminClient.from('replies').select('post_id').in('post_id', postIds) as unknown as Promise<{ data: { post_id: string }[] | null }>
-      : Promise.resolve({ data: [] as { post_id: string }[] }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ? (adminClient as any).rpc('get_post_meta_counts', { p_post_ids: postIds }) as Promise<{ data: MetaCountRow[] | null; error: { message: string } | null }>
+      : Promise.resolve({ data: [] as MetaCountRow[], error: null }),
   ])
 
   const myReactionMap = new Map<string, string>(
-    (userLikesRes.data ?? []).map(l => [l.post_id, l.reaction_type ?? 'thumbs_up'])
+    (userLikesRes.data ?? []).map(l => [l.post_id, l.reaction_type ?? 'heart'])
   )
   const bookmarkedIds = new Set((bookmarksRes.data ?? []).map(b => b.post_id))
 
   const reactionCountsByPost = new Map<string, Map<string, number>>()
-  for (const like of allLikesRes.data ?? []) {
-    const type = like.reaction_type ?? 'thumbs_up'
-    if (!reactionCountsByPost.has(like.post_id)) reactionCountsByPost.set(like.post_id, new Map())
-    const m = reactionCountsByPost.get(like.post_id)!
-    m.set(type, (m.get(type) ?? 0) + 1)
-  }
-
   const replyCountByPost = new Map<string, number>()
-  for (const r of repliesRes.data ?? []) {
-    replyCountByPost.set(r.post_id, (replyCountByPost.get(r.post_id) ?? 0) + 1)
+
+  if (!metaRes.error && metaRes.data) {
+    for (const row of metaRes.data) {
+      replyCountByPost.set(row.post_id, row.reply_count ?? 0)
+      const m = new Map<string, number>()
+      for (const [type, count] of Object.entries(row.reactions ?? {})) {
+        m.set(type, Number(count) || 0)
+      }
+      reactionCountsByPost.set(row.post_id, m)
+    }
+  } else {
+    // Fallback if migration 075 is not applied yet — previous full-row scan.
+    if (metaRes.error) {
+      console.warn('[hydratePostMeta] get_post_meta_counts fallback:', metaRes.error.message)
+    }
+    const [allLikesRes, repliesRes] = await Promise.all([
+      postIds.length > 0
+        ? adminClient.from('post_reactions').select('post_id, reaction_type').in('post_id', postIds) as unknown as Promise<{ data: LikeRow[] | null }>
+        : Promise.resolve({ data: [] as LikeRow[] }),
+      postIds.length > 0
+        ? adminClient.from('replies').select('post_id').in('post_id', postIds) as unknown as Promise<{ data: { post_id: string }[] | null }>
+        : Promise.resolve({ data: [] as { post_id: string }[] }),
+    ])
+    for (const like of allLikesRes.data ?? []) {
+      const type = like.reaction_type ?? 'heart'
+      if (!reactionCountsByPost.has(like.post_id)) reactionCountsByPost.set(like.post_id, new Map())
+      const m = reactionCountsByPost.get(like.post_id)!
+      m.set(type, (m.get(type) ?? 0) + 1)
+    }
+    for (const r of repliesRes.data ?? []) {
+      replyCountByPost.set(r.post_id, (replyCountByPost.get(r.post_id) ?? 0) + 1)
+    }
   }
 
   return page.map(row => {
@@ -103,7 +128,7 @@ async function hydratePostMeta(
       postType: (row.post_type ?? 'update') as Post['postType'],
       isPinned: row.is_pinned,
       likeCount: reactions.reduce((s, r) => s + r.count, 0),
-      replyCount: replyCountByPost.get(row.id) ?? 0,
+      replyCount: replyCountByPost.get(row.id) ?? row.reply_count ?? 0,
       createdAt: row.created_at,
       author: {
         id: author?.id ?? '',

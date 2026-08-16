@@ -3,126 +3,92 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { notifyLike } from '@/lib/notifications/create'
 
-const VALID_REACTIONS = ['heart', 'thumbs_up', 'clap', 'thumbs_down', 'celebration'] as const
-type ReactionType = typeof VALID_REACTIONS[number]
+// Legacy CommunityFeed vocabulary → canonical post_reactions CHECK values.
+const LEGACY_TO_DB: Record<string, string> = {
+  heart:       'heart',
+  thumbs_up:   'fire',
+  clap:        'clap',
+  celebration: 'hundred',
+  // thumbs_down has no canonical fit — treat as remove
+  fire:        'fire',
+  hundred:     'hundred',
+  mind:        'mind',
+  hands:       'clap',
+  mindblown:   'mind',
+}
 
 export async function POST(
   request: Request,
   { params }: { params: { postId: string } }
 ) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Read reaction_type and optional remove flag from body
-  let reactionType: ReactionType = 'thumbs_up'
+  let reactionType = 'fire'
   let explicitRemove = false
   try {
     const body = await request.json()
-    if (typeof body.reaction_type === 'string' && VALID_REACTIONS.includes(body.reaction_type as ReactionType)) {
-      reactionType = body.reaction_type as ReactionType
+    if (typeof body.reaction_type === 'string' && body.reaction_type in LEGACY_TO_DB) {
+      reactionType = LEGACY_TO_DB[body.reaction_type]
     }
-    if (body.remove === true) explicitRemove = true
-  } catch { /* no body — use default */ }
+    if (body.remove === true || body.reaction_type === 'thumbs_down') explicitRemove = true
+  } catch { /* no body — default fire toggle */ }
 
-  // RLS-FIX: resolve public.users.id by email — post_likes.user_id FKs
-  // public.users(id), and RLS checks auth.uid() which can differ.
-  const { data: profileRow } = await adminClient
-    .from('users')
-    .select('id, display_name, full_name')
-    .eq('email', user.email)
-    .single()
-  const likerId = profileRow?.id ?? user.id
+  const mode = explicitRemove ? 'remove' : 'toggle'
 
-  const { data: post } = await adminClient
-    .from('posts')
-    .select('like_count, author_id')
-    .eq('id', params.postId)
-    .single()
-  if (!post) return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (adminClient as any).rpc('toggle_post_reaction', {
+    p_user_id: profile.id,
+    p_post_id: params.postId,
+    p_reaction_type: reactionType,
+    p_mode: mode,
+  })
 
-  // Check if user already has any reaction on this post
-  const { data: existing } = await adminClient
-    .from('post_likes')
-    .select('post_id, reaction_type')
-    .eq('post_id', params.postId)
-    .eq('user_id', likerId)
-    .maybeSingle() as { data: { post_id: string; reaction_type: string | null } | null }
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
 
-  let liked = true
-  let myReaction: string | null = reactionType
-  let newLikeCount = post.like_count
+  const row = (Array.isArray(data) ? data[0] : data) as {
+    action: string
+    my_reaction: string | null
+    reaction_count: number
+    reactions: Record<string, number>
+    post_author_id: string
+    points_awarded: boolean
+  } | null
 
-  // explicitRemove=true means the frontend detected the user is un-reacting
-  // (same emoji clicked twice). Bypass the existing-row lookup entirely.
-  if (explicitRemove) {
-    await adminClient.from('post_likes').delete().eq('post_id', params.postId).eq('user_id', likerId)
-    newLikeCount = Math.max(0, post.like_count - 1)
-    liked = false
-    myReaction = null
-  } else if (existing) {
-    const sameType = existing.reaction_type === reactionType
-    if (sameType) {
-      // Toggle off — remove reaction
-      await adminClient.from('post_likes').delete().eq('post_id', params.postId).eq('user_id', likerId)
-      newLikeCount = Math.max(0, post.like_count - 1)
-      liked = false
-      myReaction = null
-    } else {
-      // Change to a different reaction — update type, like_count unchanged
-      await adminClient
-        .from('post_likes')
-        .update({ reaction_type: reactionType } as never)
-        .eq('post_id', params.postId)
-        .eq('user_id', likerId)
-    }
-  } else {
-    // New reaction
-    await adminClient
-      .from('post_likes')
-      .insert({ post_id: params.postId, user_id: likerId, reaction_type: reactionType } as never)
-    newLikeCount = post.like_count + 1
+  if (!row) return NextResponse.json({ error: 'Failed' }, { status: 500 })
 
-    // Award 2 points to post author (not self-reacting)
-    if (post.author_id !== likerId) {
-      try {
-        const { error: rpcErr } = await supabase.rpc('increment_points', { user_id: post.author_id, amount: 2 })
-        if (rpcErr) console.warn('[like] increment_points failed:', rpcErr.message)
-      } catch (err) {
-        console.warn('[like] increment_points exception:', err)
-      }
-    }
+  const liked = row.my_reaction != null
+  const reactions = Object.entries(row.reactions ?? {})
+    .map(([type, count]) => ({ type, count: Number(count) || 0 }))
+    .sort((a, b) => b.count - a.count)
 
-    // Notify author
+  if (row.action === 'added' && row.post_author_id !== profile.id) {
     const { data: channelData } = await adminClient
       .from('posts')
       .select('channels(slug)')
       .eq('id', params.postId)
       .single()
-    const likerName = profileRow?.display_name ?? profileRow?.full_name ?? 'Someone'
+    const likerName = profile.display_name ?? profile.full_name ?? 'Someone'
     const channelSlug = (channelData?.channels as { slug: string } | null)?.slug ?? 'general'
-    void notifyLike({ postAuthorId: post.author_id, likerUserId: likerId, likerName, channelSlug, postId: params.postId })
+    void notifyLike({
+      postAuthorId: row.post_author_id,
+      likerUserId: profile.id,
+      likerName,
+      channelSlug,
+      postId: params.postId,
+    })
   }
 
-  // Update like_count on the post
-  await adminClient.from('posts').update({ like_count: newLikeCount }).eq('id', params.postId)
-
-  // Fetch updated per-reaction counts (adminClient to see all users' reactions)
-  const { data: allLikes } = await adminClient
-    .from('post_likes')
-    .select('reaction_type')
-    .eq('post_id', params.postId) as { data: { reaction_type: string | null }[] | null }
-
-  const reactionMap: Record<string, number> = {}
-  for (const like of allLikes ?? []) {
-    const t = like.reaction_type ?? 'thumbs_up'
-    reactionMap[t] = (reactionMap[t] ?? 0) + 1
-  }
-  const reactions = Object.entries(reactionMap)
-    .map(([type, count]) => ({ type, count }))
-    .sort((a, b) => b.count - a.count)
-
-  return NextResponse.json({ liked, likeCount: newLikeCount, myReaction, reactions })
+  return NextResponse.json({
+    liked,
+    likeCount: row.reaction_count,
+    myReaction: row.my_reaction,
+    reactions,
+  })
 }

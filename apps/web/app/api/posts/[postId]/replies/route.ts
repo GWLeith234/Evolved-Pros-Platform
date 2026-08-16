@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import type { Reply } from '@/lib/community/types'
 import { notifyReply } from '@/lib/notifications/create'
 
@@ -31,14 +32,15 @@ export async function GET(
   { params }: { params: { postId: string } }
 ) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data, error } = await supabase
     .from('replies')
     .select('id, post_id, body, created_at, users(id, display_name, full_name, avatar_url)')
     .eq('post_id', params.postId)
     .order('created_at', { ascending: true })
+    .limit(200)
 
   if (error) return NextResponse.json({ error: 'Failed to fetch replies' }, { status: 500 })
 
@@ -51,8 +53,8 @@ export async function POST(
   { params }: { params: { postId: string } }
 ) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   let body: { body?: unknown }
   try {
@@ -65,61 +67,59 @@ export async function POST(
   if (replyBody.length < 1) return NextResponse.json({ error: 'Reply cannot be empty' }, { status: 422 })
   if (replyBody.length > 2000) return NextResponse.json({ error: 'Reply exceeds 2000 characters' }, { status: 422 })
 
-  // RLS-FIX: resolve public.users.id by email (auth.uid() ≠ public.users.id
-  // for many users) — used for FK columns + self-row updates below.
-  const { data: profileRow, error: profileErr } = await adminClient
-    .from('users')
-    .select('id, display_name, full_name, points')
-    .eq('email', user.email)
-    .single()
-  if (profileErr || !profileRow) {
-    return NextResponse.json({ error: 'User profile not found' }, { status: 404 })
-  }
-  const authorId = profileRow.id
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (adminClient as any).rpc('create_post_reply', {
+    p_user_id: profile.id,
+    p_post_id: params.postId,
+    p_body: replyBody,
+  })
 
-  // Verify post exists and get author + channel
-  const { data: post } = await adminClient
-    .from('posts')
-    .select('author_id, reply_count, channels(slug)')
-    .eq('id', params.postId)
-    .single()
-
-  if (!post) return NextResponse.json({ error: 'Post not found' }, { status: 404 })
-
-  const { data: reply, error } = await adminClient
-    .from('replies')
-    .insert({ post_id: params.postId, author_id: authorId, body: replyBody } as never)
-    .select('id, post_id, body, created_at, users(id, display_name, full_name, avatar_url)')
-    .single()
-
-  if (error || !reply) return NextResponse.json({ error: 'Failed to create reply' }, { status: 500 })
-
-  // Increment reply_count on post
-  await adminClient
-    .from('posts')
-    .update({ reply_count: post.reply_count + 1 })
-    .eq('id', params.postId)
-
-  // Award 5 points to reply author
-  await adminClient
-    .from('users')
-    .update({ points: (profileRow.points ?? 0) + 5 })
-    .eq('id', authorId)
-
-  // Notify post author via factory (handles self-reply guard internally)
-  {
-    const replierName = profileRow.display_name ?? profileRow.full_name ?? 'Someone'
-    const channelSlug = (post.channels as { slug: string } | null)?.slug ?? 'general'
-
-    void notifyReply({
-      postAuthorId:    post.author_id,
-      replyAuthorId:   authorId,
-      replyAuthorName: replierName,
-      channelSlug,
-      postId:          params.postId,
-      replySnippet:    replyBody,
-    })
+  if (error) {
+    const msg = error.message ?? ''
+    if (msg.includes('empty_body')) return NextResponse.json({ error: 'Reply cannot be empty' }, { status: 422 })
+    if (msg.includes('body_too_long')) return NextResponse.json({ error: 'Reply exceeds 2000 characters' }, { status: 422 })
+    if (msg.includes('post_not_found')) return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+    return NextResponse.json({ error: 'Failed to create reply' }, { status: 500 })
   }
 
-  return NextResponse.json(toReply(reply as Parameters<typeof toReply>[0]), { status: 201 })
+  const row = (Array.isArray(data) ? data[0] : data) as {
+    reply_id: string
+    post_id: string
+    body: string
+    created_at: string
+    author_id: string
+    author_display_name: string | null
+    author_full_name: string | null
+    author_avatar_url: string | null
+    post_author_id: string
+    channel_slug: string
+    reply_count: number
+  } | null
+
+  if (!row) return NextResponse.json({ error: 'Failed to create reply' }, { status: 500 })
+
+  void notifyReply({
+    postAuthorId:    row.post_author_id,
+    replyAuthorId:   row.author_id,
+    replyAuthorName: row.author_display_name ?? row.author_full_name ?? 'Someone',
+    channelSlug:     row.channel_slug || 'general',
+    postId:          row.post_id,
+    replySnippet:    replyBody,
+  })
+
+  return NextResponse.json(
+    toReply({
+      id: row.reply_id,
+      post_id: row.post_id,
+      body: row.body,
+      created_at: row.created_at,
+      users: {
+        id: row.author_id,
+        display_name: row.author_display_name,
+        full_name: row.author_full_name,
+        avatar_url: row.author_avatar_url,
+      },
+    }),
+    { status: 201 },
+  )
 }
