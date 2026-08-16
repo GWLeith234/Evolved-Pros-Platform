@@ -57,7 +57,7 @@ export function HomeContextStrip({
       className="flex items-center gap-3 px-4 sm:px-5 min-h-[36px] py-1.5 w-full max-w-full overflow-hidden box-border"
       style={{
         backgroundColor: 'var(--episode-banner-bg)',
-        borderTop: '2px solid var(--brand-gold, #C9A84C)',
+        borderTop: '2px solid var(--brand-gold)',
         borderBottom: '1px solid var(--episode-banner-border)',
         flexShrink: 0,
       }}

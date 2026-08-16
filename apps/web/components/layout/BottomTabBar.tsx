@@ -31,32 +31,11 @@ function UsersIcon() {
   )
 }
 
-function CalendarIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-      <line x1="16" y1="2" x2="16" y2="6" />
-      <line x1="8" y1="2" x2="8" y2="6" />
-      <line x1="3" y1="10" x2="21" y2="10" />
-    </svg>
-  )
-}
-
 function BookIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
       <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-    </svg>
-  )
-}
-
-function TargetIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <circle cx="12" cy="12" r="6" />
-      <circle cx="12" cy="12" r="2" />
     </svg>
   )
 }
@@ -72,6 +51,17 @@ function GridIcon() {
   )
 }
 
+function MicIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" y1="19" x2="12" y2="23" />
+      <line x1="8" y1="23" x2="16" y2="23" />
+    </svg>
+  )
+}
+
 interface TabItem {
   label: string
   href: string
@@ -79,20 +69,20 @@ interface TabItem {
   icon: React.ReactNode
 }
 
-// Primary DAU loops on the thumb bar. Goals folded into Home; Podcast/Media
-// under More.
+// Primary DAU loops on the thumb bar (5 slots max including More).
+// Podcast is a flagship surface — it earns a tab. LIVE + Media live under More.
 const TABS: TabItem[] = [
   { label: 'Home',      href: '/home',       match: /^\/home$/,      icon: <HomeIcon /> },
   { label: 'Community', href: '/community',  match: /^\/community/,  icon: <UsersIcon /> },
+  { label: 'Podcast',   href: '/podcast',    match: /^\/podcast/,    icon: <MicIcon /> },
   { label: 'Academy',   href: '/academy',    match: /^\/academy/,    icon: <BookIcon /> },
-  { label: 'LIVE',      href: '/live',       match: /^\/live/,       icon: <CalendarIcon /> },
 ]
 
 export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTabBarProps) {
   const pathname = usePathname()
   const [moreOpen, setMoreOpen] = useState(false)
 
-  const isMoreActive = /^\/(messages|profile|settings|admin|leaderboard|membership|podcast)/.test(pathname)
+  const isMoreActive = /^\/(messages|profile|settings|admin|leaderboard|membership|live|media)/.test(pathname)
 
   return (
     <>
@@ -121,7 +111,7 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
                 className="flex-1 flex flex-col items-center justify-center gap-0.5 relative ep-touch-target"
                 aria-current={active ? 'page' : undefined}
                 style={{
-                  color: active ? 'var(--brand-teal, #0ABFA3)' : 'var(--text-tertiary)',
+                  color: active ? 'var(--brand-teal)' : 'var(--text-tertiary)',
                   background: active ? 'rgba(10,191,163,0.10)' : 'transparent',
                   minHeight: 48,
                 }}
@@ -131,7 +121,7 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
                   {isCommunity && unreadCount > 0 && (
                     <span
                       className="absolute -top-0.5 -right-0.5 w-[6px] h-[6px] rounded-full"
-                      style={{ backgroundColor: 'var(--brand-red-hot, #ef0e30)' }}
+                      style={{ backgroundColor: 'var(--brand-red-hot)' }}
                       aria-hidden="true"
                     />
                   )}
@@ -158,7 +148,7 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
             aria-haspopup="dialog"
             aria-label="More navigation"
             style={{
-              color: isMoreActive ? 'var(--brand-teal, #0ABFA3)' : 'var(--text-tertiary)',
+              color: isMoreActive ? 'var(--brand-teal)' : 'var(--text-tertiary)',
               background: isMoreActive ? 'rgba(10,191,163,0.10)' : 'transparent',
               minHeight: 48,
             }}
@@ -168,7 +158,7 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
               {dmUnreadCount > 0 && (
                 <span
                   className="absolute -top-0.5 -right-0.5 w-[6px] h-[6px] rounded-full"
-                  style={{ backgroundColor: 'var(--brand-red-hot, #ef0e30)' }}
+                  style={{ backgroundColor: 'var(--brand-red-hot)' }}
                 />
               )}
             </span>

@@ -77,7 +77,7 @@ export function NextEventBanner() {
           className="font-condensed font-semibold truncate"
           style={{ fontSize: '12px', letterSpacing: '0.06em', color: 'var(--text-primary)' }}
         >
-          <span style={{ color: '#ef0e30', fontWeight: 700 }}>NEXT EVENT</span>
+          <span style={{ color: 'var(--brand-red-hot)', fontWeight: 700 }}>NEXT EVENT</span>
           {' · '}
           <span style={{ opacity: 0.85 }}>{event.title}</span>
           {' · '}
@@ -88,11 +88,12 @@ export function NextEventBanner() {
           height="14"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#ef0e30"
+          stroke="currentColor"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
           className="flex-shrink-0"
+          style={{ color: 'var(--brand-red-hot)' }}
         >
           <polyline points="9 18 15 12 9 6" />
         </svg>

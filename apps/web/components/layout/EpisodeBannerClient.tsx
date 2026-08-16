@@ -42,7 +42,7 @@ export function EpisodeBannerClient({
       className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:h-[38px] gap-2 sm:gap-0 px-4 sm:px-5 py-2 sm:py-0 w-full max-w-full overflow-hidden box-border"
       style={{
         backgroundColor: 'var(--episode-banner-bg)',
-        borderTop: '2px solid #C9302A',
+        borderTop: '2px solid var(--brand-red)',
         borderBottom: '1px solid var(--episode-banner-border)',
         flexShrink: 0,
       }}
@@ -50,7 +50,7 @@ export function EpisodeBannerClient({
       <div className="flex items-center gap-2 sm:gap-[10px] min-w-0">
         <span
           className="text-[12px] sm:text-[12px] font-bold uppercase tracking-wider rounded-[3px] px-2 py-[2px] shrink-0"
-          style={{ backgroundColor: '#C9302A', color: '#ffffff' }}
+          style={{ backgroundColor: 'var(--brand-red)', color: 'var(--white)' }}
         >
           LATEST EPISODE
         </span>
