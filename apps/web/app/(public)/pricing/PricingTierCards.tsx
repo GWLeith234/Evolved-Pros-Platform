@@ -25,6 +25,8 @@ interface TierDef {
   fixedPeriod?: string
   badge: string
   badgeColor: string
+  /** One-line positioning under the tier name (SPRINT TIER-1). */
+  tagline?: string
   featured?: boolean
   popular?: boolean
   keynote?: boolean
@@ -50,19 +52,25 @@ export function PricingTierCards({
   const isAnnual = billing === 'annual'
 
   const tiers: TierDef[] = [
+    // SPRINT TIER-1 — the approved ladder. Gate the Academy, open everything
+    // else: free carries the whole community/events/podcast/media/habits
+    // product plus Pillar 1 and the full assessment. The paid tiers sell the
+    // curriculum (inner game, then outer game) and access to George.
+    // Copy + feature lists only — checkout wiring below is untouched.
     {
       name: 'Community',
       fixedPrice: 'Free',
       fixedPeriod: 'forever',
       badge: 'Community',
       badgeColor: '#60A5FA',
+      tagline: 'Everything but the curriculum',
       features: [
-        { text: 'Community feed' },
-        { text: 'Podcast library' },
-        { text: 'Event discovery' },
-        { text: 'Academy', locked: true },
-        { text: 'Own the Day', locked: true },
-        { text: 'Home dashboard', locked: true },
+        { text: 'Full community feed' },
+        { text: 'Events, podcast & media' },
+        { text: 'Habits & Own the Day' },
+        { text: 'Academy Pillar 1: Foundation — complete' },
+        { text: 'The Pillar Assessment, all six scores' },
+        { text: 'Academy Pillars 2–6', locked: true },
       ],
       cta: 'Join free',
       ctaHref: '/login?mode=signup',
@@ -72,12 +80,14 @@ export function PricingTierCards({
       priceKey: 'vip',
       badge: 'VIP',
       badgeColor: '#C9A84C',
+      tagline: 'Master the inner game',
       features: [
         { text: 'Everything in Community' },
-        { text: 'Event registration' },
-        { text: 'Academy Pillars 1–3' },
-        { text: 'Own the Day' },
-        { text: 'Accountability (your #1 goal)', locked: true },
+        { text: 'Pillar 1: Foundation' },
+        { text: 'Pillar 2: Identity' },
+        { text: 'Pillar 3: Mental Toughness' },
+        { text: 'Monthly mastermind' },
+        { text: 'Full assessment breakdown + pillar plan' },
         { text: 'Academy Pillars 4–6', locked: true },
       ],
       cta: 'Start VIP',
@@ -91,13 +101,15 @@ export function PricingTierCards({
       badgeColor: '#C9302A',
       featured: true,
       popular: true,
+      tagline: 'Master the results',
       features: [
         { text: 'Everything in VIP' },
-        { text: 'Full 6-Pillar Academy' },
-        { text: 'Accountability system' },
-        { text: 'Priority events' },
+        { text: 'All 6 pillars — Strategy, Accountability, Execution' },
+        { text: 'Weekly mastermind' },
+        { text: '1:1 time with George' },
+        { text: '10% off LIVE events' },
       ],
-      callout: 'Bi-weekly 1hr mastermind with George. Topics rotate through all 6 EVOLVED pillars.',
+      callout: 'Weekly mastermind with George, plus 1:1 time. The inner game and the outer game, end to end.',
       cta: 'Go Professional',
       ctaSku: proSku,
       ctaPlanBase: 'pro',
@@ -205,6 +217,16 @@ export function PricingTierCards({
                   </span>
                 )}
               </div>
+
+              {/* Positioning line — what this tier is FOR, in five words. */}
+              {tier.tagline && (
+                <p
+                  className="font-condensed font-bold uppercase tracking-[0.12em] text-[11px] mb-3"
+                  style={{ color: tier.badgeColor }}
+                >
+                  {tier.tagline}
+                </p>
+              )}
 
               {/* Price */}
               <div className="mb-5">

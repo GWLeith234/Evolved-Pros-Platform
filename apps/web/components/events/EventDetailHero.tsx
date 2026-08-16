@@ -6,6 +6,7 @@ import {
   EVENT_TYPE_LABELS, EVENT_TYPE_STYLES,
 } from '@/lib/events/types'
 import type { EventItem } from '@/lib/events/types'
+import { buildUpgradeHref, tierBadgeLabel, tierPlanName } from '@/lib/academy/gating'
 
 interface EventDetailHeroProps {
   event: EventItem
@@ -215,16 +216,25 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
                 </p>
               )
             ) : !event.hasAccess ? (
+              /* SPRINT TIER-1 — labelling only, access rules unchanged. Names
+                 the tier this session actually needs (it hard-coded "Pro" for
+                 VIP events too) and sends the member to the pricing ladder. */
               <>
-                <p className="font-condensed font-bold uppercase tracking-[0.15em] text-[12px] text-center text-[#7a8a96]">
-                  Pro Membership Required
+                {/* This panel is a FIXED-LIGHT surface (#faf9f7 above), so it
+                    takes the theme-invariant --muted, not --text-tertiary —
+                    the latter is white-alpha in dark mode and would vanish. */}
+                <p
+                  className="font-condensed font-bold uppercase tracking-[0.15em] text-[12px] text-center"
+                  style={{ color: 'var(--muted)' }}
+                >
+                  {tierBadgeLabel(event.requiredTier) ?? ''} Membership Required
                 </p>
                 <a
-                  href="/membership"
+                  href={buildUpgradeHref({ from: 'events', tier: event.requiredTier })}
                   className="w-full font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-4 py-3 text-center transition-all"
-                  style={{ backgroundColor: '#ef0e30', color: 'white' }}
+                  style={{ backgroundColor: 'var(--brand-red-hot)', color: 'var(--white)' }}
                 >
-                  Upgrade to Pro →
+                  Unlock with {tierPlanName(event.requiredTier)} →
                 </a>
               </>
             ) : (

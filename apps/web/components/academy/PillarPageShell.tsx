@@ -10,6 +10,7 @@ import {
   fetchLessonsWithProgress,
 } from '@/lib/academy/fetchers'
 import { PillarModuleAccordion } from '@/components/academy/PillarModuleAccordion'
+import { PillarLockPanel } from '@/components/academy/PillarLockPanel'
 import { DynamicReflectionPrompt } from '@/components/academy/DynamicReflectionPrompt'
 import { DynamicPillarAudit } from '@/components/academy/DynamicPillarAudit'
 import { adminClient } from '@/lib/supabase/admin'
@@ -111,23 +112,80 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
 
   if (!course) notFound()
 
-  // Tier access check — redirect to pricing if user lacks required tier
-  if (!hasTierAccess(profile?.tier, (course as Record<string, unknown>).required_tier as 'community' | 'vip' | 'pro')) {
-    redirect('/pricing')
-  }
-
   const pNum: number = ((course as Record<string, unknown>).pillar_number as number) ?? pillarNumber ?? 1
   const config = PILLAR_CONFIG[pNum]
   if (!config) notFound()
 
-  const isCourseLocked = !!(course as Record<string, unknown>).is_locked
+  const requiredTier = (course as Record<string, unknown>).required_tier as string
 
   // lesson_progress is keyed on public.users.id (profile.id, resolved by
   // email in fetchUserProfile) — the auth uid returns 0 completions for
   // accounts where the two UUIDs diverge, flattening the pillar % to 0.
+  const isCourseLocked = !!(course as Record<string, unknown>).is_locked
   const lessons = isCourseLocked
     ? []
     : await fetchLessonsWithProgress(supabase, (course as Record<string, unknown>).slug as string, profile?.id ?? user.id, profile?.tier)
+
+  // ── TIER GATE (SPRINT TIER-1) ─────────────────────────────────────────
+  // Server-side and authoritative: nothing below renders for a member whose
+  // tier doesn't clear courses.required_tier, so lesson titles, module
+  // structure, reflection prompts and audit questions are all unreachable.
+  // fetchLessonsWithProgress has already nulled the playback ids, and the
+  // mux-token route refuses to sign one — this is the page half of that pair.
+  //
+  // Was: redirect('/pricing'), which discarded the pillar the member wanted
+  // and could not be distinguished from an auth bounce. Now the page renders
+  // the storefront panel for THIS pillar (never a 404).
+  if (!hasTierAccess(profile?.tier, requiredTier)) {
+    return (
+      <main style={{ position: 'relative', zIndex: 1, backgroundColor: 'var(--bg-page)', minHeight: '100vh' }}>
+        <section className="academy-hero" style={{ position: 'relative', display: 'flex', alignItems: 'flex-end' }}>
+          <div
+            style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: `url(${config.image})`,
+              backgroundSize: 'cover', backgroundPosition: 'center',
+              backgroundColor: 'var(--brand-navy)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(to bottom, rgba(10,15,24,0.15) 0%, rgba(10,15,24,0.97) 100%)',
+            }}
+          />
+          <div
+            className="academy-lesson-pad"
+            style={{ position: 'relative', zIndex: 1, width: '100%', padding: '0 clamp(16px, 8vw, 96px) clamp(40px, 8vw, 72px)' }}
+          >
+            <p
+              className="font-condensed font-bold uppercase"
+              style={{ color: config.color, fontSize: 12, letterSpacing: '0.25em', margin: '0 0 10px' }}
+            >
+              Pillar {pNum}
+            </p>
+            <h1
+              className="font-condensed font-black uppercase"
+              style={{
+                fontSize: 'clamp(40px, 10vw, 96px)', lineHeight: 0.88,
+                color: 'var(--white)', margin: 0, letterSpacing: '-0.02em',
+              }}
+            >
+              {config.label}
+            </h1>
+          </div>
+        </section>
+        <PillarLockPanel
+          pillarNumber={pNum}
+          pillarLabel={config.label}
+          requiredTier={requiredTier}
+          pillarColor={config.color}
+          tagline={PILLAR_TAGLINES[pNum]}
+          lessonCount={lessons.length || null}
+        />
+      </main>
+    )
+  }
 
   const completedCount = lessons.filter(l => l.completedAt).length
   const progressPct = lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { hasTierAccess } from '@/lib/tier'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,13 +65,14 @@ export async function GET() {
   const communityMemberCount = memberCountResult.count ?? 0
   const newMembersThisWeek = newMembersResult.count ?? 0
 
-  // Pillars unlocked: courses the user can access based on tier
+  // Pillars unlocked: courses the user can access based on tier.
+  //
+  // SPRINT TIER-1: this was a hand-rolled rule — "pro sees everything, else
+  // only community courses" — which silently reported VIP members as having
+  // ONE pillar unlocked instead of three. Tier questions go through
+  // hasTierAccess against the course's own required_tier, same as every gate.
   const allCourses = coursesResult.data ?? []
-  const userTier = profile.tier ?? 'vip'
-  const accessibleCourses = allCourses.filter(c => {
-    if (userTier === 'pro') return true
-    return c.required_tier === 'community'
-  })
+  const accessibleCourses = allCourses.filter(c => hasTierAccess(profile.tier, c.required_tier))
   const pillarsUnlocked = accessibleCourses.length
   const pillarsTotal = allCourses.length
 

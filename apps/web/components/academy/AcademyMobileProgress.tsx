@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import type { CourseWithProgress } from '@/lib/academy/types'
+import { buildUpgradeHref, tierBadgeLabel } from '@/lib/academy/gating'
 
 interface AcademyMobileProgressProps {
   courses: CourseWithProgress[]
@@ -104,29 +105,38 @@ export function AcademyMobileProgress({ courses, userTier, overallPct }: Academy
 
           {courses.map(course => {
             const locked = !course.hasAccess
-            const badgeLabel = course.requiredTier === 'pro' ? 'Pro' : 'VIP'
+            // SPRINT TIER-1: label and destination come from the course's own
+            // required_tier, not a pro/else guess, and the locked row is now a
+            // real link — mobile parity with the storefront grid.
+            const badgeLabel = tierBadgeLabel(course.requiredTier)
             const label = `0${course.pillarNumber} — ${SIDEBAR_SHORT_NAMES[course.pillarNumber] ?? course.title}`
             return (
               <div key={course.id} className="mb-1">
                 {locked ? (
-                  <div
-                    className="flex items-center justify-between py-2.5"
+                  <Link
+                    href={buildUpgradeHref({
+                      from: 'academy',
+                      tier: course.requiredTier,
+                      pillar: course.pillarNumber,
+                    })}
+                    className="ep-touch-target flex items-center justify-between py-2.5"
                     style={{ color: 'var(--text-tertiary)', minHeight: 44 }}
                   >
                     <span className="font-condensed font-semibold text-[12px] uppercase tracking-wide">
                       {label}
                     </span>
-                    <span
-                      className="font-condensed font-bold uppercase text-[8px] px-1.5 py-0.5"
-                      style={{
-                        color: 'var(--brand-red, #C9302A)',
-                        backgroundColor: 'rgba(201,48,42,0.12)',
-                        border: '1px solid rgba(201,48,42,0.25)',
-                      }}
-                    >
-                      {badgeLabel}
-                    </span>
-                  </div>
+                    {badgeLabel && (
+                      <span
+                        className="font-condensed font-bold uppercase text-[8px] px-1.5 py-0.5"
+                        style={{
+                          color: `var(--pillar-${course.pillarNumber}-ink, var(--pillar-${course.pillarNumber}))`,
+                          border: '1px solid var(--border-color)',
+                        }}
+                      >
+                        {badgeLabel}
+                      </span>
+                    )}
+                  </Link>
                 ) : (
                   <Link
                     href={`/academy/${course.slug}`}

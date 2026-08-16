@@ -47,7 +47,12 @@ export async function GET(
       slug: l.slug,
       title: l.title,
       description: l.description,
-      muxPlaybackId: l.mux_playback_id,
+      // SPRINT TIER-1: the playback id is content, not metadata. It was
+      // returned unconditionally alongside isLocked, so a locked pillar's
+      // lesson list handed out every playback id — enough to go and mint a
+      // token. Titles stay (the storefront advertises what's behind the gate);
+      // anything playable does not.
+      muxPlaybackId: isLocked ? null : l.mux_playback_id,
       durationSeconds: l.duration_seconds,
       sortOrder: l.sort_order,
       isPublished: l.is_published,

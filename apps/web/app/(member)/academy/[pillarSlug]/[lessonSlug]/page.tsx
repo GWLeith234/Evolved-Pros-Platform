@@ -67,9 +67,16 @@ export default async function LessonPage({ params }: Props) {
 
   if (!course || !lessonRow) notFound()
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if (!hasTierAccess(profile?.tier as any, course.required_tier as any)) {
-    redirect('/academy')
+  // SPRINT TIER-1 — server-side gate, ahead of every content fetch below
+  // (lesson body, transcript, takeaways, and the signed Mux token). A member
+  // below course.required_tier never reaches the render, so the lesson is
+  // unobtainable rather than merely hidden.
+  //
+  // Bounces to the pillar page rather than /academy: that page now renders the
+  // upgrade panel for THIS pillar, so the member lands on the thing they asked
+  // for with the price of admission on it.
+  if (!hasTierAccess(profile?.tier, course.required_tier)) {
+    redirect(`/academy/${params.pillarSlug}`)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

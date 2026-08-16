@@ -4,12 +4,20 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { eventTypeBadge } from '@/lib/events/types'
+import { hasTierAccess } from '@/lib/tier'
+import { buildUpgradeHref, tierBadgeLabel } from '@/lib/academy/gating'
 import type { HeroEvent } from './CinematicHero'
 
 interface UpcomingEventsListProps {
   events: HeroEvent[]
   /** Initial set of event ids the current user has RSVP'd to. */
   registeredIds: string[]
+  /**
+   * Viewer's effective tier, for LABELLING sessions above it (SPRINT TIER-1).
+   * Access rules are unchanged — the RSVP endpoint is still the authority;
+   * this only decides whether the row shows an RSVP button or a tier chip.
+   */
+  viewerTier: string | null
 }
 
 interface DateBadge {
@@ -35,7 +43,7 @@ function formatDateBadge(iso: string): DateBadge {
   }
 }
 
-export function UpcomingEventsList({ events, registeredIds }: UpcomingEventsListProps) {
+export function UpcomingEventsList({ events, registeredIds, viewerTier }: UpcomingEventsListProps) {
   const [registered, setRegistered] = useState<Set<string>>(() => new Set(registeredIds))
   const [inflightId, setInflightId] = useState<string | null>(null)
 
@@ -134,6 +142,10 @@ export function UpcomingEventsList({ events, registeredIds }: UpcomingEventsList
           const pillarConf = event.pillar && event.pillar >= 1 && event.pillar <= 6
             ? PILLAR_CONFIG[event.pillar]
             : null
+          // Tier comparison via hasTierAccess only. An event with no
+          // required_tier is open to everyone, which is the common case.
+          const tierChip = tierBadgeLabel(event.required_tier)
+          const gated = tierChip !== null && !hasTierAccess(viewerTier, event.required_tier)
 
           return (
             <li
@@ -284,31 +296,59 @@ export function UpcomingEventsList({ events, registeredIds }: UpcomingEventsList
                 )}
               </div>
 
-              {/* CTA */}
-              <button
-                type="button"
-                onClick={() => toggleRsvp(event.id)}
-                disabled={isInflight}
-                aria-pressed={isRegistered}
-                aria-busy={isInflight}
-                style={{
-                  padding: '10px 18px',
-                  fontFamily: '"Barlow Condensed", sans-serif',
-                  fontWeight: 700,
-                  fontSize: 12,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  background: isRegistered ? '#C9A84C' : '#C9302A',
-                  color: isRegistered ? '#0A0F18' : '#FFFFFF',
-                  border: 'none',
-                  cursor: isInflight ? 'wait' : 'pointer',
-                  transition: 'background 140ms ease',
-                  minWidth: 90,
-                  minHeight: 44,
-                }}
-              >
-                {isRegistered ? '✓ Going' : 'RSVP'}
-              </button>
+              {/* CTA — a tier chip replaces the RSVP action for sessions
+                  above the viewer's tier (SPRINT TIER-1). Labelling only: the
+                  RSVP endpoint still enforces access on its own. */}
+              {gated ? (
+                <Link
+                  href={buildUpgradeHref({ from: 'events', tier: event.required_tier })}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    padding: '10px 18px',
+                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontWeight: 700,
+                    fontSize: 12,
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    background: 'var(--bg-elevated)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border-color)',
+                    textDecoration: 'none',
+                    minWidth: 90,
+                    minHeight: 44,
+                  }}
+                >
+                  {tierChip}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => toggleRsvp(event.id)}
+                  disabled={isInflight}
+                  aria-pressed={isRegistered}
+                  aria-busy={isInflight}
+                  style={{
+                    padding: '10px 18px',
+                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontWeight: 700,
+                    fontSize: 12,
+                    letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    background: isRegistered ? 'var(--brand-gold)' : 'var(--brand-red)',
+                    color: isRegistered ? 'var(--navy-abyss)' : 'var(--white)',
+                    border: 'none',
+                    cursor: isInflight ? 'wait' : 'pointer',
+                    transition: 'background 140ms ease',
+                    minWidth: 90,
+                    minHeight: 44,
+                  }}
+                >
+                  {isRegistered ? '✓ Going' : 'RSVP'}
+                </button>
+              )}
             </li>
           )
         })}

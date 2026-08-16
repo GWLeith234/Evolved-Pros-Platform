@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { AcademyMobileProgress } from '@/components/academy/AcademyMobileProgress'
@@ -47,6 +48,22 @@ export default async function AcademyPage() {
         <p className="academy-lede font-body text-[14px] mt-1">
           A 6-pillar professional development framework designed to transform how you work, think, and lead.
         </p>
+        {/* SPRINT TIER-1: the assessment is a community-tier feature — every
+            member, free included, sees their real six scores. Linked from the
+            header so it is reachable regardless of which pillars are open. */}
+        <Link
+          href="/academy/assessment"
+          className="inline-flex items-center gap-2 mt-3 font-condensed font-bold uppercase tracking-[0.14em] text-[11px] ep-touch-target"
+          style={{
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-color)',
+            padding: '8px 16px',
+            minHeight: 40,
+            textDecoration: 'none',
+          }}
+        >
+          Your Pillar Assessment →
+        </Link>
       </div>
 
       {/* Mobile collapsible progress — hidden on desktop */}

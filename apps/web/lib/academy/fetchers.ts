@@ -241,7 +241,11 @@ export async function fetchLessonsWithProgress(
       slug: lesson.slug,
       title: lesson.title,
       description: lesson.description,
-      muxPlaybackId: lesson.mux_playback_id,
+      // SPRINT TIER-1: never hand a playback id to a below-tier viewer. The
+      // /api/lessons/[id]/mux-token route refuses to sign one anyway, but the
+      // id should not reach the client at all — the lesson list is a
+      // storefront (titles, durations, counts), not a content delivery.
+      muxPlaybackId: isLocked ? null : lesson.mux_playback_id,
       durationSeconds: lesson.duration_seconds,
       sortOrder: lesson.sort_order,
       isPublished: lesson.is_published,

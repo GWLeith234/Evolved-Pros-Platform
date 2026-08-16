@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { formatEventDate, formatDuration, EVENT_TYPE_LABELS } from '@/lib/events/types'
 import type { EventItem } from '@/lib/events/types'
-import { Tooltip } from '@/components/ui/Tooltip'
+import { buildUpgradeHref, tierBadgeLabel, tierPlanName } from '@/lib/academy/gating'
 
 const TYPE_GRADIENTS: Record<string, string> = {
   live:     'linear-gradient(135deg, #1a0a0a, #3d1515, #1B2A4A)',
@@ -36,8 +36,9 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
   const { day, month, time } = formatEventDate(event.startsAt)
   const duration = formatDuration(event.startsAt, event.endsAt)
   const typeLabel = EVENT_TYPE_LABELS[event.eventType]
-  const badgeBg = TYPE_BADGE_BG[event.eventType] ?? '#1b3c5a'
+  const badgeBg = TYPE_BADGE_BG[event.eventType] ?? TYPE_BADGE_BG.inperson
   const gradient = TYPE_GRADIENTS[event.eventType] ?? TYPE_GRADIENTS.inperson
+  const tierChip = tierBadgeLabel(event.requiredTier)
 
   async function handleAction() {
     if (!hasAccess || loading) return
@@ -69,15 +70,35 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
       </a>
     )
   } else if (!hasAccess) {
+    // SPRINT TIER-1 — labelling only; event access rules are unchanged. The
+    // chip names the tier the SESSION actually requires (this used to say
+    // "Pro Required" on every gated event, including VIP ones) and links to
+    // the pricing ladder instead of pointing at Settings.
     cta = (
-      <Tooltip content="This event requires a Pro membership. Upgrade in Settings to access it.">
-        <span
-          className="flex w-full items-center justify-center text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 min-h-[44px] cursor-default"
-          style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: '#7a8a96', border: '1px solid rgba(255,255,255,0.08)' }}
-        >
-          Pro Required
-        </span>
-      </Tooltip>
+      <Link
+        href={buildUpgradeHref({ from: 'events', tier: event.requiredTier })}
+        className="flex w-full items-center justify-center gap-2 text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 min-h-[44px]"
+        style={{
+          // This whole card is a FIXED-DARK surface (see the container bg
+          // below), so the CTA uses the same white-alpha values as its sibling
+          // "Watch Recording" action rather than semantic tokens, which would
+          // flip to parchment on a card that stays dark in light mode.
+          backgroundColor: 'rgba(255,255,255,0.06)',
+          color: 'var(--white)',
+          border: '1px solid rgba(255,255,255,0.15)',
+          textDecoration: 'none',
+        }}
+      >
+        {tierChip && (
+          <span
+            className="font-condensed font-black uppercase tracking-[0.16em] text-[10px] px-1.5 py-0.5"
+            style={{ color: 'var(--brand-gold-bright)', border: '1px solid rgba(255,255,255,0.15)' }}
+          >
+            {tierChip}
+          </span>
+        )}
+        Unlock with {tierPlanName(event.requiredTier)}
+      </Link>
     )
   } else if (registered) {
     cta = (

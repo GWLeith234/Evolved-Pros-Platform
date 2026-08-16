@@ -8,6 +8,7 @@ import { AskGeorgeDrawer } from '@/components/layout/AskGeorgeDrawer'
 import { LogoMark } from '@/components/ui/LogoMark'
 import { useTheme } from '@/components/theme/ThemeProvider'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
+import { hasTierAccess } from '@/lib/tier'
 
 // The bell links straight to the /notifications feed (single destination —
 // no in-nav drawer). Loaded after paint so TopNav can SSR without an empty
@@ -54,17 +55,21 @@ interface NavItem { label: string; href: string; minTier?: 'vip' | 'pro'; highli
 const NAV_ITEMS: NavItem[] = [
   { label: 'Home',      href: '/home' },
   { label: 'Community', href: '/community' },
-  { label: 'Academy',   href: '/academy',  minTier: 'vip' },
+  // SPRINT TIER-1: Academy is open to every member. The grid is the
+  // storefront — all six pillars are visible to all tiers, with the locked
+  // ones badged and linked to /pricing. Hiding the nav item below VIP hid the
+  // upsell along with the content.
+  { label: 'Academy',   href: '/academy' },
   { label: 'LIVE',      href: '/live' },
   { label: 'Podcast',   href: '/podcast' },
   { label: 'Media',     href: '/media',    highlight: true },
 ]
 
-const TIER_RANK: Record<string, number> = { community: 1, vip: 2, pro: 3 }
-
+// Tier comparisons go through hasTierAccess — this file used to carry its own
+// TIER_RANK table, a second source of truth for the same question.
 function canAccess(userTier: string | null, minTier?: string): boolean {
   if (!minTier) return true
-  return (TIER_RANK[userTier ?? ''] ?? 0) >= (TIER_RANK[minTier] ?? 0)
+  return hasTierAccess(userTier, minTier)
 }
 
 function getInitials(name: string | null | undefined): string {

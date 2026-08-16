@@ -1,10 +1,10 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { ProgressBar, Button } from '@evolved-pros/ui'
+import { ProgressBar } from '@evolved-pros/ui'
 import type { CourseWithProgress } from '@/lib/academy/types'
-import { Tooltip } from '@/components/ui/Tooltip'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { buildUpgradeHref, tierBadgeLabel, tierPlanName } from '@/lib/academy/gating'
 
 interface CourseCardProps {
   course: CourseWithProgress
@@ -12,48 +12,57 @@ interface CourseCardProps {
   userTier: string | null
 }
 
-function LockIcon() {
-  return (
-    <svg width="12" height="14" viewBox="0 0 12 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="6" width="10" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M3.5 6V4a2.5 2.5 0 015 0v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  )
-}
-
 /**
  * Immersive pillar course card — standardized progress, done state, hover
  * (Sprint 2). Visual language matches InProgressPillarHero + design tokens.
+ *
+ * SPRINT TIER-1 — the grid is a STOREFRONT. A locked card is not a dead,
+ * dimmed placeholder: it keeps its title, pillar color, artwork and lesson
+ * count, wears a VIP/PRO badge, and the whole card is a live link to the
+ * pricing page pre-scoped to this pillar. The only thing a lock removes is
+ * the member's own progress (there is none) and the route into the content.
  */
 export function CourseCard({ course, isLocked, userTier }: CourseCardProps) {
   const router = useRouter()
   const isComplete = course.progressPct === 100
-  const imageUrl = PILLAR_CONFIG[course.pillarNumber]?.image ?? ''
-  const pillarColor = PILLAR_CONFIG[course.pillarNumber]?.color ?? '#68a2b9'
+  // Fall back to the Pillar 1 config rather than a raw hex literal: the color
+  // is concatenated with alpha suffixes below, so it has to stay a hex string
+  // (a var() would produce invalid CSS), and lib/pillar-colors is the token
+  // source of truth for those six values.
+  const config = PILLAR_CONFIG[course.pillarNumber] ?? PILLAR_CONFIG[1]
+  const imageUrl = config.image
+  const pillarColor = config.color
   const pillar =
     course.pillarNumber >= 1 && course.pillarNumber <= 6
       ? (course.pillarNumber as 1 | 2 | 3 | 4 | 5 | 6)
       : undefined
 
   void userTier
-  const needsPro = course.requiredTier === 'pro'
-  const tierLabel = needsPro ? 'Pro' : 'VIP'
-  const tooltipText = needsPro
-    ? 'Upgrade to Pro to unlock this pillar.'
-    : 'Upgrade to VIP to unlock this pillar.'
+  const tierBadge = tierBadgeLabel(course.requiredTier)
+  const planName = tierPlanName(course.requiredTier)
+  const upgradeHref = buildUpgradeHref({
+    from: 'academy',
+    tier: course.requiredTier,
+    pillar: course.pillarNumber,
+  })
+  const destination = isLocked ? upgradeHref : `/academy/${course.slug}`
 
   function handleClick() {
-    if (isLocked) return
-    router.push(`/academy/${course.slug}`)
+    router.push(destination)
   }
 
   return (
     <div
       onClick={handleClick}
-      role={isLocked ? undefined : 'button'}
-      tabIndex={isLocked ? -1 : 0}
+      role="button"
+      tabIndex={0}
+      aria-label={
+        isLocked
+          ? `Pillar ${course.pillarNumber}: ${course.title} — unlock with ${planName}`
+          : undefined
+      }
       onKeyDown={e => {
-        if (!isLocked && (e.key === 'Enter' || e.key === ' ')) handleClick()
+        if (e.key === 'Enter' || e.key === ' ') handleClick()
       }}
       className={`ep-course-card relative overflow-hidden${isLocked ? ' ep-course-card--locked' : ''}${isComplete ? ' ep-course-card--done' : ''}`}
       style={{
@@ -61,10 +70,12 @@ export function CourseCard({ course, isLocked, userTier }: CourseCardProps) {
         height: 240,
         width: '100%',
         maxWidth: '100%',
-        border: `1px solid ${isComplete ? `${pillarColor}66` : 'var(--border-color)'}`,
+        // Locked cards take the pillar's own accent border, not the neutral
+        // one: the card is merchandise, so it should look as alive as an
+        // unlocked one. (Was opacity 0.72 + a grey edge — it read as broken.)
+        border: `1px solid ${isComplete || isLocked ? `${pillarColor}66` : 'var(--border-color)'}`,
         borderRadius: 0,
-        opacity: isLocked ? 0.72 : 1,
-        cursor: isLocked ? 'default' : 'pointer',
+        cursor: 'pointer',
         boxShadow: isComplete ? `0 0 0 1px ${pillarColor}33` : undefined,
       }}
     >
@@ -106,25 +117,26 @@ export function CourseCard({ course, isLocked, userTier }: CourseCardProps) {
         <span
           className="absolute top-3 right-3 z-10 font-condensed font-bold uppercase tracking-[0.14em] text-[11px] px-2 py-1"
           style={{
-            color: '#0A0F18',
-            background: 'var(--brand-gold, #C9A84C)',
-            boxShadow: '0 0 16px rgba(201,168,76,0.45)',
+            color: 'var(--navy-abyss)',
+            background: 'var(--brand-gold)',
+            boxShadow: 'var(--shadow-glow-gold)',
           }}
         >
           ✓ Done
         </span>
       )}
 
-      {/* Lock badge */}
-      {isLocked && (
-        <Tooltip content={tooltipText}>
-          <div
-            className="absolute top-3 right-3 w-6 h-6 flex items-center justify-center z-10"
-            style={{ backgroundColor: 'rgba(0,0,0,0.55)', color: 'rgba(255,255,255,0.85)' }}
-          >
-            <LockIcon />
-          </div>
-        </Tooltip>
+      {/* Tier badge — replaces the old grey padlock. The padlock said "you
+          can't have this"; the badge says which plan this belongs to, which is
+          the whole point of showing the card. Solid pillar color with abyss
+          ink: the card art behind it is always dark in both themes. */}
+      {isLocked && tierBadge && (
+        <span
+          className="absolute top-3 right-3 z-10 font-condensed font-black uppercase tracking-[0.16em] text-[11px] px-2 py-1"
+          style={{ color: 'var(--navy-abyss)', background: pillarColor }}
+        >
+          {tierBadge}
+        </span>
       )}
 
       {/* Bottom content */}
@@ -150,20 +162,24 @@ export function CourseCard({ course, isLocked, userTier }: CourseCardProps) {
         </p>
 
         {isLocked ? (
-          <div className="flex items-center gap-2 flex-wrap" onClick={e => e.stopPropagation()}>
-            <span
-              className="font-condensed font-bold uppercase text-[11px] px-2 py-0.5"
-              style={{
-                color: '#c9a84c',
-                backgroundColor: 'rgba(201,168,76,0.15)',
-                border: '1px solid rgba(201,168,76,0.30)',
-              }}
+          /* Lesson count stays visible — it is the merchandise. The whole
+             card is the link (see handleClick), so this is text, not a
+             nested control. */
+          <div className="space-y-1">
+            <p
+              className="font-condensed uppercase tracking-[0.12em] text-[11px]"
+              style={{ color: 'rgba(255,255,255,0.55)', margin: 0 }}
             >
-              {tierLabel} Required
-            </span>
-            <Button variant="secondary" size="sm" href="/pricing">
-              Upgrade
-            </Button>
+              {typeof course.totalLessons === 'number' && course.totalLessons > 0
+                ? `${course.totalLessons} ${course.totalLessons === 1 ? 'lesson' : 'lessons'}`
+                : 'Lessons coming soon'}
+            </p>
+            <p
+              className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px]"
+              style={{ color: pillarColor, margin: 0 }}
+            >
+              Unlock with {planName} →
+            </p>
           </div>
         ) : course.totalLessons === null ? (
           <p className="font-condensed text-[12px]" style={{ color: 'rgba(255,255,255,0.50)' }}>
