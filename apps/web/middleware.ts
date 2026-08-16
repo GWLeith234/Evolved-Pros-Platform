@@ -15,6 +15,10 @@ const PUBLIC_ROUTES = [
   // Public SEO podcast section (index, episode pages, RSS) — must be reachable
   // by logged-out visitors and crawlers. Also removed from the matcher below.
   '/podcast',
+  // Public keynote/speaking funnel (landing page, inquiry form) — must be
+  // reachable by logged-out visitors and crawlers. Also removed from the
+  // matcher below.
+  '/live',
   // Closed-beta lockout screen — must be reachable by suspended members, so it
   // is never gated (also absent from the matcher below, belt-and-suspenders).
   '/beta-paused',
@@ -204,8 +208,10 @@ export const config = {
     // NOTE: /podcast is intentionally NOT matched — it is a public SEO section
     // (see PUBLIC_ROUTES). Middleware must not run on it so logged-out visitors
     // and crawlers get the server-rendered page instead of an auth redirect.
-    '/live',
-    '/live/:path*',
+    // NOTE: /live is intentionally NOT matched — it is a public keynote/speaking
+    // funnel (see PUBLIC_ROUTES). Middleware must not run on it so logged-out
+    // visitors and crawlers get the server-rendered page instead of an auth
+    // redirect.
     '/profile/:path*',
     '/messages',
     '/messages/:path*',
