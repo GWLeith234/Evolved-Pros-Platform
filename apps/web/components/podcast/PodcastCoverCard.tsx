@@ -127,7 +127,7 @@ export function PodcastCoverCard({ episode, interactive = true }: PodcastCoverCa
               position: 'absolute',
               inset: 0,
               background:
-                'radial-gradient(80% 70% at 50% 30%, #1a3348 0%, #112535 55%, #0A0F18 100%)',
+                'radial-gradient(80% 70% at 50% 30%, var(--navy) 0%, var(--navy-dark) 55%, var(--navy-abyss) 100%)',
             }}
           />
         )}

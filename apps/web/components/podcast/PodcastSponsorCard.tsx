@@ -10,8 +10,14 @@ import { stripTrailingArrow } from '@/lib/brand'
 const FB = 'var(--font-barlow)'
 const FBC = 'var(--font-barlow-condensed)'
 const FBN = 'var(--font-bebas)'
-const NAVY = 'var(--pod-navy, #112535)'
-const WHITE = '#F5F0E8'
+const NAVY = 'var(--pod-navy)'
+const WHITE = 'var(--paper)'
+const GOLD = 'var(--brand-gold)'
+const GOLD_BRIGHT = 'var(--brand-gold-bright)'
+const ACADEMY_ART_BG =
+  'radial-gradient(120% 90% at 20% 0%, var(--navy) 0%, var(--navy-dark) 50%, var(--navy-abyss) 100%)'
+const PARTNER_ART_BG =
+  'linear-gradient(135deg, var(--navy-deep) 0%, var(--navy-dark) 46%, var(--navy) 78%, var(--brand-red) 150%)'
 
 const DEFAULT_ROTATION_SECS = 8
 const MIN_ROTATION_SECS = 4
@@ -72,9 +78,7 @@ export function SquareSponsorCard({
           flex: '1 1 0',
           minHeight: 0,
           overflow: 'hidden',
-          background: academy
-            ? 'radial-gradient(120% 90% at 20% 0%, #1a3348 0%, #112535 50%, #0A0F18 100%)'
-            : 'linear-gradient(135deg, #0A2530 0%, #101B2C 46%, #2A1416 78%, #C9302A 150%)',
+          background: academy ? ACADEMY_ART_BG : PARTNER_ART_BG,
         }}
       >
         {academy ? (
@@ -145,8 +149,8 @@ export function SquareSponsorCard({
             top: 10,
             left: 10,
             padding: '3px 8px',
-            background: academy ? 'rgba(201,168,76,0.18)' : 'var(--brand-gold, #C9A84C)',
-            color: academy ? '#E7CE86' : '#0A0F18',
+            background: academy ? 'rgba(201,168,76,0.18)' : GOLD,
+            color: academy ? GOLD_BRIGHT : 'var(--navy-abyss)',
             border: academy ? '1px solid rgba(201,168,76,0.45)' : 'none',
             fontFamily: FBC,
             fontWeight: 800,
@@ -177,7 +181,7 @@ export function SquareSponsorCard({
           style={{
             width: 24,
             height: 3,
-            background: academy ? '#C9A84C' : 'var(--brand-red, #C9302A)',
+            background: academy ? GOLD : 'var(--brand-red)',
             display: 'block',
           }}
         />
@@ -227,7 +231,7 @@ export function SquareSponsorCard({
               fontSize: 'clamp(8px, 2.4vw, 10px)',
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
-              color: 'var(--brand-gold, #C9A84C)',
+              color: GOLD,
             }}
           >
             {disclosure}
@@ -289,7 +293,7 @@ function AcademyArt() {
           fontSize: 9,
           letterSpacing: '0.18em',
           textTransform: 'uppercase',
-          color: '#C9A84C',
+          color: GOLD,
         }}
       >
         Evolved Architecture™
@@ -307,7 +311,7 @@ function AcademyArt() {
       >
         Six pillars.
         <br />
-        <span style={{ color: '#E7CE86' }}>No ceiling.</span>
+        <span style={{ color: GOLD_BRIGHT }}>No ceiling.</span>
       </p>
       <ul
         style={{
