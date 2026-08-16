@@ -1592,11 +1592,23 @@ html.light-mode .live-force-dark {
   --bg-elevated:    #1A2332;
   --border-color:   rgba(255,255,255,0.07);
   --text-primary:   #ffffff;
-  --text-secondary: rgba(255,255,255,0.6);
-  --text-tertiary:  rgba(255,255,255,0.35);
+  --text-secondary: rgba(255,255,255,0.78);
+  --text-tertiary:  rgba(255,255,255,0.55);
+  --text-strong:    #fff;
+  --text-1:         rgba(255,255,255,0.92);
+  --text-2:         rgba(255,255,255,0.78);
+  --text-3:         rgba(255,255,255,0.62);
   --page-bg:        #0d1c27;
   --card-bg:        #111926;
   --card-border:    rgba(255,255,255,0.07);
+}
+
+/* /live body copy: bump editorial --text-2/3 so kickers and city lists stay
+   readable on navy (was ~0.55–0.65 and felt washed out on mobile). */
+.live-force-dark {
+  --text-1: rgba(255, 255, 255, 0.92);
+  --text-2: rgba(255, 255, 255, 0.78);
+  --text-3: rgba(255, 255, 255, 0.62);
 }
 
 /* Public podcast episode pages hardcode a navy shell (#0A0F18). In light mode

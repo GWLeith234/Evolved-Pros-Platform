@@ -34,20 +34,15 @@ function countryRegion(country: string): Region {
   }
 }
 
-/**
- * Prefer major hubs when collapsing long US/Canada lists — still show every
- * city, but as a single flowing line rather than a tall bullet stack.
- */
 function sortCities(cities: string[]): string[] {
   return [...cities].sort((a, b) => a.localeCompare(b))
 }
 
 /**
- * Past speaking archive — consolidated by region so the LIVE page stays
- * scannable (was ~20 country cards with 100+ USA city bullets).
+ * Past stages as cities only — same pin set as the globe above.
+ * No event write-ups; when a date passes, the city stays on the map + here.
  */
 export function LivePastSpeaking() {
-  // country → unique cities
   const byCountry = new Map<string, string[]>()
   for (const pin of SPEAKING_PINS) {
     const list = byCountry.get(pin.country) ?? []
@@ -55,7 +50,6 @@ export function LivePastSpeaking() {
     byCountry.set(pin.country, list)
   }
 
-  // region → { country, cities }[]
   const byRegion = new Map<Region, { country: string; cities: string[] }[]>()
   for (const r of REGION_ORDER) byRegion.set(r, [])
   for (const [country, cities] of byCountry) {
@@ -70,68 +64,13 @@ export function LivePastSpeaking() {
   const totalCountries = SPEAKING_STATS.countries
 
   return (
-    <section className="live-section-pad" style={{ margin: '64px auto 0' }}>
+    <section className="live-section-pad" style={{ margin: '48px auto 0' }}>
       <LiveSectionHeader
         eyebrow="The Archive"
-        title="Past speaking events"
-        kicker={`${totalCities}+ cities · ${totalCountries} countries · ${SPEAKING_STATS.talks}+ stages. Consolidated by region.`}
+        title="Cities on the tour"
+        kicker={`${totalCities} cities · ${totalCountries} countries — every name is a pin on the map above.`}
       />
 
-      {/* Stat strip */}
-      <div
-        style={{
-          marginTop: 20,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-          gap: 1,
-          background: 'var(--border-color, var(--border-soft2))',
-          border: '1px solid var(--border-color, var(--border-soft2))',
-        }}
-      >
-        {[
-          { label: 'Talks', value: `${SPEAKING_STATS.talks}+` },
-          { label: 'Cities', value: `${totalCities}` },
-          { label: 'Countries', value: `${totalCountries}` },
-          { label: 'Years', value: `${SPEAKING_STATS.yearsActive}` },
-        ].map(s => (
-          <div
-            key={s.label}
-            style={{
-              background: 'var(--bg-surface)',
-              padding: '14px 16px',
-              textAlign: 'center',
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                fontFamily: FBN,
-                fontSize: 28,
-                letterSpacing: '0.04em',
-                color: 'var(--brand-gold, #C9A84C)',
-                lineHeight: 1,
-              }}
-            >
-              {s.value}
-            </p>
-            <p
-              style={{
-                margin: '6px 0 0',
-                fontFamily: FBC,
-                fontWeight: 700,
-                fontSize: 10,
-                letterSpacing: '0.2em',
-                textTransform: 'uppercase',
-                color: 'var(--text-tertiary, rgba(255,255,255,0.4))',
-              }}
-            >
-              {s.label}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      {/* Regional blocks */}
       <div
         style={{
           marginTop: 16,
@@ -185,7 +124,7 @@ export function LivePastSpeaking() {
                     fontSize: 11,
                     letterSpacing: '0.14em',
                     textTransform: 'uppercase',
-                    color: 'var(--text-tertiary, rgba(255,255,255,0.4))',
+                    color: 'var(--text-3, rgba(255,255,255,0.55))',
                   }}
                 >
                   {rows.length} {rows.length === 1 ? 'country' : 'countries'} · {cityCount} cities
@@ -211,21 +150,20 @@ export function LivePastSpeaking() {
                         style={{
                           marginLeft: 8,
                           fontWeight: 600,
-                          color: 'var(--text-tertiary, rgba(255,255,255,0.35))',
+                          color: 'var(--text-3, rgba(255,255,255,0.55))',
                           letterSpacing: '0.1em',
                         }}
                       >
                         {cities.length}
                       </span>
                     </p>
-                    {/* Single flowing line — much denser than one li per city */}
                     <p
                       style={{
                         margin: '6px 0 0',
                         fontFamily: FB,
-                        fontSize: 14,
+                        fontSize: 15,
                         lineHeight: 1.55,
-                        color: 'var(--text-secondary, rgba(255,255,255,0.65))',
+                        color: 'var(--text-2, rgba(255,255,255,0.78))',
                       }}
                     >
                       {cities.join(' · ')}

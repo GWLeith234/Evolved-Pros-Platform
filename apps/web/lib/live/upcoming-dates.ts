@@ -1,3 +1,15 @@
+/**
+ * Upcoming *speaking* dates for /live.
+ *
+ * Rules:
+ * - Only real stage / conference / workshop dates belong here.
+ * - Product launches (podcast, platform, book) do NOT — they are not speaking events.
+ * - Past dates are filtered out at render time; when a speaking date passes, add
+ *   its city to `speaking-pins.ts` (if missing) so it stays on the globe + archive.
+ *
+ * To add a date: push a row with city, country, event title, and CONFIRMED | HOLD.
+ */
+
 export interface UpcomingDate {
   date: Date
   city: string
@@ -9,45 +21,35 @@ export interface UpcomingDate {
   linkUrl?: string
 }
 
+/**
+ * Editable calendar. Keep this list short and current — the UI auto-hides
+ * anything before today so stale rows never show as "upcoming."
+ *
+ * (Cleared Aug 2026: Apr 28 podcast launch, May 15 platform launch, May 20
+ * TVOT Montreal, and Jul 15 book launch were all past and/or not speaking.)
+ */
 export const UPCOMING_DATES: UpcomingDate[] = [
-  {
-    date: new Date(2026, 3, 28),
-    city: 'Everywhere',
-    country: '',
-    event: 'Conquer Local Podcast Launches',
-    tag: 'CONFIRMED',
-    detail: 'Season 1 drops on every major podcast platform — Apple, Spotify, YouTube. New conversations with operators every week.',
-    linkLabel: 'Listen',
-    linkUrl: 'https://evolvex360.com/podcast',
-  },
-  {
-    date: new Date(2026, 4, 15),
-    city: 'Everywhere',
-    country: '',
-    event: 'EVOLVED Platform Goes Live',
-    tag: 'CONFIRMED',
-    detail: 'The full EVOLVED operating system opens to founding members — courses, cohorts, community, and the daily discipline engine.',
-    linkLabel: 'Get early access',
-    linkUrl: 'https://evolvex360.com',
-  },
-  {
-    date: new Date(2026, 4, 20),
-    city: 'Montreal',
-    country: 'Canada',
-    event: 'TVOT Conference',
-    tag: 'CONFIRMED',
-    detail: 'Panelist on the future of connected TV and revenue. Joining operators from across the broadcast and streaming industry.',
-    linkLabel: 'Conference site',
-    linkUrl: 'https://tvot.tv',
-  },
-  {
-    date: new Date(2026, 6, 15),
-    city: 'Everywhere',
-    country: '',
-    event: 'EVOLVED Book Launch Day',
-    tag: 'CONFIRMED',
-    detail: 'The book that codifies twenty years on stage and in the field. Pre-order on Amazon — search "Evolved by George Leith." Hardcover, ebook and audio.',
-    linkLabel: 'Pre-order on Amazon',
-    linkUrl: 'https://www.amazon.com/s?k=Evolved+by+George+Leith',
-  },
+  // Example (uncomment / replace when a date is locked):
+  // {
+  //   date: new Date(2026, 9, 14),
+  //   city: 'Chicago',
+  //   country: 'USA',
+  //   event: 'Revenue Leadership Summit',
+  //   tag: 'CONFIRMED',
+  //   detail: 'Keynote on the EVOLVED Architecture™ for sales leaders.',
+  // },
 ]
+
+/** Start of local calendar day — dates on/after this count as upcoming. */
+export function startOfToday(): Date {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
+/** Upcoming speaking rows only (date ≥ today), soonest first. */
+export function getUpcomingSpeakingDates(now = startOfToday()): UpcomingDate[] {
+  return UPCOMING_DATES.filter(d => d.date.getTime() >= now.getTime()).sort(
+    (a, b) => a.date.getTime() - b.date.getTime(),
+  )
+}
