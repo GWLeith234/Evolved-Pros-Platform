@@ -12,12 +12,14 @@ import { LiveSectionHeader } from '@/components/live/LiveSectionHeader'
 import { LiveGlobeLazy } from './LiveGlobeLazy'
 import { LiveUpcomingDates } from '@/components/live/LiveUpcomingDates'
 import { LivePastSpeaking } from '@/components/live/LivePastSpeaking'
+import { LiveProductMilestones } from '@/components/live/LiveProductMilestones'
 import { LiveSponsors } from '@/components/live/LiveSponsors'
 import { LivePillarGrid } from '@/components/live/LivePillarGrid'
 import { LiveTestimonials } from '@/components/live/LiveTestimonials'
 import { LivePhotoRotator } from '@/components/live/LivePhotoRotator'
 import { LiveFinalCTA } from '@/components/live/LiveFinalCTA'
-import { SPEAKING_PINS, SPEAKING_STATS } from '@/lib/live/speaking-pins'
+import { SPEAKING_STATS } from '@/lib/live/speaking-pins'
+import { getSpeakingPins, statsFromPins } from '@/lib/live/get-speaking-pins'
 import {
   DEFAULT_ACADEMY_SPONSORS,
   pickAcademySponsors,
@@ -49,8 +51,9 @@ async function fetchLiveSponsors(): Promise<SponsorAd[]> {
 }
 
 export default async function LivePage() {
-  const countries = SPEAKING_STATS.countries
-  const tourTitle = `${SPEAKING_STATS.talks}+ stages. ${countries} countries. ${SPEAKING_STATS.yearsActive} years.`
+  const pins = await getSpeakingPins()
+  const pinStats = statsFromPins(pins)
+  const tourTitle = `${SPEAKING_STATS.talks}+ stages. ${pinStats.countries} countries. ${SPEAKING_STATS.yearsActive} years.`
 
   const supabase = createClient()
   const {
@@ -111,14 +114,17 @@ export default async function LivePage() {
             overflow: 'hidden',
           }}
         >
-          <LiveGlobeLazy />
+          <LiveGlobeLazy pins={pins} />
         </div>
         <p style={{ position: 'absolute', left: -9999, width: 1, height: 1, overflow: 'hidden' }}>
-          Countries on tour: {Array.from(new Set(SPEAKING_PINS.map(p => p.country))).join(', ')}.
+          Countries on tour: {Array.from(new Set(pins.map(p => p.country))).join(', ')}.
         </p>
       </section>
 
-      <LivePastSpeaking />
+      <LivePastSpeaking pins={pins} />
+
+      {/* Product / platform milestones — not speaking */}
+      <LiveProductMilestones />
 
       {/* Evolution Partner ads */}
       <LiveSponsors ads={sponsors} />

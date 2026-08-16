@@ -24,7 +24,7 @@ export const SPEAKING_PINS: SpeakingPin[] = [
   // Asia / SEA
   { city: 'Bali',           country: 'Indonesia',    lat:  -8.4095, lon: 115.1889 },
   { city: 'Kuala Lumpur',   country: 'Malaysia',     lat:   3.1390, lon: 101.6869 },
-  { city: 'Hong Kong',      country: 'Hong Kong',    lat:  22.3193, lon: 114.1694 },
+  { city: 'Hong Kong',      country: 'China',        lat:  22.3193, lon: 114.1694 },
   { city: 'Shanghai',       country: 'China',        lat:  31.2304, lon: 121.4737 },
   { city: 'Phuket',         country: 'Thailand',     lat:   7.8804, lon:  98.3923 },
   // Europe
@@ -117,8 +117,8 @@ export const SPEAKING_PINS: SpeakingPin[] = [
   { city: 'Biloxi',         country: 'USA',          lat:  30.3960, lon:  -88.8853 },
   { city: 'Memphis',        country: 'USA',          lat:  35.1495, lon:  -90.0490 },
   { city: 'Nashville',      country: 'USA',          lat:  36.1627, lon:  -86.7816 },
-  { city: 'Norfolk',        country: 'USA',          lat:  40.6970, lon:  -97.4859 },
-  { city: 'Norfolk VA',     country: 'USA',          lat:  36.8508, lon:  -76.2859 },
+  { city: 'Norfolk NE',     country: 'USA',          lat:  40.6970, lon:  -97.4859 },
+  { city: 'Norfolk',        country: 'USA',          lat:  36.8508, lon:  -76.2859 },
   { city: 'Atlanta',        country: 'USA',          lat:  33.7490, lon:  -84.3880 },
   { city: 'Modesto',        country: 'USA',          lat:  37.6391, lon: -120.9969 },
   { city: 'Olympia',        country: 'USA',          lat:  47.0379, lon: -122.9007 },
