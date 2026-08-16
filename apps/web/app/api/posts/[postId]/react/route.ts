@@ -3,18 +3,15 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 // Brief naming (UI-facing) → DB CHECK-constraint values from Sprint 0 migration.
-// Sprint 0 locked DB values to ('fire','hundred','clap','heart','mind') —
-// COMMUNITY-SPRINT-2 brief renamed clap→hands and mind→mindblown for the UI.
-// Translate at the API boundary so the DB stays consistent.
 const EMOJI_TO_DB: Record<string, string> = {
   fire:      'fire',
   hundred:   'hundred',
   hands:     'clap',
   heart:     'heart',
   mindblown: 'mind',
-  // Backward-compat: also accept DB names directly.
   clap:      'clap',
   mind:      'mind',
 }
@@ -29,29 +26,40 @@ const DB_TO_EMOJI: Record<string, string> = {
 
 const EMPTY_COUNTS = { fire: 0, hundred: 0, hands: 0, heart: 0, mindblown: 0 }
 
-async function resolveUserId(email: string): Promise<string | null> {
-  const { data } = await adminClient
-    .from('users')
-    .select('id')
-    .eq('email', email)
-    .single()
-  return data?.id ?? null
-}
-
-async function readCounts(postId: string): Promise<typeof EMPTY_COUNTS> {
-  const { data } = await adminClient
-    .from('post_reactions')
-    .select('reaction_type')
-    .eq('post_id', postId) as { data: { reaction_type: string }[] | null }
-
+function countsFromJson(reactions: Record<string, number> | null | undefined) {
   const counts = { ...EMPTY_COUNTS }
-  for (const row of data ?? []) {
-    const ui = DB_TO_EMOJI[row.reaction_type]
-    if (ui && ui in counts) {
-      counts[ui as keyof typeof EMPTY_COUNTS] += 1
-    }
+  for (const [dbType, n] of Object.entries(reactions ?? {})) {
+    const ui = DB_TO_EMOJI[dbType]
+    if (ui && ui in counts) counts[ui as keyof typeof EMPTY_COUNTS] = Number(n) || 0
   }
   return counts
+}
+
+type ToggleRow = {
+  action: string
+  my_reaction: string | null
+  reaction_count: number
+  reactions: Record<string, number>
+  post_author_id: string
+  points_awarded: boolean
+}
+
+async function callToggle(
+  userId: string,
+  postId: string,
+  reactionType: string | null,
+  mode: 'set' | 'toggle' | 'remove',
+): Promise<{ row: ToggleRow | null; error: string | null }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (adminClient as any).rpc('toggle_post_reaction', {
+    p_user_id: userId,
+    p_post_id: postId,
+    p_reaction_type: reactionType ?? 'heart',
+    p_mode: mode,
+  })
+  if (error) return { row: null, error: error.message }
+  const row = Array.isArray(data) ? data[0] : data
+  return { row: row as ToggleRow, error: null }
 }
 
 export async function POST(
@@ -59,8 +67,8 @@ export async function POST(
   { params }: { params: { postId: string } },
 ) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   let dbValue: string
   try {
@@ -74,23 +82,12 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid body' }, { status: 400 })
   }
 
-  const userId = await resolveUserId(user.email)
-  if (!userId) return NextResponse.json({ error: 'User not found' }, { status: 404 })
-
-  // Composite PK (user_id, post_id) — upsert flips reaction type for the
-  // same user without creating duplicates.
-  const { error } = await adminClient
-    .from('post_reactions')
-    .upsert(
-      { user_id: userId, post_id: params.postId, reaction_type: dbValue } as never,
-      { onConflict: 'user_id,post_id' } as never,
-    )
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  const { row, error } = await callToggle(profile.id, params.postId, dbValue, 'set')
+  if (error || !row) {
+    return NextResponse.json({ error: error ?? 'Failed' }, { status: 500 })
   }
 
-  const counts = await readCounts(params.postId)
-  return NextResponse.json({ ok: true, counts })
+  return NextResponse.json({ ok: true, counts: countsFromJson(row.reactions) })
 }
 
 export async function DELETE(
@@ -98,21 +95,13 @@ export async function DELETE(
   { params }: { params: { postId: string } },
 ) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const userId = await resolveUserId(user.email)
-  if (!userId) return NextResponse.json({ error: 'User not found' }, { status: 404 })
-
-  const { error } = await adminClient
-    .from('post_reactions')
-    .delete()
-    .eq('user_id', userId)
-    .eq('post_id', params.postId)
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  const { row, error } = await callToggle(profile.id, params.postId, 'heart', 'remove')
+  if (error || !row) {
+    return NextResponse.json({ error: error ?? 'Failed' }, { status: 500 })
   }
 
-  const counts = await readCounts(params.postId)
-  return NextResponse.json({ ok: true, counts })
+  return NextResponse.json({ ok: true, counts: countsFromJson(row.reactions) })
 }
