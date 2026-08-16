@@ -2,9 +2,13 @@
 import type { Metadata, Viewport } from 'next'
 import { Playfair_Display, Barlow_Condensed, Barlow, Bebas_Neue, Merriweather, Abril_Fatface } from 'next/font/google'
 import { getDefaultTheme } from '@/lib/cache/shared'
+import { getGscVerification } from '@/lib/analytics/public-ids'
+import { AudienceAnalytics } from '@/components/analytics/AudienceAnalytics'
 import { ThemeInit } from '@/components/ThemeInit'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import './globals.css'
+
+const gscVerification = getGscVerification()
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -73,6 +77,8 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
+  // Search Console HTML-tag verification. Omitted when the env var is unset.
+  ...(gscVerification ? { verification: { google: gscVerification } } : {}),
 }
 
 /** iOS/Android web: device-width + safe-area (viewport-fit=cover). */
@@ -124,6 +130,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         }}
       >
         <ThemeProvider>{children}</ThemeProvider>
+        <AudienceAnalytics />
       </body>
     </html>
   )
