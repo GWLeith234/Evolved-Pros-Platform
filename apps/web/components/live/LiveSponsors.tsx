@@ -1,22 +1,37 @@
 import { AcademyLessonSponsors } from '@/components/academy/AcademyLessonSponsors'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import { isAcademyAd } from '@/lib/sponsors/partners'
 import { LiveSectionHeader } from './LiveSectionHeader'
 
 /**
- * 1–2 Evolution Partner cards on the LIVE page.
+ * 1–2 featured cards on the LIVE page (Academy promo + Evolution Partner).
  * Section header lives here once — AcademyLessonSponsors is body-only.
  */
 export function LiveSponsors({ ads }: { ads: SponsorAd[] }) {
   if (!ads.length) return null
+  const slice = ads.slice(0, 2)
+  const hasAcademy = slice.some(isAcademyAd)
+  const hasPartner = slice.some(a => !isAcademyAd(a))
+  const title = hasAcademy && hasPartner
+    ? 'Featured'
+    : hasAcademy
+      ? 'Evolved Pros Academy'
+      : 'Evolution Partners'
+  const kicker = hasAcademy && hasPartner
+    ? 'Build the architecture — and the partners behind the operators on this stage.'
+    : hasAcademy
+      ? 'Six pillars. One system. Make excellence inevitable.'
+      : 'Brands that back the operators on this stage.'
+
   return (
     <section className="live-section-pad" style={{ margin: '56px auto 0' }}>
       <LiveSectionHeader
-        eyebrow="Partners"
-        title="Evolution Partners"
-        kicker="Brands that back the operators on this stage."
+        eyebrow={hasAcademy ? 'Academy' : 'Partners'}
+        title={title}
+        kicker={kicker}
       />
       <div style={{ marginTop: 8 }}>
-        <AcademyLessonSponsors ads={ads.slice(0, 2)} hideHeader />
+        <AcademyLessonSponsors ads={slice} hideHeader />
       </div>
     </section>
   )

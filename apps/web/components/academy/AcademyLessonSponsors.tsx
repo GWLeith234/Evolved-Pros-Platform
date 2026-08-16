@@ -1,9 +1,10 @@
 import { SponsorAdCard, type SponsorAd } from '@/components/home/HomeSponsorAd'
+import { isAcademyAd } from '@/lib/sponsors/partners'
 
 /**
- * Evolution Partner strip for Academy lesson / course pages.
- * 1–2 premium cards — after main content, before discussion / related lessons.
- * Pass hideHeader when a parent already renders the section title (e.g. LIVE).
+ * Footer strip for Academy lesson / course pages (also reused on LIVE).
+ * Mixes Academy product promo with Evolution Partners when both are present.
+ * Pass hideHeader when a parent already renders the section title.
  */
 export function AcademyLessonSponsors({
   ads,
@@ -24,9 +25,23 @@ export function AcademyLessonSponsors({
   }
   if (!shown.length) return null
 
+  const hasAcademy = shown.some(isAcademyAd)
+  const hasPartner = shown.some(a => !isAcademyAd(a))
+  const title = hasAcademy && hasPartner
+    ? 'Featured'
+    : hasAcademy
+      ? 'Evolved Pros Academy'
+      : 'Evolution Partners'
+  const subtitle = hasAcademy && hasPartner
+    ? 'Architecture · Partners'
+    : hasAcademy
+      ? 'Six pillars · One system'
+      : 'Hand-picked tools'
+  const aria = hasAcademy && !hasPartner ? 'Evolved Pros Academy' : 'Featured'
+
   return (
     <section
-      aria-label="Evolution Partners"
+      aria-label={aria}
       style={{
         marginTop: hideHeader ? 0 : 8,
         marginBottom: hideHeader ? 0 : 40,
@@ -52,10 +67,10 @@ export function AcademyLessonSponsors({
               fontSize: 11,
               letterSpacing: '0.22em',
               textTransform: 'uppercase',
-              color: 'var(--brand-red, #C9302A)',
+              color: hasAcademy ? 'var(--brand-gold, #C9A84C)' : 'var(--brand-red, #C9302A)',
             }}
           >
-            Evolution Partners
+            {title}
           </p>
           <p
             style={{
@@ -68,7 +83,7 @@ export function AcademyLessonSponsors({
               color: 'var(--text-secondary, rgba(255,255,255,0.55))',
             }}
           >
-            Hand-picked tools
+            {subtitle}
           </p>
         </div>
       )}

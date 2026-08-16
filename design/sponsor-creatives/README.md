@@ -30,10 +30,12 @@ six-bar / spectrum motif uses them in order:
 
 ## Creative 1 — Evolved Pros Academy ✅
 
-`academy-300x250.html` / `academy-728x90.html`. Navy→black gradient, gold top
-rule, real EP logo (`logo_horizontal_dark.png` — white wordmark), Playfair
-headline "Six Pillars. No Ceiling.", Barlow sub, the six pillar colors (ascending
-bars on 300×250, a full-width bottom spectrum on 728×90), gold "LEARN MORE" CTA.
+`academy-portrait.html` / `academy-300x250.html` / `academy-728x90.html`.
+Navy→black gradient, gold top rule, EP logo + **Academy** badge (never Partner),
+Playfair conversion headline **"Stop collecting tips. Build the system."**,
+named six-pillar chips (Foundation → Execution), red **"Enter the Academy"** CTA.
+Portrait is the primary in-app creative; banners keep the same story for
+`platform_ads.image_url` placements.
 
 ## Creative 2 — EVOLVED book launch
 

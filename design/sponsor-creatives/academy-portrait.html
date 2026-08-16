@@ -6,36 +6,51 @@
   html, body { width: 600px; height: 900px; overflow: hidden; }
   .ad { position: relative; width: 600px; height: 900px;
     background: radial-gradient(120% 90% at 18% 4%, #17324a 0%, #112535 42%, #0a141f 78%, #060c14 100%);
-    padding: 48px 46px 44px; display: flex; flex-direction: column; font-family: "Barlow", sans-serif; }
+    padding: 42px 44px 40px; display: flex; flex-direction: column; font-family: "Barlow", sans-serif; }
   .rule { position: absolute; top: 0; left: 0; right: 0; height: 6px;
     background: linear-gradient(90deg, #C9A84C 0%, #E7CE86 50%, #C9A84C 100%); }
-  .logo { height: 40px; width: auto; opacity: .96; align-self: flex-start; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .logo { height: 36px; width: auto; opacity: .96; }
+  .badge { font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: 13px;
+    letter-spacing: .18em; text-transform: uppercase; color: #E7CE86;
+    border: 1px solid rgba(201,168,76,.45); background: rgba(201,168,76,.12);
+    padding: 8px 12px; border-radius: 6px; }
+  .eyebrow { font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: 16px;
+    letter-spacing: .22em; text-transform: uppercase; color: #C9A84C; margin-top: 36px; }
   .headline { font-family: "Playfair Display", serif; font-weight: 900; color: #F5F0E8;
-    font-size: 66px; line-height: 1.02; letter-spacing: -0.02em; margin-top: 40px; }
+    font-size: 52px; line-height: 1.05; letter-spacing: -0.02em; margin-top: 14px; }
   .headline .gold { color: #E7CE86; }
-  .sub { font-family: "Barlow", sans-serif; font-weight: 500; color: rgba(245,240,232,.64);
-    font-size: 23px; line-height: 1.3; margin-top: 20px; max-width: 470px; }
-  .bars { display: flex; align-items: flex-end; gap: 16px; height: 210px; margin-top: auto; }
-  .bar { flex: 1; border-radius: 6px 6px 0 0; box-shadow: 0 0 34px -10px currentColor; }
-  .cta { margin-top: 30px; text-align: center; font-family: "Barlow Condensed", sans-serif;
-    font-weight: 800; font-size: 26px; letter-spacing: .18em; color: #0a141f; text-transform: uppercase;
-    background: linear-gradient(180deg,#E7CE86,#C9A84C); padding: 20px; border-radius: 12px;
-    box-shadow: 0 12px 34px -12px rgba(201,168,76,.6); }
+  .sub { font-family: "Barlow", sans-serif; font-weight: 500; color: rgba(245,240,232,.68);
+    font-size: 22px; line-height: 1.35; margin-top: 18px; max-width: 480px; }
+  .pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: auto; }
+  .pillar { display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+    background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; }
+  .dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; box-shadow: 0 0 16px -2px currentColor; }
+  .pname { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 18px;
+    letter-spacing: .08em; text-transform: uppercase; color: rgba(245,240,232,.92); }
+  .cta { margin-top: 28px; text-align: center; font-family: "Barlow Condensed", sans-serif;
+    font-weight: 800; font-size: 24px; letter-spacing: .16em; color: #fff; text-transform: uppercase;
+    background: #C9302A; padding: 20px; border-radius: 12px;
+    box-shadow: 0 14px 36px -12px rgba(201,48,42,.55); }
 </style></head>
 <body>
   <div class="ad">
     <div class="rule"></div>
-    <img class="logo" src="assets/logo_dark.png" alt="Evolved Pros">
-    <h1 class="headline">Six&nbsp;Pillars.<br><span class="gold">No&nbsp;Ceiling.</span></h1>
-    <p class="sub">The framework that makes transformation inevitable.</p>
-    <div class="bars">
-      <span class="bar" style="height:32%; background:#FFA538; color:#FFA538"></span>
-      <span class="bar" style="height:45%; background:#A78BFA; color:#A78BFA"></span>
-      <span class="bar" style="height:58%; background:#F87171; color:#F87171"></span>
-      <span class="bar" style="height:71%; background:#60A5FA; color:#60A5FA"></span>
-      <span class="bar" style="height:85%; background:#C9A84C; color:#C9A84C"></span>
-      <span class="bar" style="height:100%; background:#0ABFA3; color:#0ABFA3"></span>
+    <div class="top">
+      <img class="logo" src="assets/logo_dark.png" alt="Evolved Pros">
+      <span class="badge">Academy</span>
     </div>
-    <div class="cta">Learn More</div>
+    <p class="eyebrow">The Evolved Architecture™</p>
+    <h1 class="headline">Stop collecting tips.<br><span class="gold">Build the system.</span></h1>
+    <p class="sub">Six named pillars. One operating architecture. Make excellence inevitable.</p>
+    <div class="pillars">
+      <div class="pillar"><span class="dot" style="background:#FFA538;color:#FFA538"></span><span class="pname">Foundation</span></div>
+      <div class="pillar"><span class="dot" style="background:#A78BFA;color:#A78BFA"></span><span class="pname">Identity</span></div>
+      <div class="pillar"><span class="dot" style="background:#F87171;color:#F87171"></span><span class="pname">Mental Toughness</span></div>
+      <div class="pillar"><span class="dot" style="background:#60A5FA;color:#60A5FA"></span><span class="pname">Strategy</span></div>
+      <div class="pillar"><span class="dot" style="background:#C9A84C;color:#C9A84C"></span><span class="pname">Accountability</span></div>
+      <div class="pillar"><span class="dot" style="background:#0ABFA3;color:#0ABFA3"></span><span class="pname">Execution</span></div>
+    </div>
+    <div class="cta">Enter the Academy →</div>
   </div>
 </body></html>
