@@ -190,7 +190,7 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
             flexDirection: 'column',
           }}>
             <span style={{
-              fontFamily: '"Bebas Neue", sans-serif',
+              fontFamily: 'var(--font-logo), sans-serif',
               fontSize: 38, lineHeight: 1,
               color: 'var(--text-primary)', letterSpacing: '0.02em',
             }}>{formatPct(totalSlots ? totalDone / totalSlots : 0)}</span>
@@ -200,13 +200,13 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
             (replaces the redundant "{remaining} TO GO" line). */}
         <p style={{
           margin: '8px 0 2px',
-          fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+          fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
           fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase',
           color: 'var(--text-primary)',
         }}>{formatCount(totalDone, totalSlots, 'done')}</p>
         <p style={{
           margin: 0,
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase',
           color: 'var(--text-tertiary)',
         }}>
@@ -219,7 +219,7 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
       <div style={{ padding: '6px 16px 0' }}>
         <p style={{
           margin: '0 0 4px',
-          fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+          fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
           fontSize: 9, letterSpacing: '0.32em', textTransform: 'uppercase',
           color: 'var(--text-tertiary)',
         }}>HABITS</p>
@@ -267,7 +267,7 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
       <div style={{ padding: '8px 16px 14px' }}>
         <p style={{
           margin: '0 0 4px',
-          fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+          fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
           fontSize: 9, letterSpacing: '0.32em', textTransform: 'uppercase',
           color: 'var(--text-tertiary)',
         }}>COMMITS</p>
@@ -309,7 +309,7 @@ export function DailyPulseCard({ habits: initialHabits = [], commitments: initia
           href="/academy/accountability"
           style={{
             display: 'inline-block', marginTop: commits.length > 0 ? 8 : 0,
-            fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+            fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
             fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase',
             color: TEAL, textDecoration: 'none',
           }}

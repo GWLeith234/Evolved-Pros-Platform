@@ -139,7 +139,7 @@ export function PeerDiscussion({ courseId, moduleNumber, title }: Props) {
       {/* Header */}
       <div style={{ marginBottom: '20px' }}>
         <p style={{
-          fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+          fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
           fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
           color: GOLD, margin: '0 0 4px',
         }}>
@@ -173,7 +173,7 @@ export function PeerDiscussion({ courseId, moduleNumber, title }: Props) {
             style={{
               backgroundColor: newBody.trim() ? CRIMSON : `${CRIMSON}22`,
               color: newBody.trim() ? '#0A0F18' : `${CRIMSON}55`,
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
               padding: '9px 22px', borderRadius: '4px', border: 'none',
               cursor: newBody.trim() ? 'pointer' : 'default', transition: 'all 0.15s',
@@ -186,7 +186,7 @@ export function PeerDiscussion({ courseId, moduleNumber, title }: Props) {
 
       {/* Thread */}
       {loading ? (
-        <p style={{ color: 'rgba(250,249,247,0.2)', fontSize: '12px', fontFamily: '"Barlow Condensed", sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+        <p style={{ color: 'rgba(250,249,247,0.2)', fontSize: '12px', fontFamily: 'var(--font-condensed), sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
           Loading…
         </p>
       ) : posts.length === 0 ? (
@@ -247,7 +247,7 @@ export function PeerDiscussion({ courseId, moduleNumber, title }: Props) {
                       style={{
                         backgroundColor: replyBody.trim() ? CRIMSON : `${CRIMSON}22`,
                         color: replyBody.trim() ? '#0A0F18' : `${CRIMSON}55`,
-                        fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                        fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                         fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                         padding: '7px 16px', borderRadius: '4px', border: 'none',
                         cursor: replyBody.trim() ? 'pointer' : 'default',
@@ -260,7 +260,7 @@ export function PeerDiscussion({ courseId, moduleNumber, title }: Props) {
                       onClick={() => { setReplyingTo(null); setReplyBody('') }}
                       style={{
                         background: 'none', border: 'none',
-                        fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                        fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                         fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                         color: 'rgba(250,249,247,0.25)', cursor: 'pointer', padding: '7px 0',
                       }}
@@ -310,7 +310,7 @@ function PostCard({
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           <span style={{
-            fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+            fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
             fontSize: isReply ? '10px' : '12px', color: 'white',
           }}>
             {initials}
@@ -337,7 +337,7 @@ function PostCard({
               background: 'none', border: 'none', cursor: 'pointer', padding: 0,
               display: 'flex', alignItems: 'center', gap: '4px',
               color: 'rgba(250,249,247,0.3)', fontSize: '12px',
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               letterSpacing: '0.06em', transition: 'color 0.15s',
             }}
             onMouseEnter={e => (e.currentTarget.style.color = CRIMSON)}
@@ -353,7 +353,7 @@ function PostCard({
               onClick={onReply}
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                 fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                 color: 'rgba(250,249,247,0.25)', transition: 'color 0.15s',
               }}

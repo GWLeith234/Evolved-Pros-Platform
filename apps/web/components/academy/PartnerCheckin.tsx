@@ -187,7 +187,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
   }
 
   const GOLD_EYEBROW: React.CSSProperties = {
-    fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+    fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
     fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
     color: GOLD, margin: '0 0 4px',
   }
@@ -196,7 +196,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
   if (pageState === 'loading') {
     return (
       <div style={surfaceCard}>
-        <p style={{ color: 'rgba(250,249,247,0.2)', fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+        <p style={{ color: 'rgba(250,249,247,0.2)', fontFamily: 'var(--font-condensed), sans-serif', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
           Loading partner status…
         </p>
       </div>
@@ -237,7 +237,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
               style={{
                 backgroundColor: canInvite ? GOLD : `${GOLD}22`,
                 color:           canInvite ? '#0A0F18' : `${GOLD}55`,
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                 fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                 padding: '10px 20px', borderRadius: '4px', border: 'none',
                 cursor: canInvite ? 'pointer' : 'default', flexShrink: 0,
@@ -303,7 +303,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
             disabled={actioning}
             style={{
               backgroundColor: GOLD, color: '#0A0F18',
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
               padding: '10px 24px', borderRadius: '4px', border: 'none',
               cursor: actioning ? 'default' : 'pointer',
@@ -358,7 +358,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
         {/* Partner's latest check-in (read only) */}
         {latestPartnerCheckin && (
           <div style={{ marginBottom: '28px' }}>
-            <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.3)', margin: '0 0 10px' }}>
+            <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.3)', margin: '0 0 10px' }}>
               {partnerDisplayName}&apos;s latest check-in
             </p>
             <div style={{ backgroundColor: '#0A0F18', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '6px', padding: '14px 16px' }}>
@@ -367,7 +367,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
                   display: 'inline-block', marginBottom: '8px',
                   backgroundColor: OUTCOME_CONFIG[latestPartnerCheckin.outcome].bg,
                   color:           OUTCOME_CONFIG[latestPartnerCheckin.outcome].color,
-                  fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                  fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                   fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                   padding: '3px 10px', borderRadius: '3px',
                 }}>
@@ -393,7 +393,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
 
         {/* My check-in form */}
         <div style={{ marginBottom: myCheckins.length > 0 ? '28px' : '0' }}>
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.3)', margin: '0 0 14px' }}>
+          <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.3)', margin: '0 0 14px' }}>
             My weekly check-in
           </p>
 
@@ -425,7 +425,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
                       padding: '9px 18px', borderRadius: '4px', border: `1px solid ${selected ? cfg.color : 'rgba(255,255,255,0.1)'}`,
                       backgroundColor: selected ? cfg.bg : 'transparent',
                       color: selected ? cfg.color : 'rgba(250,249,247,0.4)',
-                      fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                      fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                       fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase',
                       cursor: 'pointer', transition: 'all 0.15s',
                     }}
@@ -458,7 +458,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
               style={{
                 backgroundColor: canSubmitCheckin ? GOLD : `${GOLD}22`,
                 color:           canSubmitCheckin ? '#0A0F18' : `${GOLD}55`,
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                 fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                 padding: '10px 24px', borderRadius: '4px', border: 'none',
                 cursor: canSubmitCheckin ? 'pointer' : 'default',
@@ -467,7 +467,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
               {ciSubmitting ? 'Saving…' : 'Submit check-in'}
             </button>
             {ciSaved && (
-              <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: TEAL }}>
+              <span style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: TEAL }}>
                 ✓ Saved
               </span>
             )}
@@ -480,7 +480,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
         {/* History */}
         {myCheckins.length > 0 && (
           <div>
-            <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.22)', margin: '0 0 10px' }}>
+            <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.22)', margin: '0 0 10px' }}>
               My recent check-ins
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -491,7 +491,7 @@ export function PartnerCheckin({ courseId, currentUserId }: Props) {
                     <div style={{ flexShrink: 0, textAlign: 'center', minWidth: '52px' }}>
                       <p style={{ color: 'rgba(250,249,247,0.3)', fontSize: '12px', margin: 0 }}>{fmtWeek(c.week_start)}</p>
                       {cfg && (
-                        <span style={{ color: cfg.color, fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                        <span style={{ color: cfg.color, fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                           {cfg.label}
                         </span>
                       )}
@@ -525,7 +525,7 @@ const surfaceCard: React.CSSProperties = {
 
 const fieldLabel: React.CSSProperties = {
   display: 'block',
-  fontFamily: '"Barlow Condensed", sans-serif',
+  fontFamily: 'var(--font-condensed), sans-serif',
   fontWeight: 700,
   fontSize: '12px',
   letterSpacing: '0.18em',
@@ -565,7 +565,7 @@ const ghostBtn: React.CSSProperties = {
   background: 'none',
   border: 'none',
   cursor: 'pointer',
-  fontFamily: '"Barlow Condensed", sans-serif',
+  fontFamily: 'var(--font-condensed), sans-serif',
   fontWeight: 700,
   fontSize: '12px',
   letterSpacing: '0.12em',

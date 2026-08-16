@@ -53,7 +53,7 @@ export function OnboardingPost({ displayName, company, onContinue }: Props) {
 
   return (
     <div>
-      <h2 style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900, fontSize: '26px', color: '#faf9f7', margin: '0 0 6px' }}>
+      <h2 style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 900, fontSize: '26px', color: '#faf9f7', margin: '0 0 6px' }}>
         Introduce yourself.
       </h2>
       <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '14px', color: 'rgba(250,249,247,0.45)', margin: '0 0 24px' }}>
@@ -84,7 +84,7 @@ export function OnboardingPost({ displayName, company, onContinue }: Props) {
         onBlur={e  => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
       />
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
-        <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', color: text.length > 450 ? '#ef0e30' : 'rgba(255,255,255,0.25)' }}>
+        <span style={{ fontFamily: 'var(--font-condensed), sans-serif', fontSize: '12px', color: text.length > 450 ? '#ef0e30' : 'rgba(255,255,255,0.25)' }}>
           {text.length}/500
         </span>
       </div>
@@ -102,7 +102,7 @@ export function OnboardingPost({ displayName, company, onContinue }: Props) {
           padding: '14px 24px',
           backgroundColor: '#C9A84C',
           color: '#0A0F18',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 900,
           fontSize: '14px',
           letterSpacing: '0.12em',
@@ -127,7 +127,7 @@ export function OnboardingPost({ displayName, company, onContinue }: Props) {
           background: 'none',
           border: 'none',
           cursor: 'pointer',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontSize: '12px',
           letterSpacing: '0.1em',
           textTransform: 'uppercase',

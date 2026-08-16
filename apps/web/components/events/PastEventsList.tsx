@@ -43,7 +43,7 @@ export function PastEventsList({ events }: PastEventsListProps) {
       <h3
         style={{
           margin: '0 0 16px',
-          fontFamily: '"Bebas Neue", sans-serif',
+          fontFamily: 'var(--font-logo), sans-serif',
           fontSize: 22,
           letterSpacing: '0.06em',
           textTransform: 'uppercase',
@@ -90,7 +90,7 @@ export function PastEventsList({ events }: PastEventsListProps) {
                 <p
                   style={{
                     margin: 0,
-                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontFamily: 'var(--font-condensed), sans-serif',
                     fontWeight: 700,
                     fontSize: 12,
                     letterSpacing: '0.22em',
@@ -102,7 +102,7 @@ export function PastEventsList({ events }: PastEventsListProps) {
                 <p
                   style={{
                     margin: '2px 0 0',
-                    fontFamily: '"Bebas Neue", sans-serif',
+                    fontFamily: 'var(--font-logo), sans-serif',
                     fontSize: 22,
                     color: 'var(--text-primary)',
                     lineHeight: 1,
@@ -113,7 +113,7 @@ export function PastEventsList({ events }: PastEventsListProps) {
                 <p
                   style={{
                     margin: '4px 0 0',
-                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontFamily: 'var(--font-condensed), sans-serif',
                     fontWeight: 600,
                     fontSize: 12,
                     letterSpacing: '0.14em',
@@ -134,7 +134,7 @@ export function PastEventsList({ events }: PastEventsListProps) {
                       alignItems: 'center',
                       gap: 4,
                       padding: '2px 8px',
-                      fontFamily: '"Barlow Condensed", sans-serif',
+                      fontFamily: 'var(--font-condensed), sans-serif',
                       fontWeight: 700,
                       fontSize: 12,
                       letterSpacing: '0.18em',
@@ -151,7 +151,7 @@ export function PastEventsList({ events }: PastEventsListProps) {
                       style={{
                         display: 'inline-block',
                         padding: '2px 8px',
-                        fontFamily: '"Barlow Condensed", sans-serif',
+                        fontFamily: 'var(--font-condensed), sans-serif',
                         fontWeight: 700,
                         fontSize: 12,
                         letterSpacing: '0.18em',
@@ -172,7 +172,7 @@ export function PastEventsList({ events }: PastEventsListProps) {
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical',
                     margin: '6px 0 4px',
-                    fontFamily: '"Barlow", sans-serif',
+                    fontFamily: 'var(--font-body), sans-serif',
                     fontSize: 16,
                     fontWeight: 600,
                     color: 'var(--text-primary)',
@@ -195,7 +195,7 @@ export function PastEventsList({ events }: PastEventsListProps) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     padding: '10px 18px',
-                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontFamily: 'var(--font-condensed), sans-serif',
                     fontWeight: 700,
                     fontSize: 12,
                     letterSpacing: '0.18em',
@@ -217,7 +217,7 @@ export function PastEventsList({ events }: PastEventsListProps) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     padding: '10px 18px',
-                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontFamily: 'var(--font-condensed), sans-serif',
                     fontWeight: 600,
                     fontSize: 12,
                     letterSpacing: '0.18em',

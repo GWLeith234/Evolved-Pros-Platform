@@ -92,7 +92,7 @@ export default async function AdminPartnersPage() {
                               width: 28, height: 28, borderRadius: 4,
                               background: s.brand_color || '#1b3c5a',
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              fontFamily: '"Bebas Neue", sans-serif', fontSize: 13, color: '#fff',
+                              fontFamily: 'var(--font-logo), sans-serif', fontSize: 13, color: '#fff',
                             }}
                           >
                             {s.name[0]?.toUpperCase()}

@@ -74,7 +74,7 @@ export function NotToDoTool({ courseId }: Props) {
       <div style={{ marginBottom: '20px' }}>
         <h3
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 900,
             fontSize: '20px',
             textTransform: 'uppercase',
@@ -117,7 +117,7 @@ export function NotToDoTool({ courseId }: Props) {
             color: input.trim() && !saving ? '#0A0F18' : 'rgba(96,165,250,0.4)',
             border: 'none',
             borderRadius: '4px',
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 700,
             fontSize: '13px',
             letterSpacing: '0.1em',

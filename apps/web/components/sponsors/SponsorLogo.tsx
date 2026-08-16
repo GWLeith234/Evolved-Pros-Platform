@@ -36,7 +36,7 @@ export function SponsorLogo({
         justifyContent: 'center',
         border: `1px solid ${color}`,
         color,
-        fontFamily: '"Barlow Condensed", sans-serif',
+        fontFamily: 'var(--font-condensed), sans-serif',
         fontWeight: 800,
         fontSize: Math.round(size * 0.5),
         letterSpacing: '0.04em',

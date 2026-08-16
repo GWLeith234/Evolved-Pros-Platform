@@ -144,7 +144,7 @@ function PremiumPartnerCard({
         className="absolute right-5 top-3 z-[2] rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#0A0F18] shadow-sm"
         style={{
           backgroundColor: 'var(--brand-gold, #C9A84C)',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           boxShadow: '0 2px 8px rgba(201,168,76,0.35)',
         }}
       >
@@ -229,7 +229,7 @@ function PremiumPartnerCard({
           <p
             className="m-0 text-[11px] font-bold uppercase tracking-[0.2em]"
             style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               color: SPONSOR_RED,
             }}
           >
@@ -238,7 +238,7 @@ function PremiumPartnerCard({
           <h4
             className="mt-1.5 m-0 text-[1.15rem] font-bold leading-[1.25]"
             style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               color: 'var(--text-primary, #fff)',
               letterSpacing: '0.01em',
             }}
@@ -248,7 +248,7 @@ function PremiumPartnerCard({
           <p
             className="mt-2 m-0 text-sm leading-relaxed"
             style={{
-              fontFamily: '"Barlow", sans-serif',
+              fontFamily: 'var(--font-body), sans-serif',
               color: 'var(--text-secondary, rgba(255,255,255,0.55))',
             }}
           >
@@ -258,7 +258,7 @@ function PremiumPartnerCard({
             <p
               className="mt-3 m-0 text-[10px] font-semibold uppercase leading-snug tracking-[0.06em]"
               style={{
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 color: 'var(--text-tertiary, rgba(255,255,255,0.4))',
               }}
             >
@@ -271,7 +271,7 @@ function PremiumPartnerCard({
           className="ep-sponsor-cta mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-extrabold uppercase tracking-[0.14em] text-white transition-[background-color,transform] duration-200"
           style={{
             backgroundColor: SPONSOR_RED,
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
           }}
         >
           {cta}
@@ -324,7 +324,7 @@ export function SponsorAdCard({ ad }: { ad: SponsorAd }) {
         className="absolute -top-3 right-6 z-[1] rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#0A0F18] shadow-sm"
         style={{
           backgroundColor: 'var(--brand-gold, #C9A84C)',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           boxShadow: '0 2px 8px rgba(201,168,76,0.35)',
         }}
       >
@@ -357,7 +357,7 @@ export function SponsorAdCard({ ad }: { ad: SponsorAd }) {
           <h4
             className="text-xl font-semibold tracking-wide"
             style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               color: 'var(--text-primary, #fff)',
               letterSpacing: '0.04em',
             }}
@@ -367,7 +367,7 @@ export function SponsorAdCard({ ad }: { ad: SponsorAd }) {
           <p
             className="mt-2 text-sm leading-relaxed"
             style={{
-              fontFamily: '"Barlow", sans-serif',
+              fontFamily: 'var(--font-body), sans-serif',
               color: 'var(--text-secondary, rgba(255,255,255,0.55))',
             }}
           >
@@ -384,7 +384,7 @@ export function SponsorAdCard({ ad }: { ad: SponsorAd }) {
           className="ep-sponsor-cta inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-extrabold uppercase tracking-[0.14em] text-white transition-[background-color,transform] duration-200"
           style={{
             backgroundColor: SPONSOR_RED,
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
           }}
         >
           {cta}
@@ -420,7 +420,7 @@ export function SponsoredEyebrow() {
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
       <span
         style={{
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 700,
           fontSize: 9,
           letterSpacing: '0.42em',
@@ -441,7 +441,7 @@ export function SponsoredEyebrow() {
       />
       <span
         style={{
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 600,
           fontSize: 9,
           letterSpacing: '0.22em',

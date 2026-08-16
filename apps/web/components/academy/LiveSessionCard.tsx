@@ -56,7 +56,7 @@ export async function LiveSessionCard({ pillarNumber }: Props) {
         <div>
           <p
             style={{
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
               color: config?.color ?? '#68a2b9', margin: '0 0 4px',
             }}
@@ -70,7 +70,7 @@ export async function LiveSessionCard({ pillarNumber }: Props) {
         <a
           href="/events"
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+            fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
             fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase',
             color: 'rgba(250,249,247,0.35)', textDecoration: 'none',
           }}
@@ -91,7 +91,7 @@ export async function LiveSessionCard({ pillarNumber }: Props) {
         >
           <p
             style={{
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase',
               color: 'rgba(250,249,247,0.25)', margin: '0 0 8px',
             }}
@@ -105,7 +105,7 @@ export async function LiveSessionCard({ pillarNumber }: Props) {
             href="/events"
             style={{
               display: 'inline-block', marginTop: '16px',
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase',
               color: config?.color ?? '#68a2b9', textDecoration: 'none',
             }}
@@ -130,7 +130,7 @@ export async function LiveSessionCard({ pillarNumber }: Props) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                   <span
                     style={{
-                      fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                      fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                       fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase',
                       color: config?.color ?? '#68a2b9',
                       backgroundColor: `${config?.color ?? '#68a2b9'}18`,
@@ -142,7 +142,7 @@ export async function LiveSessionCard({ pillarNumber }: Props) {
                   {event.tier_access === 'pro' && (
                     <span
                       style={{
-                        fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                        fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                         fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase',
                         color: '#C9A84C', backgroundColor: 'rgba(201,168,76,0.1)',
                         padding: '2px 8px', borderRadius: '3px',
@@ -171,7 +171,7 @@ export async function LiveSessionCard({ pillarNumber }: Props) {
                   flexShrink: 0,
                   display: 'inline-flex', alignItems: 'center',
                   backgroundColor: config?.color ?? '#68a2b9', color: '#0A0F18',
-                  fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                  fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                   fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase',
                   padding: '8px 16px', borderRadius: '4px', textDecoration: 'none',
                   whiteSpace: 'nowrap',

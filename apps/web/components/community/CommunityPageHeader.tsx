@@ -6,7 +6,7 @@ export function CommunityPageHeader() {
       <p
         style={{
           margin: 0,
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontSize: 12,
           fontWeight: 600,
           letterSpacing: '0.22em',
@@ -31,7 +31,7 @@ export function CommunityPageHeader() {
         style={{
           margin: '8px 0 0',
           maxWidth: 520,
-          fontFamily: '"Playfair Display", serif',
+          fontFamily: 'var(--font-display), serif',
           fontStyle: 'italic',
           fontSize: 'var(--type-body-size, 16px)',
           lineHeight: 1.4,

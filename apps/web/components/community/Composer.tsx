@@ -220,7 +220,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
                 padding: '14px 16px',
                 minHeight: 48,
                 flexShrink: 0,
-                fontFamily: '"Bebas Neue", sans-serif',
+                fontFamily: 'var(--font-logo), sans-serif',
                 fontSize: 13,
                 letterSpacing: '0.16em',
                 textTransform: 'uppercase',
@@ -268,7 +268,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
           ) : (
             <span
               style={{
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 800,
                 fontSize: 12,
                 color: '#0A0F18',
@@ -292,7 +292,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
               border: 'none',
               outline: 'none',
               color: 'var(--composer-textarea-text)',
-              fontFamily: '"Barlow", sans-serif',
+              fontFamily: 'var(--font-body), sans-serif',
               fontSize: 14,
               lineHeight: 1.5,
               minHeight: 70,
@@ -325,7 +325,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
                       border: '1px solid var(--composer-border)',
                       outline: 'none',
                       color: 'var(--composer-textarea-text)',
-                      fontFamily: '"Barlow", sans-serif',
+                      fontFamily: 'var(--font-body), sans-serif',
                       fontSize: 13,
                       lineHeight: 1.4,
                       padding: '8px 10px',
@@ -364,7 +364,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
                     background: 'transparent',
                     border: `1px dashed ${TEAL}66`,
                     color: TEAL,
-                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontFamily: 'var(--font-condensed), sans-serif',
                     fontSize: 12,
                     fontWeight: 700,
                     letterSpacing: '0.14em',
@@ -380,7 +380,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
                 <p
                   style={{
                     margin: 0,
-                    fontFamily: '"Barlow", sans-serif',
+                    fontFamily: 'var(--font-body), sans-serif',
                     fontSize: 12,
                     color: 'var(--composer-pillar-label)',
                   }}
@@ -421,7 +421,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
                   border: 'none',
                   outline: 'none',
                   color: 'var(--composer-textarea-text)',
-                  fontFamily: '"Barlow", sans-serif',
+                  fontFamily: 'var(--font-body), sans-serif',
                   fontSize: 13,
                   lineHeight: 1.4,
                 }}
@@ -432,7 +432,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
                 disabled={!aiIdea.trim() || aiLoading}
                 style={{
                   padding: '6px 14px',
-                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontFamily: 'var(--font-condensed), sans-serif',
                   fontSize: 12,
                   fontWeight: 700,
                   letterSpacing: '0.14em',
@@ -455,7 +455,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
               role="alert"
               style={{
                 margin: 0,
-                fontFamily: '"Barlow", sans-serif',
+                fontFamily: 'var(--font-body), sans-serif',
                 fontSize: 12,
                 color: '#ef6075',
               }}
@@ -490,7 +490,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
       >
         <span
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontSize: 12,
             fontWeight: 600,
             letterSpacing: '0.22em',
@@ -511,7 +511,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
               onClick={() => setSelectedPillar(active ? null : p)}
               style={{
                 padding: '4px 10px',
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontSize: 12,
                 fontWeight: 700,
                 letterSpacing: '0.14em',
@@ -536,7 +536,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
           style={{
             marginLeft: 'auto',
             padding: '8px 14px',
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontSize: 12,
             fontWeight: 700,
             letterSpacing: '0.18em',
@@ -558,7 +558,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
           disabled={!canPost}
           style={{
             padding: '10px 24px',
-            fontFamily: '"Bebas Neue", sans-serif',
+            fontFamily: 'var(--font-logo), sans-serif',
             fontSize: 13,
             letterSpacing: '0.16em',
             textTransform: 'uppercase',
@@ -594,7 +594,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
           style={{
             margin: 0,
             padding: '0 20px 12px',
-            fontFamily: '"Barlow", sans-serif',
+            fontFamily: 'var(--font-body), sans-serif',
             fontSize: 12,
             color: '#ef6075',
           }}

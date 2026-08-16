@@ -29,7 +29,7 @@ export function SponsorCardLessonBreak({ sponsor }: { sponsor: Sponsor }) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 700,
             fontSize: 10,
             letterSpacing: '0.22em',
@@ -41,7 +41,7 @@ export function SponsorCardLessonBreak({ sponsor }: { sponsor: Sponsor }) {
         </span>
         <span
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 700,
             fontSize: 9,
             letterSpacing: '0.18em',
@@ -60,7 +60,7 @@ export function SponsorCardLessonBreak({ sponsor }: { sponsor: Sponsor }) {
         <SponsorLogo sponsor={sponsor} size={56} color={color} />
         <span
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 800,
             fontSize: 16,
             letterSpacing: '0.18em',
@@ -77,7 +77,7 @@ export function SponsorCardLessonBreak({ sponsor }: { sponsor: Sponsor }) {
         <p
           style={{
             margin: 0,
-            fontFamily: '"Playfair Display", Georgia, serif',
+            fontFamily: 'var(--font-display), Georgia, serif',
             fontSize: 22,
             fontWeight: 500,
             lineHeight: 1.3,
@@ -115,7 +115,7 @@ export function SponsorCardLessonBreak({ sponsor }: { sponsor: Sponsor }) {
               alignItems: 'center',
               gap: 6,
               padding: '12px 22px',
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontWeight: 800,
               fontSize: 12,
               letterSpacing: '0.14em',

@@ -48,7 +48,7 @@ export function ClimbingTowardCard({ pillar, courseSlug }: ClimbingTowardCardPro
         <span
           className="leading-none"
           style={{
-            fontFamily: '"Bebas Neue", sans-serif',
+            fontFamily: 'var(--font-logo), sans-serif',
             fontSize: 28,
             letterSpacing: '0.02em',
             color: cfg.color,
@@ -68,7 +68,7 @@ export function ClimbingTowardCard({ pillar, courseSlug }: ClimbingTowardCardPro
         <p
           className="mb-3"
           style={{
-            fontFamily: '"Playfair Display", Georgia, serif',
+            fontFamily: 'var(--font-display), Georgia, serif',
             fontSize: 13,
             fontStyle: 'italic',
             color: 'var(--text-secondary)',

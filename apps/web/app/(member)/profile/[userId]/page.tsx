@@ -95,7 +95,7 @@ export default async function MemberProfilePage({
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
             <h1
               style={{
-                fontFamily: '"Playfair Display", Georgia, serif',
+                fontFamily: 'var(--font-display), Georgia, serif',
                 fontWeight: 700,
                 fontSize: '28px',
                 color: '#F5F0E8',
@@ -107,7 +107,7 @@ export default async function MemberProfilePage({
             <a
               href={`/profile/${profile.id}`}
               style={{
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 600,
                 fontSize: '12px',
                 textTransform: 'uppercase',

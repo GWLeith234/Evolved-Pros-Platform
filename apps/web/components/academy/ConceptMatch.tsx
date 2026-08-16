@@ -156,7 +156,7 @@ export function ConceptMatch({ courseId, pairs, title }: Props) {
       <div style={surfaceCard}>
         <p style={eyebrow}>{title ?? 'Concept Match'}</p>
         <div style={{ textAlign: 'center', padding: '12px 0 24px' }}>
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900, fontSize: 'clamp(28px, 5vw, 42px)', color: TEAL, margin: '0 0 8px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+          <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 900, fontSize: 'clamp(28px, 5vw, 42px)', color: TEAL, margin: '0 0 8px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
             {pairs.length} / {pairs.length} — All Matched
           </p>
           {elapsed !== null && (
@@ -185,7 +185,7 @@ export function ConceptMatch({ courseId, pairs, title }: Props) {
               disabled={submitting}
               style={{
                 backgroundColor: GOLD, color: '#0A0F18',
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                 fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                 padding: '10px 24px', borderRadius: '4px', border: 'none',
                 cursor: submitting ? 'default' : 'pointer',
@@ -195,7 +195,7 @@ export function ConceptMatch({ courseId, pairs, title }: Props) {
             </button>
           )}
           {submitted && (
-            <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: TEAL }}>
+            <span style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: TEAL }}>
               ✓ Score Saved
             </span>
           )}
@@ -226,14 +226,14 @@ export function ConceptMatch({ courseId, pairs, title }: Props) {
           <p style={{ color: 'rgba(250,249,247,0.4)', fontSize: '13px', margin: 0 }}>
             Match each term to its definition.
           </p>
-          <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', color: matchedCount > 0 ? TEAL : 'rgba(250,249,247,0.25)' }}>
+          <span style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', color: matchedCount > 0 ? TEAL : 'rgba(250,249,247,0.25)' }}>
             {matchedCount} / {pairs.length} matched
           </span>
         </div>
       </div>
 
       {isLoading ? (
-        <p style={{ color: 'rgba(250,249,247,0.2)', fontSize: '12px', fontFamily: '"Barlow Condensed", sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+        <p style={{ color: 'rgba(250,249,247,0.2)', fontSize: '12px', fontFamily: 'var(--font-condensed), sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
           Loading…
         </p>
       ) : (
@@ -295,7 +295,7 @@ const surfaceCard: React.CSSProperties = {
 }
 
 const eyebrow: React.CSSProperties = {
-  fontFamily: '"Barlow Condensed", sans-serif',
+  fontFamily: 'var(--font-condensed), sans-serif',
   fontWeight: 700,
   fontSize: '12px',
   letterSpacing: '0.22em',
@@ -305,7 +305,7 @@ const eyebrow: React.CSSProperties = {
 }
 
 const colHeader: React.CSSProperties = {
-  fontFamily: '"Barlow Condensed", sans-serif',
+  fontFamily: 'var(--font-condensed), sans-serif',
   fontWeight: 700,
   fontSize: '12px',
   letterSpacing: '0.18em',
@@ -318,7 +318,7 @@ const ghostBtn: React.CSSProperties = {
   background: 'none',
   border: 'none',
   cursor: 'pointer',
-  fontFamily: '"Barlow Condensed", sans-serif',
+  fontFamily: 'var(--font-condensed), sans-serif',
   fontWeight: 700,
   fontSize: '12px',
   letterSpacing: '0.12em',

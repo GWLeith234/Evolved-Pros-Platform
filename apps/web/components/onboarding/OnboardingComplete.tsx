@@ -92,7 +92,7 @@ export function OnboardingComplete({ displayName }: Props) {
       {/* Member name */}
       {displayName && (
         <p style={{
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 700,
           fontSize: '12px',
           letterSpacing: '0.2em',
@@ -118,7 +118,7 @@ export function OnboardingComplete({ displayName }: Props) {
         open the scoreboard anytime to track streaks and goals.
       </p>
       <p style={{
-        fontFamily: '"Barlow Condensed", sans-serif',
+        fontFamily: 'var(--font-condensed), sans-serif',
         fontWeight: 700,
         fontSize: 11,
         letterSpacing: '0.14em',
@@ -139,7 +139,7 @@ export function OnboardingComplete({ displayName }: Props) {
           padding: '16px 24px',
           backgroundColor: '#C9302A',
           color: '#fff',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 900,
           fontSize: '15px',
           letterSpacing: '0.14em',
@@ -163,7 +163,7 @@ export function OnboardingComplete({ displayName }: Props) {
           padding: '14px 24px',
           backgroundColor: 'var(--bg-elevated)',
           color: 'var(--text-primary)',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 700,
           fontSize: '14px',
           letterSpacing: '0.12em',
@@ -187,7 +187,7 @@ export function OnboardingComplete({ displayName }: Props) {
           padding: '14px 24px',
           backgroundColor: 'rgba(201,168,76,0.12)',
           color: '#C9A84C',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 800,
           fontSize: '13px',
           letterSpacing: '0.12em',
@@ -211,7 +211,7 @@ export function OnboardingComplete({ displayName }: Props) {
           padding: '12px 24px',
           background: 'none',
           color: 'var(--text-secondary)',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 700,
           fontSize: '12px',
           letterSpacing: '0.12em',

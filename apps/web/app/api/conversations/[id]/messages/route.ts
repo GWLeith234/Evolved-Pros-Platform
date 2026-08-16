@@ -1,30 +1,32 @@
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { notifyNewDm } from '@/lib/notifications/create'
 
 export const dynamic = 'force-dynamic'
 
+const DEFAULT_LIMIT = 50
+const MAX_LIMIT = 100
+
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const conversationId = params.id
+  const userId = profile.id
+  const { searchParams } = new URL(request.url)
+  const limit = Math.min(
+    Math.max(parseInt(searchParams.get('limit') ?? String(DEFAULT_LIMIT), 10) || DEFAULT_LIMIT, 1),
+    MAX_LIMIT,
+  )
+  const beforeCreatedAt = searchParams.get('beforeCreatedAt')
+  const beforeId = searchParams.get('beforeId')
 
-  // RLS-FIX: resolve public.users.id by email — conversations participant ids
-  // and messages.sender_id all FK public.users(id).
-  const { data: profile } = await adminClient
-    .from('users')
-    .select('id')
-    .eq('email', user.email)
-    .single()
-  const userId = profile?.id ?? user.id
-
-  // Verify user is a participant
   const { data: conversation } = await adminClient
     .from('conversations')
     .select('id, participant_one_id, participant_two_id')
@@ -34,31 +36,97 @@ export async function GET(
 
   if (!conversation) return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
 
-  // Fetch messages
-  const { data: messages, error } = await adminClient
+  // Newest-first page, then reverse for chronological display.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let query = (adminClient as any)
     .from('messages')
     .select('id, conversation_id, sender_id, body, read_at, created_at')
     .eq('conversation_id', conversationId)
-    .order('created_at', { ascending: true })
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
+    .limit(limit + 1)
 
-  if (error) return NextResponse.json({ error: 'Failed to fetch messages' }, { status: 500 })
-
-  // Mark unread messages from other user as read (fire and forget, non-blocking)
-  const unreadIds = (messages ?? [])
-    .filter(m => m.sender_id !== userId && !m.read_at)
-    .map(m => m.id)
-
-  if (unreadIds.length > 0) {
-    adminClient
-      .from('messages')
-      .update({ read_at: new Date().toISOString() })
-      .in('id', unreadIds)
-      .then(({ error: markError }) => {
-        if (markError) console.warn('[messages] mark read failed:', markError.message)
-      })
+  if (beforeCreatedAt && beforeId) {
+    // Cursor: (created_at, id) strictly older than the bound.
+    query = query.or(
+      `created_at.lt.${beforeCreatedAt},and(created_at.eq.${beforeCreatedAt},id.lt.${beforeId})`,
+    )
   }
 
-  return NextResponse.json({ messages: messages ?? [] })
+  const { data: rows, error } = await query
+  if (error) return NextResponse.json({ error: 'Failed to fetch messages' }, { status: 500 })
+
+  const pageDesc = (rows ?? []) as Array<{
+    id: string
+    conversation_id: string
+    sender_id: string
+    body: string
+    read_at: string | null
+    created_at: string
+  }>
+  const hasMore = pageDesc.length > limit
+  const slice = hasMore ? pageDesc.slice(0, limit) : pageDesc
+  const messages = [...slice].reverse()
+
+  const oldest = messages[0]
+  const nextCursor = hasMore && oldest
+    ? { createdAt: oldest.created_at, id: oldest.id }
+    : null
+
+  // Mark unread from the other party as read (only on the latest page / no cursor).
+  if (!beforeCreatedAt) {
+    const unreadIds = messages
+      .filter(m => m.sender_id !== userId && !m.read_at)
+      .map(m => m.id)
+    if (unreadIds.length > 0) {
+      void adminClient
+        .from('messages')
+        .update({ read_at: new Date().toISOString() })
+        .in('id', unreadIds)
+        .then(({ error: markError }) => {
+          if (markError) console.warn('[messages] mark read failed:', markError.message)
+        })
+    }
+  }
+
+  return NextResponse.json({ messages, nextCursor, hasMore })
+}
+
+/** Mark a single inbound message as read — used by realtime instead of full GET. */
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const supabase = createClient()
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  let body: { messageId?: unknown }
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
+  const messageId = typeof body.messageId === 'string' ? body.messageId : null
+  if (!messageId) return NextResponse.json({ error: 'messageId required' }, { status: 422 })
+
+  const { data: conversation } = await adminClient
+    .from('conversations')
+    .select('id')
+    .eq('id', params.id)
+    .or(`participant_one_id.eq.${profile.id},participant_two_id.eq.${profile.id}`)
+    .maybeSingle()
+  if (!conversation) return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
+
+  const { error } = await adminClient
+    .from('messages')
+    .update({ read_at: new Date().toISOString() })
+    .eq('id', messageId)
+    .eq('conversation_id', params.id)
+    .neq('sender_id', profile.id)
+
+  if (error) return NextResponse.json({ error: 'Failed to mark read' }, { status: 500 })
+  return NextResponse.json({ ok: true })
 }
 
 export async function POST(
@@ -66,20 +134,12 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const conversationId = params.id
+  const senderId = profile.id
 
-  // RLS-FIX: messages.sender_id FKs public.users(id); resolve by email.
-  const { data: profile } = await adminClient
-    .from('users')
-    .select('id, display_name, full_name')
-    .eq('email', user.email)
-    .single()
-  const senderId = profile?.id ?? user.id
-
-  // Verify user is a participant
   const { data: conversation } = await adminClient
     .from('conversations')
     .select('id, participant_one_id, participant_two_id, last_message_at')
@@ -100,7 +160,6 @@ export async function POST(
   if (!messageBody) return NextResponse.json({ error: 'body is required' }, { status: 422 })
   if (messageBody.length > 2000) return NextResponse.json({ error: 'Message too long' }, { status: 422 })
 
-  // Insert message
   const { data: message, error } = await adminClient
     .from('messages')
     .insert({
@@ -115,8 +174,7 @@ export async function POST(
     return NextResponse.json({ error: 'Failed to send message' }, { status: 500 })
   }
 
-  // Update conversation last_message_at
-  adminClient
+  void adminClient
     .from('conversations')
     .update({ last_message_at: new Date().toISOString() })
     .eq('id', conversationId)
@@ -124,7 +182,6 @@ export async function POST(
       if (updateErr) console.warn('[messages] update last_message_at failed:', updateErr.message)
     })
 
-  // Notify recipient if first message OR if last message was > 1 hour ago
   const recipientId = conversation.participant_one_id === senderId
     ? conversation.participant_two_id
     : conversation.participant_one_id
@@ -133,7 +190,7 @@ export async function POST(
   const shouldNotify = !lastAt || (Date.now() - new Date(lastAt).getTime() > 3_600_000)
 
   if (shouldNotify) {
-    const senderName = profile?.display_name ?? profile?.full_name ?? 'A member'
+    const senderName = profile.display_name ?? profile.full_name ?? 'A member'
     notifyNewDm({ recipientId, senderName, conversationId }).catch(err => {
       console.warn('[messages] notifyNewDm failed:', err)
     })

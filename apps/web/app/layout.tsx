@@ -22,7 +22,7 @@ const barlowCondensed = Barlow_Condensed({
 const barlow = Barlow({
   subsets: ['latin'],
   variable: '--font-body',
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['400', '500', '600', '700'],
 })
 
 const bebasNeue = Bebas_Neue({
@@ -103,16 +103,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       suppressHydrationWarning
     >
       <head>
-        {/* Google Fonts — exposes the literal family names ("Bebas Neue",
-           "Barlow Condensed", "Barlow", "Playfair Display") so component-level
-           fontFamily strings resolve. next/font above also loads these for the
-           CSS-variable form (--font-logo etc.) used by other components. */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Barlow:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&display=swap"
-        />
         <ThemeInit defaultTheme={defaultTheme} />
       </head>
       <body

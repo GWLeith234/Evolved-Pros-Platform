@@ -34,7 +34,7 @@ export function SponsorCardPreroll({ sponsor }: { sponsor: Sponsor }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span
             style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontWeight: 700,
               fontSize: 10,
               letterSpacing: '0.22em',
@@ -46,7 +46,7 @@ export function SponsorCardPreroll({ sponsor }: { sponsor: Sponsor }) {
           </span>
           <span
             style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontWeight: 800,
               fontSize: 12,
               letterSpacing: '0.18em',
@@ -62,7 +62,7 @@ export function SponsorCardPreroll({ sponsor }: { sponsor: Sponsor }) {
           <p
             style={{
               margin: 0,
-              fontFamily: '"Playfair Display", Georgia, serif',
+              fontFamily: 'var(--font-display), Georgia, serif',
               fontSize: 16,
               fontWeight: 500,
               lineHeight: 1.35,
@@ -108,7 +108,7 @@ export function SponsorCardPreroll({ sponsor }: { sponsor: Sponsor }) {
             alignItems: 'center',
             gap: 6,
             padding: '8px 16px',
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 700,
             fontSize: 11,
             letterSpacing: '0.14em',

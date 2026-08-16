@@ -133,7 +133,7 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
       {/* Header */}
       <div style={{ marginBottom: '16px' }}>
         <p style={{
-          fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+          fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
           fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
           color: GOLD, margin: '0 0 2px',
         }}>
@@ -145,7 +145,7 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
           </p>
           {hasSaved && (
             <span style={{
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase',
               color: completedCount === savedCommitments.length ? CRIMSON : 'var(--text-tertiary)',
             }}>
@@ -156,7 +156,7 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
       </div>
 
       {loading ? (
-        <p style={{ color: 'var(--text-tertiary)', fontSize: '12px', fontFamily: '"Barlow Condensed", sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+        <p style={{ color: 'var(--text-tertiary)', fontSize: '12px', fontFamily: 'var(--font-condensed), sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
           Loading…
         </p>
       ) : hasSaved ? (
@@ -206,7 +206,7 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
             onClick={() => setSavedCommitments([])}
             style={{
               background: 'none', border: 'none', cursor: 'pointer',
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase',
               color: 'var(--text-tertiary)', padding: '8px 0 0', textAlign: 'left',
             }}
@@ -245,7 +245,7 @@ export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props)
             style={{
               backgroundColor: inputs.some(s => s.trim()) ? GOLD : 'var(--bg-elevated)',
               color: inputs.some(s => s.trim()) ? '#0A0F18' : 'var(--text-tertiary)',
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
               padding: '10px', borderRadius: '0', border: 'none',
               cursor: inputs.some(s => s.trim()) ? 'pointer' : 'default',

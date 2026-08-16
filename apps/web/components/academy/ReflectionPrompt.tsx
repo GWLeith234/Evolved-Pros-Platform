@@ -79,7 +79,7 @@ export function ReflectionPrompt({ courseId, promptText }: Props) {
       <div style={{ marginBottom: '20px' }}>
         <p
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+            fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
             fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
             color: '#C9A84C', margin: '0 0 8px',
           }}
@@ -115,7 +115,7 @@ export function ReflectionPrompt({ courseId, promptText }: Props) {
             </svg>
             <span
               style={{
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                 fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase',
                 color: '#C9A84C',
               }}
@@ -154,7 +154,7 @@ export function ReflectionPrompt({ courseId, promptText }: Props) {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px' }}>
             <span
               style={{
-                fontSize: '12px', fontFamily: '"Barlow Condensed", sans-serif',
+                fontSize: '12px', fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 600, color: text.length >= 50 ? 'rgba(250,249,247,0.3)' : 'rgba(250,249,247,0.2)',
               }}
             >
@@ -170,7 +170,7 @@ export function ReflectionPrompt({ courseId, promptText }: Props) {
               style={{
                 backgroundColor: canSubmit ? '#C9A84C' : 'rgba(201,168,76,0.2)',
                 color: canSubmit ? '#0A0F18' : 'rgba(201,168,76,0.4)',
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                 fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                 padding: '10px 24px', borderRadius: '4px', border: 'none',
                 cursor: canSubmit ? 'pointer' : 'default', transition: 'all 0.2s',

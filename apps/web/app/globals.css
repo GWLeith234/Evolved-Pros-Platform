@@ -553,7 +553,7 @@ html.light-mode header a[href="/media"] {
   color: var(--text-primary);
 }
 .ep-type-h1 {
-  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-family: var(--font-barlow-condensed), var(--font-condensed), sans-serif;
   font-weight: 700;
   font-size: var(--type-h1-size);
   line-height: var(--type-h1-lh);
@@ -561,14 +561,14 @@ html.light-mode header a[href="/media"] {
   color: var(--text-primary);
 }
 .ep-type-h2 {
-  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-family: var(--font-barlow-condensed), var(--font-condensed), sans-serif;
   font-weight: 700;
   font-size: var(--type-h2-size);
   line-height: var(--type-h2-lh);
   color: var(--text-primary);
 }
 .ep-type-h3 {
-  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-family: var(--font-barlow-condensed), var(--font-condensed), sans-serif;
   font-weight: 600;
   font-size: var(--type-h3-size);
   line-height: var(--type-h3-lh);
@@ -577,21 +577,21 @@ html.light-mode header a[href="/media"] {
   color: var(--text-primary);
 }
 .ep-type-body {
-  font-family: var(--font-barlow), "Barlow", sans-serif;
+  font-family: var(--font-barlow), var(--font-body), sans-serif;
   font-weight: 400;
   font-size: var(--type-body-size);
   line-height: var(--type-body-lh);
   color: var(--text-primary);
 }
 .ep-type-body-sm {
-  font-family: var(--font-barlow), "Barlow", sans-serif;
+  font-family: var(--font-barlow), var(--font-body), sans-serif;
   font-weight: 400;
   font-size: var(--type-body-sm-size);
   line-height: var(--type-body-sm-lh);
   color: var(--text-secondary);
 }
 .ep-type-eyebrow {
-  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-family: var(--font-barlow-condensed), var(--font-condensed), sans-serif;
   font-weight: 600;
   font-size: var(--type-eyebrow-size);
   line-height: 1.2;
@@ -600,7 +600,7 @@ html.light-mode header a[href="/media"] {
   color: var(--brand-gold);
 }
 .ep-type-label {
-  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-family: var(--font-barlow-condensed), var(--font-condensed), sans-serif;
   font-weight: 700;
   font-size: var(--type-label-size);
   line-height: 1.2;
@@ -1339,7 +1339,7 @@ html.cream-mode body {
   top: 12px;
   z-index: 10000;
   padding: 10px 16px;
-  font-family: "Barlow Condensed", sans-serif;
+  font-family: var(--font-condensed), sans-serif;
   font-weight: 700;
   font-size: 12px;
   letter-spacing: 0.14em;
@@ -1442,7 +1442,7 @@ html.cream-mode body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Barlow Condensed", sans-serif;
+  font-family: var(--font-condensed), sans-serif;
   font-weight: 800;
   font-size: 12px;
   line-height: 1;
@@ -1454,7 +1454,7 @@ html.cream-mode body {
 }
 .ep-toast__title {
   margin: 0 0 2px;
-  font-family: "Barlow Condensed", sans-serif;
+  font-family: var(--font-condensed), sans-serif;
   font-weight: 700;
   font-size: 12px;
   letter-spacing: 0.12em;
@@ -1462,7 +1462,7 @@ html.cream-mode body {
 }
 .ep-toast__message {
   margin: 0;
-  font-family: Barlow, sans-serif;
+  font-family: var(--font-body), sans-serif;
   font-size: 13px;
   line-height: 1.45;
 }
@@ -1472,7 +1472,7 @@ html.cream-mode body {
   border: none;
   background: none;
   cursor: pointer;
-  font-family: "Barlow Condensed", sans-serif;
+  font-family: var(--font-condensed), sans-serif;
   font-weight: 700;
   font-size: 11px;
   letter-spacing: 0.14em;
@@ -1852,7 +1852,7 @@ html.light-mode .live-force-dark {
   flex-shrink: 0;
 }
 .ep-section-eyebrow__label {
-  font-family: "Barlow Condensed", sans-serif;
+  font-family: var(--font-condensed), sans-serif;
   font-weight: 700;
   font-size: 10px;
   letter-spacing: 0.42em;
@@ -1889,7 +1889,7 @@ html.light-mode .ep-interactive-surface:hover {
 a.ep-text-link {
   color: var(--brand-teal, #0ABFA3);
   text-decoration: none;
-  font-family: "Barlow Condensed", sans-serif;
+  font-family: var(--font-condensed), sans-serif;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1909,7 +1909,7 @@ a.ep-text-link:focus-visible {
   text-align: center;
   padding: 2rem 1rem;
   color: var(--text-tertiary);
-  font-family: "Barlow Condensed", sans-serif;
+  font-family: var(--font-condensed), sans-serif;
   font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;

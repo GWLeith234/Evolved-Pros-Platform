@@ -13,7 +13,7 @@ export function EventsPageHeader() {
       <p
         style={{
           margin: 0,
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontSize: 12,
           fontWeight: 600,
           letterSpacing: '0.32em',

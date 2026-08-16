@@ -149,13 +149,13 @@ function CadenceCard({ type, title, description, saved, courseId, onSaved }: Car
       {/* Card header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
         <div>
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color: TEAL, margin: '0 0 2px' }}>
+          <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color: TEAL, margin: '0 0 2px' }}>
             {title}
           </p>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', margin: 0 }}>{description}</p>
         </div>
         {isSaved && (
-          <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: TEAL, backgroundColor: `${TEAL}15`, border: `1px solid ${TEAL}30`, padding: '2px 8px', borderRadius: '20px' }}>
+          <span style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: TEAL, backgroundColor: `${TEAL}15`, border: `1px solid ${TEAL}30`, padding: '2px 8px', borderRadius: '20px' }}>
             Saved
           </span>
         )}
@@ -163,7 +163,7 @@ function CadenceCard({ type, title, description, saved, courseId, onSaved }: Car
 
       {/* Schedule selector */}
       <div style={{ marginBottom: '12px' }}>
-        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', margin: '0 0 6px' }}>
+        <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', margin: '0 0 6px' }}>
           {type === 'weekly' ? 'Day of week' : type === 'monthly' ? 'Day of month' : 'Start month'}
         </p>
         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
@@ -180,7 +180,7 @@ function CadenceCard({ type, title, description, saved, courseId, onSaved }: Car
                   setIsSaved(false)
                 }}
                 style={{
-                  fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px',
+                  fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px',
                   letterSpacing: '0.06em', textTransform: 'uppercase',
                   padding: '5px 10px', borderRadius: '4px', border: 'none', cursor: 'pointer',
                   backgroundColor: active ? TEAL : 'rgba(255,255,255,0.05)',
@@ -198,7 +198,7 @@ function CadenceCard({ type, title, description, saved, courseId, onSaved }: Car
       {/* Time + focus row */}
       <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '10px', marginBottom: '14px' }}>
         <div>
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', margin: '0 0 6px' }}>
+          <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', margin: '0 0 6px' }}>
             Time
           </p>
           <input
@@ -210,7 +210,7 @@ function CadenceCard({ type, title, description, saved, courseId, onSaved }: Car
           />
         </div>
         <div>
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', margin: '0 0 6px' }}>
+          <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', margin: '0 0 6px' }}>
             Focus area
           </p>
           <input
@@ -231,7 +231,7 @@ function CadenceCard({ type, title, description, saved, courseId, onSaved }: Car
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
         <div>
           {isSaved && (
-            <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', color: 'rgba(255,255,255,0.35)', margin: 0 }}>
+            <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontSize: '12px', color: 'rgba(255,255,255,0.35)', margin: 0 }}>
               Next {type} review: <span style={{ color: TEAL }}>{getNextDate()}</span>
             </p>
           )}
@@ -242,7 +242,7 @@ function CadenceCard({ type, title, description, saved, courseId, onSaved }: Car
           onClick={handleSave}
           disabled={saving}
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+            fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
             fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase',
             padding: '8px 18px', borderRadius: '4px', border: 'none', cursor: 'pointer',
             backgroundColor: TEAL, color: '#0A0F18', opacity: saving ? 0.6 : 1,
@@ -299,7 +299,7 @@ export function ReviewCadences({ courseId, initialCadences = [] }: Props) {
     <div style={{ backgroundColor: '#111926', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '8px', padding: '24px 28px' }}>
       {/* Header */}
       <div style={{ marginBottom: '20px' }}>
-        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase', color: TEAL, margin: '0 0 4px' }}>
+        <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase', color: TEAL, margin: '0 0 4px' }}>
           Review Cadences
         </p>
         <p style={{ color: '#faf9f7', fontSize: '15px', fontWeight: 600, margin: '0 0 4px' }}>

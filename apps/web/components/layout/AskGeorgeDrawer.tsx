@@ -93,7 +93,7 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
             <div className="flex items-center gap-2">
               <span
                 style={{
-                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontFamily: 'var(--font-condensed), sans-serif',
                   fontWeight: 700,
                   fontSize: '18px',
                   color: 'var(--text-primary)',
@@ -104,7 +104,7 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
               </span>
               <span
                 style={{
-                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontFamily: 'var(--font-condensed), sans-serif',
                   fontWeight: 700,
                   fontSize: '12px',
                   letterSpacing: '0.1em',
@@ -121,7 +121,7 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
             </div>
             <span
               style={{
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontSize: '12px',
                 color: 'var(--text-tertiary)',
                 letterSpacing: '0.02em',

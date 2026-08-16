@@ -560,7 +560,7 @@ const tableQa: React.CSSProperties = {
   alignItems: 'center',
   minHeight: 28,
   padding: '4px 8px',
-  fontFamily: '"Barlow Condensed", sans-serif',
+  fontFamily: 'var(--font-condensed), sans-serif',
   fontWeight: 700,
   fontSize: 10,
   letterSpacing: '0.12em',

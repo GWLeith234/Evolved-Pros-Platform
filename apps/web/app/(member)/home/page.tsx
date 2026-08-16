@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
@@ -6,7 +7,8 @@ import { CommitmentTracker } from '@/components/academy/CommitmentTracker'
 import { HomeContextStrip } from '@/components/home/HomeContextStrip'
 import { countUserPosts } from '@/lib/community/postCount'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
-import { getGreetingQuotes, getActivePlatformAds } from '@/lib/cache/shared'
+import { getGreetingQuoteOfDay, getActivePlatformAds } from '@/lib/cache/shared'
+import { Skeleton } from '@/components/shared/Skeleton'
 
 export const metadata: Metadata = { title: 'Home — Evolved Pros' }
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
@@ -506,6 +508,56 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[] }> {
   }
 }
 
+function DiscoverySkeleton() {
+  return (
+    <div
+      className="home-4up-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+      style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }}
+      aria-hidden
+    >
+      {[0, 1, 2].map(i => (
+        <div
+          key={i}
+          className="rounded-lg p-4 space-y-3"
+          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)', minHeight: 180 }}
+        >
+          <Skeleton height={12} width="40%" />
+          <Skeleton height={16} width="85%" />
+          <Skeleton height={14} width="70%" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** Below-fold tiles + sponsors — streams independently of the hero. */
+async function HomeDiscoverySection({ userId }: { userId: string }) {
+  const [pulsePosts, pinnedLiveEvent, topStories, latestEpisodesResult, sponsors] = await Promise.all([
+    fetchLatestPulsePosts(3),
+    fetchPinnedLiveEvent(userId),
+    fetchTopStories(3),
+    fetchLatestEpisodes(3),
+    fetchHomeSponsors(),
+  ])
+
+  return (
+    <>
+      <div
+        className="home-4up-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+        style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }}
+      >
+        <CommunityPulseTile posts={pulsePosts} pinnedEvent={pinnedLiveEvent} />
+        <TopStoriesTile stories={topStories} />
+        <PodcastReelTile
+          episodes={latestEpisodesResult.episodes}
+          latestEpisodeNumber={latestEpisodesResult.latestNumber}
+        />
+      </div>
+      <HomeSponsorRow ads={sponsors.home} />
+    </>
+  )
+}
+
 export default async function MemberHomePage() {
   // PERF: shares React.cache() with member layout — one auth+profile per request.
   const profile = await resolveCurrentUser()
@@ -518,35 +570,25 @@ export default async function MemberHomePage() {
   const weekStart = getCurrentMonday()
   const supabase = createClient()
 
+  // Above-the-fold only — discovery tiles stream in a sibling Suspense boundary.
   const [
     events,
     courseProgress,
     scoreboardCounts,
-    quotes,
+    quote,
     badgeData,
-    // HOME-4UP-TILES fetchers
-    pulsePosts,
-    pinnedLiveEvent,
-    topStories,
     latestEpisodesResult,
     quarterlyGoalsResult,
-    // HOME-DAILY-PULSE fetchers
     dailyHabits,
     weekCommitments,
-    sponsors,
   ] = await Promise.all([
-    // MR-HOME-1: member_badges / lesson-derived queries store rows under
-    // public.users.id, NOT auth.uid(). Pass profile.id so they return data for
-    // accounts where auth.uid() ≠ public.users.id.
     fetchUpcomingEvents(supabase, profile.id),
     fetchCourseProgress(supabase, profile.id),
     fetchScoreboardCounts(profile.id),
-    getGreetingQuotes(),
+    getGreetingQuoteOfDay(dayOfYear),
     supabase.from('member_badges').select('pillar_number, awarded_at').eq('user_id', profile.id),
-    fetchLatestPulsePosts(3),
-    fetchPinnedLiveEvent(profile.id),
-    fetchTopStories(3),
-    fetchLatestEpisodes(3),
+    // One episode for the context strip — discovery section loads the reel separately.
+    fetchLatestEpisodes(1),
     supabase
       .from('quarterly_goals')
       .select('id, title, period, progress_pct, weekly_delta, pillar')
@@ -554,17 +596,12 @@ export default async function MemberHomePage() {
       .eq('is_active', true)
       .order('created_at', { ascending: true })
       .limit(5),
-    // HOME-DAILY-PULSE — habits, habit_completions, and weekly_commitments all
-    // FK their user_id to public.users.id, so key on profile.id (email-resolved).
     fetchTodaysHabits(profile.id),
     fetchWeekCommitments(profile.id, weekStart),
-    // Sponsor ads SSR — avoids client waterfall after paint
-    fetchHomeSponsors(),
   ])
 
   const quarterlyGoals = (quarterlyGoalsResult.data ?? []) as GoalForCard[]
 
-  const quote = quotes?.length ? quotes[dayOfYear % quotes.length] : null
   const earnedBadges = badgeData.data?.map(b => b.pillar_number) ?? []
   const awardedAtByPillar = new Map(
     (badgeData.data ?? []).map(b => [b.pillar_number, b.awarded_at]),
@@ -812,22 +849,10 @@ export default async function MemberHomePage() {
           cards were dropped; habit/commit/goal progress lives in the hub). */}
       <TodaysEvolution actions={todaysActions} />
 
-      {/* HOME tiles — Community Pulse / Top Stories / Latest Drops. The Daily
-          Pulse tile was removed: AccountabilityHub up top is the single daily
-          driver (rings + habit toggles), so the tile was a duplicate habit +
-          commitment mark-complete surface. (.home-4up-grid class kept as the
-          shared CSS hook; now a 3-up row.) */}
-      <div
-        className="home-4up-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
-        style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }}
-      >
-        <CommunityPulseTile posts={pulsePosts} pinnedEvent={pinnedLiveEvent} />
-        <TopStoriesTile stories={topStories} />
-        <PodcastReelTile episodes={latestEpisodesResult.episodes} latestEpisodeNumber={latestEpisodesResult.latestNumber} />
-      </div>
-
-      {/* Evolution Partner row — SSR-fetched platform_ads (no client waterfall). */}
-      <HomeSponsorRow ads={sponsors.home} />
+      {/* Discovery tiles + sponsors stream after the hero (Suspense). */}
+      <Suspense fallback={<DiscoverySkeleton />}>
+        <HomeDiscoverySection userId={profile.id} />
+      </Suspense>
 
       <ProfileCompletePrompt
         hasAvatar={Boolean(profile.avatar_url)}

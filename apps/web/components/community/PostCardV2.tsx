@@ -253,7 +253,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
           ) : (
             <span
               style={{
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 800,
                 fontSize: 13,
                 color: '#FFFFFF',
@@ -269,7 +269,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
             <Link
               href={`/profile/${post.author.id}`}
               style={{
-                fontFamily: '"Bebas Neue", sans-serif',
+                fontFamily: 'var(--font-logo), sans-serif',
                 fontSize: 18,
                 letterSpacing: '0.01em',
                 color: 'var(--text-primary)',
@@ -283,7 +283,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
               <span
                 style={{
                   padding: '4px 8px',
-                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontFamily: 'var(--font-condensed), sans-serif',
                   fontSize: 12,
                   fontWeight: 700,
                   letterSpacing: '0.18em',
@@ -298,7 +298,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
             )}
             <span
               style={{
-                fontFamily: '"Barlow", sans-serif',
+                fontFamily: 'var(--font-body), sans-serif',
                 fontSize: 12,
                 letterSpacing: '0.08em',
                 color: 'var(--text-tertiary)',
@@ -313,7 +313,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
                 style={{
                   marginLeft: 'auto',
                   padding: '4px 10px',
-                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontFamily: 'var(--font-condensed), sans-serif',
                   fontSize: 12,
                   fontWeight: 700,
                   letterSpacing: '0.18em',
@@ -336,7 +336,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
       <p
         style={{
           margin: '16px 0 0',
-          fontFamily: '"Barlow", sans-serif',
+          fontFamily: 'var(--font-body), sans-serif',
           fontSize: 15,
           lineHeight: 1.55,
           color: 'var(--text-primary)',
@@ -353,7 +353,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
           <span
             style={{
               padding: '4px 10px',
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: '0.14em',
@@ -408,7 +408,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
                 color: active ? v.color : 'var(--text-secondary)',
                 cursor: 'pointer',
                 borderRadius: 0,
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontSize: 12,
                 fontWeight: 700,
                 letterSpacing: '0.08em',
@@ -491,7 +491,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
             border: 'none',
             color: 'var(--text-secondary)',
             cursor: 'pointer',
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontSize: 12,
             fontWeight: 700,
             letterSpacing: '0.14em',

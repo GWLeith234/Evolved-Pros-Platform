@@ -194,18 +194,25 @@ export async function fetchCourseBySlug(
 
 export async function fetchLessonsWithProgress(
   supabase: SB,
-  pillarSlug: string,
+  pillarSlugOrCourse: string | { id: string; required_tier: string | null },
   userId: string,
   // Widened to string: the value flows from DB tier columns (string|null) and
   // is only consumed by hasTierAccess, which already tolerates any string.
   userTier: string | null | undefined,
 ): Promise<LessonWithProgress[]> {
-  // Get course
-  const { data: course } = await supabase
-    .from('courses')
-    .select('id, required_tier')
-    .eq('slug', pillarSlug)
-    .maybeSingle()
+  // Prefer a resolved course object to avoid a duplicate slug lookup when the
+  // caller already fetched the course (lesson page / PillarPageShell).
+  let course: { id: string; required_tier: string | null } | null
+  if (typeof pillarSlugOrCourse === 'string') {
+    const { data } = await supabase
+      .from('courses')
+      .select('id, required_tier')
+      .eq('slug', pillarSlugOrCourse)
+      .maybeSingle()
+    course = data
+  } else {
+    course = pillarSlugOrCourse
+  }
 
   if (!course) return []
 
@@ -269,16 +276,20 @@ export async function fetchCourseByPillarNumber(
 
 export async function fetchLessonBySlug(
   supabase: SB,
-  pillarSlug: string,
+  pillarSlugOrCourseId: string,
   lessonSlug: string,
+  opts?: { courseId?: string },
 ): Promise<Database['public']['Tables']['lessons']['Row'] | null> {
-  const { data: course } = await supabase
-    .from('courses')
-    .select('id')
-    .eq('slug', pillarSlug)
-    .maybeSingle()
-
-  if (!course) return null
+  let courseId = opts?.courseId
+  if (!courseId) {
+    const { data: course } = await supabase
+      .from('courses')
+      .select('id')
+      .eq('slug', pillarSlugOrCourseId)
+      .maybeSingle()
+    if (!course) return null
+    courseId = course.id
+  }
 
   // Published-only: every list/count surface already filters drafts, but
   // without this a member could still open a draft by typing its URL
@@ -287,7 +298,7 @@ export async function fetchLessonBySlug(
   const { data: lesson } = await supabase
     .from('lessons')
     .select('*')
-    .eq('course_id', course.id)
+    .eq('course_id', courseId)
     .eq('slug', lessonSlug)
     .eq('is_published', true)
     .maybeSingle()

@@ -87,7 +87,7 @@ export function PillarModuleAccordion({ modules, courseSlug, pillarColor }: Prop
                     backgroundColor: allDone ? pillarColor : 'rgba(255,255,255,0.07)',
                     border: `1px solid ${allDone ? pillarColor : 'rgba(255,255,255,0.1)'}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '12px', fontFamily: '"Barlow Condensed", sans-serif',
+                    fontSize: '12px', fontFamily: 'var(--font-condensed), sans-serif',
                     fontWeight: 700, color: allDone ? '#0A0F18' : 'rgba(250,249,247,0.5)',
                   }}
                 >
@@ -95,7 +95,7 @@ export function PillarModuleAccordion({ modules, courseSlug, pillarColor }: Prop
                 </span>
                 <span
                   style={{
-                    fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                    fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                     fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase',
                     color: isOpen ? '#faf9f7' : 'rgba(250,249,247,0.65)',
                   }}
@@ -107,7 +107,7 @@ export function PillarModuleAccordion({ modules, courseSlug, pillarColor }: Prop
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <span
                   style={{
-                    fontSize: '12px', fontFamily: '"Barlow Condensed", sans-serif',
+                    fontSize: '12px', fontFamily: 'var(--font-condensed), sans-serif',
                     fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase',
                     color: allDone ? pillarColor : 'rgba(250,249,247,0.3)',
                   }}
@@ -163,7 +163,7 @@ export function PillarModuleAccordion({ modules, courseSlug, pillarColor }: Prop
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p
                         style={{
-                          fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 600,
+                          fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 600,
                           fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                           color: 'rgba(250,249,247,0.3)', margin: '0 0 2px',
                         }}
@@ -184,7 +184,7 @@ export function PillarModuleAccordion({ modules, courseSlug, pillarColor }: Prop
                     {lesson.durationSeconds && (
                       <span
                         style={{
-                          fontSize: '12px', fontFamily: '"Barlow Condensed", sans-serif',
+                          fontSize: '12px', fontFamily: 'var(--font-condensed), sans-serif',
                           fontWeight: 600, color: 'rgba(250,249,247,0.25)', flexShrink: 0,
                         }}
                       >

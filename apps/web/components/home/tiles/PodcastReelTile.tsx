@@ -71,7 +71,7 @@ export function PodcastReelTile({ episodes }: PodcastReelTileProps) {
           <p
             style={{
               margin: 0,
-              fontFamily: '"Barlow", sans-serif',
+              fontFamily: 'var(--font-body), sans-serif',
               fontSize: 12,
               color: 'var(--text-tertiary)',
             }}
@@ -105,7 +105,7 @@ export function PodcastReelTile({ episodes }: PodcastReelTileProps) {
                   >
                     <span
                       style={{
-                        fontFamily: '"Bebas Neue", sans-serif',
+                        fontFamily: 'var(--font-logo), sans-serif',
                         fontSize: 18,
                         letterSpacing: '0.04em',
                         color: ep.accent,
@@ -122,7 +122,7 @@ export function PodcastReelTile({ episodes }: PodcastReelTileProps) {
                           right: -4,
                           background: '#ef0e30',
                           color: '#fff',
-                          fontFamily: '"Barlow Condensed", sans-serif',
+                          fontFamily: 'var(--font-condensed), sans-serif',
                           fontWeight: 800,
                           fontSize: 7,
                           letterSpacing: '0.18em',
@@ -141,7 +141,7 @@ export function PodcastReelTile({ episodes }: PodcastReelTileProps) {
                     style={{
                       display: 'block',
                       margin: 0,
-                      fontFamily: '"Barlow", sans-serif',
+                      fontFamily: 'var(--font-body), sans-serif',
                       fontSize: 12.5,
                       fontWeight: 600,
                       color: 'var(--text-primary)',
@@ -159,7 +159,7 @@ export function PodcastReelTile({ episodes }: PodcastReelTileProps) {
                   <p
                     style={{
                       margin: 0,
-                      fontFamily: '"Barlow Condensed", sans-serif',
+                      fontFamily: 'var(--font-condensed), sans-serif',
                       fontWeight: 600,
                       fontSize: 9,
                       letterSpacing: '0.16em',

@@ -98,7 +98,7 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
           <p
             style={{
               margin: 0,
-              fontFamily: '"Barlow", sans-serif',
+              fontFamily: 'var(--font-body), sans-serif',
               fontSize: 12,
               color: 'var(--text-tertiary)',
             }}
@@ -131,7 +131,7 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontFamily: 'var(--font-condensed), sans-serif',
                     fontWeight: 800,
                     fontSize: 10,
                     letterSpacing: '0.04em',
@@ -145,7 +145,7 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span
                     style={{
-                      fontFamily: '"Barlow Condensed", sans-serif',
+                      fontFamily: 'var(--font-condensed), sans-serif',
                       fontWeight: 700,
                       fontSize: 11,
                       letterSpacing: '0.08em',
@@ -167,7 +167,7 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
                   )}
                   <span
                     style={{
-                      fontFamily: '"Barlow Condensed", sans-serif',
+                      fontFamily: 'var(--font-condensed), sans-serif',
                       fontWeight: 600,
                       fontSize: 9,
                       letterSpacing: '0.18em',
@@ -183,7 +183,7 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
                 <p
                   style={{
                     margin: 0,
-                    fontFamily: '"Barlow", sans-serif',
+                    fontFamily: 'var(--font-body), sans-serif',
                     fontSize: 12,
                     lineHeight: 1.4,
                     color: 'var(--text-secondary)',
@@ -203,7 +203,7 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: 4,
-                      fontFamily: '"Barlow Condensed", sans-serif',
+                      fontFamily: 'var(--font-condensed), sans-serif',
                       fontSize: 11,
                       fontWeight: 600,
                       letterSpacing: '0.08em',
@@ -220,7 +220,7 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: 4,
-                      fontFamily: '"Barlow Condensed", sans-serif',
+                      fontFamily: 'var(--font-condensed), sans-serif',
                       fontSize: 11,
                       fontWeight: 600,
                       letterSpacing: '0.08em',
@@ -263,7 +263,7 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
           >
             <div
               style={{
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 700,
                 fontSize: 8,
                 letterSpacing: '0.18em',
@@ -275,7 +275,7 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
             </div>
             <div
               style={{
-                fontFamily: '"Bebas Neue", sans-serif',
+                fontFamily: 'var(--font-logo), sans-serif',
                 fontSize: 14,
                 color: 'var(--text-primary)',
                 lineHeight: 1,
@@ -288,7 +288,7 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
             <p
               style={{
                 margin: 0,
-                fontFamily: '"Barlow", sans-serif',
+                fontFamily: 'var(--font-body), sans-serif',
                 fontSize: 11.5,
                 color: 'var(--text-primary)',
                 fontWeight: 600,
@@ -302,7 +302,7 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
             <p
               style={{
                 margin: '2px 0 0',
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontSize: 10,
                 letterSpacing: '0.14em',
                 textTransform: 'uppercase',
@@ -318,7 +318,7 @@ export function CommunityPulseTile({ posts, pinnedEvent }: CommunityPulseTilePro
             disabled={rsvpInFlight}
             style={{
               padding: '6px 12px',
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontWeight: 800,
               fontSize: 10,
               letterSpacing: '0.18em',

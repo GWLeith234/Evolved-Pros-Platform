@@ -97,5 +97,9 @@ export async function POST(request: Request) {
     await adminClient.from('episodes').update({ pinned: false }).neq('id', data.id)
   }
 
+  const { revalidateTag } = await import('next/cache')
+  const { CACHE_TAGS } = await import('@/lib/cache/shared')
+  revalidateTag(CACHE_TAGS.podcastEpisodes)
+
   return NextResponse.json(data, { status: 201 })
 }

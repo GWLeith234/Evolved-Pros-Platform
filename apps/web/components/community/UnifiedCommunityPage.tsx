@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { PostCardV2 } from './PostCardV2'
 import { PostReplyThread } from './PostReplyThread'
 import { FeedAdUnit } from './FeedAdUnit'
@@ -134,40 +133,56 @@ export function UnifiedCommunityPage({
     setPosts(prev => prev.map(p => p.id === postId ? { ...p, replyCount: (p.replyCount ?? 0) + 1 } : p))
   }, [])
 
-  // Realtime subscription — no channel filter (unified)
+  // Realtime subscription — no channel filter (unified).
+  // Dynamic-import the browser client inside the effect so @supabase/realtime-js
+  // stays off the SSR module graph (same pattern as member chrome).
   useEffect(() => {
-    const supabase = createClient()
-    const sub = supabase
-      .channel('community-unified-feed')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'posts' },
-        (payload) => {
+    let cancelled = false
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let client: any = null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let channel: any = null
+
+    void (async () => {
+      const { createClient } = await import('@/lib/supabase/client')
+      if (cancelled) return
+      client = createClient()
+      channel = client
+        .channel('community-unified-feed')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'posts' },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const row = payload.new as any
-          if (row.author_id === currentUser.id) return
-          const newPost: Post = {
-            id: row.id,
-            channelId: row.channel_id,
-            body: row.body,
-            pillarTag: row.pillar_tag,
-            postType: row.post_type ?? 'update',
-            isPinned: row.is_pinned,
-            likeCount: row.like_count ?? 0,
-            replyCount: row.reply_count ?? 0,
-            createdAt: row.created_at,
-            author: { id: row.author_id, displayName: 'Member', avatarUrl: null },
-            isLiked: false,
-            myReaction: null,
-            reactions: [],
-            isBookmarked: false,
+          (payload: any) => {
+            const row = payload.new
+            if (row.author_id === currentUser.id) return
+            const newPost: Post = {
+              id: row.id,
+              channelId: row.channel_id,
+              body: row.body,
+              pillarTag: row.pillar_tag,
+              postType: row.post_type ?? 'update',
+              isPinned: row.is_pinned,
+              likeCount: row.like_count ?? 0,
+              replyCount: row.reply_count ?? 0,
+              createdAt: row.created_at,
+              author: { id: row.author_id, displayName: 'Member', avatarUrl: null },
+              isLiked: false,
+              myReaction: null,
+              reactions: [],
+              isBookmarked: false,
+            }
+            setQueuedCount(c => c + 1)
+            setQueued(prev => [newPost, ...prev])
           }
-          setQueuedCount(c => c + 1)
-          setQueued(prev => [newPost, ...prev])
-        }
-      )
-      .subscribe()
-    return () => { supabase.removeChannel(sub) }
+        )
+        .subscribe()
+    })()
+
+    return () => {
+      cancelled = true
+      if (client && channel) client.removeChannel(channel)
+    }
   }, [currentUser.id])
 
   // LOAD MORE button — explicit, not infinite scroll (anchors the page,
@@ -418,7 +433,7 @@ export function UnifiedCommunityPage({
                 disabled={loadingMore}
                 style={{
                   padding: '10px 28px',
-                  fontFamily: '"Bebas Neue", sans-serif',
+                  fontFamily: 'var(--font-logo), sans-serif',
                   fontSize: 13,
                   letterSpacing: '0.16em',
                   textTransform: 'uppercase',

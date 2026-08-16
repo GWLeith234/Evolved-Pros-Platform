@@ -50,11 +50,12 @@ const config: Config = {
         tertiary:  'var(--text-tertiary)',
       },
       fontFamily: {
-        display:   ['"Playfair Display"', 'Georgia', 'serif'],
-        condensed: ['"Barlow Condensed"', 'sans-serif'],
-        body:      ['Barlow', 'sans-serif'],
-        serif:     ['Merriweather', 'Georgia', 'serif'],
-        bebas:     ['"Bebas Neue"', 'Impact', 'sans-serif'],
+        display:   ['var(--font-display)', 'Georgia', 'serif'],
+        condensed: ['var(--font-condensed)', 'sans-serif'],
+        body:      ['var(--font-body)', 'sans-serif'],
+        serif:     ['var(--font-serif)', 'Georgia', 'serif'],
+        bebas:     ['var(--font-logo)', 'Impact', 'sans-serif'],
+        abril:     ['var(--font-abril)', 'cursive'],
       },
       fontSize: {
         'ep-display': ['clamp(2.75rem, 9vw, 5.5rem)', { lineHeight: '0.95', letterSpacing: '0.02em' }],

@@ -100,7 +100,7 @@ export function NotifBell({ initialUnreadCount, userId }: NotifBellProps) {
             padding: '0 3px',
             background: 'var(--brand-red-hover)',
             color: '#fff',
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 700,
             fontSize: 9,
             lineHeight: 1,

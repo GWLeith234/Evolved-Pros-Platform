@@ -120,7 +120,7 @@ function TierBadge({ tier }: { tier: string }) {
         color: c.fg,
         padding: '4px 14px 4px 10px',
         clipPath: 'polygon(0 0, 100% 0, calc(100% - 8px) 100%, 0 100%)',
-        fontFamily: '"Barlow Condensed", sans-serif',
+        fontFamily: 'var(--font-condensed), sans-serif',
         fontWeight: 800,
         fontSize: 10,
         letterSpacing: '0.18em',
@@ -199,7 +199,7 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
         )}
         <span
           style={{
-            fontFamily: '"Bebas Neue", sans-serif',
+            fontFamily: 'var(--font-logo), sans-serif',
             fontSize: 10,
             color: earned
               ? 'var(--navy-abyss)'
@@ -230,7 +230,7 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
       </div>
       <span
         style={{
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: earned ? 700 : inProgress ? 600 : 500,
           fontSize: 10,
           letterSpacing: '0.18em',
@@ -275,7 +275,7 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
       />
       <span
         style={{
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: earned ? 700 : inProgress ? 600 : 500,
           fontSize: 13,
           letterSpacing: '0.04em',
@@ -296,7 +296,7 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
       {inProgress && (
         <span
           style={{
-            fontFamily: '"Bebas Neue", sans-serif',
+            fontFamily: 'var(--font-logo), sans-serif',
             fontSize: 13,
             color: color,
             fontVariantNumeric: 'tabular-nums',
@@ -309,7 +309,7 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
       {earned && (
         <span
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 800,
             fontSize: 11,
             letterSpacing: '0.18em',
@@ -325,7 +325,7 @@ function PillarRow({ pillar }: { pillar: ArchPillar }) {
         <span
           aria-hidden="true"
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 600,
             fontSize: 11,
             color: 'rgba(255,255,255,0.35)',
@@ -411,7 +411,7 @@ function ScoreCell({
       />
       <span
         style={{
-          fontFamily: '"Bebas Neue", sans-serif',
+          fontFamily: 'var(--font-logo), sans-serif',
           fontSize: 22,
           letterSpacing: '0.04em',
           color: lit ? '#fff' : 'rgba(255,255,255,0.45)',
@@ -424,7 +424,7 @@ function ScoreCell({
       <span
         style={{
           marginTop: 4,
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 600,
           fontSize: 10,
           letterSpacing: '0.18em',
@@ -437,7 +437,7 @@ function ScoreCell({
       <span
         style={{
           marginTop: 3,
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 500,
           fontSize: 11,
           letterSpacing: '0.04em',
@@ -644,7 +644,7 @@ export function WelcomeBanner({
               >
                 <span
                   style={{
-                    fontFamily: '"Playfair Display", Georgia, serif',
+                    fontFamily: 'var(--font-display), Georgia, serif',
                     fontWeight: 900,
                     fontSize: 56,
                     color: '#fff',
@@ -670,7 +670,7 @@ export function WelcomeBanner({
               suppressHydrationWarning
               style={{
                 margin: 0,
-                fontFamily: '"Playfair Display", Georgia, serif',
+                fontFamily: 'var(--font-display), Georgia, serif',
                 fontWeight: 700,
                 fontSize: 38,
                 lineHeight: 1.1,
@@ -686,7 +686,7 @@ export function WelcomeBanner({
                 <p
                   style={{
                     margin: 0,
-                    fontFamily: '"Playfair Display", Georgia, serif',
+                    fontFamily: 'var(--font-display), Georgia, serif',
                     fontStyle: 'italic',
                     fontSize: 14,
                     lineHeight: 1.5,
@@ -699,7 +699,7 @@ export function WelcomeBanner({
                   <p
                     style={{
                       margin: '4px 0 0',
-                      fontFamily: '"Barlow Condensed", sans-serif',
+                      fontFamily: 'var(--font-condensed), sans-serif',
                       fontWeight: 600,
                       fontSize: 11,
                       letterSpacing: '0.18em',
@@ -746,7 +746,7 @@ export function WelcomeBanner({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontFamily: '"Bebas Neue", sans-serif',
+                fontFamily: 'var(--font-logo), sans-serif',
                 fontSize: 12,
                 color: 'var(--navy-abyss)',
                 flexShrink: 0,
@@ -756,7 +756,7 @@ export function WelcomeBanner({
             </span>
             <span
               style={{
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 600,
                 fontSize: 11,
                 letterSpacing: '0.2em',
@@ -771,7 +771,7 @@ export function WelcomeBanner({
             </span>
             <span
               style={{
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 700,
                 fontSize: 9,
                 letterSpacing: '0.2em',
@@ -806,7 +806,7 @@ export function WelcomeBanner({
             <span
               suppressHydrationWarning
               style={{
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 700,
                 fontSize: 12,
                 letterSpacing: '0.2em',
@@ -829,7 +829,7 @@ export function WelcomeBanner({
             <span
               suppressHydrationWarning
               style={{
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 600,
                 fontSize: 12,
                 letterSpacing: '0.18em',
@@ -863,7 +863,7 @@ export function WelcomeBanner({
               <span
                 suppressHydrationWarning
                 style={{
-                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontFamily: 'var(--font-condensed), sans-serif',
                   fontWeight: 800,
                   fontSize: 11,
                   letterSpacing: '0.18em',
@@ -897,7 +897,7 @@ export function WelcomeBanner({
               <span
                 suppressHydrationWarning
                 style={{
-                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontFamily: 'var(--font-condensed), sans-serif',
                   fontWeight: 800,
                   fontSize: 11,
                   letterSpacing: '0.06em',
@@ -926,7 +926,7 @@ export function WelcomeBanner({
             >
               <span
                 style={{
-                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontFamily: 'var(--font-condensed), sans-serif',
                   fontWeight: 700,
                   fontSize: 9,
                   letterSpacing: '0.32em',
@@ -973,7 +973,7 @@ export function WelcomeBanner({
             <div className="welcome-banner-architecture" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'stretch' }}>
               <span
                 style={{
-                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontFamily: 'var(--font-condensed), sans-serif',
                   fontWeight: 700,
                   fontSize: 9,
                   letterSpacing: '0.32em',

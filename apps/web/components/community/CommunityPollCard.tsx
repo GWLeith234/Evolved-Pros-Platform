@@ -125,7 +125,7 @@ export function CommunityPollCard() {
         <p
           style={{
             margin: 0,
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 800,
             fontSize: 11,
             letterSpacing: '0.18em',
@@ -138,7 +138,7 @@ export function CommunityPollCard() {
         <p
           style={{
             margin: '8px 0 0',
-            fontFamily: '"Barlow", sans-serif',
+            fontFamily: 'var(--font-body), sans-serif',
             fontSize: 13,
             lineHeight: 1.4,
             color: 'var(--text-secondary)',
@@ -176,7 +176,7 @@ export function CommunityPollCard() {
       >
         <span
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 800,
             fontSize: 11,
             letterSpacing: '0.18em',
@@ -188,7 +188,7 @@ export function CommunityPollCard() {
         </span>
         <span
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 700,
             fontSize: 10,
             letterSpacing: '0.12em',
@@ -204,7 +204,7 @@ export function CommunityPollCard() {
         <p
           style={{
             margin: '0 0 10px',
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 700,
             fontSize: 14,
             lineHeight: 1.3,
@@ -250,13 +250,13 @@ export function CommunityPollCard() {
                       gap: 8,
                       fontSize: 12,
                       color: 'var(--text-primary)',
-                      fontFamily: '"Barlow", sans-serif',
+                      fontFamily: 'var(--font-body), sans-serif',
                     }}
                   >
                     <span>{o.option_text}</span>
                     <span
                       style={{
-                        fontFamily: '"Barlow Condensed", sans-serif',
+                        fontFamily: 'var(--font-condensed), sans-serif',
                         fontWeight: 700,
                         color: 'var(--text-secondary)',
                         whiteSpace: 'nowrap',
@@ -278,7 +278,7 @@ export function CommunityPollCard() {
                   textAlign: 'left',
                   padding: '8px 10px',
                   fontSize: 12,
-                  fontFamily: '"Barlow", sans-serif',
+                  fontFamily: 'var(--font-body), sans-serif',
                   color: 'var(--text-primary)',
                   background: 'var(--bg-elevated)',
                   border: '1px solid var(--border-color)',
@@ -302,7 +302,7 @@ export function CommunityPollCard() {
           <p
             style={{
               margin: '10px 0 0',
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontSize: 10,
               letterSpacing: '0.14em',
               textTransform: 'uppercase',

@@ -40,7 +40,7 @@ export function SponsorCardInline({ sponsor }: { sponsor: Sponsor }) {
       {/* Eyebrow */}
       <span
         style={{
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 800,
           fontSize: 9,
           letterSpacing: '0.18em',
@@ -60,7 +60,7 @@ export function SponsorCardInline({ sponsor }: { sponsor: Sponsor }) {
         <SponsorLogo sponsor={sponsor} size={28} color={color} />
         <span
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 800,
             fontSize: 12,
             letterSpacing: '0.18em',
@@ -79,7 +79,7 @@ export function SponsorCardInline({ sponsor }: { sponsor: Sponsor }) {
           margin: 0,
           flex: 1,
           minWidth: 0,
-          fontFamily: '"Playfair Display", Georgia, serif',
+          fontFamily: 'var(--font-display), Georgia, serif',
           fontSize: 14,
           fontWeight: 500,
           lineHeight: 1.3,
@@ -103,7 +103,7 @@ export function SponsorCardInline({ sponsor }: { sponsor: Sponsor }) {
             alignItems: 'center',
             gap: 4,
             padding: '6px 12px',
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 700,
             fontSize: 10,
             letterSpacing: '0.14em',

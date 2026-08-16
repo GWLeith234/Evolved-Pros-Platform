@@ -130,7 +130,7 @@ export function LoginForm() {
 
           {sent ? (
             <div className="text-center py-4">
-              <h2 className="text-[color:var(--navy)] text-2xl mb-3" style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700 }}>
+              <h2 className="text-[color:var(--navy)] text-2xl mb-3" style={{ fontFamily: 'var(--font-display), Georgia, serif', fontWeight: 700 }}>
                 Check your inbox.
               </h2>
               <p className="text-muted text-sm">A login link is on its way to {email}</p>
@@ -139,7 +139,7 @@ export function LoginForm() {
             <>
               <h2
                 className="text-navy-dark text-3xl font-bold mb-6"
-                style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
+                style={{ fontFamily: 'var(--font-display), Georgia, serif' }}
               >
                 {isSignup ? 'Let\u2019s get started.' : 'Welcome back.'}
               </h2>
@@ -151,7 +151,7 @@ export function LoginForm() {
                   onClick={() => { setTab('password'); setError(null) }}
                   className="flex-1 min-h-[44px] py-2 text-xs font-bold tracking-wider transition-colors"
                   style={{
-                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontFamily: 'var(--font-condensed), sans-serif',
                     backgroundColor: tab === 'password' ? 'var(--navy)' : 'transparent',
                     color: tab === 'password' ? 'var(--white)' : 'var(--muted)',
                   }}
@@ -163,7 +163,7 @@ export function LoginForm() {
                   onClick={() => { setTab('magic'); setError(null) }}
                   className="flex-1 min-h-[44px] py-2 text-xs font-bold tracking-wider transition-colors"
                   style={{
-                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontFamily: 'var(--font-condensed), sans-serif',
                     backgroundColor: tab === 'magic' ? 'var(--navy)' : 'transparent',
                     color: tab === 'magic' ? 'var(--white)' : 'var(--muted)',
                   }}
@@ -185,7 +185,7 @@ export function LoginForm() {
               {tab === 'password' ? (
                 <form onSubmit={handlePassword} className="space-y-4">
                   <div>
-                    <label className="block text-[color:var(--navy)] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
+                    <label className="block text-[color:var(--navy)] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: 'var(--font-condensed), sans-serif' }}>
                       EMAIL ADDRESS
                     </label>
                     <input
@@ -199,7 +199,7 @@ export function LoginForm() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[color:var(--navy)] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
+                    <label className="block text-[color:var(--navy)] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: 'var(--font-condensed), sans-serif' }}>
                       PASSWORD
                     </label>
                     <div className="relative">
@@ -267,7 +267,7 @@ export function LoginForm() {
                     disabled={loading}
                     aria-busy={loading}
                     className={`w-full py-3 rounded font-bold uppercase tracking-wider text-sm text-white transition-all disabled:opacity-50 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: 'var(--brand-red-hot)' }}
+                    style={{ fontFamily: 'var(--font-condensed), sans-serif', backgroundColor: 'var(--brand-red-hot)' }}
                   >
                     {loading ? (<><Spinner />Signing in…</>) : 'Sign In →'}
                   </button>
@@ -278,7 +278,7 @@ export function LoginForm() {
                     We&apos;ll email you a one-click login link. No password needed.
                   </p>
                   <div>
-                    <label className="block text-[color:var(--navy)] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
+                    <label className="block text-[color:var(--navy)] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: 'var(--font-condensed), sans-serif' }}>
                       EMAIL ADDRESS
                     </label>
                     <input
@@ -295,7 +295,7 @@ export function LoginForm() {
                     disabled={loading}
                     aria-busy={loading}
                     className={`w-full py-3 rounded font-bold uppercase tracking-wider text-sm text-white transition-all disabled:opacity-50 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: 'var(--brand-red-hot)' }}
+                    style={{ fontFamily: 'var(--font-condensed), sans-serif', backgroundColor: 'var(--brand-red-hot)' }}
                   >
                     {loading ? (<><Spinner />Sending…</>) : 'Send Login Link →'}
                   </button>

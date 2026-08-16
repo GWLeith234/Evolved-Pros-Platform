@@ -71,7 +71,7 @@ export function CompletionClient({ displayName, completedAt, alumniAwardedAt, pi
           <h1 style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: 'clamp(40px, 7vw, 64px)', color: GOLD, margin: '0 0 12px', letterSpacing: '0.04em', lineHeight: 1 }}>
             EVOLVED
           </h1>
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 20, color: 'white', margin: '0 0 8px', letterSpacing: '0.04em' }}>
+          <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: 20, color: 'white', margin: '0 0 8px', letterSpacing: '0.04em' }}>
             You have completed The Evolved Architecture™
           </p>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, margin: '0 0 20px' }}>
@@ -85,7 +85,7 @@ export function CompletionClient({ displayName, completedAt, alumniAwardedAt, pi
 
         {/* 6 Pillar badges */}
         <div style={{ marginBottom: 40 }}>
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginBottom: 16 }}>
+          <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginBottom: 16 }}>
             All 6 Pillars Complete
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
@@ -99,10 +99,10 @@ export function CompletionClient({ displayName, completedAt, alumniAwardedAt, pi
                     {['🧱','🪞','🧠','🎯','📊','⚡'][b.number - 1]}
                   </span>
                 </div>
-                <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', color: b.earned ? 'white' : 'rgba(255,255,255,0.25)', margin: '0 0 2px', letterSpacing: '0.04em' }}>
+                <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', color: b.earned ? 'white' : 'rgba(255,255,255,0.25)', margin: '0 0 2px', letterSpacing: '0.04em' }}>
                   {b.label}
                 </p>
-                <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color: b.earned ? b.color : 'rgba(255,255,255,0.15)', margin: 0 }}>
+                <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color: b.earned ? b.color : 'rgba(255,255,255,0.15)', margin: 0 }}>
                   {b.earned ? 'Complete' : 'Pending'}
                 </p>
               </div>
@@ -118,7 +118,7 @@ export function CompletionClient({ displayName, completedAt, alumniAwardedAt, pi
           <p style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: 28, color: GOLD, margin: '0 0 4px', letterSpacing: '0.08em' }}>
             EVOLVED
           </p>
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '13px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', margin: '0 0 12px' }}>
+          <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '13px', letterSpacing: '0.3em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', margin: '0 0 12px' }}>
             ALUMNI
           </p>
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '12px', margin: 0 }}>
@@ -128,7 +128,7 @@ export function CompletionClient({ displayName, completedAt, alumniAwardedAt, pi
 
         {/* Share section */}
         <div style={{ backgroundColor: '#111926', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '28px 32px', marginBottom: 40 }}>
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'white', margin: '0 0 16px' }}>
+          <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'white', margin: '0 0 16px' }}>
             Share your achievement
           </p>
           <pre style={{ backgroundColor: '#0d1520', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 6, padding: '14px 16px', color: 'rgba(255,255,255,0.6)', fontSize: '12px', lineHeight: 1.7, whiteSpace: 'pre-wrap', margin: '0 0 16px', fontFamily: 'inherit' }}>
@@ -138,7 +138,7 @@ export function CompletionClient({ displayName, completedAt, alumniAwardedAt, pi
             <button
               type="button"
               onClick={handleCopy}
-              style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', backgroundColor: copied ? TEAL : '#0d6b91', color: 'white', border: 'none', borderRadius: 4, padding: '10px 20px', cursor: 'pointer', transition: 'background-color 0.2s' }}
+              style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', backgroundColor: copied ? TEAL : '#0d6b91', color: 'white', border: 'none', borderRadius: 4, padding: '10px 20px', cursor: 'pointer', transition: 'background-color 0.2s' }}
             >
               {copied ? '✓ Copied!' : 'Copy for LinkedIn'}
             </button>
@@ -146,7 +146,7 @@ export function CompletionClient({ displayName, completedAt, alumniAwardedAt, pi
               href={`https://twitter.com/intent/tweet?text=${TWEET_TEXT}`}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', backgroundColor: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)', borderRadius: 4, padding: '10px 20px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
+              style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', backgroundColor: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)', borderRadius: 4, padding: '10px 20px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}
             >
               Share on X →
             </a>
@@ -157,13 +157,13 @@ export function CompletionClient({ displayName, completedAt, alumniAwardedAt, pi
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link
             href="/academy"
-            style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase', backgroundColor: TEAL, color: '#0A0F18', borderRadius: 6, padding: '13px 28px', textDecoration: 'none' }}
+            style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase', backgroundColor: TEAL, color: '#0A0F18', borderRadius: 6, padding: '13px 28px', textDecoration: 'none' }}
           >
             Go to Academy →
           </Link>
           <Link
             href="/profile/me"
-            style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase', backgroundColor: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: '13px 28px', textDecoration: 'none' }}
+            style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase', backgroundColor: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: '13px 28px', textDecoration: 'none' }}
           >
             View Profile →
           </Link>

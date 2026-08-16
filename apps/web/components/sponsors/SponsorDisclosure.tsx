@@ -4,7 +4,7 @@ export function SponsorDisclosure({ inline = false }: { inline?: boolean }) {
   return (
     <span
       style={{
-        fontFamily: '"Barlow Condensed", sans-serif',
+        fontFamily: 'var(--font-condensed), sans-serif',
         fontWeight: 600,
         fontSize: inline ? 9 : 10,
         letterSpacing: '0.14em',

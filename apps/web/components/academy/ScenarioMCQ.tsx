@@ -116,7 +116,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
         <div style={{ height: '3px', backgroundColor: pct >= 80 ? TEAL : pct >= 60 ? GOLD : RED_ERR }} />
         <div style={{ padding: '28px' }}>
           <p style={{
-            fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+            fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
             fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
             color: GOLD, margin: '0 0 8px',
           }}>
@@ -126,20 +126,20 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
           {/* Score */}
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '16px' }}>
             <span style={{
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 900,
               fontSize: '52px', lineHeight: 1, color: pct >= 80 ? TEAL : pct >= 60 ? GOLD : RED_ERR,
             }}>
               {correctCount}
             </span>
             <span style={{ color: 'rgba(250,249,247,0.3)', fontSize: '24px', fontWeight: 300 }}>/</span>
             <span style={{
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '24px', color: 'rgba(250,249,247,0.5)',
             }}>
               {questions.length}
             </span>
             <span style={{
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '13px', letterSpacing: '0.1em', textTransform: 'uppercase',
               color: 'rgba(250,249,247,0.3)', marginLeft: '4px',
             }}>
@@ -187,7 +187,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
                 disabled={submitting}
                 style={{
                   backgroundColor: GOLD, color: '#0A0F18',
-                  fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                  fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                   fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                   padding: '11px 24px', borderRadius: '4px', border: 'none',
                   cursor: submitting ? 'default' : 'pointer',
@@ -198,7 +198,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
             )}
             {saveError && !submitted && (
               <span style={{
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                 fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: RED_ERR,
               }}>
                 {saveError}
@@ -206,7 +206,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
             )}
             {submitted && (
               <span style={{
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                 fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: TEAL,
               }}>
                 ✓ Result Saved
@@ -217,7 +217,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
               onClick={handleRetake}
               style={{
                 background: 'none', border: 'none',
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                 fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase',
                 color: 'rgba(250,249,247,0.3)', cursor: 'pointer', padding: 0,
               }}
@@ -238,7 +238,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
       {/* Header */}
       <div style={{ marginBottom: '20px' }}>
         <p style={{
-          fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+          fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
           fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
           color: GOLD, margin: '0 0 4px',
         }}>
@@ -249,7 +249,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
             <div style={{ height: '100%', width: `${progress}%`, backgroundColor: TEAL, borderRadius: '2px', transition: 'width 0.3s ease' }} />
           </div>
           <span style={{
-            fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+            fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
             fontSize: '12px', letterSpacing: '0.1em', color: 'rgba(250,249,247,0.4)', flexShrink: 0,
           }}>
             {currentIdx + 1} / {questions.length}
@@ -319,7 +319,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
             borderRadius: '6px', padding: '12px 16px', marginBottom: '16px',
           }}>
             <p style={{
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.18em', textTransform: 'uppercase',
               color: answer.isCorrect ? TEAL : GOLD, margin: '0 0 6px',
             }}>
@@ -334,7 +334,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
             onClick={handleNext}
             style={{
               backgroundColor: GOLD, color: '#0A0F18',
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
               padding: '11px 24px', borderRadius: '4px', border: 'none', cursor: 'pointer',
             }}

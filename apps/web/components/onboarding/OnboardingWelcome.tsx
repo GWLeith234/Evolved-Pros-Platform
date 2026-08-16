@@ -24,7 +24,7 @@ export function OnboardingWelcome({ displayName, onContinue }: Props) {
       {/* Heading */}
       <h1
         style={{
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 900,
           fontSize: 'clamp(28px, 6vw, 42px)',
           color: '#C9A84C',
@@ -77,7 +77,7 @@ export function OnboardingWelcome({ displayName, onContinue }: Props) {
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontSize: '14px',
               fontWeight: 600,
               letterSpacing: '0.03em',
@@ -114,7 +114,7 @@ export function OnboardingWelcome({ displayName, onContinue }: Props) {
           padding: '16px 24px',
           backgroundColor: '#C9302A',
           color: '#ffffff',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 900,
           fontSize: '15px',
           letterSpacing: '0.14em',

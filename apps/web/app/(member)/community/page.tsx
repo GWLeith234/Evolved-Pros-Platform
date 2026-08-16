@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
-import { UnifiedCommunityPageClient } from './UnifiedCommunityPageClient'
+import { UnifiedCommunityPage } from '@/components/community/UnifiedCommunityPage'
 import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
 import {
   ALL_FLAGSHIP_SPONSORS,
@@ -138,7 +138,7 @@ export default async function CommunityPage() {
   return (
     <>
       <EpisodeBanner />
-      <UnifiedCommunityPageClient
+      <UnifiedCommunityPage
         posts={postsResult.posts}
         nextCursor={postsResult.nextCursor}
         hasMore={postsResult.hasMore}

@@ -137,7 +137,7 @@ export function OnboardingFlow({ initialStep, userId, displayName }: Props) {
       </div>
       <p
         style={{
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontSize: '12px',
           fontWeight: 700,
           letterSpacing: '0.18em',
@@ -206,7 +206,7 @@ export function OnboardingFlow({ initialStep, userId, displayName }: Props) {
             background: 'none',
             border: 'none',
             cursor: 'pointer',
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontSize: '12px',
             letterSpacing: '0.1em',
             textTransform: 'uppercase',

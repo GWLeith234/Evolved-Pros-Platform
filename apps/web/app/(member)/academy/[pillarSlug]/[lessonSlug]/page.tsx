@@ -9,7 +9,6 @@ import {
   fetchCourseBySlug,
   fetchLessonBySlug,
   fetchLessonsWithProgress,
-  fetchLessonProgress,
   fetchCoursesWithProgress,
   fetchUserProfile,
 } from '@/lib/academy/fetchers'
@@ -59,13 +58,17 @@ export default async function LessonPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [course, lessonRow, profile] = await Promise.all([
+  const [course, profile] = await Promise.all([
     fetchCourseBySlug(supabase, params.pillarSlug),
-    fetchLessonBySlug(supabase, params.pillarSlug, params.lessonSlug),
     fetchUserProfile(supabase, user.id),
   ])
 
-  if (!course || !lessonRow) notFound()
+  if (!course) notFound()
+
+  const lessonRow = await fetchLessonBySlug(supabase, params.pillarSlug, params.lessonSlug, {
+    courseId: course.id,
+  })
+  if (!lessonRow) notFound()
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (!hasTierAccess(profile?.tier as any, course.required_tier as any)) {
@@ -77,16 +80,23 @@ export default async function LessonPage({ params }: Props) {
   // lesson_progress is keyed on public.users.id (profile.id, resolved by
   // email in fetchUserProfile), not the auth session uid.
   const memberId = profile?.id ?? user.id
-  const [lessons, progress, allCourses, sponsorAds] = await Promise.all([
-    fetchLessonsWithProgress(supabase, params.pillarSlug, memberId, profileTier),
-    fetchLessonProgress(supabase, memberId, lessonRow.id),
+  const [lessons, allCourses, sponsorAds, muxToken] = await Promise.all([
+    fetchLessonsWithProgress(
+      supabase,
+      { id: course.id, required_tier: course.required_tier },
+      memberId,
+      profileTier,
+    ),
     fetchCoursesWithProgress(supabase, memberId, profileTier),
     fetchAcademyLessonSponsors(),
+    lessonRow.mux_playback_id
+      ? generateMuxToken(lessonRow.mux_playback_id)
+      : Promise.resolve(null),
   ])
 
-  const muxToken = lessonRow.mux_playback_id
-    ? await generateMuxToken(lessonRow.mux_playback_id)
-    : null
+  // Progress for the current lesson comes from the list we just loaded —
+  // avoids a third progress round-trip.
+  const progress = lessons.find(l => l.id === lessonRow.id) ?? null
 
   // Pillar resolution — keyed by course.pillar_number (1-6).
   // Fixes the "PILLAR UNDEFINED" breadcrumb bug: previous code interpolated
@@ -107,7 +117,7 @@ export default async function LessonPage({ params }: Props) {
   const thisIdx = sortedCourses.findIndex(c => c.slug === params.pillarSlug)
   const nextCourse = sortedCourses[thisIdx + 1]
 
-  if (isAllComplete && !progress?.completed_at) {
+  if (isAllComplete && !progress?.completedAt) {
     return (
       <div className="p-8" style={{ backgroundColor: '#0A0F18', minHeight: '100%' }}>
         <CompletionCertificate
@@ -136,7 +146,7 @@ export default async function LessonPage({ params }: Props) {
           maxWidth: 1280,
           margin: '0 auto',
           padding: '16px 24px 12px',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontSize: 11,
           fontWeight: 600,
           letterSpacing: '0.14em',
@@ -177,7 +187,7 @@ export default async function LessonPage({ params }: Props) {
             embedUrl={lessonRow.embed_url}
             playbackId={lessonRow.mux_playback_id ?? ''}
             token={muxToken}
-            initialProgress={progress?.watch_time_seconds ?? 0}
+            initialProgress={progress?.watchTimeSeconds ?? 0}
             lessonId={lessonRow.id}
             lessonNumber={currentIdx + 1}
             totalLessons={lessons.length}
@@ -207,7 +217,7 @@ export default async function LessonPage({ params }: Props) {
           color: pillarColor,
         }}
         author={author}
-        isCompleted={!!progress?.completed_at}
+        isCompleted={!!progress?.completedAt}
         nextLesson={
           nextLesson
             ? {

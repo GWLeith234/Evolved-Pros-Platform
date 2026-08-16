@@ -91,6 +91,9 @@ export async function PATCH(
     .single()
 
   if (error || !data) return NextResponse.json({ error: 'Update failed' }, { status: 500 })
+  const { revalidateTag } = await import('next/cache')
+  const { CACHE_TAGS } = await import('@/lib/cache/shared')
+  revalidateTag(CACHE_TAGS.podcastEpisodes)
   return NextResponse.json(data)
 }
 
@@ -103,5 +106,8 @@ export async function DELETE(
 
   const { error } = await adminClient.from('episodes').delete().eq('id', params.episodeId)
   if (error) return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
+  const { revalidateTag } = await import('next/cache')
+  const { CACHE_TAGS } = await import('@/lib/cache/shared')
+  revalidateTag(CACHE_TAGS.podcastEpisodes)
   return new NextResponse(null, { status: 204 })
 }

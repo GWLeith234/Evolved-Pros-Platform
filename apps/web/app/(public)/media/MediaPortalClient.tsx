@@ -140,7 +140,7 @@ function PillarTag({
         ...style,
         display: 'inline-block',
         padding: '3px 8px',
-        fontFamily: '"Barlow Condensed", sans-serif',
+        fontFamily: 'var(--font-condensed), sans-serif',
         fontWeight: 700,
         fontSize: 10,
         letterSpacing: '0.14em',
@@ -214,7 +214,7 @@ function FeaturedCard({ story }: { story: MediaStory }) {
       >
         <h2
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 500,
             fontSize: 24,
             lineHeight: 1.2,
@@ -287,7 +287,7 @@ function ArticleCard({ story }: { story: MediaStory }) {
         <h3
           style={{
             margin: '10px 0 8px',
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 700,
             fontSize: 16,
             lineHeight: 1.3,
@@ -388,7 +388,7 @@ export function MediaPortalClient({
             {episodes.length > 0 && (
               <div className="ed-rail-card" style={{ marginBottom: 16, maxWidth: '100%', overflow: 'hidden', background: 'var(--paper-card)', border: '1px solid var(--paper-line-soft)' }}>
                 <div style={{ background: 'var(--paper-card)', padding: '10px 12px', borderBottom: '2px solid var(--brand-gold)' }}>
-                  <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 12, color: 'var(--navy-dark)', textTransform: 'uppercase', letterSpacing: '0.14em' }}>
+                  <span style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: 12, color: 'var(--navy-dark)', textTransform: 'uppercase', letterSpacing: '0.14em' }}>
                     Latest Podcast
                   </span>
                 </div>
@@ -397,12 +397,12 @@ export function MediaPortalClient({
                     <div key={ep.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderBottom: '1px solid var(--paper-line-soft)' }}>
                       <div style={{ width: 44, height: 44, borderRadius: 4, background: 'var(--navy-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', flexShrink: 0 }}>
                         <span style={{ fontSize: 18 }}>🎙</span>
-                        <span style={{ position: 'absolute', bottom: -2, right: -2, fontSize: 7, fontWeight: 700, fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: 'var(--brand-red)', color: 'var(--white)', padding: '1px 4px', borderRadius: 2, textTransform: 'uppercase' }}>
+                        <span style={{ position: 'absolute', bottom: -2, right: -2, fontSize: 7, fontWeight: 700, fontFamily: 'var(--font-condensed), sans-serif', backgroundColor: 'var(--brand-red)', color: 'var(--white)', padding: '1px 4px', borderRadius: 2, textTransform: 'uppercase' }}>
                           EP
                         </span>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 9, color: 'var(--media-ink-soft)', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>
+                        <p style={{ fontSize: 9, color: 'var(--media-ink-soft)', fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>
                           Episode {ep.episode_number}
                         </p>
                         <p style={{ fontSize: 12, color: 'var(--navy-dark)', fontWeight: 600, fontFamily: 'var(--font-body)', lineHeight: 1.3, margin: '1px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -427,7 +427,7 @@ export function MediaPortalClient({
             {sidebarStories.length > 0 && (
               <div className="ed-rail-card" style={{ marginBottom: 16, maxWidth: '100%', overflow: 'hidden', background: 'var(--paper-card)', border: '1px solid var(--paper-line-soft)' }}>
                 <div style={{ background: 'var(--paper-card)', padding: '10px 12px', borderBottom: '2px solid var(--brand-gold)' }}>
-                  <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 12, color: 'var(--navy-dark)', textTransform: 'uppercase', letterSpacing: '0.14em' }}>
+                  <span style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: 12, color: 'var(--navy-dark)', textTransform: 'uppercase', letterSpacing: '0.14em' }}>
                     Latest Stories
                   </span>
                 </div>
@@ -442,7 +442,7 @@ export function MediaPortalClient({
                         )}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 9, textTransform: 'uppercase', fontWeight: 700, fontFamily: '"Barlow Condensed", sans-serif', color: tagColorForStory(s), letterSpacing: '0.10em', margin: '0 0 3px' }}>
+                        <p style={{ fontSize: 9, textTransform: 'uppercase', fontWeight: 700, fontFamily: 'var(--font-condensed), sans-serif', color: tagColorForStory(s), letterSpacing: '0.10em', margin: '0 0 3px' }}>
                           {tagLabelForStory(s)}
                         </p>
                         <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--navy-dark)', lineHeight: 1.3, fontFamily: 'var(--font-body)', margin: '0 0 3px' }}>
@@ -475,7 +475,7 @@ export function MediaPortalClient({
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 40, height: 2, background: 'var(--brand-gold)' }} />
-          <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 12, color: 'var(--navy-dark)', textTransform: 'uppercase', letterSpacing: '0.14em', whiteSpace: 'nowrap' }}>
+          <span style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: 12, color: 'var(--navy-dark)', textTransform: 'uppercase', letterSpacing: '0.14em', whiteSpace: 'nowrap' }}>
             {activeCategory === ALL_LABEL ? 'More from Evolved Media' : `More in ${activeCategory}`}
           </span>
           <div style={{ flex: 1, height: 1, background: 'var(--paper-line-soft)' }} />
