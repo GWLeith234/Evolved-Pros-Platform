@@ -1,5 +1,6 @@
 import 'server-only'
 import { cache } from 'react'
+import { cookies } from 'next/headers'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
 import { createClient } from '@/lib/supabase/server'
@@ -45,6 +46,23 @@ export type CurrentUserProfile = Database['public']['Tables']['users']['Row']
  * fold them onto resolveCurrentUser.
  */
 const resolveCurrentUserCached = cache(async (): Promise<CurrentUserProfile | null> => {
+  // dev_session bypass: gated on NODE_ENV === 'development', inert in production
+  // builds. Completes the same audited dev-login affordance already implemented
+  // in middleware.ts, (member)/layout.tsx, and (admin)/admin/layout.tsx so that
+  // member pages (which resolve the caller here, e.g. app/(member)/home/page.tsx)
+  // render locally without a live Supabase backend. The cookie payload is a
+  // subset of the users row; unknown columns read as undefined in dev.
+  if (process.env.NODE_ENV === 'development') {
+    const devSession = cookies().get('dev_session')?.value
+    if (devSession) {
+      try {
+        return JSON.parse(devSession) as CurrentUserProfile
+      } catch {
+        // Malformed cookie — fall through to real Supabase auth below.
+      }
+    }
+  }
+
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
