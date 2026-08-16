@@ -19,6 +19,8 @@ export async function GET(request: Request) {
   const readFilter = searchParams.get('read')
   const cursor = searchParams.get('cursor')
   const limit = Math.min(parseInt(searchParams.get('limit') ?? '20', 10), 50)
+  // PERF: NotifBell polls with countOnly=1 — skip the list query entirely.
+  const countOnly = searchParams.get('countOnly') === '1'
 
   // Unread count (always computed regardless of filters)
   const { count: unreadCount } = await supabase
@@ -26,6 +28,10 @@ export async function GET(request: Request) {
     .select('id', { count: 'exact', head: true })
     .eq('user_id', profile.id)
     .eq('is_read', false)
+
+  if (countOnly) {
+    return NextResponse.json({ unreadCount: unreadCount ?? 0 })
+  }
 
   // Build query — unread first, then by created_at DESC
   let query = supabase

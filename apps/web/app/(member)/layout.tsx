@@ -1,22 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cookies, headers } from 'next/headers'
-// SPRINT HYDRATION-FIX-4 — TopNav, BottomTabBar, NextEventBanner, and
-// RightRail each (directly or transitively) import @/lib/supabase/client,
-// which evaluates @supabase/realtime-js on first import. That eval lands
-// inside React's hydrator and trips errors #425 / #422 on every member
-// page. Loading them through ssr:false dynamic wrappers keeps the realtime
-// library off the SSR/hydration path. See MemberChromeClient.tsx.
+// SPRINT HYDRATION-FIX-4 — TopNav, BottomTabBar, NextEventBanner historically
+// pulled @supabase/realtime-js into hydration. They now defer client creation.
 import {
   TopNavClient,
   BottomTabBarClient,
   NextEventBannerClient,
-  RightRailClient,
 } from '@/components/layout/MemberChromeClient'
 import { ToastProvider } from '@/lib/toast'
 import { SkipToContent } from '@/components/a11y/SkipToContent'
 import { LiveAnnouncerProvider } from '@/components/a11y/LiveAnnouncer'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { getPlatformSettingsMap } from '@/lib/cache/shared'
 
 export default async function MemberLayout({ children }: { children: React.ReactNode }) {
   // RSC prefetch guard: skip auth + profile fetching for *prefetch* requests
@@ -60,7 +56,6 @@ export default async function MemberLayout({ children }: { children: React.React
                 >
                   {children}
                 </main>
-                <RightRailClient />
               </div>
               <BottomTabBarClient role={profile.role} unreadCount={0} dmUnreadCount={0} />
             </div>
@@ -96,22 +91,16 @@ export default async function MemberLayout({ children }: { children: React.React
     redirect('/membership-expired?reason=expired')
   }
 
-  const [{ count: unreadCount }, { data: settingsRows }] = await Promise.all([
+  const [{ count: unreadCount }, settings] = await Promise.all([
     supabase
       .from('notifications')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', profile.id)
       .eq('is_read', false),
-    // One round-trip for all nav settings instead of three single() reads.
-    // The nav logo is no longer admin-configurable — TopNav renders the
-    // canonical LogoMark directly — so we only read the theme-toggle flag.
-    supabase
-      .from('platform_settings')
-      .select('key, value')
-      .in('key', ['members_can_toggle_theme']),
+    // Cached 5 min — shared with root layout theme read.
+    getPlatformSettingsMap(),
   ])
 
-  const settings = new Map((settingsRows ?? []).map(s => [s.key, s.value]))
   const membersCanToggleTheme = settings.get('members_can_toggle_theme') !== 'false'
 
   return (
@@ -139,7 +128,6 @@ export default async function MemberLayout({ children }: { children: React.React
             >
               {children}
             </main>
-            <RightRailClient />
           </div>
           <BottomTabBarClient role={profile.role} unreadCount={unreadCount ?? 0} dmUnreadCount={0} />
         </div>

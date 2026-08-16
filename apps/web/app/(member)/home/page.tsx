@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation'
 import { CommitmentTracker } from '@/components/academy/CommitmentTracker'
 import { HomeContextStrip } from '@/components/home/HomeContextStrip'
 import { countUserPosts } from '@/lib/community/postCount'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { getGreetingQuotes, getActivePlatformAds } from '@/lib/cache/shared'
 
 export const metadata: Metadata = { title: 'Home — Evolved Pros' }
 import { WelcomeBanner } from '@/components/home/WelcomeBanner'
@@ -20,7 +22,6 @@ import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/Podc
 import { type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/DailyPulseCard'
 import {
   HomeSponsorRow,
-  SPONSOR_AD_COLUMNS,
   type SponsorAd,
 } from '@/components/home/HomeSponsorAd'
 import {
@@ -30,15 +31,6 @@ import {
 } from '@/lib/sponsors/partners'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { formatRelative, formatDuration as formatMinutes, formatDate } from '@/lib/format'
-
-async function fetchCurrentUser(supabase: ReturnType<typeof createClient>, email: string) {
-  const { data } = await supabase
-    .from('users')
-    .select('id, display_name, full_name, tier, points, avatar_url, bio, role_title')
-    .eq('email', email)
-    .single()
-  return data
-}
 
 async function fetchUpcomingEvents(supabase: ReturnType<typeof createClient>, userId: string) {
   const [events, registrations] = await Promise.all([
@@ -495,18 +487,9 @@ async function fetchWeekCommitments(profileId: string, weekStart: string): Promi
  * bypasses RLS so members always see active placements.
  */
 async function fetchHomeSponsors(): Promise<{ home: SponsorAd[] }> {
-  // Main row: 2 rotated partners.
+  // Main row: 2 rotated partners. Ads catalogue is cached (2 min).
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = adminClient as any
-    const { data: rows } = await sb
-      .from('platform_ads')
-      .select(SPONSOR_AD_COLUMNS + ', placement')
-      .eq('is_active', true)
-      .order('sort_order')
-      .limit(12)
-
-    const all = (rows ?? []) as Array<SponsorAd & { placement?: string | null }>
+    const all = (await getActivePlatformAds()) as Array<SponsorAd & { placement?: string | null }>
     if (all.length === 0) {
       return { home: pickHomeSponsors(DEFAULT_HOME_SPONSORS) }
     }
@@ -524,11 +507,8 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[] }> {
 }
 
 export default async function MemberHomePage() {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const profile = await fetchCurrentUser(supabase, user.email!)
+  // PERF: shares React.cache() with member layout — one auth+profile per request.
+  const profile = await resolveCurrentUser()
   if (!profile) redirect('/login')
 
   const dayOfYear = Math.floor(
@@ -536,12 +516,13 @@ export default async function MemberHomePage() {
   )
 
   const weekStart = getCurrentMonday()
+  const supabase = createClient()
 
   const [
     events,
     courseProgress,
     scoreboardCounts,
-    quotesResult,
+    quotes,
     badgeData,
     // HOME-4UP-TILES fetchers
     pulsePosts,
@@ -560,8 +541,7 @@ export default async function MemberHomePage() {
     fetchUpcomingEvents(supabase, profile.id),
     fetchCourseProgress(supabase, profile.id),
     fetchScoreboardCounts(profile.id),
-    // Use adminClient to bypass RLS — greeting_quotes is a public table but anon key may be blocked
-    adminClient.from('greeting_quotes').select('quote_text, source').order('day_number'),
+    getGreetingQuotes(),
     supabase.from('member_badges').select('pillar_number, awarded_at').eq('user_id', profile.id),
     fetchLatestPulsePosts(3),
     fetchPinnedLiveEvent(profile.id),
@@ -584,7 +564,6 @@ export default async function MemberHomePage() {
 
   const quarterlyGoals = (quarterlyGoalsResult.data ?? []) as GoalForCard[]
 
-  const quotes = quotesResult.data ?? []
   const quote = quotes?.length ? quotes[dayOfYear % quotes.length] : null
   const earnedBadges = badgeData.data?.map(b => b.pillar_number) ?? []
   const awardedAtByPillar = new Map(

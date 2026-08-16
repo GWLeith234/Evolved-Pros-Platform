@@ -59,6 +59,9 @@ export async function POST(request: Request) {
       .single()
 
     if (error || !data) return NextResponse.json({ error: error?.message ?? 'Failed to create ad' }, { status: 500 })
+    const { revalidateTag } = await import('next/cache')
+    const { CACHE_TAGS } = await import('@/lib/cache/shared')
+    revalidateTag(CACHE_TAGS.platformAds)
     return NextResponse.json(data, { status: 201 })
   } catch {
     return NextResponse.json({ error: 'Failed to create ad' }, { status: 500 })

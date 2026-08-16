@@ -1,6 +1,8 @@
 import 'server-only'
+import { cache } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
+import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { effectiveTier } from '@/lib/tier'
 
@@ -31,15 +33,19 @@ export type CurrentUserProfile = Database['public']['Tables']['users']['Row']
  * still hit "users can read own row WHERE id = auth.uid()" policies and
  * return null in the same drift cases this is meant to fix.
  *
+ * PERF: React.cache() dedupes within a single request/RSC render tree so
+ * middleware-adjacent layout + page + nested fetchers share one auth +
+ * profile round-trip. The optional supabase arg is accepted for call-site
+ * back-compat but ignored — cookies() make createClient() request-scoped.
+ *
  * Parallel helpers:
  *   - lib/admin/helpers.ts:requireAdminApi  → admin role check (subset)
  *   - lib/academy/fetchers.ts:fetchUserProfile → academy variant
  * Both already use the same id-then-email pattern; future cleanup can
  * fold them onto resolveCurrentUser.
  */
-export async function resolveCurrentUser(
-  supabase: SupabaseClient<Database>,
-): Promise<CurrentUserProfile | null> {
+const resolveCurrentUserCached = cache(async (): Promise<CurrentUserProfile | null> => {
+  const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
@@ -72,4 +78,10 @@ export async function resolveCurrentUser(
     .eq('email', user.email)
     .maybeSingle()
   return byEmail ? withEffectiveTier(byEmail) : null
+})
+
+export async function resolveCurrentUser(
+  _supabase?: SupabaseClient<Database>,
+): Promise<CurrentUserProfile | null> {
+  return resolveCurrentUserCached()
 }

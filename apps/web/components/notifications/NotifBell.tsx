@@ -10,7 +10,8 @@ interface NotifBellProps {
 
 async function fetchUnreadCount(): Promise<number> {
   try {
-    const res = await fetch('/api/notifications?limit=1')
+    // countOnly skips the notification list query on the server.
+    const res = await fetch('/api/notifications?countOnly=1')
     if (!res.ok) return 0
     const data = await res.json() as { unreadCount: number }
     return data.unreadCount ?? 0
@@ -34,9 +35,21 @@ export function NotifBell({ initialUnreadCount, userId }: NotifBellProps) {
   // Poll every 30s instead of holding a Supabase Realtime WebSocket open.
   // The persistent transport prevented the browser from reaching idle, which
   // broke Lighthouse, Puppeteer, and any tool that waits on the `load` event.
+  // PERF: skip ticks while the tab is hidden; refresh immediately on focus.
   useEffect(() => {
-    const interval = setInterval(() => { void refreshCount() }, 30000)
-    return () => clearInterval(interval)
+    const tick = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return
+      void refreshCount()
+    }
+    const interval = setInterval(tick, 30000)
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') void refreshCount()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
   }, [refreshCount])
 
   return (

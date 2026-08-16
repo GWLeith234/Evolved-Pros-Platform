@@ -1,7 +1,7 @@
 // cache-bust: 2026-03-25
 import type { Metadata, Viewport } from 'next'
 import { Playfair_Display, Barlow_Condensed, Barlow, Bebas_Neue, Merriweather, Abril_Fatface } from 'next/font/google'
-import { createClient } from '@/lib/supabase/server'
+import { getDefaultTheme } from '@/lib/cache/shared'
 import { ThemeInit } from '@/components/ThemeInit'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import './globals.css'
@@ -88,15 +88,10 @@ export const viewport: Viewport = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Cached 5 min — avoids a DB round-trip on every public + member request.
   let defaultTheme = 'dark'
   try {
-    const supabase = createClient()
-    const { data } = await supabase
-      .from('platform_settings')
-      .select('value')
-      .eq('key', 'default_theme')
-      .single()
-    if (data?.value) defaultTheme = data.value
+    defaultTheme = await getDefaultTheme()
   } catch {
     // platform_settings may not exist yet — use default
   }
