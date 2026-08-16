@@ -7,6 +7,7 @@ export const CACHE_TAGS = {
   platformSettings: 'platform-settings',
   greetingQuotes: 'greeting-quotes',
   platformAds: 'platform-ads',
+  podcastEpisodes: 'podcast-episodes',
 } as const
 
 type SettingRow = { key: string; value: string | null }
@@ -65,6 +66,21 @@ const getGreetingQuotesCached = unstable_cache(
 /** Full greeting-quote catalogue (1h cache). Callers pick by day-of-year. */
 export async function getGreetingQuotes(): Promise<QuoteRow[]> {
   return getGreetingQuotesCached()
+}
+
+/**
+ * One rotating quote for the given UTC day-of-year (1–366).
+ * Still uses the cached catalogue (small) — avoids shipping the array to
+ * callers that only need a single entry.
+ */
+export async function getGreetingQuoteOfDay(
+  dayOfYear: number,
+): Promise<QuoteRow | null> {
+  const quotes = await getGreetingQuotes()
+  if (!quotes.length) return null
+  // Match historical home behaviour: dayOfYear % length (0-based index).
+  const idx = ((dayOfYear % quotes.length) + quotes.length) % quotes.length
+  return quotes[idx] ?? null
 }
 
 type AdRow = {

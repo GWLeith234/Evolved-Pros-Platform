@@ -108,7 +108,7 @@ export function HierarchySort({ title, items: initialItems, onSortComplete, save
       {/* Header */}
       <div style={{ marginBottom: '20px' }}>
         <p style={{
-          fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+          fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
           fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
           color: GOLD, margin: '0 0 4px',
         }}>
@@ -152,7 +152,7 @@ export function HierarchySort({ title, items: initialItems, onSortComplete, save
               {/* Rank number */}
               <span style={{
                 flexShrink: 0,
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900,
+                fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 900,
                 fontSize: '16px', color: isDragging || isOver ? CRIMSON : 'rgba(250,249,247,0.15)',
                 lineHeight: 1.3, minWidth: '20px', textAlign: 'center',
                 transition: 'color 0.15s',
@@ -194,7 +194,7 @@ export function HierarchySort({ title, items: initialItems, onSortComplete, save
               onClick={handleSave}
               style={{
                 backgroundColor: GOLD, color: '#0A0F18',
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                 fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                 padding: '9px 20px', borderRadius: '4px', border: 'none', cursor: 'pointer',
               }}
@@ -204,7 +204,7 @@ export function HierarchySort({ title, items: initialItems, onSortComplete, save
           )}
           {saved && (
             <span style={{
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
               color: CRIMSON,
             }}>

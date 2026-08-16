@@ -106,7 +106,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
             ) : (
               <span
                 style={{
-                  fontFamily: '"Abril Fatface", Georgia, serif',
+                  fontFamily: 'var(--font-abril), Georgia, serif',
                   fontSize: '48px',
                   color: '#0A0F18',
                   lineHeight: 1,
@@ -121,7 +121,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               <h1
                 style={{
-                  fontFamily: '"Playfair Display", Georgia, serif',
+                  fontFamily: 'var(--font-display), Georgia, serif',
                   fontWeight: 700,
                   fontSize: '32px',
                   color: 'var(--text-primary)',
@@ -141,7 +141,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
                     border: `1px solid ${tierColor}`,
                     backgroundColor: `${tierColor}22`,
                     color: tierColor,
-                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontFamily: 'var(--font-condensed), sans-serif',
                     fontWeight: 700,
                     fontSize: '12px',
                     textTransform: 'uppercase',
@@ -155,7 +155,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
             {profile.role_title && (
               <p
                 style={{
-                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontFamily: 'var(--font-condensed), sans-serif',
                   fontWeight: 600,
                   fontSize: '14px',
                   color: 'var(--text-tertiary)',
@@ -183,7 +183,7 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
                   border: '1px solid #C9A84C',
                   color: '#C9A84C',
                   backgroundColor: 'transparent',
-                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontFamily: 'var(--font-condensed), sans-serif',
                   fontWeight: 700,
                   fontSize: '12px',
                   textTransform: 'uppercase',

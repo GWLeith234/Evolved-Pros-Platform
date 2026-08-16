@@ -136,7 +136,7 @@ export function Capstone({ courseId, pillarNumber, memberName }: Props) {
           {/* Pillar badge */}
           <p
             style={{
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.26em', textTransform: 'uppercase',
               color: color, margin: '0 0 12px',
             }}
@@ -147,7 +147,7 @@ export function Capstone({ courseId, pillarNumber, memberName }: Props) {
           {/* Main heading */}
           <h2
             style={{
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 900,
               fontSize: 'clamp(32px, 5vw, 52px)', letterSpacing: '0.06em', textTransform: 'uppercase',
               color: '#faf9f7', margin: '0 0 16px', lineHeight: 1.05,
             }}
@@ -175,7 +175,7 @@ export function Capstone({ courseId, pillarNumber, memberName }: Props) {
             style={{
               display: 'inline-flex', alignItems: 'center', gap: '8px',
               backgroundColor: color, color: '#0A0F18',
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '13px', letterSpacing: '0.14em', textTransform: 'uppercase',
               padding: '14px 32px', borderRadius: '6px', textDecoration: 'none',
             }}
@@ -189,7 +189,7 @@ export function Capstone({ courseId, pillarNumber, memberName }: Props) {
             style={{
               marginTop: '16px', fontSize: '12px',
               color: 'rgba(250,249,247,0.3)', textDecoration: 'none',
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               letterSpacing: '0.12em', textTransform: 'uppercase',
             }}
           >
@@ -216,7 +216,7 @@ export function Capstone({ courseId, pillarNumber, memberName }: Props) {
       <div style={{ marginBottom: '20px' }}>
         <p
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+            fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
             fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
             color: color, margin: '0 0 4px',
           }}
@@ -243,7 +243,7 @@ export function Capstone({ courseId, pillarNumber, memberName }: Props) {
       >
         <p
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+            fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
             fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase',
             color: color, margin: '0 0 8px',
           }}
@@ -297,7 +297,7 @@ export function Capstone({ courseId, pillarNumber, memberName }: Props) {
             style={{
               backgroundColor: meetsMin ? color : `${color}22`,
               color: meetsMin ? '#0A0F18' : `${color}55`,
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
               padding: '10px 24px', borderRadius: '4px', border: 'none',
               cursor: meetsMin ? 'pointer' : 'default', transition: 'all 0.2s',

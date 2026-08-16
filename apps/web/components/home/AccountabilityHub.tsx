@@ -126,7 +126,7 @@ function ProgressRing({
       >
         <span
           style={{
-            fontFamily: '"Bebas Neue", sans-serif',
+            fontFamily: 'var(--font-logo), sans-serif',
             fontSize: size >= 96 ? 28 : 22,
             letterSpacing: '0.02em',
             color: 'var(--text-primary)',
@@ -139,7 +139,7 @@ function ProgressRing({
           <span
             style={{
               marginTop: 2,
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontWeight: 700,
               fontSize: 9,
               letterSpacing: '0.18em',
@@ -430,7 +430,7 @@ export function AccountabilityHub({
             <p
               style={{
                 margin: 0,
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 800,
                 fontSize: 11,
                 letterSpacing: '0.22em',
@@ -443,7 +443,7 @@ export function AccountabilityHub({
             <h2
               style={{
                 margin: '4px 0 0',
-                fontFamily: '"Bebas Neue", sans-serif',
+                fontFamily: 'var(--font-logo), sans-serif',
                 fontSize: isFull ? 34 : 26,
                 letterSpacing: '0.04em',
                 lineHeight: 1,
@@ -457,7 +457,7 @@ export function AccountabilityHub({
               <p
                 style={{
                   margin: '6px 0 0',
-                  fontFamily: '"Barlow", sans-serif',
+                  fontFamily: 'var(--font-body), sans-serif',
                   fontSize: 13,
                   color: 'var(--text-secondary)',
                 }}
@@ -471,7 +471,7 @@ export function AccountabilityHub({
               <span
                 className="hub-flash"
                 style={{
-                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontFamily: 'var(--font-condensed), sans-serif',
                   fontWeight: 700,
                   fontSize: 11,
                   letterSpacing: '0.12em',
@@ -489,7 +489,7 @@ export function AccountabilityHub({
               <Link
                 href="/home"
                 style={{
-                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontFamily: 'var(--font-condensed), sans-serif',
                   fontWeight: 800,
                   fontSize: 11,
                   letterSpacing: '0.14em',
@@ -531,7 +531,7 @@ export function AccountabilityHub({
             <p
               style={{
                 margin: 0,
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 700,
                 fontSize: 10,
                 letterSpacing: '0.16em',
@@ -556,7 +556,7 @@ export function AccountabilityHub({
             <p
               style={{
                 margin: 0,
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 700,
                 fontSize: 10,
                 letterSpacing: '0.16em',
@@ -699,7 +699,7 @@ export function AccountabilityHub({
                     <span
                       style={{
                         flex: 1,
-                        fontFamily: '"Barlow", sans-serif',
+                        fontFamily: 'var(--font-body), sans-serif',
                         fontSize: 13,
                         color: h.completedToday
                           ? 'var(--text-tertiary)'
@@ -715,7 +715,7 @@ export function AccountabilityHub({
                     </span>
                     <span
                       style={{
-                        fontFamily: '"Barlow Condensed", sans-serif',
+                        fontFamily: 'var(--font-condensed), sans-serif',
                         fontWeight: 700,
                         fontSize: 10,
                         letterSpacing: '0.08em',
@@ -785,7 +785,7 @@ export function AccountabilityHub({
                       <span
                         style={{
                           flex: 1,
-                          fontFamily: '"Barlow", sans-serif',
+                          fontFamily: 'var(--font-body), sans-serif',
                           fontSize: 13,
                           color: c.is_completed
                             ? 'var(--text-tertiary)'
@@ -843,7 +843,7 @@ export function AccountabilityHub({
                     >
                       <span
                         style={{
-                          fontFamily: '"Barlow", sans-serif',
+                          fontFamily: 'var(--font-body), sans-serif',
                           fontWeight: 600,
                           fontSize: 13,
                           color: 'var(--text-primary)',
@@ -854,7 +854,7 @@ export function AccountabilityHub({
                       </span>
                       <span
                         style={{
-                          fontFamily: '"Barlow Condensed", sans-serif',
+                          fontFamily: 'var(--font-condensed), sans-serif',
                           fontWeight: 700,
                           fontSize: 11,
                           letterSpacing: '0.1em',
@@ -876,7 +876,7 @@ export function AccountabilityHub({
                     >
                       <span
                         style={{
-                          fontFamily: '"Bebas Neue", sans-serif',
+                          fontFamily: 'var(--font-logo), sans-serif',
                           fontSize: 22,
                           letterSpacing: '0.02em',
                           color: 'var(--text-primary)',
@@ -886,7 +886,7 @@ export function AccountabilityHub({
                       </span>
                       <span
                         style={{
-                          fontFamily: '"Barlow Condensed", sans-serif',
+                          fontFamily: 'var(--font-condensed), sans-serif',
                           fontWeight: 700,
                           fontSize: 12,
                           color:
@@ -929,7 +929,7 @@ export function AccountabilityHub({
                         />
                         <span
                           style={{
-                            fontFamily: '"Bebas Neue", sans-serif',
+                            fontFamily: 'var(--font-logo), sans-serif',
                             fontSize: 18,
                             width: 44,
                             textAlign: 'right',
@@ -964,7 +964,7 @@ export function AccountabilityHub({
                           border: 'none',
                           padding: 0,
                           cursor: 'pointer',
-                          fontFamily: '"Barlow Condensed", sans-serif',
+                          fontFamily: 'var(--font-condensed), sans-serif',
                           fontWeight: 800,
                           fontSize: 11,
                           letterSpacing: '0.14em',
@@ -993,7 +993,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
     <p
       style={{
         margin: '0 0 8px',
-        fontFamily: '"Barlow Condensed", sans-serif',
+        fontFamily: 'var(--font-condensed), sans-serif',
         fontWeight: 800,
         fontSize: 10,
         letterSpacing: '0.22em',
@@ -1011,7 +1011,7 @@ function EmptyHint({ children }: { children: React.ReactNode }) {
     <p
       style={{
         margin: 0,
-        fontFamily: '"Barlow", sans-serif',
+        fontFamily: 'var(--font-body), sans-serif',
         fontSize: 13,
         color: 'var(--text-tertiary)',
         lineHeight: 1.45,
@@ -1046,7 +1046,7 @@ function StatChip({
       <p
         style={{
           margin: 0,
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 700,
           fontSize: 10,
           letterSpacing: '0.18em',
@@ -1059,7 +1059,7 @@ function StatChip({
       <p
         style={{
           margin: '4px 0 0',
-          fontFamily: '"Bebas Neue", sans-serif',
+          fontFamily: 'var(--font-logo), sans-serif',
           fontSize: 24,
           letterSpacing: '0.02em',
           color: 'var(--text-primary)',
@@ -1071,7 +1071,7 @@ function StatChip({
       <p
         style={{
           margin: '4px 0 0',
-          fontFamily: '"Barlow", sans-serif',
+          fontFamily: 'var(--font-body), sans-serif',
           fontSize: 11,
           color: 'var(--text-tertiary)',
         }}
@@ -1088,7 +1088,7 @@ function quickBtnStyle(accent: string, primary: boolean): React.CSSProperties {
     alignItems: 'center',
     gap: 6,
     padding: '8px 14px',
-    fontFamily: '"Barlow Condensed", sans-serif',
+    fontFamily: 'var(--font-condensed), sans-serif',
     fontWeight: 800,
     fontSize: 11,
     letterSpacing: '0.14em',

@@ -51,7 +51,7 @@ function RailEyebrow({ children, accent }: { children: ReactNode; accent?: strin
     <p
       style={{
         margin: 0,
-        fontFamily: '"Barlow Condensed", sans-serif',
+        fontFamily: 'var(--font-condensed), sans-serif',
         fontWeight: 800,
         fontSize: 11,
         letterSpacing: '0.18em',
@@ -80,7 +80,7 @@ function PodcastPromoCard({ episode }: { episode: RailPodcastEpisode | null }) {
             <p
               style={{
                 margin: '6px 0 0',
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 700,
                 fontSize: 10,
                 letterSpacing: '0.16em',
@@ -94,7 +94,7 @@ function PodcastPromoCard({ episode }: { episode: RailPodcastEpisode | null }) {
             <h3
               style={{
                 margin: '8px 0 0',
-                fontFamily: '"Playfair Display", Georgia, serif',
+                fontFamily: 'var(--font-display), Georgia, serif',
                 fontWeight: 700,
                 fontSize: 15,
                 lineHeight: 1.3,
@@ -108,7 +108,7 @@ function PodcastPromoCard({ episode }: { episode: RailPodcastEpisode | null }) {
           <h3
             style={{
               margin: '8px 0 0',
-              fontFamily: '"Playfair Display", Georgia, serif',
+              fontFamily: 'var(--font-display), Georgia, serif',
               fontWeight: 700,
               fontSize: 15,
               lineHeight: 1.3,
@@ -127,7 +127,7 @@ function PodcastPromoCard({ episode }: { episode: RailPodcastEpisode | null }) {
             gap: 6,
             marginTop: 12,
             minHeight: 40,
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 800,
             fontSize: 11,
             letterSpacing: '0.16em',
@@ -158,7 +158,7 @@ function AcademyPromoCard({ academyContinue }: { academyContinue: RailAcademyCon
         <h3
           style={{
             margin: '8px 0 0',
-            fontFamily: '"Bebas Neue", sans-serif',
+            fontFamily: 'var(--font-logo), sans-serif',
             fontSize: 20,
             letterSpacing: '0.04em',
             lineHeight: 1.1,
@@ -171,7 +171,7 @@ function AcademyPromoCard({ academyContinue }: { academyContinue: RailAcademyCon
         <p
           style={{
             margin: '8px 0 0',
-            fontFamily: '"Barlow", sans-serif',
+            fontFamily: 'var(--font-body), sans-serif',
             fontSize: 13,
             lineHeight: 1.45,
             color: 'var(--text-secondary)',
@@ -209,7 +209,7 @@ function AcademyPromoCard({ academyContinue }: { academyContinue: RailAcademyCon
             gap: 6,
             marginTop: 12,
             minHeight: 40,
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 800,
             fontSize: 11,
             letterSpacing: '0.16em',
@@ -353,7 +353,7 @@ function MobileEngagementStrip({
         >
           <span
             style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontWeight: 800,
               fontSize: 10,
               letterSpacing: '0.16em',
@@ -365,7 +365,7 @@ function MobileEngagementStrip({
           </span>
           <span
             style={{
-              fontFamily: '"Barlow", sans-serif',
+              fontFamily: 'var(--font-body), sans-serif',
               fontSize: 13,
               fontWeight: 600,
               color: 'var(--text-primary)',

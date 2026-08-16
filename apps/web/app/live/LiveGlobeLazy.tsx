@@ -17,7 +17,7 @@ export const LiveGlobeLazy = nextDynamic(
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontSize: 12,
           letterSpacing: '0.18em',
           textTransform: 'uppercase',

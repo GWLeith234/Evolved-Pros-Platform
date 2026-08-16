@@ -127,7 +127,7 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
               Playfair. Playfair is reserved for editorial copy. */}
           <span
             className="leading-none"
-            style={{ fontFamily: '"Bebas Neue", sans-serif', letterSpacing: '0.02em', fontSize: 26, color: textColor }}
+            style={{ fontFamily: 'var(--font-logo), sans-serif', letterSpacing: '0.02em', fontSize: 26, color: textColor }}
           >
             {formatPct(goal.progress_pct / 100)}
           </span>

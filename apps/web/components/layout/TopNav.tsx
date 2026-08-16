@@ -160,7 +160,7 @@ export function TopNav({
             gap: 12,
             padding: '8px 16px',
             fontSize: 12,
-            fontFamily: '"Barlow", sans-serif',
+            fontFamily: 'var(--font-body), sans-serif',
             background: daysUntilExpiry <= 7 ? 'rgba(239,14,48,0.08)' : 'rgba(201,168,76,0.1)',
             color: daysUntilExpiry <= 7 ? 'var(--red-soft)' : 'var(--brand-gold)',
             borderBottom: '1px solid var(--topnav-border)',
@@ -172,7 +172,7 @@ export function TopNav({
           <Link
             href="/membership"
             style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: '0.16em',
@@ -268,7 +268,7 @@ export function TopNav({
                   padding: '8px 12px',
                   flexShrink: 0,
                   whiteSpace: 'nowrap',
-                  fontFamily: 'var(--font-bebas), "Bebas Neue", sans-serif',
+                  fontFamily: 'var(--font-bebas), var(--font-logo), sans-serif',
                   fontSize: 'var(--type-nav-size, 16px)',
                   letterSpacing: 'var(--type-nav-track, 0.08em)',
                   textTransform: 'uppercase',
@@ -382,7 +382,7 @@ export function TopNav({
             <span
               className="ep-ask-label"
               style={{
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 800,
                 fontSize: 13,
                 letterSpacing: '0.12em',
@@ -450,7 +450,7 @@ export function TopNav({
                     justifyContent: 'center',
                     width: '100%',
                     height: '100%',
-                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontFamily: 'var(--font-condensed), sans-serif',
                     fontWeight: 700,
                     fontSize: 13,
                     color: '#fff',
@@ -510,7 +510,7 @@ export function TopNav({
                           justifyContent: 'center',
                           width: '100%',
                           height: '100%',
-                          fontFamily: '"Barlow Condensed", sans-serif',
+                          fontFamily: 'var(--font-condensed), sans-serif',
                           fontWeight: 700,
                           color: '#fff',
                           fontSize: 14,
@@ -524,7 +524,7 @@ export function TopNav({
                     <p
                       style={{
                         margin: 0,
-                        fontFamily: '"Barlow Condensed", sans-serif',
+                        fontFamily: 'var(--font-condensed), sans-serif',
                         fontWeight: 700,
                         fontSize: 13,
                         color: 'var(--text-primary)',
@@ -539,7 +539,7 @@ export function TopNav({
                     <p
                       style={{
                         margin: '2px 0 0',
-                        fontFamily: '"Barlow Condensed", sans-serif',
+                        fontFamily: 'var(--font-condensed), sans-serif',
                         fontWeight: 600,
                         fontSize: 10,
                         letterSpacing: '0.18em',
@@ -568,7 +568,7 @@ export function TopNav({
                       alignItems: 'center',
                       minHeight: 44,
                       padding: '12px 16px',
-                      fontFamily: '"Barlow", sans-serif',
+                      fontFamily: 'var(--font-body), sans-serif',
                       fontSize: 13,
                       color: isLight ? 'rgba(27,42,74,0.85)' : 'rgba(255,255,255,0.8)',
                       textDecoration: 'none',
@@ -599,7 +599,7 @@ export function TopNav({
                       textAlign: 'left',
                       minHeight: 44,
                       padding: '12px 16px',
-                      fontFamily: '"Barlow", sans-serif',
+                      fontFamily: 'var(--font-body), sans-serif',
                       fontSize: 13,
                       color: 'var(--red-soft)',
                       background: 'none',

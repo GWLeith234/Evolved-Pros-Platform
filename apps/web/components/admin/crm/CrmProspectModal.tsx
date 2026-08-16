@@ -35,7 +35,7 @@ const inputStyle: React.CSSProperties = {
   width: '100%',
   minHeight: 40,
   padding: '8px 12px',
-  fontFamily: '"Barlow", sans-serif',
+  fontFamily: 'var(--font-body), sans-serif',
   fontSize: 13,
   border: '1px solid rgba(27,60,90,0.14)',
   borderRadius: 4,
@@ -46,7 +46,7 @@ const inputStyle: React.CSSProperties = {
 
 const labelStyle: React.CSSProperties = {
   display: 'block',
-  fontFamily: '"Barlow Condensed", sans-serif',
+  fontFamily: 'var(--font-condensed), sans-serif',
   fontWeight: 700,
   fontSize: 10,
   letterSpacing: '0.16em',

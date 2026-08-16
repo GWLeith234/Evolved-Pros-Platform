@@ -85,7 +85,7 @@ export function TileFooterLink({ href, children }: TileFooterLinkProps) {
       href={href}
       style={{
         display: 'block',
-        fontFamily: '"Barlow Condensed", sans-serif',
+        fontFamily: 'var(--font-condensed), sans-serif',
         fontWeight: 700,
         fontSize: 11,
         letterSpacing: '0.22em',

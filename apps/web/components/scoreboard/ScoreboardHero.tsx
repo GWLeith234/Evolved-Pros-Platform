@@ -166,7 +166,7 @@ export function ScoreboardHero({
           <p
             style={{
               margin: 0,
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontWeight: 800,
               fontSize: 11,
               letterSpacing: '0.22em',
@@ -180,7 +180,7 @@ export function ScoreboardHero({
             className="ep-fluid-title"
             style={{
               margin: '6px 0 0',
-              fontFamily: '"Bebas Neue", sans-serif',
+              fontFamily: 'var(--font-logo), sans-serif',
               letterSpacing: '0.04em',
               textTransform: 'uppercase',
               color: 'var(--text-primary)',
@@ -296,7 +296,7 @@ export function ScoreboardHero({
             <p
               style={{
                 margin: '8px 0 0',
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 700,
                 fontSize: 10,
                 letterSpacing: '0.18em',
@@ -317,7 +317,7 @@ export function ScoreboardHero({
             <p
               style={{
                 margin: '8px 0 0',
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 700,
                 fontSize: 10,
                 letterSpacing: '0.18em',
@@ -338,7 +338,7 @@ export function ScoreboardHero({
             <p
               style={{
                 margin: '8px 0 0',
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 700,
                 fontSize: 10,
                 letterSpacing: '0.18em',
@@ -369,7 +369,7 @@ export function ScoreboardHero({
             <p
               style={{
                 margin: 0,
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 800,
                 fontSize: 10,
                 letterSpacing: '0.2em',
@@ -416,7 +416,7 @@ export function ScoreboardHero({
               <p
                 style={{
                   margin: 0,
-                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontFamily: 'var(--font-condensed), sans-serif',
                   fontWeight: 800,
                   fontSize: 12,
                   letterSpacing: '0.16em',
@@ -429,7 +429,7 @@ export function ScoreboardHero({
               <Link
                 href="/academy"
                 style={{
-                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontFamily: 'var(--font-condensed), sans-serif',
                   fontWeight: 700,
                   fontSize: 11,
                   letterSpacing: '0.12em',

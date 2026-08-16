@@ -121,7 +121,7 @@ function SectionLabel({ children }: { children: string }) {
   return (
     <p
       style={{
-        fontFamily: '"Barlow Condensed", sans-serif',
+        fontFamily: 'var(--font-condensed), sans-serif',
         fontWeight: 700,
         fontSize: 11,
         letterSpacing: '0.18em',
@@ -238,7 +238,7 @@ export function LessonLayer({
             display: 'inline-flex',
             alignItems: 'center',
             padding: '4px 10px',
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 700,
             fontSize: 10,
             letterSpacing: '0.16em',
@@ -268,7 +268,7 @@ export function LessonLayer({
 
         <p
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontSize: 12,
             letterSpacing: '0.10em',
             textTransform: 'uppercase',
@@ -444,7 +444,7 @@ export function LessonLayer({
             onClick={handleSaveNotes}
             style={{
               padding: '8px 16px',
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontWeight: 700,
               fontSize: 11,
               letterSpacing: '0.14em',
@@ -549,7 +549,7 @@ export function LessonLayer({
               <p
                 style={{
                   margin: 0,
-                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontFamily: 'var(--font-condensed), sans-serif',
                   fontSize: 10,
                   letterSpacing: '0.16em',
                   textTransform: 'uppercase',
@@ -612,7 +612,7 @@ export function LessonLayer({
             color: '#fff',
             border: 'none',
             borderRadius: 4,
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 700,
             fontSize: 13,
             letterSpacing: '0.14em',
@@ -632,7 +632,7 @@ export function LessonLayer({
             color: TOKENS.textPrimary,
             border: `1px solid ${TOKENS.border}`,
             borderRadius: 4,
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 700,
             fontSize: 13,
             letterSpacing: '0.14em',

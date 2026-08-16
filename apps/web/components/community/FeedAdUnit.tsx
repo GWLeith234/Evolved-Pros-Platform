@@ -34,7 +34,7 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
           position: 'absolute',
           top: 8,
           right: 12,
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 700,
           fontSize: 9,
           letterSpacing: '0.18em',
@@ -80,7 +80,7 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
       <div style={{ flex: 1, minWidth: 0, paddingRight: 8 }}>
         <p
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 700,
             fontSize: 14,
             color: 'var(--text-primary)',
@@ -93,7 +93,7 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
         {ad.sponsor_name && ad.headline && (
           <p
             style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontSize: 12,
               color: 'var(--text-tertiary)',
               lineHeight: 1.2,
@@ -114,7 +114,7 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
           alignItems: 'center',
           padding: '6px 12px',
           minHeight: 32,
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 700,
           fontSize: 11,
           letterSpacing: '0.14em',

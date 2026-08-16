@@ -117,7 +117,7 @@ function Pill({
         background: active ? '#112535' : '#FFFFFF',
         border: `1px solid ${active ? '#112535' : '#E5E0D8'}`,
         color: active ? '#FFFFFF' : '#374151',
-        fontFamily: '"Barlow Condensed", sans-serif',
+        fontFamily: 'var(--font-condensed), sans-serif',
         fontWeight: 700,
         fontSize: 11,
         letterSpacing: '0.18em',

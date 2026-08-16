@@ -95,7 +95,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
           <p
             style={{
               margin: 0,
-              fontFamily: '"Bebas Neue", sans-serif',
+              fontFamily: 'var(--font-logo), sans-serif',
               fontSize: 32,
               letterSpacing: '0.08em',
               color: 'var(--text-primary)',
@@ -106,7 +106,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
           <p
             style={{
               margin: '12px 0 0',
-              fontFamily: '"Barlow", sans-serif',
+              fontFamily: 'var(--font-body), sans-serif',
               fontSize: 14,
               lineHeight: 1.5,
               color: 'var(--text-tertiary)',
@@ -228,7 +228,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             background: typeBadge.background,
             color: typeBadge.color,
             border: `1px solid ${typeBadge.border}`,
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 700,
             fontSize: 12,
             letterSpacing: '0.22em',
@@ -259,7 +259,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
               background: 'rgba(201,168,76,0.18)',
               border: '1px solid rgba(201,168,76,0.55)',
               color: '#C9A84C',
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontWeight: 700,
               fontSize: 12,
               letterSpacing: '0.22em',
@@ -291,7 +291,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             position: 'absolute',
             bottom: 18,
             right: 24,
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 700,
             fontSize: 12,
             letterSpacing: '0.4em',
@@ -324,7 +324,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             style={{
               display: 'inline-block',
               padding: '4px 10px',
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontSize: 12,
               fontWeight: 700,
               letterSpacing: '0.22em',
@@ -345,7 +345,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             className="ch-title"
             style={{
               margin: 0,
-              fontFamily: '"Bebas Neue", sans-serif',
+              fontFamily: 'var(--font-logo), sans-serif',
               fontWeight: 400,
               fontSize: 'clamp(40px, 6vw, 72px)',
               lineHeight: 1.02,
@@ -366,7 +366,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             className="ch-tagline"
             style={{
               margin: '10px 0 0',
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontWeight: 600,
               fontSize: 14,
               letterSpacing: '0.18em',
@@ -385,7 +385,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             className="ch-description"
             style={{
               margin: '14px 0 0',
-              fontFamily: '"Barlow", sans-serif',
+              fontFamily: 'var(--font-body), sans-serif',
               fontSize: 16,
               lineHeight: 1.45,
               color: 'rgba(255,255,255,0.78)',
@@ -440,7 +440,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontFamily: '"Bebas Neue", sans-serif',
+                  fontFamily: 'var(--font-logo), sans-serif',
                   fontSize: 14,
                   color: '#FFFFFF',
                   flexShrink: 0,
@@ -455,7 +455,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
                   className="ch-host-name"
                   style={{
                     margin: 0,
-                    fontFamily: '"Barlow", sans-serif',
+                    fontFamily: 'var(--font-body), sans-serif',
                     fontWeight: 600,
                     fontSize: 14,
                     color: '#FFFFFF',
@@ -469,7 +469,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
                   className="ch-host-role"
                   style={{
                     margin: 0,
-                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontFamily: 'var(--font-condensed), sans-serif',
                     fontWeight: 600,
                     fontSize: 12,
                     letterSpacing: '0.18em',
@@ -493,7 +493,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             alignItems: 'baseline',
             gap: 24,
             flexWrap: 'wrap',
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 600,
             fontSize: 12,
             letterSpacing: '0.18em',
@@ -534,7 +534,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             className="ch-rsvp"
             style={{
               padding: '14px 32px',
-              fontFamily: '"Bebas Neue", sans-serif',
+              fontFamily: 'var(--font-logo), sans-serif',
               fontSize: 15,
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
@@ -554,7 +554,7 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
             className="ch-rsvp"
             style={{
               padding: '14px 28px',
-              fontFamily: '"Bebas Neue", sans-serif',
+              fontFamily: 'var(--font-logo), sans-serif',
               fontSize: 15,
               letterSpacing: '0.14em',
               textTransform: 'uppercase',

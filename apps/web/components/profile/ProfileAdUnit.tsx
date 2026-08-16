@@ -36,7 +36,7 @@ export function ProfileAdUnit({ ad }: ProfileAdUnitProps) {
           position: 'absolute',
           top: '8px',
           right: '10px',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 700,
           fontSize: '8px',
           letterSpacing: '0.1em',
@@ -73,11 +73,11 @@ export function ProfileAdUnit({ ad }: ProfileAdUnitProps) {
 
       {/* Text */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '13px', color: 'white', lineHeight: 1.2, marginBottom: '2px' }}>
+        <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '13px', color: 'white', lineHeight: 1.2, marginBottom: '2px' }}>
           {label}
         </p>
         {ad.sponsor_name && ad.headline && (
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.3 }}>
+          <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontSize: '12px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.3 }}>
             {ad.sponsor_name}
           </p>
         )}
@@ -89,7 +89,7 @@ export function ProfileAdUnit({ ad }: ProfileAdUnitProps) {
           flexShrink: 0,
           backgroundColor: '#C9302A',
           color: 'white',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 700,
           fontSize: '12px',
           letterSpacing: '0.08em',

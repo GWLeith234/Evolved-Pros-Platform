@@ -24,7 +24,7 @@ const inputStyle: React.CSSProperties = {
 }
 
 const labelStyle: React.CSSProperties = {
-  fontFamily: '"Barlow Condensed", sans-serif',
+  fontFamily: 'var(--font-condensed), sans-serif',
   fontWeight: 700,
   fontSize: '12px',
   letterSpacing: '0.18em',
@@ -93,7 +93,7 @@ export function OnboardingProfile({ userId, onContinue }: Props) {
   return (
     <div>
       {/* Heading */}
-      <h2 style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900, fontSize: '26px', color: 'var(--text-primary)', margin: '0 0 4px' }}>
+      <h2 style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 900, fontSize: '26px', color: 'var(--text-primary)', margin: '0 0 4px' }}>
         Set up your profile
       </h2>
       <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '14px', color: 'var(--text-secondary)', margin: '0 0 28px' }}>
@@ -131,7 +131,7 @@ export function OnboardingProfile({ userId, onContinue }: Props) {
             </svg>
           )}
         </button>
-        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: uploading ? GOLD : 'var(--text-secondary)', marginTop: '8px' }}>
+        <p style={{ fontFamily: 'var(--font-condensed), sans-serif', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: uploading ? GOLD : 'var(--text-secondary)', marginTop: '8px' }}>
           {uploading ? 'Uploading…' : avatarUrl ? 'Tap to change' : 'Add a photo'}
         </p>
         {uploadError && (
@@ -194,7 +194,7 @@ export function OnboardingProfile({ userId, onContinue }: Props) {
           padding: '14px 24px',
           backgroundColor: GOLD,
           color: '#0A0F18',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 900,
           fontSize: '14px',
           letterSpacing: '0.12em',

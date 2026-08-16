@@ -66,7 +66,7 @@ export function TileCard({ accent, eyebrowColor, eyebrow, title, newCount, child
           <p
             style={{
               margin: 0,
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontWeight: 700,
               fontSize: 9,
               letterSpacing: '0.32em',
@@ -79,7 +79,7 @@ export function TileCard({ accent, eyebrowColor, eyebrow, title, newCount, child
           <h3
             style={{
               margin: '4px 0 0',
-              fontFamily: '"Bebas Neue", sans-serif',
+              fontFamily: 'var(--font-logo), sans-serif',
               fontSize: 22,
               letterSpacing: '0.04em',
               color: 'var(--text-primary)',
@@ -93,7 +93,7 @@ export function TileCard({ accent, eyebrowColor, eyebrow, title, newCount, child
         {newCount != null && newCount > 0 && (
           <span
             style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontWeight: 700,
               fontSize: 11,
               letterSpacing: '0.18em',

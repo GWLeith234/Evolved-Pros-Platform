@@ -30,7 +30,7 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
   const badge = (
     <span
       style={{
-        fontFamily: '"Barlow Condensed", sans-serif',
+        fontFamily: 'var(--font-condensed), sans-serif',
         fontWeight: 800,
         fontSize: 9,
         letterSpacing: '0.22em',
@@ -129,7 +129,7 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
               alignItems: 'center',
               padding: '6px 12px',
               minHeight: 32,
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontWeight: 700,
               fontSize: 11,
               letterSpacing: '0.14em',

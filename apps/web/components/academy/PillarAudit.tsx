@@ -84,7 +84,7 @@ export function PillarAudit({ courseId, questions, pillarColor = '#C9A84C' }: Pr
       >
         <p
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+            fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
             fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
             color: pillarColor, margin: '0 0 20px',
           }}
@@ -96,7 +96,7 @@ export function PillarAudit({ courseId, questions, pillarColor = '#C9A84C' }: Pr
           <div style={{ textAlign: 'center' }}>
             <p
               style={{
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900,
+                fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 900,
                 fontSize: '56px', lineHeight: 1, color: pillarColor, margin: 0,
               }}
             >
@@ -104,7 +104,7 @@ export function PillarAudit({ courseId, questions, pillarColor = '#C9A84C' }: Pr
             </p>
             <p
               style={{
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                 fontSize: '12px', letterSpacing: '0.18em', textTransform: 'uppercase',
                 color: 'rgba(250,249,247,0.3)', margin: '4px 0 0',
               }}
@@ -140,7 +140,7 @@ export function PillarAudit({ courseId, questions, pillarColor = '#C9A84C' }: Pr
             style={{
               background: 'none', border: `1px solid rgba(255,255,255,0.12)`,
               borderRadius: '4px', padding: '6px 14px',
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
               color: 'rgba(250,249,247,0.5)', cursor: 'pointer',
             }}
@@ -164,7 +164,7 @@ export function PillarAudit({ courseId, questions, pillarColor = '#C9A84C' }: Pr
     >
       <p
         style={{
-          fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+          fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
           fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
           color: pillarColor, margin: '0 0 4px',
         }}
@@ -179,7 +179,7 @@ export function PillarAudit({ courseId, questions, pillarColor = '#C9A84C' }: Pr
         {questions.map((q, idx) => (
           <div key={q.id}>
             <p style={{ color: '#faf9f7', fontSize: '14px', lineHeight: 1.5, margin: '0 0 12px' }}>
-              <span style={{ color: 'rgba(250,249,247,0.3)', marginRight: '8px', fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', fontWeight: 700 }}>
+              <span style={{ color: 'rgba(250,249,247,0.3)', marginRight: '8px', fontFamily: 'var(--font-condensed), sans-serif', fontSize: '12px', fontWeight: 700 }}>
                 {String(idx + 1).padStart(2, '0')}
               </span>
               {q.text}
@@ -199,7 +199,7 @@ export function PillarAudit({ courseId, questions, pillarColor = '#C9A84C' }: Pr
                       backgroundColor: isSelected ? pillarColor : 'rgba(255,255,255,0.05)',
                       border: `1px solid ${isSelected ? pillarColor : 'rgba(255,255,255,0.1)'}`,
                       color: isSelected ? '#0A0F18' : 'rgba(250,249,247,0.5)',
-                      fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '14px',
+                      fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700, fontSize: '14px',
                       cursor: 'pointer', transition: 'all 0.15s',
                     }}
                   >
@@ -231,7 +231,7 @@ export function PillarAudit({ courseId, questions, pillarColor = '#C9A84C' }: Pr
             style={{
               backgroundColor: allAnswered ? pillarColor : 'rgba(201,168,76,0.15)',
               color: allAnswered ? '#0A0F18' : 'rgba(201,168,76,0.35)',
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
               padding: '10px 24px', borderRadius: '4px', border: 'none',
               cursor: allAnswered ? 'pointer' : 'default', transition: 'all 0.2s',

@@ -136,7 +136,7 @@ export default async function LessonPage({ params }: Props) {
           maxWidth: 1280,
           margin: '0 auto',
           padding: '16px 24px 12px',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontSize: 11,
           fontWeight: 600,
           letterSpacing: '0.14em',

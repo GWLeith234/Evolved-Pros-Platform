@@ -49,7 +49,7 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 12,
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontSize: 11,
           fontWeight: 500,
           letterSpacing: '0.22em',
@@ -130,7 +130,7 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
         <h1
           style={{
             margin: '6px 0 0',
-            fontFamily: '"Abril Fatface", "Playfair Display", Georgia, serif',
+            fontFamily: 'var(--font-abril), var(--font-display), Georgia, serif',
             fontWeight: 400,
             fontSize: 'clamp(40px, 9vw, 108px)',
             lineHeight: 0.95,
@@ -144,7 +144,7 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
         <p
           style={{
             margin: '10px 0 0',
-            fontFamily: '"Playfair Display", Georgia, serif',
+            fontFamily: 'var(--font-display), Georgia, serif',
             fontStyle: 'italic',
             fontSize: 16,
             color: '#6B7280',
@@ -182,7 +182,7 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
               style={{
                 position: 'relative',
                 padding: '6px 10px',
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: active ? 700 : 600,
                 fontSize: 13,
                 letterSpacing: '0.16em',
@@ -210,7 +210,7 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
             border: '1px solid #E5E0D8',
             color: '#112535',
             cursor: 'pointer',
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 600,
             fontSize: 11,
             letterSpacing: '0.18em',

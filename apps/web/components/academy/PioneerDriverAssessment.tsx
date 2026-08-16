@@ -260,7 +260,7 @@ export function PioneerDriverAssessment() {
   if (loading) {
     return (
       <div style={{ backgroundColor: '#111926', borderRadius: '8px', padding: '40px', textAlign: 'center' }}>
-        <p style={{ color: 'rgba(250,249,247,0.3)', fontSize: '13px', fontFamily: '"Barlow Condensed", sans-serif', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+        <p style={{ color: 'rgba(250,249,247,0.3)', fontSize: '13px', fontFamily: 'var(--font-condensed), sans-serif', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
           Loading assessment…
         </p>
       </div>
@@ -297,7 +297,7 @@ export function PioneerDriverAssessment() {
       {/* Header */}
       <div style={{ marginBottom: '24px' }}>
         <p style={{
-          fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+          fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
           fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
           color: GOLD, margin: '0 0 4px',
         }}>
@@ -313,7 +313,7 @@ export function PioneerDriverAssessment() {
             <div style={{ height: '100%', width: `${progress}%`, backgroundColor: GOLD, borderRadius: '2px', transition: 'width 0.3s ease' }} />
           </div>
           <span style={{
-            fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+            fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
             fontSize: '12px', letterSpacing: '0.1em', color: 'rgba(250,249,247,0.4)',
             flexShrink: 0,
           }}>
@@ -370,7 +370,7 @@ function AnswerButton({ label, text, onClick }: { label: string; text: string; o
         backgroundColor: hovered ? `${GOLD}22` : 'rgba(255,255,255,0.06)',
         border: `1px solid ${hovered ? GOLD : 'rgba(255,255,255,0.15)'}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+        fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
         fontSize: '12px', letterSpacing: '0.05em',
         color: hovered ? GOLD : 'rgba(250,249,247,0.5)',
         transition: 'all 0.15s',
@@ -417,7 +417,7 @@ function ResultScreen({
         {/* Saved badge */}
         {isFromSaved && formattedDate && (
           <p style={{
-            fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+            fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
             fontSize: '12px', letterSpacing: '0.18em', textTransform: 'uppercase',
             color: 'rgba(250,249,247,0.3)', margin: '0 0 16px',
           }}>
@@ -427,7 +427,7 @@ function ResultScreen({
 
         {/* Assessment label */}
         <p style={{
-          fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+          fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
           fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
           color: GOLD, margin: '0 0 8px',
         }}>
@@ -436,7 +436,7 @@ function ResultScreen({
 
         {/* Type name */}
         <h2 style={{
-          fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900,
+          fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 900,
           fontSize: 'clamp(28px, 5vw, 44px)', textTransform: 'uppercase',
           color: typeColor, margin: '0 0 20px', letterSpacing: '0.04em', lineHeight: 1,
         }}>
@@ -451,7 +451,7 @@ function ResultScreen({
         {/* Strengths */}
         <div style={{ marginBottom: '24px' }}>
           <p style={{
-            fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+            fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
             fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase',
             color: 'rgba(250,249,247,0.35)', margin: '0 0 10px',
           }}>
@@ -474,7 +474,7 @@ function ResultScreen({
           borderRadius: '6px', padding: '14px 18px', marginBottom: '28px',
         }}>
           <p style={{
-            fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+            fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
             fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase',
             color: typeColor, margin: '0 0 6px',
           }}>
@@ -494,7 +494,7 @@ function ResultScreen({
               disabled={saving}
               style={{
                 backgroundColor: GOLD, color: '#0A0F18',
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
                 fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                 padding: '11px 24px', borderRadius: '4px', border: 'none',
                 cursor: saving ? 'default' : 'pointer',
@@ -505,7 +505,7 @@ function ResultScreen({
           )}
           {saved && (
             <span style={{
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
               color: typeColor,
             }}>
@@ -520,7 +520,7 @@ function ResultScreen({
             onClick={onRetake}
             style={{
               background: 'none', border: 'none',
-              fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+              fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 700,
               fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase',
               color: 'rgba(250,249,247,0.3)', cursor: 'pointer', padding: 0,
             }}

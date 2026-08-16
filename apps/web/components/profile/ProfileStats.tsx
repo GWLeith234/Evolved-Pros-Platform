@@ -11,7 +11,7 @@ interface ProfileStatsProps {
 const PILLAR_NUMBERS = [1, 2, 3, 4, 5, 6] as const
 
 const labelStyle: React.CSSProperties = {
-  fontFamily: '"Barlow Condensed", sans-serif',
+  fontFamily: 'var(--font-condensed), sans-serif',
   fontWeight: 600,
   fontSize: '12px',
   textTransform: 'uppercase',
@@ -21,7 +21,7 @@ const labelStyle: React.CSSProperties = {
 }
 
 const valueStyle: React.CSSProperties = {
-  fontFamily: '"Playfair Display", Georgia, serif',
+  fontFamily: 'var(--font-display), Georgia, serif',
   fontWeight: 700,
   fontSize: '22px',
   color: '#F5F0E8',

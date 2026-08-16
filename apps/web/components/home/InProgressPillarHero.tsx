@@ -78,7 +78,7 @@ export function InProgressPillarHero({
         <span
           className="leading-none"
           style={{
-            fontFamily: '"Bebas Neue", sans-serif',
+            fontFamily: 'var(--font-logo), sans-serif',
             letterSpacing: '0.02em',
             fontSize: 48,
             color: cfg.color,
@@ -109,7 +109,7 @@ export function InProgressPillarHero({
         <p
           className="mt-1 mb-4"
           style={{
-            fontFamily: '"Playfair Display", Georgia, serif',
+            fontFamily: 'var(--font-display), Georgia, serif',
             fontSize: 16,
             fontStyle: 'italic',
             color: 'var(--text-secondary)',

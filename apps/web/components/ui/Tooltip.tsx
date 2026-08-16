@@ -61,7 +61,7 @@ export function Tooltip({ content, children, className }: TooltipProps) {
             backgroundColor: '#112535',
             color: 'white',
             fontSize: '12px',
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 500,
             padding: '8px 12px',
             borderRadius: '5px',

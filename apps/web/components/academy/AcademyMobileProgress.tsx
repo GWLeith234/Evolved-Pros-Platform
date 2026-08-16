@@ -66,7 +66,7 @@ export function AcademyMobileProgress({ courses, userTier, overallPct }: Academy
           <span
             className="leading-none"
             style={{
-              fontFamily: '"Bebas Neue", sans-serif',
+              fontFamily: 'var(--font-logo), sans-serif',
               fontSize: 18,
               color: 'var(--brand-teal, #0ABFA3)',
             }}

@@ -16,7 +16,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
     }}>
       <div style={{ textAlign: 'center', maxWidth: 400, padding: '0 24px' }}>
         <p style={{
-          fontFamily:    '"Barlow Condensed", sans-serif',
+          fontFamily:    'var(--font-condensed), sans-serif',
           fontSize:      10,
           fontWeight:    700,
           letterSpacing: '0.18em',
@@ -52,7 +52,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
             border:        'none',
             padding:       '12px 28px',
             cursor:        'pointer',
-            fontFamily:    '"Barlow Condensed", sans-serif',
+            fontFamily:    'var(--font-condensed), sans-serif',
             fontSize:      11,
             fontWeight:    700,
             letterSpacing: '0.12em',

@@ -43,7 +43,7 @@ export function TodaysEvolution({ actions }: TodaysEvolutionProps) {
           <p
             style={{
               margin: 0,
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: 'var(--font-condensed), sans-serif',
               fontWeight: 800,
               fontSize: 11,
               letterSpacing: '0.22em',
@@ -56,7 +56,7 @@ export function TodaysEvolution({ actions }: TodaysEvolutionProps) {
           <h2
             style={{
               margin: '4px 0 0',
-              fontFamily: '"Bebas Neue", sans-serif',
+              fontFamily: 'var(--font-logo), sans-serif',
               fontSize: 28,
               letterSpacing: '0.04em',
               lineHeight: 1,
@@ -103,7 +103,7 @@ export function TodaysEvolution({ actions }: TodaysEvolutionProps) {
             <p
               style={{
                 margin: 0,
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 800,
                 fontSize: 10,
                 letterSpacing: '0.18em',
@@ -116,7 +116,7 @@ export function TodaysEvolution({ actions }: TodaysEvolutionProps) {
             <h3
               style={{
                 margin: 0,
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 800,
                 fontSize: 16,
                 letterSpacing: '0.02em',
@@ -130,7 +130,7 @@ export function TodaysEvolution({ actions }: TodaysEvolutionProps) {
               style={{
                 margin: 0,
                 flex: 1,
-                fontFamily: '"Barlow", sans-serif',
+                fontFamily: 'var(--font-body), sans-serif',
                 fontSize: 13,
                 lineHeight: 1.4,
                 color: 'var(--text-secondary)',
@@ -150,7 +150,7 @@ export function TodaysEvolution({ actions }: TodaysEvolutionProps) {
                 gap: 6,
                 padding: '6px 12px',
                 minHeight: 32,
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 700,
                 fontSize: 11,
                 letterSpacing: '0.14em',

@@ -38,7 +38,7 @@ export function OnboardingPillar({ onContinue }: Props) {
   return (
     <div>
       {/* Heading */}
-      <h2 style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900, fontSize: '26px', color: 'var(--text-primary)', margin: '0 0 8px' }}>
+      <h2 style={{ fontFamily: 'var(--font-condensed), sans-serif', fontWeight: 900, fontSize: '26px', color: 'var(--text-primary)', margin: '0 0 8px' }}>
         Where do you need the most work?
       </h2>
       <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.55, margin: '0 0 24px' }}>
@@ -75,7 +75,7 @@ export function OnboardingPillar({ onContinue }: Props) {
               )}
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isSelected ? 'white' : pillar.color, marginBottom: '8px' }} />
               <p style={{
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 700,
                 fontSize: '8px',
                 letterSpacing: '0.16em',
@@ -86,7 +86,7 @@ export function OnboardingPillar({ onContinue }: Props) {
                 Pillar {pillar.number}
               </p>
               <p style={{
-                fontFamily: '"Barlow Condensed", sans-serif',
+                fontFamily: 'var(--font-condensed), sans-serif',
                 fontWeight: 700,
                 fontSize: '13px',
                 color: isSelected ? 'white' : 'var(--text-primary)',
@@ -119,7 +119,7 @@ export function OnboardingPillar({ onContinue }: Props) {
           padding: '14px 24px',
           backgroundColor: selectedPillar?.color ?? '#C9A84C',
           color: '#0A0F18',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontWeight: 900,
           fontSize: '14px',
           letterSpacing: '0.12em',
@@ -146,7 +146,7 @@ export function OnboardingPillar({ onContinue }: Props) {
           background: 'none',
           border: 'none',
           cursor: 'pointer',
-          fontFamily: '"Barlow Condensed", sans-serif',
+          fontFamily: 'var(--font-condensed), sans-serif',
           fontSize: '12px',
           letterSpacing: '0.1em',
           textTransform: 'uppercase',

@@ -14,7 +14,7 @@ export default function NotFound() {
       <div style={{ textAlign: 'center', maxWidth: 400, padding: '0 24px' }}>
         <p
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontSize: 10,
             fontWeight: 700,
             letterSpacing: '0.18em',
@@ -55,7 +55,7 @@ export default function NotFound() {
             background: '#ef0e30',
             color: '#fff',
             padding: '12px 28px',
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontSize: 11,
             fontWeight: 700,
             letterSpacing: '0.12em',

@@ -23,9 +23,9 @@ import {
   type PublicEpisode,
 } from '@/lib/podcast/public'
 
-// Public, server-rendered, indexable. The transcript is real DOM text in the
-// SSR HTML (view-source shows it) — the whole point of the SEO sprint.
-export const dynamic = 'force-dynamic'
+// Public, server-rendered, indexable. ISR every 5 minutes — no cookies.
+// The transcript is real DOM text in the SSR HTML (view-source shows it).
+export const revalidate = 300
 
 interface Props {
   params: { slug: string }
@@ -229,7 +229,7 @@ export default async function PublicEpisodePage({ params }: Props) {
                   className="rounded-lg p-5"
                   style={{ background: 'rgba(255,255,255,0.04)', borderLeft: '3px solid #ef0e30' }}
                 >
-                  <p className="text-[18px] italic leading-snug" style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', color: IVORY }}>
+                  <p className="text-[18px] italic leading-snug" style={{ fontFamily: 'var(--font-display), Georgia, serif', color: IVORY }}>
                     “{qt.text}”
                   </p>
                   {qt.speaker && (

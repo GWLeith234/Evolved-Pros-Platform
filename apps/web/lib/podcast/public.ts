@@ -1,8 +1,10 @@
 import 'server-only'
+import { unstable_cache } from 'next/cache'
 import { adminClient } from '@/lib/supabase/admin'
 import { SPONSOR_AD_COLUMNS, type SponsorAd } from '@/components/home/HomeSponsorAd'
 import { ALL_FLAGSHIP_SPONSORS, ensureFlagshipSponsors } from '@/lib/sponsors/partners'
 import { dedupeSponsors } from '@/lib/sponsors/rotate'
+import { CACHE_TAGS } from '@/lib/cache/shared'
 
 // ---------------------------------------------------------------------------
 // Public podcast data + SEO helpers (SPRINT — Public SEO Podcast Pages).
@@ -109,7 +111,7 @@ function normalize(row: any): PublicEpisode {
   }
 }
 
-export async function getPublishedEpisodes(): Promise<PublicEpisode[]> {
+async function loadPublishedEpisodes(): Promise<PublicEpisode[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (adminClient as any)
     .from('episodes')
@@ -120,7 +122,17 @@ export async function getPublishedEpisodes(): Promise<PublicEpisode[]> {
   return ((data ?? []) as unknown[]).map(normalize)
 }
 
-export async function getEpisodeBySlug(slug: string): Promise<PublicEpisode | null> {
+const getPublishedEpisodesCached = unstable_cache(
+  loadPublishedEpisodes,
+  ['podcast-published-episodes'],
+  { revalidate: 300, tags: [CACHE_TAGS.podcastEpisodes] },
+)
+
+export async function getPublishedEpisodes(): Promise<PublicEpisode[]> {
+  return getPublishedEpisodesCached()
+}
+
+async function loadEpisodeBySlug(slug: string): Promise<PublicEpisode | null> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (adminClient as any)
     .from('episodes')
@@ -129,6 +141,15 @@ export async function getEpisodeBySlug(slug: string): Promise<PublicEpisode | nu
     .eq('is_published', true)
     .maybeSingle()
   return data ? normalize(data) : null
+}
+
+export async function getEpisodeBySlug(slug: string): Promise<PublicEpisode | null> {
+  // Per-slug cache key so episode pages can ISR independently.
+  return unstable_cache(
+    () => loadEpisodeBySlug(slug),
+    ['podcast-episode', slug],
+    { revalidate: 300, tags: [CACHE_TAGS.podcastEpisodes] },
+  )()
 }
 
 /** 3–4 published episodes sharing the most tags with `ep` (fallback: newest). */
@@ -200,7 +221,7 @@ export function youtubeTimestampUrl(youtubeId: string | null, ts: number): strin
  * flagship partners so a rotating slot is never empty. Shared by the index grid
  * and the episode-page sponsor slots so both rotate through the same inventory.
  */
-export async function getPodcastSponsorPool(): Promise<SponsorAd[]> {
+async function loadPodcastSponsorPool(): Promise<SponsorAd[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = adminClient as any
   const nowIso = new Date().toISOString()
@@ -229,4 +250,58 @@ export async function getPodcastSponsorPool(): Promise<SponsorAd[]> {
   } catch {
     return dedupeSponsors(ALL_FLAGSHIP_SPONSORS)
   }
+}
+
+const getPodcastSponsorPoolCached = unstable_cache(
+  loadPodcastSponsorPool,
+  ['podcast-sponsor-pool'],
+  { revalidate: 120, tags: [CACHE_TAGS.platformAds] },
+)
+
+export async function getPodcastSponsorPool(): Promise<SponsorAd[]> {
+  return getPodcastSponsorPoolCached()
+}
+
+/** Catalogue rows for the member-style podcast index grid (ISR-safe). */
+const CATALOGUE_COLS =
+  'id, slug, episode_number, title, description, pillar, pinned, guest_name, guest_title, guest_company, guest_image_url, thumbnail_url, duration_seconds, published_at, youtube_url'
+
+export type CatalogueEpisodeRow = {
+  id: string
+  slug: string
+  episode_number: number | null
+  title: string
+  description: string | null
+  pillar: string | null
+  pinned: boolean | null
+  guest_name: string | null
+  guest_title: string | null
+  guest_company: string | null
+  guest_image_url: string | null
+  thumbnail_url: string | null
+  duration_seconds: number | null
+  published_at: string | null
+  youtube_url: string | null
+}
+
+async function loadPodcastCatalogue(): Promise<CatalogueEpisodeRow[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (adminClient as any)
+    .from('episodes')
+    .select(CATALOGUE_COLS)
+    .eq('is_published', true)
+    .order('published_at', { ascending: false })
+    .order('episode_number', { ascending: false })
+    .limit(100)
+  return (data ?? []) as CatalogueEpisodeRow[]
+}
+
+const getPodcastCatalogueCached = unstable_cache(
+  loadPodcastCatalogue,
+  ['podcast-catalogue-grid'],
+  { revalidate: 300, tags: [CACHE_TAGS.podcastEpisodes] },
+)
+
+export async function getPodcastCatalogue(): Promise<CatalogueEpisodeRow[]> {
+  return getPodcastCatalogueCached()
 }

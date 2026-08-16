@@ -29,7 +29,7 @@ export function StreakBadge({ days, bump, className = '', style }: StreakBadgePr
         display: 'inline-flex',
         alignItems: 'center',
         gap: 3,
-        fontFamily: '"Barlow Condensed", sans-serif',
+        fontFamily: 'var(--font-condensed), sans-serif',
         fontWeight: 700,
         fontSize: 10,
         letterSpacing: '0.08em',

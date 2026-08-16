@@ -44,7 +44,7 @@ export function TopStoriesTile({ stories }: TopStoriesTileProps) {
           <p
             style={{
               margin: 0,
-              fontFamily: '"Barlow", sans-serif',
+              fontFamily: 'var(--font-body), sans-serif',
               fontSize: 12,
               color: 'var(--text-tertiary)',
             }}
@@ -63,7 +63,7 @@ export function TopStoriesTile({ stories }: TopStoriesTileProps) {
                   style={{
                     width: 28,
                     textAlign: 'center',
-                    fontFamily: '"Bebas Neue", sans-serif',
+                    fontFamily: 'var(--font-logo), sans-serif',
                     fontSize: 22,
                     letterSpacing: '0.02em',
                     color: 'var(--text-tertiary)',
@@ -83,7 +83,7 @@ export function TopStoriesTile({ stories }: TopStoriesTileProps) {
                   style={{
                     display: 'block',
                     margin: 0,
-                    fontFamily: '"Playfair Display", Georgia, serif',
+                    fontFamily: 'var(--font-display), Georgia, serif',
                     fontSize: 13,
                     lineHeight: 1.35,
                     fontWeight: 700,
@@ -98,7 +98,7 @@ export function TopStoriesTile({ stories }: TopStoriesTileProps) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span
                     style={{
-                      fontFamily: '"Barlow Condensed", sans-serif',
+                      fontFamily: 'var(--font-condensed), sans-serif',
                       fontWeight: 700,
                       fontSize: 9,
                       letterSpacing: '0.22em',
@@ -111,7 +111,7 @@ export function TopStoriesTile({ stories }: TopStoriesTileProps) {
                   {s.isHot && (
                     <span
                       style={{
-                        fontFamily: '"Barlow Condensed", sans-serif',
+                        fontFamily: 'var(--font-condensed), sans-serif',
                         fontWeight: 800,
                         fontSize: 8,
                         letterSpacing: '0.22em',
@@ -126,7 +126,7 @@ export function TopStoriesTile({ stories }: TopStoriesTileProps) {
                   )}
                   <span
                     style={{
-                      fontFamily: '"Barlow Condensed", sans-serif',
+                      fontFamily: 'var(--font-condensed), sans-serif',
                       fontWeight: 600,
                       fontSize: 9,
                       letterSpacing: '0.18em',

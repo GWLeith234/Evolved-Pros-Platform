@@ -529,7 +529,7 @@ function PartnerPreview({ values }: { values: PartnerFormValues }) {
               style={{
                 width: 40, height: 40, borderRadius: 4, background: accent,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontFamily: '"Bebas Neue", sans-serif', fontSize: 18, color: '#fff',
+                fontFamily: 'var(--font-logo), sans-serif', fontSize: 18, color: '#fff',
               }}
             >
               {(values.name || '?')[0]?.toUpperCase()}
@@ -548,7 +548,7 @@ function PartnerPreview({ values }: { values: PartnerFormValues }) {
         {values.tagline && (
           <p
             style={{
-              fontFamily: '"Playfair Display", Georgia, serif',
+              fontFamily: 'var(--font-display), Georgia, serif',
               fontSize: 18,
               fontStyle: 'italic',
               color: '#fff',
@@ -560,7 +560,7 @@ function PartnerPreview({ values }: { values: PartnerFormValues }) {
         )}
 
         {values.body_copy && (
-          <p style={{ fontFamily: '"Barlow", sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.5 }}>
+          <p style={{ fontFamily: 'var(--font-body), sans-serif', fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.5 }}>
             {values.body_copy}
           </p>
         )}
@@ -573,7 +573,7 @@ function PartnerPreview({ values }: { values: PartnerFormValues }) {
             padding: '8px 16px',
             background: accent,
             color: '#fff',
-            fontFamily: '"Barlow Condensed", sans-serif',
+            fontFamily: 'var(--font-condensed), sans-serif',
             fontWeight: 700,
             fontSize: 12,
             letterSpacing: '0.16em',
