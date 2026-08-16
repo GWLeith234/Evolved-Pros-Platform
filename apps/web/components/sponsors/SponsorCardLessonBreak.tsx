@@ -57,7 +57,7 @@ export function SponsorCardLessonBreak({ sponsor }: { sponsor: Sponsor }) {
 
       {/* Logo + brand */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <SponsorLogo sponsor={sponsor} size={56} color={color} />
+        <SponsorLogo sponsor={sponsor} size={64} color={color} />
         <span
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',

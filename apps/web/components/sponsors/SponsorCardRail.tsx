@@ -61,7 +61,7 @@ export function SponsorCardRail({ sponsor }: { sponsor: Sponsor }) {
             fontSize: 8,
             letterSpacing: '0.16em',
             textTransform: 'uppercase',
-            color: 'rgba(245,240,232,0.4)',
+            color: 'rgba(245,240,232,0.65)',
             border: `1px solid ${SPONSOR_BORDER}`,
             padding: '1px 5px',
           }}
@@ -72,7 +72,7 @@ export function SponsorCardRail({ sponsor }: { sponsor: Sponsor }) {
 
       {/* Logo + brand row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <SponsorLogo sponsor={sponsor} size={28} color={color} />
+        <SponsorLogo sponsor={sponsor} size={36} color={color} />
         <span
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',

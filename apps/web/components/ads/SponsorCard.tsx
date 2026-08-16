@@ -153,8 +153,8 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
           src={ad.image_url}
           alt={ad.tool_name ?? ''}
           style={{
-            width: 40,
-            height: 40,
+            width: 48,
+            height: 48,
             objectFit: 'contain',
             flexShrink: 0,
           }}

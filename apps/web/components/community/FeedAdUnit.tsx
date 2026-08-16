@@ -50,8 +50,8 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
 
       <div
         style={{
-          width: 40,
-          height: 40,
+          width: 48,
+          height: 48,
           flexShrink: 0,
           backgroundColor: 'rgba(201,48,42,0.12)',
           border: '1px solid rgba(201,48,42,0.28)',
@@ -67,7 +67,7 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
           <img
             src={ad.image_url}
             alt={label}
-            style={{ width: 40, height: 40, objectFit: 'cover' }}
+            style={{ width: 48, height: 48, objectFit: 'cover' }}
           />
         ) : (
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand-red, #C9302A)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

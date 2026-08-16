@@ -133,7 +133,7 @@ export default async function PublicEpisodePage({ params }: Props) {
   const showSegments = hasSegments(ep)
 
   return (
-    <div style={{ background: '#0A0F18', minHeight: '100%', color: IVORY }}>
+    <div className="podcast-force-dark" style={{ background: '#0A0F18', minHeight: '100%', color: IVORY }}>
       {/* JSON-LD: PodcastEpisode + VideoObject + BreadcrumbList */}
       <script
         type="application/ld+json"
@@ -337,7 +337,7 @@ function SponsorSlot({ pool, startIndex }: { pool: SponsorAd[]; startIndex: numb
         </span>
       </div>
       <div className="mx-auto max-w-[300px]">
-        <RotatingSponsorCard pool={pool} startIndex={startIndex} />
+        <RotatingSponsorCard pool={pool} startIndex={startIndex} showDisclosure={false} />
       </div>
     </div>
   )
