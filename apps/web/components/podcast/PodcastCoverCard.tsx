@@ -4,13 +4,9 @@ import { useRouter } from 'next/navigation'
 import type { PodcastEpisode, PodcastPillar } from '@/lib/podcast/transforms'
 import { PILLAR_META, displayEpisodeTitle } from '@/lib/podcast/transforms'
 
-// SPRINT B — the 9:16 cover card. This is a constant "physical" object: a cream
-// sleeve with a navy plate. Its colours DO NOT flip with the app theme (only the
-// surrounding page chrome does). SPRINT C moved those literals into FIXED
-// structural tokens in globals.css — defined in :root only and never redefined
-// under html.light-mode / cream-mode — so the card carries zero raw hex while
-// staying theme-invariant. Do not swap --pod-cream for the identical-looking
-// --ed-cream: that one IS theme-scoped.
+// SPRINT B — the 9:16 cover card. Cream sleeve + navy plate; colours are
+// theme-invariant (see --pod-* tokens). Layout: art flex-shrinks, plate is
+// content-sized so typography never clips inside overflow:hidden.
 const CREAM = 'var(--pod-cream)'
 const NAVY = 'var(--pod-navy)'
 const WHITE = 'var(--white)'
@@ -21,9 +17,6 @@ const FBN = 'var(--font-bebas)'
 const FBC = 'var(--font-barlow-condensed)'
 const FPI = 'var(--font-display)' // Playfair Display
 
-// Pillar accents for this card (SPRINT B spec). These reuse the existing
-// --pillar-1..6 tokens — byte-identical values to the Sprint B literals, and
-// already theme-invariant — rather than minting card-scoped duplicates.
 const PILLAR_HEX: Record<PodcastPillar, string> = {
   foundation: 'var(--pillar-1)',
   identity: 'var(--pillar-2)',
@@ -52,12 +45,11 @@ export function PodcastCoverCard({ episode, interactive = true }: PodcastCoverCa
   const router = useRouter()
 
   const guestName = episode.guest.name?.trim() || ''
-  // The pilot (and any guestless episode) gets the typographic fallback — no
-  // portrait, plate expanded, podcast name where the guest name would be.
   const isPilot = !guestName
-  // Only ever render <img> when there is a real art URL — never a broken image.
-  const artUrl = episode.guest.photo
-  const showArt = !isPilot && !!artUrl
+  // Prefer guest portrait; fall back to episode cover/thumbnail so we never
+  // render a blank cream void when art exists.
+  const artUrl = episode.guest.photo || episode.cover
+  const showArt = !!artUrl
 
   const pillarHex = PILLAR_HEX[episode.pillar] ?? PILLAR_HEX.foundation
   const pillarLabel = (PILLAR_META[episode.pillar]?.label ?? 'Foundation').toUpperCase()
@@ -71,13 +63,6 @@ export function PodcastCoverCard({ episode, interactive = true }: PodcastCoverCa
   const dateStr = fmtCardDate(episode.releasedAt)
   const metaParts = [dateStr, episode.duration > 0 ? `${episode.duration} MIN` : ''].filter(Boolean)
   const metaLine = metaParts.join(' · ')
-
-  // The art region carries a fixed square-ish aspect that equals the top ~62%
-  // of a 9:16 card at the design width; the navy plate then sizes to its own
-  // content below it. This keeps the card at 9:16 at typical widths while
-  // GUARANTEEING the plate text never clips at narrow/mobile widths (it grows a
-  // little instead). The pilot uses a short cream field so the plate expands.
-  const artAspect = isPilot ? '1 / 0.62' : '1 / 1.1'
 
   const navigate = () => interactive && router.push(`/podcast/${episode.slug}`)
 
@@ -107,20 +92,21 @@ export function PodcastCoverCard({ episode, interactive = true }: PodcastCoverCa
         display: 'flex',
         flexDirection: 'column',
         cursor: interactive ? 'pointer' : 'default',
+        border: '1px solid var(--podcast-border-soft2)',
       }}
     >
-      {/* ART REGION — square-ish top (~62% of a 9:16 card); cream field on the pilot */}
+      {/* ART — flex-shrinks so the navy plate always keeps its full height */}
       <div
         style={{
           position: 'relative',
           width: '100%',
-          aspectRatio: artAspect,
-          flex: '0 0 auto',
+          flex: '1 1 0',
+          minHeight: 0,
           background: CREAM,
           overflow: 'hidden',
         }}
       >
-        {showArt && (
+        {showArt ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={artUrl as string}
@@ -130,35 +116,65 @@ export function PodcastCoverCard({ episode, interactive = true }: PodcastCoverCa
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              objectPosition: '50% 20%',
+              objectPosition: isPilot ? '50% 50%' : '50% 20%',
               display: 'block',
             }}
           />
+        ) : (
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background:
+                'radial-gradient(80% 70% at 50% 30%, #1a3348 0%, #112535 55%, #0A0F18 100%)',
+            }}
+          />
+        )}
+
+        {episode.isNew && (
+          <span
+            style={{
+              position: 'absolute',
+              top: 10,
+              left: 10,
+              padding: '3px 8px',
+              background: 'var(--brand-red)',
+              color: '#fff',
+              fontFamily: FBC,
+              fontWeight: 800,
+              fontSize: 10,
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+            }}
+          >
+            New
+          </span>
         )}
       </div>
 
-      {/* NAVY PLATE — bottom, sized to content so text never clips */}
+      {/* NAVY PLATE — content-sized, never shrinks (fixes mobile text clipping) */}
       <div
+        className="podcast-cover-plate"
         style={{
-          flex: '1 1 auto',
+          flex: '0 0 auto',
           background: NAVY,
           color: WHITE,
-          padding: '16px 16px 15px',
+          padding: '12px 12px 11px',
           display: 'flex',
           flexDirection: 'column',
+          gap: 0,
         }}
       >
-        {/* 28×3 pillar rule */}
-        <span aria-hidden="true" style={{ width: 28, height: 3, background: pillarHex, display: 'block' }} />
+        <span aria-hidden="true" style={{ width: 24, height: 3, background: pillarHex, display: 'block' }} />
 
-        {/* Kicker */}
         <span
           style={{
-            marginTop: 10,
+            marginTop: 8,
             fontFamily: FBC,
             fontWeight: 700,
-            fontSize: 10,
-            letterSpacing: '0.2em',
+            fontSize: 'clamp(8px, 2.6vw, 10px)',
+            letterSpacing: '0.16em',
             textTransform: 'uppercase',
             color: pillarHex,
           }}
@@ -166,13 +182,12 @@ export function PodcastCoverCard({ episode, interactive = true }: PodcastCoverCa
           {kicker}
         </span>
 
-        {/* Headline — guest name (or podcast name for the pilot) */}
         <span
           style={{
-            marginTop: 6,
+            marginTop: 4,
             fontFamily: FBN,
-            fontSize: isPilot ? 26 : 31,
-            lineHeight: 0.93,
+            fontSize: isPilot ? 'clamp(18px, 6.5vw, 26px)' : 'clamp(20px, 7vw, 30px)',
+            lineHeight: 0.95,
             letterSpacing: '0.01em',
             color: WHITE,
             display: '-webkit-box',
@@ -184,17 +199,16 @@ export function PodcastCoverCard({ episode, interactive = true }: PodcastCoverCa
           {headline}
         </span>
 
-        {/* Episode title — Playfair italic, 3-line clamp, white 56% */}
         <span
           style={{
-            marginTop: 8,
+            marginTop: 6,
             fontFamily: FPI,
             fontStyle: 'italic',
-            fontSize: 13,
-            lineHeight: 1.3,
+            fontSize: 'clamp(11px, 3.2vw, 13px)',
+            lineHeight: 1.25,
             color: WHITE_56,
             display: '-webkit-box',
-            WebkitLineClamp: 3,
+            WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
           }}
@@ -202,16 +216,14 @@ export function PodcastCoverCard({ episode, interactive = true }: PodcastCoverCa
           {title}
         </span>
 
-        {/* Divider + date · duration */}
         {metaLine && (
-          <div style={{ marginTop: 'auto', paddingTop: 12 }}>
-            <span style={{ display: 'block', height: 1, background: DIVIDER, marginBottom: 10 }} aria-hidden="true" />
+          <div style={{ marginTop: 10, paddingTop: 8, borderTop: `1px solid ${DIVIDER}` }}>
             <span
               style={{
                 fontFamily: FBC,
                 fontWeight: 600,
-                fontSize: 10,
-                letterSpacing: '0.14em',
+                fontSize: 'clamp(8px, 2.4vw, 10px)',
+                letterSpacing: '0.12em',
                 textTransform: 'uppercase',
                 color: WHITE_56,
               }}
@@ -228,6 +240,11 @@ export function PodcastCoverCard({ episode, interactive = true }: PodcastCoverCa
         .podcast-cover-card--interactive:focus-visible {
           outline: 2px solid var(--brand-teal);
           outline-offset: 2px;
+        }
+        @media (max-width: 600px) {
+          .podcast-cover-plate {
+            padding: 10px 10px 9px !important;
+          }
         }
       `}</style>
     </article>

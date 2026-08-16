@@ -100,6 +100,7 @@ export const ACADEMY_SPONSOR_AD: SponsorAd = {
   link_url: '/academy',
 }
 
+<<<<<<< HEAD
 /** Upgrade-focused Academy promo (membership CTA). */
 export const ACADEMY_UPGRADE_AD: SponsorAd = {
   id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567891',
@@ -118,13 +119,28 @@ export function isAcademyAd(ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_na
   if (ad.id === ACADEMY_AD_ID || ad.id === ACADEMY_UPGRADE_AD.id) return true
   const name = `${ad.sponsor_name ?? ''} ${ad.tool_name ?? ''}`.toLowerCase()
   if (name.includes('evolved pros academy') || name === 'academy') return true
+=======
+export function isAcademyAd(
+  ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_name' | 'image_url' | 'click_url' | 'link_url'>,
+): boolean {
+  if (ad.id === ACADEMY_AD_ID) return true
+  const name = `${ad.sponsor_name ?? ''} ${ad.tool_name ?? ''}`.toLowerCase()
+  if (name.includes('evolved pros academy') || name === 'academy') return true
+  const href = `${ad.click_url ?? ''} ${ad.link_url ?? ''}`.toLowerCase()
+  if (href.includes('/academy')) return true
+>>>>>>> b772654 (fix podcast archive grid: cover text, ad fit, Academy promo)
   const img = (ad.image_url ?? '').toLowerCase()
   return img.includes('/ads/academy') || img.includes('academy-300') || img.includes('academy-portrait')
 }
 
+<<<<<<< HEAD
 /** Flagship Evolution Partners only — never Academy self-promo. */
 export function premiumPartnerKind(
   ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_name' | 'image_url'>,
+=======
+export function premiumPartnerKind(
+  ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_name' | 'image_url' | 'click_url' | 'link_url'>,
+>>>>>>> b772654 (fix podcast archive grid: cover text, ad fit, Academy promo)
 ): PremiumPartnerKind {
   if (isAcademyAd(ad)) return null
   if (isAdCellerantAd(ad)) return 'adcellerant'
@@ -159,7 +175,12 @@ export const DEFAULT_ACADEMY_SPONSORS: SponsorAd[] = [
 
 /**
  * Ensure flagship Evolution Partners are present in the pool (deduped).
+<<<<<<< HEAD
  * Academy self-promo is never injected here — use pickAcademySponsors for that.
+=======
+ * Does not force a fixed display order — use pickRotatedSponsors for that.
+ * Academy self-promo is never injected here — use ensurePodcastSponsors.
+>>>>>>> b772654 (fix podcast archive grid: cover text, ad fit, Academy promo)
  */
 export function ensureFlagshipSponsors(list: SponsorAd[]): SponsorAd[] {
   const byId = new Map(list.map(a => [a.id, a]))
@@ -178,8 +199,22 @@ export function ensureFlagshipSponsors(list: SponsorAd[]): SponsorAd[] {
   return dedupeSponsors([adc, ex, xpr, ...rest])
 }
 
+<<<<<<< HEAD
 /** Exactly two sponsors for /home main row — daily rotation, no dups.
  *  Home stays Evolution Partners only (no Academy self-promo in that row). */
+=======
+/**
+ * Podcast archive pool: Academy promo first, then Evolution Partners.
+ * Never falls back to unrelated placements (community banners, etc.).
+ */
+export function ensurePodcastSponsors(list: SponsorAd[]): SponsorAd[] {
+  const academy = list.find(isAcademyAd) ?? ACADEMY_SPONSOR_AD
+  const partners = ensureFlagshipSponsors(list.filter(a => !isAcademyAd(a)))
+  return dedupeSponsors([academy, ...partners])
+}
+
+/** Exactly two sponsors for /home main row — daily rotation, no dups. */
+>>>>>>> b772654 (fix podcast archive grid: cover text, ad fit, Academy promo)
 export function pickHomeSponsors(list: SponsorAd[]): SponsorAd[] {
   const partnersOnly = list.filter(a => !isAcademyAd(a))
   return pickRotatedSponsors(ensureFlagshipSponsors(partnersOnly), 2, {

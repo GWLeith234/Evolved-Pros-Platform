@@ -1,233 +1,373 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
-import { premiumPartnerKind } from '@/lib/sponsors/partners'
+import { isAcademyAd, premiumPartnerKind } from '@/lib/sponsors/partners'
+import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { stripTrailingArrow } from '@/lib/brand'
 
-// Type tokens shared with the episode tile so the sponsor unit reads as a
-// sibling of the album-cover grid, not a bolt-on.
 const FB = 'var(--font-barlow)'
 const FBC = 'var(--font-barlow-condensed)'
+const FBN = 'var(--font-bebas)'
+const NAVY = 'var(--pod-navy, #112535)'
+const WHITE = '#F5F0E8'
 
-/** Default hold before a slot advances when an ad omits rotation_interval. */
 const DEFAULT_ROTATION_SECS = 8
-/** Floor so a mis-configured 0/1s interval never spins the card. */
 const MIN_ROTATION_SECS = 4
+
+const PILLAR_DOTS = [1, 2, 3, 4, 5, 6] as const
 
 function href(ad: SponsorAd): string | null {
   return [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
 }
 
 /**
- * A single Evolution Partner unit sized to match an episode album-cover tile:
- * one grid cell wide, 1:1 square poster, sharp corners + soft border, meta
- * below. Uploaded square creatives render full-bleed (cover); known flagship
- * partners (wordmark logos) get a designed square — logo contained on a brand
- * gradient — so a banner-shaped logo never crops badly.
+ * Evolution Partner / Academy unit sized to match PodcastCoverCard (9:16).
+ * Meta lives inside the navy plate — same footprint as episode tiles so the
+ * archive grid stays level on mobile and desktop.
  */
 export function SquareSponsorCard({
   ad,
   showDisclosure = true,
 }: {
   ad: SponsorAd
-  /** When false, parent already shows Sponsored / Evolution Partner labels. */
   showDisclosure?: boolean
 }) {
   const [hovered, setHovered] = useState(false)
   const link = href(ad)
-  const name = ad.sponsor_name ?? ad.tool_name ?? 'Evolution Partner'
-  const tagline = stripTrailingArrow(ad.headline ?? ad.endorsement_quote ?? '')
-  const isFlagshipLogo = premiumPartnerKind(ad) !== null
+  const academy = isAcademyAd(ad)
+  const name = ad.sponsor_name ?? ad.tool_name ?? (academy ? 'Evolved Pros Academy' : 'Evolution Partner')
+  const tagline = stripTrailingArrow(
+    ad.headline ?? ad.endorsement_quote ?? (academy ? 'Stop collecting tips. Build the system.' : ''),
+  )
+  const isFlagshipLogo = !academy && premiumPartnerKind(ad) !== null
+  const badge = academy ? 'Academy' : 'Partner'
+  const disclosure = academy ? 'Evolved Pros Academy' : 'Sponsored · Evolution Partner'
 
-  const poster = (
-    <div
-      className="podcast-tile-cover"
+  const card = (
+    <article
+      className="podcast-sponsor-cover"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setHovered(true)}
+      onBlur={() => setHovered(false)}
       style={{
         position: 'relative',
-        display: 'block',
         width: '100%',
-        aspectRatio: '1 / 1',
+        aspectRatio: '9 / 16',
         overflow: 'hidden',
-        borderRadius: 0,
+        display: 'flex',
+        flexDirection: 'column',
         border: `1px solid ${hovered ? 'var(--brand-gold)' : 'var(--podcast-border-soft2)'}`,
         transform: hovered ? 'translateY(-4px)' : 'translateY(0)',
         transition: 'transform 200ms ease, border-color 200ms ease',
-        // Album-art region reads as its own dark surface in both themes, the
-        // same way episode covers (photos) do.
-        background: 'linear-gradient(135deg, #0A2530 0%, #101B2C 46%, #2A1416 78%, #C9302A 150%)',
+        background: NAVY,
       }}
     >
-      {ad.image_url ? (
-        isFlagshipLogo ? (
-          // Wordmark logo — contain + breathing room so it never crops.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={ad.image_url}
-            alt={name}
-            loading="lazy"
-            decoding="async"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              width: '100%',
-              height: '100%',
-              objectFit: 'contain',
-              // Keep breathing room so wordmarks don't crop, but fill the
-              // square enough that logos don't look stranded in empty space.
-              padding: '10%',
-              transform: hovered ? 'scale(1.04)' : 'scale(1)',
-              transition: 'transform 280ms ease',
-              filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.4))',
-            }}
-          />
+      {/* Creative / logo region — shrinks; plate never clips */}
+      <div
+        style={{
+          position: 'relative',
+          flex: '1 1 0',
+          minHeight: 0,
+          overflow: 'hidden',
+          background: academy
+            ? 'radial-gradient(120% 90% at 20% 0%, #1a3348 0%, #112535 50%, #0A0F18 100%)'
+            : 'linear-gradient(135deg, #0A2530 0%, #101B2C 46%, #2A1416 78%, #C9302A 150%)',
+        }}
+      >
+        {academy ? (
+          <AcademyArt />
+        ) : ad.image_url ? (
+          isFlagshipLogo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={ad.image_url}
+              alt={name}
+              loading="lazy"
+              decoding="async"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                padding: '14%',
+                transform: hovered ? 'scale(1.04)' : 'scale(1)',
+                transition: 'transform 280ms ease',
+                filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.4))',
+              }}
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={ad.image_url}
+              alt={name}
+              loading="lazy"
+              decoding="async"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                objectPosition: 'center',
+                padding: '8%',
+                background: 'rgba(0,0,0,0.25)',
+                transform: hovered ? 'scale(1.03)' : 'scale(1)',
+                transition: 'transform 280ms ease',
+              }}
+            />
+          )
         ) : (
-          // Square album creative — full-bleed cover per the supplied spec.
-          <div
+          <span
+            aria-hidden
             style={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: `url(${ad.image_url})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              transform: hovered ? 'scale(1.04)' : 'scale(1)',
-              transition: 'transform 280ms ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontFamily: FBN,
+              fontSize: 64,
+              color: 'rgba(255,255,255,0.9)',
+              letterSpacing: '0.04em',
             }}
-          />
-        )
-      ) : (
-        // No creative — brand initial as album art.
+          >
+            {name.charAt(0).toUpperCase()}
+          </span>
+        )}
+
+        <span
+          style={{
+            position: 'absolute',
+            top: 10,
+            left: 10,
+            padding: '3px 8px',
+            background: academy ? 'rgba(201,168,76,0.18)' : 'var(--brand-gold, #C9A84C)',
+            color: academy ? '#E7CE86' : '#0A0F18',
+            border: academy ? '1px solid rgba(201,168,76,0.45)' : 'none',
+            fontFamily: FBC,
+            fontWeight: 800,
+            fontSize: 10,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            boxShadow: academy ? 'none' : '0 2px 8px rgba(201,168,76,0.35)',
+          }}
+        >
+          {badge}
+        </span>
+      </div>
+
+      {/* Navy plate — mirrors PodcastCoverCard */}
+      <div
+        style={{
+          flex: '0 0 auto',
+          background: NAVY,
+          color: WHITE,
+          padding: '12px 12px 11px',
+          display: 'flex',
+          flexDirection: 'column',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+        }}
+      >
         <span
           aria-hidden
           style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontFamily: 'var(--font-bebas)',
-            fontSize: 72,
-            color: 'rgba(255,255,255,0.9)',
-            letterSpacing: '0.04em',
+            width: 24,
+            height: 3,
+            background: academy ? '#C9A84C' : 'var(--brand-red, #C9302A)',
+            display: 'block',
           }}
-        >
-          {name.charAt(0).toUpperCase()}
-        </span>
-      )}
-
-      {/* PARTNER chip — same gold-on-black grammar as the episode number chip. */}
-      <span
-        style={{
-          position: 'absolute',
-          top: 14,
-          left: 14,
-          padding: '3px 8px',
-          background: 'var(--brand-gold, #C9A84C)',
-          color: '#0A0F18',
-          fontFamily: FBC,
-          fontWeight: 800,
-          fontSize: 11,
-          letterSpacing: '0.22em',
-          textTransform: 'uppercase',
-          boxShadow: '0 2px 8px rgba(201,168,76,0.35)',
-        }}
-      >
-        Partner
-      </span>
-    </div>
-  )
-
-  // Meta sits on the page surface (cream listing OR forced-dark episode shell).
-  // Fallbacks stay ivory so a missing theme token never drops to navy-on-navy.
-  const meta = (
-    <div style={{ padding: '16px 2px 0', textAlign: 'left' }}>
-      <p
-        style={{
-          margin: '0 0 4px',
-          fontFamily: FBC,
-          fontWeight: 700,
-          fontSize: 13,
-          letterSpacing: '0.14em',
-          textTransform: 'uppercase',
-          color: 'var(--podcast-text-strong, #F5F0E8)',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        }}
-      >
-        {name}
-      </p>
-      {tagline && (
+        />
         <p
           style={{
-            margin: 0,
-            fontFamily: FB,
-            fontSize: 15,
-            fontWeight: 600,
-            lineHeight: 1.25,
-            color: 'var(--podcast-text-1, rgba(245,240,232,0.88))',
+            margin: '8px 0 0',
+            fontFamily: FBC,
+            fontWeight: 800,
+            fontSize: 'clamp(11px, 3.2vw, 13px)',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: WHITE,
             display: '-webkit-box',
             WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
           }}
         >
-          {tagline}
+          {name}
         </p>
-      )}
-      {showDisclosure && (
-        <p
-          style={{
-            margin: '8px 0 0',
-            fontFamily: FBC,
-            fontWeight: 700,
-            fontSize: 11,
-            letterSpacing: '0.22em',
-            textTransform: 'uppercase',
-            color: 'var(--brand-gold, #C9A84C)',
-          }}
-        >
-          Sponsored · Evolution Partner
-        </p>
-      )}
-    </div>
-  )
-
-  const body = (
-    <article
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onFocus={() => setHovered(true)}
-      onBlur={() => setHovered(false)}
-      style={{ display: 'flex', flexDirection: 'column' }}
-    >
-      {poster}
-      {meta}
+        {tagline && (
+          <p
+            style={{
+              margin: '6px 0 0',
+              fontFamily: FB,
+              fontSize: 'clamp(11px, 3vw, 13px)',
+              fontWeight: 500,
+              lineHeight: 1.3,
+              color: 'rgba(245,240,232,0.62)',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {tagline}
+          </p>
+        )}
+        {showDisclosure && (
+          <p
+            style={{
+              margin: '10px 0 0',
+              paddingTop: 8,
+              borderTop: '1px solid rgba(255,255,255,0.12)',
+              fontFamily: FBC,
+              fontWeight: 700,
+              fontSize: 'clamp(8px, 2.4vw, 10px)',
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--brand-gold, #C9A84C)',
+            }}
+          >
+            {disclosure}
+          </p>
+        )}
+      </div>
     </article>
   )
 
-  if (link) {
+  if (!link) return card
+
+  const external = /^https?:\/\//i.test(link)
+  if (external) {
     return (
       <a
         href={link}
         target="_blank"
         rel="noopener noreferrer sponsored"
-        className="no-underline"
-        aria-label={`${name} — Evolution Partner`}
+        className="no-underline block"
+        aria-label={`${name}${academy ? ' — Evolved Pros Academy' : ' — Evolution Partner'}`}
         style={{ color: 'inherit', textDecoration: 'none' }}
       >
-        {body}
+        {card}
       </a>
     )
   }
-  return body
+
+  return (
+    <Link
+      href={link}
+      className="no-underline block"
+      aria-label={`${name}${academy ? ' — Evolved Pros Academy' : ' — Evolution Partner'}`}
+      style={{ color: 'inherit', textDecoration: 'none' }}
+    >
+      {card}
+    </Link>
+  )
+}
+
+/** Compact six-pillar art for Academy self-promo (no clipped PNG banners). */
+function AcademyArt() {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
+        padding: '16px 12px 14px',
+        gap: 10,
+      }}
+    >
+      <p
+        style={{
+          margin: 0,
+          fontFamily: FBC,
+          fontWeight: 800,
+          fontSize: 9,
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+          color: '#C9A84C',
+        }}
+      >
+        Evolved Architecture™
+      </p>
+      <p
+        style={{
+          margin: 0,
+          fontFamily: 'var(--font-display), Georgia, serif',
+          fontWeight: 700,
+          fontSize: 'clamp(16px, 5vw, 22px)',
+          lineHeight: 1.1,
+          color: WHITE,
+          letterSpacing: '-0.01em',
+        }}
+      >
+        Six pillars.
+        <br />
+        <span style={{ color: '#E7CE86' }}>No ceiling.</span>
+      </p>
+      <ul
+        style={{
+          listStyle: 'none',
+          margin: '4px 0 0',
+          padding: 0,
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 4,
+        }}
+      >
+        {PILLAR_DOTS.map(n => {
+          const p = PILLAR_CONFIG[n]
+          return (
+            <li
+              key={n}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '4px 6px',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.07)',
+              }}
+            >
+              <span
+                aria-hidden
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: 1,
+                  background: p.color,
+                  flexShrink: 0,
+                }}
+              />
+              <span
+                style={{
+                  fontFamily: FBC,
+                  fontWeight: 700,
+                  fontSize: 8,
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(245,240,232,0.88)',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {p.label}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
 }
 
 /**
- * A rotating sponsor slot. Cycles through the active, in-date pool, honoring
- * each ad's rotation_interval. `startIndex` staggers slots so two on-screen
- * cards don't show the same partner at the same moment. With a single-ad pool
- * it holds static (nothing to rotate to).
+ * Rotating sponsor slot. Cycles the pool; `startIndex` staggers adjacent cards.
  */
 export function RotatingSponsorCard({
   pool,
