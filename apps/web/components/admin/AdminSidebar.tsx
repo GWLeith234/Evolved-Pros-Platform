@@ -48,6 +48,7 @@ const SECTIONS: ReadonlyArray<SidebarSectionData> = [
       { label: 'Courses',   href: '/admin/courses',   match: /^\/admin\/courses/ },
       { label: 'Episodes',  href: '/admin/episodes',  match: /^\/admin\/episodes/ },
       { label: 'Events',    href: '/admin/events',    match: /^\/admin\/events/ },
+      { label: 'Speaking',  href: '/admin/speaking',  match: /^\/admin\/speaking/ },
       { label: 'Media',     href: '/admin/media',     match: /^\/admin\/media/ },
       { label: 'Careers',   href: '/admin/careers',   match: /^\/admin\/careers/ },
       { label: 'Polls',     href: '/admin/polls',     match: /^\/admin\/polls/ },

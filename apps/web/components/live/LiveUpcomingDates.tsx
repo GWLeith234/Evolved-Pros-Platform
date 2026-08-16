@@ -13,8 +13,8 @@ const BOOKING_HREF =
  * Where upcoming stage dates live. Past product-launch fluff was removed —
  * this section is speaking-only, with an empty state when nothing is locked.
  */
-export function LiveUpcomingDates() {
-  const dates = getUpcomingSpeakingDates()
+export async function LiveUpcomingDates() {
+  const dates = await getUpcomingSpeakingDates()
 
   return (
     <section className="live-section-pad" style={{ margin: '64px auto 0' }}>
