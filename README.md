@@ -51,7 +51,9 @@ pnpm dev                               # runs turbo run dev
 
 The web app expects a Supabase instance and a minimum set of env vars.
 See `.env.example` and [`docs/VENDASTA_INTEGRATION.md` §9](docs/VENDASTA_INTEGRATION.md#9-environment-variables)
-for the full list.
+for the full list. Optional audience analytics (GA4, Search Console
+verification, Microsoft Clarity) are documented in
+[`docs/ANALYTICS.md`](docs/ANALYTICS.md).
 
 ## Scripts
 
@@ -90,3 +92,4 @@ for the full list.
 | Mux         | `POST /api/webhooks/mux`             | Mux Node SDK for upload/asset management              | `apps/web/lib/mux/`             |
 | Resend      | —                                    | Transactional email via `@react-email/components`     | `apps/web/lib/resend/`          |
 | Supabase    | Row-level security policies          | Service-role admin client for server routes           | `apps/web/lib/supabase/`        |
+| GA4 / GSC / Clarity | — (env-gated; no tag if unset) | Page views, Search Console verify, heatmaps     | [`docs/ANALYTICS.md`](docs/ANALYTICS.md) |
