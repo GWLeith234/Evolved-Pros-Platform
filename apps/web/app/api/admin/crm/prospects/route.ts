@@ -24,6 +24,9 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url)
   const stageParam = searchParams.get('stage')
+  // ?keynote=1 — narrows to keynote-interested rows, served by the partial
+  // index on keynote_interest WHERE true from migration 076.
+  const keynoteOnly = searchParams.get('keynote') === '1'
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (adminClient as any)
@@ -33,6 +36,9 @@ export async function GET(request: Request) {
 
   if (stageParam && isCrmStage(stageParam)) {
     query = query.eq('stage', stageParam)
+  }
+  if (keynoteOnly) {
+    query = query.eq('keynote_interest', true)
   }
 
   const { data, error } = await query

@@ -63,7 +63,7 @@ export function LiveFinalCTA() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 320 }}>
             <a
-              href="mailto:george@evolvex360.com?subject=Booking%20request"
+              href="#book-george"
               className="ep-pressable ep-touch-target"
               style={{
                 padding: '16px 32px',

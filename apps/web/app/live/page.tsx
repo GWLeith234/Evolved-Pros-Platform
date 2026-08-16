@@ -18,6 +18,7 @@ import { LivePillarGrid } from '@/components/live/LivePillarGrid'
 import { LiveTestimonials } from '@/components/live/LiveTestimonials'
 import { LivePhotoRotator } from '@/components/live/LivePhotoRotator'
 import { LiveFinalCTA } from '@/components/live/LiveFinalCTA'
+import { LiveBookingInquiry } from '@/components/live/LiveBookingInquiry'
 import { SPEAKING_STATS } from '@/lib/live/speaking-pins'
 import { getSpeakingPins, statsFromPins } from '@/lib/live/get-speaking-pins'
 import {
@@ -133,6 +134,7 @@ export default async function LivePage() {
       <LiveTestimonials />
       <LivePhotoRotator />
       <LiveFinalCTA />
+      <LiveBookingInquiry />
     </div>
   )
 }

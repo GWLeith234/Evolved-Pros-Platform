@@ -8,6 +8,7 @@ import {
   followUpLabel,
   formatMoney,
   formatShortDate,
+  parseCrmProspect,
   prospectValue,
   relativeContact,
   type CrmProspect,
@@ -49,6 +50,10 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
   const [flash, setFlash] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [view, setView] = useState<ViewMode>('board')
+  // KN-1 — keynote filter. Refetched server-side (?keynote=1) rather than
+  // filtered in memory, so it still finds rows beyond the page's initial 500.
+  const [keynoteOnly, setKeynoteOnly] = useState(false)
+  const [keynoteBusy, setKeynoteBusy] = useState(false)
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -63,6 +68,34 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
   }, [prospects, query])
 
   const board = useMemo(() => groupByStage(filtered), [filtered])
+
+  const keynoteCount = useMemo(
+    () => prospects.filter(p => p.keynote_interest).length,
+    [prospects],
+  )
+
+  async function toggleKeynote() {
+    const next = !keynoteOnly
+    setKeynoteBusy(true)
+    try {
+      const res = await fetch(`/api/admin/crm/prospects${next ? '?keynote=1' : ''}`)
+      if (!res.ok) {
+        showFlash('Could not load prospects')
+        return
+      }
+      const json = (await res.json()) as { prospects: Array<Record<string, unknown>> }
+      setProspects(
+        (json.prospects ?? [])
+          .map(r => parseCrmProspect(r))
+          .filter((p): p is CrmProspect => p != null),
+      )
+      setKeynoteOnly(next)
+    } catch {
+      showFlash('Network error')
+    } finally {
+      setKeynoteBusy(false)
+    }
+  }
 
   const pipelineMrr = useMemo(() => {
     return prospects.reduce((sum, p) => {
@@ -267,6 +300,36 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
               ${pipelineMrr.toLocaleString('en-US')}/mo
             </p>
           </div>
+
+          {/* Keynote filter — server-side (?keynote=1), with the live count */}
+          <button
+            type="button"
+            onClick={() => void toggleKeynote()}
+            disabled={keynoteBusy}
+            aria-pressed={keynoteOnly}
+            title="Show only prospects who asked about a keynote"
+            className="font-condensed font-bold uppercase text-[11px] tracking-wider px-3 py-2 rounded inline-flex items-center gap-1.5"
+            style={{
+              background: keynoteOnly ? 'var(--brand-gold)' : 'var(--admin-subtle)',
+              color: keynoteOnly ? 'var(--navy-abyss)' : 'var(--brand-gold)',
+              border: '1px solid var(--admin-border)',
+              cursor: keynoteBusy ? 'wait' : 'pointer',
+              opacity: keynoteBusy ? 0.6 : 1,
+              minHeight: 40,
+            }}
+          >
+            <MicIcon />
+            Keynote
+            <span
+              className="rounded px-1.5"
+              style={{
+                background: keynoteOnly ? 'var(--navy-abyss)' : 'var(--admin-card)',
+                color: keynoteOnly ? 'var(--brand-gold)' : 'var(--admin-text-2)',
+              }}
+            >
+              {keynoteCount}
+            </span>
+          </button>
 
           {/* View toggle */}
           <div
@@ -582,4 +645,25 @@ const tableQa: React.CSSProperties = {
   border: '1px solid rgba(104,162,185,0.4)',
   borderRadius: 3,
   cursor: 'pointer',
+}
+
+/** Mic glyph for the keynote filter — matches the badge on CrmCard. */
+function MicIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      width="9"
+      height="9"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" y1="19" x2="12" y2="23" />
+    </svg>
+  )
 }
