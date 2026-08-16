@@ -221,13 +221,25 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
           >
             Lead → Prospect → Community → VIP (${CRM_STAGE_META.vip.mrr}) → Professional (${CRM_STAGE_META.professional.mrr}) · drag to move stages
           </p>
-          <p className="mt-1">
+          <p className="mt-1 flex flex-wrap items-center gap-3">
             <Link
               href="/admin/products"
               className="font-condensed font-bold uppercase text-[11px] tracking-wider"
               style={{ color: '#68a2b9', textDecoration: 'none' }}
             >
               Products & membership →
+            </Link>
+            <Link
+              href="/admin/crm/import"
+              className="font-condensed font-bold uppercase text-[11px] tracking-wider px-2.5 py-1 rounded"
+              style={{
+                color: 'var(--brand-teal)',
+                background: 'var(--admin-subtle)',
+                border: '1px solid var(--admin-border)',
+                textDecoration: 'none',
+              }}
+            >
+              Import CSV
             </Link>
           </p>
         </div>
