@@ -12,7 +12,7 @@ const FB = 'var(--font-barlow)'
 const FBC = 'var(--font-barlow-condensed)'
 const FBN = 'var(--font-bebas)'
 
-/** One rotating sponsor card after every Nth episode (album-cover ratio 3:1). */
+/** One rotating sponsor card after every Nth episode. */
 const AD_EVERY_N = 3
 
 interface PodcastGridProps {
@@ -37,17 +37,13 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
     return list
   }, [episodes, filter, sort])
 
-  // Interleave one album-cover-sized sponsor unit after every 3rd episode.
-  // Each slot is a single grid cell (same footprint as an episode tile) that
-  // rotates through the full active/in-date pool, honoring rotation_interval.
-  // Slots are staggered so adjacent cards don't show the same partner, and the
-  // rotation self-cycles so a short pool never leaves a gap.
+  // Interleave one 9:16 sponsor unit after every 3rd episode — same footprint
+  // as PodcastCoverCard so the archive grid stays level.
   const gridChildren = useMemo(() => {
     const nodes: ReactNode[] = []
     let slot = 0
     filtered.forEach((ep, i) => {
       nodes.push(<PodcastCoverCard key={ep.id} episode={ep} />)
-      // After every 3rd episode (1-based), drop in a rotating sponsor cell.
       if (sponsorAds.length > 0 && (i + 1) % AD_EVERY_N === 0) {
         const startIndex = slot++
         nodes.push(
@@ -73,7 +69,7 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
       style={{
         maxWidth: 1280,
         margin: '0 auto',
-        padding: '40px 24px 96px',
+        padding: '40px 24px 120px',
         fontFamily: FB,
       }}
     >
@@ -228,8 +224,7 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
       )}
 
       {/* Archive reflow: desktop auto-fills; ≤600px drops to 2-up, then
-          1-up on the narrowest phones so nothing clips. Card covers get a
-          brand-teal keyboard focus ring (PODCAST-CLEANUP S7). */}
+          1-up on the narrowest phones. Sponsor slots share the 9:16 cell. */}
       <style>{`
         .podcast-tile-cover { outline: none; }
         .podcast-tile-cover:focus-visible {
@@ -238,14 +233,20 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
         }
         .podcast-sponsor-slot {
           min-width: 0;
+          width: 100%;
+          align-self: stretch;
+        }
+        .podcast-sponsor-slot > a,
+        .podcast-sponsor-slot > .podcast-sponsor-cover {
+          height: 100%;
         }
         @media (max-width: 600px) {
           .podcast-archive-grid {
             grid-template-columns: 1fr 1fr !important;
-            gap: 24px 14px !important;
+            gap: 20px 12px !important;
           }
         }
-        @media (max-width: 400px) {
+        @media (max-width: 380px) {
           .podcast-archive-grid {
             grid-template-columns: 1fr !important;
           }

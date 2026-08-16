@@ -37,14 +37,15 @@ export function AcademyArchitectureCard({
       style={{
         borderColor: 'rgba(201,168,76,0.35)',
         background:
-          'radial-gradient(120% 90% at 12% 0%, #1a3348 0%, #111926 45%, #0A0F18 100%)',
+          'radial-gradient(120% 90% at 12% 0%, var(--navy) 0%, var(--navy-dark) 45%, var(--navy-abyss) 100%)',
       }}
     >
       <span
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-[3px]"
         style={{
-          background: 'linear-gradient(90deg, #C9A84C 0%, #E7CE86 50%, #C9A84C 100%)',
+          background:
+            'linear-gradient(90deg, var(--brand-gold) 0%, var(--brand-gold-bright) 50%, var(--brand-gold) 100%)',
         }}
       />
 
@@ -54,7 +55,7 @@ export function AcademyArchitectureCard({
             className="m-0 text-[11px] font-extrabold uppercase tracking-[0.22em]"
             style={{
               fontFamily: '"Barlow Condensed", sans-serif',
-              color: '#C9A84C',
+              color: 'var(--brand-gold)',
             }}
           >
             The Evolved Architecture™
@@ -64,7 +65,7 @@ export function AcademyArchitectureCard({
             style={{
               fontFamily: '"Barlow Condensed", sans-serif',
               background: 'rgba(201,168,76,0.15)',
-              color: '#E7CE86',
+              color: 'var(--brand-gold-bright)',
               border: '1px solid rgba(201,168,76,0.35)',
             }}
           >
@@ -77,7 +78,7 @@ export function AcademyArchitectureCard({
             className="m-0 text-[1.35rem] font-bold leading-[1.2] sm:text-[1.5rem]"
             style={{
               fontFamily: '"Playfair Display", Georgia, serif',
-              color: '#F5F0E8',
+              color: 'var(--paper)',
               letterSpacing: '-0.01em',
             }}
           >
@@ -132,7 +133,7 @@ export function AcademyArchitectureCard({
         <div
           className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-extrabold uppercase tracking-[0.14em] text-white transition-[background-color,transform] duration-200"
           style={{
-            backgroundColor: '#C9302A',
+            backgroundColor: 'var(--brand-red)',
             fontFamily: '"Barlow Condensed", sans-serif',
           }}
         >

@@ -1,8 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { PodcastEpisode } from '@/lib/podcast/transforms'
 import { fmtPodcastDate, PILLAR_META } from '@/lib/podcast/transforms'
+import {
+  episodeShareUrl,
+  isEpisodeSaved,
+  nativeShareOrCopy,
+  openShareWindow,
+  shareUrls,
+  toggleSavedEpisode,
+} from '@/lib/podcast/share'
 
 const FB = 'var(--font-barlow)'
 const FBC = 'var(--font-barlow-condensed)'
@@ -26,7 +34,7 @@ function getInitials(name: string): string {
   return name.split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase() || '?'
 }
 
-const SHARE_ICONS: Array<{ key: string; label: string; path: React.ReactNode }> = [
+const SHARE_ICONS: Array<{ key: 'x' | 'linkedin' | 'facebook'; label: string; path: React.ReactNode }> = [
   {
     key: 'x',
     label: 'Share on X',
@@ -46,6 +54,8 @@ const SHARE_ICONS: Array<{ key: string; label: string; path: React.ReactNode }> 
 
 export function PodcastHero({ episode }: PodcastHeroProps) {
   const [watchHover, setWatchHover] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [shareNote, setShareNote] = useState<string | null>(null)
   const detailHref = `/podcast/${episode.slug}`
   const pillar = PILLAR_META[episode.pillar]
 
@@ -53,6 +63,40 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
   // falls back to the in-app episode detail page.
   const watchUrl = episode.youtubeUrl ?? detailHref
   const watchExternal = Boolean(episode.youtubeUrl)
+
+  useEffect(() => {
+    setSaved(isEpisodeSaved(episode.id))
+  }, [episode.id])
+
+  useEffect(() => {
+    if (!shareNote) return
+    const t = window.setTimeout(() => setShareNote(null), 2200)
+    return () => window.clearTimeout(t)
+  }, [shareNote])
+
+  function flashShare(msg: string) {
+    setShareNote(msg)
+  }
+
+  async function handleNativeShare() {
+    const url = episodeShareUrl(episode.slug)
+    const result = await nativeShareOrCopy(url, episode.title)
+    if (result === 'copied') flashShare('Link copied')
+    else if (result === 'shared') flashShare('Shared')
+    else if (result === 'failed') flashShare('Couldn’t share')
+  }
+
+  function handleSocialShare(key: 'x' | 'linkedin' | 'facebook') {
+    const url = episodeShareUrl(episode.slug)
+    const urls = shareUrls(url, episode.title)
+    openShareWindow(urls[key])
+  }
+
+  function handleSave() {
+    const next = toggleSavedEpisode(episode.id)
+    setSaved(next)
+    flashShare(next ? 'Saved for later' : 'Removed from saved')
+  }
 
   return (
     <section
@@ -384,11 +428,14 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
 
             <button
               type="button"
+              onClick={handleSave}
+              aria-pressed={saved}
+              aria-label={saved ? 'Remove from saved episodes' : 'Save episode for later'}
               style={{
                 padding: '14px 20px',
-                background: 'transparent',
-                color: 'var(--podcast-text-strong)',
-                border: '1px solid var(--podcast-border-strong)',
+                background: saved ? 'color-mix(in srgb, var(--brand-gold) 14%, transparent)' : 'transparent',
+                color: saved ? 'var(--brand-gold)' : 'var(--podcast-text-strong)',
+                border: `1px solid ${saved ? 'var(--brand-gold)' : 'var(--podcast-border-strong)'}`,
                 fontFamily: FBC,
                 fontWeight: 700,
                 fontSize: 12,
@@ -400,15 +447,26 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
                 gap: 8,
               }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill={saved ? 'currentColor' : 'none'}
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
               </svg>
-              Save
+              {saved ? 'Saved' : 'Save'}
             </button>
 
-            {/* Share — channel-icon group */}
+            {/* Share — native share / copy + channel intents */}
             <div style={{ display: 'inline-flex', alignItems: 'stretch', border: '1px solid var(--podcast-border-strong)', height: 46 }}>
-              <span
+              <button
+                type="button"
+                onClick={() => void handleNativeShare()}
+                aria-label="Share episode link"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -420,7 +478,10 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
                   letterSpacing: '0.28em',
                   textTransform: 'uppercase',
                   color: 'var(--podcast-text-3)',
+                  border: 'none',
                   borderRight: '1px solid var(--podcast-border-soft2)',
+                  background: 'transparent',
+                  cursor: 'pointer',
                 }}
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -431,13 +492,14 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
                   <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
                 </svg>
                 Share
-              </span>
+              </button>
               {SHARE_ICONS.map((c, i) => (
                 <button
                   key={c.key}
                   type="button"
                   title={c.label}
                   aria-label={c.label}
+                  onClick={() => handleSocialShare(c.key)}
                   style={{
                     width: 44,
                     height: '100%',
@@ -460,6 +522,23 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
               ))}
             </div>
           </div>
+          {shareNote && (
+            <p
+              role="status"
+              aria-live="polite"
+              style={{
+                margin: '10px 0 0',
+                fontFamily: FBC,
+                fontWeight: 700,
+                fontSize: 11,
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                color: 'var(--brand-gold)',
+              }}
+            >
+              {shareNote}
+            </p>
+          )}
         </div>
       </div>
 

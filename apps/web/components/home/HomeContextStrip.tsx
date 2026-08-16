@@ -71,7 +71,7 @@ export function HomeContextStrip({
           >
             <span
               className="font-bold uppercase tracking-wider rounded-[3px] px-1.5 py-[1px] shrink-0"
-              style={{ backgroundColor: 'var(--brand-gold, #C9A84C)', color: '#0A0F18' }}
+              style={{ backgroundColor: 'var(--brand-gold)', color: '#0A0F18' }}
             >
               Next
             </span>

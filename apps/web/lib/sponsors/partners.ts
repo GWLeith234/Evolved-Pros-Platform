@@ -114,17 +114,24 @@ export const ACADEMY_UPGRADE_AD: SponsorAd = {
   link_url: '/membership',
 }
 
-export function isAcademyAd(ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_name' | 'image_url'>): boolean {
+export function isAcademyAd(
+  ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_name' | 'image_url' | 'click_url' | 'link_url'>,
+): boolean {
   if (ad.id === ACADEMY_AD_ID || ad.id === ACADEMY_UPGRADE_AD.id) return true
   const name = `${ad.sponsor_name ?? ''} ${ad.tool_name ?? ''}`.toLowerCase()
   if (name.includes('evolved pros academy') || name === 'academy') return true
+  const href = `${ad.click_url ?? ''} ${ad.link_url ?? ''}`.toLowerCase()
+  if (href.includes('/academy') || href.includes('/membership')) {
+    // Membership CTA is still Academy self-promo when the row is labeled Academy.
+    if (name.includes('academy') || (ad.image_url ?? '').toLowerCase().includes('academy')) return true
+  }
   const img = (ad.image_url ?? '').toLowerCase()
   return img.includes('/ads/academy') || img.includes('academy-300') || img.includes('academy-portrait')
 }
 
 /** Flagship Evolution Partners only — never Academy self-promo. */
 export function premiumPartnerKind(
-  ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_name' | 'image_url'>,
+  ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_name' | 'image_url' | 'click_url' | 'link_url'>,
 ): PremiumPartnerKind {
   if (isAcademyAd(ad)) return null
   if (isAdCellerantAd(ad)) return 'adcellerant'
@@ -159,7 +166,8 @@ export const DEFAULT_ACADEMY_SPONSORS: SponsorAd[] = [
 
 /**
  * Ensure flagship Evolution Partners are present in the pool (deduped).
- * Academy self-promo is never injected here — use pickAcademySponsors for that.
+ * Academy self-promo is never injected here — use pickAcademySponsors /
+ * ensurePodcastSponsors for that.
  */
 export function ensureFlagshipSponsors(list: SponsorAd[]): SponsorAd[] {
   const byId = new Map(list.map(a => [a.id, a]))
@@ -176,6 +184,16 @@ export function ensureFlagshipSponsors(list: SponsorAd[]): SponsorAd[] {
       !isRetiredPartnerAd(a),
   )
   return dedupeSponsors([adc, ex, xpr, ...rest])
+}
+
+/**
+ * Podcast archive pool: Academy promo first, then Evolution Partners.
+ * Never falls back to unrelated placements (community banners, etc.).
+ */
+export function ensurePodcastSponsors(list: SponsorAd[]): SponsorAd[] {
+  const academy = list.find(isAcademyAd) ?? ACADEMY_SPONSOR_AD
+  const partners = ensureFlagshipSponsors(list.filter(a => !isAcademyAd(a)))
+  return dedupeSponsors([academy, ...partners])
 }
 
 /** Exactly two sponsors for /home main row — daily rotation, no dups.

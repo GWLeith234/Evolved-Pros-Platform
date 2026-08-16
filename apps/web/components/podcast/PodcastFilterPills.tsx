@@ -9,9 +9,6 @@ const FBC = 'var(--font-barlow-condensed)'
 export type FilterKey = PodcastPillar | 'all'
 export type SortKey = 'newest' | 'oldest' | 'longest'
 
-// Filter pills read straight from the single CATEGORY → pillar token map, so
-// pill / badge / dot colors can never diverge (PODCAST-CLEANUP S2). "All" uses
-// the brand gold accent.
 const FILTERS: Array<{ key: FilterKey; label: string; color: string }> = [
   { key: 'all', label: 'All episodes', color: 'var(--brand-gold)' },
   ...PILLAR_ORDER.map(p => ({ key: p as FilterKey, label: PILLAR_META[p].label, color: PILLAR_META[p].color })),
@@ -53,52 +50,62 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
   const activeSort = SORTS.find(s => s.key === sort) ?? SORTS[0]
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: 10,
-        marginBottom: 32,
-      }}
-    >
-      {FILTERS.map(f => {
-        const active = filter === f.key
-        return (
-          <button
-            key={f.key}
-            type="button"
-            onClick={() => onFilterChange(f.key)}
-            style={{
-              minHeight: 44,
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '0 14px',
-              background: active ? f.color : 'transparent',
-              color: active ? 'var(--bg-page)' : f.color,
-              border: `1px solid ${active ? f.color : `color-mix(in srgb, ${f.color} 40%, transparent)`}`,
-              borderRadius: 0,
-              fontFamily: FBC,
-              fontWeight: 700,
-              fontSize: 12,
-              letterSpacing: '0.22em',
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-              transition: 'all 120ms ease',
-            }}
-          >
-            {f.label}
-          </button>
-        )
-      })}
-      <span style={{ flex: 1 }} />
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, position: 'relative' }}>
+    <div className="podcast-filter-bar" style={{ marginBottom: 32 }}>
+      {/* Pillar pills — horizontal scroll on mobile so Sort never collides */}
+      <div
+        className="podcast-filter-pills"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          paddingBottom: 4,
+          marginBottom: 12,
+          scrollbarWidth: 'none',
+        }}
+      >
+        {FILTERS.map(f => {
+          const active = filter === f.key
+          return (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => onFilterChange(f.key)}
+              style={{
+                minHeight: 40,
+                flex: '0 0 auto',
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '0 12px',
+                background: active ? f.color : 'transparent',
+                color: active ? 'var(--bg-page)' : f.color,
+                border: `1px solid ${active ? f.color : `color-mix(in srgb, ${f.color} 40%, transparent)`}`,
+                borderRadius: 0,
+                fontFamily: FBC,
+                fontWeight: 700,
+                fontSize: 11,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                transition: 'all 120ms ease',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {f.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Sort — own row so Next Event / pills never obscure it */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, position: 'relative' }}>
         <span
           style={{
             fontFamily: FBC,
             fontWeight: 700,
-            fontSize: 12,
-            letterSpacing: '0.32em',
+            fontSize: 11,
+            letterSpacing: '0.28em',
             textTransform: 'uppercase',
             color: 'var(--podcast-text-4)',
           }}
@@ -110,8 +117,10 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
             type="button"
             onClick={() => setSortOpen(o => !o)}
             onBlur={() => setTimeout(() => setSortOpen(false), 120)}
+            aria-expanded={sortOpen}
+            aria-haspopup="listbox"
             style={{
-              minHeight: 44,
+              minHeight: 40,
               display: 'inline-flex',
               alignItems: 'center',
               padding: '0 32px 0 12px',
@@ -121,12 +130,12 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
               borderRadius: 0,
               fontFamily: FBC,
               fontWeight: 700,
-              fontSize: 12,
-              letterSpacing: '0.18em',
+              fontSize: 11,
+              letterSpacing: '0.16em',
               textTransform: 'uppercase',
               cursor: 'pointer',
               position: 'relative',
-              minWidth: 160,
+              minWidth: 148,
               textAlign: 'left',
             }}
           >
@@ -146,7 +155,8 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
                 minWidth: 200,
                 background: 'var(--podcast-bg-surface)',
                 border: '1px solid var(--podcast-border-strong)',
-                zIndex: 10,
+                zIndex: 60,
+                boxShadow: '0 12px 28px rgba(0,0,0,0.18)',
               }}
             >
               {SORTS.map(s => {
@@ -155,6 +165,8 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
                   <li key={s.key}>
                     <button
                       type="button"
+                      role="option"
+                      aria-selected={active}
                       onMouseDown={e => e.preventDefault()}
                       onClick={() => {
                         onSortChange(s.key)
@@ -172,7 +184,7 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
                         fontFamily: FBC,
                         fontWeight: 700,
                         fontSize: 12,
-                        letterSpacing: '0.18em',
+                        letterSpacing: '0.16em',
                         textTransform: 'uppercase',
                         cursor: 'pointer',
                         textAlign: 'left',
@@ -187,6 +199,10 @@ export function PodcastFilterPills({ filter, sort, onFilterChange, onSortChange 
           )}
         </div>
       </div>
+
+      <style>{`
+        .podcast-filter-pills::-webkit-scrollbar { display: none; }
+      `}</style>
     </div>
   )
 }
