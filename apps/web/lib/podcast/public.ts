@@ -31,6 +31,8 @@ export interface PublicEpisode {
   title: string
   guest_name: string | null
   guest_bio: string | null
+  guest_image_url: string | null
+  thumbnail_url: string | null
   published_at: string | null
   youtube_id: string | null
   spotify_url: string | null
@@ -46,7 +48,7 @@ export interface PublicEpisode {
 }
 
 const SELECT_COLS =
-  'id, slug, episode_number, title, guest_name, guest_bio, published_at, ' +
+  'id, slug, episode_number, title, guest_name, guest_bio, guest_image_url, thumbnail_url, published_at, ' +
   'youtube_id, youtube_url, spotify_url, apple_url, duration_seconds, location, ' +
   'summary, description, tags, chapters, pull_quotes, transcript_text, transcript, transcript_segments'
 
@@ -94,6 +96,8 @@ function normalize(row: any): PublicEpisode {
     title: row.title,
     guest_name: row.guest_name ?? null,
     guest_bio: row.guest_bio ?? null,
+    guest_image_url: row.guest_image_url ?? null,
+    thumbnail_url: row.thumbnail_url ?? null,
     published_at: row.published_at ?? null,
     youtube_id: parseYouTubeId(row.youtube_id ?? row.youtube_url),
     spotify_url: row.spotify_url ?? null,
@@ -150,6 +154,13 @@ export function episodeUrl(slug: string): string {
 export function ytThumb(youtubeId: string | null, quality: 'hq' | 'max' = 'max'): string | null {
   if (!youtubeId) return null
   return `https://i.ytimg.com/vi/${youtubeId}/${quality === 'max' ? 'maxresdefault' : 'hqdefault'}.jpg`
+}
+
+/** Best available poster for the episode player facade. */
+export function episodePosterUrl(ep: Pick<PublicEpisode, 'thumbnail_url' | 'guest_image_url' | 'youtube_id'>): string | null {
+  return ep.thumbnail_url?.trim()
+    || ep.guest_image_url?.trim()
+    || ytThumb(ep.youtube_id, 'max')
 }
 
 export function summaryText(ep: PublicEpisode): string {
