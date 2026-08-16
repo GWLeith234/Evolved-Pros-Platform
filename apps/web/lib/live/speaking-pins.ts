@@ -19,7 +19,7 @@ export const SPEAKING_PINS: SpeakingPin[] = [
   // Australia
   { city: 'Sydney',         country: 'Australia',    lat: -33.8688, lon: 151.2093 },
   { city: 'Melbourne',      country: 'Australia',    lat: -37.8136, lon: 144.9631 },
-  { city: 'Tasmania',       country: 'Australia',    lat: -42.0409, lon: 146.8087 },
+  { city: 'Hobart',         country: 'Australia',    lat: -42.8821, lon: 147.3272 },
   { city: 'Brisbane',       country: 'Australia',    lat: -27.4698, lon: 153.0251 },
   // Asia / SEA
   { city: 'Bali',           country: 'Indonesia',    lat:  -8.4095, lon: 115.1889 },

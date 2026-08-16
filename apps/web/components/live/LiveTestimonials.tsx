@@ -8,7 +8,11 @@ const FP = 'Playfair Display, Georgia, serif'
 export function LiveTestimonials() {
   return (
     <section className="live-section-pad" style={{ margin: '72px auto 0' }}>
-      <LiveSectionHeader eyebrow="From the Hosts" title="What organizers say" />
+      <LiveSectionHeader
+        eyebrow="From the field"
+        title="What partners say"
+        kicker="Training floors, mentorship, and the mic — not just the keynote slot."
+      />
       <div className="live-testimonial-grid" style={{ marginTop: 24 }}>
         {LIVE_TESTIMONIALS.map((t, i) => (
           <div
@@ -42,7 +46,7 @@ export function LiveTestimonials() {
                 fontStyle: 'italic',
                 fontSize: 18,
                 lineHeight: 1.45,
-                color: 'var(--text-1)',
+                color: 'var(--text-2)',
                 flex: 1,
               }}
             >
@@ -52,7 +56,7 @@ export function LiveTestimonials() {
               <p style={{ margin: 0, fontFamily: FB, fontSize: 14, fontWeight: 600, color: 'var(--text-strong)' }}>
                 {t.author}
               </p>
-              <p style={{ margin: '2px 0 0', fontFamily: FB, fontSize: 12, color: 'var(--text-3)' }}>{t.role}</p>
+              <p style={{ margin: '2px 0 0', fontFamily: FB, fontSize: 13, color: 'var(--text-3)' }}>{t.role}</p>
               <p
                 style={{
                   margin: '8px 0 0',

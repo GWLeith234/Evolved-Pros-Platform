@@ -91,12 +91,15 @@ export default async function LivePage() {
       <LiveMasthead />
       <LiveSplitHero />
 
-      {/* Globe — tour overview */}
+      {/* Upcoming speaking — clear slot for confirmed dates / holds */}
+      <LiveUpcomingDates />
+
+      {/* Past stages — globe (cities as pins) + city archive */}
       <section className="live-section-pad" style={{ marginTop: 56 }}>
         <LiveSectionHeader
           eyebrow="The Tour"
           title={tourTitle}
-          kicker="Every gold pin is a stage George has stood on."
+          kicker="Every gold pin is a city where George has taken the stage."
         />
         <div
           style={{
@@ -115,10 +118,6 @@ export default async function LivePage() {
         </p>
       </section>
 
-      {/* Upcoming speaking events — cities on every row */}
-      <LiveUpcomingDates />
-
-      {/* Past speaking events — cities by country */}
       <LivePastSpeaking />
 
       {/* Evolution Partner ads */}

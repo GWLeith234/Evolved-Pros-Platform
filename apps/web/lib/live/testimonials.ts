@@ -13,13 +13,15 @@ export const LIVE_TESTIMONIALS: LiveTestimonial[] = [
     event: 'Toronto · Montreal',
   },
   {
-    quote: 'I have such great respect for George. You are an incredible leader and inspiration. I appreciate all your knowledge and excellent advice. What I love most about you is your passion for helping other business owners. Truly helping. Keep being the true leader you were born to be.',
+    quote:
+      'I have such great respect for George — an incredible leader and inspiration. What I love most is his passion for helping other business owners. Truly helping. Keep being the true leader you were born to be.',
     author: 'Amy Andrew Delardi',
     role: 'CEO, Infinite Web Designs',
     event: 'Mentorship',
   },
   {
-    quote: 'George! It was such a pleasure to be a guest on your podcast. Your team is amazing & it was such a joy to chat. I loved our conversation on your show! I really hope we are able to collaborate again!',
+    quote:
+      'It was such a pleasure to be a guest on the podcast. The team is amazing and it was a joy to chat. I loved our conversation and hope we collaborate again.',
     author: 'Dr. Cindy McGovern',
     role: 'CEO, Orange Leaf Consulting',
     event: 'Conquer Local Podcast',
