@@ -1,3 +1,7 @@
+import type { PostMedia } from './media'
+
+export type { PostMedia }
+
 export type PillarTag = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6'
 
 export type PostType = 'update' | 'question' | 'win' | 'announce' | 'poll'
@@ -38,6 +42,8 @@ export type Post = {
   reactions: Reaction[]
   isBookmarked: boolean
   pollId?: string | null
+  // CM-1: single attached asset, null for every text-only post.
+  media?: PostMedia | null
 }
 
 export type Reply = {
@@ -46,6 +52,8 @@ export type Reply = {
   body: string
   createdAt: string
   author: PostAuthor
+  // CM-1: single attached asset, null for every text-only comment.
+  media?: PostMedia | null
 }
 
 export type LeaderboardEntry = {

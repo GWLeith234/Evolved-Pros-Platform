@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { getAvatarColor } from '@/lib/community/types'
+import { MediaAttachControl } from './MediaAttachControl'
+import { PostMedia } from './PostMedia'
 import type { Reply } from '@/lib/community/types'
 
 interface PostReplyThreadProps {
@@ -14,7 +16,8 @@ interface PostReplyThreadProps {
     displayName: string | null
     avatarUrl: string | null
   }
-  onReplySubmit: (body: string) => Promise<void>
+  // CM-1: file is null for the text-only path, which is unchanged.
+  onReplySubmit: (body: string, file: File | null) => Promise<void>
 }
 
 const INITIAL_SHOW = 3
@@ -68,7 +71,17 @@ function ReplyItem({ reply }: { reply: Reply }) {
             {ago ?? ''}
           </span>
         </div>
-        <p className="text-[13px] text-[#3a4a56] leading-relaxed mt-0.5">{reply.body}</p>
+        {reply.body && (
+          <p className="text-[13px] text-[#3a4a56] leading-relaxed mt-0.5">{reply.body}</p>
+        )}
+        {/* CM-1: attached image, shorter frame than a stream card. */}
+        {reply.media && (
+          <PostMedia
+            media={reply.media}
+            alt={`Image attached by ${reply.author.displayName}`}
+            maxHeight={320}
+          />
+        )}
       </div>
     </div>
   )
@@ -84,19 +97,30 @@ export function PostReplyThread({
   const [submitting, setSubmitting] = useState(false)
   const [showAll, setShowAll] = useState(false)
   const [error, setError] = useState('')
+  // CM-1: one optional image on a comment.
+  const [file, setFile] = useState<File | null>(null)
+  const [mediaError, setMediaError] = useState<string | null>(null)
 
   const visible = showAll ? replies : replies.slice(0, INITIAL_SHOW)
   const hiddenCount = replies.length - INITIAL_SHOW
 
+  // An image on its own is a valid comment; a standing media rejection blocks
+  // the submit rather than silently sending text-only.
+  const canReply = (replyBody.trim().length > 0 || file !== null) && !submitting && !mediaError
+
   async function handleSubmit() {
-    if (!replyBody.trim()) return
+    if (!canReply) return
     setSubmitting(true)
     setError('')
     try {
-      await onReplySubmit(replyBody.trim())
+      await onReplySubmit(replyBody.trim(), file)
       setReplyBody('')
+      setFile(null)
+      setMediaError(null)
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to reply.')
+      const message = err instanceof Error ? err.message : 'Failed to reply.'
+      if (file && /image|file|upload|mb\b/i.test(message)) setMediaError(message)
+      else setError(message)
     } finally {
       setSubmitting(false)
     }
@@ -155,14 +179,25 @@ export function PostReplyThread({
             }}
           />
           {error && <p className="text-xs text-[#ef0e30] mt-1">{error}</p>}
+          {/* CM-1 attach — mounted whenever the thread is open. */}
+          <div className="mt-2">
+            <MediaAttachControl
+              file={file}
+              onChange={setFile}
+              error={mediaError}
+              onError={setMediaError}
+              disabled={submitting}
+              compact
+            />
+          </div>
           <div className="flex justify-end mt-1.5">
             <button
               onClick={handleSubmit}
-              disabled={submitting || !replyBody.trim()}
+              disabled={!canReply}
               className="font-condensed font-bold uppercase tracking-wide text-[12px] sm:text-[12px] rounded px-3 py-1.5 text-white transition-all"
               style={{
-                backgroundColor: submitting || !replyBody.trim() ? 'rgba(239,14,48,0.4)' : '#ef0e30',
-                cursor: submitting || !replyBody.trim() ? 'not-allowed' : 'pointer',
+                backgroundColor: canReply ? '#ef0e30' : 'rgba(239,14,48,0.4)',
+                cursor: canReply ? 'pointer' : 'not-allowed',
               }}
             >
               {submitting ? '...' : 'Reply →'}

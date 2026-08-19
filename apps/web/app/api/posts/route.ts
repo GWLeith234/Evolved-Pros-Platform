@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { toPostMedia } from '@/lib/community/media'
 import type { Post } from '@/lib/community/types'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
@@ -17,6 +18,11 @@ function toPost(
     like_count: number
     reply_count: number
     created_at: string
+    // CM-1 media columns (migration 079) — null on every pre-079 row.
+    media_url?: string | null
+    media_kind?: string | null
+    media_width?: number | null
+    media_height?: number | null
     users: { id: string; display_name: string | null; full_name: string | null; avatar_url: string | null; tier: string | null } | null
   },
   myReactionMap: Map<string, string>,
@@ -47,6 +53,7 @@ function toPost(
     myReaction: myReactionMap.get(row.id) ?? null,
     reactions,
     isBookmarked: bookmarkedIds.has(row.id),
+    media: toPostMedia(row),
   }
 }
 
@@ -64,7 +71,7 @@ export async function GET(request: Request) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query: any = adminClient
     .from('posts')
-    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
+    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, media_url, media_kind, media_width, media_height, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
     .eq('is_pinned', false)
     .order('created_at', { ascending: false })
     .limit(limit + 1)
@@ -276,7 +283,7 @@ export async function POST(request: Request) {
       pillar: pillarInt,
       ...(resolvedPollId ? { poll_id: resolvedPollId } : {}),
     } as never)
-    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
+    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, media_url, media_kind, media_width, media_height, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
     .single()
 
   if (error || !post) {

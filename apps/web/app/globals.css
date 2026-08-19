@@ -170,6 +170,18 @@
   --composer-post-btn-text:             #FFFFFF;
   --composer-post-btn-disabled:         rgba(255,255,255,0.10);
 
+  /* Post media frame (SPRINT CM-1). The frame is what shows through the
+     letterbox bars of an object-fit:contain image, so it must be the DARK
+     surface here — a white/parchment frame is the "white letterbox in dark
+     theme" failure. */
+  --post-media-frame-bg:      #0A0F18;
+  --post-media-frame-border:  rgba(255,255,255,0.08);
+  --post-media-fallback-text: rgba(255,255,255,0.55);
+  --attach-chip-bg:           rgba(255,255,255,0.04);
+  --attach-chip-border:       rgba(255,255,255,0.14);
+  --attach-chip-text:         rgba(255,255,255,0.75);
+  --attach-error-text:        #F87171;
+
   /* Welcome banner v2 tokens (WELCOME-BANNER-V2) */
   --banner-bg:            #1A1F3A;
   --banner-bg-end:        #0A0F18;
@@ -395,6 +407,15 @@ html.light-mode {
   --composer-post-btn-bg:               #C9302A;
   --composer-post-btn-text:             #FFFFFF;
   --composer-post-btn-disabled:         rgba(27,42,74,0.10);
+
+  /* Post media frame — light overrides (SPRINT CM-1). */
+  --post-media-frame-bg:      #F0EBE3;
+  --post-media-frame-border:  rgba(27,42,74,0.12);
+  --post-media-fallback-text: rgba(27,42,74,0.60);
+  --attach-chip-bg:           rgba(27,42,74,0.04);
+  --attach-chip-border:       rgba(27,42,74,0.16);
+  --attach-chip-text:         rgba(27,42,74,0.75);
+  --attach-error-text:        #B32234;
 
   /* Welcome banner v2 — light overrides (WELCOME-BANNER-V2) */
   --banner-bg:            #FAF7F2;

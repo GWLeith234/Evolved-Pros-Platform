@@ -1845,6 +1845,10 @@ export type Database = {
           is_pinned: boolean
           kind: string
           like_count: number
+          media_height: number | null
+          media_kind: string | null
+          media_url: string | null
+          media_width: number | null
           pillar: number | null
           pillar_tag: string | null
           poll_id: string | null
@@ -1865,6 +1869,10 @@ export type Database = {
           is_pinned?: boolean
           kind?: string
           like_count?: number
+          media_height?: number | null
+          media_kind?: string | null
+          media_url?: string | null
+          media_width?: number | null
           pillar?: number | null
           pillar_tag?: string | null
           poll_id?: string | null
@@ -1885,6 +1893,10 @@ export type Database = {
           is_pinned?: boolean
           kind?: string
           like_count?: number
+          media_height?: number | null
+          media_kind?: string | null
+          media_url?: string | null
+          media_width?: number | null
           pillar?: number | null
           pillar_tag?: string | null
           poll_id?: string | null
@@ -2027,6 +2039,10 @@ export type Database = {
           body: string
           created_at: string
           id: string
+          media_height: number | null
+          media_kind: string | null
+          media_url: string | null
+          media_width: number | null
           post_id: string
         }
         Insert: {
@@ -2034,6 +2050,10 @@ export type Database = {
           body: string
           created_at?: string
           id?: string
+          media_height?: number | null
+          media_kind?: string | null
+          media_url?: string | null
+          media_width?: number | null
           post_id: string
         }
         Update: {
@@ -2041,6 +2061,10 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
+          media_height?: number | null
+          media_kind?: string | null
+          media_url?: string | null
+          media_width?: number | null
           post_id?: string
         }
         Relationships: [

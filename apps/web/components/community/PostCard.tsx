@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { PostReplyThread } from './PostReplyThread'
+import { PostMedia } from './PostMedia'
 import { ReactionPicker } from './ReactionPicker'
 import { getAvatarColor } from '@/lib/community/types'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
@@ -93,14 +94,19 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
     setShowReplies(v => !v)
   }
 
-  async function handleReplySubmit(body: string) {
-    const res = await fetch(`/api/posts/${post.id}/replies`, {
+  // CM-1: multipart so a comment on the channel feed can carry one image,
+  // same as the unified feed. Without a file part this is the old text-only
+  // reply, unchanged.
+  async function handleReplySubmit(body: string, file: File | null) {
+    const form = new FormData()
+    form.append('body', body)
+    if (file) form.append('file', file, file.name)
+    const res = await fetch(`/api/community/posts/${post.id}/comments`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ body }),
+      body: form,
     })
     if (!res.ok) {
-      const data = await res.json()
+      const data = await res.json().catch(() => ({})) as { error?: string }
       throw new Error(data.error ?? 'Failed to reply')
     }
     const reply = await res.json() as Reply
@@ -283,12 +289,21 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
       </div>
 
       {/* Body */}
-      <p
-        className="font-body text-[14px] leading-[1.72] mb-4"
-        style={{ color: isAnnounce ? 'rgba(255,255,255,0.75)' : (isLightCard || !isDark) ? '#3a4a56' : 'rgba(255,255,255,0.75)' }}
-      >
-        {post.body}
-      </p>
+      {post.body && (
+        <p
+          className="font-body text-[14px] leading-[1.72] mb-4"
+          style={{ color: isAnnounce ? 'rgba(255,255,255,0.75)' : (isLightCard || !isDark) ? '#3a4a56' : 'rgba(255,255,255,0.75)' }}
+        >
+          {post.body}
+        </p>
+      )}
+
+      {/* CM-1 attached media — below the body, above the action row. */}
+      {post.media && (
+        <div className="mb-4">
+          <PostMedia media={post.media} alt={`Image shared by ${post.author.displayName}`} />
+        </div>
+      )}
 
       {/* Actions */}
       <div

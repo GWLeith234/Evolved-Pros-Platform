@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { toPostMedia } from '@/lib/community/media'
 import type { Reply } from '@/lib/community/types'
 import { notifyReply } from '@/lib/notifications/create'
 
@@ -11,6 +12,11 @@ function toReply(row: {
   post_id: string
   body: string
   created_at: string
+  // CM-1 media columns (migration 079) — null on every pre-079 row.
+  media_url?: string | null
+  media_kind?: string | null
+  media_width?: number | null
+  media_height?: number | null
   users: { id: string; display_name: string | null; full_name: string | null; avatar_url: string | null } | null
 }): Reply {
   return {
@@ -18,6 +24,7 @@ function toReply(row: {
     postId: row.post_id,
     body: row.body,
     createdAt: row.created_at,
+    media: toPostMedia(row),
     author: {
       id: row.users?.id ?? '',
       displayName: row.users?.full_name ?? row.users?.display_name ?? 'Member',
@@ -36,7 +43,7 @@ export async function GET(
 
   const { data, error } = await supabase
     .from('replies')
-    .select('id, post_id, body, created_at, users(id, display_name, full_name, avatar_url)')
+    .select('id, post_id, body, created_at, media_url, media_kind, media_width, media_height, users(id, display_name, full_name, avatar_url)')
     .eq('post_id', params.postId)
     .order('created_at', { ascending: true })
 
@@ -89,7 +96,7 @@ export async function POST(
   const { data: reply, error } = await adminClient
     .from('replies')
     .insert({ post_id: params.postId, author_id: authorId, body: replyBody } as never)
-    .select('id, post_id, body, created_at, users(id, display_name, full_name, avatar_url)')
+    .select('id, post_id, body, created_at, media_url, media_kind, media_width, media_height, users(id, display_name, full_name, avatar_url)')
     .single()
 
   if (error || !reply) return NextResponse.json({ error: 'Failed to create reply' }, { status: 500 })

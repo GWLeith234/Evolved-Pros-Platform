@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
 import { adminClient } from '@/lib/supabase/admin'
+import { toPostMedia } from './media'
 import type { Channel, Post, LeaderboardEntry, MemberSummary, CommunityAd, WeeklyLeaderboardEntry } from './types'
 
 type SB = SupabaseClient<Database>
@@ -38,6 +39,11 @@ type PostRow = {
   like_count: number
   reply_count: number
   created_at: string
+  // CM-1 media columns (migration 079) — null on every pre-079 row.
+  media_url?: string | null
+  media_kind?: string | null
+  media_width?: number | null
+  media_height?: number | null
   users: { id: string; display_name: string | null; full_name: string | null; avatar_url: string | null; tier?: string | null } | null
 }
 
@@ -115,6 +121,7 @@ async function hydratePostMeta(
       myReaction: myReactionMap.get(row.id) ?? null,
       reactions,
       isBookmarked: bookmarkedIds.has(row.id),
+      media: toPostMedia(row),
     } satisfies Post
   })
 }
@@ -133,7 +140,7 @@ export async function fetchPosts(
 
   const { data: rows } = await adminClient
     .from('posts')
-    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
+    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, media_url, media_kind, media_width, media_height, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
     .eq('channel_id', channel.id)
     .eq('is_pinned', false)
     .order('created_at', { ascending: false })
@@ -155,7 +162,7 @@ export async function fetchAllPosts(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query: any = adminClient
     .from('posts')
-    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
+    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, media_url, media_kind, media_width, media_height, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
     .eq('is_pinned', false)
     .order('created_at', { ascending: false })
     .limit(limit + 1)

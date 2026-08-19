@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { MediaAttachControl } from './MediaAttachControl'
 
 type Kind = 'update' | 'question' | 'win' | 'poll'
 type Pillar = 1 | 2 | 3 | 4 | 5 | 6
@@ -88,6 +89,9 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
   const [pollOptions, setPollOptions] = useState<string[]>(['', ''])
   const [isPosting, setIsPosting] = useState(false)
   const [error, setError] = useState('')
+  // CM-1: one optional image. null === today's text-only submit, exactly.
+  const [file, setFile] = useState<File | null>(null)
+  const [mediaError, setMediaError] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   // "Write for me" assist
@@ -144,35 +148,60 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
   const activeTab = TABS.find(t => t.kind === activeKind) ?? TABS[0]
   const validPollOptionCount = pollOptions.filter(o => o.trim().length > 0).length
   const pollReady = activeKind !== 'poll' || validPollOptionCount >= 2
-  const canPost = body.trim().length > 0 && pollReady && !isPosting
+  // An image on its own is a valid post on the non-poll tabs; a standing
+  // media rejection blocks the submit rather than silently posting text-only.
+  const hasContent = body.trim().length > 0 || (activeKind !== 'poll' && file !== null)
+  const canPost = hasContent && pollReady && !isPosting && !mediaError
 
   async function handleSubmit() {
     if (!canPost) return
     setIsPosting(true)
     setError('')
     try {
-      const cleanedPollOptions = pollOptions.map(o => o.trim()).filter(Boolean)
-      const res = await fetch('/api/posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          channelId,
-          body: body.trim(),
-          kind: activeKind,
-          pillar: selectedPillar,
-          ...(activeKind === 'poll' ? { pollOptions: cleanedPollOptions } : {}),
-        }),
-      })
+      let res: Response
+      if (activeKind === 'poll') {
+        // Polls need poll_options rows and never carry media in CM-1, so they
+        // stay on the original JSON route — unchanged behaviour.
+        const cleanedPollOptions = pollOptions.map(o => o.trim()).filter(Boolean)
+        res = await fetch('/api/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            channelId,
+            body: body.trim(),
+            kind: activeKind,
+            pillar: selectedPillar,
+            pollOptions: cleanedPollOptions,
+          }),
+        })
+      } else {
+        // CM-1: multipart, with or without a file. No file part === the
+        // text-only path, byte-identical to before.
+        const form = new FormData()
+        form.append('channelId', channelId)
+        form.append('body', body.trim())
+        form.append('type', activeKind)
+        if (selectedPillar) form.append('pillar', String(selectedPillar))
+        if (file) form.append('file', file, file.name)
+        res = await fetch('/api/community/posts', { method: 'POST', body: form })
+      }
+
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
+        const data = await res.json().catch(() => ({})) as { error?: string }
         throw new Error(data.error ?? 'Failed to post')
       }
       setBody('')
       setSelectedPillar(null)
       setPollOptions(['', ''])
+      setFile(null)
+      setMediaError(null)
       onPostCreated?.()
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to post.')
+      const message = err instanceof Error ? err.message : 'Failed to post.'
+      // Surface upload rejections next to the attach control, general
+      // failures under the Post button. Never swallow either.
+      if (file && /image|file|upload|mb\b/i.test(message)) setMediaError(message)
+      else setError(message)
     } finally {
       setIsPosting(false)
     }
@@ -390,6 +419,16 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
               )}
             </div>
           )}
+
+          {/* CM-1 attach. Always mounted so the file input is in the DOM on
+              every tab — disabled on Poll, which carries no media in v1. */}
+          <MediaAttachControl
+            file={file}
+            onChange={setFile}
+            error={mediaError}
+            onError={setMediaError}
+            disabled={aiLoading || isPosting || activeKind === 'poll'}
+          />
 
           {aiOpen && (
             <div

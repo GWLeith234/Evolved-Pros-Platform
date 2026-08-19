@@ -9,6 +9,7 @@ import { CommunityPageHeader } from './CommunityPageHeader'
 import { Composer } from './Composer'
 import { FilterRail } from './FilterRail'
 import type { KindFilter, Pillar, SortBy } from './FilterRail'
+import { toPostMedia } from '@/lib/community/media'
 import type { Post, Reply, CommunityAd, WeeklyLeaderboardEntry } from '@/lib/community/types'
 import {
   CommunityRightRail,
@@ -116,11 +117,15 @@ export function UnifiedCommunityPage({
   // Submit handler for the inline composer inside PostReplyThread. Posts the
   // reply, appends it to the local cache, and bumps the post's replyCount so
   // the icon's number reflects the new state without a refetch.
-  const handleReplySubmit = useCallback(async (postId: string, body: string) => {
-    const res = await fetch(`/api/posts/${postId}/replies`, {
+  // CM-1: multipart so a comment can carry one image. With no file part this
+  // is the same text-only reply as before, just over form-data.
+  const handleReplySubmit = useCallback(async (postId: string, body: string, file: File | null) => {
+    const form = new FormData()
+    form.append('body', body)
+    if (file) form.append('file', file, file.name)
+    const res = await fetch(`/api/community/posts/${postId}/comments`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ body }),
+      body: form,
     })
     if (!res.ok) {
       const data = await res.json().catch(() => ({})) as { error?: string }
@@ -161,6 +166,7 @@ export function UnifiedCommunityPage({
             myReaction: null,
             reactions: [],
             isBookmarked: false,
+            media: toPostMedia(row),
           }
           setQueuedCount(c => c + 1)
           setQueued(prev => [newPost, ...prev])
@@ -387,7 +393,7 @@ export function UnifiedCommunityPage({
                             displayName: currentUser.displayName,
                             avatarUrl: currentUser.avatarUrl,
                           }}
-                          onReplySubmit={body => handleReplySubmit(post.id, body)}
+                          onReplySubmit={(body, file) => handleReplySubmit(post.id, body, file)}
                         />
                       )}
                     </div>

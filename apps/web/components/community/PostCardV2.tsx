@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { buildPermalink } from '@/lib/community/media'
+import { PostMedia } from './PostMedia'
 import type { Post } from '@/lib/community/types'
 
 // Brief naming (UI-facing): fire/hundred/hands/heart/mindblown.
@@ -172,6 +174,23 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
     }, 700)
   }
 
+  // CM-1 share affordance. Clipboard is not available on insecure origins or
+  // when permission is denied — fall back to opening the permalink so the URL
+  // is at least in the address bar.
+  const permalink = buildPermalink(post.id)
+  const [shareState, setShareState] = useState<'idle' | 'copied'>('idle')
+
+  async function handleShare() {
+    const url = typeof window !== 'undefined' ? `${window.location.origin}${permalink}` : permalink
+    try {
+      await navigator.clipboard.writeText(url)
+      setShareState('copied')
+      window.setTimeout(() => setShareState('idle'), 1800)
+    } catch {
+      window.open(permalink, '_self')
+    }
+  }
+
   const pillarNum = post.pillarTag ? parseInt(post.pillarTag.slice(1), 10) : null
   const pillarConf = pillarNum && pillarNum >= 1 && pillarNum <= 6 ? PILLAR_CONFIG[pillarNum] : null
   const tierBadge = tierBadgeStyle(post.author.tier)
@@ -296,18 +315,21 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
                 {tierBadge.label}
               </span>
             )}
-            <span
+            <Link
+              href={permalink}
+              aria-label="Open this post"
               style={{
                 fontFamily: '"Barlow", sans-serif',
                 fontSize: 12,
                 letterSpacing: '0.08em',
                 color: 'var(--text-tertiary)',
                 textTransform: 'uppercase',
+                textDecoration: 'none',
               }}
               suppressHydrationWarning
             >
               <ClientTimeAgo dateStr={post.createdAt} />
-            </span>
+            </Link>
             {kindLabel && (
               <span
                 style={{
@@ -333,6 +355,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
       </header>
 
       {/* Body */}
+      {post.body && (
       <p
         style={{
           margin: '16px 0 0',
@@ -346,6 +369,7 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
       >
         {post.body}
       </p>
+      )}
 
       {/* Pillar tag */}
       {pillarConf && pillarNum && (
@@ -366,6 +390,13 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
             {pillarConf.label}
           </span>
         </div>
+      )}
+
+      {/* CM-1 attached media — full feed width, below the body, above the
+          reaction row. object-fit:contain inside PostMedia, so a square quote
+          card is never cropped. */}
+      {post.media && (
+        <PostMedia media={post.media} alt={`Image shared by ${post.author.displayName}`} />
       )}
 
       {/* Reaction row — uniform chip anatomy (Sprint 2) */}
@@ -474,12 +505,44 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
           )
         })}
 
+        {/* CM-1 permalink / share */}
+        <button
+          type="button"
+          onClick={handleShare}
+          aria-label={`Copy link to this post${shareState === 'copied' ? ' — copied' : ''}`}
+          style={{
+            marginLeft: 'auto',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            minHeight: 44,
+            minWidth: 44,
+            padding: '6px 10px',
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--text-secondary)',
+            cursor: 'pointer',
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+            <path d="M16 6l-4-4-4 4" />
+            <path d="M12 2v14" />
+          </svg>
+          <span aria-hidden="true">{shareState === 'copied' ? 'Copied' : 'Share'}</span>
+        </button>
+
         <button
           type="button"
           onClick={() => onCommentClick?.(post.id)}
           aria-label="Comments"
           style={{
-            marginLeft: 'auto',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
