@@ -13,6 +13,7 @@ import { SkipToContent } from '@/components/a11y/SkipToContent'
 import { LiveAnnouncerProvider } from '@/components/a11y/LiveAnnouncer'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { getPlatformSettingsMap } from '@/lib/cache/shared'
+import { ThemeSync } from '@/components/theme/ThemeSync'
 
 export default async function MemberLayout({ children }: { children: React.ReactNode }) {
   // RSC prefetch guard: skip auth + profile fetching for *prefetch* requests
@@ -106,6 +107,9 @@ export default async function MemberLayout({ children }: { children: React.React
   return (
     <ToastProvider>
       <LiveAnnouncerProvider>
+        {/* Stored theme wins over the localStorage hint. Parse-blocking, so it
+            lands before the shell paints — no flash in a fresh browser. */}
+        <ThemeSync theme={profile.theme} />
         <SkipToContent />
         {/* SCROLL-FIX: member chrome is a fixed viewport shell (100dvh).
             TopNav sits in normal flow (sticky). Main is the only vertical

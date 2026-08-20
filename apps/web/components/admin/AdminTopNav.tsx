@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { Modal } from '@/components/ui/Modal'
 import { AdminSidebarNav } from './AdminSidebar'
 import { useTheme } from '@/components/theme/ThemeProvider'
+import { toggleLabel } from '@/lib/theme'
 
 interface AdminTopNavProps {
   profile: {
@@ -24,7 +25,8 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
   // Admins can toggle the whole app theme from the admin shell. The topnav is
   // always dark chrome, so the icon keeps a fixed light color (a theme-driven
   // token would go navy-on-navy in light mode).
-  const { resolvedTheme, toggleTheme } = useTheme()
+  const { preference, toggleTheme } = useTheme()
+  const themeLabel = toggleLabel(preference)
 
   return (
     <header
@@ -117,21 +119,27 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
         <button
           type="button"
           onClick={toggleTheme}
-          aria-label={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-label={themeLabel}
+          title={themeLabel}
           className="w-8 h-8 flex items-center justify-center rounded flex-shrink-0 transition-colors"
           style={{ color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.12)' }}
           onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.95)'}
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.6)'}
         >
-          {resolvedTheme === 'dark' ? (
-            // Sun — click to go light
+          {preference === 'system' ? (
+            // Display — following this device's setting
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="2" y="4" width="20" height="13" rx="2" />
+              <path d="M8 21h8M12 17v4" />
+            </svg>
+          ) : preference === 'light' ? (
+            // Sun — light mode is pinned
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="4" />
               <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
             </svg>
           ) : (
-            // Moon — click to go dark
+            // Moon — dark mode is pinned
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
             </svg>

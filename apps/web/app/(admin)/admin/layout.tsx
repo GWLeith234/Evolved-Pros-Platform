@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { cookies, headers } from 'next/headers'
 import { AdminTopNav } from '@/components/admin/AdminTopNav'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
+import { ThemeSync } from '@/components/theme/ThemeSync'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   // RSC prefetch guard: middleware lets prefetch requests through so it can't
@@ -44,7 +45,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const { data: profile } = await adminClient
     .from('users')
-    .select('role, display_name, full_name')
+    .select('role, display_name, full_name, theme')
     .eq('email', user.email!)
     .maybeSingle()
 
@@ -52,6 +53,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="ep-member-shell">
+      {/* Stored theme wins over the localStorage hint (see ThemeSync). */}
+      <ThemeSync theme={profile.theme} />
       <AdminTopNav profile={profile} />
       <div className="ep-member-body">
         <AdminSidebar />
