@@ -21,6 +21,15 @@ export type MediaSitemapEntry = {
   priority: number
 }
 
+/**
+ * Unpublished stories that must never appear in the sitemap, even if a
+ * query drops the is_published filter or a row is flagged true by mistake.
+ */
+export const UNPUBLISHED_MEDIA_PATHS = new Set([
+  '/media/execution/why-elite-sales-teams-swear-by-ritual-not-motivation',
+  '/media/strategy/build-repeatable-sales-strategy-framework',
+])
+
 /** Same path the live article route serves. Null if pillar or slug is missing. */
 export function mediaArticlePath(
   pillar: string | null | undefined,
@@ -34,7 +43,8 @@ export function mediaArticlePath(
 
 /**
  * Map published media_stories rows to sitemap entries.
- * Unpublished rows and rows missing pillar/slug are dropped.
+ * Unpublished rows, the explicit unpublished-slug denylist, and rows
+ * missing pillar/slug are dropped.
  * lastmod / changeFrequency / priority match podcast episode entries.
  */
 export function toMediaSitemapEntries(
@@ -45,7 +55,7 @@ export function toMediaSitemapEntries(
   for (const row of rows) {
     if (row.is_published !== true) continue
     const path = mediaArticlePath(row.pillar, row.slug)
-    if (!path) continue
+    if (!path || UNPUBLISHED_MEDIA_PATHS.has(path)) continue
     entries.push({
       url: `${base}${path}`,
       lastModified: row.published_at ? new Date(row.published_at) : new Date(),

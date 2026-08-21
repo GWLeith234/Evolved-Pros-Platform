@@ -54,4 +54,23 @@ describe('toMediaSitemapEntries', () => {
     ])
     expect(entries.some(e => e.url.includes('/login'))).toBe(false)
   })
+
+  it('skips the two known unpublished slugs even if is_published is wrongly true', () => {
+    const entries = toMediaSitemapEntries(BASE, [
+      {
+        pillar: 'execution',
+        slug: 'why-elite-sales-teams-swear-by-ritual-not-motivation',
+        published_at: null,
+        is_published: true,
+      },
+      {
+        pillar: 'strategy',
+        slug: 'build-repeatable-sales-strategy-framework',
+        published_at: null,
+        is_published: true,
+      },
+      { pillar: 'identity', slug: 'real-article', published_at: null, is_published: true },
+    ])
+    expect(entries.map(e => e.url)).toEqual([`${BASE}/media/identity/real-article`])
+  })
 })
