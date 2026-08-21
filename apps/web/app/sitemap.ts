@@ -1,4 +1,6 @@
 import { MetadataRoute } from 'next'
+import { adminClient } from '@/lib/supabase/admin'
+import { toMediaSitemapEntries } from '@/lib/media/sitemap'
 import { SITE_URL, getPublishedEpisodes } from '@/lib/podcast/public'
 
 // Brand-domain URLs via NEXT_PUBLIC_SITE_URL (SITE_URL). Never the Railway host.
@@ -31,5 +33,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Never let a DB hiccup blank the sitemap — static routes still emit.
   }
 
-  return [...staticRoutes, ...episodeRoutes]
+  let mediaRoutes: MetadataRoute.Sitemap = []
+  try {
+    const { data } = await adminClient
+      .from('media_stories')
+      .select('pillar, slug, published_at, is_published')
+      .eq('is_published', true)
+    mediaRoutes = toMediaSitemapEntries(base, data ?? [])
+  } catch {
+    // Same as episodes: a media query failure must not blank the sitemap.
+  }
+
+  return [...staticRoutes, ...episodeRoutes, ...mediaRoutes]
 }
