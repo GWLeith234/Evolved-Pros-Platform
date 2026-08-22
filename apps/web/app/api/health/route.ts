@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -43,8 +43,15 @@ export async function GET() {
   }
 
   try {
-    const supabase = createClient()
-    const { error } = await supabase.from('users').select('id').limit(1)
+    // Service role + head-only count: the probe must survive public.users being
+    // closed to anon (S1 — users_select_for_joins), and it has no business
+    // pulling row data. `head: true` sends HEAD, so PostgREST returns the count
+    // header and no body. A real connectivity failure still surfaces as
+    // `error` and degrades the probe below.
+    const { error } = await adminClient
+      .from('users')
+      .select('id', { head: true, count: 'exact' })
+      .limit(1)
     if (error) {
       checks.supabase = `error: ${error.message}`
       checks.status = 'degraded'

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { MediaPortalClient } from './MediaPortalClient'
 import type { MediaStory, Episode } from './MediaPortalClient'
 import { Masthead } from '@/components/media/Masthead'
@@ -25,12 +26,17 @@ export default async function MediaPage() {
 
   const stories = (allStories ?? []) as MediaStory[]
 
-  // Look up author avatars from users table by full_name
+  // Look up author avatars from users table by full_name.
+  //
+  // Service role, not the request client: this page is reachable logged-out, so
+  // `createClient()` here is an anonymous PostgREST context. public.users must
+  // not be readable by anon (S1 — users_select_for_joins), so the avatar join
+  // runs server-side under the service key. Column allowlist stays narrow.
   const authorNames = [...new Set(stories.map(s => s.author).filter(Boolean) as string[])]
   const authorAvatars: Record<string, string> = {}
   if (authorNames.length > 0) {
     try {
-      const { data: profiles } = await supabase
+      const { data: profiles } = await adminClient
         .from('users')
         .select('full_name, avatar_url')
         .in('full_name', authorNames)
