@@ -37,7 +37,6 @@ export interface Episode {
 interface MediaPortalClientProps {
   stories: MediaStory[]
   episodes: Episode[]
-  authorAvatars?: Record<string, string>
 }
 
 // ── Pillar / category helpers ───────────────────────────────────────────────
@@ -321,10 +320,7 @@ function ArticleCard({ story }: { story: MediaStory }) {
 export function MediaPortalClient({
   stories,
   episodes,
-  authorAvatars: _authorAvatars = {},
 }: MediaPortalClientProps) {
-  void _authorAvatars   // currently unused after the redesign — preserved on
-                        // the prop so the server fetch doesn't have to change.
   const [activeCategory, setActiveCategory] = useState<string>(ALL_LABEL)
 
   const filteredStories = useMemo(() => {

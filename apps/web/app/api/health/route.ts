@@ -1,4 +1,3 @@
-import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -9,6 +8,13 @@ export const dynamic = 'force-dynamic'
  * - 503 only when critical env is missing (misconfigured deploy).
  * - 200 with `ready: false` if Supabase is flaky (avoids restart thrash
  *   during cold starts / brief network blips).
+ *
+ * `@/lib/supabase/admin` is imported lazily inside the try block, never at
+ * module scope: it calls createClient(url!, serviceRoleKey!) on evaluation and
+ * supabase-js throws 'supabaseKey is required' on a falsy key. A static import
+ * would make this route throw during module evaluation on a deploy missing the
+ * service-role key — an opaque 500 from the one endpoint whose job is to report
+ * `serviceRole: false`.
  */
 export async function GET() {
   const env = {
@@ -21,7 +27,11 @@ export async function GET() {
     appUrl: !!(process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL),
   }
 
-  const criticalOk = env.supabaseUrl && env.supabaseKey
+  // serviceRole is critical: without it the admin client cannot be constructed
+  // at all, so a deploy missing it is genuinely broken and should fail its
+  // healthcheck loudly via the 503 `misconfigured` response below — which
+  // already reports the full env object, serviceRole: false included.
+  const criticalOk = env.supabaseUrl && env.supabaseKey && env.serviceRole
 
   const checks = {
     status: 'ok' as 'ok' | 'degraded' | 'misconfigured',
@@ -43,6 +53,10 @@ export async function GET() {
   }
 
   try {
+    // Lazy, inside the try: an import-time throw from the admin module degrades
+    // the probe to `unreachable` instead of taking the whole route down.
+    const { adminClient } = await import('@/lib/supabase/admin')
+
     // Service role + head-only count: the probe must survive public.users being
     // closed to anon (S1 — users_select_for_joins), and it has no business
     // pulling row data. `head: true` sends HEAD, so PostgREST returns the count
