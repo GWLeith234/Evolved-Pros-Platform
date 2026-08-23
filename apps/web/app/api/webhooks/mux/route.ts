@@ -24,9 +24,9 @@ const MAX_TIMESTAMP_SKEW_MS = 5 * 60 * 1000
  * on MUX_WEBHOOK_SECRET. Returns null when the request passes; returns
  * a NextResponse to short-circuit the handler when it fails.
  *
- * Returns null (allow) when MUX_WEBHOOK_SECRET is not configured so the
- * existing prod setup keeps working until the env var lands on Railway —
- * a one-line warning is logged each time this happens so it's visible.
+ * Fail closed when MUX_WEBHOOK_SECRET is missing. A missing secret used
+ * to accept unsigned payloads, so anyone could POST `video.asset.ready`
+ * and write mux_playback_id onto lessons.
  */
 function verifyMuxSignature(
   rawBody: string,
@@ -34,8 +34,8 @@ function verifyMuxSignature(
 ): NextResponse | null {
   const secret = process.env.MUX_WEBHOOK_SECRET
   if (!secret) {
-    console.warn('[mux/webhook] MUX_WEBHOOK_SECRET not set — accepting unsigned payload')
-    return null
+    console.error('[mux/webhook] MUX_WEBHOOK_SECRET is not set — refusing unsigned payload')
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 503 })
   }
   if (!muxSig) {
     return NextResponse.json({ error: 'Missing Mux-Signature header' }, { status: 401 })

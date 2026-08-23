@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { computeMrr, tierMonthlyPrice, isRevenueMember, pricingLadderState, type LadderTier } from './pricing'
-import { hasTierAccess } from './tier'
+import { computeMrr, tierMonthlyPrice, isRevenueMember, pricingLadderState, planAmountCents, TIERS, type LadderTier } from './pricing'
+import { hasTierAccess, effectiveTier } from './tier'
 
 describe('revenue hygiene — guests never count as revenue', () => {
   it('a comped guest Pro contributes $0 MRR', () => {
@@ -87,5 +87,39 @@ describe('pricingLadderState — current-plan marking (SPRINT PRICE-1)', () => {
 
   it('treats an unrecognised tier as no entitlement — CTAs stay live', () => {
     expect(state('legacy-gold', 'vip')).toBeNull()
+  })
+})
+
+describe('planAmountCents — Vendasta checkout amounts match the catalogue', () => {
+  it('uses the canonical $49 / $249 ladder, not the legacy $79 VIP', () => {
+    expect(planAmountCents('vip_monthly')).toBe(4900)
+    expect(planAmountCents('vip_annual')).toBe(49000)
+    expect(planAmountCents('pro_monthly')).toBe(24900)
+    expect(planAmountCents('pro_annual')).toBe(249000)
+  })
+
+  it('honours a catalogue override', () => {
+    const override = {
+      ...TIERS,
+      vip: { monthly: 59, annual: 590 },
+    }
+    expect(planAmountCents('vip_monthly', override)).toBe(5900)
+    expect(planAmountCents('vip_annual', override)).toBe(59000)
+  })
+})
+
+describe('effectiveTier — dead statuses drop to community', () => {
+  it('treats expired / canceled / unpaid as community', () => {
+    expect(effectiveTier('vip', 'expired')).toBe('community')
+    expect(effectiveTier('pro', 'canceled')).toBe('community')
+    expect(effectiveTier('pro', 'cancelled')).toBe('community')
+    expect(effectiveTier('vip', 'unpaid')).toBe('community')
+  })
+
+  it('fails open on past_due, active, and missing status', () => {
+    expect(effectiveTier('vip', 'past_due')).toBe('vip')
+    expect(effectiveTier('pro', 'active')).toBe('pro')
+    expect(effectiveTier('vip', null)).toBe('vip')
+    expect(effectiveTier('vip', '')).toBe('vip')
   })
 })

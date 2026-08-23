@@ -88,7 +88,7 @@ export async function POST(
     // Award 2 points to post author (not self-reacting)
     if (post.author_id !== likerId) {
       try {
-        const { error: rpcErr } = await supabase.rpc('increment_points', { user_id: post.author_id, amount: 2 })
+        const { error: rpcErr } = await adminClient.rpc('increment_points', { user_id: post.author_id, amount: 2 })
         if (rpcErr) console.warn('[like] increment_points failed:', rpcErr.message)
       } catch (err) {
         console.warn('[like] increment_points exception:', err)

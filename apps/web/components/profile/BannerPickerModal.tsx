@@ -20,7 +20,7 @@ interface BannerPickerModalProps {
   onClose: () => void
 }
 
-export function BannerPickerModal({ userId, userEmail, currentBannerUrl, onSave, onClose }: BannerPickerModalProps) {
+export function BannerPickerModal({ userId, userEmail: _userEmail, currentBannerUrl, onSave, onClose }: BannerPickerModalProps) {
   const [banners, setBanners] = useState<Banner[]>([])
   const [selected, setSelected] = useState<string | null>(currentBannerUrl)
   const [uploading, setUploading] = useState(false)
@@ -61,10 +61,12 @@ export function BannerPickerModal({ userId, userEmail, currentBannerUrl, onSave,
     if (!selected) return
     setSaving(true)
     try {
-      const supabase = createClient()
-      // RLS-FIX: auth.uid() ≠ public.users.id on some accounts, so update
-      // by email to stay consistent with the rest of the codebase.
-      await supabase.from('users').update({ banner_url: selected }).eq('email', userEmail)
+      const res = await fetch('/api/profile/banner', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: selected }),
+      })
+      if (!res.ok) return
       onSave(selected)
     } finally {
       setSaving(false)

@@ -23,6 +23,9 @@ import { createClient } from '@/lib/supabase/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { getOrCreateAccountGroup } from '@/lib/vendasta/accounts'
 import { createOrder, type BillingInterval } from '@/lib/vendasta/orders'
+import { alreadyEntitledTo } from '@/lib/stripe/purchaseGuard'
+import { getMembershipPricing } from '@/lib/commerce/catalogue'
+import { planAmountCents, type PaidPlanKey } from '@/lib/pricing'
 
 interface SkuConfig {
   envVar:      string
@@ -30,43 +33,51 @@ interface SkuConfig {
   amountCents: number
   interval:    BillingInterval
   tier:        'vip' | 'pro'
+  plan:        PaidPlanKey
 }
 
-function skuCatalog(): Record<string, SkuConfig> {
+function skuCatalog(amountFor: (plan: PaidPlanKey) => number): Record<PaidPlanKey, SkuConfig> {
   return {
     vip_monthly: {
       envVar:      'NEXT_PUBLIC_VENDASTA_MP_VIP_M',
       sku:         process.env.NEXT_PUBLIC_VENDASTA_MP_VIP_M,
-      amountCents: 7900,
+      amountCents: amountFor('vip_monthly'),
       interval:    'MONTHLY',
       tier:        'vip',
+      plan:        'vip_monthly',
     },
     vip_annual: {
       envVar:      'NEXT_PUBLIC_VENDASTA_MP_VIP_Y',
       sku:         process.env.NEXT_PUBLIC_VENDASTA_MP_VIP_Y,
-      amountCents: 79000,
+      amountCents: amountFor('vip_annual'),
       interval:    'YEARLY',
       tier:        'vip',
+      plan:        'vip_annual',
     },
     pro_monthly: {
       envVar:      'NEXT_PUBLIC_VENDASTA_MP_PRO_M',
       sku:         process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_M,
-      amountCents: 24900,
+      amountCents: amountFor('pro_monthly'),
       interval:    'MONTHLY',
       tier:        'pro',
+      plan:        'pro_monthly',
     },
     pro_annual: {
       envVar:      'NEXT_PUBLIC_VENDASTA_MP_PRO_Y',
       sku:         process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_Y,
-      amountCents: 249000,
+      amountCents: amountFor('pro_annual'),
       interval:    'YEARLY',
       tier:        'pro',
+      plan:        'pro_annual',
     },
   }
 }
 
-function findConfigForSku(requestedSku: string): SkuConfig | null {
-  const catalog = skuCatalog()
+function findConfigForSku(
+  requestedSku: string,
+  amountFor: (plan: PaidPlanKey) => number,
+): SkuConfig | null {
+  const catalog = skuCatalog(amountFor)
   for (const cfg of Object.values(catalog)) {
     if (cfg.sku && cfg.sku === requestedSku) return cfg
   }
@@ -95,10 +106,21 @@ export async function POST(request: Request) {
   }
 
   // 3. SKU allowlist — must match one of the four env-configured values
-  const cfg = findConfigForSku(sku)
+  const { tiers } = await getMembershipPricing()
+  const amountFor = (plan: PaidPlanKey) => planAmountCents(plan, tiers)
+  const cfg = findConfigForSku(sku, amountFor)
   if (!cfg) {
     console.warn('[Checkout] rejected unknown SKU', { sku, userId: profile.id })
     return NextResponse.json({ error: 'Invalid SKU' }, { status: 422 })
+  }
+
+  // 3b. Same repurchase guard as /api/stripe/checkout — a live VIP must not
+  // open a second Vendasta order because the UI hid the button.
+  if (alreadyEntitledTo(profile.tier, profile.tier_status, cfg.plan)) {
+    return NextResponse.json(
+      { error: 'alreadyEntitledTo', plan: cfg.plan },
+      { status: 409 },
+    )
   }
 
   if (!profile.email) {

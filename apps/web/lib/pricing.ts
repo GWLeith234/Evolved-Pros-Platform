@@ -29,6 +29,21 @@ export const TIERS: Record<TierKey, TierPrice> = {
   professional: { monthly: 249, annual: 2490 },
 }
 
+export type PaidPlanKey = 'vip_monthly' | 'vip_annual' | 'pro_monthly' | 'pro_annual'
+
+/** Cents to send to Vendasta / any checkout that still takes an amount. */
+export function planAmountCents(
+  plan: PaidPlanKey,
+  tiers: Record<TierKey, TierPrice> = TIERS,
+): number {
+  switch (plan) {
+    case 'vip_monthly': return Math.round(tiers.vip.monthly * 100)
+    case 'vip_annual':  return Math.round(tiers.vip.annual * 100)
+    case 'pro_monthly': return Math.round(tiers.professional.monthly * 100)
+    case 'pro_annual':  return Math.round(tiers.professional.annual * 100)
+  }
+}
+
 /**
  * Normalize a stored/loose tier string to a canonical key. The DB
  * (users.tier) and the admin products catalog store the professional tier as
