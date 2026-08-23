@@ -30,7 +30,13 @@ const PUBLIC_ROUTES = [
 // auth, not by the beta gate, not by the onboarding gate (see the early return
 // below). /pricing is the only checkout surface, so it has to stay reachable
 // for anonymous visitors AND for signed-in members mid-onboarding.
-const SESSION_OPTIONAL_ROUTES = ['/membership', '/pricing']
+//
+// /live is the public speaking/booking shell: prospects arrive cold from a
+// keynote referral, and its inquiry form posts anonymously (/api/speaking/inquiry
+// writes via the service role for exactly that reason). It sits here rather than
+// in PUBLIC_ROUTES because the page still reads the session — it renders a
+// "back to platform" link for signed-in members and nothing else auth-dependent.
+const SESSION_OPTIONAL_ROUTES = ['/membership', '/pricing', '/live']
 const ADMIN_ROUTES = ['/admin', '/api/admin']
 
 export async function middleware(request: NextRequest) {
