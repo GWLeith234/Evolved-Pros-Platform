@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 interface SyncResponse {
   inserted?: number
+  linked?: number
   skipped?: number
   malformed?: number
   episodes?: string[]
@@ -26,10 +27,12 @@ export function SyncPodcastButton() {
         throw new Error(data.error ?? `HTTP ${res.status}`)
       }
       const inserted = data.inserted ?? 0
+      const linked = data.linked ?? 0
       const skipped = data.skipped ?? 0
-      const message = inserted === 0
+      const added = inserted + linked
+      const message = added === 0
         ? `Up to date — ${skipped} already in sync`
-        : `${inserted} new episode${inserted === 1 ? '' : 's'} added · ${skipped} already in sync`
+        : `${added} draft episode${added === 1 ? '' : 's'} ready for review · ${skipped} already in sync`
       setStatus({ tone: 'success', message })
       // Refresh the server-rendered table so new rows appear.
       router.refresh()
