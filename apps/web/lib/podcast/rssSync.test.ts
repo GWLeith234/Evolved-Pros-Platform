@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildDraftEpisodeRow,
-  episodeThumbnailFromRss,
   parseDuration,
   pickGuid,
   uniqueSlug,
@@ -20,24 +19,8 @@ describe('pickGuid', () => {
   })
 })
 
-describe('episodeThumbnailFromRss', () => {
-  it('uses per-item itunes:image when present', () => {
-    expect(
-      episodeThumbnailFromRss({
-        'itunes:image': { '@_href': 'https://cdn.example/guest.jpg' },
-      }),
-    ).toBe('https://cdn.example/guest.jpg')
-  })
-
-  it('does not invent a thumbnail when the item has no image', () => {
-    // Channel artwork must never be written here — it buries guest portraits.
-    expect(episodeThumbnailFromRss({})).toBeNull()
-    expect(episodeThumbnailFromRss({ 'itunes:image': {} })).toBeNull()
-  })
-})
-
 describe('buildDraftEpisodeRow', () => {
-  it('lands unpublished with null published_at (platform-release semantics)', () => {
+  it('lands unpublished with null published_at and no cover fields', () => {
     const row = buildDraftEpisodeRow(
       {
         title: 'Guest Talk',
@@ -55,7 +38,19 @@ describe('buildDraftEpisodeRow', () => {
     expect(row.transistor_episode_id).toBe('124107842')
     expect(row.episode_number).toBe(8)
     expect(row.duration_seconds).toBe(3723)
-    expect(row.thumbnail_url).toBeNull()
+    expect(row).not.toHaveProperty('thumbnail_url')
+  })
+
+  it('does not write RSS itunes:image to thumbnail_url', () => {
+    const row = buildDraftEpisodeRow(
+      {
+        title: 'With Art',
+        'itunes:image': { '@_href': 'https://cdn.example/guest.jpg' },
+      },
+      '999',
+      'with-art',
+    )
+    expect(row).not.toHaveProperty('thumbnail_url')
   })
 })
 

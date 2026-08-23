@@ -4,8 +4,8 @@
  * Product rules:
  * - `published_at` = platform release (set when an admin publishes), never RSS pubDate.
  * - New RSS rows land as drafts (`is_published: false`) so pillar + guest art can land first.
- * - Per-item itunes:image only — never fall back to channel artwork (that buries guest portraits
- *   because episodePosterUrl prefers thumbnail_url over guest_image_url).
+ * - Never write thumbnail_url, guest_image_url, or pillar — cover/portrait layers and
+ *   pillar assignment are admin-owned before publish.
  */
 
 export interface RssEnclosure {
@@ -38,7 +38,6 @@ export interface EpisodeInsertRow {
   description: string | null
   show_notes: string | null
   audio_url: string | null
-  thumbnail_url: string | null
   published_at: null
   duration_seconds: number | null
   episode_number: number | null
@@ -88,14 +87,6 @@ export function slugify(input: string): string {
     .slice(0, 200)
 }
 
-/** Episode-level itunes:image only — never channel art. */
-export function episodeThumbnailFromRss(item: RssItem): string | null {
-  const href = item['itunes:image']?.['@_href']
-  if (typeof href !== 'string') return null
-  const trimmed = href.trim()
-  return trimmed || null
-}
-
 export function uniqueSlug(
   title: string,
   guid: string,
@@ -135,7 +126,6 @@ export function buildDraftEpisodeRow(
     description,
     show_notes: showNotes,
     audio_url: item.enclosure?.['@_url'] ?? null,
-    thumbnail_url: episodeThumbnailFromRss(item),
     published_at: null,
     duration_seconds: parseDuration(item['itunes:duration']),
     episode_number: parseInteger(item['itunes:episode']),
