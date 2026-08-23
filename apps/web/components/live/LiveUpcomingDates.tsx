@@ -206,8 +206,7 @@ export async function LiveUpcomingDates() {
             }}
           >
             When a keynote, panel, or workshop is locked, it shows up here with the city.
-            Past stages live on the map below — cities only, no long write-ups. Add dates in
-            Admin → Speaking.
+            Past stages live on the map below — cities only, no long write-ups.
           </p>
           <a
             href={BOOKING_HREF}

@@ -5,32 +5,16 @@ import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { XMLParser } from 'fast-xml-parser'
-
-interface RssEnclosure {
-  '@_url'?: string
-  '@_type'?: string
-  '@_length'?: string
-}
-
-interface RssItunesImage {
-  '@_href'?: string
-}
-
-interface RssItem {
-  guid?: string | { '#text'?: string }
-  title?: string
-  description?: string
-  pubDate?: string
-  enclosure?: RssEnclosure
-  'content:encoded'?: string
-  'itunes:duration'?: string | number
-  'itunes:episode'?: string | number
-  'itunes:season'?: string | number
-  'itunes:image'?: RssItunesImage
-}
+import {
+  buildDraftEpisodeRow,
+  pickGuid,
+  parseInteger,
+  uniqueSlug,
+  type RssItem,
+} from '@/lib/podcast/rssSync'
 
 interface RssChannel {
-  'itunes:image'?: RssItunesImage
+  'itunes:image'?: { '@_href'?: string }
   item?: RssItem | RssItem[]
 }
 
@@ -38,62 +22,11 @@ interface RssPayload {
   rss?: { channel?: RssChannel }
 }
 
-interface EpisodeRow {
-  transistor_episode_id: string
-  title: string
+interface ExistingEpisode {
+  id: string
   slug: string
-  description: string | null
-  show_notes: string | null
-  audio_url: string | null
-  thumbnail_url: string | null
-  published_at: string | null
-  duration_seconds: number | null
   episode_number: number | null
-  season: number
-  is_published: boolean
-  is_members_only: boolean
-  pinned: boolean
-}
-
-function pickGuid(guid: RssItem['guid']): string | null {
-  if (!guid) return null
-  if (typeof guid === 'string') return guid.trim() || null
-  if (typeof guid === 'object' && typeof guid['#text'] === 'string') {
-    return guid['#text'].trim() || null
-  }
-  return null
-}
-
-function parseDuration(value: string | number | undefined): number | null {
-  if (value === undefined || value === null) return null
-  if (typeof value === 'number') return Number.isFinite(value) ? value : null
-  const str = String(value).trim()
-  if (!str) return null
-  if (str.includes(':')) {
-    // HH:MM:SS or MM:SS
-    const parts = str.split(':').map(p => parseInt(p, 10))
-    if (parts.some(n => Number.isNaN(n))) return null
-    let seconds = 0
-    for (const part of parts) seconds = seconds * 60 + part
-    return seconds
-  }
-  const n = parseInt(str, 10)
-  return Number.isNaN(n) ? null : n
-}
-
-function parseInteger(value: string | number | undefined): number | null {
-  if (value === undefined || value === null) return null
-  if (typeof value === 'number') return Number.isFinite(value) ? Math.trunc(value) : null
-  const n = parseInt(String(value), 10)
-  return Number.isNaN(n) ? null : n
-}
-
-function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-    .slice(0, 200)
+  transistor_episode_id: string | null
 }
 
 export async function POST(request: Request) {
@@ -111,7 +44,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'PODCAST_RSS_URL not set' }, { status: 500 })
   }
 
-  // Fetch RSS
   let xml: string
   try {
     const res = await fetch(rssUrl, { cache: 'no-store' })
@@ -127,7 +59,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `RSS fetch error: ${msg}` }, { status: 502 })
   }
 
-  // Parse XML
   const parser = new XMLParser({
     ignoreAttributes: false,
     attributeNamePrefix: '@_',
@@ -148,112 +79,120 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'RSS has no <channel>' }, { status: 502 })
   }
 
-  const channelArtwork = channel['itunes:image']?.['@_href'] ?? null
   const rawItems = channel.item
   const items: RssItem[] = Array.isArray(rawItems) ? rawItems : rawItems ? [rawItems] : []
 
   if (items.length === 0) {
-    return NextResponse.json({ inserted: 0, skipped: 0, episodes: [] })
+    return NextResponse.json({ inserted: 0, linked: 0, skipped: 0, episodes: [] })
   }
 
-  // Pre-fetch existing slugs once so we can resolve collisions in-memory
-  // before sending the upsert.
-  const { data: existingSlugRows } = await adminClient
+  const { data: existingRows } = await adminClient
     .from('episodes')
-    .select('slug')
-  const existingSlugs = new Set((existingSlugRows ?? []).map(r => r.slug))
+    .select('id, slug, episode_number, transistor_episode_id')
+
+  const existing = (existingRows ?? []) as ExistingEpisode[]
+  const existingSlugs = new Set(existing.map(r => r.slug).filter(Boolean))
+  const byGuid = new Map(
+    existing
+      .filter(r => r.transistor_episode_id)
+      .map(r => [r.transistor_episode_id as string, r]),
+  )
+  // Orphan catalog rows (manual / seed) waiting for a Transistor GUID.
+  const orphanByNumber = new Map<number, ExistingEpisode>()
+  for (const row of existing) {
+    if (row.transistor_episode_id) continue
+    if (row.episode_number === null || row.episode_number === undefined) continue
+    if (!orphanByNumber.has(row.episode_number)) {
+      orphanByNumber.set(row.episode_number, row)
+    }
+  }
 
   const seenSlugs = new Set<string>()
-  const episodes: EpisodeRow[] = []
+  const toInsert: ReturnType<typeof buildDraftEpisodeRow>[] = []
+  const linkedTitles: string[] = []
   const skippedReasons: string[] = []
+  let skippedKnown = 0
 
   for (const item of items) {
     const guid = pickGuid(item.guid)
     const title = typeof item.title === 'string' ? item.title.trim() : ''
-    const audioUrl = item.enclosure?.['@_url'] ?? null
-
     if (!guid || !title) {
       skippedReasons.push(`malformed item (guid="${guid ?? ''}", title="${title}")`)
       continue
     }
 
-    let slug = slugify(title)
-    if (!slug) slug = `episode-${guid.slice(0, 8)}`
-    const episodeNumber = parseInteger(item['itunes:episode'])
+    if (byGuid.has(guid)) {
+      skippedKnown += 1
+      continue
+    }
 
-    // Slug collision: append episode number, then a short guid suffix.
-    if (existingSlugs.has(slug) || seenSlugs.has(slug)) {
-      const suffix = episodeNumber !== null ? `-${episodeNumber}` : `-${guid.slice(0, 6)}`
-      slug = `${slug}${suffix}`
+    const episodeNumber = parseInteger(item['itunes:episode'])
+    const audioUrl = item.enclosure?.['@_url'] ?? null
+
+    // Adopt: stamp GUID onto an existing episode_number row that has none.
+    // Never touch thumbnail_url / published_at / is_published / guest art / pillar.
+    const orphan = episodeNumber !== null ? orphanByNumber.get(episodeNumber) : undefined
+    if (orphan) {
+      const { error: linkError } = await adminClient
+        .from('episodes')
+        .update({
+          transistor_episode_id: guid,
+          ...(audioUrl ? { audio_url: audioUrl } : {}),
+        })
+        .eq('id', orphan.id)
+        .is('transistor_episode_id', null)
+
+      if (linkError) {
+        console.error('[podcast-sync] GUID adopt failed:', linkError)
+        return NextResponse.json(
+          { error: 'Sync failed. Check server logs for details.' },
+          { status: 500 },
+        )
+      }
+
+      byGuid.set(guid, { ...orphan, transistor_episode_id: guid })
+      orphanByNumber.delete(episodeNumber!)
+      linkedTitles.push(orphan.slug || title)
+      continue
     }
-    if (existingSlugs.has(slug) || seenSlugs.has(slug)) {
-      // Final fallback — guarantee uniqueness.
-      slug = `${slug}-${Date.now().toString(36).slice(-4)}`
-    }
+
+    const taken = new Set([...existingSlugs, ...seenSlugs])
+    const slug = uniqueSlug(title, guid, episodeNumber, taken)
     seenSlugs.add(slug)
 
-    const description = typeof item.description === 'string' ? item.description : null
-    const showNotes = typeof item['content:encoded'] === 'string'
-      ? item['content:encoded']
-      : description
-    const thumbnailUrl = item['itunes:image']?.['@_href'] ?? channelArtwork
-    const publishedAt = item.pubDate
-      ? (() => {
-          const d = new Date(item.pubDate as string)
-          return Number.isNaN(d.getTime()) ? null : d.toISOString()
-        })()
-      : null
-    const seasonRaw = parseInteger(item['itunes:season'])
-
-    episodes.push({
-      transistor_episode_id: guid,
-      title,
-      slug,
-      description,
-      show_notes: showNotes,
-      audio_url: audioUrl,
-      thumbnail_url: thumbnailUrl,
-      published_at: publishedAt,
-      duration_seconds: parseDuration(item['itunes:duration']),
-      episode_number: episodeNumber,
-      season: seasonRaw ?? 1,
-      is_published: true,
-      is_members_only: false,
-      pinned: false,
-    })
+    toInsert.push(buildDraftEpisodeRow(item, guid, slug))
   }
 
-  // Upsert by transistor_episode_id, never overwriting existing rows.
-  // ignoreDuplicates: true => existing transistor_episode_id rows pass
-  // through unchanged. Insert returns only the newly-created rows.
-  const { data: inserted, error: upsertError } = await adminClient
-    .from('episodes')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .upsert(episodes as any, {
-      onConflict: 'transistor_episode_id',
-      ignoreDuplicates: true,
-    })
-    .select('id, title')
+  let insertedRows: Array<{ id: string; title: string }> = []
 
-  if (upsertError) {
-    // Never surface raw Postgres errors to the admin UI — they're
-    // unintelligible to the human clicking "Sync Podcast" and have leaked
-    // schema details before (e.g. the ON CONFLICT mismatch that prompted
-    // migration 046). Log the full error server-side; return a friendly
-    // generic message.
-    console.error('[podcast-sync] RSS upsert failed:', upsertError)
-    return NextResponse.json(
-      { error: 'Sync failed. Check server logs for details.' },
-      { status: 500 },
-    )
+  if (toInsert.length > 0) {
+    // Upsert by transistor_episode_id, never overwriting existing rows.
+    // ignoreDuplicates: true => existing GUID rows pass through unchanged.
+    const { data: inserted, error: upsertError } = await adminClient
+      .from('episodes')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .upsert(toInsert as any, {
+        onConflict: 'transistor_episode_id',
+        ignoreDuplicates: true,
+      })
+      .select('id, title')
+
+    if (upsertError) {
+      console.error('[podcast-sync] RSS upsert failed:', upsertError)
+      return NextResponse.json(
+        { error: 'Sync failed. Check server logs for details.' },
+        { status: 500 },
+      )
+    }
+
+    insertedRows = (inserted ?? []) as Array<{ id: string; title: string }>
   }
-
-  const insertedRows = (inserted ?? []) as Array<{ id: string; title: string }>
 
   return NextResponse.json({
     inserted: insertedRows.length,
-    skipped: episodes.length - insertedRows.length,
+    linked: linkedTitles.length,
+    skipped: skippedKnown + (toInsert.length - insertedRows.length),
     malformed: skippedReasons.length,
-    episodes: insertedRows.map(r => r.title),
+    episodes: [...linkedTitles, ...insertedRows.map(r => r.title)],
   })
 }
