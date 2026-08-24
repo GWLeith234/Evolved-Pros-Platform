@@ -3,6 +3,9 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { YouTubeFacade } from '@/components/podcast/public/YouTubeFacade'
 import { RotatingSponsorCard } from '@/components/podcast/PodcastSponsorCard'
+import { GuestDossier } from '@/components/podcast/GuestDossier'
+import { RelatedEpisodes } from '@/components/podcast/RelatedEpisodes'
+import { buildEpisodeExtras, buildRelatedEpisodes } from '@/lib/podcast/episodeExtras'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import {
   SITE_URL,
@@ -10,7 +13,6 @@ import {
   getEpisodeBySlug,
   getPublishedEpisodes,
   getPodcastSponsorPool,
-  relatedEpisodes,
   episodeUrl,
   ytThumb,
   summaryText,
@@ -128,7 +130,9 @@ export default async function PublicEpisodePage({ params }: Props) {
   if (!ep) notFound()
 
   const [all, sponsors] = await Promise.all([getPublishedEpisodes(), getPodcastSponsorPool()])
-  const related = relatedEpisodes(ep, all, 4)
+  // extras is null on Ep 0 (no guest) — no dossier there, but the rail stays.
+  const extras = buildEpisodeExtras(ep, all)
+  const related = extras?.related ?? buildRelatedEpisodes(ep, all)
   const paragraphs = transcriptParagraphs(ep)
   const segments = ep.transcript_segments
   const showSegments = hasSegments(ep)
@@ -232,7 +236,7 @@ export default async function PublicEpisodePage({ params }: Props) {
               {ep.pull_quotes.map((qt, i) => (
                 <blockquote
                   key={i}
-                  className="rounded-lg p-5"
+                  className="p-5"
                   style={{ background: 'rgba(255,255,255,0.04)', borderLeft: '3px solid #ef0e30' }}
                 >
                   <p className="text-[18px] italic leading-snug" style={{ fontFamily: 'var(--font-playfair, Georgia, serif)', color: IVORY }}>
@@ -290,40 +294,12 @@ export default async function PublicEpisodePage({ params }: Props) {
         {/* Sponsor — bottom slot */}
         <SponsorSlot pool={sponsors} startIndex={2} />
 
-        {/* Guest block */}
-        {ep.guest_name && ep.guest_bio && (
-          <section className="mb-12 rounded-xl p-6" style={{ background: '#111926', border: '1px solid rgba(245,240,232,0.08)' }} aria-labelledby="guest-heading">
-            <h2 id="guest-heading" className="font-condensed text-[13px] font-bold uppercase tracking-[0.2em]" style={{ color: '#ef0e30' }}>
-              About {ep.guest_name}
-            </h2>
-            <p className="mt-3 text-[15px] leading-relaxed" style={{ color: DIM }}>{ep.guest_bio}</p>
-          </section>
-        )}
+        {/* Guest dossier — gated on guest_name ONLY. The old block also required
+            guest_bio, which hid the dossier on the 4 episodes whose bio is null. */}
+        {extras && <GuestDossier guest={extras.guest} />}
 
         {/* Related */}
-        {related.length > 0 && (
-          <section aria-labelledby="related-heading">
-            <h2 id="related-heading" className="mb-4 font-condensed text-[13px] font-bold uppercase tracking-[0.2em]" style={{ color: '#ef0e30' }}>
-              Related episodes
-            </h2>
-            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-              {related.map(r => (
-                <li key={r.slug}>
-                  <Link href={`/podcast/${r.slug}`} className="flex gap-3 rounded-lg p-3 no-underline transition-colors" style={{ background: '#111926', border: '1px solid rgba(245,240,232,0.08)' }}>
-                    {ytThumb(r.youtube_id, 'hq') && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={ytThumb(r.youtube_id, 'hq')!} alt="" className="h-16 w-28 shrink-0 rounded object-cover" loading="lazy" />
-                    )}
-                    <span>
-                      <span className="font-condensed text-[15px] font-bold leading-tight" style={{ color: IVORY }}>{r.title}</span>
-                      {r.guest_name && <span className="mt-0.5 block text-[12px]" style={{ color: DIMMER }}>{r.guest_name}</span>}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+        <RelatedEpisodes episodes={related} />
       </div>
     </div>
   )
@@ -355,7 +331,7 @@ function ListenLink({ href, label }: { href: string; label: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="rounded-lg px-4 py-2 font-condensed text-[13px] font-bold uppercase tracking-[0.1em] no-underline transition-opacity hover:opacity-80"
+      className="px-4 py-2 font-condensed text-[13px] font-bold uppercase tracking-[0.1em] no-underline transition-opacity hover:opacity-80"
       style={{ color: IVORY, border: '1px solid rgba(245,240,232,0.18)' }}
     >
       {label}

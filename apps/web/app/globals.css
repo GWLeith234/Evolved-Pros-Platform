@@ -88,6 +88,7 @@
      zero raw hex. Themed neutrals live in the semantic tokens above. */
   --white:            #FFFFFF;
   --navy-abyss:       #0A0F18;  /* always-dark hero/page ink (= dark --bg-page) */
+  --navy-card:        #111926;  /* always-dark card surface (= dark --bg-surface) */
   --brand-navy:       #1B2A4A;
   --red-soft:         #ef6075;  /* expiry / soft-warning red on dark nav */
   --success-green:    #3a8a5a;

@@ -30,6 +30,10 @@ export interface PublicEpisode {
   title: string
   guest_name: string | null
   guest_bio: string | null
+  /** Guest's role, e.g. "Chief Digital Officer". Populated on all 9 guests. */
+  guest_title: string | null
+  /** Guest's org, e.g. "Salem Media". Populated on all 9 guests. */
+  guest_company: string | null
   guest_image_url: string | null
   thumbnail_url: string | null
   published_at: string | null
@@ -40,6 +44,10 @@ export interface PublicEpisode {
   location: string | null
   summary: string | null
   tags: string[]
+  /** Primary pillar slug. Populated on all 10 published episodes. */
+  pillar: string | null
+  /** Secondary pillar slugs. Populated on only 3 today; [] elsewhere. */
+  pillars: string[]
   chapters: Chapter[]
   pull_quotes: PullQuote[]
   transcript_text: string | null
@@ -47,9 +55,10 @@ export interface PublicEpisode {
 }
 
 const SELECT_COLS =
-  'id, slug, episode_number, title, guest_name, guest_bio, guest_image_url, thumbnail_url, published_at, ' +
+  'id, slug, episode_number, title, guest_name, guest_bio, guest_title, guest_company, ' +
+  'guest_image_url, thumbnail_url, published_at, ' +
   'youtube_id, youtube_url, spotify_url, apple_url, duration_seconds, location, ' +
-  'summary, description, tags, chapters, pull_quotes, transcript_text, transcript, transcript_segments'
+  'summary, description, tags, pillar, pillars, chapters, pull_quotes, transcript_text, transcript, transcript_segments'
 
 const YT_ID_RE = /^[A-Za-z0-9_-]{8,15}$/
 
@@ -95,6 +104,8 @@ function normalize(row: any): PublicEpisode {
     title: row.title,
     guest_name: row.guest_name ?? null,
     guest_bio: row.guest_bio ?? null,
+    guest_title: row.guest_title ?? null,
+    guest_company: row.guest_company ?? null,
     guest_image_url: row.guest_image_url ?? null,
     thumbnail_url: row.thumbnail_url ?? null,
     published_at: row.published_at ?? null,
@@ -105,6 +116,9 @@ function normalize(row: any): PublicEpisode {
     location: row.location ?? null,
     summary: row.summary ?? row.description ?? null,
     tags: asArray<string>(row.tags),
+    pillar: row.pillar ?? null,
+    // `pillars` is string[] | null in the schema — coerce the null to [].
+    pillars: asArray<string>(row.pillars),
     chapters: asArray<Chapter>(row.chapters),
     pull_quotes: asArray<PullQuote>(row.pull_quotes),
     transcript_text: transcriptText,
