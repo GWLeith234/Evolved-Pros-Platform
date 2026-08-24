@@ -13,11 +13,11 @@ import { showBookingStrip, showLinks, type Guest } from '@/lib/podcast/episodeEx
  *    so the 2px brand-red top rule carries it and the last row has no bottom
  *    rule — the table ends on content, not on a dangling hairline.
  *
- * Colors come from tokens, never raw hex (STYLEGUIDE §1): --brand-red is the
- * spec's section red, --brand-gold the headline gold, --brand-teal the focus
- * ring, --navy-card the always-dark card surface. Each already resolves to the
- * exact value the spec names. The --podcast-* text/border tiers are re-pinned
- * to ivory inside .podcast-force-dark, so they stay correct in light theme.
+ * Colors come from tokens, never raw hex (STYLEGUIDE §1): --brand-red-hot
+ * matches Chapters / Highlights / Transcript on this page; --brand-gold the
+ * headline gold; --brand-teal the focus ring; --navy-card the always-dark
+ * card surface. The --podcast-* text/border tiers are re-pinned to ivory
+ * inside .podcast-force-dark, so they stay correct in light theme.
  */
 
 const PILLAR_BY_NUMBER = new Map(PILLARS.map(p => [p.n as number, p]))
@@ -143,7 +143,7 @@ const CSS = `
   margin: 0 0 20px;
   font-size: 13px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.2em;
-  color: var(--brand-red);
+  color: var(--brand-red-hot);
 }
 .gd-grid { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: start; }
 @media (min-width: 768px)  { .gd-grid { grid-template-columns: 220px 1fr; gap: 28px; } }
@@ -195,7 +195,7 @@ const CSS = `
 /* One row must look deliberate: the 2px rule opens the table, each row closes
    with a hairline, and the LAST row has none — so a single-row table reads as
    a titled block, not a truncated list. */
-.gd-facts { margin: 22px 0 0; border-top: 2px solid var(--brand-red); }
+.gd-facts { margin: 22px 0 0; border-top: 2px solid var(--brand-red-hot); }
 .gd-fact {
   display: grid; grid-template-columns: 1fr; gap: 2px;
   padding: 10px 0;

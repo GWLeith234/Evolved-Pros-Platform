@@ -5,16 +5,18 @@ import type { RelatedEpisode } from '@/lib/podcast/episodeExtras'
 /**
  * Section B — Related episodes (SPRINT PODCAST-1). Server component.
  *
- * 4 cols >=1200, 2 cols 768-1199, 1 col below. Ships the DEFAULT 1-col mobile
- * stack only — the snap-scroll rail is optional-behind-a-flag in the spec and
- * we are not adding a flag this sprint.
+ * 2 cols >=768, 1 col below. The section lives inside the page's max-w-3xl
+ * (768px), so a 4-col ≥1200 rule would yield ~164px cards and hard-truncate
+ * titles. Ships the DEFAULT 1-col mobile stack only — the snap-scroll rail
+ * is optional-behind-a-flag in the spec and we are not adding a flag.
  *
  * Thumbnails are maxresdefault (1280x720, true 16:9) with explicit width/height
  * so the card reserves its box and does not shift on load. hqdefault is 480x360
  * 4:3 and letterboxes inside a 16:9 frame — never use it here.
  *
  * Colors are tokens, not raw hex (STYLEGUIDE §1): --navy-card is the card
- * surface, --navy-abyss the thumbnail well, --brand-red the section eyebrow.
+ * surface, --navy-abyss the thumbnail well, --brand-red-hot the section
+ * eyebrow — same hot red as Chapters / Highlights / Transcript on this page.
  */
 export function RelatedEpisodes({ episodes }: { episodes: RelatedEpisode[] }) {
   if (episodes.length === 0) return null
@@ -87,14 +89,13 @@ const CSS = `
   margin: 0 0 20px;
   font-size: 13px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.2em;
-  color: var(--brand-red);
+  color: var(--brand-red-hot);
 }
 .re-grid {
   display: grid; grid-template-columns: 1fr; gap: 16px;
   margin: 0; padding: 0; list-style: none;
 }
 @media (min-width: 768px)  { .re-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1200px) { .re-grid { grid-template-columns: repeat(4, 1fr); } }
 
 .re-cell { min-width: 0; }
 .re-card {
