@@ -146,7 +146,9 @@ export default async function PublicEpisodePage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(ep)) }}
       />
 
-      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      {/* Article column — reading measure. pt-10 only; the wider dossier/rail
+          wrapper below owns the page's bottom padding. */}
+      <div className="mx-auto max-w-3xl px-4 pt-10 sm:px-6">
         {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-6 font-condensed text-[12px] uppercase tracking-[0.14em]" style={{ color: DIMMER }}>
           <Link href="/podcast" style={{ color: '#ef0e30', textDecoration: 'none' }}>Podcast</Link>
@@ -293,7 +295,20 @@ export default async function PublicEpisodePage({ params }: Props) {
 
         {/* Sponsor — bottom slot */}
         <SponsorSlot pool={sponsors} startIndex={2} />
+      </div>
 
+      {/* Wider column for the dossier + rail. The article above stays at
+          max-w-3xl (768px) for reading measure; these two sections were drawn
+          against a 1220px container, and at 768px the rail's 4 columns collapse
+          to ~162px and truncate titles mid-word.
+
+          The article div owns pt-10 only — this wrapper owns the bottom padding,
+          so the seam does not get two stacked paddings.
+
+          DECLARED DEVIATION from spec §4.5 (20/40/56px container padding): px-4 /
+          sm:px-6 is kept so the left edge lines up with the article column above.
+          A 4px misalignment at the seam is visible; the padding delta is not. */}
+      <div className="mx-auto max-w-[1220px] px-4 pb-10 sm:px-6">
         {/* Guest dossier — gated on guest_name ONLY. The old block also required
             guest_bio, which hid the dossier on the 4 episodes whose bio is null. */}
         {extras && <GuestDossier guest={extras.guest} />}

@@ -1,5 +1,5 @@
 import { getPillarColor, PILLARS } from '@/lib/pillars'
-import { showBookingStrip, showLinks, type Guest } from '@/lib/podcast/episodeExtras'
+import { showBookingStrip, showLinks, type Guest, type GuestLink } from '@/lib/podcast/episodeExtras'
 
 /**
  * Section A — Guest dossier (SPRINT PODCAST-1). Server component, no state.
@@ -21,6 +21,19 @@ import { showBookingStrip, showLinks, type Guest } from '@/lib/podcast/episodeEx
  */
 
 const PILLAR_BY_NUMBER = new Map(PILLARS.map(p => [p.n as number, p]))
+
+/** Display label per link kind — the tile's first line. */
+const LINK_KIND_LABEL: Record<GuestLink['kind'], string> = {
+  podcast: 'Podcast',
+  youtube: 'YouTube',
+  linkedin: 'LinkedIn',
+  website: 'Website',
+  instagram: 'Instagram',
+  x: 'X',
+  tiktok: 'TikTok',
+  substack: 'Substack',
+  books: 'Books',
+}
 
 export function GuestDossier({ guest }: { guest: Guest }) {
   const facts: Array<{ label: string; value: string }> = []
@@ -50,10 +63,10 @@ export function GuestDossier({ guest }: { guest: Guest }) {
           {guest.headshot ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={guest.headshot}
-              alt={guest.name}
-              width={300}
-              height={375}
+              src={guest.headshot.url}
+              alt={guest.headshot.alt}
+              width={guest.headshot.width}
+              height={guest.headshot.height}
               loading="lazy"
               className="gd-headshot"
             />
@@ -99,14 +112,11 @@ export function GuestDossier({ guest }: { guest: Guest }) {
           {showLinks(guest.links) && (
             <ul className="gd-links" aria-label={`Follow ${guest.name}`}>
               {guest.links.map(l => (
-                <li key={l.href} className="gd-link-cell">
-                  <a
-                    href={l.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="gd-link font-condensed"
-                  >
-                    {l.label}
+                <li key={l.url} className="gd-link-cell">
+                  <a href={l.url} target="_blank" rel="noopener noreferrer" className="gd-link">
+                    <span className="gd-link-kind font-condensed">{LINK_KIND_LABEL[l.kind]}</span>
+                    <span className="gd-link-title font-condensed">{l.title}</span>
+                    {l.meta && <span className="gd-link-meta font-body">{l.meta}</span>}
                   </a>
                 </li>
               ))}
@@ -146,8 +156,8 @@ const CSS = `
   color: var(--brand-red);
 }
 .gd-grid { display: grid; grid-template-columns: 1fr; gap: 24px; align-items: start; }
-@media (min-width: 768px)  { .gd-grid { grid-template-columns: 220px 1fr; gap: 28px; } }
-@media (min-width: 1200px) { .gd-grid { grid-template-columns: 300px 1fr; gap: 32px; } }
+@media (min-width: 768px)  { .gd-grid { grid-template-columns: 220px 1fr; gap: 40px; } }
+@media (min-width: 1200px) { .gd-grid { grid-template-columns: 300px 1fr; gap: 56px; } }
 
 /* Stacked mobile: cap the portrait. At full column width a 4:5 crop is taller
    than the viewport, so the name fell a whole screen below the fold. */
@@ -170,7 +180,8 @@ const CSS = `
   letter-spacing: 0.02em; text-transform: uppercase;
   color: var(--podcast-text-strong);
 }
-@media (min-width: 1200px) { .gd-name { font-size: 46px; } }
+@media (min-width: 768px)  { .gd-name { font-size: 46px; } }
+@media (min-width: 1200px) { .gd-name { font-size: 56px; } }
 .gd-headline {
   margin: 6px 0 0;
   font-size: 16px; font-weight: 600;
@@ -222,14 +233,24 @@ const CSS = `
   border-right: 1px solid var(--podcast-border-med);
   border-bottom: 1px solid var(--podcast-border-med);
 }
+/* Three distinct lines: kind, then title, then optional meta. */
 .gd-link {
-  display: block; padding: 12px 14px;
-  font-size: 12px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.14em;
-  color: var(--podcast-text-strong); text-decoration: none;
-  border-radius: 0;
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 12px 14px;
+  text-decoration: none; border-radius: 0;
 }
-@media (hover: hover) { .gd-link:hover { color: var(--brand-gold); } }
+.gd-link-kind {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.18em;
+  color: var(--podcast-text-4);
+}
+.gd-link-title {
+  font-size: 14px; font-weight: 700; line-height: 1.2;
+  color: var(--podcast-text-strong);
+  overflow-wrap: anywhere;
+}
+.gd-link-meta { font-size: 12px; line-height: 1.3; color: var(--podcast-text-3); }
+@media (hover: hover) { .gd-link:hover .gd-link-title { color: var(--brand-gold); } }
 
 .gd-booking {
   display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px;

@@ -105,7 +105,13 @@ describe('guest.facts', () => {
 // ── 4. Links gate ───────────────────────────────────────────────────────────
 
 describe('showLinks', () => {
-  const link = (n: number): GuestLink => ({ label: `L${n}`, href: `https://x.test/${n}` })
+  const link = (n: number): GuestLink => ({
+    kind: 'website',
+    url: `https://x.test/${n}`,
+    title: `Link ${n}`,
+    meta: null,
+    verifiedAt: '2026-08-01T00:00:00.000Z',
+  })
 
   it('hides the Follow block under 3 links', () => {
     expect(showLinks([])).toBe(false)
@@ -192,8 +198,8 @@ describe('related', () => {
 
   it('uses maxresdefault (true 16:9), never hqdefault', () => {
     const [first] = buildRelatedEpisodes(current, pool)
-    expect(first.thumbnail).toContain('maxresdefault.jpg')
-    expect(first.thumbnail).not.toContain('hqdefault')
+    expect(first.thumbnail?.url).toContain('maxresdefault.jpg')
+    expect(first.thumbnail?.url).not.toContain('hqdefault')
   })
 
   it('formats duration as mm:ss', () => {
@@ -257,6 +263,145 @@ describe('reason', () => {
     ]
     for (const card of buildRelatedEpisodes(current, pool)) {
       expect(card.reason.trim()).not.toBe('')
+    }
+  })
+})
+
+// ── PODCAST-1b — Image shape ────────────────────────────────────────────────
+
+describe('guest.headshot (Image)', () => {
+  it('is null when guest_image_url is null', () => {
+    const x = buildEpisodeExtras(ep({ guest_image_url: null }), [])
+    expect(x?.guest.headshot).toBeNull()
+  })
+
+  it('carries the guest name as alt and the nominal 4:5 box', () => {
+    const x = buildEpisodeExtras(ep({ guest_name: 'Heather Monahan' }), [])
+    expect(x?.guest.headshot).toEqual({
+      url: 'https://cdn.test/dennis.jpg',
+      alt: 'Heather Monahan',
+      width: 600,
+      height: 750,
+    })
+  })
+})
+
+describe('related.thumbnail (Image)', () => {
+  const current = ep({ slug: 'current', guest_name: 'Host' })
+  const pool = [
+    current,
+    ep({ slug: 'a', guest_name: 'A' }),
+    ep({ slug: 'b', guest_name: 'B' }),
+  ]
+
+  it("has alt exactly '' on every card — deliberate, the title already names it", () => {
+    const out = buildRelatedEpisodes(current, pool)
+    expect(out.length).toBeGreaterThan(0)
+    for (const card of out) {
+      expect(card.thumbnail?.alt).toBe('')
+    }
+  })
+
+  it('carries the true 16:9 pixel box so the frame reserves space (no CLS)', () => {
+    for (const card of buildRelatedEpisodes(current, pool)) {
+      expect(card.thumbnail?.width).toBe(1280)
+      expect(card.thumbnail?.height).toBe(720)
+    }
+  })
+
+  it('is null when the episode has no youtube_id', () => {
+    const noVid = ep({ slug: 'novid', guest_name: 'No Video', youtube_id: null })
+    const [card] = buildRelatedEpisodes(current, [current, noVid])
+    expect(card.thumbnail).toBeNull()
+  })
+})
+
+// ── PODCAST-1b — pillar identity is a number ────────────────────────────────
+
+describe('related.pillar', () => {
+  it('is a number, never a slug string', () => {
+    const current = ep({ slug: 'current', guest_name: 'Host' })
+    const pool = [
+      current,
+      ep({ slug: 'a', guest_name: 'A', pillar: 'mental-toughness' }),
+      ep({ slug: 'b', guest_name: 'B', pillar: 'execution' }),
+    ]
+    const out = buildRelatedEpisodes(current, pool)
+    expect(out.map(r => r.pillar)).toEqual([3, 6])
+    for (const card of out) {
+      expect(typeof card.pillar).toBe('number')
+    }
+  })
+
+  it('is null — not a string — when the column is null', () => {
+    const current = ep({ slug: 'current', guest_name: 'Host' })
+    const noPillar = ep({ slug: 'np', guest_name: 'NP', pillar: null, pillars: [] })
+    const [card] = buildRelatedEpisodes(current, [current, noPillar])
+    expect(card.pillar).toBeNull()
+  })
+})
+
+// ── PODCAST-1b — GuestLink round-trip ───────────────────────────────────────
+
+describe('GuestLink', () => {
+  it('round-trips kind / url / title / meta / verifiedAt', () => {
+    const fixture: GuestLink = {
+      kind: 'books',
+      url: 'https://example.test/creating-confidence',
+      title: 'Creating Confidence',
+      meta: '312K followers',
+      verifiedAt: '2026-08-24T12:00:00.000Z',
+    }
+    const [only] = [fixture]
+    expect(only.kind).toBe('books')
+    expect(only.url).toBe('https://example.test/creating-confidence')
+    expect(only.title).toBe('Creating Confidence')
+    expect(only.meta).toBe('312K followers')
+    expect(only.verifiedAt).toBe('2026-08-24T12:00:00.000Z')
+    // meta is the only nullable member of the shape.
+    expect({ ...fixture, meta: null }.meta).toBeNull()
+  })
+})
+
+// ── PODCAST-1b — truncation ─────────────────────────────────────────────────
+
+describe('truncation', () => {
+  it('caps guestHeadline at 42 chars', () => {
+    const long = guestHeadline('Journalist & Founder, BrightTrail', 'BrightTrail.biz')
+    expect(long.length).toBeLessThanOrEqual(42)
+    expect(long.endsWith('…')).toBe(true)
+  })
+
+  it('cuts guestHeadline on a word boundary, never mid-word', () => {
+    const long = guestHeadline('Journalist & Founder, BrightTrail', 'BrightTrail.biz')
+    const body = long.slice(0, -1)
+    // The kept text must be a whole-word prefix of the untruncated string.
+    expect('Journalist & Founder, BrightTrail · BrightTrail.biz').toContain(body)
+    expect(body.endsWith(' ')).toBe(false)
+  })
+
+  it('leaves a short headline untouched', () => {
+    expect(guestHeadline('Founder', 'Boss In Heels')).toBe('Founder · Boss In Heels')
+  })
+
+  it('caps reason at 60 chars and never returns an empty string', () => {
+    const tag = 'a-very-long-user-authored-tag-that-runs-well-past-the-sixty-char-cap'
+    const r = relatedReason(ep({ tags: [tag] }), ep({ tags: [tag] }))
+    expect(r.length).toBeLessThanOrEqual(60)
+    expect(r.trim()).not.toBe('')
+  })
+
+  it('keeps every emitted reason within the cap', () => {
+    const current = ep({ slug: 'current', tags: ['sales'] })
+    const pool = [
+      current,
+      ep({ slug: 'a', guest_name: 'A', tags: ['sales'] }),
+      ep({ slug: 'b', guest_name: 'B', tags: [], pillar: 'execution' }),
+      ep({ slug: 'c', guest_name: 'C', tags: [], pillar: null, pillars: [] }),
+    ]
+    for (const card of buildRelatedEpisodes(current, pool)) {
+      expect(card.reason.length).toBeLessThanOrEqual(60)
+      expect(card.reason).not.toBe('')
     }
   })
 })

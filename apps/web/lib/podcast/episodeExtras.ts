@@ -25,9 +25,41 @@ import { relatedEpisodes, ytThumb, type PublicEpisode } from '@/lib/podcast/publ
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
+/**
+ * An image with its box already decided. width/height travel with the URL so
+ * every consumer reserves the same space and nothing shifts on load
+ * (acceptance criterion 5, no CLS) — the components must not re-invent them.
+ */
+export interface Image {
+  url: string
+  alt: string
+  width: number
+  height: number
+}
+
 export interface GuestLink {
-  label: string
-  href: string
+  kind:
+    | 'podcast'
+    | 'youtube'
+    | 'linkedin'
+    | 'website'
+    | 'instagram'
+    | 'x'
+    | 'tiktok'
+    | 'substack'
+    | 'books'
+  /** Absolute, https, already resolved — never a bare handle or relative path. */
+  url: string
+  /** "Creating Confidence" / "@heathermonahan". */
+  title: string
+  /** "312K followers". Null when we have no figure worth showing. */
+  meta: string | null
+  /**
+   * ISO timestamp of the last successful check. The 30-day re-verify cron has
+   * nothing to write to without this, which is why {label, href} could not
+   * stand — a dead link would have gone on rendering forever.
+   */
+  verifiedAt: string
 }
 
 export interface GuestFacts {
@@ -51,7 +83,8 @@ export interface Guest {
   /** "Title · Company", omitting nulls. '' when both are missing. */
   headline: string
   bio: string | null
-  headshot: string | null
+  /** alt is the guest's name. Nominal 4:5 (600x750). */
+  headshot: Image | null
   facts: GuestFacts
   /** Pillar numbers, 1..6, primary first, deduped. */
   pillars: number[]
@@ -62,15 +95,31 @@ export interface Guest {
 export interface RelatedEpisode {
   slug: string
   title: string
+  /**
+   * ACCEPTED DIVERGENCE from the spec, which calls this `number`. Decided, not
+   * missed: `episodeNumber` says what it holds, and the column is genuinely
+   * nullable, so the type says so too.
+   */
   episodeNumber: number | null
   guestName: string | null
+  /** Truncated at 42 chars on a word boundary. */
   guestHeadline: string
-  /** Primary pillar slug, for the eyebrow label + color. */
-  pillar: string | null
-  thumbnail: string | null
+  /**
+   * Primary pillar NUMBER, 1..6 — not the slug. Guest.pillars is already
+   * number[]; one file must not carry two types for one identity. The eyebrow
+   * label and color both resolve from the id via lib/pillars.
+   */
+  pillar: number | null
+  /**
+   * alt is deliberately '' — the card is a link whose visible title already
+   * names the episode, so alt text here is a duplicate announcement for a
+   * screen reader. This is the correct choice, NOT a missing alt. Do not
+   * "fix" it. 1280x720, true 16:9.
+   */
+  thumbnail: Image | null
   /** mm:ss. '' when duration_seconds is null — the chip is then omitted. */
   durationLabel: string
-  /** Never ''. Explains what actually matched. */
+  /** Never ''. Explains what actually matched. Capped at 60 chars. */
   reason: string
 }
 
@@ -98,15 +147,38 @@ export function showBookingStrip(contact: GuestContact): boolean {
 
 const PILLAR_NUMBER = new Map(PILLARS.map(p => [p.slug, p.n as number]))
 
-/** "Title · Company", dropping nulls/blanks. '' when nothing is known. */
+/** Spec truncation limits. */
+export const HEADLINE_MAX = 42
+export const REASON_MAX = 60
+
+/**
+ * Trim to `max` on a WORD boundary and add an ellipsis. Never cuts mid-word —
+ * "Journalist & Founder, Bright…" reads as trimmed; "Bri…" reads as broken.
+ * The ellipsis is counted inside the budget, so the result never exceeds `max`.
+ */
+export function truncateWords(value: string, max: number): string {
+  const s = value.trim()
+  if (s.length <= max) return s
+  // Reserve one char for the ellipsis, then fall back to the last space.
+  const head = s.slice(0, max - 1)
+  const cut = head.lastIndexOf(' ')
+  const body = (cut > 0 ? head.slice(0, cut) : head).replace(/[\s.,;:·-]+$/, '')
+  return `${body}…`
+}
+
+/**
+ * "Title · Company", dropping nulls/blanks. '' when nothing is known.
+ * Truncated at HEADLINE_MAX on a word boundary.
+ */
 export function guestHeadline(
   title: string | null | undefined,
   company: string | null | undefined,
 ): string {
-  return [title, company]
+  const joined = [title, company]
     .map(v => (v ?? '').trim())
     .filter(Boolean)
     .join(' · ')
+  return truncateWords(joined, HEADLINE_MAX)
 }
 
 /** Primary pillar first, then secondaries, deduped, unknown slugs dropped. */
@@ -143,14 +215,19 @@ const PILLAR_LABEL = new Map(PILLARS.map(p => [p.slug, p.name]))
  * Why this card is here, from what actually fired. Tag beats pillar beats the
  * honest fallback. With tags empty on 6 of 10 episodes the fallback is common,
  * which is correct — we do not dress up "newest" as a themed match.
+ *
+ * Capped at REASON_MAX on a word boundary. A long user-authored tag is the only
+ * realistic way to reach the cap.
  */
 export function relatedReason(ep: PublicEpisode, other: PublicEpisode): string {
   const sharedTag = other.tags.find(t => ep.tags.includes(t))
-  if (sharedTag) return `Same theme — ${sharedTag}`
+  if (sharedTag) return truncateWords(`Same theme — ${sharedTag}`, REASON_MAX)
 
   const mine = pillarSlugs(ep)
   const sharedPillar = pillarSlugs(other).find(p => mine.includes(p))
-  if (sharedPillar) return `Same pillar — ${PILLAR_LABEL.get(sharedPillar) ?? sharedPillar}`
+  if (sharedPillar) {
+    return truncateWords(`Same pillar — ${PILLAR_LABEL.get(sharedPillar) ?? sharedPillar}`, REASON_MAX)
+  }
 
   return 'More from the show'
 }
@@ -158,6 +235,19 @@ export function relatedReason(ep: PublicEpisode, other: PublicEpisode): string {
 // ── Adapter ─────────────────────────────────────────────────────────────────
 
 const RELATED_LIMIT = 4
+
+/** Nominal portrait box. Sources are not all 4:5 yet; the frame crops to it. */
+const HEADSHOT_W = 600
+const HEADSHOT_H = 750
+
+/** maxresdefault's true pixel box. */
+const THUMB_W = 1280
+const THUMB_H = 720
+
+/** alt is '' by design — see RelatedEpisode.thumbnail. Not an omission. */
+function toThumb(url: string | null): Image | null {
+  return url ? { url, alt: '', width: THUMB_W, height: THUMB_H } : null
+}
 
 /**
  * Build the dossier + related rail for one episode.
@@ -180,7 +270,9 @@ function buildGuest(ep: PublicEpisode, name: string): Guest {
     name,
     headline: guestHeadline(ep.guest_title, ep.guest_company),
     bio: ep.guest_bio,
-    headshot: ep.guest_image_url,
+    headshot: ep.guest_image_url
+      ? { url: ep.guest_image_url, alt: name, width: HEADSHOT_W, height: HEADSHOT_H }
+      : null,
     facts: {
       company: ep.guest_company,
       location: ep.location,
@@ -219,10 +311,11 @@ export function buildRelatedEpisodes(ep: PublicEpisode, all: PublicEpisode[]): R
       episodeNumber: other.episode_number,
       guestName: other.guest_name,
       guestHeadline: guestHeadline(other.guest_title, other.guest_company),
-      pillar: other.pillar,
+      pillar: pillarNumbers(other)[0] ?? null,
       // 'max' = maxresdefault, 1280x720 and truly 16:9. Never 'hq' —
       // hqdefault is 480x360 4:3 and letterboxes inside a 16:9 frame.
-      thumbnail: ytThumb(other.youtube_id, 'max'),
+      // alt is '' on purpose — see the RelatedEpisode.thumbnail doc comment.
+      thumbnail: toThumb(ytThumb(other.youtube_id, 'max')),
       durationLabel: durationLabel(other.duration_seconds),
       reason: relatedReason(ep, other),
     })

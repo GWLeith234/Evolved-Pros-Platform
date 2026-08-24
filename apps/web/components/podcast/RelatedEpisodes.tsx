@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getPillarColor, getPillarLabel } from '@/lib/pillars'
+import { getPillar, getPillarColor, getPillarLabel } from '@/lib/pillars'
 import type { RelatedEpisode } from '@/lib/podcast/episodeExtras'
 
 /**
@@ -29,8 +29,11 @@ export function RelatedEpisodes({ episodes }: { episodes: RelatedEpisode[] }) {
 
       <ul className="re-grid">
         {episodes.map(ep => {
-          const pillarColor = getPillarColor(ep.pillar)
-          const pillarLabel = getPillarLabel(ep.pillar)
+          // pillar is a NUMBER (1..6) on the view model; lib/pillars is keyed by
+          // slug, so resolve the slug from the id here.
+          const pillarSlug = ep.pillar != null ? (getPillar(ep.pillar)?.slug ?? null) : null
+          const pillarColor = getPillarColor(pillarSlug)
+          const pillarLabel = getPillarLabel(pillarSlug)
           const eyebrow = [pillarLabel, ep.episodeNumber != null ? `Ep ${ep.episodeNumber}` : null]
             .filter(Boolean)
             .join(' · ')
@@ -40,12 +43,15 @@ export function RelatedEpisodes({ episodes }: { episodes: RelatedEpisode[] }) {
               <Link href={`/podcast/${ep.slug}`} className="re-card">
                 <span className="re-thumb">
                   {ep.thumbnail && (
+                    // alt comes from the data and is deliberately '' — the card's
+                    // visible title already names the episode, so alt here would
+                    // be a duplicate announcement. Not a missing alt.
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={ep.thumbnail}
-                      alt=""
-                      width={1280}
-                      height={720}
+                      src={ep.thumbnail.url}
+                      alt={ep.thumbnail.alt}
+                      width={ep.thumbnail.width}
+                      height={ep.thumbnail.height}
                       loading="lazy"
                       className="re-img"
                     />
