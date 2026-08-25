@@ -1410,6 +1410,17 @@ html.cream-mode body {
   outline-offset: 2px;
 }
 
+/* COMPOSER-1 / FINDING 01 — the community attach chip.
+   Its <input type=file> is visually hidden, so tab focus lands on the input
+   while the visible chip is a <label>. Labels are not in the rule above, so
+   the chip showed no ring. The wrapper holds both, and rings when focus is
+   anywhere inside it. Same token and geometry as the global rule, so the chip
+   matches every other focusable control in both themes. */
+.ep-attach-chip:focus-within {
+  outline: 2px solid var(--btn-focus-ring, rgba(10,191,163,0.55));
+  outline-offset: 2px;
+}
+
 /* Toast viewport — above bottom tabs on mobile, safe-area aware */
 .ep-toast-viewport {
   position: fixed;

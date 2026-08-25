@@ -77,63 +77,70 @@ export function MediaAttachControl({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
-      {/* Visually hidden but present, focusable, and labelled. */}
-      <input
-        ref={inputRef}
-        id={inputId}
-        type="file"
-        accept={IMAGE_ACCEPT_ATTR}
-        onChange={handleSelect}
-        disabled={disabled}
-        data-testid="community-attach-input"
-        style={{
-          position: 'absolute',
-          width: 1,
-          height: 1,
-          padding: 0,
-          margin: -1,
-          overflow: 'hidden',
-          clipPath: 'inset(50%)',
-          whiteSpace: 'nowrap',
-          border: 0,
-        }}
-      />
-
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 }}>
-        <label
-          htmlFor={inputId}
-          aria-disabled={disabled || undefined}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 7,
-            minHeight: compact ? 34 : 40,
-            padding: compact ? '6px 10px' : '8px 14px',
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: chipSize,
-            fontWeight: 700,
-            letterSpacing: '0.16em',
-            textTransform: 'uppercase',
-            background: 'var(--attach-chip-bg)',
-            color: 'var(--attach-chip-text)',
-            border: '1px solid var(--attach-chip-border)',
-            borderRadius: 0,
-            cursor: disabled ? 'not-allowed' : 'pointer',
-            opacity: disabled ? 0.5 : 1,
-            transition: 'opacity 140ms ease',
-          }}
-        >
-          <svg
-            width="14" height="14" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            aria-hidden="true"
+        {/* FINDING 01: tab focus lands on the INPUT, never the label, and the
+            global :focus-visible rule in globals.css does not cover labels — so
+            the chip showed no ring at all. The input now sits inside this
+            wrapper with the label, and .ep-attach-chip rings on :focus-within.
+            A class is required: :focus-within cannot be expressed in a style={}
+            object, and this component is otherwise all inline styles. */}
+        <span className="ep-attach-chip" style={{ display: 'inline-flex', position: 'relative' }}>
+          {/* Visually hidden but present, focusable, and labelled. */}
+          <input
+            ref={inputRef}
+            id={inputId}
+            type="file"
+            accept={IMAGE_ACCEPT_ATTR}
+            onChange={handleSelect}
+            disabled={disabled}
+            data-testid="community-attach-input"
+            style={{
+              position: 'absolute',
+              width: 1,
+              height: 1,
+              padding: 0,
+              margin: -1,
+              overflow: 'hidden',
+              clipPath: 'inset(50%)',
+              whiteSpace: 'nowrap',
+              border: 0,
+            }}
+          />
+          <label
+            htmlFor={inputId}
+            aria-disabled={disabled || undefined}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 7,
+              minHeight: compact ? 34 : 40,
+              padding: compact ? '6px 10px' : '8px 14px',
+              fontFamily: '"Barlow Condensed", sans-serif',
+              fontSize: chipSize,
+              fontWeight: 700,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              background: 'var(--attach-chip-bg)',
+              color: 'var(--attach-chip-text)',
+              border: '1px solid var(--attach-chip-border)',
+              borderRadius: 0,
+              cursor: disabled ? 'not-allowed' : 'pointer',
+              opacity: disabled ? 0.5 : 1,
+              transition: 'opacity 140ms ease',
+            }}
           >
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-            <circle cx="8.5" cy="8.5" r="1.5" />
-            <path d="m21 15-5-5L5 21" />
-          </svg>
-          {file ? 'Replace image' : 'Add image'}
-        </label>
+            <svg
+              width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="m21 15-5-5L5 21" />
+            </svg>
+            {file ? 'Replace image' : 'Add image'}
+          </label>
+        </span>
 
         {file && previewUrl && (
           <span
@@ -200,18 +207,54 @@ export function MediaAttachControl({
         )}
       </div>
 
+      {/* FINDING 04: the reject path sets the error AND clears the file, so
+          before this the only reset was a successful re-pick — and the submit
+          gate stayed blocked forever otherwise. Dismissing is the SECOND exit,
+          and it is the user's explicit acknowledgment, which is what keeps the
+          original guard honest: they cannot post text-only until they have
+          actively said "yes, I saw that".
+
+          The dismiss control sits immediately after the message, not pushed to
+          the far edge — it has to read as belonging to THIS error. */}
       {error && (
-        <p
-          role="alert"
-          style={{
-            margin: 0,
-            fontFamily: '"Barlow", sans-serif',
-            fontSize: 12,
-            color: 'var(--attach-error-text)',
-          }}
-        >
-          {error}
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
+          <p
+            role="alert"
+            style={{
+              margin: 0,
+              minWidth: 0,
+              fontFamily: '"Barlow", sans-serif',
+              fontSize: 12,
+              color: 'var(--attach-error-text)',
+            }}
+          >
+            {error}
+          </p>
+          <button
+            type="button"
+            onClick={() => onError(null)}
+            aria-label="Dismiss image error"
+            style={{
+              /* Looks small, but the hit area is a full 44px square. */
+              minWidth: 44,
+              minHeight: 44,
+              flexShrink: 0,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 0,
+              background: 'transparent',
+              border: 'none',
+              borderRadius: 0,
+              color: 'var(--attach-error-text)',
+              fontSize: 16,
+              lineHeight: 1,
+              cursor: 'pointer',
+            }}
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
       )}
     </div>
   )
