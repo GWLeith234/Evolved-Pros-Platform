@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import { listPublicMediaStories } from '@/lib/media/sitemap'
 import { MediaPortalClient } from './MediaPortalClient'
 import type { MediaStory, Episode } from './MediaPortalClient'
 import { Masthead } from '@/components/media/Masthead'
@@ -14,16 +15,15 @@ export const metadata: Metadata = {
 export default async function MediaPage() {
   const supabase = createClient()
 
-  // Fetch a wider window so the client can filter by category without
-  // a refetch round-trip.
+  // All published stories — no page-size cap. Category pills filter this
+  // list client-side, so every is_published row must be reachable on /media.
   const { data: allStories } = await supabase
     .from('media_stories')
     .select('id, title, slug, excerpt, pillar, story_type, featured_image_url, author, published_at, body, views')
     .eq('is_published', true)
     .order('published_at', { ascending: false })
-    .limit(30)
 
-  const stories = (allStories ?? []) as MediaStory[]
+  const stories = listPublicMediaStories((allStories ?? []) as MediaStory[])
 
   // Fetch 3 most recent published episodes
   let episodes: Episode[] = []

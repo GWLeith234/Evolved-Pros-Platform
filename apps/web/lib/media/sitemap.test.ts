@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { mediaArticlePath, toMediaSitemapEntries } from './sitemap'
+import {
+  isListedPublicMediaStory,
+  listPublicMediaStories,
+  mediaArticlePath,
+  toMediaSitemapEntries,
+} from './sitemap'
 
 const BASE = 'https://platform.evolvedpros.com'
 
@@ -72,5 +77,43 @@ describe('toMediaSitemapEntries', () => {
       { pillar: 'identity', slug: 'real-article', published_at: null, is_published: true },
     ])
     expect(entries.map(e => e.url)).toEqual([`${BASE}/media/identity/real-article`])
+  })
+})
+
+describe('listPublicMediaStories', () => {
+  it('keeps every published story so the /media hub is not capped at 30', () => {
+    const rows = Array.from({ length: 36 }, (_, i) => ({
+      pillar: 'foundation',
+      slug: `story-${i + 1}`,
+      is_published: true as const,
+    }))
+    expect(listPublicMediaStories(rows)).toHaveLength(36)
+  })
+
+  it('excludes unpublished rows and the two known unpublished slugs', () => {
+    const listed = listPublicMediaStories([
+      { pillar: 'identity', slug: 'real-article', is_published: true },
+      { pillar: 'execution', slug: 'draft', is_published: false },
+      {
+        pillar: 'execution',
+        slug: 'why-elite-sales-teams-swear-by-ritual-not-motivation',
+        is_published: true,
+      },
+      {
+        pillar: 'strategy',
+        slug: 'build-repeatable-sales-strategy-framework',
+        is_published: true,
+      },
+    ])
+    expect(listed.map(s => s.slug)).toEqual(['real-article'])
+  })
+
+  it('drops rows missing pillar or slug', () => {
+    expect(
+      isListedPublicMediaStory({ pillar: null, slug: 'no-pillar', is_published: true }),
+    ).toBe(false)
+    expect(
+      isListedPublicMediaStory({ pillar: 'strategy', slug: null, is_published: true }),
+    ).toBe(false)
   })
 })

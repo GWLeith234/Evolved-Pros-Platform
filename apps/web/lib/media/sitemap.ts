@@ -42,6 +42,30 @@ export function mediaArticlePath(
 }
 
 /**
+ * Whether a media_stories row belongs on the public /media hub.
+ * Unpublished rows, the explicit unpublished-slug denylist, and rows
+ * missing pillar/slug are excluded.
+ */
+export function isListedPublicMediaStory(story: {
+  pillar: string | null | undefined
+  slug: string | null | undefined
+  is_published?: boolean | null
+}): boolean {
+  if (story.is_published === false) return false
+  const path = mediaArticlePath(story.pillar, story.slug)
+  return Boolean(path && !UNPUBLISHED_MEDIA_PATHS.has(path))
+}
+
+/** Drop unpublished / denylisted / incomplete rows from a hub listing. */
+export function listPublicMediaStories<T extends {
+  pillar: string | null | undefined
+  slug: string | null | undefined
+  is_published?: boolean | null
+}>(stories: T[]): T[] {
+  return stories.filter(isListedPublicMediaStory)
+}
+
+/**
  * Map published media_stories rows to sitemap entries.
  * Unpublished rows, the explicit unpublished-slug denylist, and rows
  * missing pillar/slug are dropped.
