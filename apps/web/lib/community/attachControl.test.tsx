@@ -173,12 +173,12 @@ describe('attach control — dismissing a rejection (COMPOSER-1, FINDING 04)', (
 })
 
 describe('attach chip — keyboard focus ring (COMPOSER-1, FINDING 01)', () => {
-  it('wraps the hidden input and the label together so :focus-within can ring the chip', () => {
+  it('wraps the hidden input and the label together so :has(:focus-visible) can ring the chip', () => {
     const html = renderToStaticMarkup(
       <MediaAttachControl file={null} onChange={noop} error={null} onError={noop} />,
     )
     /* Tab focus lands on the input; the visible chip is the label. Only a
-       shared wrapper can ring the chip when the input takes focus. */
+       shared wrapper can ring the chip when the input shows :focus-visible. */
     const wrapper = html.match(/<span class="ep-attach-chip"[\s\S]*?<\/span>/)?.[0] ?? ''
     expect(wrapper).toContain('type="file"')
     expect(wrapper).toContain('<label')

@@ -73,6 +73,14 @@ export function MediaAttachControl({
     inputRef.current?.focus()
   }
 
+  /* COMPOSER-1 Bugbot: dismissing unmounts this button. Restore focus to the
+     file input the same way handleRemove does, so keyboard users stay in the
+     composer instead of dropping to the document. */
+  function handleDismissError() {
+    onError(null)
+    inputRef.current?.focus()
+  }
+
   const chipSize = compact ? 11 : 12
 
   return (
@@ -81,8 +89,8 @@ export function MediaAttachControl({
         {/* FINDING 01: tab focus lands on the INPUT, never the label, and the
             global :focus-visible rule in globals.css does not cover labels — so
             the chip showed no ring at all. The input now sits inside this
-            wrapper with the label, and .ep-attach-chip rings on :focus-within.
-            A class is required: :focus-within cannot be expressed in a style={}
+            wrapper with the label, and .ep-attach-chip rings on :has(:focus-visible) so the ring is keyboard-only.
+            A class is required: :has() cannot be expressed in a style={}
             object, and this component is otherwise all inline styles. */}
         <span className="ep-attach-chip" style={{ display: 'inline-flex', position: 'relative' }}>
           {/* Visually hidden but present, focusable, and labelled. */}
@@ -232,7 +240,7 @@ export function MediaAttachControl({
           </p>
           <button
             type="button"
-            onClick={() => onError(null)}
+            onClick={handleDismissError}
             aria-label="Dismiss image error"
             style={{
               /* Looks small, but the hit area is a full 44px square. */
