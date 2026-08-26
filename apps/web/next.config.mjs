@@ -49,6 +49,33 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // GATE-1b — retire platform.evolvedpros.com. Every page already emits a
+      // canonical on www, but the platform host still served the identical app
+      // with a 200, so we were telling Google "this is really a www URL" while
+      // continuing to serve the duplicate. A canonical without a redirect is a
+      // hint, not a directive; this closes it with a real 308.
+      //
+      // This lives in next.config, NOT middleware, on purpose: middleware.ts
+      // uses an explicit matcher allow-list that deliberately does not match
+      // /podcast (so crawlers get the server-rendered page rather than an auth
+      // redirect), and a host redirect has to fire on every path. redirects()
+      // resolves in the Next router before middleware and needs no matcher
+      // change, so it cannot touch the auth path.
+      //
+      // *** THE /api EXCLUSION IS LOAD-BEARING — DO NOT "SIMPLIFY" IT AWAY ***
+      // Stripe (LIVE MODE), Vendasta, Mux and the external cron scheduler are
+      // all configured TODAY against platform.evolvedpros.com. Webhook senders
+      // generally do not follow redirects — Stripe does not. A blanket host
+      // redirect would silently break live payment webhooks, tier changes and
+      // every cron job, and the failure is silent: the sender records the 308
+      // and moves on. /api/* keeps serving normally on the platform host until
+      // those URLs are repointed provider-side, which is a separate manual task.
+      {
+        source: '/:path((?!api/).*)',
+        has: [{ type: 'host', value: 'platform.evolvedpros.com' }],
+        destination: 'https://www.evolvedpros.com/:path',
+        permanent: true,
+      },
       // /scoreboard was folded into /home (Goals → Home consolidation).
       // Permanent 308 so bookmarks, shared links, and old in-app buttons land
       // on the Home dashboard that now hosts the scoreboard.
