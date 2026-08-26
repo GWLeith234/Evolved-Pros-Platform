@@ -57,11 +57,25 @@ export function canonicalUrl(pathname: string = '/'): string {
   return path === '/' ? CANONICAL_ORIGIN : `${CANONICAL_ORIGIN}${path}`
 }
 
+/** Root-layout OG fields Next.js will drop when a child sets `openGraph`. */
+export const DEFAULT_OPEN_GRAPH = {
+  type: 'website' as const,
+  siteName: 'Evolved Pros',
+}
+
+function metadataString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined
+}
+
 /**
  * Metadata fragment every public indexable page should spread or return.
  * Sets rel=canonical and the matching og:url. Extra title/description/og
  * fields merge on top; canonical + og:url always win so a caller cannot
  * accidentally reintroduce the platform host.
+ *
+ * Next.js only shallow-merges metadata: a child `openGraph` replaces the
+ * parent object, so this helper re-applies siteName / type (and copies
+ * title / description onto og tags) instead of relying on layout inherit.
  */
 export function publicPageMetadata(
   pathname: string,
@@ -69,9 +83,17 @@ export function publicPageMetadata(
 ): Metadata {
   const url = canonicalUrl(pathname)
   const { openGraph, alternates, ...rest } = extra
+  const title = metadataString(extra.title)
+  const description = metadataString(extra.description)
   return {
     ...rest,
     alternates: { ...alternates, canonical: url },
-    openGraph: { ...openGraph, url },
+    openGraph: {
+      ...DEFAULT_OPEN_GRAPH,
+      ...(title ? { title } : {}),
+      ...(description ? { description } : {}),
+      ...openGraph,
+      url,
+    },
   }
 }
