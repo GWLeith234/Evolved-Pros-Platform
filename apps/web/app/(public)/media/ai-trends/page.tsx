@@ -2,13 +2,14 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { adminClient } from '@/lib/supabase/admin'
+import { publicPageMetadata } from '@/lib/seo/canonical'
 
 export const revalidate = 120
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata('/media/ai-trends', {
   title: 'AI Trends — Evolved Media',
   description: 'Artificial intelligence trends shaping sales, marketing, and business strategy.',
-}
+})
 
 interface Article {
   id: string; title: string; slug: string; featured_image_url: string | null

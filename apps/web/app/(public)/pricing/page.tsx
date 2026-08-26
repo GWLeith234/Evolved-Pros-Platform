@@ -9,11 +9,12 @@ import { getMembershipPricing } from '@/lib/commerce/catalogue'
 import { LogoMark } from '@/components/ui/LogoMark'
 import { tierPlanName } from '@/lib/academy/gating'
 import { PILLAR_NAMES } from '@/lib/academy/types'
+import { publicPageMetadata } from '@/lib/seo/canonical'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata('/pricing', {
   title: 'Pricing — Evolved Pros',
   description: 'Community, VIP, Professional, and Keynote tiers for high performers.',
-}
+})
 
 // Amounts are read live from the products + prices catalogue at request time
 // (single source of truth), so a price edit reflects without a redeploy.

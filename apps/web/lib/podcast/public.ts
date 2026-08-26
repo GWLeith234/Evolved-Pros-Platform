@@ -2,6 +2,7 @@ import 'server-only'
 import { adminClient } from '@/lib/supabase/admin'
 import { SPONSOR_AD_COLUMNS, type SponsorAd } from '@/components/home/HomeSponsorAd'
 import { ensurePodcastSponsors } from '@/lib/sponsors/partners'
+import { resolveCanonicalOrigin } from '@/lib/seo/canonical'
 
 // ---------------------------------------------------------------------------
 // Public podcast data + SEO helpers (SPRINT — Public SEO Podcast Pages).
@@ -13,9 +14,9 @@ import { ensurePodcastSponsors } from '@/lib/sponsors/partners'
 // server-side (no cookie coupling, works during ISR/build).
 // ---------------------------------------------------------------------------
 
-/** Brand domain for canonical / OG / sitemap / RSS URLs. Set NEXT_PUBLIC_SITE_URL
- *  in Railway to the real brand domain — never the *.up.railway.app host. */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://evolvedpros.com').replace(/\/+$/, '')
+/** Brand domain for canonical / OG / sitemap / RSS URLs. Always www —
+ *  platform / apex / preview hosts are collapsed by resolveCanonicalOrigin. */
+export const SITE_URL = resolveCanonicalOrigin(process.env.NEXT_PUBLIC_SITE_URL)
 
 export const SERIES_NAME = 'The Evolved Pros Podcast'
 

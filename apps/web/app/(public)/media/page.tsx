@@ -1,16 +1,17 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { listPublicMediaStories } from '@/lib/media/sitemap'
+import { publicPageMetadata } from '@/lib/seo/canonical'
 import { MediaPortalClient } from './MediaPortalClient'
 import type { MediaStory, Episode } from './MediaPortalClient'
 import { Masthead } from '@/components/media/Masthead'
 
 export const revalidate = 60
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata('/media', {
   title: 'Evolved Media — Sales & Personal Development Intelligence',
   description: 'Pioneer stories, leadership insights, and business strategy from the EVOLVED framework.',
-}
+})
 
 export default async function MediaPage() {
   const supabase = createClient()
