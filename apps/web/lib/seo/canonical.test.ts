@@ -88,7 +88,9 @@ describe('publicPageMetadata', () => {
     })
     expect(meta.alternates?.canonical).toBe(`https://www.evolvedpros.com${path}`)
     expect(meta.openGraph?.url).toBe(`https://www.evolvedpros.com${path}`)
-    expect(meta.openGraph?.type).toBe('article')
+    // Next's OpenGraph union does not share `type` across members.
+    const articleOg = meta.openGraph as { type?: string } | undefined
+    expect(articleOg?.type).toBe('article')
   })
 
   it('lets a caller set og title but not override the www url', () => {
@@ -101,6 +103,7 @@ describe('publicPageMetadata', () => {
     })
     expect(meta.alternates?.canonical).toBe('https://www.evolvedpros.com/pricing')
     expect(meta.openGraph?.url).toBe('https://www.evolvedpros.com/pricing')
-    expect(meta.openGraph?.title).toBe('Pricing')
+    const pricedOg = meta.openGraph as { title?: string } | undefined
+    expect(pricedOg?.title).toBe('Pricing')
   })
 })
