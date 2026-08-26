@@ -1,4 +1,6 @@
 import { MetadataRoute } from 'next'
+import { SITE_URL } from '@/lib/podcast/public'
+import { robotsSitemapUrl } from '@/lib/seo/publicRoutes'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -6,9 +8,11 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin', '/api/', '/auth/'],
+        disallow: ['/admin', '/api/', '/auth/', '/onboarding', '/dev-login'],
       },
     ],
-    sitemap: 'https://platform.evolvedpros.com/sitemap.xml',
+    // Derived from SITE_URL, never hardcoded: this used to name
+    // platform.evolvedpros.com while every canonical tag pointed elsewhere.
+    sitemap: robotsSitemapUrl(SITE_URL),
   }
 }

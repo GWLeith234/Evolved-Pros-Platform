@@ -2,23 +2,47 @@ import { MetadataRoute } from 'next'
 import { adminClient } from '@/lib/supabase/admin'
 import { toMediaSitemapEntries } from '@/lib/media/sitemap'
 import { SITE_URL, getPublishedEpisodes } from '@/lib/podcast/public'
+import { PUBLIC_SITEMAP_PATHS, type PublicSitemapPath } from '@/lib/seo/publicRoutes'
 
 // Brand-domain URLs via NEXT_PUBLIC_SITE_URL (SITE_URL). Never the Railway host.
 export const dynamic = 'force-dynamic'
 
+type Freq = NonNullable<MetadataRoute.Sitemap[number]['changeFrequency']>
+
+const SITEMAP_FREQ: Record<PublicSitemapPath, Freq> = {
+  '/':        'daily',
+  '/podcast': 'weekly',
+  '/live':    'monthly',
+  '/media':   'daily',
+  '/pricing': 'monthly',
+}
+
+const SITEMAP_PRIORITY: Record<PublicSitemapPath, number> = {
+  '/':        1,
+  '/podcast': 0.9,
+  '/live':    0.7,
+  '/media':   0.7,
+  '/pricing': 0.8,
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = SITE_URL
 
-  const staticRoutes: MetadataRoute.Sitemap = [
-    { url: base, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
-    { url: `${base}/podcast`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${base}/community`, lastModified: new Date(), changeFrequency: 'hourly', priority: 0.8 },
-    { url: `${base}/events`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
-    { url: `${base}/academy`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${base}/live`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${base}/media`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.7 },
-    { url: `${base}/leaderboard`, lastModified: new Date(), changeFrequency: 'hourly', priority: 0.6 },
-  ]
+  // GATE-1 — /community, /events, /academy and /leaderboard were REMOVED from
+  // this list. All four require auth, so an anonymous request is redirected to
+  // /login, and Googlebot is anonymous: we were advertising four URLs that
+  // never serve their advertised content. Do NOT add them back until they are
+  // genuinely anon-readable — that needs anon-role RLS, not a sitemap entry.
+  //
+  // /live and /pricing stay because both are in SESSION_OPTIONAL_ROUTES:
+  // middleware refreshes the session but never bounces an anonymous visitor.
+  // The single source of truth is PUBLIC_SITEMAP_PATHS, which is unit-tested.
+  const staticRoutes: MetadataRoute.Sitemap = PUBLIC_SITEMAP_PATHS.map(path => ({
+    url: path === '/' ? base : `${base}${path}`,
+    lastModified: new Date(),
+    changeFrequency: SITEMAP_FREQ[path],
+    priority: SITEMAP_PRIORITY[path],
+  }))
 
   let episodeRoutes: MetadataRoute.Sitemap = []
   try {

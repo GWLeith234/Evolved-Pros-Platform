@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Playfair_Display, Barlow_Condensed, Barlow, Bebas_Neue, Merriweather, Abril_Fatface } from 'next/font/google'
 import { getDefaultTheme } from '@/lib/cache/shared'
 import { getGscVerification } from '@/lib/analytics/public-ids'
+import { SITE_URL } from '@/lib/podcast/public'
 import { AudienceAnalytics } from '@/components/analytics/AudienceAnalytics'
 import { ThemeInit } from '@/components/ThemeInit'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
@@ -60,7 +61,7 @@ export const metadata: Metadata = {
   openGraph: {
     title:       'Evolved Pros',
     description: 'The platform for high performers.',
-    url:         'https://platform.evolvedpros.com',
+    url:         SITE_URL,
     siteName:    'Evolved Pros',
     type:        'website',
   },
