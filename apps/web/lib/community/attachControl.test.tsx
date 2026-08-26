@@ -132,3 +132,55 @@ describe('feed media render', () => {
     expect(html).toContain('alt="Quote card"')
   })
 })
+
+describe('attach control — dismissing a rejection (COMPOSER-1, FINDING 04)', () => {
+  const REJECTION = 'That image is 10.6 MB. Images must be 10.0 MB or smaller.'
+
+  it('offers a dismiss button while the error stands', () => {
+    const html = renderToStaticMarkup(
+      <MediaAttachControl file={null} onChange={noop} error={REJECTION} onError={noop} />,
+    )
+    expect(html).toContain('aria-label="Dismiss image error"')
+    /* A real button — not a clickable div or span. */
+    expect(html).toMatch(/<button[^>]*aria-label="Dismiss image error"/)
+    expect(html).toMatch(/<button[^>]*type="button"[^>]*aria-label="Dismiss image error"/)
+  })
+
+  it('has no dismiss button when there is no error to dismiss', () => {
+    const html = renderToStaticMarkup(
+      <MediaAttachControl file={null} onChange={noop} error={null} onError={noop} />,
+    )
+    expect(html).not.toContain('Dismiss image error')
+  })
+
+  it('keeps a 44px hit area even though the glyph is small', () => {
+    const html = renderToStaticMarkup(
+      <MediaAttachControl file={null} onChange={noop} error={REJECTION} onError={noop} />,
+    )
+    const button = html.match(/<button[^>]*aria-label="Dismiss image error"[^>]*>/)?.[0] ?? ''
+    expect(button).toContain('min-width:44px')
+    expect(button).toContain('min-height:44px')
+  })
+
+  it('colours the dismiss control from a token, never a fixed hex', () => {
+    const html = renderToStaticMarkup(
+      <MediaAttachControl file={null} onChange={noop} error={REJECTION} onError={noop} />,
+    )
+    const button = html.match(/<button[^>]*aria-label="Dismiss image error"[^>]*>/)?.[0] ?? ''
+    expect(button).toContain('var(--attach-error-text)')
+    expect(button).not.toMatch(/#[0-9a-fA-F]{6}/)
+  })
+})
+
+describe('attach chip — keyboard focus ring (COMPOSER-1, FINDING 01)', () => {
+  it('wraps the hidden input and the label together so :has(:focus-visible) can ring the chip', () => {
+    const html = renderToStaticMarkup(
+      <MediaAttachControl file={null} onChange={noop} error={null} onError={noop} />,
+    )
+    /* Tab focus lands on the input; the visible chip is the label. Only a
+       shared wrapper can ring the chip when the input shows :focus-visible. */
+    const wrapper = html.match(/<span class="ep-attach-chip"[\s\S]*?<\/span>/)?.[0] ?? ''
+    expect(wrapper).toContain('type="file"')
+    expect(wrapper).toContain('<label')
+  })
+})

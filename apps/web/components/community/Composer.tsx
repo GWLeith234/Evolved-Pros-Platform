@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { MediaAttachControl } from './MediaAttachControl'
+import { canSubmitPost, type ComposerKind } from '@/lib/community/composer'
 
-type Kind = 'update' | 'question' | 'win' | 'poll'
 type Pillar = 1 | 2 | 3 | 4 | 5 | 6
 
 interface ComposerProps {
@@ -19,7 +19,7 @@ interface ComposerProps {
 }
 
 interface TabConfig {
-  kind: Kind
+  kind: ComposerKind
   label: string
   icon: React.ReactNode
   placeholder: string
@@ -83,7 +83,7 @@ function tierAvatarBg(tier: string | null): string {
 }
 
 export function Composer({ currentUser, channelId, onPostCreated }: ComposerProps) {
-  const [activeKind, setActiveKind] = useState<Kind>('update')
+  const [activeKind, setActiveKind] = useState<ComposerKind>('update')
   const [body, setBody] = useState('')
   const [selectedPillar, setSelectedPillar] = useState<Pillar | null>(null)
   const [pollOptions, setPollOptions] = useState<string[]>(['', ''])
@@ -147,11 +147,18 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
 
   const activeTab = TABS.find(t => t.kind === activeKind) ?? TABS[0]
   const validPollOptionCount = pollOptions.filter(o => o.trim().length > 0).length
-  const pollReady = activeKind !== 'poll' || validPollOptionCount >= 2
   // An image on its own is a valid post on the non-poll tabs; a standing
   // media rejection blocks the submit rather than silently posting text-only.
-  const hasContent = body.trim().length > 0 || (activeKind !== 'poll' && file !== null)
-  const canPost = hasContent && pollReady && !isPosting && !mediaError
+  // The rule lives in lib/community/composer.ts so it can be unit-tested; the
+  // user clears a standing rejection by dismissing it or picking a valid image.
+  const canPost = canSubmitPost({
+    body,
+    activeKind,
+    file,
+    mediaError,
+    validPollOptionCount,
+    isPosting,
+  })
 
   async function handleSubmit() {
     if (!canPost) return
