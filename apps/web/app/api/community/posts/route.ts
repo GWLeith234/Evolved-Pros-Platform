@@ -115,7 +115,7 @@ export async function POST(request: Request) {
 
   /* Points are a nice-to-have — never let them fail the post. */
   try {
-    const { error: rpcErr } = await supabase.rpc('increment_points', { user_id: profile.id, amount: 10 })
+    const { error: rpcErr } = await adminClient.rpc('increment_points', { user_id: profile.id, amount: 10 })
     if (rpcErr) console.warn('[community/posts] increment_points failed:', rpcErr.message)
   } catch (err) {
     console.warn('[community/posts] increment_points exception:', err)

@@ -27,18 +27,21 @@ export function hasTierAccess(userTier: TierInput, requiredTier: TierInput): boo
 //
 // Both 'canceled' (Stripe's US spelling) and 'cancelled' (UK) are listed
 // because we do not assume which Stripe emits.
-const DEAD_SUBSCRIPTION_STATUSES = new Set(['unpaid', 'canceled', 'cancelled'])
+const DEAD_SUBSCRIPTION_STATUSES = new Set(['unpaid', 'canceled', 'cancelled', 'expired'])
 
 /**
  * The tier a member is actually entitled to right now, given their raw tier and
  * subscription status. Returns 'community' when tier_status marks the paid
  * subscription dead; otherwise returns the tier unchanged.
  *
- * FAILS OPEN on everything else, by design — NULL, 'active', 'expired' (legacy
- * Vendasta, deliberately NOT denied), 'past_due' (grace window), and any
- * unrecognised value all keep the member's tier. Locking out a real member is
- * strictly worse than a short window of unpaid access, so an unknown or missing
- * status must never remove access.
+ * FAILS OPEN on everything else, by design — NULL, 'active', 'past_due'
+ * (grace window), and any unrecognised value all keep the member's tier.
+ * Legacy Vendasta `'expired'` is dead: the member layout already sends
+ * those accounts to /membership-expired, so treating them as still-entitled
+ * blocked renewals (pricing showed "Current plan", checkout 409'd).
+ * Locking out a real member on an *unknown* status is still worse than a
+ * short window of unpaid access, so a missing/unrecognised status never
+ * removes access.
  */
 export function effectiveTier(
   tier: string | null | undefined,

@@ -81,7 +81,7 @@ export async function POST(
   if (completed && !alreadyCompleted) {
     pointsAwarded = 50
     try {
-      await Promise.resolve(supabase.rpc('increment_points', { user_id: userId, amount: 50 }))
+      await Promise.resolve(adminClient.rpc('increment_points', { user_id: userId, amount: 50 }))
     } catch {
       // Fallback if RPC not available
       const { data } = await adminClient.from('users').select('points').eq('id', userId).single()

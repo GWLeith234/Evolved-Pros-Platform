@@ -11,6 +11,7 @@ import {
 import { ToastProvider } from '@/lib/toast'
 import { SkipToContent } from '@/components/a11y/SkipToContent'
 import { LiveAnnouncerProvider } from '@/components/a11y/LiveAnnouncer'
+import { ThemeSync } from '@/components/theme/ThemeSync'
 
 // Public podcast section, but part of the platform: a logged-in member gets
 // the full member chrome (TopNav, RightRail, bottom tabs) so /podcast is a
@@ -66,6 +67,7 @@ export default async function PodcastLayout({ children }: { children: React.Reac
   return (
     <ToastProvider>
       <LiveAnnouncerProvider>
+        <ThemeSync theme={profile.theme} />
         <SkipToContent />
         <div className="ep-member-shell">
           <TopNavClient profile={profile} unreadCount={unreadCount ?? 0} membersCanToggleTheme={membersCanToggleTheme} />

@@ -18,6 +18,8 @@ export default async function MediaPage() {
 
   // All published stories — no page-size cap. Category pills filter this
   // list client-side, so every is_published row must be reachable on /media.
+  // Request client is correct here: live RLS has "Public can read published
+  // stories" on media_stories and the 071 public-read policy on episodes.
   const { data: allStories } = await supabase
     .from('media_stories')
     .select('id, title, slug, excerpt, pillar, story_type, featured_image_url, author, published_at, body, views')

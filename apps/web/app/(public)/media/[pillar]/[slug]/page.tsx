@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { marked } from 'marked'
 import { adminClient } from '@/lib/supabase/admin'
 import { getPillarLabel, getPillarColor } from '@/lib/pillars'
+import { mediaStoryHref } from '@/lib/media/paths'
 import { StoryCommentsClient as StoryComments, MediaAdZoneClient as MediaAdZone } from '../../MediaClientShims'
 import { ArticleShareBar } from './ArticleShareBar'
 import { CANONICAL_ORIGIN, canonicalUrl, publicPageMetadata } from '@/lib/seo/canonical'
@@ -158,7 +159,9 @@ export default async function StoryPage({
     const { data: profile } = await adminClient
       .from('users')
       .select('full_name, avatar_url, role, current_pillar')
-      .eq('id', '266e82af-a5ed-4770-a81a-10716d497d3a')
+      .eq('full_name', story.author)
+      .order('created_at', { ascending: true })
+      .limit(1)
       .maybeSingle()
     authorUser = profile ?? null
     if (!authorUser) {
@@ -168,14 +171,16 @@ export default async function StoryPage({
   const authorAvatar = authorUser?.avatar_url ?? null
 
   // Related stories: same pillar, exclude current
-  const { data: related } = await adminClient
+  const relatedQuery = adminClient
     .from('media_stories')
     .select('id, title, slug, pillar, featured_image_url, published_at, body')
-    .eq('pillar', params.pillar)
     .eq('is_published', true)
     .neq('id', story.id)
     .order('published_at', { ascending: false })
     .limit(3)
+  const { data: related } = params.pillar === 'general'
+    ? await relatedQuery.is('pillar', null)
+    : await relatedQuery.eq('pillar', params.pillar)
 
   // Latest 2 episodes for sidebar
   let episodes: Episode[] = []
@@ -424,7 +429,7 @@ export default async function StoryPage({
           {/* 3-column grid */}
           <div className="media-related-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
             {(related ?? []).map((r: RelatedStory) => (
-              <Link key={r.id} href={`/media/${r.pillar}/${r.slug}`} style={{ textDecoration: 'none', display: 'block', backgroundColor: '#fff', border: '0.5px solid rgba(43,58,90,0.1)', borderRadius: 2, overflow: 'hidden' }}>
+              <Link key={r.id} href={mediaStoryHref(r.pillar, r.slug)} style={{ textDecoration: 'none', display: 'block', backgroundColor: '#fff', border: '0.5px solid rgba(43,58,90,0.1)', borderRadius: 2, overflow: 'hidden' }}>
                 <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: 'var(--media-ink)', overflow: 'hidden' }}>
                   {r.featured_image_url ? (
                     <Image src={r.featured_image_url} alt="" fill sizes="(max-width: 767px) 100vw, 360px" className="object-cover" />
