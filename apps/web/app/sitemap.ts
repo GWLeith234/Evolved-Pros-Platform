@@ -1,10 +1,11 @@
 import { MetadataRoute } from 'next'
 import { adminClient } from '@/lib/supabase/admin'
 import { toMediaSitemapEntries } from '@/lib/media/sitemap'
-import { SITE_URL, getPublishedEpisodes } from '@/lib/podcast/public'
+import { getPublishedEpisodes } from '@/lib/podcast/public'
+import { CANONICAL_ORIGIN } from '@/lib/seo/canonical'
 import { PUBLIC_SITEMAP_PATHS, type PublicSitemapPath } from '@/lib/seo/publicRoutes'
 
-// Brand-domain URLs via NEXT_PUBLIC_SITE_URL (SITE_URL). Never the Railway host.
+// Brand-domain URLs on www. Never platform, never the Railway host.
 export const dynamic = 'force-dynamic'
 
 type Freq = NonNullable<MetadataRoute.Sitemap[number]['changeFrequency']>
@@ -26,7 +27,7 @@ const SITEMAP_PRIORITY: Record<PublicSitemapPath, number> = {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = SITE_URL
+  const base = CANONICAL_ORIGIN
 
   // GATE-1 — /community, /events, /academy and /leaderboard were REMOVED from
   // this list. All four require auth, so an anonymous request is redirected to

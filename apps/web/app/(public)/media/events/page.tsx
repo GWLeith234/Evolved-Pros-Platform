@@ -1,13 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { adminClient } from '@/lib/supabase/admin'
+import { publicPageMetadata } from '@/lib/seo/canonical'
 
 export const revalidate = 120
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata('/media/events', {
   title: 'Events — Evolved Media',
   description: 'Upcoming and past events from Evolved Pros. Workshops, keynotes, and networking for sales professionals.',
-}
+})
 
 // ── Types ────────────────────────────────────────────────────────────────────
 

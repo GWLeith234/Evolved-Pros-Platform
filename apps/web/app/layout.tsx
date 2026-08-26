@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Playfair_Display, Barlow_Condensed, Barlow, Bebas_Neue, Merriweather, Abril_Fatface } from 'next/font/google'
 import { getDefaultTheme } from '@/lib/cache/shared'
 import { getGscVerification } from '@/lib/analytics/public-ids'
-import { SITE_URL } from '@/lib/podcast/public'
+import { CANONICAL_ORIGIN } from '@/lib/seo/canonical'
 import { AudienceAnalytics } from '@/components/analytics/AudienceAnalytics'
 import { ThemeInit } from '@/components/ThemeInit'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
@@ -52,6 +52,10 @@ const merriweather = Merriweather({
 const LOGO_CIRCLE_DARK = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Branding/logo_circle_dark.png`
 
 export const metadata: Metadata = {
+  // Resolve relative canonical / og URLs to www. Page-level publicPageMetadata
+  // (or generateMetadata) owns the path-specific url so /media cannot inherit
+  // the homepage the way it did when this layout hardcoded og:url = SITE_URL.
+  metadataBase: new URL(CANONICAL_ORIGIN),
   title:       'Evolved Pros — The Platform for High Performers',
   description: 'Community, academy, and accountability for professionals who operate at the highest level.',
   icons: {
@@ -61,7 +65,6 @@ export const metadata: Metadata = {
   openGraph: {
     title:       'Evolved Pros',
     description: 'The platform for high performers.',
-    url:         SITE_URL,
     siteName:    'Evolved Pros',
     type:        'website',
   },

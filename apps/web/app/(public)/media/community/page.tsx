@@ -5,13 +5,14 @@ import { adminClient } from '@/lib/supabase/admin'
 import { PILLAR_LABELS } from '@/lib/community/types'
 import type { PillarTag } from '@/lib/community/types'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { publicPageMetadata } from '@/lib/seo/canonical'
 
 export const revalidate = 120
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata('/media/community', {
   title: 'Community — Evolved Media',
   description: 'See what 10,000 high-performing sales professionals are talking about inside Evolved Pros.',
-}
+})
 
 // ── Types ────────────────────────────────────────────────────────────────────
 

@@ -5,6 +5,7 @@ import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { dbRowToEpisode, assertMonotonicNumbering, type EpisodeRow, type ProgressRow } from '@/lib/podcast/transforms'
 import { PodcastPageShell } from '@/components/podcast/PodcastPageShell'
 import { SITE_URL, SERIES_NAME, getPodcastSponsorPool } from '@/lib/podcast/public'
+import { publicPageMetadata } from '@/lib/seo/canonical'
 
 // Public + SEO-indexable, but renders the full editorial podcast experience
 // (masthead, hero, album-cover grid, rotating Evolution Partner sponsor cards).
@@ -13,19 +14,17 @@ import { SITE_URL, SERIES_NAME, getPodcastSponsorPool } from '@/lib/podcast/publ
 // when a member is signed in.
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata('/podcast', {
   title: `${SERIES_NAME} — Evolved Pros`,
   description:
     'Long-form conversations on AI, go-to-market, and the evolution of work with George Leith and guests. Full transcripts, chapters, and highlights.',
-  alternates: { canonical: `${SITE_URL}/podcast` },
   openGraph: {
     type: 'website',
     title: SERIES_NAME,
     description: 'Long-form conversations on AI, go-to-market, and the evolution of work with George Leith and guests.',
-    url: `${SITE_URL}/podcast`,
     siteName: SERIES_NAME,
   },
-}
+})
 
 export default async function PublicPodcastIndex() {
   const supabase = createClient()

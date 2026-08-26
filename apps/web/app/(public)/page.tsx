@@ -5,6 +5,7 @@ import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { createClient } from '@/lib/supabase/server'
 import { listPublicMediaStories } from '@/lib/media/sitemap'
 import { SITE_URL, getPublishedEpisodes } from '@/lib/podcast/public'
+import { publicPageMetadata } from '@/lib/seo/canonical'
 
 /**
  * The public front door (SPRINT GATE-1).
@@ -33,16 +34,14 @@ import { SITE_URL, getPublishedEpisodes } from '@/lib/podcast/public'
 
 const LOGO_CIRCLE_DARK = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Branding/logo_circle_dark.png`
 
-export const metadata: Metadata = {
-  alternates: { canonical: SITE_URL },
+export const metadata: Metadata = publicPageMetadata('/', {
   openGraph: {
-    url: SITE_URL,
     images: [{ url: LOGO_CIRCLE_DARK }],
   },
   twitter: {
     images: [LOGO_CIRCLE_DARK],
   },
-}
+})
 
 interface LandingEpisode {
   slug: string

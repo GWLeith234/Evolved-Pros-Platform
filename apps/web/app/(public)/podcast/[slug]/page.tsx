@@ -25,6 +25,7 @@ import {
   episodePosterUrl,
   type PublicEpisode,
 } from '@/lib/podcast/public'
+import { publicPageMetadata } from '@/lib/seo/canonical'
 
 // Public, server-rendered, indexable. The transcript is real DOM text in the
 // SSR HTML (view-source shows it) — the whole point of the SEO sprint.
@@ -39,17 +40,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!ep) return { title: SERIES_NAME }
   const title = `${ep.title} — ${SERIES_NAME}`
   const description = summaryText(ep) || `${ep.title}${ep.guest_name ? ` with ${ep.guest_name}` : ''} on ${SERIES_NAME}.`
-  const url = episodeUrl(ep.slug)
   const image = ytThumb(ep.youtube_id, 'max')
-  return {
+  return publicPageMetadata(`/podcast/${ep.slug}`, {
     title,
     description,
-    alternates: { canonical: url },
     openGraph: {
       type: 'article',
       title,
       description,
-      url,
       siteName: SERIES_NAME,
       images: image ? [{ url: image, width: 1280, height: 720, alt: ep.title }] : undefined,
       publishedTime: ep.published_at ?? undefined,
@@ -60,7 +58,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       images: image ? [image] : undefined,
     },
-  }
+  })
 }
 
 function jsonLd(ep: PublicEpisode) {

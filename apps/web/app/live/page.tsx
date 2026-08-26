@@ -27,12 +27,13 @@ import {
 } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
+import { publicPageMetadata } from '@/lib/seo/canonical'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata('/live', {
   title: 'LIVE — Evolved Pros',
   description:
     'High-energy keynotes, workshops, and mastermind formats. Upcoming and past speaking events worldwide — powered by the EVOLVED Architecture™.',
-}
+})
 
 async function fetchLiveSponsors(): Promise<SponsorAd[]> {
   try {

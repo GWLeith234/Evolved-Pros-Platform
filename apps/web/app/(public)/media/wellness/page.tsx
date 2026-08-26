@@ -2,13 +2,14 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { adminClient } from '@/lib/supabase/admin'
+import { publicPageMetadata } from '@/lib/seo/canonical'
 
 export const revalidate = 120
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata('/media/wellness', {
   title: 'Wellness — Evolved Media',
   description: 'Physical and mental wellness strategies for high-performing professionals.',
-}
+})
 
 interface Article {
   id: string; title: string; slug: string; featured_image_url: string | null

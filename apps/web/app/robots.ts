@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next'
-import { SITE_URL } from '@/lib/podcast/public'
+import { CANONICAL_ORIGIN } from '@/lib/seo/canonical'
 import { robotsSitemapUrl } from '@/lib/seo/publicRoutes'
 
 export default function robots(): MetadataRoute.Robots {
@@ -11,8 +11,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/admin', '/api/', '/auth/', '/onboarding', '/dev-login'],
       },
     ],
-    // Derived from SITE_URL, never hardcoded: this used to name
-    // platform.evolvedpros.com while every canonical tag pointed elsewhere.
-    sitemap: robotsSitemapUrl(SITE_URL),
+    // Always www.evolvedpros.com — never platform, never the Railway host.
+    sitemap: robotsSitemapUrl(CANONICAL_ORIGIN),
   }
 }

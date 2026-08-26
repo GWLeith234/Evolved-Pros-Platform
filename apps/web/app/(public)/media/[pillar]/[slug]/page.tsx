@@ -7,6 +7,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { getPillarLabel, getPillarColor } from '@/lib/pillars'
 import { StoryCommentsClient as StoryComments, MediaAdZoneClient as MediaAdZone } from '../../MediaClientShims'
 import { ArticleShareBar } from './ArticleShareBar'
+import { CANONICAL_ORIGIN, canonicalUrl, publicPageMetadata } from '@/lib/seo/canonical'
 
 export const revalidate = 3600
 export const dynamicParams = true
@@ -110,14 +111,12 @@ export async function generateMetadata(
   const title = story.seo_title || `${story.title} | Evolved Media`
   const description = story.seo_description || story.excerpt || ''
   const image = story.featured_image_url || '/og-default.png'
-  const url = `https://platform.evolvedpros.com/media/${params.pillar}/${params.slug}`
 
-  return {
+  return publicPageMetadata(`/media/${params.pillar}/${params.slug}`, {
     title,
     description,
-    alternates: { canonical: url },
     openGraph: {
-      title, description, url, type: 'article',
+      title, description, type: 'article',
       publishedTime: story.published_at ?? undefined,
       modifiedTime: story.updated_at ?? undefined,
       authors: [story.author ?? 'George Leith'],
@@ -125,7 +124,7 @@ export async function generateMetadata(
       images: [{ url: image, width: 1200, height: 630, alt: story.title }],
     },
     twitter: { card: 'summary_large_image', title, description, images: [image] },
-  }
+  })
 }
 
 // ── Page ────────────────────────────────────────────────────────────────────
@@ -147,7 +146,7 @@ export default async function StoryPage({
   const isOriginal = !story.pillar
   const pLabel = isOriginal ? 'Original' : getPillarLabel(story.pillar)
   const pColor = isOriginal ? 'var(--brand-gold)' : getPillarColor(story.pillar)
-  const articleUrl = `https://platform.evolvedpros.com/media/${params.pillar}/${params.slug}`
+  const articleUrl = canonicalUrl(`/media/${params.pillar}/${params.slug}`)
 
   // Look up author avatar by full_name (media_stories.author is a plain
   // string not an FK — match on users.full_name).
@@ -197,16 +196,16 @@ export default async function StoryPage({
     '@context': 'https://schema.org', '@type': 'Article',
     headline: story.title, description: story.excerpt,
     author: { '@type': 'Person', name: story.author ?? 'George Leith' },
-    publisher: { '@type': 'Organization', name: 'Evolved Pros', url: 'https://platform.evolvedpros.com' },
+    publisher: { '@type': 'Organization', name: 'Evolved Pros', url: CANONICAL_ORIGIN },
     datePublished: story.published_at, dateModified: story.updated_at,
     url: articleUrl, image: story.featured_image_url || '/og-default.png',
   }
   const breadcrumbSchema = {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://platform.evolvedpros.com' },
-      { '@type': 'ListItem', position: 2, name: 'Evolved Media', item: 'https://platform.evolvedpros.com/media' },
-      { '@type': 'ListItem', position: 3, name: pLabel, item: `https://platform.evolvedpros.com/media/${params.pillar}` },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: CANONICAL_ORIGIN },
+      { '@type': 'ListItem', position: 2, name: 'Evolved Media', item: canonicalUrl('/media') },
+      { '@type': 'ListItem', position: 3, name: pLabel, item: canonicalUrl(`/media/${params.pillar}`) },
       { '@type': 'ListItem', position: 4, name: story.title.slice(0, 50) },
     ],
   }

@@ -2,13 +2,14 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { adminClient } from '@/lib/supabase/admin'
+import { publicPageMetadata } from '@/lib/seo/canonical'
 
 export const revalidate = 120
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata('/media/evolved-architecture', {
   title: 'Evolved Architecture — Evolved Media',
   description: 'All 6 pillars of the EVOLVED Architecture™ — Foundation, Identity, Mental Toughness, Strategy, Accountability, Execution.',
-}
+})
 
 interface Article {
   id: string; title: string; slug: string; featured_image_url: string | null
