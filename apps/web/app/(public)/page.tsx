@@ -4,7 +4,7 @@ import { LogoMark } from '@/components/ui/LogoMark'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { createClient } from '@/lib/supabase/server'
 import { listPublicMediaStories } from '@/lib/media/sitemap'
-import { SITE_URL, getPublishedEpisodes } from '@/lib/podcast/public'
+import { getPublishedEpisodes } from '@/lib/podcast/public'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 
 /**

@@ -80,6 +80,25 @@ describe('publicPageMetadata', () => {
     expect(meta.description).toBe('Pioneer stories')
   })
 
+  it('keeps root siteName / type / og title when the page only passes title', () => {
+    // Next.js replaces the parent openGraph object; /media and /pricing
+    // used to lose siteName + type by returning { url } alone.
+    const meta = publicPageMetadata('/media', {
+      title: 'Evolved Media',
+      description: 'Pioneer stories',
+    })
+    const og = meta.openGraph as {
+      type?: string
+      siteName?: string
+      title?: string
+      description?: string
+    }
+    expect(og.type).toBe('website')
+    expect(og.siteName).toBe('Evolved Pros')
+    expect(og.title).toBe('Evolved Media')
+    expect(og.description).toBe('Pioneer stories')
+  })
+
   it('emits matching canonical + og:url for a sample article', () => {
     const path = '/media/strategy/close-the-gap'
     const meta = publicPageMetadata(path, {
@@ -89,8 +108,9 @@ describe('publicPageMetadata', () => {
     expect(meta.alternates?.canonical).toBe(`https://www.evolvedpros.com${path}`)
     expect(meta.openGraph?.url).toBe(`https://www.evolvedpros.com${path}`)
     // Next's OpenGraph union does not share `type` across members.
-    const articleOg = meta.openGraph as { type?: string } | undefined
+    const articleOg = meta.openGraph as { type?: string; siteName?: string } | undefined
     expect(articleOg?.type).toBe('article')
+    expect(articleOg?.siteName).toBe('Evolved Pros')
   })
 
   it('lets a caller set og title but not override the www url', () => {
