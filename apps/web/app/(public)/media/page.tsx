@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
-import { listPublicMediaStories } from '@/lib/media/sitemap'
+import { MediaStoryCrawlIndex } from '@/lib/media/crawlIndex'
+import { getPublishedMediaStoriesForHub } from '@/lib/media/public'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 import { MediaPortalClient } from './MediaPortalClient'
-import type { MediaStory, Episode } from './MediaPortalClient'
+import type { Episode } from './MediaPortalClient'
 import { Masthead } from '@/components/media/Masthead'
 
 export const revalidate = 60
@@ -16,17 +17,11 @@ export const metadata: Metadata = publicPageMetadata('/media', {
 export default async function MediaPage() {
   const supabase = createClient()
 
-  // All published stories — no page-size cap. Category pills filter this
-  // list client-side, so every is_published row must be reachable on /media.
-  // Request client is correct here: live RLS has "Public can read published
-  // stories" on media_stories and the 071 public-read policy on episodes.
-  const { data: allStories } = await supabase
-    .from('media_stories')
-    .select('id, title, slug, excerpt, pillar, story_type, featured_image_url, author, published_at, body, views')
-    .eq('is_published', true)
-    .order('published_at', { ascending: false })
-
-  const stories = listPublicMediaStories((allStories ?? []) as MediaStory[])
+  // adminClient, same as sitemap.ts and /media/[pillar]/[slug]. The
+  // cookie-scoped request client SSRs an empty list for anonymous
+  // Googlebot (live 2026-08-27: 0 article hrefs, ~50KB shell). Published
+  // filter + unpublished-slug denylist still apply inside the helper.
+  const stories = await getPublishedMediaStoriesForHub()
 
   // Fetch 3 most recent published episodes
   let episodes: Episode[] = []
@@ -45,6 +40,7 @@ export default async function MediaPage() {
   return (
     <>
       <Masthead />
+      <MediaStoryCrawlIndex stories={stories} />
       <MediaPortalClient
         stories={stories}
         episodes={episodes}
