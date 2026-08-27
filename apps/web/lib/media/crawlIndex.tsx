@@ -29,19 +29,19 @@ export function mediaHubCrawlLinks(stories: CrawlStory[]): MediaCrawlLink[] {
 /**
  * Server-rendered article index. Plain <a href> tags so the initial HTML
  * contains every published path even if MediaPortalClient hydrates later.
- * Visually hidden — the designed grid is the visible list; these are the
- * same URLs for crawlers that do not run client JS.
+ * Hidden from sight, AT, and tab order — the designed grid is the visible
+ * list; these are the same URLs for crawlers that do not run client JS.
  */
 export function MediaStoryCrawlIndex({ stories }: { stories: CrawlStory[] }) {
   const links = mediaHubCrawlLinks(stories)
   if (links.length === 0) return null
 
   return (
-    <nav aria-label="Published media articles" className="sr-only">
+    <nav aria-hidden="true" className="sr-only" {...{ inert: '' }}>
       <ul>
         {links.map(link => (
           <li key={link.id}>
-            <a href={link.href}>{link.title}</a>
+            <a href={link.href} tabIndex={-1}>{link.title}</a>
           </li>
         ))}
       </ul>

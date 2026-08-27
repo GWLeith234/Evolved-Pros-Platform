@@ -56,8 +56,19 @@ describe('MediaStoryCrawlIndex', () => {
     const hrefs = [...html.matchAll(/href="(\/media\/[a-z0-9-]+\/[a-z0-9-]+)"/g)].map(m => m[1])
     expect(hrefs).toHaveLength(36)
     expect(new Set(hrefs).size).toBe(36)
-    expect(html).toContain('aria-label="Published media articles"')
+    expect(html).toContain('aria-hidden="true"')
+    expect(html).toContain('inert')
+    expect(html).toContain('tabindex="-1"')
+    expect(html).not.toContain('aria-label=')
     expect(html).not.toContain('why-elite-sales-teams-swear-by-ritual-not-motivation')
+  })
+
+  it('keeps crawl hrefs out of the a11y tree and tab order', () => {
+    const html = renderToStaticMarkup(
+      <MediaStoryCrawlIndex stories={[story({ id: 'keep', slug: 'real-article', pillar: 'identity' })]} />,
+    )
+    expect(html).toMatch(/<nav aria-hidden="true"[^>]*inert/)
+    expect(html.match(/tabindex="-1"/g)?.length).toBe(1)
   })
 
   it('renders nothing when there are no listed stories', () => {
