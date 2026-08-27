@@ -29,15 +29,17 @@ export function mediaHubCrawlLinks(stories: CrawlStory[]): MediaCrawlLink[] {
 /**
  * Server-rendered article index. Plain <a href> tags so the initial HTML
  * contains every published path even if MediaPortalClient hydrates later.
- * Hidden from sight, AT, and tab order — the designed grid is the visible
- * list; these are the same URLs for crawlers that do not run client JS.
+ * Hidden from sight, AT, and tab order (aria-hidden + tabindex=-1). The
+ * designed grid is the visible list; these are the same URLs for crawlers
+ * that do not run client JS. `inert` is omitted: React 18 drops the
+ * boolean attribute from SSR HTML.
  */
 export function MediaStoryCrawlIndex({ stories }: { stories: CrawlStory[] }) {
   const links = mediaHubCrawlLinks(stories)
   if (links.length === 0) return null
 
   return (
-    <nav aria-hidden="true" className="sr-only" {...{ inert: '' }}>
+    <nav aria-hidden="true" className="sr-only">
       <ul>
         {links.map(link => (
           <li key={link.id}>
