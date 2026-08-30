@@ -1,13 +1,14 @@
 import type { Metadata } from 'next'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 import { SUPPORT_EMAIL } from '@/lib/layout/publicFooter'
+import { REGISTERED_OFFICE_LINES } from '@/lib/layout/legalCopy'
 import {
+  LegalAddress,
   LegalList,
   LegalMail,
   LegalP,
   LegalPage,
   LegalSection,
-  LegalTodo,
 } from '@/components/layout/LegalPage'
 
 // Unique title on purpose — this page must NOT inherit the homepage meta.
@@ -20,9 +21,10 @@ export const metadata: Metadata = publicPageMetadata('/privacy', {
 /**
  * SPRINT FOOTER-1 — /privacy (previously a 404).
  *
- * Sections are fixed by the sprint card. The Payments section says only that
- * payments are processed by Stripe — no refund or cancellation language here;
- * that blank lives on /terms and is counsel's to write.
+ * Sections are fixed by the sprint card. The registered office lives in
+ * lib/layout/legalCopy.ts (same block as /terms). The Payments section says
+ * only that payments are processed by Stripe — refund and cancellation
+ * language lives on /terms. Do not add a privacy-law treatise here.
  *
  * The processor list mirrors what the app actually calls: Supabase (auth +
  * database), Stripe (payments), Resend (email), Mux (video), Google Analytics
@@ -47,7 +49,7 @@ export default function PrivacyPage() {
           GWLeith Revenue Growth Solutions is the party responsible for the personal
           information described on this page.
         </LegalP>
-        <LegalTodo label="Registered office / mailing address" />
+        <LegalAddress lines={REGISTERED_OFFICE_LINES} />
       </LegalSection>
 
       <LegalSection title="What we collect">
