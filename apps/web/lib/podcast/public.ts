@@ -1,5 +1,4 @@
 import 'server-only'
-import { getSiteUrl } from '@/lib/urls'
 import { adminClient } from '@/lib/supabase/admin'
 import { SPONSOR_AD_COLUMNS, type SponsorAd } from '@/components/home/HomeSponsorAd'
 import { ensurePodcastSponsors } from '@/lib/sponsors/partners'
