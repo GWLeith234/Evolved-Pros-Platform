@@ -59,6 +59,11 @@ interface WelcomeBannerProps {
   period?: MarvelScenePeriod
   /** Optional override for testing — when omitted, uses live ticking clock. */
   now?: Date
+  /**
+   * Resume target for the Architecture column link — the member's next
+   * incomplete lesson, resolved server-side on /home. Defaults to /academy.
+   */
+  academyHref?: string
 }
 
 // ── Architecture-column pillar palette (canonical, one hue per pillar) ──
@@ -464,6 +469,7 @@ export function WelcomeBanner({
   pillars,
   period: periodOverride,
   now: nowOverride,
+  academyHref = '/academy',
 }: WelcomeBannerProps) {
   // Live clock — ticks every 30 seconds (matches JSX line 548).
   // CRITICAL: `now` MUST stay null on first render (SSR + first client render)
@@ -983,7 +989,7 @@ export function WelcomeBanner({
                 The Architecture
               </span>
               <a
-                href="/academy"
+                href={academyHref}
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
