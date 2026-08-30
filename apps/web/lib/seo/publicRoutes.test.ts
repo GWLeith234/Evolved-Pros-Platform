@@ -12,8 +12,26 @@ import { PUBLIC_SITEMAP_PATHS, robotsSitemapUrl } from './publicRoutes'
 const GATED_PATHS = ['/community', '/events', '/academy', '/leaderboard']
 
 describe('PUBLIC_SITEMAP_PATHS', () => {
-  it('is exactly the five anon-reachable paths', () => {
-    expect([...PUBLIC_SITEMAP_PATHS]).toEqual(['/', '/podcast', '/live', '/media', '/pricing'])
+  it('is exactly the eight anon-reachable paths', () => {
+    expect([...PUBLIC_SITEMAP_PATHS]).toEqual([
+      '/',
+      '/podcast',
+      '/live',
+      '/media',
+      '/pricing',
+      '/terms',
+      '/privacy',
+      '/contact',
+    ])
+  })
+
+  // FOOTER-1: the global footer is the only in-page door to these three, and
+  // all three 404'd before this sprint. If one is dropped from the sitemap it
+  // is almost certainly because the page was dropped too.
+  it('advertises the public legal pages the footer links to', () => {
+    for (const legal of ['/terms', '/privacy', '/contact']) {
+      expect([...PUBLIC_SITEMAP_PATHS]).toContain(legal)
+    }
   })
 
   it('advertises no route that requires auth', () => {
