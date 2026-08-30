@@ -73,7 +73,7 @@ function MembershipExpiredContent() {
       {/* CTAs */}
       <div className="space-y-3">
         <Link
-          href="/membership"
+          href="/pricing"
           className="block w-full py-3 rounded font-condensed font-semibold uppercase tracking-wide text-sm text-white text-center transition-colors"
           style={{ backgroundColor: '#ef0e30' }}
         >

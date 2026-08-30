@@ -38,9 +38,6 @@ export async function GET(request: Request) {
   }
 
   const expired = data ?? []
-  if (expired.length > 0) {
-    console.log(`[Cron] expire-tiers: expired ${expired.length} members`)
-  }
 
   return Response.json({ ok: true, expired: expired.length })
 }

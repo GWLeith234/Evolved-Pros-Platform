@@ -242,7 +242,7 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
         </Link>
 
         <Link
-          href="/membership"
+          href="/pricing"
           onClick={onClose}
           className={linkClass}
           style={{ color: 'var(--text-primary)' }}

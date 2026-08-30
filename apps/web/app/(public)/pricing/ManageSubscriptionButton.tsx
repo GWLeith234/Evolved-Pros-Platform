@@ -6,8 +6,8 @@ import { useState } from 'react'
  * SPRINT PRICE-1 — the only place a paying member can reach their subscription.
  *
  * Posts to the existing /api/stripe/portal route (reused, not duplicated)
- * and follows the Stripe-hosted portal URL it returns. Used on /membership
- * (the account billing page) for members with a live paid plan.
+ * and follows the Stripe-hosted portal URL it returns. Used on /pricing
+ * for members with a live paid plan.
  */
 export function ManageSubscriptionButton() {
   const [busy, setBusy] = useState(false)

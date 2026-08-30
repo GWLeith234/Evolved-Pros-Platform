@@ -77,7 +77,7 @@ export default async function AcademyPage() {
         <CourseGrid courses={courses} userTier={profile?.tier ?? null} />
         {showUpgrade && (
           <div className="mt-8 max-w-xl">
-            <AcademyArchitectureCard ad={ACADEMY_UPGRADE_AD} href="/membership" />
+            <AcademyArchitectureCard ad={ACADEMY_UPGRADE_AD} href="/pricing" />
           </div>
         )}
       </div>

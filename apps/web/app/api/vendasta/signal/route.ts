@@ -129,8 +129,6 @@ async function sendPillarCompleteSignal(
       console.error(`[Vendasta Signal] PATCH contact ${contactId} failed ${patchRes.status}: ${text}`)
       return
     }
-
-    console.log(`[Vendasta Signal] Pillar ${pillarNumber} (${pillarName}) complete → contact ${contactId}`)
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     console.error(`[Vendasta Signal] Network error: ${msg}`)

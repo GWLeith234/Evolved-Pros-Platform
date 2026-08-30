@@ -108,8 +108,8 @@ export async function POST(request: Request) {
       metadata: meta,
       subscription_data: { metadata: meta },
       allow_promotion_codes: true,
-      success_url: `${APP_URL}/membership?checkout=success`,
-      cancel_url: `${APP_URL}/membership?checkout=cancelled`,
+      success_url: `${APP_URL}/pricing?checkout=success`,
+      cancel_url: `${APP_URL}/pricing?checkout=cancelled`,
     })
 
     return NextResponse.json({ url: session.url })
