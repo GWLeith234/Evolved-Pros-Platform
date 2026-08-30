@@ -107,18 +107,11 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
           the swipe gesture on touch devices. */}
       <style>{`
         .ed-network-links::-webkit-scrollbar { display: none; }
-        /* MOBILE-MEDIA-FIX: at <640px "BACK TO PLATFORM" + the network links
-           were crowding the row and clipping COMMUN[ity]. Push the network
-           links to a second flexed row on mobile and give the strip a
-           trailing pad so nothing renders flush to the right edge. */
-        @media (max-width: 639px) {
-          .ed-masthead-date-strip { flex-wrap: wrap !important; padding-right: 16px !important; row-gap: 8px; }
-          .ed-network-links { width: 100%; padding-right: 8px; }
-        }
       `}</style>
 
       {/* Masthead title */}
       <div
+        className="ed-masthead-title-block"
         style={{
           maxWidth: 1280,
           margin: '0 auto',
@@ -155,7 +148,7 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
       </div>
 
       {/* Hairlines */}
-      <div style={{ maxWidth: 1280, margin: '8px auto 0', padding: '0 24px' }}>
+      <div className="ed-masthead-hairlines" style={{ maxWidth: 1280, margin: '8px auto 0', padding: '0 24px' }}>
         <div style={{ height: 1, background: '#C9A84C' }} />
         <div style={{ height: 3, background: 'transparent' }} />
         <div style={{ height: 1, background: '#C9A84C' }} />
@@ -163,6 +156,7 @@ export function Masthead({ activeNav = 'Top Stories', issueNumber = '№ 0421' }
 
       {/* Category nav */}
       <nav
+        className="ed-masthead-category-nav"
         style={{
           maxWidth: 1280,
           margin: '0 auto',

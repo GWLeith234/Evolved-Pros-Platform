@@ -347,13 +347,13 @@ export function MediaPortalClient({
       />
 
       {/* ── Section 1: Hero + right rail ── */}
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 0' }}>
+      <div className="media-shell-section" style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 0' }}>
         <div
           className="media-hero-grid"
-          style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24 }}
+          style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24, minWidth: 0, width: '100%' }}
         >
           {/* LEFT — Featured card (or empty state) */}
-          <div>
+          <div style={{ minWidth: 0, maxWidth: '100%' }}>
             {featured ? (
               <FeaturedCard story={featured} />
             ) : (
@@ -468,7 +468,7 @@ export function MediaPortalClient({
       </div>
 
       {/* ── Section 2: "More from Evolved Media" divider ── */}
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px 0' }}>
+      <div className="media-shell-section" style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 40, height: 2, background: 'var(--brand-gold)' }} />
           <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 12, color: 'var(--navy-dark)', textTransform: 'uppercase', letterSpacing: '0.14em', whiteSpace: 'nowrap' }}>
@@ -479,7 +479,7 @@ export function MediaPortalClient({
       </div>
 
       {/* ── Section 3: Card grid ── */}
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 56px' }}>
+      <div className="media-shell-section" style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 56px' }}>
         {grid.length > 0 ? (
           <div className="media-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {grid.map(s => (
@@ -508,13 +508,6 @@ export function MediaPortalClient({
         }
         @media (max-width: 767px) {
           .media-hero-grid { grid-template-columns: 1fr !important; }
-        }
-        /* Mobile: featured-card byline shrinks (not overflows). Rail cards
-           keep the hardcoded light surface — DO NOT flip to dark here. */
-        @media (max-width: 639px) {
-          .ed-featured-meta { padding: 14px 16px 16px !important; gap: 8px !important; grid-template-columns: 1fr !important; }
-          .ed-featured-meta-byline { text-align: left !important; white-space: normal !important; }
-          .ed-rail-card { width: 100%; max-width: 100%; }
         }
         @media (prefers-reduced-motion: reduce) {
           .media-card:hover { transform: none; }

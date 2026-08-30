@@ -250,7 +250,7 @@ export default async function StoryPage({
         {/* Overlay */}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(transparent 30%, rgba(0,0,0,0.75))' }} />
         {/* Contents */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 24 }}>
+        <div className="media-detail-hero-overlay" style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
             {!isOriginal && (
               <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: 'var(--brand-gold)', display: 'inline-block' }} />
@@ -262,7 +262,7 @@ export default async function StoryPage({
           <h1 className="media-detail-title" style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 32, color: '#fff', lineHeight: 1.1, maxWidth: 680, margin: '0 0 8px', overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
             {story.title}
           </h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="media-detail-meta-row" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             {authorAvatar ? (
               <Image src={authorAvatar} alt={story.author ?? 'George Leith'} width={28} height={28} className="rounded-full object-cover" style={{ flexShrink: 0 }} />
             ) : (
@@ -288,10 +288,20 @@ export default async function StoryPage({
       {/* 3. Two-column layout */}
       <div
         className="media-detail-grid"
-        style={{ display: 'grid', gridTemplateColumns: '1fr 260px', gap: 24, maxWidth: 1100, margin: '0 auto', padding: '24px 24px 40px' }}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 260px',
+          gap: 24,
+          maxWidth: 1100,
+          width: '100%',
+          boxSizing: 'border-box',
+          minWidth: 0,
+          margin: '0 auto',
+          padding: '24px 24px 40px',
+        }}
       >
         {/* LEFT — Article body */}
-        <div>
+        <div className="media-detail-main" style={{ minWidth: 0, maxWidth: '100%' }}>
           {/* Share bar (top) */}
           <ArticleShareBar articleUrl={articleUrl} articleTitle={story.title} label="Share this article" />
 
@@ -324,7 +334,7 @@ export default async function StoryPage({
         </div>
 
         {/* RIGHT — Sidebar */}
-        <div>
+        <div className="media-detail-sidebar" style={{ minWidth: 0, maxWidth: '100%' }}>
           {/* Author card */}
           <div style={{ backgroundColor: '#fff', border: '1px solid rgba(43,58,90,0.1)', borderRadius: 2, padding: 14, textAlign: 'center', marginBottom: 16 }}>
             {authorAvatar ? (
@@ -417,7 +427,7 @@ export default async function StoryPage({
 
       {/* 4. Related articles */}
       {(related ?? []).length > 0 && (
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 40px' }}>
+        <div className="media-related-wrap" style={{ maxWidth: 1100, width: '100%', boxSizing: 'border-box', margin: '0 auto', padding: '0 24px 40px' }}>
           {/* Section head */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
             <div style={{ width: 40, height: 2, backgroundColor: 'var(--media-ink)', flexShrink: 0 }} />
@@ -519,19 +529,6 @@ export default async function StoryPage({
           .media-related-grid {
             grid-template-columns: 1fr !important;
           }
-        }
-        /* MOBILE-MEDIA-FIX: at <640px the 32px headline + 24px gutters spill
-           past the 375px viewport. Tighten gutters, shrink the headline, and
-           allow long words to wrap. Body prose inherits the max-width:100%
-           guard so figures/wide tokens can't extend past the article column. */
-        @media (max-width: 639px) {
-          .media-detail-breadcrumb { padding-left: 16px !important; padding-right: 16px !important; }
-          .media-detail-hero { width: 100%; max-width: 100%; }
-          .media-detail-hero > div[style*="position: absolute"]:last-child { padding: 16px !important; }
-          .media-detail-title { font-size: 22px !important; max-width: 100% !important; }
-          .media-detail-grid { padding-left: 16px !important; padding-right: 16px !important; max-width: 100% !important; }
-          .media-prose { max-width: 100%; overflow-wrap: anywhere; word-break: break-word; }
-          .media-prose img, .media-prose iframe, .media-prose table { max-width: 100%; height: auto; }
         }
       `}</style>
     </>

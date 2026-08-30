@@ -1,3 +1,5 @@
+import './media-mobile.css'
+
 export default function MediaLayout({ children }: { children: React.ReactNode }) {
   // SPRINT N — THEME DECISION: /media is a standalone cream/light editorial
   // magazine shell, intentionally locked to light (colorScheme: 'light' below)
