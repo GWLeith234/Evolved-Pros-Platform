@@ -740,6 +740,7 @@ export default async function MemberHomePage() {
           storyCount: scoreboardCounts.storyCount,
         }}
         pillars={pillars}
+        academyHref={inProgressContinueHref ?? courseHref}
       />
 
       {/* ABOVE THE FOLD — the single canonical daily accountability block, and
