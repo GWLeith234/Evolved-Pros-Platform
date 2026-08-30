@@ -131,30 +131,21 @@ export function LegalList({ items }: { items: ReactNode[] }) {
 }
 
 /**
- * An unresolved legal blank.
- *
- * FOOTER-1 rule: do not invent legal copy. Registered office / mailing
- * address, governing law and venue, and refund / cancellation language are
- * George's and counsel's to write — they ship as this literal marker and
- * nothing more. Grep `TODO GEORGE / COUNSEL` to find every one of them.
+ * Registered office / mailing address block used on /terms and /privacy.
+ * Lines come from lib/layout/legalCopy.ts — do not hardcode a different address here.
  */
-export const LEGAL_TODO = 'TODO GEORGE / COUNSEL'
-
-export function LegalTodo({ label }: { label: string }) {
+export function LegalAddress({ lines }: { lines: readonly string[] }) {
   return (
-    <p style={{ margin: '0 0 12px' }}>
-      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{label}:</span>{' '}
-      <span
-        style={{
-          fontFamily: '"Barlow Condensed", sans-serif',
-          fontWeight: 700,
-          letterSpacing: '0.08em',
-          color: 'var(--brand-red-hot)',
-        }}
-      >
-        {LEGAL_TODO}
+    <address style={{ fontStyle: 'normal', margin: '0 0 12px' }}>
+      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+        Registered office / mailing address
       </span>
-    </p>
+      {lines.map(line => (
+        <span key={line} style={{ display: 'block' }}>
+          {line}
+        </span>
+      ))}
+    </address>
   )
 }
 

@@ -3,12 +3,17 @@ import type { Metadata } from 'next'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 import { SPEAKING_EMAIL, SUPPORT_EMAIL } from '@/lib/layout/publicFooter'
 import {
+  GOVERNING_LAW_AND_VENUE,
+  MEMBERSHIP_REFUND_PARAS,
+  REGISTERED_OFFICE_LINES,
+} from '@/lib/layout/legalCopy'
+import {
+  LegalAddress,
   LegalList,
   LegalMail,
   LegalP,
   LegalPage,
   LegalSection,
-  LegalTodo,
 } from '@/components/layout/LegalPage'
 
 // Unique title on purpose — this page must NOT inherit the homepage meta.
@@ -21,12 +26,10 @@ export const metadata: Metadata = publicPageMetadata('/terms', {
 /**
  * SPRINT FOOTER-1 — /terms (previously a 404).
  *
- * Sections and their order are fixed by the sprint card. Three blanks are
- * deliberately unwritten and marked `TODO GEORGE / COUNSEL`: registered office
- * / mailing address (Who we are), refund / cancellation (Plans), and governing
- * law + venue (Changes). Do not fill these in from a template — they are
- * counsel's call, and the entity is GWLeith Revenue Growth Solutions, not
- * Evolved Pros, Evolved Publishing or EvolveX360.
+ * Address, membership refunds, and governing law are George's 2026-08-29
+ * lock in lib/layout/legalCopy.ts. Do not invent extra doctrine. The entity
+ * is GWLeith Revenue Growth Solutions, not Evolved Pros, Evolved Publishing
+ * or EvolveX360. MacDermid Lamarsh still blesses wording later.
  *
  * The Plans section mirrors /pricing (lib/pricing.ts). If the ladder changes,
  * change both.
@@ -52,7 +55,7 @@ export default function TermsPage() {
           &ldquo;Platform&rdquo; means evolvedpros.com and the Evolved Pros member
           application.
         </LegalP>
-        <LegalTodo label="Registered office / mailing address" />
+        <LegalAddress lines={REGISTERED_OFFICE_LINES} />
       </LegalSection>
 
       <LegalSection title="The service">
@@ -104,7 +107,9 @@ export default function TermsPage() {
           plans renew for successive terms until they are cancelled. Payments are
           processed by Stripe.
         </LegalP>
-        <LegalTodo label="Refund and cancellation terms" />
+        {MEMBERSHIP_REFUND_PARAS.map(para => (
+          <LegalP key={para}>{para}</LegalP>
+        ))}
       </LegalSection>
 
       <LegalSection title="Acceptable use">
@@ -196,7 +201,7 @@ export default function TermsPage() {
           lives on this page. If a change is material we will say so here, and
           continuing to use the platform after that means you accept the updated terms.
         </LegalP>
-        <LegalTodo label="Governing law and venue" />
+        <LegalP>{GOVERNING_LAW_AND_VENUE}</LegalP>
       </LegalSection>
 
       <LegalSection title="Contact">
