@@ -137,7 +137,14 @@ export function LegalList({ items }: { items: ReactNode[] }) {
 export function LegalAddress({ lines }: { lines: readonly string[] }) {
   return (
     <address style={{ fontStyle: 'normal', margin: '0 0 12px' }}>
-      <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+      <span
+        style={{
+          display: 'block',
+          marginBottom: 6,
+          fontWeight: 600,
+          color: 'var(--text-primary)',
+        }}
+      >
         Registered office / mailing address
       </span>
       {lines.map(line => (
