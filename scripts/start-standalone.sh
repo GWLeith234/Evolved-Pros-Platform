@@ -19,7 +19,11 @@ CANDIDATES=(
 
 for f in "${CANDIDATES[@]}"; do
   if [[ -f "$f" ]]; then
-    export HOSTNAME="${HOSTNAME:-0.0.0.0}"
+    # Railway injects HOSTNAME as the container id (e.g. e95bec60f635). Next
+    # standalone binds to it, so the replica listens on a name the healthcheck
+    # probe cannot reach — Ready in 74ms, then "never became healthy". Force
+    # the bind; do not defer to the environment. Matches Dockerfile:33.
+    export HOSTNAME=0.0.0.0
     export PORT="${PORT:-3000}"
     exec node "$f"
   fi
