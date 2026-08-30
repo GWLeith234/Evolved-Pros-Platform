@@ -105,9 +105,10 @@ export default async function LandingPage() {
       <header
         style={{
           display: 'flex',
+          flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 16,
+          gap: '12px 16px',
           maxWidth: 1120,
           margin: '0 auto',
           padding: '20px 20px',
@@ -129,25 +130,35 @@ export default async function LandingPage() {
           </span>
         </span>
 
-        {/* Sign in is deliberately modest — /pricing is the primary action. */}
-        <Link
-          href={signedIn ? '/home' : '/login'}
+        {/* DOORS-1 — the header used to offer "Sign in" and nothing else, so
+            the only door on the front page was the one for people who already
+            had a key. Join free is now the primary action; Sign in stays as a
+            ghost beside it. Podcast / Media / LIVE moved up here from the hero
+            button row, where they were competing with the CTA.
+            Wraps rather than scrolls: at 360px the nav drops under the
+            wordmark instead of pushing the page wide. */}
+        <nav
+          aria-label="Primary"
           style={{
-            display: 'inline-flex',
+            display: 'flex',
+            flexWrap: 'wrap',
             alignItems: 'center',
-            minHeight: 44,
-            padding: '0 4px',
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: 13,
-            fontWeight: 700,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-            color: 'var(--text-secondary)',
-            textDecoration: 'none',
+            gap: '8px 14px',
+            minWidth: 0,
           }}
         >
-          {signedIn ? 'Open the platform' : 'Sign in'}
-        </Link>
+          <HeaderLink href="/podcast" label="Podcast" />
+          <HeaderLink href="/media" label="Media" />
+          <HeaderLink href="/live" label="LIVE" />
+          {signedIn ? (
+            <HeaderLink href="/home" label="Open the platform" />
+          ) : (
+            <>
+              <HeaderLink href="/login" label="Sign in" />
+              <HeaderCta href="/join" label="Join free" />
+            </>
+          )}
+        </nav>
       </header>
 
       <main style={{ maxWidth: 1120, margin: '0 auto', padding: '0 20px 72px' }}>
@@ -180,30 +191,33 @@ export default async function LandingPage() {
             academy, and live events.
           </p>
 
+          {/* DOORS-1 — exactly one red primary and one ghost. The hero used
+              to be a red "See membership" plus three bordered section buttons
+              (Podcast / Media / LIVE), which read as four competing CTAs and
+              sent the only strong one at the paywall. Those three are now
+              header nav links; the primary is the free door. */}
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginTop: 28 }}>
-            <Link
-              href="/pricing"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                minHeight: 48,
-                padding: '0 26px',
-                fontFamily: '"Barlow Condensed", sans-serif',
-                fontSize: 14,
-                fontWeight: 700,
-                letterSpacing: '0.16em',
-                textTransform: 'uppercase',
-                background: 'var(--brand-red)',
-                color: 'var(--white)',
-                textDecoration: 'none',
-              }}
-            >
-              See membership
-            </Link>
-            <NavLink href="/podcast" label="Podcast" />
-            <NavLink href="/media" label="Media" />
-            <NavLink href="/live" label="Live" />
+            {signedIn ? (
+              <PrimaryCta href="/home" label="Open the platform" />
+            ) : (
+              <PrimaryCta href="/join" label="Join free — full community, no card" />
+            )}
+            <NavLink href="/pricing" label="See pricing" />
           </div>
+
+          {/* Verbatim from /pricing (page.tsx:102) — the one line that makes
+              "no card" mean something. No other claim is added here. */}
+          <p
+            style={{
+              margin: '16px 0 0',
+              fontFamily: '"Barlow", sans-serif',
+              fontSize: 14,
+              lineHeight: 1.6,
+              color: 'var(--text-tertiary)',
+            }}
+          >
+            Everything but the curriculum is free. The Academy is what you upgrade for.
+          </p>
         </section>
 
         {/* Renders only with real rows. No episodes → no section, no empty state
@@ -225,6 +239,83 @@ export default async function LandingPage() {
         )}
       </main>
     </div>
+  )
+}
+
+/** Compact header nav item. Text only — the header's one button is HeaderCta. */
+function HeaderLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        minHeight: 44,
+        padding: '0 2px',
+        fontFamily: '"Barlow Condensed", sans-serif',
+        fontSize: 13,
+        fontWeight: 700,
+        letterSpacing: '0.14em',
+        textTransform: 'uppercase',
+        color: 'var(--text-secondary)',
+        textDecoration: 'none',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {label}
+    </Link>
+  )
+}
+
+/** The header's single red CTA. */
+function HeaderCta({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        minHeight: 40,
+        padding: '0 16px',
+        fontFamily: '"Barlow Condensed", sans-serif',
+        fontSize: 13,
+        fontWeight: 700,
+        letterSpacing: '0.14em',
+        textTransform: 'uppercase',
+        background: 'var(--brand-red)',
+        color: 'var(--white)',
+        textDecoration: 'none',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {label}
+    </Link>
+  )
+}
+
+/** The hero's single red CTA. Wraps rather than overflows on a narrow phone. */
+function PrimaryCta({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        minHeight: 48,
+        padding: '12px 26px',
+        fontFamily: '"Barlow Condensed", sans-serif',
+        fontSize: 14,
+        fontWeight: 700,
+        letterSpacing: '0.16em',
+        textTransform: 'uppercase',
+        background: 'var(--brand-red)',
+        color: 'var(--white)',
+        textDecoration: 'none',
+        maxWidth: '100%',
+      }}
+    >
+      {label}
+    </Link>
   )
 }
 
