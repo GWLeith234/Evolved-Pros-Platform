@@ -79,7 +79,7 @@ export function PublicFooter({
             }}
           >
             {PUBLIC_FOOTER_LINKS.map(link => (
-              <li key={link.href} style={{ minWidth: 0 }}>
+              <li key={link.label} style={{ minWidth: 0 }}>
                 {link.cta ? (
                   <Link
                     href={link.href}
