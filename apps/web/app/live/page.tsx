@@ -28,6 +28,7 @@ import {
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { PublicFooter } from '@/components/layout/PublicFooter'
 
 export const metadata: Metadata = publicPageMetadata('/live', {
   title: 'LIVE — Evolved Pros',
@@ -136,6 +137,13 @@ export default async function LivePage() {
       <LivePhotoRotator />
       <LiveFinalCTA />
       <LiveBookingInquiry />
+
+      {/* SPRINT FOOTER-1 — /live sits outside the (public) route group, so it
+         mounts the global footer itself. It goes INSIDE .live-force-dark: that
+         wrapper re-declares the semantic tokens to their dark values in light
+         mode, so the footer stays navy with the rest of the page instead of
+         flipping to parchment underneath it. */}
+      <PublicFooter />
     </div>
   )
 }

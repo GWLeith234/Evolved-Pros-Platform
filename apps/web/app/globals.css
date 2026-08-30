@@ -1626,8 +1626,14 @@ html.light-mode .ep-bottom-tabs {
    background was flipping to cream while its hardcoded white text stayed white.
    Re-declare the global surface and text tokens to their dark values on the
    /live wrapper so light-mode has no effect inside it (the /live-specific text
-   and border tokens are already theme-constant). */
-html.light-mode .live-force-dark {
+   and border tokens are already theme-constant).
+
+   SPRINT FOOTER-1 — .ep-force-dark is the generic form of the same escape
+   hatch, for any element that must stay dark inside a fixed-dark shell that
+   is not /live (today: the PublicFooter under the /login card). Same token
+   set, no second copy of the values. */
+html.light-mode .live-force-dark,
+html.light-mode .ep-force-dark {
   --bg-page:        #0A0F18;
   --bg-surface:     #111926;
   --bg-elevated:    #1A2332;
@@ -1988,4 +1994,35 @@ a.ep-text-link:focus-visible {
   font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+/* ── SPRINT FOOTER-1 — global public footer ───────────────────────────────
+   .ep-public-shell is the (public) template wrapper: a column that keeps the
+   footer at the bottom of short pages instead of floating it mid-viewport.
+
+   The suppression rule below exists because /podcast renders the FULL member
+   chrome for a signed-in member (.ep-member-shell — height:100dvh, its own
+   scroller, its own bottom tab bar). A public marketing footer hanging below
+   that shell would add a second, dead scroll region to an in-app surface, so
+   it is hidden there. Anonymous visitors and crawlers — the ones this sprint
+   is for — never hit that branch and always get the footer. */
+.ep-public-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: 100%;
+}
+.ep-public-shell > .ep-public-shell-main {
+  flex: 1 0 auto;
+  min-width: 0;
+}
+.ep-public-shell:has(.ep-member-shell) > .ep-public-footer {
+  display: none;
+}
+
+/* Ghost footer links lift to full-strength ink on hover/focus. The single red
+   CTA (Join free) is styled inline in the component. */
+.ep-public-footer-link:hover,
+.ep-public-footer-link:focus-visible {
+  color: var(--text-primary);
 }

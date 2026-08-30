@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { safeRedirectPath } from '@/lib/auth/safeRedirect'
 import { loginCopyFor } from '@/lib/auth/loginCopy'
+import { PublicFooter } from '@/components/layout/PublicFooter'
 import { LoginForm } from './LoginForm'
 
 interface LoginSearchParams {
@@ -44,9 +45,17 @@ export default async function LoginPage({
 
   // Wraps LoginForm so its useSearchParams() read of ?mode=signup
   // can't make the prerendered HTML disagree with the hydrated client (#425).
+  //
+  // SPRINT FOOTER-1 — /login is outside the (public) route group, so it mounts
+  // the global footer itself. LoginForm's shell is a fixed-dark navy card that
+  // does NOT flip with the theme, so the footer is pinned dark (tone="dark")
+  // to match rather than turning parchment underneath it.
   return (
-    <Suspense fallback={null}>
-      <LoginForm />
-    </Suspense>
+    <div style={{ background: 'var(--navy-dark)' }}>
+      <Suspense fallback={null}>
+        <LoginForm />
+      </Suspense>
+      <PublicFooter tone="dark" />
+    </div>
   )
 }

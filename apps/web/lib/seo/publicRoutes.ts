@@ -25,8 +25,23 @@
  * but not the buy page is the same class of false signal, inverted.
  *
  * /membership stays out: it is a member surface, not a public one.
+ *
+ * SPRINT FOOTER-1 added /terms, /privacy and /contact. All three are static
+ * pages under app/(public) and none of them appears in the middleware matcher,
+ * so middleware never runs on them and an anonymous request renders the page —
+ * the same bar the five above have to clear. They are also the only pages the
+ * global footer links to that Google could not otherwise discover.
  */
-export const PUBLIC_SITEMAP_PATHS = ['/', '/podcast', '/live', '/media', '/pricing'] as const
+export const PUBLIC_SITEMAP_PATHS = [
+  '/',
+  '/podcast',
+  '/live',
+  '/media',
+  '/pricing',
+  '/terms',
+  '/privacy',
+  '/contact',
+] as const
 
 export type PublicSitemapPath = (typeof PUBLIC_SITEMAP_PATHS)[number]
 

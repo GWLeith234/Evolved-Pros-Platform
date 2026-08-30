@@ -1,3 +1,5 @@
+import { PublicFooter } from '@/components/layout/PublicFooter'
+
 /**
  * Public marketing / editorial routes (/, /media, /podcast, /pricing, …).
  *
@@ -6,7 +8,17 @@
  * host. Do not hardcode platform.evolvedpros.com. The root layout sets
  * metadataBase to www; this layout does not guess a path (a wrong homepage
  * canonical is how /media shipped with og:url pointing at /).
+ *
+ * SPRINT FOOTER-1 — this is the single mount point for the global public
+ * footer, so every route in the tree inherits it. Routes OUTSIDE this group
+ * (/live, /login, app/not-found.tsx) mount <PublicFooter /> themselves; if you
+ * add another public shell outside (public), mount it there too.
  */
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+  return (
+    <div className="ep-public-shell">
+      <div className="ep-public-shell-main">{children}</div>
+      <PublicFooter />
+    </div>
+  )
 }
