@@ -107,6 +107,9 @@ export default function TermsPage() {
           plans renew for successive terms until they are cancelled. Payments are
           processed by Stripe.
         </LegalP>
+        <LegalP>
+          <strong style={{ color: 'var(--text-primary)' }}>Refund and cancellation terms.</strong>
+        </LegalP>
         {MEMBERSHIP_REFUND_PARAS.map(para => (
           <LegalP key={para}>{para}</LegalP>
         ))}
@@ -201,7 +204,10 @@ export default function TermsPage() {
           lives on this page. If a change is material we will say so here, and
           continuing to use the platform after that means you accept the updated terms.
         </LegalP>
-        <LegalP>{GOVERNING_LAW_AND_VENUE}</LegalP>
+        <LegalP>
+          <strong style={{ color: 'var(--text-primary)' }}>Governing law and venue.</strong>{' '}
+          {GOVERNING_LAW_AND_VENUE}
+        </LegalP>
       </LegalSection>
 
       <LegalSection title="Contact">
