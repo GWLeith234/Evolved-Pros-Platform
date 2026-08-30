@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { PUBLIC_SITEMAP_PATHS, robotsSitemapUrl } from './publicRoutes'
+import {
+  LOGIN_DOCUMENT_ROBOTS,
+  PUBLIC_SITEMAP_PATHS,
+  ROBOTS_DISALLOW,
+  robotsSitemapUrl,
+} from './publicRoutes'
 
 /**
  * GATE-1. This file imports NOTHING but the module under test — deliberately.
@@ -62,5 +67,21 @@ describe('robotsSitemapUrl', () => {
     for (const input of inputs) {
       expect(robotsSitemapUrl(input)).not.toContain('platform.evolvedpros.com')
     }
+  })
+})
+
+describe('ROBOTS_DISALLOW', () => {
+  it('disallows the thin auth document', () => {
+    expect([...ROBOTS_DISALLOW]).toContain('/login')
+  })
+
+  it('does not hide the public sell page', () => {
+    expect([...ROBOTS_DISALLOW]).not.toContain('/pricing')
+  })
+})
+
+describe('LOGIN_DOCUMENT_ROBOTS', () => {
+  it('noindexes /login and /login?mode=signup (same document)', () => {
+    expect(LOGIN_DOCUMENT_ROBOTS).toEqual({ index: false, follow: false })
   })
 })

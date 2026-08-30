@@ -155,7 +155,7 @@ export default async function LandingPage() {
           ) : (
             <>
               <HeaderLink href="/login" label="Sign in" />
-              <HeaderCta href="/join" label="Join free" />
+              <HeaderCta href="/pricing" label="Join free" />
             </>
           )}
         </nav>
@@ -195,12 +195,13 @@ export default async function LandingPage() {
               to be a red "See membership" plus three bordered section buttons
               (Podcast / Media / LIVE), which read as four competing CTAs and
               sent the only strong one at the paywall. Those three are now
-              header nav links; the primary is the free door. */}
+              header nav links; the primary is Join free → /pricing, not the
+              /join 308. */}
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginTop: 28 }}>
             {signedIn ? (
               <PrimaryCta href="/home" label="Open the platform" />
             ) : (
-              <PrimaryCta href="/join" label="Join free — full community, no card" />
+              <PrimaryCta href="/pricing" label="Join free — full community, no card" />
             )}
             <NavLink href="/pricing" label="See pricing" />
           </div>
