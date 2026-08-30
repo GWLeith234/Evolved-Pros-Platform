@@ -99,8 +99,9 @@ There is **no `PLATFORM_DOMAIN` env var**. The deploy config
 - `NEXT_PUBLIC_APP_URL` — the serving app URL (Railway); guest links are built
   from this (`${NEXT_PUBLIC_APP_URL}/guest/<token>`), falling back to
   `https://platform.evolvedpros.com` (matching the friend-invite precedent).
-- `NEXT_PUBLIC_SITE_URL` — the canonical brand domain
-  (`https://platform.evolvedpros.com`), used for SEO/canonical.
+  This is the canonical app origin Railway must keep.
+- `NEXT_PUBLIC_SITE_URL` — brand / SEO origin (canonical, OG, sitemap, RSS).
+  Falls back to `NEXT_PUBLIC_APP_URL` when unset. Not a second app URL.
 
 ---
 

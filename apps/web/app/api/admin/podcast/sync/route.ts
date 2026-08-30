@@ -29,15 +29,9 @@ interface ExistingEpisode {
   transistor_episode_id: string | null
 }
 
-export async function POST(request: Request) {
-  const cronSecret = process.env.CRON_SECRET
-  const cronHeader = request.headers.get('x-cron-secret')
-  const isCron = !!cronSecret && cronHeader === cronSecret
-
-  if (!isCron) {
-    const guard = await requireAdminApi()
-    if (guard instanceof Response) return guard
-  }
+export async function POST() {
+  const guard = await requireAdminApi()
+  if (guard instanceof Response) return guard
 
   const rssUrl = process.env.PODCAST_RSS_URL
   if (!rssUrl) {

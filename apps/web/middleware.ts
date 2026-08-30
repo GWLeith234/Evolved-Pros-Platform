@@ -50,15 +50,14 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // RSC prefetch requests must not be redirected — Next.js cannot parse a
-  // redirect response as RSC data and reports it as a 503. Let these through;
-  // the server component itself enforces auth for its own rendered output.
-  if (
+  // RSC requests (including click navigations, not just hover-prefetch) must
+  // not be redirected — Next.js cannot parse a redirect as RSC and reports
+  // 503. Session refresh MUST still run: Server Components cannot set auth
+  // cookies (createClient swallows that), so skipping refresh here is why
+  // /pricing showed SIGN IN to a logged-in member after an in-app navigation.
+  const isRsc =
     request.headers.get('RSC') === '1' ||
     request.headers.get('Next-Router-Prefetch') === '1'
-  ) {
-    return NextResponse.next()
-  }
 
   // Allow public routes through immediately
   if (PUBLIC_ROUTES.some(r => pathname.startsWith(r))) {
@@ -128,6 +127,11 @@ export async function middleware(request: NextRequest) {
   // and wrong for /pricing, which is the only checkout surface: a half-onboarded
   // member must still be able to buy.
   if (SESSION_OPTIONAL_ROUTES.some(r => pathname.startsWith(r))) {
+    return supabaseResponse
+  }
+
+  // Refresh happened above. For RSC, stop here so we never 307 the payload.
+  if (isRsc) {
     return supabaseResponse
   }
 

@@ -79,9 +79,11 @@ verification, Microsoft Clarity) are documented in
 
 ## Deployment
 
-- Web is deployed to Railway via Nixpacks (`railway.toml`).
-  Health check: `GET /api/health` returns a status payload with
-  Supabase / Resend / Mux / Vendasta env presence.
+- Web is deployed to Railway via Nixpacks (`railway.toml` + `nixpacks.toml`).
+  Node 20. Standalone boot: `bash scripts/start-standalone.sh`
+  (`node apps/web/.next/standalone/apps/web/server.js`).
+  Health check: `GET /api/health`. Do not use `next start` — the app
+  is `output: 'standalone'`.
 - Mobile is built via Expo EAS (configured in `apps/mobile/app.json`).
 
 ## Integrations at a glance

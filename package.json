@@ -21,6 +21,9 @@
     "turbo": "^2.0.0",
     "typescript": "^5.4.0"
   },
+  "engines": {
+    "node": ">=20 <23"
+  },
   "pnpm": {
     "overrides": {
       "@types/react": "18.3.28",

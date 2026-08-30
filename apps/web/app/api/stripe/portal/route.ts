@@ -15,8 +15,9 @@ import { createClient } from '@/lib/supabase/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { getStripe, stripeConfigured } from '@/lib/stripe/config'
 import { effectiveTier, hasTierAccess } from '@/lib/tier'
+import { getAppUrl } from '@/lib/urls'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://platform.evolvedpros.com'
+const APP_URL = getAppUrl()
 
 export async function POST() {
   const supabase = createClient()
@@ -47,7 +48,7 @@ export async function POST() {
   try {
     const session = await getStripe().billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${APP_URL}/pricing`,
+      return_url: `${APP_URL}/membership`,
     })
     return NextResponse.json({ url: session.url })
   } catch (err) {

@@ -1,6 +1,15 @@
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  // Monorepo: trace workspace packages so standalone includes them, and so
+  // the emit path is apps/web/.next/standalone/apps/web/server.js (the path
+  // railway.toml / scripts/start-standalone.sh boot).
+  outputFileTracingRoot: path.join(__dirname, '../..'),
   // supabase-js@2.100.0 (postgrest-js v2) broke type inference for inline
   // partial selects. Runtime is correct — suppress to keep builds green.
   typescript: { ignoreBuildErrors: true },

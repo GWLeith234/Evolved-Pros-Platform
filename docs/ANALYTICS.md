@@ -18,7 +18,7 @@ values in git (`.env`, `.env.local`, or committed examples).
 | --- | --- | --- |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | GA4 page views, session duration, traffic location/geo, engaged sessions | [Google Analytics](https://analytics.google.com/) → Admin → Data collection and modification → Data streams → your web stream → **Measurement ID** (`G-XXXXXXXX`) |
 | `NEXT_PUBLIC_GSC_VERIFICATION` | Google Search Console **site verification only** (HTML meta tag; GSC is not a JS tag) | [Search Console](https://search.google.com/search-console) → Settings → Ownership verification → **HTML tag** → the `content="…"` value only |
-| `NEXT_PUBLIC_CLARITY_ID` | Microsoft Clarity heatmaps and session replay | [Clarity](https://clarity.microsoft.com/) → the project → Settings → Setup → **project ID** |
+| `NEXT_PUBLIC_CLARITY_ID` | Microsoft Clarity heatmaps and session replay. Optional — leave unset to skip the snippet. Do not invent an ID. CSP already allows `clarity.ms` so the tag can load when this is set. | [Clarity](https://clarity.microsoft.com/) → the project → Settings → Setup → **project ID** |
 
 After setting a var, redeploy (or restart) so Next.js inlines the `NEXT_PUBLIC_*` values.
 

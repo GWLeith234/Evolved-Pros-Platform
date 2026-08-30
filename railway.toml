@@ -1,9 +1,16 @@
+# Source of truth for the Railway `web` service. Dashboard start/build
+# settings lose to this file. Do not switch the builder to Railpack here —
+# production deploys are Nixpacks + this start command.
+
 [build]
 builder = "nixpacks"
+nixpacksConfigPath = "nixpacks.toml"
 installCommand = "pnpm install --no-frozen-lockfile"
+buildCommand = "pnpm --filter web build && bash scripts/prepare-standalone.sh"
 
 [deploy]
-startCommand = "cd apps/web && pnpm start"
+# Standalone server (not `next start`). Healthcheck stays /api/health.
+startCommand = "bash scripts/start-standalone.sh"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"

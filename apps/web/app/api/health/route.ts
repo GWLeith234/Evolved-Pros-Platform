@@ -24,6 +24,7 @@ export async function GET() {
     resend: !!process.env.RESEND_API_KEY,
     mux: !!(process.env.MUX_TOKEN_ID && process.env.MUX_TOKEN_SECRET),
     vendasta: !!process.env.VENDASTA_VERIFIER_TOKEN,
+    // APP_URL is canonical; SITE_URL is the SEO fallback alias.
     appUrl: !!(process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL),
   }
 

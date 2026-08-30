@@ -1,0 +1,9 @@
+# Source of truth for Railway Nixpacks. Dashboard builder/start settings
+# must not override this file or railway.toml.
+#
+# Node 20 is required. Nixpacks defaults to 18 when this is unset, which
+# trips the @supabase/supabase-js deprecation warning and is not supported.
+# Also pinned via package.json engines, .nvmrc, and .node-version.
+
+[variables]
+NIXPACKS_NODE_VERSION = "20"
