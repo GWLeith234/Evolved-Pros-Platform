@@ -56,6 +56,5 @@ export async function GET(request: Request) {
     void addContactTag(contact.vendasta_contact_id, 'renewal-reminder-due')
   }
 
-  console.log(`[Cron] renewal-reminders: tagged ${contacts.length} contacts`)
   return Response.json({ ok: true, tagged: contacts.length })
 }

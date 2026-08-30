@@ -6,8 +6,6 @@ import { hasTierAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
-export const revalidate = 300
-
 export async function GET() {
   const supabase = createClient()
   const profile = await resolveCurrentUser(supabase)

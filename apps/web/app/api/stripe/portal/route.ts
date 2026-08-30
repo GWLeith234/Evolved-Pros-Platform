@@ -48,7 +48,7 @@ export async function POST() {
   try {
     const session = await getStripe().billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${APP_URL}/membership`,
+      return_url: `${APP_URL}/pricing`,
     })
     return NextResponse.json({ url: session.url })
   } catch (err) {

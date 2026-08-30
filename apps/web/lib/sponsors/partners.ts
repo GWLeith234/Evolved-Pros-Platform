@@ -110,8 +110,8 @@ export const ACADEMY_UPGRADE_AD: SponsorAd = {
     'Strategy, Accountability, and Execution are Pro. Build the full architecture — not half of it.',
   cta_text: 'Upgrade to Pro',
   image_url: '/ads/academy-portrait.png',
-  click_url: '/membership',
-  link_url: '/membership',
+  click_url: '/pricing',
+  link_url: '/pricing',
 }
 
 export function isAcademyAd(
@@ -121,8 +121,8 @@ export function isAcademyAd(
   const name = `${ad.sponsor_name ?? ''} ${ad.tool_name ?? ''}`.toLowerCase()
   if (name.includes('evolved pros academy') || name === 'academy') return true
   const href = `${ad.click_url ?? ''} ${ad.link_url ?? ''}`.toLowerCase()
-  if (href.includes('/academy') || href.includes('/membership')) {
-    // Membership CTA is still Academy self-promo when the row is labeled Academy.
+  if (href.includes('/academy') || href.includes('/pricing') || href.includes('/membership')) {
+    // Pricing/membership CTA is still Academy self-promo when the row is labeled Academy.
     if (name.includes('academy') || (ad.image_url ?? '').toLowerCase().includes('academy')) return true
   }
   const img = (ad.image_url ?? '').toLowerCase()

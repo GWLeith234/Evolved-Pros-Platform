@@ -4,8 +4,6 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
-export const revalidate = 300
-
 export async function GET() {
   const supabase = createClient()
   const currentUser = await resolveCurrentUser(supabase)

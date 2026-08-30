@@ -4,8 +4,6 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
-export const revalidate = 60
-
 type ActivityItem = {
   type: 'community_post' | 'community_reply' | 'event_reminder' | 'lesson_completed' | 'lesson_unlocked'
   text: string

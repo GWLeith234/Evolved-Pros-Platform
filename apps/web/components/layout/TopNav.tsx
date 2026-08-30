@@ -175,7 +175,7 @@ export function TopNav({
             Your membership renews in <strong>{daysUntilExpiry} day{daysUntilExpiry !== 1 ? 's' : ''}</strong>
           </span>
           <Link
-            href="/membership"
+            href="/pricing"
             style={{
               fontFamily: '"Barlow Condensed", sans-serif',
               fontWeight: 700,
@@ -561,7 +561,7 @@ export function TopNav({
                 {[
                   { label: 'Profile',    href: '/profile/me' },
                   { label: 'Settings',   href: '/settings' },
-                  { label: 'Membership', href: '/membership' },
+                  { label: 'Membership', href: '/pricing' },
                 ].map(item => (
                   <Link
                     key={item.href}

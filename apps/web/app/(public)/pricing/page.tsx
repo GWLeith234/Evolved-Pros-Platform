@@ -2,8 +2,9 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { RedeemCodeForm } from './RedeemCodeForm'
 import { PricingTierCards } from './PricingTierCards'
+import { ManageSubscriptionButton } from './ManageSubscriptionButton'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
-import { effectiveTier } from '@/lib/tier'
+import { effectiveTier, hasTierAccess } from '@/lib/tier'
 import { getMembershipPricing } from '@/lib/commerce/catalogue'
 import { tierPlanName } from '@/lib/academy/gating'
 import { PILLAR_NAMES } from '@/lib/academy/types'
@@ -156,6 +157,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
         (profile as unknown as { tier_status?: string | null }).tier_status,
       )
     : null
+  const showManageSubscription = Boolean(profile && hasTierAccess(currentTier, 'vip'))
   // Header chrome lives in ./layout.tsx (TopNav + account menu when signed
   // in, Sign in when anonymous). Do not add a second SIGN IN control here.
   return (
@@ -172,6 +174,11 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
           <p className="font-body text-sm max-w-lg mx-auto" style={{ color: 'rgba(245,240,232,0.5)' }}>
             {hero.sub}
           </p>
+          {showManageSubscription && (
+            <div className="mt-6 flex justify-center">
+              <ManageSubscriptionButton />
+            </div>
+          )}
         </div>
 
         {/* Tier cards + monthly/annual toggle — amounts from the catalogue. */}
