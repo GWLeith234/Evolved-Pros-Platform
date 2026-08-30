@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { loginCopyFor } from '@/lib/auth/loginCopy'
 import { LogoMark } from '@/components/ui/LogoMark'
 
 // Map raw Supabase auth errors into copy that doesn't sound like a stack trace.
@@ -40,7 +41,12 @@ function Spinner() {
 
 export function LoginForm() {
   const searchParams = useSearchParams()
-  const isSignup = searchParams.get('mode') === 'signup'
+  // DOORS-1 — /join and /signup 308 here with ?mode=signup, so this screen has
+  // to greet a first-time visitor as well as a returning member. The heading
+  // and submit label come from lib/auth/loginCopy.ts, the same module
+  // page.tsx's generateMetadata reads, so the tab title and the button can
+  // never drift apart.
+  const copy = loginCopyFor(searchParams.get('mode'))
 
   // SPRINT I Phase 2 follow-up — return the member to where they came from.
   // /pricing sends ?redirect=/pricing when a paid CTA gets a 401 for an
@@ -141,7 +147,7 @@ export function LoginForm() {
                 className="text-navy-dark text-3xl font-bold mb-6"
                 style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
               >
-                {isSignup ? 'Let\u2019s get started.' : 'Welcome back.'}
+                {copy.heading}
               </h2>
 
               {/* Tabs */}
@@ -269,7 +275,7 @@ export function LoginForm() {
                     className={`w-full py-3 rounded font-bold uppercase tracking-wider text-sm text-white transition-all disabled:opacity-50 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                     style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: 'var(--brand-red-hot)' }}
                   >
-                    {loading ? (<><Spinner />Signing in…</>) : 'Sign In →'}
+                    {loading ? (<><Spinner />Signing in…</>) : copy.submit}
                   </button>
                 </form>
               ) : (

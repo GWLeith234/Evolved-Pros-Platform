@@ -80,6 +80,42 @@ const nextConfig = {
       // Permanent 308 so bookmarks, shared links, and old in-app buttons land
       // on the Home dashboard that now hosts the scoreboard.
       { source: '/scoreboard', destination: '/home', permanent: true },
+
+      // ── SPRINT DOORS-1 — the front door actually opens ──────────────────
+      //
+      // ORDER MATTERS, AND THE TWO-HOP IS DELIBERATE. These sit AFTER the
+      // platform->www host block above, so a request to
+      // platform.evolvedpros.com/join resolves as:
+      //
+      //   platform/join  -308->  https://www.evolvedpros.com/join
+      //                  -308->  /login?mode=signup
+      //
+      // Two hops is CORRECT. Collapsing it into one would put a platform-host
+      // URL in the final Location header — i.e. hand out a non-canonical
+      // destination, exactly what GATE-1b closed. Do not "optimise" these
+      // above the host block.
+      //
+      // /join is the URL George says on stage, on the podcast and in the book;
+      // /signup is what people type instead. Both are the free-tier door,
+      // which is the signup mode of /login.
+      { source: '/join', destination: '/login?mode=signup', permanent: true },
+      { source: '/signup', destination: '/login?mode=signup', permanent: true },
+
+      // /membership was a route file whose entire body was redirect('/pricing').
+      // Next prerendered that statically, so the server answered 200 with a
+      // shell that redirected on the client — a real page to a crawler, a flash
+      // of nothing to a member, and the query string dropped on the way. A
+      // config redirect answers 308 before rendering and carries ?checkout=…
+      // (Stripe's return URL) and ?tier=… through to /pricing intact. The route
+      // file is deleted in this commit.
+      { source: '/membership', destination: '/pricing', permanent: true },
+
+      // The only Strategy pillar page that exists is /academy/strategic-approach.
+      // /academy/strategy is the shorter name people (and older in-app links)
+      // reach for; it resolves to the [pillarSlug] route, finds no course with
+      // that slug, and notFound()s. Still member-gated after the hop —
+      // middleware runs on the destination exactly as before.
+      { source: '/academy/strategy', destination: '/academy/strategic-approach', permanent: true },
     ]
   },
   async headers() {

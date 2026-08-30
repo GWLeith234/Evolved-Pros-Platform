@@ -558,8 +558,15 @@ html.light-mode main .border-white\/\[0\.06\] {
 }
 
 /* Media highlight is now --topnav-highlight (theme token). Keep a structural
-   fallback so any residual inline gold still reads in light mode. */
-html.light-mode header a[href="/media"] {
+   fallback so any residual inline gold still reads in light mode.
+   SPRINT DOORS-1 — scoped from `header` to `.ep-topnav`, which is the member
+   TopNav this was always written for (TopNav.tsx:196 renders
+   <header class="ep-topnav">, and its Media item already sets the same token
+   inline, so this stays a redundant safety net there). Unscoped, it matched
+   ANY <header>: the moment the public landing page moved Media into its
+   header nav, that one link went gold in light mode while Podcast / LIVE /
+   Sign in beside it stayed secondary ink. No colour value changed. */
+html.light-mode .ep-topnav a[href="/media"] {
   color: var(--topnav-highlight) !important;
 }
 
