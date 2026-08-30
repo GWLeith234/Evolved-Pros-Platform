@@ -1,0 +1,130 @@
+/**
+ * SPRINT MOBILE-1 — /media mobile shell discipline (<640px).
+ * Replaces the stale MOBILE-MEDIA-FIX blocks in Masthead + article page +
+ * duplicates in MediaPortalClient. Desktop (≥640px) untouched.
+ */
+@media (max-width: 639px) {
+  /* Hub section gutters (was hardcoded 24px inline). */
+  .media-shell-section {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* Masthead date strip + category nav gutters. */
+  .ed-masthead-date-strip {
+    flex-wrap: wrap !important;
+    padding-right: 16px !important;
+    row-gap: 8px;
+  }
+
+  .ed-network-links {
+    width: 100%;
+    padding-right: 8px;
+  }
+
+  .ed-masthead-title-block,
+  .ed-masthead-hairlines,
+  .ed-masthead-category-nav {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* Hub hero grid: min-width:auto on grid items was sizing the featured card
+     wider than the viewport; layout overflow-x:hidden masked scrollWidth. */
+  .media-hero-grid {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .media-hero-grid > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .ed-featured-meta {
+    padding: 14px 16px 16px !important;
+    gap: 8px !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .ed-featured-meta-byline {
+    text-align: left !important;
+    white-space: normal !important;
+  }
+
+  .ed-rail-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Article detail: grid + columns must shrink inside 100vw. */
+  .media-detail-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .media-detail-main,
+  .media-detail-sidebar {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .media-detail-breadcrumb {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .media-detail-hero {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .media-detail-hero-overlay {
+    padding: 16px !important;
+  }
+
+  .media-detail-title {
+    font-size: clamp(22px, 6.5vw, 28px) !important;
+    max-width: 100% !important;
+  }
+
+  .media-detail-meta-row {
+    flex-wrap: wrap !important;
+    row-gap: 4px;
+  }
+
+  .media-prose {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .media-prose img,
+  .media-prose iframe,
+  .media-prose table {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* StoryComments used -mx-4 which blew past the article column. */
+  .media-story-comments {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .media-related-wrap {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
