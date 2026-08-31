@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     let body: Record<string, unknown>
     try { body = await request.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
 
-    const zone = typeof body.zone === 'string' && ['A', 'B', 'C', 'D'].includes(body.zone)
+    const zone = typeof body.zone === 'string' && ['A', 'B', 'C', 'D', 'E'].includes(body.zone)
       ? body.zone
       : 'A'
     const adType = typeof body.ad_type === 'string' && ['image', 'video', 'native'].includes(body.ad_type)
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
         is_active: body.is_active === true,
         sort_order: typeof body.sort_order === 'number' ? body.sort_order : 0,
         // keep placement for backwards compatibility with sidebar ad query
-        placement: zone === 'A' ? 'sidebar' : 'topnav',
+        placement: zone === 'A' || zone === 'E' ? 'sidebar' : 'topnav',
         placements: Array.isArray(body.placements) ? body.placements : ['platform'],
       })
       .select()

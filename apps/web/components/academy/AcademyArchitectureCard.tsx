@@ -1,7 +1,9 @@
-import Link from 'next/link'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { stripTrailingArrow } from '@/lib/brand'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import { HouseAdTracker } from '@/components/ads/HouseAdTracker'
+import { inferHouseAdSlot } from '@/lib/ads/house'
+import { ACADEMY_SPONSOR_AD } from '@/lib/sponsors/partners'
 
 const PILLARS = [1, 2, 3, 4, 5, 6] as const
 
@@ -16,19 +18,22 @@ const DEFAULT_CTA = 'Enter the Academy'
  */
 export function AcademyArchitectureCard({
   ad,
-  href = '/academy',
+  href: _href,
   className,
+  locationId = 'academy',
 }: {
   ad?: SponsorAd | null
-  /** Override destination (e.g. /membership for upgrade-focused placements). */
+  /** Ignored — house Academy units always go to /pricing with UTMs. */
   href?: string
   className?: string
+  locationId?: string
 }) {
+  void _href
   const headline = ad?.headline?.trim() || DEFAULT_HEADLINE
   const sub = ad?.endorsement_quote?.trim() || DEFAULT_SUB
   const cta = stripTrailingArrow(ad?.cta_text?.trim() || DEFAULT_CTA)
-  const dest = [ad?.click_url, ad?.link_url].find(u => u && u !== '#') ?? href
-  const external = /^https?:\/\//i.test(dest)
+  const tracked = ad ?? ACADEMY_SPONSOR_AD
+  const slot = inferHouseAdSlot(tracked)
   const wrapClass = ['group block h-full no-underline', className].filter(Boolean).join(' ')
 
   const inner = (
@@ -149,27 +154,15 @@ export function AcademyArchitectureCard({
     </article>
   )
 
-  if (external) {
-    return (
-      <a
-        href={dest}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={wrapClass}
-        aria-label={`${headline} — Evolved Pros Academy`}
-      >
-        {inner}
-      </a>
-    )
-  }
-
   return (
-    <Link
-      href={dest}
+    <HouseAdTracker
+      ad={tracked}
+      slot={slot}
+      locationId={locationId}
       className={wrapClass}
-      aria-label={`${headline} — Evolved Pros Academy`}
+      ariaLabel={`${headline} — Evolved Pros Academy`}
     >
       {inner}
-    </Link>
+    </HouseAdTracker>
   )
 }

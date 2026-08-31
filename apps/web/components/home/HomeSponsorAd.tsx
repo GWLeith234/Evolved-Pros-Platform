@@ -307,7 +307,7 @@ function PremiumPartnerCard({
  * Flagship partners → premium hero layout; others → logo + tagline.
  */
 export function SponsorAdCard({ ad }: { ad: SponsorAd }) {
-  if (isAcademyAd(ad)) return <AcademyArchitectureCard ad={ad} className="pt-3" />
+  if (isAcademyAd(ad)) return <AcademyArchitectureCard ad={ad} className="pt-3" locationId="home" />
 
   const kind = premiumPartnerKind(ad)
   if (kind) return <PremiumPartnerCard ad={ad} kind={kind} />
@@ -474,6 +474,15 @@ export function SponsoredEyebrow() {
 export function HomeSponsorAd({ ad }: { ad: SponsorAd | null }) {
   if (!ad) return null
 
+  // House Evolved Pros offers do not wear a SPONSOR / Sponsored tag.
+  if (isAcademyAd(ad)) {
+    return (
+      <section aria-label="Evolved Pros Academy">
+        <SponsorAdCard ad={ad} />
+      </section>
+    )
+  }
+
   return (
     <section aria-label="Sponsored">
       <SponsoredEyebrow />
@@ -492,10 +501,14 @@ export function HomeSponsorRow({ ads }: { ads: SponsorAd[] }) {
   })
   if (!unique.length) return null
 
+  const partners = unique.filter(a => !isAcademyAd(a))
+  const houseOnly = partners.length === 0
+  const label = houseOnly ? 'Evolved Pros Academy' : 'Sponsored'
+
   if (unique.length === 1) {
     return (
-      <section aria-label="Sponsored">
-        <SponsoredEyebrow />
+      <section aria-label={label}>
+        {!houseOnly && <SponsoredEyebrow />}
         <div style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }}>
           <SponsorAdCard ad={unique[0]} />
         </div>
@@ -504,8 +517,8 @@ export function HomeSponsorRow({ ads }: { ads: SponsorAd[] }) {
   }
 
   return (
-    <section aria-label="Sponsored">
-      <SponsoredEyebrow />
+    <section aria-label={label}>
+      {!houseOnly && <SponsoredEyebrow />}
       <div
         className="grid grid-cols-1 gap-6 md:grid-cols-2"
         style={{ width: '100%', maxWidth: 1440, margin: '0 auto', paddingTop: 4 }}

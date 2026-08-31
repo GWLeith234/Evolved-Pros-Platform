@@ -6,6 +6,8 @@ import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { isAcademyAd, premiumPartnerKind } from '@/lib/sponsors/partners'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { stripTrailingArrow } from '@/lib/brand'
+import { HouseAdTracker } from '@/components/ads/HouseAdTracker'
+import { inferHouseAdSlot, resolveServedAdHref } from '@/lib/ads/house'
 
 const FB = 'var(--font-barlow)'
 const FBC = 'var(--font-barlow-condensed)'
@@ -25,7 +27,7 @@ const MIN_ROTATION_SECS = 4
 const PILLAR_DOTS = [1, 2, 3, 4, 5, 6] as const
 
 function href(ad: SponsorAd): string | null {
-  return [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
+  return resolveServedAdHref(ad, isAcademyAd(ad))
 }
 
 /**
@@ -243,6 +245,21 @@ export function SquareSponsorCard({
 
   if (!link) return card
 
+  if (academy) {
+    return (
+      <HouseAdTracker
+        ad={ad}
+        slot={inferHouseAdSlot(ad)}
+        locationId="podcast"
+        className="no-underline block"
+        ariaLabel={`${name} — Evolved Pros Academy`}
+        style={{ color: 'inherit', textDecoration: 'none' }}
+      >
+        {card}
+      </HouseAdTracker>
+    )
+  }
+
   const external = /^https?:\/\//i.test(link)
   if (external) {
     return (
@@ -251,7 +268,7 @@ export function SquareSponsorCard({
         target="_blank"
         rel="noopener noreferrer sponsored"
         className="no-underline block"
-        aria-label={`${name}${academy ? ' — Evolved Pros Academy' : ' — Evolution Partner'}`}
+        aria-label={`${name} — Evolution Partner`}
         style={{ color: 'inherit', textDecoration: 'none' }}
       >
         {card}
@@ -263,7 +280,7 @@ export function SquareSponsorCard({
     <Link
       href={link}
       className="no-underline block"
-      aria-label={`${name}${academy ? ' — Evolved Pros Academy' : ' — Evolution Partner'}`}
+      aria-label={`${name} — Evolution Partner`}
       style={{ color: 'inherit', textDecoration: 'none' }}
     >
       {card}

@@ -1,4 +1,5 @@
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import { houseAdHref } from '@/lib/ads/house'
 import {
   ADCELLERANT_AD_ID,
   ADCELLERANT_ASSETS,
@@ -87,6 +88,9 @@ export type PremiumPartnerKind = 'adcellerant' | 'xpr' | 'evolvex360' | null
 /** Fixed UUID for Evolved Pros Academy self-promo (not a partner). */
 export const ACADEMY_AD_ID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
 
+/** Fallback IAB slot for architecture / portrait cards (not a banner). */
+const ACADEMY_FALLBACK_HREF = houseAdHref('300x250')
+
 export const ACADEMY_SPONSOR_AD: SponsorAd = {
   id: ACADEMY_AD_ID,
   sponsor_name: 'Evolved Pros Academy',
@@ -96,11 +100,11 @@ export const ACADEMY_SPONSOR_AD: SponsorAd = {
     'Six pillars. One architecture. The framework operators use to make excellence inevitable.',
   cta_text: 'Enter the Academy',
   image_url: '/ads/academy-portrait.png',
-  click_url: '/academy',
-  link_url: '/academy',
+  click_url: ACADEMY_FALLBACK_HREF,
+  link_url: ACADEMY_FALLBACK_HREF,
 }
 
-/** Upgrade-focused Academy promo (membership CTA). */
+/** Upgrade-focused Academy promo (membership CTA → /pricing). */
 export const ACADEMY_UPGRADE_AD: SponsorAd = {
   id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567891',
   sponsor_name: 'Evolved Pros Academy',
@@ -110,8 +114,8 @@ export const ACADEMY_UPGRADE_AD: SponsorAd = {
     'Strategy, Accountability, and Execution are Pro. Build the full architecture — not half of it.',
   cta_text: 'Upgrade to Pro',
   image_url: '/ads/academy-portrait.png',
-  click_url: '/membership',
-  link_url: '/membership',
+  click_url: ACADEMY_FALLBACK_HREF,
+  link_url: ACADEMY_FALLBACK_HREF,
 }
 
 export function isAcademyAd(
@@ -121,8 +125,9 @@ export function isAcademyAd(
   const name = `${ad.sponsor_name ?? ''} ${ad.tool_name ?? ''}`.toLowerCase()
   if (name.includes('evolved pros academy') || name === 'academy') return true
   const href = `${ad.click_url ?? ''} ${ad.link_url ?? ''}`.toLowerCase()
-  if (href.includes('/academy') || href.includes('/membership')) {
-    // Membership CTA is still Academy self-promo when the row is labeled Academy.
+  if (href.includes('utm_source=house') && href.includes('utm_campaign=academy')) return true
+  if (href.includes('/academy') || href.includes('/membership') || href.includes('/pricing')) {
+    // Membership / pricing CTA is still Academy self-promo when the row is labeled Academy.
     if (name.includes('academy') || (ad.image_url ?? '').toLowerCase().includes('academy')) return true
   }
   const img = (ad.image_url ?? '').toLowerCase()
