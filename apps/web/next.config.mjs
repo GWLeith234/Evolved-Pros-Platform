@@ -72,7 +72,7 @@ const nextConfig = {
       // change, so it cannot touch the auth path.
       //
       // *** THE /api EXCLUSION IS LOAD-BEARING — DO NOT "SIMPLIFY" IT AWAY ***
-      // Stripe (LIVE MODE), Vendasta, Mux and the external cron scheduler are
+      // Stripe (LIVE MODE), Mux and the external cron scheduler are
       // all configured TODAY against platform.evolvedpros.com. Webhook senders
       // generally do not follow redirects — Stripe does not. A blanket host
       // redirect would silently break live payment webhooks, tier changes and

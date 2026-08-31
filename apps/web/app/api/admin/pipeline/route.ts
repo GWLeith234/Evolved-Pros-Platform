@@ -37,7 +37,7 @@ export async function GET() {
   // Fetch all community members
   const { data: members } = await supabase
     .from('users')
-    .select('id, display_name, full_name, avatar_url, tier, tier_status, created_at, vendasta_contact_id')
+    .select('id, display_name, full_name, avatar_url, tier, tier_status, created_at')
     .neq('role', 'admin')
     .in('tier_status', ['active', 'trial'])
 

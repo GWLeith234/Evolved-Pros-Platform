@@ -4,7 +4,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 
 // Re-export utils so existing server-side imports don't break.
-// (EngagementLevel / getVendastaCrmUrl consumers import from './utils' directly.)
+// (EngagementLevel consumers import from './utils' directly.)
 export {
   getEngagementLevel,
   getEngagementScore,

@@ -12,13 +12,10 @@ export async function GET(
   if (check instanceof Response) return check
 
   // RLS-FIX: adminClient bypasses RLS so admins see canonical data.
-  // The webhooks query depends on vendasta_contact_id, so it runs after
-  // userResult resolves — splitting it out fixes the TDZ bug where the
-  // original code referenced userResult inside its own Promise.all.
   const [userResult, postsResult, progressResult] = await Promise.all([
     adminClient
       .from('users')
-      .select('id, email, full_name, display_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, comp_promo_code_id, vendasta_contact_id, points, created_at, updated_at, company, linkedin_url, website_url, twitter_handle, phone, phone_visible, current_pillar, goal_90day, goal_visible')
+      .select('id, email, full_name, display_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, comp_promo_code_id, points, created_at, updated_at, company, linkedin_url, website_url, twitter_handle, phone, phone_visible, current_pillar, goal_90day, goal_visible')
       .eq('id', params.userId)
       .maybeSingle(),
     adminClient
@@ -38,14 +35,6 @@ export async function GET(
 
   const user = userResult.data
 
-  const webhooksResult = user.vendasta_contact_id
-    ? await adminClient
-        .from('vendasta_webhooks')
-        .select('id, event_type, vendasta_order_id, product_sku, processed_at, status, error_message')
-        .eq('vendasta_contact_id', user.vendasta_contact_id)
-        .order('processed_at', { ascending: false })
-        .limit(50)
-    : { data: [] }
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
   const postsLast30   = (postsResult.data ?? []).filter(p => p.created_at >= thirtyDaysAgo).length
   const lessonsLast30 = (progressResult.data ?? []).filter(p => p.updated_at >= thirtyDaysAgo && p.completed_at).length
@@ -62,7 +51,6 @@ export async function GET(
     tier:              user.tier,
     tierStatus:        user.tier_status,
     tierExpiresAt:     user.tier_expires_at,
-    vendastaContactId: user.vendasta_contact_id,
     points:            user.points,
     joinedAt:          user.created_at,
     lastActive:        user.updated_at,
@@ -82,6 +70,5 @@ export async function GET(
     lessonsLast30,
     recentPosts:       postsResult.data ?? [],
     lessonProgress:    progressResult.data ?? [],
-    vendastaWebhooks:  webhooksResult.data ?? [],
   })
 }

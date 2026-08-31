@@ -42,7 +42,7 @@ describe('alreadyEntitledTo — dead subscription statuses', () => {
     expect(alreadyEntitledTo('vip', 'past_due', 'vip_monthly')).toBe(true)
   })
 
-  it('legacy Vendasta "expired" is dead — repurchase is allowed', () => {
+  it('legacy "expired" is dead — repurchase is allowed', () => {
     expect(alreadyEntitledTo('vip', 'expired', 'vip_monthly')).toBe(false)
     expect(alreadyEntitledTo('pro', 'expired', 'pro_monthly')).toBe(false)
   })

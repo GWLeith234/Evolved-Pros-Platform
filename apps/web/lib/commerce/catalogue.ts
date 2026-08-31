@@ -5,7 +5,7 @@ import { TIERS, type TierKey, type TierPrice } from '@/lib/pricing'
 // ---------------------------------------------------------------------------
 // Commerce catalogue — SPRINT I Phase 2.
 // Reads the own products / prices schema (source of truth). Replaces the
-// hardcoded lib/admin/products defaults + platform_settings + Vendasta SKUs.
+// hardcoded lib/admin/products defaults + platform_settings.
 // ---------------------------------------------------------------------------
 
 export type ProductKind = 'membership' | 'live_event' | 'high_ticket'

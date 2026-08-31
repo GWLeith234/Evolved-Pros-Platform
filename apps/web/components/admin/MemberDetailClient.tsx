@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getVendastaCrmUrl } from '@/lib/admin/utils'
 
 interface Post {
   id: string
@@ -21,16 +20,6 @@ interface LessonProgress {
     course_id: string
     courses: { title: string; pillar_number: number } | null
   } | null
-}
-
-interface VendastaWebhook {
-  id: string
-  event_type: string
-  vendasta_order_id: string | null
-  product_sku: string | null
-  processed_at: string
-  status: string
-  error_message: string | null
 }
 
 interface GuestEngagement {
@@ -65,7 +54,6 @@ interface MemberDetail {
   tierExpiresAt: string | null
   role: string | null
   guestEngagements: GuestEngagement[]
-  vendastaContactId: string | null
   points: number
   joinedAt: string
   lastActive: string
@@ -76,10 +64,9 @@ interface MemberDetail {
   lessonsLast30: number
   recentPosts: Post[]
   lessonProgress: LessonProgress[]
-  vendastaWebhooks: VendastaWebhook[]
 }
 
-type Tab = 'overview' | 'activity' | 'progress' | 'guest' | 'vendasta'
+type Tab = 'overview' | 'activity' | 'progress' | 'guest'
 
 // Hydration-safe UTC formatters — toLocaleDateString depended on the runtime
 // timezone / ICU data and threw React #418/#425 hydration warnings.
@@ -105,11 +92,6 @@ function fmtDatetime(iso: string): string {
   const period = h >= 12 ? 'PM' : 'AM'
   const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h
   return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${h12}:${m} ${period} UTC`
-}
-
-const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
-  success: { bg: 'rgba(34,197,94,0.1)',  color: '#15803d' },
-  error:   { bg: 'rgba(239,14,48,0.1)',  color: '#ef0e30' },
 }
 
 const GUEST_STATUS_COLORS: Record<string, { bg: string; color: string }> = {
@@ -211,7 +193,6 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
     { id: 'activity',  label: 'Activity'  },
     { id: 'progress',  label: 'Progress'  },
     ...(isGuest ? [{ id: 'guest' as Tab, label: 'Guest' }] : []),
-    { id: 'vendasta',  label: 'Billing'   },
   ]
 
   return (
@@ -266,18 +247,6 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
             </div>
           </div>
         </div>
-
-        {member.vendastaContactId && (
-          <a
-            href={getVendastaCrmUrl(member.vendastaContactId)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-condensed font-semibold uppercase tracking-wide text-[12px] px-3 py-2 rounded transition-all"
-            style={{ color: '#68a2b9', border: '1px solid rgba(104,162,185,0.3)' }}
-          >
-            View in CRM →
-          </a>
-        )}
       </div>
 
       {/* Admin actions */}
@@ -600,64 +569,6 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
                 </div>
               )
             })
-          )}
-        </div>
-      )}
-
-      {tab === 'vendasta' && (
-        <div>
-          {member.vendastaContactId ? (
-            <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mb-4">
-              Contact ID: <span className="text-[color:var(--admin-text)] font-bold">{member.vendastaContactId}</span>
-            </p>
-          ) : (
-            <p className="font-condensed text-[12px] text-[#ef0e30] mb-4">No CRM contact linked.</p>
-          )}
-          {member.vendastaWebhooks.length === 0 ? (
-            <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">No webhook events found.</p>
-          ) : (
-            <div className="rounded-lg overflow-hidden" style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)' }}>
-              <table className="w-full">
-                <thead>
-                  <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.03)' }}>
-                    {['Event', 'Order ID', 'SKU', 'Date', 'Status'].map(h => (
-                      <th key={h} className="px-4 py-2 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[color:var(--admin-text-2)]">
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {member.vendastaWebhooks.map((wh, i, arr) => {
-                    const sc = STATUS_COLORS[wh.status] ?? STATUS_COLORS.error
-                    return (
-                      <tr key={wh.id} style={{ borderBottom: i === arr.length - 1 ? 'none' : '1px solid rgba(27,60,90,0.06)' }}>
-                        <td className="px-4 py-2.5">
-                          <span className="font-condensed text-[12px] text-[color:var(--admin-text)]">{wh.event_type}</span>
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">{wh.vendasta_order_id ?? '—'}</span>
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">{wh.product_sku ?? '—'}</span>
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">{fmtDatetime(wh.processed_at)}</span>
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <span
-                            className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
-                            style={{ backgroundColor: sc.bg, color: sc.color }}
-                          >
-                            {wh.status}
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
           )}
         </div>
       )}

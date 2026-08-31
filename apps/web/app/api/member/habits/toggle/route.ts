@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   const supabase = createClient()
   // habits / habit_completions FK their user_id to public.users.id, so key on
   // the email-resolved profile id — not the raw auth UID (auth.uid() ===
-  // public.users.id is not guaranteed for future Vendasta signups).
+  // public.users.id is not guaranteed for every signup path).
   const profile = await resolveCurrentUser(supabase)
   if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 

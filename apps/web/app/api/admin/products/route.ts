@@ -9,7 +9,7 @@ import { stripeConfigured } from '@/lib/stripe/config'
 
 // SPRINT I Phase 2 — the admin Products screen reads/writes our own
 // products/prices catalogue (source of truth), not the old hardcoded defaults
-// + platform_settings + Vendasta SKUs.
+// + platform_settings.
 
 async function memberCounts(): Promise<Record<string, number>> {
   const { data: members } = await adminClient

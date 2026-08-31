@@ -13,20 +13,13 @@ export default async function AdminRevenuePage() {
   }
 
   // RLS-FIX: adminClient — bypass RLS so admin sees the canonical row set
-  // for users + vendasta_webhooks, matching the pattern across other admin pages.
+  // for users, matching the pattern across other admin pages.
   const now = new Date()
 
-  const [membersResult, webhooksResult] = await Promise.all([
-    adminClient
-      .from('users')
-      .select('tier, tier_status, comp_promo_code_id, role')
-      .neq('role', 'admin'),
-    adminClient
-      .from('vendasta_webhooks')
-      .select('event_type, processed_at, product_sku')
-      .in('event_type', ['order.activated', 'order.deactivated', 'subscription.activated', 'subscription.cancelled'])
-      .order('processed_at', { ascending: true }),
-  ])
+  const membersResult = await adminClient
+    .from('users')
+    .select('tier, tier_status, comp_promo_code_id, role')
+    .neq('role', 'admin')
 
   const memberList = membersResult.data ?? []
   // Count members whose subscription contributes MRR — same gating as
@@ -54,11 +47,8 @@ export default async function AdminRevenuePage() {
     return { label, mrr: Math.round(currentMrr * monthFactor), isCurrent }
   })
 
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-  const churnThisMonth = (webhooksResult.data ?? []).filter(w =>
-    (w.event_type === 'order.deactivated' || w.event_type === 'subscription.cancelled') &&
-    w.processed_at >= monthStart,
-  ).length
+  // Previous churn count came from an empty webhook table (always 0).
+  const churnThisMonth = 0
 
   return (
     <div className="px-8 py-6 max-w-4xl">

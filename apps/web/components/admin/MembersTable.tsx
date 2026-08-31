@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { getVendastaCrmUrl } from '@/lib/admin/utils'
 import type { EngagementLevel } from '@/lib/admin/utils'
 import { AdminEditProfileModal } from './AdminEditProfileModal'
 
@@ -15,7 +14,6 @@ export interface MemberRow {
   tier: string | null
   tierStatus: string | null
   role: string | null
-  vendastaContactId: string | null
   points: number
   joinedAt: string
   mrr: number
@@ -250,7 +248,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
         <table className="w-full min-w-[820px]">
           <thead>
             <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.03)' }}>
-              {['Member', 'Plan', 'Status', 'Joined', 'MRR', 'Engagement', 'CRM ref', ''].map(h => {
+              {['Member', 'Plan', 'Status', 'Joined', 'MRR', 'Engagement', ''].map(h => {
                 const isActions = h === ''
                 const isEngagement = h === 'Engagement'
                 return (
@@ -273,7 +271,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-4 py-10 text-center font-condensed text-[12px] text-[color:var(--admin-text-2)]">
+                <td colSpan={7} className="px-4 py-10 text-center font-condensed text-[12px] text-[color:var(--admin-text-2)]">
                   No members found.
                 </td>
               </tr>
@@ -356,7 +354,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                     </td>
 
                     {/* Engagement — narrower bar + compact padding to free up
-                        room for the CRM ref + Actions columns on 1280-1440px desktops. */}
+                        room for the Actions column on 1280-1440px desktops. */}
                     <td className="px-2 py-3">
                       <div className="flex items-center gap-2">
                         <div
@@ -372,27 +370,6 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                           {m.engagementLevel}
                         </span>
                       </div>
-                    </td>
-
-                    {/* CRM ref — external contact link (reads vendastaContactId) */}
-                    <td className="px-4 py-3">
-                      {m.vendastaContactId ? (
-                        <a
-                          href={getVendastaCrmUrl(m.vendastaContactId)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded transition-colors"
-                          style={{
-                            backgroundColor: 'rgba(104,162,185,0.08)',
-                            color: '#68a2b9',
-                            border: '1px solid rgba(104,162,185,0.2)',
-                          }}
-                        >
-                          {m.vendastaContactId.slice(0, 10)}…
-                        </a>
-                      ) : (
-                        <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">Not linked</span>
-                      )}
                     </td>
 
                     {/* Actions — sticky-right so Edit/View never clip on narrow desktops. */}

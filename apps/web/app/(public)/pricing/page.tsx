@@ -18,12 +18,6 @@ export const metadata: Metadata = publicPageMetadata('/pricing', {
 // (single source of truth), so a price edit reflects without a redeploy.
 export const dynamic = 'force-dynamic'
 
-// SPRINT V-CHECKOUT — SKUs surfaced to the client; server validates against
-// the matching NEXT_PUBLIC_VENDASTA_MP_* env var in /api/checkout before
-// submitting. Names match the Railway-configured marketplace product vars.
-const VIP_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_MP_VIP_M ?? ''
-const PRO_MONTHLY_SKU = process.env.NEXT_PUBLIC_VENDASTA_MP_PRO_M ?? ''
-
 // ── Comparison table ─────────────────────────────────────────────────────────────
 
 type TierSymbol = 'yes' | 'half' | 'no'
@@ -177,8 +171,6 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
         {/* Tier cards + monthly/annual toggle — amounts from the catalogue. */}
         <PricingTierCards
           pricing={tiers}
-          vipSku={VIP_MONTHLY_SKU}
-          proSku={PRO_MONTHLY_SKU}
           currentTier={currentTier}
         />
 

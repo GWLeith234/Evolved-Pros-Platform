@@ -28,7 +28,3 @@ export function getTierMrr(
 ): number {
   return tierMonthlyPrice(tier, tierStatus, isComped)
 }
-
-export function getVendastaCrmUrl(contactId: string): string {
-  return `https://business.vendasta.com/crm/contacts/${contactId}`
-}

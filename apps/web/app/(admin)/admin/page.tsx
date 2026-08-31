@@ -18,11 +18,6 @@ function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
 }
 
-const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
-  success: { bg: 'rgba(34,197,94,0.1)',   color: '#16a34a' },
-  error:   { bg: 'rgba(239,14,48,0.1)',    color: '#ef0e30' },
-}
-
 export default async function AdminDashboardPage() {
   const h = headers()
   if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
@@ -61,16 +56,6 @@ export default async function AdminDashboardPage() {
     // Published episodes only — drafts shouldn't count toward the public catalog tile.
     adminClient.from('episodes').select('id', { count: 'exact', head: true }).eq('is_published', true),
   ])
-
-  // vendasta_webhooks may not exist in all environments — fetch separately so it can't crash the page
-  const recentWebhooks = await adminClient
-    .from('vendasta_webhooks')
-    .select('id, event_type, vendasta_contact_id, product_sku, processed_at, status')
-    .order('processed_at', { ascending: false })
-    .limit(5)
-    // PostgrestFilterBuilder is a thenable, not a Promise — it has no .catch().
-    // Use the two-arg .then(onFulfilled, onRejected) to handle failures.
-    .then(r => r, () => ({ data: null, error: null }))
 
   const users = allUsers.data ?? []
   const activeUsers    = users.filter(u => u.tier_status === 'active' || u.tier_status === 'trial')
@@ -246,96 +231,6 @@ export default async function AdminDashboardPage() {
             </tbody>
           </table>
         )}
-      </div>
-
-      {/* Recent billing webhooks (rows from vendasta_webhooks) */}
-      <div className="rounded-lg overflow-hidden" style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)' }}>
-        <div
-          className="flex items-center justify-between px-5 py-3"
-          style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}
-        >
-          <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[10px] text-[color:var(--admin-text)]">
-            Recent Billing Activity
-          </p>
-          <a
-            href="https://business.vendasta.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-condensed text-[10px] text-[#68a2b9] hover:text-[color:var(--admin-text)] transition-colors"
-          >
-            Open CRM →
-          </a>
-        </div>
-
-        {(() => {
-          // Drop rows that would render as em-dashes for every meaningful
-          // field — when neither the contact id nor the product sku is set,
-          // the row is just placeholder noise and looks broken to QA.
-          const rows = (recentWebhooks.data ?? []).filter(
-            wh => (wh.vendasta_contact_id && String(wh.vendasta_contact_id).trim())
-              || (wh.product_sku && String(wh.product_sku).trim()),
-          )
-          if (rows.length === 0) {
-            return (
-              <div className="px-5 py-8 text-center space-y-2">
-                <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">No recent billing activity.</p>
-                <a
-                  href="https://business.vendasta.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block font-condensed text-[11px] text-[#68a2b9] hover:text-[color:var(--admin-text)] underline transition-colors"
-                >
-                  Connect the CRM to see member events here.
-                </a>
-              </div>
-            )
-          }
-          return (
-          <table className="w-full">
-            <tbody>
-              {rows.map((wh, i, arr) => {
-                const sc = STATUS_COLORS[wh.status ?? ''] ?? STATUS_COLORS.error
-                return (
-                  <tr
-                    key={wh.id}
-                    style={{ borderBottom: i === arr.length - 1 ? 'none' : '1px solid rgba(27,60,90,0.06)' }}
-                  >
-                    <td className="px-5 py-3">
-                      <span
-                        className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded"
-                        style={{ backgroundColor: 'var(--admin-subtle)', color: 'var(--admin-text)', border: '1px solid var(--admin-border)' }}
-                      >
-                        {wh.event_type}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3">
-                      <p className="font-condensed text-[11px] text-[color:var(--admin-text-2)]">
-                        {wh.vendasta_contact_id ?? '—'}
-                      </p>
-                    </td>
-                    <td className="px-5 py-3">
-                      <p className="font-condensed text-[11px] text-[color:var(--admin-text-2)]">
-                        {wh.product_sku ?? '—'}
-                      </p>
-                    </td>
-                    <td className="px-5 py-3">
-                      <p className="font-condensed text-[11px] text-[color:var(--admin-text-2)]">{fmtDate(wh.processed_at)}</p>
-                    </td>
-                    <td className="px-5 py-3 text-right">
-                      <span
-                        className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded"
-                        style={{ backgroundColor: sc.bg, color: sc.color }}
-                      >
-                        {wh.status}
-                      </span>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-          )
-        })()}
       </div>
     </div>
   )
