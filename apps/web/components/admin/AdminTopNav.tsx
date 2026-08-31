@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { Modal } from '@/components/ui/Modal'
 import { AdminSidebarNav } from './AdminSidebar'
+import { LogoMark } from '@/components/ui/LogoMark'
 import { useTheme } from '@/components/theme/ThemeProvider'
 import { toggleLabel } from '@/lib/theme'
 
@@ -53,14 +54,16 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
             <line x1="4" y1="18" x2="20" y2="18" />
           </svg>
         </button>
-        {/* Inline #fff, not .text-white: the light-mode compat shim repaints
-            .text-white navy, which vanished on this always-dark chrome. */}
+        {/* Canonical lockup (white wordmark + red mic disc). Admin chrome is
+            always #0d1c27, so variant="light" — do not use the CSS EVOLVED·PROS
+            wordmark or a theme-swapped navy mark that would vanish on navy. */}
         <Link
           href="/admin"
-          className="font-condensed font-bold tracking-[0.14em] text-base select-none"
-          style={{ color: '#fff' }}
+          aria-label="Evolved Pros — Admin"
+          className="flex items-center flex-shrink-0 select-none"
+          style={{ textDecoration: 'none' }}
         >
-          EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS
+          <LogoMark variant="light" height={28} />
         </Link>
         <span
           className="hidden sm:inline-block font-condensed font-bold uppercase tracking-[0.18em] text-[12px] px-2 py-0.5 rounded"

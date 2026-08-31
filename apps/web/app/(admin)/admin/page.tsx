@@ -2,8 +2,6 @@ import type { Metadata } from 'next'
 import { adminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
 import Link from 'next/link'
-import { computeMrr } from '@/lib/pricing'
-import { getMrrMonthlyByTierKey } from '@/lib/commerce/catalogue'
 import { InviteMemberButton } from './InviteMemberButton'
 
 export const metadata: Metadata = { title: 'Admin — Evolved Pros' }
@@ -61,7 +59,6 @@ export default async function AdminDashboardPage() {
   const activeUsers    = users.filter(u => u.tier_status === 'active' || u.tier_status === 'trial')
   const cancelledUsers = users.filter(u => u.tier_status === 'cancelled' || u.tier_status === 'expired')
   const proUsers       = users.filter(u => u.tier === 'pro' && u.tier_status === 'active')
-  const vipUsers       = users.filter(u => u.tier === 'vip' && u.tier_status === 'active')
 
   // The "Active Members" tile counts only tier_status in {active, trial}.
   // /admin/members deliberately renders the full non-admin roster (incl.
@@ -70,10 +67,8 @@ export default async function AdminDashboardPage() {
   // /admin/members's count and looked like a bug to QA — relabel + sub-label
   // so the filter is explicit on screen.
   const activeMembers = activeUsers.length
-  // Canonical MRR — same computeMrr + same non-admin member scope as
-  // /admin/revenue, priced off the catalogue so both always agree.
-  const monthlyByTier = await getMrrMonthlyByTierKey()
-  const mrr           = computeMrr(users, monthlyByTier)
+  // MRR stays empty until VENDASTA-4 wires billing_events. Do not invent
+  // it from tier counts × list price (same rule as /admin/revenue).
   const proMembers    = proUsers.length
   const proLastMo     = proLastMonth.count ?? 0
   const totalEver     = activeUsers.length + cancelledUsers.length
@@ -94,8 +89,8 @@ export default async function AdminDashboardPage() {
     },
     {
       label:    'MRR',
-      value:    fmt(mrr, '$'),
-      delta:    `from ${proMembers} professional + ${vipUsers.length} vip`,
+      value:    '—',
+      delta:    'awaiting billing_events · TODO VENDASTA-4',
       deltaPos: true,
       color:    '#68a2b9',
       bg:       'rgba(104,162,185,0.08)',
