@@ -12,10 +12,10 @@ interface Ad {
   id: string
   image_url: string | null
   click_url: string | null
-  link_url?: string | null
+  link_url: string | null
   headline: string | null
   sponsor_name: string | null
-  tool_name?: string | null
+  tool_name: string | null
 }
 
 interface MediaAdZoneProps {

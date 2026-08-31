@@ -12,11 +12,11 @@ import { recordHouseAdFromUnit } from '@/lib/ads/track'
 
 type TrackableAd = HouseAdIdentity & {
   id: string
-  sponsor_name?: string | null
-  tool_name?: string | null
-  image_url?: string | null
-  click_url?: string | null
-  link_url?: string | null
+  sponsor_name: string | null
+  tool_name: string | null
+  image_url: string | null
+  click_url: string | null
+  link_url: string | null
 }
 
 /**

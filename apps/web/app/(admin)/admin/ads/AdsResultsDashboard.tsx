@@ -21,7 +21,7 @@ function Cell({
   align = 'left',
   strong = false,
 }: {
-  children: React.ReactNode
+  children?: React.ReactNode
   align?: 'left' | 'right'
   strong?: boolean
 }) {

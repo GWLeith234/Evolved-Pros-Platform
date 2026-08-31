@@ -85,8 +85,10 @@ function isRetiredPartnerAd(ad: Pick<SponsorAd, 'sponsor_name' | 'tool_name'>): 
 
 export type PremiumPartnerKind = 'adcellerant' | 'xpr' | 'evolvex360' | null
 
-/** Fixed UUID for Evolved Pros Academy self-promo (not a partner). */
-export const ACADEMY_AD_ID = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+/** Fixed UUID for Evolved Pros Academy self-promo (not a partner).
+ *  Distinct from ADCELLERANT_AD_ID — those used to collide, which made
+ *  isAcademyAd() treat the AdCellerant seed as a house unit. */
+export const ACADEMY_AD_ID = 'c0a1b2c3-d4e5-4789-abcd-ef1234567aca'
 
 /** Fallback IAB slot for architecture / portrait cards (not a banner). */
 const ACADEMY_FALLBACK_HREF = houseAdHref('300x250')
@@ -121,8 +123,10 @@ export const ACADEMY_UPGRADE_AD: SponsorAd = {
 export function isAcademyAd(
   ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_name' | 'image_url' | 'click_url' | 'link_url'>,
 ): boolean {
-  if (ad.id === ACADEMY_AD_ID || ad.id === ACADEMY_UPGRADE_AD.id) return true
   const name = `${ad.sponsor_name ?? ''} ${ad.tool_name ?? ''}`.toLowerCase()
+  // Paid partners never count as house, even if a UUID collided in an older seed.
+  if (name.includes('adcellerant') || name.includes('evolvex') || name.includes('xpr')) return false
+  if (ad.id === ACADEMY_AD_ID || ad.id === ACADEMY_UPGRADE_AD.id) return true
   if (name.includes('evolved pros academy') || name === 'academy') return true
   const href = `${ad.click_url ?? ''} ${ad.link_url ?? ''}`.toLowerCase()
   if (href.includes('utm_source=house') && href.includes('utm_campaign=academy')) return true
