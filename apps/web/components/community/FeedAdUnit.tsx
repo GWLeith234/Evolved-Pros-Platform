@@ -1,6 +1,9 @@
 import { gradients } from '@evolved-pros/ui'
 import type { CommunityAd } from '@/lib/community/types'
 import { stripTrailingArrow } from '@/lib/brand'
+import { isAcademyAd } from '@/lib/sponsors/partners'
+import { HouseAdTracker } from '@/components/ads/HouseAdTracker'
+import { inferHouseAdSlot, resolveServedAdHref } from '@/lib/ads/house'
 
 interface FeedAdUnitProps {
   ad: CommunityAd
@@ -8,8 +11,9 @@ interface FeedAdUnitProps {
 
 /** In-feed Evolution Partner unit — theme tokens + shared Button CTA (Sprint 2). */
 export function FeedAdUnit({ ad }: FeedAdUnitProps) {
-  const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
-  const label = ad.headline ?? ad.tool_name ?? ad.sponsor_name ?? 'Sponsored'
+  const house = isAcademyAd(ad)
+  const href = resolveServedAdHref(ad, house)
+  const label = ad.headline ?? ad.tool_name ?? ad.sponsor_name ?? (house ? 'Evolved Pros Academy' : 'Sponsored')
   const cta = stripTrailingArrow(ad.cta_text ?? 'Learn More')
 
   const inner = (
@@ -29,24 +33,26 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
         transition: 'border-color 160ms ease, box-shadow 160ms ease',
       }}
     >
-      <span
-        style={{
-          position: 'absolute',
-          top: 8,
-          right: 12,
-          fontFamily: '"Barlow Condensed", sans-serif',
-          fontWeight: 700,
-          fontSize: 9,
-          letterSpacing: '0.18em',
-          textTransform: 'uppercase',
-          color: '#0A0F18',
-          background: 'var(--brand-gold, #C9A84C)',
-          padding: '3px 8px',
-          borderRadius: 3,
-        }}
-      >
-        Partner
-      </span>
+      {!house && (
+        <span
+          style={{
+            position: 'absolute',
+            top: 8,
+            right: 12,
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontWeight: 700,
+            fontSize: 9,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: '#0A0F18',
+            background: 'var(--brand-gold, #C9A84C)',
+            padding: '3px 8px',
+            borderRadius: 3,
+          }}
+        >
+          Partner
+        </span>
+      )}
 
       <div
         style={{
@@ -129,6 +135,20 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
       </span>
     </div>
   )
+
+  if (house) {
+    return (
+      <HouseAdTracker
+        ad={ad}
+        slot={inferHouseAdSlot(ad)}
+        locationId="community-feed"
+        style={{ display: 'block', textDecoration: 'none' }}
+        ariaLabel={`${label} — Evolved Pros Academy`}
+      >
+        {inner}
+      </HouseAdTracker>
+    )
+  }
 
   if (href) {
     return (

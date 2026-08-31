@@ -39,7 +39,7 @@ interface PlacementAd {
 type AdsSection = 'zones' | 'placements'
 
 const SECTIONS: { key: AdsSection; label: string; blurb: string }[] = [
-  { key: 'zones', label: 'Banner Zones (A/B/C)', blurb: 'IAB display zones — sidebar rectangle, native in-feed, leaderboard, and pre-roll video.' },
+  { key: 'zones', label: 'Banner Zones (A–E)', blurb: 'IAB display zones — 300×250 sidebar, native in-feed, 728×90 leaderboard, pre-roll video, and 300×600 half-page.' },
   { key: 'placements', label: 'Sidebar / Endorsement Placements', blurb: 'Sponsor cards with George’s endorsement — home sidebar, home row, community, academy, and events.' },
 ]
 

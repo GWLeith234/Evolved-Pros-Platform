@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ImagePicker } from '@/components/admin/ImagePicker'
 
-type Zone = 'A' | 'B' | 'C' | 'D'
+type Zone = 'A' | 'B' | 'C' | 'D' | 'E'
 type AdType = 'image' | 'video' | 'native'
 
 interface Ad {
@@ -42,6 +42,7 @@ const ZONE_LABELS: Record<Zone, string> = {
   B: 'Zone B — Native In-Feed',
   C: 'Zone C — 728×90 Leaderboard',
   D: 'Zone D — Pre-Roll Video',
+  E: 'Zone E — 300×600 Half Page',
 }
 
 const ZONE_DESCRIPTIONS: Record<Zone, string> = {
@@ -49,6 +50,7 @@ const ZONE_DESCRIPTIONS: Record<Zone, string> = {
   B: 'Native card embedded in community feed',
   C: '728×90 horizontal banner',
   D: 'Pre-roll video before episode playback',
+  E: '300×600 half-page (house Academy + partners)',
 }
 
 const DEFAULT_FORM: AdFormValues = {
@@ -598,7 +600,7 @@ export function AdsManager({ initialAds }: { initialAds: Ad[] }) {
   const [ads, setAds] = useState<Ad[]>(initialAds)
   const [activeZone, setActiveZone] = useState<Zone>('A')
 
-  const zones: Zone[] = ['A', 'B', 'C', 'D']
+  const zones: Zone[] = ['A', 'B', 'C', 'D', 'E']
   // Derive from adStatus so the count matches the per-row badges.
   const activeCount = ads.filter(a => adStatus(a) === 'active').length
 
@@ -606,7 +608,7 @@ export function AdsManager({ initialAds }: { initialAds: Ad[] }) {
     <div>
       {/* Reactive count — updates immediately after any create/delete */}
       <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mb-6">
-        {ads.length} total · {activeCount} active · 4 IAB zones
+        {ads.length} total · {activeCount} active · 5 IAB zones (300×250 / 728×90 / 300×600)
       </p>
       {/* Zone tabs */}
       <div
@@ -624,7 +626,7 @@ export function AdsManager({ initialAds }: { initialAds: Ad[] }) {
               style={{
                 backgroundColor: active ? '#1b3c5a' : 'white',
                 color: active ? 'white' : '#7a8a96',
-                borderRight: zone !== 'D' ? '1px solid rgba(27,60,90,0.12)' : 'none',
+                borderRight: zone !== 'E' ? '1px solid rgba(27,60,90,0.12)' : 'none',
               }}
             >
               Zone {zone}

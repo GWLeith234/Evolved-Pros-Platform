@@ -393,10 +393,10 @@ export default async function StoryPage({
             </div>
           )}
 
-          {/* Ad zone — wired to platform_ads (zone='C', placements contains
-              'media'). MediaAdZone returns null when no active ad is
-              assigned, so the slot collapses cleanly instead of leaking a
-              placeholder into production. */}
+          {/* IAB slots — collapse when no active platform_ads row is assigned.
+              A = 300×250, E = 300×600, C = 728×90. */}
+          <MediaAdZone zone="A" />
+          <MediaAdZone zone="E" />
           <MediaAdZone zone="C" />
         </div>
       </div>
