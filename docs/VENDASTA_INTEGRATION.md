@@ -1,3 +1,5 @@
+ARCHIVED 2026-08-30 — Vendasta was fully deprecated in VENDASTA-1. Retained as a record of what ran in production.
+
 # Evolved Pros Platform — Vendasta Integration Guide
 
 This document describes every touch point between the Evolved Pros Platform

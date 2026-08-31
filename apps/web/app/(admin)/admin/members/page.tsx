@@ -20,7 +20,7 @@ export default async function AdminMembersPage() {
   // already gates this page on role = 'admin'.
   const { data: users } = await adminClient
     .from('users')
-    .select('id, email, full_name, display_name, avatar_url, tier, tier_status, role, comp_promo_code_id, vendasta_contact_id, points, created_at')
+    .select('id, email, full_name, display_name, avatar_url, tier, tier_status, role, comp_promo_code_id, points, created_at')
     .order('created_at', { ascending: false })
     .limit(200)
 
@@ -54,7 +54,6 @@ export default async function AdminMembersPage() {
       tier:              u.tier,
       tierStatus:        u.tier_status,
       role:              u.role,
-      vendastaContactId: u.vendasta_contact_id,
       points:            u.points,
       joinedAt:          u.created_at,
       mrr:               getTierMrr(u.tier, u.tier_status, Boolean(u.comp_promo_code_id)),

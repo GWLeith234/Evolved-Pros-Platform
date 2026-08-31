@@ -5,7 +5,6 @@ import { NextResponse, type NextRequest } from 'next/server'
 const PUBLIC_ROUTES = [
   '/login',
   '/auth/callback',
-  '/api/webhooks/vendasta',
   '/api/health',
   '/api/cron',
   '/dev-login',

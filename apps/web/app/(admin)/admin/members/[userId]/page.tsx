@@ -23,13 +23,13 @@ export default async function AdminMemberDetailPage({ params }: Props) {
   }
 
   // RLS-FIX: adminClient — bypass RLS so admin sees canonical user / posts /
-  // lesson_progress / vendasta_webhooks rows.
+  // lesson_progress rows.
   // maybeSingle() returns null on no-match instead of throwing PGRST116, so a
   // stale /admin/members/[userId] link falls through to notFound() cleanly.
   const [userResult, postsResult, progressResult, guestResult] = await Promise.all([
     adminClient
       .from('users')
-      .select('id, email, full_name, display_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, role, comp_promo_code_id, vendasta_contact_id, points, created_at, updated_at')
+      .select('id, email, full_name, display_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, role, comp_promo_code_id, points, created_at, updated_at')
       .eq('id', params.userId)
       .limit(1)
       .maybeSingle(),
@@ -55,16 +55,6 @@ export default async function AdminMemberDetailPage({ params }: Props) {
   if (!userResult.data) notFound()
   const user = userResult.data
 
-  // Fetch billing webhooks (vendasta_webhooks) if a CRM contact is linked
-  const webhooksResult = user.vendasta_contact_id
-    ? await adminClient
-        .from('vendasta_webhooks')
-        .select('id, event_type, vendasta_order_id, product_sku, processed_at, status, error_message')
-        .eq('vendasta_contact_id', user.vendasta_contact_id)
-        .order('processed_at', { ascending: false })
-        .limit(50)
-    : { data: [] }
-
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
   const p30 = (postsResult.data ?? []).filter(p => p.created_at >= thirtyDaysAgo).length
   const l30 = (progressResult.data ?? []).filter(p => p.updated_at >= thirtyDaysAgo && p.completed_at).length
@@ -83,7 +73,6 @@ export default async function AdminMemberDetailPage({ params }: Props) {
     tierExpiresAt:     user.tier_expires_at,
     role:              (user as { role?: string | null }).role ?? null,
     guestEngagements:  (guestResult?.data ?? []) as Parameters<typeof MemberDetailClient>[0]['member']['guestEngagements'],
-    vendastaContactId: user.vendasta_contact_id,
     points:            user.points,
     joinedAt:          user.created_at,
     lastActive:        user.updated_at,
@@ -94,7 +83,6 @@ export default async function AdminMemberDetailPage({ params }: Props) {
     lessonsLast30:     l30,
     recentPosts:       (postsResult.data ?? []) as Parameters<typeof MemberDetailClient>[0]['member']['recentPosts'],
     lessonProgress:    (progressResult.data ?? []) as Parameters<typeof MemberDetailClient>[0]['member']['lessonProgress'],
-    vendastaWebhooks:  (webhooksResult.data ?? []) as Parameters<typeof MemberDetailClient>[0]['member']['vendastaWebhooks'],
   }
 
   const displayName = user.display_name ?? user.full_name ?? user.email

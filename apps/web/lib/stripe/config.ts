@@ -4,10 +4,8 @@ import Stripe from 'stripe'
 // ---------------------------------------------------------------------------
 // Stripe integration — SPRINT I Phase 1 (TEST MODE)
 //
-// Strangler pattern: this lives alongside the legacy Vendasta checkout
-// (/api/checkout) and is not wired live until a test-mode purchase is proven
-// to round-trip to a tier change. Live keys / real charges are George's — the
-// code only ever reads STRIPE_* env vars, which in this phase are test-mode.
+// Stripe Checkout is the payment path. Live keys / real charges are George's —
+// the code only ever reads STRIPE_* env vars.
 //
 // Price *amounts* deliberately live in the Stripe dashboard (test mode), NOT
 // in this file. We reference prices by env-configured price id only, so the

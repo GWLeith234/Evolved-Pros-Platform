@@ -34,15 +34,6 @@ const SECTIONS: ReadonlyArray<SidebarSectionData> = [
     ],
   },
   {
-    // Legacy external-CRM surfaces — folded behind one section until the
-    // in-house CRM/catalogue/payments migration retires them entirely.
-    title: 'Legacy CRM',
-    items: [
-      { label: 'Contacts',      href: 'https://business.vendasta.com/crm/contacts',     match: /^$/ },
-      { label: 'Opportunities', href: 'https://business.vendasta.com/crm/opportunities', match: /^$/ },
-    ],
-  },
-  {
     title: 'Content',
     items: [
       { label: 'Courses',   href: '/admin/courses',   match: /^\/admin\/courses/ },

@@ -90,7 +90,7 @@ describe('pricingLadderState — current-plan marking (SPRINT PRICE-1)', () => {
   })
 })
 
-describe('planAmountCents — Vendasta checkout amounts match the catalogue', () => {
+describe('planAmountCents — checkout amounts match the catalogue', () => {
   it('uses the canonical $49 / $249 ladder, not the legacy $79 VIP', () => {
     expect(planAmountCents('vip_monthly')).toBe(4900)
     expect(planAmountCents('vip_annual')).toBe(49000)

@@ -31,7 +31,7 @@ export const TIERS: Record<TierKey, TierPrice> = {
 
 export type PaidPlanKey = 'vip_monthly' | 'vip_annual' | 'pro_monthly' | 'pro_annual'
 
-/** Cents to send to Vendasta / any checkout that still takes an amount. */
+/** Cents for any checkout that still takes an amount. */
 export function planAmountCents(
   plan: PaidPlanKey,
   tiers: Record<TierKey, TierPrice> = TIERS,

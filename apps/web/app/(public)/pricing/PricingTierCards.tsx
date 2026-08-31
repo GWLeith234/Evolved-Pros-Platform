@@ -41,7 +41,6 @@ interface TierDef {
   callout?: string
   cta: string
   ctaHref?: string
-  ctaSku?: string
   /** Stripe plan family; combined with the billing toggle into a plan key. */
   ctaPlanBase?: 'vip' | 'pro'
   /**
@@ -53,13 +52,9 @@ interface TierDef {
 
 export function PricingTierCards({
   pricing,
-  vipSku,
-  proSku,
   currentTier = null,
 }: {
   pricing: Record<TierKey, TierPrice>
-  vipSku: string
-  proSku: string
   /**
    * The viewer's EFFECTIVE tier (already run through effectiveTier by the
    * page), or null when anonymous / free. Drives current-plan marking so an
@@ -112,7 +107,6 @@ export function PricingTierCards({
         { text: 'Academy Pillars 4–6', locked: true },
       ],
       cta: 'Start VIP',
-      ctaSku: vipSku,
       ctaPlanBase: 'vip',
       tierKey: 'vip',
     },
@@ -133,7 +127,6 @@ export function PricingTierCards({
       ],
       callout: 'Weekly mastermind with George, plus 1:1 time. The inner game and the outer game, end to end.',
       cta: 'Go Professional',
-      ctaSku: proSku,
       ctaPlanBase: 'pro',
       tierKey: 'pro',
     },
@@ -349,7 +342,6 @@ export function PricingTierCards({
                 <PricingCtaButton
                   label={tier.cta}
                   href={tier.ctaHref}
-                  sku={tier.ctaSku}
                   plan={
                     tier.ctaPlanBase
                       ? (`${tier.ctaPlanBase}_${isAnnual ? 'annual' : 'monthly'}` as const)
