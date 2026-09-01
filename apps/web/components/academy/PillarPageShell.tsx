@@ -17,11 +17,11 @@ import { adminClient } from '@/lib/supabase/admin'
 import { ProfileAdUnit } from '@/components/profile/ProfileAdUnit'
 import { AcademyLessonSponsors } from '@/components/academy/AcademyLessonSponsors'
 import {
-  DEFAULT_ACADEMY_SPONSORS,
   pickAcademySponsors,
 } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
+import { filterLiveAds } from '@/lib/ads/iab'
 
 interface Props {
   pillarNumber?: number
@@ -220,27 +220,27 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: pillarAdData } = await (adminClient.from('platform_ads' as any) as any)
-    .select('id, image_url, headline, tool_name, cta_text, link_url, click_url, sponsor_name')
+    .select(SPONSOR_AD_COLUMNS)
     .eq('is_active', true)
-    .limit(1)
-    .maybeSingle()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const pillarAd = (pillarAdData as any) ?? null
+    .order('sort_order')
+    .limit(24)
+  const pillarPool = filterLiveAds((pillarAdData ?? []) as SponsorAd[])
+  const pillarAd = pickAcademySponsors(pillarPool, 1)[0] ?? null
 
-  // 1–2 Evolution Partners for course footer (lesson pages use the same catalog)
-  let courseSponsors: SponsorAd[] = pickAcademySponsors(DEFAULT_ACADEMY_SPONSORS, 2)
+  // Today's IAB stills for the course footer — never the old architecture/logo fallbacks.
+  let courseSponsors: SponsorAd[] = []
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: sponsorRows } = await (adminClient as any)
       .from('platform_ads')
-      .select(SPONSOR_AD_COLUMNS + ', placement')
+      .select(SPONSOR_AD_COLUMNS)
       .eq('is_active', true)
       .order('sort_order')
-      .limit(12)
-    const all = (sponsorRows ?? []) as SponsorAd[]
-    if (all.length > 0) courseSponsors = pickAcademySponsors(all, 2)
+      .limit(24)
+    const all = filterLiveAds((sponsorRows ?? []) as SponsorAd[])
+    if (all.length > 0) courseSponsors = pickAcademySponsors(all, 4)
   } catch {
-    /* rotated static fallback already set */
+    /* empty — do not invent old partner cards */
   }
 
   return (

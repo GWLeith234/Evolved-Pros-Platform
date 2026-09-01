@@ -7,6 +7,7 @@ import { CategoryPills, CATEGORY_COLORS } from '@/components/media/CategoryPills
 import { getPillarLabel } from '@/lib/pillars'
 import { PollWidget } from '@/components/media/PollWidget'
 import { MediaAdZoneClient as MediaAdZone } from './MediaClientShims'
+import { HomeSponsorRow, type SponsorAd } from '@/components/home/HomeSponsorAd'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -37,6 +38,7 @@ export interface Episode {
 interface MediaPortalClientProps {
   stories: MediaStory[]
   episodes: Episode[]
+  ads?: SponsorAd[]
 }
 
 // ── Pillar / category helpers ───────────────────────────────────────────────
@@ -320,6 +322,7 @@ function ArticleCard({ story }: { story: MediaStory }) {
 export function MediaPortalClient({
   stories,
   episodes,
+  ads = [],
 }: MediaPortalClientProps) {
   const [activeCategory, setActiveCategory] = useState<string>(ALL_LABEL)
 
@@ -345,6 +348,10 @@ export function MediaPortalClient({
         initialActive={activeCategory}
         onSelect={setActiveCategory}
       />
+
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '8px 24px 0' }}>
+        <MediaAdZone zone="C" />
+      </div>
 
       {/* ── Section 1: Hero + right rail ── */}
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 0' }}>
@@ -461,11 +468,19 @@ export function MediaPortalClient({
                 unfilled slot collapses cleanly instead of leaking a debug
                 placeholder into production. */}
             <div style={{ marginTop: 16 }}>
+              <MediaAdZone zone="A" />
               <MediaAdZone zone="B" />
+              <MediaAdZone zone="E" />
             </div>
           </aside>
         </div>
       </div>
+
+      {ads.length > 0 && (
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '28px 24px 0' }}>
+          <HomeSponsorRow ads={ads} />
+        </div>
+      )}
 
       {/* ── Section 2: "More from Evolved Media" divider ── */}
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px 0' }}>

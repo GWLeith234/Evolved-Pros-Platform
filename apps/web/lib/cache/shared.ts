@@ -1,6 +1,7 @@
 import 'server-only'
 import { unstable_cache } from 'next/cache'
 import { adminClient } from '@/lib/supabase/admin'
+import { filterLiveAds } from '@/lib/ads/iab'
 
 /** Cache tags — revalidate from admin write routes when those land. */
 export const CACHE_TAGS = {
@@ -81,7 +82,13 @@ type AdRow = {
   rotation_interval: number | null
   sort_order: number | null
   placement: string | null
+  placements: string[] | null
   is_active: boolean | null
+  ad_type: string | null
+  title: string | null
+  zone: string | null
+  start_date: string | null
+  end_date: string | null
 }
 
 async function loadActivePlatformAds(): Promise<AdRow[]> {
@@ -89,12 +96,12 @@ async function loadActivePlatformAds(): Promise<AdRow[]> {
   const { data } = await (adminClient as any)
     .from('platform_ads')
     .select(
-      'id, image_url, headline, body_copy, tool_name, cta_text, link_url, click_url, sponsor_name, endorsement_quote, rotation_interval, sort_order, placement, is_active',
+      'id, image_url, headline, body_copy, tool_name, cta_text, link_url, click_url, sponsor_name, endorsement_quote, rotation_interval, sort_order, placement, placements, is_active, ad_type, title, zone, start_date, end_date',
     )
     .eq('is_active', true)
     .order('sort_order')
-    .limit(24)
-  return (data ?? []) as AdRow[]
+    .limit(48)
+  return filterLiveAds((data ?? []) as AdRow[])
 }
 
 const getActivePlatformAdsCached = unstable_cache(

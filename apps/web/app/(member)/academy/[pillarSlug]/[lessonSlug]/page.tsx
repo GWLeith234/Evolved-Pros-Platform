@@ -19,11 +19,11 @@ import { asTranscriptSegments } from '@/lib/academy/transcript'
 import { asKeyTakeaways } from '@/lib/academy/takeaways'
 import { adminClient } from '@/lib/supabase/admin'
 import {
-  DEFAULT_ACADEMY_SPONSORS,
   pickAcademySponsors,
 } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
+import { adMatchesSurface, filterLiveAds } from '@/lib/ads/iab'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,16 +37,12 @@ async function fetchAcademyLessonSponsors(): Promise<SponsorAd[]> {
       .eq('is_active', true)
       .order('sort_order')
       .limit(12)
-    const all = (rows ?? []) as Array<SponsorAd & { placement?: string | null }>
-    if (all.length === 0) return pickAcademySponsors(DEFAULT_ACADEMY_SPONSORS, 2)
-    // Prefer academy/all placements when present
-    const preferred = all.filter(a => {
-      const p = (a.placement ?? 'all').toLowerCase()
-      return p === 'academy' || p === 'all'
-    })
-    return pickAcademySponsors(preferred.length ? preferred : all, 2)
+    const all = filterLiveAds((rows ?? []) as Array<SponsorAd & { placement?: string | null }>)
+    if (all.length === 0) return []
+    const preferred = all.filter(a => adMatchesSurface(a, 'academy'))
+    return pickAcademySponsors(preferred.length ? preferred : all, 4)
   } catch {
-    return pickAcademySponsors(DEFAULT_ACADEMY_SPONSORS, 2)
+    return []
   }
 }
 

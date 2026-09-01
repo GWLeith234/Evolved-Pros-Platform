@@ -2,6 +2,7 @@ import 'server-only'
 import { adminClient } from '@/lib/supabase/admin'
 import { SPONSOR_AD_COLUMNS, type SponsorAd } from '@/components/home/HomeSponsorAd'
 import { ensurePodcastSponsors } from '@/lib/sponsors/partners'
+import { adMatchesSurface, filterLiveAds } from '@/lib/ads/iab'
 import { resolveCanonicalOrigin } from '@/lib/seo/canonical'
 
 // ---------------------------------------------------------------------------
@@ -221,9 +222,8 @@ export function youtubeTimestampUrl(youtubeId: string | null, ts: number): strin
 
 /**
  * Evolution Partner + Academy pool for podcast surfaces (index + episode pages).
- * Uses podcast/`all` placements only — never dumps every active ad (which was
- * pulling clipped Academy banners into the archive grid). Always includes the
- * Academy architecture promo + flagship partners.
+ * `placements: [platform]` IAB stills are eligible; copy-based house banners
+ * stay out of the 9:16 grid unless no stills exist (ensurePodcastSponsors).
  */
 export async function getPodcastSponsorPool(): Promise<SponsorAd[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -236,12 +236,12 @@ export async function getPodcastSponsorPool(): Promise<SponsorAd[]> {
       .or(`start_date.is.null,start_date.lte.${nowIso}`)
       .or(`end_date.is.null,end_date.gte.${nowIso}`)
       .order('sort_order')
-      .limit(24)
+      .limit(48)
   try {
-    const primary = await inDate(
-      sb.from('platform_ads').select(SPONSOR_AD_COLUMNS).in('placement', ['podcast', 'all']),
+    const primary = await inDate(sb.from('platform_ads').select(SPONSOR_AD_COLUMNS))
+    const rows = filterLiveAds((primary.data ?? []) as SponsorAd[]).filter(a =>
+      adMatchesSurface(a, 'podcast'),
     )
-    const rows = (primary.data ?? []) as SponsorAd[]
     return ensurePodcastSponsors(rows)
   } catch {
     return ensurePodcastSponsors([])

@@ -6,6 +6,9 @@ import { publicPageMetadata } from '@/lib/seo/canonical'
 import { MediaPortalClient } from './MediaPortalClient'
 import type { Episode } from './MediaPortalClient'
 import { Masthead } from '@/components/media/Masthead'
+import { getActivePlatformAds } from '@/lib/cache/shared'
+import { pickHomeSponsors } from '@/lib/sponsors/partners'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 export const revalidate = 60
 
@@ -44,6 +47,7 @@ export default async function MediaPage() {
       <MediaPortalClient
         stories={stories}
         episodes={episodes}
+        ads={pickHomeSponsors((await getActivePlatformAds()) as SponsorAd[])}
       />
     </>
   )

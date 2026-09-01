@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { IabImageAd } from '@/components/ads/IabImageAd'
+import { adMatchesSurface, filterLiveAds, isIabImageStill } from '@/lib/ads/iab'
 import { isAcademyAd } from '@/lib/sponsors/partners'
 import { IAB_ZONE_TO_SLOT, inferHouseAdSlot } from '@/lib/ads/house'
 import { HouseAdTracker } from '@/components/ads/HouseAdTracker'
@@ -16,6 +18,16 @@ interface Ad {
   headline: string | null
   sponsor_name: string | null
   tool_name: string | null
+  ad_type: string | null
+  title: string | null
+  body_copy: string | null
+  cta_text: string | null
+  zone: string | null
+  placements: string[] | null
+  placement: string | null
+  start_date: string | null
+  end_date: string | null
+  is_active: boolean | null
 }
 
 interface MediaAdZoneProps {
@@ -36,19 +48,40 @@ export function MediaAdZone({ zone }: MediaAdZoneProps) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(supabase as any)
       .from('platform_ads')
-      .select('id, image_url, click_url, link_url, headline, sponsor_name, tool_name')
+      .select(
+        'id, image_url, click_url, link_url, headline, sponsor_name, tool_name, ad_type, title, body_copy, cta_text, zone, placements, placement, start_date, end_date, is_active',
+      )
       .eq('zone', zone)
       .eq('is_active', true)
-      .contains('placements', ['media'])
       .order('sort_order')
-      .limit(1)
-      .maybeSingle()
-      .then(({ data }: { data: Ad | null }) => {
-        if (data) setAd(data)
+      .then(({ data }: { data: Ad[] | null }) => {
+        const live = filterLiveAds(data ?? []).filter(row => adMatchesSurface(row, 'media'))
+        const still = live.find(row => isIabImageStill(row) && row.image_url)
+        setAd(still ?? live.find(row => row.image_url) ?? null)
       })
   }, [zone])
 
   if (!ad || !ad.image_url) return null
+
+  if (isIabImageStill(ad)) {
+    return (
+      <div data-ad-zone={zone} style={{ marginBottom: '14px' }}>
+        <p
+          style={{
+            fontFamily: 'sans-serif',
+            fontSize: '12px',
+            color: 'rgba(10,15,24,0.35)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            marginBottom: '4px',
+          }}
+        >
+          Advertisement
+        </p>
+        <IabImageAd ad={{ ...ad, image_url: ad.image_url }} locationId={`media-zone-${zone}`} />
+      </div>
+    )
+  }
 
   const house = isAcademyAd(ad)
   const slot = IAB_ZONE_TO_SLOT[zone] ?? inferHouseAdSlot({ ...ad, zone })
@@ -80,7 +113,8 @@ export function MediaAdZone({ zone }: MediaAdZoneProps) {
           width: size ? size.w : '100%',
           maxWidth: '100%',
           height: 'auto',
-          borderRadius: '4px',
+          aspectRatio: size ? `${size.w} / ${size.h}` : undefined,
+          objectFit: 'contain',
           display: 'block',
         }}
       />
@@ -106,7 +140,7 @@ export function MediaAdZone({ zone }: MediaAdZoneProps) {
   if (ad.click_url) {
     return (
       <div data-ad-zone={zone} style={{ marginBottom: '14px' }}>
-        <a href={ad.click_url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+        <a href={ad.click_url} target="_blank" rel="noopener noreferrer sponsored" style={{ textDecoration: 'none' }}>
           {inner}
         </a>
       </div>
