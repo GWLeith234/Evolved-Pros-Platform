@@ -12,7 +12,7 @@ import { PUBLIC_SITEMAP_PATHS, robotsSitemapUrl } from './publicRoutes'
 const GATED_PATHS = ['/community', '/events', '/academy', '/leaderboard']
 
 describe('PUBLIC_SITEMAP_PATHS', () => {
-  it('is exactly the eight anon-reachable paths', () => {
+  it('is exactly the nine anon-reachable paths', () => {
     expect([...PUBLIC_SITEMAP_PATHS]).toEqual([
       '/',
       '/podcast',
@@ -22,7 +22,13 @@ describe('PUBLIC_SITEMAP_PATHS', () => {
       '/terms',
       '/privacy',
       '/contact',
+      '/evolved',
     ])
+  })
+
+  it('advertises the EVOLVED book preorder dest the house IAB ads click to', () => {
+    expect([...PUBLIC_SITEMAP_PATHS]).toContain('/evolved')
+    expect([...PUBLIC_SITEMAP_PATHS]).not.toContain('/book')
   })
 
   // FOOTER-1: the global footer is the only in-page door to these three, and
