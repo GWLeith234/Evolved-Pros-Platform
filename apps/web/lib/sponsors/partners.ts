@@ -63,9 +63,14 @@ export const ACADEMY_UPGRADE_AD: SponsorAd = {
   link_url: ACADEMY_FALLBACK_HREF,
 }
 
-export function isAcademyAd(
-  ad: Pick<SponsorAd, 'id' | 'sponsor_name' | 'tool_name' | 'image_url' | 'click_url' | 'link_url'>,
-): boolean {
+export function isAcademyAd(ad: {
+  id?: string | null
+  sponsor_name?: string | null
+  tool_name?: string | null
+  image_url?: string | null
+  click_url?: string | null
+  link_url?: string | null
+}): boolean {
   const name = `${ad.sponsor_name ?? ''} ${ad.tool_name ?? ''}`.toLowerCase()
   // Paid partners never count as house, even if a UUID collided in an older seed.
   if (name.includes('adcellerant') || name.includes('evolvex') || name.includes('xpr')) return false
