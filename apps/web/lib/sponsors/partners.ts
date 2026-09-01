@@ -1,6 +1,12 @@
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { houseAdHref } from '@/lib/ads/house'
-import { dedupeIabStillsBySponsor, isBlockedLegacyAd, isIabImageStill, preferIabZone } from '@/lib/ads/iab'
+import {
+  dedupeIabStillsBySponsor,
+  isBlockedLegacyAd,
+  isIabImageStill,
+  isLeaderboardStill,
+  preferIabZone,
+} from '@/lib/ads/iab'
 import { dedupeSponsors, pickRotatedSponsors, sponsorKey } from './rotate'
 
 function liveCatalog(list: SponsorAd[]): SponsorAd[] {
@@ -8,7 +14,10 @@ function liveCatalog(list: SponsorAd[]): SponsorAd[] {
 }
 
 function pickLiveStills(list: SponsorAd[], count: number, salt: number): SponsorAd[] {
-  const stills = preferIabZone(liveCatalog(list).filter(isIabImageStill), 'A')
+  const cards = liveCatalog(list)
+    .filter(isIabImageStill)
+    .filter(a => !isLeaderboardStill(a))
+  const stills = preferIabZone(cards, 'A')
   if (!stills.length) return []
   return pickRotatedSponsors(dedupeIabStillsBySponsor(stills, 'A'), count, { salt })
 }

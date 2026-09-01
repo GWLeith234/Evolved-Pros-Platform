@@ -15,6 +15,7 @@ import {
 import { hasTierAccess } from '@/lib/tier'
 import { ACADEMY_UPGRADE_AD, pickAcademySponsors } from '@/lib/sponsors/partners'
 import { getActivePlatformAds } from '@/lib/cache/shared'
+import { adMatchesSurface } from '@/lib/ads/iab'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 export const dynamic = 'force-dynamic'
@@ -35,7 +36,9 @@ export default async function AcademyPage() {
   const completedLessons = courses.reduce((s, c) => s + c.completedLessons, 0)
   const overallPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
   const showUpgrade = !hasTierAccess(profile?.tier, 'pro')
-  const sponsorAds = pickAcademySponsors((await getActivePlatformAds()) as SponsorAd[], 4)
+  const catalog = (await getActivePlatformAds()) as SponsorAd[]
+  const academyPool = catalog.filter(a => adMatchesSurface(a, 'academy'))
+  const sponsorAds = pickAcademySponsors(academyPool.length ? academyPool : catalog, 4)
 
   return (
     <div className="academy-page ep-surface-mobile">

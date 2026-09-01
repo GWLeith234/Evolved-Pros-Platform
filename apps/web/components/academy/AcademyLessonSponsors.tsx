@@ -1,7 +1,7 @@
 import { SponsorAdCard, type SponsorAd } from '@/components/home/HomeSponsorAd'
 import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import { isAcademyAd } from '@/lib/sponsors/partners'
-import { isIabImageStill } from '@/lib/ads/iab'
+import { isIabImageStill, isLeaderboardStill } from '@/lib/ads/iab'
 
 /**
  * Footer strip for Academy lesson / course pages (also reused on LIVE).
@@ -21,6 +21,7 @@ export function AcademyLessonSponsors({
   const shown: SponsorAd[] = []
   for (const ad of ads) {
     if (!ad?.id || seen.has(ad.id)) continue
+    if (isLeaderboardStill(ad)) continue
     seen.add(ad.id)
     shown.push(ad)
     if (shown.length >= 4) break
