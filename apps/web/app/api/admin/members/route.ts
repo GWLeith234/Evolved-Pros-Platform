@@ -72,6 +72,7 @@ export async function GET(request: Request) {
       avatarUrl:          u.avatar_url,
       tier:               u.tier,
       tierStatus:         u.tier_status,
+      isComped:           Boolean(u.comp_promo_code_id),
       points:             u.points,
       joinedAt:           u.created_at,
       mrr:                getTierMrr(u.tier, u.tier_status, Boolean(u.comp_promo_code_id)),

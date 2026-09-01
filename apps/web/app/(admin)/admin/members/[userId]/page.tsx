@@ -72,6 +72,7 @@ export default async function AdminMemberDetailPage({ params }: Props) {
     tierStatus:        user.tier_status,
     tierExpiresAt:     user.tier_expires_at,
     role:              (user as { role?: string | null }).role ?? null,
+    isComped:          Boolean(user.comp_promo_code_id),
     guestEngagements:  (guestResult?.data ?? []) as Parameters<typeof MemberDetailClient>[0]['member']['guestEngagements'],
     points:            user.points,
     joinedAt:          user.created_at,

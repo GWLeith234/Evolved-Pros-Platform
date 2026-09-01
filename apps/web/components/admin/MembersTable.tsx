@@ -3,7 +3,9 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import type { EngagementLevel } from '@/lib/admin/utils'
+import { MEMBER_FILTERS, matchesMemberFilter, type MemberFilter } from '@/lib/admin/fog'
 import { AdminEditProfileModal } from './AdminEditProfileModal'
+import { MemberPlanBadges } from './MemberPlanBadges'
 
 export interface MemberRow {
   id: string
@@ -14,6 +16,8 @@ export interface MemberRow {
   tier: string | null
   tierStatus: string | null
   role: string | null
+  /** Complimentary Friends of George — from users.comp_promo_code_id, never inferred from MRR. */
+  isComped: boolean
   points: number
   joinedAt: string
   mrr: number
@@ -23,10 +27,6 @@ export interface MemberRow {
   lessonsLast30: number
 }
 
-const TIER_COLORS: Record<string, { bg: string; color: string; border: string }> = {
-  pro:       { bg: 'rgba(201,48,42,0.1)',   color: '#C9302A', border: 'rgba(201,48,42,0.3)' },
-  vip:       { bg: 'rgba(201,168,76,0.1)',  color: '#a07c1e', border: 'rgba(201,168,76,0.3)' },
-}
 const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
   active:    { bg: 'rgba(34,197,94,0.08)',  color: '#15803d' },
   trial:     { bg: 'rgba(201,168,76,0.08)', color: '#92660b' },
@@ -38,13 +38,6 @@ const ENG_COLORS: Record<EngagementLevel, { bar: string; text: string }> = {
   Med:  { bar: '#c9a84c', text: '#7a6020' },
   Low:  { bar: '#cbd5e1', text: '#7a8a96' },
 }
-
-const FILTERS = ['All', 'Pro', 'VIP', 'Guest', 'Trial', 'Cancelled'] as const
-type Filter = typeof FILTERS[number]
-
-// Guest persona badge (comped Pro access, no revenue) — visually distinct from
-// the paid tier pills so admins can tell a guest apart at a glance.
-const GUEST_BADGE = { bg: 'rgba(27,60,90,0.12)', color: '#1b3c5a', border: 'rgba(27,60,90,0.35)' }
 
 // Hydration-safe UTC formatter. toLocaleDateString() depends on the runtime's
 // ICU data and timezone — Node and the browser disagreed on borderline rows
@@ -74,7 +67,7 @@ function resolveDisplayName(m: { fullName: string | null; displayName: string | 
 
 export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }) {
   const [search, setSearch] = useState('')
-  const [filter, setFilter] = useState<Filter>('All')
+  const [filter, setFilter] = useState<MemberFilter>('All')
   const [members, setMembers] = useState<MemberRow[]>(initialMembers)
   const [editingMember, setEditingMember] = useState<MemberRow | null>(null)
 
@@ -88,11 +81,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
         (m.email ?? '').toLowerCase().includes(q),
       )
     }
-    if (filter === 'Pro')  list = list.filter(m => m.tier === 'pro' && m.role !== 'guest')
-    if (filter === 'VIP')  list = list.filter(m => m.tier === 'vip')
-    if (filter === 'Guest')      list = list.filter(m => m.role === 'guest')
-    if (filter === 'Trial')      list = list.filter(m => m.tierStatus === 'trial')
-    if (filter === 'Cancelled')  list = list.filter(m => m.tierStatus === 'cancelled' || m.tierStatus === 'expired')
+    if (filter !== 'All') list = list.filter(m => matchesMemberFilter(m, filter))
     return list
   }, [members, search, filter])
 
@@ -116,9 +105,10 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
           onBlur={e => (e.currentTarget.style.borderColor = 'rgba(27,60,90,0.18)')}
         />
         <div className="flex items-center gap-1 flex-wrap">
-          {FILTERS.map(f => (
+          {MEMBER_FILTERS.map(f => (
             <button
               key={f}
+              data-testid={`filter-${f.toLowerCase()}`}
               onClick={() => setFilter(f)}
               className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-3 py-1.5 rounded transition-all"
               style={{
@@ -145,7 +135,6 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
         ) : (
           filtered.map((m, i) => {
             const name = resolveDisplayName(m)
-            const tierStyle = TIER_COLORS[m.tier ?? ''] ?? TIER_COLORS.vip
             const statusStyle = STATUS_COLORS[m.tierStatus ?? ''] ?? STATUS_COLORS.expired
             const engStyle = ENG_COLORS[m.engagementLevel]
             const engPct = Math.min(100, m.engagementScore * 10)
@@ -174,22 +163,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
 
                 {/* Row 2: Plan + Status + Joined */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  {m.role === 'guest' ? (
-                    <span
-                      className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
-                      style={{ backgroundColor: GUEST_BADGE.bg, color: GUEST_BADGE.color, border: `1px solid ${GUEST_BADGE.border}` }}
-                    >
-                      GUEST
-                    </span>
-                  ) : null}
-                  {m.tier ? (
-                    <span
-                      className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
-                      style={{ backgroundColor: tierStyle.bg, color: tierStyle.color, border: `1px solid ${tierStyle.border}` }}
-                    >
-                      {m.tier.toUpperCase()}
-                    </span>
-                  ) : null}
+                  <MemberPlanBadges role={m.role} tier={m.tier} isComped={m.isComped} />
                   <span
                     className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
                     style={{ backgroundColor: statusStyle.bg, color: statusStyle.color }}
@@ -278,7 +252,6 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
             ) : (
               filtered.map((m, i) => {
                 const name = resolveDisplayName(m)
-                const tierStyle = TIER_COLORS[m.tier ?? ''] ?? TIER_COLORS.vip
                 const statusStyle = STATUS_COLORS[m.tierStatus ?? ''] ?? STATUS_COLORS.expired
                 const engStyle = ENG_COLORS[m.engagementLevel]
                 const engPct = Math.min(100, m.engagementScore * 10)
@@ -310,24 +283,7 @@ export function MembersTable({ initialMembers }: { initialMembers: MemberRow[] }
                     {/* Plan */}
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        {m.role === 'guest' ? (
-                          <span
-                            className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
-                            style={{ backgroundColor: GUEST_BADGE.bg, color: GUEST_BADGE.color, border: `1px solid ${GUEST_BADGE.border}` }}
-                          >
-                            GUEST
-                          </span>
-                        ) : null}
-                        {m.tier ? (
-                          <span
-                            className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
-                            style={{ backgroundColor: tierStyle.bg, color: tierStyle.color, border: `1px solid ${tierStyle.border}` }}
-                          >
-                            {m.tier.toUpperCase()}
-                          </span>
-                        ) : (!m.role || m.role !== 'guest') ? (
-                          <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">—</span>
-                        ) : null}
+                        <MemberPlanBadges role={m.role} tier={m.tier} isComped={m.isComped} />
                       </div>
                     </td>
 

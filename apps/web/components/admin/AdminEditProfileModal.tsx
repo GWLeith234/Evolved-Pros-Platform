@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getTierMrr } from '@/lib/admin/utils'
+import { FOG_BADGE, FOG_TITLE } from '@/lib/admin/fog'
 import type { MemberRow } from './MembersTable'
 
 interface Props {
@@ -43,6 +45,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
   const [fullName,    setFullName]    = useState(member.fullName ?? '')
   const [tier,        setTier]        = useState(member.tier ?? 'vip')
   const [tierStatus,  setTierStatus]  = useState(member.tierStatus ?? 'active')
+  const [friendsOfGeorge, setFriendsOfGeorge] = useState(member.isComped)
   const [avatarUrl,   setAvatarUrl]   = useState(member.avatarUrl ?? '')
   const [bannerUrl,   setBannerUrl]   = useState('')
   const [avatarUploading, setAvatarUploading] = useState(false)
@@ -137,6 +140,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
           current_pillar: currentPillar,
           goal_90day:     goal90day || null,
           goal_visible:   goalVisible,
+          friends_of_george: friendsOfGeorge,
         }),
       })
       const data = await res.json()
@@ -148,6 +152,8 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
         tier,
         tierStatus,
         avatarUrl:   avatarUrl  || null,
+        isComped:    friendsOfGeorge,
+        mrr:         getTierMrr(tier, tierStatus, friendsOfGeorge),
       })
       onClose()
     } catch (e) {
@@ -319,6 +325,28 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                   <option value="expired">Expired</option>
                 </select>
               </div>
+            </div>
+
+            {/* Friends of George — complimentary flag, independent of paid VIP. */}
+            <div>
+              <label style={labelStyle}>Friends of George</label>
+              <button
+                type="button"
+                onClick={() => setFriendsOfGeorge(v => !v)}
+                data-testid="fog-toggle"
+                className="w-full py-2 rounded font-condensed font-bold uppercase tracking-[0.1em] text-[12px] transition-all"
+                style={{
+                  backgroundColor: friendsOfGeorge ? FOG_BADGE.bg : 'transparent',
+                  border: `1.5px solid ${friendsOfGeorge ? '#c9a84c' : 'rgba(27,60,90,0.12)'}`,
+                  color: friendsOfGeorge ? FOG_BADGE.color : '#7a8a96',
+                }}
+                title={FOG_TITLE}
+              >
+                {friendsOfGeorge ? 'FOG — complimentary' : 'Not FOG'}
+              </button>
+              <p className="font-condensed text-[12px] mt-1.5" style={{ color: 'var(--admin-text-2)' }}>
+                Complimentary access, excluded from MRR. Does not change paid VIP.
+              </p>
             </div>
 
             {/* Professional section header */}
