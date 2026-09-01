@@ -123,6 +123,24 @@ describe('isAcademyAd', () => {
     expect(pickHomeSponsors([ACADEMY_SPONSOR_AD])).toEqual([])
     expect(ensurePodcastSponsors([])).toEqual([])
     expect(pickAcademySponsors([], 2)).toEqual([])
+    expect(
+      pickAcademySponsors(
+        [
+          {
+            ...stills[2],
+            zone: 'C',
+            click_url: 'https://transcendibogaine.com/?utm_content=728x90',
+          },
+        ],
+        2,
+      ),
+    ).toEqual([])
+    const mixed = pickHomeSponsors([
+      ...stills,
+      { ...stills[2], id: 'tr-c', zone: 'C', click_url: 'https://transcendibogaine.com/?utm_content=728x90' },
+    ])
+    expect(mixed.every(a => a.zone === 'A')).toBe(true)
+    expect(mixed.filter(a => a.sponsor_name === 'Transcend Clinic')).toHaveLength(1)
   })
 
   it('treats a platform_ads row with house UTMs as Academy self-promo', () => {

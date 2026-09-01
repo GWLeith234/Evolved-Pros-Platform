@@ -1,7 +1,7 @@
 import { AcademyLessonSponsors } from '@/components/academy/AcademyLessonSponsors'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { isAcademyAd } from '@/lib/sponsors/partners'
-import { isIabImageStill } from '@/lib/ads/iab'
+import { isIabImageStill, isLeaderboardStill } from '@/lib/ads/iab'
 import { LiveSectionHeader } from './LiveSectionHeader'
 
 /**
@@ -9,8 +9,8 @@ import { LiveSectionHeader } from './LiveSectionHeader'
  * Section header lives here once — AcademyLessonSponsors is body-only.
  */
 export function LiveSponsors({ ads }: { ads: SponsorAd[] }) {
-  if (!ads.length) return null
-  const slice = ads.slice(0, 4)
+  const slice = ads.filter(a => !isLeaderboardStill(a)).slice(0, 4)
+  if (!slice.length) return null
   const stillsOnly = slice.every(isIabImageStill)
   const hasAcademy = slice.some(isAcademyAd)
   const hasPartner = slice.some(a => !isAcademyAd(a))

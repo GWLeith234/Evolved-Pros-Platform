@@ -5,8 +5,9 @@ import type { PodcastEpisode } from '@/lib/podcast/transforms'
 import { sortEpisodesNewest } from '@/lib/podcast/transforms'
 import { PodcastFilterPills, type FilterKey, type SortKey } from './PodcastFilterPills'
 import { PodcastCoverCard } from './PodcastCoverCard'
-import { RotatingSponsorCard } from './PodcastSponsorCard'
+import { SquareSponsorCard } from './PodcastSponsorCard'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import { dedupeIabStillsBySponsor, isIabImageStill, isLeaderboardStill } from '@/lib/ads/iab'
 
 const FB = 'var(--font-barlow)'
 const FBC = 'var(--font-barlow-condensed)'
@@ -37,6 +38,17 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
     return list
   }, [episodes, filter, sort])
 
+  // One unique IAB still per sponsor (zone A / portrait — never 728×90).
+  // Do not wrap the pool — that printed ADC + EVX twice as fake episode tiles.
+  const uniqueStills = useMemo(
+    () =>
+      dedupeIabStillsBySponsor(
+        sponsorAds.filter(a => isIabImageStill(a) && !isLeaderboardStill(a)),
+        'A',
+      ),
+    [sponsorAds],
+  )
+
   // Interleave one 9:16 sponsor unit after every 3rd episode — same footprint
   // as PodcastCoverCard so the archive grid stays level.
   const gridChildren = useMemo(() => {
@@ -44,17 +56,17 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
     let slot = 0
     filtered.forEach((ep, i) => {
       nodes.push(<PodcastCoverCard key={ep.id} episode={ep} />)
-      if (sponsorAds.length > 0 && (i + 1) % AD_EVERY_N === 0) {
-        const startIndex = slot++
+      if (slot < uniqueStills.length && (i + 1) % AD_EVERY_N === 0) {
+        const ad = uniqueStills[slot++]
         nodes.push(
-          <div key={`sponsor-slot-${startIndex}`} className="podcast-sponsor-slot">
-            <RotatingSponsorCard pool={sponsorAds} startIndex={startIndex} />
+          <div key={`sponsor-slot-${ad.id}`} className="podcast-sponsor-slot">
+            <SquareSponsorCard ad={ad} />
           </div>,
         )
       }
     })
     return nodes
-  }, [filtered, sponsorAds])
+  }, [filtered, uniqueStills])
 
   // Headline count excludes the pilot — it carries a PILOT chip, not a number,
   // so "5 episodes + pilot" reads true (PODCAST-CLEANUP S6).

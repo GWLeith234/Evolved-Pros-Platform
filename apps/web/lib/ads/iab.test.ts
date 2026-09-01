@@ -8,7 +8,9 @@ import {
   isAdScheduleLive,
   isBlockedLegacyAd,
   isIabImageStill,
+  isLeaderboardStill,
   preferIabZone,
+  resolveIabZone,
 } from './iab'
 
 const STILL = {
@@ -178,5 +180,18 @@ describe('filter / surface / zone helpers', () => {
     const onlyE = [{ ...STILL, zone: 'E' }]
     expect(preferIabZone(onlyE, 'A')).toEqual(onlyE)
     expect(preferIabZone([STILL, { ...STILL, zone: 'E' }], 'A')).toEqual([STILL])
+  })
+
+  it('never falls back to a 728×90 leaderboard for card slots', () => {
+    const leader = {
+      ...STILL,
+      zone: 'C',
+      click_url: 'https://transcendibogaine.com/?utm_content=728x90',
+    }
+    expect(resolveIabZone(leader)).toBe('C')
+    expect(isLeaderboardStill(leader)).toBe(true)
+    expect(isLeaderboardStill({ ...STILL, zone: null, click_url: 'https://x.com/?utm_content=728x90' })).toBe(true)
+    expect(preferIabZone([leader], 'A')).toEqual([])
+    expect(preferIabZone([{ ...STILL, zone: 'E' }, leader], 'A')).toEqual([{ ...STILL, zone: 'E' }])
   })
 })

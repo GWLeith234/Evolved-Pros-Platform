@@ -73,6 +73,22 @@ export function iabSlotPx(ad: IabAdIdentity, hint?: string | null): { w: number;
   return { ...px, slot }
 }
 
+/** Zone letter from the row, or from utm_content / filename (728x90 → C). */
+export function resolveIabZone(ad: IabAdIdentity): string {
+  const z = (ad.zone ?? '').trim().toUpperCase()
+  if (z && IAB_ZONE_TO_SLOT[z]) return z
+  const hay = `${ad.image_url ?? ''} ${ad.click_url ?? ''} ${ad.link_url ?? ''}`.toLowerCase()
+  if (hay.includes('728x90') || hay.includes('728-90')) return 'C'
+  if (hay.includes('300x600') || hay.includes('300-600')) return 'E'
+  if (hay.includes('300x250') || hay.includes('300-250')) return 'A'
+  return z
+}
+
+/** 728×90 leaderboards do not belong in portrait / sidebar / featured cards. */
+export function isLeaderboardStill(ad: IabAdIdentity): boolean {
+  return resolveIabZone(ad) === 'C'
+}
+
 /** Stored destination only — never rewrite house stills to /pricing. */
 export function iabClickHref(ad: IabAdIdentity): string | null {
   return [ad.click_url, ad.link_url].find(u => typeof u === 'string' && u.trim() && u !== '#') ?? null
@@ -174,8 +190,10 @@ export function adMatchesSurface(ad: IabAdIdentity, surface: string): boolean {
 
 export function preferIabZone<T extends IabAdIdentity>(ads: T[], zone = 'A'): T[] {
   const letter = zone.toUpperCase()
-  const match = ads.filter(ad => (ad.zone ?? '').trim().toUpperCase() === letter)
-  return match.length ? match : ads
+  const match = ads.filter(ad => resolveIabZone(ad) === letter)
+  if (match.length) return match
+  // Never fall back to a 728×90 leaderboard in a card/sidebar slot.
+  return ads.filter(ad => resolveIabZone(ad) !== 'C')
 }
 
 /** One still per sponsor so A/C/E sizes of the same brand do not collide. */

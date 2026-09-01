@@ -44,7 +44,7 @@ async function fetchLiveSponsors(): Promise<SponsorAd[]> {
       .select(SPONSOR_AD_COLUMNS + ', placement')
       .eq('is_active', true)
       .order('sort_order')
-      .limit(12)
+      .limit(48)
     const all = filterLiveAds((rows ?? []) as SponsorAd[]).filter(a => adMatchesSurface(a, 'live'))
     if (all.length === 0) return []
     return pickAcademySponsors(all, 4)
