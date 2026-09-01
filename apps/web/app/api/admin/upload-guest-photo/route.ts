@@ -60,7 +60,42 @@ export async function POST(request: Request) {
     const arrayBuffer = await blob.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
-    const { error: uploadError } = await adminClient.storage
+    // Parse form data
+    let formData: FormData
+    try {
+      formData = await request.formData()
+    } catch (formErr) {
+      console.error('[upload-guest-photo] FormData parse error:', formErr)
+      return NextResponse.json({ error: 'Invalid form data' }, { status: 400 })
+    }
+
+    const file = formData.get('file')
+    console.log('[upload-guest-photo] file received:', file ? `type=${typeof file}, isString=${typeof file === 'string'}` : 'null')
+
+    if (!file || typeof file === 'string') {
+      return NextResponse.json({ error: 'file is required' }, { status: 422 })
+    }
+
+    // Build upload path
+    const blob = file as Blob
+    const episodeId = formData.get('episodeId')
+    const idSegment = typeof episodeId === 'string' && episodeId.trim() ? episodeId.trim() : 'new'
+    const timestamp = Date.now()
+    const fileName = 'name' in blob && typeof (blob as Record<string, unknown>).name === 'string'
+      ? (blob as Record<string, unknown>).name as string
+      : 'photo.jpg'
+    const ext = fileName.split('.').pop()?.toLowerCase() || 'jpg'
+    const path = `episodes/guest-${idSegment}-${timestamp}.${ext}`
+
+    console.log('[upload-guest-photo] path:', path, 'size:', blob.size, 'type:', blob.type)
+
+    // Read file into buffer
+    const arrayBuffer = await blob.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+    console.log('[upload-guest-photo] buffer created, bytes:', buffer.length)
+
+    // Upload to Supabase Storage
+    const { data: uploadData, error: uploadError } = await adminClient.storage
       .from('Branding')
       .upload(path, buffer, {
         contentType: blob.type || 'image/jpeg',
@@ -72,6 +107,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: `Storage upload failed: ${uploadError.message}` }, { status: 500 })
     }
 
+    // Get public URL
     const { data: { publicUrl } } = adminClient.storage.from('Branding').getPublicUrl(path)
     return NextResponse.json({ url: publicUrl })
   } catch (err: unknown) {
