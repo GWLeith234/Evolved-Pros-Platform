@@ -3,7 +3,7 @@
 import { useState, type CSSProperties } from 'react'
 import { gradients } from '@evolved-pros/ui'
 import { stripTrailingArrow } from '@/lib/brand'
-import { IabImageAd } from '@/components/ads/IabImageAd'
+import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import { isIabImageStill } from '@/lib/ads/iab'
 
 type SponsorAd = {
@@ -33,7 +33,7 @@ const RED = '#C9302A'
 /** Evolution Partner card — uniform shell + Sprint 1 button chrome (Sprint 2). */
 export function SponsorCard({ ad, variant }: SponsorCardProps) {
   if (isIabImageStill(ad) && ad.image_url) {
-    return <IabImageAd ad={{ ...ad, image_url: ad.image_url }} locationId={variant} />
+    return <IabAdvertisementSlot ad={{ ...ad, image_url: ad.image_url }} locationId={variant} />
   }
 
   const ctaText = stripTrailingArrow(ad.cta_text || 'Learn More')

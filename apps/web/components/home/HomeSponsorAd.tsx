@@ -1,7 +1,7 @@
 import { stripTrailingArrow } from '@/lib/brand'
 import { isAcademyAd } from '@/lib/sponsors/partners'
 import { AcademyArchitectureCard } from '@/components/academy/AcademyArchitectureCard'
-import { IabImageAd } from '@/components/ads/IabImageAd'
+import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import { isIabImageStill } from '@/lib/ads/iab'
 
 export type SponsorAd = {
@@ -67,11 +67,23 @@ function MicGlyph() {
  */
 export function SponsorAdCard({ ad, locationId = 'home' }: { ad: SponsorAd; locationId?: string }) {
   if (isIabImageStill(ad) && ad.image_url) {
-    return <IabImageAd ad={{ ...ad, image_url: ad.image_url }} locationId={locationId} className="pt-3" />
+    return (
+      <IabAdvertisementSlot
+        ad={{ ...ad, image_url: ad.image_url }}
+        locationId={locationId}
+        className="pt-3"
+      />
+    )
   }
 
   if (ad.image_url && !ad.headline?.trim() && !ad.cta_text?.trim() && !ad.body_copy?.trim()) {
-    return <IabImageAd ad={{ ...ad, image_url: ad.image_url }} locationId={locationId} className="pt-3" />
+    return (
+      <IabAdvertisementSlot
+        ad={{ ...ad, image_url: ad.image_url }}
+        locationId={locationId}
+        className="pt-3"
+      />
+    )
   }
 
   if (isAcademyAd(ad)) return <AcademyArchitectureCard ad={ad} className="pt-3" locationId={locationId} />

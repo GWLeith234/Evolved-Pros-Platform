@@ -463,10 +463,8 @@ export function MediaPortalClient({
 
             <PollWidget />
 
-            {/* Wired to platform_ads (zone='B', placements contains 'media').
-                MediaAdZone returns null when no active ad is assigned, so an
-                unfilled slot collapses cleanly instead of leaking a debug
-                placeholder into production. */}
+            {/* IAB zones A/B/E — platform-only and media placements both serve.
+                Empty zones collapse instead of leaking a placeholder. */}
             <div style={{ marginTop: 16 }}>
               <MediaAdZone zone="A" />
               <MediaAdZone zone="B" />

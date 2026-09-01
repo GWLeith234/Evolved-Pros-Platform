@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { IabImageAd } from '@/components/ads/IabImageAd'
+import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import { adMatchesSurface, filterLiveAds, isIabImageStill } from '@/lib/ads/iab'
 import { isAcademyAd } from '@/lib/sponsors/partners'
 import { IAB_ZONE_TO_SLOT, inferHouseAdSlot } from '@/lib/ads/house'
@@ -66,19 +66,11 @@ export function MediaAdZone({ zone }: MediaAdZoneProps) {
   if (isIabImageStill(ad)) {
     return (
       <div data-ad-zone={zone} style={{ marginBottom: '14px' }}>
-        <p
-          style={{
-            fontFamily: 'sans-serif',
-            fontSize: '12px',
-            color: 'rgba(10,15,24,0.35)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            marginBottom: '4px',
-          }}
-        >
-          Advertisement
-        </p>
-        <IabImageAd ad={{ ...ad, image_url: ad.image_url }} locationId={`media-zone-${zone}`} />
+        <IabAdvertisementSlot
+          ad={{ ...ad, image_url: ad.image_url }}
+          locationId={`media-zone-${zone}`}
+          tone="paper"
+        />
       </div>
     )
   }

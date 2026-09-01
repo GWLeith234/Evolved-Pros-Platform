@@ -5,7 +5,7 @@ import { MemberBadge } from '@/components/ui/MemberBadge'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { tierColor } from '@/lib/tier-color'
 import type { LeaderboardEntry, MemberSummary, CommunityAd, EpisodeSummary } from '@/lib/community/types'
-import { IabImageAd } from '@/components/ads/IabImageAd'
+import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import { isIabImageStill } from '@/lib/ads/iab'
 
 interface LeaderboardRailProps {
@@ -122,7 +122,7 @@ function ActiveMemberRow({ member }: { member: MemberSummary }) {
 
 function AdCard({ ad }: { ad: CommunityAd }) {
   if (isIabImageStill(ad) && ad.image_url) {
-    return <IabImageAd ad={{ ...ad, image_url: ad.image_url }} locationId="community-rail" />
+    return <IabAdvertisementSlot ad={{ ...ad, image_url: ad.image_url }} locationId="community-rail" />
   }
   const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
   const label = ad.headline ?? ad.tool_name ?? ad.sponsor_name ?? 'Sponsored'

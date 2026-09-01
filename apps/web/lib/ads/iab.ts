@@ -44,18 +44,21 @@ function blank(value: string | null | undefined): boolean {
 
 /**
  * Full-creative Image still: the PNG is the ad.
- * Partner chrome is only for text/logo units (they have copy).
+ * Image-typed / IAB-zoned rows stay stills even if leftover headline/CTA
+ * is on the row — wrapping those in Partner chrome (duplicate name +
+ * LEARN MORE) is the Academy bug. Copy-only / native units stay cards.
  */
 export function isIabImageStill(ad: IabAdIdentity): boolean {
   if (blank(ad.image_url)) return false
   const type = (ad.ad_type ?? '').trim().toLowerCase()
   if (type && type !== 'image') return false
-  if (!blank(ad.headline) || !blank(ad.cta_text) || !blank(ad.body_copy)) return false
 
   if (type === 'image') return true
 
   const zone = (ad.zone ?? '').trim().toUpperCase()
   if (zone && IAB_ZONE_TO_SLOT[zone]) return true
+
+  if (!blank(ad.headline) || !blank(ad.cta_text) || !blank(ad.body_copy)) return false
 
   const title = (ad.title ?? '').trim().toLowerCase()
   if (!title || title === 'ad') return true
@@ -148,14 +151,24 @@ const SURFACE_ALIASES: Record<string, string[]> = {
   platform: ['platform', 'all'],
 }
 
-/** `placements: [platform]` means the still may serve on every surface. */
+function placementTokens(ad: IabAdIdentity): string[] {
+  const raw = ad.placements
+  const list = Array.isArray(raw)
+    ? raw
+    : typeof raw === 'string' && raw.trim()
+      ? raw.split(/[{},\s]+/).filter(Boolean)
+      : []
+  return [...list, ad.placement ?? '']
+    .map(p => String(p).toLowerCase().trim())
+    .filter(Boolean)
+}
+
+/** `placements: [platform]` is a wildcard — including Media (Media checkbox unchecked). */
 export function adMatchesSurface(ad: IabAdIdentity, surface: string): boolean {
   const wanted = SURFACE_ALIASES[surface.toLowerCase()] ?? [surface.toLowerCase(), 'platform', 'all']
-  const bags = [
-    ...(ad.placements ?? []).map(p => p.toLowerCase()),
-    (ad.placement ?? '').toLowerCase(),
-  ].filter(Boolean)
+  const bags = placementTokens(ad)
   if (bags.length === 0) return true
+  if (bags.includes('platform') || bags.includes('all')) return true
   return bags.some(p => wanted.includes(p))
 }
 
