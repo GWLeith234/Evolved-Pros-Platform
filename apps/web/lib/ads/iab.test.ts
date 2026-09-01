@@ -36,21 +36,21 @@ describe('isIabImageStill', () => {
     expect(isIabImageStill({ ...STILL, sponsor_name: 'EvolveX360', zone: 'E' })).toBe(true)
   })
 
-  it('does not treat text/logo partner or house copy units as stills', () => {
+  it('keeps Image / IAB-zone rows as stills even if leftover copy is on the row', () => {
     expect(
       isIabImageStill({
         ...STILL,
         headline: 'Six Pillars. No Ceiling.',
         cta_text: 'Learn More',
       }),
-    ).toBe(false)
+    ).toBe(true)
     expect(
       isIabImageStill({
         ...STILL,
-        headline: 'EVOLVED presale on now.',
-        cta_text: 'Pre-order',
+        headline: 'Transcend Clinic',
+        cta_text: 'Learn More',
       }),
-    ).toBe(false)
+    ).toBe(true)
     expect(
       isIabImageStill({
         ad_type: 'native',
@@ -58,6 +58,19 @@ describe('isIabImageStill', () => {
         headline: null,
         cta_text: null,
         body_copy: null,
+      }),
+    ).toBe(false)
+  })
+
+  it('does not treat copy-led house units without an IAB zone as stills', () => {
+    expect(
+      isIabImageStill({
+        image_url: '/ads/academy-portrait.png',
+        headline: 'Stop collecting tips. Build the system.',
+        cta_text: 'Enter the Academy',
+        body_copy: null,
+        ad_type: null,
+        zone: null,
       }),
     ).toBe(false)
   })
@@ -146,6 +159,9 @@ describe('filter / surface / zone helpers', () => {
     expect(adMatchesSurface(STILL, 'live')).toBe(true)
     expect(adMatchesSurface({ placements: ['media'], placement: 'sidebar' }, 'media')).toBe(true)
     expect(adMatchesSurface({ placements: ['media'] }, 'academy')).toBe(false)
+    expect(adMatchesSurface({ placements: ['platform'] }, 'media')).toBe(true)
+    expect(adMatchesSurface({ placements: ['platform'] }, 'academy')).toBe(true)
+    expect(adMatchesSurface({ placements: ['media'] }, 'media')).toBe(true)
   })
 
   it('dedupes A/C/E stills of the same sponsor, preferring zone A', () => {

@@ -1,4 +1,4 @@
-import { IabImageAd } from '@/components/ads/IabImageAd'
+import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import { isIabImageStill } from '@/lib/ads/iab'
 
 interface Ad {
@@ -22,7 +22,12 @@ interface ProfileAdUnitProps {
 
 export function ProfileAdUnit({ ad }: ProfileAdUnitProps) {
   if (isIabImageStill(ad) && ad.image_url) {
-    return <IabImageAd ad={{ ...ad, image_url: ad.image_url }} locationId="academy-pillar" />
+    return (
+      <IabAdvertisementSlot
+        ad={{ ...ad, image_url: ad.image_url }}
+        locationId="academy-pillar"
+      />
+    )
   }
 
   const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null

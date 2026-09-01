@@ -1,4 +1,5 @@
 import { SponsorAdCard, type SponsorAd } from '@/components/home/HomeSponsorAd'
+import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import { isAcademyAd } from '@/lib/sponsors/partners'
 import { isIabImageStill } from '@/lib/ads/iab'
 
@@ -103,9 +104,17 @@ export function AcademyLessonSponsors({
           maxWidth: 960,
         }}
       >
-        {shown.map(ad => (
-          <SponsorAdCard key={ad.id} ad={ad} locationId="academy" />
-        ))}
+        {shown.map(ad =>
+          isIabImageStill(ad) && ad.image_url ? (
+            <IabAdvertisementSlot
+              key={ad.id}
+              ad={{ ...ad, image_url: ad.image_url }}
+              locationId="academy"
+            />
+          ) : (
+            <SponsorAdCard key={ad.id} ad={ad} locationId="academy" />
+          ),
+        )}
       </div>
     </section>
   )

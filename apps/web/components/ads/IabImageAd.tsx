@@ -12,6 +12,11 @@ type IabImageAdProps = {
   style?: CSSProperties
 }
 
+type IabAdvertisementSlotProps = IabImageAdProps & {
+  /** Media articles sit on paper; member surfaces are ink/dark. */
+  tone?: 'paper' | 'ink'
+}
+
 /**
  * Clickable IAB still — the uploaded PNG is the entire unit.
  * No PARTNER chip, no sponsor_name reprint, no LEARN MORE, no 1:1 crop.
@@ -105,5 +110,37 @@ export function IabImageAd({ ad, locationId, className, style }: IabImageAdProps
     >
       {img}
     </a>
+  )
+}
+
+/**
+ * Media article layout — the source of truth for Platform too.
+ * ADVERTISEMENT label + clickable IAB still. No Partner chip, no
+ * duplicate sponsor name, no extra LEARN MORE.
+ */
+export function IabAdvertisementSlot({
+  ad,
+  locationId,
+  className,
+  style,
+  tone = 'ink',
+}: IabAdvertisementSlotProps) {
+  const labelColor = tone === 'paper' ? 'rgba(10,15,24,0.35)' : 'var(--text-secondary, rgba(255,255,255,0.45))'
+  return (
+    <div className={className} style={style} data-ad-layout="iab-media">
+      <p
+        style={{
+          fontFamily: 'sans-serif',
+          fontSize: '12px',
+          color: labelColor,
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+          marginBottom: '4px',
+        }}
+      >
+        Advertisement
+      </p>
+      <IabImageAd ad={ad} locationId={locationId} />
+    </div>
   )
 }
