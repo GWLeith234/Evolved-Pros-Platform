@@ -168,9 +168,9 @@ const SURFACE_ALIASES: Record<string, string[]> = {
 }
 
 function placementTokens(ad: IabAdIdentity): string[] {
-  const raw = ad.placements
+  const raw: unknown = ad.placements
   const list = Array.isArray(raw)
-    ? raw
+    ? raw.map(String)
     : typeof raw === 'string' && raw.trim()
       ? raw.split(/[{},\s]+/).filter(Boolean)
       : []
