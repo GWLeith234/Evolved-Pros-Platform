@@ -3,6 +3,8 @@ import type { CommunityAd } from '@/lib/community/types'
 import { stripTrailingArrow } from '@/lib/brand'
 import { isAcademyAd } from '@/lib/sponsors/partners'
 import { HouseAdTracker } from '@/components/ads/HouseAdTracker'
+import { IabImageAd } from '@/components/ads/IabImageAd'
+import { isIabImageStill } from '@/lib/ads/iab'
 import { inferHouseAdSlot, resolveServedAdHref } from '@/lib/ads/house'
 
 interface FeedAdUnitProps {
@@ -11,6 +13,14 @@ interface FeedAdUnitProps {
 
 /** In-feed Evolution Partner unit — theme tokens + shared Button CTA (Sprint 2). */
 export function FeedAdUnit({ ad }: FeedAdUnitProps) {
+  if (isIabImageStill(ad) && ad.image_url) {
+    return (
+      <div style={{ marginBottom: 10 }}>
+        <IabImageAd ad={{ ...ad, image_url: ad.image_url }} locationId="community-feed" />
+      </div>
+    )
+  }
+
   const house = isAcademyAd(ad)
   const href = resolveServedAdHref(ad, house)
   const label = ad.headline ?? ad.tool_name ?? ad.sponsor_name ?? (house ? 'Evolved Pros Academy' : 'Sponsored')

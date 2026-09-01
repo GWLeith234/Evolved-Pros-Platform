@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+import { filterLiveAds } from '@/lib/ads/iab'
+
 type SponsorAd = {
   id: string
   image_url: string | null
@@ -12,7 +14,15 @@ type SponsorAd = {
   special_offer: string | null
   cta_text: string | null
   link_url: string | null
+  click_url?: string | null
   sponsor_name?: string | null
+  ad_type?: string | null
+  title?: string | null
+  body_copy?: string | null
+  zone?: string | null
+  start_date?: string | null
+  end_date?: string | null
+  is_active?: boolean | null
 }
 
 /** Shuffle in place (Fisher–Yates). */
@@ -52,8 +62,8 @@ export function useSponsorAd(placement: 'academy' | 'community' | 'events') {
     Promise.all([
       supabase
         .from('platform_ads')
-        .select('id, image_url, headline, tool_name, endorsement_quote, special_offer, cta_text, link_url, sponsor_name')
-        .in('placement', [placement, 'all'])
+        .select('id, image_url, headline, tool_name, endorsement_quote, special_offer, cta_text, link_url, click_url, sponsor_name, ad_type, title, body_copy, zone, start_date, end_date, is_active')
+        .in('placement', [placement, 'all', 'sidebar', 'topnav', 'platform'])
         .eq('is_active', true)
         .order('sort_order'),
       supabase
@@ -62,7 +72,7 @@ export function useSponsorAd(placement: 'academy' | 'community' | 'events') {
         .eq('key', 'ad_sidebar_interval')
         .maybeSingle(),
     ]).then(([adsResult, intervalResult]) => {
-      const list = shuffleInPlace(dedupeClientAds(adsResult.data ?? []))
+      const list = shuffleInPlace(dedupeClientAds(filterLiveAds(adsResult.data ?? [])))
       if (!list.length) return
       setAds(list)
       const start = Math.floor(Math.random() * list.length)
