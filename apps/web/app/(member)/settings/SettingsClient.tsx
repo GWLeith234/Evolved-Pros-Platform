@@ -1,0 +1,420 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import { EmailPrefsForm } from '@/components/notifications/EmailPrefsForm'
+import { useToast } from '@/lib/toast'
+
+type TriOption = 'immediate' | 'digest' | 'off'
+type BinOption = 'immediate' | 'off'
+type Prefs = {
+  community_reply: TriOption
+  community_mention: TriOption
+  event_reminder: BinOption
+  course_unlock: BinOption
+  system_billing: 'immediate'
+}
+
+interface SettingsClientProps {
+  userId: string
+  email: string
+  fullName: string
+  tier: string | null
+  createdAt: string | null
+  initialPrefs: Prefs
+}
+
+const TABS = [
+  { key: 'profile', label: 'Profile' },
+  { key: 'notifications', label: 'Notifications' },
+  { key: 'membership', label: 'Membership' },
+  { key: 'account', label: 'Account' },
+] as const
+
+type TabKey = typeof TABS[number]['key']
+
+function isTabKey(value: string | null): value is TabKey {
+  return value === 'profile' || value === 'notifications' || value === 'membership' || value === 'account'
+}
+
+function tierBadge(tier: string | null): { label: string; color: string } {
+  const t = tier?.toLowerCase()
+  if (t === 'vip') return { label: 'VIP', color: 'var(--brand-gold)' }
+  if (t === 'pro' || t === 'professional') return { label: 'Pro', color: 'var(--brand-red)' }
+  return { label: 'Member', color: 'var(--muted)' }
+}
+
+function formatDate(value: string | null): string {
+  if (!value) return '—'
+  try {
+    const d = new Date(value)
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+  } catch {
+    return '—'
+  }
+}
+
+export function SettingsClient({
+  userId,
+  email,
+  fullName,
+  tier,
+  createdAt,
+  initialPrefs,
+}: SettingsClientProps) {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+  const tabParam = searchParams?.get('tab') ?? null
+  const [activeTab, setActiveTab] = useState<TabKey>(isTabKey(tabParam) ? tabParam : 'profile')
+
+  useEffect(() => {
+    if (isTabKey(tabParam) && tabParam !== activeTab) setActiveTab(tabParam)
+  }, [tabParam, activeTab])
+
+  function selectTab(next: TabKey) {
+    setActiveTab(next)
+    const params = new URLSearchParams(searchParams?.toString() ?? '')
+    params.set('tab', next)
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+  }
+
+  return (
+    <div className="px-6 md:px-8 py-6 max-w-3xl">
+      <div className="mb-6">
+        <h1 className="font-display font-medium text-[28px] text-primary tracking-widest">SETTINGS</h1>
+        <p className="font-condensed text-[12px] text-muted mt-0.5">
+          Manage your profile, notifications, membership, and account.
+        </p>
+      </div>
+
+      <div className="relative mb-6 border-b border-[rgba(27,60,90,0.12)]">
+        <div
+          className="flex gap-1 overflow-x-auto snap-x snap-mandatory"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {TABS.map(t => (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => selectTab(t.key)}
+              className="px-4 py-2.5 font-condensed font-semibold uppercase tracking-wide text-xs transition-colors border-b-2 -mb-px whitespace-nowrap snap-start"
+              style={{
+                color: activeTab === t.key ? 'var(--teal)' : 'var(--muted)',
+                borderColor: activeTab === t.key ? 'var(--teal)' : 'transparent',
+                background: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        {/* Right-edge fade mask: hints at scrollable overflow on mobile.
+            Hidden at >=640px where the full tab row fits. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute top-0 right-0 h-full w-8 sm:hidden"
+          style={{
+            background:
+              'linear-gradient(to right, rgba(245,240,232,0), rgba(245,240,232,1))',
+          }}
+        />
+      </div>
+
+      {activeTab === 'profile' && <ProfileTab userId={userId} />}
+      {activeTab === 'notifications' && <NotificationsTab initialPrefs={initialPrefs} />}
+      {activeTab === 'membership' && <MembershipTab tier={tier} createdAt={createdAt} />}
+      {activeTab === 'account' && <AccountTab userId={userId} email={email} fullName={fullName} />}
+    </div>
+  )
+}
+
+function NotificationsTab({ initialPrefs }: { initialPrefs: Prefs }) {
+  // This tab is PREFERENCES only — the notification feed lives at /notifications
+  // (one destination, reached from the bell). Label it clearly so it doesn't
+  // read as a second feed.
+  return (
+    <div className="space-y-4">
+      <div
+        className="rounded-lg p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        style={{ border: '1px solid var(--notif-card-border)', backgroundColor: 'var(--btn-ghost-bg)' }}
+      >
+        <div>
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] mb-1" style={{ color: 'var(--text-tertiary)' }}>
+            Notification Preferences
+          </p>
+          <p className="font-body text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+            Choose how and when Evolved Pros emails you. To read your notifications, open the feed.
+          </p>
+        </div>
+        <Link
+          href="/notifications"
+          className="inline-flex items-center justify-center flex-shrink-0 font-condensed font-semibold uppercase tracking-wide text-[12px] rounded px-5 py-2.5 transition-all"
+          style={{ border: '1px solid var(--notif-card-border)', color: 'var(--text-primary)' }}
+        >
+          View Feed →
+        </Link>
+      </div>
+
+      <EmailPrefsForm initialPrefs={initialPrefs} />
+    </div>
+  )
+}
+
+function ProfileTab({ userId }: { userId: string }) {
+  return (
+    <div
+      className="rounded-lg p-6"
+      style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.02)' }}
+    >
+      <h2 className="font-condensed font-bold uppercase tracking-widest text-xs text-primary mb-2">
+        Profile Details
+      </h2>
+      <p className="font-body text-[14px] text-muted mb-4 leading-relaxed">
+        Your name, photo, bio, pillar, and 90-day goal are edited on your profile page.
+      </p>
+      <Link
+        href={`/profile/${userId}?edit=1`}
+        className="inline-block font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-6 py-2.5 transition-all"
+        style={{ backgroundColor: 'var(--navy)', color: 'var(--white)' }}
+      >
+        Edit Profile
+      </Link>
+    </div>
+  )
+}
+
+function MembershipTab({ tier, createdAt }: { tier: string | null; createdAt: string | null }) {
+  const badge = tierBadge(tier)
+  const t = tier?.toLowerCase()
+  const isVip = t === 'vip'
+
+  return (
+    <div className="space-y-4">
+      <div
+        className="rounded-lg p-6"
+        style={{ border: '1px solid rgba(27,60,90,0.1)' }}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-muted mb-1">
+              Current Tier
+            </p>
+            <span
+              className="inline-block font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-3 py-1.5"
+              style={{ backgroundColor: badge.color, color: 'white' }}
+            >
+              {badge.label}
+            </span>
+          </div>
+          <div className="text-right">
+            <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-muted mb-1">
+              Member Since
+            </p>
+            <p className="font-body text-[14px] text-primary">{formatDate(createdAt)}</p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 pt-4" style={{ borderTop: '1px solid rgba(27,60,90,0.06)' }}>
+          {isVip && (
+            <Link
+              href="/pricing"
+              className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-5 py-2.5 transition-all"
+              style={{ backgroundColor: 'var(--navy)', color: 'var(--white)' }}
+            >
+              Upgrade to Pro
+            </Link>
+          )}
+          <Link
+            href="/pricing"
+            className="font-condensed font-semibold uppercase tracking-wide text-[12px] rounded px-5 py-2.5 transition-all"
+            style={{ border: '1px solid rgba(27,60,90,0.2)', color: 'var(--navy)' }}
+          >
+            Manage Billing
+          </Link>
+        </div>
+      </div>
+
+      <ComingSoonCard message="Detailed billing history and self-serve plan changes are coming soon." />
+    </div>
+  )
+}
+
+function AccountTab({ userId, email, fullName }: { userId: string; email: string; fullName: string }) {
+  const { showToast } = useToast()
+  const [name, setName] = useState(fullName)
+  const [savingName, setSavingName] = useState(false)
+  const [nameSaved, setNameSaved] = useState(false)
+  const [nameError, setNameError] = useState<string | null>(null)
+
+  const [resetting, setResetting] = useState(false)
+
+  // Clear the "saved!" indicator after 3s, but cancel the timer if the
+  // component unmounts mid-flight — otherwise the timer fires against a
+  // dead instance and React logs "setState on unmounted component".
+  useEffect(() => {
+    if (!nameSaved) return
+    const id = setTimeout(() => setNameSaved(false), 3000)
+    return () => clearTimeout(id)
+  }, [nameSaved])
+
+  async function handleSaveName() {
+    setSavingName(true)
+    setNameError(null)
+    setNameSaved(false)
+    try {
+      const res = await fetch('/api/user/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name: name }),
+      })
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string }
+        throw new Error(data.error ?? 'Save failed')
+      }
+      setNameSaved(true)
+      showToast('Name saved', 'success')
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Something went wrong'
+      setNameError(msg)
+      showToast(msg, 'error')
+    } finally {
+      setSavingName(false)
+    }
+  }
+
+  async function handlePasswordReset() {
+    setResetting(true)
+    try {
+      const res = await fetch('/api/auth/reset-password', { method: 'POST' })
+      if (!res.ok) throw new Error('reset-failed')
+      showToast('Check your inbox for a password reset link.', 'success')
+    } catch {
+      showToast('Something went wrong. Please try again.', 'error')
+    } finally {
+      setResetting(false)
+    }
+  }
+
+  void userId
+
+  return (
+    <div className="space-y-5">
+      <div
+        className="rounded-lg p-5"
+        style={{ border: '1px solid rgba(27,60,90,0.1)' }}
+      >
+        <label className="block">
+          <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-muted mb-2 block">
+            Full Name
+          </span>
+          <input
+            type="text"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            maxLength={100}
+            className="w-full px-3 py-2 rounded font-body text-[14px] text-[color:var(--navy)] focus:outline-none"
+            style={{ border: '1px solid rgba(27,60,90,0.18)', backgroundColor: 'white' }}
+          />
+          <p className="font-condensed text-[11px] text-muted mt-1.5">
+            This is your real name shown in admin and billing.
+          </p>
+        </label>
+        {nameError && (
+          <p className="font-condensed text-[11px] text-red-hot mt-2">{nameError}</p>
+        )}
+        <div className="flex items-center gap-4 mt-3">
+          <button
+            type="button"
+            onClick={handleSaveName}
+            disabled={savingName || name === fullName}
+            className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-5 py-2 transition-all"
+            style={{
+              backgroundColor: 'var(--navy)',
+              color: 'white',
+              opacity: savingName || name === fullName ? 0.5 : 1,
+              cursor: savingName || name === fullName ? 'default' : 'pointer',
+            }}
+          >
+            {savingName ? 'Saving...' : 'Save Name'}
+          </button>
+          {nameSaved && (
+            <span className="font-condensed text-[11px]" style={{ color: 'var(--teal)' }}>
+              Saved ✓
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div
+        className="rounded-lg p-5"
+        style={{ border: '1px solid rgba(27,60,90,0.1)' }}
+      >
+        <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-muted mb-2 block">
+          Email
+        </span>
+        <input
+          type="email"
+          value={email}
+          readOnly
+          disabled
+          className="w-full px-3 py-2 rounded font-body text-[14px]"
+          style={{
+            border: '1px solid rgba(27,60,90,0.1)',
+            backgroundColor: 'rgba(27,60,90,0.04)',
+            color: 'var(--muted)',
+            cursor: 'not-allowed',
+          }}
+        />
+        <p className="font-condensed text-[11px] text-muted mt-2">
+          Contact support to change the email on your account.
+        </p>
+      </div>
+
+      <div
+        className="rounded-lg p-5"
+        style={{ border: '1px solid rgba(27,60,90,0.1)' }}
+      >
+        <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-muted mb-1 block">
+          Password
+        </span>
+        <p className="font-body text-[14px] text-muted mb-3">
+          We&apos;ll email you a secure link to set a new password.
+        </p>
+        <button
+          type="button"
+          onClick={handlePasswordReset}
+          disabled={resetting}
+          className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-5 py-2 transition-all"
+          style={{
+            backgroundColor: 'var(--navy)',
+            color: 'white',
+            opacity: resetting ? 0.7 : 1,
+            cursor: resetting ? 'default' : 'pointer',
+          }}
+        >
+          {resetting ? 'Sending...' : 'Change Password'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function ComingSoonCard({ message }: { message: string }) {
+  return (
+    <div
+      className="rounded-lg p-5"
+      style={{
+        border: '1px dashed rgba(27,60,90,0.18)',
+        backgroundColor: 'rgba(27,60,90,0.02)',
+      }}
+    >
+      <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-muted mb-1">
+        Coming Soon
+      </p>
+      <p className="font-body text-[13px] text-muted leading-relaxed">{message}</p>
+    </div>
+  )
+}

@@ -32,4 +32,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
+# Node 20 image (see FROM). Matches package.json engines + nixpacks.toml.
 CMD ["node", "apps/web/server.js"]

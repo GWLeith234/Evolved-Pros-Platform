@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const revalidate = 60
 
@@ -16,8 +17,8 @@ type ActivityItem = {
 
 export async function GET() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const items: ActivityItem[] = []
 
@@ -25,7 +26,7 @@ export async function GET() {
   const { data: notifications } = await supabase
     .from('notifications')
     .select('id, type, title, body, action_url, created_at')
-    .eq('user_id', user.id)
+    .eq('user_id', profile.id)
     .order('created_at', { ascending: false })
     .limit(10)
 
@@ -65,7 +66,7 @@ export async function GET() {
   const { data: completions } = await supabase
     .from('lesson_progress')
     .select('lesson_id, completed_at, lessons(id, title, sort_order, course_id, courses(title, slug))')
-    .eq('user_id', user.id)
+    .eq('user_id', profile.id)
     .not('completed_at', 'is', null)
     .order('completed_at', { ascending: false })
     .limit(5)

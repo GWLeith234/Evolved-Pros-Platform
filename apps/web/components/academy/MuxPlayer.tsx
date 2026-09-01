@@ -11,6 +11,9 @@ interface MuxPlayerProps {
   totalLessons: number
   courseTitle: string
   onComplete?: () => void
+  /** Height cap (px). Default 420 for the legacy sidebar layout; the
+   *  full-width lesson layout passes a larger value. */
+  maxHeight?: number
 }
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
@@ -24,6 +27,7 @@ export function MuxPlayer({
   totalLessons,
   courseTitle,
   onComplete,
+  maxHeight = 420,
 }: MuxPlayerProps) {
   const playerRef = useRef<any>(null)
   const saveTimerRef = useRef<NodeJS.Timeout>()
@@ -103,12 +107,33 @@ export function MuxPlayer({
     }
   }, [saveProgress])
 
+  // External seek hook — transcript click rows dispatch
+  // window.dispatchEvent(new CustomEvent('academy:seek', { detail: { seconds } }))
+  // and the player jumps to that timestamp.
+  useEffect(() => {
+    function onSeek(event: Event) {
+      const detail = (event as CustomEvent<{ seconds?: number }>).detail
+      const seconds = typeof detail?.seconds === 'number' ? detail.seconds : NaN
+      if (Number.isNaN(seconds)) return
+      const el = playerRef.current
+      if (!el) return
+      try {
+        el.currentTime = seconds
+        if (typeof el.play === 'function') void el.play()
+      } catch {
+        /* ignore — player may not be ready yet */
+      }
+    }
+    window.addEventListener('academy:seek', onSeek as EventListener)
+    return () => window.removeEventListener('academy:seek', onSeek as EventListener)
+  }, [])
+
   if (!playbackId) {
     return (
       <div style={{
         background:    '#112535',
         aspectRatio:   '16/9',
-        maxHeight:     420,
+        maxHeight,
         display:       'flex',
         alignItems:    'center',
         justifyContent: 'center',
@@ -121,7 +146,7 @@ export function MuxPlayer({
   }
 
   return (
-    <div style={{ position: 'relative', background: '#112535', maxHeight: 420 }}>
+    <div style={{ position: 'relative', background: '#112535', maxHeight }}>
       <MuxPlayerElement
         ref={playerRef}
         playbackId={playbackId}
@@ -131,7 +156,7 @@ export function MuxPlayer({
           handleTimeUpdateForCompletion(e)
         }}
         accentColor="#ef0e30"
-        style={{ width: '100%', aspectRatio: '16/9', maxHeight: 420 }}
+        style={{ width: '100%', aspectRatio: '16/9', maxHeight }}
         metadata={{
           video_title:    courseTitle,
           viewer_user_id: lessonId,

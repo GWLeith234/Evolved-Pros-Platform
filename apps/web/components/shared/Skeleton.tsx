@@ -5,19 +5,35 @@ interface SkeletonProps {
   height?: string | number
   className?: string
   rounded?: boolean
+  /** Optional explicit border-radius (px). Overrides `rounded`. */
+  radius?: number
 }
 
-export function Skeleton({ width, height, className, rounded = false }: SkeletonProps) {
+/**
+ * Theme-aware shimmer skeleton.
+ * Uses --skeleton-base / --skeleton-highlight from globals.css
+ * (dark: white-alpha, light: navy-alpha). Falls back safely if unset.
+ */
+export function Skeleton({
+  width,
+  height,
+  className,
+  rounded = false,
+  radius,
+}: SkeletonProps) {
   return (
     <div
       className={className}
+      role="presentation"
+      aria-hidden="true"
       style={{
         width,
         height,
-        background:     'linear-gradient(90deg, rgba(27,60,90,0.06) 25%, rgba(27,60,90,0.10) 50%, rgba(27,60,90,0.06) 75%)',
+        background:
+          'linear-gradient(90deg, var(--skeleton-base, rgba(255,255,255,0.06)) 25%, var(--skeleton-highlight, rgba(255,255,255,0.12)) 50%, var(--skeleton-base, rgba(255,255,255,0.06)) 75%)',
         backgroundSize: '200% 100%',
-        animation:      'skeleton-shimmer 1.5s infinite',
-        borderRadius:   rounded ? 9999 : 4,
+        animation: 'skeleton-shimmer 1.5s ease-in-out infinite',
+        borderRadius: radius ?? (rounded ? 9999 : 4),
       }}
     />
   )
@@ -25,32 +41,23 @@ export function Skeleton({ width, height, className, rounded = false }: Skeleton
 
 // ── Preset composite skeletons ─────────────────────────────────────────────
 
-export function StatCardSkeleton() {
-  return (
-    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' as const }}>
-      {[0, 1, 2, 3].map(i => (
-        <div key={i} style={{
-          flex:            '1 1 140px',
-          background:      '#fff',
-          border:          '1px solid rgba(27,60,90,0.10)',
-          borderRadius:    8,
-          padding:         '16px 20px',
-        }}>
-          <Skeleton height={10} width={60} className="mb-2" />
-          <Skeleton height={28} width={80} />
-        </div>
-      ))}
-    </div>
-  )
+const cardStyle: React.CSSProperties = {
+  background: 'var(--bg-surface, #fff)',
+  border: '1px solid var(--border-color, rgba(27,60,90,0.10))',
 }
 
 export function PostSkeleton() {
   return (
-    <div style={{
-      background:      '#fff',
-      borderBottom:    '1px solid rgba(27,60,90,0.08)',
-      padding:         '20px 24px',
-    }}>
+    <div
+      style={{
+        ...cardStyle,
+        borderBottom: '1px solid var(--border-color, rgba(27,60,90,0.08))',
+        borderTop: 'none',
+        borderLeft: 'none',
+        borderRight: 'none',
+        padding: '20px 24px',
+      }}
+    >
       <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
         <Skeleton width={36} height={36} rounded />
         <div style={{ flex: 1 }}>
@@ -64,37 +71,18 @@ export function PostSkeleton() {
   )
 }
 
-export function CourseCardSkeleton() {
-  return (
-    <div style={{
-      background:   '#fff',
-      border:       '1px solid rgba(27,60,90,0.10)',
-      borderRadius: 8,
-      overflow:     'hidden',
-      marginBottom: 8,
-      display:      'flex',
-    }}>
-      <Skeleton width={72} height={88} />
-      <div style={{ flex: 1, padding: '14px 16px' }}>
-        <Skeleton height={10} width={60} className="mb-2" />
-        <Skeleton height={16} width="75%" className="mb-2" />
-        <Skeleton height={4} width="100%" />
-      </div>
-    </div>
-  )
-}
-
 export function EventCardSkeleton() {
   return (
-    <div style={{
-      background:   '#fff',
-      border:       '1px solid rgba(27,60,90,0.10)',
-      borderRadius: 8,
-      padding:      16,
-      display:      'flex',
-      gap:          16,
-      marginBottom: 8,
-    }}>
+    <div
+      style={{
+        ...cardStyle,
+        borderRadius: 0,
+        padding: 16,
+        display: 'flex',
+        gap: 16,
+        marginBottom: 8,
+      }}
+    >
       <Skeleton width={48} height={52} />
       <div style={{ flex: 1 }}>
         <Skeleton height={10} width={80} className="mb-2" />
@@ -107,16 +95,117 @@ export function EventCardSkeleton() {
 
 export function NotificationSkeleton() {
   return (
-    <div style={{
-      padding:      '14px 20px',
-      borderBottom: '1px solid rgba(27,60,90,0.06)',
-      display:      'flex',
-      gap:          12,
-    }}>
+    <div
+      style={{
+        padding: '14px 20px',
+        borderBottom: '1px solid var(--border-color, rgba(27,60,90,0.06))',
+        display: 'flex',
+        gap: 12,
+      }}
+    >
       <Skeleton width={8} height={8} rounded className="mt-1 flex-shrink-0" />
       <div style={{ flex: 1 }}>
         <Skeleton height={13} width="85%" className="mb-1.5" />
         <Skeleton height={10} width={60} />
+      </div>
+    </div>
+  )
+}
+
+/** Generic card placeholder for home tiles / sponsor slots. */
+export function CardSkeleton({ height = 160 }: { height?: number }) {
+  return (
+    <div
+      style={{
+        ...cardStyle,
+        borderRadius: 0,
+        padding: 20,
+        height,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12,
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Skeleton width={36} height={36} />
+        <Skeleton height={14} width={120} />
+      </div>
+      <Skeleton height={16} width="85%" />
+      <Skeleton height={12} width="60%" />
+      <div style={{ marginTop: 'auto' }}>
+        <Skeleton height={28} width={110} />
+      </div>
+    </div>
+  )
+}
+
+/** Compact action card for Today's Evolution strip. */
+export function ActionCardSkeleton() {
+  return (
+    <div
+      style={{
+        ...cardStyle,
+        padding: '16px',
+        minHeight: 140,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+      }}
+    >
+      <Skeleton height={10} width={64} />
+      <Skeleton height={16} width="75%" />
+      <Skeleton height={12} width="90%" />
+      <div style={{ marginTop: 'auto' }}>
+        <Skeleton height={28} width={100} />
+      </div>
+    </div>
+  )
+}
+
+/** Right-rail compact card (poll / podcast / academy). */
+export function RailCardSkeleton({ height = 120 }: { height?: number }) {
+  return (
+    <div style={{ ...cardStyle, padding: 14, height }}>
+      <Skeleton height={10} width={72} className="mb-3" />
+      <Skeleton height={14} width="90%" className="mb-2" />
+      <Skeleton height={12} width="70%" className="mb-3" />
+      <Skeleton height={28} width={96} />
+    </div>
+  )
+}
+
+/** Academy course card in the pillar grid. */
+export function CourseCardSkeleton() {
+  return (
+    <div style={{ ...cardStyle, overflow: 'hidden' }}>
+      <Skeleton height={140} width="100%" radius={0} />
+      <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <Skeleton height={10} width={80} />
+        <Skeleton height={22} width="70%" />
+        <Skeleton height={12} width="95%" />
+        <Skeleton height={6} width="100%" />
+      </div>
+    </div>
+  )
+}
+
+/** Lesson player + content chrome. */
+export function LessonPageSkeleton() {
+  return (
+    <div style={{ background: 'var(--bg-page)', minHeight: '100%' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 12px' }}>
+        <Skeleton height={12} width={280} />
+      </div>
+      <Skeleton height={360} width="100%" radius={0} />
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px' }}>
+        <Skeleton height={28} width="70%" className="mb-4" />
+        <Skeleton height={14} width="100%" className="mb-2" />
+        <Skeleton height={14} width="92%" className="mb-2" />
+        <Skeleton height={14} width="85%" className="mb-8" />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <CardSkeleton height={200} />
+          <CardSkeleton height={200} />
+        </div>
       </div>
     </div>
   )

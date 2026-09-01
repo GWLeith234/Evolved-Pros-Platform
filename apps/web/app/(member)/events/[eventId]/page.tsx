@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import { EventDetailHero } from '@/components/events/EventDetailHero'
 import { hasTierAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,26 +13,25 @@ interface Props {
 
 export default async function EventDetailPage({ params }: Props) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) redirect('/login')
 
-  const [{ data: profile }, { data: row }, regResult] = await Promise.all([
-    supabase.from('users').select('tier, role').eq('id', user.id).single(),
+  const [{ data: row }, regResult] = await Promise.all([
     supabase
       .from('events')
-      .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published')
+      .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, image_url, required_tier, registration_count, is_published')
       .eq('id', params.eventId)
       .single(),
     supabase
       .from('event_registrations')
       .select('event_id')
-      .eq('user_id', user.id)
+      .eq('user_id', profile.id)
       .eq('event_id', params.eventId)
       .maybeSingle(),
   ])
 
   if (!row) notFound()
-  if (!row.is_published && profile?.role !== 'admin') notFound()
+  if (!row.is_published && profile.role !== 'admin') notFound()
 
   const isRegistered = !!regResult.data
   const event: EventItem = {
@@ -43,10 +43,11 @@ export default async function EventDetailPage({ params }: Props) {
     endsAt: row.ends_at,
     zoomUrl: isRegistered ? row.zoom_url : null,
     recordingUrl: row.recording_url,
-    requiredTier: row.required_tier as 'community' | 'pro' | null,
+    imageUrl: row.image_url ?? null,
+    requiredTier: row.required_tier as 'community' | 'vip' | 'pro' | null,
     registrationCount: row.registration_count,
     isRegistered,
-    hasAccess: hasTierAccess(profile?.tier, row.required_tier as 'community' | 'pro' | null),
+    hasAccess: hasTierAccess(profile.tier as 'community' | 'vip' | 'pro' | null, row.required_tier as 'community' | 'vip' | 'pro' | null),
     isPublished: row.is_published,
   }
 
@@ -54,7 +55,7 @@ export default async function EventDetailPage({ params }: Props) {
     <div className="px-8 py-6 max-w-4xl mx-auto w-full" style={{ backgroundColor: '#faf9f7', minHeight: '100%' }}>
       <div className="mb-4">
         <a
-          href="/events"
+          href="/live"
           className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a] transition-colors"
         >
           ← Back to Events

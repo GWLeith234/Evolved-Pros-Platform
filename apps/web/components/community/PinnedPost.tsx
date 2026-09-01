@@ -15,13 +15,13 @@ export function PinnedPost({ label, body }: PinnedPostProps) {
       }}
     >
       <p
-        className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-2"
+        className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] sm:text-[12px] mb-2"
         style={{ color: '#ef0e30' }}
       >
         📌 {label}
       </p>
       <p
-        className="text-[13px] leading-[1.55] text-[#1b3c5a]"
+        className="text-[13px] leading-[1.55] text-primary"
         dangerouslySetInnerHTML={{ __html: body.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
       />
     </div>

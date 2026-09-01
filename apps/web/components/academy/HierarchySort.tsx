@@ -109,7 +109,7 @@ export function HierarchySort({ title, items: initialItems, onSortComplete, save
       <div style={{ marginBottom: '20px' }}>
         <p style={{
           fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-          fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
+          fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
           color: GOLD, margin: '0 0 4px',
         }}>
           Ranking Exercise
@@ -195,7 +195,7 @@ export function HierarchySort({ title, items: initialItems, onSortComplete, save
               style={{
                 backgroundColor: GOLD, color: '#0A0F18',
                 fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-                fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase',
+                fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                 padding: '9px 20px', borderRadius: '4px', border: 'none', cursor: 'pointer',
               }}
             >
@@ -205,7 +205,7 @@ export function HierarchySort({ title, items: initialItems, onSortComplete, save
           {saved && (
             <span style={{
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase',
+              fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
               color: CRIMSON,
             }}>
               ✓ Ranking Saved

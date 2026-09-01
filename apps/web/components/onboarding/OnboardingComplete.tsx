@@ -8,22 +8,36 @@ interface Props {
 
 const TEAL = '#0ABFA3'
 
+// Land members in Foundation immediately — first lesson of first course.
+const FIRST_COURSE_HREF = '/academy/foundation'
+
 async function finish(destination: string) {
   await fetch('/api/onboarding/complete', { method: 'PATCH' })
   window.location.href = destination
 }
 
 export function OnboardingComplete({ displayName }: Props) {
-  const [loading, setLoading] = useState<'academy' | 'community' | null>(null)
+  const [loading, setLoading] = useState<'academy' | 'community' | 'home' | 'scoreboard' | null>(null)
 
   async function handleAcademy() {
     setLoading('academy')
-    await finish('/academy')
+    await finish(FIRST_COURSE_HREF)
   }
 
   async function handleCommunity() {
     setLoading('community')
     await finish('/community')
+  }
+
+  async function handleHome() {
+    setLoading('home')
+    await finish('/home')
+  }
+
+  /** Scoreboard / Daily Pulse now lives on Home (Goals → Home consolidation). */
+  async function handleScoreboard() {
+    setLoading('scoreboard')
+    await finish('/home')
   }
 
   return (
@@ -68,7 +82,7 @@ export function OnboardingComplete({ displayName }: Props) {
         fontFamily: '"Arial Black", Arial, sans-serif',
         fontWeight: 900,
         fontSize: '36px',
-        color: '#ffffff',
+        color: 'var(--text-primary)',
         margin: '0 0 12px',
         lineHeight: 1.0,
       }}>
@@ -80,7 +94,7 @@ export function OnboardingComplete({ displayName }: Props) {
         <p style={{
           fontFamily: '"Barlow Condensed", sans-serif',
           fontWeight: 700,
-          fontSize: '11px',
+          fontSize: '12px',
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
           color: TEAL,
@@ -90,21 +104,32 @@ export function OnboardingComplete({ displayName }: Props) {
         </p>
       )}
 
-      {/* Subtext */}
       <p style={{
         fontFamily: 'Barlow, sans-serif',
         fontSize: '14px',
-        color: 'rgba(250,249,247,0.5)',
+        color: 'var(--text-secondary)',
         lineHeight: 1.6,
-        margin: '0 0 36px',
-        maxWidth: '340px',
+        margin: '0 0 12px',
+        maxWidth: '360px',
         marginLeft: 'auto',
         marginRight: 'auto',
       }}>
-        Welcome to Evolved Pros. Your journey to becoming an elite sales professional starts now.
+        Six pillars. One daily pulse. Foundation is the base everything else builds on —
+        open the scoreboard anytime to track streaks and goals.
+      </p>
+      <p style={{
+        fontFamily: '"Barlow Condensed", sans-serif',
+        fontWeight: 700,
+        fontSize: 11,
+        letterSpacing: '0.14em',
+        textTransform: 'uppercase',
+        color: 'rgba(201,168,76,0.85)',
+        margin: '0 0 24px',
+      }}>
+        Foundation · Identity · Mental · Strategy · Accountability · Execution
       </p>
 
-      {/* Primary CTA — Academy */}
+      {/* Primary — straight into Foundation */}
       <button
         type="button"
         onClick={handleAcademy}
@@ -112,8 +137,8 @@ export function OnboardingComplete({ displayName }: Props) {
         style={{
           width: '100%',
           padding: '16px 24px',
-          backgroundColor: '#C9A84C',
-          color: '#0A0F18',
+          backgroundColor: '#C9302A',
+          color: '#fff',
           fontFamily: '"Barlow Condensed", sans-serif',
           fontWeight: 900,
           fontSize: '15px',
@@ -122,35 +147,80 @@ export function OnboardingComplete({ displayName }: Props) {
           border: 'none',
           borderRadius: '6px',
           cursor: loading ? 'not-allowed' : 'pointer',
-          opacity: loading === 'community' ? 0.5 : 1,
+          opacity: loading && loading !== 'academy' ? 0.5 : 1,
           marginBottom: '10px',
         }}
       >
-        {loading === 'academy' ? 'Loading…' : 'Start Academy →'}
+        {loading === 'academy' ? 'Loading…' : 'Start Foundation →'}
       </button>
 
-      {/* Secondary CTA — Community */}
+      <button
+        type="button"
+        onClick={handleHome}
+        disabled={!!loading}
+        style={{
+          width: '100%',
+          padding: '14px 24px',
+          backgroundColor: 'var(--bg-elevated)',
+          color: 'var(--text-primary)',
+          fontFamily: '"Barlow Condensed", sans-serif',
+          fontWeight: 700,
+          fontSize: '14px',
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          border: '1px solid var(--border-color)',
+          borderRadius: '6px',
+          cursor: loading ? 'not-allowed' : 'pointer',
+          opacity: loading && loading !== 'home' ? 0.5 : 1,
+          marginBottom: '8px',
+        }}
+      >
+        {loading === 'home' ? 'Loading…' : 'Go to Home'}
+      </button>
+
+      <button
+        type="button"
+        onClick={handleScoreboard}
+        disabled={!!loading}
+        style={{
+          width: '100%',
+          padding: '14px 24px',
+          backgroundColor: 'rgba(201,168,76,0.12)',
+          color: '#C9A84C',
+          fontFamily: '"Barlow Condensed", sans-serif',
+          fontWeight: 800,
+          fontSize: '13px',
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          border: '1px solid rgba(201,168,76,0.35)',
+          borderRadius: '6px',
+          cursor: loading ? 'not-allowed' : 'pointer',
+          opacity: loading && loading !== 'scoreboard' ? 0.5 : 1,
+          marginBottom: '8px',
+        }}
+      >
+        {loading === 'scoreboard' ? 'Loading…' : 'Open Scoreboard & Daily Pulse →'}
+      </button>
+
       <button
         type="button"
         onClick={handleCommunity}
         disabled={!!loading}
         style={{
           width: '100%',
-          padding: '14px 24px',
-          backgroundColor: 'rgba(255,255,255,0.05)',
-          color: 'rgba(255,255,255,0.7)',
+          padding: '12px 24px',
+          background: 'none',
+          color: 'var(--text-secondary)',
           fontFamily: '"Barlow Condensed", sans-serif',
           fontWeight: 700,
-          fontSize: '14px',
+          fontSize: '12px',
           letterSpacing: '0.12em',
           textTransform: 'uppercase',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: '6px',
+          border: 'none',
           cursor: loading ? 'not-allowed' : 'pointer',
-          opacity: loading === 'academy' ? 0.5 : 1,
         }}
       >
-        {loading === 'community' ? 'Loading…' : 'Go to Community'}
+        {loading === 'community' ? 'Loading…' : 'Or join the community first'}
       </button>
     </div>
   )

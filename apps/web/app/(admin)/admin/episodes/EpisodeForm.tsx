@@ -2,6 +2,24 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { ImagePicker } from '@/components/admin/ImagePicker'
+
+export type Pillar =
+  | 'foundation'
+  | 'identity'
+  | 'mental-toughness'
+  | 'strategy'
+  | 'accountability'
+  | 'execution'
+
+const PILLAR_OPTIONS: { value: Pillar; label: string }[] = [
+  { value: 'foundation', label: 'Foundation' },
+  { value: 'identity', label: 'Identity' },
+  { value: 'mental-toughness', label: 'Mental Toughness' },
+  { value: 'strategy', label: 'Strategy' },
+  { value: 'accountability', label: 'Accountability' },
+  { value: 'execution', label: 'Execution' },
+]
 
 interface EpisodeFormValues {
   title: string
@@ -15,10 +33,16 @@ interface EpisodeFormValues {
   guestImageUrl: string
   muxPlaybackId: string
   youtubeUrl: string
+  audioUrl: string
   thumbnailUrl: string
-  durationSeconds: string
+  duration: string
   transcript: string
+  showNotes: string
+  pillar: Pillar | ''
+  transistorEpisodeId: string
+  isMembersOnly: boolean
   isPublished: boolean
+  pinned: boolean
 }
 
 interface EpisodeFormProps {
@@ -38,10 +62,16 @@ const DEFAULT_VALUES: EpisodeFormValues = {
   guestImageUrl: '',
   muxPlaybackId: '',
   youtubeUrl: '',
+  audioUrl: '',
   thumbnailUrl: '',
-  durationSeconds: '',
+  duration: '',
   transcript: '',
+  showNotes: '',
+  pillar: '',
+  transistorEpisodeId: '',
+  isMembersOnly: false,
   isPublished: false,
+  pinned: false,
 }
 
 function slugify(title: string): string {
@@ -51,6 +81,19 @@ function slugify(title: string): string {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .trim()
+}
+
+// Runtime is entered as mm:ss (or h:mm:ss) and stored as duration_seconds.
+function durationToSeconds(value: string): number | null {
+  const t = value.trim()
+  if (!t) return null
+  if (!t.includes(':')) {
+    const n = parseInt(t, 10)
+    return Number.isFinite(n) && n >= 0 ? n : null
+  }
+  const parts = t.split(':').map(p => parseInt(p, 10))
+  if (parts.some(n => !Number.isFinite(n) || n < 0)) return null
+  return parts.reduce((acc, p) => acc * 60 + p, 0)
 }
 
 function LabelledInput({
@@ -64,17 +107,17 @@ function LabelledInput({
 }) {
   return (
     <div>
-      <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
+      <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)] mb-1.5">
         {label}
       </label>
       {children}
-      {hint && <p className="font-condensed text-[10px] text-[#7a8a96] mt-1">{hint}</p>}
+      {hint && <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] mt-1">{hint}</p>}
     </div>
   )
 }
 
-const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none transition-all'
-const inputStyle = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }
+const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[color:var(--admin-text)] outline-none transition-all'
+const inputStyle = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'var(--admin-card)' }
 
 export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
   const router = useRouter()
@@ -90,11 +133,117 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
   const [photoUploading, setPhotoUploading] = useState(false)
   const [photoError, setPhotoError] = useState<string | null>(null)
 
-  // Transcript generation state
-  const [audioUrl, setAudioUrl] = useState('')
+  // Transcript generation state (separate from the saved audio_url field —
+  // this is the source file fed to Whisper).
+  const [transcribeAudioUrl, setTranscribeAudioUrl] = useState('')
   const [transcribing, setTranscribing] = useState(false)
   const [transcribeError, setTranscribeError] = useState<string | null>(null)
   const [transcribeSuccess, setTranscribeSuccess] = useState(false)
+
+  // AI writer state
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
+  const [aiImagePrompt, setAiImagePrompt] = useState<string | null>(null)
+
+  // Album-cover generation state
+  const [coverLoading, setCoverLoading] = useState(false)
+  const [coverError, setCoverError] = useState<string | null>(null)
+
+  async function handleGenerateCover() {
+    setCoverError(null)
+    if (!values.pillar) {
+      setCoverError('Pick a pillar first.')
+      return
+    }
+    const hasPhoto = !!values.guestImageUrl.trim()
+    if (hasPhoto) {
+      // Photo variant — behaviour unchanged: a guest name is still required.
+      if (!values.guestName.trim()) {
+        setCoverError('Enter a guest name first.')
+        return
+      }
+    } else {
+      // No photo — offer the branded photoless motif instead of hard-blocking.
+      const ok = window.confirm('No guest photo set. Generate a photoless motif cover for this pillar instead?')
+      if (!ok) return
+    }
+    setCoverLoading(true)
+    try {
+      const durationSec = durationToSeconds(values.duration)
+      const runtime = durationSec && durationSec > 0 ? Math.round(durationSec / 60) : undefined
+      const res = await fetch('/api/admin/episodes/cover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          episodeNumber: values.episodeNumber || undefined,
+          title: values.title.trim() || undefined,
+          guestName: values.guestName.trim() || undefined,
+          guestTitle: values.guestTitle.trim() || undefined,
+          runtime,
+          pillar: values.pillar,
+          photoUrl: hasPhoto ? values.guestImageUrl.trim() : undefined,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Could not generate cover')
+      if (!data.url) throw new Error('No cover URL returned')
+      set('thumbnailUrl', data.url)
+    } catch (e) {
+      setCoverError(e instanceof Error ? e.message : 'Could not generate cover')
+    } finally {
+      setCoverLoading(false)
+    }
+  }
+
+  async function handleAIWrite() {
+    const titleVal = values.title.trim()
+    const guestVal = values.guestName.trim()
+    if (!titleVal || !guestVal) {
+      setAiError('Enter a title and guest name first.')
+      return
+    }
+    setAiLoading(true)
+    setAiError(null)
+    try {
+      const res = await fetch('/api/admin/ai/write-episode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: titleVal,
+          guest_name: guestVal,
+          guest_title: values.guestTitle.trim() || undefined,
+          guest_company: values.guestCompany.trim() || undefined,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Could not generate')
+      const ep = data.episode
+
+      // Map AI's 'mental' → form's 'mental-toughness'.
+      const aiPillar = ep.pillar === 'mental' ? 'mental-toughness' : ep.pillar
+      const validPillars: Pillar[] = [
+        'foundation', 'identity', 'mental-toughness', 'strategy', 'accountability', 'execution',
+      ]
+      const pillarTag = validPillars.includes(aiPillar as Pillar) ? (aiPillar as Pillar) : null
+
+      // Stitch show_notes + key_takeaways into the existing showNotes field.
+      const merged = ep.key_takeaways
+        ? `${ep.show_notes ?? ''}\n\n## Key Takeaways\n${ep.key_takeaways}`.trim()
+        : (ep.show_notes ?? '')
+
+      setValues(prev => ({
+        ...prev,
+        description: ep.description ?? prev.description,
+        showNotes: merged || prev.showNotes,
+        pillar: pillarTag ?? prev.pillar,
+      }))
+      setAiImagePrompt(ep.image_prompt ?? null)
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'Could not generate — try again')
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   function set<K extends keyof EpisodeFormValues>(key: K, value: EpisodeFormValues[K]) {
     setValues(prev => ({ ...prev, [key]: value }))
@@ -115,6 +264,9 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
       const formData = new FormData()
       formData.append('file', file)
       if (episodeId) formData.append('episodeId', episodeId)
+      // Slug drives the canonical path Branding/episodes/guest-{slug}.jpg.
+      const slug = values.slug.trim() || slugify(values.title.trim())
+      if (slug) formData.append('slug', slug)
       const res = await fetch('/api/admin/upload-guest-photo', {
         method: 'POST',
         body: formData,
@@ -142,7 +294,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
       setTranscribeError('Save the episode first before generating a transcript.')
       return
     }
-    if (!audioUrl.trim()) {
+    if (!transcribeAudioUrl.trim()) {
       setTranscribeError('Enter an audio URL to generate a transcript.')
       return
     }
@@ -155,7 +307,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
       const res = await fetch('/api/admin/transcribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ episodeId, audioUrl: audioUrl.trim() }),
+        body: JSON.stringify({ episodeId, audioUrl: transcribeAudioUrl.trim() }),
       })
 
       const data = await res.json()
@@ -187,10 +339,16 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
       guest_image_url: values.guestImageUrl.trim() || null,
       mux_playback_id: values.muxPlaybackId.trim() || null,
       youtube_url: values.youtubeUrl.trim() || null,
+      audio_url: values.audioUrl.trim() || null,
       thumbnail_url: values.thumbnailUrl.trim() || null,
-      duration_seconds: values.durationSeconds ? parseInt(values.durationSeconds, 10) : null,
+      duration_seconds: durationToSeconds(values.duration),
       transcript: values.transcript.trim() || null,
+      show_notes: values.showNotes.trim() || null,
+      pillar: values.pillar || null,
+      transistor_episode_id: values.transistorEpisodeId.trim() || null,
+      is_members_only: values.isMembersOnly,
       is_published: values.isPublished,
+      pinned: values.pinned,
     }
 
     try {
@@ -294,6 +452,41 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
           style={inputStyle}
           placeholder="Episode title"
         />
+        <div className="flex items-center gap-3 mt-2">
+          <button
+            type="button"
+            onClick={handleAIWrite}
+            disabled={aiLoading}
+            className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-3 py-1.5 transition-all disabled:opacity-50"
+            style={{ border: '1px solid #0ABFA3', color: '#0ABFA3', backgroundColor: 'transparent' }}
+          >
+            {aiLoading ? (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#0ABFA3' }} />
+                Writing…
+              </span>
+            ) : 'Write with AI'}
+          </button>
+          {aiError && (
+            <span className="font-condensed text-[11px]" style={{ color: '#ef0e30' }}>{aiError}</span>
+          )}
+        </div>
+        {aiImagePrompt && (
+          <div
+            className="rounded-lg p-3 mt-3"
+            style={{ backgroundColor: 'rgba(10,191,163,0.06)', border: '1px solid rgba(10,191,163,0.2)' }}
+          >
+            <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-1" style={{ color: '#0ABFA3' }}>
+              AI image prompt
+            </p>
+            <p className="font-body text-[12px] leading-relaxed" style={{ color: 'var(--admin-text)' }}>
+              {aiImagePrompt}
+            </p>
+            <p className="font-condensed text-[10px] mt-1" style={{ color: 'var(--admin-text-2)' }}>
+              Use this prompt in the image generator below.
+            </p>
+          </div>
+        )}
       </LabelledInput>
 
       {/* Slug */}
@@ -349,7 +542,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
 
       {/* Guest info */}
       <div>
-        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-3">
+        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)] mb-3">
           Guest Info
         </p>
         <div className="space-y-4">
@@ -396,7 +589,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
           >
             <div
               className="rounded-lg p-4"
-              style={{ backgroundColor: '#f5f7f9', border: '1px solid rgba(27,60,90,0.1)' }}
+              style={{ backgroundColor: 'var(--admin-subtle)', border: '1px solid rgba(27,60,90,0.1)' }}
             >
               {/* Preview */}
               {values.guestImageUrl && (
@@ -409,10 +602,10 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
                     style={{ border: '1px solid rgba(27,60,90,0.15)' }}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="font-condensed text-[10px] text-[#7a8a96] mb-2 truncate">{values.guestImageUrl}</p>
+                    <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] mb-2 truncate">{values.guestImageUrl}</p>
                     <label
                       className="font-condensed font-bold uppercase tracking-wide text-[10px] rounded px-3 py-1.5 cursor-pointer transition-all inline-block"
-                      style={{ backgroundColor: 'transparent', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.2)' }}
+                      style={{ backgroundColor: 'transparent', color: 'var(--admin-text)', border: '1px solid rgba(27,60,90,0.2)' }}
                     >
                       Replace
                       <input
@@ -438,7 +631,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
                   }}
                 >
                   {photoUploading ? (
-                    <span className="font-condensed text-[12px]" style={{ color: '#7a8a96' }}>Uploading…</span>
+                    <span className="font-condensed text-[12px]" style={{ color: 'var(--admin-text-2)' }}>Uploading…</span>
                   ) : (
                     <>
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(27,60,90,0.3)" strokeWidth="1.5">
@@ -446,7 +639,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
                         <polyline points="17 8 12 3 7 8"/>
                         <line x1="12" y1="3" x2="12" y2="15"/>
                       </svg>
-                      <span className="font-condensed font-semibold text-[11px]" style={{ color: '#7a8a96' }}>
+                      <span className="font-condensed font-semibold text-[11px]" style={{ color: 'var(--admin-text-2)' }}>
                         Click to upload guest photo
                       </span>
                     </>
@@ -471,11 +664,17 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
 
       {/* Media */}
       <div>
-        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-3">
+        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)] mb-1">
           Media
         </p>
+        <p className="font-condensed text-[11px] text-[color:var(--admin-text-2)] mb-3 leading-relaxed">
+          Provide a Mux Playback ID for native player playback, or a YouTube URL for YouTube-hosted episodes. Either is fine — both fields are optional, and an episode can be published with only one (or, for audio-only episodes, neither).
+        </p>
         <div className="space-y-4">
-          <LabelledInput label="Mux Playback ID" hint="The playback ID from Mux (not the full URL)">
+          <LabelledInput
+            label="Mux Playback ID"
+            hint="Optional — the playback ID from Mux (not the full URL). Leave blank for YouTube-hosted episodes."
+          >
             <input
               type="text"
               value={values.muxPlaybackId}
@@ -486,7 +685,10 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
               placeholder="e.g. abc123xyz"
             />
           </LabelledInput>
-          <LabelledInput label="YouTube URL">
+          <LabelledInput
+            label="YouTube URL"
+            hint="Optional — set this for YouTube-hosted episodes when there's no Mux upload."
+          >
             <input
               type="url"
               value={values.youtubeUrl}
@@ -496,25 +698,70 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
               placeholder="https://youtube.com/watch?v=..."
             />
           </LabelledInput>
-          <LabelledInput label="Thumbnail URL">
+          <LabelledInput
+            label="Audio URL"
+            hint="Optional — direct link to the published audio file (MP3 / M4A) for audio-only playback."
+          >
             <input
               type="url"
-              value={values.thumbnailUrl}
-              onChange={e => set('thumbnailUrl', e.target.value)}
+              value={values.audioUrl}
+              onChange={e => set('audioUrl', e.target.value)}
               className={inputClass}
               style={inputStyle}
-              placeholder="https://..."
+              placeholder="https://... direct link to audio file"
             />
           </LabelledInput>
-          <LabelledInput label="Duration (seconds)">
+          <ImagePicker
+            label="Episode Thumbnail"
+            value={values.thumbnailUrl || null}
+            onChange={url => set('thumbnailUrl', url)}
+          />
+
+          {/* Auto album cover — renders branded 2:3 key art from the guest photo */}
+          <div
+            className="rounded-lg p-4"
+            style={{ backgroundColor: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.25)' }}
+          >
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div>
+                <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-0.5" style={{ color: '#9a7d2e' }}>
+                  Auto Album Cover
+                </p>
+                <p className="font-condensed text-[10px]" style={{ color: 'var(--admin-text-2)' }}>
+                  Generates branded key art from the guest photo + pillar, and sets it as the thumbnail above.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleGenerateCover}
+                disabled={coverLoading}
+                className="flex-shrink-0 font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2 transition-all disabled:opacity-50"
+                style={{ border: '1px solid #C9A84C', color: '#9a7d2e', backgroundColor: 'transparent' }}
+              >
+                {coverLoading ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#C9A84C' }} />
+                    Rendering…
+                  </span>
+                ) : 'Generate Cover'}
+              </button>
+            </div>
+            {coverError && (
+              <p className="font-condensed text-[11px] mt-2" style={{ color: '#ef0e30' }}>{coverError}</p>
+            )}
+          </div>
+          <LabelledInput
+            label="Duration (mm:ss)"
+            hint="Enter runtime as mm:ss (or h:mm:ss). Saved as duration_seconds."
+          >
             <input
-              type="number"
-              value={values.durationSeconds}
-              onChange={e => set('durationSeconds', e.target.value)}
-              min={0}
+              type="text"
+              inputMode="numeric"
+              value={values.duration}
+              onChange={e => set('duration', e.target.value)}
               className={inputClass}
               style={inputStyle}
-              placeholder="e.g. 3600 for 1 hour"
+              placeholder="e.g. 42:15"
             />
           </LabelledInput>
         </div>
@@ -523,28 +770,28 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
       {/* Transcript */}
       <div
         className="rounded-lg p-5 space-y-4"
-        style={{ backgroundColor: '#f5f7f9', border: '1px solid rgba(27,60,90,0.1)' }}
+        style={{ backgroundColor: 'var(--admin-subtle)', border: '1px solid rgba(27,60,90,0.1)' }}
       >
         <div>
-          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-0.5">
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)] mb-0.5">
             Transcript
           </p>
-          <p className="font-condensed text-[10px] text-[#7a8a96]">
+          <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)]">
             Paste a transcript manually, or generate one from an audio file using Whisper.
           </p>
         </div>
 
         {/* Audio URL + Generate button */}
         <div>
-          <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5">
+          <label className="block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)] mb-1.5">
             Audio URL (MP3 / M4A)
           </label>
           <div className="flex gap-2">
             <input
               type="url"
-              value={audioUrl}
-              onChange={e => { setAudioUrl(e.target.value); setTranscribeError(null); setTranscribeSuccess(false) }}
-              className={`flex-1 rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none transition-all`}
+              value={transcribeAudioUrl}
+              onChange={e => { setTranscribeAudioUrl(e.target.value); setTranscribeError(null); setTranscribeSuccess(false) }}
+              className={`flex-1 rounded px-3 py-2.5 font-body text-[13px] text-[color:var(--admin-text)] outline-none transition-all`}
               style={inputStyle}
               placeholder="https://... direct link to audio file"
               disabled={transcribing}
@@ -552,13 +799,13 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
             <button
               type="button"
               onClick={handleGenerateTranscript}
-              disabled={transcribing || !audioUrl.trim()}
+              disabled={transcribing || !transcribeAudioUrl.trim()}
               className="flex-shrink-0 font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2.5 transition-all whitespace-nowrap"
               style={{
                 backgroundColor: transcribing ? 'rgba(27,60,90,0.4)' : '#1b3c5a',
                 color: 'white',
-                opacity: !audioUrl.trim() ? 0.4 : 1,
-                cursor: transcribing || !audioUrl.trim() ? 'not-allowed' : 'pointer',
+                opacity: !transcribeAudioUrl.trim() ? 0.4 : 1,
+                cursor: transcribing || !transcribeAudioUrl.trim() ? 'not-allowed' : 'pointer',
               }}
             >
               {transcribing ? 'Generating…' : 'Generate Transcript'}
@@ -601,6 +848,96 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
         </LabelledInput>
       </div>
 
+      {/* Show notes */}
+      <LabelledInput label="Show notes" hint="Markdown supported. Distinct from description (short summary) and transcript (full text).">
+        <textarea
+          value={values.showNotes}
+          onChange={e => set('showNotes', e.target.value)}
+          className={`${inputClass} resize-y`}
+          style={{ ...inputStyle, minHeight: '200px' }}
+          placeholder="Episode show notes — links, timestamps, key takeaways…"
+        />
+      </LabelledInput>
+
+      {/* Pillar */}
+      <LabelledInput label="Pillar" hint="The EVOLVED pillar this episode maps to. Shown on the public /podcast page.">
+        <select
+          value={values.pillar}
+          onChange={e => set('pillar', e.target.value as Pillar | '')}
+          className={inputClass}
+          style={inputStyle}
+        >
+          <option value="">— Select a pillar —</option>
+          {PILLAR_OPTIONS.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          ))}
+        </select>
+      </LabelledInput>
+
+      {/* Transistor episode ID */}
+      <LabelledInput
+        label="Transistor episode ID"
+        hint="Paste from Transistor's episode URL after publishing there. Leave blank if not yet published on Transistor."
+      >
+        <input
+          type="text"
+          value={values.transistorEpisodeId}
+          onChange={e => set('transistorEpisodeId', e.target.value)}
+          maxLength={100}
+          className={inputClass}
+          style={inputStyle}
+          placeholder="e.g. 1234567"
+        />
+      </LabelledInput>
+
+      {/* Members-only toggle */}
+      <div className="flex items-start gap-3">
+        <button
+          type="button"
+          onClick={() => set('isMembersOnly', !values.isMembersOnly)}
+          className="relative w-10 h-5 rounded-full transition-colors flex-shrink-0 mt-0.5"
+          style={{ backgroundColor: values.isMembersOnly ? '#68a2b9' : 'rgba(27,60,90,0.15)' }}
+          aria-label="Toggle members-only"
+        >
+          <span
+            className="absolute top-0.5 w-4 h-4 rounded-full bg-[var(--admin-card)] transition-transform"
+            style={{ transform: values.isMembersOnly ? 'translateX(22px)' : 'translateX(2px)' }}
+          />
+        </button>
+        <div>
+          <span className="font-condensed font-semibold text-[12px] text-[color:var(--admin-text)] block">
+            Members only
+          </span>
+          <span className="font-condensed text-[10px] text-[color:var(--admin-text-2)]">
+            If on, only VIP and Pro tiers can play this episode.
+          </span>
+        </div>
+      </div>
+
+      {/* Pinned toggle */}
+      <div className="flex items-start gap-3">
+        <button
+          type="button"
+          onClick={() => set('pinned', !values.pinned)}
+          className="relative w-10 h-5 rounded-full transition-colors flex-shrink-0 mt-0.5"
+          style={{ backgroundColor: values.pinned ? '#C9A84C' : 'rgba(27,60,90,0.15)' }}
+          aria-label="Toggle pinned"
+        >
+          <span
+            className="absolute top-0.5 w-4 h-4 rounded-full bg-[var(--admin-card)] transition-transform"
+            style={{ transform: values.pinned ? 'translateX(22px)' : 'translateX(2px)' }}
+          />
+        </button>
+        <div>
+          <span className="font-condensed font-semibold text-[12px] text-[color:var(--admin-text)] block">
+            Pinned ★
+          </span>
+          <span className="font-condensed text-[10px] text-[color:var(--admin-text-2)]">
+            Feature this episode at the top of /podcast. Pinning this one unpins any other.
+          </span>
+        </div>
+      </div>
+
       {/* Published toggle */}
       <div className="flex items-center gap-3">
         <button
@@ -610,11 +947,11 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
           style={{ backgroundColor: values.isPublished ? '#68a2b9' : 'rgba(27,60,90,0.15)' }}
         >
           <span
-            className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform"
+            className="absolute top-0.5 w-4 h-4 rounded-full bg-[var(--admin-card)] transition-transform"
             style={{ transform: values.isPublished ? 'translateX(22px)' : 'translateX(2px)' }}
           />
         </button>
-        <span className="font-condensed font-semibold text-[12px] text-[#1b3c5a]">
+        <span className="font-condensed font-semibold text-[12px] text-[color:var(--admin-text)]">
           {values.isPublished ? 'Published (visible to members)' : 'Draft (hidden from members)'}
         </span>
       </div>
@@ -637,7 +974,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
         <div className="flex items-center gap-3">
           <a
             href="/admin/episodes"
-            className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a] transition-colors"
+            className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[color:var(--admin-text-2)] hover:text-[color:var(--admin-text)] transition-colors"
           >
             Cancel
           </a>

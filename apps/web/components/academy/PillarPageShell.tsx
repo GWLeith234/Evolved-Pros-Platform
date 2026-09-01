@@ -10,10 +10,18 @@ import {
   fetchLessonsWithProgress,
 } from '@/lib/academy/fetchers'
 import { PillarModuleAccordion } from '@/components/academy/PillarModuleAccordion'
-import { ReflectionPrompt } from '@/components/academy/ReflectionPrompt'
-import { PillarAudit } from '@/components/academy/PillarAudit'
+import { PillarLockPanel } from '@/components/academy/PillarLockPanel'
+import { DynamicReflectionPrompt } from '@/components/academy/DynamicReflectionPrompt'
+import { DynamicPillarAudit } from '@/components/academy/DynamicPillarAudit'
 import { adminClient } from '@/lib/supabase/admin'
 import { ProfileAdUnit } from '@/components/profile/ProfileAdUnit'
+import { AcademyLessonSponsors } from '@/components/academy/AcademyLessonSponsors'
+import {
+  pickAcademySponsors,
+} from '@/lib/sponsors/partners'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
+import { filterLiveAds } from '@/lib/ads/iab'
 
 interface Props {
   pillarNumber?: number
@@ -104,20 +112,80 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
 
   if (!course) notFound()
 
-  // Tier access check — redirect to pricing if user lacks required tier
-  if (!hasTierAccess(profile?.tier, (course as Record<string, unknown>).required_tier as 'community' | 'vip' | 'pro')) {
-    redirect('/pricing')
-  }
-
   const pNum: number = ((course as Record<string, unknown>).pillar_number as number) ?? pillarNumber ?? 1
   const config = PILLAR_CONFIG[pNum]
   if (!config) notFound()
 
-  const isCourseLocked = !!(course as Record<string, unknown>).is_locked
+  const requiredTier = (course as Record<string, unknown>).required_tier as string
 
+  // lesson_progress is keyed on public.users.id (profile.id, resolved by
+  // email in fetchUserProfile) — the auth uid returns 0 completions for
+  // accounts where the two UUIDs diverge, flattening the pillar % to 0.
+  const isCourseLocked = !!(course as Record<string, unknown>).is_locked
   const lessons = isCourseLocked
     ? []
-    : await fetchLessonsWithProgress(supabase, (course as Record<string, unknown>).slug as string, user.id, profile?.tier)
+    : await fetchLessonsWithProgress(supabase, (course as Record<string, unknown>).slug as string, profile?.id ?? user.id, profile?.tier)
+
+  // ── TIER GATE (SPRINT TIER-1) ─────────────────────────────────────────
+  // Server-side and authoritative: nothing below renders for a member whose
+  // tier doesn't clear courses.required_tier, so lesson titles, module
+  // structure, reflection prompts and audit questions are all unreachable.
+  // fetchLessonsWithProgress has already nulled the playback ids, and the
+  // mux-token route refuses to sign one — this is the page half of that pair.
+  //
+  // Was: redirect('/pricing'), which discarded the pillar the member wanted
+  // and could not be distinguished from an auth bounce. Now the page renders
+  // the storefront panel for THIS pillar (never a 404).
+  if (!hasTierAccess(profile?.tier, requiredTier)) {
+    return (
+      <main style={{ position: 'relative', zIndex: 1, backgroundColor: 'var(--bg-page)', minHeight: '100vh' }}>
+        <section className="academy-hero" style={{ position: 'relative', display: 'flex', alignItems: 'flex-end' }}>
+          <div
+            style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: `url(${config.image})`,
+              backgroundSize: 'cover', backgroundPosition: 'center',
+              backgroundColor: 'var(--brand-navy)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(to bottom, rgba(10,15,24,0.15) 0%, rgba(10,15,24,0.97) 100%)',
+            }}
+          />
+          <div
+            className="academy-lesson-pad"
+            style={{ position: 'relative', zIndex: 1, width: '100%', padding: '0 clamp(16px, 8vw, 96px) clamp(40px, 8vw, 72px)' }}
+          >
+            <p
+              className="font-condensed font-bold uppercase"
+              style={{ color: config.color, fontSize: 12, letterSpacing: '0.25em', margin: '0 0 10px' }}
+            >
+              Pillar {pNum}
+            </p>
+            <h1
+              className="font-condensed font-black uppercase"
+              style={{
+                fontSize: 'clamp(40px, 10vw, 96px)', lineHeight: 0.88,
+                color: 'var(--white)', margin: 0, letterSpacing: '-0.02em',
+              }}
+            >
+              {config.label}
+            </h1>
+          </div>
+        </section>
+        <PillarLockPanel
+          pillarNumber={pNum}
+          pillarLabel={config.label}
+          requiredTier={requiredTier}
+          pillarColor={config.color}
+          tagline={PILLAR_TAGLINES[pNum]}
+          lessonCount={lessons.length || null}
+        />
+      </main>
+    )
+  }
 
   const completedCount = lessons.filter(l => l.completedAt).length
   const progressPct = lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0
@@ -142,6 +210,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
         sortOrder: l.sortOrder,
         completedAt: l.completedAt,
         durationSeconds: l.durationSeconds,
+        thumbnailUrl: l.thumbnailUrl,
       })),
     }))
 
@@ -151,18 +220,34 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: pillarAdData } = await (adminClient.from('platform_ads' as any) as any)
-    .select('id, image_url, headline, tool_name, cta_text, link_url, click_url, sponsor_name')
+    .select(SPONSOR_AD_COLUMNS)
     .eq('is_active', true)
-    .limit(1)
-    .maybeSingle()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const pillarAd = (pillarAdData as any) ?? null
+    .order('sort_order')
+    .limit(24)
+  const pillarPool = filterLiveAds((pillarAdData ?? []) as SponsorAd[])
+  const pillarAd = pickAcademySponsors(pillarPool, 1)[0] ?? null
+
+  // Today's IAB stills for the course footer — never the old architecture/logo fallbacks.
+  let courseSponsors: SponsorAd[] = []
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: sponsorRows } = await (adminClient as any)
+      .from('platform_ads')
+      .select(SPONSOR_AD_COLUMNS)
+      .eq('is_active', true)
+      .order('sort_order')
+      .limit(24)
+    const all = filterLiveAds((sponsorRows ?? []) as SponsorAd[])
+    if (all.length > 0) courseSponsors = pickAcademySponsors(all, 4)
+  } catch {
+    /* empty — do not invent old partner cards */
+  }
 
   return (
-    <main style={{ backgroundColor: '#0A0F18', minHeight: '100vh', color: '#faf9f7' }}>
+    <main style={{ position: 'relative', zIndex: 1, backgroundColor: '#0A0F18', minHeight: '100vh', color: '#faf9f7' }}>
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
-      <section style={{ position: 'relative', minHeight: '65vh', display: 'flex', alignItems: 'flex-end' }}>
+      <section className="academy-hero" style={{ position: 'relative', display: 'flex', alignItems: 'flex-end' }}>
         {/* Background image + color fallback */}
         <div
           style={{
@@ -180,11 +265,11 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
           }}
         />
         {/* Content */}
-        <div style={{ position: 'relative', zIndex: 1, width: '100%', padding: '0 clamp(24px, 8vw, 96px) 72px' }}>
+        <div className="academy-lesson-pad" style={{ position: 'relative', zIndex: 1, width: '100%', padding: '0 clamp(16px, 8vw, 96px) clamp(40px, 8vw, 72px)' }}>
           <p
             style={{
               color: config.color, fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '11px', letterSpacing: '0.25em', textTransform: 'uppercase', margin: '0 0 10px',
+              fontSize: '12px', letterSpacing: '0.25em', textTransform: 'uppercase', margin: '0 0 10px',
             }}
           >
             Pillar {pNum}
@@ -192,7 +277,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
           <h1
             style={{
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900,
-              fontSize: 'clamp(56px, 10vw, 96px)', lineHeight: 0.88,
+              fontSize: 'clamp(40px, 10vw, 96px)', lineHeight: 0.88,
               textTransform: 'uppercase', color: '#faf9f7',
               margin: '0 0 20px', letterSpacing: '-0.02em',
             }}
@@ -209,7 +294,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <span
                   style={{
-                    fontSize: '10px', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                    fontSize: '12px', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
                     letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.35)',
                   }}
                 >
@@ -217,7 +302,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
                 </span>
                 <span
                   style={{
-                    fontSize: '10px', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
+                    fontSize: '12px', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
                     letterSpacing: '0.12em', color: config.color,
                   }}
                 >
@@ -234,15 +319,16 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
           {!isCourseLocked && firstLesson && (
             <a
               href={`/academy/${courseSlug}/${firstLesson.slug}`}
+              className="academy-hero-cta ep-pressable ep-touch-target"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: '8px',
                 backgroundColor: config.color, color: '#0A0F18',
                 fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
                 fontSize: '13px', letterSpacing: '0.12em', textTransform: 'uppercase',
-                padding: '14px 28px', borderRadius: '4px', textDecoration: 'none',
+                padding: '14px 28px', minHeight: 48, borderRadius: '4px', textDecoration: 'none',
               }}
             >
-              {progressPct > 0 && !isAllComplete ? `Continue ${config.label}` : `Start ${config.label}`} →
+              {isAllComplete ? `Review ${config.label}` : progressPct > 0 ? `Continue ${config.label}` : `Start ${config.label}`} →
             </a>
           )}
         </div>
@@ -285,14 +371,14 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
               <h2 style={{
                 fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900,
                 fontSize: 'clamp(24px, 4vw, 32px)', textTransform: 'uppercase',
-                color: '#faf9f7', margin: 0, letterSpacing: '0.04em',
+                color: 'var(--text-primary)', margin: 0, letterSpacing: '0.04em',
               }}>
                 This Pillar is Locked
               </h2>
 
               {/* Subtext */}
-              <p style={{ color: 'rgba(250,249,247,0.45)', fontSize: '15px', lineHeight: 1.65, margin: 0 }}>
-                Complete <strong style={{ color: 'rgba(250,249,247,0.75)', fontWeight: 600 }}>{prevLabel}</strong> to unlock {config.label}.
+              <p style={{ color: 'var(--text-secondary)', fontSize: '15px', lineHeight: 1.65, margin: 0 }}>
+                Complete <strong style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{prevLabel}</strong> to unlock {config.label}.
                 Pillars unlock in sequence as you complete each capstone.
               </p>
 
@@ -317,8 +403,8 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
               <a
                 href="/academy"
                 style={{
-                  color: 'rgba(250,249,247,0.25)', fontFamily: '"Barlow Condensed", sans-serif',
-                  fontWeight: 700, fontSize: '11px', letterSpacing: '0.15em',
+                  color: 'var(--text-tertiary)', fontFamily: '"Barlow Condensed", sans-serif',
+                  fontWeight: 700, fontSize: '12px', letterSpacing: '0.15em',
                   textTransform: 'uppercase', textDecoration: 'none',
                 }}
               >
@@ -335,7 +421,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
           <div style={{ maxWidth: '820px' }}>
             <p
               style={{
-                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px',
+                fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px',
                 letterSpacing: '0.25em', textTransform: 'uppercase',
                 color: 'rgba(250,249,247,0.3)', marginBottom: '24px',
               }}
@@ -347,13 +433,17 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
               courseSlug={courseSlug}
               pillarColor={config.color}
             />
+            {/* Evolution Partners — after modules, before reflection / audit */}
+            <div style={{ marginTop: 32 }}>
+              <AcademyLessonSponsors ads={courseSponsors} />
+            </div>
           </div>
         </section>
       )}
 
       {!isCourseLocked && lessons.length === 0 && (
         <section style={{ backgroundColor: 'var(--bg-surface)', padding: '56px clamp(24px, 8vw, 96px)', textAlign: 'center' }}>
-          <p style={{ color: 'rgba(250,249,247,0.3)', fontFamily: '"Barlow Condensed", sans-serif', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          <p style={{ color: 'var(--text-tertiary)', fontFamily: '"Barlow Condensed", sans-serif', fontSize: '14px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             Lessons coming soon
           </p>
         </section>
@@ -364,14 +454,14 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
         <section style={{ backgroundColor: '#0A0F18', padding: '0 clamp(24px, 8vw, 96px) 56px' }}>
           <div style={{ maxWidth: '820px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {showReflection && (
-              <ReflectionPrompt
+              <DynamicReflectionPrompt
                 pillarId={String(pNum)}
                 courseId={(course as Record<string, unknown>).id as string}
                 promptText={PILLAR_REFLECTION_PROMPTS[pNum] ?? 'What stood out to you from this pillar?'}
               />
             )}
             {showAudit && (
-              <PillarAudit
+              <DynamicPillarAudit
                 pillarId={String(pNum)}
                 courseId={(course as Record<string, unknown>).id as string}
                 questions={PILLAR_AUDIT_QUESTIONS[pNum] ?? []}
@@ -412,7 +502,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
           )}
           <p
             style={{
-              color: 'rgba(250,249,247,0.3)', fontSize: '11px',
+              color: 'rgba(250,249,247,0.3)', fontSize: '12px',
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
               letterSpacing: '0.2em', textTransform: 'uppercase', marginTop: '28px',
             }}
@@ -448,12 +538,12 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
             <h2
               style={{
                 fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900,
-                fontSize: '36px', textTransform: 'uppercase', color: '#faf9f7', margin: '0 0 12px',
+                fontSize: '36px', textTransform: 'uppercase', color: 'var(--text-primary)', margin: '0 0 12px',
               }}
             >
               {config.label} Complete
             </h2>
-            <p style={{ color: 'rgba(250,249,247,0.45)', fontSize: '15px', lineHeight: 1.6, margin: '0 0 36px' }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '15px', lineHeight: 1.6, margin: '0 0 36px' }}>
               You&apos;ve finished all lessons in this pillar. On to the next.
             </p>
             <a

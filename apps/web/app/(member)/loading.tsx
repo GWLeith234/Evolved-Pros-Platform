@@ -1,38 +1,25 @@
+import { Skeleton } from '@/components/shared/Skeleton'
+
+/**
+ * Lightweight member-shell fallback — avoids full-screen branded flash on
+ * every navigation so page transitions feel snappier.
+ */
 export default function MemberLoading() {
   return (
     <div
-      className="flex-1 flex items-center justify-center"
-      style={{ backgroundColor: '#faf9f7', minHeight: '100%' }}
+      role="status"
+      aria-label="Loading"
+      style={{
+        background: 'var(--bg-page)',
+        minHeight: '40vh',
+        padding: '48px 24px',
+      }}
     >
-      <div className="flex flex-col items-center gap-4">
-        <svg
-          className="animate-spin"
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          style={{ color: '#ef0e30' }}
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="3"
-          />
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-          />
-        </svg>
-        <p
-          className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px]"
-          style={{ color: 'rgba(27,60,90,0.4)' }}
-        >
-          Loading
-        </p>
+      <div style={{ maxWidth: 720, margin: '0 auto' }}>
+        <Skeleton height={12} width={120} className="mb-4" />
+        <Skeleton height={28} width="60%" className="mb-3" />
+        <Skeleton height={14} width="90%" className="mb-2" />
+        <Skeleton height={14} width="75%" />
       </div>
     </div>
   )

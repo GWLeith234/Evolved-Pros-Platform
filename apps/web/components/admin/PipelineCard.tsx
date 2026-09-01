@@ -26,28 +26,28 @@ export function PipelineCard({ member, isUpgradeReady = false }: PipelineCardPro
     <div
       className="rounded p-3 mb-2 transition-all cursor-default"
       style={{
-        backgroundColor: 'white',
+        backgroundColor: 'var(--admin-card)',
         border: `1px solid ${isUpgradeReady ? '#c9a84c' : 'rgba(27,60,90,0.1)'}`,
         borderLeft: isUpgradeReady ? '3px solid #c9a84c' : '1px solid rgba(27,60,90,0.1)',
       }}
     >
-      <p className="font-body font-semibold text-[13px] text-[#1b3c5a] mb-0.5">{name}</p>
-      <p className="font-condensed text-[11px] text-[#7a8a96] mb-1.5">{stageContext}</p>
+      <p className="font-body font-semibold text-[13px] text-[color:var(--admin-text)] mb-0.5">{name}</p>
+      <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mb-1.5">{stageContext}</p>
 
       {member.stageNote && (
-        <p className="font-condensed text-[10px] text-[#7a8a96] mb-1.5">{member.stageNote}</p>
+        <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mb-1.5">{member.stageNote}</p>
       )}
 
       <div className="flex items-center justify-between">
         {member.estimatedValue > 0 ? (
           <span
             className="font-condensed font-bold text-[12px]"
-            style={{ color: '#112535' }}
+            style={{ color: 'var(--admin-text-strong)' }}
           >
-            ${member.estimatedValue.toLocaleString()}/yr
+            ${member.estimatedValue.toLocaleString('en-US')}/yr
           </span>
         ) : (
-          <span className="font-condensed text-[10px] text-[#7a8a96]">—</span>
+          <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">—</span>
         )}
         {member.overridden && (
           <span

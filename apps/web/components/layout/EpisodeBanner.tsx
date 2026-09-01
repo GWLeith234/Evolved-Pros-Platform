@@ -1,5 +1,5 @@
 import { adminClient } from '@/lib/supabase/admin'
-import Link from 'next/link'
+import { EpisodeBannerClient } from './EpisodeBannerClient'
 
 const YOUTUBE_CHANNEL = 'https://www.youtube.com/@EvolvedPros'
 const BLOCKED_YT_IDS = new Set(['dQw4w9WgXcQ'])
@@ -52,95 +52,19 @@ export async function EpisodeBanner() {
 
   if (!episode) return null
 
-  const displayText = episode.title
-  const guestLabel = episode.guest_name ?? null
-  const dateLabel = episode.published_at ? formatPublishedAt(episode.published_at) : null
-
   const sanitizedYtUrl = sanitizeYoutubeUrl(episode.youtube_url)
   const href = sanitizedYtUrl ?? (episode.slug ? `/podcast/${episode.slug}` : '/podcast')
   const ctaLabel = sanitizedYtUrl ? '▶ Watch on YouTube' : '▶ Watch now'
 
   return (
-    <div
-      style={{
-        backgroundColor: '#111926',
-        borderTop: '2px solid #C9302A',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        height: '38px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingLeft: '20px',
-        paddingRight: '20px',
-        flexShrink: 0,
-      }}
-    >
-      {/* Left: badge + guest/title + date */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
-        <span
-          style={{
-            backgroundColor: '#C9302A',
-            color: '#ffffff',
-            fontSize: '9px',
-            fontWeight: 700,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            padding: '2px 8px',
-            borderRadius: '3px',
-            flexShrink: 0,
-          }}
-        >
-          LATEST EPISODE
-        </span>
-
-        {/* Episode title — primary */}
-        <span
-          className="truncate max-w-[160px] sm:max-w-xs md:max-w-none text-sm"
-          style={{ color: '#ffffff', fontWeight: 500 }}
-        >
-          {displayText}
-        </span>
-
-        {/* Guest name */}
-        {guestLabel && (
-          <>
-            <span style={{ width: '3px', height: '3px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
-            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>
-              {guestLabel}
-            </span>
-          </>
-        )}
-
-        {/* Date */}
-        {dateLabel && (
-          <>
-            <span style={{ width: '3px', height: '3px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.2)', flexShrink: 0 }} />
-            <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>
-              {dateLabel}
-            </span>
-          </>
-        )}
-      </div>
-
-      {/* Right: CTA button */}
-      <Link
-        href={href}
-        {...(sanitizedYtUrl ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-        style={{
-          backgroundColor: 'rgba(201,48,42,0.15)',
-          border: '1px solid rgba(201,48,42,0.3)',
-          color: '#C9302A',
-          fontSize: '11px',
-          fontWeight: 500,
-          padding: '4px 12px',
-          borderRadius: '4px',
-          textDecoration: 'none',
-          flexShrink: 0,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {ctaLabel}
-      </Link>
-    </div>
+    <EpisodeBannerClient
+      episodeId={episode.id}
+      displayText={episode.title}
+      guestLabel={episode.guest_name ?? null}
+      dateLabel={episode.published_at ? formatPublishedAt(episode.published_at) : null}
+      href={href}
+      ctaLabel={ctaLabel}
+      externalLink={Boolean(sanitizedYtUrl)}
+    />
   )
 }

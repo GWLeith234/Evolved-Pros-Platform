@@ -14,18 +14,56 @@ interface Commitment {
 
 interface Props {
   courseId?: string
-  weekStart: string // YYYY-MM-DD — Monday of current week
+  /** YYYY-MM-DD — Monday hint from the server. Optional; the component
+   *  derives the user's local Monday on mount and uses that for both
+   *  the displayed range and the API request. The server-passed value
+   *  is only honoured for the brief moment between SSR and hydration
+   *  to avoid a layout flash. */
+  weekStart?: string
 }
 
 function formatWeekRange(weekStart: string): string {
-  const start = new Date(weekStart + 'T00:00:00')
+  if (!weekStart) return ''
+  // Anchor to UTC midnight + format in UTC so server-rendered range text
+  // exactly matches client first paint, regardless of the user's local
+  // timezone. Sprint N hardening pattern.
+  const start = new Date(weekStart + 'T00:00:00Z')
+  if (Number.isNaN(start.getTime())) return ''
   const end = new Date(start)
-  end.setDate(start.getDate() + 6)
-  const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  end.setUTCDate(start.getUTCDate() + 6)
+  const fmt = (d: Date) =>
+    d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
   return `${fmt(start)} — ${fmt(end)}`
 }
 
-export function CommitmentTracker({ courseId, weekStart }: Props) {
+/** Compute Monday of the user's local current week, formatted YYYY-MM-DD.
+ *  On Sunday, advance the reference date by 1 day so we return the upcoming
+ *  Monday rather than the prior one — Sunday evening should already be
+ *  showing the new week the member is about to commit to.
+ */
+function localMondayString(): string {
+  const now = new Date()
+  const ref = now.getDay() === 0 ? new Date(now.getTime() + 86_400_000) : now
+  const day = ref.getDay()                 // 1=Mon … 6=Sat after Sunday-bump
+  const diff = 1 - day
+  const monday = new Date(ref)
+  monday.setHours(0, 0, 0, 0)
+  monday.setDate(ref.getDate() + diff)
+  const yyyy = monday.getFullYear()
+  const mm = String(monday.getMonth() + 1).padStart(2, '0')
+  const dd = String(monday.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
+export function CommitmentTracker({ courseId, weekStart: weekStartProp }: Props) {
+  // Derive the user's local Monday on mount. Until then we render against the
+  // server-passed prop (or an empty string) so SSR and hydration align.
+  const [resolvedWeekStart, setResolvedWeekStart] = useState<string>(weekStartProp ?? '')
+  useEffect(() => {
+    setResolvedWeekStart(localMondayString())
+  }, [])
+  const weekStart = resolvedWeekStart || weekStartProp || ''
+
   const [savedCommitments, setSavedCommitments] = useState<Commitment[]>([])
   const [inputs, setInputs] = useState(['', '', ''])
   const [loading, setLoading] = useState(true)
@@ -33,6 +71,7 @@ export function CommitmentTracker({ courseId, weekStart }: Props) {
   const [togglingId, setTogglingId] = useState<string | null>(null)
 
   useEffect(() => {
+    if (!weekStart) return
     fetch(`/api/commitments?week_start=${encodeURIComponent(weekStart)}`)
       .then(r => r.json())
       .then((data: { commitments?: Commitment[] }) => {
@@ -90,12 +129,12 @@ export function CommitmentTracker({ courseId, weekStart }: Props) {
   const hasSaved = savedCommitments.length > 0
 
   return (
-    <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '20px' }}>
+    <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: '0', padding: '20px' }}>
       {/* Header */}
       <div style={{ marginBottom: '16px' }}>
         <p style={{
           fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-          fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
+          fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
           color: GOLD, margin: '0 0 2px',
         }}>
           This Week&apos;s Commitments
@@ -107,8 +146,8 @@ export function CommitmentTracker({ courseId, weekStart }: Props) {
           {hasSaved && (
             <span style={{
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase',
-              color: completedCount === savedCommitments.length ? CRIMSON : 'rgba(250,249,247,0.3)',
+              fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase',
+              color: completedCount === savedCommitments.length ? CRIMSON : 'var(--text-tertiary)',
             }}>
               {completedCount} / {savedCommitments.length}
             </span>
@@ -137,9 +176,9 @@ export function CommitmentTracker({ courseId, weekStart }: Props) {
             >
               {/* Checkbox */}
               <div style={{
-                flexShrink: 0, width: '20px', height: '20px', borderRadius: '4px',
+                flexShrink: 0, width: '20px', height: '20px', borderRadius: '0',
                 backgroundColor: c.is_completed ? CRIMSON : 'transparent',
-                border: `2px solid ${c.is_completed ? CRIMSON : 'rgba(255,255,255,0.2)'}`,
+                border: `2px solid ${c.is_completed ? CRIMSON : 'var(--border-color)'}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 transition: 'all 0.15s',
               }}>
@@ -168,7 +207,7 @@ export function CommitmentTracker({ courseId, weekStart }: Props) {
             style={{
               background: 'none', border: 'none', cursor: 'pointer',
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase',
+              fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase',
               color: 'var(--text-tertiary)', padding: '8px 0 0', textAlign: 'left',
             }}
           >
@@ -193,7 +232,7 @@ export function CommitmentTracker({ courseId, weekStart }: Props) {
               style={{
                 backgroundColor: 'var(--bg-elevated)',
                 border: `1px solid ${val.trim() ? CRIMSON + '55' : 'var(--border-color)'}`,
-                borderRadius: '4px', padding: '9px 12px',
+                borderRadius: '0', padding: '9px 12px',
                 color: 'var(--text-primary)', fontSize: '13px', outline: 'none',
                 fontFamily: 'inherit', transition: 'border-color 0.2s',
               }}
@@ -204,11 +243,11 @@ export function CommitmentTracker({ courseId, weekStart }: Props) {
             onClick={handleSave}
             disabled={!inputs.some(s => s.trim()) || saving}
             style={{
-              backgroundColor: inputs.some(s => s.trim()) ? GOLD : 'rgba(255,255,255,0.05)',
-              color: inputs.some(s => s.trim()) ? '#0A0F18' : 'rgba(255,255,255,0.2)',
+              backgroundColor: inputs.some(s => s.trim()) ? GOLD : 'var(--bg-elevated)',
+              color: inputs.some(s => s.trim()) ? '#0A0F18' : 'var(--text-tertiary)',
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase',
-              padding: '10px', borderRadius: '4px', border: 'none',
+              fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
+              padding: '10px', borderRadius: '0', border: 'none',
               cursor: inputs.some(s => s.trim()) ? 'pointer' : 'default',
               marginTop: '4px', transition: 'all 0.15s',
             }}

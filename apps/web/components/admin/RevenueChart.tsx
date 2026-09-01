@@ -7,29 +7,42 @@ interface MonthBar {
 interface RevenueChartProps {
   months: MonthBar[]
   currentMrr: number
-  proCount: number
   communityCount: number
-  proMrr: number
+  vipCount: number
+  proCount: number
   communityMrr: number
+  vipMrr: number
+  proMrr: number
+  /** Monthly price per tier (whole dollars) — from the catalogue via the
+   *  revenue page, so labels can't drift from the live prices. */
+  vipMonthly: number
+  proMonthly: number
   churnThisMonth: number
 }
 
 export function RevenueChart({
   months,
   currentMrr,
-  proCount,
   communityCount,
-  proMrr,
+  vipCount,
+  proCount,
   communityMrr,
+  vipMrr,
+  proMrr,
+  vipMonthly,
+  proMonthly,
   churnThisMonth,
 }: RevenueChartProps) {
   const maxMrr = Math.max(...months.map(m => m.mrr), 1)
 
+  // Prices come from the catalogue (via props) so the card labels can't drift
+  // from the live prices. Total MRR = Community + VIP + Pro card MRRs.
   const stats = [
-    { label: 'Total MRR',       value: `$${currentMrr.toLocaleString()}`,     color: '#68a2b9' },
-    { label: `Pro × $79`,       value: `$${proMrr.toLocaleString()} / ${proCount} members`,  color: '#c9a84c' },
-    { label: `Community × $39`, value: `$${communityMrr.toLocaleString()} / ${communityCount} members`, color: '#1b3c5a' },
-    { label: 'Churn (month)',   value: `${churnThisMonth} cancelled`,           color: '#ef0e30' },
+    { label: 'Total MRR',                    value: `$${currentMrr.toLocaleString('en-US')}`, color: '#68a2b9' },
+    { label: `VIP × $${vipMonthly}`,          value: `$${vipMrr.toLocaleString('en-US')} / ${vipCount} members`,             color: '#c9a84c' },
+    { label: `Pro × $${proMonthly}`,          value: `$${proMrr.toLocaleString('en-US')} / ${proCount} members`,             color: '#C9302A' },
+    { label: 'Community (Free)',             value: `$${communityMrr.toLocaleString('en-US')} / ${communityCount} members`, color: 'var(--admin-text)' },
+    { label: 'Churn (month)',                value: `${churnThisMonth} cancelled`,            color: '#ef0e30' },
   ]
 
   return (
@@ -37,9 +50,9 @@ export function RevenueChart({
       {/* Bar chart */}
       <div
         className="rounded-lg p-6 mb-6"
-        style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.1)' }}
+        style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)' }}
       >
-        <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[10px] text-[#7a8a96] mb-5">
+        <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[12px] text-[color:var(--admin-text-2)] mb-5">
           MRR — Last 6 Months
         </p>
 
@@ -49,7 +62,7 @@ export function RevenueChart({
             const heightPct = maxMrr > 0 ? (month.mrr / maxMrr) * 100 : 0
             return (
               <div key={month.label} className="flex-1 flex flex-col items-center gap-1.5">
-                <span className="font-condensed font-bold text-[10px]" style={{ color: '#1b3c5a' }}>
+                <span className="font-condensed font-bold text-[12px]" style={{ color: 'var(--admin-text)' }}>
                   ${month.mrr > 999 ? `${(month.mrr / 1000).toFixed(1)}k` : month.mrr}
                 </span>
                 <div
@@ -60,36 +73,36 @@ export function RevenueChart({
                     maxHeight: '80px',
                   }}
                 />
-                <span className="font-condensed text-[10px] text-[#7a8a96]">{month.label}</span>
+                <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">{month.label}</span>
               </div>
             )
           })}
         </div>
 
-        <p className="font-condensed text-[10px] text-[#7a8a96] mt-3">
+        <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mt-3">
           Red bar = current month · Based on active tier counts × price
         </p>
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {stats.map(s => (
           <div
             key={s.label}
             className="rounded-lg p-4"
-            style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.1)' }}
+            style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)' }}
           >
             <p
-              className="font-condensed font-bold uppercase tracking-[0.16em] text-[9px] mb-2"
+              className="font-condensed font-bold uppercase tracking-[0.16em] text-[12px] mb-2"
               style={{ color: s.color }}
             >
               {s.label}
             </p>
-            <p className="font-display font-black text-[22px] leading-none text-[#112535]">
+            <p className="font-display font-black text-[22px] leading-none text-[color:var(--admin-text-strong)]">
               {s.value.split(' ')[0]}
             </p>
             {s.value.includes(' ') && (
-              <p className="font-condensed text-[10px] text-[#7a8a96] mt-0.5">
+              <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mt-0.5">
                 {s.value.slice(s.value.indexOf(' ') + 1)}
               </p>
             )}

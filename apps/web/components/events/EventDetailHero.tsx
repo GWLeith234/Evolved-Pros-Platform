@@ -6,6 +6,7 @@ import {
   EVENT_TYPE_LABELS, EVENT_TYPE_STYLES,
 } from '@/lib/events/types'
 import type { EventItem } from '@/lib/events/types'
+import { buildUpgradeHref, tierBadgeLabel, tierPlanName } from '@/lib/academy/gating'
 
 interface EventDetailHeroProps {
   event: EventItem
@@ -70,10 +71,18 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
     <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.12)' }}>
       {/* Header */}
       <div
-        className="px-8 py-8"
-        style={{ backgroundColor: '#112535' }}
+        className="px-8 py-8 relative"
+        style={{
+          backgroundColor: '#112535',
+          backgroundImage: event.imageUrl ? `url(${event.imageUrl})` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
       >
-        <div className="flex items-start gap-6">
+        {event.imageUrl && (
+          <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.55)' }} />
+        )}
+        <div className="flex items-start gap-6 relative z-10">
           {/* Date block */}
           <div className="flex-shrink-0 w-16 text-center">
             <p
@@ -82,7 +91,7 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
             >
               {day}
             </p>
-            <p className="font-condensed font-bold uppercase text-[11px]" style={{ color: '#ef0e30' }}>
+            <p className="font-condensed font-bold uppercase text-[12px]" style={{ color: '#ef0e30' }}>
               {month}
             </p>
           </div>
@@ -91,14 +100,14 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-2">
               <span
-                className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
+                className="font-condensed font-bold uppercase text-[12px] rounded px-2 py-0.5"
                 style={{ color: typeStyle.color, backgroundColor: typeStyle.bg, border: `1px solid ${typeStyle.border}` }}
               >
                 {typeLabel}
               </span>
               {event.requiredTier === 'pro' && (
                 <span
-                  className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
+                  className="font-condensed font-bold uppercase text-[12px] rounded px-2 py-0.5"
                   style={{ color: '#c9a84c', backgroundColor: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)' }}
                 >
                   Pro
@@ -133,26 +142,26 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
             {/* Details grid */}
             <div className="grid grid-cols-2 gap-x-8 gap-y-3">
               <div>
-                <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-0.5">Date</p>
+                <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96] mb-0.5">Date</p>
                 <p className="font-body font-semibold text-[13px] text-[#1b3c5a]">{full}</p>
               </div>
               <div>
-                <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-0.5">Time</p>
+                <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96] mb-0.5">Time</p>
                 <p className="font-body font-semibold text-[13px] text-[#1b3c5a]">{time}{event.endsAt ? ` – ${formatEventDate(event.endsAt).time}` : ''}</p>
               </div>
               <div>
-                <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-0.5">Duration</p>
+                <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96] mb-0.5">Duration</p>
                 <p className="font-body font-semibold text-[13px] text-[#1b3c5a]">{duration}</p>
               </div>
               <div>
-                <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-0.5">Format</p>
+                <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96] mb-0.5">Format</p>
                 <p className="font-body font-semibold text-[13px] text-[#1b3c5a]">{typeLabel}</p>
               </div>
 
               {/* Zoom link — only when registered */}
               {registered && event.zoomUrl && !isPast && (
                 <div className="col-span-2">
-                  <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-0.5">Join Link</p>
+                  <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96] mb-0.5">Join Link</p>
                   <a
                     href={event.zoomUrl}
                     target="_blank"
@@ -167,7 +176,7 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
               {/* Recording link */}
               {isPast && event.recordingUrl && (
                 <div className="col-span-2">
-                  <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-0.5">Recording</p>
+                  <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] text-[#7a8a96] mb-0.5">Recording</p>
                   <a
                     href={event.recordingUrl}
                     target="_blank"
@@ -187,7 +196,7 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
             style={{ backgroundColor: '#faf9f7', border: '1px solid rgba(27,60,90,0.1)' }}
           >
             {error && (
-              <p className="font-condensed text-[11px] text-[#ef0e30]">{error}</p>
+              <p className="font-condensed text-[12px] text-[#ef0e30]">{error}</p>
             )}
 
             {isPast ? (
@@ -202,21 +211,30 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
                   Watch Recording →
                 </a>
               ) : (
-                <p className="font-condensed text-[11px] text-center text-[#7a8a96]">
+                <p className="font-condensed text-[12px] text-center text-[#7a8a96]">
                   Recording not available yet.
                 </p>
               )
             ) : !event.hasAccess ? (
+              /* SPRINT TIER-1 — labelling only, access rules unchanged. Names
+                 the tier this session actually needs (it hard-coded "Pro" for
+                 VIP events too) and sends the member to the pricing ladder. */
               <>
-                <p className="font-condensed font-bold uppercase tracking-[0.15em] text-[9px] text-center text-[#7a8a96]">
-                  Pro Membership Required
+                {/* This panel is a FIXED-LIGHT surface (#faf9f7 above), so it
+                    takes the theme-invariant --muted, not --text-tertiary —
+                    the latter is white-alpha in dark mode and would vanish. */}
+                <p
+                  className="font-condensed font-bold uppercase tracking-[0.15em] text-[12px] text-center"
+                  style={{ color: 'var(--muted)' }}
+                >
+                  {tierBadgeLabel(event.requiredTier) ?? ''} Membership Required
                 </p>
                 <a
-                  href="/membership"
+                  href={buildUpgradeHref({ from: 'events', tier: event.requiredTier })}
                   className="w-full font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-4 py-3 text-center transition-all"
-                  style={{ backgroundColor: '#ef0e30', color: 'white' }}
+                  style={{ backgroundColor: 'var(--brand-red-hot)', color: 'var(--white)' }}
                 >
-                  Upgrade to Pro →
+                  Unlock with {tierPlanName(event.requiredTier)} →
                 </a>
               </>
             ) : (
@@ -239,7 +257,7 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
             {!isPast && (
               <button
                 onClick={addToGoogleCalendar}
-                className="w-full font-condensed font-semibold uppercase tracking-wide text-[11px] rounded px-4 py-2.5 transition-all text-center"
+                className="w-full font-condensed font-semibold uppercase tracking-wide text-[12px] rounded px-4 py-2.5 transition-all text-center"
                 style={{ color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'transparent' }}
               >
                 Add to Calendar
@@ -248,7 +266,7 @@ export function EventDetailHero({ event }: EventDetailHeroProps) {
 
             {/* Registration count */}
             {event.registrationCount > 0 && (
-              <p className="font-condensed text-[10px] text-center text-[#7a8a96]">
+              <p className="font-condensed text-[12px] text-center text-[#7a8a96]">
                 {event.registrationCount} {event.registrationCount === 1 ? 'person' : 'people'} registered
               </p>
             )}

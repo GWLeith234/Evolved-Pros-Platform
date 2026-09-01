@@ -137,7 +137,7 @@ export function Capstone({ courseId, pillarNumber, memberName }: Props) {
           <p
             style={{
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '11px', letterSpacing: '0.26em', textTransform: 'uppercase',
+              fontSize: '12px', letterSpacing: '0.26em', textTransform: 'uppercase',
               color: color, margin: '0 0 12px',
             }}
           >
@@ -157,6 +157,7 @@ export function Capstone({ courseId, pillarNumber, memberName }: Props) {
 
           {/* Member name + date */}
           <p
+            suppressHydrationWarning
             style={{
               fontSize: '15px', color: 'rgba(250,249,247,0.5)',
               margin: '0 0 40px', lineHeight: 1.6,
@@ -216,7 +217,7 @@ export function Capstone({ courseId, pillarNumber, memberName }: Props) {
         <p
           style={{
             fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-            fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
+            fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
             color: color, margin: '0 0 4px',
           }}
         >
@@ -243,7 +244,7 @@ export function Capstone({ courseId, pillarNumber, memberName }: Props) {
         <p
           style={{
             fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-            fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase',
+            fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase',
             color: color, margin: '0 0 8px',
           }}
         >

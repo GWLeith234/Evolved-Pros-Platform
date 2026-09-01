@@ -7,7 +7,6 @@ import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 
 function MembershipExpiredContent() {
-  const checkoutUrl = process.env.NEXT_PUBLIC_VENDASTA_CHECKOUT_URL ?? '#'
   const reason = useSearchParams().get('reason')
   const isCancelled = reason === 'cancelled'
 

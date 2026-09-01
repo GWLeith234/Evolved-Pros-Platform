@@ -1,6 +1,10 @@
+import type { PostMedia } from './media'
+
+export type { PostMedia }
+
 export type PillarTag = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6'
 
-export type PostType = 'update' | 'question' | 'win' | 'announce'
+export type PostType = 'update' | 'question' | 'win' | 'announce' | 'poll'
 
 export type Channel = {
   id: string
@@ -37,6 +41,9 @@ export type Post = {
   myReaction: string | null
   reactions: Reaction[]
   isBookmarked: boolean
+  pollId?: string | null
+  // CM-1: single attached asset, null for every text-only post.
+  media?: PostMedia | null
 }
 
 export type Reply = {
@@ -45,6 +52,8 @@ export type Reply = {
   body: string
   createdAt: string
   author: PostAuthor
+  // CM-1: single attached asset, null for every text-only comment.
+  media?: PostMedia | null
 }
 
 export type LeaderboardEntry = {
@@ -56,13 +65,26 @@ export type LeaderboardEntry = {
   isCurrentUser: boolean
 }
 
+// MR1: weekly leaderboard sourced from post counts in the last 7 days,
+// since no points-history table exists yet. `weeklyPosts` is the raw
+// post count used for ranking and surfaced as the weekly delta.
+export type WeeklyLeaderboardEntry = {
+  rank: number
+  userId: string
+  displayName: string
+  avatarUrl: string | null
+  points: number
+  weeklyPosts: number
+  isCurrentUser: boolean
+}
+
 export type MemberSummary = {
   id: string
   displayName: string
   avatarUrl: string | null
   roleTitle: string | null
   location: string | null
-  tier: 'community' | 'pro' | null
+  tier: 'community' | 'vip' | 'pro' | null
   points: number
 }
 
@@ -70,11 +92,20 @@ export type CommunityAd = {
   id: string
   image_url: string | null
   headline: string | null
+  body_copy: string | null
   tool_name: string | null
   cta_text: string | null
   link_url: string | null
   click_url: string | null
   sponsor_name: string | null
+  ad_type?: string | null
+  title?: string | null
+  zone?: string | null
+  placement?: string | null
+  placements?: string[] | null
+  start_date?: string | null
+  end_date?: string | null
+  is_active?: boolean | null
 }
 
 export type EpisodeSummary = {

@@ -20,7 +20,7 @@ export function TranscriptSection({ transcript }: TranscriptSectionProps) {
         className="w-full flex items-center justify-between px-6 py-4 transition-colors"
         style={{ backgroundColor: open ? 'rgba(255,255,255,0.03)' : 'transparent' }}
       >
-        <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[11px]" style={{ color: 'rgba(255,255,255,0.7)' }}>
+        <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px]" style={{ color: 'rgba(255,255,255,0.7)' }}>
           Read Transcript
         </span>
         <span

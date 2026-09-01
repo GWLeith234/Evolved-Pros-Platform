@@ -2,14 +2,25 @@
   "name": "web",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20 <23"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "start:standalone": "bash ../../scripts/start-standalone.sh",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:mobile": "node ../../scripts/mobile-smoke.mjs",
+    "test:mobile:visual": "node ../../scripts/mobile-smoke.mjs --visual",
+    "test:a11y": "node ../../scripts/a11y-smoke.mjs",
+    "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.89.0",
     "@evolved-pros/db": "workspace:*",
     "@evolved-pros/ui": "workspace:*",
     "@mux/mux-node": "^12.8.1",
@@ -17,30 +28,37 @@
     "@react-email/components": "^0.0.19",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.43.0",
-    "@tanstack/react-query": "^5.40.0",
-    "clsx": "^2.1.0",
+    "canvas-confetti": "^1.9.4",
+    "fast-xml-parser": "^5.7.2",
+    "jose": "^6.2.3",
     "marked": "^18.0.0",
     "next": "14.2.35",
     "openai": "^6.33.0",
+    "papaparse": "^5.6.0",
+    "pg": "^8.22.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
-    "recharts": "2.12.7",
     "resend": "^3.2.0",
-    "tailwind-merge": "^2.3.0",
-    "zustand": "^4.5.0"
+    "sharp": "^0.33.5",
+    "stripe": "^17",
+    "tailwind-merge": "^2.3.0"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "@types/marked": "^6.0.0",
     "@types/node": "^20",
+    "@types/papaparse": "^5.5.2",
+    "@types/pg": "^8.20.0",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "autoprefixer": "^10.4.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
+    "autoprefixer": "^10.4.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.35",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitest": "^2.1.9"
   }
 }

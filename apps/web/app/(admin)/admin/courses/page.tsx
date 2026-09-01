@@ -1,13 +1,19 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminCoursesPage() {
-  const supabase = createClient()
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
-  const { data: courses } = await supabase
+  // RLS-FIX: adminClient — courses_select_authenticated filters is_published=true,
+  // hiding drafts from admins on the SSR client. Mirrors AD2.3 episodes fix.
+  const { data: courses } = await adminClient
     .from('courses')
     .select('id, pillar_number, slug, title, required_tier, is_published, sort_order')
     .order('sort_order')
@@ -15,7 +21,7 @@ export default async function AdminCoursesPage() {
   // Fetch lesson counts per course
   const courseIds = (courses ?? []).map(c => c.id)
   const { data: lessonCounts } = courseIds.length > 0
-    ? await supabase
+    ? await adminClient
         .from('lessons')
         .select('course_id, id')
         .in('course_id', courseIds)
@@ -30,8 +36,8 @@ export default async function AdminCoursesPage() {
   return (
     <div className="px-8 py-6">
       <div className="mb-6">
-        <h1 className="font-display font-black text-[28px] text-[#112535]">Courses</h1>
-        <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
+        <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)]">Courses</h1>
+        <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mt-0.5">
           6 pillar course tracks — manage lessons and content
         </p>
       </div>
@@ -40,11 +46,11 @@ export default async function AdminCoursesPage() {
         <table className="w-full">
           <thead>
             <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.03)' }}>
-              <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">Pillar</th>
-              <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">Title</th>
-              <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">Tier</th>
-              <th className="px-5 py-3 text-right font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">Lessons</th>
-              <th className="px-5 py-3 text-center font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">Status</th>
+              <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)]">Pillar</th>
+              <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)]">Title</th>
+              <th className="px-5 py-3 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)]">Tier</th>
+              <th className="px-5 py-3 text-right font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)]">Lessons</th>
+              <th className="px-5 py-3 text-center font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)]">Status</th>
               <th className="px-5 py-3"></th>
             </tr>
           </thead>
@@ -54,7 +60,7 @@ export default async function AdminCoursesPage() {
                 key={course.id}
                 style={{
                   borderBottom: i === (courses ?? []).length - 1 ? 'none' : '1px solid rgba(27,60,90,0.06)',
-                  backgroundColor: 'white',
+                  backgroundColor: 'var(--admin-card)',
                 }}
               >
                 <td className="px-5 py-3">
@@ -66,16 +72,16 @@ export default async function AdminCoursesPage() {
                   </span>
                 </td>
                 <td className="px-5 py-3">
-                  <p className="font-body font-semibold text-[13px] text-[#1b3c5a]">{course.title}</p>
-                  <p className="font-condensed text-[10px] text-[#7a8a96]">{course.slug}</p>
+                  <p className="font-body font-semibold text-[13px] text-[color:var(--admin-text)]">{course.title}</p>
+                  <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)]">{course.slug}</p>
                 </td>
                 <td className="px-5 py-3">
-                  <span className="font-condensed text-[11px] text-[#1b3c5a] capitalize">
+                  <span className="font-condensed text-[11px] text-[color:var(--admin-text)] capitalize">
                     {course.required_tier}
                   </span>
                 </td>
                 <td className="px-5 py-3 text-right">
-                  <span className="font-condensed font-bold text-[13px] text-[#1b3c5a]">
+                  <span className="font-condensed font-bold text-[13px] text-[color:var(--admin-text)]">
                     {countMap.get(course.id) ?? 0}
                   </span>
                 </td>
@@ -94,7 +100,7 @@ export default async function AdminCoursesPage() {
                 <td className="px-5 py-3 text-right">
                   <Link
                     href={`/admin/courses/${course.id}`}
-                    className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#68a2b9] hover:text-[#1b3c5a] transition-colors"
+                    className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#68a2b9] hover:text-[color:var(--admin-text)] transition-colors"
                   >
                     Manage Lessons →
                   </Link>

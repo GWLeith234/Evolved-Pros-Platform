@@ -20,6 +20,8 @@ export async function POST(request: Request) {
   if (!courseId) return NextResponse.json({ error: 'course_id is required' }, { status: 422 })
   if (!scores) return NextResponse.json({ error: 'scores is required' }, { status: 422 })
 
+  /* pillar_audits.user_id FKs auth.users(id) and RLS checks auth.uid();
+     must use the auth UUID, not public.users.id. */
   const { data, error } = await supabase
     .from('pillar_audits')
     .insert({
@@ -27,7 +29,7 @@ export async function POST(request: Request) {
       course_id: courseId,
       score: totalScore,
       notes: JSON.stringify(scores),
-    })
+    } as never)
     .select('id, course_id, score, created_at')
     .single()
 

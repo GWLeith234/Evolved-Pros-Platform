@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { ImagePicker } from '@/components/admin/ImagePicker'
 
 interface StoryData {
   id?: string
@@ -41,9 +42,9 @@ function slugify(text: string): string {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80)
 }
 
-const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none transition-all'
-const inputStyle: React.CSSProperties = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }
-const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5'
+const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[color:var(--admin-text)] outline-none transition-all'
+const inputStyle: React.CSSProperties = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'var(--admin-card)' }
+const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)] mb-1.5'
 
 export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryData>; isEdit?: boolean }) {
   const router = useRouter()
@@ -105,7 +106,11 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
         setError((data as { error?: string }).error ?? 'Save failed')
         return
       }
-      router.push('/admin/media')
+      // Toast lives on /admin/media — read ?toast=… and render an
+      // aria-live banner. 'published' / 'saved' / 'deleted' are the
+      // three keys the list page knows about.
+      const toast = publish ? 'published' : 'saved'
+      router.push(`/admin/media?toast=${toast}`)
       router.refresh()
     } finally {
       setSaving(false)
@@ -117,7 +122,7 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
     if (!window.confirm('Delete this story? This cannot be undone.')) return
     setSaving(true)
     await fetch(`/api/admin/media/${initial.id}`, { method: 'DELETE' })
-    router.push('/admin/media')
+    router.push('/admin/media?toast=deleted')
     router.refresh()
   }
 
@@ -145,7 +150,7 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
             className={inputClass} style={inputStyle} placeholder="story-slug"
           />
           {pillar && slug && (
-            <p className="font-condensed text-[10px] text-[#7a8a96] mt-1">/media/{pillar}/{slug}</p>
+            <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] mt-1">/media/{pillar}/{slug}</p>
           )}
         </div>
       </div>
@@ -179,20 +184,23 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
       )}
 
       <div className="mb-4">
-        <label className={labelClass}>Excerpt <span className="text-[#7a8a96]">(160 chars max)</span></label>
+        <label className={labelClass}>Excerpt <span className="text-[color:var(--admin-text-2)]">(160 chars max)</span></label>
         <textarea value={excerpt} onChange={e => setExcerpt(e.target.value.slice(0, 160))} rows={2} className={inputClass} style={inputStyle} placeholder="Short summary for cards and meta description..." />
-        <p className="font-condensed text-[10px] text-[#7a8a96] mt-0.5 text-right">{excerpt.length}/160</p>
+        <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] mt-0.5 text-right">{excerpt.length}/160</p>
       </div>
 
       <div className="mb-4">
-        <label className={labelClass}>Article Body <span className="text-[#7a8a96]">(markdown)</span></label>
+        <label className={labelClass}>Article Body <span className="text-[color:var(--admin-text-2)]">(markdown)</span></label>
         <textarea value={body} onChange={e => setBody(e.target.value)} rows={16} className={inputClass} style={{ ...inputStyle, fontFamily: 'monospace', fontSize: 13 }} placeholder="# Article content in markdown..." />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className={labelClass}>Featured Image URL</label>
-          <input type="text" value={imageUrl} onChange={e => setImageUrl(e.target.value)} className={inputClass} style={inputStyle} placeholder="https://..." />
+          <ImagePicker
+            label="Story Image"
+            value={imageUrl || null}
+            onChange={url => setImageUrl(url)}
+          />
         </div>
         <div>
           <label className={labelClass}>Author</label>
@@ -202,30 +210,30 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className={labelClass}>SEO Title <span className="text-[#7a8a96]">(defaults to title)</span></label>
+          <label className={labelClass}>SEO Title <span className="text-[color:var(--admin-text-2)]">(defaults to title)</span></label>
           <input type="text" value={seoTitle} onChange={e => setSeoTitle(e.target.value)} className={inputClass} style={inputStyle} />
         </div>
         <div>
-          <label className={labelClass}>SEO Description <span className="text-[#7a8a96]">(defaults to excerpt)</span></label>
+          <label className={labelClass}>SEO Description <span className="text-[color:var(--admin-text-2)]">(defaults to excerpt)</span></label>
           <input type="text" value={seoDesc} onChange={e => setSeoDesc(e.target.value)} className={inputClass} style={inputStyle} />
         </div>
       </div>
 
       <div className="mb-4">
-        <label className={labelClass}>Tags <span className="text-[#7a8a96]">(comma-separated)</span></label>
+        <label className={labelClass}>Tags <span className="text-[color:var(--admin-text-2)]">(comma-separated)</span></label>
         <input type="text" value={tags} onChange={e => setTags(e.target.value)} className={inputClass} style={inputStyle} placeholder="leadership, strategy, mindset" />
       </div>
 
       <label className="flex items-center gap-2 mb-6 cursor-pointer">
         <input type="checkbox" checked={isFeatured} onChange={e => setIsFeatured(e.target.checked)} className="accent-[#1b3c5a]" />
-        <span className="font-condensed font-semibold text-[12px] text-[#1b3c5a]">Featured story</span>
+        <span className="font-condensed font-semibold text-[12px] text-[color:var(--admin-text)]">Featured story</span>
       </label>
 
       <div className="flex items-center gap-3">
         <button
           type="button" onClick={() => handleSave(false)} disabled={saving}
           className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-6 py-2.5 rounded transition-all disabled:opacity-40"
-          style={{ backgroundColor: 'rgba(27,60,90,0.08)', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.15)' }}
+          style={{ backgroundColor: 'rgba(27,60,90,0.08)', color: 'var(--admin-text)', border: '1px solid rgba(27,60,90,0.15)' }}
         >
           {saving ? 'Saving...' : 'Save as Draft'}
         </button>

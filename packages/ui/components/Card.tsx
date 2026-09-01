@@ -20,7 +20,7 @@ interface CardBodyProps {
 export function Card({ children, className = '' }: CardProps) {
   return (
     <div
-      className={`rounded-lg overflow-hidden ${className}`}
+      className={`overflow-hidden ${className}`}
       style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
     >
       {children}
@@ -37,7 +37,10 @@ export function CardHeader({ title, eyebrow, action, className = '' }: CardHeade
             {eyebrow}
           </p>
         )}
-        <h3 className="font-condensed font-semibold text-white text-base uppercase tracking-wide">
+        <h3
+          className="font-condensed font-semibold text-base uppercase tracking-wide"
+          style={{ color: 'var(--text-primary, #fff)' }}
+        >
           {title}
         </h3>
       </div>

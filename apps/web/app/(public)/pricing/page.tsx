@@ -1,299 +1,182 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { RedeemCodeForm } from './RedeemCodeForm'
+import { PricingTierCards } from './PricingTierCards'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { effectiveTier } from '@/lib/tier'
+import { getMembershipPricing } from '@/lib/commerce/catalogue'
+import { tierPlanName } from '@/lib/academy/gating'
+import { PILLAR_NAMES } from '@/lib/academy/types'
+import { publicPageMetadata } from '@/lib/seo/canonical'
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata('/pricing', {
   title: 'Pricing — Evolved Pros',
   description: 'Community, VIP, Professional, and Keynote tiers for high performers.',
-}
+})
 
-<<<<<<< HEAD
-// ── Tier data ────────────────────────────────────────────────────────────────────
-=======
-// ── Tier data ──────────────────────────────────────────────────────────────
->>>>>>> origin/claude/init-evolved-pros-platform-Q2oUw
+// Amounts are read live from the products + prices catalogue at request time
+// (single source of truth), so a price edit reflects without a redeploy.
+export const dynamic = 'force-dynamic'
 
-interface Feature { text: string; locked?: boolean }
-
-interface Tier {
-  name: string
-  price: string
-  period?: string
-  badge: string
-  badgeColor: string
-  featured?: boolean
-  popular?: boolean
-  keynote?: boolean
-  features: Feature[]
-  callout?: string
-  cta: string
-  ctaHref: string
-}
-
-const TIERS: Tier[] = [
-  {
-    name: 'Community',
-    price: 'Free',
-    period: 'forever',
-    badge: 'Community',
-    badgeColor: '#60A5FA',
-    features: [
-      { text: 'Community feed' },
-      { text: 'Podcast library' },
-      { text: 'Event discovery' },
-      { text: 'Academy', locked: true },
-      { text: 'Discipline board', locked: true },
-      { text: 'Scoreboard', locked: true },
-    ],
-    cta: 'Join free',
-    ctaHref: '/login?mode=signup',
-  },
-  {
-    name: 'VIP',
-<<<<<<< HEAD
-    price: '$49',
-=======
-    price: '$79',
->>>>>>> origin/claude/init-evolved-pros-platform-Q2oUw
-    period: '/month',
-    badge: 'VIP',
-    badgeColor: '#C9A84C',
-    features: [
-      { text: 'Everything in Community' },
-      { text: 'Event registration' },
-      { text: 'Academy Pillars 1\u20133' },
-      { text: 'Discipline board' },
-      { text: 'Scoreboard + WIG (your #1 goal)', locked: true },
-      { text: 'Academy Pillars 4\u20136', locked: true },
-    ],
-    cta: 'Start VIP',
-    ctaHref: '#vendasta-vip',
-  },
-  {
-    name: 'Professional',
-    price: '$249',
-    period: '/month',
-    badge: 'Professional',
-    badgeColor: '#C9302A',
-    featured: true,
-    popular: true,
-    features: [
-      { text: 'Everything in VIP' },
-      { text: 'Full 6-Pillar Academy' },
-      { text: 'Scoreboard + WIG system' },
-      { text: 'Priority events' },
-    ],
-    callout: 'Bi-weekly 1hr mastermind with George. Topics rotate through all 6 EVOLVED pillars.',
-    cta: 'Go Professional',
-    ctaHref: '#vendasta-pro',
-  },
-  {
-    name: 'Keynotes',
-    price: 'Inquire',
-    period: 'for fee',
-    badge: 'Keynotes',
-    badgeColor: '#C9A84C',
-    keynote: true,
-    features: [
-      { text: 'Custom keynote' },
-      { text: 'EVOLVED Architecture talks' },
-      { text: 'Half-day & full-day formats' },
-      { text: 'Virtual or in-person' },
-    ],
-    cta: 'Book George',
-    ctaHref: '/live',
-  },
-]
-
-<<<<<<< HEAD
 // ── Comparison table ─────────────────────────────────────────────────────────────
-=======
-// ── Comparison table ───────────────────────────────────────────────────────
->>>>>>> origin/claude/init-evolved-pros-platform-Q2oUw
 
-type Symbol = 'yes' | 'half' | 'no'
+type TierSymbol = 'yes' | 'half' | 'no'
 interface ComparisonRow {
   label: string
-  community: Symbol
-  vip: Symbol
-  pro: Symbol
+  community: TierSymbol
+  vip: TierSymbol
+  pro: TierSymbol
 }
 
+// SPRINT TIER-1 \u2014 mirrors the approved ladder: the Academy curriculum is the
+// only thing gated. Community/events/podcast/media/habits and the assessment
+// scores are open to every member, free included.
 const COMPARISON: ComparisonRow[] = [
-  { label: 'Community feed',       community: 'yes',  vip: 'yes',  pro: 'yes' },
-  { label: 'Podcast',              community: 'yes',  vip: 'yes',  pro: 'yes' },
-  { label: 'Event discovery',      community: 'yes',  vip: 'yes',  pro: 'yes' },
-  { label: 'Event registration',   community: 'no',   vip: 'yes',  pro: 'yes' },
-  { label: 'Academy Pillars 1\u20133', community: 'no',   vip: 'yes',  pro: 'yes' },
-  { label: 'Full Academy (all 6)', community: 'no',   vip: 'half', pro: 'yes' },
-  { label: 'Discipline board',     community: 'no',   vip: 'yes',  pro: 'yes' },
-  { label: 'Scoreboard + WIG (your #1 goal)',  community: 'no',   vip: 'no',   pro: 'yes' },
-  { label: 'Bi-weekly mastermind', community: 'no',   vip: 'no',   pro: 'yes' },
+  { label: 'Community feed',                  community: 'yes',  vip: 'yes',  pro: 'yes' },
+  { label: 'Podcast & media',                 community: 'yes',  vip: 'yes',  pro: 'yes' },
+  { label: 'Events & registration',           community: 'yes',  vip: 'yes',  pro: 'yes' },
+  { label: 'Habits / Own the Day',            community: 'yes',  vip: 'yes',  pro: 'yes' },
+  { label: 'Pillar Assessment (all 6 scores)', community: 'yes', vip: 'yes',  pro: 'yes' },
+  { label: 'Academy Pillar 1: Foundation',    community: 'yes',  vip: 'yes',  pro: 'yes' },
+  { label: 'Academy Pillars 2\u20133 (inner game)', community: 'no', vip: 'yes', pro: 'yes' },
+  { label: 'Academy Pillars 4\u20136 (outer game)', community: 'no', vip: 'no',  pro: 'yes' },
+  { label: 'Full Academy (all 6)',            community: 'no',   vip: 'half', pro: 'yes' },
+  { label: 'Assessment breakdown + pillar plan', community: 'no', vip: 'yes',  pro: 'yes' },
+  { label: 'Monthly mastermind',              community: 'no',   vip: 'yes',  pro: 'yes' },
+  { label: 'Weekly mastermind',               community: 'no',   vip: 'no',   pro: 'yes' },
+  { label: '1:1 time with George',            community: 'no',   vip: 'no',   pro: 'yes' },
+  { label: '10% off LIVE events',             community: 'no',   vip: 'no',   pro: 'yes' },
 ]
 
-function SymbolCell({ value }: { value: Symbol }) {
+function SymbolCell({ value }: { value: TierSymbol }) {
   if (value === 'yes') return <span style={{ color: '#0ABFA3', fontWeight: 700 }}>&#10003;</span>
   if (value === 'half') return <span style={{ color: '#C9A84C', fontWeight: 600, fontSize: 11 }}>3 of 6</span>
   return <span style={{ color: 'rgba(245,240,232,0.2)' }}>&ndash;</span>
 }
 
-<<<<<<< HEAD
 // ── Page ─────────────────────────────────────────────────────────────────────
 
-export default function PricingPage() {
-  return (
-    <div style={{ backgroundColor: '#0A0F18', minHeight: '100vh' }}>
-=======
-// ── From= banner messages ──────────────────────────────────────────────────
+/**
+ * SPRINT TIER-1 — contextual headline.
+ *
+ * Locked Academy cards, the pillar lock panel, the assessment banner and the
+ * events chips all link here with ?from=…&pillar=…&tier=…. Honouring those
+ * params means a member who bounced off Mental Toughness lands on "Unlock
+ * Mental Toughness with VIP" rather than a generic ladder.
+ *
+ * COPY ONLY. No checkout state is derived from these params — the CTA buttons
+ * and SKUs below are identical whether or not they are present. Params come
+ * from a URL a stranger can edit, so every value is validated against a known
+ * set before it reaches the page.
+ */
+function contextualHero(searchParams: Record<string, string | string[] | undefined>): {
+  eyebrow: string
+  title: string
+  sub: string
+} {
+  const one = (v: string | string[] | undefined): string =>
+    (Array.isArray(v) ? v[0] : v ?? '').toLowerCase()
 
-const FROM_MESSAGES: Record<string, { tier: string; feature: string }> = {
-  discipline: { tier: 'VIP', feature: 'the Discipline board' },
-  scoreboard: { tier: 'Professional', feature: 'Scoreboards' },
-  academy:    { tier: 'VIP', feature: 'the Academy' },
+  const from = one(searchParams.from)
+  const tierParam = one(searchParams.tier)
+  const tier = tierParam === 'vip' || tierParam === 'pro' ? tierParam : null
+  const planName = tier ? tierPlanName(tier) : null
+
+  const pillarNum = Number.parseInt(one(searchParams.pillar), 10)
+  const pillarName =
+    Number.isInteger(pillarNum) && pillarNum >= 1 && pillarNum <= 6
+      ? PILLAR_NAMES[pillarNum]
+      : null
+
+  const DEFAULT = {
+    eyebrow: 'Pricing',
+    title: 'Invest in your evolution.',
+    sub: 'Everything but the curriculum is free. The Academy is what you upgrade for.',
+  }
+
+  if (from === 'academy' || from === 'assessment') {
+    if (pillarName && planName) {
+      return {
+        eyebrow: from === 'assessment' ? 'Your weakest pillar' : 'The Academy',
+        title: `Unlock ${pillarName} with ${planName}.`,
+        sub:
+          from === 'assessment'
+            ? `${pillarName} scored lowest in your assessment. ${planName} opens it.`
+            : `Pillar ${pillarNum} is part of ${planName}. Your progress in the open pillars carries over.`,
+      }
+    }
+    if (planName) {
+      return {
+        eyebrow: 'The Academy',
+        title: `Unlock the Academy with ${planName}.`,
+        sub: 'Pillar 1 is free forever. The rest of the curriculum comes with a plan.',
+      }
+    }
+  }
+
+  if (from === 'events') {
+    return {
+      eyebrow: 'Events',
+      title: planName ? `That session is ${planName}.` : 'Get into every session.',
+      sub: 'Event discovery and registration are free. Masterminds come with a plan.',
+    }
+  }
+
+  return DEFAULT
 }
 
-// ── Page ───────────────────────────────────────────────────────────────────
+interface PricingPageProps {
+  searchParams?: Record<string, string | string[] | undefined>
+}
 
-export default function PricingPage({ searchParams }: { searchParams: { from?: string } }) {
-  const fromMsg = searchParams.from ? FROM_MESSAGES[searchParams.from] : null
+export default async function PricingPage({ searchParams }: PricingPageProps) {
+  // Amounts sourced from the products + prices catalogue (single source of
+  // truth). getMembershipPricing falls back to the canonical lib/pricing
+  // constants per amount if the catalogue query fails or is empty.
+  const { tiers } = await getMembershipPricing()
+  const hero = contextualHero(searchParams ?? {})
 
+  // SPRINT PRICE-1 — who is looking at this page?
+  //
+  // This page stays PUBLIC: resolveCurrentUser returns null for an anonymous
+  // visitor and we render the logged-out state. It must never redirect. The
+  // session is refreshed by middleware (/pricing is in SESSION_OPTIONAL_ROUTES
+  // and in config.matcher), so a member with a stale access token still reads
+  // as signed in rather than being shown a buy button for a plan they own.
+  const profile = await resolveCurrentUser()
+  const currentTier = profile
+    ? effectiveTier(
+        (profile as unknown as { tier?: string | null }).tier,
+        (profile as unknown as { tier_status?: string | null }).tier_status,
+      )
+    : null
+  // Header chrome lives in ./layout.tsx (TopNav + account menu when signed
+  // in, Sign in when anonymous). Do not add a second SIGN IN control here.
   return (
-    <div style={{ backgroundColor: '#0A0F18', minHeight: '100vh' }}>
-      {/* From= upgrade banner */}
-      {fromMsg && (
-        <div
-          className="flex items-center justify-center gap-2 px-4 py-3 text-[13px] font-body"
-          style={{ backgroundColor: 'rgba(201,168,76,0.1)', color: '#C9A84C', borderBottom: '1px solid rgba(201,168,76,0.15)' }}
-        >
-          You need <strong>{fromMsg.tier}</strong> to access {fromMsg.feature}.
-        </div>
-      )}
-
->>>>>>> origin/claude/init-evolved-pros-platform-Q2oUw
-      {/* Header */}
-      <header
-        className="flex items-center justify-between px-6 py-4"
-        style={{ borderBottom: '1px solid rgba(245,240,232,0.06)' }}
-      >
-        <Link href="/" className="font-condensed font-bold tracking-[0.18em] text-[14px]" style={{ color: '#F5F0E8', textDecoration: 'none' }}>
-          EVOLVED<span style={{ color: '#C9302A' }}>&middot;</span>PROS
-        </Link>
-        <Link
-          href="/login"
-          className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] px-4 py-2 rounded transition-opacity hover:opacity-80"
-          style={{ color: '#F5F0E8', border: '1px solid rgba(245,240,232,0.15)' }}
-        >
-          Sign in
-        </Link>
-      </header>
-
+    <div style={{ backgroundColor: '#0A0F18', minHeight: '100%' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16">
         {/* Hero */}
         <div className="text-center mb-16">
           <p className="font-condensed font-bold uppercase tracking-[0.2em] text-[10px] mb-3" style={{ color: '#C9A84C' }}>
-            Pricing
+            {hero.eyebrow}
           </p>
           <h1 className="font-display font-bold text-3xl sm:text-4xl mb-4" style={{ color: '#F5F0E8' }}>
-            Invest in your evolution.
+            {hero.title}
           </h1>
           <p className="font-body text-sm max-w-lg mx-auto" style={{ color: 'rgba(245,240,232,0.5)' }}>
-            Every tier unlocks more of the EVOLVED system. Start free, upgrade when you're ready.
+            {hero.sub}
           </p>
         </div>
 
-        {/* Tier cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-20">
-          {TIERS.map(tier => (
-            <div
-              key={tier.name}
-              className="rounded-xl p-6 flex flex-col"
-              style={{
-                backgroundColor: '#111926',
-                border: tier.featured
-                  ? '1.5px solid #C9302A'
-                  : tier.keynote
-                  ? '1.5px dashed rgba(201,168,76,0.4)'
-                  : '1px solid rgba(245,240,232,0.06)',
-              }}
-            >
-              {/* Badge */}
-              <div className="mb-4 flex items-center gap-2">
-                <span
-                  className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] px-2.5 py-1 rounded"
-                  style={{
-                    backgroundColor: `${tier.badgeColor}18`,
-                    color: tier.badgeColor,
-                    border: `1px solid ${tier.badgeColor}30`,
-                  }}
-                >
-                  {tier.badge}
-                </span>
-                {tier.popular && (
-                  <span className="font-condensed font-bold uppercase tracking-[0.1em] text-[8px] px-2 py-0.5 rounded" style={{ backgroundColor: 'rgba(201,48,42,.1)', color: '#C9302A' }}>
-                    Most popular
-                  </span>
-                )}
-              </div>
+        {/* Tier cards + monthly/annual toggle — amounts from the catalogue. */}
+        <PricingTierCards
+          pricing={tiers}
+          currentTier={currentTier}
+        />
 
-              {/* Price */}
-              <div className="mb-5">
-                <span className="font-display font-bold text-3xl" style={{ color: '#F5F0E8' }}>
-                  {tier.price}
-                </span>
-                {tier.period && (
-                  <span className="font-body text-sm ml-1" style={{ color: 'rgba(245,240,232,0.4)' }}>
-                    {tier.period}
-                  </span>
-                )}
-              </div>
-
-              {/* Features */}
-              <ul className="space-y-2.5 mb-6 flex-1">
-                {tier.features.map(f => (
-                  <li key={f.text} className="flex items-start gap-2 text-[13px] font-body" style={{ color: f.locked ? 'rgba(245,240,232,0.25)' : 'rgba(245,240,232,0.7)' }}>
-                    <span className="mt-0.5 flex-shrink-0" style={{ color: f.locked ? 'rgba(245,240,232,0.15)' : '#0ABFA3' }}>
-                      {f.locked ? (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                      ) : (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      )}
-                    </span>
-                    {f.text}
-                  </li>
-                ))}
-              </ul>
-
-              {/* Mastermind callout */}
-              {tier.callout && (
-                <div
-                  className="rounded-lg p-4 mb-6"
-                  style={{
-                    backgroundColor: 'rgba(201,48,42,0.08)',
-                    border: '1px solid rgba(201,48,42,0.15)',
-                  }}
-                >
-                  <p className="font-condensed font-bold uppercase tracking-[0.12em] text-[9px] mb-1.5" style={{ color: '#C9302A' }}>
-                    Mastermind
-                  </p>
-                  <p className="font-body text-[12px] leading-relaxed" style={{ color: 'rgba(245,240,232,0.6)' }}>
-                    {tier.callout}
-                  </p>
-                </div>
-              )}
-
-              {/* CTA */}
-              <Link
-                href={tier.ctaHref}
-                className="block w-full py-3 rounded-lg font-condensed font-bold uppercase tracking-[0.1em] text-[12px] text-center transition-opacity hover:opacity-90"
-                style={{
-                  backgroundColor: tier.featured ? '#C9302A' : 'rgba(245,240,232,0.06)',
-                  color: tier.featured ? '#fff' : '#F5F0E8',
-                  border: tier.featured ? 'none' : '1px solid rgba(245,240,232,0.1)',
-                }}
-              >
-                {tier.cta}
-              </Link>
-            </div>
-          ))}
+        {/* Have a code? — comp / access-code redemption (Friends of George). */}
+        <div className="max-w-2xl mx-auto mb-20">
+          <RedeemCodeForm />
         </div>
 
         {/* Comparison table */}
@@ -348,14 +231,14 @@ export default function PricingPage({ searchParams }: { searchParams: { from?: s
         {/* Footer CTA */}
         <div className="text-center">
           <p className="font-body text-sm mb-4" style={{ color: 'rgba(245,240,232,0.4)' }}>
-            Questions? Reach out to George directly.
+            Questions? Reach out and we&rsquo;ll get back to you.
           </p>
           <Link
-            href="mailto:geoleith@gmail.com"
+            href="mailto:support@evolvedpros.com?subject=Pricing%20question%20-%20Evolved%20Pros"
             className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] px-5 py-2.5 rounded transition-opacity hover:opacity-80"
             style={{ color: '#C9A84C', border: '1px solid rgba(201,168,76,0.3)' }}
           >
-            Contact George
+            Contact support
           </Link>
         </div>
       </div>

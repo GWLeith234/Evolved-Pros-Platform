@@ -1,38 +1,34 @@
 export const dynamic = 'force-dynamic'
 
-import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { requireAdminApi } from '@/lib/admin/helpers'
 import { Resend } from 'resend'
 import { MagicLinkEmail } from '@/lib/resend/emails/MagicLink'
 
 // Use RESEND_FROM_EMAIL env var (set to hello@evolvedpros.com once domain is verified in Resend)
 // Falls back to sandbox sender so invites never silently break if env var is missing
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL ?? 'Evolved Pros <onboarding@resend.dev>'
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL ?? 'Evolved Pros <noreply@evolvedpros.com>'
 
 export async function POST(request: Request) {
-  // Verify the caller is an admin
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.role !== 'admin') {
-    return Response.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  // Canonical admin gate — resolves role via .eq('email', user.email) on
+  // adminClient. The previous inline check used .eq('id', user.id) on the
+  // SSR client and returned null whenever auth.uid() ≠ public.users.id,
+  // which is what was 403'ing George's invites.
+  const guard = await requireAdminApi()
+  if (guard instanceof Response) return guard
 
   const { email, fullName, tier } = await request.json() as {
     email: string
     fullName: string
-    tier: 'vip' | 'pro'
+    tier: 'community' | 'vip' | 'pro'
   }
 
   if (!email || !fullName || !tier) {
     return Response.json({ error: 'email, fullName, and tier are required' }, { status: 400 })
+  }
+
+  if (!['community', 'vip', 'pro'].includes(tier)) {
+    return Response.json({ error: 'Invalid tier' }, { status: 422 })
   }
 
   // Check if user already exists

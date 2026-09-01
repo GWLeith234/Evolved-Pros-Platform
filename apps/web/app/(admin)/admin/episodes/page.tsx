@@ -1,6 +1,9 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import { EpisodeThumbnail } from './EpisodeThumbnail'
+import { SyncPodcastButton } from './SyncPodcastButton'
+import { DeleteEpisodeButton } from './DeleteEpisodeButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,12 +15,40 @@ function formatDuration(seconds: number | null): string {
   return `${m}m`
 }
 
-export default async function AdminEpisodesPage() {
-  const supabase = createClient()
+// Timezone-stable: format in UTC so SSR and client renders agree.
+const PUBLISHED_DATE_FMT = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
 
-  const { data: rows } = await supabase
+function fmtPublished(iso: string | null): string {
+  if (!iso) return '—'
+  return PUBLISHED_DATE_FMT.format(new Date(iso))
+}
+
+const PILLAR_META: Record<string, { label: string; color: string }> = {
+  foundation:         { label: 'Foundation',       color: '#FFA538' },
+  identity:           { label: 'Identity',         color: '#A78BFA' },
+  'mental-toughness': { label: 'Mental Toughness', color: '#F87171' },
+  strategy:           { label: 'Strategy',         color: '#60A5FA' },
+  accountability:     { label: 'Accountability',   color: '#C9A84C' },
+  execution:          { label: 'Execution',        color: '#0ABFA3' },
+}
+
+export default async function AdminEpisodesPage() {
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
+
+  // RLS-FIX: adminClient — episodes RLS admin policy keys on users.id = auth.uid(),
+  // which the codebase documents as mismatched. SSR client would silently filter
+  // drafts for admins. Service role bypasses RLS so admins see all rows.
+  const { data: rows } = await adminClient
     .from('episodes')
-    .select('id, episode_number, season, title, guest_name, guest_company, thumbnail_url, duration_seconds, is_published, published_at, created_at')
+    .select('id, episode_number, season, title, guest_name, guest_company, thumbnail_url, duration_seconds, is_published, published_at, created_at, pillar, pillars, pinned')
     .order('episode_number', { ascending: false })
     .limit(200)
 
@@ -27,18 +58,21 @@ export default async function AdminEpisodesPage() {
     <div className="px-8 py-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="font-display font-black text-[28px] text-[#112535]">Episodes</h1>
-          <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
+          <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)]">Episodes</h1>
+          <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mt-0.5">
             {episodes.length} total · {episodes.filter(e => e.is_published).length} published
           </p>
         </div>
-        <Link
-          href="/admin/episodes/new"
-          className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-5 py-2.5 transition-all"
-          style={{ backgroundColor: '#1b3c5a', color: 'white' }}
-        >
-          + New Episode
-        </Link>
+        <div className="flex items-start gap-3">
+          <SyncPodcastButton />
+          <Link
+            href="/admin/episodes/new"
+            className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-5 py-2.5 transition-all"
+            style={{ backgroundColor: '#1b3c5a', color: 'white' }}
+          >
+            + New Episode
+          </Link>
+        </div>
       </div>
 
       {episodes.length === 0 ? (
@@ -46,23 +80,35 @@ export default async function AdminEpisodesPage() {
           className="rounded-lg px-8 py-12 text-center"
           style={{ border: '1px dashed rgba(27,60,90,0.2)' }}
         >
-          <p className="font-condensed font-bold uppercase tracking-widest text-[11px] text-[#7a8a96]">
+          <p className="font-condensed font-bold uppercase tracking-widest text-[11px] text-[color:var(--admin-text-2)]">
             No episodes yet
           </p>
-          <p className="font-body text-[13px] text-[#7a8a96] mt-1">
+          <p className="font-body text-[13px] text-[color:var(--admin-text-2)] mt-1">
             Create your first episode to get started.
           </p>
         </div>
       ) : (
-        <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.1)' }}>
-          <table className="w-full">
+        <div className="rounded-lg overflow-x-auto" style={{ border: '1px solid rgba(27,60,90,0.1)' }}>
+          <table className="w-full" style={{ minWidth: 880 }}>
+            <colgroup>
+              <col style={{ width: 48 }} />
+              <col />
+              <col style={{ width: 160 }} />
+              <col className="hidden md:table-column" style={{ width: 160 }} />
+              <col className="hidden md:table-column" style={{ width: 96 }} />
+              <col style={{ width: 96 }} />
+              <col style={{ width: 120 }} />
+              <col style={{ width: 80 }} />
+            </colgroup>
             <thead>
-              <tr style={{ backgroundColor: '#f5f7f9', borderBottom: '1px solid rgba(27,60,90,0.1)' }}>
-                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96]">#</th>
-                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96]">Title</th>
-                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96] hidden md:table-cell">Guest</th>
-                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96] hidden md:table-cell">Duration</th>
-                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96]">Status</th>
+              <tr style={{ backgroundColor: 'var(--admin-subtle)', borderBottom: '1px solid rgba(27,60,90,0.1)' }}>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[color:var(--admin-text-2)]">#</th>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[color:var(--admin-text-2)]">Title</th>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[color:var(--admin-text-2)]">Pillar</th>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[color:var(--admin-text-2)] hidden md:table-cell">Guest</th>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[color:var(--admin-text-2)] hidden md:table-cell">Duration</th>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[color:var(--admin-text-2)]">Status</th>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[color:var(--admin-text-2)]">Published</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -72,7 +118,7 @@ export default async function AdminEpisodesPage() {
                   key={ep.id}
                   style={{
                     borderBottom: i < episodes.length - 1 ? '1px solid rgba(27,60,90,0.06)' : 'none',
-                    backgroundColor: 'white',
+                    backgroundColor: 'var(--admin-card)',
                   }}
                 >
                   <td className="px-4 py-3">
@@ -80,35 +126,55 @@ export default async function AdminEpisodesPage() {
                       {ep.episode_number ?? '—'}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
+                  <td className="px-4 py-3 min-w-[260px]">
+                    <div className="flex items-center gap-3 min-w-0">
                       {ep.thumbnail_url && (
                         <EpisodeThumbnail src={ep.thumbnail_url} alt={ep.title} />
                       )}
-                      <div className="min-w-0">
-                        <p className="font-body font-semibold text-[13px] text-[#1b3c5a] truncate max-w-[240px]">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-body font-semibold text-[13px] text-[color:var(--admin-text)] truncate">
+                          {ep.pinned && (
+                            <span title="Pinned" style={{ color: '#C9A84C' }} className="mr-1">★</span>
+                          )}
                           {ep.title}
                         </p>
                         {ep.season && ep.season > 1 && (
-                          <p className="font-condensed text-[10px] text-[#7a8a96]">Season {ep.season}</p>
+                          <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)]">Season {ep.season}</p>
                         )}
                       </div>
                     </div>
                   </td>
+                  <td className="px-4 py-3">
+                    {(() => {
+                      const key = ep.pillar ?? (Array.isArray(ep.pillars) ? ep.pillars[0] : null)
+                      const meta = key ? PILLAR_META[key] : null
+                      if (!meta) {
+                        return <span className="font-condensed text-[11px] text-[color:var(--admin-text-2)]">—</span>
+                      }
+                      return (
+                        <span
+                          className="font-condensed font-bold uppercase text-[9px] tracking-wider rounded-full px-2 py-0.5 whitespace-nowrap"
+                          style={{ backgroundColor: `${meta.color}1F`, color: meta.color }}
+                        >
+                          {meta.label}
+                        </span>
+                      )
+                    })()}
+                  </td>
                   <td className="px-4 py-3 hidden md:table-cell">
                     {ep.guest_name ? (
                       <div>
-                        <p className="font-body text-[12px] text-[#1b3c5a]">{ep.guest_name}</p>
+                        <p className="font-body text-[12px] text-[color:var(--admin-text)]">{ep.guest_name}</p>
                         {ep.guest_company && (
-                          <p className="font-condensed text-[10px] text-[#7a8a96]">{ep.guest_company}</p>
+                          <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)]">{ep.guest_company}</p>
                         )}
                       </div>
                     ) : (
-                      <span className="font-condensed text-[11px] text-[#7a8a96]">—</span>
+                      <span className="font-condensed text-[11px] text-[color:var(--admin-text-2)]">—</span>
                     )}
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
-                    <span className="font-condensed text-[12px] text-[#7a8a96]">
+                    <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">
                       {formatDuration(ep.duration_seconds)}
                     </span>
                   </td>
@@ -118,19 +184,27 @@ export default async function AdminEpisodesPage() {
                       style={
                         ep.is_published
                           ? { backgroundColor: 'rgba(104,162,185,0.12)', color: '#68a2b9' }
-                          : { backgroundColor: 'rgba(27,60,90,0.06)', color: '#7a8a96' }
+                          : { backgroundColor: 'rgba(217,119,6,0.12)', color: '#b45309' }
                       }
                     >
                       {ep.is_published ? 'Published' : 'Draft'}
                     </span>
                   </td>
+                  <td className="px-4 py-3">
+                    <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)] whitespace-nowrap">
+                      {fmtPublished(ep.published_at)}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/admin/episodes/${ep.id}/edit`}
-                      className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#68a2b9] hover:text-[#1b3c5a] transition-colors"
-                    >
-                      Edit
-                    </Link>
+                    <div className="flex items-center justify-end gap-3">
+                      <Link
+                        href={`/admin/episodes/${ep.id}/edit`}
+                        className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#68a2b9] hover:text-[color:var(--admin-text)] transition-colors"
+                      >
+                        Edit
+                      </Link>
+                      <DeleteEpisodeButton episodeId={ep.id} title={ep.title} />
+                    </div>
                   </td>
                 </tr>
               ))}

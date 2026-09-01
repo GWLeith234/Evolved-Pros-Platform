@@ -1,22 +1,19 @@
 export const dynamic = 'force-dynamic'
 
-import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { requireAdminApi } from '@/lib/admin/helpers'
+import {
+  FOG_PROMO_CODE,
+  friendsOfGeorgeToCompPromoCodeId,
+  shouldApplyFriendsOfGeorge,
+} from '@/lib/admin/fog'
 
 export async function PATCH(
   request: Request,
   { params }: { params: { userId: string } },
 ) {
-  // Verify caller is admin
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { data: caller } = await supabase
-    .from('users').select('role').eq('id', user.id).single()
-  if (caller?.role !== 'admin') {
-    return Response.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  const guard = await requireAdminApi()
+  if (guard instanceof Response) return guard
 
   const body = await request.json() as {
     display_name?: string
@@ -34,6 +31,7 @@ export async function PATCH(
     current_pillar?: string | null
     goal_90day?: string
     goal_visible?: boolean
+    friends_of_george?: boolean
   }
 
   const VALID_PILLARS = new Set(['p1', 'p2', 'p3', 'p4', 'p5', 'p6'])
@@ -60,6 +58,25 @@ export async function PATCH(
   }
   if (body.goal_90day      !== undefined) update.goal_90day      = body.goal_90day
   if (body.goal_visible    !== undefined) update.goal_visible     = body.goal_visible
+
+  // FOG flag writes users.comp_promo_code_id via the seeded FRIENDSOFGEORGE
+  // code. No roster backfill — only the member being edited is touched.
+  if (shouldApplyFriendsOfGeorge(body)) {
+    let fogPromoCodeId: string | null = null
+    if (body.friends_of_george) {
+      const { data: fogCode } = await (adminClient as any)
+        .from('promo_codes')
+        .select('id')
+        .eq('code', FOG_PROMO_CODE)
+        .maybeSingle()
+      fogPromoCodeId = fogCode?.id ?? null
+    }
+    const mapped = friendsOfGeorgeToCompPromoCodeId(body.friends_of_george === true, fogPromoCodeId)
+    if ('error' in mapped) {
+      return Response.json({ error: mapped.error }, { status: 500 })
+    }
+    update.comp_promo_code_id = mapped.value
+  }
 
   if (!Object.keys(update).length) {
     return Response.json({ error: 'No fields to update' }, { status: 400 })

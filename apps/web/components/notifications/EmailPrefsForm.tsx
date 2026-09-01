@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useToast } from '@/lib/toast'
 
 type TriOption = 'immediate' | 'digest' | 'off'
 type BinOption = 'immediate' | 'off'
@@ -12,6 +13,8 @@ interface Prefs {
   course_unlock: BinOption
   system_billing: 'immediate'
 }
+
+type PrefKey = keyof Prefs
 
 interface EmailPrefsFormProps {
   initialPrefs: Prefs
@@ -28,66 +31,105 @@ const BIN_OPTIONS: { value: BinOption; label: string }[] = [
   { value: 'off',       label: 'Off' },
 ]
 
-export function EmailPrefsForm({ initialPrefs }: EmailPrefsFormProps) {
-  const [prefs, setPrefs] = useState<Prefs>(initialPrefs)
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+const DEBOUNCE_MS = 400
 
-  async function handleSave() {
-    setSaving(true)
-    setError(null)
-    setSaved(false)
+export function EmailPrefsForm({ initialPrefs }: EmailPrefsFormProps) {
+  const { showToast } = useToast()
+  const [prefs, setPrefs] = useState<Prefs>(initialPrefs)
+  const [pendingKey, setPendingKey] = useState<PrefKey | null>(null)
+
+  const latestPrefsRef = useRef<Prefs>(initialPrefs)
+  const lastSavedRef = useRef<Prefs>(initialPrefs)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
+
+  function scheduleSave(key: PrefKey, next: Prefs) {
+    latestPrefsRef.current = next
+    setPendingKey(key)
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => { void runSave() }, DEBOUNCE_MS)
+  }
+
+  async function runSave() {
+    const snapshot = latestPrefsRef.current
+    const prevSaved = lastSavedRef.current
     try {
       const res = await fetch('/api/user/me', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notification_preferences: prefs }),
+        body: JSON.stringify({ notification_preferences: snapshot }),
       })
-      if (!res.ok) {
-        const data = await res.json() as { error?: string }
-        throw new Error(data.error ?? 'Save failed')
-      }
-      setSaved(true)
-      setTimeout(() => setSaved(false), 3000)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Something went wrong')
+      if (!res.ok) throw new Error('Save failed')
+      lastSavedRef.current = snapshot
+      showToast('Preferences saved', 'success')
+    } catch {
+      // Revert UI to last successfully saved state on failure
+      latestPrefsRef.current = prevSaved
+      setPrefs(prevSaved)
+      showToast('Could not save preferences. Please try again.', 'error')
     } finally {
-      setSaving(false)
+      setPendingKey(null)
     }
   }
 
+  function handleChange<K extends PrefKey>(key: K, value: Prefs[K]) {
+    const next = { ...prefs, [key]: value }
+    setPrefs(next)
+    scheduleSave(key, next)
+  }
+
   function RadioGroup<T extends string>({
+    rowKey,
     label,
     value,
     options,
     onChange,
     disabled,
   }: {
+    rowKey: PrefKey
     label: string
     value: T
     options: { value: T; label: string }[]
     onChange: (v: T) => void
     disabled?: boolean
   }) {
+    const isSaving = pendingKey === rowKey
     return (
       <div
-        className="flex items-center justify-between py-3 px-4"
-        style={{ borderBottom: '1px solid rgba(27,60,90,0.06)' }}
+        className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-0 py-3 px-4"
+        style={{ borderBottom: '1px solid var(--notif-card-border)' }}
       >
-        <span className="font-body font-medium text-[13px] text-[#1b3c5a]">{label}</span>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
+          <span className="font-body font-medium text-[13px]" style={{ color: 'var(--text-primary)' }}>{label}</span>
+          {isSaving && (
+            <span
+              className="inline-block rounded-full border-2 border-t-transparent animate-spin"
+              style={{ width: 12, height: 12, borderColor: 'var(--text-primary)', borderTopColor: 'transparent' }}
+              aria-label="Saving"
+            />
+          )}
+        </div>
+        <div
+          className="grid w-full grid-flow-col auto-cols-fr gap-1 sm:flex sm:w-auto sm:items-center"
+          role="group"
+          aria-label={`${label} frequency`}
+        >
           {options.map(opt => (
             <button
               key={opt.value}
               type="button"
               disabled={disabled}
               onClick={() => onChange(opt.value)}
-              className="font-condensed font-semibold uppercase text-[10px] rounded px-3 py-1.5 transition-all"
+              className="font-condensed font-semibold uppercase text-[12px] rounded px-3 py-1.5 transition-all w-full sm:w-auto"
               style={{
-                backgroundColor: value === opt.value ? '#1b3c5a' : 'transparent',
-                color: value === opt.value ? 'white' : '#7a8a96',
-                border: value === opt.value ? '1px solid #1b3c5a' : '1px solid rgba(27,60,90,0.15)',
+                backgroundColor: value === opt.value ? 'var(--text-primary)' : 'transparent',
+                color: value === opt.value ? 'var(--bg-page)' : 'var(--text-secondary)',
+                border: `1px solid ${value === opt.value ? 'var(--text-primary)' : 'var(--notif-card-border)'}`,
                 opacity: disabled ? 0.6 : 1,
                 cursor: disabled ? 'default' : 'pointer',
               }}
@@ -103,45 +145,50 @@ export function EmailPrefsForm({ initialPrefs }: EmailPrefsFormProps) {
   return (
     <div>
       <div
-        className="rounded-lg overflow-hidden mb-5"
-        style={{ border: '1px solid rgba(27,60,90,0.1)' }}
+        className="rounded-lg overflow-hidden mb-2"
+        style={{ border: '1px solid var(--notif-card-border)' }}
       >
-        <div style={{ backgroundColor: 'rgba(27,60,90,0.03)' }}>
+        <div style={{ backgroundColor: 'var(--btn-ghost-bg)' }}>
           <div className="grid grid-cols-[1fr_auto] px-4 py-2">
-            <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">
+            <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
               Notification Type
             </span>
-            <span className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">
+            <span className="hidden sm:inline font-condensed font-bold uppercase tracking-[0.18em] text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
               Frequency
             </span>
           </div>
         </div>
 
         <RadioGroup
+          rowKey="community_reply"
           label="Community Replies"
           value={prefs.community_reply}
           options={TRI_OPTIONS}
-          onChange={v => setPrefs(p => ({ ...p, community_reply: v }))}
+          onChange={v => handleChange('community_reply', v)}
         />
         <RadioGroup
+          rowKey="community_mention"
           label="Community Mentions"
           value={prefs.community_mention}
           options={TRI_OPTIONS}
-          onChange={v => setPrefs(p => ({ ...p, community_mention: v }))}
+          onChange={v => handleChange('community_mention', v)}
         />
         <RadioGroup
+          rowKey="event_reminder"
           label="Event Reminders"
           value={prefs.event_reminder}
           options={BIN_OPTIONS}
-          onChange={v => setPrefs(p => ({ ...p, event_reminder: v }))}
+          onChange={v => handleChange('event_reminder', v)}
         />
         <RadioGroup
+          rowKey="course_unlock"
           label="Course Unlocks"
           value={prefs.course_unlock}
           options={BIN_OPTIONS}
-          onChange={v => setPrefs(p => ({ ...p, course_unlock: v }))}
+          onChange={v => handleChange('course_unlock', v)}
         />
         <RadioGroup
+          rowKey="system_billing"
           label="Billing / System"
           value={prefs.system_billing}
           options={[{ value: 'immediate' as const, label: 'Immediate' }]}
@@ -150,25 +197,9 @@ export function EmailPrefsForm({ initialPrefs }: EmailPrefsFormProps) {
         />
       </div>
 
-      {error && (
-        <p className="font-condensed text-[11px] text-[#ef0e30] mb-3">{error}</p>
-      )}
-
-      <div className="flex items-center gap-4">
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-6 py-2.5 transition-all"
-          style={{ backgroundColor: '#1b3c5a', color: 'white', opacity: saving ? 0.7 : 1 }}
-        >
-          {saving ? 'Saving...' : 'Save Preferences'}
-        </button>
-        {saved && (
-          <span className="font-condensed text-[11px]" style={{ color: '#68a2b9' }}>
-            Saved ✓
-          </span>
-        )}
-      </div>
+      <p className="font-condensed text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
+        Changes save automatically.
+      </p>
     </div>
   )
 }

@@ -1,28 +1,20 @@
 export const dynamic = 'force-dynamic'
 
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
-
-async function requireAdmin(supabase: ReturnType<typeof createClient>) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { user: null, error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
-  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return { user: null, error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
-  return { user, error: null }
-}
+import { requireAdminApi } from '@/lib/admin/helpers'
 
 export async function PATCH(
   request: Request,
   { params }: { params: { adId: string } }
 ) {
-  const supabase = createClient()
-  const { error: authError } = await requireAdmin(supabase)
-  if (authError) return authError
+  const auth = await requireAdminApi()
+  if (auth instanceof Response) return auth
 
   let body: Record<string, unknown>
   try { body = await request.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
 
-  const allowed = ['zone', 'ad_type', 'sponsor_name', 'image_url', 'click_url', 'headline', 'start_date', 'end_date', 'is_active', 'sort_order'] as const
+  const allowed = ['zone', 'ad_type', 'sponsor_name', 'image_url', 'click_url', 'headline', 'body_copy', 'cta_text', 'start_date', 'end_date', 'is_active', 'sort_order', 'placements'] as const
   const update: Record<string, unknown> = {}
   for (const key of allowed) {
     if (key in body) update[key] = body[key]
@@ -32,7 +24,8 @@ export async function PATCH(
     return NextResponse.json({ error: 'No valid fields' }, { status: 422 })
   }
 
-  const { data, error } = await supabase
+  // RLS-FIX: adminClient — see ads/route.ts.
+  const { data, error } = await adminClient
     .from('platform_ads')
     .update(update)
     .eq('id', params.adId)
@@ -40,6 +33,9 @@ export async function PATCH(
     .single()
 
   if (error || !data) return NextResponse.json({ error: 'Update failed' }, { status: 500 })
+  const { revalidateTag } = await import('next/cache')
+  const { CACHE_TAGS } = await import('@/lib/cache/shared')
+  revalidateTag(CACHE_TAGS.platformAds)
   return NextResponse.json(data)
 }
 
@@ -47,11 +43,13 @@ export async function DELETE(
   _request: Request,
   { params }: { params: { adId: string } }
 ) {
-  const supabase = createClient()
-  const { error: authError } = await requireAdmin(supabase)
-  if (authError) return authError
+  const auth = await requireAdminApi()
+  if (auth instanceof Response) return auth
 
-  const { error } = await supabase.from('platform_ads').delete().eq('id', params.adId)
+  const { error } = await adminClient.from('platform_ads').delete().eq('id', params.adId)
   if (error) return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
+  const { revalidateTag } = await import('next/cache')
+  const { CACHE_TAGS } = await import('@/lib/cache/shared')
+  revalidateTag(CACHE_TAGS.platformAds)
   return new NextResponse(null, { status: 204 })
 }

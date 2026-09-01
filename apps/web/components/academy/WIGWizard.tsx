@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const BLUE = '#60A5FA'
 const GOLD = '#C9A84C'
@@ -126,7 +126,7 @@ export function WIGWizard({ courseId, domain: defaultDomain = 'professional' }: 
     <div style={{ backgroundColor: '#111926', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '8px', padding: '24px' }}>
       {/* Header */}
       <div style={{ marginBottom: '20px' }}>
-        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: GOLD, margin: '0 0 4px' }}>
+        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase', color: GOLD, margin: '0 0 4px' }}>
           WIG Wizard
         </p>
         <p style={{ color: '#faf9f7', fontSize: '15px', fontWeight: 600, margin: '0 0 4px' }}>Wildly Important Goals</p>
@@ -147,7 +147,7 @@ export function WIGWizard({ courseId, domain: defaultDomain = 'professional' }: 
               onClick={() => { setActiveDomain(d.id); if (editing && editing !== d.id) setEditing(null) }}
               style={{
                 fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-                fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase',
+                fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                 padding: '8px 16px', borderRadius: '4px', border: 'none', cursor: 'pointer',
                 backgroundColor: isActive ? BLUE : 'rgba(255,255,255,0.05)',
                 color: isActive ? '#0A0F18' : hasSaved ? BLUE : 'rgba(250,249,247,0.5)',
@@ -215,14 +215,14 @@ function WizardForm({ domain, wizard: w, prompts, saving, saveError, isEditing, 
               }}>
                 {done
                   ? <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 2.5" stroke={BLUE} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  : <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '11px', color: active ? '#0A0F18' : 'rgba(250,249,247,0.3)' }}>{n}</span>
+                  : <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', color: active ? '#0A0F18' : 'rgba(250,249,247,0.3)' }}>{n}</span>
                 }
               </div>
               {n < STEPS && <div style={{ width: '20px', height: '2px', backgroundColor: done ? `${BLUE}55` : 'rgba(255,255,255,0.08)', borderRadius: '1px' }} />}
             </div>
           )
         })}
-        <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: BLUE, marginLeft: '8px' }}>
+        <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: BLUE, marginLeft: '8px' }}>
           Step {w.step} of {STEPS} — {stepLabels[w.step - 1]}
         </span>
       </div>
@@ -251,6 +251,7 @@ function WizardForm({ domain, wizard: w, prompts, saving, saveError, isEditing, 
           canAdvance={w.to.trim().length > 0}
           onNext={() => onGoToStep(3)}
           onBack={() => onGoToStep(1)}
+          focusOnMount
         />
       )}
       {w.step === 3 && (
@@ -301,7 +302,7 @@ function WizardForm({ domain, wizard: w, prompts, saving, saveError, isEditing, 
               {saving ? 'Saving…' : 'Save WIG'}
             </button>
             {isEditing && (
-              <button type="button" onClick={onCancelEdit} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.25)', padding: 0 }}>
+              <button type="button" onClick={onCancelEdit} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.25)', padding: 0 }}>
                 Cancel
               </button>
             )}
@@ -312,22 +313,31 @@ function WizardForm({ domain, wizard: w, prompts, saving, saveError, isEditing, 
   )
 }
 
-function StepInput({ label, sublabel, placeholder, value, onChange, color, canAdvance, onNext, onBack }: {
+function StepInput({ label, sublabel, placeholder, value, onChange, color, canAdvance, onNext, onBack, focusOnMount = false }: {
   label: string; sublabel: string; placeholder: string; value: string
   onChange: (v: string) => void; color: string; canAdvance: boolean
   onNext: () => void; onBack?: () => void
+  /** Focus the input when this step mounts. Off for step 1 — a bare
+   *  autoFocus made the browser scroll the Strategy pillar page down to
+   *  the wizard on initial page load. Steps reached by clicking Next may
+   *  focus (preventScroll) since the user is already at the wizard. */
+  focusOnMount?: boolean
 }) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (focusOnMount) inputRef.current?.focus({ preventScroll: true })
+  }, [focusOnMount])
   return (
     <div>
       <p style={{ color: '#faf9f7', fontSize: '15px', fontWeight: 600, margin: '0 0 4px' }}>{label}</p>
       <p style={{ color: 'rgba(250,249,247,0.4)', fontSize: '13px', margin: '0 0 16px' }}>{sublabel}</p>
       <input
+        ref={inputRef}
         type="text"
         value={value}
         onChange={e => onChange(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter' && canAdvance) onNext() }}
         placeholder={placeholder}
-        autoFocus
         style={{
           width: '100%', backgroundColor: 'rgba(255,255,255,0.04)',
           border: `1px solid ${canAdvance ? color + '44' : 'rgba(255,255,255,0.1)'}`,
@@ -352,18 +362,18 @@ function SavedCard({ wig, onEdit, color }: { wig: SavedWIG; onEdit: () => void; 
   return (
     <div style={{ backgroundColor: `${color}0A`, border: `1px solid ${color}22`, borderRadius: '8px', padding: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color, margin: 0 }}>
+        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color, margin: 0 }}>
           Wildly Important Goal · Saved {updatedDate}
         </p>
-        <button type="button" onClick={onEdit} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.3)', padding: 0 }}>
+        <button type="button" onClick={onEdit} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(250,249,247,0.3)', padding: 0 }}>
           Edit
         </button>
       </div>
       <p style={{ color: '#faf9f7', fontSize: '16px', fontWeight: 600, lineHeight: 1.55, margin: '0 0 16px' }}>{c.statement}</p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+      <div className="academy-tool-grid-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
         {[['FROM', c.from], ['TO', c.to], ['BY', c.by ? formatDate(c.by) : '—']].map(([k, v]) => (
           <div key={k}>
-            <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color, margin: '0 0 4px' }}>{k}</p>
+            <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase', color, margin: '0 0 4px' }}>{k}</p>
             <p style={{ color: 'rgba(250,249,247,0.65)', fontSize: '13px', margin: 0, lineHeight: 1.4 }}>{v}</p>
           </div>
         ))}
@@ -375,11 +385,11 @@ function SavedCard({ wig, onEdit, color }: { wig: SavedWIG; onEdit: () => void; 
 const backBtnStyle: React.CSSProperties = {
   background: 'none', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer',
   fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-  fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase',
+  fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
   color: 'rgba(250,249,247,0.4)', padding: '9px 18px', borderRadius: '4px',
 }
 const nextBtnStyle: React.CSSProperties = {
   fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-  fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase',
+  fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
   padding: '9px 22px', borderRadius: '4px', border: 'none', transition: 'all 0.15s',
 }

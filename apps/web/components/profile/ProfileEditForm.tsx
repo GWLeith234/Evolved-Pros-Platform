@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useToast } from '@/lib/toast'
 import { Input, Textarea } from '@evolved-pros/ui'
 import { Button } from '@/components/ui/Button'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { BannerPickerModal } from '@/components/profile/BannerPickerModal'
+import { ImagePicker } from '@/components/admin/ImagePicker'
 
 const PILLAR_LABELS: Record<string, string> = {
   p1: 'Foundation',
@@ -38,6 +39,7 @@ type ProfileFields = {
 
 interface ProfileEditFormProps {
   userId: string
+  userEmail: string
   profile: ProfileFields
   onSaved?: (updated: ProfileFields) => void
 }
@@ -56,41 +58,7 @@ function InfoIcon() {
   )
 }
 
-function resizeImage(file: File, maxSize: number): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const img = new Image()
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        let { width, height } = img
-        if (width > maxSize || height > maxSize) {
-          if (width > height) {
-            height = Math.round((height * maxSize) / width)
-            width = maxSize
-          } else {
-            width = Math.round((width * maxSize) / height)
-            height = maxSize
-          }
-        }
-        canvas.width = width
-        canvas.height = height
-        const ctx = canvas.getContext('2d')!
-        ctx.drawImage(img, 0, 0, width, height)
-        canvas.toBlob(blob => {
-          if (blob) resolve(blob)
-          else reject(new Error('Canvas toBlob failed'))
-        }, 'image/jpeg', 0.9)
-      }
-      img.onerror = reject
-      img.src = e.target?.result as string
-    }
-    reader.onerror = reject
-    reader.readAsDataURL(file)
-  })
-}
-
-export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormProps) {
+export function ProfileEditForm({ userId, userEmail, profile, onSaved }: ProfileEditFormProps) {
   const { showToast: globalToast } = useToast()
   const [fields, setFields] = useState({
     display_name: profile.display_name ?? '',
@@ -110,10 +78,8 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
   const [goalVisible, setGoalVisible] = useState(profile.goal_visible ?? true)
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? '')
   const [bannerUrl, setBannerUrl] = useState(profile.banner_url ?? '')
-  const [avatarLoading, setAvatarLoading] = useState(false)
   const [bannerModalOpen, setBannerModalOpen] = useState(false)
   const [saving, setSaving] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   function showToast(type: 'success' | 'error', message: string) {
     globalToast(message, type)
@@ -123,43 +89,19 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
     setFields(prev => ({ ...prev, [field]: value }))
   }
 
-  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      showToast('error', 'Please upload a JPEG, PNG, or WebP image.')
-      return
-    }
-    setAvatarLoading(true)
+  async function handleAvatarSelected(url: string) {
+    setAvatarUrl(url)
     try {
-      const resized = await resizeImage(file, 400)
-      const supabase = createClient()
-      // Upload to the 'Branding' bucket under the avatars/ path
-      const path = `avatars/${userId}.jpg`
-      const { error: uploadError } = await supabase.storage
-        .from('Branding')
-        .upload(path, resized, { upsert: true, contentType: 'image/jpeg' })
-      if (uploadError) throw uploadError
-
-      const { data } = supabase.storage.from('Branding').getPublicUrl(path)
-      const newUrl = `${data.publicUrl}?t=${Date.now()}`
-      setAvatarUrl(newUrl)
-
-      // Persist to public.users
       await fetch('/api/user/me', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ avatar_url: newUrl }),
+        body: JSON.stringify({ avatar_url: url }),
       })
-
-      // Propagate to auth.users metadata so it shows in nav immediately
-      await supabase.auth.updateUser({ data: { avatar_url: newUrl } })
-
+      const supabase = createClient()
+      await supabase.auth.updateUser({ data: { avatar_url: url } })
       showToast('success', 'Profile photo updated.')
     } catch {
-      showToast('error', 'Avatar upload failed. Please try again.')
-    } finally {
-      setAvatarLoading(false)
+      showToast('error', 'Could not save profile photo.')
     }
   }
 
@@ -196,7 +138,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
       }
       const updated = await res.json()
       onSaved?.(updated)
-      showToast('success', 'Profile saved successfully.')
+      showToast('success', 'Profile updated')
     } catch (err: unknown) {
       showToast('error', err instanceof Error ? err.message : 'Save failed.')
     } finally {
@@ -204,64 +146,20 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
     }
   }
 
-  function getInitials(name: string): string {
-    return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
-  }
-
-  const displayName = fields.display_name || fields.full_name || 'Member'
-
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* ── Profile Photo ─────────────────────────────────────────── */}
-      <div>
-        <div className="flex items-center mb-2">
-          <label className="font-condensed font-medium uppercase text-[11px]" style={{ color: 'var(--text-secondary)', letterSpacing: '0.06em' }}>
-            Profile Photo
-          </label>
-          <Tooltip content="Square image recommended · JPEG, PNG or WebP · Max 400×400px · File size under 2MB · Your photo appears on your posts, profile, and in the member directory">
-            <InfoIcon />
-          </Tooltip>
-        </div>
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={avatarLoading}
-            className="relative w-16 h-16 rounded overflow-hidden flex items-center justify-center cursor-pointer flex-shrink-0 transition-opacity hover:opacity-80"
-            style={{ backgroundColor: '#ef0e30' }}
-          >
-            {avatarLoading ? (
-              <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-            ) : avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarUrl} alt="Avatar" className="w-16 h-16 object-cover" />
-            ) : (
-              <span className="font-condensed font-bold text-white text-xl">
-                {getInitials(displayName)}
-              </span>
-            )}
-          </button>
-          <div>
-            <p className="font-body text-sm" style={{ color: 'var(--text-secondary)' }}>Click to upload a new photo</p>
-            <p className="font-body text-xs mt-0.5" style={{ color: 'var(--text-tertiary)' }}>JPEG, PNG or WebP · max 400×400</p>
-          </div>
-        </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          className="hidden"
-          onChange={handleAvatarChange}
-        />
-      </div>
+      <ImagePicker
+        label="Profile Photo"
+        value={avatarUrl || null}
+        onChange={handleAvatarSelected}
+        uploadEndpoint="/api/user/avatar"
+      />
 
       {/* ── Profile Banner ────────────────────────────────────────── */}
       <div>
         <div className="flex items-center mb-2">
-          <label className="font-condensed font-medium uppercase text-[11px]" style={{ color: 'var(--text-secondary)', letterSpacing: '0.06em' }}>
+          <label className="font-condensed font-medium uppercase text-[12px]" style={{ color: 'var(--text-secondary)', letterSpacing: '0.06em' }}>
             Profile Banner
           </label>
           <Tooltip content="Landscape image · Minimum 1200×300px · JPEG or PNG · File size under 5MB · Your banner appears at the top of your public profile page">
@@ -284,7 +182,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
         <button
           type="button"
           onClick={() => setBannerModalOpen(true)}
-          className="font-condensed font-bold uppercase tracking-wide text-[11px] px-4 py-2 rounded transition-colors"
+          className="font-condensed font-bold uppercase tracking-wide text-[12px] px-4 py-2 rounded transition-colors"
           style={{
             border: '1px solid var(--border-color)',
             color: 'var(--text-secondary)',
@@ -299,6 +197,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
       {bannerModalOpen && (
         <BannerPickerModal
           userId={userId}
+          userEmail={userEmail}
           currentBannerUrl={bannerUrl || null}
           onSave={handleBannerSaved}
           onClose={() => setBannerModalOpen(false)}
@@ -308,13 +207,18 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
       {/* ── Fields ───────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Tooltip content="Shown on your posts, leaderboard, and community profile." className="block">
-          <Input
-            label="Display Name"
-            value={fields.display_name}
-            onChange={e => handleChange('display_name', e.target.value)}
-            maxLength={50}
-            placeholder="How you appear to others"
-          />
+          <div>
+            <Input
+              label="Display Name"
+              value={fields.display_name}
+              onChange={e => handleChange('display_name', e.target.value)}
+              maxLength={50}
+              placeholder="How you appear to others"
+            />
+            <p className="font-condensed text-[12px] mt-1.5" style={{ color: 'var(--text-secondary)' }}>
+              Your public handle — shown in community posts and leaderboard.
+            </p>
+          </div>
         </Tooltip>
         <Tooltip content="Your full name. Only visible to administrators." className="block">
           <Input
@@ -352,7 +256,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
 
       {/* Professional section */}
       <div>
-        <p className="font-condensed font-medium uppercase text-[9px] mb-4" style={{ color: 'var(--text-secondary)', letterSpacing: '0.12em' }}>
+        <p className="font-condensed font-medium uppercase text-[12px] mb-4" style={{ color: 'var(--text-secondary)', letterSpacing: '0.12em' }}>
           Professional
         </p>
 
@@ -405,7 +309,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
                 onChange={e => setPhoneVisible(e.target.checked)}
                 className="w-4 h-4 rounded accent-[#1b3c5a] cursor-pointer"
               />
-              <span className="font-condensed text-[11px] uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>
+              <span className="font-condensed text-[12px] uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>
                 Visible to members
               </span>
             </label>
@@ -413,7 +317,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
 
           {/* Current Pillar pill selector */}
           <div>
-            <label className="block font-condensed font-medium uppercase text-[11px] mb-2" style={{ color: 'var(--text-secondary)', letterSpacing: '0.06em' }}>
+            <label className="block font-condensed font-medium uppercase text-[12px] mb-2" style={{ color: 'var(--text-secondary)', letterSpacing: '0.06em' }}>
               Current Pillar
             </label>
             <div className="flex flex-wrap gap-2">
@@ -424,7 +328,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
                     key={pillar}
                     type="button"
                     onClick={() => setCurrentPillar(isActive ? null : pillar)}
-                    className="px-3 py-1.5 rounded font-condensed font-bold uppercase tracking-wide text-[10px] transition-all"
+                    className="px-3 py-1.5 rounded font-condensed font-bold uppercase tracking-wide text-[12px] transition-all"
                     style={{
                       backgroundColor: isActive ? 'var(--bg-elevated)' : 'transparent',
                       color: isActive ? 'var(--text-primary)' : 'var(--text-tertiary)',
@@ -455,7 +359,7 @@ export function ProfileEditForm({ userId, profile, onSaved }: ProfileEditFormPro
                 onChange={e => setGoalVisible(e.target.checked)}
                 className="w-4 h-4 rounded accent-[#1b3c5a] cursor-pointer"
               />
-              <span className="font-condensed text-[11px] uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>
+              <span className="font-condensed text-[12px] uppercase tracking-wide" style={{ color: 'var(--text-secondary)' }}>
                 Make this public
               </span>
             </label>

@@ -2,10 +2,9 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { fetchUserProfile, fetchCourseByPillarNumber, fetchWIGByDomain } from '@/lib/academy/fetchers'
+import { fetchUserProfile, fetchCourseByPillarNumber } from '@/lib/academy/fetchers'
 import { PillarPageShell } from '@/components/academy/PillarPageShell'
 import { LiveSessionCard } from '@/components/academy/LiveSessionCard'
-import { Scoreboard } from '@/components/academy/Scoreboard'
 import { PartnerCheckin } from '@/components/academy/PartnerCheckin'
 import { ScenarioMCQ } from '@/components/academy/ScenarioMCQ'
 import { PeerDiscussion } from '@/components/academy/PeerDiscussion'
@@ -160,25 +159,16 @@ export default async function Page() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [profile, p5Course, wigRow] = await Promise.all([
+  const [profile, p5Course] = await Promise.all([
     fetchUserProfile(supabase, user.id),
     fetchCourseByPillarNumber(supabase, 5),
-    fetchWIGByDomain(supabase, user.id, 'professional'),
   ])
 
   const memberName   = profile?.full_name ?? profile?.display_name ?? null
-  const wigContent   = wigRow?.content as { statement?: string } | null
-  const wigStatement = wigContent?.statement ?? undefined
 
   return (
     <PillarPageShell pillarNumber={5} showReflection showAudit>
       <LiveSessionCard pillarId="accountability" pillarNumber={5} />
-      {p5Course && (
-        <Scoreboard
-          courseId={p5Course.id}
-          initialWigStatement={wigStatement}
-        />
-      )}
       {p5Course && (
         <PartnerCheckin
           courseId={p5Course.id}

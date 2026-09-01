@@ -1,18 +1,20 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import { BrandingPortalClient } from './BrandingPortalClient'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminBrandingPage() {
-  const supabase = createClient()
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
-  const [{ data: settings }, { data: ads }, { data: banners }] = await Promise.all([
-    supabase.from('platform_settings').select('key, value'),
-    supabase
-      .from('platform_ads')
-      .select('id, placement, image_url, headline, cta_text, link_url, sort_order, is_active')
-      .order('sort_order'),
-    supabase
+  // RLS-FIX: adminClient — banner/settings reads are admin-managed; bypass RLS
+  // for consistency. Ad management now lives entirely under /admin/ads.
+  const [{ data: settings }, { data: banners }] = await Promise.all([
+    adminClient.from('platform_settings').select('key, value'),
+    adminClient
       .from('profile_banners')
       .select('id, pillar, title, image_url, sort_order, is_active')
       .order('sort_order'),
@@ -26,7 +28,6 @@ export default async function AdminBrandingPage() {
   return (
     <BrandingPortalClient
       initialSettings={settingsMap}
-      initialAds={ads ?? []}
       initialBanners={banners ?? []}
     />
   )

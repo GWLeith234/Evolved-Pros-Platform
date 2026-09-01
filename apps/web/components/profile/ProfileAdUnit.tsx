@@ -1,4 +1,8 @@
+import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
+import { isIabImageStill } from '@/lib/ads/iab'
+
 interface Ad {
+  id?: string | null
   headline?: string | null
   tool_name?: string | null
   cta_text?: string | null
@@ -6,6 +10,10 @@ interface Ad {
   click_url?: string | null
   image_url?: string | null
   sponsor_name?: string | null
+  ad_type?: string | null
+  title?: string | null
+  body_copy?: string | null
+  zone?: string | null
 }
 
 interface ProfileAdUnitProps {
@@ -13,6 +21,15 @@ interface ProfileAdUnitProps {
 }
 
 export function ProfileAdUnit({ ad }: ProfileAdUnitProps) {
+  if (isIabImageStill(ad) && ad.image_url) {
+    return (
+      <IabAdvertisementSlot
+        ad={{ ...ad, image_url: ad.image_url }}
+        locationId="academy-pillar"
+      />
+    )
+  }
+
   const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
   const label = ad.headline ?? ad.tool_name ?? ad.sponsor_name ?? 'Sponsored'
   const cta = ad.cta_text ?? 'Learn More →'
@@ -77,7 +94,7 @@ export function ProfileAdUnit({ ad }: ProfileAdUnitProps) {
           {label}
         </p>
         {ad.sponsor_name && ad.headline && (
-          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '11px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.3 }}>
+          <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', color: 'rgba(255,255,255,0.4)', lineHeight: 1.3 }}>
             {ad.sponsor_name}
           </p>
         )}
@@ -91,7 +108,7 @@ export function ProfileAdUnit({ ad }: ProfileAdUnitProps) {
           color: 'white',
           fontFamily: '"Barlow Condensed", sans-serif',
           fontWeight: 700,
-          fontSize: '11px',
+          fontSize: '12px',
           letterSpacing: '0.08em',
           textTransform: 'uppercase',
           padding: '7px 14px',

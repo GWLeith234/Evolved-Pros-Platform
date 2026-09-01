@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { ConversationThread } from './ConversationThread'
+import { Modal } from '@/components/ui/Modal'
 
 interface Conversation {
   id: string
@@ -365,94 +366,93 @@ export function MessagesClient({
       </div>
 
       {/* New Message Modal */}
-      {newMessageOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center"
-          style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
-          onClick={() => { setNewMessageOpen(false); setMemberSearch(''); setMemberResults([]) }}
-        >
-          <div
-            className="w-full max-w-md mx-4 rounded-xl overflow-hidden"
-            style={{ backgroundColor: '#112535', border: '1px solid rgba(255,255,255,0.1)' }}
-            onClick={e => e.stopPropagation()}
+      <Modal
+        open={newMessageOpen}
+        onClose={() => { setNewMessageOpen(false); setMemberSearch(''); setMemberResults([]) }}
+        ariaLabel="New message"
+        maxWidth={448}
+        panelStyle={{
+          backgroundColor: '#112535',
+          border: '1px solid rgba(255,255,255,0.1)',
+          color: 'rgba(255,255,255,0.9)',
+        }}
+      >
+        <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <h3
+            className="font-condensed font-bold uppercase tracking-[0.14em] text-[14px]"
+            style={{ color: 'rgba(255,255,255,0.9)' }}
           >
-            <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-              <h3
-                className="font-condensed font-bold uppercase tracking-[0.14em] text-[14px]"
-                style={{ color: 'rgba(255,255,255,0.9)' }}
-              >
-                New Message
-              </h3>
-            </div>
-
-            <div className="px-5 py-3">
-              <input
-                type="text"
-                autoFocus
-                placeholder="Search members…"
-                value={memberSearch}
-                onChange={e => setMemberSearch(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg text-sm font-body outline-none"
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.08)',
-                  color: 'white',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                }}
-              />
-            </div>
-
-            <div className="max-h-64 overflow-y-auto">
-              {searchLoading && (
-                <div className="px-5 py-3">
-                  <p className="font-condensed text-[11px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                    Searching…
-                  </p>
-                </div>
-              )}
-              {!searchLoading && memberSearch && memberResults.length === 0 && (
-                <div className="px-5 py-3">
-                  <p className="font-condensed text-[11px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                    No members found
-                  </p>
-                </div>
-              )}
-              {memberResults.map(member => (
-                <button
-                  key={member.id}
-                  type="button"
-                  disabled={startingConv}
-                  onClick={() => handleStartConversation(member.id)}
-                  className="w-full flex items-center gap-3 px-5 py-3 text-left transition-colors"
-                  style={{ color: 'rgba(255,255,255,0.85)' }}
-                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)')}
-                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
-                >
-                  <Avatar url={member.avatarUrl} name={member.displayName} size={36} />
-                  <div>
-                    <p className="font-condensed font-semibold text-[13px]">{member.displayName}</p>
-                    {member.roleTitle && (
-                      <p className="font-body text-[11px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                        {member.roleTitle}
-                      </p>
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            <div className="px-5 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-              <button
-                type="button"
-                onClick={() => { setNewMessageOpen(false); setMemberSearch(''); setMemberResults([]) }}
-                className="font-condensed text-[12px] uppercase tracking-wide"
-                style={{ color: 'rgba(255,255,255,0.4)' }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
+            New Message
+          </h3>
         </div>
-      )}
+
+        <div className="px-5 py-3">
+          <label htmlFor="new-message-search" className="sr-only">Search members</label>
+          <input
+            id="new-message-search"
+            type="text"
+            placeholder="Search members…"
+            value={memberSearch}
+            onChange={e => setMemberSearch(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg text-sm font-body outline-none"
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.08)',
+              color: 'white',
+              border: '1px solid rgba(255,255,255,0.12)',
+            }}
+          />
+        </div>
+
+        <div className="max-h-64 overflow-y-auto">
+          {searchLoading && (
+            <div className="px-5 py-3">
+              <p className="font-condensed text-[11px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                Searching…
+              </p>
+            </div>
+          )}
+          {!searchLoading && memberSearch && memberResults.length === 0 && (
+            <div className="px-5 py-3">
+              <p className="font-condensed text-[11px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                No members found
+              </p>
+            </div>
+          )}
+          {memberResults.map(member => (
+            <button
+              key={member.id}
+              type="button"
+              disabled={startingConv}
+              onClick={() => handleStartConversation(member.id)}
+              className="w-full flex items-center gap-3 px-5 py-3 text-left transition-colors"
+              style={{ color: 'rgba(255,255,255,0.85)' }}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.06)')}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
+            >
+              <Avatar url={member.avatarUrl} name={member.displayName} size={36} />
+              <div>
+                <p className="font-condensed font-semibold text-[13px]">{member.displayName}</p>
+                {member.roleTitle && (
+                  <p className="font-body text-[11px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                    {member.roleTitle}
+                  </p>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <div className="px-5 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <button
+            type="button"
+            onClick={() => { setNewMessageOpen(false); setMemberSearch(''); setMemberResults([]) }}
+            className="font-condensed text-[12px] uppercase tracking-wide"
+            style={{ color: 'rgba(255,255,255,0.4)' }}
+          >
+            Cancel
+          </button>
+        </div>
+      </Modal>
     </div>
   )
 }

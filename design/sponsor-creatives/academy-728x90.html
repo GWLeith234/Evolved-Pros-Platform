@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 728px; height: 90px; overflow: hidden; }
+  .ad {
+    position: relative; width: 728px; height: 90px;
+    background: radial-gradient(120% 200% at 8% 0%, #17324a 0%, #112535 40%, #0a141f 80%, #060c14 100%);
+    display: flex; align-items: center; gap: 16px; padding: 0 18px 6px 20px;
+    font-family: "Barlow", sans-serif;
+  }
+  .rule { position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #C9A84C 0%, #E7CE86 50%, #C9A84C 100%); }
+  .logo { height: 26px; width: auto; flex-shrink: 0; opacity: .96; }
+  .divider { width: 1px; height: 42px; background: rgba(245,240,232,.14); flex-shrink: 0; }
+  .copy { flex: 1; min-width: 0; }
+  .eyebrow { font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: 10px;
+    letter-spacing: .16em; text-transform: uppercase; color: #C9A84C; }
+  .headline { font-family: "Playfair Display", serif; font-weight: 900; color: #F5F0E8;
+    font-size: 20px; line-height: 1.1; letter-spacing: -0.01em; margin-top: 2px; white-space: nowrap; }
+  .headline .gold { color: #E7CE86; }
+  .pillars { display: flex; gap: 6px; flex-shrink: 0; }
+  .pillar { display: flex; align-items: center; gap: 4px; padding: 5px 7px;
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 4px; }
+  .dot { width: 7px; height: 7px; border-radius: 1px; flex-shrink: 0; }
+  .pname { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 10px;
+    letter-spacing: .05em; text-transform: uppercase; color: rgba(245,240,232,.9); }
+  .cta { flex-shrink: 0; font-family: "Barlow Condensed", sans-serif; font-weight: 800;
+    font-size: 12px; letter-spacing: .12em; color: #fff;
+    background: #C9302A; padding: 11px 16px; border-radius: 6px;
+    text-transform: uppercase; box-shadow: 0 6px 16px -6px rgba(201,48,42,.55); white-space: nowrap; }
+  .spectrum { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; display: flex; }
+  .spectrum span { flex: 1; }
+</style></head>
+<body>
+  <div class="ad">
+    <div class="rule"></div>
+    <img class="logo" src="assets/logo_dark.png" alt="Evolved Pros">
+    <div class="divider"></div>
+    <div class="copy">
+      <div class="eyebrow">Academy · Six Pillars</div>
+      <div class="headline">Stop collecting tips. <span class="gold">Build the system.</span></div>
+    </div>
+    <div class="pillars">
+      <div class="pillar"><span class="dot" style="background:#FFA538"></span><span class="pname">F</span></div>
+      <div class="pillar"><span class="dot" style="background:#A78BFA"></span><span class="pname">I</span></div>
+      <div class="pillar"><span class="dot" style="background:#F87171"></span><span class="pname">MT</span></div>
+      <div class="pillar"><span class="dot" style="background:#60A5FA"></span><span class="pname">S</span></div>
+      <div class="pillar"><span class="dot" style="background:#C9A84C"></span><span class="pname">A</span></div>
+      <div class="pillar"><span class="dot" style="background:#0ABFA3"></span><span class="pname">E</span></div>
+    </div>
+    <div class="cta">Enter →</div>
+    <div class="spectrum">
+      <span style="background:#FFA538"></span>
+      <span style="background:#A78BFA"></span>
+      <span style="background:#F87171"></span>
+      <span style="background:#60A5FA"></span>
+      <span style="background:#C9A84C"></span>
+      <span style="background:#0ABFA3"></span>
+    </div>
+  </div>
+</body></html>

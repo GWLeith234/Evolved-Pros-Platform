@@ -1,4 +1,4 @@
-import { MediaStoryForm } from '../MediaStoryForm'
+import { NewStoryClient } from './NewStoryClient'
 
 export default function NewMediaStoryPage() {
   return (
@@ -6,10 +6,10 @@ export default function NewMediaStoryPage() {
       <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-1" style={{ color: '#68a2b9' }}>
         Evolved Media
       </p>
-      <h1 className="font-display font-bold text-xl mb-6" style={{ color: '#1b3c5a' }}>
+      <h1 className="font-display font-bold text-xl mb-6" style={{ color: 'var(--admin-text)' }}>
         New Story
       </h1>
-      <MediaStoryForm />
+      <NewStoryClient />
     </div>
   )
 }

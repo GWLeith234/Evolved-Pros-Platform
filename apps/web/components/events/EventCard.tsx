@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { formatEventDate, formatDuration, EVENT_TYPE_LABELS } from '@/lib/events/types'
 import type { EventItem } from '@/lib/events/types'
-import { Tooltip } from '@/components/ui/Tooltip'
+import { buildUpgradeHref, tierBadgeLabel, tierPlanName } from '@/lib/academy/gating'
 
 const TYPE_GRADIENTS: Record<string, string> = {
   live:     'linear-gradient(135deg, #1a0a0a, #3d1515, #1B2A4A)',
@@ -36,8 +36,9 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
   const { day, month, time } = formatEventDate(event.startsAt)
   const duration = formatDuration(event.startsAt, event.endsAt)
   const typeLabel = EVENT_TYPE_LABELS[event.eventType]
-  const badgeBg = TYPE_BADGE_BG[event.eventType] ?? '#1b3c5a'
+  const badgeBg = TYPE_BADGE_BG[event.eventType] ?? TYPE_BADGE_BG.inperson
   const gradient = TYPE_GRADIENTS[event.eventType] ?? TYPE_GRADIENTS.inperson
+  const tierChip = tierBadgeLabel(event.requiredTier)
 
   async function handleAction() {
     if (!hasAccess || loading) return
@@ -62,29 +63,49 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
         href={event.recordingUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="block w-full text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 transition-colors"
+        className="flex w-full items-center justify-center text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 min-h-[44px] transition-colors"
         style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.15)' }}
       >
         Watch Recording
       </a>
     )
   } else if (!hasAccess) {
+    // SPRINT TIER-1 — labelling only; event access rules are unchanged. The
+    // chip names the tier the SESSION actually requires (this used to say
+    // "Pro Required" on every gated event, including VIP ones) and links to
+    // the pricing ladder instead of pointing at Settings.
     cta = (
-      <Tooltip content="This event requires a Pro membership. Upgrade in Settings to access it.">
-        <span
-          className="block w-full text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 cursor-default"
-          style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: '#7a8a96', border: '1px solid rgba(255,255,255,0.08)' }}
-        >
-          Pro Required
-        </span>
-      </Tooltip>
+      <Link
+        href={buildUpgradeHref({ from: 'events', tier: event.requiredTier })}
+        className="flex w-full items-center justify-center gap-2 text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 min-h-[44px]"
+        style={{
+          // This whole card is a FIXED-DARK surface (see the container bg
+          // below), so the CTA uses the same white-alpha values as its sibling
+          // "Watch Recording" action rather than semantic tokens, which would
+          // flip to parchment on a card that stays dark in light mode.
+          backgroundColor: 'rgba(255,255,255,0.06)',
+          color: 'var(--white)',
+          border: '1px solid rgba(255,255,255,0.15)',
+          textDecoration: 'none',
+        }}
+      >
+        {tierChip && (
+          <span
+            className="font-condensed font-black uppercase tracking-[0.16em] text-[10px] px-1.5 py-0.5"
+            style={{ color: 'var(--brand-gold-bright)', border: '1px solid rgba(255,255,255,0.15)' }}
+          >
+            {tierChip}
+          </span>
+        )}
+        Unlock with {tierPlanName(event.requiredTier)}
+      </Link>
     )
   } else if (registered) {
     cta = (
       <button
         onClick={handleAction}
         disabled={loading}
-        className="block w-full text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 transition-colors"
+        className="flex w-full items-center justify-center text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 min-h-[44px] transition-colors"
         style={{ backgroundColor: '#0ABFA3', color: 'white' }}
       >
         {loading ? '...' : '✓ Registered'}
@@ -95,7 +116,7 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
       <button
         onClick={handleAction}
         disabled={loading}
-        className="block w-full text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 transition-colors"
+        className="flex w-full items-center justify-center text-center font-condensed font-bold uppercase tracking-wide text-[12px] rounded py-2.5 min-h-[44px] transition-colors"
         style={{ backgroundColor: '#ef0e30', color: 'white' }}
       >
         {loading ? '...' : 'Register →'}
@@ -147,7 +168,7 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
             </span>
             <span
               className="font-condensed font-bold uppercase leading-none"
-              style={{ fontSize: '10px', color: 'rgba(255,255,255,0.75)', marginTop: '2px' }}
+              style={{ fontSize: '12px', color: 'rgba(255,255,255,0.75)', marginTop: '2px' }}
             >
               {month}
             </span>
@@ -155,7 +176,7 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
           {/* Type badge — top-right */}
           <div className="absolute top-3 right-3">
             <span
-              className="font-condensed font-bold uppercase tracking-wide text-[9px] rounded px-2 py-1 text-white"
+              className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-2 py-1 text-white"
               style={{ backgroundColor: badgeBg }}
             >
               {typeLabel}
@@ -168,13 +189,13 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
       <div className="flex flex-col flex-1 p-4 gap-2">
         <Link href={`/events/${event.id}`} className="group">
           <h3
-            className="font-body font-semibold leading-snug group-hover:text-[#68a2b9] transition-colors"
+            className="font-body font-semibold leading-snug line-clamp-2 group-hover:text-[#68a2b9] transition-colors"
             style={{ fontSize: '15px', color: '#faf9f7' }}
           >
             {event.title}
           </h3>
         </Link>
-        <p className="font-condensed text-[11px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+        <p className="font-condensed text-[12px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
           {time}{duration ? ` · ${duration}` : ''}
           {event.registrationCount > 0 && ` · ${event.registrationCount} registered`}
         </p>

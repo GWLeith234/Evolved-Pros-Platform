@@ -1,4 +1,7 @@
-const LOGO = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_nav_light.png'
+'use client'
+
+import { LogoMark } from '@/components/ui/LogoMark'
+import { useTheme } from '@/components/theme/ThemeProvider'
 
 interface Props {
   displayName: string
@@ -7,16 +10,16 @@ interface Props {
 
 export function OnboardingWelcome({ displayName, onContinue }: Props) {
   const firstName = displayName?.split(' ')[0] || ''
+  // Card flips with the theme, so the wordmark must too: white mark on the
+  // dark card, navy mark on the light card. Same useTheme + LogoMark swap the
+  // nav uses (TopNav).
+  const { resolvedTheme } = useTheme()
+  const isLight = resolvedTheme === 'light'
 
   return (
     <div style={{ textAlign: 'center' }}>
-      {/* Logo */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={LOGO}
-        alt="Evolved Pros"
-        style={{ height: 32, marginBottom: 28, opacity: 0.9 }}
-      />
+      {/* Horizontal EVOLVED PROS wordmark with red mic — flips per theme */}
+      <LogoMark variant={isLight ? 'dark' : 'light'} height={36} className="mb-7 opacity-95" />
 
       {/* Heading */}
       <h1
@@ -38,7 +41,7 @@ export function OnboardingWelcome({ displayName, onContinue }: Props) {
         style={{
           fontFamily: 'Barlow, sans-serif',
           fontSize: '16px',
-          color: 'rgba(250,249,247,0.55)',
+          color: 'var(--text-secondary)',
           lineHeight: 1.6,
           margin: '0 0 32px',
           maxWidth: '420px',
@@ -46,32 +49,30 @@ export function OnboardingWelcome({ displayName, onContinue }: Props) {
           marginRight: 'auto',
         }}
       >
-        You&apos;re now part of an elite community of sales professionals.
-        Let&apos;s get you set up in 2 minutes.
+        Three quick steps, then straight into Foundation — your first course.
       </p>
 
-      {/* Value prop card */}
+      {/* Value prop — shorter for speed-to-first-lesson */}
       <div
         style={{
           backgroundColor: 'rgba(201,168,76,0.06)',
           border: '1px solid rgba(201,168,76,0.3)',
           borderRadius: '10px',
-          padding: '20px 24px',
-          marginBottom: '36px',
+          padding: '16px 20px',
+          marginBottom: '28px',
           textAlign: 'left',
           display: 'flex',
           flexDirection: 'column',
-          gap: '10px',
+          gap: '8px',
         }}
       >
         {[
-          { icon: '\u{1F4DA}', text: '6-pillar academy \u2014 Foundation through Execution' },
-          { icon: '\u{1F465}', text: 'Community of elite sales peers' },
-          { icon: '\u{1F4CA}', text: 'Scoreboard & weekly accountability' },
-          { icon: '\u{1F399}\uFE0F', text: 'The Evolved Pros Podcast' },
-        ].map(({ icon, text }) => (
+          { n: '1', text: 'Name + photo (optional)' },
+          { n: '2', text: 'Pick your growth focus' },
+          { n: '3', text: 'Start Foundation lesson 1' },
+        ].map(({ n, text }) => (
           <div
-            key={text}
+            key={n}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -80,23 +81,38 @@ export function OnboardingWelcome({ displayName, onContinue }: Props) {
               fontSize: '14px',
               fontWeight: 600,
               letterSpacing: '0.03em',
-              color: 'rgba(250,249,247,0.8)',
+              color: 'var(--text-primary)',
             }}
           >
-            <span style={{ fontSize: '18px', lineHeight: 1 }}>{icon}</span>
+            <span
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                background: 'rgba(201,168,76,0.2)',
+                color: '#C9A84C',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 11,
+                fontWeight: 800,
+                flexShrink: 0,
+              }}
+            >
+              {n}
+            </span>
             {text}
           </div>
         ))}
       </div>
 
-      {/* CTA */}
       <button
         type="button"
         onClick={onContinue}
         style={{
           width: '100%',
           padding: '16px 24px',
-          backgroundColor: '#0ABFA3',
+          backgroundColor: '#C9302A',
           color: '#ffffff',
           fontFamily: '"Barlow Condensed", sans-serif',
           fontWeight: 900,
@@ -111,7 +127,7 @@ export function OnboardingWelcome({ displayName, onContinue }: Props) {
         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.9' }}
         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '1' }}
       >
-        LET&apos;S GET STARTED &rarr;
+        Start in under 2 minutes →
       </button>
     </div>
   )

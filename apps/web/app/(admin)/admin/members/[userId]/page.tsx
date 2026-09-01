@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { getEngagementLevel, getEngagementScore, getTierMrr } from '@/lib/admin/helpers'
@@ -11,39 +12,48 @@ interface Props {
 }
 
 export default async function AdminMemberDetailPage({ params }: Props) {
-  const supabase = createClient()
+  // Short-circuit ONLY on prefetch — regular RSC navigations also send
+  // RSC=1 and short-circuiting them was the BUG-1 root cause: the detail
+  // page returned null on click-through, leaving the admin layout shell
+  // visible and giving QA the impression that "/admin/members/[id] renders
+  // index instead of detail."
+  const h = headers()
+  if (h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
-  const [userResult, postsResult, progressResult] = await Promise.all([
-    supabase
+  // RLS-FIX: adminClient — bypass RLS so admin sees canonical user / posts /
+  // lesson_progress rows.
+  // maybeSingle() returns null on no-match instead of throwing PGRST116, so a
+  // stale /admin/members/[userId] link falls through to notFound() cleanly.
+  const [userResult, postsResult, progressResult, guestResult] = await Promise.all([
+    adminClient
       .from('users')
-      .select('id, email, full_name, display_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, vendasta_contact_id, points, created_at, updated_at')
+      .select('id, email, full_name, display_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, role, comp_promo_code_id, points, created_at, updated_at')
       .eq('id', params.userId)
-      .single(),
-    supabase
+      .limit(1)
+      .maybeSingle(),
+    adminClient
       .from('posts')
       .select('id, body, created_at, channels(name, slug)')
       .eq('author_id', params.userId)
       .order('created_at', { ascending: false })
       .limit(20),
-    supabase
+    adminClient
       .from('lesson_progress')
       .select('lesson_id, completed_at, watch_time_seconds, updated_at, lessons(title, course_id, courses(title, pillar_number))')
       .eq('user_id', params.userId)
       .order('updated_at', { ascending: false }),
+    // Guest persona: intake + booking rows (new table — not yet in generated types).
+    (adminClient as any)
+      .from('guest_engagements')
+      .select('id, episode_id, status, token_expires_at, one_liner, short_bio, headshot_url, topics, links, av_notes, tee_size, consent_release, submitted_at, created_at, episodes(title, slug)')
+      .eq('user_id', params.userId)
+      .order('created_at', { ascending: false }),
   ])
 
   if (!userResult.data) notFound()
   const user = userResult.data
-
-  // Fetch Vendasta webhooks if contact linked
-  const webhooksResult = user.vendasta_contact_id
-    ? await supabase
-        .from('vendasta_webhooks')
-        .select('id, event_type, vendasta_order_id, product_sku, processed_at, status, error_message')
-        .eq('vendasta_contact_id', user.vendasta_contact_id)
-        .order('processed_at', { ascending: false })
-        .limit(50)
-    : { data: [] }
 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
   const p30 = (postsResult.data ?? []).filter(p => p.created_at >= thirtyDaysAgo).length
@@ -61,18 +71,19 @@ export default async function AdminMemberDetailPage({ params }: Props) {
     tier:              user.tier,
     tierStatus:        user.tier_status,
     tierExpiresAt:     user.tier_expires_at,
-    vendastaContactId: user.vendasta_contact_id,
+    role:              (user as { role?: string | null }).role ?? null,
+    isComped:          Boolean(user.comp_promo_code_id),
+    guestEngagements:  (guestResult?.data ?? []) as Parameters<typeof MemberDetailClient>[0]['member']['guestEngagements'],
     points:            user.points,
     joinedAt:          user.created_at,
     lastActive:        user.updated_at,
-    mrr:               getTierMrr(user.tier, user.tier_status),
+    mrr:               getTierMrr(user.tier, user.tier_status, Boolean(user.comp_promo_code_id)),
     engagementLevel:   getEngagementLevel(p30, l30),
     engagementScore:   getEngagementScore(p30, l30),
     postsLast30:       p30,
     lessonsLast30:     l30,
     recentPosts:       (postsResult.data ?? []) as Parameters<typeof MemberDetailClient>[0]['member']['recentPosts'],
     lessonProgress:    (progressResult.data ?? []) as Parameters<typeof MemberDetailClient>[0]['member']['lessonProgress'],
-    vendastaWebhooks:  (webhooksResult.data ?? []) as Parameters<typeof MemberDetailClient>[0]['member']['vendastaWebhooks'],
   }
 
   const displayName = user.display_name ?? user.full_name ?? user.email
@@ -82,11 +93,11 @@ export default async function AdminMemberDetailPage({ params }: Props) {
       <div className="px-8 pt-6 pb-0">
         <Link
           href="/admin/members"
-          className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a] transition-colors"
+          className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[color:var(--admin-text-2)] hover:text-[color:var(--admin-text)] transition-colors"
         >
           ← All Members
         </Link>
-        <h1 className="font-display font-black text-[28px] text-[#112535] mt-2">{displayName}</h1>
+        <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)] mt-2">{displayName}</h1>
       </div>
       <MemberDetailClient member={member} />
     </div>

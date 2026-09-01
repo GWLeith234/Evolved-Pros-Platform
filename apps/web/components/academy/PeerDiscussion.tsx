@@ -140,7 +140,7 @@ export function PeerDiscussion({ courseId, moduleNumber, title }: Props) {
       <div style={{ marginBottom: '20px' }}>
         <p style={{
           fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-          fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
+          fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
           color: GOLD, margin: '0 0 4px',
         }}>
           Peer Discussion
@@ -174,7 +174,7 @@ export function PeerDiscussion({ courseId, moduleNumber, title }: Props) {
               backgroundColor: newBody.trim() ? CRIMSON : `${CRIMSON}22`,
               color: newBody.trim() ? '#0A0F18' : `${CRIMSON}55`,
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase',
+              fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
               padding: '9px 22px', borderRadius: '4px', border: 'none',
               cursor: newBody.trim() ? 'pointer' : 'default', transition: 'all 0.15s',
             }}
@@ -248,7 +248,7 @@ export function PeerDiscussion({ courseId, moduleNumber, title }: Props) {
                         backgroundColor: replyBody.trim() ? CRIMSON : `${CRIMSON}22`,
                         color: replyBody.trim() ? '#0A0F18' : `${CRIMSON}55`,
                         fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-                        fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase',
+                        fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                         padding: '7px 16px', borderRadius: '4px', border: 'none',
                         cursor: replyBody.trim() ? 'pointer' : 'default',
                       }}
@@ -261,7 +261,7 @@ export function PeerDiscussion({ courseId, moduleNumber, title }: Props) {
                       style={{
                         background: 'none', border: 'none',
                         fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-                        fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase',
+                        fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                         color: 'rgba(250,249,247,0.25)', cursor: 'pointer', padding: '7px 0',
                       }}
                     >
@@ -322,7 +322,7 @@ function PostCard({
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
           <span style={{ fontWeight: 600, fontSize: '13px', color: '#faf9f7' }}>{name}</span>
-          <span style={{ fontSize: '11px', color: 'rgba(250,249,247,0.3)' }}>{relativeTime(post.created_at)}</span>
+          <span style={{ fontSize: '12px', color: 'rgba(250,249,247,0.3)' }}>{relativeTime(post.created_at)}</span>
         </div>
         <p style={{ color: 'rgba(250,249,247,0.75)', fontSize: '13px', lineHeight: 1.6, margin: '0 0 8px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
           {post.body}
@@ -354,7 +354,7 @@ function PostCard({
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: 0,
                 fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-                fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase',
+                fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                 color: 'rgba(250,249,247,0.25)', transition: 'color 0.15s',
               }}
               onMouseEnter={e => (e.currentTarget.style.color = 'rgba(250,249,247,0.6)')}

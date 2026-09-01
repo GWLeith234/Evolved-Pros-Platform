@@ -117,7 +117,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
         <div style={{ padding: '28px' }}>
           <p style={{
             fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-            fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
+            fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
             color: GOLD, margin: '0 0 8px',
           }}>
             Module {moduleNumber} Check-In · Results
@@ -170,7 +170,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
                     <p style={{ color: 'rgba(250,249,247,0.7)', fontSize: '12px', margin: '0 0 4px', lineHeight: 1.5 }}>
                       {q.scenario.length > 80 ? q.scenario.slice(0, 80) + '…' : q.scenario}
                     </p>
-                    <p style={{ color: 'rgba(250,249,247,0.35)', fontSize: '11px', margin: 0, lineHeight: 1.4 }}>
+                    <p style={{ color: 'rgba(250,249,247,0.35)', fontSize: '12px', margin: 0, lineHeight: 1.4 }}>
                       {a?.explanation}
                     </p>
                   </div>
@@ -199,7 +199,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
             {saveError && !submitted && (
               <span style={{
                 fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-                fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: RED_ERR,
+                fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: RED_ERR,
               }}>
                 {saveError}
               </span>
@@ -207,7 +207,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
             {submitted && (
               <span style={{
                 fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-                fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: TEAL,
+                fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: TEAL,
               }}>
                 ✓ Result Saved
               </span>
@@ -218,7 +218,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
               style={{
                 background: 'none', border: 'none',
                 fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-                fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase',
+                fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase',
                 color: 'rgba(250,249,247,0.3)', cursor: 'pointer', padding: 0,
               }}
             >
@@ -239,7 +239,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
       <div style={{ marginBottom: '20px' }}>
         <p style={{
           fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-          fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
+          fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
           color: GOLD, margin: '0 0 4px',
         }}>
           Module {moduleNumber} Check-In
@@ -250,7 +250,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
           </div>
           <span style={{
             fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-            fontSize: '11px', letterSpacing: '0.1em', color: 'rgba(250,249,247,0.4)', flexShrink: 0,
+            fontSize: '12px', letterSpacing: '0.1em', color: 'rgba(250,249,247,0.4)', flexShrink: 0,
           }}>
             {currentIdx + 1} / {questions.length}
           </span>
@@ -320,7 +320,7 @@ export function ScenarioMCQ({ courseId, moduleNumber, questions }: Props) {
           }}>
             <p style={{
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase',
+              fontSize: '12px', letterSpacing: '0.18em', textTransform: 'uppercase',
               color: answer.isCorrect ? TEAL : GOLD, margin: '0 0 6px',
             }}>
               {answer.isCorrect ? 'Correct' : 'Not quite — here\'s why'}

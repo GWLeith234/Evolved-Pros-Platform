@@ -1,0 +1,37 @@
+// Editorial header for /events. Mirrors CommunityPageHeader's structure
+// (eyebrow + display heading) — events are visual, so no tagline.
+// All colors come from existing globals tokens (--text-tertiary,
+// --text-primary, --border-color), so it themes automatically.
+export function EventsPageHeader() {
+  return (
+    <header
+      style={{
+        padding: '32px 24px',
+        borderBottom: '1px solid var(--border-color)',
+      }}
+    >
+      <p
+        style={{
+          margin: 0,
+          fontFamily: '"Barlow Condensed", sans-serif',
+          fontSize: 12,
+          fontWeight: 600,
+          letterSpacing: '0.32em',
+          textTransform: 'uppercase',
+          color: 'var(--text-tertiary)',
+        }}
+      >
+        Evolved Pros
+      </p>
+      <h1
+        className="ep-type-display"
+        style={{
+          margin: '8px 0 0',
+          color: 'var(--text-primary)',
+        }}
+      >
+        Events
+      </h1>
+    </header>
+  )
+}

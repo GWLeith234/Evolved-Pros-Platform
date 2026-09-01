@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, 'claude/init-evolved-pros-platform-**']
   pull_request:
-    branches: [main]
+    branches: [main, 'claude/init-evolved-pros-platform-**']
 
 jobs:
   check:
@@ -16,14 +16,21 @@ jobs:
         with: { node-version: '20', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
 
-      # type-check: non-blocking until types.ts is regenerated from the live DB
+      # type-check: runs on main/develop AND the integration branch. Hard gate as of
+      # 2026-07-01 — error count has been 0 since PR #17. If this ever fails,
+      # it means new type debt was introduced; fix it, don't re-add continue-on-error.
       - name: Type check
         run: pnpm type-check
-        continue-on-error: true
 
       # lint: blocking — this is the real quality gate
       - name: Lint
         run: pnpm lint
+
+      # hex ratchet (STYLEGUIDE.md §4): raw hex in apps/web UI code may only
+      # go down. Blocking — adding raw hex fails the build; converting hex to
+      # tokens requires lowering .hex-baseline in the same commit.
+      - name: Hex ratchet
+        run: bash scripts/check-hex-ratchet.sh
 
       # build: non-blocking — next/font/google may fail to fetch fonts on
       # GitHub runners. The production build on Railway always succeeds.

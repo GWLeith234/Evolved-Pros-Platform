@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { toPostMedia } from '@/lib/community/media'
 import type { Post } from '@/lib/community/types'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,6 +18,11 @@ function toPost(
     like_count: number
     reply_count: number
     created_at: string
+    // CM-1 media columns (migration 079) — null on every pre-079 row.
+    media_url?: string | null
+    media_kind?: string | null
+    media_width?: number | null
+    media_height?: number | null
     users: { id: string; display_name: string | null; full_name: string | null; avatar_url: string | null; tier: string | null } | null
   },
   myReactionMap: Map<string, string>,
@@ -46,13 +53,14 @@ function toPost(
     myReaction: myReactionMap.get(row.id) ?? null,
     reactions,
     isBookmarked: bookmarkedIds.has(row.id),
+    media: toPostMedia(row),
   }
 }
 
 export async function GET(request: Request) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const channelSlug = searchParams.get('channelSlug')
@@ -63,7 +71,7 @@ export async function GET(request: Request) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query: any = adminClient
     .from('posts')
-    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
+    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, media_url, media_kind, media_width, media_height, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
     .eq('is_pinned', false)
     .order('created_at', { ascending: false })
     .limit(limit + 1)
@@ -94,29 +102,39 @@ export async function GET(request: Request) {
   const nextCursor = hasMore && page.length > 0 ? page[page.length - 1].created_at : null
 
   const postIds = page.map((p: { id: string }) => p.id)
-  type LikeRow = { post_id: string; reaction_type: string | null }
-  const [userLikesResult, bookmarksResult, allLikesResult] = await Promise.all([
+  // COMMUNITY-SPRINT-2: source reactions from post_reactions (Sprint 0
+  // table) instead of legacy post_likes. Sprint 0's migration backfilled
+  // post_likes data into post_reactions, so counts stay accurate.
+  // DB stores ('fire','hundred','clap','heart','mind') per Sprint 0 CHECK;
+  // map clap→hands and mind→mindblown for the new UI.
+  const DB_TO_EMOJI: Record<string, string> = {
+    fire: 'fire', hundred: 'hundred', clap: 'hands', heart: 'heart', mind: 'mindblown',
+  }
+  type ReactionRow = { post_id: string; user_id: string; reaction_type: string }
+  const [userReactionsResult, bookmarksResult, allReactionsResult] = await Promise.all([
     postIds.length > 0
-      ? supabase.from('post_likes').select('post_id, reaction_type').eq('user_id', user.id).in('post_id', postIds) as Promise<{ data: LikeRow[] | null }>
-      : Promise.resolve({ data: [] as LikeRow[] }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ? (adminClient as any).from('post_reactions').select('post_id, user_id, reaction_type').eq('user_id', profile.id).in('post_id', postIds) as Promise<{ data: ReactionRow[] | null }>
+      : Promise.resolve({ data: [] as ReactionRow[] }),
     postIds.length > 0
-      ? supabase.from('post_bookmarks').select('post_id').eq('user_id', user.id).in('post_id', postIds)
+      ? supabase.from('post_bookmarks').select('post_id').eq('user_id', profile.id).in('post_id', postIds)
       : Promise.resolve({ data: [] as { post_id: string }[] }),
     postIds.length > 0
-      ? adminClient.from('post_likes').select('post_id, reaction_type').in('post_id', postIds) as Promise<{ data: LikeRow[] | null }>
-      : Promise.resolve({ data: [] as LikeRow[] }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ? (adminClient as any).from('post_reactions').select('post_id, user_id, reaction_type').in('post_id', postIds) as Promise<{ data: ReactionRow[] | null }>
+      : Promise.resolve({ data: [] as ReactionRow[] }),
   ])
 
   const myReactionMap = new Map<string, string>(
-    (userLikesResult.data ?? []).map(l => [l.post_id, l.reaction_type ?? 'thumbs_up'])
+    (userReactionsResult.data ?? []).map(r => [r.post_id, DB_TO_EMOJI[r.reaction_type] ?? r.reaction_type])
   )
   const bookmarkedIds = new Set((bookmarksResult.data ?? []).map(b => b.post_id))
 
   const reactionCountsByPost = new Map<string, Map<string, number>>()
-  for (const like of allLikesResult.data ?? []) {
-    const type = like.reaction_type ?? 'thumbs_up'
-    if (!reactionCountsByPost.has(like.post_id)) reactionCountsByPost.set(like.post_id, new Map())
-    const m = reactionCountsByPost.get(like.post_id)!
+  for (const r of allReactionsResult.data ?? []) {
+    const type = DB_TO_EMOJI[r.reaction_type] ?? r.reaction_type
+    if (!reactionCountsByPost.has(r.post_id)) reactionCountsByPost.set(r.post_id, new Map())
+    const m = reactionCountsByPost.get(r.post_id)!
     m.set(type, (m.get(type) ?? 0) + 1)
   }
 
@@ -129,10 +147,19 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  let body: { channelId?: unknown; body?: unknown; pillarTag?: unknown; postType?: unknown }
+  let body: {
+    channelId?: unknown
+    body?: unknown
+    pillarTag?: unknown
+    postType?: unknown
+    pollId?: unknown
+    pollOptions?: unknown
+    kind?: unknown      // COMMUNITY-SPRINT-1: new composer
+    pillar?: unknown    // COMMUNITY-SPRINT-1: integer 1-6 or null
+  }
   try {
     body = await request.json()
   } catch {
@@ -142,28 +169,121 @@ export async function POST(request: Request) {
   const channelId = typeof body.channelId === 'string' ? body.channelId : null
   const postBody = typeof body.body === 'string' ? body.body.trim() : ''
   const pillarTag = typeof body.pillarTag === 'string' ? body.pillarTag : null
-  const postType = typeof body.postType === 'string' ? body.postType : 'update'
+  const postType = typeof body.postType === 'string' ? body.postType : null
+  const pollId = typeof body.pollId === 'string' ? body.pollId : null
+  const pollOptions: string[] | null = Array.isArray(body.pollOptions)
+    ? (body.pollOptions as unknown[])
+        .filter((s): s is string => typeof s === 'string')
+        .map(s => s.trim())
+        .filter(Boolean)
+    : null
+
+  // New (Sprint 1) inputs.
+  const rawKind = typeof body.kind === 'string' ? body.kind : null
+  const rawPillar =
+    typeof body.pillar === 'number' ? body.pillar :
+    body.pillar === null ? null :
+    undefined
+
+  // Detect call site so legacy callers keep their min-10-char rule and new
+  // composer callers (which gate on non-empty client-side) only need >0.
+  const isNewComposer = rawKind !== null
+  const minBodyLen = isNewComposer ? 1 : 10
 
   if (!channelId) return NextResponse.json({ error: 'channelId is required' }, { status: 422 })
-  if (postBody.length < 10) return NextResponse.json({ error: 'Post must be at least 10 characters' }, { status: 422 })
+  if (postBody.length < minBodyLen) {
+    return NextResponse.json(
+      { error: isNewComposer ? 'Post body required' : 'Post must be at least 10 characters' },
+      { status: isNewComposer ? 400 : 422 },
+    )
+  }
   if (postBody.length > 5000) return NextResponse.json({ error: 'Post exceeds 5000 characters' }, { status: 422 })
 
+  const VALID_KINDS = ['update', 'win', 'question', 'poll'] as const
+  if (rawKind !== null && !VALID_KINDS.includes(rawKind as typeof VALID_KINDS[number])) {
+    return NextResponse.json({ error: 'Invalid kind' }, { status: 400 })
+  }
+  if (rawPillar !== undefined && rawPillar !== null) {
+    if (!Number.isInteger(rawPillar) || rawPillar < 1 || rawPillar > 6) {
+      return NextResponse.json({ error: 'Invalid pillar' }, { status: 400 })
+    }
+  }
+
+  // Resolve canonical kind / pillar — prefer new fields, fall back to legacy.
+  const validPostTypes = ['update', 'question', 'win', 'announce', 'poll']
+  const legacyType = postType && validPostTypes.includes(postType) ? postType : null
+  const kind: 'update' | 'win' | 'question' | 'poll' =
+    (rawKind as 'update' | 'win' | 'question' | 'poll' | null) ??
+    (legacyType === 'announce' ? 'update' : (legacyType as 'update' | 'win' | 'question' | 'poll' | null)) ??
+    'update'
+
   const validPillarTags = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6']
-  const validatedTag = pillarTag && validPillarTags.includes(pillarTag) ? pillarTag : null
+  const legacyTag = pillarTag && validPillarTags.includes(pillarTag) ? pillarTag : null
+  const pillarInt: number | null =
+    rawPillar !== undefined ? (rawPillar as number | null) :
+    legacyTag ? Number(legacyTag.slice(1)) :
+    null
+  const pillarText: string | null =
+    pillarInt !== null && pillarInt >= 1 && pillarInt <= 6 ? `p${pillarInt}` : legacyTag
 
-  const validPostTypes = ['update', 'question', 'win', 'announce']
-  const validatedPostType = validPostTypes.includes(postType) ? postType : 'update'
+  const authorId = profile.id
 
-  const { data: post, error } = await supabase
+  // Poll creation: when kind === 'poll' and the composer sent options,
+  // create the poll + poll_options rows first so we can attach the
+  // resulting poll_id to the post insert below.
+  let resolvedPollId: string | null = pollId
+  if (kind === 'poll' && !resolvedPollId && pollOptions) {
+    if (pollOptions.length < 2) {
+      return NextResponse.json({ error: 'Polls need at least 2 options' }, { status: 422 })
+    }
+    if (pollOptions.length > 4) {
+      return NextResponse.json({ error: 'Polls support at most 4 options' }, { status: 422 })
+    }
+
+    const { data: pollRow, error: pollErr } = await adminClient
+      .from('polls')
+      .insert({
+        question: postBody.slice(0, 500),
+        created_by: profile.id,
+        status: 'active',
+      } as never)
+      .select('id')
+      .single()
+
+    if (pollErr || !pollRow) {
+      console.error('[posts] poll insert failed:', pollErr?.message)
+      return NextResponse.json({ error: 'Failed to create poll' }, { status: 500 })
+    }
+
+    const newPollId = (pollRow as { id: string }).id
+    const optionRows = pollOptions.map((text, idx) => ({
+      poll_id: newPollId,
+      option_text: text.slice(0, 200),
+      display_order: idx,
+    }))
+    const { error: optsErr } = await adminClient.from('poll_options').insert(optionRows as never)
+    if (optsErr) {
+      console.error('[posts] poll_options insert failed:', optsErr.message)
+      return NextResponse.json({ error: 'Failed to create poll options' }, { status: 500 })
+    }
+    resolvedPollId = newPollId
+  }
+
+  const { data: post, error } = await adminClient
     .from('posts')
     .insert({
-      author_id: user.id,
+      author_id: authorId,
       channel_id: channelId,
       body: postBody,
-      pillar_tag: validatedTag as 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | null,
-      post_type: validatedPostType,
-    })
-    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
+      // Legacy columns — kept in sync so existing fetchers keep returning posts correctly.
+      pillar_tag: pillarText as 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | null,
+      post_type: legacyType ?? kind,
+      // New columns (Sprint 0/1).
+      kind,
+      pillar: pillarInt,
+      ...(resolvedPollId ? { poll_id: resolvedPollId } : {}),
+    } as never)
+    .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, media_url, media_kind, media_width, media_height, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
     .single()
 
   if (error || !post) {
@@ -171,13 +291,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to create post' }, { status: 500 })
   }
 
-  void Promise.resolve(supabase.rpc('increment_points', { user_id: user.id, amount: 10 } as Record<string, unknown>)).then(({ error }) => {
-    if (error) {
-      console.warn('[posts] increment_points RPC failed:', error.message, '— skipping points award')
-    }
-  }).catch(err => {
-    console.warn('[posts] increment_points threw:', err)
-  })
+  // Award 10 points for posting (fire-and-forget — never block the response)
+  try {
+    const { error: rpcErr } = await adminClient.rpc('increment_points', { user_id: profile.id, amount: 10 })
+    if (rpcErr) console.warn('[posts] increment_points failed:', rpcErr.message)
+  } catch (err) {
+    console.warn('[posts] increment_points exception:', err)
+  }
 
   const result: Post = toPost(
     post as Parameters<typeof toPost>[0],

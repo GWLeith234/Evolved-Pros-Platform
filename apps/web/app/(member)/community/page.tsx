@@ -2,148 +2,163 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
-import { UnifiedCommunityPage } from '@/components/community/UnifiedCommunityPage'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { UnifiedCommunityPageClient } from './UnifiedCommunityPageClient'
+import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
+import {
+  pickCommunityRailSponsors,
+} from '@/lib/sponsors/partners'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import type { RailAcademyContinue, RailPodcastEpisode } from '@/components/community/CommunityRightRail'
 
 export const metadata: Metadata = { title: 'Community — Evolved Pros' }
 import {
   fetchChannels,
   fetchAllPosts,
   fetchPinnedAnnouncement,
-  fetchLeaderboard,
-  fetchActiveMembers,
-  fetchCurrentUserProfile,
   fetchCommunityAds,
-  fetchLatestPodcastEpisode,
+  fetchWeeklyLeaderboard,
 } from '@/lib/community/fetchers'
-import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+
+async function fetchLatestPodcastEpisode(): Promise<RailPodcastEpisode | null> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await (adminClient as any)
+      .from('episodes')
+      .select('id, title, slug, guest_name, episode_number')
+      .eq('is_published', true)
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .limit(1)
+      .maybeSingle()
+    if (!data) return null
+    return {
+      id: data.id,
+      title: data.title,
+      slug: data.slug ?? null,
+      guest_name: data.guest_name ?? null,
+      episode_number: data.episode_number ?? null,
+    }
+  } catch {
+    return null
+  }
+}
+
+async function fetchAcademyContinue(userId: string): Promise<RailAcademyContinue> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = adminClient as any
+    const [{ data: courses }, { data: lessons }, { data: progress }] = await Promise.all([
+      sb.from('courses').select('id, title, slug, sort_order').eq('is_published', true).order('sort_order'),
+      sb.from('lessons').select('id, course_id, slug').eq('is_published', true),
+      sb
+        .from('lesson_progress')
+        .select('lesson_id, completed_at')
+        .eq('user_id', userId)
+        .not('completed_at', 'is', null),
+    ])
+    const completed = new Set(
+      ((progress ?? []) as { lesson_id: string }[]).map(p => p.lesson_id),
+    )
+    const lessonsByCourse: Record<string, { id: string; slug: string | null }[]> = {}
+    for (const l of (lessons ?? []) as { id: string; course_id: string; slug: string | null }[]) {
+      if (!lessonsByCourse[l.course_id]) lessonsByCourse[l.course_id] = []
+      lessonsByCourse[l.course_id].push(l)
+    }
+
+    let best: RailAcademyContinue = null
+    for (const c of (courses ?? []) as { id: string; title: string; slug: string }[]) {
+      const list = lessonsByCourse[c.id] ?? []
+      if (list.length === 0) continue
+      const done = list.filter(l => completed.has(l.id)).length
+      if (done === 0) continue
+      const pct = Math.round((done / list.length) * 100)
+      if (pct >= 100) continue
+      const next = list.find(l => !completed.has(l.id))
+      const href = next?.slug
+        ? `/academy/${c.slug}/${next.slug}`
+        : `/academy/${c.slug}`
+      // Prefer the most progressed incomplete course
+      if (!best || pct > (best.progressPct ?? 0)) {
+        best = {
+          courseTitle: c.title,
+          courseSlug: c.slug,
+          progressPct: pct,
+          href,
+        }
+      }
+    }
+    return best
+  } catch {
+    return null
+  }
+}
+
+function railSponsorsFromAds(
+  communityAds: { id: string; image_url: string | null; headline: string | null; tool_name: string | null; cta_text: string | null; link_url: string | null; click_url: string | null; sponsor_name: string | null; body_copy?: string | null; ad_type?: string | null; title?: string | null; zone?: string | null }[],
+): SponsorAd[] {
+  const fromDb: SponsorAd[] = communityAds.map(a => ({
+    id: a.id,
+    image_url: a.image_url,
+    click_url: a.click_url,
+    link_url: a.link_url,
+    headline: a.headline,
+    tool_name: a.tool_name,
+    sponsor_name: a.sponsor_name,
+    cta_text: a.cta_text,
+    endorsement_quote: a.body_copy ?? null,
+    ad_type: a.ad_type ?? null,
+    title: a.title ?? null,
+    zone: a.zone ?? null,
+    body_copy: a.body_copy ?? null,
+  }))
+  if (fromDb.length === 0) return []
+  return pickCommunityRailSponsors(fromDb, 4)
+}
 
 export default async function CommunityPage() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) redirect('/login')
 
-  const [profile, channels, postsResult, pinnedPost, leaderboard, activeMembers, ads, episode, coursesRes, scoreboardRes, eventRes] = await Promise.all([
-    fetchCurrentUserProfile(supabase, user.id),
-    fetchChannels(supabase),
-    fetchAllPosts(supabase, { userId: user.id }),
-    fetchPinnedAnnouncement(supabase),
-    fetchLeaderboard(supabase, user.id),
-    fetchActiveMembers(supabase),
-    fetchCommunityAds(),
-    fetchLatestPodcastEpisode(),
-    // Academy progress: courses with lesson counts
-    supabase
-      .from('courses')
-      .select('id, pillar_number, title')
-      .order('pillar_number'),
-    // User's active scoreboard
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
-      .from('scoreboards')
-      .select('wig_statement, lead1_label, lead1_target, lead1_count')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .limit(1)
-      .maybeSingle(),
-    // Next upcoming event
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
-      .from('events')
-      .select('title, starts_at')
-      .gte('starts_at', new Date().toISOString())
-      .order('starts_at')
-      .limit(1)
-      .maybeSingle(),
-  ])
+  const [channels, postsResult, pinnedPost, weeklyLeaderboard, ads, latestEpisode, academyContinue] =
+    await Promise.all([
+      fetchChannels(supabase),
+      fetchAllPosts(supabase, { userId: profile.id }),
+      fetchPinnedAnnouncement(supabase),
+      fetchWeeklyLeaderboard(supabase, profile.id),
+      fetchCommunityAds(),
+      fetchLatestPodcastEpisode(),
+      fetchAcademyContinue(profile.id),
+    ])
 
   const generalChannel = channels.find(c => c.slug === 'general')
   if (!generalChannel) redirect('/home')
 
   const isAdmin = profile?.role === 'admin'
-  const userPoints = profile?.points ?? 0
-
-  // Compute pillarProgress from courses + lesson_progress
-  let pillarProgress: { pillar: string; label: string; pct: number } | null = null
-  const courses = (coursesRes.data ?? []) as { id: string; pillar_number: number; title: string }[]
-  if (courses.length > 0 && profile) {
-    const currentPillar = profile.current_pillar ?? 1
-    const pillarCourses = courses.filter(c => c.pillar_number === currentPillar)
-    if (pillarCourses.length > 0) {
-      const courseIds = pillarCourses.map(c => c.id)
-      const [lessonsRes, progressRes] = await Promise.all([
-        supabase.from('lessons').select('id, course_id').in('course_id', courseIds),
-        supabase.from('lesson_progress').select('lesson_id').eq('user_id', user.id).eq('completed', true),
-      ])
-      const totalLessons = (lessonsRes.data ?? []).length
-      const completedIds = new Set((progressRes.data ?? []).map(p => p.lesson_id))
-      const pillarLessonIds = new Set((lessonsRes.data ?? []).map(l => l.id))
-      const completedInPillar = [...completedIds].filter(id => pillarLessonIds.has(id)).length
-      const pct = totalLessons > 0 ? Math.round((completedInPillar / totalLessons) * 100) : 0
-      const pillarConfig = PILLAR_CONFIG[currentPillar]
-      pillarProgress = {
-        pillar: `p${currentPillar}`,
-        label: pillarConfig?.label ?? `Pillar ${currentPillar}`,
-        pct,
-      }
-    }
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const scoreboardData = (scoreboardRes.data as any) ?? null
-  const scoreboard = scoreboardData ? {
-    wigStatement: scoreboardData.wig_statement ?? null,
-    lead1Label: scoreboardData.lead1_label ?? null,
-    lead1Target: scoreboardData.lead1_target ?? null,
-    lead1Count: scoreboardData.lead1_count ?? null,
-  } : null
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const eventData = (eventRes.data as any) ?? null
-  const nextEvent = eventData ? {
-    title: eventData.title,
-    startsAt: eventData.starts_at,
-  } : null
-
-  // Derive userRank and nextRankEntry from leaderboard
-  const meEntry = leaderboard.find(e => e.isCurrentUser)
-  const userRank = meEntry?.rank ?? null
-  const myPoints = meEntry?.points ?? userPoints
-  // Find the person just ahead (smallest points > myPoints among leaderboard)
-  const ahead = leaderboard
-    .filter(e => !e.isCurrentUser && e.points > myPoints)
-    .sort((a, b) => a.points - b.points)[0] ?? null
-  const nextRankEntry = ahead ? { displayName: ahead.displayName, points: ahead.points } : null
-
-  const episodeSummary = episode ? {
-    title: episode.title,
-    guestName: episode.guest_name ?? null,
-    durationSeconds: episode.duration_seconds ?? null,
-  } : null
+  const railSponsors = railSponsorsFromAds(ads)
 
   return (
-    <UnifiedCommunityPage
-      posts={postsResult.posts}
-      nextCursor={postsResult.nextCursor}
-      hasMore={postsResult.hasMore}
-      pinnedPost={pinnedPost}
-      ads={ads}
-      currentUser={{
-        id: user.id,
-        displayName: profile?.display_name ?? profile?.full_name ?? null,
-        avatarUrl: profile?.avatar_url ?? null,
-        tier: profile?.tier ?? null,
-        isAdmin,
-      }}
-      defaultChannelId={generalChannel.id}
-      dashboardProps={{
-        pillarProgress,
-        episode: episodeSummary,
-        scoreboard,
-        nextEvent,
-        userRank,
-        nextRankEntry,
-        userPoints: myPoints,
-      }}
-    />
+    <>
+      <EpisodeBanner />
+      <UnifiedCommunityPageClient
+        posts={postsResult.posts}
+        nextCursor={postsResult.nextCursor}
+        hasMore={postsResult.hasMore}
+        pinnedPost={pinnedPost}
+        ads={ads}
+        currentUser={{
+          id: profile.id,
+          displayName: profile?.display_name ?? profile?.full_name ?? null,
+          avatarUrl: profile?.avatar_url ?? null,
+          tier: profile?.tier ?? null,
+          isAdmin,
+        }}
+        defaultChannelId={generalChannel.id}
+        weeklyLeaderboard={weeklyLeaderboard}
+        latestEpisode={latestEpisode}
+        academyContinue={academyContinue}
+        railSponsors={railSponsors}
+      />
+    </>
   )
 }

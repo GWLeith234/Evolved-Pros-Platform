@@ -1,13 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
 import { PostReplyThread } from './PostReplyThread'
+import { PostMedia } from './PostMedia'
 import { ReactionPicker } from './ReactionPicker'
-import { getAvatarColor, PILLAR_LABELS } from '@/lib/community/types'
+import { getAvatarColor } from '@/lib/community/types'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { MemberBadge } from '@/components/ui/MemberBadge'
 import { Tooltip } from '@/components/ui/Tooltip'
 import type { Post, Reply, PillarTag } from '@/lib/community/types'
+import { GeorgeReplyAssist } from './GeorgeReplyAssist'
+import { useTheme } from '@/components/theme/ThemeProvider'
 
 interface PostCardProps {
   post: Post & { replies?: Reply[] }
@@ -16,6 +21,7 @@ interface PostCardProps {
   onReact: (postId: string, reactionType: string) => void
   onBookmark: (postId: string) => void
   activeFilter?: string
+  isAdmin?: boolean
 }
 
 function timeAgo(dateStr: string): string {
@@ -27,23 +33,18 @@ function timeAgo(dateStr: string): string {
 }
 
 // Defers Date.now() to client-only — avoids server/client mismatch (hydration error #425)
+// Pattern B: useState<string | null>(null) so the initial render is identical
+// on server and client (both produce ''), then useEffect fills in after mount.
 function ClientTimeAgo({ dateStr }: { dateStr: string }) {
-  const [ago, setAgo] = useState('')
-  useEffect(() => { setAgo(timeAgo(dateStr)) }, [dateStr])
-  return <>{ago}</>
+  const [label, setLabel] = useState<string | null>(null)
+  useEffect(() => { setLabel(timeAgo(dateStr)) }, [dateStr])
+  return <>{label ?? ''}</>
 }
 
 function getInitials(name: string): string {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 }
 
-function HeartIcon({ filled }: { filled: boolean }) {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-    </svg>
-  )
-}
 
 function ReplyIcon() {
   return (
@@ -61,24 +62,19 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
   )
 }
 
-export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark, activeFilter }: PostCardProps) {
+export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark, activeFilter, isAdmin }: PostCardProps) {
   const [showReplies, setShowReplies] = useState(false)
   const [replies, setReplies] = useState<Reply[]>(post.replies ?? [])
   const [loadingReplies, setLoadingReplies] = useState(false)
-  const [isDark, setIsDark] = useState(true)
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark'
+
+  // Use locally-tracked replies when present; otherwise fall back to server replyCount
+  const totalReplies = replies.length > 0 ? replies.length : (post.replyCount ?? 0)
 
   useEffect(() => {
     setShowReplies(false)
   }, [activeFilter])
-
-  useEffect(() => {
-    setIsDark(!document.documentElement.classList.contains('light-mode'))
-    const observer = new MutationObserver(() => {
-      setIsDark(!document.documentElement.classList.contains('light-mode'))
-    })
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-    return () => observer.disconnect()
-  }, [])
 
   const avatarBg = getAvatarColor(post.author.id)
 
@@ -98,14 +94,19 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
     setShowReplies(v => !v)
   }
 
-  async function handleReplySubmit(body: string) {
-    const res = await fetch(`/api/posts/${post.id}/replies`, {
+  // CM-1: multipart so a comment on the channel feed can carry one image,
+  // same as the unified feed. Without a file part this is the old text-only
+  // reply, unchanged.
+  async function handleReplySubmit(body: string, file: File | null) {
+    const form = new FormData()
+    form.append('body', body)
+    if (file) form.append('file', file, file.name)
+    const res = await fetch(`/api/community/posts/${post.id}/comments`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ body }),
+      body: form,
     })
     if (!res.ok) {
-      const data = await res.json()
+      const data = await res.json().catch(() => ({})) as { error?: string }
       throw new Error(data.error ?? 'Failed to reply')
     }
     const reply = await res.json() as Reply
@@ -127,7 +128,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
   const accentColor = pillarConf?.color
     ?? (isWin ? '#C9A84C' : isAnnounce ? '#ef0e30' : isQuestion ? '#60A5FA' : '#68a2b9')
 
-  const actionBtnClass = `flex items-center gap-1.5 font-condensed font-semibold uppercase text-[11px] tracking-wide hover:text-[#ef0e30] transition-colors duration-150 ${isLightCard || !isDark ? 'text-[#1b3c5a]/70' : 'text-[#7a8a96]'}`
+  const actionBtnClass = `flex items-center justify-center gap-1.5 min-h-[44px] min-w-[44px] px-2 font-condensed font-semibold uppercase text-[12px] sm:text-[12px] tracking-wide hover:text-[#ef0e30] transition-colors duration-150 ${isLightCard || !isDark ? 'text-[#1b3c5a]/70' : 'text-[#7a8a96]'}`
 
   const cardStyle: React.CSSProperties = isWin
     ? {
@@ -180,15 +181,18 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
       {/* Header */}
       <div className="flex items-start gap-3 mb-3">
         {/* Avatar */}
-        <div
+        <Link
+          href={`/profile/${post.author.id}`}
           className="w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden"
           style={{ backgroundColor: avatarBg }}
+          aria-label={`${post.author.displayName} profile`}
         >
           {post.author.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={post.author.avatarUrl}
-              alt={post.author.displayName}
+              alt={`${post.author.displayName} avatar`}
+              width={36}
+              height={36}
               className="w-9 h-9 rounded-full object-cover"
             />
           ) : (
@@ -196,16 +200,17 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
               {getInitials(post.author.displayName)}
             </span>
           )}
-        </div>
+        </Link>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span
-              className="font-body font-semibold text-[14px]"
+            <Link
+              href={`/profile/${post.author.id}`}
+              className="font-body font-semibold text-[14px] hover:underline"
               style={{ color: isAnnounce ? 'white' : (isLightCard || !isDark) ? '#1b3c5a' : 'rgba(255,255,255,0.9)' }}
             >
               {post.author.displayName}
-            </span>
+            </Link>
             {post.author.tier && (
               post.author.tier === 'pro' ? (
                 <Tooltip content="Pro members have access to all 6 pillars and exclusive events.">
@@ -218,7 +223,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
             {/* Post type badges */}
             {isWin && (
               <span
-                className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
+                className="font-condensed font-bold uppercase text-[12px] sm:text-[12px] rounded px-2 py-0.5"
                 style={{ backgroundColor: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.25)', color: '#C9A84C' }}
               >
                 🏆 Win
@@ -226,7 +231,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
             )}
             {isQuestion && (
               <span
-                className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
+                className="font-condensed font-bold uppercase text-[12px] sm:text-[12px] rounded px-2 py-0.5"
                 style={{ backgroundColor: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60A5FA' }}
               >
                 ❓ Question
@@ -234,7 +239,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
             )}
             {isAnnounce && (
               <span
-                className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
+                className="font-condensed font-bold uppercase text-[12px] sm:text-[12px] rounded px-2 py-0.5"
                 style={{ backgroundColor: 'rgba(239,14,48,0.15)', border: '1px solid rgba(239,14,48,0.25)', color: '#ef0e30' }}
               >
                 📣 Announcement
@@ -243,7 +248,7 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
             {/* Pillar badge */}
             {pillarLabel && pillarConf && (
               <span
-                className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
+                className="font-condensed font-bold uppercase text-[12px] sm:text-[12px] rounded px-2 py-0.5"
                 style={{
                   backgroundColor: `${pillarConf.color}18`,
                   border: `1px solid ${pillarConf.color}40`,
@@ -253,10 +258,30 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
                 {pillarLabel}
               </span>
             )}
+            {/* Unanswered pill — admin only, hides as soon as a reply lands */}
+            {isAdmin && totalReplies === 0 && (
+              <span
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  padding: '2px 8px',
+                  borderRadius: '3px',
+                  background: 'rgba(201,168,76,0.12)',
+                  color: '#C9A84C',
+                  border: '1px solid rgba(201,168,76,0.25)',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Unanswered
+              </span>
+            )}
           </div>
           <p
-            className="font-condensed font-semibold uppercase text-[10px] mt-0.5"
+            className="font-condensed font-semibold uppercase text-[12px] sm:text-[12px] mt-0.5"
             style={{ color: isAnnounce ? 'rgba(255,255,255,0.4)' : (isLightCard || !isDark) ? 'rgba(27,60,90,0.5)' : '#7a8a96' }}
+            suppressHydrationWarning
           >
             <ClientTimeAgo dateStr={post.createdAt} />
           </p>
@@ -264,12 +289,21 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
       </div>
 
       {/* Body */}
-      <p
-        className="font-body text-[14px] leading-[1.72] mb-4"
-        style={{ color: isAnnounce ? 'rgba(255,255,255,0.75)' : (isLightCard || !isDark) ? '#3a4a56' : 'rgba(255,255,255,0.75)' }}
-      >
-        {post.body}
-      </p>
+      {post.body && (
+        <p
+          className="font-body text-[14px] leading-[1.72] mb-4"
+          style={{ color: isAnnounce ? 'rgba(255,255,255,0.75)' : (isLightCard || !isDark) ? '#3a4a56' : 'rgba(255,255,255,0.75)' }}
+        >
+          {post.body}
+        </p>
+      )}
+
+      {/* CM-1 attached media — below the body, above the action row. */}
+      {post.media && (
+        <div className="mb-4">
+          <PostMedia media={post.media} alt={`Image shared by ${post.author.displayName}`} />
+        </div>
+      )}
 
       {/* Actions */}
       <div
@@ -318,6 +352,21 @@ export function PostCard({ post, currentUserId, currentUser, onReact, onBookmark
               onReplySubmit={handleReplySubmit}
             />
           )}
+        </div>
+      )}
+
+      {isAdmin && (
+        <div className="px-4 pb-3">
+          <GeorgeReplyAssist
+            postId={post.id}
+            postBody={post.body}
+            authorName={post.author.displayName}
+            pillarTag={post.pillarTag ?? undefined}
+            onReplySent={reply => {
+              setReplies(prev => [...prev, reply])
+              setShowReplies(true)
+            }}
+          />
         </div>
       )}
     </div>

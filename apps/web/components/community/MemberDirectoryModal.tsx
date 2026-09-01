@@ -139,8 +139,8 @@ export function MemberDirectoryModal({ onClose }: MemberDirectoryModalProps) {
           ) : (
             members.map(member => {
               const avatarBg = getAvatarColor(member.id)
-              const tierColor = member.tier === 'pro' ? '#c9a84c' : '#68a2b9'
-              const tierBorder = member.tier === 'pro' ? 'rgba(201,168,76,0.3)' : 'rgba(104,162,185,0.3)'
+              const tierColor = member.tier === 'pro' ? '#C9302A' : member.tier === 'vip' ? '#C9A84C' : '#68a2b9'
+              const tierBorder = member.tier === 'pro' ? 'rgba(201,48,42,0.3)' : member.tier === 'vip' ? 'rgba(201,168,76,0.3)' : 'rgba(104,162,185,0.3)'
 
               return (
                 <Link
@@ -173,7 +173,7 @@ export function MemberDirectoryModal({ onClose }: MemberDirectoryModalProps) {
                       </span>
                       {member.tier && (
                         <span
-                          className="font-condensed font-bold uppercase text-[9px] rounded px-2 py-0.5"
+                          className="font-condensed font-bold uppercase text-[12px] sm:text-[12px] rounded px-2 py-0.5"
                           style={{
                             color: tierColor,
                             border: `1px solid ${tierBorder}`,
@@ -186,12 +186,12 @@ export function MemberDirectoryModal({ onClose }: MemberDirectoryModalProps) {
                     </div>
                     <div className="flex items-center gap-3 mt-0.5">
                       {member.roleTitle && (
-                        <span className="font-condensed text-[11px] text-[#7a8a96] truncate">
+                        <span className="font-condensed text-[12px] sm:text-[12px] text-[#7a8a96] truncate">
                           {member.roleTitle}
                         </span>
                       )}
                       {member.location && (
-                        <span className="font-condensed text-[11px] text-[#7a8a96]">
+                        <span className="font-condensed text-[12px] sm:text-[12px] text-[#7a8a96]">
                           · {member.location}
                         </span>
                       )}
@@ -201,9 +201,9 @@ export function MemberDirectoryModal({ onClose }: MemberDirectoryModalProps) {
                   {/* Points */}
                   <div className="flex-shrink-0 text-right">
                     <p className="font-condensed font-bold text-[12px] text-[#1b3c5a]">
-                      {member.points.toLocaleString()}
+                      {member.points.toLocaleString('en-US')}
                     </p>
-                    <p className="font-condensed text-[9px] uppercase text-[#7a8a96]">pts</p>
+                    <p className="font-condensed text-[12px] sm:text-[12px] uppercase text-[#7a8a96]">pts</p>
                   </div>
                 </Link>
               )

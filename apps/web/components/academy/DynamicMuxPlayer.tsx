@@ -10,6 +10,7 @@ interface MuxPlayerProps {
   totalLessons: number
   courseTitle: string
   onComplete?: () => void
+  maxHeight?: number
 }
 
 // Lazy-load the heavy Mux player — keeps the initial bundle ~200KB lighter.

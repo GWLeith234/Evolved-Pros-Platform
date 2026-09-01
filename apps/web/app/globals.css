@@ -24,11 +24,291 @@
   /* DS1 semantic tokens */
   --bg-page:       #0A0F18;
   --bg-surface:    #111926;
-  --bg-elevated:   #0A0F18;
+  --bg-elevated:   #1A2332;
   --border-color:  rgba(255,255,255,0.07);
   --text-primary:  #ffffff;
-  --text-secondary: rgba(255,255,255,0.6);
-  --text-tertiary: rgba(255,255,255,0.35);
+  /* SPRINT N.2 — dark-mode legibility bump. Secondary/tertiary were faint
+     (0.6 / 0.35); raised for readable labels and meta text on dark surfaces. */
+  --text-secondary: rgba(255,255,255,0.7);
+  --text-tertiary: rgba(255,255,255,0.5);
+
+  /* SPRINT F — notification feed. Type-accent colors used for the eyebrow
+     label, unread dot, and card left-border. Dark defaults (accents on the
+     #111926 surface all clear AA); light overrides live in the light-mode
+     block and are darkened so the small-caps label text passes WCAG AA on a
+     white card. Surface/border/text bind to the shared DS tokens so the feed
+     flips cleanly with the theme. */
+  --notif-community: #79b0c6;  /* teal   — ~5.6:1 on #111926 */
+  --notif-event:     #ff2d4a;  /* red    — ~5.1:1 on #111926 */
+  --notif-academy:   #d4b45f;  /* gold   — ~7.2:1 on #111926 */
+  --notif-system:    #9FB2C2;  /* slate  — ~7.4:1 on #111926 */
+  --notif-card-bg:      var(--bg-surface);
+  --notif-card-border:  var(--border-color);
+  --notif-unread-wash:  rgba(121,176,198,0.10);
+
+  /* SPRINT N — admin dual-theme tokens. Admin was a fixed light palette built
+     from hardcoded hex; these neutral tokens let it follow the global theme.
+     Dark defaults here; light values in the html.light-mode block below.
+     Accent/brand colors (red/teal/gold/green) stay constant and are NOT
+     tokenized — only neutrals (page/card/surface/text/border) flip. */
+  --admin-page:        #0F1720;
+  --admin-card:        #182233;
+  --admin-subtle:      #202C3D;
+  --admin-text:        #E6EDF3;
+  --admin-text-strong: #FFFFFF;
+  --admin-text-2:      #9FB2C2;
+  --admin-border:      rgba(255,255,255,0.09);
+
+  /* DS2 — TopNav v2 + brand (FOUNDATION-TOPNAV-V2) */
+  --bg-topnav:     #0D1B2A;
+  /* Nav background — dark by default; light mode flips to parchment so
+     dark link titles remain WCAG-readable (SPRINT-1 UI polish). */
+  --bg-nav:        #0D1B2A;
+  --text-dim:      rgba(255,255,255,0.6);
+  --text-muted:    rgba(255,255,255,0.45);
+  --border-subtle: rgba(255,255,255,0.06);
+  --brand-red:       #C9302A;
+  --brand-red-hover: #cc0a28;
+  --brand-red-hot:   #ef0e30;
+  --brand-gold:    #C9A84C;
+  --brand-gold-bright: #E7CE86;
+  --brand-teal:    #0ABFA3;
+  --brand-blue:    #60A5FA;
+  --brand-violet:  #A78BFA;
+  --pillar-1: #FFA538;
+  --pillar-2: #A78BFA;
+  --pillar-3: #F87171;
+  --pillar-4: #60A5FA;
+  --pillar-5: #C9A84C;
+  --pillar-6: #0ABFA3;
+
+  /* SPRINT-S (style lockdown) — fixed structural inks. These do NOT flip with
+     the theme: always-dark heroes (WelcomeBanner), the /media editorial cream
+     chrome, and fixed-light cards (login) reference them so components carry
+     zero raw hex. Themed neutrals live in the semantic tokens above. */
+  --white:            #FFFFFF;
+  --navy-abyss:       #0A0F18;  /* always-dark hero/page ink (= dark --bg-page) */
+  --navy-card:        #111926;  /* always-dark card surface (= dark --bg-surface) */
+  --brand-navy:       #1B2A4A;
+  --red-soft:         #ef6075;  /* expiry / soft-warning red on dark nav */
+  --success-green:    #3a8a5a;
+  --violet-light:     #C9A4FF;  /* AI-button conic gradient stops */
+  --violet-deep:      #8B6FE8;
+  --paper-line:       #E0D8CC;  /* cream hairline (media chrome, light dropdown) */
+  --paper-line-soft:  #E5E0D8;
+  --media-ink:        #2B3A5A;  /* editorial navy-slate ink family (/media) */
+  --media-ink-deep:   #1A2540;
+  --media-ink-soft:   #6B7280;
+  --media-ink-slate:  #3a4a56;
+  --media-body-ink:   #1A1A1A;
+  --media-cream-tint: #F9F6F1;
+  --media-hero-blue:  #1E3060;
+  /* /media academy pillar-card gradients (P1-P6) */
+  --media-grad-1: linear-gradient(135deg,#3a2a1a,#7a5a3a);
+  --media-grad-2: linear-gradient(135deg,#2a1a3a,#5a2d7a);
+  --media-grad-3: linear-gradient(135deg,#3a1a1a,#7a2d2d);
+  --media-grad-4: linear-gradient(135deg,#1a2a4a,#2d4a7a);
+  --media-grad-5: linear-gradient(135deg,#3a3a1a,#7a7a2a);
+  --media-grad-6: linear-gradient(135deg,#1a3a3a,#2d7a7a);
+
+  /* Podcast cover card (SPRINT B / SPRINT C). The 9:16 card is a constant
+     "physical" object — a cream sleeve with a navy plate — so these are FIXED
+     structural inks like the block above: they must NOT be redefined under
+     html.light-mode / cream-mode, or the card would start flipping with the
+     app theme. Deliberately NOT aliased to --ed-cream, which looks identical
+     but is scoped to the cream editorial theme (cross-aliasing editorial into
+     platform tokens is what the pillar-ink note below warns against).
+     The card's 6 pillar accents reuse --pillar-1..6 directly — same values,
+     already theme-invariant. */
+  --pod-cream: #FAF6EE;
+  --pod-navy:  #0F1724;
+
+  /* Font-family aliases (PODCAST-CLEANUP S4). next/font exposes Bebas Neue as
+     --font-logo and Barlow as --font-body; these friendlier aliases let
+     components reference the design-system intent rather than the loader name. */
+  --font-bebas:           var(--font-logo);
+  --font-barlow:          var(--font-body);
+  --font-barlow-condensed: var(--font-condensed);
+
+  /* TopNav dual-theme tokens (TOPNAV-POLISH-DUAL-THEME).
+     The TopNav reads every color from these vars; light overrides live below. */
+  --topnav-border:      rgba(255,255,255,0.06);
+  --topnav-link-active: #FFFFFF;
+  --topnav-link-idle:   rgba(255,255,255,0.62);
+  --topnav-link-hover:  rgba(255,255,255,0.92);
+  --topnav-divider:     rgba(255,255,255,0.08);
+  --topnav-bell-icon:   rgba(255,255,255,0.72);
+  --topnav-ring-bg:     #0D1B2A;
+  /* Media / featured nav link — gold on dark, darker gold on light parchment */
+  --topnav-highlight:   #C9A84C;
+
+  /* Episode banner tokens (EPISODEBANNER-THEME) */
+  --episode-banner-bg:       #111926;
+  --episode-banner-text:     rgba(255,255,255,0.85);
+  --episode-banner-text-dim: rgba(255,255,255,0.55);
+  --episode-banner-border:   rgba(255,255,255,0.08);
+  --episode-banner-cta-bg:   #C9302A;
+  --episode-banner-cta-text: #FFFFFF;
+
+  /* Community page + composer tokens (COMMUNITY-SPRINT-1) */
+  --community-page-bg:                  #0A0F18;
+  --community-header-eyebrow:           #C9A84C;
+  --community-header-title:             #FFFFFF;
+  --community-header-tagline:           rgba(255,255,255,0.65);
+  --composer-bg:                        #111926;
+  --composer-border:                    rgba(255,255,255,0.06);
+  --composer-tab-active:                #C9A84C;
+  --composer-tab-idle:                  rgba(255,255,255,0.45);
+  --composer-tab-hover:                 rgba(255,255,255,0.75);
+  --composer-tab-underline:             #C9A84C;
+  --composer-textarea-bg:               transparent;
+  --composer-textarea-text:             rgba(255,255,255,0.95);
+  --composer-placeholder:               rgba(255,255,255,0.40);
+  --composer-pillar-label:              rgba(255,255,255,0.45);
+  --composer-pillar-chip-bg:            rgba(255,255,255,0.04);
+  --composer-pillar-chip-active-text:   #0A0F18;
+  --composer-post-btn-bg:               #C9302A;
+  --composer-post-btn-text:             #FFFFFF;
+  --composer-post-btn-disabled:         rgba(255,255,255,0.10);
+
+  /* Post media frame (SPRINT CM-1). The frame is what shows through the
+     letterbox bars of an object-fit:contain image, so it must be the DARK
+     surface here — a white/parchment frame is the "white letterbox in dark
+     theme" failure. */
+  --post-media-frame-bg:      #0A0F18;
+  --post-media-frame-border:  rgba(255,255,255,0.08);
+  --post-media-fallback-text: rgba(255,255,255,0.55);
+  --attach-chip-bg:           rgba(255,255,255,0.04);
+  --attach-chip-border:       rgba(255,255,255,0.14);
+  --attach-chip-text:         rgba(255,255,255,0.75);
+  --attach-error-text:        #F87171;
+
+  /* Welcome banner v2 tokens (WELCOME-BANNER-V2) */
+  --banner-bg:            #1A1F3A;
+  --banner-bg-end:        #0A0F18;
+  --banner-text:          #FFFFFF;
+  --banner-text-dim:      rgba(255,255,255,0.80);
+  --banner-text-muted:    rgba(255,255,255,0.55);
+  --banner-eyebrow:       #C9A84C;
+  --banner-quote:         rgba(255,255,255,0.85);
+  --banner-attribution:   #C9A84C;
+  --banner-pillar-bg:     rgba(255,255,255,0.04);
+  --banner-pillar-border: rgba(255,255,255,0.06);
+
+  /* Reactions + filter rail (COMMUNITY-SPRINT-2).
+     5 reactions: 🔥 fire, 💯 hundred, 🙌 hands, ❤️ heart (GOLD, brand lock),
+     🤯 mindblown. Heart is gold not red — Evolved Pros brand pattern. */
+  --reaction-fire-bg:         rgba(249,115,22,0.12);
+  --reaction-fire-color:      #F97316;
+  --reaction-hundred-bg:      rgba(239,68,68,0.12);
+  --reaction-hundred-color:   #EF4444;
+  --reaction-hands-bg:        rgba(34,197,94,0.12);
+  --reaction-hands-color:     #22C55E;
+  --reaction-heart-bg:        rgba(201,168,76,0.16);
+  --reaction-heart-color:     #C9A84C;
+  --reaction-mindblown-bg:    rgba(167,139,250,0.12);
+  --reaction-mindblown-color: #A78BFA;
+
+  --filter-rail-bg:           #111926;
+  --filter-rail-active-bg:    #1A2332;
+  --filter-rail-border:       rgba(255,255,255,0.08);
+
+  /* Home 4-up tile accents (HOME-4UP-TILES). Top stripe + eyebrow color
+     for each below-fold tile. SPRINT M re-aligned --tile-stories to
+     accountability gold (#C9A84C) and --tile-discipline to execution
+     teal (#0ABFA3) so the bottom cards match the SPRINT M design's
+     violet / gold / blue / teal four-up palette. */
+  --tile-community:   #A78BFA;
+  --tile-stories:     #C9A84C;
+  --tile-podcast:     #60A5FA;
+  --tile-discipline:  #0ABFA3;
+
+  /* Events tokens (EVENTS-SPRINT-1). Hero overlay gradient + format chips
+     + RSVP active color. Format colors stay constant across themes —
+     they're brand category accents like reactions. */
+  --events-hero-overlay-from:  rgba(10,15,24,0);
+  --events-hero-overlay-to:    rgba(10,15,24,0.92);
+  --events-hero-pill-bg:       rgba(255,255,255,0.08);
+  --events-hero-pill-border:   rgba(255,255,255,0.16);
+  --events-format-live:        #EF0E30;
+  --events-format-in-person:   #E8B547;
+  --events-format-podcast:     #3FB8E8;
+  --events-format-replay:      #A78BFA;
+  --events-rsvp-active:        #19C9A6;
+
+  /* Shared structural primitives (THEME-TOGGLE-SPRINT). Both the platform
+     light-mode surfaces and the /media editorial cream palette reference
+     these independently — never cross-alias --bg-page to --ed-bg or vice
+     versa; they're two consumers of one shared value, not aliases of
+     each other. */
+  --paper:      #F5F0E8;
+  --paper-card: #FFFFFF;
+
+  /* Skeleton loaders (SPRINT-1) — theme-aware shimmer base/highlight */
+  --skeleton-base:      rgba(255,255,255,0.06);
+  --skeleton-highlight: rgba(255,255,255,0.12);
+
+  /* Typography scale (SPRINT-1) — paired with packages/ui/tokens typography */
+  --type-display-size: clamp(2.75rem, 9vw, 5.5rem);
+  --type-display-lh:   0.95;
+  --type-h1-size:      1.75rem;
+  --type-h1-lh:        1.2;
+  --type-h2-size:      1.25rem;
+  --type-h2-lh:        1.25;
+  --type-h3-size:      1rem;
+  --type-h3-lh:        1.3;
+  --type-body-size:    0.9375rem;
+  --type-body-lh:      1.6;
+  --type-body-sm-size: 0.8125rem;
+  --type-body-sm-lh:   1.5;
+  --type-eyebrow-size: 0.6875rem;
+  --type-eyebrow-track: 0.14em;
+  --type-label-size:   0.625rem;
+  --type-label-track:  0.18em;
+  --type-nav-size:     1rem;
+  --type-nav-track:    0.08em;
+
+  /* Spacing scale (SPRINT-1 foundation) — 4px base */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radii — sharp editorial default; pill only for CTAs / tracks */
+  --radius-none: 0px;
+  --radius-sm:   2px;
+  --radius-md:   4px;
+  --radius-lg:   8px;
+  --radius-pill: 9999px;
+
+  /* Shadows (dark default; light overrides below) */
+  --shadow-sm:        0 1px 2px rgba(0,0,0,0.35);
+  --shadow-md:        0 8px 24px rgba(0,0,0,0.40);
+  --shadow-lg:        0 16px 48px rgba(0,0,0,0.50);
+  --shadow-glow-red:  0 0 24px rgba(201,48,42,0.35);
+  --shadow-glow-gold: 0 0 24px rgba(201,168,76,0.30);
+  --shadow-glow-teal: 0 0 24px rgba(10,191,163,0.30);
+
+  /* Button ghost surface (theme-aware) */
+  --btn-ghost-bg:     rgba(255,255,255,0.06);
+  --btn-ghost-hover:  rgba(255,255,255,0.12);
+  --btn-focus-ring:   rgba(10,191,163,0.55);
+
+  /* Brand gradients (mirrored from packages/ui/tokens) */
+  --gradient-primary: linear-gradient(135deg, #EF0E30 0%, #C9302A 55%, #A8201C 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #FF1A3A 0%, #D4342E 55%, #B82420 100%);
+  --gradient-success: linear-gradient(135deg, #0ABFA3 0%, #0A9980 100%);
+  --gradient-gold: linear-gradient(135deg, #C9A84C 0%, #8B7332 100%);
+}
+
+html {
+  background-color: #0A0F18;
 }
 
 body {
@@ -47,31 +327,187 @@ html.light-mode {
   --card-bg:     #ffffff;
   --card-border: #E8E2D9;
 
-  --bg-page:       #F5F0E8;
-  --bg-surface:    #ffffff;
+  --bg-page:       var(--paper);
+  --bg-surface:    var(--paper-card);
   --bg-elevated:   #F0EBE3;
-  --border-color:  #E8E2D9;
+  /* THEME-CONSISTENCY: #E8E2D9 was too close to the parchment page bg, so white
+     cards read as edgeless. A navy-tinted alpha border gives cards a crisp but
+     soft edge in light mode (and reads consistently over both #FFFFFF surfaces
+     and the #F5F0E8 page). */
+  --border-color:  rgba(27,42,74,0.14);
   --text-primary:  #1b3c5a;
-  --text-secondary: #6B7A8D;
-  --text-tertiary: rgba(107,122,141,0.5);
+  /* THEME-FIX-V2: previous values failed WCAG AA on white surfaces.
+       --text-secondary: #6B7A8D     was 3.86:1 on #fff
+       --text-tertiary:  rgba(107,122,141,0.5) was ~1.7:1 — invisible
+     Settings / profile form labels and helper text use these tokens. */
+  --text-secondary: #4A5868;   /* 7.4:1 on #fff — AAA */
+  --text-tertiary:  #5C6A7C;   /* 5.0:1 on #fff — AA */
+
+  /* SPRINT N — admin light palette (the original fixed admin colors). */
+  --admin-page:        #faf9f7;
+  --admin-card:        #ffffff;
+  --admin-subtle:      #f5f7f9;
+  --admin-text:        #1b3c5a;
+  --admin-text-strong: #112535;
+  --admin-text-2:      #7a8a96;
+  --admin-border:      rgba(17,37,53,0.10);
+
+  /* DS2 light variants (FOUNDATION-TOPNAV-V2 + SPRINT-1 nav contrast) */
+  --bg-topnav:     #FAF7F2;
+  --bg-nav:        #FAF7F2; /* light parchment — dark titles stay readable */
+  --text-dim:      rgba(27,42,74,0.68);
+  /* Bumped 0.45 → 0.60: secondary nav text (AI George label, meta) was too
+     faint on parchment (THEME-CONSISTENCY). */
+  --text-muted:    rgba(27,42,74,0.60);
+  --border-subtle: rgba(27,42,74,0.12);
+
+  /* TopNav dual-theme tokens — light overrides (TOPNAV-POLISH-DUAL-THEME +
+     THEME-CONSISTENCY). Idle links were rgba(...,0.55) → ~2.8:1 on the #FAF7F2
+     parchment nav, which fails WCAG AA. Bumped to 0.72 (~4.6:1, AA) so every
+     nav item is clearly legible; active/hover stay solid navy (~11:1). */
+  --topnav-border:      rgba(27,42,74,0.14);
+  --topnav-link-active: #1B2A4A;
+  --topnav-link-idle:   rgba(27,42,74,0.78);
+  --topnav-link-hover:  #1B2A4A;
+  --topnav-divider:     rgba(27,42,74,0.16);
+  --topnav-bell-icon:   rgba(27,42,74,0.78);
+  --topnav-ring-bg:     #FAF7F2;
+  /* Gold #C9A84C fails WCAG on parchment (~2.6:1); use dark gold for light nav */
+  --topnav-highlight:   #8B6A00;
+
+  /* Skeleton — light parchment (SPRINT-1) */
+  --skeleton-base:      rgba(27,42,74,0.06);
+  --skeleton-highlight: rgba(27,42,74,0.12);
+
+  /* Episode banner — light overrides (EPISODEBANNER-THEME).
+     Banner bg sits a hair darker than topnav parchment so it reads as a
+     distinct strip rather than blending invisibly into the nav. */
+  --episode-banner-bg:       #F5F1EA;
+  --episode-banner-text:     #1B2A4A;
+  --episode-banner-text-dim: rgba(27,42,74,0.55);
+  --episode-banner-border:   rgba(27,42,74,0.10);
+  --episode-banner-cta-bg:   #C9302A;
+  --episode-banner-cta-text: #FFFFFF;
+
+  /* Community page + composer — light overrides (COMMUNITY-SPRINT-1) */
+  --community-page-bg:                  #FAF7F2;
+  --community-header-eyebrow:           #8B7332;
+  --community-header-title:             #1B2A4A;
+  --community-header-tagline:           rgba(27,42,74,0.65);
+  --composer-bg:                        #FFFFFF;
+  --composer-border:                    rgba(27,42,74,0.10);
+  --composer-tab-active:                #8B7332;
+  --composer-tab-idle:                  rgba(27,42,74,0.45);
+  --composer-tab-hover:                 rgba(27,42,74,0.75);
+  --composer-tab-underline:             #8B7332;
+  --composer-textarea-text:             #1B2A4A;
+  --composer-placeholder:               rgba(27,42,74,0.40);
+  --composer-pillar-label:              rgba(27,42,74,0.45);
+  --composer-pillar-chip-bg:            rgba(27,42,74,0.04);
+  --composer-pillar-chip-active-text:   #FFFFFF;
+  --composer-post-btn-bg:               #C9302A;
+  --composer-post-btn-text:             #FFFFFF;
+  --composer-post-btn-disabled:         rgba(27,42,74,0.10);
+
+  /* Post media frame — light overrides (SPRINT CM-1). */
+  --post-media-frame-bg:      #F0EBE3;
+  --post-media-frame-border:  rgba(27,42,74,0.12);
+  --post-media-fallback-text: rgba(27,42,74,0.60);
+  --attach-chip-bg:           rgba(27,42,74,0.04);
+  --attach-chip-border:       rgba(27,42,74,0.16);
+  --attach-chip-text:         rgba(27,42,74,0.75);
+  --attach-error-text:        #B32234;
+
+  /* Welcome banner v2 — light overrides (WELCOME-BANNER-V2) */
+  --banner-bg:            #FAF7F2;
+  --banner-bg-end:        #F5F1EA;
+  --banner-text:          #1B2A4A;
+  --banner-text-dim:      rgba(27,42,74,0.80);
+  --banner-text-muted:    rgba(27,42,74,0.55);
+  --banner-eyebrow:       #8B7332;
+  --banner-quote:         rgba(27,42,74,0.80);
+  --banner-attribution:   #8B7332;
+  --banner-pillar-bg:     rgba(27,42,74,0.04);
+  --banner-pillar-border: rgba(27,42,74,0.08);
+
+  /* Reactions + filter rail — light overrides (COMMUNITY-SPRINT-2).
+     Slightly higher opacity than dark so chips read on parchment bg. */
+  --reaction-fire-bg:         rgba(249,115,22,0.18);
+  --reaction-fire-color:      #C2410C;
+  --reaction-hundred-bg:      rgba(239,68,68,0.18);
+  --reaction-hundred-color:   #B91C1C;
+  --reaction-hands-bg:        rgba(34,197,94,0.18);
+  --reaction-hands-color:     #15803D;
+  --reaction-heart-bg:        rgba(201,168,76,0.22);
+  --reaction-heart-color:     #8B7332;
+  --reaction-mindblown-bg:    rgba(167,139,250,0.18);
+  --reaction-mindblown-color: #6D28D9;
+
+  --filter-rail-bg:           #FFFFFF;
+  --filter-rail-active-bg:    #F5F0E8;
+  --filter-rail-border:       rgba(27,42,74,0.10);
+
+  /* SPRINT F — notification accents darkened for AA. Read items are
+     transparent, so the label sits on the #F5F0E8 parchment page bg (not pure
+     white); these inks are tuned to clear 4.5:1 on parchment (the harder of
+     the two light surfaces). community 4.85:1 · event 4.69:1 · academy 5.0:1
+     · system 4.86:1 on #F5F0E8. */
+  --notif-community: #2C7186;
+  --notif-event:     #C9302A;
+  --notif-academy:   #7A6420;
+  --notif-system:    #5C6A7C;
+  --notif-unread-wash:  rgba(44,113,134,0.08);
+
+  /* Pillar ink tokens (THEME-TOGGLE-SPRINT) — light-mode-only text/border/
+     accent-bar colors for the 6 pillar categories, paired with a 12% alpha
+     tint of the raw --pillar-N hue for pill/chip fill backgrounds. Dark mode
+     keeps using the raw --pillar-N values directly; these are not defined
+     in :root. --pillar-5-ink was checked against --brand-gold-dark before
+     writing it as a literal — that token doesn't exist anywhere in this
+     codebase (only the editorial-scoped --ed-gold shares the same #8B6A00
+     value, and cross-aliasing editorial into platform tokens is exactly
+     what Step 7 above says not to do). */
+  --pillar-1-ink: #B45A00;  /* Foundation */
+  --pillar-2-ink: #7C5CE0;  /* Identity */
+  --pillar-3-ink: #D2382F;  /* Mental Toughness */
+  --pillar-4-ink: #1F6FD6;  /* Strategy */
+  --pillar-5-ink: #8B6A00;  /* Accountability */
+  --pillar-6-ink: #0A7D6A;  /* Execution */
+
+  /* Events — light overrides (EVENTS-SPRINT-1). Gradient leans warm-ink
+     so the cinematic hero still reads against parchment surfaces. Format
+     accent colors stay constant across themes. */
+  --events-hero-overlay-from:  rgba(35,28,18,0);
+  --events-hero-overlay-to:    rgba(35,28,18,0.85);
+  --events-hero-pill-bg:       rgba(255,255,255,0.10);
+  --events-hero-pill-border:   rgba(255,255,255,0.20);
+
+  /* SPRINT-1 foundation — light shadows + ghost buttons */
+  --shadow-sm:        0 1px 2px rgba(27,42,74,0.08);
+  --shadow-md:        0 8px 24px rgba(27,42,74,0.10);
+  --shadow-lg:        0 16px 48px rgba(27,42,74,0.14);
+  --shadow-glow-red:  0 0 20px rgba(201,48,42,0.18);
+  --shadow-glow-gold: 0 0 20px rgba(139,106,0,0.16);
+  --shadow-glow-teal: 0 0 20px rgba(10,153,128,0.16);
+  --btn-ghost-bg:     rgba(27,42,74,0.04);
+  --btn-ghost-hover:  rgba(27,42,74,0.08);
+  --btn-focus-ring:   rgba(10,153,128,0.45);
 }
 
 /* Page background + body text */
+html.light-mode {
+  background-color: #F5F0E8;
+}
 html.light-mode body {
   background-color: #F5F0E8;
   color: #1b3c5a;
 }
 
-/* Top nav */
-html.light-mode header {
-  background-color: #1b3c5a !important;
-  border-bottom-color: rgba(255,255,255,0.1) !important;
-}
-
-/* Sidebar */
-html.light-mode aside {
-  background-color: #1b3c5a !important;
-}
+/* Sidebar — the old blanket `aside { background: #1b3c5a !important }` shim
+   is gone: it forced EVERY aside (notif filter, channel rail, leaderboard,
+   community right rail) to stay navy in light mode and defeated their
+   token-driven backgrounds. Rails now style themselves via --bg-surface /
+   --card-bg; always-dark chrome (AdminSidebar) carries its own fixed color. */
 
 /* Main content area */
 html.light-mode main {
@@ -99,16 +535,19 @@ html.light-mode .bg-\[\#faf9f7\] {
   background-color: #FAF7F2 !important;
 }
 
-/* Tailwind text-white inside card panels → body text color */
-html.light-mode main .text-white {
+/* Tailwind text-white → body text color (any element, not just <main>) */
+html.light-mode .text-white {
   color: #1b3c5a !important;
 }
 
-/* Muted text */
-html.light-mode main .text-white\/40,
-html.light-mode main .text-white\/50,
-html.light-mode main .text-white\/60,
-html.light-mode main .text-white\/70 {
+/* Muted text — covers /20, /25, /30 in addition to /40–/70 */
+html.light-mode .text-white\/20,
+html.light-mode .text-white\/25,
+html.light-mode .text-white\/30,
+html.light-mode .text-white\/40,
+html.light-mode .text-white\/50,
+html.light-mode .text-white\/60,
+html.light-mode .text-white\/70 {
   color: #7a8a96 !important;
 }
 
@@ -118,24 +557,1472 @@ html.light-mode main .border-white\/\[0\.06\] {
   border-color: #E8E2D9 !important;
 }
 
+/* Media highlight is now --topnav-highlight (theme token). Keep a structural
+   fallback so any residual inline gold still reads in light mode.
+   SPRINT DOORS-1 — scoped from `header` to `.ep-topnav`, which is the member
+   TopNav this was always written for (TopNav.tsx:196 renders
+   <header class="ep-topnav">, and its Media item already sets the same token
+   inline, so this stays a redundant safety net there). Unscoped, it matched
+   ANY <header>: the moment the public landing page moved Media into its
+   header nav, that one link went gold in light mode while Podcast / LIVE /
+   Sign in beside it stayed secondary ink. No colour value changed. */
+html.light-mode .ep-topnav a[href="/media"] {
+  color: var(--topnav-highlight) !important;
+}
+
+/* ── Typography utilities (SPRINT-1) ─────────────────────────────────────
+   Semantic type scale. Colors bind to --text-primary / --text-secondary so
+   contrast is correct in both themes without per-component overrides. */
+.ep-type-display {
+  font-family: var(--font-bebas);
+  font-weight: 400;
+  font-size: var(--type-display-size);
+  line-height: var(--type-display-lh);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+.ep-type-h1 {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: var(--type-h1-size);
+  line-height: var(--type-h1-lh);
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+.ep-type-h2 {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: var(--type-h2-size);
+  line-height: var(--type-h2-lh);
+  color: var(--text-primary);
+}
+.ep-type-h3 {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 600;
+  font-size: var(--type-h3-size);
+  line-height: var(--type-h3-lh);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+.ep-type-body {
+  font-family: var(--font-barlow), "Barlow", sans-serif;
+  font-weight: 400;
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-lh);
+  color: var(--text-primary);
+}
+.ep-type-body-sm {
+  font-family: var(--font-barlow), "Barlow", sans-serif;
+  font-weight: 400;
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-lh);
+  color: var(--text-secondary);
+}
+.ep-type-eyebrow {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 600;
+  font-size: var(--type-eyebrow-size);
+  line-height: 1.2;
+  letter-spacing: var(--type-eyebrow-track);
+  text-transform: uppercase;
+  color: var(--brand-gold);
+}
+.ep-type-label {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: var(--type-label-size);
+  line-height: 1.2;
+  letter-spacing: var(--type-label-track);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.ep-type-nav {
+  font-family: var(--font-bebas);
+  font-weight: 400;
+  font-size: var(--type-nav-size);
+  line-height: 1;
+  letter-spacing: var(--type-nav-track);
+  text-transform: uppercase;
+}
+
 * { box-sizing: border-box; }
-html, body { overflow-x: hidden; }
+
+/* ── Global document scroll (public pages, login, LIVE, etc.) ────────────
+   Explicit overflow-y: auto so overflow-x: hidden does not trap vertical
+   scroll (CSS: non-visible overflow-x can force overflow-y to auto/clip). */
+html {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  min-height: 100%;
+  margin: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-tap-highlight-color: rgba(201, 48, 42, 0.12);
+}
+button,
+a,
+[role="button"],
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+/* Finger-friendly interactive floor on coarse pointers (phones/tablets). */
+@media (pointer: coarse) {
+  button:not(.ep-icon-btn-sm),
+  a.ep-touch-target,
+  .ep-touch-target {
+    min-height: 44px;
+  }
+}
+
+/* ── Member app shell (SCROLL-FIX) ───────────────────────────────────────
+   Bound the chrome to the viewport. TopNav is sticky/in-flow. Main is the
+   single vertical scroll container. Without a max height on the shell,
+   overflow-y:auto on main never engages and the page appears frozen. */
+.ep-member-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  /* contain horizontal bleed from drawers without blocking main scroll */
+  width: 100%;
+}
+@supports not (height: 100dvh) {
+  .ep-member-shell {
+    height: 100vh;
+    max-height: 100vh;
+  }
+}
+.ep-member-body {
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+.ep-topnav {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding-left: max(12px, env(safe-area-inset-left, 0px));
+  padding-right: max(12px, env(safe-area-inset-right, 0px));
+  /* Safe-area for notched phones; keep content row ≥72px */
+  padding-top: env(safe-area-inset-top, 0px);
+  min-height: calc(72px + env(safe-area-inset-top, 0px));
+  height: auto !important;
+  box-sizing: border-box;
+}
+.ep-main-scroll {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  /* Bottom tabs (fixed) + home indicator — content never sits under the bar */
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 1024px) {
+  .ep-main-scroll {
+    padding-bottom: 0;
+  }
+}
+.ep-bottom-tabs {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  min-height: calc(56px + env(safe-area-inset-bottom, 0px));
+}
+/* Ask George drawer open: hide the fixed bottom tab bar so the chat input +
+   Send aren't clipped behind it on <lg viewports (the drawer sets this class
+   on <body> while open). */
+body.ask-george-open .ep-bottom-tabs {
+  display: none !important;
+}
+.ep-bottom-tabs a,
+.ep-bottom-tabs button {
+  min-height: 48px;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 120ms ease, background-color 120ms ease, transform 80ms ease;
+}
+.ep-bottom-tabs a:active,
+.ep-bottom-tabs button:active {
+  transform: scale(0.96);
+  opacity: 0.92;
+}
+
+/* Compact top nav on small phones */
+@media (max-width: 639px) {
+  .ep-topnav {
+    min-height: calc(60px + env(safe-area-inset-top, 0px));
+    gap: 8px !important;
+    padding-left: max(10px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(10px, env(safe-area-inset-right, 0px)) !important;
+  }
+  .ep-topnav-logo img {
+    height: 32px !important;
+    width: auto !important;
+  }
+  .ep-ask-label {
+    display: none !important;
+  }
+  .ep-ask-btn {
+    padding: 0 6px 0 4px !important;
+    height: 40px !important;
+    min-width: 44px;
+  }
+  .ep-topnav-cluster {
+    gap: 6px !important;
+  }
+  .ep-topnav-divider {
+    display: none !important;
+  }
+}
+
+/* Horizontal scroll rows — momentum + no scrollbar chrome on mobile */
+.ep-scroll-x {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  max-width: 100%;
+}
+.ep-scroll-x::-webkit-scrollbar {
+  display: none;
+}
+
+/* LIVE page responsive grids */
+.live-split-hero-grid {
+  display: grid;
+  grid-template-columns: 6fr 6fr;
+}
+.live-split-hero-photo {
+  position: relative;
+  min-height: 520px;
+  background: #0A0F18;
+}
+.live-upcoming-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 140px;
+  align-items: start;
+  gap: 24px;
+}
+.live-pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.live-testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.live-final-cta-inner {
+  padding: 56px 48px;
+}
+.live-final-cta-copy {
+  flex: 1;
+  min-width: min(100%, 280px);
+}
+.live-masthead-title {
+  font-size: clamp(56px, 18vw, 96px);
+}
+@media (max-width: 900px) {
+  .live-split-hero-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .live-split-hero-photo {
+    min-height: 280px !important;
+    order: -1;
+  }
+  .live-split-hero-copy {
+    padding: 28px 20px !important;
+  }
+  .live-upcoming-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    padding: 18px 16px !important;
+  }
+  .live-pillar-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .live-testimonial-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .live-final-cta-inner {
+    padding: 32px 20px !important;
+  }
+}
+@media (min-width: 640px) and (max-width: 900px) {
+  .live-pillar-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Academy course / lesson mobile */
+.academy-hero {
+  min-height: min(65vh, 560px);
+}
+@media (max-width: 639px) {
+  .academy-hero {
+    min-height: 48vh !important;
+  }
+  .academy-hero-cta {
+    width: 100%;
+    justify-content: center;
+    min-height: 48px;
+  }
+  .academy-lesson-pad {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  .academy-tool-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+  .academy-tool-grid-3 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Community mobile channel pills + engagement */
+.community-channel-pill {
+  min-height: 40px;
+  padding: 10px 16px !important;
+  font-size: 13px !important;
+  -webkit-tap-highlight-color: transparent;
+}
+.community-mobile-chip {
+  min-height: 52px;
+  min-width: 132px;
+  padding: 12px 16px !important;
+}
+
+/* Page gutters — home / scoreboard feel less cramped on phones */
+@media (max-width: 639px) {
+  .ep-page-gutter {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  .hub-root .hub-overview-grid {
+    gap: 12px !important;
+    padding: 14px 14px !important;
+  }
+}
+
+/* Instant press feedback for primary CTAs (loading feel) */
+.ep-pressable {
+  transition: transform 100ms ease, opacity 100ms ease;
+}
+.ep-pressable:active {
+  transform: scale(0.98);
+  opacity: 0.92;
+}
+
+/* Admin Prospects CRM kanban */
+.crm-board-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(200px, 1fr));
+  gap: 12px;
+}
+@media (max-width: 1200px) {
+  .crm-board-grid {
+    grid-auto-flow: column;
+    grid-template-columns: repeat(5, minmax(220px, 1fr));
+  }
+}
+.crm-qa:hover {
+  filter: brightness(0.95);
+  background: rgba(27, 60, 90, 0.04) !important;
+}
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
 @keyframes skeleton-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
-/* ─── Academy always dark ──────────────────────────────────────────────────
-   :has() selects <main> when it contains [data-academy-page], beating the
-   html.light-mode .bg-[#faf9f7] !important rule above.
-   ───────────────────────────────────────────────────────────────────────── */
-html.light-mode main:has([data-academy-page]) {
-  background-color: #0A0F18 !important;
+/* ── Evolution Partner sponsor card (SPRINT-1 polish) ───────────────────
+   Dual-theme surfaces + CSS-only hover evolution micro-animation.
+   prefers-reduced-motion is handled by the global reduce block below. */
+.ep-sponsor-card {
+  background: var(--bg-surface, #111926);
+  border-color: rgba(201, 48, 42, 0.30);
+  box-shadow: 0 0 0 transparent;
+}
+.ep-sponsor-card:hover,
+.group:hover .ep-sponsor-card {
+  border-color: rgba(201, 48, 42, 0.55);
+}
+.ep-sponsor-wash {
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(201, 48, 42, 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(201, 48, 42, 0.04), transparent 40%);
+}
+.ep-sponsor-cta:hover {
+  background-color: #a82622 !important;
+}
+/* Three rising bars — "evolution" micro-motion on card hover only */
+.ep-evolve-bars {
+  position: absolute;
+  left: 16px;
+  bottom: 18px;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 18px;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+  z-index: 1;
+}
+.group:hover .ep-evolve-bars {
+  opacity: 0.9;
+}
+.ep-evolve-bars span {
+  display: block;
+  width: 3px;
+  border-radius: 1px;
+  background: #C9302A;
+  transform-origin: bottom center;
+  opacity: 0.55;
+}
+.ep-evolve-bars span:nth-child(1) { height: 6px; }
+.ep-evolve-bars span:nth-child(2) { height: 11px; }
+.ep-evolve-bars span:nth-child(3) { height: 16px; }
+.group:hover .ep-evolve-bars span {
+  animation: ep-evolve-rise 1.05s ease-in-out infinite;
+}
+.group:hover .ep-evolve-bars span:nth-child(2) { animation-delay: 0.12s; }
+.group:hover .ep-evolve-bars span:nth-child(3) { animation-delay: 0.24s; }
+@keyframes ep-evolve-rise {
+  0%, 100% { transform: scaleY(0.55); opacity: 0.4; }
+  50%      { transform: scaleY(1);    opacity: 1; }
+}
+html.light-mode .ep-sponsor-card {
+  background: var(--bg-surface, #FFFFFF);
+  box-shadow: 0 1px 0 rgba(27, 42, 74, 0.04);
+}
+html.light-mode .group:hover .ep-sponsor-card {
+  box-shadow: 0 12px 32px rgba(201, 48, 42, 0.12);
+}
+/* Premium Evolution Partner cards (AdCellerant, XPR Media) */
+.ep-premium-partner-card,
+.ep-adcellerant-card {
+  border-color: rgba(201, 48, 42, 0.32);
+}
+html.light-mode .ep-premium-partner-card,
+html.light-mode .ep-adcellerant-card {
+  border-color: rgba(201, 48, 42, 0.28);
 }
 
-[data-academy-page] {
-  background-color: #0A0F18 !important;
-  color: #ffffff !important;
+/* EVENTS-SPRINT-1: pulsing red dot for "live now / starting soon" indicator. */
+@keyframes events-live-pulse {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(1.18); }
+}
+
+/* WELCOME-BANNER-V3: sparkle dot on earned pillar badges + JustEarned card pulse.
+   Ported verbatim from welcome-banner.jsx (line 497-504) — keep in CSS so SSR
+   doesn't have to inject via document.head at runtime. */
+@keyframes pillarSparkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50%      { opacity: 1;   transform: scale(1.3); }
+}
+@keyframes earnedPulse {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 1; }
+}
+
+/* UI-HEART: confetti burst when toggling the gold heart reaction on. */
+@keyframes ui-heart-confetti {
+  0%   { transform: translate(0, 0) scale(0) rotate(0deg);                                 opacity: 0; }
+  20%  { transform: translate(0, 0) scale(1) rotate(0deg);                                 opacity: 1; }
+  100% { transform: translate(var(--dx, 0), var(--dy, 0)) scale(0) rotate(var(--rot, 0)); opacity: 0; }
+}
+
+/* LOAD-1: subtle logo breath on the branded loading screens. */
+@keyframes brand-loading-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1);    }
+  50%      { opacity: 1;   transform: scale(1.04); }
+}
+
+/* LOAD-2: "Evolution" loader — theme-aware wordmark swap + slim indeterminate
+   red progress bar. The wordmark PNGs bake in their own ink color, so we show
+   the white-text lockup on dark surfaces and the navy-text lockup on light
+   (parchment) surfaces. Swap is pure CSS so the server-rendered loader needs
+   no client JS and never flashes the wrong variant. */
+.ep-loader-logo--dark  { display: block; }
+.ep-loader-logo--light { display: none; }
+html.light-mode .ep-loader-logo--dark  { display: none; }
+html.light-mode .ep-loader-logo--light { display: block; }
+
+.ep-loader-track {
+  position: relative;
+  width: 180px;
+  height: 3px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--skeleton-base, rgba(255,255,255,0.08));
+}
+.ep-loader-track::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #C9302A 35%, #EF0E30 65%, transparent);
+  animation: ep-loader-bar 1.1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes ep-loader-bar {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(350%);  }
+}
+
+/* GOALS-MICRO: subtle, delightful accountability micro-interactions. All are
+   theme-agnostic (accent color is passed in via the --ep-glow custom property
+   or a brand hue) and automatically neutralised by the prefers-reduced-motion
+   block at the bottom of this file, so they stay lightweight and accessible. */
+
+/* Checkbox "pop" + soft glow ring when a habit/commit is checked. */
+@keyframes ep-check-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.28); }
+  100% { transform: scale(1); }
+}
+@keyframes ep-check-glow {
+  0%   { box-shadow: 0 0 0 0 var(--ep-glow, rgba(201,168,76,0.55)); }
+  100% { box-shadow: 0 0 0 10px rgba(201,168,76,0); }
+}
+
+/* Streak badge bump when the streak increments. */
+@keyframes ep-streak-pop {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.22) translateY(-1px); }
+  100% { transform: scale(1); }
+}
+
+/* Progress ring celebratory glow when a daily card hits 100%. */
+@keyframes ep-ring-glow {
+  0%, 100% { filter: drop-shadow(0 0 2px rgba(201,168,76,0.45)); }
+  50%      { filter: drop-shadow(0 0 8px rgba(201,168,76,0.95)); }
+}
+
+/* Progress-bar fill reveal: grows from the left on mount. The fill element
+   keeps its real width:% inline, so if motion is reduced (animation disabled)
+   it simply renders at full width — never stuck at zero. */
+.ep-progress-fill {
+  transform-origin: left center;
+  animation: ep-progress-grow 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes ep-progress-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+/* Completed bars get a soft accent glow (accent passed via --ep-glow)
+   plus a brief celebrate pulse (Sprint 3). */
+.ep-progress-fill--done {
+  box-shadow: 0 0 8px var(--ep-glow, rgba(34,197,94,0.7));
+  animation: ep-progress-grow 0.9s cubic-bezier(0.22, 1, 0.36, 1) both,
+             ep-progress-celebrate 1.2s ease 0.3s 1;
+}
+
+/* ── SPRINT-1 Component Library — Button interactions ─────────────────────
+   Surfaces are mostly inline (so they work in isolation), but hover / active /
+   focus live here so we don't need React hover state. */
+.ep-btn:focus-visible {
+  outline: 2px solid var(--btn-focus-ring, rgba(10,191,163,0.55));
+  outline-offset: 2px;
+}
+.ep-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.ep-btn--primary:hover:not(:disabled),
+.ep-btn--pill:hover:not(:disabled) {
+  background: var(--gradient-primary-hover) !important;
+  filter: brightness(1.05);
+}
+.ep-btn--secondary:hover:not(:disabled) {
+  background: rgba(201,168,76,0.10) !important;
+}
+.ep-btn--success:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.ep-btn--ghost:hover:not(:disabled) {
+  background: var(--btn-ghost-hover) !important;
+  color: var(--text-primary) !important;
+}
+.ep-btn--tertiary:hover:not(:disabled) {
+  opacity: 0.85;
+}
+.ep-btn-spinner {
+  animation: ep-btn-spin 0.7s linear infinite;
+}
+@keyframes ep-btn-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes ep-achievement-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ep-achievement-banner {
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── SPRINT-2 surface polish ─────────────────────────────────────────────── */
+.ep-surface-card {
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+.ep-surface-card:hover {
+  border-color: var(--border-emphasized, rgba(255,255,255,0.15));
+  box-shadow: var(--shadow-md);
+}
+
+.ep-post-card:hover {
+  border-color: var(--border-emphasized, rgba(255,255,255,0.15));
+  box-shadow: var(--shadow-sm);
+}
+
+.ep-reaction-chip:active {
+  transform: scale(0.96);
+}
+
+.ep-course-card {
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+.ep-course-card:not(.ep-course-card--locked):hover {
+  transform: translateY(-3px) scale(1.015);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(201,48,42,0.45) !important;
+}
+.ep-course-card:not(.ep-course-card--locked):hover .ep-course-card__media {
+  transform: scale(1.04);
+}
+.ep-course-card__media {
+  transition: transform 280ms ease;
+}
+.ep-course-card--done:not(.ep-course-card--locked):hover {
+  border-color: rgba(201,168,76,0.55) !important;
+  box-shadow: var(--shadow-glow-gold);
+}
+
+.ep-sponsor-inline:hover {
+  border-color: rgba(201,48,42,0.40);
+  box-shadow: var(--shadow-glow-red);
+}
+
+/* HOME-4UP-TILES responsive grid breakpoints. */
+@media (max-width: 1100px) {
+  .home-4up-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 720px) {
+  .home-4up-grid { grid-template-columns: 1fr !important; }
+}
+
+/* Accountability Hub — daily/weekly progress micro-animations */
+@keyframes hub-flash-in {
+  0%   { opacity: 0; transform: translateY(4px); }
+  15%  { opacity: 1; transform: translateY(0); }
+  85%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+.hub-flash {
+  animation: hub-flash-in 1.8s ease forwards;
+}
+@media (max-width: 720px) {
+  .hub-overview-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .hub-body-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Shared design-system tokens used by editorial pages (/live, etc).
+   /live is navy-only (no theme toggle) so these values are constant.
+   Canonical names per the design handoff colors_and_type.css.
+   ───────────────────────────────────────────────────────────────── */
+:root {
+  --text-strong:   #fff;
+  --text-1:        rgba(255,255,255,0.85);
+  --text-2:        rgba(255,255,255,0.65);
+  --text-3:        rgba(255,255,255,0.55);
+  --text-4:        rgba(255,255,255,0.45);
+  --text-5:        rgba(255,255,255,0.35);
+  --border-soft:   rgba(255,255,255,0.05);
+  --border-soft2:  rgba(255,255,255,0.08);
+  --border-med:    rgba(255,255,255,0.10);
+  --border-med2:   rgba(255,255,255,0.12);
+  --border-strong: rgba(255,255,255,0.15);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Podcast redesign tokens (DESIGN-REF-PODCAST, PODCAST-CLEANUP S1)
+   The page-scoped --podcast-* aliases now point at the canonical DS
+   tokens in ONE place, so brand surfaces/text/borders stay in lockstep
+   with the rest of the platform. Theme flips come for free via the
+   canonical tokens (html.light-mode); the podcast page itself runs
+   navy-only. The opacity tiers that have no canonical equivalent stay
+   as white-alpha utility scrims (allowed non-brand utility values).
+   ───────────────────────────────────────────────────────────────── */
+:root {
+  --podcast-text-strong:  var(--text-primary);
+  --podcast-text-1:       rgba(255,255,255,0.85);
+  --podcast-text-2:       var(--text-secondary);
+  --podcast-text-3:       var(--text-tertiary);
+  --podcast-text-4:       rgba(255,255,255,0.45);
+  --podcast-text-5:       rgba(255,255,255,0.35);
+  --podcast-text-6:       rgba(255,255,255,0.25);
+  --podcast-bg-page:      var(--bg-page);
+  --podcast-bg-surface:   var(--bg-surface);
+  --podcast-bg-elevated:  var(--bg-elevated);
+  --podcast-border-soft:   rgba(255,255,255,0.05);
+  --podcast-border-soft2:  var(--border-color);
+  --podcast-border-med:    rgba(255,255,255,0.10);
+  --podcast-border-med2:   rgba(255,255,255,0.12);
+  --podcast-border-strong: rgba(255,255,255,0.15);
+}
+
+/* SPRINT N.3 — podcast in LIGHT theme renders on cream (--podcast-bg-* alias
+   var(--bg-*)). The white-alpha text/border tiers above don't flip, so they
+   were invisible on cream. Re-map them to navy-alpha (#1B2A4A) in light mode so
+   the podcast page is legible when the app theme is light. text-strong/2/3
+   already flip via the canonical --text-* tokens. */
+html.light-mode {
+  --podcast-text-1:        rgba(27,42,74,0.90);
+  --podcast-text-4:        rgba(27,42,74,0.60);
+  --podcast-text-5:        rgba(27,42,74,0.48);
+  --podcast-text-6:        rgba(27,42,74,0.34);
+  --podcast-border-soft:   rgba(27,42,74,0.08);
+  --podcast-border-med:    rgba(27,42,74,0.12);
+  --podcast-border-med2:   rgba(27,42,74,0.14);
+  --podcast-border-strong: rgba(27,42,74,0.18);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Editorial cream-paper tokens (DESIGN-REF-PLATFORM-HANDOFF, MR1).
+   Ported verbatim from _design_refs/platform-handoff-2026-04-29/
+   styles/colors_and_type.css. The --ed-* prefix is reserved for the
+   /media editorial chrome and must not collide with --podcast-* or
+   the platform DS tokens above. Activated by Media's ThemeBridge,
+   which sets BOTH body[data-theme="cream"] AND html.cream-mode so
+   TopNav (which reads platform tokens) stays navy.
+   ───────────────────────────────────────────────────────────────── */
+body[data-theme="cream"],
+html.cream-mode body {
+  --ed-bg:             var(--paper);
+  --ed-surface:        var(--paper-card);
+  --ed-cream:          #FAF6EE;
+  --ed-border:         #E0D8CC;
+  --ed-border-soft:    #EAE3D5;
+  --ed-text:           #1B2A4A;
+  --ed-text-muted:     #6B7A8D;
+  --ed-text-subtle:    #8A9099;
+  --ed-navy:           #1B2A4A;
+  --ed-red:            #C9302A;
+  --ed-gold:           #8B6A00;
+  --ed-gold-soft:      #C9A84C;
+  --ed-header-bg:      #1B2A4A;
+  --ed-header-text:    #F5F0E8;
+  --ed-accent-action:  #C9302A;
+  --ed-accent-urgency: #C9A84C;
+}
+
+/* prefers-reduced-motion safety net — neutralise decorative animations and
+   transitions for OS-configured users. Loading spinners keep spinning so
+   busy state remains visible. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:        0.001ms !important;
+    animation-iteration-count: 1       !important;
+    transition-duration:       0.001ms !important;
+    scroll-behavior:           auto    !important;
+  }
+  .ep-btn-spinner,
+  .ep-toast__timer,
+  [class*='animate-spin'] {
+    animation-duration: 0.7s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
+
+/* ── SPRINT-3: Skip link, focus rings, toasts, micro-interactions ───────── */
+.ep-skip-link {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 10000;
+  padding: 10px 16px;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #fff;
+  background: var(--brand-red, #C9302A);
+  border: 2px solid transparent;
+  transform: translateY(-200%);
+  transition: transform 120ms ease;
+}
+.ep-skip-link:focus,
+.ep-skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid var(--btn-focus-ring, rgba(10,191,163,0.55));
+  outline-offset: 2px;
+}
+
+/* Screen-reader only (matches Tailwind sr-only; available without TW utilities) */
+.ep-sr-only,
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Main landmark: remove default focus ring when skip-link lands, keep keyboard ring */
+#main-content:focus {
+  outline: none;
+}
+#main-content:focus-visible {
+  outline: 2px solid var(--btn-focus-ring, rgba(10,191,163,0.55));
+  outline-offset: -2px;
+}
+
+/* Global keyboard focus — mouse users keep clean UI via :focus-visible */
+:where(a, button, input, textarea, select, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--btn-focus-ring, rgba(10,191,163,0.55));
+  outline-offset: 2px;
+}
+
+/* COMPOSER-1 / FINDING 01 — the community attach chip.
+   Its <input type=file> is visually hidden, so tab focus lands on the input
+   while the visible chip is a <label>. Labels are not in the rule above, so
+   the chip showed no ring. The wrapper holds both and rings when the hidden
+   input has :focus-visible — keyboard-only, matching the global rule so mouse
+   clicks do not leave a persistent outline. Same token and geometry. */
+.ep-attach-chip:has(:focus-visible) {
+  outline: 2px solid var(--btn-focus-ring, rgba(10,191,163,0.55));
+  outline-offset: 2px;
+}
+
+/* Toast viewport — above bottom tabs on mobile, safe-area aware */
+.ep-toast-viewport {
+  position: fixed;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  /* Desktop: bottom-right */
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: max(24px, env(safe-area-inset-bottom, 0px));
+  left: auto;
+  width: min(380px, calc(100vw - 24px));
+  max-width: 100%;
+}
+@media (max-width: 1023px) {
+  .ep-toast-viewport {
+    /* Sit above the fixed bottom tab bar (56px + safe area) */
+    left: 12px;
+    right: 12px;
+    width: auto;
+    bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+    align-items: stretch;
+  }
+}
+
+.ep-toast {
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px 14px;
+  border-radius: 0;
+  min-width: 0;
+  overflow: hidden;
+  transform: translateY(12px) scale(0.98);
+  opacity: 0;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease;
+}
+.ep-toast--in {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+.ep-toast--out {
+  transform: translateY(8px) scale(0.98);
+  opacity: 0;
+}
+.ep-toast__icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  line-height: 1;
+  margin-top: 1px;
+}
+.ep-toast__body {
+  flex: 1;
+  min-width: 0;
+}
+.ep-toast__title {
+  margin: 0 0 2px;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.ep-toast__message {
+  margin: 0;
+  font-family: Barlow, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.ep-toast__action {
+  margin-top: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.ep-toast__dismiss {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: -4px -4px 0 0;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+}
+.ep-toast__dismiss:hover {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+.ep-toast__timer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  transform-origin: left center;
+  animation: ep-toast-timer var(--toast-ms, 3200ms) linear forwards;
+}
+@keyframes ep-toast-timer {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+.ep-toast:hover .ep-toast__timer,
+.ep-toast:focus-within .ep-toast__timer {
+  animation-play-state: paused;
+}
+
+/* Streak micro-interaction */
+.ep-streak-badge--bump {
+  animation: ep-streak-pop 0.5s ease;
+}
+
+/* Progress success flash (100%) */
+@keyframes ep-progress-celebrate {
+  0%, 100% { filter: brightness(1); }
+  40%      { filter: brightness(1.25); }
+}
+
+/* Mobile: denser home metric grid + 4-up stack already handled; tighten spacing */
+@media (max-width: 639px) {
+  .ep-page-gutter {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+  .home-4up-grid {
+    gap: 12px !important;
+  }
+  .ep-stat-card .ep-stat-value {
+    font-size: 1.65rem !important;
+  }
+}
+
+/* Light mode: body + bottom tab chrome tokens */
+html.light-mode body {
+  background-color: var(--bg-page, #F5F0E8);
+  color: var(--text-primary, #1B2A4A);
+}
+html.light-mode .ep-bottom-tabs {
+  border-top-color: var(--border-color) !important;
+  background-color: var(--bg-nav) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SPRINT 4A — Mobile / tablet responsiveness system
+   Breakpoints (canonical):
+     phone     ≤ 639px   (Tailwind sm starts at 640)
+     tablet    640–1023  (Bottom tabs until 1024; TopNav links at lg)
+     desktop   ≥ 1024px  (lg)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Hard guarantee: no horizontal document scroll on any member surface */
+.ep-member-shell,
+.ep-main-scroll,
+.ep-page-gutter,
+.ep-surface-mobile {
+  max-width: 100%;
+  min-width: 0;
+}
+.ep-page-gutter {
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: max(24px, env(safe-area-inset-left, 0px));
+  padding-right: max(24px, env(safe-area-inset-right, 0px));
+}
+.ep-no-x-scroll {
+  /* clip (not hidden) prevents horizontal scroll without establishing a scroll
+     container. hidden computes overflow-y to auto, which breaks descendant
+     position:sticky (the community right rail). */
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+/* SPRINT N.1 — /live is a navy-only single-theme shell. In light mode its page
+   background was flipping to cream while its hardcoded white text stayed white.
+   Re-declare the global surface and text tokens to their dark values on the
+   /live wrapper so light-mode has no effect inside it (the /live-specific text
+   and border tokens are already theme-constant).
+
+   SPRINT FOOTER-1 — .ep-force-dark is the generic form of the same escape
+   hatch, for any element that must stay dark inside a fixed-dark shell that
+   is not /live (today: the PublicFooter under the /login card). Same token
+   set, no second copy of the values. */
+html.light-mode .live-force-dark,
+html.light-mode .ep-force-dark {
+  --bg-page:        #0A0F18;
+  --bg-surface:     #111926;
+  --bg-elevated:    #1A2332;
+  --border-color:   rgba(255,255,255,0.07);
+  --text-primary:   #ffffff;
+  --text-secondary: rgba(255,255,255,0.78);
+  --text-tertiary:  rgba(255,255,255,0.55);
+  --text-strong:    #fff;
+  --text-1:         rgba(255,255,255,0.92);
+  --text-2:         rgba(255,255,255,0.78);
+  --text-3:         rgba(255,255,255,0.62);
+  --page-bg:        #0d1c27;
+  --card-bg:        #111926;
+  --card-border:    rgba(255,255,255,0.07);
+}
+
+/* /live body copy: bump editorial --text-2/3 so kickers and city lists stay
+   readable on navy (was ~0.55–0.65 and felt washed out on mobile). */
+.live-force-dark {
+  --text-1: rgba(255, 255, 255, 0.92);
+  --text-2: rgba(255, 255, 255, 0.78);
+  --text-3: rgba(255, 255, 255, 0.62);
+}
+
+/* Public podcast episode pages hardcode a navy shell (#0A0F18). In light mode
+   --podcast-text-* flip to navy-alpha for the cream listing page — which made
+   sponsor meta (and any other podcast-token text) unreadable on the dark
+   episode surface. Re-pin tokens to ivory inside the episode shell. */
+html.light-mode .podcast-force-dark {
+  --podcast-text-strong:  #F5F0E8;
+  --podcast-text-1:       rgba(245, 240, 232, 0.88);
+  --podcast-text-2:       rgba(245, 240, 232, 0.72);
+  --podcast-text-3:       rgba(245, 240, 232, 0.58);
+  --podcast-text-4:       rgba(245, 240, 232, 0.48);
+  --podcast-text-5:       rgba(245, 240, 232, 0.38);
+  --podcast-text-6:       rgba(245, 240, 232, 0.28);
+  --podcast-border-soft:  rgba(255, 255, 255, 0.05);
+  --podcast-border-soft2: rgba(255, 255, 255, 0.08);
+  --podcast-border-med:   rgba(255, 255, 255, 0.10);
+  --podcast-border-med2:  rgba(255, 255, 255, 0.12);
+  --podcast-border-strong: rgba(255, 255, 255, 0.15);
+  --text-primary:   #F5F0E8;
+  --text-secondary: rgba(245, 240, 232, 0.72);
+  --text-tertiary:  rgba(245, 240, 232, 0.48);
+}
+
+
+/* Fluid type for section titles on small screens */
+.ep-fluid-title {
+  font-size: clamp(1.35rem, 4.5vw, 2rem);
+  line-height: 1.15;
+  word-break: break-word;
+}
+.ep-fluid-display {
+  font-size: clamp(1.75rem, 7vw, 3rem);
+  line-height: 0.95;
+}
+
+/* Coarse-pointer (phones/tablets): premium tap targets for design-system controls */
+@media (pointer: coarse) {
+  .ep-btn {
+    min-height: 44px !important;
+  }
+  .ep-btn[data-size='sm'] {
+    min-height: 40px !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+  .ep-btn[data-size='lg'] {
+    min-height: 52px !important;
+  }
+  .ep-reaction-chip {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  .ep-course-card {
+    min-height: 220px;
+  }
+  .ep-post-card {
+    padding: 16px 14px 14px !important;
+  }
+  .ep-toast {
+    min-height: 48px;
+  }
+  /* Press feedback for cards that navigate */
+  .ep-surface-card:active,
+  .ep-course-card:not(.ep-course-card--locked):active {
+    transform: scale(0.985);
+  }
+}
+
+/* Phone layout densification */
+@media (max-width: 639px) {
+  .ep-page-gutter {
+    padding-left: max(14px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(14px, env(safe-area-inset-right, 0px)) !important;
+  }
+
+  /* Home: stack metric strip 2×2 already via grid; tighten section rhythm */
+  .ep-page-gutter > * + * {
+    /* children own spacing via space-y; ensure no bleed */
+    max-width: 100%;
+  }
+
+  /* Welcome banner scoreboard already has inline media; reinforce no overflow */
+  .welcome-banner-inner,
+  .welcome-banner-scoreboard,
+  .welcome-banner-architecture {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Academy index hero copy */
+  .academy-page-header h1 {
+    font-size: clamp(26px, 8vw, 32px) !important;
+  }
+  .academy-page-header p {
+    font-size: 13px !important;
+  }
+
+  /* Community compose / filter stickiness under topnav */
+  .filter-rail-mobile {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    gap: 10px !important;
+  }
+
+  /* Live: reduce side padding */
+  .live-section-pad {
+    padding-left: max(16px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(16px, env(safe-area-inset-right, 0px)) !important;
+  }
+  .live-masthead-title {
+    font-size: clamp(42px, 14vw, 72px) !important;
+  }
+
+  /* Bottom tabs: slightly larger labels for thumb readability */
+  .ep-bottom-tabs .font-condensed {
+    font-size: 10px !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  /* Course cards fill width; reduce fixed height slightly for small viewports */
+  .ep-course-card {
+    height: auto !important;
+    min-height: 200px;
+    aspect-ratio: 16 / 11;
+  }
+
+  /* Prevent long unbroken URLs/words from blowing layout */
+  .ep-post-card p,
+  .ep-main-scroll p,
+  .ep-main-scroll h1,
+  .ep-main-scroll h2,
+  .ep-main-scroll h3 {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Tablet: 2-up pillars + keep bottom tabs (nav links still hidden until lg) */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .ep-page-gutter {
+    padding-left: max(20px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(20px, env(safe-area-inset-right, 0px)) !important;
+  }
+  .home-4up-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+  .academy-course-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .live-pillar-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  /* Welcome scoreboard: 4-across on tablet is tight — keep 2×2 */
+  .welcome-banner-scoreboard {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* Community feed: prevent rail/filter from forcing horizontal page scroll */
+.community-feed-col {
+  min-width: 0;
+  max-width: 100%;
+}
+.community-pinned {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary);
+}
+.community-pinned .community-pinned-label {
+  color: var(--brand-gold, #C9A84C) !important;
+}
+.community-pinned .community-pinned-body {
+  color: var(--text-secondary) !important;
+}
+
+/* Academy page surfaces — dual-theme (was hardcoded #0A0F18) */
+.academy-page {
+  background-color: var(--bg-page) !important;
   min-height: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.academy-page-header {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+.academy-page-header h1 {
+  color: var(--text-primary) !important;
+}
+.academy-page-header .academy-lede {
+  color: var(--text-secondary) !important;
+}
+
+/* Horizontal momentum rows (filter pillars, chips) — shared utility */
+.ep-h-scroll {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  max-width: 100%;
+  /* Edge fade hint on mobile */
+  mask-image: linear-gradient(to right, #000 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, #000 92%, transparent 100%);
+}
+.ep-h-scroll::-webkit-scrollbar {
+  display: none;
+}
+.ep-h-scroll > * {
+  flex-shrink: 0;
+}
+@media (min-width: 1024px) {
+  .ep-h-scroll {
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+}
+
+/* Live page responsive section padding */
+.live-section-pad {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: max(24px, env(safe-area-inset-left, 0px));
+  padding-right: max(24px, env(safe-area-inset-right, 0px));
+}
+
+/* Landscape phones: keep bottom tabs usable; reduce main bottom pad slightly */
+@media (max-height: 480px) and (orientation: landscape) {
+  .ep-main-scroll {
+    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+  }
+  .ep-bottom-tabs {
+    min-height: calc(48px + env(safe-area-inset-bottom, 0px));
+  }
+  .ep-bottom-tabs a,
+  .ep-bottom-tabs button {
+    min-height: 44px;
+  }
+}
+
+/* ── SPRINT 4C — Scoreboard micro-interactions ─────────────────────────── */
+@keyframes scoreboard-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0); }
+  40% { box-shadow: 0 0 0 6px rgba(201,168,76,0.18); }
+}
+.scoreboard-hero--pulse {
+  animation: scoreboard-pulse 1.2s ease 1;
+}
+@media (max-width: 639px) {
+  .scoreboard-hero .ep-progress-circle {
+    /* rings stay readable on narrow screens */
+    transform: scale(0.92);
+    transform-origin: center center;
+  }
+}
+
+/* ── SPRINT 5 — Final visual polish ─────────────────────────────────────── */
+/* Consistent section eyebrow used across home / scoreboard / academy */
+.ep-section-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 12px 0 4px;
+}
+.ep-section-eyebrow__rule {
+  width: 28px;
+  height: 1px;
+  background: rgba(201, 168, 76, 0.5);
+  flex-shrink: 0;
+}
+.ep-section-eyebrow__label {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: rgba(201, 168, 76, 0.85);
+  white-space: nowrap;
+}
+.ep-section-eyebrow__grow {
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
+  min-width: 12px;
+}
+html.light-mode .ep-section-eyebrow__label {
+  color: var(--brand-gold, #8B6A00);
+}
+html.light-mode .ep-section-eyebrow__rule {
+  background: rgba(139, 106, 0, 0.45);
+}
+
+/* Uniform interactive surface hover (cards, list rows) */
+.ep-interactive-surface {
+  transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+.ep-interactive-surface:hover {
+  border-color: var(--border-emphasized, rgba(255, 255, 255, 0.15));
+  box-shadow: var(--shadow-sm);
+}
+html.light-mode .ep-interactive-surface:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Link polish — keyboard + pointer */
+a.ep-text-link {
+  color: var(--brand-teal, #0ABFA3);
+  text-decoration: none;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 12px;
+  transition: color 120ms ease, opacity 120ms ease;
+}
+a.ep-text-link:hover {
+  opacity: 0.85;
+}
+a.ep-text-link:focus-visible {
+  outline: 2px solid var(--btn-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Empty states — readable in both themes */
+.ep-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-tertiary);
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ── SPRINT FOOTER-1 — global public footer ───────────────────────────────
+   .ep-public-shell is the (public) template wrapper: a column that keeps the
+   footer at the bottom of short pages instead of floating it mid-viewport.
+
+   The suppression rule below exists because /podcast renders the FULL member
+   chrome for a signed-in member (.ep-member-shell — height:100dvh, its own
+   scroller, its own bottom tab bar). A public marketing footer hanging below
+   that shell would add a second, dead scroll region to an in-app surface, so
+   it is hidden there. Anonymous visitors and crawlers — the ones this sprint
+   is for — never hit that branch and always get the footer. */
+.ep-public-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: 100%;
+}
+.ep-public-shell > .ep-public-shell-main {
+  flex: 1 0 auto;
+  min-width: 0;
+}
+.ep-public-shell:has(.ep-member-shell) > .ep-public-footer {
+  display: none;
+}
+
+/* Ghost footer links lift to full-strength ink on hover/focus. The single red
+   CTA (Join free) is styled inline in the component. */
+.ep-public-footer-link:hover,
+.ep-public-footer-link:focus-visible {
+  color: var(--text-primary);
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { formatDurationMMSS } from '@/lib/academy/types'
 
 interface LessonItem {
   id: string
@@ -10,6 +11,7 @@ interface LessonItem {
   sortOrder: number
   completedAt: string | null
   durationSeconds: number | null
+  thumbnailUrl: string | null
 }
 
 interface ModuleGroup {
@@ -28,6 +30,17 @@ function formatDur(s: number | null): string {
   const m = Math.round(s / 60)
   if (m < 60) return `${m}m`
   return `${Math.floor(m / 60)}h ${m % 60}m`
+}
+
+// Matches Tabler's ti-player-play glyph (icon-tabler-player-play) — no
+// icon-library dependency added, consistent with this file's other icons.
+function ThumbnailPlayIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M7 4v16l13 -8z" fill="#fff"/>
+    </svg>
+  )
 }
 
 export function PillarModuleAccordion({ modules, courseSlug, pillarColor }: Props) {
@@ -74,7 +87,7 @@ export function PillarModuleAccordion({ modules, courseSlug, pillarColor }: Prop
                     backgroundColor: allDone ? pillarColor : 'rgba(255,255,255,0.07)',
                     border: `1px solid ${allDone ? pillarColor : 'rgba(255,255,255,0.1)'}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '11px', fontFamily: '"Barlow Condensed", sans-serif',
+                    fontSize: '12px', fontFamily: '"Barlow Condensed", sans-serif',
                     fontWeight: 700, color: allDone ? '#0A0F18' : 'rgba(250,249,247,0.5)',
                   }}
                 >
@@ -94,7 +107,7 @@ export function PillarModuleAccordion({ modules, courseSlug, pillarColor }: Prop
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <span
                   style={{
-                    fontSize: '11px', fontFamily: '"Barlow Condensed", sans-serif',
+                    fontSize: '12px', fontFamily: '"Barlow Condensed", sans-serif',
                     fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase',
                     color: allDone ? pillarColor : 'rgba(250,249,247,0.3)',
                   }}
@@ -151,7 +164,7 @@ export function PillarModuleAccordion({ modules, courseSlug, pillarColor }: Prop
                       <p
                         style={{
                           fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 600,
-                          fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase',
+                          fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
                           color: 'rgba(250,249,247,0.3)', margin: '0 0 2px',
                         }}
                       >
@@ -178,6 +191,56 @@ export function PillarModuleAccordion({ modules, courseSlug, pillarColor }: Prop
                         {formatDur(lesson.durationSeconds)}
                       </span>
                     )}
+
+                    {/* Thumbnail */}
+                    <div
+                      style={{
+                        position: 'relative',
+                        width: 96,
+                        height: 64,
+                        flexShrink: 0,
+                        borderRadius: 6,
+                        overflow: 'hidden',
+                        backgroundImage: lesson.thumbnailUrl
+                          ? `url(${lesson.thumbnailUrl})`
+                          : `linear-gradient(135deg, ${pillarColor}33 0%, ${pillarColor}11 100%)`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundColor: '#0d1620',
+                      }}
+                    >
+                      <div
+                        className="absolute flex items-center justify-center"
+                        style={{
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          width: 28,
+                          height: 28,
+                          borderRadius: '50%',
+                          backgroundColor: 'rgba(10,15,24,0.45)',
+                        }}
+                      >
+                        <ThumbnailPlayIcon />
+                      </div>
+                      {formatDurationMMSS(lesson.durationSeconds) && (
+                        <span
+                          className="absolute font-condensed font-bold"
+                          style={{
+                            bottom: 3,
+                            right: 4,
+                            fontSize: '10px',
+                            lineHeight: '14px',
+                            color: '#fff',
+                            backgroundColor: 'rgba(10,15,24,0.6)',
+                            padding: '0 3px',
+                            borderRadius: 2,
+                          }}
+                        >
+                          {formatDurationMMSS(lesson.durationSeconds)}
+                        </span>
+                      )}
+                    </div>
                   </Link>
                 ))}
               </div>

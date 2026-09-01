@@ -2,13 +2,14 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { hasTierAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const typeFilter = searchParams.get('type') as EventType | null
@@ -16,16 +17,9 @@ export async function GET(request: Request) {
   const limit = Math.min(parseInt(searchParams.get('limit') ?? '50', 10), 100)
   const cursor = searchParams.get('cursor') ?? ''
 
-  // Fetch user profile for tier
-  const { data: profile } = await supabase
-    .from('users')
-    .select('tier')
-    .eq('id', user.id)
-    .single()
-
   let query = supabase
     .from('events')
-    .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published')
+    .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published, image_url')
     .eq('is_published', true)
     .order('starts_at', { ascending: upcomingOnly })
     .limit(limit + 1)
@@ -57,7 +51,7 @@ export async function GET(request: Request) {
     ? await supabase
         .from('event_registrations')
         .select('event_id')
-        .eq('user_id', user.id)
+        .eq('user_id', profile.id)
         .in('event_id', eventIds)
     : { data: [] }
 
@@ -65,7 +59,7 @@ export async function GET(request: Request) {
 
   const events: EventItem[] = page.map(e => {
     const isRegistered = registeredIds.has(e.id)
-    const access = hasTierAccess(profile?.tier, e.required_tier as 'community' | 'pro' | null)
+    const access = hasTierAccess(profile.tier, e.required_tier as 'community' | 'vip' | 'pro' | null)
     return {
       id: e.id,
       title: e.title,
@@ -75,7 +69,8 @@ export async function GET(request: Request) {
       endsAt: e.ends_at,
       zoomUrl: isRegistered ? e.zoom_url : null,   // only expose when registered
       recordingUrl: e.recording_url,
-      requiredTier: e.required_tier as 'community' | 'pro' | null,
+      imageUrl: e.image_url,
+      requiredTier: e.required_tier as 'community' | 'vip' | 'pro' | null,
       registrationCount: e.registration_count,
       isRegistered,
       hasAccess: access,

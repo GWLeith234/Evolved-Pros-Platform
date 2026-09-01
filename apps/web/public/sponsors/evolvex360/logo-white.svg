@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="36" viewBox="0 0 220 36" fill="none" role="img" aria-label="EvolveX360">
+  <defs>
+    <linearGradient id="ex-e" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#C9A4FF"/>
+      <stop offset="100%" stop-color="#6A2BD9"/>
+    </linearGradient>
+  </defs>
+  <!-- E mark -->
+  <rect x="0" y="2" width="32" height="32" rx="8" fill="#15103a"/>
+  <path d="M9 10 H24 V13.5 H13 V16 H22 V19.5 H13 V22 H24 V25.5 H9 V10Z" fill="url(#ex-e)"/>
+  <text x="42" y="24" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" letter-spacing="0.06em" fill="#FFFFFF">EVOLVEX360</text>
+</svg>

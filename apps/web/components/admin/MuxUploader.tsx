@@ -67,16 +67,16 @@ export function MuxUploader({ lessonId: _lessonId, existingPlaybackId, onUploadC
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-5 py-2.5"
+            className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-5 py-2.5"
             style={{ background: '#1b3c5a', color: '#fff', border: 'none', cursor: 'pointer' }}
           >
             {existingPlaybackId ? 'Replace Video' : 'Upload Video'}
           </button>
-          <p className="font-condensed text-[11px] mt-2" style={{ color: '#7a8a96' }}>
+          <p className="font-condensed text-[12px] mt-2" style={{ color: 'var(--admin-text-2)' }}>
             MP4, MOV, or MKV · Max 10 GB
           </p>
           {errorMsg && (
-            <p className="font-condensed text-[11px] mt-2 font-semibold" style={{ color: '#ef0e30' }}>
+            <p className="font-condensed text-[12px] mt-2 font-semibold" style={{ color: '#ef0e30' }}>
               {errorMsg}
             </p>
           )}
@@ -85,7 +85,7 @@ export function MuxUploader({ lessonId: _lessonId, existingPlaybackId, onUploadC
 
       {status === 'uploading' && (
         <div>
-          <div className="font-condensed text-[12px] mb-2" style={{ color: '#1b3c5a' }}>
+          <div className="font-condensed text-[12px] mb-2" style={{ color: 'var(--admin-text)' }}>
             Uploading… {progress}%
           </div>
           <div style={{ height: 4, background: 'rgba(27,60,90,0.1)', borderRadius: 2 }}>

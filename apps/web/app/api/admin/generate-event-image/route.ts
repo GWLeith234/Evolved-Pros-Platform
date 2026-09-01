@@ -1,17 +1,8 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { requireAdminApi } from '@/lib/admin/helpers'
 import OpenAI from 'openai'
-
-async function requireAdmin() {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
-  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
-  return { userId: user.id }
-}
 
 async function generateDallePrompt(title: string, mood: string): Promise<string> {
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
@@ -56,8 +47,8 @@ Generate a DALL-E 3 prompt for a 16:9 cinematic event banner image. Keep it unde
 }
 
 export async function POST(request: Request) {
-  const auth = await requireAdmin()
-  if ('error' in auth) return auth.error
+  const guard = await requireAdminApi()
+  if (guard instanceof Response) return guard
 
   let body: Record<string, unknown>
   try { body = await request.json() } catch {
@@ -77,7 +68,6 @@ export async function POST(request: Request) {
   try {
     // Step 1: Generate DALL-E prompt via Anthropic
     const dallePrompt = await generateDallePrompt(title, mood)
-    console.log('[generate-event-image] prompt:', dallePrompt.slice(0, 120))
 
     // Step 2: 3 parallel DALL-E 3 calls (each n:1 — DALL-E 3 requires n=1 per call)
     const openai = new OpenAI({ apiKey: OPENAI_API_KEY })
@@ -96,13 +86,12 @@ export async function POST(request: Request) {
     })
 
     let images: string[] = results
-      .filter((r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof openai.images.generate>>> => r.status === 'fulfilled')
+      .filter((r): r is PromiseFulfilledResult<OpenAI.Images.ImagesResponse> => r.status === 'fulfilled')
       .map(r => r.value.data?.[0]?.url ?? '')
       .filter(Boolean)
 
     // Fallback: if all parallel calls failed, try a single sequential call
     if (images.length === 0) {
-      console.log('[generate-event-image] all parallel calls failed, attempting sequential fallback')
       try {
         const fallback = await openai.images.generate({ model: 'dall-e-3', prompt: dallePrompt, n: 1, size: '1024x1024', quality: 'standard' })
         const url = fallback.data?.[0]?.url

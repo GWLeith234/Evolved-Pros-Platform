@@ -1,20 +1,14 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { requireAdminApi } from '@/lib/admin/helpers'
+import { asTranscriptSegments } from '@/lib/academy/transcript'
+import { asKeyTakeaways } from '@/lib/academy/takeaways'
 
 export const dynamic = 'force-dynamic'
 
-async function requireAdmin(supabase: ReturnType<typeof createClient>) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
-  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return { error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
-  return { user }
-}
-
 export async function POST(req: Request) {
-  const supabase = createClient()
-  const auth = await requireAdmin(supabase)
-  if ('error' in auth) return auth.error
+  const auth = await requireAdminApi()
+  if (auth instanceof Response) return auth
 
   const body = await req.json() as {
     course_id: string
@@ -24,13 +18,50 @@ export async function POST(req: Request) {
     sort_order?: number
     duration_seconds?: number | null
     is_published?: boolean
+    transcript?: unknown
+    key_takeaways?: unknown
+    discussion_prompt?: unknown
+    content_blocks?: unknown
   }
 
   if (!body.course_id || !body.title?.trim() || !body.slug?.trim()) {
     return NextResponse.json({ error: 'course_id, title, and slug are required' }, { status: 400 })
   }
 
-  const { data, error } = await supabase
+  if (body.content_blocks != null && !Array.isArray(body.content_blocks)) {
+    return NextResponse.json({ error: 'content_blocks must be an array' }, { status: 422 })
+  }
+  const contentBlocks = Array.isArray(body.content_blocks) ? body.content_blocks : []
+
+  const transcript = body.transcript != null ? asTranscriptSegments(body.transcript) : null
+  if (body.transcript != null && !transcript) {
+    return NextResponse.json(
+      { error: 'transcript must be null or an array of { timestamp, seconds, text } segments' },
+      { status: 422 },
+    )
+  }
+
+  const keyTakeaways = body.key_takeaways != null ? asKeyTakeaways(body.key_takeaways) : null
+  if (body.key_takeaways != null && !keyTakeaways) {
+    return NextResponse.json(
+      { error: 'key_takeaways must be null or an array of 1-8 non-empty strings (≤300 chars each)' },
+      { status: 422 },
+    )
+  }
+
+  if (body.discussion_prompt != null && (typeof body.discussion_prompt !== 'string' || body.discussion_prompt.length > 500)) {
+    return NextResponse.json(
+      { error: 'discussion_prompt must be null or a string of ≤500 chars' },
+      { status: 422 },
+    )
+  }
+  const discussionPrompt = typeof body.discussion_prompt === 'string'
+    ? body.discussion_prompt.trim() || null
+    : null
+
+  // RLS-FIX: adminClient bypasses the lessons RLS admin-role check that
+  // breaks for users where auth.uid() ≠ public.users.id.
+  const { data, error } = await adminClient
     .from('lessons')
     .insert({
       course_id: body.course_id,
@@ -40,6 +71,10 @@ export async function POST(req: Request) {
       sort_order: body.sort_order ?? 1,
       duration_seconds: body.duration_seconds ?? null,
       is_published: body.is_published ?? false,
+      transcript,
+      key_takeaways: keyTakeaways,
+      discussion_prompt: discussionPrompt,
+      content_blocks: contentBlocks,
     })
     .select('*')
     .single()

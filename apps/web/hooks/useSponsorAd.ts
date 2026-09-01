@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+import { filterLiveAds } from '@/lib/ads/iab'
+
 type SponsorAd = {
   id: string
   image_url: string | null
@@ -12,8 +14,43 @@ type SponsorAd = {
   special_offer: string | null
   cta_text: string | null
   link_url: string | null
+  click_url?: string | null
+  sponsor_name?: string | null
+  ad_type?: string | null
+  title?: string | null
+  body_copy?: string | null
+  zone?: string | null
+  start_date?: string | null
+  end_date?: string | null
+  is_active?: boolean | null
 }
 
+/** Shuffle in place (Fisher–Yates). */
+function shuffleInPlace<T>(arr: T[]): T[] {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[arr[i], arr[j]] = [arr[j], arr[i]]
+  }
+  return arr
+}
+
+/** Dedupe by id / name for client-fetched ads. */
+function dedupeClientAds(list: SponsorAd[]): SponsorAd[] {
+  const seen = new Set<string>()
+  const out: SponsorAd[] = []
+  for (const ad of list) {
+    const k = ad.id || `${ad.sponsor_name ?? ''}|${ad.tool_name ?? ''}`.toLowerCase()
+    if (!k || seen.has(k)) continue
+    seen.add(k)
+    out.push(ad)
+  }
+  return out
+}
+
+/**
+ * Client-side rotating sponsor for legacy placements (academy/community/events).
+ * Starts at a random index and cycles; list is shuffled + deduped on load.
+ */
 export function useSponsorAd(placement: 'academy' | 'community' | 'events') {
   const [ad, setAd] = useState<SponsorAd | null>(null)
   const [ads, setAds] = useState<SponsorAd[]>([])
@@ -25,8 +62,8 @@ export function useSponsorAd(placement: 'academy' | 'community' | 'events') {
     Promise.all([
       supabase
         .from('platform_ads')
-        .select('id, image_url, headline, tool_name, endorsement_quote, special_offer, cta_text, link_url')
-        .in('placement', [placement, 'all'])
+        .select('id, image_url, headline, tool_name, endorsement_quote, special_offer, cta_text, link_url, click_url, sponsor_name, ad_type, title, body_copy, zone, start_date, end_date, is_active')
+        .in('placement', [placement, 'all', 'sidebar', 'topnav', 'platform'])
         .eq('is_active', true)
         .order('sort_order'),
       supabase
@@ -35,10 +72,12 @@ export function useSponsorAd(placement: 'academy' | 'community' | 'events') {
         .eq('key', 'ad_sidebar_interval')
         .maybeSingle(),
     ]).then(([adsResult, intervalResult]) => {
-      const list = adsResult.data ?? []
+      const list = shuffleInPlace(dedupeClientAds(filterLiveAds(adsResult.data ?? [])))
       if (!list.length) return
       setAds(list)
-      setAd(list[0])
+      const start = Math.floor(Math.random() * list.length)
+      setIdx(start)
+      setAd(list[start])
       const secs = parseInt(intervalResult.data?.value ?? '10', 10)
       const ms = (isNaN(secs) ? 10 : secs) * 1000
       if (list.length > 1) {
@@ -51,10 +90,11 @@ export function useSponsorAd(placement: 'academy' | 'community' | 'events') {
         }, ms)
       }
     })
-    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
   }, [placement])
 
-  // suppress unused variable warning — idx is used internally by the setIdx callback
   void idx
   void ads
 

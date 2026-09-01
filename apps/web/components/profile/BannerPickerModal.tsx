@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { Modal } from '@/components/ui/Modal'
 
 interface Banner {
   id: string
@@ -13,12 +14,13 @@ interface Banner {
 
 interface BannerPickerModalProps {
   userId: string
+  userEmail: string
   currentBannerUrl: string | null
   onSave: (url: string) => void
   onClose: () => void
 }
 
-export function BannerPickerModal({ userId, currentBannerUrl, onSave, onClose }: BannerPickerModalProps) {
+export function BannerPickerModal({ userId, userEmail: _userEmail, currentBannerUrl, onSave, onClose }: BannerPickerModalProps) {
   const [banners, setBanners] = useState<Banner[]>([])
   const [selected, setSelected] = useState<string | null>(currentBannerUrl)
   const [uploading, setUploading] = useState(false)
@@ -26,13 +28,11 @@ export function BannerPickerModal({ userId, currentBannerUrl, onSave, onClose }:
 
   useEffect(() => {
     const supabase = createClient()
-    console.log('[banner] fetching banners')
     supabase
       .from('profile_banners')
       .select('id, label, image_url, pillar, sort_order')
       .order('sort_order')
-      .then(({ data, error }) => {
-        console.log('[banner] result:', data?.length ?? 0, 'error:', error?.message ?? 'none')
+      .then(({ data }) => {
         if (data) setBanners(data)
       })
   }, [])
@@ -61,8 +61,12 @@ export function BannerPickerModal({ userId, currentBannerUrl, onSave, onClose }:
     if (!selected) return
     setSaving(true)
     try {
-      const supabase = createClient()
-      await supabase.from('users').update({ banner_url: selected }).eq('id', userId)
+      const res = await fetch('/api/profile/banner', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: selected }),
+      })
+      if (!res.ok) return
       onSave(selected)
     } finally {
       setSaving(false)
@@ -70,43 +74,8 @@ export function BannerPickerModal({ userId, currentBannerUrl, onSave, onClose }:
   }
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0,0,0,0.7)',
-        zIndex: 100,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
-      }}
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <div
-        style={{
-          background: 'white',
-          borderRadius: '12px',
-          padding: '24px',
-          maxWidth: '560px',
-          width: '100%',
-          maxHeight: '80vh',
-          overflowY: 'auto',
-        }}
-      >
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="font-display font-bold text-[20px]" style={{ color: '#112535' }}>
-            Choose your banner
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            style={{ color: '#7a8a96', fontSize: '20px', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1 }}
-          >
-            ×
-          </button>
-        </div>
-
+    <Modal open onClose={onClose} title="Choose your banner" maxWidth={560}>
+      <div style={{ padding: 24 }}>
         {/* Preset banners grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
           {banners.map(banner => (
@@ -114,6 +83,7 @@ export function BannerPickerModal({ userId, currentBannerUrl, onSave, onClose }:
               key={banner.id}
               type="button"
               onClick={() => setSelected(banner.image_url)}
+              aria-pressed={selected === banner.image_url}
               style={{
                 border: selected === banner.image_url ? '2px solid #ef0e30' : '2px solid transparent',
                 borderRadius: '8px',
@@ -127,7 +97,7 @@ export function BannerPickerModal({ userId, currentBannerUrl, onSave, onClose }:
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={banner.image_url}
-                alt={banner.label ?? ''}
+                alt={banner.label ?? banner.pillar ?? 'Profile banner option'}
                 style={{ width: '100%', height: '90px', objectFit: 'cover', display: 'block' }}
               />
               <p
@@ -148,11 +118,11 @@ export function BannerPickerModal({ userId, currentBannerUrl, onSave, onClose }:
             marginBottom: '20px',
           }}
         >
-          <p className="font-condensed font-bold uppercase tracking-wide text-[11px] mb-2" style={{ color: '#7a8a96' }}>
+          <p className="font-condensed font-bold uppercase tracking-wide text-[12px] mb-2" style={{ color: '#7a8a96' }}>
             Upload your own
           </p>
           <label
-            className="inline-flex items-center gap-2 cursor-pointer rounded px-4 py-2 font-condensed font-semibold uppercase text-[11px] tracking-wide"
+            className="inline-flex items-center gap-2 cursor-pointer rounded px-4 py-2 font-condensed font-semibold uppercase text-[12px] tracking-wide"
             style={{
               border: '1px solid rgba(27,60,90,0.2)',
               color: '#1b3c5a',
@@ -185,6 +155,7 @@ export function BannerPickerModal({ userId, currentBannerUrl, onSave, onClose }:
           type="button"
           onClick={handleSave}
           disabled={!selected || saving}
+          aria-busy={saving}
           className="w-full rounded py-3 font-condensed font-bold uppercase tracking-wider text-[13px] transition-opacity"
           style={{
             backgroundColor: '#ef0e30',
@@ -195,6 +166,6 @@ export function BannerPickerModal({ userId, currentBannerUrl, onSave, onClose }:
           {saving ? 'Saving…' : 'Save Banner'}
         </button>
       </div>
-    </div>
+    </Modal>
   )
 }

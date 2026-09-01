@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TopNav — Redesign</title>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@400;500;600;700&family=Merriweather:wght@400;700&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand-red: #C9302A;
+    --brand-red-hot: #ef0e30;
+    --brand-gold: #C9A84C;
+    --brand-teal: #0ABFA3;
+    --brand-blue: #60A5FA;
+    --brand-violet: #A78BFA;
+    --bg-page: #0A0F18;
+    --bg-surface: #111926;
+    --bg-elevated: #1A2332;
+    --bg-topnav: #0D1B2A;
+    --text-primary: #ffffff;
+    --text-muted: rgba(255,255,255,0.45);
+    --text-dim: rgba(255,255,255,0.6);
+    --border-subtle: rgba(255,255,255,0.06);
+    --font-logo: 'Bebas Neue', sans-serif;
+    --font-condensed: 'Barlow Condensed', sans-serif;
+    --font-body: 'Barlow', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg-page); color: var(--text-primary); font-family: var(--font-body); }
+  body { min-height: 100vh; }
+  a { text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  #root { min-height: 100vh; }
+
+  /* Page scaffolding (just to give the nav context) */
+  .page-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 48px 24px;
+  }
+  .page-content h1 {
+    font-family: var(--font-logo);
+    font-size: 48px;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.35);
+    margin: 0 0 8px;
+    text-transform: uppercase;
+  }
+  .page-content p {
+    font-family: var(--font-body);
+    color: rgba(255,255,255,0.4);
+    max-width: 560px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="topnav.jsx"></script>
+<script type="text/babel" src="app.jsx"></script>
+
+</body>
+</html>

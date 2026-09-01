@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi, getEngagementLevel, getEngagementScore } from '@/lib/admin/helpers'
 
@@ -36,7 +37,7 @@ export async function GET() {
   // Fetch all community members
   const { data: members } = await supabase
     .from('users')
-    .select('id, display_name, full_name, avatar_url, tier, tier_status, created_at, vendasta_contact_id')
+    .select('id, display_name, full_name, avatar_url, tier, tier_status, created_at')
     .neq('role', 'admin')
     .in('tier_status', ['active', 'trial'])
 
@@ -160,8 +161,9 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Invalid parameters' }, { status: 422 })
   }
 
-  const supabase = createClient()
-  const { error } = await supabase
+  // RLS-FIX: adminClient — pipeline_stage_overrides RLS admin-role check
+  // breaks for users where auth.uid() ≠ public.users.id.
+  const { error } = await adminClient
     .from('pipeline_stage_overrides')
     .upsert({
       user_id:    userId,

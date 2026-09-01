@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const metadata: Metadata = { title: 'Notifications — Evolved Pros' }
 import { NotificationsContent } from './NotificationsContent'
@@ -13,13 +14,13 @@ type NotifType = Database['public']['Tables']['notifications']['Row']['type']
 
 export default async function NotificationsPage() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) redirect('/login')
 
   const { data: rows } = await supabase
     .from('notifications')
     .select('id, type, title, body, action_url, is_read, created_at')
-    .eq('user_id', user.id)
+    .eq('user_id', profile.id)
     .order('is_read', { ascending: true })
     .order('created_at', { ascending: false })
     .limit(50)
@@ -27,7 +28,7 @@ export default async function NotificationsPage() {
   const { count: unreadCount } = await supabase
     .from('notifications')
     .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
+    .eq('user_id', profile.id)
     .eq('is_read', false)
 
   const notifications: NotifItemData[] = (rows ?? []).map(n => ({

@@ -1,10 +1,20 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { ChannelSidebar } from './ChannelSidebar'
-import { CommunityFeed } from './CommunityFeed'
 import { LeaderboardRail } from './LeaderboardRail'
 import type { Channel, Post, LeaderboardEntry, MemberSummary } from '@/lib/community/types'
+
+// SPRINT HYDRATION-FIX-3 — CommunityFeed opens a Supabase Realtime channel
+// inside its useEffect. The realtime-js client carries MessageChannel /
+// MessagePort plumbing that surfaces in React's scheduler stack during
+// hydration of /community/[channelSlug] (#425/#422). Forcing the subtree
+// client-only removes the dual-render entirely.
+const CommunityFeed = dynamic(
+  () => import('./CommunityFeed').then((m) => m.CommunityFeed),
+  { ssr: false },
+)
 
 interface CommunityLayoutProps {
   channels: Channel[]
@@ -62,24 +72,24 @@ export function CommunityLayout({
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#faf9f7]">
         {/* Mobile channel pills — hidden on desktop */}
         <div
-          className="md:hidden overflow-x-auto flex gap-2 px-4 py-2 flex-shrink-0"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', backgroundColor: '#112535' }}
+          className="ep-scroll-x md:hidden flex gap-2 px-4 py-2.5 flex-shrink-0"
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', backgroundColor: 'var(--bg-nav, #112535)' }}
         >
           {channels.map(ch => {
             const active = ch.slug === currentChannelSlug
             return (
               <button
                 key={ch.slug}
+                type="button"
                 onClick={() => handleMobileChannelClick(ch.slug)}
-                className="flex-shrink-0 font-condensed font-semibold uppercase tracking-wide"
+                className="community-channel-pill flex-shrink-0 font-condensed font-semibold uppercase tracking-wide ep-pressable"
                 style={{
-                  fontSize: '11px',
-                  padding: '6px 12px',
                   borderRadius: '9999px',
                   backgroundColor: active ? 'rgba(104,162,185,0.2)' : 'rgba(255,255,255,0.06)',
-                  color: active ? '#68a2b9' : 'rgba(255,255,255,0.5)',
+                  color: active ? '#68a2b9' : 'rgba(255,255,255,0.55)',
                   border: `1px solid ${active ? 'rgba(104,162,185,0.3)' : 'rgba(255,255,255,0.08)'}`,
                   whiteSpace: 'nowrap',
+                  cursor: 'pointer',
                 }}
               >
                 {ch.name}

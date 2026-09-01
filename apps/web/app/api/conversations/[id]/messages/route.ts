@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { notifyNewDm } from '@/lib/notifications/create'
 
@@ -10,22 +11,31 @@ export async function GET(
 ) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const conversationId = params.id
 
+  // RLS-FIX: resolve public.users.id by email — conversations participant ids
+  // and messages.sender_id all FK public.users(id).
+  const { data: profile } = await adminClient
+    .from('users')
+    .select('id')
+    .eq('email', user.email)
+    .single()
+  const userId = profile?.id ?? user.id
+
   // Verify user is a participant
-  const { data: conversation } = await supabase
+  const { data: conversation } = await adminClient
     .from('conversations')
     .select('id, participant_one_id, participant_two_id')
     .eq('id', conversationId)
-    .or(`participant_one_id.eq.${user.id},participant_two_id.eq.${user.id}`)
+    .or(`participant_one_id.eq.${userId},participant_two_id.eq.${userId}`)
     .maybeSingle()
 
   if (!conversation) return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
 
   // Fetch messages
-  const { data: messages, error } = await supabase
+  const { data: messages, error } = await adminClient
     .from('messages')
     .select('id, conversation_id, sender_id, body, read_at, created_at')
     .eq('conversation_id', conversationId)
@@ -35,11 +45,11 @@ export async function GET(
 
   // Mark unread messages from other user as read (fire and forget, non-blocking)
   const unreadIds = (messages ?? [])
-    .filter(m => m.sender_id !== user.id && !m.read_at)
+    .filter(m => m.sender_id !== userId && !m.read_at)
     .map(m => m.id)
 
   if (unreadIds.length > 0) {
-    supabase
+    adminClient
       .from('messages')
       .update({ read_at: new Date().toISOString() })
       .in('id', unreadIds)
@@ -57,16 +67,24 @@ export async function POST(
 ) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const conversationId = params.id
 
+  // RLS-FIX: messages.sender_id FKs public.users(id); resolve by email.
+  const { data: profile } = await adminClient
+    .from('users')
+    .select('id, display_name, full_name')
+    .eq('email', user.email)
+    .single()
+  const senderId = profile?.id ?? user.id
+
   // Verify user is a participant
-  const { data: conversation } = await supabase
+  const { data: conversation } = await adminClient
     .from('conversations')
     .select('id, participant_one_id, participant_two_id, last_message_at')
     .eq('id', conversationId)
-    .or(`participant_one_id.eq.${user.id},participant_two_id.eq.${user.id}`)
+    .or(`participant_one_id.eq.${senderId},participant_two_id.eq.${senderId}`)
     .maybeSingle()
 
   if (!conversation) return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
@@ -83,13 +101,13 @@ export async function POST(
   if (messageBody.length > 2000) return NextResponse.json({ error: 'Message too long' }, { status: 422 })
 
   // Insert message
-  const { data: message, error } = await supabase
+  const { data: message, error } = await adminClient
     .from('messages')
     .insert({
       conversation_id: conversationId,
-      sender_id: user.id,
+      sender_id: senderId,
       body: messageBody,
-    })
+    } as never)
     .select('id, conversation_id, sender_id, body, read_at, created_at')
     .single()
 
@@ -98,7 +116,7 @@ export async function POST(
   }
 
   // Update conversation last_message_at
-  supabase
+  adminClient
     .from('conversations')
     .update({ last_message_at: new Date().toISOString() })
     .eq('id', conversationId)
@@ -107,7 +125,7 @@ export async function POST(
     })
 
   // Notify recipient if first message OR if last message was > 1 hour ago
-  const recipientId = conversation.participant_one_id === user.id
+  const recipientId = conversation.participant_one_id === senderId
     ? conversation.participant_two_id
     : conversation.participant_one_id
 
@@ -115,18 +133,10 @@ export async function POST(
   const shouldNotify = !lastAt || (Date.now() - new Date(lastAt).getTime() > 3_600_000)
 
   if (shouldNotify) {
-    // Get sender name for notification
-    supabase
-      .from('users')
-      .select('display_name, full_name')
-      .eq('id', user.id)
-      .single()
-      .then(({ data: sender }) => {
-        const senderName = sender?.display_name ?? sender?.full_name ?? 'A member'
-        notifyNewDm({ recipientId, senderName, conversationId }).catch(err => {
-          console.warn('[messages] notifyNewDm failed:', err)
-        })
-      })
+    const senderName = profile?.display_name ?? profile?.full_name ?? 'A member'
+    notifyNewDm({ recipientId, senderName, conversationId }).catch(err => {
+      console.warn('[messages] notifyNewDm failed:', err)
+    })
   }
 
   return NextResponse.json(message, { status: 201 })

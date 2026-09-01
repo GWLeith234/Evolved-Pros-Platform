@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { EmailPrefsForm } from '@/components/notifications/EmailPrefsForm'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,18 +16,12 @@ const DEFAULT_PREFS = {
 
 export default async function NotificationPreferencesPage() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('users')
-    .select('notification_preferences')
-    .eq('id', user.id)
-    .single()
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) redirect('/login')
 
   const prefs = {
     ...DEFAULT_PREFS,
-    ...(profile?.notification_preferences ?? {}),
+    ...((profile.notification_preferences as Record<string, unknown> | null) ?? {}),
   }
 
   return (
@@ -34,13 +29,14 @@ export default async function NotificationPreferencesPage() {
       <div className="mb-6">
         <Link
           href="/notifications"
-          className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a] transition-colors"
+          className="font-condensed font-semibold uppercase tracking-wide text-[11px] transition-colors"
+          style={{ color: 'var(--text-tertiary)' }}
         >
           ← Back to Notifications
         </Link>
       </div>
-      <h1 className="font-display font-black text-[28px] text-[#112535] mb-1">Email Preferences</h1>
-      <p className="font-body text-[14px] text-[#7a8a96] mb-6">
+      <h1 className="font-display font-black text-[28px] mb-1" style={{ color: 'var(--text-primary)' }}>Email Preferences</h1>
+      <p className="font-body text-[14px] mb-6" style={{ color: 'var(--text-secondary)' }}>
         Control how and when you receive email notifications from Evolved Pros.
       </p>
       <EmailPrefsForm initialPrefs={prefs} />

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getVendastaCrmUrl } from '@/lib/admin/utils'
+import { MemberPlanBadges } from './MemberPlanBadges'
 
 interface Post {
   id: string
@@ -23,19 +23,27 @@ interface LessonProgress {
   } | null
 }
 
-interface VendastaWebhook {
+interface GuestEngagement {
   id: string
-  event_type: string
-  vendasta_order_id: string | null
-  product_sku: string | null
-  processed_at: string
+  episode_id: string | null
   status: string
-  error_message: string | null
+  token_expires_at: string | null
+  one_liner: string | null
+  short_bio: string | null
+  headshot_url: string | null
+  topics: unknown
+  links: unknown
+  av_notes: string | null
+  tee_size: string | null
+  consent_release: boolean
+  submitted_at: string | null
+  created_at: string
+  episodes: { title: string | null; slug: string | null } | null
 }
 
 interface MemberDetail {
   id: string
-  email: string
+  email: string | null
   fullName: string | null
   displayName: string | null
   avatarUrl: string | null
@@ -45,7 +53,9 @@ interface MemberDetail {
   tier: string | null
   tierStatus: string | null
   tierExpiresAt: string | null
-  vendastaContactId: string | null
+  role: string | null
+  isComped: boolean
+  guestEngagements: GuestEngagement[]
   points: number
   joinedAt: string
   lastActive: string
@@ -56,21 +66,51 @@ interface MemberDetail {
   lessonsLast30: number
   recentPosts: Post[]
   lessonProgress: LessonProgress[]
-  vendastaWebhooks: VendastaWebhook[]
 }
 
-type Tab = 'overview' | 'activity' | 'progress' | 'vendasta'
+type Tab = 'overview' | 'activity' | 'progress' | 'guest'
 
+// Hydration-safe UTC formatters — toLocaleDateString depended on the runtime
+// timezone / ICU data and threw React #418/#425 hydration warnings.
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 function fmtDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`
+}
+// Same hazard as the dates: Number#toLocaleString varies by ICU build
+// (Node prod vs the browser), so a 4-digit points value would render
+// "1234" server-side and "1,234" client-side and trip React #418.
+function fmtNumber(n: number): string {
+  const s = String(Math.trunc(Math.abs(n)))
+  const grouped = s.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return n < 0 ? `-${grouped}` : grouped
 }
 function fmtDatetime(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const h = d.getUTCHours()
+  const m = d.getUTCMinutes().toString().padStart(2, '0')
+  const period = h >= 12 ? 'PM' : 'AM'
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h
+  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${h12}:${m} ${period} UTC`
 }
 
-const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
-  success: { bg: 'rgba(34,197,94,0.1)',  color: '#15803d' },
-  error:   { bg: 'rgba(239,14,48,0.1)',  color: '#ef0e30' },
+const GUEST_STATUS_COLORS: Record<string, { bg: string; color: string }> = {
+  invited:   { bg: 'rgba(201,168,76,0.12)', color: '#92660b' },
+  viewed:    { bg: 'rgba(104,162,185,0.12)', color: '#1b3c5a' },
+  submitted: { bg: 'rgba(34,197,94,0.1)',  color: '#15803d' },
+  confirmed: { bg: 'rgba(34,197,94,0.14)', color: '#15803d' },
+  revoked:   { bg: 'rgba(239,14,48,0.1)',  color: '#ef0e30' },
+}
+
+function GuestField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded px-3 py-2" style={{ backgroundColor: 'rgba(27,60,90,0.03)', border: '1px solid rgba(27,60,90,0.08)' }}>
+      <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[11px] text-[color:var(--admin-text-2)] mb-1">{label}</p>
+      {children}
+    </div>
+  )
 }
 
 export function MemberDetailClient({ member }: { member: MemberDetail }) {
@@ -85,7 +125,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
   const [notifSending, setNotifSending] = useState(false)
   const [notifMsg, setNotifMsg]     = useState('')
 
-  const name = member.displayName ?? member.fullName ?? member.email
+  const name = member.displayName ?? member.fullName ?? member.email ?? 'Member'
 
   async function handleSaveTier() {
     setSaving(true)
@@ -149,11 +189,12 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
     progressByCourse[courseId].lessons.push(lp)
   }
 
+  const isGuest = member.role === 'guest' || (member.guestEngagements?.length ?? 0) > 0
   const TABS: { id: Tab; label: string }[] = [
     { id: 'overview',  label: 'Overview'  },
     { id: 'activity',  label: 'Activity'  },
     { id: 'progress',  label: 'Progress'  },
-    { id: 'vendasta',  label: 'Vendasta'  },
+    ...(isGuest ? [{ id: 'guest' as Tab, label: 'Guest' }] : []),
   ]
 
   return (
@@ -161,7 +202,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
       {/* Header */}
       <div
         className="rounded-lg p-6 mb-6 flex items-start justify-between"
-        style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.1)' }}
+        style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)' }}
       >
         <div className="flex items-center gap-4">
           <div
@@ -174,78 +215,61 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
             ) : name[0]?.toUpperCase()}
           </div>
           <div>
-            <h2 className="font-display font-black text-[22px] text-[#112535]">{name}</h2>
-            <p className="font-condensed text-[12px] text-[#7a8a96]">{member.email}</p>
+            {member.roleTitle && (
+              <p className="font-body font-semibold text-[14px] text-[color:var(--admin-text-strong)]">{member.roleTitle}</p>
+            )}
+            <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">{member.email}</p>
             <div className="flex items-center gap-2 mt-1">
-              {member.tier && (
-                <span
-                  className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded"
-                  style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.15)' }}
-                >
-                  {member.tier}
-                </span>
-              )}
+              <MemberPlanBadges role={member.role} tier={member.tier} isComped={member.isComped} />
               {member.tierStatus && (
                 <span
-                  className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded"
+                  className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
                   style={{ backgroundColor: 'rgba(34,197,94,0.08)', color: '#15803d' }}
                 >
-                  {member.tierStatus}
+                  {member.tierStatus.toUpperCase()}
                 </span>
               )}
-              <span className="font-condensed text-[10px] text-[#c9a84c] font-bold">{member.points} pts</span>
+              <span className="font-condensed text-[12px] text-[#c9a84c] font-bold">{member.points} pts</span>
             </div>
           </div>
         </div>
-
-        {member.vendastaContactId && (
-          <a
-            href={getVendastaCrmUrl(member.vendastaContactId)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-condensed font-semibold uppercase tracking-wide text-[10px] px-3 py-2 rounded transition-all"
-            style={{ color: '#68a2b9', border: '1px solid rgba(104,162,185,0.3)' }}
-          >
-            View in Vendasta CRM →
-          </a>
-        )}
       </div>
 
       {/* Admin actions */}
       <div
         className="rounded-lg p-5 mb-6"
-        style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.1)' }}
+        style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)' }}
       >
-        <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[10px] text-[#1b3c5a] mb-4">
+        <p className="font-condensed font-bold uppercase tracking-[0.16em] text-[12px] text-[color:var(--admin-text)] mb-4">
           Admin Actions
         </p>
         <div className="flex flex-wrap items-end gap-4">
           {/* Tier */}
           <div>
-            <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] mb-1">
+            <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[12px] text-[color:var(--admin-text-2)] mb-1">
               Tier
             </label>
             <select
               value={tier}
               onChange={e => setTier(e.target.value)}
               className="font-condensed text-[12px] rounded px-2.5 py-1.5 outline-none"
-              style={{ border: '1px solid rgba(27,60,90,0.2)', color: '#112535', backgroundColor: 'white' }}
+              style={{ border: '1px solid rgba(27,60,90,0.2)', color: 'var(--admin-text-strong)', backgroundColor: 'var(--admin-card)' }}
             >
               <option value="vip">VIP</option>
-              <option value="pro">Professional</option>
+              <option value="pro">Pro</option>
             </select>
           </div>
 
           {/* Status */}
           <div>
-            <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] mb-1">
+            <label className="block font-condensed font-bold uppercase tracking-[0.14em] text-[12px] text-[color:var(--admin-text-2)] mb-1">
               Status
             </label>
             <select
               value={tierStatus}
               onChange={e => setTierStatus(e.target.value)}
               className="font-condensed text-[12px] rounded px-2.5 py-1.5 outline-none"
-              style={{ border: '1px solid rgba(27,60,90,0.2)', color: '#112535', backgroundColor: 'white' }}
+              style={{ border: '1px solid rgba(27,60,90,0.2)', color: 'var(--admin-text-strong)', backgroundColor: 'var(--admin-card)' }}
             >
               <option value="active">Active</option>
               <option value="trial">Trial</option>
@@ -257,14 +281,14 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
           <button
             onClick={handleSaveTier}
             disabled={saving}
-            className="font-condensed font-bold uppercase tracking-wide text-[11px] px-4 py-2 rounded transition-all disabled:opacity-50"
+            className="font-condensed font-bold uppercase tracking-wide text-[12px] px-4 py-2 rounded transition-all disabled:opacity-50"
             style={{ backgroundColor: '#1b3c5a', color: 'white' }}
           >
             {saving ? 'Saving…' : 'Update'}
           </button>
 
           {saveMsg && (
-            <span className="font-condensed text-[11px] text-[#15803d]">{saveMsg}</span>
+            <span className="font-condensed text-[12px] text-[#15803d]">{saveMsg}</span>
           )}
 
           {/* Suspend shortcut — requires confirmation to prevent accidental clicks */}
@@ -278,7 +302,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
                 setTierStatus('cancelled')
                 void handleSaveTier()
               }}
-              className="font-condensed font-bold uppercase tracking-wide text-[11px] px-4 py-2 rounded transition-all ml-auto"
+              className="font-condensed font-bold uppercase tracking-wide text-[12px] px-4 py-2 rounded transition-all ml-auto"
               style={{ color: '#ef0e30', border: '1px solid rgba(239,14,48,0.3)' }}
             >
               Suspend Member
@@ -288,7 +312,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
 
         {/* Direct notification */}
         <div className="mt-5 pt-5" style={{ borderTop: '1px solid rgba(27,60,90,0.08)' }}>
-          <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] mb-3">
+          <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] text-[color:var(--admin-text-2)] mb-3">
             Send Direct Notification
           </p>
           <div className="flex flex-wrap gap-2">
@@ -299,7 +323,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
               onChange={e => setNotifTitle(e.target.value)}
               maxLength={100}
               className="font-condensed text-[12px] rounded px-3 py-1.5 outline-none flex-1"
-              style={{ border: '1px solid rgba(27,60,90,0.18)', color: '#112535', backgroundColor: 'white', minWidth: '140px' }}
+              style={{ border: '1px solid rgba(27,60,90,0.18)', color: 'var(--admin-text-strong)', backgroundColor: 'var(--admin-card)', minWidth: '140px' }}
             />
             <input
               type="text"
@@ -308,18 +332,18 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
               onChange={e => setNotifBody(e.target.value)}
               maxLength={500}
               className="font-condensed text-[12px] rounded px-3 py-1.5 outline-none flex-[2]"
-              style={{ border: '1px solid rgba(27,60,90,0.18)', color: '#112535', backgroundColor: 'white', minWidth: '200px' }}
+              style={{ border: '1px solid rgba(27,60,90,0.18)', color: 'var(--admin-text-strong)', backgroundColor: 'var(--admin-card)', minWidth: '200px' }}
             />
             <button
               onClick={handleSendNotif}
               disabled={notifSending || !notifTitle.trim() || !notifBody.trim()}
-              className="font-condensed font-bold uppercase tracking-wide text-[11px] px-4 py-1.5 rounded disabled:opacity-50"
+              className="font-condensed font-bold uppercase tracking-wide text-[12px] px-4 py-1.5 rounded disabled:opacity-50"
               style={{ backgroundColor: '#68a2b9', color: 'white' }}
             >
               {notifSending ? 'Sending…' : 'Send'}
             </button>
           </div>
-          {notifMsg && <p className="font-condensed text-[11px] text-[#15803d] mt-1">{notifMsg}</p>}
+          {notifMsg && <p className="font-condensed text-[12px] text-[#15803d] mt-1">{notifMsg}</p>}
         </div>
       </div>
 
@@ -329,7 +353,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className="font-condensed font-bold uppercase tracking-[0.12em] text-[11px] px-5 py-3 transition-all relative"
+            className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] px-5 py-3 transition-all relative"
             style={{ color: tab === t.id ? '#1b3c5a' : '#7a8a96' }}
           >
             {t.label}
@@ -346,7 +370,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
           {[
             { label: 'Joined',         value: fmtDate(member.joinedAt) },
             { label: 'Last Active',    value: fmtDate(member.lastActive) },
-            { label: 'Points',         value: member.points.toLocaleString() },
+            { label: 'Points',         value: fmtNumber(member.points) },
             { label: 'MRR',            value: member.mrr > 0 ? `$${member.mrr}/mo` : '—' },
             { label: 'Engagement',     value: member.engagementLevel },
             { label: 'Posts (30d)',    value: String(member.postsLast30) },
@@ -357,10 +381,10 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
             <div
               key={item.label}
               className="rounded px-4 py-3"
-              style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.08)' }}
+              style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.08)' }}
             >
-              <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[#7a8a96] mb-0.5">{item.label}</p>
-              <p className="font-condensed font-semibold text-[14px] text-[#112535]">{item.value}</p>
+              <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] text-[color:var(--admin-text-2)] mb-0.5">{item.label}</p>
+              <p className="font-condensed font-semibold text-[14px] text-[color:var(--admin-text-strong)]">{item.value}</p>
             </div>
           ))}
         </div>
@@ -369,21 +393,21 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
       {tab === 'activity' && (
         <div className="space-y-2">
           {member.recentPosts.length === 0 ? (
-            <p className="font-condensed text-[12px] text-[#7a8a96]">No recent posts.</p>
+            <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">No recent posts.</p>
           ) : (
             member.recentPosts.map(post => (
               <div
                 key={post.id}
                 className="rounded p-4"
-                style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.08)' }}
+                style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.08)' }}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-condensed font-bold text-[10px] text-[#68a2b9]">
+                  <span className="font-condensed font-bold text-[12px] text-[#68a2b9]">
                     #{(post.channels as { name: string; slug: string } | null)?.slug ?? 'general'}
                   </span>
-                  <span className="font-condensed text-[10px] text-[#7a8a96]">{fmtDatetime(post.created_at)}</span>
+                  <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">{fmtDatetime(post.created_at)}</span>
                 </div>
-                <p className="font-body text-[13px] text-[#112535] line-clamp-2">{post.body}</p>
+                <p className="font-body text-[13px] text-[color:var(--admin-text-strong)] line-clamp-2">{post.body}</p>
               </div>
             ))
           )}
@@ -400,14 +424,14 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
               <div
                 key={group.courseTitle}
                 className="rounded-lg p-4"
-                style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.08)' }}
+                style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.08)' }}
               >
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <span className="font-condensed font-bold text-[10px] text-[#68a2b9] mr-2">P{group.pillarNumber}</span>
-                    <span className="font-condensed font-semibold text-[13px] text-[#112535]">{group.courseTitle}</span>
+                    <span className="font-condensed font-bold text-[12px] text-[#68a2b9] mr-2">P{group.pillarNumber}</span>
+                    <span className="font-condensed font-semibold text-[13px] text-[color:var(--admin-text-strong)]">{group.courseTitle}</span>
                   </div>
-                  <span className="font-condensed font-bold text-[12px] text-[#1b3c5a]">{completed}/{total} ({pct}%)</span>
+                  <span className="font-condensed font-bold text-[12px] text-[color:var(--admin-text)]">{completed}/{total} ({pct}%)</span>
                 </div>
                 <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(27,60,90,0.08)' }}>
                   <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: '#68a2b9' }} />
@@ -416,65 +440,121 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
             )
           })}
           {Object.keys(progressByCourse).length === 0 && (
-            <p className="font-condensed text-[12px] text-[#7a8a96]">No lesson progress recorded.</p>
+            <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">No lesson progress recorded.</p>
           )}
         </div>
       )}
 
-      {tab === 'vendasta' && (
-        <div>
-          {member.vendastaContactId ? (
-            <p className="font-condensed text-[12px] text-[#7a8a96] mb-4">
-              Contact ID: <span className="text-[#1b3c5a] font-bold">{member.vendastaContactId}</span>
+      {tab === 'guest' && (
+        <div className="space-y-4">
+          {member.guestEngagements.length === 0 ? (
+            <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">
+              No guest engagements for this member.
             </p>
           ) : (
-            <p className="font-condensed text-[12px] text-[#ef0e30] mb-4">No Vendasta contact linked.</p>
-          )}
-          {member.vendastaWebhooks.length === 0 ? (
-            <p className="font-condensed text-[12px] text-[#7a8a96]">No webhook events found.</p>
-          ) : (
-            <div className="rounded-lg overflow-hidden" style={{ backgroundColor: 'white', border: '1px solid rgba(27,60,90,0.1)' }}>
-              <table className="w-full">
-                <thead>
-                  <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.03)' }}>
-                    {['Event', 'Order ID', 'SKU', 'Date', 'Status'].map(h => (
-                      <th key={h} className="px-4 py-2 text-left font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96]">
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {member.vendastaWebhooks.map((wh, i, arr) => {
-                    const sc = STATUS_COLORS[wh.status] ?? STATUS_COLORS.error
-                    return (
-                      <tr key={wh.id} style={{ borderBottom: i === arr.length - 1 ? 'none' : '1px solid rgba(27,60,90,0.06)' }}>
-                        <td className="px-4 py-2.5">
-                          <span className="font-condensed text-[11px] text-[#1b3c5a]">{wh.event_type}</span>
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <span className="font-condensed text-[11px] text-[#7a8a96]">{wh.vendasta_order_id ?? '—'}</span>
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <span className="font-condensed text-[11px] text-[#7a8a96]">{wh.product_sku ?? '—'}</span>
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <span className="font-condensed text-[11px] text-[#7a8a96]">{fmtDatetime(wh.processed_at)}</span>
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <span
-                            className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded"
-                            style={{ backgroundColor: sc.bg, color: sc.color }}
-                          >
-                            {wh.status}
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+            member.guestEngagements.map(g => {
+              const topics = Array.isArray(g.topics) ? (g.topics as unknown[]) : []
+              const links = Array.isArray(g.links) ? (g.links as unknown[]) : []
+              const expired = g.token_expires_at ? new Date(g.token_expires_at).getTime() < Date.now() : false
+              const badge = GUEST_STATUS_COLORS[g.status] ?? { bg: 'rgba(27,60,90,0.08)', color: 'var(--admin-text-2)' }
+              return (
+                <div
+                  key={g.id}
+                  className="rounded-lg p-5"
+                  style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)' }}
+                >
+                  <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
+                        style={{ backgroundColor: badge.bg, color: badge.color }}
+                      >
+                        {g.status}
+                      </span>
+                      {g.episodes?.title && (
+                        <span className="font-condensed text-[12px] text-[color:var(--admin-text)]">
+                          {g.episodes.title}
+                        </span>
+                      )}
+                      {expired && (
+                        <span className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
+                          style={{ backgroundColor: 'rgba(239,14,48,0.08)', color: '#ef0e30' }}>
+                          link expired
+                        </span>
+                      )}
+                    </div>
+                    <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">
+                      {g.submitted_at ? `Submitted ${fmtDate(g.submitted_at)}` : `Invited ${fmtDate(g.created_at)}`}
+                    </span>
+                  </div>
+
+                  <div className="flex items-start gap-4">
+                    {g.headshot_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={g.headshot_url} alt="Guest headshot" className="w-16 h-16 rounded object-cover flex-shrink-0"
+                        style={{ border: '1px solid rgba(27,60,90,0.15)' }} />
+                    )}
+                    <div className="min-w-0 flex-1 space-y-2">
+                      {g.one_liner && (
+                        <p className="font-body text-[13px] text-[color:var(--admin-text-strong)] italic">&ldquo;{g.one_liner}&rdquo;</p>
+                      )}
+                      {g.short_bio && (
+                        <p className="font-body text-[13px] text-[color:var(--admin-text-2)] line-clamp-4">{g.short_bio}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {(topics.length > 0 || links.length > 0 || g.tee_size || g.av_notes) && (
+                    <div className="grid grid-cols-2 gap-3 mt-4">
+                      {topics.length > 0 && (
+                        <GuestField label="Topics">
+                          <div className="flex flex-wrap gap-1">
+                            {topics.map((t, i) => (
+                              <span key={i} className="font-condensed text-[12px] px-2 py-0.5 rounded"
+                                style={{ backgroundColor: 'rgba(104,162,185,0.1)', color: '#1b3c5a' }}>
+                                {String(t)}
+                              </span>
+                            ))}
+                          </div>
+                        </GuestField>
+                      )}
+                      {links.length > 0 && (
+                        <GuestField label="Links">
+                          <div className="flex flex-col gap-0.5">
+                            {links.map((l, i) => {
+                              const url = typeof l === 'string' ? l : String((l as any)?.url ?? '')
+                              const label = typeof l === 'string' ? l : String((l as any)?.label || url)
+                              if (!url) return null
+                              return (
+                                <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                                  className="font-condensed text-[12px] text-[#68a2b9] truncate">
+                                  {label}
+                                </a>
+                              )
+                            })}
+                          </div>
+                        </GuestField>
+                      )}
+                      {g.tee_size && (
+                        <GuestField label="Tee size">
+                          <span className="font-condensed text-[13px] text-[color:var(--admin-text-strong)]">{g.tee_size}</span>
+                        </GuestField>
+                      )}
+                      {g.av_notes && (
+                        <GuestField label="A/V notes">
+                          <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">{g.av_notes}</span>
+                        </GuestField>
+                      )}
+                      <GuestField label="Recording release">
+                        <span className="font-condensed text-[13px]" style={{ color: g.consent_release ? '#15803d' : '#ef0e30' }}>
+                          {g.consent_release ? 'Consented' : 'Not yet'}
+                        </span>
+                      </GuestField>
+                    </div>
+                  )}
+                </div>
+              )
+            })
           )}
         </div>
       )}

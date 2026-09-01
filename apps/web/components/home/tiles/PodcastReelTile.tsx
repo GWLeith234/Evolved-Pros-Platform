@@ -1,0 +1,195 @@
+// HOME-4UP-TILES: ports PodcastReelCard from home-tiles.jsx (lines 350-440).
+// 3 latest episodes with square cover (gradient + episode number),
+// title, guest · role · duration, and a play control that opens the episode.
+// Bottom link to /podcast.
+
+import { TileCard } from './TileCard'
+import { TileRow, TileFooterLink } from './TileRow'
+import { formatEpisode } from '@/lib/format'
+
+const ACCENT = 'var(--tile-podcast)'
+
+export interface PulseEpisode {
+  id: string
+  slug: string
+  episodeNumber: number | null
+  title: string
+  guestName: string | null
+  guestTitle: string | null
+  guestCompany: string | null
+  /** Formatted duration ("12 min") or null to hide the slot — never "—". */
+  durationLabel: string | null
+  /** Whether the episode is < 7 days old — drives the corner NEW badge. */
+  isNew: boolean
+  /** Per-episode accent (rotates through pillar palette in v1). */
+  accent: string
+}
+
+interface PodcastReelTileProps {
+  episodes: PulseEpisode[]
+  /** Latest episode number. No longer drives the header pill (the pill is a
+   *  "N NEW" count now, per A1.1) — the episode number lives on each row's
+   *  cover chip. Kept for the page's call site; intentionally unused. */
+  latestEpisodeNumber?: number | null
+}
+
+function guestLine(ep: PulseEpisode): string {
+  const parts: string[] = []
+  if (ep.guestName) parts.push(ep.guestName)
+  const role = [ep.guestTitle, ep.guestCompany].filter(Boolean).join(', ')
+  if (role) parts.push(role)
+  if (ep.durationLabel) parts.push(ep.durationLabel)
+  return parts.join(' · ')
+}
+
+export function PodcastReelTile({ episodes }: PodcastReelTileProps) {
+  const newCount = episodes.filter(ep => ep.isNew).length
+
+  const bottomLink = <TileFooterLink href="/podcast">All episodes</TileFooterLink>
+
+  return (
+    <TileCard
+      accent={ACCENT}
+      eyebrow="Podcast"
+      title="Latest drops"
+      newCount={newCount}
+      footer={bottomLink}
+    >
+      {episodes.length === 0 ? (
+        <div style={{ padding: '24px 16px', textAlign: 'center' }}>
+          <p
+            style={{
+              margin: 0,
+              fontFamily: '"Barlow", sans-serif',
+              fontSize: 12,
+              color: 'var(--text-tertiary)',
+            }}
+          >
+            New episodes coming soon.
+          </p>
+        </div>
+      ) : (
+        <ul style={{ margin: 0, padding: '4px 16px 0', listStyle: 'none' }}>
+          {episodes.map((ep, i) => {
+            const episodeHref = `/podcast/${ep.slug}`
+            return (
+              <TileRow
+                key={ep.id}
+                isFirst={i === 0}
+                align="center"
+                leading={
+                  <a
+                    href={episodeHref}
+                    style={{
+                      position: 'relative',
+                      width: 44,
+                      height: 44,
+                      background: `linear-gradient(135deg, ${ep.accent}33, ${ep.accent}11)`,
+                      border: `1px solid ${ep.accent}55`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: '"Bebas Neue", sans-serif',
+                        fontSize: 18,
+                        letterSpacing: '0.04em',
+                        color: ep.accent,
+                        fontVariantNumeric: 'tabular-nums',
+                      }}
+                    >
+                      {formatEpisode(ep.episodeNumber) || '—'}
+                    </span>
+                    {ep.isNew && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: -4,
+                          right: -4,
+                          background: '#ef0e30',
+                          color: '#fff',
+                          fontFamily: '"Barlow Condensed", sans-serif',
+                          fontWeight: 800,
+                          fontSize: 7,
+                          letterSpacing: '0.18em',
+                          textTransform: 'uppercase',
+                          padding: '1px 4px',
+                        }}
+                      >
+                        New
+                      </span>
+                    )}
+                  </a>
+                }
+                primary={
+                  <a
+                    href={episodeHref}
+                    style={{
+                      display: 'block',
+                      margin: 0,
+                      fontFamily: '"Barlow", sans-serif',
+                      fontSize: 12.5,
+                      fontWeight: 600,
+                      color: 'var(--text-primary)',
+                      lineHeight: 1.3,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    {ep.title}
+                  </a>
+                }
+                meta={
+                  <p
+                    style={{
+                      margin: 0,
+                      fontFamily: '"Barlow Condensed", sans-serif',
+                      fontWeight: 600,
+                      fontSize: 9,
+                      letterSpacing: '0.16em',
+                      textTransform: 'uppercase',
+                      color: 'var(--text-tertiary)',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {guestLine(ep)}
+                  </p>
+                }
+                trailing={
+                  <a
+                    href={episodeHref}
+                    aria-label={`Play ${ep.title}`}
+                    style={{
+                      width: 32,
+                      height: 32,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'transparent',
+                      color: ep.accent,
+                      border: `1px solid ${ep.accent}`,
+                      borderRadius: '50%',
+                      textDecoration: 'none',
+                      transition: 'all 120ms ease',
+                    }}
+                  >
+                    <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
+                      <path d="M3 2 L10 6 L3 10 Z" />
+                    </svg>
+                  </a>
+                }
+              />
+            )
+          })}
+        </ul>
+      )}
+    </TileCard>
+  )
+}

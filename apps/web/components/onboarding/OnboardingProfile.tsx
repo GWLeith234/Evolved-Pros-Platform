@@ -12,11 +12,11 @@ const GOLD = '#C9A84C'
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
-  backgroundColor: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.1)',
+  backgroundColor: 'var(--bg-elevated)',
+  border: '1px solid var(--border-color)',
   borderRadius: '6px',
   padding: '10px 12px',
-  color: '#faf9f7',
+  color: 'var(--text-primary)',
   fontSize: '14px',
   fontFamily: 'Barlow, sans-serif',
   outline: 'none',
@@ -26,10 +26,10 @@ const inputStyle: React.CSSProperties = {
 const labelStyle: React.CSSProperties = {
   fontFamily: '"Barlow Condensed", sans-serif',
   fontWeight: 700,
-  fontSize: '9px',
+  fontSize: '12px',
   letterSpacing: '0.18em',
   textTransform: 'uppercase',
-  color: 'rgba(255,255,255,0.35)',
+  color: 'var(--text-secondary)',
   display: 'block',
   marginBottom: '6px',
 }
@@ -93,10 +93,10 @@ export function OnboardingProfile({ userId, onContinue }: Props) {
   return (
     <div>
       {/* Heading */}
-      <h2 style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900, fontSize: '26px', color: '#faf9f7', margin: '0 0 4px' }}>
+      <h2 style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900, fontSize: '26px', color: 'var(--text-primary)', margin: '0 0 4px' }}>
         Set up your profile
       </h2>
-      <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '14px', color: 'rgba(250,249,247,0.45)', margin: '0 0 28px' }}>
+      <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '14px', color: 'var(--text-secondary)', margin: '0 0 28px' }}>
         Help your peers know who you are.
       </p>
 
@@ -131,11 +131,11 @@ export function OnboardingProfile({ userId, onContinue }: Props) {
             </svg>
           )}
         </button>
-        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: uploading ? GOLD : 'rgba(255,255,255,0.3)', marginTop: '8px' }}>
+        <p style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: uploading ? GOLD : 'var(--text-secondary)', marginTop: '8px' }}>
           {uploading ? 'Uploading…' : avatarUrl ? 'Tap to change' : 'Add a photo'}
         </p>
         {uploadError && (
-          <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '11px', color: '#ef0e30', marginTop: '4px', textAlign: 'center' }}>{uploadError}</p>
+          <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '12px', color: '#ef0e30', marginTop: '4px', textAlign: 'center' }}>{uploadError}</p>
         )}
         <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
       </div>

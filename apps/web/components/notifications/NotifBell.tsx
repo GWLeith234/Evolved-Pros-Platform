@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { NotifDrawer } from './NotifDrawer'
+import Link from 'next/link'
 
 interface NotifBellProps {
   initialUnreadCount: number
@@ -11,7 +10,8 @@ interface NotifBellProps {
 
 async function fetchUnreadCount(): Promise<number> {
   try {
-    const res = await fetch('/api/notifications?limit=1')
+    // countOnly skips the notification list query on the server.
+    const res = await fetch('/api/notifications?countOnly=1')
     if (!res.ok) return 0
     const data = await res.json() as { unreadCount: number }
     return data.unreadCount ?? 0
@@ -22,81 +22,98 @@ async function fetchUnreadCount(): Promise<number> {
 
 export function NotifBell({ initialUnreadCount, userId }: NotifBellProps) {
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount)
-  const [drawerOpen, setDrawerOpen] = useState(false)
+
+  // userId is retained in the props contract for callers/back-compat, but the
+  // bell no longer opens an in-nav drawer — it links straight to the feed.
+  void userId
 
   const refreshCount = useCallback(async () => {
     const count = await fetchUnreadCount()
     setUnreadCount(count)
   }, [])
 
+  // Poll every 30s instead of holding a Supabase Realtime WebSocket open.
+  // The persistent transport prevented the browser from reaching idle, which
+  // broke Lighthouse, Puppeteer, and any tool that waits on the `load` event.
+  // PERF: skip ticks while the tab is hidden; refresh immediately on focus.
   useEffect(() => {
-    const supabase = createClient()
-    const channel = supabase
-      .channel(`notif-bell-${userId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${userId}`,
-        },
-        () => setUnreadCount(c => c + 1),
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${userId}`,
-        },
-        () => { void refreshCount() },
-      )
-      .subscribe()
-
-    return () => { void supabase.removeChannel(channel) }
-  }, [userId, refreshCount])
+    const tick = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return
+      void refreshCount()
+    }
+    const interval = setInterval(tick, 30000)
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') void refreshCount()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
+  }, [refreshCount])
 
   return (
-    <>
-      <button
-        onClick={() => setDrawerOpen(v => !v)}
-        className="relative w-8 h-8 flex items-center justify-center rounded transition-colors"
-        style={{
-          backgroundColor: 'rgba(255,255,255,0.05)',
-          border: '1px solid rgba(255,255,255,0.08)',
-        }}
-        aria-label="Notifications"
+    <Link
+      href="/notifications"
+      aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+      style={{
+        position: 'relative',
+        width: 44,
+        height: 44,
+        minWidth: 44,
+        minHeight: 44,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'transparent',
+        border: 'none',
+        cursor: 'pointer',
+        color: 'var(--topnav-bell-icon)',
+        transition: 'color 120ms ease',
+        WebkitTapHighlightColor: 'transparent',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.color = 'var(--topnav-link-active)' }}
+      onMouseLeave={e => { e.currentTarget.style.color = 'var(--topnav-bell-icon)' }}
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ color: 'rgba(255,255,255,0.5)' }}
+        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      </svg>
+      {unreadCount > 0 && (
+        <span
+          style={{
+            position: 'absolute',
+            top: 4,
+            right: 4,
+            minWidth: 14,
+            height: 14,
+            padding: '0 3px',
+            background: 'var(--brand-red-hover)',
+            color: '#fff',
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontWeight: 700,
+            fontSize: 9,
+            lineHeight: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '2px solid var(--bg-nav)',
+            borderRadius: 999,
+          }}
         >
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-        </svg>
-        {unreadCount > 0 && (
-          <span
-            className="absolute top-0.5 right-0.5 w-[7px] h-[7px] rounded-full"
-            style={{ backgroundColor: '#ef0e30' }}
-          />
-        )}
-      </button>
-
-      <NotifDrawer
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        userId={userId}
-        onRead={() => setUnreadCount(c => Math.max(0, c - 1))}
-      />
-    </>
+          {unreadCount > 9 ? '9+' : unreadCount}
+        </span>
+      )}
+    </Link>
   )
 }

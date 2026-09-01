@@ -1,14 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-
-const NAV_TABS = [
-  { label: 'Members',      href: '/admin/members',  match: /^\/admin\/members/ },
-  { label: 'Revenue',      href: '/admin/revenue',  match: /^\/admin\/revenue/ },
-  { label: 'Pipeline',     href: '/admin/pipeline', match: /^\/admin\/pipeline/ },
-  { label: 'Vendasta CRM', href: 'https://business.vendasta.com/crm/contacts', match: /^$/ },
-]
+import { useState } from 'react'
+import { Modal } from '@/components/ui/Modal'
+import { AdminSidebarNav } from './AdminSidebar'
+import { LogoMark } from '@/components/ui/LogoMark'
+import { useTheme } from '@/components/theme/ThemeProvider'
+import { toggleLabel } from '@/lib/theme'
 
 interface AdminTopNavProps {
   profile: {
@@ -23,12 +21,17 @@ function getInitials(name: string | null | undefined): string {
 }
 
 export function AdminTopNav({ profile }: AdminTopNavProps) {
-  const pathname = usePathname()
   const displayName = profile.display_name ?? profile.full_name ?? ''
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  // Admins can toggle the whole app theme from the admin shell. The topnav is
+  // always dark chrome, so the icon keeps a fixed light color (a theme-driven
+  // token would go navy-on-navy in light mode).
+  const { preference, toggleTheme } = useTheme()
+  const themeLabel = toggleLabel(preference)
 
   return (
     <header
-      className="sticky top-0 z-40 flex items-center justify-between px-6 h-14 flex-shrink-0"
+      className="sticky top-0 z-40 flex items-center justify-between px-4 sm:px-6 h-14 flex-shrink-0"
       style={{
         backgroundColor: '#0d1c27',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
@@ -36,14 +39,34 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
     >
       {/* Logo + Admin label */}
       <div className="flex items-center gap-3">
+        {/* Mobile menu trigger — visible only when desktop sidebar is hidden */}
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label="Open admin navigation"
+          aria-expanded={mobileMenuOpen}
+          className="md:hidden -ml-1 p-2 rounded"
+          style={{ color: 'rgba(255,255,255,0.7)' }}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+            <line x1="4" y1="6" x2="20" y2="6" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <line x1="4" y1="18" x2="20" y2="18" />
+          </svg>
+        </button>
+        {/* Canonical lockup (white wordmark + red mic disc). Admin chrome is
+            always #0d1c27, so variant="light" — do not use the CSS EVOLVED·PROS
+            wordmark or a theme-swapped navy mark that would vanish on navy. */}
         <Link
           href="/admin"
-          className="font-condensed font-bold text-white tracking-[0.14em] text-base select-none"
+          aria-label="Evolved Pros — Admin"
+          className="flex items-center flex-shrink-0 select-none"
+          style={{ textDecoration: 'none' }}
         >
-          EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS
+          <LogoMark variant="light" height={28} />
         </Link>
         <span
-          className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] px-2 py-0.5 rounded"
+          className="hidden sm:inline-block font-condensed font-bold uppercase tracking-[0.18em] text-[12px] px-2 py-0.5 rounded"
           style={{
             color: 'rgba(255,255,255,0.5)',
             backgroundColor: 'rgba(255,255,255,0.06)',
@@ -54,56 +77,83 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
         </span>
       </div>
 
-      {/* Nav tabs */}
-      <nav className="hidden md:flex items-end h-full gap-1">
-        {NAV_TABS.map(tab => {
-          const isActive = tab.match.test(pathname)
-          const isExternal = tab.href.startsWith('http')
-          return (
-            <Link
-              key={tab.label}
-              href={tab.href}
-              target={isExternal ? '_blank' : undefined}
-              rel={isExternal ? 'noopener noreferrer' : undefined}
-              className="relative h-full flex items-center px-4 font-condensed font-semibold uppercase tracking-[0.12em] text-[11px] transition-colors duration-150"
-              style={{ color: isActive ? '#a8cdd9' : 'rgba(255,255,255,0.45)' }}
-              onMouseEnter={e => {
-                if (!isActive) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.8)'
-              }}
-              onMouseLeave={e => {
-                if (!isActive) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)'
-              }}
-            >
-              {tab.label}
-              {isActive && (
-                <span
-                  className="absolute bottom-0 left-0 right-0 h-0.5"
-                  style={{ backgroundColor: '#68a2b9' }}
-                />
-              )}
-            </Link>
-          )
-        })}
-      </nav>
+      {/* Mobile nav modal — surfaces the same sections as the desktop sidebar
+          when the viewport is below md (where AdminSidebar is hidden). */}
+      <Modal
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        ariaLabel="Admin navigation"
+        maxWidth={320}
+        panelStyle={{
+          backgroundColor: '#0d1c27',
+          color: 'rgba(255,255,255,0.85)',
+          padding: '20px 0',
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: '85vh',
+        }}
+      >
+        <AdminSidebarNav onSelect={() => setMobileMenuOpen(false)} />
+      </Modal>
 
-      {/* Right: Vendasta Sync badge + avatar */}
+      {/* Nav lives in the left rail (AdminSidebar) — the top bar carries only
+          brand, platform link, theme toggle, and avatar. The former duplicate
+          top-bar tabs and sync badge were removed in the nav dedup; remaining
+          legacy CRM links live under the rail's "Legacy CRM" section until
+          the in-house migration removes them. */}
+
+      {/* Right: Back to platform + theme toggle + avatar */}
       <div className="flex items-center gap-3">
-        <span
-          className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] px-2.5 py-1 rounded"
+        <Link
+          href="/home"
+          className="font-condensed font-bold uppercase tracking-[0.14em] text-[12px] px-2.5 py-1 rounded transition-colors"
           style={{
-            color: '#68a2b9',
-            backgroundColor: 'rgba(104,162,185,0.1)',
-            border: '1px solid rgba(104,162,185,0.25)',
+            color: 'rgba(255,255,255,0.55)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            textDecoration: 'none',
+            whiteSpace: 'nowrap',
           }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.9)'}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.55)'}
         >
-          Vendasta Sync
-        </span>
+          ← Platform
+        </Link>
+
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label={themeLabel}
+          title={themeLabel}
+          className="w-8 h-8 flex items-center justify-center rounded flex-shrink-0 transition-colors"
+          style={{ color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.12)' }}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.95)'}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.6)'}
+        >
+          {preference === 'system' ? (
+            // Display — following this device's setting
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="2" y="4" width="20" height="13" rx="2" />
+              <path d="M8 21h8M12 17v4" />
+            </svg>
+          ) : preference === 'light' ? (
+            // Sun — light mode is pinned
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+            </svg>
+          ) : (
+            // Moon — dark mode is pinned
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          )}
+        </button>
 
         <div
           className="w-8 h-8 flex items-center justify-center rounded flex-shrink-0"
-          style={{ backgroundColor: '#1b3c5a' }}
+          style={{ backgroundColor: '#1b3c5a', border: '1px solid rgba(255,255,255,0.15)' }}
         >
-          <span className="font-condensed font-bold text-white text-xs">
+          <span className="font-condensed font-bold text-xs" style={{ color: '#fff' }}>
             {getInitials(displayName)}
           </span>
         </div>

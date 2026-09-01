@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 300px; height: 250px; overflow: hidden; }
+  .ad {
+    position: relative; width: 300px; height: 250px;
+    background: radial-gradient(120% 120% at 15% 0%, #17324a 0%, #112535 42%, #0a141f 78%, #060c14 100%);
+    padding: 12px 12px 10px; display: flex; flex-direction: column;
+    font-family: "Barlow", sans-serif;
+  }
+  .rule { position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, #C9A84C 0%, #E7CE86 50%, #C9A84C 100%); }
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .logo { height: 15px; width: auto; opacity: .96; }
+  .badge { font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: 9px;
+    letter-spacing: .14em; text-transform: uppercase; color: #E7CE86;
+    border: 1px solid rgba(201,168,76,.4); background: rgba(201,168,76,.12);
+    padding: 3px 6px; border-radius: 4px; }
+  .eyebrow { font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: 9px;
+    letter-spacing: .16em; text-transform: uppercase; color: #C9A84C; margin-top: 8px; }
+  .headline { font-family: "Playfair Display", serif; font-weight: 900; color: #F5F0E8;
+    font-size: 20px; line-height: 1.08; letter-spacing: -0.01em; margin-top: 3px; }
+  .headline .gold { color: #E7CE86; }
+  .pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 8px; }
+  .pillar { display: flex; align-items: center; gap: 5px; padding: 4px 6px;
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); border-radius: 4px; }
+  .dot { width: 6px; height: 6px; border-radius: 1px; flex-shrink: 0; }
+  .pname { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 10px;
+    letter-spacing: .05em; text-transform: uppercase; color: rgba(245,240,232,.9);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cta { margin-top: auto; text-align: center;
+    font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: 12px;
+    letter-spacing: .14em; color: #fff; background: #C9302A;
+    padding: 8px 12px; border-radius: 6px; text-transform: uppercase;
+    box-shadow: 0 6px 16px -6px rgba(201,48,42,.55); }
+</style></head>
+<body>
+  <div class="ad">
+    <div class="rule"></div>
+    <div class="top">
+      <img class="logo" src="assets/logo_dark.png" alt="Evolved Pros">
+      <span class="badge">Academy</span>
+    </div>
+    <p class="eyebrow">Evolved Architecture™</p>
+    <h1 class="headline">Stop collecting tips.<br><span class="gold">Build the system.</span></h1>
+    <div class="pillars">
+      <div class="pillar"><span class="dot" style="background:#FFA538"></span><span class="pname">Foundation</span></div>
+      <div class="pillar"><span class="dot" style="background:#A78BFA"></span><span class="pname">Identity</span></div>
+      <div class="pillar"><span class="dot" style="background:#F87171"></span><span class="pname">Mental Toughness</span></div>
+      <div class="pillar"><span class="dot" style="background:#60A5FA"></span><span class="pname">Strategy</span></div>
+      <div class="pillar"><span class="dot" style="background:#C9A84C"></span><span class="pname">Accountability</span></div>
+      <div class="pillar"><span class="dot" style="background:#0ABFA3"></span><span class="pname">Execution</span></div>
+    </div>
+    <div class="cta">Enter the Academy →</div>
+  </div>
+</body></html>

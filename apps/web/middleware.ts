@@ -5,32 +5,58 @@ import { NextResponse, type NextRequest } from 'next/server'
 const PUBLIC_ROUTES = [
   '/login',
   '/auth/callback',
-  '/api/webhooks/vendasta',
   '/api/health',
+  '/api/cron',
   '/dev-login',
   '/api/dev-login',
-  '/pricing',
   '/media',
-  '/live',
+  // Public SEO podcast section (index, episode pages, RSS) — must be reachable
+  // by logged-out visitors and crawlers. Also removed from the matcher below.
+  '/podcast',
+  // Closed-beta lockout screen — must be reachable by suspended members, so it
+  // is never gated (also absent from the matcher below, belt-and-suspenders).
+  '/beta-paused',
+  // Guest intake — /guest/[token] and its API are reached by an anonymous
+  // invited guest via a signed token, so they must be public (also absent from
+  // the matcher below). The token is the credential; writes go through the
+  // service role after token + signature + expiry validation.
+  '/guest',
+  '/api/guest',
 ]
 
-// Routes that are publicly accessible but still need session refresh
-// so server components can read the user's auth state.
-const SESSION_OPTIONAL_ROUTES = ['/membership']
-const ADMIN_ROUTES = ['/admin']
+// Routes that are publicly accessible but still need session refresh so server
+// components can read the user's auth state. These are NEVER gated — not by
+// auth, not by the beta gate, not by the onboarding gate (see the early return
+// below). /pricing is the only checkout surface, so it has to stay reachable
+// for anonymous visitors AND for signed-in members mid-onboarding.
+//
+// /live is the public speaking/booking shell: prospects arrive cold from a
+// keynote referral, and its inquiry form posts anonymously (/api/speaking/inquiry
+// writes via the service role for exactly that reason). It sits here rather than
+// in PUBLIC_ROUTES because the page still reads the session — it renders a
+// "back to platform" link for signed-in members and nothing else auth-dependent.
+const SESSION_OPTIONAL_ROUTES = ['/membership', '/pricing', '/live']
+const ADMIN_ROUTES = ['/admin', '/api/admin']
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // RSC prefetch requests must not be redirected — Next.js cannot parse a
-  // redirect response as RSC data and reports it as a 503. Let these through;
-  // the server component itself enforces auth for its own rendered output.
-  if (
+  // Media subdomain: skip all auth — entire site is public
+  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? ''
+  if (host.startsWith('media.')) {
+    const response = NextResponse.next()
+    response.headers.set('x-media-standalone', 'true')
+    return response
+  }
+
+  // RSC requests (including click navigations, not just hover-prefetch) must
+  // not be redirected — Next.js cannot parse a redirect as RSC and reports
+  // 503. Session refresh MUST still run: Server Components cannot set auth
+  // cookies (createClient swallows that), so skipping refresh here is why
+  // /pricing showed SIGN IN to a logged-in member after an in-app navigation.
+  const isRsc =
     request.headers.get('RSC') === '1' ||
     request.headers.get('Next-Router-Prefetch') === '1'
-  ) {
-    return NextResponse.next()
-  }
 
   // Allow public routes through immediately
   if (PUBLIC_ROUTES.some(r => pathname.startsWith(r))) {
@@ -45,9 +71,15 @@ export async function middleware(request: NextRequest) {
         try {
           const profile = JSON.parse(devSession) as { role?: string }
           if (profile.role !== 'admin') {
+            if (pathname.startsWith('/api/')) {
+              return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+            }
             return NextResponse.redirect(new URL('/home', request.url))
           }
         } catch {
+          if (pathname.startsWith('/api/')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+          }
           return NextResponse.redirect(new URL('/login', request.url))
         }
       }
@@ -84,15 +116,41 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Session-optional routes: the session has been refreshed above, so server
+  // components can read auth state — and that is ALL middleware does here.
+  //
+  // This check sits OUTSIDE the `if (!user)` block on purpose. Inside it, only
+  // anonymous visitors were let through; a signed-in user fell past it into the
+  // member-route gates below and would be redirected to /onboarding (or
+  // /beta-paused) instead of seeing the page. That is fine for a member surface
+  // and wrong for /pricing, which is the only checkout surface: a half-onboarded
+  // member must still be able to buy.
+  if (SESSION_OPTIONAL_ROUTES.some(r => pathname.startsWith(r))) {
+    return supabaseResponse
+  }
+
+  // Refresh happened above. For RSC, stop here so we never 307 the payload.
+  if (isRsc) {
+    return supabaseResponse
+  }
+
   if (!user) {
-    // Session-optional routes (e.g. /membership): let them through without auth.
-    // Session was still refreshed above so server components can call getUser().
-    if (SESSION_OPTIONAL_ROUTES.some(r => pathname.startsWith(r))) {
-      return supabaseResponse
+    // /api/* paths are programmatic — return JSON 401 instead of a 307 redirect
+    // to /login (which would leak HTML to a fetch() caller).
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    // Carry forward any cookies Supabase wrote during getUser() (e.g. a partial
+    // token-refresh attempt). A bare NextResponse.redirect() drops them, which
+    // can drop the user's session on the very next request — the symptom QA hit
+    // when /home → /podcast or /home → /live unexpectedly bounced to /login.
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    return NextResponse.redirect(url)
+    const redirect = NextResponse.redirect(url)
+    supabaseResponse.cookies.getAll().forEach(c => {
+      redirect.cookies.set(c.name, c.value, c)
+    })
+    return redirect
   }
 
   // Onboarding routes: authenticated user is allowed through unconditionally.
@@ -115,13 +173,29 @@ export async function middleware(request: NextRequest) {
     )
     const { data: profile } = await adminClient
       .from('users')
-      .select('role, onboarding_completed')
+      .select('role, onboarding_completed, access_status, comp_promo_code_id')
       .eq('email', user.email!)
       .single()
 
-    // Admin route guard
+    // Admin route guard — JSON 403 for /api/admin/*, redirect for /admin/*
     if (isAdminRoute && profile?.role !== 'admin') {
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
       return NextResponse.redirect(new URL('/home', request.url))
+    }
+
+    // Beta gate (SPRINT Q): pause non-admin, non-comped members during the
+    // closed beta. Admins and comped Friends of George (comp_promo_code_id set)
+    // always pass. Reversible — flip access_status back to 'active' to restore.
+    // Keyed on comp_promo_code_id, NOT tier_status, so comped Pros aren't paused.
+    if (
+      isMemberRoute &&
+      profile?.role !== 'admin' &&
+      profile?.access_status === 'suspended' &&
+      !profile?.comp_promo_code_id
+    ) {
+      return NextResponse.redirect(new URL('/beta-paused', request.url))
     }
 
     // Onboarding gate: redirect new members to /onboarding until they complete the flow
@@ -146,8 +220,11 @@ export const config = {
     '/events/:path*',
     '/academy',
     '/academy/:path*',
-    '/podcast',
-    '/podcast/:path*',
+    // NOTE: /podcast is intentionally NOT matched — it is a public SEO section
+    // (see PUBLIC_ROUTES). Middleware must not run on it so logged-out visitors
+    // and crawlers get the server-rendered page instead of an auth redirect.
+    '/live',
+    '/live/:path*',
     '/profile/:path*',
     '/messages',
     '/messages/:path*',
@@ -156,6 +233,7 @@ export const config = {
     '/notifications',
     '/notifications/:path*',
     '/membership',
+    '/pricing',
     '/onboarding',
     '/onboarding/:path*',
     '/admin',
@@ -164,5 +242,6 @@ export const config = {
     '/api/admin/:path*',
     '/api/onboarding/:path*',
     '/api/settings/:path*',
+    '/api/cron/:path*',
   ],
 }

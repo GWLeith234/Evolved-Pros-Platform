@@ -1,15 +1,8 @@
 export const dynamic = 'force-dynamic'
 
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
-
-async function requireAdmin(supabase: ReturnType<typeof createClient>) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { user: null, error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
-  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return { user: null, error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
-  return { user, error: null }
-}
+import { requireAdminApi } from '@/lib/admin/helpers'
 
 function slugify(title: string): string {
   return title
@@ -20,12 +13,22 @@ function slugify(title: string): string {
     .trim()
 }
 
-export async function GET() {
-  const supabase = createClient()
-  const { error: authError } = await requireAdmin(supabase)
-  if (authError) return authError
+// Canonical pillar set — mirrors the episodes_pillar_check / episodes_pillars_check
+// constraints. The public /podcast read path keys on the singular `pillar` column,
+// so admin writes set `pillar` and keep the legacy `pillars` array in sync.
+const PILLAR_SET = new Set([
+  'foundation', 'identity', 'mental-toughness', 'strategy', 'accountability', 'execution',
+])
 
-  const { data, error } = await supabase
+function normalizePillar(value: unknown): string | null {
+  return typeof value === 'string' && PILLAR_SET.has(value) ? value : null
+}
+
+export async function GET() {
+  const auth = await requireAdminApi()
+  if (auth instanceof Response) return auth
+
+  const { data, error } = await adminClient
     .from('episodes')
     .select('id, episode_number, season, title, slug, guest_name, guest_company, thumbnail_url, duration_seconds, is_published, published_at, created_at')
     .order('episode_number', { ascending: false })
@@ -35,9 +38,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const supabase = createClient()
-  const { error: authError } = await requireAdmin(supabase)
-  if (authError) return authError
+  const auth = await requireAdminApi()
+  if (auth instanceof Response) return auth
 
   let body: Record<string, unknown>
   try { body = await request.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
@@ -51,8 +53,12 @@ export async function POST(request: Request) {
 
   const isPublished = body.is_published === true
   const publishedAt = isPublished ? new Date().toISOString() : null
+  const pinned = body.pinned === true
+  const pillar = normalizePillar(body.pillar)
 
-  const { data, error } = await supabase
+  // RLS-FIX: adminClient — episodes RLS admin-role check breaks for users
+  // where auth.uid() ≠ public.users.id.
+  const { data, error } = await adminClient
     .from('episodes')
     .insert({
       title,
@@ -65,10 +71,19 @@ export async function POST(request: Request) {
       guest_company: typeof body.guest_company === 'string' ? body.guest_company.trim() || null : null,
       mux_playback_id: typeof body.mux_playback_id === 'string' ? body.mux_playback_id.trim() || null : null,
       youtube_url: typeof body.youtube_url === 'string' ? body.youtube_url.trim() || null : null,
+      audio_url: typeof body.audio_url === 'string' ? body.audio_url.trim() || null : null,
       thumbnail_url: typeof body.thumbnail_url === 'string' ? body.thumbnail_url.trim() || null : null,
       duration_seconds: typeof body.duration_seconds === 'number' ? body.duration_seconds : null,
       transcript: typeof body.transcript === 'string' ? body.transcript.trim() || null : null,
       guest_image_url: typeof body.guest_image_url === 'string' ? body.guest_image_url.trim() || null : null,
+      show_notes: typeof body.show_notes === 'string' ? body.show_notes.trim() || null : null,
+      // Singular `pillar` is canonical (public /podcast reads it); keep the
+      // legacy `pillars` array in sync so the admin list + any array readers agree.
+      pillar,
+      pillars: pillar ? [pillar] : [],
+      transistor_episode_id: typeof body.transistor_episode_id === 'string' ? body.transistor_episode_id.trim() || null : null,
+      is_members_only: body.is_members_only === true,
+      pinned,
       is_published: isPublished,
       published_at: publishedAt,
     })
@@ -76,5 +91,11 @@ export async function POST(request: Request) {
     .single()
 
   if (error || !data) return NextResponse.json({ error: error?.message ?? 'Failed to create episode' }, { status: 500 })
+
+  // Pinned is single-occupancy: clear every other row in the same write.
+  if (pinned) {
+    await adminClient.from('episodes').update({ pinned: false }).neq('id', data.id)
+  }
+
   return NextResponse.json(data, { status: 201 })
 }

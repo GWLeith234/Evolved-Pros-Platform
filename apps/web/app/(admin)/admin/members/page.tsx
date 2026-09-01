@@ -1,17 +1,26 @@
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
+import { headers } from 'next/headers'
 import { getEngagementLevel, getEngagementScore, getTierMrr } from '@/lib/admin/helpers'
 import { MembersTable } from '@/components/admin/MembersTable'
 import type { MemberRow } from '@/components/admin/MembersTable'
+import { InviteMemberButton } from '@/components/admin/InviteMemberButton'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminMembersPage() {
-  const supabase = createClient()
+  // Short-circuit ONLY on prefetch — regular RSC click navigations also set
+  // RSC=1, and returning null on those left the page blank (BUG-1 family).
+  const h = headers()
+  if (h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
-  const { data: users } = await supabase
+  // RLS-FIX: adminClient — bypass RLS so the admin sees the canonical row set,
+  // matching the pattern used in the episodes admin queries. The (admin) layout
+  // already gates this page on role = 'admin'.
+  const { data: users } = await adminClient
     .from('users')
-    .select('id, email, full_name, display_name, avatar_url, tier, tier_status, vendasta_contact_id, points, created_at')
-    .neq('role', 'admin')
+    .select('id, email, full_name, display_name, avatar_url, tier, tier_status, role, comp_promo_code_id, points, created_at')
     .order('created_at', { ascending: false })
     .limit(200)
 
@@ -21,10 +30,10 @@ export default async function AdminMembersPage() {
 
   const [postsData, lessonsData] = await Promise.all([
     userIds.length > 0
-      ? supabase.from('posts').select('author_id').in('author_id', userIds).gte('created_at', thirtyDaysAgo)
+      ? adminClient.from('posts').select('author_id').in('author_id', userIds).gte('created_at', thirtyDaysAgo)
       : Promise.resolve({ data: [] }),
     userIds.length > 0
-      ? supabase.from('lesson_progress').select('user_id').in('user_id', userIds).gte('updated_at', thirtyDaysAgo).not('completed_at', 'is', null)
+      ? adminClient.from('lesson_progress').select('user_id').in('user_id', userIds).gte('updated_at', thirtyDaysAgo).not('completed_at', 'is', null)
       : Promise.resolve({ data: [] }),
   ])
 
@@ -44,10 +53,11 @@ export default async function AdminMembersPage() {
       avatarUrl:         u.avatar_url,
       tier:              u.tier,
       tierStatus:        u.tier_status,
-      vendastaContactId: u.vendasta_contact_id,
+      role:              u.role,
+      isComped:          Boolean(u.comp_promo_code_id),
       points:            u.points,
       joinedAt:          u.created_at,
-      mrr:               getTierMrr(u.tier, u.tier_status),
+      mrr:               getTierMrr(u.tier, u.tier_status, Boolean(u.comp_promo_code_id)),
       engagementLevel:   getEngagementLevel(p30, l30),
       engagementScore:   getEngagementScore(p30, l30),
       postsLast30:       p30,
@@ -56,12 +66,15 @@ export default async function AdminMembersPage() {
   })
 
   return (
-    <div className="px-8 py-6">
-      <div className="mb-6">
-        <h1 className="font-display font-black text-[28px] text-[#112535]">Members</h1>
-        <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
-          {members.length} total — search, filter, manage
-        </p>
+    <div className="px-4 sm:px-8 py-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+        <div>
+          <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)]">Members</h1>
+          <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mt-0.5">
+            {members.length} total — search, filter, manage
+          </p>
+        </div>
+        <InviteMemberButton />
       </div>
       <MembersTable initialMembers={members} />
     </div>

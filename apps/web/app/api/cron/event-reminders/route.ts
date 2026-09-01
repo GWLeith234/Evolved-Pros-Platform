@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { sendEventReminderEmail } from '@/lib/resend/emails/event-reminder'
 import { notifyEventReminder } from '@/lib/notifications/create'
@@ -12,14 +12,15 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const supabase = createClient()
+  // RLS-FIX: cron has no user session, so auth.uid() is NULL and every
+  // RLS policy rejects. Use adminClient for all queries.
 
   // Find events starting in the next 24–25 hours
   const now = new Date()
   const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000)
   const in25h = new Date(now.getTime() + 25 * 60 * 60 * 1000)
 
-  const { data: events } = await supabase
+  const { data: events } = await adminClient
     .from('events')
     .select('id, title, description, event_type, starts_at, ends_at, zoom_url')
     .eq('is_published', true)
@@ -34,7 +35,8 @@ export async function GET(request: Request) {
 
   for (const event of events) {
     // Get all registrations for this event
-    const { data: regs } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: regs } = await (adminClient as any)
       .from('event_registrations')
       .select('user_id, users(email, display_name, full_name)')
       .eq('event_id', event.id)
@@ -75,7 +77,7 @@ export async function GET(request: Request) {
     }
 
     // Mark reminder notifications as read/sent
-    await supabase
+    await adminClient
       .from('notifications')
       .update({ is_read: true })
       .eq('type', 'event_reminder')

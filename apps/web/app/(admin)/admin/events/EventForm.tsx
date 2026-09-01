@@ -1,20 +1,22 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { EventImageGenerator } from '@/components/admin/EventImageGenerator'
+import { ImagePicker } from '@/components/admin/ImagePicker'
 
 interface EventFormValues {
   title: string
   description: string
+  tagline: string
+  ctaText: string
+  pillar: string
   eventType: 'live' | 'virtual' | 'inperson'
   startsAt: string
   endsAt: string
   zoomUrl: string
   recordingUrl: string
   imageUrl: string
-  requiredTier: 'community' | 'pro' | ''
+  requiredTier: 'community' | 'vip' | 'pro' | ''
   tierAccess: 'all' | 'vip' | 'pro'
   isPublished: boolean
 }
@@ -27,6 +29,9 @@ interface EventFormProps {
 const DEFAULT_VALUES: EventFormValues = {
   title: '',
   description: '',
+  tagline: '',
+  ctaText: '',
+  pillar: '',
   eventType: 'virtual',
   startsAt: '',
   endsAt: '',
@@ -43,6 +48,12 @@ function toDatetimeLocal(iso: string): string {
   return iso.slice(0, 16)
 }
 
+// events.pillar is stored as integer 1-6. The AI returns the slug
+// vocabulary. Map at save time so the column stays integer.
+const PILLAR_SLUG_TO_NUMBER: Record<string, number> = {
+  foundation: 1, identity: 2, mental: 3, strategy: 4, accountability: 5, execution: 6,
+}
+
 export function EventForm({ initialValues, eventId }: EventFormProps) {
   const router = useRouter()
   const [values, setValues] = useState<EventFormValues>({
@@ -53,35 +64,46 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [uploadState, setUploadState] = useState<'idle' | 'uploading' | 'error'>('idle')
-  const [uploadError, setUploadError] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  async function handleFileSelect(file: File) {
-    const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp']
-    if (!ACCEPTED.includes(file.type)) {
-      setUploadError('Please upload a JPEG, PNG, or WebP image')
+  // AI writer state. Image prompt is the only field that doesn't have a
+  // dedicated form input — it's a hint for the ImagePicker generator and
+  // stays in component state for the user to copy into that flow.
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
+  const [aiImagePrompt, setAiImagePrompt] = useState<string>('')
+
+  async function handleAIWrite() {
+    if (!values.title.trim()) {
+      setAiError('Enter a title first.')
       return
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setUploadError('Image must be under 5MB')
-      return
-    }
-    setUploadError(null)
-    setUploadState('uploading')
+    setAiLoading(true)
+    setAiError(null)
     try {
-      const supabase = createClient()
-      const path = `events/${Date.now()}-${file.name}`
-      const { data: upload, error: uploadErr } = await supabase.storage
-        .from('Branding')
-        .upload(path, file, { contentType: file.type, upsert: true })
-      if (uploadErr || !upload) throw new Error(uploadErr?.message ?? 'Upload failed')
-      const { data: { publicUrl } } = supabase.storage.from('Branding').getPublicUrl(upload.path)
-      set('imageUrl', publicUrl)
-      setUploadState('idle')
-    } catch {
-      setUploadState('error')
-      setUploadError('Upload failed — try again')
+      const res = await fetch('/api/admin/ai/write-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: values.title.trim(),
+          format: values.eventType,
+          date: values.startsAt || undefined,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Could not generate')
+      const ev = data.event ?? {}
+      setValues(prev => ({
+        ...prev,
+        description: ev.description ?? prev.description,
+        tagline:     ev.tagline     ?? prev.tagline,
+        ctaText:     ev.cta_text    ?? prev.ctaText,
+        pillar:      ev.pillar      ?? prev.pillar,
+      }))
+      setAiImagePrompt(ev.image_prompt ?? '')
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'Could not generate — try again')
+    } finally {
+      setAiLoading(false)
     }
   }
 
@@ -96,6 +118,9 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
     const payload = {
       title: values.title.trim(),
       description: values.description.trim() || null,
+      tagline: values.tagline.trim() || null,
+      cta_text: values.ctaText.trim() || null,
+      pillar: values.pillar ? PILLAR_SLUG_TO_NUMBER[values.pillar] ?? null : null,
       event_type: values.eventType,
       starts_at: values.startsAt ? new Date(values.startsAt).toISOString() : null,
       ends_at: values.endsAt ? new Date(values.endsAt).toISOString() : null,
@@ -139,25 +164,25 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
 
   async function handleDelete() {
     if (!eventId) return
-    if (!confirm('Delete this event? This cannot be undone.')) return
-    setSaving(true)
+    // Use window.confirm/alert explicitly so this works even in browser
+    // contexts that strip the global shorthand (e.g. some embed wrappers).
+    if (!window.confirm('Delete this event? This cannot be undone.')) return
     try {
       const res = await fetch(`/api/admin/events/${eventId}`, { method: 'DELETE' })
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error ?? 'Delete failed')
+      if (res.ok) {
+        router.push('/admin/events')
+        router.refresh()
+      } else {
+        window.alert('Delete failed — please try again')
       }
-      router.push('/admin/events')
-      router.refresh()
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Delete failed')
-      setSaving(false)
+    } catch {
+      window.alert('Delete failed — please try again')
     }
   }
 
-  const inputStyle = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }
-  const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5'
-  const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none transition-all'
+  const inputStyle = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'var(--admin-card)' }
+  const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)] mb-1.5'
+  const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[color:var(--admin-text)] outline-none transition-all'
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -182,6 +207,56 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
           style={inputStyle}
           placeholder="Event title"
         />
+        <div className="flex items-center gap-3 mt-2">
+          <button
+            type="button"
+            onClick={handleAIWrite}
+            disabled={aiLoading || !values.title.trim()}
+            className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-3 py-1.5 transition-all disabled:opacity-50"
+            style={{ border: '1px solid #0ABFA3', color: '#0ABFA3', backgroundColor: 'transparent' }}
+          >
+            {aiLoading ? (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#0ABFA3' }} />
+                Writing…
+              </span>
+            ) : 'Write with AI'}
+          </button>
+          {aiError && (
+            <span className="font-condensed text-[11px]" style={{ color: '#ef0e30' }}>{aiError}</span>
+          )}
+        </div>
+      </div>
+
+      {aiImagePrompt && (
+        <div
+          className="rounded-lg p-4"
+          style={{ backgroundColor: 'rgba(10,191,163,0.06)', border: '1px solid rgba(10,191,163,0.2)' }}
+        >
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-1" style={{ color: '#0ABFA3' }}>
+            AI image prompt
+          </p>
+          <p className="font-body text-[12px] leading-relaxed" style={{ color: 'var(--admin-text)' }}>
+            {aiImagePrompt}
+          </p>
+          <p className="font-condensed text-[10px] mt-1" style={{ color: 'var(--admin-text-2)' }}>
+            Tagline, CTA, description and pillar were filled in below — this prompt is for the image generator.
+          </p>
+        </div>
+      )}
+
+      {/* Tagline */}
+      <div>
+        <label className={labelClass}>Tagline</label>
+        <input
+          type="text"
+          value={values.tagline}
+          onChange={e => set('tagline', e.target.value)}
+          maxLength={140}
+          className={inputClass}
+          style={inputStyle}
+          placeholder="Short hook shown beneath the title in the hero"
+        />
       </div>
 
       {/* Description */}
@@ -195,6 +270,39 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
           style={inputStyle}
           placeholder="What is this event about?"
         />
+      </div>
+
+      {/* CTA + Pillar */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className={labelClass}>CTA Button Text</label>
+          <input
+            type="text"
+            value={values.ctaText}
+            onChange={e => set('ctaText', e.target.value)}
+            maxLength={40}
+            className={inputClass}
+            style={inputStyle}
+            placeholder="Defaults to RSVP"
+          />
+        </div>
+        <div>
+          <label className={labelClass}>Pillar</label>
+          <select
+            value={values.pillar}
+            onChange={e => set('pillar', e.target.value)}
+            className={inputClass}
+            style={inputStyle}
+          >
+            <option value="">— none —</option>
+            <option value="foundation">Foundation</option>
+            <option value="identity">Identity</option>
+            <option value="mental">Mental Toughness</option>
+            <option value="strategy">Strategy</option>
+            <option value="accountability">Accountability</option>
+            <option value="execution">Execution</option>
+          </select>
+        </div>
       </div>
 
       {/* Event type */}
@@ -254,7 +362,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
           style={inputStyle}
           placeholder="https://zoom.us/j/..."
         />
-        <p className="font-condensed text-[10px] text-[#7a8a96] mt-1">Only shown to registered members</p>
+        <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] mt-1">Only shown to registered members</p>
       </div>
 
       {/* Recording URL */}
@@ -270,93 +378,12 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
         />
       </div>
 
-      {/* Cover Image Upload + AI Generator */}
-      <div>
-        <label className={labelClass}>Cover Image</label>
-
-        {/* Hidden file input */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          style={{ display: 'none' }}
-          onChange={e => { if (e.target.files?.[0]) handleFileSelect(e.target.files[0]) }}
-        />
-
-        {values.imageUrl ? (
-          /* Preview with Replace / Remove */
-          <div className="flex items-center gap-4 mb-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={values.imageUrl}
-              alt=""
-              style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 6, border: '1px solid rgba(27,60,90,0.15)', flexShrink: 0 }}
-            />
-            <div className="flex flex-col gap-1.5">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadState === 'uploading'}
-                className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-4 py-2 transition-all"
-                style={{ border: '1px solid rgba(27,60,90,0.2)', color: '#1b3c5a', backgroundColor: 'transparent' }}
-              >
-                {uploadState === 'uploading' ? 'Uploading…' : 'Replace'}
-              </button>
-              <button
-                type="button"
-                onClick={() => { set('imageUrl', ''); setUploadError(null) }}
-                className="font-condensed text-[10px] text-left"
-                style={{ color: '#ef0e30', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-        ) : (
-          /* Drop zone */
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploadState === 'uploading'}
-            className="w-full mb-3 transition-colors"
-            style={{
-              border: '2px dashed rgba(27,60,90,0.2)',
-              borderRadius: 8,
-              padding: '32px 20px',
-              backgroundColor: 'transparent',
-              cursor: uploadState === 'uploading' ? 'default' : 'pointer',
-              textAlign: 'center',
-            }}
-          >
-            {uploadState === 'uploading' ? (
-              <p className="font-condensed font-semibold text-[13px]" style={{ color: '#7a8a96' }}>Uploading…</p>
-            ) : (
-              <>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(122,138,150,0.6)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 8px' }}>
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="17 8 12 3 7 8"/>
-                  <line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-                <p className="font-condensed font-semibold text-[13px] mb-1" style={{ color: '#7a8a96' }}>
-                  Click to upload or drag &amp; drop
-                </p>
-                <p className="font-condensed text-[11px]" style={{ color: 'rgba(122,138,150,0.55)' }}>
-                  JPEG, PNG, WebP · max 5 MB
-                </p>
-              </>
-            )}
-          </button>
-        )}
-
-        {uploadError && (
-          <p className="font-condensed text-[11px] mb-3" style={{ color: '#ef0e30' }}>{uploadError}</p>
-        )}
-
-        <EventImageGenerator
-          eventTitle={values.title}
-          onSelect={url => set('imageUrl', url)}
-        />
-      </div>
+      {/* Cover Image */}
+      <ImagePicker
+        label="Event Cover Image"
+        value={values.imageUrl || null}
+        onChange={url => set('imageUrl', url)}
+      />
 
       {/* Tier Access */}
       <div>
@@ -384,7 +411,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
       <div>
         <label className={labelClass}>Required Tier (legacy)</label>
         <div className="flex gap-2">
-          {([['', 'Any Tier'], ['community', 'Community'], ['pro', 'Pro']] as const).map(([val, label]) => (
+          {([['', 'Any Tier'], ['community', 'Community'], ['vip', 'VIP'], ['pro', 'Pro']] as const).map(([val, label]) => (
             <button
               key={val}
               type="button"
@@ -424,7 +451,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
         <div className="flex items-center gap-3">
           <a
             href="/admin/events"
-            className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a] transition-colors"
+            className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[color:var(--admin-text-2)] hover:text-[color:var(--admin-text)] transition-colors"
           >
             Cancel
           </a>
@@ -437,7 +464,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
             className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-5 py-2.5 transition-all"
             style={{
               backgroundColor: 'transparent',
-              color: '#1b3c5a',
+              color: 'var(--admin-text)',
               border: '1px solid rgba(27,60,90,0.25)',
               opacity: saving || !values.title.trim() || !values.startsAt ? 0.5 : 1,
             }}

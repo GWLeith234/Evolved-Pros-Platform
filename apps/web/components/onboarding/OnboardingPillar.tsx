@@ -3,7 +3,7 @@
 import { useState } from 'react'
 
 interface Props {
-  onContinue: () => void
+  onContinue: (color?: string) => void
 }
 
 const PILLARS = [
@@ -29,7 +29,8 @@ export function OnboardingPillar({ onContinue }: Props) {
       })
     }
     setSaving(false)
-    onContinue()
+    const pillar = PILLARS.find(p => p.number === selected)
+    onContinue(pillar?.color)
   }
 
   const selectedPillar = PILLARS.find(p => p.number === selected)
@@ -37,11 +38,11 @@ export function OnboardingPillar({ onContinue }: Props) {
   return (
     <div>
       {/* Heading */}
-      <h2 style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900, fontSize: '26px', color: '#faf9f7', margin: '0 0 8px' }}>
+      <h2 style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 900, fontSize: '26px', color: 'var(--text-primary)', margin: '0 0 8px' }}>
         Where do you need the most work?
       </h2>
-      <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '13px', color: 'rgba(250,249,247,0.45)', lineHeight: 1.55, margin: '0 0 24px' }}>
-        Pick your biggest growth area. You&apos;ll still start with Foundation — it&apos;s the base everything else builds on.
+      <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.55, margin: '0 0 24px' }}>
+        Pick your biggest growth area. Everyone starts with Foundation — it unlocks the rest.
       </p>
 
       {/* Pillar grid */}
@@ -57,8 +58,8 @@ export function OnboardingPillar({ onContinue }: Props) {
                 position: 'relative',
                 padding: '14px 12px',
                 borderRadius: '8px',
-                border: `2px solid ${isSelected ? pillar.color : 'rgba(255,255,255,0.07)'}`,
-                backgroundColor: isSelected ? pillar.color : 'rgba(255,255,255,0.02)',
+                border: `2px solid ${isSelected ? pillar.color : 'var(--border-color)'}`,
+                backgroundColor: isSelected ? pillar.color : 'var(--bg-elevated)',
                 cursor: 'pointer',
                 textAlign: 'left',
                 transition: 'all 0.15s',
@@ -79,7 +80,7 @@ export function OnboardingPillar({ onContinue }: Props) {
                 fontSize: '8px',
                 letterSpacing: '0.16em',
                 textTransform: 'uppercase',
-                color: isSelected ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.3)',
+                color: isSelected ? 'rgba(255,255,255,0.7)' : 'var(--text-secondary)',
                 margin: '0 0 3px',
               }}>
                 Pillar {pillar.number}
@@ -88,7 +89,7 @@ export function OnboardingPillar({ onContinue }: Props) {
                 fontFamily: '"Barlow Condensed", sans-serif',
                 fontWeight: 700,
                 fontSize: '13px',
-                color: isSelected ? 'white' : '#faf9f7',
+                color: isSelected ? 'white' : 'var(--text-primary)',
                 margin: '0 0 4px',
                 lineHeight: 1.1,
               }}>
@@ -96,8 +97,8 @@ export function OnboardingPillar({ onContinue }: Props) {
               </p>
               <p style={{
                 fontFamily: 'Barlow, sans-serif',
-                fontSize: '11px',
-                color: isSelected ? 'rgba(255,255,255,0.75)' : 'rgba(250,249,247,0.35)',
+                fontSize: '12px',
+                color: isSelected ? 'rgba(255,255,255,0.75)' : 'var(--text-secondary)',
                 margin: 0,
                 lineHeight: 1.4,
               }}>
@@ -136,7 +137,7 @@ export function OnboardingPillar({ onContinue }: Props) {
       {/* Skip */}
       <button
         type="button"
-        onClick={onContinue}
+        onClick={() => onContinue()}
         style={{
           display: 'block',
           width: '100%',
@@ -146,10 +147,10 @@ export function OnboardingPillar({ onContinue }: Props) {
           border: 'none',
           cursor: 'pointer',
           fontFamily: '"Barlow Condensed", sans-serif',
-          fontSize: '11px',
+          fontSize: '12px',
           letterSpacing: '0.1em',
           textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.2)',
+          color: 'var(--text-secondary)',
           textAlign: 'center',
         }}
       >

@@ -2,7 +2,9 @@ import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-const LOGO_URL = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_nav_dark.png'
+// Prefer the horizontal EVOLVED PROS wordmark with red mic when available in
+// Branding storage; falls back to the legacy nav mark path for older buckets.
+const LOGO_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Branding/logo_horizontal_dark.png`
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://web-production-db912.up.railway.app'
 
 function completionEmailHtml({ displayName, completionDate }: { displayName: string; completionDate: string }): string {

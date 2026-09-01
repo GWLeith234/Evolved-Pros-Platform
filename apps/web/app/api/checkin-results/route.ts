@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import type { Json } from '@evolved-pros/db'
 
 export async function GET(request: Request) {
   const supabase = createClient()
@@ -53,6 +54,7 @@ export async function POST(request: Request) {
   if (score === null) return NextResponse.json({ error: 'score is required' }, { status: 422 })
   if (maxScore === null) return NextResponse.json({ error: 'max_score is required' }, { status: 422 })
 
+  /* checkin_results.user_id FKs auth.users(id) and RLS checks auth.uid(). */
   const { data, error } = await supabase
     .from('checkin_results')
     .insert({
@@ -62,7 +64,7 @@ export async function POST(request: Request) {
       checkin_type: checkinType,
       score,
       max_score: maxScore,
-      result_json: resultJson,
+      result_json: resultJson as Json,
     })
     .select('id, course_id, module_number, checkin_type, score, max_score, created_at')
     .single()

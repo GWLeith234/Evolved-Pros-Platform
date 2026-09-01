@@ -1,9 +1,12 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getAvatarColor } from '@/lib/community/types'
 import { MemberBadge } from '@/components/ui/MemberBadge'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { tierColor } from '@/lib/tier-color'
 import type { LeaderboardEntry, MemberSummary, CommunityAd, EpisodeSummary } from '@/lib/community/types'
+import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
+import { isIabImageStill } from '@/lib/ads/iab'
 
 interface LeaderboardRailProps {
   leaderboard: LeaderboardEntry[]
@@ -39,12 +42,12 @@ function RailSection({ eyebrow, children, tooltip }: { eyebrow: string; children
     <div>
       {tooltip ? (
         <Tooltip content={tooltip}>
-          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-3 cursor-help" style={{ color: '#ef0e30' }}>
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] sm:text-[12px] mb-3 cursor-help" style={{ color: '#ef0e30' }}>
             {eyebrow}
           </p>
         </Tooltip>
       ) : (
-        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-3" style={{ color: '#ef0e30' }}>
+        <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] sm:text-[12px] mb-3" style={{ color: '#ef0e30' }}>
           {eyebrow}
         </p>
       )}
@@ -66,10 +69,15 @@ function LeaderboardRow({ entry, currentUserTier }: { entry: LeaderboardEntry; c
       </span>
       <div className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden" style={{ backgroundColor: avatarBg }}>
         {entry.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={entry.avatarUrl} alt={entry.displayName} className="w-7 h-7 rounded-full object-cover" />
+          <Image
+            src={entry.avatarUrl}
+            alt={`${entry.displayName} avatar`}
+            width={28}
+            height={28}
+            className="w-7 h-7 rounded-full object-cover"
+          />
         ) : (
-          <span style={{ fontSize: '9px' }} className="font-condensed font-bold text-white">{getInitials(entry.displayName)}</span>
+          <span style={{ fontSize: '12px' }} className="font-condensed font-bold text-white">{getInitials(entry.displayName)}</span>
         )}
       </div>
       <div className="flex-1 min-w-0">
@@ -77,7 +85,7 @@ function LeaderboardRow({ entry, currentUserTier }: { entry: LeaderboardEntry; c
           {entry.displayName}{entry.isCurrentUser ? ' (You)' : ''}
         </p>
         <p className="font-condensed font-bold text-[12px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          {entry.points.toLocaleString()} pts
+          {entry.points.toLocaleString('en-US')} pts
         </p>
       </div>
     </div>
@@ -90,10 +98,15 @@ function ActiveMemberRow({ member }: { member: MemberSummary }) {
     <Link href={`/profile/${member.id}`} className="flex items-center gap-2.5 py-2 group">
       <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden" style={{ backgroundColor: avatarBg }}>
         {member.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={member.avatarUrl} alt={member.displayName} className="w-8 h-8 rounded-full object-cover" />
+          <Image
+            src={member.avatarUrl}
+            alt={`${member.displayName} avatar`}
+            width={32}
+            height={32}
+            className="w-8 h-8 rounded-full object-cover"
+          />
         ) : (
-          <span className="text-[10px] font-condensed font-bold text-white">{getInitials(member.displayName)}</span>
+          <span className="text-[12px] sm:text-[12px] font-condensed font-bold text-white">{getInitials(member.displayName)}</span>
         )}
       </div>
       <div className="flex-1 min-w-0">
@@ -101,13 +114,16 @@ function ActiveMemberRow({ member }: { member: MemberSummary }) {
           <span className="font-body text-[13px] font-medium text-[#1b3c5a] group-hover:text-[#68a2b9] transition-colors truncate">{member.displayName}</span>
           {member.tier && <MemberBadge tier={member.tier} size="sm" />}
         </div>
-        {member.roleTitle && <p className="font-condensed text-[10px] text-[#7a8a96] truncate">{member.roleTitle}</p>}
+        {member.roleTitle && <p className="font-condensed text-[12px] sm:text-[12px] text-[#7a8a96] truncate">{member.roleTitle}</p>}
       </div>
     </Link>
   )
 }
 
 function AdCard({ ad }: { ad: CommunityAd }) {
+  if (isIabImageStill(ad) && ad.image_url) {
+    return <IabAdvertisementSlot ad={{ ...ad, image_url: ad.image_url }} locationId="community-rail" />
+  }
   const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
   const label = ad.headline ?? ad.tool_name ?? ad.sponsor_name ?? 'Sponsored'
   const cta = ad.cta_text ?? 'Learn More →'
@@ -119,6 +135,8 @@ function AdCard({ ad }: { ad: CommunityAd }) {
         <img
           src={ad.image_url}
           alt={label}
+          loading="lazy"
+          decoding="async"
           className="w-full object-cover"
           style={{ aspectRatio: '4/3' }}
         />
@@ -127,17 +145,20 @@ function AdCard({ ad }: { ad: CommunityAd }) {
           className="w-full flex items-center justify-center"
           style={{ aspectRatio: '4/3', backgroundColor: 'rgba(27,60,90,0.06)' }}
         >
-          <span className="font-condensed text-[11px]" style={{ color: 'rgba(27,60,90,0.3)' }}>{label}</span>
+          <span className="font-condensed text-[12px]" style={{ color: 'rgba(27,60,90,0.3)' }}>{label}</span>
         </div>
       )}
       <div className="px-3 py-2.5" style={{ backgroundColor: '#f5f7f9' }}>
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <p className="font-condensed font-bold text-[12px] leading-tight truncate" style={{ color: '#112535' }}>{label}</p>
-            <p className="font-condensed font-semibold text-[11px] mt-1" style={{ color: '#68a2b9' }}>{cta}</p>
+            {ad.body_copy && (
+              <p className="font-condensed text-[12px] sm:text-[12px] mt-0.5 leading-snug" style={{ color: '#7a8a96' }}>{ad.body_copy}</p>
+            )}
+            <p className="font-condensed font-semibold text-[12px] sm:text-[12px] mt-1" style={{ color: '#68a2b9' }}>{cta}</p>
           </div>
           <span
-            className="font-condensed font-bold text-[8px] uppercase tracking-wider rounded flex-shrink-0 px-1.5 py-0.5"
+            className="font-condensed font-bold text-[12px] uppercase tracking-wider rounded flex-shrink-0 px-1.5 py-0.5"
             style={{ backgroundColor: '#ef0e30', color: 'white' }}
           >
             Ad
@@ -165,14 +186,18 @@ function PodcastCard({ episode }: { episode: EpisodeSummary }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={episode.guest_image_url}
-            alt={episode.title}
+            alt={`${episode.title} — guest`}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover object-top"
           />
         ) : episode.thumbnail_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={episode.thumbnail_url}
-            alt={episode.title}
+            alt={`${episode.title} — episode thumbnail`}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover"
           />
         ) : (
@@ -210,21 +235,21 @@ function PodcastCard({ episode }: { episode: EpisodeSummary }) {
           <p className="font-condensed font-bold text-[12px] text-white leading-tight">{episode.guest_name}</p>
         )}
         {(episode.guest_title || episode.guest_company) && (
-          <p className="font-condensed font-semibold text-[10px]" style={{ color: '#C9A84C' }}>
+          <p className="font-condensed font-semibold text-[12px] sm:text-[12px]" style={{ color: '#C9A84C' }}>
             {episode.guest_title}
             {episode.guest_title && episode.guest_company && ' · '}
             {episode.guest_company}
           </p>
         )}
         {(duration || date) && (
-          <p className="font-condensed text-[10px] mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
+          <p className="font-condensed text-[12px] sm:text-[12px] mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
             {duration}{duration && date ? ' · ' : ''}{date}
           </p>
         )}
 
         {/* Watch button */}
         <div
-          className="mt-2.5 rounded py-2 text-center font-condensed font-bold uppercase tracking-[0.12em] text-[11px] text-white transition-all group-hover:bg-[#1b3c5a]"
+          className="mt-2.5 rounded py-2 text-center font-condensed font-bold uppercase tracking-[0.12em] text-[12px] sm:text-[12px] text-white transition-all group-hover:bg-[#1b3c5a]"
           style={{ backgroundColor: '#112535', border: '1px solid rgba(255,255,255,0.1)' }}
         >
           ▶ Watch Now
@@ -232,7 +257,7 @@ function PodcastCard({ episode }: { episode: EpisodeSummary }) {
       </div>
 
       <p
-        className="font-condensed text-[9px] text-center mt-1.5 uppercase tracking-[0.18em]"
+        className="font-condensed text-[12px] sm:text-[12px] text-center mt-1.5 uppercase tracking-[0.18em]"
         style={{ color: '#0ABFA3' }}
       >
         ↻ Updates every week
@@ -308,7 +333,7 @@ export function LeaderboardRail({ leaderboard, activeMembers, currentUserId, cur
       {episode && (
         <>
           <Divider />
-          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-3" style={{ color: '#ef0e30' }}>
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[12px] sm:text-[12px] mb-3" style={{ color: '#ef0e30' }}>
             Latest Podcast
           </p>
           <PodcastCard episode={episode} />

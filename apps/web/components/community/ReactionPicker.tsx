@@ -68,14 +68,15 @@ export function ReactionPicker({ postId, reactions, myReaction, onReact }: React
             key={r.type}
             type="button"
             onClick={() => handlePick(r.type)}
-            className="flex items-center gap-1 rounded-full font-condensed font-semibold text-[11px] transition-colors"
+            className="flex items-center justify-center gap-1 rounded-full font-condensed font-semibold text-[12px] transition-colors"
             style={{
-              padding: '2px 8px',
+              minHeight: 44,
+              minWidth: 44,
+              padding: '0 12px',
               backgroundColor: isMine ? 'rgba(239,14,48,0.08)' : 'rgba(27,60,90,0.06)',
               border: `1px solid ${isMine ? 'rgba(239,14,48,0.30)' : 'rgba(27,60,90,0.10)'}`,
               color: isMine ? '#ef0e30' : '#7a8a96',
               flexShrink: 0,
-              minWidth: 'fit-content',
             }}
             title={def?.label}
           >
@@ -91,8 +92,8 @@ export function ReactionPicker({ postId, reactions, myReaction, onReact }: React
           ref={triggerRef}
           type="button"
           onClick={openPicker}
-          className="font-condensed font-semibold uppercase text-[11px] tracking-wide transition-colors"
-          style={{ color: '#7a8a96' }}
+          className="inline-flex items-center justify-center font-condensed font-semibold uppercase text-[12px] tracking-wide transition-colors"
+          style={{ color: '#7a8a96', minHeight: 44, minWidth: 44, padding: '0 8px' }}
           onMouseEnter={e => (e.currentTarget.style.color = '#ef0e30')}
           onMouseLeave={e => (e.currentTarget.style.color = '#7a8a96')}
         >
@@ -121,13 +122,15 @@ export function ReactionPicker({ postId, reactions, myReaction, onReact }: React
               key={r.type}
               type="button"
               onClick={() => handlePick(r.type)}
-              className="transition-transform hover:scale-125"
+              className="inline-flex items-center justify-center transition-transform hover:scale-125"
               style={{
                 fontSize: '18px',
                 lineHeight: 1,
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
+                minHeight: 44,
+                minWidth: 44,
                 padding: '3px 4px',
                 opacity: myReaction === r.type ? 1 : 0.8,
                 filter: myReaction === r.type ? 'drop-shadow(0 0 2px rgba(239,14,48,0.6))' : 'none',

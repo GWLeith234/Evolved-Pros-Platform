@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { ImagePicker } from '@/components/admin/ImagePicker'
 
-type Zone = 'A' | 'B' | 'C' | 'D'
+type Zone = 'A' | 'B' | 'C' | 'D' | 'E'
 type AdType = 'image' | 'video' | 'native'
 
 interface Ad {
@@ -13,6 +14,8 @@ interface Ad {
   image_url: string | null
   click_url: string | null
   headline: string | null
+  body_copy: string | null
+  cta_text: string | null
   start_date: string | null
   end_date: string | null
   is_active: boolean
@@ -26,9 +29,12 @@ interface AdFormValues {
   imageUrl: string
   clickUrl: string
   headline: string
+  bodyCopy: string
+  ctaText: string
   startDate: string
   endDate: string
   isActive: boolean
+  placements: string[]
 }
 
 const ZONE_LABELS: Record<Zone, string> = {
@@ -36,6 +42,7 @@ const ZONE_LABELS: Record<Zone, string> = {
   B: 'Zone B — Native In-Feed',
   C: 'Zone C — 728×90 Leaderboard',
   D: 'Zone D — Pre-Roll Video',
+  E: 'Zone E — 300×600 Half Page',
 }
 
 const ZONE_DESCRIPTIONS: Record<Zone, string> = {
@@ -43,6 +50,7 @@ const ZONE_DESCRIPTIONS: Record<Zone, string> = {
   B: 'Native card embedded in community feed',
   C: '728×90 horizontal banner',
   D: 'Pre-roll video before episode playback',
+  E: '300×600 half-page (house Academy + partners)',
 }
 
 const DEFAULT_FORM: AdFormValues = {
@@ -52,25 +60,32 @@ const DEFAULT_FORM: AdFormValues = {
   imageUrl: '',
   clickUrl: '',
   headline: '',
+  bodyCopy: '',
+  ctaText: '',
   startDate: '',
   endDate: '',
   isActive: true,
+  placements: ['platform'],
 }
 
+// An ad is "expired" the moment its end_date passes, regardless of the
+// is_active flag. The header pill and the per-row badge both read from
+// this single function so they can never disagree (the QA bug was the
+// header counting `is_active` while the badge counted `end_date`).
 function adStatus(ad: Ad): 'active' | 'scheduled' | 'expired' | 'inactive' {
-  if (!ad.is_active) return 'inactive'
   const now = Date.now()
+  if (ad.end_date && new Date(ad.end_date).getTime() <= now) return 'expired'
+  if (!ad.is_active) return 'inactive'
   if (ad.start_date && new Date(ad.start_date).getTime() > now) return 'scheduled'
-  if (ad.end_date && new Date(ad.end_date).getTime() < now) return 'expired'
   return 'active'
 }
 
 function StatusBadge({ status }: { status: ReturnType<typeof adStatus> }) {
   const styles: Record<typeof status, React.CSSProperties> = {
-    active:    { backgroundColor: 'rgba(104,162,185,0.12)', color: '#68a2b9' },
-    scheduled: { backgroundColor: 'rgba(201,168,76,0.12)',  color: '#C9A84C' },
-    expired:   { backgroundColor: 'rgba(27,60,90,0.08)',    color: '#7a8a96' },
-    inactive:  { backgroundColor: 'rgba(27,60,90,0.06)',    color: '#7a8a96' },
+    active:    { backgroundColor: 'rgba(0,200,100,0.15)', color: '#00c864' },
+    scheduled: { backgroundColor: 'rgba(201,168,76,0.12)', color: '#C9A84C' },
+    expired:   { backgroundColor: 'rgba(27,60,90,0.08)',   color: 'var(--admin-text-2)' },
+    inactive:  { backgroundColor: 'transparent',           color: 'var(--admin-text-2)', border: '1px solid rgba(122,138,150,0.4)' },
   }
   return (
     <span
@@ -87,9 +102,9 @@ function formatDate(iso: string | null): string {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[#1b3c5a] outline-none transition-all'
-const inputStyle: React.CSSProperties = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'white' }
-const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[#7a8a96] mb-1.5'
+const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[color:var(--admin-text)] outline-none transition-all'
+const inputStyle: React.CSSProperties = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'var(--admin-card)' }
+const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)] mb-1.5'
 
 function AdForm({
   initialValues,
@@ -128,9 +143,12 @@ function AdForm({
       image_url: values.imageUrl.trim() || null,
       click_url: values.clickUrl.trim() || null,
       headline: values.headline.trim() || null,
+      body_copy: values.bodyCopy.trim() || null,
+      cta_text: values.ctaText.trim() || null,
       start_date: values.startDate || null,
       end_date: values.endDate || null,
       is_active: values.isActive,
+      placements: values.placements,
     }
 
     try {
@@ -194,13 +212,41 @@ function AdForm({
         />
       </div>
 
+      {/* Body copy */}
+      <div>
+        <label className={labelClass}>Body copy</label>
+        <textarea
+          value={values.bodyCopy}
+          onChange={e => set('bodyCopy', e.target.value)}
+          className={inputClass}
+          style={{ ...inputStyle, minHeight: 64, resize: 'vertical' }}
+          placeholder="Supporting sentence under the headline"
+          maxLength={120}
+        />
+        <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] mt-1">{values.bodyCopy.length}/120</p>
+      </div>
+
+      {/* CTA text */}
+      <div>
+        <label className={labelClass}>CTA button text</label>
+        <input
+          type="text"
+          value={values.ctaText}
+          onChange={e => set('ctaText', e.target.value)}
+          className={inputClass}
+          style={inputStyle}
+          placeholder="e.g. TRY FREE FOR 30 DAYS →"
+          maxLength={40}
+        />
+      </div>
+
       {/* Zone (locked to current tab) + Ad Type */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className={labelClass}>Zone</label>
           <div
-            className="rounded px-3 py-2.5 font-body text-[13px] text-[#7a8a96]"
-            style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: '#f5f7f9' }}
+            className="rounded px-3 py-2.5 font-body text-[13px] text-[color:var(--admin-text-2)]"
+            style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'var(--admin-subtle)' }}
           >
             Zone {values.zone} — {ZONE_DESCRIPTIONS[values.zone]}
           </div>
@@ -227,18 +273,12 @@ function AdForm({
         </div>
       </div>
 
-      {/* Image URL */}
-      <div>
-        <label className={labelClass}>Image URL</label>
-        <input
-          type="url"
-          value={values.imageUrl}
-          onChange={e => set('imageUrl', e.target.value)}
-          className={inputClass}
-          style={inputStyle}
-          placeholder="https://... (paste URL or upload to Branding bucket)"
-        />
-      </div>
+      {/* Image */}
+      <ImagePicker
+        label="Ad Image"
+        value={values.imageUrl || null}
+        onChange={url => set('imageUrl', url)}
+      />
 
       {/* Click URL */}
       <div>
@@ -264,7 +304,7 @@ function AdForm({
             className={inputClass}
             style={inputStyle}
           />
-          <p className="font-condensed text-[10px] text-[#7a8a96] mt-1">Leave blank = always active</p>
+          <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] mt-1">Leave blank = always active</p>
         </div>
         <div>
           <label className={labelClass}>End Date (optional)</label>
@@ -275,7 +315,7 @@ function AdForm({
             className={inputClass}
             style={inputStyle}
           />
-          <p className="font-condensed text-[10px] text-[#7a8a96] mt-1">Leave blank = no expiry</p>
+          <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] mt-1">Leave blank = no expiry</p>
         </div>
       </div>
 
@@ -288,13 +328,39 @@ function AdForm({
           style={{ backgroundColor: values.isActive ? '#68a2b9' : 'rgba(27,60,90,0.15)' }}
         >
           <span
-            className="absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform"
+            className="absolute top-0.5 w-4 h-4 rounded-full bg-[var(--admin-card)] transition-transform"
             style={{ transform: values.isActive ? 'translateX(22px)' : 'translateX(2px)' }}
           />
         </button>
-        <span className="font-condensed font-semibold text-[12px] text-[#1b3c5a]">
+        <span className="font-condensed font-semibold text-[12px] text-[color:var(--admin-text)]">
           {values.isActive ? 'Active' : 'Inactive (paused)'}
         </span>
+      </div>
+
+      {/* Placements */}
+      <div>
+        <label className={labelClass}>Placements</label>
+        <div className="flex items-center gap-4">
+          {(['platform', 'media'] as const).map(p => {
+            const checked = values.placements.includes(p)
+            return (
+              <label key={p} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => {
+                    const next = checked
+                      ? values.placements.filter(x => x !== p)
+                      : [...values.placements, p]
+                    set('placements', next.length ? next : ['platform'])
+                  }}
+                  className="accent-[#68a2b9]"
+                />
+                <span className="font-condensed font-semibold text-[12px] text-[color:var(--admin-text)] capitalize">{p}</span>
+              </label>
+            )
+          })}
+        </div>
       </div>
 
       {/* Actions */}
@@ -302,7 +368,7 @@ function AdForm({
         <button
           type="button"
           onClick={onCancel}
-          className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a] transition-colors"
+          className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[color:var(--admin-text-2)] hover:text-[color:var(--admin-text)] transition-colors"
         >
           Cancel
         </button>
@@ -367,7 +433,7 @@ function ZonePanel({
     <div className="space-y-4">
       {/* Zone description pill */}
       <div className="flex items-center justify-between">
-        <span className="font-condensed text-[11px]" style={{ color: '#7a8a96' }}>
+        <span className="font-condensed text-[11px]" style={{ color: 'var(--admin-text-2)' }}>
           {ZONE_DESCRIPTIONS[zone]} · {zoneAds.length} ad{zoneAds.length !== 1 ? 's' : ''}
         </span>
         {!showForm && !editingId && (
@@ -385,9 +451,9 @@ function ZonePanel({
       {showForm && (
         <div
           className="rounded-lg p-5"
-          style={{ backgroundColor: '#f5f7f9', border: '1px solid rgba(27,60,90,0.1)' }}
+          style={{ backgroundColor: 'var(--admin-subtle)', border: '1px solid rgba(27,60,90,0.1)' }}
         >
-          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-[#1b3c5a] mb-4">
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-[color:var(--admin-text)] mb-4">
             New Ad — Zone {zone}
           </p>
           <AdForm
@@ -402,9 +468,9 @@ function ZonePanel({
       {editingId && editingAd && (
         <div
           className="rounded-lg p-5"
-          style={{ backgroundColor: '#f5f7f9', border: '1px solid rgba(27,60,90,0.1)' }}
+          style={{ backgroundColor: 'var(--admin-subtle)', border: '1px solid rgba(27,60,90,0.1)' }}
         >
-          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-[#1b3c5a] mb-4">
+          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] text-[color:var(--admin-text)] mb-4">
             Edit Ad
           </p>
           <AdForm
@@ -417,9 +483,12 @@ function ZonePanel({
               imageUrl: editingAd.image_url ?? '',
               clickUrl: editingAd.click_url ?? '',
               headline: editingAd.headline ?? '',
+              bodyCopy: editingAd.body_copy ?? '',
+              ctaText: editingAd.cta_text ?? '',
               startDate: editingAd.start_date ? editingAd.start_date.slice(0, 10) : '',
               endDate: editingAd.end_date ? editingAd.end_date.slice(0, 10) : '',
               isActive: editingAd.is_active,
+              placements: (editingAd as unknown as Record<string, unknown>).placements as string[] ?? ['platform'],
             }}
             onSaved={handleSaved}
             onCancel={() => setEditingId(null)}
@@ -433,10 +502,10 @@ function ZonePanel({
           className="rounded-lg px-8 py-10 text-center"
           style={{ border: '1px dashed rgba(27,60,90,0.15)' }}
         >
-          <p className="font-condensed font-bold uppercase tracking-widest text-[10px] text-[#7a8a96]">
+          <p className="font-condensed font-bold uppercase tracking-widest text-[10px] text-[color:var(--admin-text-2)]">
             No ads in Zone {zone}
           </p>
-          <p className="font-body text-[12px] text-[#7a8a96] mt-1">
+          <p className="font-body text-[12px] text-[color:var(--admin-text-2)] mt-1">
             Click "+ New Ad" to create one.
           </p>
         </div>
@@ -444,11 +513,11 @@ function ZonePanel({
         <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.1)' }}>
           <table className="w-full">
             <thead>
-              <tr style={{ backgroundColor: '#f5f7f9', borderBottom: '1px solid rgba(27,60,90,0.1)' }}>
-                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96]">Sponsor</th>
-                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96] hidden md:table-cell">Type</th>
-                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96] hidden lg:table-cell">Dates</th>
-                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[#7a8a96]">Status</th>
+              <tr style={{ backgroundColor: 'var(--admin-subtle)', borderBottom: '1px solid rgba(27,60,90,0.1)' }}>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[color:var(--admin-text-2)]">Sponsor</th>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[color:var(--admin-text-2)] hidden md:table-cell">Type</th>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[color:var(--admin-text-2)] hidden lg:table-cell">Dates</th>
+                <th className="text-left px-4 py-3 font-condensed font-bold uppercase tracking-[0.16em] text-[9px] text-[color:var(--admin-text-2)]">Status</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -460,7 +529,7 @@ function ZonePanel({
                     key={ad.id}
                     style={{
                       borderBottom: i < zoneAds.length - 1 ? '1px solid rgba(27,60,90,0.06)' : 'none',
-                      backgroundColor: 'white',
+                      backgroundColor: 'var(--admin-card)',
                     }}
                   >
                     <td className="px-4 py-3">
@@ -474,22 +543,22 @@ function ZonePanel({
                           />
                         )}
                         <div>
-                          <p className="font-body font-semibold text-[13px] text-[#1b3c5a]">
-                            {ad.sponsor_name ?? <span className="text-[#7a8a96]">—</span>}
+                          <p className="font-body font-semibold text-[13px] text-[color:var(--admin-text)]">
+                            {ad.sponsor_name ?? <span className="text-[color:var(--admin-text-2)]">—</span>}
                           </p>
                           {ad.headline && (
-                            <p className="font-condensed text-[10px] text-[#7a8a96] truncate max-w-[180px]">{ad.headline}</p>
+                            <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] truncate max-w-[180px]">{ad.headline}</p>
                           )}
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#7a8a96] capitalize">
+                      <span className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[color:var(--admin-text-2)] capitalize">
                         {ad.ad_type ?? 'image'}
                       </span>
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell">
-                      <span className="font-condensed text-[11px] text-[#7a8a96]">
+                      <span className="font-condensed text-[11px] text-[color:var(--admin-text-2)]">
                         {ad.start_date || ad.end_date
                           ? `${formatDate(ad.start_date)} → ${formatDate(ad.end_date)}`
                           : 'Always active'}
@@ -502,7 +571,7 @@ function ZonePanel({
                       <div className="flex items-center justify-end gap-3">
                         <button
                           onClick={() => { setEditingId(ad.id); setShowForm(false) }}
-                          className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#68a2b9] hover:text-[#1b3c5a] transition-colors"
+                          className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#68a2b9] hover:text-[color:var(--admin-text)] transition-colors"
                         >
                           Edit
                         </button>
@@ -531,14 +600,15 @@ export function AdsManager({ initialAds }: { initialAds: Ad[] }) {
   const [ads, setAds] = useState<Ad[]>(initialAds)
   const [activeZone, setActiveZone] = useState<Zone>('A')
 
-  const zones: Zone[] = ['A', 'B', 'C', 'D']
-  const activeCount = ads.filter(a => a.is_active).length
+  const zones: Zone[] = ['A', 'B', 'C', 'D', 'E']
+  // Derive from adStatus so the count matches the per-row badges.
+  const activeCount = ads.filter(a => adStatus(a) === 'active').length
 
   return (
     <div>
       {/* Reactive count — updates immediately after any create/delete */}
-      <p className="font-condensed text-[12px] text-[#7a8a96] mb-6">
-        {ads.length} total · {activeCount} active · 4 IAB zones
+      <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mb-6">
+        {ads.length} total · {activeCount} active · 5 IAB zones (300×250 / 728×90 / 300×600)
       </p>
       {/* Zone tabs */}
       <div
@@ -556,7 +626,7 @@ export function AdsManager({ initialAds }: { initialAds: Ad[] }) {
               style={{
                 backgroundColor: active ? '#1b3c5a' : 'white',
                 color: active ? 'white' : '#7a8a96',
-                borderRight: zone !== 'D' ? '1px solid rgba(27,60,90,0.12)' : 'none',
+                borderRight: zone !== 'E' ? '1px solid rgba(27,60,90,0.12)' : 'none',
               }}
             >
               Zone {zone}
@@ -578,7 +648,7 @@ export function AdsManager({ initialAds }: { initialAds: Ad[] }) {
 
       {/* Active zone label */}
       <div className="mb-4">
-        <h2 className="font-display font-black text-[18px] text-[#112535]">
+        <h2 className="font-display font-black text-[18px] text-[color:var(--admin-text-strong)]">
           {ZONE_LABELS[activeZone]}
         </h2>
       </div>

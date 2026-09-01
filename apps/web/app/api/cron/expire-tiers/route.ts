@@ -5,9 +5,8 @@
  * Protected by CRON_SECRET to prevent unauthorized execution.
  *
  * Sets tier_status = 'expired' for any active user whose tier_expires_at
- * is in the past. This is the enforcement counterpart to the Vendasta
- * webhook (which sets 'cancelled' on order.cancelled) — natural expirations
- * (no renewal, card decline, annual plan lapse) are caught here.
+ * is in the past. Natural expirations (no renewal, card decline, annual
+ * plan lapse) are caught here.
  */
 
 export const dynamic = 'force-dynamic'
@@ -39,7 +38,7 @@ export async function GET(request: Request) {
 
   const expired = data ?? []
   if (expired.length > 0) {
-    console.log(`[Cron] expire-tiers: expired ${expired.length} members:`, expired.map(u => u.email))
+    console.log(`[Cron] expire-tiers: expired ${expired.length} members`)
   }
 
   return Response.json({ ok: true, expired: expired.length })

@@ -1,25 +1,17 @@
 export const dynamic = 'force-dynamic'
 
-import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
-
-async function requireAdmin(supabase: ReturnType<typeof createClient>) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { user: null, error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
-  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') return { user: null, error: NextResponse.json({ error: 'Forbidden' }, { status: 403 }) }
-  return { user, error: null }
-}
+import { requireAdminApi } from '@/lib/admin/helpers'
 
 export async function GET(
   _request: Request,
   { params }: { params: { episodeId: string } }
 ) {
-  const supabase = createClient()
-  const { error: authError } = await requireAdmin(supabase)
-  if (authError) return authError
+  const auth = await requireAdminApi()
+  if (auth instanceof Response) return auth
 
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from('episodes')
     .select('*')
     .eq('id', params.episodeId)
@@ -33,18 +25,23 @@ export async function PATCH(
   request: Request,
   { params }: { params: { episodeId: string } }
 ) {
-  const supabase = createClient()
-  const { error: authError } = await requireAdmin(supabase)
-  if (authError) return authError
+  const auth = await requireAdminApi()
+  if (auth instanceof Response) return auth
 
   let body: Record<string, unknown>
   try { body = await request.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
 
+  // CLEAN-C: mux_playback_id, youtube_url, duration_seconds, and
+  // thumbnail_url are all explicitly optional on publish. A YouTube-hosted
+  // episode (e.g. the Pilot — no Mux asset) is publishable with just title
+  // and an optional description. Do NOT reintroduce a require-Mux check
+  // here without first wiring a UI alternative for YouTube/audio-only.
   const allowed = [
     'title', 'slug', 'episode_number', 'season', 'description',
     'guest_name', 'guest_title', 'guest_company', 'guest_image_url',
-    'mux_playback_id', 'youtube_url', 'thumbnail_url',
+    'mux_playback_id', 'youtube_url', 'audio_url', 'thumbnail_url',
     'duration_seconds', 'is_published', 'transcript',
+    'show_notes', 'transistor_episode_id', 'is_members_only', 'pinned',
   ] as const
 
   const update: Record<string, unknown> = {}
@@ -52,9 +49,20 @@ export async function PATCH(
     if (key in body) update[key] = body[key]
   }
 
+  // Singular `pillar` is canonical (public /podcast reads it). Validate against
+  // the constraint set and keep the legacy `pillars` array in sync.
+  if ('pillar' in body) {
+    const PILLAR_SET = new Set([
+      'foundation', 'identity', 'mental-toughness', 'strategy', 'accountability', 'execution',
+    ])
+    const pillar = typeof body.pillar === 'string' && PILLAR_SET.has(body.pillar) ? body.pillar : null
+    update.pillar = pillar
+    update.pillars = pillar ? [pillar] : []
+  }
+
   // Auto-set published_at when publishing for first time
   if (update.is_published === true) {
-    const { data: existing } = await supabase
+    const { data: existing } = await adminClient
       .from('episodes')
       .select('is_published, published_at')
       .eq('id', params.episodeId)
@@ -68,7 +76,14 @@ export async function PATCH(
     return NextResponse.json({ error: 'No valid fields' }, { status: 422 })
   }
 
-  const { data, error } = await supabase
+  // Pinned is single-occupancy: clear every other row in the same write before
+  // setting this one, so at most one episode is ever pinned.
+  if (update.pinned === true) {
+    await adminClient.from('episodes').update({ pinned: false }).neq('id', params.episodeId)
+  }
+
+  // RLS-FIX: adminClient — see episodes/route.ts.
+  const { data, error } = await adminClient
     .from('episodes')
     .update(update)
     .eq('id', params.episodeId)
@@ -83,11 +98,10 @@ export async function DELETE(
   _request: Request,
   { params }: { params: { episodeId: string } }
 ) {
-  const supabase = createClient()
-  const { error: authError } = await requireAdmin(supabase)
-  if (authError) return authError
+  const auth = await requireAdminApi()
+  if (auth instanceof Response) return auth
 
-  const { error } = await supabase.from('episodes').delete().eq('id', params.episodeId)
+  const { error } = await adminClient.from('episodes').delete().eq('id', params.episodeId)
   if (error) return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
   return new NextResponse(null, { status: 204 })
 }

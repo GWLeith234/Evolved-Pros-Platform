@@ -1,23 +1,30 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { FeedCompose } from './FeedCompose'
-import { PostCard } from './PostCard'
-import { DashboardStrip } from './DashboardStrip'
+import { PostCardV2 } from './PostCardV2'
+import { PostReplyThread } from './PostReplyThread'
 import { FeedAdUnit } from './FeedAdUnit'
-import { PILLAR_CONFIG } from '@/lib/pillar-colors'
-import type { Post, CommunityAd } from '@/lib/community/types'
-import type { DashboardStripProps } from './DashboardStrip'
+import { CommunityPageHeader } from './CommunityPageHeader'
+import { Composer } from './Composer'
+import { FilterRail } from './FilterRail'
+import type { KindFilter, Pillar, SortBy } from './FilterRail'
+import { toPostMedia } from '@/lib/community/media'
+import type { Post, Reply, CommunityAd, WeeklyLeaderboardEntry } from '@/lib/community/types'
+import {
+  CommunityRightRail,
+  CommunityMobileEngagement,
+  type RailAcademyContinue,
+  type RailPodcastEpisode,
+} from './CommunityRightRail'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
-type Filter = 'all' | 'win' | 'question' | PillarFilter
-type PillarFilter = 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6'
+function getInitials(name: string | null | undefined): string {
+  if (!name) return '?'
+  return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+}
 
-const PILLAR_FILTERS = Object.entries(PILLAR_CONFIG).map(([num, config]) => ({
-  id: `p${num}` as PillarFilter,
-  label: config.label,
-  color: config.color,
-}))
+const PAGE_SIZE = 20
 
 interface UnifiedCommunityPageProps {
   posts: Post[]
@@ -33,8 +40,10 @@ interface UnifiedCommunityPageProps {
     isAdmin: boolean
   }
   defaultChannelId: string
-  // Dashboard strip data
-  dashboardProps: Omit<DashboardStripProps, never>
+  weeklyLeaderboard: WeeklyLeaderboardEntry[]
+  latestEpisode?: RailPodcastEpisode | null
+  academyContinue?: RailAcademyContinue
+  railSponsors?: SponsorAd[]
 }
 
 export function UnifiedCommunityPage({
@@ -45,17 +54,90 @@ export function UnifiedCommunityPage({
   ads,
   currentUser,
   defaultChannelId,
-  dashboardProps,
+  weeklyLeaderboard,
+  latestEpisode = null,
+  academyContinue = null,
+  railSponsors = [],
 }: UnifiedCommunityPageProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts)
   const [cursor, setCursor] = useState<string | null>(initialCursor)
   const [hasMore, setHasMore] = useState(initialHasMore)
   const [loadingMore, setLoadingMore] = useState(false)
-  const [activeFilter, setActiveFilter] = useState<Filter>('all')
   const [queuedCount, setQueuedCount] = useState(0)
   const [queued, setQueued] = useState<Post[]>([])
 
-  const sentinelRef = useRef<HTMLDivElement>(null)
+  // COMMUNITY-SPRINT-2: filter rail state
+  const [activeKind, setActiveKind] = useState<KindFilter>('all')
+  const [activePillars, setActivePillars] = useState<Pillar[]>([])
+  const [sortBy, setSortBy] = useState<SortBy>('newest')
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+
+  // Inline reply thread — the comment icon on PostCardV2 calls
+  // onCommentClick(postId) which toggles expandedPostId; PostReplyThread
+  // renders directly below the matching card. Replies are lazy-loaded on
+  // first expand and cached so re-opening is instant.
+  const [expandedPostId, setExpandedPostId] = useState<string | null>(null)
+  const [repliesByPost, setRepliesByPost] = useState<Record<string, Reply[]>>({})
+  const [loadingRepliesFor, setLoadingRepliesFor] = useState<string | null>(null)
+
+  const handleCommentClick = useCallback((postId: string) => {
+    setExpandedPostId(prev => (prev === postId ? null : postId))
+  }, [])
+
+  // Fetch replies whenever a post is expanded for the first time. Posts that
+  // already have replies in the cache (or never had any per replyCount=0)
+  // skip the fetch.
+  useEffect(() => {
+    if (!expandedPostId) return
+    if (repliesByPost[expandedPostId] !== undefined) return
+    const post = posts.find(p => p.id === expandedPostId)
+    if (!post) return
+    if (post.replyCount === 0) {
+      setRepliesByPost(prev => ({ ...prev, [expandedPostId]: [] }))
+      return
+    }
+    let cancelled = false
+    setLoadingRepliesFor(expandedPostId)
+    void fetch(`/api/posts/${expandedPostId}/replies`)
+      .then(res => (res.ok ? res.json() as Promise<{ replies: Reply[] }> : { replies: [] as Reply[] }))
+      .then(data => {
+        if (cancelled) return
+        setRepliesByPost(prev => ({ ...prev, [expandedPostId]: data.replies ?? [] }))
+      })
+      .catch(() => {
+        if (cancelled) return
+        setRepliesByPost(prev => ({ ...prev, [expandedPostId]: [] }))
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingRepliesFor(prev => (prev === expandedPostId ? null : prev))
+      })
+    return () => { cancelled = true }
+  }, [expandedPostId, posts, repliesByPost])
+
+  // Submit handler for the inline composer inside PostReplyThread. Posts the
+  // reply, appends it to the local cache, and bumps the post's replyCount so
+  // the icon's number reflects the new state without a refetch.
+  // CM-1: multipart so a comment can carry one image. With no file part this
+  // is the same text-only reply as before, just over form-data.
+  const handleReplySubmit = useCallback(async (postId: string, body: string, file: File | null) => {
+    const form = new FormData()
+    form.append('body', body)
+    if (file) form.append('file', file, file.name)
+    const res = await fetch(`/api/community/posts/${postId}/comments`, {
+      method: 'POST',
+      body: form,
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({})) as { error?: string }
+      throw new Error(data.error ?? 'Failed to reply')
+    }
+    const reply = await res.json() as Reply
+    setRepliesByPost(prev => ({
+      ...prev,
+      [postId]: [...(prev[postId] ?? []), reply],
+    }))
+    setPosts(prev => prev.map(p => p.id === postId ? { ...p, replyCount: (p.replyCount ?? 0) + 1 } : p))
+  }, [])
 
   // Realtime subscription — no channel filter (unified)
   useEffect(() => {
@@ -84,6 +166,7 @@ export function UnifiedCommunityPage({
             myReaction: null,
             reactions: [],
             isBookmarked: false,
+            media: toPostMedia(row),
           }
           setQueuedCount(c => c + 1)
           setQueued(prev => [newPost, ...prev])
@@ -93,7 +176,8 @@ export function UnifiedCommunityPage({
     return () => { supabase.removeChannel(sub) }
   }, [currentUser.id])
 
-  // Infinite scroll
+  // LOAD MORE button — explicit, not infinite scroll (anchors the page,
+  // easier on weak connections per Sprint 2 brief).
   const loadMore = useCallback(async () => {
     if (!hasMore || loadingMore || !cursor) return
     setLoadingMore(true)
@@ -107,23 +191,26 @@ export function UnifiedCommunityPage({
       })
       setCursor(data.nextCursor)
       setHasMore(data.hasMore)
+      setVisibleCount(c => c + PAGE_SIZE)
     } finally {
       setLoadingMore(false)
     }
   }, [cursor, hasMore, loadingMore])
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      entries => { if (entries[0].isIntersecting && hasMore && !loadingMore) loadMore() },
-      { threshold: 0.1 }
-    )
-    if (sentinelRef.current) observer.observe(sentinelRef.current)
-    return () => observer.disconnect()
-  }, [hasMore, loadingMore, loadMore])
-
   function handlePostCreated(post: Post) {
     setPosts(prev => [post, ...prev])
   }
+
+  // New Composer (Sprint 1) doesn't return the created post object —
+  // re-fetch the latest row and prepend so the user sees their own post.
+  const handleNewComposerPost = useCallback(async () => {
+    try {
+      const res = await fetch('/api/posts?limit=1')
+      if (!res.ok) return
+      const data = await res.json() as { posts: Post[] }
+      if (data.posts[0]) handlePostCreated(data.posts[0])
+    } catch { /* swallow — realtime will catch up eventually */ }
+  }, [])
 
   function flushQueued() {
     setPosts(prev => {
@@ -134,186 +221,119 @@ export function UnifiedCommunityPage({
     setQueuedCount(0)
   }
 
-  function handleReact(postId: string, reactionType: string) {
-    const currentPost = posts.find(p => p.id === postId)
-    const isToggleOff = currentPost?.myReaction === reactionType
-    let original: Post | null = null
+  // Reset visible count whenever filters change so the user sees the top of
+  // the freshly filtered list.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE)
+  }, [activeKind, activePillars, sortBy])
 
-    setPosts(prev => prev.map(p => {
-      if (p.id !== postId) return p
-      original = p
-      const toggleOff = p.myReaction === reactionType
-      const reactionMap = new Map(p.reactions.map(r => [r.type, r.count]))
-      if (p.myReaction && !toggleOff) {
-        const c = reactionMap.get(p.myReaction) ?? 0
-        c <= 1 ? reactionMap.delete(p.myReaction) : reactionMap.set(p.myReaction, c - 1)
+  // COMMUNITY-SPRINT-2 client-side filter + sort. Filter logic stays
+  // client-side per brief — DO NOT migrate to server in this sprint.
+  const filtered = useMemo(() => {
+    let list = posts.filter(post => {
+      if (activeKind !== 'all') {
+        // Match either legacy post_type or new kind values.
+        if (post.postType !== activeKind) return false
       }
-      if (toggleOff) {
-        const c = reactionMap.get(reactionType) ?? 0
-        c <= 1 ? reactionMap.delete(reactionType) : reactionMap.set(reactionType, c - 1)
-      } else {
-        reactionMap.set(reactionType, (reactionMap.get(reactionType) ?? 0) + 1)
+      if (activePillars.length > 0) {
+        const pillarNum = post.pillarTag ? parseInt(post.pillarTag.slice(1), 10) : null
+        if (pillarNum === null || !activePillars.includes(pillarNum as Pillar)) return false
       }
-      const reactions = Array.from(reactionMap.entries())
-        .map(([type, count]) => ({ type, count }))
-        .sort((a, b) => b.count - a.count)
-      return { ...p, myReaction: toggleOff ? null : reactionType, isLiked: !toggleOff, likeCount: reactions.reduce((s, r) => s + r.count, 0), reactions }
-    }))
-
-    fetch(`/api/posts/${postId}/like`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reaction_type: reactionType, remove: isToggleOff }),
+      return true
     })
-      .then(async res => {
-        if (res.ok) {
-          const data = await res.json()
-          setPosts(prev => prev.map(p => p.id !== postId ? p : {
-            ...p,
-            isLiked: data.liked,
-            likeCount: data.likeCount,
-            myReaction: data.myReaction,
-            reactions: data.reactions.length > 0 ? data.reactions : p.reactions,
-          }))
-        } else if (original) {
-          const snap = original
-          setPosts(prev => prev.map(p => p.id !== postId ? p : snap))
-        }
-      })
-      .catch(() => {
-        if (original) {
-          const snap = original
-          setPosts(prev => prev.map(p => p.id !== postId ? p : snap))
-        }
-      })
-  }
 
-  function handleBookmark(postId: string) {
-    setPosts(prev => prev.map(p => p.id !== postId ? p : { ...p, isBookmarked: !p.isBookmarked }))
-    fetch(`/api/posts/${postId}/bookmark`, { method: 'POST' })
-      .catch(() => {
-        setPosts(prev => prev.map(p => p.id !== postId ? p : { ...p, isBookmarked: !p.isBookmarked }))
-      })
-  }
+    if (sortBy === 'newest') {
+      list = [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    } else if (sortBy === 'oldest') {
+      list = [...list].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+    } else if (sortBy === 'most_reacted') {
+      const total = (p: Post) => (p.reactions ?? []).reduce((s, r) => s + r.count, 0)
+      list = [...list].sort((a, b) => total(b) - total(a))
+    }
 
-  // Client-side filtering
-  const filtered = posts.filter(post => {
-    if (activeFilter === 'all') return true
-    if (activeFilter === 'win') return post.postType === 'win'
-    if (activeFilter === 'question') return post.postType === 'question'
-    return post.pillarTag === activeFilter
-  })
+    return list
+  }, [posts, activeKind, activePillars, sortBy])
+
+  const visible = filtered.slice(0, visibleCount)
+  // Hide LOAD MORE entirely on an empty filter — fetching more posts that
+  // would also fail the filter is pure noise. Re-enable once at least one
+  // post matches.
+  const hasMoreVisible = filtered.length > 0 && (filtered.length > visibleCount || hasMore)
+
+  // Dedupe: never inject a feed ad for a partner already featured on the rail
+  const railIds = useMemo(
+    () => new Set(railSponsors.map(s => s.id).filter(Boolean)),
+    [railSponsors],
+  )
+  const feedAds = useMemo(
+    () => ads.filter(a => !railIds.has(a.id)),
+    [ads, railIds],
+  )
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 overflow-x-hidden" style={{ height: '100%' }}>
-      {/* Dashboard strip */}
-      <DashboardStrip {...dashboardProps} />
+    /* SCROLL-FIX: grow with content; let .ep-main-scroll own vertical scroll.
+       Nested height:100% + overflow-y-auto trapped the feed when the shell broke. */
+    <div className="flex flex-col w-full" style={{ background: 'var(--community-page-bg)' }}>
+      {/* Editorial header (COMMUNITY-SPRINT-1) */}
+      <CommunityPageHeader />
 
-      {/* Parchment header */}
-      <div
-        style={{ backgroundColor: '#F5F0E8', borderBottom: '1px solid rgba(27,42,74,0.1)', padding: '20px 24px 16px' }}
-      >
-        <p
-          className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] mb-1"
-          style={{ color: '#C9302A' }}
+      {/* Feed (left) + weekly leaderboard rail (right) */}
+      <div style={{ background: 'var(--community-page-bg)' }}>
+        <div
+          className="w-full mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(280px,35fr)] gap-4 sm:gap-6 ep-no-x-scroll"
+          style={{ maxWidth: 1280 }}
         >
-          EVOLVED PROS
-        </p>
-        <h1
-          className="font-display font-black leading-tight mb-1"
-          style={{ fontSize: '28px', color: '#1B2A4A' }}
-        >
-          Community
-        </h1>
-        <p
-          className="font-body text-[14px] mb-4"
-          style={{ color: '#6B7A8D', maxWidth: '540px' }}
-        >
-          Connect with high-performing sales professionals. Share wins, ask questions, and build accountability.
-        </p>
+          <div className="community-feed-col" style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
 
-        {/* Filter pill bar */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {[
-            { id: 'all' as Filter, label: 'All', color: null },
-            { id: 'win' as Filter, label: '🏆 Wins', color: null },
-            { id: 'question' as Filter, label: '❓ Questions', color: null },
-          ].map(f => {
-            const active = activeFilter === f.id
-            return (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setActiveFilter(f.id)}
-                className="font-condensed font-semibold uppercase tracking-[0.1em] text-[10px] transition-all"
-                style={{
-                  padding: '5px 14px',
-                  borderRadius: '20px',
-                  backgroundColor: active ? '#1B2A4A' : '#ffffff',
-                  color: active ? '#ffffff' : '#1B2A4A',
-                  border: `1px solid ${active ? '#1B2A4A' : 'rgba(27,42,74,0.15)'}`,
-                }}
-              >
-                {f.label}
-              </button>
-            )
-          })}
-          {PILLAR_FILTERS.map(f => {
-            const active = activeFilter === f.id
-            return (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setActiveFilter(f.id)}
-                className="font-condensed font-semibold uppercase tracking-[0.1em] text-[10px] transition-all"
-                style={{
-                  padding: '5px 14px',
-                  borderRadius: '20px',
-                  backgroundColor: active ? '#1B2A4A' : '#ffffff',
-                  color: active ? '#ffffff' : '#1B2A4A',
-                  border: `1px solid ${active ? '#1B2A4A' : 'rgba(27,42,74,0.15)'}`,
-                }}
-              >
-                {f.label}
-              </button>
-            )
-          })}
-        </div>
-      </div>
+          {/* Mobile engagement: poll + compact Learn/Listen chips */}
+          <CommunityMobileEngagement
+            latestEpisode={latestEpisode}
+            academyContinue={academyContinue}
+          />
 
-      {/* Feed — full-width, centered, scrollable */}
-      <div className="flex-1 overflow-y-auto" style={{ backgroundColor: '#0A0F18' }}>
-        <div className="w-full mx-auto px-6 py-4 space-y-3">
-
-          {/* Pinned announcement */}
+          {/* Pinned announcement — theme tokens (Sprint 4A) */}
           {pinnedPost && (
             <div
-              className="rounded-lg"
-              style={{
-                backgroundColor: '#112535',
-                border: '1px solid rgba(255,255,255,0.08)',
-                padding: '16px 20px',
-              }}
+              className="community-pinned"
+              style={{ padding: '14px 16px' }}
             >
               <p
-                className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-2"
-                style={{ color: '#C9A84C' }}
+                className="community-pinned-label font-condensed font-bold uppercase tracking-[0.18em] text-[12px] mb-2"
               >
                 📌 {pinnedPost.label}
               </p>
               <p
-                className="font-body text-[13px] leading-[1.55]"
-                style={{ color: 'rgba(255,255,255,0.8)' }}
+                className="community-pinned-body font-body text-[13px] leading-[1.55]"
                 dangerouslySetInnerHTML={{ __html: pinnedPost.body.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
               />
             </div>
           )}
 
-          {/* Compose */}
-          <FeedCompose
+          {/* Compose (COMMUNITY-SPRINT-1) — anchor target for the mobile
+              "Start a post" quick-action (SPRINT E). */}
+          <div id="community-composer" style={{ scrollMarginTop: 88 }}>
+          <Composer
             channelId={defaultChannelId}
-            currentUser={currentUser}
-            onPostCreated={handlePostCreated}
+            currentUser={{
+              displayName: currentUser.displayName ?? '',
+              initials: getInitials(currentUser.displayName),
+              avatarUrl: currentUser.avatarUrl,
+              tier: currentUser.tier ?? null,
+            }}
+            onPostCreated={handleNewComposerPost}
+          />
+          </div>
+
+          {/* Filter rail — sits inside the main column between composer and
+              feed so the right rail can extend full-height (matches
+              SPRINT-K design). */}
+          <FilterRail
+            activeKind={activeKind}
+            activePillars={activePillars}
+            sortBy={sortBy}
+            onChangeKind={setActiveKind}
+            onChangePillars={setActivePillars}
+            onChangeSort={setSortBy}
           />
 
           {/* New posts banner */}
@@ -327,50 +347,113 @@ export function UnifiedCommunityPage({
             </button>
           )}
 
-          {/* Posts + in-feed ads */}
+          {/* Posts + in-feed ads (COMMUNITY-SPRINT-2: PostCardV2 + visibleCount pagination) */}
           {filtered.length === 0 ? (
             <div className="py-16 text-center">
-              <p className="font-condensed text-xs tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                {activeFilter === 'all' ? 'No posts yet — be the first to share.' : 'No posts in this category yet.'}
+              <p className="font-condensed text-xs tracking-widest" style={{ color: 'var(--text-tertiary)' }}>
+                {activeKind === 'all' && activePillars.length === 0
+                  ? 'No posts yet — be the first to share.'
+                  : 'No posts match the current filters.'}
               </p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', background: '#0A0F18' }}>
-              {filtered.map((post, index) => (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {visible.map((post, index) => (
                 <React.Fragment key={post.id}>
-                  <PostCard
+                  <PostCardV2
                     post={post}
                     currentUserId={currentUser.id}
-                    currentUser={{ id: currentUser.id, displayName: currentUser.displayName, avatarUrl: currentUser.avatarUrl }}
-                    onReact={handleReact}
-                    onBookmark={handleBookmark}
-                    activeFilter={activeFilter}
+                    onCommentClick={handleCommentClick}
                   />
-                  {/* Inject ad after every 3rd post */}
-                  {(index + 1) % 3 === 0 && ads.length > 0 && (
-                    <FeedAdUnit ad={ads[Math.floor(index / 3) % ads.length]} />
+                  {/* Inline reply thread — renders directly under the card
+                      when its comment icon is clicked. Lives outside
+                      PostCardV2 so the card stays presentational. */}
+                  {expandedPostId === post.id && (
+                    <div
+                      className="px-3 sm:px-6 pb-5"
+                      style={{
+                        background: 'var(--bg-surface)',
+                        borderBottom: '1px solid var(--border-color)',
+                      }}
+                    >
+                      {loadingRepliesFor === post.id && repliesByPost[post.id] === undefined ? (
+                        <p
+                          className="font-condensed text-xs uppercase tracking-widest pl-4 pt-3"
+                          style={{ color: 'var(--text-tertiary)' }}
+                        >
+                          Loading…
+                        </p>
+                      ) : (
+                        <PostReplyThread
+                          postId={post.id}
+                          replies={repliesByPost[post.id] ?? []}
+                          totalReplies={post.replyCount ?? 0}
+                          currentUser={{
+                            id: currentUser.id,
+                            displayName: currentUser.displayName,
+                            avatarUrl: currentUser.avatarUrl,
+                          }}
+                          onReplySubmit={(body, file) => handleReplySubmit(post.id, body, file)}
+                        />
+                      )}
+                    </div>
+                  )}
+                  {/* Inject compact feed ad after every 3rd post — never a rail partner */}
+                  {(index + 1) % 3 === 0 && feedAds.length > 0 && (
+                    <FeedAdUnit ad={feedAds[Math.floor(index / 3) % feedAds.length]} />
                   )}
                 </React.Fragment>
               ))}
             </div>
           )}
 
-          <div ref={sentinelRef} className="h-4" />
-
-          {loadingMore && (
-            <div className="flex justify-center py-4">
-              <svg className="animate-spin h-5 w-5" style={{ color: 'rgba(255,255,255,0.3)' }} fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
+          {/* LOAD MORE button — explicit, anchors the page (COMMUNITY-SPRINT-2) */}
+          {hasMoreVisible && (
+            <div className="flex justify-center py-6">
+              <button
+                type="button"
+                onClick={() => {
+                  // First reveal more from already-fetched posts; only hit
+                  // the network once the local cache is exhausted.
+                  if (visibleCount < filtered.length) {
+                    setVisibleCount(c => c + PAGE_SIZE)
+                  } else {
+                    void loadMore()
+                  }
+                }}
+                disabled={loadingMore}
+                style={{
+                  padding: '10px 28px',
+                  fontFamily: '"Bebas Neue", sans-serif',
+                  fontSize: 13,
+                  letterSpacing: '0.16em',
+                  textTransform: 'uppercase',
+                  background: 'var(--bg-elevated)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border-color)',
+                  cursor: loadingMore ? 'wait' : 'pointer',
+                  borderRadius: 0,
+                }}
+              >
+                {loadingMore ? 'Loading…' : 'Load more'}
+              </button>
             </div>
           )}
 
           {!hasMore && posts.length > 0 && (
-            <p className="text-center font-condensed text-[10px] tracking-widest py-4" style={{ color: 'rgba(255,255,255,0.2)' }}>
+            <p className="text-center font-condensed text-[12px] sm:text-[12px] tracking-widest py-4" style={{ color: 'rgba(255,255,255,0.2)' }}>
               You&apos;ve reached the beginning
             </p>
           )}
+          </div>
+
+          {/* Right rail — polls / podcast / academy / sponsors / leaderboard */}
+          <CommunityRightRail
+            weeklyLeaderboard={weeklyLeaderboard}
+            latestEpisode={latestEpisode}
+            academyContinue={academyContinue}
+            sponsors={railSponsors}
+          />
         </div>
       </div>
     </div>

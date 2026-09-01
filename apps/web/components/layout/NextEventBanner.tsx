@@ -1,61 +1,83 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { useRouter, usePathname } from 'next/navigation'
 
 type NextEvent = { id: string; title: string; starts_at: string } | null
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', {
+  // timeZone: 'UTC' so the rendered string is deterministic regardless of the
+  // viewer's locale. starts_at is stored as ISO UTC; matches the EpisodeBanner
+  // formatter pattern. Keeps SSR/CSR text identical and avoids React #425.
+  return new Date(iso).toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
+    timeZone: 'UTC',
   })
+}
+
+function isMobileViewport(): boolean {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia('(max-width: 767px)').matches
 }
 
 export function NextEventBanner() {
   const [event, setEvent] = useState<NextEvent>(null)
   const router = useRouter()
+  const pathname = usePathname()
+  // SPRINT A — Home renders its own combined context strip (event + episode),
+  // so this layout-level bar is suppressed there to avoid a double promo bar.
+  const suppressed = pathname === '/home'
 
   useEffect(() => {
-    const supabase = createClient()
-    supabase
-      .from('events')
-      .select('id, title, starts_at')
-      .eq('is_published', true)
-      .gt('starts_at', new Date().toISOString())
-      .order('starts_at', { ascending: true })
-      .limit(1)
-      .single()
-      .then(({ data }) => {
-        if (data) setEvent(data)
-      })
-  }, [])
+    if (suppressed) return
+    // Banner is md:hidden — skip the network round-trip on desktop.
+    if (!isMobileViewport()) return
 
-  if (!event) return null
+    let cancelled = false
+    void (async () => {
+      // Defer supabase client so this module can SSR without realtime-js eval.
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('events')
+        .select('id, title, starts_at')
+        .eq('is_published', true)
+        .gt('starts_at', new Date().toISOString())
+        .order('starts_at', { ascending: true })
+        .limit(1)
+        .maybeSingle()
+      if (!cancelled && data) setEvent(data)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [suppressed])
+
+  if (suppressed || !event) return null
 
   const label = `NEXT EVENT · ${event.title} · ${formatDate(event.starts_at)}`
 
   return (
-    <div className="md:hidden flex-shrink-0 flex justify-center w-full" style={{ backgroundColor: '#0d1c27' }}>
+    <div className="md:hidden flex-shrink-0 flex justify-center w-full" style={{ backgroundColor: 'var(--bg-page)' }}>
       <button
         type="button"
-        onClick={() => router.push('/events')}
+        onClick={() => router.push(`/events/${event.id}`)}
         className="flex items-center justify-between gap-3 w-full max-w-[320px] px-4"
         style={{
           height: '50px',
-          backgroundColor: '#112535',
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
+          backgroundColor: 'var(--bg-surface)',
+          borderBottom: '1px solid var(--border-color)',
         }}
         aria-label={label}
       >
         <span
-          className="font-condensed font-semibold text-white truncate"
-          style={{ fontSize: '11px', letterSpacing: '0.06em' }}
+          className="font-condensed font-semibold truncate"
+          style={{ fontSize: '12px', letterSpacing: '0.06em', color: 'var(--text-primary)' }}
         >
-          <span style={{ color: '#ef0e30', fontWeight: 700 }}>NEXT EVENT</span>
+          <span style={{ color: 'var(--brand-red-hot)', fontWeight: 700 }}>NEXT EVENT</span>
           {' · '}
           <span style={{ opacity: 0.85 }}>{event.title}</span>
           {' · '}
@@ -66,11 +88,12 @@ export function NextEventBanner() {
           height="14"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#ef0e30"
+          stroke="currentColor"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
           className="flex-shrink-0"
+          style={{ color: 'var(--brand-red-hot)' }}
         >
           <polyline points="9 18 15 12 9 6" />
         </svg>

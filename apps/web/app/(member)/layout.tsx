@@ -1,14 +1,35 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
-import { TopNav } from '@/components/layout/TopNav'
-import { BottomTabBar } from '@/components/layout/BottomTabBar'
-import { NextEventBanner } from '@/components/layout/NextEventBanner'
-import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
-import { RightRail } from '@/components/layout/RightRail'
+import { cookies, headers } from 'next/headers'
+// SPRINT HYDRATION-FIX-4 — TopNav, BottomTabBar, NextEventBanner historically
+// pulled @supabase/realtime-js into hydration. They now defer client creation.
+import {
+  TopNavClient,
+  BottomTabBarClient,
+  NextEventBannerClient,
+} from '@/components/layout/MemberChromeClient'
 import { ToastProvider } from '@/lib/toast'
+import { SkipToContent } from '@/components/a11y/SkipToContent'
+import { LiveAnnouncerProvider } from '@/components/a11y/LiveAnnouncer'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { getPlatformSettingsMap } from '@/lib/cache/shared'
+import { ThemeSync } from '@/components/theme/ThemeSync'
 
 export default async function MemberLayout({ children }: { children: React.ReactNode }) {
+  // RSC prefetch guard: skip auth + profile fetching for *prefetch* requests
+  // only. Click navigations also send RSC=1 to fetch the streaming RSC payload
+  // for the new segment — short-circuiting those returned bare children with no
+  // TopNav / RightRail / tier checks, which surfaced as 503-on-click for
+  // /academy/[pillar]/[lessonSlug] (same root cause as ADMIN-MEMBERS d9c5228).
+  // Gate strictly on Next-Router-Prefetch so real navigations re-run the full
+  // layout. Middleware (middleware.ts:36-41) still lets prefetch through, so
+  // skipping here can't 503.
+  const h = headers()
+  const isPrefetch = h.get('Next-Router-Prefetch') === '1'
+  if (isPrefetch) {
+    return <>{children}</>
+  }
+
   // Dev bypass: skip Supabase when a dev_session cookie is present
   if (process.env.NODE_ENV === 'development') {
     const cookieStore = cookies()
@@ -20,31 +41,37 @@ export default async function MemberLayout({ children }: { children: React.React
       }
       return (
         <ToastProvider>
-          <div className="flex flex-col min-h-screen">
-            <TopNav profile={profile} unreadCount={0} />
-            <EpisodeBanner />
-            <NextEventBanner />
-            <div className="flex flex-1 min-h-0">
-              <main className="flex-1 overflow-y-auto pb-16 md:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>{children}</main>
-              <RightRail />
+          <LiveAnnouncerProvider>
+            <SkipToContent />
+            {/* ep-member-shell: fixed viewport height so main's overflow-y-auto
+                has a real max-height and page content can scroll again. */}
+            <div className="ep-member-shell">
+              <TopNavClient profile={profile} unreadCount={0} />
+              <NextEventBannerClient />
+              <div className="ep-member-body">
+                <main
+                  id="main-content"
+                  tabIndex={-1}
+                  className="ep-main-scroll"
+                  style={{ backgroundColor: 'var(--bg-page)' }}
+                >
+                  {children}
+                </main>
+              </div>
+              <BottomTabBarClient role={profile.role} unreadCount={0} dmUnreadCount={0} />
             </div>
-            <BottomTabBar role={profile.role} unreadCount={0} dmUnreadCount={0} />
-          </div>
+          </LiveAnnouncerProvider>
         </ToastProvider>
       )
     }
   }
 
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('users')
-    .select('id, display_name, full_name, avatar_url, tier, tier_status, tier_expires_at, role, points')
-    .eq('id', user.id)
-    .single()
-
+  // Use the canonical id-then-email resolver so a transient miss on the
+  // brittle .eq('email', user.email).single() doesn't bounce the user to
+  // /login — the bug QA hit on /podcast nav. resolveCurrentUser also goes
+  // through adminClient so RLS on public.users can't shadow the read.
+  const profile = await resolveCurrentUser(supabase)
   if (!profile) redirect('/login')
 
   // Normalize tier and role to lowercase so all downstream comparisons work
@@ -65,47 +92,50 @@ export default async function MemberLayout({ children }: { children: React.React
     redirect('/membership-expired?reason=expired')
   }
 
-  const [{ count: unreadCount }, { data: logoSetting }, { data: logoLightSetting }, { data: themeSetting }] = await Promise.all([
+  const [{ count: unreadCount }, settings] = await Promise.all([
     supabase
       .from('notifications')
       .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
+      .eq('user_id', profile.id)
       .eq('is_read', false),
-    supabase
-      .from('platform_settings')
-      .select('value')
-      .eq('key', 'logo_dark_url')
-      .single(),
-    supabase
-      .from('platform_settings')
-      .select('value')
-      .eq('key', 'logo_nav_light_url')
-      .single(),
-    supabase
-      .from('platform_settings')
-      .select('value')
-      .eq('key', 'members_can_toggle_theme')
-      .single(),
+    // Cached 5 min — shared with root layout theme read.
+    getPlatformSettingsMap(),
   ])
 
-  const logoUrl = logoSetting?.value || null
-  const logoLightUrl = logoLightSetting?.value || null
-  const membersCanToggleTheme = themeSetting?.value !== 'false'
+  const membersCanToggleTheme = settings.get('members_can_toggle_theme') !== 'false'
 
   return (
     <ToastProvider>
-      <div className="flex flex-col min-h-screen">
-        <TopNav profile={profile} unreadCount={unreadCount ?? 0} logoUrl={logoUrl} logoLightUrl={logoLightUrl} membersCanToggleTheme={membersCanToggleTheme} />
-        <EpisodeBanner />
-        <NextEventBanner />
-        <div className="flex flex-1 min-h-0">
-          <main className="flex-1 overflow-y-auto pb-16 md:pb-0" style={{ backgroundColor: 'var(--bg-page)' }}>
-            {children}
-          </main>
-          <RightRail />
+      <LiveAnnouncerProvider>
+        {/* Stored theme wins over the localStorage hint. Parse-blocking, so it
+            lands before the shell paints — no flash in a fresh browser. */}
+        <ThemeSync theme={profile.theme} />
+        <SkipToContent />
+        {/* SCROLL-FIX: member chrome is a fixed viewport shell (100dvh).
+            TopNav sits in normal flow (sticky). Main is the only vertical
+            scroller (overflow-y: auto + min-height: 0). Using min-h-screen
+            + fixed nav + overflow-y-auto on main left main unbounded so
+            nothing scrolled after the mobile polish sprint. */}
+        <div className="ep-member-shell">
+          <TopNavClient profile={profile} unreadCount={unreadCount ?? 0} membersCanToggleTheme={membersCanToggleTheme} />
+          {/* SPRINT N-3: <EpisodeBanner /> moved out of the layout into each
+              page (home/community/events). */}
+          <NextEventBannerClient />
+          <div className="ep-member-body">
+            {/* min-w-0: prevent wide children from expanding past the flex parent
+                (settings tab strip, etc.). Scroll lives on .ep-main-scroll. */}
+            <main
+              id="main-content"
+              tabIndex={-1}
+              className="ep-main-scroll"
+              style={{ backgroundColor: 'var(--bg-page)' }}
+            >
+              {children}
+            </main>
+          </div>
+          <BottomTabBarClient role={profile.role} unreadCount={unreadCount ?? 0} dmUnreadCount={0} />
         </div>
-        <BottomTabBar role={profile.role} unreadCount={unreadCount ?? 0} dmUnreadCount={0} />
-      </div>
+      </LiveAnnouncerProvider>
     </ToastProvider>
   )
 }

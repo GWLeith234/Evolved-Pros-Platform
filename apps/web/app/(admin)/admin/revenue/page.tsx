@@ -1,64 +1,42 @@
-import { createClient } from '@/lib/supabase/server'
-import { getTierMrr } from '@/lib/admin/helpers'
-import { RevenueChart } from '@/components/admin/RevenueChart'
+import { headers } from 'next/headers'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Revenue stays empty until Stripe billing events exist.
+ * Do not invent MRR from active tier counts × list price, and do not
+ * synthesize a 6-month chart. The previous page did both; this stub
+ * is the correct empty state.
+ */
 export default async function AdminRevenuePage() {
-  const supabase = createClient()
-  const now = new Date()
-
-  const [membersResult, webhooksResult] = await Promise.all([
-    supabase
-      .from('users')
-      .select('tier, tier_status')
-      .neq('role', 'admin'),
-    supabase
-      .from('vendasta_webhooks')
-      .select('event_type, processed_at, product_sku')
-      .in('event_type', ['order.activated', 'order.deactivated', 'subscription.activated', 'subscription.cancelled'])
-      .order('processed_at', { ascending: true }),
-  ])
-
-  const memberList = membersResult.data ?? []
-  const proCount       = memberList.filter(m => m.tier === 'pro'       && m.tier_status === 'active').length
-  const vipCount       = memberList.filter(m => m.tier === 'vip'       && m.tier_status === 'active').length
-  const communityCount = memberList.filter(m => m.tier === 'community' && m.tier_status === 'active').length
-  const currentMrr     = memberList.reduce((sum, m) => sum + getTierMrr(m.tier, m.tier_status), 0)
-
-  // Build 6-month bars
-  const months = Array.from({ length: 6 }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
-    const label = d.toLocaleDateString('en-US', { month: 'short' })
-    const isCurrent = i === 5
-    const monthFactor = 1 - ((5 - i) * 0.04)
-    return { label, mrr: Math.round(currentMrr * monthFactor), isCurrent }
-  })
-
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-  const churnThisMonth = (webhooksResult.data ?? []).filter(w =>
-    (w.event_type === 'order.deactivated' || w.event_type === 'subscription.cancelled') &&
-    w.processed_at >= monthStart,
-  ).length
+  const h = headers()
+  if (h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1') {
+    return null
+  }
 
   return (
     <div className="px-8 py-6 max-w-4xl">
       <div className="mb-6">
-        <h1 className="font-display font-black text-[28px] text-[#112535]">Revenue</h1>
-        <p className="font-condensed text-[12px] text-[#7a8a96] mt-0.5">
-          MRR based on active tier counts × price — Vendasta is billing source of truth
+        <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)]">Revenue</h1>
+        <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mt-0.5">
+          Figures appear when Stripe billing events exist. This page does not estimate from member count or list price.
         </p>
       </div>
 
-      <RevenueChart
-        months={months}
-        currentMrr={currentMrr}
-        proCount={proCount}
-        communityCount={communityCount}
-        proMrr={proCount * 79}
-        communityMrr={communityCount * 39}
-        churnThisMonth={churnThisMonth}
-      />
+      <div
+        className="rounded-lg px-8 py-12 text-center"
+        style={{
+          backgroundColor: 'var(--admin-card)',
+          border: '1px dashed rgba(27,60,90,0.2)',
+        }}
+      >
+        <p className="font-condensed font-bold uppercase tracking-widest text-[11px] text-[color:var(--admin-text-2)]">
+          No billing events yet
+        </p>
+        <p className="font-body text-[13px] text-[color:var(--admin-text-2)] mt-2 max-w-md mx-auto">
+          MRR, churn, and the 6-month chart populate from Stripe once charges land.
+        </p>
+      </div>
     </div>
   )
 }

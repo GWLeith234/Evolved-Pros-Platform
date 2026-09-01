@@ -44,7 +44,7 @@ function AvatarCircle({ name, url, color }: { name: string; url: string | null; 
   const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
   return (
     <div
-      className="rounded-full flex items-center justify-center font-condensed font-bold text-[10px]"
+      className="rounded-full flex items-center justify-center font-condensed font-bold text-[12px]"
       style={{ width: 32, height: 32, backgroundColor: color, color: '#fff' }}
     >
       {initials}
@@ -151,7 +151,7 @@ export function StoryComments({ storyId, pillarColor }: StoryCommentsProps) {
           />
           <div className="flex items-center justify-between mt-2">
             <span
-              className="font-condensed text-[10px]"
+              className="font-condensed text-[12px]"
               style={{ color: body.length > 900 ? '#C9302A' : 'rgba(10,15,24,0.3)' }}
             >
               {body.length}/1000
@@ -159,7 +159,7 @@ export function StoryComments({ storyId, pillarColor }: StoryCommentsProps) {
             <button
               type="submit"
               disabled={!body.trim() || submitting}
-              className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] px-5 py-2 rounded transition-opacity"
+              className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-5 py-2 rounded transition-opacity"
               style={{
                 backgroundColor: pillarColor,
                 color: '#fff',
@@ -216,7 +216,7 @@ export function StoryComments({ storyId, pillarColor }: StoryCommentsProps) {
                 <span className="font-body font-semibold text-[13px]" style={{ color: '#0A0F18' }}>
                   {c.author.display_name}
                 </span>
-                <span className="font-condensed text-[10px]" style={{ color: 'rgba(10,15,24,0.35)' }}>
+                <span className="font-condensed text-[12px]" style={{ color: 'rgba(10,15,24,0.35)' }}>
                   {timeAgo(c.createdAt)}
                 </span>
               </div>

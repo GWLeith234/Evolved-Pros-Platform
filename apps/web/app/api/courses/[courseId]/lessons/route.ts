@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { hasTierAccess } from '@/lib/tier'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,17 +10,14 @@ export async function GET(
   { params }: { params: { courseId: string } },
 ) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const [{ data: course }, { data: profile }] = await Promise.all([
-    supabase
-      .from('courses')
-      .select('id, required_tier')
-      .eq('id', params.courseId)
-      .single(),
-    supabase.from('users').select('tier').eq('id', user.id).single(),
-  ])
+  const { data: course } = await supabase
+    .from('courses')
+    .select('id, required_tier')
+    .eq('id', params.courseId)
+    .single()
 
   if (!course) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
@@ -36,11 +34,11 @@ export async function GET(
   const { data: progress } = await supabase
     .from('lesson_progress')
     .select('lesson_id, completed_at, watch_time_seconds')
-    .eq('user_id', user.id)
+    .eq('user_id', profile.id)
     .in('lesson_id', lessonIds)
 
   const progressMap = new Map((progress ?? []).map(p => [p.lesson_id, p]))
-  const isLocked = !hasTierAccess(profile?.tier, course.required_tier as 'community' | 'pro')
+  const isLocked = !hasTierAccess(profile.tier, course.required_tier as 'community' | 'vip' | 'pro')
 
   const result = lessons.map(l => {
     const prog = progressMap.get(l.id)
@@ -49,7 +47,12 @@ export async function GET(
       slug: l.slug,
       title: l.title,
       description: l.description,
-      muxPlaybackId: l.mux_playback_id,
+      // SPRINT TIER-1: the playback id is content, not metadata. It was
+      // returned unconditionally alongside isLocked, so a locked pillar's
+      // lesson list handed out every playback id — enough to go and mint a
+      // token. Titles stay (the storefront advertises what's behind the gate);
+      // anything playable does not.
+      muxPlaybackId: isLocked ? null : l.mux_playback_id,
       durationSeconds: l.duration_seconds,
       sortOrder: l.sort_order,
       isPublished: l.is_published,

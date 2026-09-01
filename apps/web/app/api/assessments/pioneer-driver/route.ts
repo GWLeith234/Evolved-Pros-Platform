@@ -3,6 +3,8 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import type { Json } from '@evolved-pros/db'
 
 type AssessmentType = 'PIONEER' | 'DRIVER' | 'CONNECTOR' | 'ARCHITECT'
 const VALID_TYPES: AssessmentType[] = ['PIONEER', 'DRIVER', 'CONNECTOR', 'ARCHITECT']
@@ -46,14 +48,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'type_result must be one of PIONEER, DRIVER, CONNECTOR, ARCHITECT' }, { status: 422 })
   }
 
-  // Use admin client to bypass RLS for both insert and user update
-  const { data: assessment, error: insertError } = await adminClient
+  /* assessments.user_id FKs auth.users(id) and RLS checks auth.uid().
+     Use the session-aware client so the JWT is sent, mirroring the
+     checkin_results route that QA confirmed works. */
+  const { data: assessment, error: insertError } = await supabase
     .from('assessments')
     .insert({
       user_id: user.id,
       assessment_type: 'pioneer-driver',
       type_result: typeResult,
-      scores_json: scoresJson,
+      scores_json: scoresJson as Json,
     })
     .select('id, user_id, assessment_type, type_result, scores_json, created_at')
     .single()
@@ -63,15 +67,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: insertError?.message ?? 'Failed to save assessment' }, { status: 500 })
   }
 
-  // Update pioneer_driver_type on user profile
-  const { error: updateError } = await adminClient
-    .from('users')
-    .update({ pioneer_driver_type: typeResult })
-    .eq('id', user.id)
+  /* Follow-up users-table update still needs public.users.id (legacy
+     accounts have auth.uid() ≠ public.users.id). adminClient because
+     RLS on users.update is admin-only. */
+  const profile = await resolveCurrentUser(supabase)
+  if (profile) {
+    const { error: updateError } = await adminClient
+      .from('users')
+      .update({ pioneer_driver_type: typeResult })
+      .eq('id', profile.id)
 
-  if (updateError) {
-    console.error('[POST /api/assessments/pioneer-driver] user update', updateError)
-    // Non-fatal — assessment was saved, just log
+    if (updateError) {
+      console.error('[POST /api/assessments/pioneer-driver] user update', updateError)
+      // Non-fatal — assessment was saved, just log
+    }
   }
 
   return NextResponse.json({ assessment }, { status: 201 })

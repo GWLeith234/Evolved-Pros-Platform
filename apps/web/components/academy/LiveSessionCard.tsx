@@ -57,7 +57,7 @@ export async function LiveSessionCard({ pillarNumber }: Props) {
           <p
             style={{
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
+              fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
               color: config?.color ?? '#68a2b9', margin: '0 0 4px',
             }}
           >
@@ -71,7 +71,7 @@ export async function LiveSessionCard({ pillarNumber }: Props) {
           href="/events"
           style={{
             fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-            fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase',
+            fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase',
             color: 'rgba(250,249,247,0.35)', textDecoration: 'none',
           }}
         >
@@ -106,7 +106,7 @@ export async function LiveSessionCard({ pillarNumber }: Props) {
             style={{
               display: 'inline-block', marginTop: '16px',
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase',
+              fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase',
               color: config?.color ?? '#68a2b9', textDecoration: 'none',
             }}
           >
@@ -131,7 +131,7 @@ export async function LiveSessionCard({ pillarNumber }: Props) {
                   <span
                     style={{
                       fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-                      fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase',
+                      fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase',
                       color: config?.color ?? '#68a2b9',
                       backgroundColor: `${config?.color ?? '#68a2b9'}18`,
                       padding: '2px 8px', borderRadius: '3px',
@@ -143,7 +143,7 @@ export async function LiveSessionCard({ pillarNumber }: Props) {
                     <span
                       style={{
                         fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-                        fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase',
+                        fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase',
                         color: '#C9A84C', backgroundColor: 'rgba(201,168,76,0.1)',
                         padding: '2px 8px', borderRadius: '3px',
                       }}
@@ -172,7 +172,7 @@ export async function LiveSessionCard({ pillarNumber }: Props) {
                   display: 'inline-flex', alignItems: 'center',
                   backgroundColor: config?.color ?? '#68a2b9', color: '#0A0F18',
                   fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-                  fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase',
+                  fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase',
                   padding: '8px 16px', borderRadius: '4px', textDecoration: 'none',
                   whiteSpace: 'nowrap',
                 }}

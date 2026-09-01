@@ -2,29 +2,22 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const revalidate = 300
 
 export async function GET() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const currentUser = await resolveCurrentUser(supabase)
+  if (!currentUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const [topUsersResult, currentUserResult] = await Promise.all([
-    supabase
-      .from('users')
-      .select('id, display_name, full_name, avatar_url, points')
-      .order('points', { ascending: false })
-      .limit(10),
-    supabase
-      .from('users')
-      .select('id, display_name, full_name, avatar_url, points')
-      .eq('id', user.id)
-      .single(),
-  ])
+  const { data: topUsersData } = await supabase
+    .from('users')
+    .select('id, display_name, full_name, avatar_url, points')
+    .order('points', { ascending: false })
+    .limit(10)
 
-  const topUsers = topUsersResult.data ?? []
-  const currentUser = currentUserResult.data
+  const topUsers = topUsersData ?? []
 
   const entries = topUsers.map((u, i) => ({
     rank: i + 1,
@@ -32,16 +25,16 @@ export async function GET() {
     displayName: u.display_name ?? u.full_name ?? 'Member',
     avatarUrl: u.avatar_url,
     points: u.points,
-    isCurrentUser: u.id === user.id,
+    isCurrentUser: u.id === currentUser.id,
   }))
 
   // Current user rank (if not in top 10)
   let currentUserRank = entries.findIndex(e => e.isCurrentUser) + 1
-  if (currentUserRank === 0 && currentUser) {
+  if (currentUserRank === 0) {
     const { count } = await supabase
       .from('users')
       .select('id', { count: 'exact', head: true })
-      .gt('points', currentUser.points)
+      .gt('points', currentUser.points ?? 0)
     currentUserRank = (count ?? 0) + 1
 
     // Append current user to entries if not already in top 10
@@ -50,7 +43,7 @@ export async function GET() {
       userId: currentUser.id,
       displayName: currentUser.display_name ?? currentUser.full_name ?? 'Member',
       avatarUrl: currentUser.avatar_url,
-      points: currentUser.points,
+      points: currentUser.points ?? 0,
       isCurrentUser: true,
     })
   }

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getTierMrr } from '@/lib/admin/utils'
+import { FOG_BADGE, FOG_TITLE } from '@/lib/admin/fog'
 import type { MemberRow } from './MembersTable'
 
 interface Props {
@@ -29,13 +31,13 @@ function getInitials(name: string | null | undefined) {
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '8px 12px',
   border: '1px solid rgba(27,60,90,0.18)', borderRadius: '6px',
-  fontSize: '13px', fontFamily: 'var(--font-body)', color: '#112535',
-  outline: 'none', backgroundColor: '#fff',
+  fontSize: '13px', fontFamily: 'var(--font-body)', color: 'var(--admin-text-strong)',
+  outline: 'none', backgroundColor: 'var(--admin-card)',
 }
 const labelStyle: React.CSSProperties = {
   display: 'block', fontFamily: 'var(--font-condensed)', fontWeight: 700,
-  fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase',
-  color: '#7a8a96', marginBottom: '5px',
+  fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
+  color: 'var(--admin-text-2)', marginBottom: '5px',
 }
 
 export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
@@ -43,6 +45,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
   const [fullName,    setFullName]    = useState(member.fullName ?? '')
   const [tier,        setTier]        = useState(member.tier ?? 'vip')
   const [tierStatus,  setTierStatus]  = useState(member.tierStatus ?? 'active')
+  const [friendsOfGeorge, setFriendsOfGeorge] = useState(member.isComped)
   const [avatarUrl,   setAvatarUrl]   = useState(member.avatarUrl ?? '')
   const [bannerUrl,   setBannerUrl]   = useState('')
   const [avatarUploading, setAvatarUploading] = useState(false)
@@ -137,6 +140,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
           current_pillar: currentPillar,
           goal_90day:     goal90day || null,
           goal_visible:   goalVisible,
+          friends_of_george: friendsOfGeorge,
         }),
       })
       const data = await res.json()
@@ -148,6 +152,8 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
         tier,
         tierStatus,
         avatarUrl:   avatarUrl  || null,
+        isComped:    friendsOfGeorge,
+        mrr:         getTierMrr(tier, tierStatus, friendsOfGeorge),
       })
       onClose()
     } catch (e) {
@@ -156,7 +162,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
     }
   }
 
-  const name = member.displayName ?? member.fullName ?? member.email
+  const name = member.displayName ?? member.fullName ?? member.email ?? 'Member'
 
   return (
     <div
@@ -166,18 +172,18 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
     >
       <div
         className="w-full max-w-lg rounded-xl shadow-2xl overflow-hidden"
-        style={{ backgroundColor: '#fff', border: '1px solid rgba(27,60,90,0.1)', maxHeight: '90vh', overflowY: 'auto' }}
+        style={{ backgroundColor: 'var(--admin-card)', border: '1px solid rgba(27,60,90,0.1)', maxHeight: '90vh', overflowY: 'auto' }}
       >
         {/* Header */}
         <div
-          className="flex items-center justify-between px-6 py-4 sticky top-0 bg-white"
+          className="flex items-center justify-between px-6 py-4 sticky top-0 bg-[var(--admin-card)]"
           style={{ borderBottom: '1px solid rgba(27,60,90,0.08)' }}
         >
           <div>
-            <h2 className="font-display font-black text-[18px]" style={{ color: '#112535' }}>
+            <h2 className="font-display font-black text-[18px]" style={{ color: 'var(--admin-text-strong)' }}>
               Edit Profile
             </h2>
-            <p className="font-condensed text-[11px] mt-0.5" style={{ color: '#7a8a96' }}>
+            <p className="font-condensed text-[12px] mt-0.5" style={{ color: 'var(--admin-text-2)' }}>
               {name} · {member.email}
             </p>
           </div>
@@ -211,8 +217,8 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                 </div>
                 <div className="flex-1">
                   <label
-                    className="inline-flex items-center gap-1.5 font-condensed font-bold uppercase tracking-[0.1em] text-[10px] px-3 py-2 rounded cursor-pointer transition-colors"
-                    style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.15)' }}
+                    className="inline-flex items-center gap-1.5 font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-3 py-2 rounded cursor-pointer transition-colors"
+                    style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: 'var(--admin-text)', border: '1px solid rgba(27,60,90,0.15)' }}
                     onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.1)')}
                     onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.06)')}
                   >
@@ -227,7 +233,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                     />
                   </label>
                   {avatarUrl && (
-                    <p className="font-condensed text-[10px] mt-1" style={{ color: '#68a2b9' }}>✓ Photo uploaded</p>
+                    <p className="font-condensed text-[12px] mt-1" style={{ color: '#68a2b9' }}>✓ Photo uploaded</p>
                   )}
                 </div>
               </div>
@@ -243,8 +249,8 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                 <div className="w-full rounded-lg mb-2" style={{ height: '80px', background: 'linear-gradient(135deg, #112535 0%, #1b3c5a 100%)' }} />
               )}
               <label
-                className="inline-flex items-center gap-1.5 font-condensed font-bold uppercase tracking-[0.1em] text-[10px] px-3 py-2 rounded cursor-pointer transition-colors"
-                style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.15)' }}
+                className="inline-flex items-center gap-1.5 font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-3 py-2 rounded cursor-pointer transition-colors"
+                style={{ backgroundColor: 'rgba(27,60,90,0.06)', color: 'var(--admin-text)', border: '1px solid rgba(27,60,90,0.15)' }}
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.1)')}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.06)')}
               >
@@ -259,7 +265,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                 />
               </label>
               {bannerUrl && (
-                <span className="font-condensed text-[10px] ml-2" style={{ color: '#68a2b9' }}>✓ Banner uploaded</span>
+                <span className="font-condensed text-[12px] ml-2" style={{ color: '#68a2b9' }}>✓ Banner uploaded</span>
               )}
             </div>
 
@@ -293,11 +299,11 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                   {(['vip', 'pro'] as const).map(t => (
                     <button
                       key={t} type="button" onClick={() => setTier(t)}
-                      className="flex-1 py-2 rounded font-condensed font-bold uppercase tracking-[0.1em] text-[10px] transition-all"
+                      className="flex-1 py-2 rounded font-condensed font-bold uppercase tracking-[0.1em] text-[12px] transition-all"
                       style={{
-                        backgroundColor: tier === t ? (t === 'pro' ? 'rgba(201,168,76,0.1)' : 'rgba(27,60,90,0.06)') : 'transparent',
-                        border: `1.5px solid ${tier === t ? (t === 'pro' ? '#c9a84c' : '#1b3c5a') : 'rgba(27,60,90,0.12)'}`,
-                        color: tier === t ? (t === 'pro' ? '#a07c1e' : '#1b3c5a') : '#7a8a96',
+                        backgroundColor: tier === t ? (t === 'pro' ? 'rgba(201,48,42,0.1)' : 'rgba(201,168,76,0.1)') : 'transparent',
+                        border: `1.5px solid ${tier === t ? (t === 'pro' ? '#C9302A' : '#c9a84c') : 'rgba(27,60,90,0.12)'}`,
+                        color: tier === t ? (t === 'pro' ? '#C9302A' : '#a07c1e') : '#7a8a96',
                       }}
                     >
                       {t === 'pro' ? 'Professional' : 'VIP'}
@@ -321,9 +327,31 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
               </div>
             </div>
 
+            {/* Friends of George — complimentary flag, independent of paid VIP. */}
+            <div>
+              <label style={labelStyle}>Friends of George</label>
+              <button
+                type="button"
+                onClick={() => setFriendsOfGeorge(v => !v)}
+                data-testid="fog-toggle"
+                className="w-full py-2 rounded font-condensed font-bold uppercase tracking-[0.1em] text-[12px] transition-all"
+                style={{
+                  backgroundColor: friendsOfGeorge ? FOG_BADGE.bg : 'transparent',
+                  border: `1.5px solid ${friendsOfGeorge ? '#c9a84c' : 'rgba(27,60,90,0.12)'}`,
+                  color: friendsOfGeorge ? FOG_BADGE.color : '#7a8a96',
+                }}
+                title={FOG_TITLE}
+              >
+                {friendsOfGeorge ? 'FOG — complimentary' : 'Not FOG'}
+              </button>
+              <p className="font-condensed text-[12px] mt-1.5" style={{ color: 'var(--admin-text-2)' }}>
+                Complimentary access, excluded from MRR. Does not change paid VIP.
+              </p>
+            </div>
+
             {/* Professional section header */}
             <div style={{ borderTop: '1px solid rgba(27,60,90,0.08)', paddingTop: '16px' }}>
-              <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7a8a96', marginBottom: '12px' }}>
+              <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: '12px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--admin-text-2)', marginBottom: '12px' }}>
                 Professional
               </p>
 
@@ -385,7 +413,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                     type="checkbox" checked={phoneVisible} onChange={e => setPhoneVisible(e.target.checked)}
                     style={{ width: '14px', height: '14px', accentColor: '#1b3c5a', cursor: 'pointer' }}
                   />
-                  <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a8a96' }}>
+                  <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--admin-text-2)' }}>
                     Visible to members
                   </span>
                 </label>
@@ -404,7 +432,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                         style={{
                           padding: '5px 10px', borderRadius: '4px',
                           fontFamily: 'var(--font-condensed)', fontWeight: 700,
-                          fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase',
+                          fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase',
                           backgroundColor: isActive ? '#1b3c5a' : 'transparent',
                           color: isActive ? '#ffffff' : '#7a8a96',
                           border: `1.5px solid ${isActive ? '#1b3c5a' : 'rgba(27,60,90,0.2)'}`,
@@ -434,7 +462,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
                     type="checkbox" checked={goalVisible} onChange={e => setGoalVisible(e.target.checked)}
                     style={{ width: '14px', height: '14px', accentColor: '#1b3c5a', cursor: 'pointer' }}
                   />
-                  <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a8a96' }}>
+                  <span style={{ fontFamily: 'var(--font-condensed)', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--admin-text-2)' }}>
                     Make this public
                   </span>
                 </label>
@@ -444,7 +472,7 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
             {/* Error */}
             {status === 'error' && (
               <p
-                className="font-condensed text-[11px] px-3 py-2 rounded"
+                className="font-condensed text-[12px] px-3 py-2 rounded"
                 style={{ backgroundColor: 'rgba(239,14,48,0.06)', color: '#ef0e30', border: '1px solid rgba(239,14,48,0.15)' }}
               >
                 {errorMsg}
@@ -454,19 +482,19 @@ export function AdminEditProfileModal({ member, onClose, onSaved }: Props) {
 
           {/* Footer */}
           <div
-            className="flex items-center justify-end gap-3 px-6 py-4 sticky bottom-0 bg-white"
+            className="flex items-center justify-end gap-3 px-6 py-4 sticky bottom-0 bg-[var(--admin-card)]"
             style={{ borderTop: '1px solid rgba(27,60,90,0.08)' }}
           >
             <button
               type="button" onClick={onClose}
-              className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] px-4 py-2 rounded transition-colors"
-              style={{ backgroundColor: 'rgba(27,60,90,0.05)', color: '#7a8a96', border: '1px solid rgba(27,60,90,0.12)' }}
+              className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-4 py-2 rounded transition-colors"
+              style={{ backgroundColor: 'rgba(27,60,90,0.05)', color: 'var(--admin-text-2)', border: '1px solid rgba(27,60,90,0.12)' }}
             >
               Cancel
             </button>
             <button
               type="submit" disabled={status === 'saving' || avatarUploading || bannerUploading}
-              className="font-condensed font-bold uppercase tracking-[0.12em] text-[11px] px-5 py-2 rounded transition-colors"
+              className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] px-5 py-2 rounded transition-colors"
               style={{
                 backgroundColor: (status === 'saving' || avatarUploading || bannerUploading) ? 'rgba(27,60,90,0.4)' : '#1b3c5a',
                 color: '#fff',

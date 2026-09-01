@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 const ALLOWED_STRING_FIELDS = [
@@ -30,12 +31,14 @@ const VALID_PILLARS = new Set(['p1', 'p2', 'p3', 'p4', 'p5', 'p6'])
 export async function GET() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data, error } = await supabase
+  // RLS-FIX: query public.users by email — auth.uid() doesn't always match
+  // public.users.id, so .eq('id', user.id) returns null for many users.
+  const { data, error } = await adminClient
     .from('users')
     .select('id, email, display_name, full_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, points, role, created_at, company, linkedin_url, website_url, twitter_handle, phone, phone_visible, current_pillar, goal_90day, goal_visible')
-    .eq('id', user.id)
+    .eq('email', user.email)
     .single()
 
   if (error || !data) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -46,7 +49,7 @@ export async function GET() {
 export async function PATCH(request: Request) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   let body: Record<string, unknown>
   try {
@@ -106,10 +109,12 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'No valid fields provided' }, { status: 422 })
   }
 
-  const { data, error } = await supabase
+  // RLS-FIX: update by email (resolves to public.users.id internally) so
+  // the WHERE clause matches the row even when auth.uid() ≠ public.users.id.
+  const { data, error } = await adminClient
     .from('users')
     .update(update)
-    .eq('id', user.id)
+    .eq('email', user.email)
     .select('id, email, display_name, full_name, avatar_url, bio, role_title, location, tier, tier_status, tier_expires_at, points, role, created_at, company, linkedin_url, website_url, twitter_handle, phone, phone_visible, current_pillar, goal_90day, goal_visible')
     .single()
 

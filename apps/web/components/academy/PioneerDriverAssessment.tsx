@@ -298,7 +298,7 @@ export function PioneerDriverAssessment() {
       <div style={{ marginBottom: '24px' }}>
         <p style={{
           fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-          fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
+          fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
           color: GOLD, margin: '0 0 4px',
         }}>
           Pioneer-Driver Assessment
@@ -314,7 +314,7 @@ export function PioneerDriverAssessment() {
           </div>
           <span style={{
             fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-            fontSize: '11px', letterSpacing: '0.1em', color: 'rgba(250,249,247,0.4)',
+            fontSize: '12px', letterSpacing: '0.1em', color: 'rgba(250,249,247,0.4)',
             flexShrink: 0,
           }}>
             {currentQ + 1} / {QUESTIONS.length}
@@ -371,7 +371,7 @@ function AnswerButton({ label, text, onClick }: { label: string; text: string; o
         border: `1px solid ${hovered ? GOLD : 'rgba(255,255,255,0.15)'}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-        fontSize: '11px', letterSpacing: '0.05em',
+        fontSize: '12px', letterSpacing: '0.05em',
         color: hovered ? GOLD : 'rgba(250,249,247,0.5)',
         transition: 'all 0.15s',
       }}>
@@ -418,7 +418,7 @@ function ResultScreen({
         {isFromSaved && formattedDate && (
           <p style={{
             fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-            fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
+            fontSize: '12px', letterSpacing: '0.18em', textTransform: 'uppercase',
             color: 'rgba(250,249,247,0.3)', margin: '0 0 16px',
           }}>
             Assessed {formattedDate}
@@ -428,7 +428,7 @@ function ResultScreen({
         {/* Assessment label */}
         <p style={{
           fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-          fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase',
+          fontSize: '12px', letterSpacing: '0.22em', textTransform: 'uppercase',
           color: GOLD, margin: '0 0 8px',
         }}>
           Pioneer-Driver Assessment
@@ -452,7 +452,7 @@ function ResultScreen({
         <div style={{ marginBottom: '24px' }}>
           <p style={{
             fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-            fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase',
+            fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase',
             color: 'rgba(250,249,247,0.35)', margin: '0 0 10px',
           }}>
             Your Strengths
@@ -475,7 +475,7 @@ function ResultScreen({
         }}>
           <p style={{
             fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-            fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase',
+            fontSize: '12px', letterSpacing: '0.2em', textTransform: 'uppercase',
             color: typeColor, margin: '0 0 6px',
           }}>
             Your Sales Superpower
@@ -506,7 +506,7 @@ function ResultScreen({
           {saved && (
             <span style={{
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase',
+              fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase',
               color: typeColor,
             }}>
               ✓ Result Saved
@@ -521,7 +521,7 @@ function ResultScreen({
             style={{
               background: 'none', border: 'none',
               fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700,
-              fontSize: '11px', letterSpacing: '0.15em', textTransform: 'uppercase',
+              fontSize: '12px', letterSpacing: '0.15em', textTransform: 'uppercase',
               color: 'rgba(250,249,247,0.3)', cursor: 'pointer', padding: 0,
             }}
           >
