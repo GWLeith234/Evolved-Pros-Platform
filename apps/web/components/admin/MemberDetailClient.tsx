@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { MemberPlanBadges } from './MemberPlanBadges'
 
 interface Post {
   id: string
@@ -53,6 +54,7 @@ interface MemberDetail {
   tierStatus: string | null
   tierExpiresAt: string | null
   role: string | null
+  isComped: boolean
   guestEngagements: GuestEngagement[]
   points: number
   joinedAt: string
@@ -218,23 +220,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
             )}
             <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">{member.email}</p>
             <div className="flex items-center gap-2 mt-1">
-              {member.role === 'guest' && (
-                <span
-                  className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
-                  style={{ backgroundColor: 'rgba(27,60,90,0.12)', color: '#1b3c5a', border: '1px solid rgba(27,60,90,0.35)' }}
-                  title="Podcast/keynote guest — comped Professional access, excluded from MRR"
-                >
-                  GUEST
-                </span>
-              )}
-              {member.tier && (
-                <span
-                  className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"
-                  style={{ backgroundColor: 'var(--admin-subtle)', color: 'var(--admin-text)', border: '1px solid var(--admin-border)' }}
-                >
-                  {member.tier.toUpperCase()}
-                </span>
-              )}
+              <MemberPlanBadges role={member.role} tier={member.tier} isComped={member.isComped} />
               {member.tierStatus && (
                 <span
                   className="font-condensed font-bold uppercase text-[12px] px-2 py-0.5 rounded"

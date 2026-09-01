@@ -50,6 +50,7 @@ export async function GET(
     location:          user.location,
     tier:              user.tier,
     tierStatus:        user.tier_status,
+    isComped:          Boolean(user.comp_promo_code_id),
     tierExpiresAt:     user.tier_expires_at,
     points:            user.points,
     joinedAt:          user.created_at,
