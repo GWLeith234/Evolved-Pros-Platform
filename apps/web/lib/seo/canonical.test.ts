@@ -58,6 +58,7 @@ describe('canonicalizePath / canonicalUrl', () => {
     )
     expect(canonicalUrl('/pricing')).toBe('https://www.evolvedpros.com/pricing')
     expect(canonicalUrl('/live')).toBe('https://www.evolvedpros.com/live')
+    expect(canonicalUrl('/evolved')).toBe('https://www.evolvedpros.com/evolved')
   })
 
   it('never names the platform host', () => {

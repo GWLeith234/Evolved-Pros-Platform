@@ -31,6 +31,11 @@
  * so middleware never runs on them and an anonymous request renders the page —
  * the same bar the five above have to clear. They are also the only pages the
  * global footer links to that Google could not otherwise discover.
+ *
+ * /evolved is the EVOLVED book preorder dest for house IAB ads. It lives at
+ * app/evolved (outside the public group so it can keep charcoal/gold chrome)
+ * and is also absent from the middleware matcher, so an anonymous request
+ * renders the page.
  */
 export const PUBLIC_SITEMAP_PATHS = [
   '/',
@@ -41,6 +46,7 @@ export const PUBLIC_SITEMAP_PATHS = [
   '/terms',
   '/privacy',
   '/contact',
+  '/evolved',
 ] as const
 
 export type PublicSitemapPath = (typeof PUBLIC_SITEMAP_PATHS)[number]
