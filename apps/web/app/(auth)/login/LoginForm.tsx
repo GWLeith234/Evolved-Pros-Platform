@@ -2,23 +2,15 @@
 import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { loginCopyFor } from '@/lib/auth/loginCopy'
+import { loginCopyFor, resolveLoginMode } from '@/lib/auth/loginCopy'
+import {
+  EMAIL_ALREADY_REGISTERED,
+  SIGNUP_CONFIRM_EMAIL,
+  humanizeAuthError,
+  interpretSignUpResult,
+  passwordAuthMethodFor,
+} from '@/lib/auth/passwordAuth'
 import { LogoMark } from '@/components/ui/LogoMark'
-
-// Map raw Supabase auth errors into copy that doesn't sound like a stack trace.
-function humanizeAuthError(message: string): string {
-  const m = message.toLowerCase()
-  if (m.includes('invalid login credentials') || m.includes('invalid email or password')) {
-    return "That email and password don't match. Try again or use a magic link."
-  }
-  if (m.includes('email not confirmed')) {
-    return 'Confirm your email first — check your inbox for the verification link.'
-  }
-  if (m.includes('rate limit') || m.includes('too many')) {
-    return 'Too many attempts. Wait a minute and try again.'
-  }
-  return message
-}
 
 function Spinner() {
   return (
@@ -46,7 +38,8 @@ export function LoginForm() {
   // and submit label come from lib/auth/loginCopy.ts, the same module
   // page.tsx's generateMetadata reads, so the tab title and the button can
   // never drift apart.
-  const copy = loginCopyFor(searchParams.get('mode'))
+  const mode = resolveLoginMode(searchParams.get('mode'))
+  const copy = loginCopyFor(mode)
 
   // SPRINT I Phase 2 follow-up — return the member to where they came from.
   // /pricing sends ?redirect=/pricing when a paid CTA gets a 401 for an
@@ -61,7 +54,7 @@ export function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [sent, setSent] = useState(false)
+  const [sent, setSent] = useState<'magic' | 'confirm' | false>(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [forgotSent, setForgotSent] = useState(false)
@@ -73,13 +66,47 @@ export function LoginForm() {
     setLoading(true)
     setError(null)
     const supabase = createClient()
+    const emailNorm = email.trim().toLowerCase()
+    // QA-FUNNEL-1 — the heading already said "Create account"; the submit
+    // used to call signInWithPassword anyway. Branch here, and never fall
+    // through from signUp to signIn (lib/auth/passwordAuth.ts).
+    if (passwordAuthMethodFor(mode) === 'signUp') {
+      const { data, error: err } = await supabase.auth.signUp({
+        email: emailNorm,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}${callbackUrl}`,
+        },
+      })
+      setLoading(false)
+      if (err) {
+        setError(humanizeAuthError(err.message, 'signup'))
+        return
+      }
+      const outcome = interpretSignUpResult(data)
+      if (outcome === 'signedIn') {
+        window.location.href = callbackUrl
+        return
+      }
+      if (outcome === 'emailTaken') {
+        setError(EMAIL_ALREADY_REGISTERED)
+        return
+      }
+      if (outcome === 'confirmEmail') {
+        setSent('confirm')
+        return
+      }
+      setError('Could not create that account. Try again or use a magic link.')
+      return
+    }
+
     const { error: err } = await supabase.auth.signInWithPassword({
-      email: email.trim().toLowerCase(),
+      email: emailNorm,
       password,
     })
     setLoading(false)
     if (err) {
-      setError(humanizeAuthError(err.message))
+      setError(humanizeAuthError(err.message, 'signin'))
       return
     }
     window.location.href = callbackUrl
@@ -99,8 +126,8 @@ export function LoginForm() {
       },
     })
     setLoading(false)
-    if (err) { setError(humanizeAuthError(err.message)); return }
-    setSent(true)
+    if (err) { setError(humanizeAuthError(err.message, mode)); return }
+    setSent('magic')
   }
 
   async function handleForgotPassword() {
@@ -139,7 +166,9 @@ export function LoginForm() {
               <h2 className="text-[color:var(--navy)] text-2xl mb-3" style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700 }}>
                 Check your inbox.
               </h2>
-              <p className="text-muted text-sm">A login link is on its way to {email}</p>
+              <p className="text-muted text-sm">
+                {sent === 'confirm' ? SIGNUP_CONFIRM_EMAIL : `A login link is on its way to ${email}`}
+              </p>
             </div>
           ) : (
             <>
@@ -275,7 +304,7 @@ export function LoginForm() {
                     className={`w-full py-3 rounded font-bold uppercase tracking-wider text-sm text-white transition-all disabled:opacity-50 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                     style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: 'var(--brand-red-hot)' }}
                   >
-                    {loading ? (<><Spinner />Signing in…</>) : copy.submit}
+                    {loading ? (<><Spinner />{mode === 'signup' ? 'Creating account…' : 'Signing in…'}</>) : copy.submit}
                   </button>
                 </form>
               ) : (
