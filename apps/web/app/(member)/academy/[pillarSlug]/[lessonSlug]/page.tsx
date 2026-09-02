@@ -17,30 +17,23 @@ import { hasTierAccess } from '@/lib/tier'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { asTranscriptSegments } from '@/lib/academy/transcript'
 import { asKeyTakeaways } from '@/lib/academy/takeaways'
-import { adminClient } from '@/lib/supabase/admin'
 import {
   pickAcademySponsors,
 } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
-import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
-import { adMatchesSurface, filterLiveAds } from '@/lib/ads/iab'
+import { getActivePlatformAds } from '@/lib/cache/shared'
+import { adMatchesSurface } from '@/lib/ads/iab'
 
 export const dynamic = 'force-dynamic'
 
 async function fetchAcademyLessonSponsors(): Promise<SponsorAd[]> {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = adminClient as any
-    const { data: rows } = await sb
-      .from('platform_ads')
-      .select(SPONSOR_AD_COLUMNS + ', placement')
-      .eq('is_active', true)
-      .order('sort_order')
-      .limit(12)
-    const all = filterLiveAds((rows ?? []) as Array<SponsorAd & { placement?: string | null }>)
-    if (all.length === 0) return []
-    const preferred = all.filter(a => adMatchesSurface(a, 'academy'))
-    return pickAcademySponsors(preferred.length ? preferred : all, 4)
+    // Cached 48-row live catalogue (already schedule-filtered). Do not
+    // limit(12) first — expired-but-active book rows would eat the slots.
+    const catalog = (await getActivePlatformAds()) as SponsorAd[]
+    if (catalog.length === 0) return []
+    const preferred = catalog.filter(a => adMatchesSurface(a, 'academy'))
+    return pickAcademySponsors(preferred.length ? preferred : catalog, 4)
   } catch {
     return []
   }

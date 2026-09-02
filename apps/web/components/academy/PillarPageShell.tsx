@@ -13,15 +13,13 @@ import { PillarModuleAccordion } from '@/components/academy/PillarModuleAccordio
 import { PillarLockPanel } from '@/components/academy/PillarLockPanel'
 import { DynamicReflectionPrompt } from '@/components/academy/DynamicReflectionPrompt'
 import { DynamicPillarAudit } from '@/components/academy/DynamicPillarAudit'
-import { adminClient } from '@/lib/supabase/admin'
 import { ProfileAdUnit } from '@/components/profile/ProfileAdUnit'
 import { AcademyLessonSponsors } from '@/components/academy/AcademyLessonSponsors'
 import {
   pickAcademySponsors,
 } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
-import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
-import { filterLiveAds } from '@/lib/ads/iab'
+import { getActivePlatformAds } from '@/lib/cache/shared'
 
 interface Props {
   pillarNumber?: number
@@ -218,30 +216,11 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
   const tagline = PILLAR_TAGLINES[pNum] ?? ''
   const quote = PILLAR_QUOTES[pNum] ?? ''
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: pillarAdData } = await (adminClient.from('platform_ads' as any) as any)
-    .select(SPONSOR_AD_COLUMNS)
-    .eq('is_active', true)
-    .order('sort_order')
-    .limit(24)
-  const pillarPool = filterLiveAds((pillarAdData ?? []) as SponsorAd[])
-  const pillarAd = pickAcademySponsors(pillarPool, 1)[0] ?? null
+  const catalog = (await getActivePlatformAds()) as SponsorAd[]
+  const pillarAd = pickAcademySponsors(catalog, 1)[0] ?? null
 
   // Today's IAB stills for the course footer — never the old architecture/logo fallbacks.
-  let courseSponsors: SponsorAd[] = []
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: sponsorRows } = await (adminClient as any)
-      .from('platform_ads')
-      .select(SPONSOR_AD_COLUMNS)
-      .eq('is_active', true)
-      .order('sort_order')
-      .limit(24)
-    const all = filterLiveAds((sponsorRows ?? []) as SponsorAd[])
-    if (all.length > 0) courseSponsors = pickAcademySponsors(all, 4)
-  } catch {
-    /* empty — do not invent old partner cards */
-  }
+  const courseSponsors = catalog.length > 0 ? pickAcademySponsors(catalog, 4) : []
 
   return (
     <main style={{ position: 'relative', zIndex: 1, backgroundColor: '#0A0F18', minHeight: '100vh', color: '#faf9f7' }}>
