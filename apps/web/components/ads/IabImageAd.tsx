@@ -125,22 +125,33 @@ export function IabAdvertisementSlot({
   style,
   tone = 'ink',
 }: IabAdvertisementSlotProps) {
+  const { w, h } = iabSlotPx(ad)
   const labelColor = tone === 'paper' ? 'rgba(10,15,24,0.35)' : 'var(--text-secondary, rgba(255,255,255,0.45))'
   return (
-    <div className={className} style={style} data-ad-layout="iab-media">
-      <p
-        style={{
-          fontFamily: 'sans-serif',
-          fontSize: '12px',
-          color: labelColor,
-          textTransform: 'uppercase',
-          letterSpacing: '0.08em',
-          marginBottom: '4px',
-        }}
+    <div
+      className={className}
+      style={{ display: 'flex', justifyContent: 'center', width: '100%', ...style }}
+      data-ad-layout="iab-media"
+      data-iab-slot={`${w}x${h}`}
+    >
+      <div
+        data-ad-unit="centered"
+        style={{ maxWidth: w, width: '100%' }}
       >
-        Advertisement
-      </p>
-      <IabImageAd ad={ad} locationId={locationId} />
+        <p
+          style={{
+            fontFamily: 'sans-serif',
+            fontSize: '12px',
+            color: labelColor,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            margin: '0 0 4px',
+          }}
+        >
+          Advertisement
+        </p>
+        <IabImageAd ad={ad} locationId={locationId} />
+      </div>
     </div>
   )
 }

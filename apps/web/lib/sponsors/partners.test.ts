@@ -5,12 +5,17 @@ import {
   ACADEMY_UPGRADE_AD,
   FOOTER_IAB_MAX,
   PODCAST_IAB_MAX,
+  adsConflictAdjacent,
   ensurePodcastSponsors,
   isAcademyAd,
+  isEvolveXAd,
+  isFirstPartyAd,
   pickAcademySponsors,
   pickHomeSponsors,
+  pickMediaFeedAds,
   pickScrollBanners,
   selectPodcastBigBoxes,
+  spreadNonAdjacentAds,
 } from './partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
@@ -240,5 +245,78 @@ describe('podcast big box + scroll banners', () => {
     const c = pickScrollBanners([zoneC])[0]
     expect(e.click_url).toBe(zoneE.click_url)
     expect(c.click_url).toBe(zoneC.click_url)
+  })
+})
+
+describe('first-party adjacency + media magazine feed', () => {
+  const zoneA = (id: string, sponsor: string, click: string): SponsorAd => ({
+    id,
+    sponsor_name: sponsor,
+    tool_name: null,
+    headline: null,
+    cta_text: null,
+    endorsement_quote: null,
+    image_url: `https://example.com/${id}.png`,
+    click_url: click,
+    link_url: null,
+    ad_type: 'image',
+    title: 'Ad',
+    zone: 'A',
+  })
+  const zoneC = (id: string, sponsor: string, click: string): SponsorAd => ({
+    ...zoneA(id, sponsor, click),
+    id,
+    zone: 'C',
+  })
+
+  const catalog: SponsorAd[] = [
+    zoneA('tr-a', 'Transcend Clinic', 'https://transcendibogaine.com/?utm_content=300x250'),
+    zoneC('tr-c', 'Transcend Clinic', 'https://transcendibogaine.com/?utm_content=728x90'),
+    zoneA('adc-a', 'AdCellerant', 'https://www.adcellerant.com/?utm_content=300x250'),
+    zoneC('adc-c', 'AdCellerant', 'https://www.adcellerant.com/?utm_content=728x90'),
+    zoneA('aca-a', 'Evolved Pros Academy', 'https://www.evolvedpros.com/pricing?utm_content=300x250'),
+    zoneC('aca-c', 'Evolved Pros Academy', 'https://www.evolvedpros.com/pricing?utm_content=728x90'),
+    zoneA('evx-a', 'EvolveX360', 'https://evolvex360.com/?utm_content=300x250'),
+    zoneC('evx-c', 'EvolveX360', 'https://evolvex360.com/?utm_content=728x90'),
+  ]
+
+  it('treats Academy and EvolveX360 as first-party and AdCellerant as a partner', () => {
+    expect(isEvolveXAd({ sponsor_name: 'EvolveX360' })).toBe(true)
+    expect(isFirstPartyAd({ sponsor_name: 'EvolveX360' })).toBe(true)
+    expect(isFirstPartyAd(ACADEMY_SPONSOR_AD)).toBe(true)
+    expect(isFirstPartyAd({ sponsor_name: 'AdCellerant' })).toBe(false)
+    expect(adsConflictAdjacent({ sponsor_name: 'Evolved Pros Academy' }, { sponsor_name: 'EvolveX360' })).toBe(true)
+    expect(adsConflictAdjacent({ sponsor_name: 'Transcend Clinic' }, { sponsor_name: 'AdCellerant' })).toBe(false)
+  })
+
+  it('drops the second house unit rather than sitting Academy next to EvolveX360', () => {
+    const pair = spreadNonAdjacentAds([
+      zoneA('aca-a', 'Evolved Pros Academy', 'https://www.evolvedpros.com/pricing?utm_content=300x250'),
+      zoneA('evx-a', 'EvolveX360', 'https://evolvex360.com/?utm_content=300x250'),
+    ])
+    expect(pair).toHaveLength(1)
+    expect(pair[0].sponsor_name).toBe('Evolved Pros Academy')
+  })
+
+  it('picks Zone C banners + at most two Zone A footer squares — never a 2×2 wall', () => {
+    const feed = pickMediaFeedAds(catalog)
+    expect(feed.banners.length).toBeGreaterThan(0)
+    expect(feed.banners.length).toBeLessThanOrEqual(FOOTER_IAB_MAX)
+    expect(feed.banners.every(a => a.zone === 'C')).toBe(true)
+    expect(feed.footer.length).toBeLessThanOrEqual(FOOTER_IAB_MAX)
+    expect(feed.footer.every(a => a.zone === 'A')).toBe(true)
+    expect(feed.footer.filter(a => isFirstPartyAd(a)).length).toBeLessThanOrEqual(1)
+    for (let i = 1; i < feed.footer.length; i++) {
+      expect(adsConflictAdjacent(feed.footer[i - 1], feed.footer[i])).toBe(false)
+    }
+  })
+
+  it('does not rewrite stored click URLs on media picks', () => {
+    const feed = pickMediaFeedAds(catalog)
+    for (const ad of [...feed.banners, ...feed.footer]) {
+      const original = catalog.find(c => c.id === ad.id)
+      expect(original).toBeTruthy()
+      expect(ad.click_url).toBe(original?.click_url)
+    }
   })
 })

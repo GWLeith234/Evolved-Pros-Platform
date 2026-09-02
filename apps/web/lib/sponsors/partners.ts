@@ -73,6 +73,68 @@ export const ACADEMY_UPGRADE_AD: SponsorAd = {
   link_url: ACADEMY_FALLBACK_HREF,
 }
 
+export function isEvolveXAd(ad: {
+  sponsor_name?: string | null
+  tool_name?: string | null
+  image_url?: string | null
+}): boolean {
+  const hay = `${ad.sponsor_name ?? ''} ${ad.tool_name ?? ''} ${ad.image_url ?? ''}`.toLowerCase()
+  return hay.includes('evolvex')
+}
+
+/** Academy self-promo and EvolveX360 — first-party, never sit adjacent. */
+export function isFirstPartyAd(ad: {
+  id?: string | null
+  sponsor_name?: string | null
+  tool_name?: string | null
+  image_url?: string | null
+  click_url?: string | null
+  link_url?: string | null
+}): boolean {
+  return isAcademyAd(ad) || isEvolveXAd(ad)
+}
+
+/** Stable family key: Academy and EvolveX360 stay distinct first-party brands. */
+export function advertiserFamilyKey(ad: {
+  id?: string | null
+  sponsor_name?: string | null
+  tool_name?: string | null
+  image_url?: string | null
+  click_url?: string | null
+  link_url?: string | null
+}): string {
+  if (isAcademyAd(ad)) return 'first-party:academy'
+  if (isEvolveXAd(ad)) return 'first-party:evolvex'
+  const name = `${ad.sponsor_name ?? ''}|${ad.tool_name ?? ''}`.toLowerCase().trim()
+  return name || ad.id || ''
+}
+
+/** Same advertiser, or two first-party house units, must not sit side by side. */
+export function adsConflictAdjacent(
+  a: Parameters<typeof advertiserFamilyKey>[0],
+  b: Parameters<typeof advertiserFamilyKey>[0],
+): boolean {
+  if (!a || !b) return false
+  if (advertiserFamilyKey(a) === advertiserFamilyKey(b)) return true
+  return isFirstPartyAd(a) && isFirstPartyAd(b)
+}
+
+/** Greedy order that drops a unit rather than placing a conflicting neighbor. */
+export function spreadNonAdjacentAds<T extends Parameters<typeof adsConflictAdjacent>[0]>(
+  list: T[],
+): T[] {
+  if (list.length <= 1) return [...list]
+  const remaining = [...list]
+  const out: T[] = []
+  while (remaining.length) {
+    const prev = out[out.length - 1]
+    const idx = remaining.findIndex(ad => !prev || !adsConflictAdjacent(prev, ad))
+    if (idx === -1) break
+    out.push(remaining.splice(idx, 1)[0] as T)
+  }
+  return out
+}
+
 export function isAcademyAd(ad: {
   id?: string | null
   sponsor_name?: string | null
@@ -140,6 +202,29 @@ export function selectPodcastBigBoxes(list: SponsorAd[]): SponsorAd[] {
 export function pickHomeSponsors(list: SponsorAd[]): SponsorAd[] {
   // Today's four accounts (ADC / Academy / Transcend / EVX), zone-A stills.
   return pickLiveStills(list, 4, 11)
+}
+
+export type MediaFeedAds = {
+  /** Zone C 728×90 — interleaved through the magazine scroll. */
+  banners: SponsorAd[]
+  /** Zone A 300×250 — footer mix only, never a 2×2 wall. */
+  footer: SponsorAd[]
+}
+
+/**
+ * Media magazine feed. Banners (Zone C) go in the story scroll; squares
+ * (Zone A, ≤ FOOTER_IAB_MAX) sit in a centered footer. Destinations are
+ * the stored click_url — never rewritten. Academy + EvolveX360 never
+ * share the footer pair.
+ */
+export function pickMediaFeedAds(list: SponsorAd[]): MediaFeedAds {
+  const banners = pickScrollBanners(list, FOOTER_IAB_MAX)
+  const bannerKeys = new Set(banners.map(advertiserFamilyKey))
+  const squares = pickLiveStills(list, 6, 47, 'A')
+  const preferred = squares.filter(s => !bannerKeys.has(advertiserFamilyKey(s)))
+  const reused = squares.filter(s => bannerKeys.has(advertiserFamilyKey(s)))
+  const footer = spreadNonAdjacentAds([...preferred, ...reused]).slice(0, FOOTER_IAB_MAX)
+  return { banners, footer }
 }
 
 /** One or two footer squares for Academy / LIVE — never a wall of four. */

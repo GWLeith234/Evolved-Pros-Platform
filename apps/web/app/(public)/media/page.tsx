@@ -7,7 +7,7 @@ import { MediaPortalClient } from './MediaPortalClient'
 import type { Episode } from './MediaPortalClient'
 import { Masthead } from '@/components/media/Masthead'
 import { getActivePlatformAds } from '@/lib/cache/shared'
-import { pickHomeSponsors } from '@/lib/sponsors/partners'
+import { pickMediaFeedAds } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 export const revalidate = 60
@@ -40,6 +40,8 @@ export default async function MediaPage() {
     // episodes table may not exist yet
   }
 
+  const mediaAds = pickMediaFeedAds((await getActivePlatformAds()) as SponsorAd[])
+
   return (
     <>
       <Masthead />
@@ -47,7 +49,8 @@ export default async function MediaPage() {
       <MediaPortalClient
         stories={stories}
         episodes={episodes}
-        ads={pickHomeSponsors((await getActivePlatformAds()) as SponsorAd[])}
+        scrollBanners={mediaAds.banners}
+        footerAds={mediaAds.footer}
       />
     </>
   )

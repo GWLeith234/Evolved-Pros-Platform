@@ -7,7 +7,9 @@ import { CategoryPills, CATEGORY_COLORS } from '@/components/media/CategoryPills
 import { getPillarLabel } from '@/lib/pillars'
 import { PollWidget } from '@/components/media/PollWidget'
 import { MediaAdZoneClient as MediaAdZone } from './MediaClientShims'
-import { HomeSponsorRow, type SponsorAd } from '@/components/home/HomeSponsorAd'
+import { MediaIabSlot } from '@/components/media/MediaIabSlot'
+import { layoutMediaFeed } from '@/lib/media/feedAds'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -38,7 +40,10 @@ export interface Episode {
 interface MediaPortalClientProps {
   stories: MediaStory[]
   episodes: Episode[]
-  ads?: SponsorAd[]
+  /** Zone C 728×90 — interleaved through the story scroll. */
+  scrollBanners?: SponsorAd[]
+  /** Zone A 300×250 — centered footer mix, never a 2×2 wall. */
+  footerAds?: SponsorAd[]
 }
 
 // ── Pillar / category helpers ───────────────────────────────────────────────
@@ -319,10 +324,47 @@ function ArticleCard({ story }: { story: MediaStory }) {
 
 // ── Main component ──────────────────────────────────────────────────────────
 
+function MediaSponsoredRule() {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, width: '100%' }}>
+      <span
+        style={{
+          fontFamily: '"Barlow Condensed", sans-serif',
+          fontWeight: 700,
+          fontSize: 9,
+          letterSpacing: '0.42em',
+          textTransform: 'uppercase',
+          color: 'rgba(10,15,24,0.35)',
+        }}
+      >
+        Sponsored
+      </span>
+      <span style={{ flex: 1, height: 1, background: 'var(--paper-line-soft)' }} />
+    </div>
+  )
+}
+
+function MediaScrollBanner({ ad }: { ad: SponsorAd }) {
+  return (
+    <div
+      data-media-ads="scroll-banner"
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        width: '100%',
+        padding: '8px 0 4px',
+      }}
+    >
+      <MediaIabSlot ad={ad} locationId="media-scroll" />
+    </div>
+  )
+}
+
 export function MediaPortalClient({
   stories,
   episodes,
-  ads = [],
+  scrollBanners = [],
+  footerAds = [],
 }: MediaPortalClientProps) {
   const [activeCategory, setActiveCategory] = useState<string>(ALL_LABEL)
 
@@ -338,6 +380,10 @@ export function MediaPortalClient({
 
   const featured = filteredStories[0] ?? null
   const grid = filteredStories.slice(1)
+  const feed = useMemo(
+    () => layoutMediaFeed(grid, { banners: scrollBanners, footer: footerAds }),
+    [grid, scrollBanners, footerAds],
+  )
   // Right rail "Latest Stories" stays unfiltered per the brief.
   const sidebarStories = stories.slice(0, 4)
 
@@ -348,10 +394,6 @@ export function MediaPortalClient({
         initialActive={activeCategory}
         onSelect={setActiveCategory}
       />
-
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '8px 24px 0' }}>
-        <MediaAdZone zone="C" />
-      </div>
 
       {/* ── Section 1: Hero + right rail ── */}
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 0' }}>
@@ -474,11 +516,11 @@ export function MediaPortalClient({
         </div>
       </div>
 
-      {ads.length > 0 && (
+      {feed.leadBanner ? (
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '28px 24px 0' }}>
-          <HomeSponsorRow ads={ads} />
+          <MediaScrollBanner ad={feed.leadBanner} />
         </div>
-      )}
+      ) : null}
 
       {/* ── Section 2: "More from Evolved Media" divider ── */}
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px 0' }}>
@@ -491,13 +533,24 @@ export function MediaPortalClient({
         </div>
       </div>
 
-      {/* ── Section 3: Card grid ── */}
+      {/* ── Section 3: Card grid, Zone C banners between rows, footer squares ── */}
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 56px' }}>
-        {grid.length > 0 ? (
-          <div className="media-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {grid.map(s => (
-              <ArticleCard key={s.id} story={s} />
-            ))}
+        {feed.chunks.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {feed.chunks.map((chunk, idx) =>
+              chunk.kind === 'banner' ? (
+                <MediaScrollBanner key={chunk.ad.id} ad={chunk.ad} />
+              ) : (
+                <div
+                  key={chunk.items.map(s => s.id).join('-') || `row-${idx}`}
+                  className="media-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                >
+                  {chunk.items.map(s => (
+                    <ArticleCard key={s.id} story={s} />
+                  ))}
+                </div>
+              ),
+            )}
           </div>
         ) : filteredStories.length === 0 && isEditorialCategory(activeCategory) ? null : (
           <div style={{ padding: '40px 0', textAlign: 'center' }}>
@@ -508,6 +561,28 @@ export function MediaPortalClient({
             </span>
           </div>
         )}
+
+        {feed.footer.length > 0 ? (
+          <section
+            aria-label="Sponsored"
+            data-media-ads="footer"
+            style={{ marginTop: 40 }}
+          >
+            <MediaSponsoredRule />
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                gap: 24,
+              }}
+            >
+              {feed.footer.map(ad => (
+                <MediaIabSlot key={ad.id} ad={ad} locationId="media-footer" />
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
 
       {/* Responsive + hover styles. Grid columns are owned by the Tailwind
