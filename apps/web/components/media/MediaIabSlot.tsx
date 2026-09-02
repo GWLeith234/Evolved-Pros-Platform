@@ -1,5 +1,6 @@
 'use client'
 
+import type { CSSProperties } from 'react'
 import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
@@ -7,9 +8,11 @@ import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 export function MediaIabSlot({
   ad,
   locationId,
+  style,
 }: {
   ad: SponsorAd
   locationId: string
+  style?: CSSProperties
 }) {
   if (!ad.image_url) return null
   return (
@@ -17,6 +20,7 @@ export function MediaIabSlot({
       ad={{ ...ad, image_url: ad.image_url }}
       locationId={locationId}
       tone="paper"
+      style={style}
     />
   )
 }

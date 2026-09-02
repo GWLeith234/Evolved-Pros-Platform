@@ -130,13 +130,17 @@ export function IabAdvertisementSlot({
   return (
     <div
       className={className}
-      style={{ display: 'flex', justifyContent: 'center', width: '100%', ...style }}
+      style={{
+        width: `min(100%, ${w}px)`,
+        marginInline: 'auto',
+        ...style,
+      }}
       data-ad-layout="iab-media"
       data-iab-slot={`${w}x${h}`}
     >
       <div
         data-ad-unit="centered"
-        style={{ maxWidth: w, width: '100%' }}
+        style={{ width: '100%' }}
       >
         <p
           style={{

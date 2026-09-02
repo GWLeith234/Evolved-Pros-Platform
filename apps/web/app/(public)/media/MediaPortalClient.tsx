@@ -578,7 +578,12 @@ export function MediaPortalClient({
               }}
             >
               {feed.footer.map(ad => (
-                <MediaIabSlot key={ad.id} ad={ad} locationId="media-footer" />
+                <MediaIabSlot
+                  key={ad.id}
+                  ad={ad}
+                  locationId="media-footer"
+                  style={{ marginInline: 0 }}
+                />
               ))}
             </div>
           </section>
