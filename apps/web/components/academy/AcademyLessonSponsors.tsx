@@ -1,6 +1,6 @@
 import { SponsorAdCard, type SponsorAd } from '@/components/home/HomeSponsorAd'
 import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
-import { isAcademyAd } from '@/lib/sponsors/partners'
+import { FOOTER_IAB_MAX, isAcademyAd } from '@/lib/sponsors/partners'
 import { isIabImageStill, isLeaderboardStill } from '@/lib/ads/iab'
 
 /**
@@ -24,7 +24,7 @@ export function AcademyLessonSponsors({
     if (isLeaderboardStill(ad)) continue
     seen.add(ad.id)
     shown.push(ad)
-    if (shown.length >= 4) break
+    if (shown.length >= FOOTER_IAB_MAX) break
   }
   if (!shown.length) return null
 

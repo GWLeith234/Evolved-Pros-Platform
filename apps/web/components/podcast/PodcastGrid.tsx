@@ -5,22 +5,22 @@ import type { PodcastEpisode } from '@/lib/podcast/transforms'
 import { sortEpisodesNewest } from '@/lib/podcast/transforms'
 import { PodcastFilterPills, type FilterKey, type SortKey } from './PodcastFilterPills'
 import { PodcastCoverCard } from './PodcastCoverCard'
-import { SquareSponsorCard } from './PodcastSponsorCard'
+import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
-import { dedupeIabStillsBySponsor, isIabImageStill, isLeaderboardStill } from '@/lib/ads/iab'
+import { selectPodcastBigBoxes } from '@/lib/sponsors/partners'
 
 const FB = 'var(--font-barlow)'
 const FBC = 'var(--font-barlow-condensed)'
 const FBN = 'var(--font-bebas)'
 
-/** One rotating sponsor card after every Nth episode. */
+/** Full-width Zone E break after every Nth episode — not a square grid cell. */
 const AD_EVERY_N = 3
 
 interface PodcastGridProps {
   episodes: PodcastEpisode[]
   /** Shown as a single card when the active filter returns nothing. */
   fallbackEpisode?: PodcastEpisode
-  /** Up to 2 Evolution Partner ads to interleave between episode cards. */
+  /** Zone E 300×600 big boxes — full-width rows, never episode-tile squares. */
   sponsorAds?: SponsorAd[]
 }
 
@@ -38,19 +38,11 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
     return list
   }, [episodes, filter, sort])
 
-  // One unique IAB still per sponsor (zone A / portrait — never 728×90).
-  // Do not wrap the pool — that printed ADC + EVX twice as fake episode tiles.
-  const uniqueStills = useMemo(
-    () =>
-      dedupeIabStillsBySponsor(
-        sponsorAds.filter(a => isIabImageStill(a) && !isLeaderboardStill(a)),
-        'A',
-      ),
-    [sponsorAds],
-  )
+  // Zone E 300×600 only — never 728×90, never a 300×250 stuffed into a tile.
+  const uniqueStills = useMemo(() => selectPodcastBigBoxes(sponsorAds), [sponsorAds])
 
-  // Interleave one 9:16 sponsor unit after every 3rd episode — same footprint
-  // as PodcastCoverCard so the archive grid stays level.
+  // Episode tiles stay in the 2-col grid. Ads break the row (1 / -1) as a
+  // centered 300×600 big box so they cannot sit as fake episode squares.
   const gridChildren = useMemo(() => {
     const nodes: ReactNode[] = []
     let slot = 0
@@ -58,9 +50,17 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
       nodes.push(<PodcastCoverCard key={ep.id} episode={ep} />)
       if (slot < uniqueStills.length && (i + 1) % AD_EVERY_N === 0) {
         const ad = uniqueStills[slot++]
+        if (!ad.image_url) return
         nodes.push(
-          <div key={`sponsor-slot-${ad.id}`} className="podcast-sponsor-slot">
-            <SquareSponsorCard ad={ad} />
+          <div
+            key={`sponsor-slot-${ad.id}`}
+            className="podcast-sponsor-bigbox"
+            style={{ gridColumn: '1 / -1', justifySelf: 'center', width: '100%' }}
+          >
+            <IabAdvertisementSlot
+              ad={{ ...ad, image_url: ad.image_url }}
+              locationId="podcast"
+            />
           </div>,
         )
       }
@@ -236,21 +236,17 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
       )}
 
       {/* Archive reflow: desktop auto-fills; ≤600px drops to 2-up, then
-          1-up on the narrowest phones. Sponsor slots share the 9:16 cell. */}
+          1-up on the narrowest phones. Big-box ads span the full row. */}
       <style>{`
         .podcast-tile-cover { outline: none; }
         .podcast-tile-cover:focus-visible {
           outline: 2px solid var(--brand-teal);
           outline-offset: 2px;
         }
-        .podcast-sponsor-slot {
+        .podcast-sponsor-bigbox {
           min-width: 0;
           width: 100%;
-          align-self: stretch;
-        }
-        .podcast-sponsor-slot > a,
-        .podcast-sponsor-slot > .podcast-sponsor-cover {
-          height: 100%;
+          padding: 8px 0 16px;
         }
         @media (max-width: 600px) {
           .podcast-archive-grid {

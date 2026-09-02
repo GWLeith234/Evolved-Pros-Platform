@@ -20,6 +20,7 @@ import { asKeyTakeaways } from '@/lib/academy/takeaways'
 import { adminClient } from '@/lib/supabase/admin'
 import {
   pickAcademySponsors,
+  pickScrollBanners,
 } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
@@ -27,7 +28,7 @@ import { adMatchesSurface, filterLiveAds } from '@/lib/ads/iab'
 
 export const dynamic = 'force-dynamic'
 
-async function fetchAcademyLessonSponsors(): Promise<SponsorAd[]> {
+async function fetchAcademyLessonCatalog(): Promise<SponsorAd[]> {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = adminClient as any
@@ -40,7 +41,7 @@ async function fetchAcademyLessonSponsors(): Promise<SponsorAd[]> {
     const all = filterLiveAds((rows ?? []) as Array<SponsorAd & { placement?: string | null }>)
     if (all.length === 0) return []
     const preferred = all.filter(a => adMatchesSurface(a, 'academy'))
-    return pickAcademySponsors(preferred.length ? preferred : all, 4)
+    return preferred.length ? preferred : all
   } catch {
     return []
   }
@@ -80,11 +81,11 @@ export default async function LessonPage({ params }: Props) {
   // lesson_progress is keyed on public.users.id (profile.id, resolved by
   // email in fetchUserProfile), not the auth session uid.
   const memberId = profile?.id ?? user.id
-  const [lessons, progress, allCourses, sponsorAds] = await Promise.all([
+  const [lessons, progress, allCourses, academyCatalog] = await Promise.all([
     fetchLessonsWithProgress(supabase, params.pillarSlug, memberId, profileTier),
     fetchLessonProgress(supabase, memberId, lessonRow.id),
     fetchCoursesWithProgress(supabase, memberId, profileTier),
-    fetchAcademyLessonSponsors(),
+    fetchAcademyLessonCatalog(),
   ])
 
   const muxToken = lessonRow.mux_playback_id
@@ -221,7 +222,8 @@ export default async function LessonPage({ params }: Props) {
               }
             : null
         }
-        sponsorAds={sponsorAds}
+        sponsorAds={pickAcademySponsors(academyCatalog, 2)}
+        scrollBanner={pickScrollBanners(academyCatalog, 1)[0] ?? null}
       />
     </div>
   )

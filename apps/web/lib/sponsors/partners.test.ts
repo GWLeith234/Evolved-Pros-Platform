@@ -3,10 +3,14 @@ import { houseAdHref } from '@/lib/ads/house'
 import {
   ACADEMY_SPONSOR_AD,
   ACADEMY_UPGRADE_AD,
+  FOOTER_IAB_MAX,
+  PODCAST_IAB_MAX,
   ensurePodcastSponsors,
   isAcademyAd,
   pickAcademySponsors,
   pickHomeSponsors,
+  pickScrollBanners,
+  selectPodcastBigBoxes,
 } from './partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
@@ -123,6 +127,7 @@ describe('isAcademyAd', () => {
     expect(pickHomeSponsors([ACADEMY_SPONSOR_AD])).toEqual([])
     expect(ensurePodcastSponsors([])).toEqual([])
     expect(pickAcademySponsors([], 2)).toEqual([])
+    expect(pickAcademySponsors(stills, 4)).toHaveLength(FOOTER_IAB_MAX)
     expect(
       pickAcademySponsors(
         [
@@ -154,5 +159,86 @@ describe('isAcademyAd', () => {
         link_url: houseAdHref('300x600'),
       }),
     ).toBe(true)
+  })
+})
+
+describe('podcast big box + scroll banners', () => {
+  const zoneA: SponsorAd = {
+    id: 'tr-a',
+    sponsor_name: 'Transcend Clinic',
+    tool_name: null,
+    headline: null,
+    cta_text: null,
+    endorsement_quote: null,
+    image_url: 'https://example.com/tr-300x250.png',
+    click_url: 'https://transcendibogaine.com/?utm_content=300x250',
+    link_url: null,
+    ad_type: 'image',
+    title: 'Ad',
+    zone: 'A',
+  }
+  const zoneE: SponsorAd = {
+    ...zoneA,
+    id: 'tr-e',
+    image_url: 'https://example.com/tr-300x600.png',
+    click_url: 'https://transcendibogaine.com/?utm_content=300x600',
+    zone: 'E',
+  }
+  const zoneC: SponsorAd = {
+    ...zoneA,
+    id: 'tr-c',
+    image_url: 'https://example.com/tr-728x90.png',
+    click_url: 'https://transcendibogaine.com/?utm_content=728x90',
+    zone: 'C',
+  }
+  const adcE: SponsorAd = {
+    ...zoneE,
+    id: 'adc-e',
+    sponsor_name: 'AdCellerant',
+    image_url: 'https://example.com/adc-300x600.png',
+    click_url: 'https://www.adcellerant.com/?utm_content=300x600',
+  }
+  const evxE: SponsorAd = {
+    ...zoneE,
+    id: 'evx-e',
+    sponsor_name: 'EvolveX360',
+    image_url: 'https://example.com/evx-300x600.png',
+    click_url: 'https://evolvex360.com/?utm_content=300x600',
+  }
+  const acaE: SponsorAd = {
+    ...zoneE,
+    id: 'aca-e',
+    sponsor_name: 'Evolved Pros Academy',
+    image_url: 'https://example.com/aca-300x600.png',
+    click_url: 'https://www.evolvedpros.com/pricing?utm_content=300x600',
+  }
+
+  it('picks Zone E 300×600 for podcast — not the square A unit', () => {
+    const pool = ensurePodcastSponsors([zoneA, zoneE, zoneC, adcE])
+    expect(pool.length).toBeGreaterThan(0)
+    expect(pool.every(a => a.zone === 'E')).toBe(true)
+    expect(pool.every(a => a.click_url?.includes('300x600'))).toBe(true)
+    expect(pool.some(a => a.zone === 'A' || a.zone === 'C')).toBe(false)
+  })
+
+  it('caps podcast archive slots at two big boxes', () => {
+    const boxes = selectPodcastBigBoxes([zoneE, adcE, evxE, acaE, zoneA])
+    expect(boxes).toHaveLength(PODCAST_IAB_MAX)
+    expect(boxes.every(a => a.zone === 'E')).toBe(true)
+  })
+
+  it('uses Zone C banners in scroll and never falls back to a square', () => {
+    expect(pickScrollBanners([zoneA, zoneE], 1)).toEqual([])
+    const banners = pickScrollBanners([zoneA, zoneE, zoneC], 2)
+    expect(banners).toHaveLength(1)
+    expect(banners[0].zone).toBe('C')
+    expect(banners[0].click_url).toContain('728x90')
+  })
+
+  it('does not rewrite stored destinations when selecting layout sizes', () => {
+    const e = ensurePodcastSponsors([zoneE])[0]
+    const c = pickScrollBanners([zoneC])[0]
+    expect(e.click_url).toBe(zoneE.click_url)
+    expect(c.click_url).toBe(zoneC.click_url)
   })
 })

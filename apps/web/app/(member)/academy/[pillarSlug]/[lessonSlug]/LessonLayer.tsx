@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { TranscriptSegment } from '@/lib/academy/transcript'
 import { AcademyLessonSponsors } from '@/components/academy/AcademyLessonSponsors'
+import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 interface LessonLayerProps {
@@ -40,8 +41,10 @@ interface LessonLayerProps {
     durationSeconds: number | null
     isLocked: boolean
   } | null
-  /** Evolution Partner ads — after content, before discussion. */
+  /** Footer squares — after content, before discussion. Cap is 2. */
   sponsorAds?: SponsorAd[]
+  /** Mid-scroll 728×90 — less intrusive than another square. */
+  scrollBanner?: SponsorAd | null
 }
 
 interface TranscriptLine {
@@ -143,6 +146,7 @@ export function LessonLayer({
   isCompleted,
   nextLesson,
   sponsorAds = [],
+  scrollBanner = null,
 }: LessonLayerProps) {
   const router = useRouter()
   const draftKey = `ep:lesson-notes:${lesson.id}`
@@ -470,7 +474,15 @@ export function LessonLayer({
         </div>
       </section>
 
-      {/* Evolution Partners — after content, before discussion */}
+      {/* Mid-scroll banner (728×90), then at most two footer squares. */}
+      {scrollBanner?.image_url && (
+        <div style={{ marginBottom: 28 }}>
+          <IabAdvertisementSlot
+            ad={{ ...scrollBanner, image_url: scrollBanner.image_url }}
+            locationId="academy"
+          />
+        </div>
+      )}
       {sponsorAds.length > 0 && <AcademyLessonSponsors ads={sponsorAds} />}
 
       {/* SECTION 5 — DISCUSSION */}

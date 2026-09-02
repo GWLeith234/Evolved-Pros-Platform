@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { YouTubeFacade } from '@/components/podcast/public/YouTubeFacade'
 import { RotatingSponsorCard } from '@/components/podcast/PodcastSponsorCard'
+import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
+import { isIabImageStill } from '@/lib/ads/iab'
 import { GuestDossier } from '@/components/podcast/GuestDossier'
 import { RelatedEpisodes } from '@/components/podcast/RelatedEpisodes'
 import { buildEpisodeExtras, buildRelatedEpisodes } from '@/lib/podcast/episodeExtras'
@@ -291,8 +293,6 @@ export default async function PublicEpisodePage({ params }: Props) {
           )}
         </section>
 
-        {/* Sponsor — bottom slot */}
-        <SponsorSlot pool={sponsors} startIndex={2} />
       </div>
 
       {/* Wider column for the dossier + rail. The article above stays at
@@ -320,20 +320,20 @@ export default async function PublicEpisodePage({ params }: Props) {
 
 function SponsorSlot({ pool, startIndex }: { pool: SponsorAd[]; startIndex: number }) {
   if (!pool.length) return null
+  const ad = pool[startIndex % pool.length]
+  const still = isIabImageStill(ad) && ad.image_url
   return (
     <div className="my-10">
-      <div className="mb-3 flex items-center gap-3">
-        <span className="font-condensed text-[10px] font-bold uppercase tracking-[0.28em]" style={{ color: DIMMER }}>
-          Sponsored
-        </span>
-        <span className="h-px flex-1" style={{ background: 'rgba(245,240,232,0.08)' }} />
-        <span className="font-condensed text-[10px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'rgba(201,168,76,0.75)' }}>
-          Evolution Partner
-        </span>
-      </div>
-      <div className="mx-auto max-w-[300px]">
-        <RotatingSponsorCard pool={pool} startIndex={startIndex} showDisclosure={false} />
-      </div>
+      {still ? (
+        <IabAdvertisementSlot
+          ad={{ ...ad, image_url: ad.image_url as string }}
+          locationId="podcast"
+        />
+      ) : (
+        <div className="mx-auto max-w-[300px]">
+          <RotatingSponsorCard pool={pool} startIndex={startIndex} showDisclosure={false} />
+        </div>
+      )}
     </div>
   )
 }

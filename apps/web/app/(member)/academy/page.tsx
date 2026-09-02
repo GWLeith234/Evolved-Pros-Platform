@@ -8,12 +8,13 @@ export const metadata: Metadata = { title: 'Academy — Evolved Pros' }
 import { CourseGrid } from '@/components/academy/CourseGrid'
 import { AcademyArchitectureCard } from '@/components/academy/AcademyArchitectureCard'
 import { AcademyLessonSponsors } from '@/components/academy/AcademyLessonSponsors'
+import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import {
   fetchCoursesWithProgress,
   fetchUserProfile,
 } from '@/lib/academy/fetchers'
 import { hasTierAccess } from '@/lib/tier'
-import { ACADEMY_UPGRADE_AD, pickAcademySponsors } from '@/lib/sponsors/partners'
+import { ACADEMY_UPGRADE_AD, pickAcademySponsors, pickScrollBanners } from '@/lib/sponsors/partners'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { adMatchesSurface } from '@/lib/ads/iab'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
@@ -38,7 +39,9 @@ export default async function AcademyPage() {
   const showUpgrade = !hasTierAccess(profile?.tier, 'pro')
   const catalog = (await getActivePlatformAds()) as SponsorAd[]
   const academyPool = catalog.filter(a => adMatchesSurface(a, 'academy'))
-  const sponsorAds = pickAcademySponsors(academyPool.length ? academyPool : catalog, 4)
+  const pool = academyPool.length ? academyPool : catalog
+  const sponsorAds = pickAcademySponsors(pool, 2)
+  const scrollBanner = pickScrollBanners(pool, 1)[0] ?? null
 
   return (
     <div className="academy-page ep-surface-mobile">
@@ -85,6 +88,14 @@ export default async function AcademyPage() {
         {showUpgrade && (
           <div className="mt-8 max-w-xl">
             <AcademyArchitectureCard ad={ACADEMY_UPGRADE_AD} locationId="academy-upgrade" />
+          </div>
+        )}
+        {scrollBanner?.image_url && (
+          <div className="mt-8">
+            <IabAdvertisementSlot
+              ad={{ ...scrollBanner, image_url: scrollBanner.image_url }}
+              locationId="academy"
+            />
           </div>
         )}
         {sponsorAds.length > 0 && (

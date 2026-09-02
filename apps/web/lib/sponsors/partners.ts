@@ -13,13 +13,23 @@ function liveCatalog(list: SponsorAd[]): SponsorAd[] {
   return list.filter(a => !isRetiredPartnerAd(a) && !isBlockedLegacyAd(a))
 }
 
-function pickLiveStills(list: SponsorAd[], count: number, salt: number): SponsorAd[] {
+/** Footer / rail squares — never a wall of four. */
+export const FOOTER_IAB_MAX = 2
+/** Podcast archive + episode: one or two 300×600 big boxes, not a grid of squares. */
+export const PODCAST_IAB_MAX = 2
+
+function pickLiveStills(
+  list: SponsorAd[],
+  count: number,
+  salt: number,
+  zone: 'A' | 'E' = 'A',
+): SponsorAd[] {
   const cards = liveCatalog(list)
     .filter(isIabImageStill)
     .filter(a => !isLeaderboardStill(a))
-  const stills = preferIabZone(cards, 'A')
+  const stills = preferIabZone(cards, zone)
   if (!stills.length) return []
-  return pickRotatedSponsors(dedupeIabStillsBySponsor(stills, 'A'), count, { salt })
+  return pickRotatedSponsors(dedupeIabStillsBySponsor(stills, zone), count, { salt })
 }
 
 export { dedupeSponsors, pickRotatedSponsors, shuffleSponsors, sponsorKey, dailySeed } from './rotate'
@@ -97,13 +107,32 @@ export function ensureFlagshipSponsors(list: SponsorAd[]): SponsorAd[] {
 }
 
 /**
- * Podcast archive pool: Academy promo first, then Evolution Partners.
- * Never falls back to unrelated placements (community banners, etc.).
+ * Podcast archive + episode pool: Zone E 300×600 big boxes.
+ * Never interleaves 300×250 squares into the episode card grid.
  */
 export function ensurePodcastSponsors(list: SponsorAd[]): SponsorAd[] {
-  const stills = pickLiveStills(list, 4, 17)
+  const stills = pickLiveStills(list, PODCAST_IAB_MAX, 17, 'E')
   if (stills.length) return stills
   return []
+}
+
+/**
+ * 728×90 leaderboards for mid-scroll — less intrusive than a stack of squares.
+ * Empty when no Zone C rows exist; never falls back to A/E.
+ */
+export function pickScrollBanners(list: SponsorAd[], count = 1): SponsorAd[] {
+  const n = Math.min(FOOTER_IAB_MAX, Math.max(1, count))
+  const banners = liveCatalog(list).filter(isIabImageStill).filter(isLeaderboardStill)
+  if (!banners.length) return []
+  return pickRotatedSponsors(dedupeIabStillsBySponsor(banners, 'C'), n, { salt: 31 })
+}
+
+/** Archive slots: prefer E, never a 728×90, never more than PODCAST_IAB_MAX. */
+export function selectPodcastBigBoxes(list: SponsorAd[]): SponsorAd[] {
+  return dedupeIabStillsBySponsor(
+    list.filter(a => isIabImageStill(a) && !isLeaderboardStill(a)),
+    'E',
+  ).slice(0, PODCAST_IAB_MAX)
 }
 
 /** Exactly two sponsors for /home main row — daily rotation, no dups.
@@ -113,9 +142,9 @@ export function pickHomeSponsors(list: SponsorAd[]): SponsorAd[] {
   return pickLiveStills(list, 4, 11)
 }
 
-/** One or two slots for Academy / LIVE — Academy promo first, then a partner. */
+/** One or two footer squares for Academy / LIVE — never a wall of four. */
 export function pickAcademySponsors(list: SponsorAd[], count = 2): SponsorAd[] {
-  const n = Math.min(4, Math.max(1, count))
+  const n = Math.min(FOOTER_IAB_MAX, Math.max(1, count))
   return pickLiveStills(list, n, 23)
 }
 

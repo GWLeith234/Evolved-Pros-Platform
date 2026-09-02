@@ -47,7 +47,7 @@ async function fetchLiveSponsors(): Promise<SponsorAd[]> {
       .limit(48)
     const all = filterLiveAds((rows ?? []) as SponsorAd[]).filter(a => adMatchesSurface(a, 'live'))
     if (all.length === 0) return []
-    return pickAcademySponsors(all, 4)
+    return pickAcademySponsors(all, 2)
   } catch {
     return []
   }

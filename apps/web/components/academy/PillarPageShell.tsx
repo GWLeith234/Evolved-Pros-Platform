@@ -18,6 +18,7 @@ import { ProfileAdUnit } from '@/components/profile/ProfileAdUnit'
 import { AcademyLessonSponsors } from '@/components/academy/AcademyLessonSponsors'
 import {
   pickAcademySponsors,
+  pickScrollBanners,
 } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
@@ -225,7 +226,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
     .order('sort_order')
     .limit(24)
   const pillarPool = filterLiveAds((pillarAdData ?? []) as SponsorAd[])
-  const pillarAd = pickAcademySponsors(pillarPool, 1)[0] ?? null
+  const pillarAd = pickScrollBanners(pillarPool, 1)[0] ?? pickAcademySponsors(pillarPool, 1)[0] ?? null
 
   // Today's IAB stills for the course footer — never the old architecture/logo fallbacks.
   let courseSponsors: SponsorAd[] = []
@@ -238,7 +239,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
       .order('sort_order')
       .limit(24)
     const all = filterLiveAds((sponsorRows ?? []) as SponsorAd[])
-    if (all.length > 0) courseSponsors = pickAcademySponsors(all, 4)
+    if (all.length > 0) courseSponsors = pickAcademySponsors(all, 2)
   } catch {
     /* empty — do not invent old partner cards */
   }

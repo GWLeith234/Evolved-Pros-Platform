@@ -222,8 +222,8 @@ export function youtubeTimestampUrl(youtubeId: string | null, ts: number): strin
 
 /**
  * Evolution Partner + Academy pool for podcast surfaces (index + episode pages).
- * `placements: [platform]` IAB stills are eligible; copy-based house banners
- * stay out of the 9:16 grid unless no stills exist (ensurePodcastSponsors).
+ * `placements: [platform]` IAB stills are eligible. Selection prefers Zone E
+ * 300×600 big boxes — never 9:16 squares stuffed into the episode grid.
  */
 export async function getPodcastSponsorPool(): Promise<SponsorAd[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
