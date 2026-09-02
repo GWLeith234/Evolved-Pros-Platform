@@ -65,13 +65,22 @@ function MicGlyph() {
  * Academy copy units → architecture card.
  * Text/logo partners with real copy → logo + tagline (never invented fallbacks).
  */
-export function SponsorAdCard({ ad, locationId = 'home' }: { ad: SponsorAd; locationId?: string }) {
+export function SponsorAdCard({
+  ad,
+  locationId = 'home',
+  tone = 'ink',
+}: {
+  ad: SponsorAd
+  locationId?: string
+  tone?: 'paper' | 'ink'
+}) {
   if (isIabImageStill(ad) && ad.image_url) {
     return (
       <IabAdvertisementSlot
         ad={{ ...ad, image_url: ad.image_url }}
         locationId={locationId}
         className="pt-3"
+        tone={tone}
       />
     )
   }
@@ -82,6 +91,7 @@ export function SponsorAdCard({ ad, locationId = 'home' }: { ad: SponsorAd; loca
         ad={{ ...ad, image_url: ad.image_url }}
         locationId={locationId}
         className="pt-3"
+        tone={tone}
       />
     )
   }
@@ -184,7 +194,10 @@ export function SponsorAdCard({ ad, locationId = 'home' }: { ad: SponsorAd; loca
   return <div className="group h-full pt-3">{card}</div>
 }
 
-export function SponsoredEyebrow() {
+export function SponsoredEyebrow({ tone = 'ink' }: { tone?: 'paper' | 'ink' }) {
+  const paper = tone === 'paper'
+  const label = paper ? 'rgba(10,15,24,0.45)' : 'var(--text-secondary, rgba(255,255,255,0.65))'
+  const rule = paper ? 'rgba(10,15,24,0.12)' : 'var(--border-color, rgba(255,255,255,0.06))'
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
       <span
@@ -194,9 +207,9 @@ export function SponsoredEyebrow() {
           fontSize: 9,
           letterSpacing: '0.42em',
           textTransform: 'uppercase',
-          color: 'var(--text-secondary, rgba(255,255,255,0.65))',
+          color: label,
           padding: '3px 8px',
-          border: '1px solid var(--border-color, rgba(255,255,255,0.12))',
+          border: `1px solid ${rule}`,
         }}
       >
         Sponsored
@@ -205,7 +218,7 @@ export function SponsoredEyebrow() {
         style={{
           flex: 1,
           height: 1,
-          background: 'var(--border-color, rgba(255,255,255,0.06))',
+          background: rule,
         }}
       />
     </div>
@@ -239,7 +252,7 @@ export function HomeSponsorAd({ ad }: { ad: SponsorAd | null }) {
   )
 }
 
-export function HomeSponsorRow({ ads }: { ads: SponsorAd[] }) {
+export function HomeSponsorRow({ ads, tone = 'ink' }: { ads: SponsorAd[]; tone?: 'paper' | 'ink' }) {
   const seen = new Set<string>()
   const unique = ads.filter(ad => {
     if (!ad?.id || seen.has(ad.id)) return false
@@ -255,13 +268,13 @@ export function HomeSponsorRow({ ads }: { ads: SponsorAd[] }) {
 
   return (
     <section aria-label={label}>
-      {!houseOnly && <SponsoredEyebrow />}
+      {!houseOnly && <SponsoredEyebrow tone={tone} />}
       <div
         className={unique.length === 1 ? undefined : 'grid grid-cols-1 gap-6 md:grid-cols-2'}
         style={{ width: '100%', maxWidth: 1440, margin: '0 auto', paddingTop: 4 }}
       >
         {unique.map(ad => (
-          <SponsorAdCard key={ad.id} ad={ad} locationId="home" />
+          <SponsorAdCard key={ad.id} ad={ad} locationId="home" tone={tone} />
         ))}
       </div>
     </section>

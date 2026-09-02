@@ -302,8 +302,10 @@ export async function fetchActiveMembers(supabase: SB, limit = 5): Promise<Membe
 export async function fetchCommunityAds(): Promise<CommunityAd[]> {
   // Cached active-ads catalogue (2 min) — filter columns for the rail/feed.
   const { getActivePlatformAds } = await import('@/lib/cache/shared')
-  const { adMatchesSurface } = await import('@/lib/ads/iab')
-  const rows = (await getActivePlatformAds()).filter(a => adMatchesSurface(a, 'community'))
+  const { adMatchesSurface, cardSafeIabStills } = await import('@/lib/ads/iab')
+  const rows = cardSafeIabStills(
+    (await getActivePlatformAds()).filter(a => adMatchesSurface(a, 'community')),
+  )
   return rows.slice(0, 12).map(a => ({
     id: a.id,
     image_url: a.image_url,

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   adMatchesSurface,
+  cardSafeIabStills,
   dedupeIabStillsBySponsor,
   filterLiveAds,
   iabClickHref,
@@ -193,5 +194,27 @@ describe('filter / surface / zone helpers', () => {
     expect(isLeaderboardStill({ ...STILL, zone: null, click_url: 'https://x.com/?utm_content=728x90' })).toBe(true)
     expect(preferIabZone([leader], 'A')).toEqual([])
     expect(preferIabZone([{ ...STILL, zone: 'E' }, leader], 'A')).toEqual([{ ...STILL, zone: 'E' }])
+  })
+
+  it('cardSafeIabStills drops leaderboards and keeps one A (or E) per sponsor', () => {
+    const leader = {
+      ...STILL,
+      id: 'tr-c',
+      zone: 'C',
+      click_url: 'https://transcendibogaine.com/?utm_content=728x90',
+    }
+    const evxE = {
+      ...STILL,
+      id: 'evx-e',
+      sponsor_name: 'EvolveX360',
+      zone: 'E',
+      image_url: 'https://example.com/evx-300x600.png',
+    }
+    const out = cardSafeIabStills([leader, STILL, evxE, { ...STILL, id: 'tr-e', zone: 'E' }])
+    expect(out.map(a => a.id).sort()).toEqual([STILL.id, 'evx-e'].sort())
+    expect(out.find(a => a.sponsor_name === 'Transcend Clinic')?.zone).toBe('A')
+    expect(out.every(a => a.zone !== 'C')).toBe(true)
+    expect(cardSafeIabStills([evxE, leader]).map(a => a.id)).toEqual(['evx-e'])
+    expect(cardSafeIabStills([leader])).toEqual([])
   })
 })

@@ -476,7 +476,7 @@ export function MediaPortalClient({
 
       {ads.length > 0 && (
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '28px 24px 0' }}>
-          <HomeSponsorRow ads={ads} />
+          <HomeSponsorRow ads={ads} tone="paper" />
         </div>
       )}
 
