@@ -198,11 +198,12 @@ export function preferIabZone<T extends IabAdIdentity>(ads: T[], zone = 'A'): T[
 
 /**
  * Card / feed / featured pool: IAB stills only, never 728×90, one per sponsor.
- * Prefer Zone A (300×250); fall back to E, never C.
+ * Prefer Zone A (300×250) *per sponsor*; keep E when that brand has no A.
+ * Do not run preferIabZone on the whole pool — one A would wipe E-only brands.
  */
 export function cardSafeIabStills<T extends IabAdIdentity>(ads: T[], preferZone = 'A'): T[] {
   const cards = ads.filter(isIabImageStill).filter(ad => !isLeaderboardStill(ad))
-  return dedupeIabStillsBySponsor(preferIabZone(cards, preferZone), preferZone)
+  return dedupeIabStillsBySponsor(cards, preferZone)
 }
 
 /** One still per sponsor so A/C/E sizes of the same brand do not collide. */
