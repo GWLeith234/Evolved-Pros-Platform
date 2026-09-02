@@ -10,7 +10,7 @@ import {
 describe('PUBLIC_FOOTER_LINKS', () => {
   it('renders the eight approved links, in order, with the exact labels', () => {
     expect(PUBLIC_FOOTER_LINKS.map(l => [l.label, l.href])).toEqual([
-      ['Join free', '/join'],
+      ['Join free', '/pricing'],
       ['Pricing', '/pricing'],
       ['Podcast', '/podcast'],
       ['Media', '/media'],
@@ -31,7 +31,15 @@ describe('PUBLIC_FOOTER_LINKS', () => {
   it('marks exactly one red CTA, and it is Join free', () => {
     const ctas = PUBLIC_FOOTER_LINKS.filter(l => l.cta)
     expect(ctas).toHaveLength(1)
-    expect(ctas[0]).toMatchObject({ label: 'Join free', href: '/join' })
+    expect(ctas[0]).toMatchObject({ label: 'Join free', href: '/pricing' })
+  })
+
+  it('does not sell Join free into the /join 308', () => {
+    expect(PUBLIC_FOOTER_LINKS.some(l => l.href === '/join')).toBe(false)
+  })
+
+  it('does not retarget the Community card door — that stays off the footer', () => {
+    expect(PUBLIC_FOOTER_LINKS.some(l => l.href.includes('/login'))).toBe(false)
   })
 
   it('uses site-relative hrefs only — never a hardcoded host', () => {

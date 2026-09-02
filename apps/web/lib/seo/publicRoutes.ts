@@ -63,3 +63,22 @@ export type PublicSitemapPath = (typeof PUBLIC_SITEMAP_PATHS)[number]
 export function robotsSitemapUrl(siteUrl: string): string {
   return `${siteUrl.replace(/\/+$/, '')}/sitemap.xml`
 }
+
+/**
+ * robots.txt Disallow list. /login is a thin auth form (and /join 308s into
+ * it); crawlers should not treat it as a landing page. /pricing stays allowed.
+ */
+export const ROBOTS_DISALLOW = [
+  '/admin',
+  '/api/',
+  '/auth/',
+  '/onboarding',
+  '/dev-login',
+  '/login',
+] as const
+
+/**
+ * Metadata robots for the /login document — both /login and
+ * /login?mode=signup. Do not apply this to /pricing.
+ */
+export const LOGIN_DOCUMENT_ROBOTS = { index: false, follow: false } as const

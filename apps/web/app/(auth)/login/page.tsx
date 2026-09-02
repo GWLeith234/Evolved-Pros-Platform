@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { safeRedirectPath } from '@/lib/auth/safeRedirect'
 import { loginCopyFor } from '@/lib/auth/loginCopy'
+import { LOGIN_DOCUMENT_ROBOTS } from '@/lib/seo/publicRoutes'
 import { PublicFooter } from '@/components/layout/PublicFooter'
 import { LoginForm } from './LoginForm'
 
@@ -28,7 +29,10 @@ export function generateMetadata({
 }: {
   searchParams: LoginSearchParams
 }): Metadata {
-  return { title: loginCopyFor(searchParams.mode).metaTitle }
+  return {
+    title: loginCopyFor(searchParams.mode).metaTitle,
+    robots: LOGIN_DOCUMENT_ROBOTS,
+  }
 }
 
 export default async function LoginPage({

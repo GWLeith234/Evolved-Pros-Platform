@@ -24,11 +24,13 @@ export interface PublicFooterLink {
 /**
  * Footer navigation, in render order.
  *
- * /join does not exist yet — SPRINT DOORS-1 adds the redirect. The link ships
- * now on purpose so the two PRs can land in order.
+ * Join free used to href /join, which 308s to /login?mode=signup — a thin
+ * auth form, not a sell page. The spoken /join URL still 308s (next.config);
+ * public chrome now lands on live /pricing instead. The Community card on
+ * /pricing keeps /login?mode=signup. Do not point this CTA at /join.
  */
 export const PUBLIC_FOOTER_LINKS: readonly PublicFooterLink[] = [
-  { label: 'Join free', href: '/join', cta: true },
+  { label: 'Join free', href: '/pricing', cta: true },
   { label: 'Pricing',   href: '/pricing' },
   { label: 'Podcast',   href: '/podcast' },
   { label: 'Media',     href: '/media' },
