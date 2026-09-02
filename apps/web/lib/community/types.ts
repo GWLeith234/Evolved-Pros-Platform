@@ -98,6 +98,14 @@ export type CommunityAd = {
   link_url: string | null
   click_url: string | null
   sponsor_name: string | null
+  ad_type?: string | null
+  title?: string | null
+  zone?: string | null
+  placement?: string | null
+  placements?: string[] | null
+  start_date?: string | null
+  end_date?: string | null
+  is_active?: boolean | null
 }
 
 export type EpisodeSummary = {

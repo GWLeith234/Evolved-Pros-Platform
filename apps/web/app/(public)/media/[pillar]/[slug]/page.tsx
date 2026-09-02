@@ -393,12 +393,19 @@ export default async function StoryPage({
             </div>
           )}
 
-          {/* IAB slots — collapse when no active platform_ads row is assigned.
-              A = 300×250, E = 300×600, C = 728×90. */}
+          {/* Sidebar IAB: A 300×250 + E 300×600 only. Never Zone C here —
+              a 728×90 leaderboard crushes in this 260px column. */}
           <MediaAdZone zone="A" />
           <MediaAdZone zone="E" />
-          <MediaAdZone zone="C" />
         </div>
+      </div>
+
+      {/* Zone C leaderboard — full width under the article grid, never the sidebar. */}
+      <div
+        className="media-zone-c"
+        style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 32px' }}
+      >
+        <MediaAdZone zone="C" />
       </div>
 
       {/* 4. Related articles */}
@@ -516,6 +523,7 @@ export default async function StoryPage({
           .media-detail-hero > div[style*="position: absolute"]:last-child { padding: 16px !important; }
           .media-detail-title { font-size: 22px !important; max-width: 100% !important; }
           .media-detail-grid { padding-left: 16px !important; padding-right: 16px !important; max-width: 100% !important; }
+          .media-zone-c { padding-left: 16px !important; padding-right: 16px !important; max-width: 100% !important; }
           .media-prose { max-width: 100%; overflow-wrap: anywhere; word-break: break-word; }
           .media-prose img, .media-prose iframe, .media-prose table { max-width: 100%; height: auto; }
         }

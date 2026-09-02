@@ -3,6 +3,8 @@
 import { useState, type CSSProperties } from 'react'
 import { gradients } from '@evolved-pros/ui'
 import { stripTrailingArrow } from '@/lib/brand'
+import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
+import { isIabImageStill } from '@/lib/ads/iab'
 
 type SponsorAd = {
   id: string
@@ -13,6 +15,12 @@ type SponsorAd = {
   special_offer: string | null
   cta_text: string | null
   link_url: string | null
+  click_url?: string | null
+  sponsor_name?: string | null
+  ad_type?: string | null
+  title?: string | null
+  body_copy?: string | null
+  zone?: string | null
 }
 
 interface SponsorCardProps {
@@ -24,8 +32,13 @@ const RED = '#C9302A'
 
 /** Evolution Partner card — uniform shell + Sprint 1 button chrome (Sprint 2). */
 export function SponsorCard({ ad, variant }: SponsorCardProps) {
-  const ctaText = stripTrailingArrow(ad.cta_text || 'Learn More')
   const [hover, setHover] = useState(false)
+
+  if (isIabImageStill(ad) && ad.image_url) {
+    return <IabAdvertisementSlot ad={{ ...ad, image_url: ad.image_url }} locationId={variant} />
+  }
+
+  const ctaText = stripTrailingArrow(ad.cta_text || 'Learn More')
 
   const badge = (
     <span

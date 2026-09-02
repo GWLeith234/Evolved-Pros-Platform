@@ -25,10 +25,9 @@ import {
   type SponsorAd,
 } from '@/components/home/HomeSponsorAd'
 import {
-  DEFAULT_HOME_SPONSORS,
   pickHomeSponsors,
-  ensureFlagshipSponsors,
 } from '@/lib/sponsors/partners'
+import { adMatchesSurface } from '@/lib/ads/iab'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { formatRelative, formatDuration as formatMinutes, formatDate } from '@/lib/format'
 
@@ -491,18 +490,15 @@ async function fetchHomeSponsors(): Promise<{ home: SponsorAd[] }> {
   try {
     const all = (await getActivePlatformAds()) as Array<SponsorAd & { placement?: string | null }>
     if (all.length === 0) {
-      return { home: pickHomeSponsors(DEFAULT_HOME_SPONSORS) }
+      return { home: [] }
     }
 
-    const homePool = all.filter(a => {
-      const p = (a.placement ?? 'all').toLowerCase()
-      return p === 'home' || p === 'all'
-    })
-    const pool = ensureFlagshipSponsors(homePool.length ? homePool : all)
+    const homePool = all.filter(a => adMatchesSurface(a, 'home'))
+    const pool = homePool.length ? homePool : all
     return { home: pickHomeSponsors(pool) }
   } catch (err) {
     console.error('[home.fetchHomeSponsors] failed:', err instanceof Error ? err.message : err)
-    return { home: pickHomeSponsors(DEFAULT_HOME_SPONSORS) }
+    return { home: [] }
   }
 }
 

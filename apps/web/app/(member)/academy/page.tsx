@@ -7,12 +7,16 @@ import { AcademyMobileProgress } from '@/components/academy/AcademyMobileProgres
 export const metadata: Metadata = { title: 'Academy — Evolved Pros' }
 import { CourseGrid } from '@/components/academy/CourseGrid'
 import { AcademyArchitectureCard } from '@/components/academy/AcademyArchitectureCard'
+import { AcademyLessonSponsors } from '@/components/academy/AcademyLessonSponsors'
 import {
   fetchCoursesWithProgress,
   fetchUserProfile,
 } from '@/lib/academy/fetchers'
 import { hasTierAccess } from '@/lib/tier'
-import { ACADEMY_UPGRADE_AD } from '@/lib/sponsors/partners'
+import { ACADEMY_UPGRADE_AD, pickAcademySponsors } from '@/lib/sponsors/partners'
+import { getActivePlatformAds } from '@/lib/cache/shared'
+import { adMatchesSurface } from '@/lib/ads/iab'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,6 +36,9 @@ export default async function AcademyPage() {
   const completedLessons = courses.reduce((s, c) => s + c.completedLessons, 0)
   const overallPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
   const showUpgrade = !hasTierAccess(profile?.tier, 'pro')
+  const catalog = (await getActivePlatformAds()) as SponsorAd[]
+  const academyPool = catalog.filter(a => adMatchesSurface(a, 'academy'))
+  const sponsorAds = pickAcademySponsors(academyPool.length ? academyPool : catalog, 4)
 
   return (
     <div className="academy-page ep-surface-mobile">
@@ -78,6 +85,11 @@ export default async function AcademyPage() {
         {showUpgrade && (
           <div className="mt-8 max-w-xl">
             <AcademyArchitectureCard ad={ACADEMY_UPGRADE_AD} locationId="academy-upgrade" />
+          </div>
+        )}
+        {sponsorAds.length > 0 && (
+          <div className="mt-8">
+            <AcademyLessonSponsors ads={sponsorAds} />
           </div>
         )}
       </div>

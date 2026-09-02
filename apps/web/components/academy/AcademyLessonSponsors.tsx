@@ -1,5 +1,7 @@
 import { SponsorAdCard, type SponsorAd } from '@/components/home/HomeSponsorAd'
+import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import { isAcademyAd } from '@/lib/sponsors/partners'
+import { isIabImageStill, isLeaderboardStill } from '@/lib/ads/iab'
 
 /**
  * Footer strip for Academy lesson / course pages (also reused on LIVE).
@@ -19,25 +21,31 @@ export function AcademyLessonSponsors({
   const shown: SponsorAd[] = []
   for (const ad of ads) {
     if (!ad?.id || seen.has(ad.id)) continue
+    if (isLeaderboardStill(ad)) continue
     seen.add(ad.id)
     shown.push(ad)
-    if (shown.length >= 2) break
+    if (shown.length >= 4) break
   }
   if (!shown.length) return null
 
+  const stillsOnly = shown.every(isIabImageStill)
   const hasAcademy = shown.some(isAcademyAd)
   const hasPartner = shown.some(a => !isAcademyAd(a))
-  const title = hasAcademy && hasPartner
-    ? 'Featured'
-    : hasAcademy
-      ? 'Evolved Pros Academy'
-      : 'Evolution Partners'
-  const subtitle = hasAcademy && hasPartner
-    ? 'Architecture · Partners'
-    : hasAcademy
-      ? 'Six pillars · One system'
-      : 'Hand-picked tools'
-  const aria = hasAcademy && !hasPartner ? 'Evolved Pros Academy' : 'Featured'
+  const title = stillsOnly
+    ? 'Sponsored'
+    : hasAcademy && hasPartner
+      ? 'Featured'
+      : hasAcademy
+        ? 'Evolved Pros Academy'
+        : 'Evolution Partners'
+  const subtitle = stillsOnly
+    ? ''
+    : hasAcademy && hasPartner
+      ? 'Architecture · Partners'
+      : hasAcademy
+        ? 'Six pillars · One system'
+        : 'Hand-picked tools'
+  const aria = stillsOnly ? 'Sponsored' : hasAcademy && !hasPartner ? 'Evolved Pros Academy' : 'Featured'
 
   return (
     <section
@@ -72,6 +80,7 @@ export function AcademyLessonSponsors({
           >
             {title}
           </p>
+          {subtitle ? (
           <p
             style={{
               margin: 0,
@@ -85,6 +94,7 @@ export function AcademyLessonSponsors({
           >
             {subtitle}
           </p>
+          ) : null}
         </div>
       )}
       <div
@@ -95,9 +105,17 @@ export function AcademyLessonSponsors({
           maxWidth: 960,
         }}
       >
-        {shown.map(ad => (
-          <SponsorAdCard key={ad.id} ad={ad} />
-        ))}
+        {shown.map(ad =>
+          isIabImageStill(ad) && ad.image_url ? (
+            <IabAdvertisementSlot
+              key={ad.id}
+              ad={{ ...ad, image_url: ad.image_url }}
+              locationId="academy"
+            />
+          ) : (
+            <SponsorAdCard key={ad.id} ad={ad} locationId="academy" />
+          ),
+        )}
       </div>
     </section>
   )

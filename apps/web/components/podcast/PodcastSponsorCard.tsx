@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
-import { isAcademyAd, premiumPartnerKind } from '@/lib/sponsors/partners'
+import { isAcademyAd } from '@/lib/sponsors/partners'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { stripTrailingArrow } from '@/lib/brand'
 import { HouseAdTracker } from '@/components/ads/HouseAdTracker'
+import { IabImageAd } from '@/components/ads/IabImageAd'
+import { isIabImageStill } from '@/lib/ads/iab'
 import { inferHouseAdSlot, resolveServedAdHref } from '@/lib/ads/house'
 
 const FB = 'var(--font-barlow)'
@@ -43,13 +45,37 @@ export function SquareSponsorCard({
   showDisclosure?: boolean
 }) {
   const [hovered, setHovered] = useState(false)
+  if (isIabImageStill(ad) && ad.image_url) {
+    const still = (
+      <article
+        className="podcast-sponsor-cover"
+        style={{
+          position: 'relative',
+          width: '100%',
+          aspectRatio: '9 / 16',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'var(--navy, #0A0F18)',
+          border: '1px solid var(--podcast-border-soft2, rgba(255,255,255,0.08))',
+        }}
+      >
+        <IabImageAd
+          ad={{ ...ad, image_url: ad.image_url }}
+          locationId="podcast"
+          style={{ maxWidth: '100%', marginInline: 0 }}
+        />
+      </article>
+    )
+    return still
+  }
   const link = href(ad)
   const academy = isAcademyAd(ad)
   const name = ad.sponsor_name ?? ad.tool_name ?? (academy ? 'Evolved Pros Academy' : 'Evolution Partner')
   const tagline = stripTrailingArrow(
     ad.headline ?? ad.endorsement_quote ?? (academy ? 'Stop collecting tips. Build the system.' : ''),
   )
-  const isFlagshipLogo = !academy && premiumPartnerKind(ad) !== null
   const badge = academy ? 'Academy' : 'Partner'
   const disclosure = academy ? 'Evolved Pros Academy' : 'Sponsored · Evolution Partner'
 
@@ -86,26 +112,6 @@ export function SquareSponsorCard({
         {academy ? (
           <AcademyArt />
         ) : ad.image_url ? (
-          isFlagshipLogo ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={ad.image_url}
-              alt={name}
-              loading="lazy"
-              decoding="async"
-              style={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-                padding: '14%',
-                transform: hovered ? 'scale(1.04)' : 'scale(1)',
-                transition: 'transform 280ms ease',
-                filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.4))',
-              }}
-            />
-          ) : (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={ad.image_url}
@@ -125,7 +131,6 @@ export function SquareSponsorCard({
                 transition: 'transform 280ms ease',
               }}
             />
-          )
         ) : (
           <span
             aria-hidden

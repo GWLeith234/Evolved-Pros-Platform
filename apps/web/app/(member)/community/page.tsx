@@ -6,7 +6,6 @@ import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { UnifiedCommunityPageClient } from './UnifiedCommunityPageClient'
 import { EpisodeBanner } from '@/components/layout/EpisodeBanner'
 import {
-  ALL_FLAGSHIP_SPONSORS,
   pickCommunityRailSponsors,
 } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
@@ -95,7 +94,7 @@ async function fetchAcademyContinue(userId: string): Promise<RailAcademyContinue
 }
 
 function railSponsorsFromAds(
-  communityAds: { id: string; image_url: string | null; headline: string | null; tool_name: string | null; cta_text: string | null; link_url: string | null; click_url: string | null; sponsor_name: string | null; body_copy?: string | null }[],
+  communityAds: { id: string; image_url: string | null; headline: string | null; tool_name: string | null; cta_text: string | null; link_url: string | null; click_url: string | null; sponsor_name: string | null; body_copy?: string | null; ad_type?: string | null; title?: string | null; zone?: string | null }[],
 ): SponsorAd[] {
   const fromDb: SponsorAd[] = communityAds.map(a => ({
     id: a.id,
@@ -107,9 +106,12 @@ function railSponsorsFromAds(
     sponsor_name: a.sponsor_name,
     cta_text: a.cta_text,
     endorsement_quote: a.body_copy ?? null,
+    ad_type: a.ad_type ?? null,
+    title: a.title ?? null,
+    zone: a.zone ?? null,
+    body_copy: a.body_copy ?? null,
   }))
-  // Daily-rotated unique partners for the sticky rail (max 4)
-  if (fromDb.length === 0) return pickCommunityRailSponsors(ALL_FLAGSHIP_SPONSORS, 4)
+  if (fromDb.length === 0) return []
   return pickCommunityRailSponsors(fromDb, 4)
 }
 

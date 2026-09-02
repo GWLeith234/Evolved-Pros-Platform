@@ -22,11 +22,11 @@ import { LiveBookingInquiry } from '@/components/live/LiveBookingInquiry'
 import { SPEAKING_STATS } from '@/lib/live/speaking-pins'
 import { getSpeakingPins, statsFromPins } from '@/lib/live/get-speaking-pins'
 import {
-  DEFAULT_ACADEMY_SPONSORS,
   pickAcademySponsors,
 } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
+import { adMatchesSurface, filterLiveAds } from '@/lib/ads/iab'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 import { PublicFooter } from '@/components/layout/PublicFooter'
 
@@ -44,12 +44,12 @@ async function fetchLiveSponsors(): Promise<SponsorAd[]> {
       .select(SPONSOR_AD_COLUMNS + ', placement')
       .eq('is_active', true)
       .order('sort_order')
-      .limit(12)
-    const all = (rows ?? []) as SponsorAd[]
-    if (all.length === 0) return pickAcademySponsors(DEFAULT_ACADEMY_SPONSORS, 2)
-    return pickAcademySponsors(all, 2)
+      .limit(48)
+    const all = filterLiveAds((rows ?? []) as SponsorAd[]).filter(a => adMatchesSurface(a, 'live'))
+    if (all.length === 0) return []
+    return pickAcademySponsors(all, 4)
   } catch {
-    return pickAcademySponsors(DEFAULT_ACADEMY_SPONSORS, 2)
+    return []
   }
 }
 

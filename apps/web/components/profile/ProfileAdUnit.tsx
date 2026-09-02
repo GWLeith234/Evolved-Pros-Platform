@@ -1,4 +1,8 @@
+import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
+import { isIabImageStill } from '@/lib/ads/iab'
+
 interface Ad {
+  id?: string | null
   headline?: string | null
   tool_name?: string | null
   cta_text?: string | null
@@ -6,6 +10,10 @@ interface Ad {
   click_url?: string | null
   image_url?: string | null
   sponsor_name?: string | null
+  ad_type?: string | null
+  title?: string | null
+  body_copy?: string | null
+  zone?: string | null
 }
 
 interface ProfileAdUnitProps {
@@ -13,6 +21,15 @@ interface ProfileAdUnitProps {
 }
 
 export function ProfileAdUnit({ ad }: ProfileAdUnitProps) {
+  if (isIabImageStill(ad) && ad.image_url) {
+    return (
+      <IabAdvertisementSlot
+        ad={{ ...ad, image_url: ad.image_url }}
+        locationId="academy-pillar"
+      />
+    )
+  }
+
   const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
   const label = ad.headline ?? ad.tool_name ?? ad.sponsor_name ?? 'Sponsored'
   const cta = ad.cta_text ?? 'Learn More →'
