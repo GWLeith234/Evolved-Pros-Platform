@@ -32,12 +32,13 @@ const RED = '#C9302A'
 
 /** Evolution Partner card — uniform shell + Sprint 1 button chrome (Sprint 2). */
 export function SponsorCard({ ad, variant }: SponsorCardProps) {
+  const [hover, setHover] = useState(false)
+
   if (isIabImageStill(ad) && ad.image_url) {
     return <IabAdvertisementSlot ad={{ ...ad, image_url: ad.image_url }} locationId={variant} />
   }
 
   const ctaText = stripTrailingArrow(ad.cta_text || 'Learn More')
-  const [hover, setHover] = useState(false)
 
   const badge = (
     <span
