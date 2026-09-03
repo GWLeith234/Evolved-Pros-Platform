@@ -16,7 +16,7 @@ import { hasTierAccess } from '@/lib/tier'
 import { ACADEMY_UPGRADE_AD, pickAcademySponsors, pickScrollBanners } from '@/lib/sponsors/partners'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { adMatchesSurface, isIabImageStill } from '@/lib/ads/iab'
-import { interleaveAds } from '@/lib/ads/rhythm'
+import { ACADEMY_CARDS_PER_AD, interleaveAds } from '@/lib/ads/rhythm'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 export const dynamic = 'force-dynamic'
@@ -79,7 +79,7 @@ export default async function AcademyPage() {
   }
 
   // A row of pillar cards, then one unit — curriculum first, ads as punctuation.
-  const chunks = interleaveAds(courses, units, 3, { trailing: false })
+  const chunks = interleaveAds(courses, units, ACADEMY_CARDS_PER_AD, { trailing: false })
 
   return (
     <div className="academy-page ep-surface-mobile">

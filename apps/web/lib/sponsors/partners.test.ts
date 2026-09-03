@@ -3,7 +3,6 @@ import { houseAdHref } from '@/lib/ads/house'
 import {
   ACADEMY_SPONSOR_AD,
   ACADEMY_UPGRADE_AD,
-  CLUSTER_IAB_MAX,
   IN_FEED_IAB_MAX,
   PODCAST_IAB_MAX,
   adsConflictAdjacent,
@@ -13,7 +12,11 @@ import {
   isEvolveXAd,
   isFirstPartyAd,
   pickAcademySponsors,
+  pickAcademyThreadAds,
   pickArticleAds,
+  pickHomePageAds,
+  ACADEMY_THREAD_IAB_MAX,
+  ARTICLE_IN_BODY_MAX,
   pickHomeSponsors,
   pickMediaFeedAds,
   pickScrollBanners,
@@ -300,20 +303,40 @@ describe('first-party adjacency + media magazine feed', () => {
     const feed = pickMediaFeedAds(catalog)
     expect(feed.sidebar).toBeTruthy()
     expect(feed.inFeed.length).toBeGreaterThan(0)
-    expect(feed.inFeed.length).toBeLessThanOrEqual(IN_FEED_IAB_MAX)
+    expect(feed.inFeed.length).toBeGreaterThan(IN_FEED_IAB_MAX)
     expect('footer' in feed).toBe(false)
     for (let i = 1; i < feed.inFeed.length; i++) {
       expect(adsConflictAdjacent(feed.inFeed[i - 1], feed.inFeed[i])).toBe(false)
     }
   })
 
-  it('article layout is one rail + one in-body unit', () => {
+  it('article layout is a couple of centered 300×250 units in the story column', () => {
     const article = pickArticleAds(catalog)
     expect(article.sidebar).toBeTruthy()
-    expect(article.inBody.length).toBeLessThanOrEqual(1)
-    expect(article.inBody.length).toBeLessThanOrEqual(CLUSTER_IAB_MAX)
+    expect(article.inBody.length).toBeGreaterThanOrEqual(2)
+    expect(article.inBody.length).toBeLessThanOrEqual(ARTICLE_IN_BODY_MAX)
+    expect(article.inBody.every(a => a.zone === 'A')).toBe(true)
     if (article.sidebar && article.inBody[0]) {
       expect(advertiserFamilyKey(article.inBody[0])).not.toBe(advertiserFamilyKey(article.sidebar))
+    }
+    expect(adsConflictAdjacent(article.inBody[0], article.inBody[1])).toBe(false)
+  })
+
+  it('academy threads pick enough units for an ad every three lesson cards', () => {
+    const thread = pickAcademyThreadAds(catalog)
+    expect(thread.length).toBeGreaterThan(IN_FEED_IAB_MAX)
+    expect(thread.length).toBeLessThanOrEqual(ACADEMY_THREAD_IAB_MAX)
+    for (let i = 1; i < thread.length; i++) {
+      expect(adsConflictAdjacent(thread[i - 1], thread[i])).toBe(false)
+    }
+  })
+
+  it('home page ads keep in-row units and an end 300×600 without adjacent twins', () => {
+    const home = pickHomePageAds(catalog)
+    const seq = [home.tileRow, home.episodeRow, home.storyRow, home.endBox].filter(Boolean)
+    expect(seq.length).toBeGreaterThan(0)
+    for (let i = 1; i < seq.length; i++) {
+      expect(adsConflictAdjacent(seq[i - 1]!, seq[i]!)).toBe(false)
     }
   })
 

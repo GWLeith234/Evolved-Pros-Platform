@@ -18,14 +18,20 @@ import { GoalCard, type GoalForCard } from '@/components/home/GoalCard'
 import { AccountabilityHub } from '@/components/home/AccountabilityHub'
 import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
 import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStoriesTile'
-import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
+import { type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
+import {
+  HomeContentAdGrid,
+  HomeEditorialCard,
+  HomeEndBox,
+} from '@/components/home/HomeContentAdGrid'
 import { type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/DailyPulseCard'
 import {
   HomeSponsorAd,
   type SponsorAd,
 } from '@/components/home/HomeSponsorAd'
 import {
-  pickHomeSponsors,
+  pickHomePageAds,
+  type HomePageAds,
 } from '@/lib/sponsors/partners'
 import { adMatchesSurface } from '@/lib/ads/iab'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
@@ -485,20 +491,18 @@ async function fetchWeekCommitments(profileId: string, weekStart: string): Promi
  * waterfall + mount gate for the sponsor row and sidebar. adminClient
  * bypasses RLS so members always see active placements.
  */
-async function fetchHomeSponsors(): Promise<{ home: SponsorAd[] }> {
-  // Main row: 2 rotated partners. Ads catalogue is cached (2 min).
+async function fetchHomeSponsors(): Promise<HomePageAds> {
+  const empty: HomePageAds = { mid: [], tileRow: null, episodeRow: null, storyRow: null, endBox: null }
   try {
     const all = (await getActivePlatformAds()) as Array<SponsorAd & { placement?: string | null }>
-    if (all.length === 0) {
-      return { home: [] }
-    }
+    if (all.length === 0) return empty
 
     const homePool = all.filter(a => adMatchesSurface(a, 'home'))
     const pool = homePool.length ? homePool : all
-    return { home: pickHomeSponsors(pool) }
+    return pickHomePageAds(pool)
   } catch (err) {
     console.error('[home.fetchHomeSponsors] failed:', err instanceof Error ? err.message : err)
-    return { home: [] }
+    return empty
   }
 }
 
@@ -542,7 +546,7 @@ export default async function MemberHomePage() {
     fetchLatestPulsePosts(3),
     fetchPinnedLiveEvent(profile.id),
     fetchTopStories(3),
-    fetchLatestEpisodes(3),
+    fetchLatestEpisodes(2),
     supabase
       .from('quarterly_goals')
       .select('id, title, period, progress_pct, weekly_delta, pillar')
@@ -758,7 +762,7 @@ export default async function MemberHomePage() {
         showGoalsList={false}
       />
 
-      {sponsors.home[0] ? <HomeSponsorAd ad={sponsors.home[0]} /> : null}
+      {sponsors.mid[0] ? <HomeSponsorAd ad={sponsors.mid[0]} /> : null}
 
       {/* BELOW THE FOLD — commitments + goals only. SPRINT M removed the
           duplicate KPI/scoreboard strip and the pillar-overview: the daily
@@ -808,7 +812,7 @@ export default async function MemberHomePage() {
         )}
       </section>
 
-      {sponsors.home[1] ? <HomeSponsorAd ad={sponsors.home[1]} /> : null}
+      {sponsors.mid[1] ? <HomeSponsorAd ad={sponsors.mid[1]} /> : null}
 
       {/* ——— The rest: one-click nudge, community & media ——— */}
 
@@ -816,19 +820,36 @@ export default async function MemberHomePage() {
           cards were dropped; habit/commit/goal progress lives in the hub). */}
       <TodaysEvolution actions={todaysActions} />
 
-      {/* HOME tiles — Community Pulse / Top Stories / Latest Drops. The Daily
-          Pulse tile was removed: AccountabilityHub up top is the single daily
-          driver (rings + habit toggles), so the tile was a duplicate habit +
-          commitment mark-complete surface. (.home-4up-grid class kept as the
-          shared CSS hook; now a 3-up row.) */}
+      {/* Two tiles, then an IAB — never a third editorial card, never a row of four. */}
       <div
         className="home-4up-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+        data-home-content-row
         style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }}
       >
         <CommunityPulseTile posts={pulsePosts} pinnedEvent={pinnedLiveEvent} />
         <TopStoriesTile stories={topStories} />
-        <PodcastReelTile episodes={latestEpisodesResult.episodes} latestEpisodeNumber={latestEpisodesResult.latestNumber} />
+        {sponsors.tileRow ? (
+          <div
+            data-home-ads="in-row"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 250 }}
+          >
+            <HomeSponsorAd ad={sponsors.tileRow} />
+          </div>
+        ) : null}
       </div>
+
+      {latestEpisodesResult.episodes.length > 0 ? (
+        <HomeContentAdGrid title="Latest episodes" href="/podcast" linkLabel="All episodes" ad={sponsors.episodeRow}>
+          {latestEpisodesResult.episodes.map(ep => (
+            <HomeEditorialCard
+              key={ep.id}
+              href={`/podcast/${ep.slug}`}
+              title={ep.title}
+              meta={ep.guestName}
+            />
+          ))}
+        </HomeContentAdGrid>
+      ) : null}
 
       <ProfileCompletePrompt
         hasAvatar={Boolean(profile.avatar_url)}
@@ -874,6 +895,8 @@ export default async function MemberHomePage() {
           />
         )}
       </div>
+
+      <HomeEndBox ad={sponsors.endBox} />
 
     </div>
   )

@@ -133,10 +133,12 @@ export function IabAdvertisementSlot({
       style={{
         width: `min(100%, ${w}px)`,
         marginInline: 'auto',
+        minHeight: h + 22,
         ...style,
       }}
       data-ad-layout="iab-media"
       data-iab-slot={`${w}x${h}`}
+      data-ad-reserved={`${h}`}
     >
       <div
         data-ad-unit="centered"

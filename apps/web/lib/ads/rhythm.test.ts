@@ -33,26 +33,26 @@ describe('interleaveAds', () => {
     expect(chunks).toEqual([{ kind: 'content', items: ['a', 'b'] }])
   })
 
-  it('defaults to two magazine rows so an ad is not punctuation on every row', () => {
-    expect(FEED_AD_EVERY).toBe(6)
+  it('defaults to one magazine row so each story row gets punctuation', () => {
+    expect(FEED_AD_EVERY).toBe(3)
     const items = Array.from({ length: 9 }, (_, i) => `s${i}`)
     const chunks = interleaveAds(items, ['ad1', 'ad2'])
-    expect(chunks.filter(c => c.kind === 'ad')).toHaveLength(1)
-    expect(chunks[0]?.kind === 'content' && chunks[0].items).toHaveLength(6)
+    expect(chunks.filter(c => c.kind === 'ad')).toHaveLength(2)
+    expect(chunks[0]?.kind === 'content' && chunks[0].items).toHaveLength(3)
   })
 })
 
 describe('layoutArticleBody', () => {
   it('inserts after a few paragraphs, not as a stack', () => {
     const blocks = ['<p>1</p>', '<p>2</p>', '<p>3</p>', '<p>4</p>', '<p>5</p>']
-    const chunks = layoutArticleBody(blocks, ['ad1', 'ad2'], [3, 8])
+    const chunks = layoutArticleBody(blocks, ['ad1', 'ad2'], [3, 6])
     expect(chunks.map(c => c.kind)).toEqual(['html', 'html', 'html', 'ad', 'html', 'html'])
     expect(hasAdjacentAds(chunks)).toBe(false)
   })
 
   it('adds a second unit later on a long story', () => {
     const blocks = Array.from({ length: 10 }, (_, i) => `<p>${i + 1}</p>`)
-    const chunks = layoutArticleBody(blocks, ['ad1', 'ad2'], [3, 8])
+    const chunks = layoutArticleBody(blocks, ['ad1', 'ad2'], [3, 6])
     const ads = chunks.filter(c => c.kind === 'ad')
     expect(ads).toHaveLength(2)
     expect(hasAdjacentAds(chunks)).toBe(false)
@@ -60,7 +60,7 @@ describe('layoutArticleBody', () => {
   })
 
   it('skips in-body ads on a short piece so the story stays the page', () => {
-    const chunks = layoutArticleBody(['<p>1</p>', '<p>2</p>'], ['ad1'], [3, 8])
+    const chunks = layoutArticleBody(['<p>1</p>', '<p>2</p>'], ['ad1'], [3, 6])
     expect(chunks.every(c => c.kind === 'html')).toBe(true)
   })
 })

@@ -7,11 +7,15 @@
  * as a footer pair or a 2×2 board.
  */
 
-/** Magazine is 3-up; punctuation is every two rows, not every row. */
+/** Magazine is 3-up; one centered unit after each row. */
 export const MAGAZINE_ROW = 3
-export const FEED_AD_EVERY = 6
-/** One in-body unit after a few blocks. A second only on a long piece. */
-export const ARTICLE_AD_AFTER = [4, 12] as const
+export const FEED_AD_EVERY = MAGAZINE_ROW
+/** In-body 300×250 units at scroll-depth breaks — a couple, not one lonely unit. */
+export const ARTICLE_AD_AFTER = [3, 6] as const
+/** Home editorial rows: two content cards, then an IAB — never a third card. */
+export const HOME_CONTENT_CARDS = 2
+/** Academy section threads: one unit after every three lesson cards. */
+export const ACADEMY_CARDS_PER_AD = 3
 
 export type RhythmChunk<T, A> =
   | { kind: 'content'; items: T[] }

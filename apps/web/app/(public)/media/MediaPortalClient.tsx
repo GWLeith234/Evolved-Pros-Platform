@@ -3,11 +3,14 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { CategoryPills, CATEGORY_COLORS } from '@/components/media/CategoryPills'
+import { CategoryPills } from '@/components/media/CategoryPills'
+import { MediaLatestPodcast } from '@/components/media/MediaLatestPodcast'
 import { getPillarLabel } from '@/lib/pillars'
 import { PollWidget } from '@/components/media/PollWidget'
 import { MediaIabSlot } from '@/components/media/MediaIabSlot'
 import { layoutMediaFeed } from '@/lib/media/feedAds'
+import { mediaFilterCategories } from '@/lib/media/filters'
+import type { MediaRailEpisode } from '@/lib/media/podcastRail'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -26,14 +29,8 @@ export interface MediaStory {
   views: number
 }
 
-export interface Episode {
-  id: string
-  episode_number: number
-  title: string
-  slug: string
-  thumbnail_url: string | null
-  duration_seconds: number | null
-  published_at: string | null
+export type Episode = MediaRailEpisode & {
+  published_at?: string | null
 }
 
 interface MediaPortalClientProps {
@@ -73,9 +70,6 @@ function tagLabelForStory(story: MediaStory): string {
   return story.story_type ? story.story_type.toUpperCase() : 'EVOLVED'
 }
 
-/** Map a CategoryPills label to the matching story.pillar slug. Editorial
- *  sections (Revenue/AI/Leadership) don't have a column today, so they
- *  filter to nothing until media_stories.section ships. */
 function categoryToPillar(category: string): string | null {
   switch (category) {
     case 'Foundation':       return 'foundation'
@@ -84,12 +78,8 @@ function categoryToPillar(category: string): string | null {
     case 'Strategy':         return 'strategy'
     case 'Accountability':   return 'accountability'
     case 'Execution':        return 'execution'
-    default:                 return null   // Revenue / AI / Leadership / All
+    default:                 return null
   }
-}
-
-function isEditorialCategory(category: string): boolean {
-  return category === 'Revenue' || category === 'AI' || category === 'Leadership'
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -102,13 +92,6 @@ function readTime(body: string | null): string {
 function formatDate(iso: string | null): string {
   if (!iso) return ''
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
-function formatDuration(seconds: number | null): string {
-  if (!seconds) return ''
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  return `${m}:${s.toString().padStart(2, '0')}`
 }
 
 function storyUrl(story: MediaStory): string {
@@ -346,13 +329,12 @@ export function MediaPortalClient({
   inFeedAds = [],
 }: MediaPortalClientProps) {
   const [activeCategory, setActiveCategory] = useState<string>(ALL_LABEL)
+  const pillarFilters = useMemo(() => mediaFilterCategories(stories), [stories])
+  const heroAd = inFeedAds[0] ?? null
+  const gridAds = heroAd ? inFeedAds.slice(1) : inFeedAds
 
   const filteredStories = useMemo(() => {
     if (activeCategory === ALL_LABEL) return stories
-    if (isEditorialCategory(activeCategory)) {
-      // No backing column yet — return empty list for an honest empty state.
-      return []
-    }
     const slug = categoryToPillar(activeCategory)
     return slug ? stories.filter(s => s.pillar === slug) : stories
   }, [stories, activeCategory])
@@ -360,8 +342,8 @@ export function MediaPortalClient({
   const featured = filteredStories[0] ?? null
   const grid = filteredStories.slice(1)
   const feed = useMemo(
-    () => layoutMediaFeed(grid, inFeedAds),
-    [grid, inFeedAds],
+    () => layoutMediaFeed(grid, gridAds),
+    [grid, gridAds],
   )
   // Right rail "Latest Stories" stays unfiltered per the brief.
   const sidebarStories = stories.slice(0, 4)
@@ -372,6 +354,7 @@ export function MediaPortalClient({
       <CategoryPills
         initialActive={activeCategory}
         onSelect={setActiveCategory}
+        categories={pillarFilters}
       />
 
       {/* ── Section 1: Hero + right rail ── */}
@@ -399,53 +382,14 @@ export function MediaPortalClient({
                   background: 'var(--paper-card)',
                 }}
               >
-                {isEditorialCategory(activeCategory)
-                  ? `${activeCategory} stories coming soon.`
-                  : 'No published stories in this category yet.'}
+                {'No published stories in this category yet.'}
               </div>
             )}
           </div>
 
           {/* RIGHT — sidebar (intentionally NOT filtered per brief) */}
           <aside>
-            {/* Latest Podcast */}
-            {episodes.length > 0 && (
-              <div className="ed-rail-card" style={{ marginBottom: 16, maxWidth: '100%', overflow: 'hidden', background: 'var(--paper-card)', border: '1px solid var(--paper-line-soft)' }}>
-                <div style={{ background: 'var(--paper-card)', padding: '10px 12px', borderBottom: '2px solid var(--brand-gold)' }}>
-                  <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 12, color: 'var(--navy-dark)', textTransform: 'uppercase', letterSpacing: '0.14em' }}>
-                    Latest Podcast
-                  </span>
-                </div>
-                <div className="ed-rail-card-body" style={{ background: 'var(--paper-card)' }}>
-                  {episodes.map(ep => (
-                    <div key={ep.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderBottom: '1px solid var(--paper-line-soft)' }}>
-                      <div style={{ width: 44, height: 44, borderRadius: 4, background: 'var(--navy-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', flexShrink: 0 }}>
-                        <span style={{ fontSize: 18 }}>🎙</span>
-                        <span style={{ position: 'absolute', bottom: -2, right: -2, fontSize: 7, fontWeight: 700, fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: 'var(--brand-red)', color: 'var(--white)', padding: '1px 4px', borderRadius: 2, textTransform: 'uppercase' }}>
-                          EP
-                        </span>
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 9, color: 'var(--media-ink-soft)', fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>
-                          Episode {ep.episode_number}
-                        </p>
-                        <p style={{ fontSize: 12, color: 'var(--navy-dark)', fontWeight: 600, fontFamily: 'var(--font-body)', lineHeight: 1.3, margin: '1px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {ep.title}
-                        </p>
-                        <p style={{ fontSize: 10, color: 'var(--media-ink-soft)', fontFamily: 'var(--font-body)', margin: 0 }}>
-                          {formatDuration(ep.duration_seconds)}
-                        </p>
-                      </div>
-                      <Link href={`/podcast/${ep.slug ?? ''}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
-                        <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--brand-red)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <span aria-hidden="true" style={{ width: 0, height: 0, borderLeft: '8px solid #fff', borderTop: '5px solid transparent', borderBottom: '5px solid transparent', marginLeft: 2 }} />
-                        </span>
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <MediaLatestPodcast episodes={episodes} />
 
             {/* Latest Stories — always unfiltered so the rail stays useful */}
             {sidebarStories.length > 0 && (
@@ -497,6 +441,12 @@ export function MediaPortalClient({
         </div>
       </div>
 
+      {heroAd?.image_url ? (
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 0' }}>
+          <MediaScrollBanner ad={heroAd} />
+        </div>
+      ) : null}
+
       {/* ── Section 2: "More from Evolved Media" divider ── */}
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -527,7 +477,7 @@ export function MediaPortalClient({
               ),
             )}
           </div>
-        ) : filteredStories.length === 0 && isEditorialCategory(activeCategory) ? null : (
+        ) : (
           <div style={{ padding: '40px 0', textAlign: 'center' }}>
             <span style={{ fontSize: 13, color: 'var(--media-ink-soft)', fontFamily: 'var(--font-body)' }}>
               {filteredStories.length === 0
@@ -561,11 +511,6 @@ export function MediaPortalClient({
           .media-card:hover { transform: none; }
         }
       `}</style>
-
-      {/* Reference CATEGORY_COLORS so the import isn't shaken out by tree-
-          shakers — it backs CategoryPills' visual mapping which the brief
-          asks us to keep aligned with this client. */}
-      {CATEGORY_COLORS && null}
     </>
   )
 }

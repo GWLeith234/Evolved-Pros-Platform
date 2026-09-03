@@ -1,3 +1,5 @@
+import { Masthead } from '@/components/media/Masthead'
+
 export default function MediaLayout({ children }: { children: React.ReactNode }) {
   // SPRINT N — THEME DECISION: /media is a standalone cream/light editorial
   // magazine shell, intentionally locked to light (colorScheme: 'light' below)
@@ -9,11 +11,15 @@ export default function MediaLayout({ children }: { children: React.ReactNode })
   // hands QA the 570-px scrollWidth they keep flagging. Containing overflow
   // here means every /media/* route inherits the fix without each child
   // having to remember.
+  //
+  // Clean masthead lives here so index AND article (and every /media/* route)
+  // share the same chrome — no dead hashes, no fake issue, no broken Search.
   return (
     <div
       className="min-h-screen bg-[#F5F0E8] text-[#374151]"
       style={{ maxWidth: '100vw', overflowX: 'hidden', color: '#374151', colorScheme: 'light' }}
     >
+      <Masthead />
       {children}
     </div>
   )

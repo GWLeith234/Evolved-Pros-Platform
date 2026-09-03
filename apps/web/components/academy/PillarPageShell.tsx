@@ -15,9 +15,9 @@ import { DynamicReflectionPrompt } from '@/components/academy/DynamicReflectionP
 import { DynamicPillarAudit } from '@/components/academy/DynamicPillarAudit'
 import { adminClient } from '@/lib/supabase/admin'
 import { ProfileAdUnit } from '@/components/profile/ProfileAdUnit'
-import { AcademyLessonSponsors } from '@/components/academy/AcademyLessonSponsors'
 import {
   pickAcademySponsors,
+  pickAcademyThreadAds,
   pickScrollBanners,
 } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
@@ -226,23 +226,10 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
     .order('sort_order')
     .limit(24)
   const pillarPool = filterLiveAds((pillarAdData ?? []) as SponsorAd[])
-  const pillarAd = pickScrollBanners(pillarPool, 1)[0] ?? pickAcademySponsors(pillarPool, 1)[0] ?? null
-
-  // Today's IAB stills for the course footer — never the old architecture/logo fallbacks.
-  let courseSponsors: SponsorAd[] = []
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: sponsorRows } = await (adminClient as any)
-      .from('platform_ads')
-      .select(SPONSOR_AD_COLUMNS)
-      .eq('is_active', true)
-      .order('sort_order')
-      .limit(24)
-    const all = filterLiveAds((sponsorRows ?? []) as SponsorAd[])
-    if (all.length > 0) courseSponsors = pickAcademySponsors(all, 1)
-  } catch {
-    /* empty — do not invent old partner cards */
-  }
+  const threadAds = pickAcademyThreadAds(pillarPool)
+  const lastThread = threadAds[threadAds.length - 1] ?? null
+  const quotePool = pillarPool.filter(a => !lastThread || a.id !== lastThread.id)
+  const pillarAd = pickScrollBanners(quotePool, 1)[0] ?? pickAcademySponsors(quotePool, 1)[0] ?? null
 
   return (
     <main style={{ position: 'relative', zIndex: 1, backgroundColor: '#0A0F18', minHeight: '100vh', color: '#faf9f7' }}>
@@ -433,11 +420,8 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
               modules={moduleGroups}
               courseSlug={courseSlug}
               pillarColor={config.color}
+              ads={threadAds}
             />
-            {/* Evolution Partners — after modules, before reflection / audit */}
-            <div style={{ marginTop: 32 }}>
-              <AcademyLessonSponsors ads={courseSponsors} />
-            </div>
           </div>
         </section>
       )}

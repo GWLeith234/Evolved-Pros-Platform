@@ -10,6 +10,8 @@ import { mediaStoryHref } from '@/lib/media/paths'
 import { StoryCommentsClient as StoryComments } from '../../MediaClientShims'
 import { ArticleShareBar } from './ArticleShareBar'
 import { MediaIabSlot } from '@/components/media/MediaIabSlot'
+import { MediaLatestPodcast } from '@/components/media/MediaLatestPodcast'
+import type { MediaRailEpisode } from '@/lib/media/podcastRail'
 import { CANONICAL_ORIGIN, canonicalUrl, publicPageMetadata } from '@/lib/seo/canonical'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { pickArticleAds } from '@/lib/sponsors/partners'
@@ -52,14 +54,7 @@ interface RelatedStory {
   body: string | null
 }
 
-interface Episode {
-  id: string
-  episode_number: number
-  title: string
-  slug: string
-  thumbnail_url: string | null
-  duration_seconds: number | null
-}
+type Episode = MediaRailEpisode
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -86,13 +81,6 @@ function readTime(body: string | null): number {
 function formatDate(iso: string | null): string {
   if (!iso) return ''
   return new Date(iso).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-}
-
-function formatDuration(seconds: number | null): string {
-  if (!seconds) return ''
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  return `${m}:${s.toString().padStart(2, '0')}`
 }
 
 // ── Static params ───────────────────────────────────────────────────────────
@@ -174,7 +162,7 @@ export default async function StoryPage({
     .eq('is_published', true)
     .neq('id', story.id)
     .order('published_at', { ascending: false })
-    .limit(3)
+    .limit(2)
   const { data: related } = params.pillar === 'general'
     ? await relatedQuery.is('pillar', null)
     : await relatedQuery.eq('pillar', params.pillar)
@@ -184,7 +172,7 @@ export default async function StoryPage({
   try {
     const { data } = await adminClient
       .from('episodes')
-      .select('id, episode_number, title, slug, thumbnail_url, duration_seconds')
+      .select('id, episode_number, title, slug, thumbnail_url, guest_image_url, youtube_url, duration_seconds')
       .eq('is_published', true)
       .order('published_at', { ascending: false })
       .limit(2)
@@ -371,42 +359,7 @@ export default async function StoryPage({
             </Link>
           </div>
 
-          {/* Latest Podcast */}
-          {episodes.length > 0 && (
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ backgroundColor: 'var(--media-ink)', padding: '7px 10px' }}>
-                <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  Latest Podcast
-                </span>
-              </div>
-              <div style={{ backgroundColor: '#fff', border: '0.5px solid rgba(43,58,90,0.1)', borderTop: 'none' }}>
-                {episodes.map(ep => (
-                  <div key={ep.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderBottom: '0.5px solid rgba(43,58,90,0.06)' }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 4, backgroundColor: 'var(--media-ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', flexShrink: 0 }}>
-                      <span style={{ fontSize: 18 }}>🎙</span>
-                      <span style={{ position: 'absolute', bottom: -2, right: -2, fontSize: 7, fontWeight: 700, fontFamily: 'var(--font-condensed)', backgroundColor: 'var(--brand-red)', color: '#fff', padding: '1px 4px', borderRadius: 2, textTransform: 'uppercase' }}>EP</span>
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: 9, color: 'rgba(43,58,90,0.45)', fontFamily: 'var(--font-condensed)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0 }}>
-                        Episode {ep.episode_number}
-                      </p>
-                      <p style={{ fontSize: 11, color: 'var(--media-ink)', fontWeight: 600, fontFamily: 'var(--font-body)', lineHeight: 1.3, margin: '1px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {ep.title}
-                      </p>
-                      {ep.duration_seconds && (
-                        <p style={{ fontSize: 9, color: 'rgba(43,58,90,0.4)', fontFamily: 'var(--font-body)', margin: 0 }}>{formatDuration(ep.duration_seconds)}</p>
-                      )}
-                    </div>
-                    <Link href={`/podcast/${ep.slug ?? ''}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
-                      <div style={{ width: 28, height: 28, borderRadius: '50%', backgroundColor: 'var(--brand-red)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ width: 0, height: 0, borderLeft: '8px solid #fff', borderTop: '5px solid transparent', borderBottom: '5px solid transparent', marginLeft: 2 }} />
-                      </div>
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <MediaLatestPodcast episodes={episodes} variant="article" />
 
           {/* Topic tags */}
           {(story.tags ?? []).length > 0 && (
@@ -450,8 +403,7 @@ export default async function StoryPage({
             </span>
             <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(43,58,90,0.15)' }} />
           </div>
-          {/* 3-column grid */}
-          <div className="media-related-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+          <div className="media-related-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
             {(related ?? []).map((r: RelatedStory) => (
               <Link key={r.id} href={mediaStoryHref(r.pillar, r.slug)} style={{ textDecoration: 'none', display: 'block', backgroundColor: '#fff', border: '0.5px solid rgba(43,58,90,0.1)', borderRadius: 2, overflow: 'hidden' }}>
                 <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: 'var(--media-ink)', overflow: 'hidden' }}>
@@ -475,6 +427,14 @@ export default async function StoryPage({
               </Link>
             ))}
           </div>
+          {articleAds.related?.image_url ? (
+            <div
+              data-media-ads="related"
+              style={{ display: 'flex', justifyContent: 'center', marginTop: 20, minHeight: 250 }}
+            >
+              <MediaIabSlot ad={articleAds.related} locationId="media-related" />
+            </div>
+          ) : null}
         </div>
       )}
 
