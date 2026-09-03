@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { episodeRailStill, episodeWatchHref, episodeWatchIsExternal } from './podcastRail'
 
@@ -49,5 +52,18 @@ describe('episodeRailStill', () => {
       }),
     ).toBe('https://cdn.example/ep.jpg')
     expect(episodeRailStill({ guest_image_url: null, thumbnail_url: null })).toBeNull()
+  })
+})
+
+describe('MediaLatestPodcast still crop', () => {
+  const src = readFileSync(
+    resolve(dirname(fileURLToPath(import.meta.url)), '../../components/media/MediaLatestPodcast.tsx'),
+    'utf8',
+  )
+
+  it('keeps the 16:9 guest still rectangular and anchored to the head', () => {
+    expect(src).toMatch(/objectPosition:\s*'50% 12%'/)
+    expect(src).toMatch(/aspectRatio:\s*'16 \/ 9'/)
+    expect(src).not.toMatch(/borderRadius:\s*['"]50%['"]/)
   })
 })

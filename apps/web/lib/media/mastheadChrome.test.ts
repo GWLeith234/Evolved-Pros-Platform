@@ -16,4 +16,13 @@ describe('Media masthead chrome', () => {
     expect(src).not.toMatch(/aria-label="Search"/)
     expect(src).not.toMatch(/George.?s Desk/)
   })
+
+  it('keeps the red / navy split and thickens Evolved by weight, not size', () => {
+    expect(src).toMatch(/data-masthead-evolved[\s\S]*color: '#C9302A'[\s\S]*fontWeight: 900/)
+    expect(src).toMatch(/data-masthead-media[\s\S]*color: '#112535'/)
+    expect(src).toMatch(/fontSize: 'clamp\(40px, 9vw, 108px\)'/)
+    const evolved = src.slice(src.indexOf('data-masthead-evolved'), src.indexOf('data-masthead-media'))
+    expect(evolved).toMatch(/fontWeight: 900/)
+    expect(evolved).not.toMatch(/fontSize:/)
+  })
 })

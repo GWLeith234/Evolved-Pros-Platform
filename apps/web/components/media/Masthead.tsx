@@ -102,7 +102,7 @@ export function Masthead() {
         <h1
           style={{
             margin: '6px 0 0',
-            fontFamily: '"Abril Fatface", "Playfair Display", Georgia, serif',
+            fontFamily: 'var(--font-abril), "Abril Fatface", "Playfair Display", Georgia, serif',
             fontWeight: 400,
             fontSize: 'clamp(40px, 9vw, 108px)',
             lineHeight: 0.95,
@@ -111,8 +111,17 @@ export function Masthead() {
           }}
         >
           <Link href="/media" style={{ color: 'inherit', textDecoration: 'none' }}>
-            <span style={{ color: '#C9302A' }}>Evolved</span>{' '}
-            <span style={{ color: '#112535' }}>Media</span>
+            <span
+              data-masthead-evolved
+              style={{
+                color: '#C9302A',
+                fontFamily: '"Playfair Display", Georgia, serif',
+                fontWeight: 900,
+              }}
+            >
+              Evolved
+            </span>{' '}
+            <span data-masthead-media style={{ color: '#112535' }}>Media</span>
           </Link>
         </h1>
         <p

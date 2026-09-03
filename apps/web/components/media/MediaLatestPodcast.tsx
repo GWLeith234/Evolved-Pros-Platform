@@ -91,7 +91,14 @@ export function MediaLatestPodcast({
                     height={45}
                     loading="lazy"
                     decoding="async"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      objectPosition: '50% 12%',
+                      borderRadius: 0,
+                      display: 'block',
+                    }}
                   />
                 ) : null}
               </div>
