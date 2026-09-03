@@ -76,9 +76,11 @@ export default async function AcademyPage() {
     units.push({ id: ad.id, kind: 'iab', ad })
   }
 
-  // Two pillar cards, then one unit — banners, squares, and big boxes through
-  // the curriculum. Never Academy next to Academy.
-  const chunks = interleaveAds(courses, units, ACADEMY_COURSE_EVERY, { trailing: true })
+  // Filled 3-up row, then one unit. A leading unit sits above the grid so
+  // the curriculum still gets more punctuation without an empty column.
+  const leading = units[0] ?? null
+  const rest = units.slice(1)
+  const chunks = interleaveAds(courses, rest, ACADEMY_COURSE_EVERY, { trailing: true })
 
   return (
     <div className="academy-page ep-surface-mobile">
@@ -122,6 +124,7 @@ export default async function AcademyPage() {
 
       <div className="px-4 md:px-8 py-5 sm:py-6">
         <div className="flex flex-col gap-6">
+          {leading ? <AcademyAdBreak unit={leading} /> : null}
           {chunks.map((chunk, idx) =>
             chunk.kind === 'ad' ? (
               <AcademyAdBreak key={chunk.ad.id} unit={chunk.ad} />

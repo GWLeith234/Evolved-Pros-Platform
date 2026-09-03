@@ -66,12 +66,12 @@ describe('page locks', () => {
     expect(hasAdjacentAds(chunks)).toBe(false)
   })
 
-  it('academy places a unit after two pillar cards', () => {
-    expect(ACADEMY_COURSE_EVERY).toBe(2)
+  it('academy places a unit after a filled 3-up row', () => {
+    expect(ACADEMY_COURSE_EVERY).toBe(3)
     const courses = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
-    const chunks = interleaveAds(courses, ['ad1', 'ad2', 'ad3'], ACADEMY_COURSE_EVERY, { trailing: true })
-    expect(chunks.filter(c => c.kind === 'ad')).toHaveLength(3)
-    expect(chunks[0]?.kind === 'content' && chunks[0].items).toHaveLength(2)
+    const chunks = interleaveAds(courses, ['ad1', 'ad2'], ACADEMY_COURSE_EVERY, { trailing: true })
+    expect(chunks.map(c => c.kind)).toEqual(['content', 'ad', 'content', 'ad'])
+    expect(chunks[0]?.kind === 'content' && chunks[0].items).toHaveLength(3)
     expect(hasAdjacentAds(chunks)).toBe(false)
   })
 })

@@ -1,7 +1,7 @@
 import { SponsorAdCard, type SponsorAd } from '@/components/home/HomeSponsorAd'
 import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import { CLUSTER_IAB_MAX, isAcademyAd } from '@/lib/sponsors/partners'
-import { isIabImageStill, isLeaderboardStill } from '@/lib/ads/iab'
+import { isIabImageStill } from '@/lib/ads/iab'
 
 /**
  * One IAB / house unit. Callers space these through the scroll —
@@ -19,7 +19,6 @@ export function AcademyLessonSponsors({
   const shown: SponsorAd[] = []
   for (const ad of ads) {
     if (!ad?.id || seen.has(ad.id)) continue
-    if (isLeaderboardStill(ad)) continue
     seen.add(ad.id)
     shown.push(ad)
     if (shown.length >= CLUSTER_IAB_MAX) break

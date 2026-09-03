@@ -14,8 +14,8 @@ export const FEED_AD_EVERY = 3
 export const PODCAST_AD_EVERY = 4
 /** Community feed: one unit after a short run of posts. */
 export const COMMUNITY_AD_EVERY = 3
-/** Academy course grid: one unit after two pillar cards. */
-export const ACADEMY_COURSE_EVERY = 2
+/** Academy course grid is 3-up; one unit after a filled row. */
+export const ACADEMY_COURSE_EVERY = 3
 /** In-body units at scroll-depth breaks on a long article. */
 export const ARTICLE_AD_AFTER = [3, 6, 9, 12, 16] as const
 
