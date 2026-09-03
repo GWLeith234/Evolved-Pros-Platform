@@ -8,13 +8,11 @@ import { PodcastCoverCard } from './PodcastCoverCard'
 import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { selectPodcastBigBoxes } from '@/lib/sponsors/partners'
+import { PODCAST_AD_EVERY, interleaveAds } from '@/lib/ads/rhythm'
 
 const FB = 'var(--font-barlow)'
 const FBC = 'var(--font-barlow-condensed)'
 const FBN = 'var(--font-bebas)'
-
-/** Full-width Zone E break after a run of episodes — not every row. */
-const AD_EVERY_N = 6
 
 interface PodcastGridProps {
   episodes: PodcastEpisode[]
@@ -41,29 +39,31 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
   // Zone E 300×600 only — never 728×90, never a 300×250 stuffed into a tile.
   const uniqueStills = useMemo(() => selectPodcastBigBoxes(sponsorAds), [sponsorAds])
 
-  // Episode tiles stay in the 2-col grid. Ads break the row (1 / -1) as a
-  // centered 300×600 big box so they cannot sit as fake episode squares.
+  // 4 episode cards, then a centered big box, then 4, then a box.
+  // Ads break the row (1 / -1) so they cannot sit as fake episode squares.
   const gridChildren = useMemo(() => {
+    const chunks = interleaveAds(filtered, uniqueStills, PODCAST_AD_EVERY, { trailing: true })
     const nodes: ReactNode[] = []
-    let slot = 0
-    filtered.forEach((ep, i) => {
-      nodes.push(<PodcastCoverCard key={ep.id} episode={ep} />)
-      if (slot < uniqueStills.length && (i + 1) % AD_EVERY_N === 0) {
-        const ad = uniqueStills[slot++]
-        if (!ad.image_url) return
+    chunks.forEach((chunk, idx) => {
+      if (chunk.kind === 'ad') {
+        if (!chunk.ad.image_url) return
         nodes.push(
           <div
-            key={`sponsor-slot-${ad.id}`}
+            key={`sponsor-slot-${chunk.ad.id}-${idx}`}
             className="podcast-sponsor-bigbox"
             style={{ gridColumn: '1 / -1', justifySelf: 'center', width: '100%' }}
           >
             <IabAdvertisementSlot
-              ad={{ ...ad, image_url: ad.image_url }}
+              ad={{ ...chunk.ad, image_url: chunk.ad.image_url }}
               locationId="podcast"
             />
           </div>,
         )
+        return
       }
+      chunk.items.forEach(ep => {
+        nodes.push(<PodcastCoverCard key={ep.id} episode={ep} />)
+      })
     })
     return nodes
   }, [filtered, uniqueStills])

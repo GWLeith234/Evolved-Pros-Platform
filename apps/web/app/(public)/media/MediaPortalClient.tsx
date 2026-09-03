@@ -39,8 +39,8 @@ export interface Episode {
 interface MediaPortalClientProps {
   stories: MediaStory[]
   episodes: Episode[]
-  /** Single sticky rail unit (300×600 / half-page preferred). */
-  sidebarAd?: SponsorAd | null
+  /** Rail: large then thin — never a stack of the same size. */
+  sidebarAds?: SponsorAd[]
   /** In-feed units — one between story rows, never a footer pair. */
   inFeedAds?: SponsorAd[]
 }
@@ -73,9 +73,7 @@ function tagLabelForStory(story: MediaStory): string {
   return story.story_type ? story.story_type.toUpperCase() : 'EVOLVED'
 }
 
-/** Map a CategoryPills label to the matching story.pillar slug. Editorial
- *  sections (Revenue/AI/Leadership) don't have a column today, so they
- *  filter to nothing until media_stories.section ships. */
+/** Map a CategoryPills label to the matching story.pillar slug. */
 function categoryToPillar(category: string): string | null {
   switch (category) {
     case 'Foundation':       return 'foundation'
@@ -84,12 +82,8 @@ function categoryToPillar(category: string): string | null {
     case 'Strategy':         return 'strategy'
     case 'Accountability':   return 'accountability'
     case 'Execution':        return 'execution'
-    default:                 return null   // Revenue / AI / Leadership / All
+    default:                 return null
   }
-}
-
-function isEditorialCategory(category: string): boolean {
-  return category === 'Revenue' || category === 'AI' || category === 'Leadership'
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -342,17 +336,13 @@ function MediaScrollBanner({ ad }: { ad: SponsorAd }) {
 export function MediaPortalClient({
   stories,
   episodes,
-  sidebarAd = null,
+  sidebarAds = [],
   inFeedAds = [],
 }: MediaPortalClientProps) {
   const [activeCategory, setActiveCategory] = useState<string>(ALL_LABEL)
 
   const filteredStories = useMemo(() => {
     if (activeCategory === ALL_LABEL) return stories
-    if (isEditorialCategory(activeCategory)) {
-      // No backing column yet — return empty list for an honest empty state.
-      return []
-    }
     const slug = categoryToPillar(activeCategory)
     return slug ? stories.filter(s => s.pillar === slug) : stories
   }, [stories, activeCategory])
@@ -399,9 +389,7 @@ export function MediaPortalClient({
                   background: 'var(--paper-card)',
                 }}
               >
-                {isEditorialCategory(activeCategory)
-                  ? `${activeCategory} stories coming soon.`
-                  : 'No published stories in this category yet.'}
+                {'No published stories in this category yet.'}
               </div>
             )}
           </div>
@@ -484,15 +472,16 @@ export function MediaPortalClient({
 
             <PollWidget />
 
-            {sidebarAd?.image_url ? (
+            {sidebarAds.filter(a => a.image_url).map((ad, i) => (
               <div
+                key={ad.id}
                 data-media-ads="sidebar"
-                className="media-sticky-rail"
-                style={{ marginTop: 16, position: 'sticky', top: 24 }}
+                className={i === sidebarAds.length - 1 ? 'media-sticky-rail' : undefined}
+                style={{ marginTop: 16, position: i === sidebarAds.length - 1 ? 'sticky' : undefined, top: i === sidebarAds.length - 1 ? 24 : undefined }}
               >
-                <MediaIabSlot ad={sidebarAd} locationId="media-rail" />
+                <MediaIabSlot ad={ad} locationId="media-rail" />
               </div>
-            ) : null}
+            ))}
           </aside>
         </div>
       </div>
@@ -527,7 +516,7 @@ export function MediaPortalClient({
               ),
             )}
           </div>
-        ) : filteredStories.length === 0 && isEditorialCategory(activeCategory) ? null : (
+        ) : (
           <div style={{ padding: '40px 0', textAlign: 'center' }}>
             <span style={{ fontSize: 13, color: 'var(--media-ink-soft)', fontFamily: 'var(--font-body)' }}>
               {filteredStories.length === 0

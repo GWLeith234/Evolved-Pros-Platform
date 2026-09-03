@@ -49,7 +49,7 @@ export default async function MediaPage() {
       <MediaPortalClient
         stories={stories}
         episodes={episodes}
-        sidebarAd={mediaAds.sidebar}
+        sidebarAds={mediaAds.sidebar}
         inFeedAds={mediaAds.inFeed}
       />
     </>

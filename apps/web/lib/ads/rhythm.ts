@@ -7,11 +7,17 @@
  * as a footer pair or a 2×2 board.
  */
 
-/** Magazine is 3-up; punctuation is every two rows, not every row. */
+/** Magazine is 3-up; punctuation is one unit after each row. */
 export const MAGAZINE_ROW = 3
-export const FEED_AD_EVERY = 6
-/** One in-body unit after a few blocks. A second only on a long piece. */
-export const ARTICLE_AD_AFTER = [4, 12] as const
+export const FEED_AD_EVERY = 3
+/** Podcast archive lock: 4 episode cards, then a big box, then 4, then a box. */
+export const PODCAST_AD_EVERY = 4
+/** Community feed: one unit after a short run of posts. */
+export const COMMUNITY_AD_EVERY = 3
+/** Academy course grid: one unit after two pillar cards. */
+export const ACADEMY_COURSE_EVERY = 2
+/** In-body units at scroll-depth breaks on a long article. */
+export const ARTICLE_AD_AFTER = [3, 6, 9, 12, 16] as const
 
 export type RhythmChunk<T, A> =
   | { kind: 'content'; items: T[] }
@@ -73,8 +79,8 @@ export function splitHtmlBlocks(html: string): string[] {
 }
 
 /**
- * Insert at most one ad after the Nth block, only when more copy follows.
- * A short piece gets zero or one unit; a long piece can take a second.
+ * Insert one ad after listed block counts, only when more copy follows.
+ * A short piece gets zero or one unit; a long piece takes several.
  */
 export function layoutArticleBody<A>(
   blocks: string[],

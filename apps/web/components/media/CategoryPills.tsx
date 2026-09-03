@@ -6,9 +6,6 @@ import { useState } from 'react'
 // First 3 categories are editorial sections (media_stories.section values land
 // in MR2). Last 6 align with the existing EVOLVED pillar slugs.
 export const CATEGORY_COLORS: Record<string, string> = {
-  Revenue: '#C9302A',
-  AI: '#1B2A4A',
-  Leadership: '#8B6A00',
   Foundation: '#FFA538',
   Identity: '#A78BFA',
   'Mental Toughness': '#F87171',
@@ -20,9 +17,6 @@ export const CATEGORY_COLORS: Record<string, string> = {
 const ALL_LABEL = 'All'
 
 const CATEGORIES: ReadonlyArray<string> = [
-  'Revenue',
-  'AI',
-  'Leadership',
   'Foundation',
   'Identity',
   'Mental Toughness',

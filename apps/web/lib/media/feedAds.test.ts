@@ -34,12 +34,12 @@ describe('layoutMediaFeed', () => {
     still('evx-a', 'EvolveX360', 'A'),
   ]
 
-  it('waits two magazine rows before a unit — not an ad every row', () => {
+  it('places one unit after each magazine row of three', () => {
     const layout = layoutMediaFeed(stories(9), inFeed)
-    expect(layout.chunks.map(c => c.kind)).toEqual(['content', 'ad', 'content'])
-    expect(layout.chunks[0]?.kind === 'content' && layout.chunks[0].items).toHaveLength(6)
+    expect(layout.chunks.map(c => c.kind)).toEqual(['content', 'ad', 'content', 'ad', 'content'])
+    expect(layout.chunks[0]?.kind === 'content' && layout.chunks[0].items).toHaveLength(3)
     expect(layout.chunks[layout.chunks.length - 1]?.kind).toBe('content')
-    expect(layout.chunks.filter(c => c.kind === 'ad')).toHaveLength(1)
+    expect(layout.chunks.filter(c => c.kind === 'ad')).toHaveLength(2)
   })
 
   it('does not invent a footer pair when there is only one story row', () => {
@@ -51,7 +51,7 @@ describe('layoutMediaFeed', () => {
   it('never places two ad blocks back-to-back, even with leftover inventory', () => {
     const layout = layoutMediaFeed(stories(18), inFeed)
     expect(hasAdjacentAds(layout.chunks)).toBe(false)
-    expect(layout.chunks.filter(c => c.kind === 'ad')).toHaveLength(2)
+    expect(layout.chunks.filter(c => c.kind === 'ad')).toHaveLength(3)
     expect(layout.chunks[layout.chunks.length - 1]?.kind).toBe('content')
   })
 

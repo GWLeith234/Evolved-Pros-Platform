@@ -6,6 +6,10 @@ import { createClient } from '@/lib/supabase/server'
 import { listPublicMediaStories } from '@/lib/media/sitemap'
 import { getPublishedEpisodes } from '@/lib/podcast/public'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { getActivePlatformAds } from '@/lib/cache/shared'
+import { pickHomeEndBigBox } from '@/lib/sponsors/partners'
+import { adMatchesSurface } from '@/lib/ads/iab'
+import { HomeSponsorAd, type SponsorAd } from '@/components/home/HomeSponsorAd'
 
 /**
  * The public front door (SPRINT GATE-1).
@@ -90,13 +94,25 @@ async function loadStories(): Promise<LandingStory[]> {
   }
 }
 
+async function loadEndBigBox(): Promise<SponsorAd | null> {
+  try {
+    const all = (await getActivePlatformAds()) as SponsorAd[]
+    const homePool = all.filter(a => adMatchesSurface(a, 'home'))
+    const pool = homePool.length ? homePool : all
+    return pickHomeEndBigBox(pool)
+  } catch {
+    return null
+  }
+}
+
 export default async function LandingPage() {
   // PUBLIC. resolveCurrentUser returns null for an anonymous visitor and this
   // page never redirects on the result — it only swaps one link.
-  const [profile, episodes, stories] = await Promise.all([
+  const [profile, episodes, stories, endAd] = await Promise.all([
     resolveCurrentUser(),
     loadEpisodes(),
     loadStories(),
+    loadEndBigBox(),
   ])
   const signedIn = profile !== null
 
@@ -238,6 +254,12 @@ export default async function LandingPage() {
             ))}
           </Panel>
         )}
+
+        {endAd ? (
+          <div style={{ padding: '32px 0 8px', borderTop: '1px solid var(--border-color)' }}>
+            <HomeSponsorAd ad={endAd} />
+          </div>
+        ) : null}
       </main>
     </div>
   )
