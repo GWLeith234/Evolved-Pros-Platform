@@ -5,7 +5,6 @@ import { getPublishedMediaStoriesForHub } from '@/lib/media/public'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 import { MediaPortalClient } from './MediaPortalClient'
 import type { Episode } from './MediaPortalClient'
-import { Masthead } from '@/components/media/Masthead'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { pickMediaFeedAds } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
@@ -31,7 +30,7 @@ export default async function MediaPage() {
   try {
     const { data } = await supabase
       .from('episodes')
-      .select('id, episode_number, title, slug, thumbnail_url, duration_seconds, published_at')
+      .select('id, episode_number, title, slug, thumbnail_url, guest_image_url, youtube_url, duration_seconds, published_at')
       .eq('is_published', true)
       .order('published_at', { ascending: false })
       .limit(3)
@@ -44,12 +43,11 @@ export default async function MediaPage() {
 
   return (
     <>
-      <Masthead />
       <MediaStoryCrawlIndex stories={stories} />
       <MediaPortalClient
         stories={stories}
         episodes={episodes}
-        sidebarAds={mediaAds.sidebar}
+        sidebarAd={mediaAds.sidebar}
         inFeedAds={mediaAds.inFeed}
       />
     </>

@@ -1,5 +1,5 @@
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
-import { FEED_AD_EVERY, interleaveAds, type RhythmChunk } from '@/lib/ads/rhythm'
+import { MAGAZINE_ROW, interleaveAds, type RhythmChunk } from '@/lib/ads/rhythm'
 
 export type MediaFeedChunk<T> = RhythmChunk<T, SponsorAd>
 
@@ -8,14 +8,14 @@ export type MediaFeedLayout<T> = {
 }
 
 /**
- * Magazine cards dominate. One in-feed unit after each 3-up row,
- * never after the last row, never a footer pair.
+ * Village / SooToday: one centered unit after each 3-up story row.
+ * A single trailing unit is allowed. Never adjacent ads, never a footer pair.
  */
 export function layoutMediaFeed<T>(
   stories: T[],
   inFeed: SponsorAd[],
-  every = FEED_AD_EVERY,
+  every = MAGAZINE_ROW,
 ): MediaFeedLayout<T> {
   const ads = inFeed.filter(a => a?.image_url)
-  return { chunks: interleaveAds(stories, ads, every, { trailing: false }) }
+  return { chunks: interleaveAds(stories, ads, every, { trailing: true }) }
 }

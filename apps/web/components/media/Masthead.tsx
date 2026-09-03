@@ -1,6 +1,5 @@
-// Editorial masthead for /media — local-news chrome only.
-// Dead section hashes (Revenue / AI / Leadership / Pillars / George’s Desk),
-// the fake issue number, and the non-functional Search button are gone.
+// Editorial masthead for /media — live chrome only.
+// Section-hash nav, issue counter, and Search control are gone.
 
 import Link from 'next/link'
 
@@ -11,12 +10,7 @@ const NETWORK_LINKS: ReadonlyArray<{ label: string; href: string }> = [
   { label: 'Live', href: '/live' },
 ]
 
-interface MastheadProps {
-  activeNav?: string
-  issueNumber?: string
-}
-
-export function Masthead(_props: MastheadProps = {}) {
+export function Masthead() {
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
@@ -108,7 +102,7 @@ export function Masthead(_props: MastheadProps = {}) {
         <h1
           style={{
             margin: '6px 0 0',
-            fontFamily: '"Abril Fatface", "Playfair Display", Georgia, serif',
+            fontFamily: 'var(--font-abril), "Abril Fatface", "Playfair Display", Georgia, serif',
             fontWeight: 400,
             fontSize: 'clamp(40px, 9vw, 108px)',
             lineHeight: 0.95,
@@ -116,8 +110,19 @@ export function Masthead(_props: MastheadProps = {}) {
             color: '#112535',
           }}
         >
-          <span style={{ color: '#C9302A' }}>Evolved</span>{' '}
-          <span style={{ color: '#112535' }}>Media</span>
+          <Link href="/media" style={{ color: 'inherit', textDecoration: 'none' }}>
+            <span
+              data-masthead-evolved
+              style={{
+                color: '#C9302A',
+                fontFamily: '"Playfair Display", Georgia, serif',
+                fontWeight: 900,
+              }}
+            >
+              Evolved
+            </span>{' '}
+            <span data-masthead-media style={{ color: '#112535' }}>Media</span>
+          </Link>
         </h1>
         <p
           style={{
@@ -132,7 +137,7 @@ export function Masthead(_props: MastheadProps = {}) {
         </p>
       </div>
 
-      <div style={{ maxWidth: 1280, margin: '8px auto 0', padding: '0 24px 12px' }}>
+      <div style={{ maxWidth: 1280, margin: '8px auto 14px', padding: '0 24px' }}>
         <div style={{ height: 1, background: '#C9A84C' }} />
         <div style={{ height: 3, background: 'transparent' }} />
         <div style={{ height: 1, background: '#C9A84C' }} />

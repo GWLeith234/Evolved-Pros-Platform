@@ -95,7 +95,7 @@ export function dbRowToEpisode(row: EpisodeRow, progress?: ProgressRow): Podcast
       role: guestRole,
       photo: row.guest_image_url,
     },
-    cover: row.thumbnail_url ?? row.guest_image_url,
+    cover: row.guest_image_url ?? row.thumbnail_url,
     duration: row.duration_seconds ? Math.round(row.duration_seconds / 60) : 0,
     releasedAt,
     isNew,

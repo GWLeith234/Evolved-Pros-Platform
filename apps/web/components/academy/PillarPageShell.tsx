@@ -15,9 +15,9 @@ import { DynamicReflectionPrompt } from '@/components/academy/DynamicReflectionP
 import { DynamicPillarAudit } from '@/components/academy/DynamicPillarAudit'
 import { adminClient } from '@/lib/supabase/admin'
 import { ProfileAdUnit } from '@/components/profile/ProfileAdUnit'
-import { AcademyLessonSponsors } from '@/components/academy/AcademyLessonSponsors'
 import {
   pickAcademySponsors,
+  pickAcademyThreadAds,
   pickScrollBanners,
 } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
@@ -226,9 +226,10 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
     .order('sort_order')
     .limit(24)
   const pillarPool = filterLiveAds((pillarAdData ?? []) as SponsorAd[])
-  const mixed = pickAcademySponsors(pillarPool, 3)
-  const courseSponsors = mixed.slice(0, 1)
-  const pillarAd = mixed[1] ?? pickScrollBanners(pillarPool, 1)[0] ?? null
+  const threadAds = pickAcademyThreadAds(pillarPool)
+  const lastThread = threadAds[threadAds.length - 1] ?? null
+  const quotePool = pillarPool.filter(a => !lastThread || a.id !== lastThread.id)
+  const pillarAd = pickScrollBanners(quotePool, 1)[0] ?? pickAcademySponsors(quotePool, 1)[0] ?? null
 
   return (
     <main style={{ position: 'relative', zIndex: 1, backgroundColor: '#0A0F18', minHeight: '100vh', color: '#faf9f7' }}>
@@ -419,11 +420,8 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
               modules={moduleGroups}
               courseSlug={courseSlug}
               pillarColor={config.color}
+              ads={threadAds}
             />
-            {/* Evolution Partners — after modules, before reflection / audit */}
-            <div style={{ marginTop: 32 }}>
-              <AcademyLessonSponsors ads={courseSponsors} />
-            </div>
           </div>
         </section>
       )}

@@ -171,10 +171,10 @@ export function ytThumb(youtubeId: string | null, quality: 'hq' | 'max' = 'max')
   return `https://i.ytimg.com/vi/${youtubeId}/${quality === 'max' ? 'maxresdefault' : 'hqdefault'}.jpg`
 }
 
-/** Best available poster for the episode player facade. */
+/** Best available poster for the episode player facade. Guest still first. */
 export function episodePosterUrl(ep: Pick<PublicEpisode, 'thumbnail_url' | 'guest_image_url' | 'youtube_id'>): string | null {
-  return ep.thumbnail_url?.trim()
-    || ep.guest_image_url?.trim()
+  return ep.guest_image_url?.trim()
+    || ep.thumbnail_url?.trim()
     || ytThumb(ep.youtube_id, 'max')
 }
 

@@ -3,7 +3,6 @@ import { houseAdHref } from '@/lib/ads/house'
 import {
   ACADEMY_SPONSOR_AD,
   ACADEMY_UPGRADE_AD,
-  ACADEMY_IAB_MAX,
   IN_FEED_IAB_MAX,
   PODCAST_IAB_MAX,
   adsConflictAdjacent,
@@ -13,9 +12,11 @@ import {
   isEvolveXAd,
   isFirstPartyAd,
   pickAcademySponsors,
+  pickAcademyThreadAds,
   pickArticleAds,
-  pickCommunityFeedAds,
-  pickHomeEndBigBox,
+  pickHomePageAds,
+  ACADEMY_THREAD_IAB_MAX,
+  ARTICLE_IN_BODY_MAX,
   pickHomeSponsors,
   pickMediaFeedAds,
   pickScrollBanners,
@@ -132,8 +133,7 @@ describe('isAcademyAd', () => {
     expect(pickHomeSponsors([ACADEMY_SPONSOR_AD])).toEqual([])
     expect(ensurePodcastSponsors([])).toEqual([])
     expect(pickAcademySponsors([], 2)).toEqual([])
-    expect(pickAcademySponsors(stills, 4).length).toBeGreaterThan(0)
-    expect(pickAcademySponsors(stills, 4).length).toBeLessThanOrEqual(ACADEMY_IAB_MAX)
+    expect(pickAcademySponsors(stills, 4)).toHaveLength(IN_FEED_IAB_MAX)
     expect(
       pickAcademySponsors(
         [
@@ -144,8 +144,8 @@ describe('isAcademyAd', () => {
           },
         ],
         2,
-      ).every(a => a.zone === 'C'),
-    ).toBe(true)
+      ),
+    ).toEqual([])
     const mixed = pickHomeSponsors([
       ...stills,
       { ...stills[2], id: 'tr-c', zone: 'C', click_url: 'https://transcendibogaine.com/?utm_content=728x90' },
@@ -227,23 +227,10 @@ describe('podcast big box + scroll banners', () => {
     expect(pool.some(a => a.zone === 'A' || a.zone === 'C')).toBe(false)
   })
 
-  it('picks multiple Zone E boxes for 4 / ad / 4 / ad — never squares', () => {
+  it('caps podcast archive slots at one big box', () => {
     const boxes = selectPodcastBigBoxes([zoneE, adcE, evxE, acaE, zoneA])
-    expect(boxes.length).toBeGreaterThan(1)
-    expect(boxes.length).toBeLessThanOrEqual(PODCAST_IAB_MAX)
+    expect(boxes).toHaveLength(PODCAST_IAB_MAX)
     expect(boxes.every(a => a.zone === 'E')).toBe(true)
-    for (let i = 1; i < boxes.length; i++) {
-      expect(adsConflictAdjacent(boxes[i - 1], boxes[i])).toBe(false)
-    }
-  })
-
-  it('end-of-home big box is Zone E and not a mid-scroll advertiser', () => {
-    const home = pickHomeSponsors([zoneA, adcE, evxE, zoneE])
-    const end = pickHomeEndBigBox([zoneA, adcE, evxE, zoneE], home)
-    expect(end?.zone).toBe('E')
-    if (end && home[0]) {
-      expect(advertiserFamilyKey(end)).not.toBe(advertiserFamilyKey(home[0]))
-    }
   })
 
   it('uses Zone C banners in scroll and never falls back to a square', () => {
@@ -312,48 +299,53 @@ describe('first-party adjacency + media magazine feed', () => {
     expect(pair[0].sponsor_name).toBe('Evolved Pros Academy')
   })
 
-  it('picks a rail plus an in-feed stream — never a footer pair', () => {
+  it('picks one sidebar unit plus an in-feed stream — never a footer pair', () => {
     const feed = pickMediaFeedAds(catalog)
-    expect(feed.sidebar.length).toBeGreaterThan(0)
-    expect(feed.sidebar.length).toBeLessThanOrEqual(2)
+    expect(feed.sidebar).toBeTruthy()
     expect(feed.inFeed.length).toBeGreaterThan(0)
-    expect(feed.inFeed.length).toBeLessThanOrEqual(IN_FEED_IAB_MAX)
+    expect(feed.inFeed.length).toBeGreaterThan(IN_FEED_IAB_MAX)
     expect('footer' in feed).toBe(false)
     for (let i = 1; i < feed.inFeed.length; i++) {
       expect(adsConflictAdjacent(feed.inFeed[i - 1], feed.inFeed[i])).toBe(false)
     }
   })
 
-  it('article rail + several in-body units, never the same advertiser twice in a row', () => {
+  it('article layout is a couple of centered 300×250 units in the story column', () => {
     const article = pickArticleAds(catalog)
-    expect(article.sidebar.length).toBeGreaterThan(0)
-    expect(article.inBody.length).toBeGreaterThan(0)
-    const placed = [...article.sidebar, ...article.inBody]
-    for (let i = 1; i < article.inBody.length; i++) {
-      expect(adsConflictAdjacent(article.inBody[i - 1], article.inBody[i])).toBe(false)
+    expect(article.sidebar).toBeTruthy()
+    expect(article.inBody.length).toBeGreaterThanOrEqual(2)
+    expect(article.inBody.length).toBeLessThanOrEqual(ARTICLE_IN_BODY_MAX)
+    expect(article.inBody.every(a => a.zone === 'A')).toBe(true)
+    if (article.sidebar && article.inBody[0]) {
+      expect(advertiserFamilyKey(article.inBody[0])).not.toBe(advertiserFamilyKey(article.sidebar))
     }
-    if (article.sidebar[0] && article.inBody[0]) {
-      expect(advertiserFamilyKey(article.inBody[0])).not.toBe(advertiserFamilyKey(article.sidebar[0]))
-    }
-    expect(placed.length).toBeGreaterThan(2)
+    expect(adsConflictAdjacent(article.inBody[0], article.inBody[1])).toBe(false)
   })
 
-  it('community feed mixes squares and banners and spreads advertisers', () => {
-    const feed = pickCommunityFeedAds(catalog)
-    expect(feed.length).toBeGreaterThan(1)
-    expect(feed.some(a => a.zone === 'A')).toBe(true)
-    expect(feed.some(a => a.zone === 'C')).toBe(true)
-    for (let i = 1; i < feed.length; i++) {
-      expect(adsConflictAdjacent(feed[i - 1], feed[i])).toBe(false)
+  it('academy threads pick enough units for an ad every three lesson cards', () => {
+    const thread = pickAcademyThreadAds(catalog)
+    expect(thread.length).toBeGreaterThan(IN_FEED_IAB_MAX)
+    expect(thread.length).toBeLessThanOrEqual(ACADEMY_THREAD_IAB_MAX)
+    for (let i = 1; i < thread.length; i++) {
+      expect(adsConflictAdjacent(thread[i - 1], thread[i])).toBe(false)
+    }
+  })
+
+  it('home page ads keep in-row units and an end 300×600 without adjacent twins', () => {
+    const home = pickHomePageAds(catalog)
+    const seq = [home.tileRow, home.episodeRow, home.storyRow, home.endBox].filter(Boolean)
+    expect(seq.length).toBeGreaterThan(0)
+    for (let i = 1; i < seq.length; i++) {
+      expect(adsConflictAdjacent(seq[i - 1]!, seq[i]!)).toBe(false)
     }
   })
 
   it('does not rewrite stored click URLs on media picks', () => {
     const feed = pickMediaFeedAds(catalog)
-    for (const ad of [...feed.sidebar, ...feed.inFeed]) {
-      const original = catalog.find(c => c.id === ad.id)
+    for (const ad of [feed.sidebar, ...feed.inFeed].filter(Boolean)) {
+      const original = catalog.find(c => c.id === ad!.id)
       expect(original).toBeTruthy()
-      expect(ad.click_url).toBe(original?.click_url)
+      expect(ad!.click_url).toBe(original?.click_url)
     }
   })
 })

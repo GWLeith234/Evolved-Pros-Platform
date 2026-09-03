@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { formatDurationMMSS } from '@/lib/academy/types'
+import { assignThreadAds } from '@/lib/academy/threadAds'
+import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 interface LessonItem {
   id: string
@@ -23,6 +26,8 @@ interface Props {
   modules: ModuleGroup[]
   courseSlug: string
   pillarColor: string
+  /** One centered IAB after every three lesson cards, across the whole pillar. */
+  ads?: SponsorAd[]
 }
 
 function formatDur(s: number | null): string {
@@ -43,11 +48,37 @@ function ThumbnailPlayIcon() {
   )
 }
 
-export function PillarModuleAccordion({ modules, courseSlug, pillarColor }: Props) {
+function ThreadAd({ ad }: { ad: SponsorAd }) {
+  if (!ad.image_url) return null
+  return (
+    <div
+      data-academy-thread-ad
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        padding: '16px 20px',
+        borderBottom: '1px solid rgba(255,255,255,0.04)',
+        minHeight: 250,
+      }}
+    >
+      <IabAdvertisementSlot
+        ad={{ ...ad, image_url: ad.image_url }}
+        locationId="academy-thread"
+      />
+    </div>
+  )
+}
+
+export function PillarModuleAccordion({ modules, courseSlug, pillarColor, ads = [] }: Props) {
   const defaultOpen = modules.find(m => m.lessons.some(l => !l.completedAt))?.moduleNumber
     ?? modules[0]?.moduleNumber
     ?? 1
   const [open, setOpen] = useState<Set<number>>(new Set([defaultOpen]))
+  const threadAds = ads.filter(a => a?.image_url)
+  const adAfterLesson = assignThreadAds(
+    modules.flatMap(m => m.lessons),
+    threadAds,
+  )
 
   function toggle(n: number) {
     setOpen(prev => {
@@ -128,14 +159,16 @@ export function PillarModuleAccordion({ modules, courseSlug, pillarColor }: Prop
             {/* Lesson list */}
             {isOpen && (
               <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                {lessons.map((lesson, idx) => (
+                {lessons.map((lesson, idx) => {
+                  const insertAd = adAfterLesson.get(lesson.id)
+                  return (
+                  <div key={lesson.id}>
                   <Link
-                    key={lesson.id}
                     href={`/academy/${courseSlug}/${lesson.slug}`}
                     style={{
                       display: 'flex', alignItems: 'center', gap: '14px',
                       padding: '14px 20px',
-                      borderBottom: idx < lessons.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                      borderBottom: idx < lessons.length - 1 || insertAd ? '1px solid rgba(255,255,255,0.04)' : 'none',
                       textDecoration: 'none',
                       backgroundColor: 'transparent',
                       transition: 'background-color 0.15s',
@@ -242,7 +275,10 @@ export function PillarModuleAccordion({ modules, courseSlug, pillarColor }: Prop
                       )}
                     </div>
                   </Link>
-                ))}
+                  {insertAd ? <ThreadAd ad={insertAd} /> : null}
+                  </div>
+                  )
+                })}
               </div>
             )}
           </div>

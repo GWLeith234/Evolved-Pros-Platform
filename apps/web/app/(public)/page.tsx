@@ -7,9 +7,15 @@ import { listPublicMediaStories } from '@/lib/media/sitemap'
 import { getPublishedEpisodes } from '@/lib/podcast/public'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 import { getActivePlatformAds } from '@/lib/cache/shared'
-import { pickHomeEndBigBox } from '@/lib/sponsors/partners'
+import { pickHomePageAds } from '@/lib/sponsors/partners'
+import { takeHomeContentRow } from '@/lib/home/contentRow'
 import { adMatchesSurface } from '@/lib/ads/iab'
-import { HomeSponsorAd, type SponsorAd } from '@/components/home/HomeSponsorAd'
+import {
+  HomeContentAdGrid,
+  HomeEditorialCard,
+  HomeEndBox,
+} from '@/components/home/HomeContentAdGrid'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 /**
  * The public front door (SPRINT GATE-1).
@@ -59,11 +65,11 @@ interface LandingStory {
   title: string
 }
 
-/** At most three, and never a hard failure — the door stays open regardless. */
+/** At most two editorial cards — the third slot is an IAB, not another story. */
 async function loadEpisodes(): Promise<LandingEpisode[]> {
   try {
     const episodes = await getPublishedEpisodes()
-    return episodes.slice(0, 3).map(e => ({
+    return takeHomeContentRow(episodes).map(e => ({
       slug: e.slug,
       title: e.title,
       guestName: e.guest_name,
@@ -86,33 +92,34 @@ async function loadStories(): Promise<LandingStory[]> {
     // listPublicMediaStories, never the raw is_published filter alone: two
     // slugs are denylisted in UNPUBLISHED_MEDIA_PATHS despite is_published
     // being true, and a raw query would put them on the front door.
-    return listPublicMediaStories(data ?? [])
-      .slice(0, 3)
-      .map(s => ({ slug: s.slug as string, pillar: s.pillar as string, title: s.title as string }))
+    return takeHomeContentRow(listPublicMediaStories(data ?? [])).map(s => ({
+      slug: s.slug as string,
+      pillar: s.pillar as string,
+      title: s.title as string,
+    }))
   } catch {
     return []
   }
 }
 
-async function loadEndBigBox(): Promise<SponsorAd | null> {
+async function loadLandingAds() {
   try {
     const all = (await getActivePlatformAds()) as SponsorAd[]
     const homePool = all.filter(a => adMatchesSurface(a, 'home'))
-    const pool = homePool.length ? homePool : all
-    return pickHomeEndBigBox(pool)
+    return pickHomePageAds(homePool.length ? homePool : all)
   } catch {
-    return null
+    return pickHomePageAds([])
   }
 }
 
 export default async function LandingPage() {
   // PUBLIC. resolveCurrentUser returns null for an anonymous visitor and this
   // page never redirects on the result — it only swaps one link.
-  const [profile, episodes, stories, endAd] = await Promise.all([
+  const [profile, episodes, stories, ads] = await Promise.all([
     resolveCurrentUser(),
     loadEpisodes(),
     loadStories(),
-    loadEndBigBox(),
+    loadLandingAds(),
   ])
   const signedIn = profile !== null
 
@@ -240,26 +247,27 @@ export default async function LandingPage() {
         {/* Renders only with real rows. No episodes → no section, no empty state
             pretending to be one. Transcripts are never printed here. */}
         {episodes.length > 0 && (
-          <Panel title="Latest episodes" href="/podcast" linkLabel="All episodes">
+          <HomeContentAdGrid title="Latest episodes" href="/podcast" linkLabel="All episodes" ad={ads.episodeRow}>
             {episodes.map(e => (
-              <Card key={e.slug} href={`/podcast/${e.slug}`} title={e.title} meta={e.guestName} />
+              <HomeEditorialCard key={e.slug} href={`/podcast/${e.slug}`} title={e.title} meta={e.guestName} />
             ))}
-          </Panel>
+          </HomeContentAdGrid>
         )}
 
         {stories.length > 0 && (
-          <Panel title="From Evolved Media" href="/media" linkLabel="All stories">
+          <HomeContentAdGrid title="From Evolved Media" href="/media" linkLabel="All stories" ad={ads.storyRow}>
             {stories.map(s => (
-              <Card key={s.slug} href={`/media/${s.pillar}/${s.slug}`} title={s.title} meta={null} />
+              <HomeEditorialCard
+                key={s.slug}
+                href={`/media/${s.pillar}/${s.slug}`}
+                title={s.title}
+                meta={null}
+              />
             ))}
-          </Panel>
+          </HomeContentAdGrid>
         )}
 
-        {endAd ? (
-          <div style={{ padding: '32px 0 8px', borderTop: '1px solid var(--border-color)' }}>
-            <HomeSponsorAd ad={endAd} />
-          </div>
-        ) : null}
+        <HomeEndBox ad={ads.endBox} />
       </main>
     </div>
   )
@@ -366,105 +374,3 @@ function NavLink({ href, label }: { href: string; label: string }) {
   )
 }
 
-function Panel({
-  title,
-  href,
-  linkLabel,
-  children,
-}: {
-  title: string
-  href: string
-  linkLabel: string
-  children: React.ReactNode
-}) {
-  return (
-    <section style={{ padding: '32px 0', borderTop: '1px solid var(--border-color)' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'baseline',
-          justifyContent: 'space-between',
-          gap: 16,
-          marginBottom: 18,
-        }}
-      >
-        <h2
-          style={{
-            margin: 0,
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: 13,
-            fontWeight: 700,
-            letterSpacing: '0.2em',
-            textTransform: 'uppercase',
-            color: 'var(--brand-red)',
-          }}
-        >
-          {title}
-        </h2>
-        <Link
-          href={href}
-          style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-            color: 'var(--text-tertiary)',
-            textDecoration: 'none',
-          }}
-        >
-          {linkLabel}
-        </Link>
-      </div>
-      <ul
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-          gap: 16,
-          margin: 0,
-          padding: 0,
-          listStyle: 'none',
-        }}
-      >
-        {children}
-      </ul>
-    </section>
-  )
-}
-
-function Card({ href, title, meta }: { href: string; title: string; meta: string | null }) {
-  return (
-    <li style={{ minWidth: 0 }}>
-      <Link
-        href={href}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 6,
-          height: '100%',
-          padding: 16,
-          background: 'var(--bg-surface)',
-          border: '1px solid var(--border-color)',
-          textDecoration: 'none',
-        }}
-      >
-        <span
-          style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: 16,
-            fontWeight: 700,
-            lineHeight: 1.25,
-            color: 'var(--text-primary)',
-          }}
-        >
-          {title}
-        </span>
-        {meta && (
-          <span style={{ fontFamily: '"Barlow", sans-serif', fontSize: 13, color: 'var(--text-tertiary)' }}>
-            {meta}
-          </span>
-        )}
-      </Link>
-    </li>
-  )
-}
