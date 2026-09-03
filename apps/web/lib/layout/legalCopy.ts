@@ -1,5 +1,10 @@
 /**
- * Locked public legal copy (George, 2026-08-29).
+ * Locked public legal copy.
+ *
+ * Address and governing law: George, 2026-08-29.
+ * Membership refunds: George, 2026-09-02 — no refunds; no 7-day first-charge
+ * refund; no Consumer Protection essay. One sentence that we do not take away
+ * rights Saskatchewan law does not let a supplier waive.
  *
  * These strings replace the FOOTER-1 `TODO GEORGE / COUNSEL` blanks on /terms
  * and /privacy. They are the owner's locked facts, not invented doctrine.
@@ -41,13 +46,14 @@ export const GOVERNING_LAW_AND_VENUE = `${GOVERNING_LAW_SENTENCE} ${GOVERNING_VE
 
 /**
  * Paid membership (VIP, Professional, any other recurring platform plan).
- * Keynotes and LIVE events are named only to put them out of scope — do not
- * invent a ticket or deposit policy here.
+ * 2026-09-02 lock: cancel anytime; cancellation stops renewal; keep access
+ * through the prepaid period; no refunds and no prorate. No 7-day first-charge
+ * refund. Keynotes and LIVE events are named only to put them out of scope —
+ * do not invent a ticket or deposit policy here.
  */
 export const MEMBERSHIP_REFUND_PARAS = [
-  'You may cancel a paid membership (VIP, Professional, or any other recurring platform plan) at any time. Cancellation stops renewal. You keep access until the end of the period already paid. We do not give a prorated refund of the current period.',
-  'First paid charge only: if you ask within 7 days of that first charge, we refund that charge in full and revoke access.',
-  'After that 7-day window, we do not refund membership payments except for rights that Saskatchewan law does not let a supplier waive. Those include internet sales and remote-contract cancellation under The Consumer Protection and Business Practices Act and its regulations: 7 days after receiving a copy of the contract if required disclosure was not given; 30 days after entering the contract if you were not given a copy; and a refund of the consideration within 15 days of a valid statutory cancellation. This is not a blanket cooling-off period.',
-  'To cancel or request a refund, write to support@evolvedpros.com. Payments are processed by Stripe.',
+  'You may cancel a paid membership (VIP, Professional, or any other recurring platform plan) at any time. Cancellation stops renewal. You keep access until the end of the period already paid. We do not refund membership payments, including the current period.',
+  'Nothing in these terms takes away rights that Saskatchewan law does not let a supplier waive.',
+  'To cancel, write to support@evolvedpros.com. Payments are processed by Stripe.',
   'Keynotes and LIVE events have their own terms, provided at booking.',
 ] as const

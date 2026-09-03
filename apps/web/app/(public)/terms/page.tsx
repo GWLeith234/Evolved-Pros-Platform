@@ -26,10 +26,11 @@ export const metadata: Metadata = publicPageMetadata('/terms', {
 /**
  * SPRINT FOOTER-1 — /terms (previously a 404).
  *
- * Address, membership refunds, and governing law are George's 2026-08-29
- * lock in lib/layout/legalCopy.ts. Do not invent extra doctrine. The entity
- * is GWLeith Revenue Growth Solutions, not Evolved Pros, Evolved Publishing
- * or EvolveX360. MacDermid Lamarsh still blesses wording later.
+ * Address and governing law are George's 2026-08-29 lock; membership
+ * refunds are the 2026-09-02 lock (no refunds, no 7-day first-charge).
+ * Copy lives in lib/layout/legalCopy.ts. Do not invent extra doctrine.
+ * The entity is GWLeith Revenue Growth Solutions, not Evolved Pros,
+ * Evolved Publishing or EvolveX360. MacDermid Lamarsh still blesses wording later.
  *
  * The Plans section mirrors /pricing (lib/pricing.ts). If the ladder changes,
  * change both.

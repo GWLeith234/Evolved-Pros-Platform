@@ -54,23 +54,32 @@ describe('governing law and venue', () => {
 })
 
 describe('membership refunds and cancellation', () => {
-  it('covers cancel-anytime, no proration, and the 7-day first-charge refund', () => {
+  it('covers cancel-anytime and no refunds of the prepaid period', () => {
     expect(refunds).toContain('cancel a paid membership')
     expect(refunds).toContain('VIP, Professional, or any other recurring platform plan')
     expect(refunds).toContain('Cancellation stops renewal')
     expect(refunds).toContain('end of the period already paid')
-    expect(refunds).toContain('do not give a prorated refund of the current period')
-    expect(refunds).toContain('First paid charge only')
-    expect(refunds).toContain('within 7 days of that first charge')
-    expect(refunds).toContain('refund that charge in full and revoke access')
+    expect(refunds).toContain('do not refund membership payments')
+    expect(refunds).toContain('including the current period')
   })
 
-  it('preserves Saskatchewan remote-contract rights and does not claim a blanket cooling-off or all-sales-final', () => {
-    expect(refunds).toContain('The Consumer Protection and Business Practices Act')
-    expect(refunds).toContain('7 days after receiving a copy')
-    expect(refunds).toContain('30 days after entering the contract')
-    expect(refunds).toContain('within 15 days of a valid statutory cancellation')
-    expect(refunds).toContain('This is not a blanket cooling-off period')
+  it('has no 7-day first-charge refund and no Consumer Protection essay', () => {
+    expect(refunds).not.toContain('First paid charge only')
+    expect(refunds).not.toContain('within 7 days of that first charge')
+    expect(refunds).not.toContain('refund that charge in full and revoke access')
+    expect(refunds).not.toContain('7-day first-charge')
+    expect(refunds).not.toContain('7-day window')
+    expect(refunds).not.toContain('The Consumer Protection and Business Practices Act')
+    expect(refunds).not.toContain('7 days after receiving a copy')
+    expect(refunds).not.toContain('30 days after entering the contract')
+    expect(refunds).not.toContain('within 15 days of a valid statutory cancellation')
+    expect(refunds).not.toContain('This is not a blanket cooling-off period')
+  })
+
+  it('keeps one Saskatchewan statutory-rights sentence and rejects all-sales-final / counsel TODOs', () => {
+    expect(refunds).toContain(
+      'Nothing in these terms takes away rights that Saskatchewan law does not let a supplier waive',
+    )
     expect(refunds.toLowerCase()).not.toContain('all sales final')
     expect(refunds).not.toContain('TODO GEORGE / COUNSEL')
   })
