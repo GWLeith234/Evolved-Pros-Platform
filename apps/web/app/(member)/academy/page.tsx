@@ -13,10 +13,10 @@ import {
   fetchUserProfile,
 } from '@/lib/academy/fetchers'
 import { hasTierAccess } from '@/lib/tier'
-import { ACADEMY_UPGRADE_AD, pickAcademySponsors, pickScrollBanners } from '@/lib/sponsors/partners'
+import { ACADEMY_UPGRADE_AD, isAcademyAd, pickAcademySponsors } from '@/lib/sponsors/partners'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { adMatchesSurface, isIabImageStill } from '@/lib/ads/iab'
-import { interleaveAds } from '@/lib/ads/rhythm'
+import { ACADEMY_COURSE_EVERY, interleaveAds } from '@/lib/ads/rhythm'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 export const dynamic = 'force-dynamic'
@@ -65,21 +65,20 @@ export default async function AcademyPage() {
   const catalog = (await getActivePlatformAds()) as SponsorAd[]
   const academyPool = catalog.filter(a => adMatchesSurface(a, 'academy'))
   const pool = academyPool.length ? academyPool : catalog
-  const sponsorAds = pickAcademySponsors(pool, 2)
-  const scrollBanner = pickScrollBanners(pool, 1)[0] ?? null
+  const sponsorAds = pickAcademySponsors(pool, 6).filter(
+    ad => !showUpgrade || !isAcademyAd(ad),
+  )
 
   const units: AcademyUnit[] = []
   if (showUpgrade) units.push({ id: 'academy-upgrade', kind: 'upgrade' })
-  if (scrollBanner && isIabImageStill(scrollBanner)) {
-    units.push({ id: scrollBanner.id, kind: 'iab', ad: scrollBanner })
-  }
   for (const ad of sponsorAds) {
-    if (units.some(u => u.id === ad.id)) continue
+    if (!isIabImageStill(ad) || units.some(u => u.id === ad.id)) continue
     units.push({ id: ad.id, kind: 'iab', ad })
   }
 
-  // A row of pillar cards, then one unit — curriculum first, ads as punctuation.
-  const chunks = interleaveAds(courses, units, 3, { trailing: false })
+  // Two pillar cards, then one unit — banners, squares, and big boxes through
+  // the curriculum. Never Academy next to Academy.
+  const chunks = interleaveAds(courses, units, ACADEMY_COURSE_EVERY, { trailing: true })
 
   return (
     <div className="academy-page ep-surface-mobile">

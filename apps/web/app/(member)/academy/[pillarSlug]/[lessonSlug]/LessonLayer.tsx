@@ -7,6 +7,7 @@ import type { TranscriptSegment } from '@/lib/academy/transcript'
 import { AcademyLessonSponsors } from '@/components/academy/AcademyLessonSponsors'
 import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import { adsConflictAdjacent } from '@/lib/sponsors/partners'
 
 interface LessonLayerProps {
   lesson: {
@@ -41,7 +42,7 @@ interface LessonLayerProps {
     durationSeconds: number | null
     isLocked: boolean
   } | null
-  /** One square after discussion — never paired with the mid-scroll banner. */
+  /** IAB units through the lesson — never the same advertiser twice in a row. */
   sponsorAds?: SponsorAd[]
   /** Mid-scroll 728×90 — after notes, before discussion. */
   scrollBanner?: SponsorAd | null
@@ -528,7 +529,10 @@ export function LessonLayer({
         />
       </section>
 
-      {sponsorAds[0] ? <AcademyLessonSponsors ads={[sponsorAds[0]]} /> : null}
+      {(() => {
+        const mid = sponsorAds.find(a => !scrollBanner || !adsConflictAdjacent(scrollBanner, a))
+        return mid ? <AcademyLessonSponsors ads={[mid]} /> : null
+      })()}
 
       {/* SECTION 6 — UP NEXT */}
       <section style={{ marginBottom: 40 }}>
@@ -666,6 +670,15 @@ export function LessonLayer({
           {markError}
         </p>
       )}
+
+      {(() => {
+        const used = [scrollBanner, sponsorAds.find(a => !scrollBanner || !adsConflictAdjacent(scrollBanner, a))].filter(Boolean) as SponsorAd[]
+        const last = used[used.length - 1] ?? scrollBanner
+        const extra = sponsorAds.find(
+          a => !used.some(u => u.id === a.id) && (!last || !adsConflictAdjacent(last, a)),
+        )
+        return extra ? <AcademyLessonSponsors ads={[extra]} /> : null
+      })()}
     </div>
   )
 }

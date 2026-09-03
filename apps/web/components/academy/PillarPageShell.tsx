@@ -226,23 +226,9 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
     .order('sort_order')
     .limit(24)
   const pillarPool = filterLiveAds((pillarAdData ?? []) as SponsorAd[])
-  const pillarAd = pickScrollBanners(pillarPool, 1)[0] ?? pickAcademySponsors(pillarPool, 1)[0] ?? null
-
-  // Today's IAB stills for the course footer — never the old architecture/logo fallbacks.
-  let courseSponsors: SponsorAd[] = []
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: sponsorRows } = await (adminClient as any)
-      .from('platform_ads')
-      .select(SPONSOR_AD_COLUMNS)
-      .eq('is_active', true)
-      .order('sort_order')
-      .limit(24)
-    const all = filterLiveAds((sponsorRows ?? []) as SponsorAd[])
-    if (all.length > 0) courseSponsors = pickAcademySponsors(all, 1)
-  } catch {
-    /* empty — do not invent old partner cards */
-  }
+  const mixed = pickAcademySponsors(pillarPool, 3)
+  const courseSponsors = mixed.slice(0, 1)
+  const pillarAd = mixed[1] ?? pickScrollBanners(pillarPool, 1)[0] ?? null
 
   return (
     <main style={{ position: 'relative', zIndex: 1, backgroundColor: '#0A0F18', minHeight: '100vh', color: '#faf9f7' }}>

@@ -427,15 +427,20 @@ export default async function StoryPage({
             </div>
           )}
 
-          {articleAds.sidebar?.image_url ? (
+          {articleAds.sidebar.filter(a => a.image_url).map((ad, i) => (
             <div
+              key={ad.id}
               data-media-ads="article-rail"
               className={hideRailOnMobile ? 'media-article-rail media-article-rail--desktop' : 'media-article-rail'}
-              style={{ position: 'sticky', top: 24 }}
+              style={{
+                marginBottom: i < articleAds.sidebar.length - 1 ? 16 : 0,
+                position: i === articleAds.sidebar.length - 1 ? 'sticky' : undefined,
+                top: i === articleAds.sidebar.length - 1 ? 24 : undefined,
+              }}
             >
-              <MediaIabSlot ad={articleAds.sidebar} locationId="media-article-rail" />
+              <MediaIabSlot ad={ad} locationId="media-article-rail" />
             </div>
-          ) : null}
+          ))}
         </div>
       </div>
 

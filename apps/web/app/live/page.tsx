@@ -27,7 +27,7 @@ import {
 } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
-import { adMatchesSurface, filterLiveAds } from '@/lib/ads/iab'
+import { adMatchesSurface, filterLiveAds, isLeaderboardStill } from '@/lib/ads/iab'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 import { PublicFooter } from '@/components/layout/PublicFooter'
 
@@ -48,7 +48,7 @@ async function fetchLiveSponsors(): Promise<SponsorAd[]> {
       .limit(48)
     const all = filterLiveAds((rows ?? []) as SponsorAd[]).filter(a => adMatchesSurface(a, 'live'))
     if (all.length === 0) return []
-    return pickAcademySponsors(all, PAGE_IAB_MAX)
+    return pickAcademySponsors(all, 6).filter(a => !isLeaderboardStill(a)).slice(0, PAGE_IAB_MAX)
   } catch {
     return []
   }

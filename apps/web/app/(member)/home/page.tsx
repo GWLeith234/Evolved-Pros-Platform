@@ -25,6 +25,7 @@ import {
   type SponsorAd,
 } from '@/components/home/HomeSponsorAd'
 import {
+  pickHomeEndBigBox,
   pickHomeSponsors,
 } from '@/lib/sponsors/partners'
 import { adMatchesSurface } from '@/lib/ads/iab'
@@ -485,20 +486,21 @@ async function fetchWeekCommitments(profileId: string, weekStart: string): Promi
  * waterfall + mount gate for the sponsor row and sidebar. adminClient
  * bypasses RLS so members always see active placements.
  */
-async function fetchHomeSponsors(): Promise<{ home: SponsorAd[] }> {
-  // Main row: 2 rotated partners. Ads catalogue is cached (2 min).
+async function fetchHomeSponsors(): Promise<{ home: SponsorAd[]; end: SponsorAd | null }> {
+  // Mid-scroll: 2 rotated partners (placement George locked). End: one Zone E.
   try {
     const all = (await getActivePlatformAds()) as Array<SponsorAd & { placement?: string | null }>
     if (all.length === 0) {
-      return { home: [] }
+      return { home: [], end: null }
     }
 
     const homePool = all.filter(a => adMatchesSurface(a, 'home'))
     const pool = homePool.length ? homePool : all
-    return { home: pickHomeSponsors(pool) }
+    const home = pickHomeSponsors(pool)
+    return { home, end: pickHomeEndBigBox(pool, home) }
   } catch (err) {
     console.error('[home.fetchHomeSponsors] failed:', err instanceof Error ? err.message : err)
-    return { home: [] }
+    return { home: [], end: null }
   }
 }
 
@@ -874,6 +876,8 @@ export default async function MemberHomePage() {
           />
         )}
       </div>
+
+      {sponsors.end ? <HomeSponsorAd ad={sponsors.end} /> : null}
 
     </div>
   )
