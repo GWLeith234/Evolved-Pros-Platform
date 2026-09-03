@@ -15,12 +15,14 @@ function liveCatalog(list: SponsorAd[]): SponsorAd[] {
 
 /** Max units that may share one cluster. Village rhythm is one. */
 export const CLUSTER_IAB_MAX = 1
-/** Legacy cap kept for podcast archive slots (spaced through episodes, not paired). */
-export const FOOTER_IAB_MAX = 2
-/** In-feed stream — enough inventory for a long scroll, placed one at a time. */
-export const IN_FEED_IAB_MAX = 4
-/** Podcast archive + episode: one or two 300×600 big boxes, not a grid of squares. */
-export const PODCAST_IAB_MAX = 2
+/** Hard cap for any single page stream. More than this reads as a board. */
+export const PAGE_IAB_MAX = 2
+/** @deprecated Use PAGE_IAB_MAX — kept so older imports do not break. */
+export const FOOTER_IAB_MAX = PAGE_IAB_MAX
+/** In-feed stream on a long magazine scroll. */
+export const IN_FEED_IAB_MAX = 2
+/** Podcast archive + episode: one 300×600, never a pair of big boxes. */
+export const PODCAST_IAB_MAX = 1
 
 function pickLiveStills(
   list: SponsorAd[],
@@ -204,8 +206,7 @@ export function selectPodcastBigBoxes(list: SponsorAd[]): SponsorAd[] {
 /** Exactly two sponsors for /home main row — daily rotation, no dups.
  *  Home stays Evolution Partners only (no Academy self-promo in that row). */
 export function pickHomeSponsors(list: SponsorAd[]): SponsorAd[] {
-  // Today's four accounts (ADC / Academy / Transcend / EVX), zone-A stills.
-  return pickLiveStills(list, 4, 11)
+  return pickLiveStills(list, PAGE_IAB_MAX, 11)
 }
 
 export type MediaFeedAds = {
@@ -254,7 +255,7 @@ export function pickArticleAds(list: SponsorAd[]): ArticleAds {
   const squares = pickLiveStills(list, 4, 73, 'A').filter(s => advertiserFamilyKey(s) !== sidebarKey)
   const bannerKeys = new Set(banners.map(advertiserFamilyKey))
   const extra = squares.filter(s => !bannerKeys.has(advertiserFamilyKey(s)))
-  const inBody = spreadNonAdjacentAds([...banners, ...extra]).slice(0, 2)
+  const inBody = spreadNonAdjacentAds([...banners, ...extra]).slice(0, 1)
   return { sidebar, inBody }
 }
 

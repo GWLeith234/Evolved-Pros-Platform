@@ -65,7 +65,7 @@ export default async function AcademyPage() {
   const catalog = (await getActivePlatformAds()) as SponsorAd[]
   const academyPool = catalog.filter(a => adMatchesSurface(a, 'academy'))
   const pool = academyPool.length ? academyPool : catalog
-  const sponsorAds = pickAcademySponsors(pool, 3)
+  const sponsorAds = pickAcademySponsors(pool, 2)
   const scrollBanner = pickScrollBanners(pool, 1)[0] ?? null
 
   const units: AcademyUnit[] = []
@@ -79,7 +79,7 @@ export default async function AcademyPage() {
   }
 
   // A row of pillar cards, then one unit — curriculum first, ads as punctuation.
-  const chunks = interleaveAds(courses, units, 3, { trailing: true })
+  const chunks = interleaveAds(courses, units, 3, { trailing: false })
 
   return (
     <div className="academy-page ep-surface-mobile">

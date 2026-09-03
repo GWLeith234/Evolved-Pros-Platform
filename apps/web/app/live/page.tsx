@@ -22,6 +22,7 @@ import { LiveBookingInquiry } from '@/components/live/LiveBookingInquiry'
 import { SPEAKING_STATS } from '@/lib/live/speaking-pins'
 import { getSpeakingPins, statsFromPins } from '@/lib/live/get-speaking-pins'
 import {
+  PAGE_IAB_MAX,
   pickAcademySponsors,
 } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
@@ -47,7 +48,7 @@ async function fetchLiveSponsors(): Promise<SponsorAd[]> {
       .limit(48)
     const all = filterLiveAds((rows ?? []) as SponsorAd[]).filter(a => adMatchesSurface(a, 'live'))
     if (all.length === 0) return []
-    return pickAcademySponsors(all, 2)
+    return pickAcademySponsors(all, PAGE_IAB_MAX)
   } catch {
     return []
   }

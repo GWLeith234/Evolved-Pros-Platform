@@ -191,9 +191,6 @@ export default async function PublicEpisodePage({ params }: Props) {
           </div>
         )}
 
-        {/* Sponsor — top slot */}
-        <SponsorSlot pool={sponsors} startIndex={0} />
-
         {/* Summary */}
         {summaryText(ep) && (
           <p className="mb-10 text-[17px] leading-relaxed" style={{ color: 'rgba(245,240,232,0.8)' }}>

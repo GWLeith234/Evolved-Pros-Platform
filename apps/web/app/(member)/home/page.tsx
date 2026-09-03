@@ -830,8 +830,6 @@ export default async function MemberHomePage() {
         <PodcastReelTile episodes={latestEpisodesResult.episodes} latestEpisodeNumber={latestEpisodesResult.latestNumber} />
       </div>
 
-      {sponsors.home[2] ? <HomeSponsorAd ad={sponsors.home[2]} /> : null}
-
       <ProfileCompletePrompt
         hasAvatar={Boolean(profile.avatar_url)}
         hasBio={Boolean(profile.bio)}
@@ -876,8 +874,6 @@ export default async function MemberHomePage() {
           />
         )}
       </div>
-
-      {sponsors.home[3] ? <HomeSponsorAd ad={sponsors.home[3]} /> : null}
 
     </div>
   )
