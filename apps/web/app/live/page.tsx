@@ -100,6 +100,8 @@ export default async function LivePage() {
       {/* Upcoming speaking — clear slot for confirmed dates / holds */}
       <LiveUpcomingDates />
 
+      <LiveSponsors ads={sponsors.slice(0, 1)} />
+
       {/* Past stages — globe (cities as pins) + city archive */}
       <section className="live-section-pad" style={{ marginTop: 56 }}>
         <LiveSectionHeader
@@ -129,8 +131,7 @@ export default async function LivePage() {
       {/* Product / platform milestones — not speaking */}
       <LiveProductMilestones />
 
-      {/* Evolution Partner ads */}
-      <LiveSponsors ads={sponsors} />
+      <LiveSponsors ads={sponsors.slice(1, 2)} />
 
       <LivePillarGrid />
       <LiveTestimonials />

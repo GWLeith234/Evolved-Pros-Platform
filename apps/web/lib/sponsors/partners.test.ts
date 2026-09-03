@@ -3,14 +3,17 @@ import { houseAdHref } from '@/lib/ads/house'
 import {
   ACADEMY_SPONSOR_AD,
   ACADEMY_UPGRADE_AD,
-  FOOTER_IAB_MAX,
+  CLUSTER_IAB_MAX,
+  IN_FEED_IAB_MAX,
   PODCAST_IAB_MAX,
   adsConflictAdjacent,
+  advertiserFamilyKey,
   ensurePodcastSponsors,
   isAcademyAd,
   isEvolveXAd,
   isFirstPartyAd,
   pickAcademySponsors,
+  pickArticleAds,
   pickHomeSponsors,
   pickMediaFeedAds,
   pickScrollBanners,
@@ -132,7 +135,7 @@ describe('isAcademyAd', () => {
     expect(pickHomeSponsors([ACADEMY_SPONSOR_AD])).toEqual([])
     expect(ensurePodcastSponsors([])).toEqual([])
     expect(pickAcademySponsors([], 2)).toEqual([])
-    expect(pickAcademySponsors(stills, 4)).toHaveLength(FOOTER_IAB_MAX)
+    expect(pickAcademySponsors(stills, 4)).toHaveLength(IN_FEED_IAB_MAX)
     expect(
       pickAcademySponsors(
         [
@@ -298,25 +301,34 @@ describe('first-party adjacency + media magazine feed', () => {
     expect(pair[0].sponsor_name).toBe('Evolved Pros Academy')
   })
 
-  it('picks Zone C banners + at most two Zone A footer squares — never a 2×2 wall', () => {
+  it('picks one sidebar unit plus an in-feed stream — never a footer pair', () => {
     const feed = pickMediaFeedAds(catalog)
-    expect(feed.banners.length).toBeGreaterThan(0)
-    expect(feed.banners.length).toBeLessThanOrEqual(FOOTER_IAB_MAX)
-    expect(feed.banners.every(a => a.zone === 'C')).toBe(true)
-    expect(feed.footer.length).toBeLessThanOrEqual(FOOTER_IAB_MAX)
-    expect(feed.footer.every(a => a.zone === 'A')).toBe(true)
-    expect(feed.footer.filter(a => isFirstPartyAd(a)).length).toBeLessThanOrEqual(1)
-    for (let i = 1; i < feed.footer.length; i++) {
-      expect(adsConflictAdjacent(feed.footer[i - 1], feed.footer[i])).toBe(false)
+    expect(feed.sidebar).toBeTruthy()
+    expect(feed.inFeed.length).toBeGreaterThan(0)
+    expect(feed.inFeed.length).toBeLessThanOrEqual(IN_FEED_IAB_MAX)
+    expect('footer' in feed).toBe(false)
+    for (let i = 1; i < feed.inFeed.length; i++) {
+      expect(adsConflictAdjacent(feed.inFeed[i - 1], feed.inFeed[i])).toBe(false)
+    }
+  })
+
+  it('article layout is one rail + at most two in-body units', () => {
+    const article = pickArticleAds(catalog)
+    expect(article.sidebar).toBeTruthy()
+    expect(article.inBody.length).toBeGreaterThan(0)
+    expect(article.inBody.length).toBeLessThanOrEqual(2)
+    expect(article.inBody.length).toBeLessThanOrEqual(CLUSTER_IAB_MAX + 1)
+    if (article.sidebar) {
+      expect(article.inBody.some(a => advertiserFamilyKey(a) === advertiserFamilyKey(article.sidebar!))).toBe(false)
     }
   })
 
   it('does not rewrite stored click URLs on media picks', () => {
     const feed = pickMediaFeedAds(catalog)
-    for (const ad of [...feed.banners, ...feed.footer]) {
-      const original = catalog.find(c => c.id === ad.id)
+    for (const ad of [feed.sidebar, ...feed.inFeed].filter(Boolean)) {
+      const original = catalog.find(c => c.id === ad!.id)
       expect(original).toBeTruthy()
-      expect(ad.click_url).toBe(original?.click_url)
+      expect(ad!.click_url).toBe(original?.click_url)
     }
   })
 })

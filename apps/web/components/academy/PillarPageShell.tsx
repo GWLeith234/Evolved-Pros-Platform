@@ -239,7 +239,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
       .order('sort_order')
       .limit(24)
     const all = filterLiveAds((sponsorRows ?? []) as SponsorAd[])
-    if (all.length > 0) courseSponsors = pickAcademySponsors(all, 2)
+    if (all.length > 0) courseSponsors = pickAcademySponsors(all, 1)
   } catch {
     /* empty — do not invent old partner cards */
   }

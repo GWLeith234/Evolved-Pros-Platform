@@ -7,9 +7,15 @@ import { adminClient } from '@/lib/supabase/admin'
 import { resolveAuthorProfile } from '@/lib/media/resolveAuthorProfile'
 import { getPillarLabel, getPillarColor } from '@/lib/pillars'
 import { mediaStoryHref } from '@/lib/media/paths'
-import { StoryCommentsClient as StoryComments, MediaAdZoneClient as MediaAdZone } from '../../MediaClientShims'
+import { StoryCommentsClient as StoryComments } from '../../MediaClientShims'
 import { ArticleShareBar } from './ArticleShareBar'
+import { MediaIabSlot } from '@/components/media/MediaIabSlot'
 import { CANONICAL_ORIGIN, canonicalUrl, publicPageMetadata } from '@/lib/seo/canonical'
+import { getActivePlatformAds } from '@/lib/cache/shared'
+import { pickArticleAds } from '@/lib/sponsors/partners'
+import { adMatchesSurface } from '@/lib/ads/iab'
+import { layoutArticleBody, splitHtmlBlocks } from '@/lib/ads/rhythm'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 export const revalidate = 3600
 export const dynamicParams = true
@@ -145,6 +151,10 @@ export default async function StoryPage({
 
   const minutes = readTime(story.body)
   const html = story.body ? await marked.parse(story.body) : ''
+  const catalog = ((await getActivePlatformAds()) as SponsorAd[]).filter(a => adMatchesSurface(a, 'media'))
+  const articleAds = pickArticleAds(catalog)
+  const articleChunks = layoutArticleBody(splitHtmlBlocks(html), articleAds.inBody)
+  const hideRailOnMobile = articleAds.inBody.length > 0
   const isOriginal = !story.pillar
   const pLabel = isOriginal ? 'Original' : getPillarLabel(story.pillar)
   const pColor = isOriginal ? 'var(--brand-gold)' : getPillarColor(story.pillar)
@@ -294,11 +304,34 @@ export default async function StoryPage({
             </div>
           )}
 
-          {/* Article body */}
-          <div
-            className="media-prose"
-            dangerouslySetInnerHTML={{ __html: html }}
-          />
+          {/* Article body — story is the page; one IAB after a few
+              paragraphs, another later if the piece is long. */}
+          <div className="media-prose">
+            {articleChunks.length > 0 ? (
+              articleChunks.map((chunk, idx) =>
+                chunk.kind === 'ad' ? (
+                  <div
+                    key={`ad-${chunk.ad.id}-${idx}`}
+                    data-media-ads="in-article"
+                    style={{
+                      margin: '28px 0',
+                      display: 'flex',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <MediaIabSlot ad={chunk.ad} locationId="media-article" />
+                  </div>
+                ) : (
+                  <div
+                    key={`copy-${idx}`}
+                    dangerouslySetInnerHTML={{ __html: chunk.html }}
+                  />
+                ),
+              )
+            ) : (
+              <div dangerouslySetInnerHTML={{ __html: html }} />
+            )}
+          </div>
 
           {/* Comments */}
           <StoryComments storyId={story.id} pillarColor={pColor} />
@@ -393,19 +426,16 @@ export default async function StoryPage({
             </div>
           )}
 
-          {/* Sidebar IAB: A 300×250 + E 300×600 only. Never Zone C here —
-              a 728×90 leaderboard crushes in this 260px column. */}
-          <MediaAdZone zone="A" />
-          <MediaAdZone zone="E" />
+          {articleAds.sidebar?.image_url ? (
+            <div
+              data-media-ads="article-rail"
+              className={hideRailOnMobile ? 'media-article-rail media-article-rail--desktop' : 'media-article-rail'}
+              style={{ position: 'sticky', top: 24 }}
+            >
+              <MediaIabSlot ad={articleAds.sidebar} locationId="media-article-rail" />
+            </div>
+          ) : null}
         </div>
-      </div>
-
-      {/* Zone C leaderboard — full width under the article grid, never the sidebar. */}
-      <div
-        className="media-zone-c"
-        style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 32px' }}
-      >
-        <MediaAdZone zone="C" />
       </div>
 
       {/* 4. Related articles */}
@@ -512,6 +542,9 @@ export default async function StoryPage({
           .media-related-grid {
             grid-template-columns: 1fr !important;
           }
+          /* In-body units already punctuate the story — don't stack the
+             rail unit directly under the article when columns collapse. */
+          .media-article-rail--desktop { display: none !important; }
         }
         /* MOBILE-MEDIA-FIX: at <640px the 32px headline + 24px gutters spill
            past the 375px viewport. Tighten gutters, shrink the headline, and

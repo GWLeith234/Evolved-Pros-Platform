@@ -21,7 +21,7 @@ import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStor
 import { PodcastReelTile, type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
 import { type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/DailyPulseCard'
 import {
-  HomeSponsorRow,
+  HomeSponsorAd,
   type SponsorAd,
 } from '@/components/home/HomeSponsorAd'
 import {
@@ -758,6 +758,8 @@ export default async function MemberHomePage() {
         showGoalsList={false}
       />
 
+      {sponsors.home[0] ? <HomeSponsorAd ad={sponsors.home[0]} /> : null}
+
       {/* BELOW THE FOLD — commitments + goals only. SPRINT M removed the
           duplicate KPI/scoreboard strip and the pillar-overview: the daily
           metrics (pulse %, streak, habits/commits/goals) live only in the hub
@@ -806,6 +808,8 @@ export default async function MemberHomePage() {
         )}
       </section>
 
+      {sponsors.home[1] ? <HomeSponsorAd ad={sponsors.home[1]} /> : null}
+
       {/* ——— The rest: one-click nudge, community & media ——— */}
 
       {/* Today's Evolution — a single engagement nudge (SPRINT M: the metric
@@ -826,8 +830,7 @@ export default async function MemberHomePage() {
         <PodcastReelTile episodes={latestEpisodesResult.episodes} latestEpisodeNumber={latestEpisodesResult.latestNumber} />
       </div>
 
-      {/* Evolution Partner row — SSR-fetched platform_ads (no client waterfall). */}
-      <HomeSponsorRow ads={sponsors.home} />
+      {sponsors.home[2] ? <HomeSponsorAd ad={sponsors.home[2]} /> : null}
 
       <ProfileCompletePrompt
         hasAvatar={Boolean(profile.avatar_url)}
@@ -873,6 +876,8 @@ export default async function MemberHomePage() {
           />
         )}
       </div>
+
+      {sponsors.home[3] ? <HomeSponsorAd ad={sponsors.home[3]} /> : null}
 
     </div>
   )

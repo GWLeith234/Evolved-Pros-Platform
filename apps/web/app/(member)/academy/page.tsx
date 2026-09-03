@@ -5,9 +5,8 @@ import { redirect } from 'next/navigation'
 import { AcademyMobileProgress } from '@/components/academy/AcademyMobileProgress'
 
 export const metadata: Metadata = { title: 'Academy — Evolved Pros' }
-import { CourseGrid } from '@/components/academy/CourseGrid'
+import { CourseCard } from '@/components/academy/CourseCard'
 import { AcademyArchitectureCard } from '@/components/academy/AcademyArchitectureCard'
-import { AcademyLessonSponsors } from '@/components/academy/AcademyLessonSponsors'
 import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import {
   fetchCoursesWithProgress,
@@ -16,10 +15,36 @@ import {
 import { hasTierAccess } from '@/lib/tier'
 import { ACADEMY_UPGRADE_AD, pickAcademySponsors, pickScrollBanners } from '@/lib/sponsors/partners'
 import { getActivePlatformAds } from '@/lib/cache/shared'
-import { adMatchesSurface } from '@/lib/ads/iab'
+import { adMatchesSurface, isIabImageStill } from '@/lib/ads/iab'
+import { interleaveAds } from '@/lib/ads/rhythm'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 export const dynamic = 'force-dynamic'
+
+type AcademyUnit =
+  | { id: string; kind: 'upgrade' }
+  | { id: string; kind: 'iab'; ad: SponsorAd }
+
+function AcademyAdBreak({ unit }: { unit: AcademyUnit }) {
+  if (unit.kind === 'upgrade') {
+    return (
+      <div data-ad-rhythm="unit" className="flex justify-center py-2">
+        <div className="w-full max-w-xl">
+          <AcademyArchitectureCard ad={ACADEMY_UPGRADE_AD} locationId="academy-upgrade" />
+        </div>
+      </div>
+    )
+  }
+  if (!unit.ad.image_url) return null
+  return (
+    <div data-ad-rhythm="unit" className="flex justify-center py-2">
+      <IabAdvertisementSlot
+        ad={{ ...unit.ad, image_url: unit.ad.image_url }}
+        locationId="academy"
+      />
+    </div>
+  )
+}
 
 export default async function AcademyPage() {
   const supabase = createClient()
@@ -40,8 +65,21 @@ export default async function AcademyPage() {
   const catalog = (await getActivePlatformAds()) as SponsorAd[]
   const academyPool = catalog.filter(a => adMatchesSurface(a, 'academy'))
   const pool = academyPool.length ? academyPool : catalog
-  const sponsorAds = pickAcademySponsors(pool, 2)
+  const sponsorAds = pickAcademySponsors(pool, 3)
   const scrollBanner = pickScrollBanners(pool, 1)[0] ?? null
+
+  const units: AcademyUnit[] = []
+  if (showUpgrade) units.push({ id: 'academy-upgrade', kind: 'upgrade' })
+  if (scrollBanner && isIabImageStill(scrollBanner)) {
+    units.push({ id: scrollBanner.id, kind: 'iab', ad: scrollBanner })
+  }
+  for (const ad of sponsorAds) {
+    if (units.some(u => u.id === ad.id)) continue
+    units.push({ id: ad.id, kind: 'iab', ad })
+  }
+
+  // A row of pillar cards, then one unit — curriculum first, ads as punctuation.
+  const chunks = interleaveAds(courses, units, 3, { trailing: true })
 
   return (
     <div className="academy-page ep-surface-mobile">
@@ -84,25 +122,27 @@ export default async function AcademyPage() {
       />
 
       <div className="px-4 md:px-8 py-5 sm:py-6">
-        <CourseGrid courses={courses} userTier={profile?.tier ?? null} />
-        {showUpgrade && (
-          <div className="mt-8 max-w-xl">
-            <AcademyArchitectureCard ad={ACADEMY_UPGRADE_AD} locationId="academy-upgrade" />
-          </div>
-        )}
-        {scrollBanner?.image_url && (
-          <div className="mt-8">
-            <IabAdvertisementSlot
-              ad={{ ...scrollBanner, image_url: scrollBanner.image_url }}
-              locationId="academy"
-            />
-          </div>
-        )}
-        {sponsorAds.length > 0 && (
-          <div className="mt-8">
-            <AcademyLessonSponsors ads={sponsorAds} />
-          </div>
-        )}
+        <div className="flex flex-col gap-6">
+          {chunks.map((chunk, idx) =>
+            chunk.kind === 'ad' ? (
+              <AcademyAdBreak key={chunk.ad.id} unit={chunk.ad} />
+            ) : (
+              <div
+                key={chunk.items.map(c => c.id).join('-') || `row-${idx}`}
+                className="academy-course-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
+              >
+                {chunk.items.map(course => (
+                  <CourseCard
+                    key={course.id}
+                    course={course}
+                    isLocked={!course.hasAccess}
+                    userTier={profile?.tier ?? null}
+                  />
+                ))}
+              </div>
+            ),
+          )}
+        </div>
       </div>
     </div>
   )

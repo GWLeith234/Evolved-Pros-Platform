@@ -13,8 +13,12 @@ function liveCatalog(list: SponsorAd[]): SponsorAd[] {
   return list.filter(a => !isRetiredPartnerAd(a) && !isBlockedLegacyAd(a))
 }
 
-/** Footer / rail squares — never a wall of four. */
+/** Max units that may share one cluster. Village rhythm is one. */
+export const CLUSTER_IAB_MAX = 1
+/** Legacy cap kept for podcast archive slots (spaced through episodes, not paired). */
 export const FOOTER_IAB_MAX = 2
+/** In-feed stream — enough inventory for a long scroll, placed one at a time. */
+export const IN_FEED_IAB_MAX = 4
 /** Podcast archive + episode: one or two 300×600 big boxes, not a grid of squares. */
 export const PODCAST_IAB_MAX = 2
 
@@ -183,7 +187,7 @@ export function ensurePodcastSponsors(list: SponsorAd[]): SponsorAd[] {
  * Empty when no Zone C rows exist; never falls back to A/E.
  */
 export function pickScrollBanners(list: SponsorAd[], count = 1): SponsorAd[] {
-  const n = Math.min(FOOTER_IAB_MAX, Math.max(1, count))
+  const n = Math.min(IN_FEED_IAB_MAX, Math.max(1, count))
   const banners = liveCatalog(list).filter(isIabImageStill).filter(isLeaderboardStill)
   if (!banners.length) return []
   return pickRotatedSponsors(dedupeIabStillsBySponsor(banners, 'C'), n, { salt: 31 })
@@ -205,31 +209,58 @@ export function pickHomeSponsors(list: SponsorAd[]): SponsorAd[] {
 }
 
 export type MediaFeedAds = {
-  /** Zone C 728×90 — interleaved through the magazine scroll. */
-  banners: SponsorAd[]
-  /** Zone A 300×250 — footer mix only, never a 2×2 wall. */
-  footer: SponsorAd[]
+  /** Optional single sticky half-page (300×600) or square beside the story. */
+  sidebar: SponsorAd | null
+  /** Zone C banners + leftover squares — one unit between story rows. */
+  inFeed: SponsorAd[]
+}
+
+export type ArticleAds = {
+  sidebar: SponsorAd | null
+  inBody: SponsorAd[]
+}
+
+function takeSidebar(list: SponsorAd[]): SponsorAd | null {
+  return pickLiveStills(list, 1, 47, 'E')[0] ?? pickLiveStills(list, 1, 47, 'A')[0] ?? null
 }
 
 /**
- * Media magazine feed. Banners (Zone C) go in the story scroll; squares
- * (Zone A, ≤ FOOTER_IAB_MAX) sit in a centered footer. Destinations are
- * the stored click_url — never rewritten. Academy + EvolveX360 never
- * share the footer pair.
+ * Media magazine feed. One sticky rail unit; remaining inventory walks
+ * the story scroll one at a time. Destinations are the stored click_url.
+ * No footer pair — leftover units that have no content spacer stay unused
+ * rather than clustering at the bottom.
  */
 export function pickMediaFeedAds(list: SponsorAd[]): MediaFeedAds {
-  const banners = pickScrollBanners(list, FOOTER_IAB_MAX)
+  const sidebar = takeSidebar(list)
+  const sidebarKey = sidebar ? advertiserFamilyKey(sidebar) : ''
+  const banners = pickScrollBanners(list, IN_FEED_IAB_MAX)
+  const squares = pickLiveStills(list, 6, 53, 'A').filter(
+    s => advertiserFamilyKey(s) !== sidebarKey,
+  )
   const bannerKeys = new Set(banners.map(advertiserFamilyKey))
-  const squares = pickLiveStills(list, 6, 47, 'A')
-  const preferred = squares.filter(s => !bannerKeys.has(advertiserFamilyKey(s)))
-  const reused = squares.filter(s => bannerKeys.has(advertiserFamilyKey(s)))
-  const footer = spreadNonAdjacentAds([...preferred, ...reused]).slice(0, FOOTER_IAB_MAX)
-  return { banners, footer }
+  const leftoverSquares = squares.filter(s => !bannerKeys.has(advertiserFamilyKey(s)))
+  const inFeed = spreadNonAdjacentAds([...banners, ...leftoverSquares]).slice(0, IN_FEED_IAB_MAX)
+  return { sidebar, inFeed }
 }
 
-/** One or two footer squares for Academy / LIVE — never a wall of four. */
+/**
+ * Article: one sticky sidebar unit; up to two in-body IABs (after copy).
+ * Sidebar and in-body never share the same advertiser.
+ */
+export function pickArticleAds(list: SponsorAd[]): ArticleAds {
+  const sidebar = takeSidebar(list)
+  const sidebarKey = sidebar ? advertiserFamilyKey(sidebar) : ''
+  const banners = pickScrollBanners(list, 2).filter(a => advertiserFamilyKey(a) !== sidebarKey)
+  const squares = pickLiveStills(list, 4, 73, 'A').filter(s => advertiserFamilyKey(s) !== sidebarKey)
+  const bannerKeys = new Set(banners.map(advertiserFamilyKey))
+  const extra = squares.filter(s => !bannerKeys.has(advertiserFamilyKey(s)))
+  const inBody = spreadNonAdjacentAds([...banners, ...extra]).slice(0, 2)
+  return { sidebar, inBody }
+}
+
+/** In-feed stream for Academy / LIVE — callers place units one at a time. */
 export function pickAcademySponsors(list: SponsorAd[], count = 2): SponsorAd[] {
-  const n = Math.min(FOOTER_IAB_MAX, Math.max(1, count))
+  const n = Math.min(IN_FEED_IAB_MAX, Math.max(1, count))
   return pickLiveStills(list, n, 23)
 }
 
