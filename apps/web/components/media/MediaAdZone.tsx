@@ -85,11 +85,11 @@ export function MediaAdZone({ zone }: MediaAdZoneProps) {
         <p
           style={{
             fontFamily: 'sans-serif',
-            fontSize: '12px',
+            fontSize: '10px',
             color: 'rgba(10,15,24,0.35)',
             textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            marginBottom: '4px',
+            letterSpacing: '0.10em',
+            marginBottom: '6px',
           }}
         >
           Advertisement

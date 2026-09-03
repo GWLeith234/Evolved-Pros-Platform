@@ -41,9 +41,9 @@ interface LessonLayerProps {
     durationSeconds: number | null
     isLocked: boolean
   } | null
-  /** Footer squares — after content, before discussion. Cap is 2. */
+  /** One square after discussion — never paired with the mid-scroll banner. */
   sponsorAds?: SponsorAd[]
-  /** Mid-scroll 728×90 — less intrusive than another square. */
+  /** Mid-scroll 728×90 — after notes, before discussion. */
   scrollBanner?: SponsorAd | null
 }
 
@@ -474,16 +474,16 @@ export function LessonLayer({
         </div>
       </section>
 
-      {/* Mid-scroll banner (728×90), then at most two footer squares. */}
+      {/* One mid-scroll unit after notes. The second unit waits until
+          discussion copy has given it a content spacer. */}
       {scrollBanner?.image_url && (
-        <div style={{ marginBottom: 28 }}>
+        <div data-ad-rhythm="unit" style={{ marginBottom: 28 }}>
           <IabAdvertisementSlot
             ad={{ ...scrollBanner, image_url: scrollBanner.image_url }}
             locationId="academy"
           />
         </div>
       )}
-      {sponsorAds.length > 0 && <AcademyLessonSponsors ads={sponsorAds} />}
 
       {/* SECTION 5 — DISCUSSION */}
       <section style={{ marginBottom: 40 }}>
@@ -527,6 +527,8 @@ export function LessonLayer({
           }}
         />
       </section>
+
+      {sponsorAds[0] ? <AcademyLessonSponsors ads={[sponsorAds[0]]} /> : null}
 
       {/* SECTION 6 — UP NEXT */}
       <section style={{ marginBottom: 40 }}>

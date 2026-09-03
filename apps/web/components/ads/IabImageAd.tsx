@@ -145,11 +145,11 @@ export function IabAdvertisementSlot({
         <p
           style={{
             fontFamily: 'sans-serif',
-            fontSize: '12px',
+            fontSize: '10px',
             color: labelColor,
             textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            margin: '0 0 4px',
+            letterSpacing: '0.10em',
+            margin: '0 0 6px',
           }}
         >
           Advertisement

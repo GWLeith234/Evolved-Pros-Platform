@@ -6,7 +6,6 @@ import Image from 'next/image'
 import { CategoryPills, CATEGORY_COLORS } from '@/components/media/CategoryPills'
 import { getPillarLabel } from '@/lib/pillars'
 import { PollWidget } from '@/components/media/PollWidget'
-import { MediaAdZoneClient as MediaAdZone } from './MediaClientShims'
 import { MediaIabSlot } from '@/components/media/MediaIabSlot'
 import { layoutMediaFeed } from '@/lib/media/feedAds'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
@@ -40,10 +39,10 @@ export interface Episode {
 interface MediaPortalClientProps {
   stories: MediaStory[]
   episodes: Episode[]
-  /** Zone C 728×90 — interleaved through the story scroll. */
-  scrollBanners?: SponsorAd[]
-  /** Zone A 300×250 — centered footer mix, never a 2×2 wall. */
-  footerAds?: SponsorAd[]
+  /** Single sticky rail unit (300×600 / half-page preferred). */
+  sidebarAd?: SponsorAd | null
+  /** In-feed units — one between story rows, never a footer pair. */
+  inFeedAds?: SponsorAd[]
 }
 
 // ── Pillar / category helpers ───────────────────────────────────────────────
@@ -324,26 +323,6 @@ function ArticleCard({ story }: { story: MediaStory }) {
 
 // ── Main component ──────────────────────────────────────────────────────────
 
-function MediaSponsoredRule() {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, width: '100%' }}>
-      <span
-        style={{
-          fontFamily: '"Barlow Condensed", sans-serif',
-          fontWeight: 700,
-          fontSize: 9,
-          letterSpacing: '0.42em',
-          textTransform: 'uppercase',
-          color: 'rgba(10,15,24,0.35)',
-        }}
-      >
-        Sponsored
-      </span>
-      <span style={{ flex: 1, height: 1, background: 'var(--paper-line-soft)' }} />
-    </div>
-  )
-}
-
 function MediaScrollBanner({ ad }: { ad: SponsorAd }) {
   return (
     <div
@@ -363,8 +342,8 @@ function MediaScrollBanner({ ad }: { ad: SponsorAd }) {
 export function MediaPortalClient({
   stories,
   episodes,
-  scrollBanners = [],
-  footerAds = [],
+  sidebarAd = null,
+  inFeedAds = [],
 }: MediaPortalClientProps) {
   const [activeCategory, setActiveCategory] = useState<string>(ALL_LABEL)
 
@@ -381,8 +360,8 @@ export function MediaPortalClient({
   const featured = filteredStories[0] ?? null
   const grid = filteredStories.slice(1)
   const feed = useMemo(
-    () => layoutMediaFeed(grid, { banners: scrollBanners, footer: footerAds }),
-    [grid, scrollBanners, footerAds],
+    () => layoutMediaFeed(grid, inFeedAds),
+    [grid, inFeedAds],
   )
   // Right rail "Latest Stories" stays unfiltered per the brief.
   const sidebarStories = stories.slice(0, 4)
@@ -505,22 +484,18 @@ export function MediaPortalClient({
 
             <PollWidget />
 
-            {/* IAB zones A/B/E — platform-only and media placements both serve.
-                Empty zones collapse instead of leaking a placeholder. */}
-            <div style={{ marginTop: 16 }}>
-              <MediaAdZone zone="A" />
-              <MediaAdZone zone="B" />
-              <MediaAdZone zone="E" />
-            </div>
+            {sidebarAd?.image_url ? (
+              <div
+                data-media-ads="sidebar"
+                className="media-sticky-rail"
+                style={{ marginTop: 16, position: 'sticky', top: 24 }}
+              >
+                <MediaIabSlot ad={sidebarAd} locationId="media-rail" />
+              </div>
+            ) : null}
           </aside>
         </div>
       </div>
-
-      {feed.leadBanner ? (
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '28px 24px 0' }}>
-          <MediaScrollBanner ad={feed.leadBanner} />
-        </div>
-      ) : null}
 
       {/* ── Section 2: "More from Evolved Media" divider ── */}
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px 0' }}>
@@ -533,12 +508,12 @@ export function MediaPortalClient({
         </div>
       </div>
 
-      {/* ── Section 3: Card grid, Zone C banners between rows, footer squares ── */}
+      {/* ── Section 3: Card grid with one in-feed unit between story rows ── */}
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 56px' }}>
         {feed.chunks.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
             {feed.chunks.map((chunk, idx) =>
-              chunk.kind === 'banner' ? (
+              chunk.kind === 'ad' ? (
                 <MediaScrollBanner key={chunk.ad.id} ad={chunk.ad} />
               ) : (
                 <div
@@ -561,33 +536,6 @@ export function MediaPortalClient({
             </span>
           </div>
         )}
-
-        {feed.footer.length > 0 ? (
-          <section
-            aria-label="Sponsored"
-            data-media-ads="footer"
-            style={{ marginTop: 40 }}
-          >
-            <MediaSponsoredRule />
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                gap: 24,
-              }}
-            >
-              {feed.footer.map(ad => (
-                <MediaIabSlot
-                  key={ad.id}
-                  ad={ad}
-                  locationId="media-footer"
-                  style={{ marginInline: 0 }}
-                />
-              ))}
-            </div>
-          </section>
-        ) : null}
       </div>
 
       {/* Responsive + hover styles. Grid columns are owned by the Tailwind

@@ -240,30 +240,9 @@ export function HomeSponsorAd({ ad }: { ad: SponsorAd | null }) {
 }
 
 export function HomeSponsorRow({ ads }: { ads: SponsorAd[] }) {
-  const seen = new Set<string>()
-  const unique = ads.filter(ad => {
-    if (!ad?.id || seen.has(ad.id)) return false
-    seen.add(ad.id)
-    return true
-  })
-  if (!unique.length) return null
-
-  const stillsOnly = unique.every(isIabImageStill)
-  const partners = unique.filter(a => !isAcademyAd(a) && !isIabImageStill(a))
-  const houseOnly = partners.length === 0 && !stillsOnly
-  const label = stillsOnly ? 'Sponsored' : houseOnly ? 'Evolved Pros Academy' : 'Sponsored'
-
-  return (
-    <section aria-label={label}>
-      {!houseOnly && <SponsoredEyebrow />}
-      <div
-        className={unique.length === 1 ? undefined : 'grid grid-cols-1 gap-6 md:grid-cols-2'}
-        style={{ width: '100%', maxWidth: 1440, margin: '0 auto', paddingTop: 4 }}
-      >
-        {unique.map(ad => (
-          <SponsorAdCard key={ad.id} ad={ad} locationId="home" />
-        ))}
-      </div>
-    </section>
-  )
+  // Safety lock: a pair/grid of units reads as an ads board.
+  // Home places remaining inventory between sections, one at a time.
+  const ad = ads.find(a => a?.id)
+  if (!ad) return null
+  return <HomeSponsorAd ad={ad} />
 }

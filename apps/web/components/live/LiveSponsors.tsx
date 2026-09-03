@@ -1,43 +1,34 @@
 import { AcademyLessonSponsors } from '@/components/academy/AcademyLessonSponsors'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
-import { FOOTER_IAB_MAX, isAcademyAd } from '@/lib/sponsors/partners'
+import { CLUSTER_IAB_MAX, isAcademyAd } from '@/lib/sponsors/partners'
 import { isIabImageStill, isLeaderboardStill } from '@/lib/ads/iab'
 import { LiveSectionHeader } from './LiveSectionHeader'
 
 /**
- * 1–2 featured cards on the LIVE page (Academy promo + Evolution Partner).
- * Section header lives here once — AcademyLessonSponsors is body-only.
+ * One featured unit on LIVE. Callers place a second unit later in the
+ * scroll — never a pair that reads as an ads board.
  */
 export function LiveSponsors({ ads }: { ads: SponsorAd[] }) {
-  const slice = ads.filter(a => !isLeaderboardStill(a)).slice(0, FOOTER_IAB_MAX)
-  if (!slice.length) return null
-  const stillsOnly = slice.every(isIabImageStill)
-  const hasAcademy = slice.some(isAcademyAd)
-  const hasPartner = slice.some(a => !isAcademyAd(a))
-  const title = stillsOnly
-    ? 'Sponsored'
-    : hasAcademy && hasPartner
-      ? 'Featured'
-      : hasAcademy
-        ? 'Evolved Pros Academy'
-        : 'Evolution Partners'
-  const kicker = stillsOnly
+  const ad = ads.filter(a => !isLeaderboardStill(a)).slice(0, CLUSTER_IAB_MAX)[0]
+  if (!ad) return null
+  const still = isIabImageStill(ad)
+  const house = isAcademyAd(ad)
+  const title = still ? 'Sponsored' : house ? 'Evolved Pros Academy' : 'Evolution Partners'
+  const kicker = still
     ? ''
-    : hasAcademy && hasPartner
-      ? 'Build the architecture — and the partners behind the operators on this stage.'
-      : hasAcademy
-        ? 'Six pillars. One system. Make excellence inevitable.'
-        : 'Brands that back the operators on this stage.'
+    : house
+      ? 'Six pillars. One system. Make excellence inevitable.'
+      : 'Brands that back the operators on this stage.'
 
   return (
-    <section className="live-section-pad" style={{ margin: '56px auto 0' }}>
+    <section className="live-section-pad" data-ad-rhythm="unit" style={{ margin: '56px auto 0' }}>
       <LiveSectionHeader
-        eyebrow={stillsOnly ? 'Sponsored' : hasAcademy ? 'Academy' : 'Partners'}
+        eyebrow={still ? 'Advertisement' : house ? 'Academy' : 'Partners'}
         title={title}
         kicker={kicker}
       />
       <div style={{ marginTop: 8 }}>
-        <AcademyLessonSponsors ads={slice} hideHeader />
+        <AcademyLessonSponsors ads={[ad]} hideHeader />
       </div>
     </section>
   )
