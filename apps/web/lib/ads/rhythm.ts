@@ -7,9 +7,11 @@
  * as a footer pair or a 2×2 board.
  */
 
-export const FEED_AD_EVERY = 3
-/** In-article: first IAB after a few blocks, another later if the story is long. */
-export const ARTICLE_AD_AFTER = [3, 8] as const
+/** Magazine is 3-up; punctuation is every two rows, not every row. */
+export const MAGAZINE_ROW = 3
+export const FEED_AD_EVERY = 6
+/** One in-body unit after a few blocks. A second only on a long piece. */
+export const ARTICLE_AD_AFTER = [4, 12] as const
 
 export type RhythmChunk<T, A> =
   | { kind: 'content'; items: T[] }
@@ -58,10 +60,16 @@ export function hasAdjacentAds<T, A>(chunks: ReadonlyArray<RhythmChunk<T, A> | A
 /** Split article HTML on block close so we can punctuate with IAB units. */
 export function splitHtmlBlocks(html: string): string[] {
   if (!html.trim()) return []
-  return html
+  const byClose = html
     .split(/(?<=<\/(?:p|h1|h2|h3|h4|blockquote|ul|ol|figure|pre)>)/i)
     .map(part => part.trim())
     .filter(Boolean)
+  if (byClose.length >= 3) return byClose
+  const byOpen = html
+    .split(/(?=<p[\s>])/i)
+    .map(part => part.trim())
+    .filter(Boolean)
+  return byOpen.length > byClose.length ? byOpen : byClose
 }
 
 /**

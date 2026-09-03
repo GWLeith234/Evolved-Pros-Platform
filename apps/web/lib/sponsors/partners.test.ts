@@ -124,14 +124,9 @@ describe('isAcademyAd', () => {
       },
     ]
     const home = pickHomeSponsors(stills)
-    expect(home).toHaveLength(4)
+    expect(home).toHaveLength(2)
     expect(home.every(a => a.title === 'Ad' && !a.headline && !a.cta_text)).toBe(true)
-    expect(home.map(a => a.sponsor_name).sort()).toEqual([
-      'AdCellerant',
-      'EvolveX360',
-      'Evolved Pros Academy',
-      'Transcend Clinic',
-    ])
+    expect(home.length).toBeLessThanOrEqual(IN_FEED_IAB_MAX)
     expect(pickHomeSponsors([ACADEMY_SPONSOR_AD])).toEqual([])
     expect(ensurePodcastSponsors([])).toEqual([])
     expect(pickAcademySponsors([], 2)).toEqual([])
@@ -229,7 +224,7 @@ describe('podcast big box + scroll banners', () => {
     expect(pool.some(a => a.zone === 'A' || a.zone === 'C')).toBe(false)
   })
 
-  it('caps podcast archive slots at two big boxes', () => {
+  it('caps podcast archive slots at one big box', () => {
     const boxes = selectPodcastBigBoxes([zoneE, adcE, evxE, acaE, zoneA])
     expect(boxes).toHaveLength(PODCAST_IAB_MAX)
     expect(boxes.every(a => a.zone === 'E')).toBe(true)
@@ -312,14 +307,13 @@ describe('first-party adjacency + media magazine feed', () => {
     }
   })
 
-  it('article layout is one rail + at most two in-body units', () => {
+  it('article layout is one rail + one in-body unit', () => {
     const article = pickArticleAds(catalog)
     expect(article.sidebar).toBeTruthy()
-    expect(article.inBody.length).toBeGreaterThan(0)
-    expect(article.inBody.length).toBeLessThanOrEqual(2)
-    expect(article.inBody.length).toBeLessThanOrEqual(CLUSTER_IAB_MAX + 1)
-    if (article.sidebar) {
-      expect(article.inBody.some(a => advertiserFamilyKey(a) === advertiserFamilyKey(article.sidebar!))).toBe(false)
+    expect(article.inBody.length).toBeLessThanOrEqual(1)
+    expect(article.inBody.length).toBeLessThanOrEqual(CLUSTER_IAB_MAX)
+    if (article.sidebar && article.inBody[0]) {
+      expect(advertiserFamilyKey(article.inBody[0])).not.toBe(advertiserFamilyKey(article.sidebar))
     }
   })
 

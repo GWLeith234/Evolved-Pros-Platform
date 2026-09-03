@@ -13,8 +13,8 @@ const FB = 'var(--font-barlow)'
 const FBC = 'var(--font-barlow-condensed)'
 const FBN = 'var(--font-bebas)'
 
-/** Full-width Zone E break after every Nth episode — not a square grid cell. */
-const AD_EVERY_N = 3
+/** Full-width Zone E break after a run of episodes — not every row. */
+const AD_EVERY_N = 6
 
 interface PodcastGridProps {
   episodes: PodcastEpisode[]

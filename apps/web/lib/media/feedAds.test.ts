@@ -34,19 +34,12 @@ describe('layoutMediaFeed', () => {
     still('evx-a', 'EvolveX360', 'A'),
   ]
 
-  it('interleaves one unit between story rows, never as a trailing dump', () => {
+  it('waits two magazine rows before a unit — not an ad every row', () => {
     const layout = layoutMediaFeed(stories(9), inFeed)
-    expect(layout.chunks.map(c => c.kind)).toEqual([
-      'content',
-      'ad',
-      'content',
-      'ad',
-      'content',
-    ])
+    expect(layout.chunks.map(c => c.kind)).toEqual(['content', 'ad', 'content'])
+    expect(layout.chunks[0]?.kind === 'content' && layout.chunks[0].items).toHaveLength(6)
     expect(layout.chunks[layout.chunks.length - 1]?.kind).toBe('content')
-    const inserted = layout.chunks.filter(c => c.kind === 'ad')
-    expect(inserted).toHaveLength(2)
-    expect(inserted[0].kind === 'ad' && inserted[0].ad.click_url).toBe(inFeed[0].click_url)
+    expect(layout.chunks.filter(c => c.kind === 'ad')).toHaveLength(1)
   })
 
   it('does not invent a footer pair when there is only one story row', () => {
@@ -55,9 +48,11 @@ describe('layoutMediaFeed', () => {
     expect(layout.chunks).toHaveLength(1)
   })
 
-  it('never places two ad blocks back-to-back in the grid', () => {
-    const layout = layoutMediaFeed(stories(12), inFeed)
+  it('never places two ad blocks back-to-back, even with leftover inventory', () => {
+    const layout = layoutMediaFeed(stories(18), inFeed)
     expect(hasAdjacentAds(layout.chunks)).toBe(false)
+    expect(layout.chunks.filter(c => c.kind === 'ad')).toHaveLength(2)
+    expect(layout.chunks[layout.chunks.length - 1]?.kind).toBe('content')
   })
 
   it('keeps an empty grid empty — no ads-only board', () => {
@@ -66,7 +61,7 @@ describe('layoutMediaFeed', () => {
   })
 
   it('does not rewrite stored click URLs', () => {
-    const layout = layoutMediaFeed(stories(6), inFeed)
+    const layout = layoutMediaFeed(stories(12), inFeed)
     const banner = layout.chunks.find(c => c.kind === 'ad')
     expect(banner && banner.kind === 'ad' && banner.ad.click_url).toBe(inFeed[0].click_url)
   })

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  FEED_AD_EVERY,
   hasAdjacentAds,
   interleaveAds,
   layoutArticleBody,
@@ -30,6 +31,14 @@ describe('interleaveAds', () => {
   it('returns content only when there are no ads', () => {
     const chunks = interleaveAds(['a', 'b'], [], 3)
     expect(chunks).toEqual([{ kind: 'content', items: ['a', 'b'] }])
+  })
+
+  it('defaults to two magazine rows so an ad is not punctuation on every row', () => {
+    expect(FEED_AD_EVERY).toBe(6)
+    const items = Array.from({ length: 9 }, (_, i) => `s${i}`)
+    const chunks = interleaveAds(items, ['ad1', 'ad2'])
+    expect(chunks.filter(c => c.kind === 'ad')).toHaveLength(1)
+    expect(chunks[0]?.kind === 'content' && chunks[0].items).toHaveLength(6)
   })
 })
 

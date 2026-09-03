@@ -154,7 +154,8 @@ export default async function StoryPage({
   const catalog = ((await getActivePlatformAds()) as SponsorAd[]).filter(a => adMatchesSurface(a, 'media'))
   const articleAds = pickArticleAds(catalog)
   const articleChunks = layoutArticleBody(splitHtmlBlocks(html), articleAds.inBody)
-  const hideRailOnMobile = articleAds.inBody.length > 0
+  const insertedInBody = articleChunks.some(c => c.kind === 'ad')
+  const hideRailOnMobile = insertedInBody
   const isOriginal = !story.pillar
   const pLabel = isOriginal ? 'Original' : getPillarLabel(story.pillar)
   const pColor = isOriginal ? 'var(--brand-gold)' : getPillarColor(story.pillar)
