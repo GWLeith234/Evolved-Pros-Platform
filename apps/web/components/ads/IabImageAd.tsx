@@ -132,11 +132,13 @@ export function IabAdvertisementSlot({
       className={className}
       style={{
         width: `min(100%, ${w}px)`,
+        minHeight: h + 22,
         marginInline: 'auto',
         minHeight: h + 22,
         ...style,
       }}
       data-ad-layout="iab-media"
+      data-ad-rhythm="unit"
       data-iab-slot={`${w}x${h}`}
       data-ad-reserved={`${h}`}
     >

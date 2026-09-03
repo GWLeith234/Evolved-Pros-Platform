@@ -29,6 +29,8 @@ export const ARTICLE_IN_BODY_MAX = 2
 export const ACADEMY_THREAD_IAB_MAX = 8
 /** Podcast archive + episode: one 300×600, never a pair of big boxes. */
 export const PODCAST_IAB_MAX = 1
+/** Community feed mix of 300×250 + 728×90. */
+export const COMMUNITY_FEED_MAX = 8
 
 function pickLiveStills(
   list: SponsorAd[],
@@ -337,6 +339,33 @@ export function pickHomePageAds(list: SponsorAd[]): HomePageAds {
 export function pickAcademySponsors(list: SponsorAd[], count = 2): SponsorAd[] {
   const n = Math.min(IN_FEED_IAB_MAX, Math.max(1, count))
   return pickLiveStills(list, n, 23)
+}
+
+/** Community feed — 300×250 squares AND 728×90 banners, spread advertisers. */
+export function pickCommunityFeedAds(list: SponsorAd[], count = COMMUNITY_FEED_MAX): SponsorAd[] {
+  const n = Math.min(COMMUNITY_FEED_MAX, Math.max(1, count))
+  const banners = pickScrollBanners(list, n)
+  const squares = pickLiveStills(list, n, 41, 'A')
+  const seen = new Set<string>()
+  const woven: SponsorAd[] = []
+  const max = Math.max(banners.length, squares.length)
+  for (let i = 0; i < max; i++) {
+    for (const ad of [squares[i], banners[i]]) {
+      if (!ad || seen.has(ad.id)) continue
+      seen.add(ad.id)
+      woven.push(ad)
+    }
+  }
+  return spreadNonAdjacentAds(woven).slice(0, n)
+}
+
+/** Home end-of-scroll 300×600 that does not repeat a mid-scroll advertiser. */
+export function pickHomeEndBigBox(list: SponsorAd[], exclude: SponsorAd[] = []): SponsorAd | null {
+  const excludeKeys = new Set(exclude.map(advertiserFamilyKey).filter(Boolean))
+  const boxes = pickLiveStills(list, 4, 71, 'E').filter(
+    a => !excludeKeys.has(advertiserFamilyKey(a)),
+  )
+  return boxes[0] ?? null
 }
 
 /** Community rail partners — up to 4, rotated, unique. Partners only. */

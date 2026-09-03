@@ -16,6 +16,10 @@ export const ARTICLE_AD_AFTER = [3, 6] as const
 export const HOME_CONTENT_CARDS = 2
 /** Academy section threads: one unit after every three lesson cards. */
 export const ACADEMY_CARDS_PER_AD = 3
+/** Podcast archive: 4 cards, then a box. */
+export const PODCAST_AD_EVERY = 4
+/** Community feed: one unit after a short run of posts. */
+export const COMMUNITY_AD_EVERY = 3
 
 export type RhythmChunk<T, A> =
   | { kind: 'content'; items: T[] }

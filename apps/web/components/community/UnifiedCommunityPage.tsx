@@ -18,6 +18,8 @@ import {
   type RailPodcastEpisode,
 } from './CommunityRightRail'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import { pickCommunityFeedAds } from '@/lib/sponsors/partners'
+import { COMMUNITY_AD_EVERY, interleaveAds } from '@/lib/ads/rhythm'
 
 function getInitials(name: string | null | undefined): string {
   if (!name) return '?'
@@ -260,14 +262,18 @@ export function UnifiedCommunityPage({
   // post matches.
   const hasMoreVisible = filtered.length > 0 && (filtered.length > visibleCount || hasMore)
 
-  // Dedupe: never inject a feed ad for a partner already featured on the rail
+  // Squares + banners through the feed. Rail rotation stays a separate pool.
   const railIds = useMemo(
     () => new Set(railSponsors.map(s => s.id).filter(Boolean)),
     [railSponsors],
   )
-  const feedAds = useMemo(
-    () => ads.filter(a => !railIds.has(a.id)),
-    [ads, railIds],
+  const feedAds = useMemo(() => {
+    const pool = ads.filter(a => !railIds.has(a.id)) as SponsorAd[]
+    return pickCommunityFeedAds(pool) as CommunityAd[]
+  }, [ads, railIds])
+  const feedChunks = useMemo(
+    () => interleaveAds(visible, feedAds, COMMUNITY_AD_EVERY, { trailing: true }),
+    [visible, feedAds],
   )
 
   return (
@@ -358,52 +364,53 @@ export function UnifiedCommunityPage({
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {visible.map((post, index) => (
-                <React.Fragment key={post.id}>
-                  <PostCardV2
-                    post={post}
-                    currentUserId={currentUser.id}
-                    onCommentClick={handleCommentClick}
-                  />
-                  {/* Inline reply thread — renders directly under the card
-                      when its comment icon is clicked. Lives outside
-                      PostCardV2 so the card stays presentational. */}
-                  {expandedPostId === post.id && (
-                    <div
-                      className="px-3 sm:px-6 pb-5"
-                      style={{
-                        background: 'var(--bg-surface)',
-                        borderBottom: '1px solid var(--border-color)',
-                      }}
-                    >
-                      {loadingRepliesFor === post.id && repliesByPost[post.id] === undefined ? (
-                        <p
-                          className="font-condensed text-xs uppercase tracking-widest pl-4 pt-3"
-                          style={{ color: 'var(--text-tertiary)' }}
-                        >
-                          Loading…
-                        </p>
-                      ) : (
-                        <PostReplyThread
-                          postId={post.id}
-                          replies={repliesByPost[post.id] ?? []}
-                          totalReplies={post.replyCount ?? 0}
-                          currentUser={{
-                            id: currentUser.id,
-                            displayName: currentUser.displayName,
-                            avatarUrl: currentUser.avatarUrl,
-                          }}
-                          onReplySubmit={(body, file) => handleReplySubmit(post.id, body, file)}
+              {feedChunks.map((chunk, chunkIdx) =>
+                chunk.kind === 'ad' ? (
+                  <FeedAdUnit key={`feed-ad-${chunk.ad.id}-${chunkIdx}`} ad={chunk.ad} />
+                ) : (
+                  <React.Fragment key={chunk.items.map(p => p.id).join('-') || `posts-${chunkIdx}`}>
+                    {chunk.items.map(post => (
+                      <React.Fragment key={post.id}>
+                        <PostCardV2
+                          post={post}
+                          currentUserId={currentUser.id}
+                          onCommentClick={handleCommentClick}
                         />
-                      )}
-                    </div>
-                  )}
-                  {/* Inject compact feed ad after every 3rd post — never a rail partner */}
-                  {(index + 1) % 3 === 0 && feedAds.length > 0 && (
-                    <FeedAdUnit ad={feedAds[Math.floor(index / 3) % feedAds.length]} />
-                  )}
-                </React.Fragment>
-              ))}
+                        {expandedPostId === post.id && (
+                          <div
+                            className="px-3 sm:px-6 pb-5"
+                            style={{
+                              background: 'var(--bg-surface)',
+                              borderBottom: '1px solid var(--border-color)',
+                            }}
+                          >
+                            {loadingRepliesFor === post.id && repliesByPost[post.id] === undefined ? (
+                              <p
+                                className="font-condensed text-xs uppercase tracking-widest pl-4 pt-3"
+                                style={{ color: 'var(--text-tertiary)' }}
+                              >
+                                Loading…
+                              </p>
+                            ) : (
+                              <PostReplyThread
+                                postId={post.id}
+                                replies={repliesByPost[post.id] ?? []}
+                                totalReplies={post.replyCount ?? 0}
+                                currentUser={{
+                                  id: currentUser.id,
+                                  displayName: currentUser.displayName,
+                                  avatarUrl: currentUser.avatarUrl,
+                                }}
+                                onReplySubmit={(body, file) => handleReplySubmit(post.id, body, file)}
+                              />
+                            )}
+                          </div>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </React.Fragment>
+                ),
+              )}
             </div>
           )}
 
