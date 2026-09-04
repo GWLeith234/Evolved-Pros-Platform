@@ -20,6 +20,8 @@ export const HOME_PATH = '/' as const
 /** Public still. Not under /home: middleware treats /home/* as the member app. */
 export const HERO_IMAGE_SRC = '/brand/hero-evolved-architecture.png' as const
 export const HERO_IMAGE_ALT = 'The Evolved Architecture' as const
+export const HERO_IMAGE_WIDTH = 1536
+export const HERO_IMAGE_HEIGHT = 1024
 export const HOME_ARIA = 'Evolved Pros home' as const
 
 export const HOME_TITLE =

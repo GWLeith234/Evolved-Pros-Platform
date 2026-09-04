@@ -7,9 +7,9 @@ import {
   HERO_IMAGE_SRC,
   HOME_SUB,
   HOME_TITLE,
-  youtubeStillUrl,
 } from '@/lib/home/conversion'
 import { getPublishedEpisodes } from '@/lib/podcast/public'
+import { allowedEpisodeStillUrl } from '@/lib/podcast/stillUrl'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 
 /**
@@ -47,7 +47,7 @@ async function loadEpisodes(): Promise<ConversionEpisode[]> {
       episodeNumber: e.episode_number,
       publishedAt: e.published_at,
       durationSeconds: e.duration_seconds,
-      stillUrl: e.thumbnail_url || e.guest_image_url || youtubeStillUrl(e.youtube_id),
+      stillUrl: allowedEpisodeStillUrl(e),
     }))
   } catch {
     return []

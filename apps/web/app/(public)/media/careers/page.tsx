@@ -2,12 +2,13 @@ import type { Metadata } from 'next'
 import { adminClient } from '@/lib/supabase/admin'
 import { CareersClient } from './CareersClient'
 import type { Job } from './CareersClient'
+import { mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 
 export const revalidate = 120
 
 export const metadata: Metadata = publicPageMetadata('/media/careers', {
-  title: 'Careers — Evolved Media',
+  title: mediaSectionTitle('Careers'),
   description: 'Curated sales, marketing, and leadership roles for high-performing professionals.',
 })
 

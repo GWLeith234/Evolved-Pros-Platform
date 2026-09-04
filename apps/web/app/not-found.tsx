@@ -40,7 +40,7 @@ export default function NotFound() {
               marginBottom: 16,
             }}
           >
-            404 — Page Not Found
+            404. Page Not Found
           </p>
           <h1
             style={{

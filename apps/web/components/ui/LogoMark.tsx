@@ -24,7 +24,8 @@ export function LogoMark({
   className,
   alt = 'Evolved Pros',
 }: LogoMarkProps) {
-  // Intrinsic asset is 1600×320 (5:1). Height drives layout; width follows.
+  // Intrinsic asset is 5:1. Reserve both axes so a late PNG decode cannot
+  // shove JOIN FREE onto the next row (mobile homepage CLS).
   const width = Math.round(height * 5)
 
   return (
@@ -37,7 +38,7 @@ export function LogoMark({
       className={className}
       style={{
         height,
-        width: 'auto',
+        width,
         display: 'block',
         objectFit: 'contain',
       }}

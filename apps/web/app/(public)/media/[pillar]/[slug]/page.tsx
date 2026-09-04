@@ -12,6 +12,7 @@ import { ArticleShareBar } from './ArticleShareBar'
 import { MediaIabSlot } from '@/components/media/MediaIabSlot'
 import { MediaLatestPodcast } from '@/components/media/MediaLatestPodcast'
 import type { MediaRailEpisode } from '@/lib/media/podcastRail'
+import { MEDIA_BRAND, mediaStoryTitle } from '@/lib/media/brand'
 import { CANONICAL_ORIGIN, canonicalUrl, publicPageMetadata } from '@/lib/seo/canonical'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { pickArticleAds } from '@/lib/sponsors/partners'
@@ -104,7 +105,7 @@ export async function generateMetadata(
   const story = await fetchStory(params.pillar, params.slug)
   if (!story) return {}
 
-  const title = story.seo_title || `${story.title} | Evolved Media`
+  const title = story.seo_title || mediaStoryTitle(story.title)
   const description = story.seo_description || story.excerpt || ''
   const image = story.featured_image_url || '/og-default.png'
 
@@ -194,7 +195,7 @@ export default async function StoryPage({
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: CANONICAL_ORIGIN },
-      { '@type': 'ListItem', position: 2, name: 'Evolved Media', item: canonicalUrl('/media') },
+      { '@type': 'ListItem', position: 2, name: MEDIA_BRAND, item: canonicalUrl('/media') },
       { '@type': 'ListItem', position: 3, name: pLabel, item: canonicalUrl(`/media/${params.pillar}`) },
       { '@type': 'ListItem', position: 4, name: story.title.slice(0, 50) },
     ],
@@ -207,7 +208,7 @@ export default async function StoryPage({
 
       {/* 1. Breadcrumb */}
       <nav className="media-detail-breadcrumb" style={{ padding: '8px 24px', fontFamily: 'var(--font-condensed)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'rgba(43,58,90,0.45)' }}>
-        <Link href="/media" style={{ color: 'rgba(43,58,90,0.45)', textDecoration: 'none' }}>Evolved Media</Link>
+        <Link href="/media" style={{ color: 'rgba(43,58,90,0.45)', textDecoration: 'none' }}>{MEDIA_BRAND}</Link>
         <span style={{ margin: '0 6px', color: 'var(--media-ink)' }}>/</span>
         <Link href={`/media?pillar=${params.pillar}`} style={{ color: pColor, textDecoration: 'none' }}>{pLabel}</Link>
         <span style={{ margin: '0 6px', color: 'var(--media-ink)' }}>/</span>

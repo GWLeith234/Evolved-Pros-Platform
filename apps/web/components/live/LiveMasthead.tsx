@@ -52,7 +52,7 @@ export function LiveMasthead() {
           maxWidth: 720,
         }}
       >
-        Keynotes, panels, and workshops &mdash; from the field, from the trenches, and on stages around the world.
+        Keynotes, panels, and workshops. From the field, from the trenches, and on stages around the world.
       </p>
     </header>
   )

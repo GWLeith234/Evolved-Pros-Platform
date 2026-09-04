@@ -15,7 +15,7 @@ import { publicPageMetadata } from '@/lib/seo/canonical'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = publicPageMetadata('/podcast', {
-  title: `${SERIES_NAME} — Evolved Pros`,
+  title: `${SERIES_NAME} | Evolved Pros`,
   description:
     'Long-form conversations on AI, go-to-market, and the evolution of work with George Leith and guests. Full transcripts, chapters, and highlights.',
   openGraph: {

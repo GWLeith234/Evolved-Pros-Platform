@@ -1,10 +1,13 @@
+import type { ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { LogoMark } from '@/components/ui/LogoMark'
 import { footerCopyright } from '@/lib/layout/publicFooter'
 import {
   HERO_IMAGE_ALT,
+  HERO_IMAGE_HEIGHT,
   HERO_IMAGE_SRC,
+  HERO_IMAGE_WIDTH,
   HOME_ARIA,
   HOME_BOOK,
   HOME_EPISODES_LINK,
@@ -48,61 +51,74 @@ export function ConversionHome({
   return (
     <div className="ep-conversion-home min-h-dvh bg-paper text-navy">
       <header className="border-b border-navy">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-5 py-4">
-          <Link href="/" aria-label={HOME_ARIA} className="shrink-0">
-            <LogoMark variant="dark" height={28} />
-          </Link>
-          <nav aria-label="Primary" className="flex min-w-0 flex-wrap items-center gap-x-3.5 gap-y-2">
-            {HOME_NAV_LINKS.map(link => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="inline-flex min-h-11 items-center font-condensed text-[13px] font-bold uppercase tracking-[0.14em] text-navy no-underline"
+        <div className="mx-auto max-w-6xl px-5 py-3 md:py-4">
+          <div className="flex h-10 items-center justify-between gap-3 md:h-auto">
+            <Link href="/" aria-label={HOME_ARIA} className="shrink-0">
+              <LogoMark variant="dark" height={28} />
+            </Link>
+            <div className="flex min-w-0 items-center justify-end gap-3">
+              <nav
+                aria-label="Primary"
+                className="hidden min-w-0 items-center gap-x-3.5 md:flex"
               >
-                {'live' in link && link.live ? (
-                  <span className="mr-1.5 text-red" aria-hidden>
-                    •
-                  </span>
-                ) : null}
-                {link.label}
-              </Link>
-            ))}
-            {signedIn ? (
-              <Link
-                href={HOME_OPEN_PLATFORM_HREF}
-                className="inline-flex min-h-11 items-center font-condensed text-[13px] font-bold uppercase tracking-[0.14em] text-navy no-underline"
-              >
-                {HOME_OPEN_PLATFORM}
-              </Link>
-            ) : (
-              <>
+                {HOME_NAV_LINKS.map(link => (
+                  <NavLink key={link.href} href={link.href} live={'live' in link && link.live}>
+                    {link.label}
+                  </NavLink>
+                ))}
+                {signedIn ? (
+                  <NavLink href={HOME_OPEN_PLATFORM_HREF}>{HOME_OPEN_PLATFORM}</NavLink>
+                ) : (
+                  <NavLink href="/login">{HOME_SIGN_IN}</NavLink>
+                )}
+              </nav>
+              {signedIn ? (
                 <Link
-                  href="/login"
-                  className="inline-flex min-h-11 items-center font-condensed text-[13px] font-bold uppercase tracking-[0.14em] text-navy no-underline"
+                  href={HOME_OPEN_PLATFORM_HREF}
+                  className="inline-flex min-h-10 items-center bg-red px-4 font-condensed text-[13px] font-bold uppercase tracking-[0.14em] text-white no-underline md:hidden"
                 >
-                  {HOME_SIGN_IN}
+                  {HOME_OPEN_PLATFORM}
                 </Link>
+              ) : (
                 <Link
                   href={JOIN_FREE_HREF}
-                  className="inline-flex min-h-10 items-center bg-red px-4 font-condensed text-[13px] font-bold uppercase tracking-[0.14em] text-white no-underline"
+                  className="inline-flex min-h-10 shrink-0 items-center bg-red px-4 font-condensed text-[13px] font-bold uppercase tracking-[0.14em] text-white no-underline"
                 >
                   {HOME_JOIN_FREE}
                 </Link>
-              </>
+              )}
+            </div>
+          </div>
+          <nav
+            aria-label="Sections"
+            className="mt-1 flex h-9 items-center gap-x-3 overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden"
+          >
+            {HOME_NAV_LINKS.map(link => (
+              <NavLink key={link.href} href={link.href} live={'live' in link && link.live} compact>
+                {link.label}
+              </NavLink>
+            ))}
+            {signedIn ? null : (
+              <NavLink href="/login" compact>
+                {HOME_SIGN_IN}
+              </NavLink>
             )}
           </nav>
         </div>
       </header>
 
       <main>
-        <section aria-label={HERO_IMAGE_ALT} className="bg-paper">
+        <section
+          aria-label={HERO_IMAGE_ALT}
+          className="relative aspect-[3/2] w-full overflow-hidden bg-paper"
+        >
           <Image
             src={HERO_IMAGE_SRC}
             alt={HERO_IMAGE_ALT}
-            width={1536}
-            height={1024}
+            width={HERO_IMAGE_WIDTH}
+            height={HERO_IMAGE_HEIGHT}
             priority
-            className="block h-auto w-full"
+            className="h-full w-full object-cover"
             sizes="100vw"
           />
         </section>
@@ -225,6 +241,36 @@ export function ConversionHome({
         </div>
       </footer>
     </div>
+  )
+}
+
+function NavLink({
+  href,
+  children,
+  live,
+  compact,
+}: {
+  href: string
+  children: ReactNode
+  live?: boolean
+  compact?: boolean
+}) {
+  return (
+    <Link
+      href={href}
+      className={`inline-flex items-center font-condensed font-bold uppercase text-navy no-underline ${
+        compact
+          ? 'h-9 text-[12px] tracking-[0.12em]'
+          : 'min-h-11 text-[13px] tracking-[0.14em]'
+      }`}
+    >
+      {live ? (
+        <span className="mr-1.5 text-red" aria-hidden>
+          •
+        </span>
+      ) : null}
+      {children}
+    </Link>
   )
 }
 

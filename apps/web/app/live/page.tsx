@@ -32,7 +32,7 @@ import { publicPageMetadata } from '@/lib/seo/canonical'
 import { PublicFooter } from '@/components/layout/PublicFooter'
 
 export const metadata: Metadata = publicPageMetadata('/live', {
-  title: 'LIVE — Evolved Pros',
+  title: 'LIVE | Evolved Pros',
   description:
     'High-energy keynotes, workshops, and mastermind formats. Upcoming and past speaking events worldwide — powered by the EVOLVED Architecture™.',
 })

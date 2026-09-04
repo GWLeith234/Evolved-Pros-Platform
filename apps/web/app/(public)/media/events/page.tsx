@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { adminClient } from '@/lib/supabase/admin'
+import { mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 
 export const revalidate = 120
 
 export const metadata: Metadata = publicPageMetadata('/media/events', {
-  title: 'Events — Evolved Media',
+  title: mediaSectionTitle('Events'),
   description: 'Upcoming and past events from Evolved Pros. Workshops, keynotes, and networking for sales professionals.',
 })
 
