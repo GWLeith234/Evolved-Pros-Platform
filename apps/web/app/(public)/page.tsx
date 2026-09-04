@@ -11,6 +11,7 @@ import {
 import { getPublishedEpisodes } from '@/lib/podcast/public'
 import { allowedEpisodeStillUrl } from '@/lib/podcast/stillUrl'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { homeOrganizationJsonLd, homeWebsiteJsonLd } from '@/lib/seo/homeJsonLd'
 
 /**
  * Conversion front door (George 2026-09-03).
@@ -56,5 +57,19 @@ async function loadEpisodes(): Promise<ConversionEpisode[]> {
 
 export default async function LandingPage() {
   const [profile, episodes] = await Promise.all([resolveCurrentUser(), loadEpisodes()])
-  return <ConversionHome signedIn={profile !== null} episodes={episodes} />
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeWebsiteJsonLd()) }}
+      />
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeOrganizationJsonLd()) }}
+      />
+      <ConversionHome signedIn={profile !== null} episodes={episodes} />
+    </>
+  )
 }

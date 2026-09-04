@@ -26,4 +26,16 @@ describe('public chrome copy', () => {
       /\$\{ep\.title\} \| \$\{SERIES_NAME\}/,
     )
   })
+
+  it('media hub title and og:title use Evolved Pros Media, not Evolved Media', () => {
+    const src = read('../../app/(public)/media/page.tsx')
+    expect(src).toMatch(/title: MEDIA_HUB_TITLE/)
+    expect(src).toMatch(/openGraph:[\s\S]*title: MEDIA_HUB_TITLE/)
+    expect(src).not.toMatch(/Evolved Media —/)
+    expect(src).not.toMatch(/title:\s*['"]Evolved Media/)
+    const masthead = read('../../components/media/Masthead.tsx')
+    expect(masthead).toMatch(/data-masthead-evolved[\s\S]*Evolved/)
+    expect(masthead).toMatch(/data-masthead-media[\s\S]*Pros Media/)
+    expect(masthead).not.toMatch(/>Media<\/span>/)
+  })
 })
