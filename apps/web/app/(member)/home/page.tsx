@@ -41,7 +41,7 @@ async function fetchUpcomingEvents(supabase: ReturnType<typeof createClient>, us
   const [events, registrations] = await Promise.all([
     supabase
       .from('events')
-      .select('id, title, description, event_type, starts_at, ends_at, zoom_url, required_tier')
+      .select('id, title, description, event_type, starts_at, ends_at, required_tier')
       .eq('is_published', true)
       .gt('starts_at', new Date().toISOString())
       .order('starts_at', { ascending: true })

@@ -23,7 +23,7 @@ export async function GET(
 
   const { data: lessons } = await supabase
     .from('lessons')
-    .select('id, course_id, slug, title, description, mux_playback_id, duration_seconds, sort_order, is_published')
+    .select('id, course_id, slug, title, duration_seconds, sort_order, is_published')
     .eq('course_id', params.courseId)
     .eq('is_published', true)
     .order('sort_order')
@@ -46,13 +46,8 @@ export async function GET(
       id: l.id,
       slug: l.slug,
       title: l.title,
-      description: l.description,
-      // SPRINT TIER-1: the playback id is content, not metadata. It was
-      // returned unconditionally alongside isLocked, so a locked pillar's
-      // lesson list handed out every playback id — enough to go and mint a
-      // token. Titles stay (the storefront advertises what's behind the gate);
-      // anything playable does not.
-      muxPlaybackId: isLocked ? null : l.mux_playback_id,
+      description: null,
+      muxPlaybackId: null,
       durationSeconds: l.duration_seconds,
       sortOrder: l.sort_order,
       isPublished: l.is_published,

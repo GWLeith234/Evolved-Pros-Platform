@@ -1,10 +1,12 @@
 export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { hasTierAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { EVENT_PRIVILEGED_COLUMNS, privilegedEventUrls } from '@/lib/events/privilegedUrls'
 
 export const revalidate = 300
 
@@ -13,9 +15,9 @@ export async function GET() {
   const profile = await resolveCurrentUser(supabase)
   if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: rows, error } = await supabase
+  const { data: rows, error } = await adminClient
     .from('events')
-    .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published, image_url')
+    .select(EVENT_PRIVILEGED_COLUMNS)
     .eq('is_published', true)
     .not('recording_url', 'is', null)
     .lte('starts_at', new Date().toISOString())
@@ -35,22 +37,30 @@ export async function GET() {
 
   const registeredIds = new Set((regs ?? []).map(r => r.event_id))
 
-  const events: EventItem[] = (rows ?? []).map(e => ({
-    id: e.id,
-    title: e.title,
-    description: e.description,
-    eventType: e.event_type as EventType,
-    startsAt: e.starts_at,
-    endsAt: e.ends_at,
-    zoomUrl: null,
-    recordingUrl: e.recording_url,
-    imageUrl: e.image_url,
-    requiredTier: e.required_tier as 'community' | 'vip' | 'pro' | null,
-    registrationCount: e.registration_count,
-    isRegistered: registeredIds.has(e.id),
-    hasAccess: hasTierAccess(profile.tier, e.required_tier as 'community' | 'vip' | 'pro' | null),
-    isPublished: e.is_published,
-  }))
+  const events: EventItem[] = (rows ?? []).map(e => {
+    const isRegistered = registeredIds.has(e.id)
+    const urls = privilegedEventUrls(e, {
+      userTier: profile.tier,
+      isRegistered,
+      isAdmin: profile.role === 'admin',
+    })
+    return {
+      id: e.id,
+      title: e.title,
+      description: e.description,
+      eventType: e.event_type as EventType,
+      startsAt: e.starts_at,
+      endsAt: e.ends_at,
+      zoomUrl: null,
+      recordingUrl: urls.recordingUrl,
+      imageUrl: e.image_url,
+      requiredTier: e.required_tier as 'community' | 'vip' | 'pro' | null,
+      registrationCount: e.registration_count,
+      isRegistered,
+      hasAccess: hasTierAccess(profile.tier, e.required_tier as 'community' | 'vip' | 'pro' | null),
+      isPublished: e.is_published,
+    }
+  })
 
   return NextResponse.json({ events })
 }

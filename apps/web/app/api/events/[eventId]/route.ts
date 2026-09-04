@@ -1,10 +1,12 @@
 export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { hasTierAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { EVENT_PRIVILEGED_COLUMNS, privilegedEventUrls } from '@/lib/events/privilegedUrls'
 
 export async function GET(
   _request: Request,
@@ -15,9 +17,9 @@ export async function GET(
   if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const [eventResult, regResult] = await Promise.all([
-    supabase
+    adminClient
       .from('events')
-      .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published, image_url')
+      .select(EVENT_PRIVILEGED_COLUMNS)
       .eq('id', params.eventId)
       .single(),
     supabase
@@ -38,6 +40,11 @@ export async function GET(
 
   const isRegistered = !!regResult.data
   const access = hasTierAccess(profile.tier, e.required_tier as 'community' | 'vip' | 'pro' | null)
+  const urls = privilegedEventUrls(e, {
+    userTier: profile.tier,
+    isRegistered,
+    isAdmin: profile.role === 'admin',
+  })
 
   const event: EventItem = {
     id: e.id,
@@ -46,8 +53,8 @@ export async function GET(
     eventType: e.event_type as EventType,
     startsAt: e.starts_at,
     endsAt: e.ends_at,
-    zoomUrl: isRegistered ? e.zoom_url : null,
-    recordingUrl: e.recording_url,
+    zoomUrl: urls.zoomUrl,
+    recordingUrl: urls.recordingUrl,
     imageUrl: e.image_url,
     requiredTier: e.required_tier as 'community' | 'vip' | 'pro' | null,
     registrationCount: e.registration_count,

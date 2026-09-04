@@ -7,7 +7,7 @@ import type { Channel, Post, LeaderboardEntry, MemberSummary, CommunityAd, Weekl
 type SB = SupabaseClient<Database>
 
 export async function fetchCurrentUserProfile(supabase: SB, userId: string) {
-  const { data } = await supabase
+  const { data } = await adminClient
     .from('users')
     .select('display_name, full_name, avatar_url, tier, points, role, current_pillar')
     .eq('id', userId)
@@ -235,12 +235,12 @@ export async function fetchLeaderboard(supabase: SB, currentUserId: string): Pro
   // Top-10 and the current user's own row don't depend on each other —
   // fetch them in parallel so the second read isn't gated on the first.
   const [{ data }, { data: currentUser }] = await Promise.all([
-    supabase
+    adminClient
       .from('users')
       .select('id, display_name, full_name, avatar_url, points')
       .order('points', { ascending: false })
       .limit(10),
-    supabase
+    adminClient
       .from('users')
       .select('id, display_name, full_name, avatar_url, points')
       .eq('id', currentUserId)
@@ -259,7 +259,7 @@ export async function fetchLeaderboard(supabase: SB, currentUserId: string): Pro
   const inList = entries.some(e => e.isCurrentUser)
   if (!inList) {
     if (currentUser) {
-      const { count } = await supabase
+      const { count } = await adminClient
         .from('users')
         .select('id', { count: 'exact', head: true })
         .gt('points', currentUser.points)
@@ -279,7 +279,7 @@ export async function fetchLeaderboard(supabase: SB, currentUserId: string): Pro
 }
 
 export async function fetchActiveMembers(supabase: SB, limit = 5): Promise<MemberSummary[]> {
-  const { data } = await supabase
+  const { data } = await adminClient
     .from('users')
     .select('id, display_name, full_name, avatar_url, role_title, location, tier, points')
     .eq('tier_status', 'active')
@@ -380,7 +380,7 @@ export async function fetchWeeklyLeaderboard(
     .slice(0, 5)
     .map(([id]) => id)
 
-  const { data: users } = await supabase
+  const { data: users } = await adminClient
     .from('users')
     .select('id, display_name, full_name, avatar_url, points')
     .in('id', topIds)

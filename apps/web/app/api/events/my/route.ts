@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { hasTierAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { EVENT_PRIVILEGED_COLUMNS, privilegedEventUrls } from '@/lib/events/privilegedUrls'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,9 +13,9 @@ export async function GET() {
   const profile = await resolveCurrentUser(supabase)
   if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: regs } = await supabase
+  const { data: regs } = await adminClient
     .from('event_registrations')
-    .select('event_id, events(id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published, image_url)')
+    .select(`event_id, events(${EVENT_PRIVILEGED_COLUMNS})`)
     .eq('user_id', profile.id)
     .order('registered_at', { ascending: true })
 
@@ -27,6 +29,11 @@ export async function GET() {
         image_url: string | null
       } | null
       if (!e || !e.is_published) return null
+      const urls = privilegedEventUrls(e, {
+        userTier: profile.tier,
+        isRegistered: true,
+        isAdmin: profile.role === 'admin',
+      })
       return {
         id: e.id,
         title: e.title,
@@ -34,8 +41,8 @@ export async function GET() {
         eventType: e.event_type as EventType,
         startsAt: e.starts_at,
         endsAt: e.ends_at,
-        zoomUrl: e.zoom_url,          // user is registered — expose Zoom link
-        recordingUrl: e.recording_url,
+        zoomUrl: urls.zoomUrl,
+        recordingUrl: urls.recordingUrl,
         imageUrl: e.image_url,
         requiredTier: e.required_tier as 'community' | 'vip' | 'pro' | null,
         registrationCount: e.registration_count,

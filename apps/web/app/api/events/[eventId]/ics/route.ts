@@ -1,9 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { generateICS } from '@/lib/events/types'
 import type { EventItem, EventType } from '@/lib/events/types'
 import { hasTierAccess } from '@/lib/tier'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { EVENT_PRIVILEGED_COLUMNS, privilegedEventUrls } from '@/lib/events/privilegedUrls'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,9 +15,9 @@ export async function GET(_req: Request, { params }: { params: { eventId: string
   if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const [{ data: row }, regResult] = await Promise.all([
-    supabase
+    adminClient
       .from('events')
-      .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, required_tier, registration_count, is_published, image_url')
+      .select(EVENT_PRIVILEGED_COLUMNS)
       .eq('id', params.eventId)
       .single(),
     supabase
@@ -29,6 +31,11 @@ export async function GET(_req: Request, { params }: { params: { eventId: string
   if (!row || !row.is_published) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const isRegistered = !!regResult.data
+  const urls = privilegedEventUrls(row, {
+    userTier: profile.tier,
+    isRegistered,
+    isAdmin: profile.role === 'admin',
+  })
   const event: EventItem = {
     id: row.id,
     title: row.title,
@@ -36,8 +43,8 @@ export async function GET(_req: Request, { params }: { params: { eventId: string
     eventType: row.event_type as EventType,
     startsAt: row.starts_at,
     endsAt: row.ends_at,
-    zoomUrl: isRegistered ? row.zoom_url : null,
-    recordingUrl: row.recording_url,
+    zoomUrl: urls.zoomUrl,
+    recordingUrl: urls.recordingUrl,
     imageUrl: row.image_url,
     requiredTier: row.required_tier as 'community' | 'vip' | 'pro' | null,
     registrationCount: row.registration_count,

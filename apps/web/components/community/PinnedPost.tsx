@@ -1,3 +1,5 @@
+import { pinnedBodyToHtml } from '@/lib/security/html'
+
 interface PinnedPostProps {
   label: string
   body: string
@@ -22,7 +24,7 @@ export function PinnedPost({ label, body }: PinnedPostProps) {
       </p>
       <p
         className="text-[13px] leading-[1.55] text-primary"
-        dangerouslySetInnerHTML={{ __html: body.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
+        dangerouslySetInnerHTML={{ __html: pinnedBodyToHtml(body) }}
       />
     </div>
   )

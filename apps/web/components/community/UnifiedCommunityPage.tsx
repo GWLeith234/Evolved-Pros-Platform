@@ -18,6 +18,7 @@ import {
   type RailPodcastEpisode,
 } from './CommunityRightRail'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import { pinnedBodyToHtml } from '@/lib/security/html'
 import { pickCommunityFeedAds } from '@/lib/sponsors/partners'
 import {
   COMMUNITY_AD_EVERY,
@@ -320,7 +321,7 @@ export function UnifiedCommunityPage({
               </p>
               <p
                 className="community-pinned-body font-body text-[13px] leading-[1.55]"
-                dangerouslySetInnerHTML={{ __html: pinnedPost.body.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>') }}
+                dangerouslySetInnerHTML={{ __html: pinnedBodyToHtml(pinnedPost.body) }}
               />
             </div>
           )}
