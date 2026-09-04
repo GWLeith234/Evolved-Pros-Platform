@@ -237,7 +237,7 @@ export type HomePageAds = {
   tileRow: SponsorAd | null
   /** In-row unit after Latest episodes (2 cards). */
   episodeRow: SponsorAd | null
-  /** In-row unit after From Evolved Media (2 cards). */
+  /** In-row unit after From Evolved Pros Media (2 cards). */
   storyRow: SponsorAd | null
   /** End-of-scroll 300×600 big box. */
   endBox: SponsorAd | null
