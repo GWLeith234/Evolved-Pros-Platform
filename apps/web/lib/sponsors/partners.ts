@@ -15,22 +15,24 @@ function liveCatalog(list: SponsorAd[]): SponsorAd[] {
 
 /** Max units that may share one cluster. Village rhythm is one. */
 export const CLUSTER_IAB_MAX = 1
-/** Hard cap for any single page stream. More than this reads as a board. */
+/** Hard cap for home mid-scroll singles. */
 export const PAGE_IAB_MAX = 2
 /** @deprecated Use PAGE_IAB_MAX — kept so older imports do not break. */
 export const FOOTER_IAB_MAX = PAGE_IAB_MAX
-/** In-feed stream on Academy / LIVE — keep this tight so those pages do not become a board. */
-export const IN_FEED_IAB_MAX = 2
-/** Media magazine may take more units because each sits alone between story rows. */
-export const MEDIA_IN_FEED_MAX = 8
-/** Story column: a couple of 300×250 units, not one lonely mid-article still. */
-export const ARTICLE_IN_BODY_MAX = 2
-/** Six Academy pillar threads — enough units for an ad every three lesson cards. */
-export const ACADEMY_THREAD_IAB_MAX = 8
-/** Podcast archive + episode: one 300×600, never a pair of big boxes. */
-export const PODCAST_IAB_MAX = 1
+/** In-feed / banner pool for Academy, LIVE, and mid-scroll 728×90s. */
+export const IN_FEED_IAB_MAX = 8
+/** Media magazine: one unit per row, then denser deeper. Recycle with a gap. */
+export const MEDIA_IN_FEED_MAX = 16
+/** Story column: 300×250 units through the piece, more as it gets longer. */
+export const ARTICLE_IN_BODY_MAX = 6
+/** Six Academy pillar threads — enough units for an ad every three cards, then every two. */
+export const ACADEMY_THREAD_IAB_MAX = 16
+/** Podcast archive + episode: 300×600 boxes through the list, recycled with a gap. */
+export const PODCAST_IAB_MAX = 8
 /** Community feed mix of 300×250 + 728×90. */
-export const COMMUNITY_FEED_MAX = 8
+export const COMMUNITY_FEED_MAX = 16
+/** LIVE speaking page: one unit between major sections. */
+export const LIVE_IAB_MAX = 6
 
 function pickLiveStills(
   list: SponsorAd[],
@@ -149,6 +151,34 @@ export function spreadNonAdjacentAds<T extends Parameters<typeof adsConflictAdja
   return out
 }
 
+/**
+ * Repeat a spread pool until `count` so a long scroll stays punctuated.
+ * Same advertiser never sits next to itself. One advertiser cannot fill
+ * two adjacent slots, so a single-brand pool stays at one unit.
+ */
+export function cycleNonAdjacentAds<T extends Parameters<typeof adsConflictAdjacent>[0]>(
+  list: T[],
+  count: number,
+): T[] {
+  const spread = spreadNonAdjacentAds(list)
+  if (!spread.length || count <= 0) return []
+  const out: T[] = []
+  let i = 0
+  let skipped = 0
+  while (out.length < count && skipped < spread.length) {
+    const cand = spread[i % spread.length] as T
+    const prev = out[out.length - 1]
+    i += 1
+    if (prev && adsConflictAdjacent(prev, cand)) {
+      skipped += 1
+      continue
+    }
+    out.push(cand)
+    skipped = 0
+  }
+  return out
+}
+
 export function isAcademyAd(ad: {
   id?: string | null
   sponsor_name?: string | null
@@ -187,9 +217,9 @@ export function ensureFlagshipSponsors(list: SponsorAd[]): SponsorAd[] {
  * Never interleaves 300×250 squares into the episode card grid.
  */
 export function ensurePodcastSponsors(list: SponsorAd[]): SponsorAd[] {
-  const stills = pickLiveStills(list, PODCAST_IAB_MAX, 17, 'E')
-  if (stills.length) return stills
-  return []
+  const stills = pickLiveStills(list, 12, 17, 'E')
+  if (!stills.length) return []
+  return cycleNonAdjacentAds(stills, PODCAST_IAB_MAX)
 }
 
 /**
@@ -200,15 +230,16 @@ export function pickScrollBanners(list: SponsorAd[], count = 1): SponsorAd[] {
   const n = Math.min(IN_FEED_IAB_MAX, Math.max(1, count))
   const banners = liveCatalog(list).filter(isIabImageStill).filter(isLeaderboardStill)
   if (!banners.length) return []
-  return pickRotatedSponsors(dedupeIabStillsBySponsor(banners, 'C'), n, { salt: 31 })
+  return cycleNonAdjacentAds(dedupeIabStillsBySponsor(banners, 'C'), n)
 }
 
-/** Archive slots: prefer E, never a 728×90, never more than PODCAST_IAB_MAX. */
+/** Archive slots: prefer E, never a 728×90. Recycle with a gap on a long list. */
 export function selectPodcastBigBoxes(list: SponsorAd[]): SponsorAd[] {
-  return dedupeIabStillsBySponsor(
+  const stills = dedupeIabStillsBySponsor(
     list.filter(a => isIabImageStill(a) && !isLeaderboardStill(a)),
     'E',
-  ).slice(0, PODCAST_IAB_MAX)
+  )
+  return cycleNonAdjacentAds(stills, PODCAST_IAB_MAX)
 }
 
 /** Exactly two sponsors for /home main row — daily rotation, no dups.
@@ -276,11 +307,20 @@ function takeNextUnit(
  */
 export function pickMediaFeedAds(list: SponsorAd[]): MediaFeedAds {
   const sidebar = takeSidebar(list)
-  const sidebarKey = sidebar ? advertiserFamilyKey(sidebar) : ''
-  const pool = [...catalogBanners(list), ...catalogSquares(list)].filter(
-    s => advertiserFamilyKey(s) !== sidebarKey,
-  )
-  const inFeed = spreadNonAdjacentAds(pool).slice(0, MEDIA_IN_FEED_MAX)
+  const pool = [...catalogBanners(list), ...catalogSquares(list)]
+  let inFeed = cycleNonAdjacentAds(pool, MEDIA_IN_FEED_MAX)
+  // Hero banner shares the first fold with the sticky rail.
+  if (sidebar && inFeed[0] && adsConflictAdjacent(sidebar, inFeed[0])) {
+    const swapAt = inFeed.findIndex((ad, i) => i > 0 && !adsConflictAdjacent(sidebar, ad))
+    if (swapAt > 0) {
+      const next = [...inFeed]
+      const [moved] = next.splice(swapAt, 1)
+      next.unshift(moved as SponsorAd)
+      inFeed = next
+    } else {
+      inFeed = inFeed.slice(1)
+    }
+  }
   return { sidebar, inFeed }
 }
 
@@ -290,25 +330,20 @@ export function pickMediaFeedAds(list: SponsorAd[]): MediaFeedAds {
  */
 export function pickArticleAds(list: SponsorAd[]): ArticleAds {
   const sidebar = takeSidebar(list)
-  const used = new Set<string>(sidebar?.id ? [sidebar.id] : [])
-  const squares = catalogSquares(list)
-  const extra = [...squares, ...catalogBanners(list)]
-  const inBody: SponsorAd[] = []
-  let prev: SponsorAd | null = sidebar
-  for (let i = 0; i < ARTICLE_IN_BODY_MAX; i++) {
-    const next = takeNextUnit(squares, prev, used)
-    if (!next) break
-    inBody.push(next)
-    prev = next
-  }
-  const related = takeNextUnit(extra, prev, used)
+  const sideKey = sidebar ? advertiserFamilyKey(sidebar) : ''
+  // Sticky rail stays on screen, so the story column never repeats that brand.
+  const squares = catalogSquares(list).filter(a => advertiserFamilyKey(a) !== sideKey)
+  const extra = [...squares, ...catalogBanners(list).filter(a => advertiserFamilyKey(a) !== sideKey)]
+  const inBody = cycleNonAdjacentAds(squares, ARTICLE_IN_BODY_MAX)
+  const used = new Set(inBody.map(a => a.id).filter(Boolean) as string[])
+  const related = takeNextUnit(extra, inBody[inBody.length - 1] ?? null, used)
   return { sidebar, inBody, related }
 }
 
 /** Lesson-thread inventory for all six Academy pillars — one unit per three cards. */
 export function pickAcademyThreadAds(list: SponsorAd[]): SponsorAd[] {
-  return spreadNonAdjacentAds([...catalogSquares(list), ...catalogBanners(list)]).slice(
-    0,
+  return cycleNonAdjacentAds(
+    [...catalogSquares(list), ...catalogBanners(list)],
     ACADEMY_THREAD_IAB_MAX,
   )
 }
@@ -335,17 +370,24 @@ export function pickHomePageAds(list: SponsorAd[]): HomePageAds {
   return { mid, tileRow, episodeRow, storyRow, endBox }
 }
 
+/** LIVE page stream: one unit between major sections, recycled with a gap. */
+export function pickLivePageAds(list: SponsorAd[], count = LIVE_IAB_MAX): SponsorAd[] {
+  const n = Math.min(LIVE_IAB_MAX, Math.max(1, count))
+  const stills = catalogSquares(list)
+  return cycleNonAdjacentAds(stills, n)
+}
+
 /** In-feed stream for Academy / LIVE — callers place units one at a time. */
 export function pickAcademySponsors(list: SponsorAd[], count = 2): SponsorAd[] {
   const n = Math.min(IN_FEED_IAB_MAX, Math.max(1, count))
-  return pickLiveStills(list, n, 23)
+  return cycleNonAdjacentAds(pickLiveStills(list, Math.max(n, 8), 23), n)
 }
 
 /** Community feed — 300×250 squares AND 728×90 banners, spread advertisers. */
 export function pickCommunityFeedAds(list: SponsorAd[], count = COMMUNITY_FEED_MAX): SponsorAd[] {
   const n = Math.min(COMMUNITY_FEED_MAX, Math.max(1, count))
-  const banners = pickScrollBanners(list, n)
-  const squares = pickLiveStills(list, n, 41, 'A')
+  const banners = catalogBanners(list)
+  const squares = catalogSquares(list)
   const seen = new Set<string>()
   const woven: SponsorAd[] = []
   const max = Math.max(banners.length, squares.length)
@@ -356,7 +398,7 @@ export function pickCommunityFeedAds(list: SponsorAd[], count = COMMUNITY_FEED_M
       woven.push(ad)
     }
   }
-  return spreadNonAdjacentAds(woven).slice(0, n)
+  return cycleNonAdjacentAds(woven, n)
 }
 
 /** Home end-of-scroll 300×600 that does not repeat a mid-scroll advertiser. */

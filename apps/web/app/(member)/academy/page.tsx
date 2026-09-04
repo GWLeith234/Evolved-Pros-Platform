@@ -65,21 +65,22 @@ export default async function AcademyPage() {
   const catalog = (await getActivePlatformAds()) as SponsorAd[]
   const academyPool = catalog.filter(a => adMatchesSurface(a, 'academy'))
   const pool = academyPool.length ? academyPool : catalog
-  const sponsorAds = pickAcademySponsors(pool, 2)
-  const scrollBanner = pickScrollBanners(pool, 1)[0] ?? null
+  const sponsorAds = pickAcademySponsors(pool, 6)
+  const scrollBanners = pickScrollBanners(pool, 4)
 
   const units: AcademyUnit[] = []
   if (showUpgrade) units.push({ id: 'academy-upgrade', kind: 'upgrade' })
-  if (scrollBanner && isIabImageStill(scrollBanner)) {
-    units.push({ id: scrollBanner.id, kind: 'iab', ad: scrollBanner })
+  for (const banner of scrollBanners) {
+    if (!isIabImageStill(banner) || units.some(u => u.id === banner.id)) continue
+    units.push({ id: banner.id, kind: 'iab', ad: banner })
   }
   for (const ad of sponsorAds) {
     if (units.some(u => u.id === ad.id)) continue
     units.push({ id: ad.id, kind: 'iab', ad })
   }
 
-  // A row of pillar cards, then one unit — curriculum first, ads as punctuation.
-  const chunks = interleaveAds(courses, units, ACADEMY_CARDS_PER_AD, { trailing: false })
+  // A row of pillar cards, then one unit — every three cards, trailing on a short catalog.
+  const chunks = interleaveAds(courses, units, ACADEMY_CARDS_PER_AD, { trailing: true })
 
   return (
     <div className="academy-page ep-surface-mobile">
@@ -125,7 +126,7 @@ export default async function AcademyPage() {
         <div className="flex flex-col gap-6">
           {chunks.map((chunk, idx) =>
             chunk.kind === 'ad' ? (
-              <AcademyAdBreak key={chunk.ad.id} unit={chunk.ad} />
+              <AcademyAdBreak key={`${chunk.ad.id}-${idx}`} unit={chunk.ad} />
             ) : (
               <div
                 key={chunk.items.map(c => c.id).join('-') || `row-${idx}`}

@@ -4,6 +4,12 @@ import { adminClient } from '@/lib/supabase/admin'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { MediaCenteredAd } from '@/components/media/MediaIabSlot'
+import { getActivePlatformAds } from '@/lib/cache/shared'
+import { pickAcademySponsors } from '@/lib/sponsors/partners'
+import { adMatchesSurface } from '@/lib/ads/iab'
+import { ACADEMY_CARDS_PER_AD, interleaveAds } from '@/lib/ads/rhythm'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 export const revalidate = 300
 
@@ -97,6 +103,12 @@ export default async function MediaAcademyPage() {
     countMap.set(lc.course_id, (countMap.get(lc.course_id) ?? 0) + 1)
   }
 
+  const catalog = ((await getActivePlatformAds()) as SponsorAd[]).filter(a =>
+    adMatchesSurface(a, 'academy') || adMatchesSurface(a, 'media'),
+  )
+  const courseAds = pickAcademySponsors(catalog, 4)
+  const courseChunks = interleaveAds(allCourses, courseAds, ACADEMY_CARDS_PER_AD, { trailing: true })
+
   const coursePillar = featured?.courses?.pillar_number ?? null
   const courseTitle = featured?.courses?.title ?? 'Course'
   const rawPreview = featured?.description ? stripMarkdown(featured.description).slice(0, 400) : ''
@@ -172,28 +184,40 @@ export default async function MediaAcademyPage() {
 
       {/* Course grid */}
       {allCourses.length > 0 ? (
-        <div className="media-academy-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
-          {allCourses.map(c => {
-            const pNum = c.pillar_number ?? 1
-            const gradient = PILLAR_GRADIENTS[pNum] ?? PILLAR_GRADIENTS[1]
-            const lessonCount = countMap.get(c.id) ?? 0
-            return (
-              <div key={c.id} style={{ backgroundColor: '#fff', border: '1px solid var(--paper-line)', borderRadius: 4, overflow: 'hidden' }}>
-                <div style={{ aspectRatio: '16/9', background: gradient }} />
-                <div style={{ padding: '9px 10px 11px' }}>
-                  <p style={{ fontSize: 8, fontWeight: 700, fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em', color: pillarColor(c.pillar_number), marginBottom: 3 }}>
-                    {pillarName(c.pillar_number)} · {lessonCount} {lessonCount === 1 ? 'lesson' : 'lessons'}
-                  </p>
-                  <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 14, color: 'var(--media-ink)', lineHeight: 1.25, margin: '0 0 6px' }}>
-                    {c.title}
-                  </p>
-                  <span style={{ fontSize: 8, fontWeight: 700, fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'rgba(43,58,90,0.35)', backgroundColor: 'rgba(43,58,90,0.06)', padding: '2px 6px', borderRadius: 2 }}>
-                    🔒 Members only
-                  </span>
-                </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
+          {courseChunks.map((chunk, idx) =>
+            chunk.kind === 'ad' ? (
+              <MediaCenteredAd key={`${chunk.ad.id}-${idx}`} ad={chunk.ad} locationId="media-academy" />
+            ) : (
+              <div
+                key={chunk.items.map(c => c.id).join('-') || `row-${idx}`}
+                className="media-academy-grid"
+                style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}
+              >
+                {chunk.items.map(c => {
+                  const pNum = c.pillar_number ?? 1
+                  const gradient = PILLAR_GRADIENTS[pNum] ?? PILLAR_GRADIENTS[1]
+                  const lessonCount = countMap.get(c.id) ?? 0
+                  return (
+                    <div key={c.id} style={{ backgroundColor: '#fff', border: '1px solid var(--paper-line)', borderRadius: 4, overflow: 'hidden' }}>
+                      <div style={{ aspectRatio: '16/9', background: gradient }} />
+                      <div style={{ padding: '9px 10px 11px' }}>
+                        <p style={{ fontSize: 8, fontWeight: 700, fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em', color: pillarColor(c.pillar_number), marginBottom: 3 }}>
+                          {pillarName(c.pillar_number)} · {lessonCount} {lessonCount === 1 ? 'lesson' : 'lessons'}
+                        </p>
+                        <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 14, color: 'var(--media-ink)', lineHeight: 1.25, margin: '0 0 6px' }}>
+                          {c.title}
+                        </p>
+                        <span style={{ fontSize: 8, fontWeight: 700, fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'rgba(43,58,90,0.35)', backgroundColor: 'rgba(43,58,90,0.06)', padding: '2px 6px', borderRadius: 2 }}>
+                          🔒 Members only
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
-            )
-          })}
+            ),
+          )}
         </div>
       ) : (
         <div style={{ padding: '40px 0', textAlign: 'center', marginBottom: 24 }}>

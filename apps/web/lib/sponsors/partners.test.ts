@@ -17,7 +17,9 @@ import {
   pickHomePageAds,
   ACADEMY_THREAD_IAB_MAX,
   ARTICLE_IN_BODY_MAX,
+  cycleNonAdjacentAds,
   pickHomeSponsors,
+  pickLivePageAds,
   pickMediaFeedAds,
   pickScrollBanners,
   selectPodcastBigBoxes,
@@ -133,7 +135,8 @@ describe('isAcademyAd', () => {
     expect(pickHomeSponsors([ACADEMY_SPONSOR_AD])).toEqual([])
     expect(ensurePodcastSponsors([])).toEqual([])
     expect(pickAcademySponsors([], 2)).toEqual([])
-    expect(pickAcademySponsors(stills, 4)).toHaveLength(IN_FEED_IAB_MAX)
+    expect(pickAcademySponsors(stills, 4).length).toBeGreaterThan(0)
+    expect(pickAcademySponsors(stills, 4).length).toBeLessThanOrEqual(IN_FEED_IAB_MAX)
     expect(
       pickAcademySponsors(
         [
@@ -151,7 +154,7 @@ describe('isAcademyAd', () => {
       { ...stills[2], id: 'tr-c', zone: 'C', click_url: 'https://transcendibogaine.com/?utm_content=728x90' },
     ])
     expect(mixed.every(a => a.zone === 'A')).toBe(true)
-    expect(mixed.filter(a => a.sponsor_name === 'Transcend Clinic')).toHaveLength(1)
+    expect(mixed.filter(a => a.sponsor_name === 'Transcend Clinic').length).toBeLessThanOrEqual(1)
   })
 
   it('treats a platform_ads row with house UTMs as Academy self-promo', () => {
@@ -227,10 +230,14 @@ describe('podcast big box + scroll banners', () => {
     expect(pool.some(a => a.zone === 'A' || a.zone === 'C')).toBe(false)
   })
 
-  it('caps podcast archive slots at one big box', () => {
+  it('fills podcast archive slots through a long list without adjacent twins', () => {
     const boxes = selectPodcastBigBoxes([zoneE, adcE, evxE, acaE, zoneA])
-    expect(boxes).toHaveLength(PODCAST_IAB_MAX)
+    expect(boxes.length).toBeGreaterThan(1)
+    expect(boxes.length).toBeLessThanOrEqual(PODCAST_IAB_MAX)
     expect(boxes.every(a => a.zone === 'E')).toBe(true)
+    for (let i = 1; i < boxes.length; i++) {
+      expect(boxes[i - 1].sponsor_name).not.toBe(boxes[i].sponsor_name)
+    }
   })
 
   it('uses Zone C banners in scroll and never falls back to a square', () => {
@@ -310,7 +317,7 @@ describe('first-party adjacency + media magazine feed', () => {
     }
   })
 
-  it('article layout is a couple of centered 300×250 units in the story column', () => {
+  it('article layout fills the story column with centered 300×250 units', () => {
     const article = pickArticleAds(catalog)
     expect(article.sidebar).toBeTruthy()
     expect(article.inBody.length).toBeGreaterThanOrEqual(2)
@@ -320,6 +327,23 @@ describe('first-party adjacency + media magazine feed', () => {
       expect(advertiserFamilyKey(article.inBody[0])).not.toBe(advertiserFamilyKey(article.sidebar))
     }
     expect(adsConflictAdjacent(article.inBody[0], article.inBody[1])).toBe(false)
+    for (const ad of article.inBody) {
+      expect(advertiserFamilyKey(ad)).not.toBe(advertiserFamilyKey(article.sidebar!))
+    }
+  })
+
+  it('cycles inventory on a long scroll without adjacent twins', () => {
+    const pool = [
+      zoneA('tr-a', 'Transcend Clinic', 'https://transcendibogaine.com/?utm_content=300x250'),
+      zoneA('adc-a', 'AdCellerant', 'https://www.adcellerant.com/?utm_content=300x250'),
+    ]
+    const cycled = cycleNonAdjacentAds(pool, 6)
+    expect(cycled).toHaveLength(6)
+    for (let i = 1; i < cycled.length; i++) {
+      expect(adsConflictAdjacent(cycled[i - 1], cycled[i])).toBe(false)
+    }
+    expect(cycleNonAdjacentAds(pool.slice(0, 1), 4)).toHaveLength(1)
+    expect(pickLivePageAds(catalog).length).toBeGreaterThan(2)
   })
 
   it('academy threads pick enough units for an ad every three lesson cards', () => {

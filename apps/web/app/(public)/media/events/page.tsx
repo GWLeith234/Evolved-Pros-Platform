@@ -3,6 +3,12 @@ import Link from 'next/link'
 import { adminClient } from '@/lib/supabase/admin'
 import { mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { MediaCenteredAd } from '@/components/media/MediaIabSlot'
+import { getActivePlatformAds } from '@/lib/cache/shared'
+import { pickCommunityFeedAds } from '@/lib/sponsors/partners'
+import { adMatchesSurface } from '@/lib/ads/iab'
+import { COMMUNITY_AD_EVERY, interleaveAds } from '@/lib/ads/rhythm'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 export const revalidate = 120
 
@@ -157,6 +163,14 @@ export default async function MediaEventsPage() {
 
   const upcomingEvents = (upcoming ?? []) as EventRow[]
   const pastEvents = (past ?? []) as EventRow[]
+  const catalog = ((await getActivePlatformAds()) as SponsorAd[]).filter(a =>
+    adMatchesSurface(a, 'events') || adMatchesSurface(a, 'media'),
+  )
+  const feedAds = pickCommunityFeedAds(catalog, 8)
+  const upcomingChunks = interleaveAds(upcomingEvents, feedAds.slice(0, 4), COMMUNITY_AD_EVERY, {
+    trailing: true,
+  })
+  const pastChunks = interleaveAds(pastEvents, feedAds.slice(4), COMMUNITY_AD_EVERY, { trailing: true })
 
   return (
     <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 24px 40px' }}>
@@ -173,9 +187,13 @@ export default async function MediaEventsPage() {
       {/* Upcoming events */}
       {upcomingEvents.length > 0 ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-          {upcomingEvents.map(ev => (
-            <EventCard key={ev.id} ev={ev} />
-          ))}
+          {upcomingChunks.map((chunk, idx) =>
+            chunk.kind === 'ad' ? (
+              <MediaCenteredAd key={`${chunk.ad.id}-${idx}`} ad={chunk.ad} locationId="media-events" />
+            ) : (
+              chunk.items.map(ev => <EventCard key={ev.id} ev={ev} />)
+            ),
+          )}
         </div>
       ) : (
         <div style={{ backgroundColor: '#fff', border: '1px solid #E0D8CC', borderRadius: 4, padding: '40px 20px', textAlign: 'center', marginBottom: 24 }}>
@@ -196,9 +214,13 @@ export default async function MediaEventsPage() {
             <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(43,58,90,0.15)' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {pastEvents.map(ev => (
-              <EventCard key={ev.id} ev={ev} isPast />
-            ))}
+            {pastChunks.map((chunk, idx) =>
+              chunk.kind === 'ad' ? (
+                <MediaCenteredAd key={`${chunk.ad.id}-p${idx}`} ad={chunk.ad} locationId="media-events" />
+              ) : (
+                chunk.items.map(ev => <EventCard key={ev.id} ev={ev} isPast />)
+              ),
+            )}
           </div>
         </>
       )}

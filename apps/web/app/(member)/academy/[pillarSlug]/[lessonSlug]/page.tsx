@@ -222,8 +222,8 @@ export default async function LessonPage({ params }: Props) {
               }
             : null
         }
-        sponsorAds={pickAcademySponsors(academyCatalog, 4)}
-        scrollBanner={pickScrollBanners(academyCatalog, 1)[0] ?? null}
+        sponsorAds={pickAcademySponsors(academyCatalog, 6)}
+        scrollBanner={pickScrollBanners(academyCatalog, 2)[0] ?? null}
       />
     </div>
   )

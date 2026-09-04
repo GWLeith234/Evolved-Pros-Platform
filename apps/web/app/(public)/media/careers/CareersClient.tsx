@@ -1,6 +1,14 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { MediaCenteredAd } from '@/components/media/MediaIabSlot'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import {
+  COMMUNITY_AD_EVERY,
+  COMMUNITY_DEEPER_EVERY,
+  COMMUNITY_TIGHTEN_AFTER,
+  interleaveAds,
+} from '@/lib/ads/rhythm'
 
 export interface Job {
   id: string
@@ -33,7 +41,7 @@ function isNewThisWeek(iso: string): boolean {
   return Date.now() - new Date(iso).getTime() < 7 * 86400000
 }
 
-export function CareersClient({ jobs }: { jobs: Job[] }) {
+export function CareersClient({ jobs, ads = [] }: { jobs: Job[]; ads?: SponsorAd[] }) {
   const [search, setSearch] = useState('')
   const [locFilter, setLocFilter] = useState('all')
   const [typeFilter, setTypeFilter] = useState('all')
@@ -72,6 +80,15 @@ export function CareersClient({ jobs }: { jobs: Job[] }) {
   }, [jobs, search, locFilter, typeFilter, catFilter])
 
   const newThisWeek = jobs.filter(j => isNewThisWeek(j.created_at)).length
+  const jobChunks = useMemo(
+    () =>
+      interleaveAds(filtered, ads.filter(a => a?.image_url), COMMUNITY_AD_EVERY, {
+        trailing: true,
+        tightenAfter: COMMUNITY_TIGHTEN_AFTER,
+        deeperEvery: COMMUNITY_DEEPER_EVERY,
+      }),
+    [filtered, ads],
+  )
 
   const selectStyle = {
     fontFamily: FB, fontSize: 12, color: '#2B3A5A',
@@ -152,7 +169,11 @@ export function CareersClient({ jobs }: { jobs: Job[] }) {
         {/* Job cards */}
         {filtered.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {filtered.map(j => (
+            {jobChunks.map((chunk, idx) =>
+              chunk.kind === 'ad' ? (
+                <MediaCenteredAd key={`${chunk.ad.id}-${idx}`} ad={chunk.ad} locationId="media-careers" />
+              ) : (
+                chunk.items.map(j => (
               <div key={j.id} style={{ backgroundColor: '#fff', border: '1px solid #E0D8CC', borderRadius: 4, padding: '12px 14px', display: 'flex', alignItems: 'flex-start', gap: 12 }}>
                 {/* Company logo placeholder */}
                 <div style={{ width: 44, height: 44, borderRadius: 4, backgroundColor: '#2B3A5A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#fff', fontWeight: 700, fontFamily: FC, flexShrink: 0 }}>
@@ -186,7 +207,9 @@ export function CareersClient({ jobs }: { jobs: Job[] }) {
                   Apply →
                 </a>
               </div>
-            ))}
+                ))
+              )
+            )}
           </div>
         ) : (
           <div style={{ backgroundColor: '#fff', border: '1px solid #E0D8CC', borderRadius: 4, padding: '40px 20px', textAlign: 'center' }}>

@@ -20,4 +20,15 @@ describe('assignThreadAds', () => {
     expect(map.get('l3')).toBe('a')
     expect(map.get('l12')).toBe('d')
   })
+
+  it('tightens after the first screen on a deep pillar', () => {
+    const cards = Array.from({ length: 18 }, (_, i) => ({ id: `l${i + 1}` }))
+    const map = assignThreadAds(cards, ['a', 'b', 'c', 'd', 'e', 'f', 'g'])
+    expect(map.get('l3')).toBe('a')
+    expect(map.get('l12')).toBe('d')
+    expect(map.get('l14')).toBe('e')
+    expect(map.get('l16')).toBe('f')
+    expect(map.get('l18')).toBe('g')
+    expect(map.size).toBe(7)
+  })
 })

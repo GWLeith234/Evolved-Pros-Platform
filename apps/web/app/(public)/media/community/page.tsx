@@ -7,6 +7,12 @@ import type { PillarTag } from '@/lib/community/types'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { MediaCenteredAd } from '@/components/media/MediaIabSlot'
+import { getActivePlatformAds } from '@/lib/cache/shared'
+import { pickCommunityFeedAds } from '@/lib/sponsors/partners'
+import { adMatchesSurface } from '@/lib/ads/iab'
+import { COMMUNITY_AD_EVERY, interleaveAds } from '@/lib/ads/rhythm'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 export const revalidate = 120
 
@@ -136,6 +142,12 @@ export default async function MediaCommunityPage() {
   const posts = ((data ?? []) as unknown as PostRow[])
   const visible = posts.slice(0, 3)
   const blurred = posts.slice(3, 8)
+  const catalog = ((await getActivePlatformAds()) as SponsorAd[]).filter(a =>
+    adMatchesSurface(a, 'community') || adMatchesSurface(a, 'media'),
+  )
+  const feedAds = pickCommunityFeedAds(catalog, 6)
+  const visibleChunks = interleaveAds(visible, feedAds.slice(0, 2), COMMUNITY_AD_EVERY, { trailing: true })
+  const blurredChunks = interleaveAds(blurred, feedAds.slice(2), COMMUNITY_AD_EVERY, { trailing: true })
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 24px 0' }}>
@@ -152,19 +164,27 @@ export default async function MediaCommunityPage() {
         </p>
       </div>
 
-      {/* Top 3 — fully visible */}
+      {/* Top 3 — fully visible, punctuated */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 0 }}>
-        {visible.map(p => (
-          <PostCard key={p.id} post={p} />
-        ))}
+        {visibleChunks.map((chunk, idx) =>
+          chunk.kind === 'ad' ? (
+            <MediaCenteredAd key={`${chunk.ad.id}-${idx}`} ad={chunk.ad} locationId="media-community" />
+          ) : (
+            chunk.items.map(p => <PostCard key={p.id} post={p} />)
+          ),
+        )}
       </div>
 
-      {/* Posts 4-8 — blurred */}
+      {/* Posts 4-8 — blurred, still punctuated */}
       {blurred.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10, position: 'relative' }}>
-          {blurred.map(p => (
-            <PostCard key={p.id} post={p} blurred />
-          ))}
+          {blurredChunks.map((chunk, idx) =>
+            chunk.kind === 'ad' ? (
+              <MediaCenteredAd key={`${chunk.ad.id}-b${idx}`} ad={chunk.ad} locationId="media-community" />
+            ) : (
+              chunk.items.map(p => <PostCard key={p.id} post={p} blurred />)
+            ),
+          )}
         </div>
       )}
 

@@ -896,6 +896,8 @@ export default async function MemberHomePage() {
         )}
       </div>
 
+      {sponsors.storyRow ? <HomeSponsorAd ad={sponsors.storyRow} /> : null}
+
       <HomeEndBox ad={sponsors.endBox} />
 
     </div>

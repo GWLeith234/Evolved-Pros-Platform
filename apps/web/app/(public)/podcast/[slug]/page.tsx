@@ -28,6 +28,7 @@ import {
   type PublicEpisode,
 } from '@/lib/podcast/public'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { interleaveAds } from '@/lib/ads/rhythm'
 
 // Public, server-rendered, indexable. The transcript is real DOM text in the
 // SSR HTML (view-source shows it) — the whole point of the SEO sprint.
@@ -252,8 +253,8 @@ export default async function PublicEpisodePage({ params }: Props) {
           </section>
         )}
 
-        {/* Sponsor — mid slot */}
-        <SponsorSlot pool={sponsors} startIndex={1} />
+        {/* Sponsor — mid slot after highlights */}
+        <SponsorSlot ad={sponsors[0] ?? null} />
 
         {/* Transcript */}
         <section className="mb-12" aria-labelledby="transcript-heading">
@@ -262,26 +263,46 @@ export default async function PublicEpisodePage({ params }: Props) {
           </h2>
           {showSegments ? (
             <div className="space-y-4">
-              {segments.map((s, i) => {
-                const yt = youtubeTimestampUrl(ep.youtube_id, s.ts)
-                return (
-                  <p key={i} id={`t-${s.ts}`} className="text-[16px] leading-relaxed" style={{ color: 'rgba(245,240,232,0.82)' }}>
-                    {s.speaker && <strong style={{ color: IVORY }}>{s.speaker}: </strong>}
-                    {s.text}{' '}
-                    {yt && (
-                      <a href={yt} target="_blank" rel="noopener noreferrer" className="font-condensed text-[12px] tabular-nums" style={{ color: DIMMER, textDecoration: 'none' }}>
-                        [{formatTimestamp(s.ts)}]
-                      </a>
-                    )}
-                  </p>
-                )
-              })}
+              {interleaveAds(segments, sponsors.slice(1), 6, {
+                trailing: true,
+                tightenAfter: 12,
+                deeperEvery: 4,
+              }).map((chunk, idx) =>
+                chunk.kind === 'ad' ? (
+                  <SponsorSlot key={`${chunk.ad.id}-${idx}`} ad={chunk.ad} />
+                ) : (
+                  chunk.items.map((s, i) => {
+                    const yt = youtubeTimestampUrl(ep.youtube_id, s.ts)
+                    return (
+                      <p key={`${s.ts}-${i}`} id={`t-${s.ts}`} className="text-[16px] leading-relaxed" style={{ color: 'rgba(245,240,232,0.82)' }}>
+                        {s.speaker && <strong style={{ color: IVORY }}>{s.speaker}: </strong>}
+                        {s.text}{' '}
+                        {yt && (
+                          <a href={yt} target="_blank" rel="noopener noreferrer" className="font-condensed text-[12px] tabular-nums" style={{ color: DIMMER, textDecoration: 'none' }}>
+                            [{formatTimestamp(s.ts)}]
+                          </a>
+                        )}
+                      </p>
+                    )
+                  })
+                ),
+              )}
             </div>
           ) : paragraphs.length > 0 ? (
             <div className="space-y-4">
-              {paragraphs.map((p, i) => (
-                <p key={i} className="text-[16px] leading-relaxed" style={{ color: 'rgba(245,240,232,0.82)' }}>{p}</p>
-              ))}
+              {interleaveAds(paragraphs, sponsors.slice(1), 4, {
+                trailing: true,
+                tightenAfter: 8,
+                deeperEvery: 3,
+              }).map((chunk, idx) =>
+                chunk.kind === 'ad' ? (
+                  <SponsorSlot key={`${chunk.ad.id}-p${idx}`} ad={chunk.ad} />
+                ) : (
+                  chunk.items.map((p, i) => (
+                    <p key={`${idx}-${i}`} className="text-[16px] leading-relaxed" style={{ color: 'rgba(245,240,232,0.82)' }}>{p}</p>
+                  ))
+                ),
+              )}
             </div>
           ) : (
             <p className="text-[15px] italic" style={{ color: DIMMER }}>
@@ -315,9 +336,8 @@ export default async function PublicEpisodePage({ params }: Props) {
   )
 }
 
-function SponsorSlot({ pool, startIndex }: { pool: SponsorAd[]; startIndex: number }) {
-  if (!pool.length) return null
-  const ad = pool[startIndex % pool.length]
+function SponsorSlot({ ad }: { ad: SponsorAd | null }) {
+  if (!ad) return null
   const still = isIabImageStill(ad) && ad.image_url
   return (
     <div className="my-10">
@@ -328,7 +348,7 @@ function SponsorSlot({ pool, startIndex }: { pool: SponsorAd[]; startIndex: numb
         />
       ) : (
         <div className="mx-auto max-w-[300px]">
-          <RotatingSponsorCard pool={pool} startIndex={startIndex} showDisclosure={false} />
+          <RotatingSponsorCard pool={[ad]} startIndex={0} showDisclosure={false} />
         </div>
       )}
     </div>

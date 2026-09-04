@@ -19,7 +19,12 @@ import {
 } from './CommunityRightRail'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { pickCommunityFeedAds } from '@/lib/sponsors/partners'
-import { COMMUNITY_AD_EVERY, interleaveAds } from '@/lib/ads/rhythm'
+import {
+  COMMUNITY_AD_EVERY,
+  COMMUNITY_DEEPER_EVERY,
+  COMMUNITY_TIGHTEN_AFTER,
+  interleaveAds,
+} from '@/lib/ads/rhythm'
 
 function getInitials(name: string | null | undefined): string {
   if (!name) return '?'
@@ -272,7 +277,12 @@ export function UnifiedCommunityPage({
     return pickCommunityFeedAds(pool) as CommunityAd[]
   }, [ads, railIds])
   const feedChunks = useMemo(
-    () => interleaveAds(visible, feedAds, COMMUNITY_AD_EVERY, { trailing: true }),
+    () =>
+      interleaveAds(visible, feedAds, COMMUNITY_AD_EVERY, {
+        trailing: true,
+        tightenAfter: COMMUNITY_TIGHTEN_AFTER,
+        deeperEvery: COMMUNITY_DEEPER_EVERY,
+      }),
     [visible, feedAds],
   )
 
