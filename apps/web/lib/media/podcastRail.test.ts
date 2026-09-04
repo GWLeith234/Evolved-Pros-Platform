@@ -38,6 +38,8 @@ describe('episodeRailStill', () => {
   it('prefers the guest still over the episode thumbnail', () => {
     expect(
       episodeRailStill({
+        slug: 'heather-monahan',
+        episode_number: 1,
         guest_image_url: 'https://cdn.example/heather.jpg',
         thumbnail_url: 'https://cdn.example/ep.jpg',
       }),
@@ -47,11 +49,20 @@ describe('episodeRailStill', () => {
   it('falls back to the episode thumbnail and never invents a face', () => {
     expect(
       episodeRailStill({
+        slug: 'heather-monahan',
+        episode_number: 1,
         guest_image_url: null,
         thumbnail_url: 'https://cdn.example/ep.jpg',
       }),
     ).toBe('https://cdn.example/ep.jpg')
-    expect(episodeRailStill({ guest_image_url: null, thumbnail_url: null })).toBeNull()
+    expect(
+      episodeRailStill({
+        slug: 'heather-monahan',
+        episode_number: 1,
+        guest_image_url: null,
+        thumbnail_url: null,
+      }),
+    ).toBeNull()
   })
 
   it('rewrites Juan EP010 CloudFront to the local still', () => {

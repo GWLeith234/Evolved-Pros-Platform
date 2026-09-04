@@ -2030,6 +2030,28 @@ a.ep-text-link:focus-visible {
   color: var(--brand-navy);
 }
 
+/* Footer brand lockup: white wordmark on dark, navy wordmark on light.
+   Force-dark shells (/login, /live) keep the white mark even when html is
+   light-mode, matching the token re-declare on .ep-force-dark / .live-force-dark. */
+.ep-public-footer-logo {
+  height: 32px;
+  width: auto;
+  max-width: min(220px, 100%);
+  object-fit: contain;
+}
+.ep-public-footer-logo--on-dark { display: block; }
+.ep-public-footer-logo--on-light { display: none; }
+html.light-mode .ep-public-footer-logo--on-dark { display: none; }
+html.light-mode .ep-public-footer-logo--on-light { display: block; }
+html.light-mode .ep-force-dark .ep-public-footer-logo--on-dark,
+html.light-mode .live-force-dark .ep-public-footer-logo--on-dark {
+  display: block;
+}
+html.light-mode .ep-force-dark .ep-public-footer-logo--on-light,
+html.light-mode .live-force-dark .ep-public-footer-logo--on-light {
+  display: none;
+}
+
 /* Ghost footer links lift to full-strength ink on hover/focus. The single red
    CTA (Join free) is styled inline in the component. */
 .ep-public-footer-link:hover,

@@ -1,5 +1,11 @@
+import Image from 'next/image'
 import Link from 'next/link'
+import { logos } from '@evolved-pros/ui'
 import { PUBLIC_FOOTER_LINKS, footerCopyright } from '@/lib/layout/publicFooter'
+
+/** Display height for the footer lockup. Intrinsic asset is 800x160 (5:1). */
+const FOOTER_LOGO_HEIGHT = 32
+const FOOTER_LOGO_WIDTH = FOOTER_LOGO_HEIGHT * 5
 
 /**
  * Global public footer (SPRINT FOOTER-1).
@@ -47,22 +53,38 @@ export function PublicFooter({
           minWidth: 0,
         }}
       >
-        {/* Wordmark — text, not an <img>, so it needs no per-theme asset swap. */}
+        {/* Same horizontal lockup as header/nav (white on dark, navy on light).
+            Swap is CSS so this stays a server component and force-dark shells
+            keep the white mark. */}
         <Link
           href="/"
           aria-label="Evolved Pros home"
+          className="ep-public-footer-brand"
           style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: 15,
-            fontWeight: 800,
-            letterSpacing: '0.18em',
-            textTransform: 'uppercase',
-            color: 'var(--text-primary)',
-            textDecoration: 'none',
+            display: 'block',
             alignSelf: 'flex-start',
+            lineHeight: 0,
+            textDecoration: 'none',
           }}
         >
-          EVOLVED<span style={{ color: 'var(--brand-red-hot)' }}>&middot;</span>PROS
+          <Image
+            src={logos.horizontalDark}
+            alt=""
+            width={800}
+            height={160}
+            sizes={`${FOOTER_LOGO_WIDTH}px`}
+            className="ep-public-footer-logo ep-public-footer-logo--on-dark"
+            style={{ height: FOOTER_LOGO_HEIGHT, width: 'auto' }}
+          />
+          <Image
+            src={logos.horizontalNavy}
+            alt=""
+            width={800}
+            height={160}
+            sizes={`${FOOTER_LOGO_WIDTH}px`}
+            className="ep-public-footer-logo ep-public-footer-logo--on-light"
+            style={{ height: FOOTER_LOGO_HEIGHT, width: 'auto' }}
+          />
         </Link>
 
         <nav aria-label="Footer" style={{ minWidth: 0 }}>
