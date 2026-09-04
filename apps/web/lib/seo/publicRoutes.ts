@@ -21,8 +21,8 @@
  *
  * /live and /pricing ARE here: both are in SESSION_OPTIONAL_ROUTES, so
  * middleware refreshes the session but never bounces an anonymous visitor.
- * /pricing is also the landing page's primary CTA — advertising the front door
- * but not the buy page is the same class of false signal, inverted.
+ * /pricing is the landing page's secondary CTA (See pricing). Advertising the
+ * front door but not the buy page is the same class of false signal, inverted.
  *
  * /membership stays out: it is a member surface, not a public one.
  *

@@ -2019,6 +2019,16 @@ a.ep-text-link:focus-visible {
 .ep-public-shell:has(.ep-member-shell) > .ep-public-footer {
   display: none;
 }
+/* Conversion `/` owns a legal-only footer (Privacy / Terms). Hide the
+   global public footer there so Join free / LIVE / Contact do not repeat. */
+.ep-public-shell:has(.ep-conversion-home) > .ep-public-footer {
+  display: none;
+}
+
+.ep-conversion-home {
+  background: var(--paper);
+  color: var(--brand-navy);
+}
 
 /* Ghost footer links lift to full-strength ink on hover/focus. The single red
    CTA (Join free) is styled inline in the component. */

@@ -167,6 +167,12 @@ const nextConfig = {
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
       },
+      {
+        source: '/home/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
       // Static Next assets — aggressive cache (hashed filenames).
       {
         source: '/_next/static/:path*',
