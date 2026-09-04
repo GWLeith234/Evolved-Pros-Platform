@@ -110,6 +110,19 @@ describe('conversion homepage layout contracts', () => {
       /header[\s\S]{0,80}flex max-w-6xl flex-wrap items-center justify-between/,
     )
   })
+
+  it('keeps conversion `/` ad-free — no IAB, slots, or platform_ads', () => {
+    const { readFileSync } = require('node:fs') as typeof import('node:fs')
+    const { dirname, resolve } = require('node:path') as typeof import('node:path')
+    const root = dirname(new URL(import.meta.url).pathname)
+    const home = readFileSync(resolve(root, '../../components/home/ConversionHome.tsx'), 'utf8')
+    const page = readFileSync(resolve(root, '../../app/(public)/page.tsx'), 'utf8')
+    for (const src of [home, page]) {
+      expect(src).not.toMatch(
+        /IabAdvertisementSlot|IabImageAd|HomeSponsorAd|AdSlot|interleaveAds|platform_ads/,
+      )
+    }
+  })
 })
 
 describe('home episode display', () => {
