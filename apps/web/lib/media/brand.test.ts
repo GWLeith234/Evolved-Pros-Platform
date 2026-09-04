@@ -21,6 +21,14 @@ describe('Evolved Pros Media brand lock', () => {
     )
   })
 
+  it('keeps hub title and og title on Evolved Pros Media', () => {
+    expect(MEDIA_HUB_TITLE.startsWith('Evolved Pros Media')).toBe(true)
+    expect(MEDIA_HUB_TITLE).not.toBe(
+      'Evolved Media — Sales & Personal Development Intelligence',
+    )
+    expect(MEDIA_HUB_TITLE).not.toMatch(/^Evolved Media\b/)
+  })
+
   it('suffixes articles and section titles with Evolved Pros Media', () => {
     expect(mediaStoryTitle('Close the Gap')).toBe('Close the Gap | Evolved Pros Media')
     expect(mediaSectionTitle('Leadership')).toBe('Leadership | Evolved Pros Media')

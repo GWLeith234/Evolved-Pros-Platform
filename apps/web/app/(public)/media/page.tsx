@@ -15,6 +15,9 @@ export const revalidate = 60
 export const metadata: Metadata = publicPageMetadata('/media', {
   title: MEDIA_HUB_TITLE,
   description: 'Pioneer stories, leadership insights, and business strategy from the EVOLVED framework.',
+  openGraph: {
+    title: MEDIA_HUB_TITLE,
+  },
 })
 
 export default async function MediaPage() {
