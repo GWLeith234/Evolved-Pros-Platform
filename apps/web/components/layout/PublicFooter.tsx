@@ -50,7 +50,7 @@ export function PublicFooter({
         {/* Wordmark — text, not an <img>, so it needs no per-theme asset swap. */}
         <Link
           href="/"
-          aria-label="Evolved Pros — home"
+          aria-label="Evolved Pros home"
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: 15,
