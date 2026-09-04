@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { MEDIA_HUB_DESCRIPTION, MEDIA_HUB_TITLE } from '@/lib/media/brand'
 import {
   CANONICAL_ORIGIN,
   SITE_NAME,
@@ -74,6 +75,26 @@ describe('publicPageMetadata', () => {
   it('locks the public brand as Evolved Pros', () => {
     expect(SITE_NAME).toBe('Evolved Pros')
     expect(SITE_NAME).not.toContain('Evolved Media')
+  })
+
+  it('copies the /media hub lock onto document, og, and twitter titles', () => {
+    const meta = publicPageMetadata('/media', {
+      title: MEDIA_HUB_TITLE,
+      description: MEDIA_HUB_DESCRIPTION,
+    })
+    expect(meta.title).toBe(
+      'Evolved Pros Media | Sales & Personal Development Intelligence',
+    )
+    expect(meta.openGraph).toMatchObject({
+      title: MEDIA_HUB_TITLE,
+      description: MEDIA_HUB_DESCRIPTION,
+    })
+    expect(meta.twitter).toMatchObject({
+      card: 'summary_large_image',
+      title: MEDIA_HUB_TITLE,
+      description: MEDIA_HUB_DESCRIPTION,
+    })
+    expect(JSON.stringify(meta)).not.toContain('Evolved Media')
   })
 
   it('emits matching canonical + og:url for the /media hub', () => {
