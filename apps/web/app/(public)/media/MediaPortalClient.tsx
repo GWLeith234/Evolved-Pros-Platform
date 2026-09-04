@@ -452,7 +452,7 @@ export function MediaPortalClient({
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 40, height: 2, background: 'var(--brand-gold)' }} />
           <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontWeight: 700, fontSize: 12, color: 'var(--navy-dark)', textTransform: 'uppercase', letterSpacing: '0.14em', whiteSpace: 'nowrap' }}>
-            {activeCategory === ALL_LABEL ? 'More from Evolved Media' : `More in ${activeCategory}`}
+            {activeCategory === ALL_LABEL ? 'More from Evolved Pros Media' : `More in ${activeCategory}`}
           </span>
           <div style={{ flex: 1, height: 1, background: 'var(--paper-line-soft)' }} />
         </div>

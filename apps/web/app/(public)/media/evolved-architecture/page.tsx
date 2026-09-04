@@ -2,12 +2,13 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { adminClient } from '@/lib/supabase/admin'
+import { MEDIA_BRAND, mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 
 export const revalidate = 120
 
 export const metadata: Metadata = publicPageMetadata('/media/evolved-architecture', {
-  title: 'Evolved Architecture — Evolved Media',
+  title: mediaSectionTitle('Evolved Architecture'),
   description: 'All 6 pillars of the EVOLVED Architecture™ — Foundation, Identity, Mental Toughness, Strategy, Accountability, Execution.',
 })
 
@@ -47,7 +48,7 @@ export default async function EvolvedArchitecturePage() {
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 24px 40px' }}>
       {/* Section band */}
       <div style={{ marginBottom: 20 }}>
-        <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 10, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>Evolved Media</p>
+        <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 10, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>{MEDIA_BRAND}</p>
         <h1 style={{ fontFamily: 'var(--font-abril, var(--font-condensed))', fontWeight: 400, fontSize: 36, color: '#2B3A5A', lineHeight: 1.1, margin: 0 }}>Evolved Architecture</h1>
         <p style={{ fontSize: 12, color: 'rgba(43,58,90,0.5)', fontFamily: 'var(--font-body)', marginTop: 6 }}>
           Foundation · Identity · Mental Toughness · Strategy · Accountability · Execution

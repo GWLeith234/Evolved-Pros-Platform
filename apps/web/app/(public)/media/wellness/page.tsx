@@ -2,12 +2,13 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { adminClient } from '@/lib/supabase/admin'
+import { MEDIA_BRAND, mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 
 export const revalidate = 120
 
 export const metadata: Metadata = publicPageMetadata('/media/wellness', {
-  title: 'Wellness — Evolved Media',
+  title: mediaSectionTitle('Wellness'),
   description: 'Physical and mental wellness strategies for high-performing professionals.',
 })
 
@@ -58,7 +59,7 @@ export default async function WellnessPage() {
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 24px 40px' }}>
       {/* Section band */}
       <div style={{ marginBottom: 20 }}>
-        <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 10, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>Evolved Media</p>
+        <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 10, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>{MEDIA_BRAND}</p>
         <h1 style={{ fontFamily: 'var(--font-abril, var(--font-condensed))', fontWeight: 400, fontSize: 36, color: '#2B3A5A', lineHeight: 1.1, margin: 0 }}>Wellness</h1>
       </div>
 

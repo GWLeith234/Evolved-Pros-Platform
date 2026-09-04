@@ -121,7 +121,7 @@ export function Masthead() {
             >
               Evolved
             </span>{' '}
-            <span data-masthead-media style={{ color: '#112535' }}>Media</span>
+            <span data-masthead-media style={{ color: '#112535' }}>Pros Media</span>
           </Link>
         </h1>
         <p
@@ -133,7 +133,7 @@ export function Masthead() {
             color: '#6B7280',
           }}
         >
-          Promoting evolution &mdash; the topics George is actively researching, learning, and teaching.
+          Promoting evolution. The topics George is actively researching, learning, and teaching.
         </p>
       </div>
 

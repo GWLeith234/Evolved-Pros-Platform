@@ -1,3 +1,5 @@
+import { allowedEpisodeStillUrl } from '@/lib/podcast/stillUrl'
+
 /**
  * Media "Latest Podcast" rail — stored destinations and stored stills only.
  * Never invent a YouTube URL. Never synthesize a face.
@@ -38,14 +40,16 @@ export function episodeWatchIsExternal(href: string): boolean {
   return /^https?:\/\//i.test(href)
 }
 
-/** Guest still first, episode thumbnail second. Null if neither exists — no mic, no fake face. */
+/** Guest still first, episode thumbnail second. Never CloudFront. Null if neither is allowed. */
 export function episodeRailStill(
-  ep: Pick<MediaRailEpisode, 'guest_image_url' | 'thumbnail_url'>,
+  ep: Pick<MediaRailEpisode, 'guest_image_url' | 'thumbnail_url' | 'slug' | 'episode_number'>,
 ): string | null {
-  const guest = ep.guest_image_url?.trim()
-  if (guest) return guest
-  const thumb = ep.thumbnail_url?.trim()
-  return thumb || null
+  return allowedEpisodeStillUrl({
+    guest_image_url: ep.guest_image_url,
+    thumbnail_url: ep.thumbnail_url,
+    slug: ep.slug,
+    episode_number: ep.episode_number,
+  })
 }
 
 export function formatRailDuration(seconds: number | null | undefined): string {

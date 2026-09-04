@@ -17,6 +17,13 @@ describe('Media masthead chrome', () => {
     expect(src).not.toMatch(/George.?s Desk/)
   })
 
+  it('names the H1 Evolved Pros Media', () => {
+    expect(src).toMatch(/data-masthead-evolved[\s\S]*Evolved/)
+    expect(src).toMatch(/data-masthead-media[\s\S]*Pros Media/)
+    expect(src).toMatch(/Promoting evolution\. The topics George/)
+    expect(src).not.toMatch(/Promoting evolution &mdash;/)
+  })
+
   it('keeps the red / navy split and thickens Evolved by weight, not size', () => {
     expect(src).toMatch(/data-masthead-evolved[\s\S]*color: '#C9302A'[\s\S]*fontWeight: 900/)
     expect(src).toMatch(/data-masthead-media[\s\S]*color: '#112535'/)

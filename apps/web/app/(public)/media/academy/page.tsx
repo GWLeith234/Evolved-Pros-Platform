@@ -2,12 +2,13 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { adminClient } from '@/lib/supabase/admin'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 
 export const revalidate = 300
 
 export const metadata: Metadata = publicPageMetadata('/media/academy', {
-  title: 'Academy — Evolved Media',
+  title: mediaSectionTitle('Academy'),
   description: 'Preview the Evolved Pros Academy. Free weekly lesson teasers plus the full 6-pillar course catalog.',
 })
 

@@ -4,6 +4,7 @@ import { SPONSOR_AD_COLUMNS, type SponsorAd } from '@/components/home/HomeSponso
 import { ensurePodcastSponsors } from '@/lib/sponsors/partners'
 import { adMatchesSurface, filterLiveAds } from '@/lib/ads/iab'
 import { resolveCanonicalOrigin } from '@/lib/seo/canonical'
+import { allowedEpisodeStillUrl } from '@/lib/podcast/stillUrl'
 
 // ---------------------------------------------------------------------------
 // Public podcast data + SEO helpers (SPRINT — Public SEO Podcast Pages).
@@ -171,11 +172,18 @@ export function ytThumb(youtubeId: string | null, quality: 'hq' | 'max' = 'max')
   return `https://i.ytimg.com/vi/${youtubeId}/${quality === 'max' ? 'maxresdefault' : 'hqdefault'}.jpg`
 }
 
-/** Best available poster for the episode player facade. Guest still first. */
-export function episodePosterUrl(ep: Pick<PublicEpisode, 'thumbnail_url' | 'guest_image_url' | 'youtube_id'>): string | null {
-  return ep.guest_image_url?.trim()
-    || ep.thumbnail_url?.trim()
-    || ytThumb(ep.youtube_id, 'max')
+/** Best available poster for the episode player facade. Guest still first. Never CloudFront. */
+export function episodePosterUrl(
+  ep: Pick<PublicEpisode, 'thumbnail_url' | 'guest_image_url' | 'youtube_id' | 'slug' | 'episode_number' | 'guest_name'>,
+): string | null {
+  return allowedEpisodeStillUrl({
+    guest_image_url: ep.guest_image_url,
+    thumbnail_url: ep.thumbnail_url,
+    youtube_id: null,
+    slug: ep.slug,
+    episode_number: ep.episode_number,
+    guest_name: ep.guest_name,
+  }) || ytThumb(ep.youtube_id, 'max')
 }
 
 export function summaryText(ep: PublicEpisode): string {

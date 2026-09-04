@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { MediaStoryCrawlIndex } from '@/lib/media/crawlIndex'
 import { getPublishedMediaStoriesForHub } from '@/lib/media/public'
+import { MEDIA_HUB_TITLE } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 import { MediaPortalClient } from './MediaPortalClient'
 import type { Episode } from './MediaPortalClient'
@@ -12,7 +13,7 @@ import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 export const revalidate = 60
 
 export const metadata: Metadata = publicPageMetadata('/media', {
-  title: 'Evolved Media — Sales & Personal Development Intelligence',
+  title: MEDIA_HUB_TITLE,
   description: 'Pioneer stories, leadership insights, and business strategy from the EVOLVED framework.',
 })
 

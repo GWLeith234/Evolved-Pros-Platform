@@ -10,12 +10,14 @@ describe('guest still order', () => {
   it('episodePosterUrl prefers guest_image_url over thumbnail_url', () => {
     const src = readFileSync(resolve(here, 'public.ts'), 'utf8')
     const fn = src.slice(src.indexOf('export function episodePosterUrl'))
-    expect(fn).toMatch(/guest_image_url\?\.trim\(\)[\s\S]*thumbnail_url\?\.trim\(\)/)
+    expect(fn).toMatch(/allowedEpisodeStillUrl/)
+    const helper = readFileSync(resolve(here, 'stillUrl.ts'), 'utf8')
+    expect(helper).toMatch(/firstAllowed\(ep\.guest_image_url\)[\s\S]*firstAllowed\(ep\.thumbnail_url\)/)
   })
 
   it('listing cover prefers guest_image_url over thumbnail_url', () => {
     const src = readFileSync(resolve(here, 'transforms.ts'), 'utf8')
-    expect(src).toMatch(/cover:\s*row\.guest_image_url\s*\?\?\s*row\.thumbnail_url/)
+    expect(src).toMatch(/cover:\s*allowedEpisodeStillUrl\(/)
   })
 })
 
@@ -33,5 +35,11 @@ describe('Juan Ep 010 public still', () => {
     expect(sql).toContain("episode_number = 10")
     expect(sql).toContain("/podcast/guests/juan-fernandez.jpg")
     expect(sql).not.toContain('juan-fernandez-ep-010')
+  })
+
+  it('homepage Latest episodes uses the allowed still helper, not CloudFront-first', () => {
+    const src = readFileSync(resolve(here, '../../app/(public)/page.tsx'), 'utf8')
+    expect(src).toMatch(/stillUrl:\s*allowedEpisodeStillUrl\(e\)/)
+    expect(src).not.toMatch(/stillUrl:\s*e\.thumbnail_url/)
   })
 })

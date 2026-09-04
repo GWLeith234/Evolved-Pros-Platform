@@ -72,12 +72,12 @@ describe('canonicalizePath / canonicalUrl', () => {
 describe('publicPageMetadata', () => {
   it('emits matching canonical + og:url for the /media hub', () => {
     const meta = publicPageMetadata('/media', {
-      title: 'Evolved Media',
+      title: 'Evolved Pros Media',
       description: 'Pioneer stories',
     })
     expect(meta.alternates?.canonical).toBe('https://www.evolvedpros.com/media')
     expect(meta.openGraph?.url).toBe('https://www.evolvedpros.com/media')
-    expect(meta.title).toBe('Evolved Media')
+    expect(meta.title).toBe('Evolved Pros Media')
     expect(meta.description).toBe('Pioneer stories')
   })
 
@@ -85,7 +85,7 @@ describe('publicPageMetadata', () => {
     // Next.js replaces the parent openGraph object; /media and /pricing
     // used to lose siteName + type by returning { url } alone.
     const meta = publicPageMetadata('/media', {
-      title: 'Evolved Media',
+      title: 'Evolved Pros Media',
       description: 'Pioneer stories',
     })
     const og = meta.openGraph as {
@@ -96,14 +96,14 @@ describe('publicPageMetadata', () => {
     }
     expect(og.type).toBe('website')
     expect(og.siteName).toBe('Evolved Pros')
-    expect(og.title).toBe('Evolved Media')
+    expect(og.title).toBe('Evolved Pros Media')
     expect(og.description).toBe('Pioneer stories')
   })
 
   it('emits matching canonical + og:url for a sample article', () => {
     const path = '/media/strategy/close-the-gap'
     const meta = publicPageMetadata(path, {
-      title: 'Close the Gap | Evolved Media',
+      title: 'Close the Gap | Evolved Pros Media',
       openGraph: { type: 'article' },
     })
     expect(meta.alternates?.canonical).toBe(`https://www.evolvedpros.com${path}`)

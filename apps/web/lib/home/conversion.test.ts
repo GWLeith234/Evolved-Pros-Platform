@@ -4,7 +4,9 @@ import { TIERS } from '@/lib/pricing'
 import {
   EM_DASH,
   HERO_IMAGE_ALT,
+  HERO_IMAGE_HEIGHT,
   HERO_IMAGE_SRC,
+  HERO_IMAGE_WIDTH,
   HOME_ARIA,
   HOME_BOOK,
   HOME_H1,
@@ -41,6 +43,7 @@ describe('conversion homepage locks', () => {
     expect(HOME_ARIA).toBe('Evolved Pros home')
     expect(HERO_IMAGE_ALT).toBe('The Evolved Architecture')
     expect(HERO_IMAGE_SRC).toBe('/brand/hero-evolved-architecture.png')
+    expect(HERO_IMAGE_WIDTH / HERO_IMAGE_HEIGHT).toBe(1.5)
   })
 
   it('sends primary Join free to signup, not /pricing or the /join 308', () => {
@@ -86,6 +89,25 @@ describe('conversion homepage locks', () => {
       expect(hasEmDash(value), value).toBe(false)
       expect(value).not.toContain(EM_DASH)
     }
+  })
+})
+
+describe('conversion homepage layout contracts', () => {
+  it('reserves the architecture hero box and keeps JOIN FREE off the wrapping nav', () => {
+    const { readFileSync } = require('node:fs') as typeof import('node:fs')
+    const { dirname, resolve } = require('node:path') as typeof import('node:path')
+    const src = readFileSync(
+      resolve(dirname(new URL(import.meta.url).pathname), '../../components/home/ConversionHome.tsx'),
+      'utf8',
+    )
+    expect(src).toMatch(/aspect-\[3\/2\]/)
+    expect(src).toMatch(/HERO_IMAGE_WIDTH/)
+    expect(src).toMatch(/JOIN_FREE_HREF/)
+    expect(src).toMatch(/shrink-0 items-center bg-red/)
+    expect(src).toMatch(/flex h-10 items-center justify-between/)
+    expect(src).not.toMatch(
+      /header[\s\S]{0,80}flex max-w-6xl flex-wrap items-center justify-between/,
+    )
   })
 })
 

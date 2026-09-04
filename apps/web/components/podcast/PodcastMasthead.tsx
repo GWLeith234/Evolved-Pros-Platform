@@ -51,7 +51,7 @@ export function PodcastMasthead() {
           maxWidth: 640,
         }}
       >
-        Real conversations with the pros who are crushing it &mdash; from the field, from the trenches, and in real life.
+        Real conversations with the pros who are crushing it. From the field, from the trenches, and in real life.
       </p>
     </header>
   )

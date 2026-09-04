@@ -53,6 +53,18 @@ describe('episodeRailStill', () => {
     ).toBe('https://cdn.example/ep.jpg')
     expect(episodeRailStill({ guest_image_url: null, thumbnail_url: null })).toBeNull()
   })
+
+  it('rewrites Juan EP010 CloudFront to the local still', () => {
+    expect(
+      episodeRailStill({
+        slug: 'evolved-pros-podcast-ep-010-juan-fernandez',
+        episode_number: 10,
+        guest_image_url: null,
+        thumbnail_url:
+          'https://d3t3ozftmdmh3i.cloudfront.net/staging/podcast_uploaded_nologo/45855303/45855303-1777183532492-6861a3cc952d5.jpg',
+      }),
+    ).toBe('/podcast/guests/juan-fernandez.jpg')
+  })
 })
 
 describe('MediaLatestPodcast still crop', () => {

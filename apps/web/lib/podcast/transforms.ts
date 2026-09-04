@@ -1,3 +1,5 @@
+import { allowedEpisodeStillUrl } from '@/lib/podcast/stillUrl'
+
 export type PodcastPillar =
   | 'foundation'
   | 'identity'
@@ -95,7 +97,13 @@ export function dbRowToEpisode(row: EpisodeRow, progress?: ProgressRow): Podcast
       role: guestRole,
       photo: row.guest_image_url,
     },
-    cover: row.guest_image_url ?? row.thumbnail_url,
+    cover: allowedEpisodeStillUrl({
+      guest_image_url: row.guest_image_url,
+      thumbnail_url: row.thumbnail_url,
+      slug: row.slug,
+      episode_number: row.episode_number,
+      guest_name: row.guest_name,
+    }),
     duration: row.duration_seconds ? Math.round(row.duration_seconds / 60) : 0,
     releasedAt,
     isNew,
