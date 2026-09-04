@@ -8,7 +8,12 @@ import { PodcastCoverCard } from './PodcastCoverCard'
 import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { selectPodcastBigBoxes } from '@/lib/sponsors/partners'
-import { PODCAST_AD_EVERY, interleaveAds } from '@/lib/ads/rhythm'
+import {
+  PODCAST_AD_EVERY,
+  PODCAST_DEEPER_EVERY,
+  PODCAST_TIGHTEN_AFTER,
+  interleaveAds,
+} from '@/lib/ads/rhythm'
 
 const FB = 'var(--font-barlow)'
 const FBC = 'var(--font-barlow-condensed)'
@@ -42,7 +47,11 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
   // 4 episode cards, then a centered big box, then 4, then a box.
   // Ads break the row (1 / -1) so they cannot sit as fake episode squares.
   const gridChildren = useMemo(() => {
-    const chunks = interleaveAds(filtered, uniqueStills, PODCAST_AD_EVERY, { trailing: true })
+    const chunks = interleaveAds(filtered, uniqueStills, PODCAST_AD_EVERY, {
+      trailing: true,
+      tightenAfter: PODCAST_TIGHTEN_AFTER,
+      deeperEvery: PODCAST_DEEPER_EVERY,
+    })
     const nodes: ReactNode[] = []
     chunks.forEach((chunk, idx) => {
       if (chunk.kind === 'ad') {

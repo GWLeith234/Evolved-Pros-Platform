@@ -21,10 +21,7 @@ import { LiveFinalCTA } from '@/components/live/LiveFinalCTA'
 import { LiveBookingInquiry } from '@/components/live/LiveBookingInquiry'
 import { SPEAKING_STATS } from '@/lib/live/speaking-pins'
 import { getSpeakingPins, statsFromPins } from '@/lib/live/get-speaking-pins'
-import {
-  PAGE_IAB_MAX,
-  pickAcademySponsors,
-} from '@/lib/sponsors/partners'
+import { pickLivePageAds } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
 import { adMatchesSurface, filterLiveAds, isLeaderboardStill } from '@/lib/ads/iab'
@@ -48,7 +45,7 @@ async function fetchLiveSponsors(): Promise<SponsorAd[]> {
       .limit(48)
     const all = filterLiveAds((rows ?? []) as SponsorAd[]).filter(a => adMatchesSurface(a, 'live'))
     if (all.length === 0) return []
-    return pickAcademySponsors(all, 6).filter(a => !isLeaderboardStill(a)).slice(0, PAGE_IAB_MAX)
+    return pickLivePageAds(all.filter(a => !isLeaderboardStill(a)))
   } catch {
     return []
   }
@@ -129,14 +126,24 @@ export default async function LivePage() {
 
       <LivePastSpeaking pins={pins} />
 
+      <LiveSponsors ads={sponsors.slice(1, 2)} />
+
       {/* Product / platform milestones — not speaking */}
       <LiveProductMilestones />
 
-      <LiveSponsors ads={sponsors.slice(1, 2)} />
+      <LiveSponsors ads={sponsors.slice(2, 3)} />
 
       <LivePillarGrid />
+
+      <LiveSponsors ads={sponsors.slice(3, 4)} />
+
       <LiveTestimonials />
+
+      <LiveSponsors ads={sponsors.slice(4, 5)} />
+
       <LivePhotoRotator />
+
+      <LiveSponsors ads={sponsors.slice(5, 6)} />
       <LiveFinalCTA />
       <LiveBookingInquiry />
 

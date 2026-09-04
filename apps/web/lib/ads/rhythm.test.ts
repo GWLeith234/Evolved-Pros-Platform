@@ -1,11 +1,25 @@
 import { describe, expect, it } from 'vitest'
 import {
   FEED_AD_EVERY,
+  articleAdBreaks,
+  cadenceGroupSizes,
   hasAdjacentAds,
   interleaveAds,
   layoutArticleBody,
   splitHtmlBlocks,
 } from './rhythm'
+
+describe('cadenceGroupSizes', () => {
+  it('keeps a fixed interval when no tighten is set', () => {
+    expect(cadenceGroupSizes(9, 3)).toEqual([3, 3, 3])
+  })
+
+  it('tightens after the first screen so a long list gets denser', () => {
+    expect(cadenceGroupSizes(15, 3, { tightenAfter: 9, deeperEvery: 2 })).toEqual([
+      3, 3, 3, 2, 2, 2,
+    ])
+  })
+})
 
 describe('interleaveAds', () => {
   it('inserts one ad between content groups and never adjacent ads', () => {
@@ -40,6 +54,33 @@ describe('interleaveAds', () => {
     expect(chunks.filter(c => c.kind === 'ad')).toHaveLength(2)
     expect(chunks[0]?.kind === 'content' && chunks[0].items).toHaveLength(3)
   })
+
+  it('places more units on a long list once the cadence tightens', () => {
+    const items = Array.from({ length: 15 }, (_, i) => `s${i}`)
+    const ads = ['a1', 'a2', 'a3', 'a4', 'a5']
+    const chunks = interleaveAds(items, ads, 3, {
+      trailing: true,
+      tightenAfter: 9,
+      deeperEvery: 2,
+    })
+    expect(chunks.filter(c => c.kind === 'ad')).toHaveLength(5)
+    expect(hasAdjacentAds(chunks)).toBe(false)
+    const contentSizes = chunks
+      .filter(c => c.kind === 'content')
+      .map(c => (c.kind === 'content' ? c.items.length : 0))
+    expect(contentSizes.slice(0, 3)).toEqual([3, 3, 3])
+    expect(contentSizes.slice(3)).toEqual([2, 2, 2])
+  })
+})
+
+describe('articleAdBreaks', () => {
+  it('skips a short piece', () => {
+    expect(articleAdBreaks(3)).toEqual([])
+  })
+
+  it('marks every few blocks, then every other on a long story', () => {
+    expect(articleAdBreaks(16)).toEqual([3, 6, 9, 11, 13, 15])
+  })
 })
 
 describe('layoutArticleBody', () => {
@@ -62,6 +103,15 @@ describe('layoutArticleBody', () => {
   it('skips in-body ads on a short piece so the story stays the page', () => {
     const chunks = layoutArticleBody(['<p>1</p>', '<p>2</p>'], ['ad1'], [3, 6])
     expect(chunks.every(c => c.kind === 'html')).toBe(true)
+  })
+
+  it('uses depth-aware breaks when none are passed', () => {
+    const blocks = Array.from({ length: 16 }, (_, i) => `<p>${i + 1}</p>`)
+    const ads = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6']
+    const chunks = layoutArticleBody(blocks, ads)
+    expect(chunks.filter(c => c.kind === 'ad')).toHaveLength(6)
+    expect(hasAdjacentAds(chunks)).toBe(false)
+    expect(chunks[chunks.length - 1]?.kind).toBe('html')
   })
 })
 

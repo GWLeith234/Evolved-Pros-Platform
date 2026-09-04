@@ -294,8 +294,8 @@ export default async function StoryPage({
             </div>
           )}
 
-          {/* Article body — story is the page; one IAB after a few
-              paragraphs, another later if the piece is long. */}
+          {/* Article body — story is the page; 300×250 units after a few
+              paragraphs, then more often as the piece gets longer. */}
           <div className="media-prose">
             {articleChunks.length > 0 ? (
               articleChunks.map((chunk, idx) =>

@@ -96,19 +96,33 @@ describe('conversion homepage locks', () => {
 })
 
 describe('conversion homepage layout contracts', () => {
+  const root = dirname(fileURLToPath(import.meta.url))
+  const conversionHomeSrc = readFileSync(
+    resolve(root, '../../components/home/ConversionHome.tsx'),
+    'utf8',
+  )
+  const conversionPageSrc = readFileSync(
+    resolve(root, '../../app/(public)/page.tsx'),
+    'utf8',
+  )
+
   it('reserves the architecture hero box and keeps JOIN FREE off the wrapping nav', () => {
-    const src = readFileSync(
-      resolve(dirname(fileURLToPath(import.meta.url)), '../../components/home/ConversionHome.tsx'),
-      'utf8',
-    )
-    expect(src).toMatch(/aspect-\[3\/2\]/)
-    expect(src).toMatch(/HERO_IMAGE_WIDTH/)
-    expect(src).toMatch(/JOIN_FREE_HREF/)
-    expect(src).toMatch(/shrink-0 items-center bg-red/)
-    expect(src).toMatch(/flex h-10 items-center justify-between/)
-    expect(src).not.toMatch(
+    expect(conversionHomeSrc).toMatch(/aspect-\[3\/2\]/)
+    expect(conversionHomeSrc).toMatch(/HERO_IMAGE_WIDTH/)
+    expect(conversionHomeSrc).toMatch(/JOIN_FREE_HREF/)
+    expect(conversionHomeSrc).toMatch(/shrink-0 items-center bg-red/)
+    expect(conversionHomeSrc).toMatch(/flex h-10 items-center justify-between/)
+    expect(conversionHomeSrc).not.toMatch(
       /header[\s\S]{0,80}flex max-w-6xl flex-wrap items-center justify-between/,
     )
+  })
+
+  it('keeps conversion `/` ad-free — no IAB, slots, or platform_ads', () => {
+    for (const src of [conversionHomeSrc, conversionPageSrc]) {
+      expect(src).not.toMatch(
+        /IabAdvertisementSlot|IabImageAd|HomeSponsorAd|AdSlot|interleaveAds|platform_ads/,
+      )
+    }
   })
 })
 

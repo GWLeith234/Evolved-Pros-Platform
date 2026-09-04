@@ -464,7 +464,7 @@ export function MediaPortalClient({
           <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
             {feed.chunks.map((chunk, idx) =>
               chunk.kind === 'ad' ? (
-                <MediaScrollBanner key={chunk.ad.id} ad={chunk.ad} />
+                <MediaScrollBanner key={`${chunk.ad.id}-${idx}`} ad={chunk.ad} />
               ) : (
                 <div
                   key={chunk.items.map(s => s.id).join('-') || `row-${idx}`}

@@ -5,21 +5,32 @@
  * appear between real content. Never two or more units with only an
  * Advertisement label between them. Leftover inventory is not dumped
  * as a footer pair or a 2×2 board.
+ *
+ * Density grows with scroll depth: the first screen uses the surface
+ * interval; later groups tighten so a long page does not go thin.
  */
 
 /** Magazine is 3-up; one centered unit after each row. */
 export const MAGAZINE_ROW = 3
 export const FEED_AD_EVERY = MAGAZINE_ROW
-/** In-body 300×250 units at scroll-depth breaks — a couple, not one lonely unit. */
-export const ARTICLE_AD_AFTER = [3, 6] as const
 /** Home editorial rows: two content cards, then an IAB — never a third card. */
 export const HOME_CONTENT_CARDS = 2
 /** Academy section threads: one unit after every three lesson cards. */
 export const ACADEMY_CARDS_PER_AD = 3
-/** Podcast archive: 4 cards, then a box. */
+/** Podcast archive: 4 cards, then a box; tighter after the first two rows. */
 export const PODCAST_AD_EVERY = 4
 /** Community feed: one unit after a short run of posts. */
 export const COMMUNITY_AD_EVERY = 3
+
+/** After this many items, magazine / community / academy lists tighten. */
+export const MEDIA_TIGHTEN_AFTER = MAGAZINE_ROW * 3
+export const MEDIA_DEEPER_EVERY = 2
+export const COMMUNITY_TIGHTEN_AFTER = COMMUNITY_AD_EVERY * 3
+export const COMMUNITY_DEEPER_EVERY = 2
+export const PODCAST_TIGHTEN_AFTER = PODCAST_AD_EVERY * 2
+export const PODCAST_DEEPER_EVERY = 3
+export const ACADEMY_TIGHTEN_AFTER = ACADEMY_CARDS_PER_AD * 4
+export const ACADEMY_DEEPER_EVERY = 2
 
 export type RhythmChunk<T, A> =
   | { kind: 'content'; items: T[] }
@@ -29,8 +40,39 @@ export type ArticleChunk<A> =
   | { kind: 'html'; html: string }
   | { kind: 'ad'; ad: A }
 
+export type InterleaveOptions = {
+  trailing?: boolean
+  /** After this many items have been placed, switch to `deeperEvery`. */
+  tightenAfter?: number
+  deeperEvery?: number
+}
+
 /**
- * Walk items in groups of `every`. Insert one ad after a group only when
+ * Group sizes that stay at `every` until `tightenAfter` items, then
+ * switch to `deeperEvery` so a long list gets denser, not thinner.
+ */
+export function cadenceGroupSizes(
+  itemCount: number,
+  every: number,
+  options?: { tightenAfter?: number; deeperEvery?: number },
+): number[] {
+  if (itemCount <= 0) return []
+  const start = Math.max(1, every)
+  const deeper = Math.max(1, options?.deeperEvery ?? Math.max(1, start - 1))
+  const tightenAfter = options?.tightenAfter
+  const sizes: number[] = []
+  let placed = 0
+  while (placed < itemCount) {
+    const useDeeper = tightenAfter != null && placed >= tightenAfter
+    const size = Math.min(useDeeper ? deeper : start, itemCount - placed)
+    sizes.push(size)
+    placed += size
+  }
+  return sizes
+}
+
+/**
+ * Walk items in cadence groups. Insert one ad after a group only when
  * another content group follows — unless `trailing` is on, in which case
  * a single unit may follow the last content group. Never adjacent ads.
  */
@@ -38,17 +80,23 @@ export function interleaveAds<T, A>(
   items: T[],
   ads: A[],
   every = FEED_AD_EVERY,
-  options?: { trailing?: boolean },
+  options?: InterleaveOptions,
 ): RhythmChunk<T, A>[] {
-  const size = Math.max(1, every)
   const trailing = options?.trailing ?? false
+  const sizes = cadenceGroupSizes(items.length, every, {
+    tightenAfter: options?.tightenAfter,
+    deeperEvery: options?.deeperEvery,
+  })
   const chunks: RhythmChunk<T, A>[] = []
+  let offset = 0
   let ai = 0
 
-  for (let i = 0; i < items.length; i += size) {
-    const group = items.slice(i, i + size)
+  for (let g = 0; g < sizes.length; g++) {
+    const size = sizes[g] as number
+    const group = items.slice(offset, offset + size)
+    offset += size
     chunks.push({ kind: 'content', items: group })
-    const hasMoreContent = i + size < items.length
+    const hasMoreContent = g < sizes.length - 1
     if (ai < ads.length && (hasMoreContent || trailing)) {
       chunks.push({ kind: 'ad', ad: ads[ai] as A })
       ai += 1
@@ -81,21 +129,40 @@ export function splitHtmlBlocks(html: string): string[] {
 }
 
 /**
- * Insert at most one ad after the Nth block, only when more copy follows.
- * A short piece gets zero or one unit; a long piece can take a second.
+ * In-body break points that grow with the piece. Short copy stays clean.
+ * A long story gets a unit every few blocks, then every other block.
+ */
+export function articleAdBreaks(blockCount: number, firstEvery = 3): number[] {
+  const start = Math.max(1, firstEvery)
+  if (blockCount < start + 1) return []
+  const breaks: number[] = []
+  let n = start
+  let step = start
+  while (n < blockCount) {
+    breaks.push(n)
+    if (n >= start * 3) step = Math.max(2, start - 1)
+    n += step
+  }
+  return breaks
+}
+
+/**
+ * Insert ads after named block indexes, only when more copy follows.
+ * When `afterBlocks` is omitted, breaks come from `articleAdBreaks`.
  */
 export function layoutArticleBody<A>(
   blocks: string[],
   ads: A[],
-  afterBlocks: readonly number[] = ARTICLE_AD_AFTER,
+  afterBlocks?: readonly number[],
 ): ArticleChunk<A>[] {
+  const marks = new Set(afterBlocks ?? articleAdBreaks(blocks.length))
   const out: ArticleChunk<A>[] = []
   let ai = 0
   for (let i = 0; i < blocks.length; i++) {
     out.push({ kind: 'html', html: blocks[i] as string })
     const n = i + 1
     const moreCopy = i < blocks.length - 1
-    if (moreCopy && ai < ads.length && afterBlocks.includes(n)) {
+    if (moreCopy && ai < ads.length && marks.has(n)) {
       out.push({ kind: 'ad', ad: ads[ai] as A })
       ai += 1
     }

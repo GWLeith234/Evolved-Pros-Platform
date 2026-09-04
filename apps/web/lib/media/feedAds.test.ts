@@ -54,6 +54,23 @@ describe('layoutMediaFeed', () => {
     expect(hasAdjacentAds(layout.chunks)).toBe(false)
   })
 
+  it('tightens after three magazine rows so a long board stays punctuated', () => {
+    const many = [
+      still('tr-c', 'Transcend Clinic', 'C'),
+      still('adc-c', 'AdCellerant', 'C'),
+      still('evx-a', 'EvolveX360', 'A'),
+      still('aca-a', 'Evolved Pros Academy', 'A'),
+      still('tr-a', 'Transcend Clinic', 'A'),
+      still('adc-a', 'AdCellerant', 'A'),
+    ]
+    const layout = layoutMediaFeed(stories(15), many)
+    const ads = layout.chunks.filter(c => c.kind === 'ad')
+    expect(ads.length).toBeGreaterThanOrEqual(5)
+    expect(hasAdjacentAds(layout.chunks)).toBe(false)
+    const first = layout.chunks[0]
+    expect(first?.kind === 'content' && first.items).toHaveLength(3)
+  })
+
   it('keeps an empty grid empty — no ads-only board', () => {
     const layout = layoutMediaFeed([], inFeed)
     expect(layout.chunks).toEqual([])
