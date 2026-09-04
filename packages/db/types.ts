@@ -2822,7 +2822,29 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      member_directory: {
+        Row: {
+          id: string
+          display_name: string | null
+          full_name: string | null
+          avatar_url: string | null
+          banner_url: string | null
+          bio: string | null
+          company: string | null
+          role_title: string | null
+          location: string | null
+          tier: string | null
+          points: number
+          current_pillar: string | null
+          created_at: string
+          linkedin_url: string | null
+          twitter_handle: string | null
+          website_url: string | null
+          goal_90day: string | null
+          goal_visible: boolean
+        }
+        Relationships: []
+      }
     }
     Functions: {
       increment_discussion_like: {

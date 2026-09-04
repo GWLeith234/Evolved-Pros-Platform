@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { marked } from 'marked'
+import { sanitizeMediaHtml } from '@/lib/security/html'
 import { adminClient } from '@/lib/supabase/admin'
 import { resolveAuthorProfile } from '@/lib/media/resolveAuthorProfile'
 import { getPillarLabel, getPillarColor } from '@/lib/pillars'
@@ -139,7 +140,7 @@ export default async function StoryPage({
   }
 
   const minutes = readTime(story.body)
-  const html = story.body ? await marked.parse(story.body) : ''
+  const html = story.body ? sanitizeMediaHtml(await marked.parse(story.body)) : ''
   const catalog = ((await getActivePlatformAds()) as SponsorAd[]).filter(a => adMatchesSurface(a, 'media'))
   const articleAds = pickArticleAds(catalog)
   const articleChunks = layoutArticleBody(splitHtmlBlocks(html), articleAds.inBody)

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { hasTierAccess } from '@/lib/tier'
@@ -22,13 +23,13 @@ export async function GET() {
     lastWeekProgressResult,
   ] = await Promise.all([
     // Total active members
-    supabase
+    adminClient
       .from('users')
       .select('id', { count: 'exact', head: true })
       .eq('tier_status', 'active'),
 
     // New members this week
-    supabase
+    adminClient
       .from('users')
       .select('id', { count: 'exact', head: true })
       .eq('tier_status', 'active')
@@ -48,7 +49,7 @@ export async function GET() {
       .not('completed_at', 'is', null),
 
     // Current leaderboard rank: count users with more points
-    supabase
+    adminClient
       .from('users')
       .select('id', { count: 'exact', head: true })
       .gt('points', profile.points),

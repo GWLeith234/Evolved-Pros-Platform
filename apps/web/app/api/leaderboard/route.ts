@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
@@ -11,7 +12,7 @@ export async function GET() {
   const currentUser = await resolveCurrentUser(supabase)
   if (!currentUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: topUsersData } = await supabase
+  const { data: topUsersData } = await adminClient
     .from('users')
     .select('id, display_name, full_name, avatar_url, points')
     .order('points', { ascending: false })
@@ -31,7 +32,7 @@ export async function GET() {
   // Current user rank (if not in top 10)
   let currentUserRank = entries.findIndex(e => e.isCurrentUser) + 1
   if (currentUserRank === 0) {
-    const { count } = await supabase
+    const { count } = await adminClient
       .from('users')
       .select('id', { count: 'exact', head: true })
       .gt('points', currentUser.points ?? 0)

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { generateMuxToken } from '@/lib/mux/client'
 import { hasTierAccess } from '@/lib/tier'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
@@ -18,13 +19,15 @@ export async function GET(
   const profile = await resolveCurrentUser(supabase)
   if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: lesson } = await supabase
+  // 084 revoked mux_playback_id from authenticated. Read via service_role
+  // only AFTER auth, and still fail-closed on tier below.
+  const { data: lesson } = await adminClient
     .from('lessons')
-    .select('mux_playback_id, course:courses(required_tier)')
+    .select('mux_playback_id, is_published, course:courses(required_tier)')
     .eq('id', params.lessonId)
-    .single()
+    .maybeSingle()
 
-  if (!lesson?.mux_playback_id) {
+  if (!lesson?.is_published || !lesson.mux_playback_id) {
     return NextResponse.json({ error: 'No video' }, { status: 404 })
   }
 

@@ -1,9 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 import { EventDetailHero } from '@/components/events/EventDetailHero'
 import { hasTierAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { EVENT_PRIVILEGED_COLUMNS, privilegedEventUrls } from '@/lib/events/privilegedUrls'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,9 +19,9 @@ export default async function EventDetailPage({ params }: Props) {
   if (!profile) redirect('/login')
 
   const [{ data: row }, regResult] = await Promise.all([
-    supabase
+    adminClient
       .from('events')
-      .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, image_url, required_tier, registration_count, is_published')
+      .select(EVENT_PRIVILEGED_COLUMNS)
       .eq('id', params.eventId)
       .single(),
     supabase
@@ -34,6 +36,11 @@ export default async function EventDetailPage({ params }: Props) {
   if (!row.is_published && profile.role !== 'admin') notFound()
 
   const isRegistered = !!regResult.data
+  const urls = privilegedEventUrls(row, {
+    userTier: profile.tier,
+    isRegistered,
+    isAdmin: profile.role === 'admin',
+  })
   const event: EventItem = {
     id: row.id,
     title: row.title,
@@ -41,8 +48,8 @@ export default async function EventDetailPage({ params }: Props) {
     eventType: row.event_type as EventType,
     startsAt: row.starts_at,
     endsAt: row.ends_at,
-    zoomUrl: isRegistered ? row.zoom_url : null,
-    recordingUrl: row.recording_url,
+    zoomUrl: urls.zoomUrl,
+    recordingUrl: urls.recordingUrl,
     imageUrl: row.image_url ?? null,
     requiredTier: row.required_tier as 'community' | 'vip' | 'pro' | null,
     registrationCount: row.registration_count,

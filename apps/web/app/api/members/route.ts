@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -14,7 +15,7 @@ export async function GET(request: Request) {
   const cursor = searchParams.get('cursor') ?? ''
   const limit = 20
 
-  let query = supabase
+  let query = adminClient
     .from('users')
     .select('id, display_name, full_name, avatar_url, role_title, location, tier, points, created_at')
     .eq('tier_status', 'active')

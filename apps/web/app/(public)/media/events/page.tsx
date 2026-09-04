@@ -26,8 +26,6 @@ interface EventRow {
   event_type: string | null
   starts_at: string
   ends_at: string | null
-  zoom_url: string | null
-  recording_url: string | null
   image_url: string | null
   required_tier: string | null
   registration_count: number
@@ -53,7 +51,7 @@ function formatEventTime(iso: string): string {
 }
 
 function isVirtual(ev: EventRow): boolean {
-  return !!ev.zoom_url || ev.event_type === 'virtual' || ev.event_type === 'webinar'
+  return ev.event_type === 'virtual' || ev.event_type === 'webinar'
 }
 
 function tierLabel(tier: string | null): string {
@@ -72,8 +70,6 @@ function isTierGated(tier: string | null): boolean {
 function EventCard({ ev, isPast }: { ev: EventRow; isPast?: boolean }) {
   const virtual = isVirtual(ev)
   const gated = isTierGated(ev.required_tier)
-  const eventHref = isPast && ev.recording_url ? ev.recording_url : '/events'
-
   return (
     <div style={{ backgroundColor: '#fff', border: '1px solid #E0D8CC', borderRadius: 4, padding: '12px 14px', display: 'flex', alignItems: 'flex-start', gap: 14, opacity: isPast ? 0.65 : 1 }}>
       {/* Date block */}
@@ -116,15 +112,9 @@ function EventCard({ ev, isPast }: { ev: EventRow; isPast?: boolean }) {
       {/* CTA */}
       <div style={{ flexShrink: 0, alignSelf: 'center' }}>
         {isPast ? (
-          ev.recording_url ? (
-            <a href={ev.recording_url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: '#fff', backgroundColor: '#2B3A5A', padding: '7px 14px', borderRadius: 3, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
-              Watch replay
-            </a>
-          ) : (
-            <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: 'rgba(43,58,90,0.3)', backgroundColor: 'rgba(43,58,90,0.06)', padding: '7px 14px', borderRadius: 3, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
-              Replay soon
-            </span>
-          )
+          <Link href="/events" style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: '#fff', backgroundColor: '#2B3A5A', padding: '7px 14px', borderRadius: 3, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+            Members replay
+          </Link>
         ) : gated ? (
           <Link href="/pricing" style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: '#AA8C3C', backgroundColor: 'rgba(201,168,76,0.12)', padding: '7px 14px', borderRadius: 3, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
             Members only
@@ -147,14 +137,14 @@ export default async function MediaEventsPage() {
   const [{ data: upcoming }, { data: past }] = await Promise.all([
     adminClient
       .from('events')
-      .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, image_url, required_tier, registration_count, is_published')
+      .select('id, title, description, event_type, starts_at, ends_at, image_url, required_tier, registration_count, is_published')
       .eq('is_published', true)
       .gte('starts_at', now)
       .order('starts_at', { ascending: true })
       .limit(10),
     adminClient
       .from('events')
-      .select('id, title, description, event_type, starts_at, ends_at, zoom_url, recording_url, image_url, required_tier, registration_count, is_published')
+      .select('id, title, description, event_type, starts_at, ends_at, image_url, required_tier, registration_count, is_published')
       .eq('is_published', true)
       .lt('starts_at', now)
       .order('starts_at', { ascending: false })

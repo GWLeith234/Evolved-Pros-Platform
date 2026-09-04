@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { MessagesClient } from './MessagesClient'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
@@ -27,7 +28,7 @@ export default async function MessagesPage() {
 
   const profileMap: Record<string, { id: string; display_name: string | null; full_name: string | null; avatar_url: string | null }> = {}
   if (uniqueIds.length > 0) {
-    const { data: profiles } = await supabase
+    const { data: profiles } = await adminClient
       .from('users')
       .select('id, display_name, full_name, avatar_url')
       .in('id', uniqueIds)

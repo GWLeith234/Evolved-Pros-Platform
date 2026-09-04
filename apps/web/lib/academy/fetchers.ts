@@ -209,9 +209,11 @@ export async function fetchLessonsWithProgress(
 
   if (!course) return []
 
+  // Catalog columns only. 084 revoked transcript/description/mux_* from
+  // authenticated PostgREST; the list is a storefront (title, duration).
   const { data: lessons } = await supabase
     .from('lessons')
-    .select('id, course_id, slug, title, description, mux_playback_id, duration_seconds, sort_order, is_published, module_number, thumbnail_url')
+    .select('id, course_id, slug, title, duration_seconds, sort_order, is_published, module_number, thumbnail_url')
     .eq('course_id', course.id)
     .eq('is_published', true)
     .order('sort_order')
@@ -240,12 +242,10 @@ export async function fetchLessonsWithProgress(
       courseId: lesson.course_id,
       slug: lesson.slug,
       title: lesson.title,
-      description: lesson.description,
-      // SPRINT TIER-1: never hand a playback id to a below-tier viewer. The
-      // /api/lessons/[id]/mux-token route refuses to sign one anyway, but the
-      // id should not reach the client at all — the lesson list is a
-      // storefront (titles, durations, counts), not a content delivery.
-      muxPlaybackId: isLocked ? null : lesson.mux_playback_id,
+      description: null,
+      // Playback ids are revoked from authenticated SELECT (084). The
+      // mux-token route is the only signer, and it stays fail-closed.
+      muxPlaybackId: null,
       durationSeconds: lesson.duration_seconds,
       sortOrder: lesson.sort_order,
       isPublished: lesson.is_published,
@@ -288,7 +288,11 @@ export async function fetchLessonBySlug(
   // without this a member could still open a draft by typing its URL
   // (found while auditing the "A5 QA Test Lesson" count discrepancy).
   // Admin views query lessons directly and are unaffected.
-  const { data: lesson } = await supabase
+  //
+  // Body columns (transcript, description, mux ids) are revoked from
+  // authenticated (084). Read via service_role; callers MUST gate with
+  // hasTierAccess before rendering the row (lesson page already redirects).
+  const { data: lesson } = await adminClient
     .from('lessons')
     .select('*')
     .eq('course_id', course.id)
