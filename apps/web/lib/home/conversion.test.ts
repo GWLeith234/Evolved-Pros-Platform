@@ -40,7 +40,7 @@ describe('conversion homepage locks', () => {
     )
     expect(HOME_ARIA).toBe('Evolved Pros home')
     expect(HERO_IMAGE_ALT).toBe('The Evolved Architecture')
-    expect(HERO_IMAGE_SRC).toBe('/home/hero-evolved-architecture.png')
+    expect(HERO_IMAGE_SRC).toBe('/brand/hero-evolved-architecture.png')
   })
 
   it('sends primary Join free to signup, not /pricing or the /join 308', () => {

@@ -1,4 +1,4 @@
-import { PublicFooter } from '@/components/layout/PublicFooter'
+import { ConversionFooterGate } from '@/components/layout/ConversionFooterGate'
 
 /**
  * Public marketing / editorial routes (/, /media, /podcast, /pricing, …).
@@ -10,15 +10,15 @@ import { PublicFooter } from '@/components/layout/PublicFooter'
  * canonical is how /media shipped with og:url pointing at /).
  *
  * SPRINT FOOTER-1 — this is the single mount point for the global public
- * footer, so every route in the tree inherits it. Routes OUTSIDE this group
- * (/live, /login, app/not-found.tsx) mount <PublicFooter /> themselves; if you
- * add another public shell outside (public), mount it there too.
+ * footer, so every route in the tree inherits it except `/`, which owns a
+ * legal-only footer. Routes OUTSIDE this group (/live, /login,
+ * app/not-found.tsx) mount <PublicFooter /> themselves.
  */
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="ep-public-shell">
       <div className="ep-public-shell-main">{children}</div>
-      <PublicFooter />
+      <ConversionFooterGate />
     </div>
   )
 }

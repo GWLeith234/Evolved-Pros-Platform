@@ -17,7 +17,8 @@ export const JOIN_FREE_HREF = '/login?mode=signup' as const
 export const SEE_PRICING_HREF = '/pricing' as const
 export const HOME_PATH = '/' as const
 
-export const HERO_IMAGE_SRC = '/home/hero-evolved-architecture.png' as const
+/** Public still. Not under /home: middleware treats /home/* as the member app. */
+export const HERO_IMAGE_SRC = '/brand/hero-evolved-architecture.png' as const
 export const HERO_IMAGE_ALT = 'The Evolved Architecture' as const
 export const HOME_ARIA = 'Evolved Pros home' as const
 
