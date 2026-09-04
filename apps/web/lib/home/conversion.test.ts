@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { BOOK_PREORDER_PATH } from '@/lib/book/preorder'
 import { TIERS } from '@/lib/pricing'
@@ -94,10 +97,8 @@ describe('conversion homepage locks', () => {
 
 describe('conversion homepage layout contracts', () => {
   it('reserves the architecture hero box and keeps JOIN FREE off the wrapping nav', () => {
-    const { readFileSync } = require('node:fs') as typeof import('node:fs')
-    const { dirname, resolve } = require('node:path') as typeof import('node:path')
     const src = readFileSync(
-      resolve(dirname(new URL(import.meta.url).pathname), '../../components/home/ConversionHome.tsx'),
+      resolve(dirname(fileURLToPath(import.meta.url)), '../../components/home/ConversionHome.tsx'),
       'utf8',
     )
     expect(src).toMatch(/aspect-\[3\/2\]/)
