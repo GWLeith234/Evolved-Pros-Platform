@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   CANONICAL_ORIGIN,
+  SITE_NAME,
   canonicalUrl,
   canonicalizePath,
   publicPageMetadata,
@@ -70,6 +71,11 @@ describe('canonicalizePath / canonicalUrl', () => {
 })
 
 describe('publicPageMetadata', () => {
+  it('locks the public brand as Evolved Pros', () => {
+    expect(SITE_NAME).toBe('Evolved Pros')
+    expect(SITE_NAME).not.toContain('Evolved Media')
+  })
+
   it('emits matching canonical + og:url for the /media hub', () => {
     const meta = publicPageMetadata('/media', {
       title: 'Evolved Pros Media',
@@ -79,6 +85,11 @@ describe('publicPageMetadata', () => {
     expect(meta.openGraph?.url).toBe('https://www.evolvedpros.com/media')
     expect(meta.title).toBe('Evolved Pros Media')
     expect(meta.description).toBe('Pioneer stories')
+    expect(meta.twitter).toMatchObject({
+      card: 'summary_large_image',
+      title: 'Evolved Pros Media',
+      description: 'Pioneer stories',
+    })
   })
 
   it('keeps root siteName / type / og title when the page only passes title', () => {
@@ -98,6 +109,10 @@ describe('publicPageMetadata', () => {
     expect(og.siteName).toBe('Evolved Pros')
     expect(og.title).toBe('Evolved Pros Media')
     expect(og.description).toBe('Pioneer stories')
+    expect(meta.twitter).toMatchObject({
+      card: 'summary_large_image',
+      title: 'Evolved Pros Media',
+    })
   })
 
   it('emits matching canonical + og:url for a sample article', () => {

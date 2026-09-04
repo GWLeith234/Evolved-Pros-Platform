@@ -57,10 +57,18 @@ export function canonicalUrl(pathname: string = '/'): string {
   return path === '/' ? CANONICAL_ORIGIN : `${CANONICAL_ORIGIN}${path}`
 }
 
+/** Public brand name for OG siteName, twitter, and JSON-LD. Never Evolved Media. */
+export const SITE_NAME = 'Evolved Pros'
+
 /** Root-layout OG fields Next.js will drop when a child sets `openGraph`. */
 export const DEFAULT_OPEN_GRAPH = {
   type: 'website' as const,
-  siteName: 'Evolved Pros',
+  siteName: SITE_NAME,
+}
+
+/** Same reason as DEFAULT_OPEN_GRAPH: a child `twitter` object replaces the parent. */
+export const DEFAULT_TWITTER = {
+  card: 'summary_large_image' as const,
 }
 
 function metadataString(value: unknown): string | undefined {
@@ -73,16 +81,18 @@ function metadataString(value: unknown): string | undefined {
  * fields merge on top; canonical + og:url always win so a caller cannot
  * accidentally reintroduce the platform host.
  *
- * Next.js only shallow-merges metadata: a child `openGraph` replaces the
- * parent object, so this helper re-applies siteName / type (and copies
- * title / description onto og tags) instead of relying on layout inherit.
+ * Next.js only shallow-merges metadata: a child `openGraph` or `twitter`
+ * replaces the parent object, so this helper re-applies siteName / type / card
+ * and copies title / description onto both og and twitter instead of relying
+ * on layout inherit. Live /media kept twitter:title as the root "Evolved Pros"
+ * after #100 renamed the document title.
  */
 export function publicPageMetadata(
   pathname: string,
   extra: Metadata = {},
 ): Metadata {
   const url = canonicalUrl(pathname)
-  const { openGraph, alternates, ...rest } = extra
+  const { openGraph, alternates, twitter, ...rest } = extra
   const title = metadataString(extra.title)
   const description = metadataString(extra.description)
   return {
@@ -94,6 +104,12 @@ export function publicPageMetadata(
       ...(description ? { description } : {}),
       ...openGraph,
       url,
+    },
+    twitter: {
+      ...DEFAULT_TWITTER,
+      ...(title ? { title } : {}),
+      ...(description ? { description } : {}),
+      ...twitter,
     },
   }
 }

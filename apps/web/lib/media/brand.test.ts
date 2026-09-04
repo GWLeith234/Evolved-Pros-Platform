@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   MEDIA_BRAND,
+  MEDIA_HUB_DESCRIPTION,
   MEDIA_HUB_TITLE,
   mediaSectionTitle,
   mediaStoryTitle,
@@ -19,6 +20,10 @@ describe('Evolved Pros Media brand lock', () => {
     expect(MEDIA_HUB_TITLE).not.toBe(
       'Evolved Media — Sales & Personal Development Intelligence',
     )
+    expect(MEDIA_HUB_DESCRIPTION).toBe(
+      'Pioneer stories, leadership insights, and business strategy from the EVOLVED framework.',
+    )
+    expect(MEDIA_HUB_DESCRIPTION).not.toContain('Evolved Media')
   })
 
   it('suffixes articles and section titles with Evolved Pros Media', () => {

@@ -26,4 +26,25 @@ describe('public chrome copy', () => {
       /\$\{ep\.title\} \| \$\{SERIES_NAME\}/,
     )
   })
+
+  it('wires /media document + twitter titles to MEDIA_HUB_TITLE', () => {
+    const src = read('../../app/(public)/media/page.tsx')
+    expect(src).toMatch(/title: MEDIA_HUB_TITLE/)
+    expect(src).toMatch(/twitter:[\s\S]*title: MEDIA_HUB_TITLE/)
+    expect(src).not.toMatch(/Evolved Media — Sales/)
+    expect(src).not.toMatch(/Evolved Media/)
+  })
+
+  it('keeps /media hub chrome as Evolved Pros Media', () => {
+    const src = read('../../app/(public)/media/MediaPortalClient.tsx')
+    expect(src).toMatch(/More from Evolved Pros Media/)
+    expect(src).not.toMatch(/More from Evolved Media/)
+    expect(src).not.toMatch(/Evolved Media/)
+  })
+
+  it('emits home WebSite JSON-LD', () => {
+    const src = read('../../app/(public)/page.tsx')
+    expect(src).toMatch(/homeJsonLd/)
+    expect(src).toMatch(/application\/ld\+json/)
+  })
 })

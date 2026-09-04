@@ -447,7 +447,7 @@ export function MediaPortalClient({
         </div>
       ) : null}
 
-      {/* ── Section 2: "More from Evolved Media" divider ── */}
+      {/* ── Section 2: "More from Evolved Pros Media" divider ── */}
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ width: 40, height: 2, background: 'var(--brand-gold)' }} />
