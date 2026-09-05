@@ -60,6 +60,13 @@ export function canonicalUrl(pathname: string = '/'): string {
 /** Public brand name for OG siteName, twitter, and JSON-LD. Never Evolved Media. */
 export const SITE_NAME = 'Evolved Pros'
 
+/**
+ * Fallback share image when a public page has no featured still.
+ * Must be a file that ships in `apps/web/public`. Do not point at
+ * `/og-default.png` or any msp-og / invented social card.
+ */
+export const DEFAULT_OG_IMAGE = '/logo_horizontal_navy.png' as const
+
 /** Root-layout OG fields Next.js will drop when a child sets `openGraph`. */
 export const DEFAULT_OPEN_GRAPH = {
   type: 'website' as const,

@@ -12,6 +12,9 @@ import { enqueueWeeklyWigNudges } from '@/lib/notifications/nudges'
  * — first form matches /api/cron/podcast-sync, second form matches
  * the publish-posts cron. Either is accepted so Railway's existing
  * scheduler conventions don't need to change.
+ *
+ * Scheduler: Railway web cronSchedule is unset. GitHub Actions
+ * `.github/workflows/cron.yml` hits this route Monday 08:15 UTC.
  */
 export async function GET(request: Request) {
   const expected = process.env.CRON_SECRET

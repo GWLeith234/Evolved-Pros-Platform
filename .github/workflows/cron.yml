@@ -2,12 +2,16 @@ name: Daily Cron Jobs
 
 on:
   schedule:
-    # Expire lapsed memberships — run first, before reminders
+    # Expire / renew / events / digest — morning UTC
     - cron: '0 8 * * *'
+    # #110 member nudges — after the 17:00 UTC evening cutoff (daily no-ops before then)
+    - cron: '0 17 * * *'
+    # Weekly WIG snapshots + check-in bells
+    - cron: '15 8 * * 1'
   workflow_dispatch:
     inputs:
       job:
-        description: 'Which job to run (all, expire-tiers, renewal-reminders, event-reminders, daily-digest)'
+        description: 'Which job to run (all, expire-tiers, renewal-reminders, event-reminders, daily-digest, member-nudges, goal-snapshots)'
         required: false
         default: 'all'
 
@@ -19,7 +23,7 @@ jobs:
   expire-tiers:
     runs-on: ubuntu-latest
     if: >-
-      github.event_name == 'schedule' ||
+      (github.event_name == 'schedule' && github.event.schedule == '0 8 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'expire-tiers'))
     steps:
       - name: Expire lapsed memberships
@@ -33,7 +37,7 @@ jobs:
     needs: expire-tiers
     if: >-
       always() && (
-        github.event_name == 'schedule' ||
+        (github.event_name == 'schedule' && github.event.schedule == '0 8 * * *') ||
         (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'renewal-reminders'))
       )
     steps:
@@ -46,7 +50,7 @@ jobs:
   event-reminders:
     runs-on: ubuntu-latest
     if: >-
-      github.event_name == 'schedule' ||
+      (github.event_name == 'schedule' && github.event.schedule == '0 8 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'event-reminders'))
     steps:
       - name: Send event reminders
@@ -58,11 +62,35 @@ jobs:
   daily-digest:
     runs-on: ubuntu-latest
     if: >-
-      github.event_name == 'schedule' ||
+      (github.event_name == 'schedule' && github.event.schedule == '0 8 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'daily-digest'))
     steps:
       - name: Send daily digest emails
         run: |
           curl -sf -X GET "$APP_URL/api/cron/daily-digest" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            | jq .
+
+  member-nudges:
+    runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '0 17 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'member-nudges'))
+    steps:
+      - name: Enqueue WIG and daily progress nudges
+        run: |
+          curl -sf -X GET "$APP_URL/api/cron/member-nudges" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            | jq .
+
+  goal-snapshots:
+    runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '15 8 * * 1') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'goal-snapshots'))
+    steps:
+      - name: Write weekly goal snapshots and WIG check-ins
+        run: |
+          curl -sf -X GET "$APP_URL/api/cron/goal-snapshots" \
             -H "Authorization: Bearer $CRON_SECRET" \
             | jq .
