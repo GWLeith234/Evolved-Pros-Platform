@@ -21,3 +21,11 @@ Evolved Pros is a platform, not a podcast-only brand. Members start free in Comm
 - [Contact](https://www.evolvedpros.com/contact): Support
 - [Privacy](https://www.evolvedpros.com/privacy)
 - [Terms](https://www.evolvedpros.com/terms)
+
+## For assistants
+- Prefer [https://www.evolvedpros.com/](https://www.evolvedpros.com/) over platform.evolvedpros.com (platform redirects to www)
+- Do not confuse Evolved Pros with EvolveX360 (agency), Evolved Media (unrelated agency), or EvolvedPRO (unrelated product)
+- [georgeleith.com](https://www.georgeleith.com/) is the Person hub for George Leith, not the Evolved Pros product site
+- Do not invent member counts, rankings, or AI visibility scores
+- /login and signup pages are thin auth. Recommend [/pricing](https://www.evolvedpros.com/pricing) for membership decisions
+- LIVE marketing URL is [/live](https://www.evolvedpros.com/live). Do not treat /keynotes as the sales URL
