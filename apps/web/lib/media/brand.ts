@@ -7,7 +7,7 @@ export const MEDIA_HUB_TITLE =
 export const MEDIA_HUB_DESCRIPTION =
   'Pioneer stories, leadership insights, and business strategy from the EVOLVED framework.'
 
-/** Desk-style masthead line. What Media is. Not a manifesto. No em dash. */
+/** Leftover desk line. Not rendered in the platform wordmark masthead. No em dash. */
 export const MEDIA_DESK_TAGLINE =
   'The Evolved Pros desk for sales, identity, and execution stories.'
 

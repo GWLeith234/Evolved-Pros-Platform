@@ -1,149 +1,54 @@
-// Editorial masthead for /media. Live chrome only.
-// Section-hash nav, issue counter, and Search control are gone.
+// Platform wordmark for /media. Shared by the hub and every article shell.
+// EP lockup + Media section label. No newspaper nameplate.
 
+import Image from 'next/image'
 import Link from 'next/link'
-import { MEDIA_DESK_TAGLINE } from '@/lib/media/brand'
-import { MEDIA_NAVY, MEDIA_RED } from '@/lib/media/desk'
+import { logos } from '@evolved-pros/ui'
+import { MediaMastheadRail } from '@/components/media/MediaMastheadRail'
 
-const NETWORK_LINKS: ReadonlyArray<{ label: string; href: string }> = [
-  { label: 'Community', href: '/community' },
-  { label: 'Events', href: '/events' },
-  { label: 'Podcast', href: '/podcast' },
-  { label: 'Live', href: '/live' },
-]
+const WORDMARK_HEIGHT = 36
+const WORDMARK_WIDTH = WORDMARK_HEIGHT * 5
 
 export function Masthead() {
-  const today = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  })
-
   return (
-    <header style={{ background: '#F5F0E8', borderBottom: '1px solid #E5E0D8', maxWidth: '100%', overflowX: 'hidden' }}>
-      <div
-        className="ed-masthead-date-strip"
-        style={{
-          maxWidth: 1280,
-          margin: '0 auto',
-          padding: '14px 16px 0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 12,
-          fontFamily: '"Barlow Condensed", sans-serif',
-          fontSize: 11,
-          fontWeight: 500,
-          letterSpacing: '0.22em',
-          textTransform: 'uppercase',
-          color: '#6B7280',
-          flexWrap: 'nowrap',
-        }}
-      >
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
-          <span suppressHydrationWarning className="hidden sm:inline">{today}</span>
-          <span aria-hidden="true" className="hidden sm:inline" style={{ color: '#C9A84C' }}>·</span>
-          <Link
-            href="/home"
-            style={{ color: MEDIA_NAVY, textDecoration: 'none' }}
-          >
+    <header className="ep-media-masthead">
+      <div className="ep-media-masthead-inner">
+        <div className="ep-media-masthead-utility">
+          <Link href="/home" className="ep-media-masthead-back">
             Back to platform
           </Link>
-          <span aria-hidden="true" className="hidden sm:inline" style={{ color: '#C9A84C' }}>·</span>
-          <Link
-            href="/pricing"
-            className="hidden sm:inline"
-            style={{ color: MEDIA_NAVY, textDecoration: 'none' }}
-          >
+          <Link href="/pricing" className="ep-media-masthead-join">
             Join Evolved Pros
           </Link>
-        </span>
-        <span
-          className="ed-network-links"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 14,
-            flexShrink: 1,
-            minWidth: 0,
-            overflowX: 'auto',
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'none',
-          }}
-        >
-          {NETWORK_LINKS.map(link => (
-            <a
-              key={link.href}
-              href={link.href}
-              style={{ color: MEDIA_NAVY, textDecoration: 'none', flexShrink: 0 }}
-            >
-              {link.label}
-            </a>
-          ))}
-        </span>
-      </div>
+        </div>
 
-      <style>{`
-        .ed-network-links::-webkit-scrollbar { display: none; }
-        @media (max-width: 639px) {
-          .ed-masthead-date-strip { flex-wrap: wrap !important; padding-right: 16px !important; row-gap: 8px; }
-          .ed-network-links { width: 100%; padding-right: 8px; }
-        }
-      `}</style>
-
-      <div
-        style={{
-          maxWidth: 1280,
-          margin: '0 auto',
-          padding: '20px 24px 12px',
-          textAlign: 'center',
-          position: 'relative',
-        }}
-      >
-        <h1
-          style={{
-            margin: '6px 0 0',
-            fontFamily: 'var(--font-abril), "Abril Fatface", "Playfair Display", Georgia, serif',
-            fontWeight: 400,
-            fontSize: 'clamp(40px, 9vw, 108px)',
-            lineHeight: 0.95,
-            letterSpacing: '0.005em',
-            color: MEDIA_NAVY,
-          }}
-        >
-          <Link href="/media" style={{ color: 'inherit', textDecoration: 'none' }}>
-            <span
-              data-masthead-evolved
-              style={{
-                color: MEDIA_RED,
-                fontFamily: '"Playfair Display", Georgia, serif',
-                fontWeight: 900,
-              }}
-            >
-              Evolved
-            </span>{' '}
-            <span data-masthead-media style={{ color: MEDIA_NAVY }}>Pros Media</span>
+        <h1 className="ep-media-masthead-wordmark">
+          <Link href="/media" aria-label="Evolved Pros Media">
+            <Image
+              src={logos.horizontalDark}
+              alt=""
+              width={WORDMARK_WIDTH}
+              height={WORDMARK_HEIGHT}
+              sizes={`${WORDMARK_WIDTH}px`}
+              className="ep-media-masthead-logo ep-media-masthead-logo--on-dark"
+              priority
+            />
+            <Image
+              src={logos.horizontalNavy}
+              alt=""
+              width={WORDMARK_WIDTH}
+              height={WORDMARK_HEIGHT}
+              sizes={`${WORDMARK_WIDTH}px`}
+              className="ep-media-masthead-logo ep-media-masthead-logo--on-light"
+              priority
+            />
+            <span data-masthead-section className="ep-media-masthead-section">
+              Media
+            </span>
           </Link>
         </h1>
-        <p
-          data-media-desk-tagline
-          style={{
-            margin: '10px 0 0',
-            fontFamily: '"Playfair Display", Georgia, serif',
-            fontStyle: 'italic',
-            fontSize: 16,
-            color: '#6B7280',
-          }}
-        >
-          {MEDIA_DESK_TAGLINE}
-        </p>
-      </div>
 
-      <div style={{ maxWidth: 1280, margin: '8px auto 14px', padding: '0 24px' }}>
-        <div style={{ height: 1, background: '#C9A84C' }} />
-        <div style={{ height: 3, background: 'transparent' }} />
-        <div style={{ height: 1, background: '#C9A84C' }} />
+        <MediaMastheadRail />
       </div>
     </header>
   )

@@ -10,18 +10,25 @@ const repoRoot = resolve(here, '../../../..')
 
 const USER_FACING = [
   resolve(here, '../../components/media/Masthead.tsx'),
+  resolve(here, '../../components/media/MediaMastheadRail.tsx'),
   resolve(here, '../../app/(public)/media/MediaPortalClient.tsx'),
   resolve(here, './brand.ts'),
   resolve(here, './desk.ts'),
 ]
 
 describe('Media copy hygiene', () => {
-  it('uses a desk tagline, not a manifesto, and never an em dash', () => {
+  it('keeps leftover desk copy free of manifesto language and em dashes', () => {
     expect(MEDIA_DESK_TAGLINE).toBe(
       'The Evolved Pros desk for sales, identity, and execution stories.',
     )
     expect(MEDIA_DESK_TAGLINE).not.toMatch(/Promoting evolution/)
     expect(MEDIA_DESK_TAGLINE).not.toContain(EM_DASH)
+    const masthead = readFileSync(
+      resolve(here, '../../components/media/Masthead.tsx'),
+      'utf8',
+    )
+    expect(masthead).not.toMatch(/MEDIA_DESK_TAGLINE/)
+    expect(masthead).not.toContain(MEDIA_DESK_TAGLINE)
   })
 
   it('keeps user-facing Media chrome free of em dashes', () => {
