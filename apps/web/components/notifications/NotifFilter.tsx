@@ -62,7 +62,7 @@ export function NotifFilter({ active, counts, onChange }: NotifFilterProps) {
             {count > 0 && (
               <span
                 className="flex-shrink-0 min-w-[18px] h-[18px] px-1 rounded-full font-condensed font-bold text-[12px] text-white flex items-center justify-center"
-                style={{ backgroundColor: '#ef0e30' }}
+                style={{ backgroundColor: 'var(--red)' }}
               >
                 {count}
               </span>

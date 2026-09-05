@@ -97,7 +97,7 @@ export function wigCopy(
     return {
       title: 'Weekly WIG check-in',
       body: opts?.title
-        ? `Update **${opts.title}** — a weekly lag check-in keeps the scoreboard honest.`
+        ? `Update **${opts.title}**. A weekly lag check-in keeps the scoreboard honest.`
         : 'Update your quarterly WIG. A weekly lag check-in keeps the scoreboard honest.',
     }
   }

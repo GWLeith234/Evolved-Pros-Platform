@@ -14,3 +14,8 @@ startCommand = "bash scripts/start-standalone.sh"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"
+# cronSchedule is intentionally unset on this web service. Railway does not
+# fire GET /api/cron/*. The in-repo scheduler is .github/workflows/cron.yml
+# (default branch Q2oUw): 08:00 expire/renew/events/digest, 17:00 member-nudges
+# (#110 WIG + daily), Monday 08:15 goal-snapshots. podcast-sync / publish-posts
+# / warmup remain admin or externally scheduled.

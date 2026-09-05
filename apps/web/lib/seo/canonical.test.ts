@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { MEDIA_HUB_DESCRIPTION, MEDIA_HUB_TITLE } from '@/lib/media/brand'
+import { existsSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import {
   CANONICAL_ORIGIN,
+  DEFAULT_OG_IMAGE,
   SITE_NAME,
   canonicalUrl,
   canonicalizePath,
@@ -162,5 +166,16 @@ describe('publicPageMetadata', () => {
     expect(meta.openGraph?.url).toBe('https://www.evolvedpros.com/pricing')
     const pricedOg = meta.openGraph as { title?: string } | undefined
     expect(pricedOg?.title).toBe('Pricing')
+  })
+})
+
+describe('DEFAULT_OG_IMAGE', () => {
+  it('points at a file that ships in apps/web/public, not a missing og-default', () => {
+    expect(DEFAULT_OG_IMAGE).toBe('/logo_horizontal_navy.png')
+    expect(DEFAULT_OG_IMAGE).not.toContain('og-default')
+    expect(DEFAULT_OG_IMAGE).not.toMatch(/msp-og/i)
+    const here = dirname(fileURLToPath(import.meta.url))
+    const asset = resolve(here, '../../public', DEFAULT_OG_IMAGE.replace(/^\//, ''))
+    expect(existsSync(asset)).toBe(true)
   })
 })

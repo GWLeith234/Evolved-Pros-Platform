@@ -15,6 +15,8 @@ import {
   wigCopy,
 } from './intents'
 
+const EM_DASH = '\u2014'
+
 const NOW = new Date('2026-09-05T21:00:00Z')
 
 describe('crossedMilestones', () => {
@@ -113,6 +115,24 @@ describe('copy + urls', () => {
     expect(contentCopy('media', 'Field note').title).toBe('New Media story')
     expect(contentCopy('live', 'Mastermind', 'live').title).toBe('New LIVE event')
     expect(contentCopy('live', 'Workshop', 'virtual').title).toBe('New event')
+  })
+
+  it('keeps WIG / daily / content copy free of em dashes', () => {
+    const blobs = [
+      wigCopy('complete'),
+      wigCopy('update', { title: 'Close $80k' }),
+      wigCopy('weekly', { title: 'Close $80k' }),
+      wigCopy('milestone', { title: 'Close $80k', milestone: 50 }),
+      dailyCopy(1),
+      dailyCopy(3),
+      contentCopy('academy', 'Lead measures'),
+      contentCopy('media', 'Field note'),
+      contentCopy('live', 'Mastermind', 'live'),
+    ]
+    for (const copy of blobs) {
+      expect(copy.title, copy.title).not.toContain(EM_DASH)
+      expect(copy.body, copy.body).not.toContain(EM_DASH)
+    }
   })
 })
 

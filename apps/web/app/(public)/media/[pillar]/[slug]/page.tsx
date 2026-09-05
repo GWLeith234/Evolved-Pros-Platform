@@ -14,7 +14,7 @@ import { MediaIabSlot } from '@/components/media/MediaIabSlot'
 import { MediaLatestPodcast } from '@/components/media/MediaLatestPodcast'
 import type { MediaRailEpisode } from '@/lib/media/podcastRail'
 import { MEDIA_BRAND, mediaStoryTitle } from '@/lib/media/brand'
-import { CANONICAL_ORIGIN, canonicalUrl, publicPageMetadata } from '@/lib/seo/canonical'
+import { CANONICAL_ORIGIN, DEFAULT_OG_IMAGE, canonicalUrl, publicPageMetadata } from '@/lib/seo/canonical'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { pickArticleAds } from '@/lib/sponsors/partners'
 import { adMatchesSurface } from '@/lib/ads/iab'
@@ -108,7 +108,7 @@ export async function generateMetadata(
 
   const title = story.seo_title || mediaStoryTitle(story.title)
   const description = story.seo_description || story.excerpt || ''
-  const image = story.featured_image_url || '/og-default.png'
+  const image = story.featured_image_url || DEFAULT_OG_IMAGE
 
   return publicPageMetadata(`/media/${params.pillar}/${params.slug}`, {
     title,
@@ -190,7 +190,7 @@ export default async function StoryPage({
     author: { '@type': 'Person', name: story.author ?? 'George Leith' },
     publisher: { '@type': 'Organization', name: 'Evolved Pros', url: CANONICAL_ORIGIN },
     datePublished: story.published_at, dateModified: story.updated_at,
-    url: articleUrl, image: story.featured_image_url || '/og-default.png',
+    url: articleUrl, image: story.featured_image_url || DEFAULT_OG_IMAGE,
   }
   const breadcrumbSchema = {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',

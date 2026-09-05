@@ -76,7 +76,7 @@ export async function notifyReply(params: {
     userId:    params.postAuthorId,
     type:      'community_reply',
     title:     'New reply on your post',
-    body:      `**${params.replyAuthorName}** replied to your post in **#${params.channelSlug}** — "${params.replySnippet.slice(0, 80)}"`,
+    body:      `**${params.replyAuthorName}** replied to your post in **#${params.channelSlug}**: "${params.replySnippet.slice(0, 80)}"`,
     actionUrl: `/community/${params.channelSlug}?post=${params.postId}`,
   })
 }

@@ -21,13 +21,6 @@ type GoalRow = {
   updated_at: string | null
 }
 
-function mondayYmd(now: Date = new Date()): string {
-  const day = now.getUTCDay()
-  const diff = day === 0 ? -6 : 1 - day
-  const monday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + diff))
-  return monday.toISOString().slice(0, 10)
-}
-
 export async function listActiveMemberIds(): Promise<string[]> {
   const { data, error } = await adminClient
     .from('users')
@@ -161,7 +154,7 @@ export async function enqueueWeeklyWigNudges(now: Date = new Date()): Promise<nu
 
 async function dailyProgressForUser(userId: string, now: Date): Promise<{ incomplete: number } | null> {
   const today = utcDateYmd(now)
-  const weekStart = mondayYmd(now)
+  const weekStart = isoMondayYmd(now)
 
   const [habitsRes, completionsRes, commitsRes] = await Promise.all([
     adminClient

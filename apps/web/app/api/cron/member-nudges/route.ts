@@ -15,6 +15,9 @@ import {
  * Safe to run hourly. Each helper dedupes on (user, type, action_url)
  * so a re-fire does not stack bells. Daily nudges no-op before 17:00 UTC
  * (WelcomeBanner evening).
+ *
+ * Scheduler: Railway web cronSchedule is unset. GitHub Actions
+ * `.github/workflows/cron.yml` hits this route at 17:00 UTC.
  */
 export async function GET(request: Request) {
   const expected = process.env.CRON_SECRET
