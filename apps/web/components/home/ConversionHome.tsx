@@ -131,7 +131,7 @@ export function ConversionHome({
       <main>
         <section
           aria-label={HERO_IMAGE_ALT}
-          className="ep-home-fold relative w-full overflow-hidden bg-paper md:min-h-[calc(100svh-5.5rem)]"
+          className="ep-home-fold relative w-full overflow-hidden bg-page md:min-h-[calc(100svh-5.5rem)]"
         >
           <div className="relative aspect-[3/2] w-full md:absolute md:inset-0 md:aspect-auto">
             <Image
