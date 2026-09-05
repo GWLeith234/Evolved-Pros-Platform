@@ -8,10 +8,12 @@ import {
   inquiryFieldLines,
   inquiryFieldSummary,
   inquiryNotificationCopy,
+  LIVE_INQUIRE_TAG,
   notifyAdmins,
   prependNotes,
   upsertKeynoteProspect,
   validateInquiry,
+  withLiveInquireTag,
   type CleanInquiry,
   type InquiryDb,
   type ProspectRow,
@@ -199,6 +201,9 @@ describe('upsertKeynoteProspect — new contact', () => {
       source: 'keynote-inquiry',
       enrichment_status: 'none',
     })
+    expect(row.tags).toEqual([LIVE_INQUIRE_TAG])
+    expect(LIVE_INQUIRE_TAG).toBe('live inquire')
+    expect(withLiveInquireTag([])).toEqual(['live inquire'])
     expect(String(row.notes)).toContain('[2026-08-16] Booking inquiry')
   })
 
@@ -223,6 +228,7 @@ describe('upsertKeynoteProspect — existing contact (23505 conflict)', () => {
       notes: 'Met at the Regina keynote.',
       phone: null,
       company: null,
+      tags: ['keynote'],
     })
     const out = await upsertKeynoteProspect(db, clean(), NOW)
 
@@ -233,11 +239,18 @@ describe('upsertKeynoteProspect — existing contact (23505 conflict)', () => {
     expect(patch.keynote_interest).toBe(true)
     expect(patch.phone).toBe('+1 555 0100')
     expect(patch.company).toBe('Northgate Media')
+    expect(patch.tags).toEqual(['keynote', 'live inquire'])
     expect(patch.last_contacted_at).toBe(NOW.toISOString())
     expect(String(patch.notes)).toContain('Met at the Regina keynote.')
     expect(String(patch.notes).indexOf('Booking inquiry')).toBeLessThan(
       String(patch.notes).indexOf('Met at the Regina keynote.'),
     )
+  })
+
+  it('writes the live inquire tag on update when the existing row had none', async () => {
+    const db = conflictDb({ id: 'p-1', notes: null, phone: null, company: null, tags: [] })
+    await upsertKeynoteProspect(db, clean(), NOW)
+    expect(vi.mocked(db.updateProspect).mock.calls[0][1].tags).toEqual(['live inquire'])
   })
 
   it('does not blank phone or company when those fields were omitted', async () => {

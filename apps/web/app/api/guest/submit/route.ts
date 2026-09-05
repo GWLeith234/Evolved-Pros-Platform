@@ -4,6 +4,8 @@ export const runtime = 'nodejs'
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { resolveGuestEngagement, ensureGuestPersona } from '@/lib/guest/engagement'
+import { supabaseIntakeDb } from '@/lib/crm/intakeDb'
+import { guestWriteFromSubmit, notifyGuestAdmins, upsertGuestProspect } from '@/lib/crm/guestIntake'
 
 // POST /api/guest/submit — an invited guest submits their intake.
 // Body: { token, one_liner, short_bio, headshot_url, topics[], links[],
@@ -135,6 +137,29 @@ export async function POST(request: Request) {
     if (headshot !== null) epPatch.guest_image_url = headshot
     if (Object.keys(epPatch).length > 0) {
       await adminClient.from('episodes').update(epPatch as any).eq('id', eng.episode_id)
+    }
+  }
+
+  const crmWrite = guestWriteFromSubmit({
+    email: eng.guest_email,
+    full_name: fullName,
+    user_id: eng.user_id,
+    company,
+    title: roleTitle,
+  })
+  if (crmWrite) {
+    try {
+      const crm = await upsertGuestProspect(supabaseIntakeDb, crmWrite)
+      if (crm.kind === 'error') {
+        console.error('[POST /api/guest/submit] prospect write failed', crm.code ?? 'unknown')
+      } else {
+        const notified = await notifyGuestAdmins(supabaseIntakeDb, crmWrite)
+        if (notified.code) {
+          console.error('[POST /api/guest/submit] admin notify failed', notified.code)
+        }
+      }
+    } catch {
+      console.error('[POST /api/guest/submit] crm intake threw')
     }
   }
 

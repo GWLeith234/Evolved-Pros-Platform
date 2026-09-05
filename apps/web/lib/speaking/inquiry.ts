@@ -10,6 +10,20 @@
  * conflicting value in a unique-violation message, so error paths log codes.
  */
 
+import {
+  LIVE_INQUIRE_SOURCE,
+  LIVE_INQUIRE_TAG,
+  mergeTags,
+  notifyIntakeAdmins,
+  prependNotes as prependIntakeNotes,
+  upsertIntakeProspect,
+  type IntakeDb,
+  type IntakeProspectRow,
+  type IntakeUpsertOutcome,
+} from '@/lib/crm/intake'
+
+export { LIVE_INQUIRE_SOURCE, LIVE_INQUIRE_TAG }
+
 const NAME_MAX = 200
 const FIELD_MAX = 200
 const EMAIL_MAX = 320
@@ -165,19 +179,16 @@ export function buildNotesBlock(inq: CleanInquiry, now: Date): string {
 }
 
 /** Newest block first, so the latest inquiry is visible without scrolling. */
-export function prependNotes(existing: string | null | undefined, block: string): string {
-  const prev = (existing ?? '').trim()
-  return prev ? `${block}\n\n---\n\n${prev}` : block
+export const prependNotes = prependIntakeNotes
+
+/** Merge `live inquire` onto an existing tag list without dupes or reordering. */
+export function withLiveInquireTag(existing: unknown): string[] {
+  return mergeTags(existing, [LIVE_INQUIRE_TAG])
 }
 
 // ── DB port ────────────────────────────────────────────────────────────────
 
-export interface ProspectRow {
-  id: string
-  notes: string | null
-  phone: string | null
-  company: string | null
-}
+export type ProspectRow = IntakeProspectRow
 
 export interface DbError {
   code?: string
@@ -187,83 +198,58 @@ export interface DbError {
  * The minimum surface the inquiry needs. Implemented against adminClient in
  * ./inquiryDb; mocked in tests.
  */
-export interface InquiryDb {
-  insertProspect(row: Record<string, unknown>): Promise<{ error: DbError | null }>
-  findProspectByEmail(email: string): Promise<{ data: ProspectRow | null; error: DbError | null }>
-  updateProspect(id: string, patch: Record<string, unknown>): Promise<{ error: DbError | null }>
-  listAdminIds(): Promise<{ data: Array<{ id: string }> | null; error: DbError | null }>
-  insertNotifications(rows: Array<Record<string, unknown>>): Promise<{ error: DbError | null }>
-}
+export type InquiryDb = IntakeDb
 
-export const PG_UNIQUE_VIOLATION = '23505'
+export { PG_UNIQUE_VIOLATION } from '@/lib/crm/intake'
 
 export type UpsertOutcome =
   | { kind: 'created' }
   | { kind: 'updated' }
   | { kind: 'error'; code?: string }
 
+function toUpsertOutcome(out: IntakeUpsertOutcome): UpsertOutcome {
+  if (out.kind === 'error') return out
+  return { kind: out.kind }
+}
+
 /**
  * Record the inquiry against crm_prospects.
  *
  * New contact  → insert as a keynote-interested lead with express consent
- *                (they initiated contact, which is what express means here).
+ *                (they initiated contact, which is what express means here)
+ *                and tag `live inquire`.
  * Known contact→ the insert hits the 076 unique index on lower(email); we then
  *                fetch and PATCH. Stage, status and consent_basis are left
  *                exactly as they were — an inbound inquiry must not demote a
  *                Professional member back to 'lead', nor silently upgrade a
- *                consent record that was established some other way.
+ *                consent record that was established some other way. The tag
+ *                is merged.
  */
 export async function upsertKeynoteProspect(
   db: InquiryDb,
   inq: CleanInquiry,
   now: Date = new Date(),
 ): Promise<UpsertOutcome> {
-  const block = buildNotesBlock(inq, now)
-  const iso = now.toISOString()
-
-  const { error: insertErr } = await db.insertProspect({
-    full_name: inq.full_name,
-    email: inq.email,
-    phone: inq.sms,
-    company: inq.company,
-    title: null,
-    notes: block,
-    stage: 'lead',
-    status: 'active',
-    source: 'keynote-inquiry',
-    consent_basis: 'express',
-    keynote_interest: true,
-    enrichment_status: 'none',
-    tags: [],
-    last_contacted_at: iso,
-    updated_at: iso,
-  })
-
-  if (!insertErr) return { kind: 'created' }
-  if (insertErr.code !== PG_UNIQUE_VIOLATION) return { kind: 'error', code: insertErr.code }
-
-  // Already a prospect — merge into the existing row.
-  const { data: existing, error: findErr } = await db.findProspectByEmail(inq.email)
-  if (findErr) return { kind: 'error', code: findErr.code }
-  if (!existing) {
-    // Raced with a delete between the insert and the lookup. Nothing sensible
-    // left to update, and retrying could loop, so report it as handled.
-    return { kind: 'error', code: 'not_found_after_conflict' }
-  }
-
-  const patch: Record<string, unknown> = {
-    keynote_interest: true,
-    notes: prependNotes(existing.notes, block),
-    last_contacted_at: iso,
-    updated_at: iso,
-  }
-  if (inq.sms) patch.phone = inq.sms
-  if (inq.company) patch.company = inq.company
-
-  const { error: updateErr } = await db.updateProspect(existing.id, patch)
-  if (updateErr) return { kind: 'error', code: updateErr.code }
-
-  return { kind: 'updated' }
+  return toUpsertOutcome(
+    await upsertIntakeProspect(
+      db,
+      {
+        email: inq.email,
+        full_name: inq.full_name,
+        phone: inq.sms,
+        company: inq.company,
+        title: null,
+        source: LIVE_INQUIRE_SOURCE,
+        tags: [LIVE_INQUIRE_TAG],
+        notesBlock: buildNotesBlock(inq, now),
+        stage: 'lead',
+        consent_basis: 'express',
+        keynote_interest: true,
+        updateExtras: { keynote_interest: true },
+      },
+      now,
+    ),
+  )
 }
 
 /**
@@ -277,24 +263,7 @@ export async function notifyAdmins(
   db: InquiryDb,
   inq: CleanInquiry,
 ): Promise<{ notified: number; code?: string }> {
-  const { data, error } = await db.listAdminIds()
-  if (error) return { notified: 0, code: error.code }
-  const admins = data ?? []
-  if (admins.length === 0) return { notified: 0 }
-
-  const copy = inquiryNotificationCopy(inq)
-  const rows = admins.map(a => ({
-    user_id: a.id,
-    type: 'system_general',
-    title: copy.title,
-    body: copy.body,
-    action_url: '/admin/crm',
-    is_read: false,
-  }))
-
-  const { error: insertErr } = await db.insertNotifications(rows)
-  if (insertErr) return { notified: 0, code: insertErr.code }
-  return { notified: rows.length }
+  return notifyIntakeAdmins(db, inquiryNotificationCopy(inq))
 }
 
 // ── Rate limiting ──────────────────────────────────────────────────────────

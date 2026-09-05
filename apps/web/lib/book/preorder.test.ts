@@ -13,6 +13,8 @@ import {
   buildPreorderNotesBlock,
   isBookIabSlot,
   joinPreorderName,
+  notifyPreorderAdmins,
+  preorderNotificationCopy,
   prependNotes,
   upsertBookPreorderProspect,
   validatePreorder,
@@ -51,6 +53,8 @@ function mockDb(overrides: Partial<PreorderDb> = {}): PreorderDb {
     insertProspect: vi.fn(async () => ({ error: null })),
     findProspectByEmail: vi.fn(async () => ({ data: null as ProspectRow | null, error: null })),
     updateProspect: vi.fn(async () => ({ error: null })),
+    listAdminIds: vi.fn(async () => ({ data: [{ id: 'admin-1' }], error: null })),
+    insertNotifications: vi.fn(async () => ({ error: null })),
     ...overrides,
   }
 }
@@ -342,5 +346,44 @@ describe('upsertBookPreorderProspect — existing contact (23505 conflict)', () 
       kind: 'error',
       code: '23514',
     })
+  })
+})
+
+describe('notifyPreorderAdmins', () => {
+  it('inserts one system_general notification per admin with name and email', async () => {
+    const db = mockDb({
+      listAdminIds: vi.fn(async () => ({ data: [{ id: 'a1' }, { id: 'a2' }], error: null })),
+    })
+    const out = await notifyPreorderAdmins(db, clean())
+
+    expect(out.notified).toBe(2)
+    const rows = vi.mocked(db.insertNotifications).mock.calls[0][0]
+    expect(rows).toHaveLength(2)
+    expect(rows[0]).toMatchObject({
+      user_id: 'a1',
+      type: 'system_general',
+      action_url: '/admin/crm',
+      is_read: false,
+    })
+    expect(String(rows[0].title)).toContain('Name: Dana Whitfield')
+    expect(String(rows[0].title)).toContain('Email: dana@northgate.example')
+    expect(String(rows[0].body)).toContain('utm_source=house')
+    expect(String(rows[0].title)).not.toContain('—')
+    expect(String(rows[0].body)).not.toContain('—')
+  })
+
+  it('omits UTM from copy when none were sent', async () => {
+    const copy = preorderNotificationCopy(
+      clean({ utm_source: null, utm_medium: null, utm_campaign: null, utm_content: null }),
+    )
+    expect(copy.title).toBe('Book preorder: Name: Dana Whitfield · Email: dana@northgate.example')
+    expect(copy.body).toBe('Name: Dana Whitfield · Email: dana@northgate.example')
+    expect(copy.title).not.toContain('utm_')
+  })
+
+  it('no-ops cleanly when there are no admins', async () => {
+    const db = mockDb({ listAdminIds: vi.fn(async () => ({ data: [], error: null })) })
+    expect(await notifyPreorderAdmins(db, clean())).toEqual({ notified: 0 })
+    expect(db.insertNotifications).not.toHaveBeenCalled()
   })
 })

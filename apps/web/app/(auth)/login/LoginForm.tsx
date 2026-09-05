@@ -10,6 +10,7 @@ import {
   interpretSignUpResult,
   passwordAuthMethodFor,
 } from '@/lib/auth/passwordAuth'
+import { requestJoinProvision, shouldProvisionJoin } from '@/lib/crm/join'
 import { LogoMark } from '@/components/ui/LogoMark'
 
 function Spinner() {
@@ -84,6 +85,9 @@ export function LoginForm() {
         return
       }
       const outcome = interpretSignUpResult(data)
+      if (shouldProvisionJoin({ mode, kind: 'password-signup', outcome })) {
+        void requestJoinProvision(emailNorm)
+      }
       if (outcome === 'signedIn') {
         window.location.href = callbackUrl
         return
@@ -127,6 +131,9 @@ export function LoginForm() {
     })
     setLoading(false)
     if (err) { setError(humanizeAuthError(err.message, mode)); return }
+    if (shouldProvisionJoin({ mode, kind: 'magic-otp' })) {
+      void requestJoinProvision(email.trim().toLowerCase())
+    }
     setSent('magic')
   }
 

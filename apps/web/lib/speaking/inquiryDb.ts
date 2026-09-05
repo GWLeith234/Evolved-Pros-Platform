@@ -27,7 +27,7 @@ export const supabaseInquiryDb: InquiryDb = {
     // one for rows this app wrote.
     const { data, error } = await db
       .from('crm_prospects')
-      .select('id, notes, phone, company')
+      .select('id, notes, tags, phone, company, stage')
       .eq('email', email)
       .maybeSingle()
     return {

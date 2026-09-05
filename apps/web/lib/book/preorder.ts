@@ -18,6 +18,7 @@
  */
 
 import { normalizeTags } from '@/lib/admin/crm'
+import { notifyIntakeAdmins } from '@/lib/crm/intake'
 import { CANONICAL_ORIGIN } from '@/lib/seo/canonical'
 
 export const BOOK_PREORDER_PATH = '/evolved' as const
@@ -175,6 +176,8 @@ export interface PreorderDb {
   insertProspect(row: Record<string, unknown>): Promise<{ error: DbError | null }>
   findProspectByEmail(email: string): Promise<{ data: ProspectRow | null; error: DbError | null }>
   updateProspect(id: string, patch: Record<string, unknown>): Promise<{ error: DbError | null }>
+  listAdminIds(): Promise<{ data: Array<{ id: string }> | null; error: DbError | null }>
+  insertNotifications(rows: Array<Record<string, unknown>>): Promise<{ error: DbError | null }>
 }
 
 export const PG_UNIQUE_VIOLATION = '23505'
@@ -235,4 +238,26 @@ export async function upsertBookPreorderProspect(
   if (updateErr) return { kind: 'error', code: updateErr.code }
 
   return { kind: 'updated' }
+}
+
+export function preorderFieldSummary(inq: CleanPreorder): string {
+  const parts = [`Name: ${inq.full_name}`, `Email: ${inq.email}`]
+  const utm = utmSummary(inq)
+  if (utm) parts.push(utm)
+  return parts.join(' · ')
+}
+
+export function preorderNotificationCopy(inq: CleanPreorder): { title: string; body: string } {
+  const summary = preorderFieldSummary(inq)
+  return {
+    title: `Book preorder: ${summary}`,
+    body: summary,
+  }
+}
+
+export async function notifyPreorderAdmins(
+  db: PreorderDb,
+  inq: CleanPreorder,
+): Promise<{ notified: number; code?: string }> {
+  return notifyIntakeAdmins(db, preorderNotificationCopy(inq))
 }
