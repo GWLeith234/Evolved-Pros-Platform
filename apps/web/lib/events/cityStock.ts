@@ -4,7 +4,12 @@
  * Unknown / blank city uses the branded fallback, not a guessed skyline.
  */
 
-export const EVENT_CITY_FALLBACK_IMAGE = '/events/city-fallback.svg'
+/**
+ * Public still. Never under /events: middleware matches that prefix as the
+ * member app and 307s anonymous requests to /login.
+ */
+export const EVENT_CITY_FALLBACK_IMAGE = '/brand/city-fallback.svg'
+const LEGACY_EVENT_CITY_FALLBACK_IMAGE = '/events/city-fallback.svg'
 
 const UNSPLASH = 'https://images.unsplash.com'
 
@@ -139,8 +144,15 @@ export function lookupCityStock(raw: string | null | undefined): CityStockEntry 
 export function isManagedEventImage(url: string | null | undefined): boolean {
   if (!url) return true
   if (url === EVENT_CITY_FALLBACK_IMAGE) return true
+  if (url === LEGACY_EVENT_CITY_FALLBACK_IMAGE) return true
   if (url.startsWith(`${UNSPLASH}/`)) return true
   return false
+}
+
+function normalizeProvidedImage(url: string | null): string | null {
+  if (!url) return null
+  if (url === LEGACY_EVENT_CITY_FALLBACK_IMAGE) return EVENT_CITY_FALLBACK_IMAGE
+  return url
 }
 
 export type ResolvedCityStock = {
@@ -160,7 +172,7 @@ export function resolveCityStock(input: {
   imageUrl?: string | null
 }): ResolvedCityStock {
   const city = normalizeCityInput(input.city)
-  const provided = input.imageUrl?.trim() || null
+  const provided = normalizeProvidedImage(input.imageUrl?.trim() || null)
   const customCover = provided && !isManagedEventImage(provided)
 
   if (customCover) {
@@ -172,7 +184,7 @@ export function resolveCityStock(input: {
     if (hit) {
       return { city: hit.label, imageUrl: hit.imageUrl, fallback: false, source: 'catalog' }
     }
-    if (provided) {
+    if (provided && provided !== EVENT_CITY_FALLBACK_IMAGE) {
       return { city, imageUrl: provided, fallback: false, source: 'provided' }
     }
   }
@@ -181,7 +193,7 @@ export function resolveCityStock(input: {
 }
 
 export function eventCardImageUrl(imageUrl: string | null | undefined): string {
-  const url = imageUrl?.trim()
+  const url = normalizeProvidedImage(imageUrl?.trim() || null)
   return url || EVENT_CITY_FALLBACK_IMAGE
 }
 

@@ -94,8 +94,10 @@ describe('Home band markup', () => {
     expect(fuel).toContain('Join thread')
     expect(fuel).toContain('Save my seat')
     expect(fuel).toContain('GTM 2026. Pavilion Annual Conference')
-    expect(fuel).toContain('/academy/architecture-still-light.svg')
-    expect(fuel).toContain('/academy/architecture-still-dark.svg')
+    expect(fuel).toContain('/brand/architecture-still-light.svg')
+    expect(fuel).toContain('/brand/architecture-still-dark.svg')
+    expect(fuel).not.toContain('/academy/architecture-still-light.svg')
+    expect(fuel).not.toContain('/academy/architecture-still-dark.svg')
     expect(fuel).toContain('Evolved Pros Academy architecture')
     expect(fuel).toContain('photo-1605833556294-ea5c7a74f57d')
     expect(fuel).toContain('Stock photo of Las Vegas')
@@ -104,8 +106,9 @@ describe('Home band markup', () => {
     const empty = renderToStaticMarkup(<HomeFuelBand academy={null} thread={null} live={null} />)
     expect(empty).toContain('Open the Academy')
     expect(empty).toContain('Start Foundation when you are ready.')
-    expect(empty).toContain('/academy/architecture-still-light.svg')
+    expect(empty).toContain('/brand/architecture-still-light.svg')
     expect(empty).not.toContain('/events/city-fallback.svg')
+    expect(empty).not.toContain('/brand/city-fallback.svg')
     expect(empty).toContain('Watch the calendar for the next workshop.')
     expect(empty).not.toMatch(/\u2014|\u2013/)
 
@@ -123,7 +126,8 @@ describe('Home band markup', () => {
         }}
       />,
     )
-    expect(unknownCity).toContain('/events/city-fallback.svg')
+    expect(unknownCity).toContain('/brand/city-fallback.svg')
+    expect(unknownCity).not.toContain('/events/city-fallback.svg')
     expect(unknownCity).toContain('alt="Event"')
     expect(unknownCity).not.toMatch(/\u2014|\u2013/)
   })
