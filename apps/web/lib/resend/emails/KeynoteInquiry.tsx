@@ -9,42 +9,23 @@ import {
   Text,
 } from '@react-email/components'
 import React from 'react'
+import { inquiryFieldLines, type CleanInquiry } from '@/lib/speaking/inquiry'
 
 interface KeynoteInquiryEmailProps {
-  fullName: string
-  email: string
-  company: string | null
-  eventName: string | null
-  eventTimeframe: string | null
-  message: string
+  inquiry: CleanInquiry
   crmUrl: string
 }
 
-// SPRINT KN-1 — the internal "someone wants to book George" alert. Same brand
-// chrome as the other transactional templates, but this one is admin-facing:
-// every field the inquirer typed is shown verbatim so George can reply from his
-// inbox without opening the CRM first.
-export function KeynoteInquiryEmail({
-  fullName,
-  email,
-  company,
-  eventName,
-  eventTimeframe,
-  message,
-  crmUrl,
-}: KeynoteInquiryEmailProps) {
-  const rows: Array<[string, string]> = [
-    ['Name', fullName],
-    ['Email', email],
-    ['Company', company || '—'],
-    ['Event', eventName || '—'],
-    ['Timeframe', eventTimeframe || '—'],
-  ]
+// Existing transactional path for the internal "someone wants to book George"
+// alert. Same brand chrome as the other templates. Every filled field is shown
+// so George can reply from his inbox without opening the CRM first.
+export function KeynoteInquiryEmail({ inquiry, crmUrl }: KeynoteInquiryEmailProps) {
+  const rows = inquiryFieldLines(inquiry)
 
   return (
     <Html>
       <Head />
-      <Preview>{`Keynote inquiry from ${fullName}${company ? ` · ${company}` : ''}`}</Preview>
+      <Preview>{`Booking inquiry from ${inquiry.full_name}${inquiry.company ? ` · ${inquiry.company}` : ''}`}</Preview>
       <Body style={bodyStyle}>
         <Section style={headerStyle}>
           <Text style={logoStyle}>
@@ -53,19 +34,15 @@ export function KeynoteInquiryEmail({
         </Section>
 
         <Container style={containerStyle}>
-          <Text style={labelStyle}>Keynote inquiry</Text>
-          <Text style={headingStyle}>{eventName || company || fullName}</Text>
+          <Text style={labelStyle}>Booking inquiry</Text>
+          <Text style={headingStyle}>{inquiry.full_name}</Text>
 
-          {rows.map(([k, v]) => (
-            <Text key={k} style={rowStyle}>
-              <span style={rowKeyStyle}>{k}</span>
-              {v}
+          {rows.map(row => (
+            <Text key={row.label} style={rowStyle}>
+              <span style={rowKeyStyle}>{row.label}</span>
+              {row.value}
             </Text>
           ))}
-
-          <Hr style={hrStyle} />
-
-          <Text style={messageStyle}>{message}</Text>
 
           <Hr style={hrStyle} />
 
@@ -141,14 +118,6 @@ const hrStyle: React.CSSProperties = {
   border: 'none',
   borderTop: '1px solid rgba(255,255,255,0.1)',
   margin: '20px 0',
-}
-
-const messageStyle: React.CSSProperties = {
-  color: 'rgba(255,255,255,0.92)',
-  fontSize: 15,
-  lineHeight: 1.6,
-  margin: 0,
-  whiteSpace: 'pre-wrap',
 }
 
 const footerStyle: React.CSSProperties = {

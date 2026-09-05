@@ -1,5 +1,5 @@
 /**
- * Keynote inquiry pipeline (SPRINT KN-1).
+ * Booking inquiry pipeline (LIVE "Inquire about booking").
  *
  * Pure logic + a narrow DB port, so the route stays thin and the validation,
  * honeypot and upsert-on-conflict behaviour are unit-testable against a mock
@@ -10,21 +10,23 @@
  * conflicting value in a unique-violation message, so error paths log codes.
  */
 
-export const INQUIRY_MESSAGE_MAX = 2000
 const NAME_MAX = 200
 const FIELD_MAX = 200
 const EMAIL_MAX = 320
+const SMS_MAX = 40
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+const SMS_RE = /^[+\d][\d\s().-]{5,}$/
 
 /** Raw shape posted by the public form, including the honeypot. */
 export interface InquiryInput {
+  name?: unknown
   full_name?: unknown
   email?: unknown
+  event_date?: unknown
+  sms?: unknown
   company?: unknown
-  event_name?: unknown
-  event_timeframe?: unknown
-  message?: unknown
   /** Honeypot — a real browser never fills this. */
   website?: unknown
 }
@@ -32,10 +34,16 @@ export interface InquiryInput {
 export interface CleanInquiry {
   full_name: string
   email: string
+  event_date: string | null
+  sms: string | null
   company: string | null
-  event_name: string | null
-  event_timeframe: string | null
-  message: string
+}
+
+export type InquiryFieldLabel = 'Name' | 'Email' | 'Date of event' | 'SMS' | 'Company'
+
+export interface InquiryFieldLine {
+  label: InquiryFieldLabel
+  value: string
 }
 
 export type ValidationResult =
@@ -48,40 +56,68 @@ function str(v: unknown, max: number): string {
   return typeof v === 'string' ? v.trim().slice(0, max) : ''
 }
 
+function isRealYmd(ymd: string): boolean {
+  if (!DATE_RE.test(ymd)) return false
+  const [ys, ms, ds] = ymd.split('-')
+  const y = Number(ys)
+  const m = Number(ms)
+  const d = Number(ds)
+  if (!Number.isInteger(y) || !Number.isInteger(m) || !Number.isInteger(d)) return false
+  const dt = new Date(Date.UTC(y, m - 1, d))
+  return (
+    dt.getUTCFullYear() === y &&
+    dt.getUTCMonth() === m - 1 &&
+    dt.getUTCDate() === d &&
+    y >= 2020 &&
+    y <= 2040
+  )
+}
+
+export function formatEventDate(ymd: string): string {
+  if (!DATE_RE.test(ymd)) return ymd
+  const [ys, ms, ds] = ymd.split('-')
+  const dt = new Date(Date.UTC(Number(ys), Number(ms) - 1, Number(ds)))
+  if (Number.isNaN(dt.getTime())) return ymd
+  return dt.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
+}
+
 export function validateInquiry(body: InquiryInput): ValidationResult {
   // Honeypot first — a bot's other fields are not worth validating.
   if (typeof body.website === 'string' && body.website.trim() !== '') {
     return { kind: 'bot' }
   }
 
-  const full_name = str(body.full_name, NAME_MAX)
-  if (!full_name) return { kind: 'invalid', error: 'Your name is required.' }
+  const full_name = str(body.name ?? body.full_name, NAME_MAX)
+  if (!full_name) return { kind: 'invalid', error: 'Name is required.' }
 
   const email = str(body.email, EMAIL_MAX).toLowerCase()
   if (!email || !EMAIL_RE.test(email)) {
     return { kind: 'invalid', error: 'A valid email address is required.' }
   }
 
-  // Length is checked before trimming to slice() so an over-long message is
-  // rejected rather than silently truncated — the sender should know.
-  if (typeof body.message === 'string' && body.message.trim().length > INQUIRY_MESSAGE_MAX) {
-    return {
-      kind: 'invalid',
-      error: `Message is too long — ${INQUIRY_MESSAGE_MAX} characters maximum.`,
-    }
+  const eventRaw = str(body.event_date, 10)
+  if (eventRaw && !isRealYmd(eventRaw)) {
+    return { kind: 'invalid', error: 'Date of event must be a real calendar date.' }
   }
-  const message = str(body.message, INQUIRY_MESSAGE_MAX)
-  if (!message) return { kind: 'invalid', error: 'Tell us a little about the event.' }
+
+  const sms = str(body.sms, SMS_MAX)
+  if (sms && !SMS_RE.test(sms)) {
+    return { kind: 'invalid', error: 'SMS must be a phone number.' }
+  }
 
   return {
     kind: 'ok',
     value: {
       full_name,
       email,
+      event_date: eventRaw || null,
+      sms: sms || null,
       company: str(body.company, FIELD_MAX) || null,
-      event_name: str(body.event_name, FIELD_MAX) || null,
-      event_timeframe: str(body.event_timeframe, FIELD_MAX) || null,
-      message,
     },
   }
 }
@@ -91,16 +127,41 @@ function isoDay(now: Date): string {
   return now.toISOString().slice(0, 10)
 }
 
+/**
+ * Filled inquiry fields in locked product order.
+ * Blank optionals are omitted so copy never trails "SMS:" or "Company:".
+ */
+export function inquiryFieldLines(inq: CleanInquiry): InquiryFieldLine[] {
+  const rows: InquiryFieldLine[] = [
+    { label: 'Name', value: inq.full_name },
+    { label: 'Email', value: inq.email },
+  ]
+  if (inq.event_date) {
+    rows.push({ label: 'Date of event', value: formatEventDate(inq.event_date) })
+  }
+  if (inq.sms) rows.push({ label: 'SMS', value: inq.sms })
+  if (inq.company) rows.push({ label: 'Company', value: inq.company })
+  return rows
+}
+
+export function inquiryFieldSummary(inq: CleanInquiry): string {
+  return inquiryFieldLines(inq)
+    .map(row => `${row.label}: ${row.value}`)
+    .join(' · ')
+}
+
+export function inquiryNotificationCopy(inq: CleanInquiry): { title: string; body: string } {
+  const summary = inquiryFieldSummary(inq)
+  return {
+    title: `Booking inquiry: ${summary}`,
+    body: summary,
+  }
+}
+
 /** A dated, human-readable block appended to the prospect's notes. */
 export function buildNotesBlock(inq: CleanInquiry, now: Date): string {
-  const meta = [
-    inq.event_name ? `Event: ${inq.event_name}` : null,
-    inq.event_timeframe ? `Timeframe: ${inq.event_timeframe}` : null,
-    inq.company ? `Company: ${inq.company}` : null,
-  ].filter(Boolean)
-
-  const header = `[${isoDay(now)}] Keynote inquiry`
-  return [meta.length ? `${header} — ${meta.join(' · ')}` : header, inq.message].join('\n')
+  const lines = [`[${isoDay(now)}] Booking inquiry`, inquiryFieldSummary(inq)]
+  return lines.join('\n')
 }
 
 /** Newest block first, so the latest inquiry is visible without scrolling. */
@@ -109,16 +170,13 @@ export function prependNotes(existing: string | null | undefined, block: string)
   return prev ? `${block}\n\n---\n\n${prev}` : block
 }
 
-/** Subject line / notification title: the most specific label we have. */
-export function inquiryLabel(inq: CleanInquiry): string {
-  return inq.event_name || inq.company || inq.full_name
-}
-
 // ── DB port ────────────────────────────────────────────────────────────────
 
 export interface ProspectRow {
   id: string
   notes: string | null
+  phone: string | null
+  company: string | null
 }
 
 export interface DbError {
@@ -166,6 +224,7 @@ export async function upsertKeynoteProspect(
   const { error: insertErr } = await db.insertProspect({
     full_name: inq.full_name,
     email: inq.email,
+    phone: inq.sms,
     company: inq.company,
     title: null,
     notes: block,
@@ -192,12 +251,16 @@ export async function upsertKeynoteProspect(
     return { kind: 'error', code: 'not_found_after_conflict' }
   }
 
-  const { error: updateErr } = await db.updateProspect(existing.id, {
+  const patch: Record<string, unknown> = {
     keynote_interest: true,
     notes: prependNotes(existing.notes, block),
     last_contacted_at: iso,
     updated_at: iso,
-  })
+  }
+  if (inq.sms) patch.phone = inq.sms
+  if (inq.company) patch.company = inq.company
+
+  const { error: updateErr } = await db.updateProspect(existing.id, patch)
   if (updateErr) return { kind: 'error', code: updateErr.code }
 
   return { kind: 'updated' }
@@ -206,6 +269,9 @@ export async function upsertKeynoteProspect(
 /**
  * Fan an in-app notification out to every admin. Best-effort: a notification
  * failure must not fail the inquiry, so this reports rather than throws.
+ *
+ * Title and body both carry the filled fields (Name, Email, Date of event,
+ * SMS, Company) so George sees them in the bell without opening the CRM.
  */
 export async function notifyAdmins(
   db: InquiryDb,
@@ -216,11 +282,12 @@ export async function notifyAdmins(
   const admins = data ?? []
   if (admins.length === 0) return { notified: 0 }
 
+  const copy = inquiryNotificationCopy(inq)
   const rows = admins.map(a => ({
     user_id: a.id,
     type: 'system_general',
-    title: `Keynote inquiry: ${inquiryLabel(inq)}`,
-    body: `${inq.full_name} asked about booking George to speak.`,
+    title: copy.title,
+    body: copy.body,
     action_url: '/admin/crm',
     is_read: false,
   }))

@@ -1724,6 +1724,7 @@ html.light-mode .ep-force-dark {
   --text-1: rgba(255, 255, 255, 0.92);
   --text-2: rgba(255, 255, 255, 0.78);
   --text-3: rgba(255, 255, 255, 0.62);
+  color-scheme: dark;
 }
 
 /* Public podcast episode pages hardcode a navy shell (#0A0F18). In light mode
