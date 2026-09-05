@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 import { RETURN_PATH_HEADER, loginHrefFor, returnPathFromRequest } from '@/lib/auth/gatedIntent'
+import { isPublicBrandAsset } from '@/lib/auth/publicAssets'
 
 const PUBLIC_ROUTES = [
   '/login',
@@ -11,6 +12,9 @@ const PUBLIC_ROUTES = [
   '/dev-login',
   '/api/dev-login',
   '/media',
+  // Public brand stills (Academy architecture, city fallback, conversion hero).
+  // Also absent from the matcher. Do not put these under /academy or /events.
+  '/brand',
   // Public SEO podcast section (index, episode pages, RSS) — must be reachable
   // by logged-out visitors and crawlers. Also removed from the matcher below.
   '/podcast',
@@ -66,6 +70,12 @@ export async function middleware(request: NextRequest) {
   const isRsc =
     request.headers.get('RSC') === '1' ||
     request.headers.get('Next-Router-Prefetch') === '1'
+
+  // Public /brand stills (svg/png/...). Matcher already omits /brand; this
+  // keeps them ungated if someone later adds /brand/:path* to the matcher.
+  if (isPublicBrandAsset(pathname)) {
+    return NextResponse.next()
+  }
 
   // Allow public routes through immediately
   if (PUBLIC_ROUTES.some(r => pathname.startsWith(r))) {
@@ -228,6 +238,8 @@ export const config = {
     '/home/:path*',
     '/community',
     '/community/:path*',
+    // Member-gated prefixes. Public stills must live under /brand, never
+    // /academy or /events, or anonymous GETs 307 to /login.
     '/events',
     '/events/:path*',
     '/academy',

@@ -119,6 +119,12 @@ describe('S4 auth wiring (source)', () => {
     expect(academyPage).toContain("loginHrefFor('/academy')")
   })
 
+  it('keeps /brand stills public and off the /academy and /events matchers', () => {
+    expect(middleware).toContain('isPublicBrandAsset')
+    expect(middleware).toContain("'/brand'")
+    expect(middleware).not.toMatch(/'\/brand\/:path\*'/)
+  })
+
   it('hides Forgot password on signup and shows reciprocal links', () => {
     expect(loginForm).toContain('LOGIN_NEW_HERE')
     expect(loginForm).toContain('SIGNUP_ALREADY_MEMBER')

@@ -37,6 +37,7 @@ describe('city stock resolver', () => {
   })
 
   it('uses the branded fallback when the city is unknown or blank', () => {
+    expect(EVENT_CITY_FALLBACK_IMAGE).toBe('/brand/city-fallback.svg')
     expect(resolveCityStock({ city: null })).toEqual({
       city: null,
       imageUrl: EVENT_CITY_FALLBACK_IMAGE,
@@ -46,6 +47,21 @@ describe('city stock resolver', () => {
     expect(resolveCityStock({ city: 'Boise' }).imageUrl).toBe(EVENT_CITY_FALLBACK_IMAGE)
     expect(resolveCityStock({ city: 'Boise' }).city).toBe('Boise')
     expect(resolveCityStock({ city: 'Boise' }).fallback).toBe(true)
+  })
+
+  it('rewrites the legacy /events fallback onto the public /brand path', () => {
+    const legacy = '/events/city-fallback.svg'
+    expect(isManagedEventImage(legacy)).toBe(true)
+    expect(eventCardImageUrl(legacy)).toBe(EVENT_CITY_FALLBACK_IMAGE)
+    expect(resolveCityStock({ city: null, imageUrl: legacy })).toEqual({
+      city: null,
+      imageUrl: EVENT_CITY_FALLBACK_IMAGE,
+      fallback: true,
+      source: 'fallback',
+    })
+    expect(resolveCityStock({ city: 'Boise', imageUrl: legacy }).imageUrl).toBe(
+      EVENT_CITY_FALLBACK_IMAGE,
+    )
   })
 
   it('keeps a custom cover and still stores the typed city', () => {
