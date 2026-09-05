@@ -115,8 +115,8 @@ INSERT INTO public.events (
 )
 SELECT
   'AI Masterminds for Senior Execs',
-  'Starts October 2, then every Friday at 2:00 PM America/Chicago (CST). Professional Tier only.',
-  'Every Friday at 2:00 PM America/Chicago. Professional Tier only.',
+  'Starts Oct 2, every Friday after at 2pm CST (America/Chicago). Professional Tier only.',
+  'Every Friday after at 2pm CST (America/Chicago). Professional Tier only.',
   'live',
   'live',
   ts,
@@ -140,8 +140,8 @@ WHERE NOT EXISTS (
 
 UPDATE public.events
 SET
-  description = 'Starts October 2, then every Friday at 2:00 PM America/Chicago (CST). Professional Tier only.',
-  tagline = 'Every Friday at 2:00 PM America/Chicago. Professional Tier only.'
+  description = 'Starts Oct 2, every Friday after at 2pm CST (America/Chicago). Professional Tier only.',
+  tagline = 'Every Friday after at 2pm CST (America/Chicago). Professional Tier only.'
 WHERE title = 'AI Masterminds for Senior Execs';
 
 -- CoS featured lock is the April 28 launch (EP-EVENTS-APR28-BOOK-OCT15).

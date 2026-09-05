@@ -4,6 +4,7 @@ import {
   BOOK_EVENT_TITLE,
   LAUNCH_EVENT_TITLE,
   MASTERMIND_EVENT_DETAIL,
+  MASTERMIND_EVENT_LINE,
   MASTERMIND_EVENT_TITLE,
   isConquerLocalTitle,
   pickNextBannerEvent,
@@ -21,11 +22,14 @@ describe('George-locked event copy', () => {
     expect(BOOK_EVENT_TITLE).toBe('EVOLVED book launches October 15')
     expect(MASTERMIND_EVENT_TITLE).toBe('AI Masterminds for Senior Execs')
     expect(MASTERMIND_EVENT_DETAIL).toBe(
-      'Starts October 2, then every Friday at 2:00 PM America/Chicago (CST). Professional Tier only.',
+      'Starts Oct 2, every Friday after at 2pm CST (America/Chicago). Professional Tier only.',
+    )
+    expect(MASTERMIND_EVENT_LINE).toBe(
+      'AI Masterminds for Senior Execs. Starts Oct 2, every Friday after at 2pm CST (America/Chicago). Professional Tier only.',
     )
     expect(isConquerLocalTitle(LAUNCH_EVENT_TITLE)).toBe(false)
     expect(isConquerLocalTitle('Conquer Local Podcast launches')).toBe(true)
-    for (const copy of [LAUNCH_EVENT_TITLE, BOOK_EVENT_TITLE, MASTERMIND_EVENT_TITLE, MASTERMIND_EVENT_DETAIL]) {
+    for (const copy of [LAUNCH_EVENT_TITLE, BOOK_EVENT_TITLE, MASTERMIND_EVENT_LINE]) {
       expect(assertNoEmDash(copy)).toBe(true)
     }
   })
@@ -37,7 +41,7 @@ const catalog = [
     starts_at: '2026-09-10T00:00:00.000Z',
   },
   {
-    title: 'GTM 2026 — Pavilion Annual Conference',
+    title: 'GTM 2026 Pavilion Annual Conference',
     starts_at: '2026-09-29T21:00:00.000Z',
   },
   {
