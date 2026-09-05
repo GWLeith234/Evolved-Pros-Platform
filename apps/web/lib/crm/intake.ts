@@ -56,7 +56,7 @@ const STAGE_RANK: Record<string, number> = {
 export interface IntakeProspectRow {
   id: string
   notes: string | null
-  tags: string[] | null
+  tags?: string[] | null
   phone?: string | null
   company?: string | null
   stage?: string | null

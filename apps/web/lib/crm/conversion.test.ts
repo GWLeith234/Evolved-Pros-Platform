@@ -113,6 +113,8 @@ describe('upsertPaidProspect', () => {
       })),
     })
     const out = await upsertPaidProspect(db, { ...PERSON, tier: 'vip' }, NOW)
+    expect(out.kind).toBe('updated')
+    if (out.kind !== 'updated') return
     expect(out.addedTags).toEqual(['paid'])
     const patch = vi.mocked(db.updateProspect).mock.calls[0][1]
     expect(patch.tags).toEqual(['join', 'paid'])

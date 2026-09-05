@@ -18,6 +18,7 @@ import {
   prependNotes as prependIntakeNotes,
   upsertIntakeProspect,
   type IntakeDb,
+  type IntakeProspectRow,
   type IntakeUpsertOutcome,
 } from '@/lib/crm/intake'
 
@@ -187,13 +188,7 @@ export function withLiveInquireTag(existing: unknown): string[] {
 
 // ── DB port ────────────────────────────────────────────────────────────────
 
-export interface ProspectRow {
-  id: string
-  notes: string | null
-  phone: string | null
-  company: string | null
-  tags?: string[] | null
-}
+export type ProspectRow = IntakeProspectRow
 
 export interface DbError {
   code?: string
