@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { notifyEventPublished } from '@/lib/notifications/fanout'
 
 export async function GET() {
   const auth = await requireAdminApi()
@@ -72,6 +73,13 @@ export async function POST(request: Request) {
   if (error || !data) {
     console.error('[POST /api/admin/events]', error)
     return NextResponse.json({ error: error?.message ?? 'Failed to create event' }, { status: 500 })
+  }
+  if (data.is_published) {
+    void notifyEventPublished({
+      eventId: data.id,
+      title: data.title,
+      eventType: data.event_type,
+    })
   }
   return NextResponse.json(data, { status: 201 })
 }

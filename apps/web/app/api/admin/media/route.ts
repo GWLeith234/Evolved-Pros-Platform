@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { adminClient } from '@/lib/supabase/admin'
 import type { TablesInsert } from '@evolved-pros/db'
+import { notifyMediaPublished } from '@/lib/notifications/fanout'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,5 +59,12 @@ export async function POST(request: Request) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (data.is_published) {
+    void notifyMediaPublished({
+      title: data.title,
+      slug: data.slug,
+      pillar: data.pillar,
+    })
+  }
   return NextResponse.json(data)
 }

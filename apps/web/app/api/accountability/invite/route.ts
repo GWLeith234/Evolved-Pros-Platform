@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { createNotification } from '@/lib/notifications/create'
 
 export async function POST(request: Request) {
   const supabase = createClient()
@@ -73,15 +74,15 @@ export async function POST(request: Request) {
     ?? user.email
     ?? 'A member'
 
-  await adminClient.from('notifications').insert({
-    user_id:    partner.id,
-    type:       'accountability_invite',
-    title:      'Accountability Partner Invite',
-    body:       `${inviterName} wants to be your accountability partner`,
-    action_url: '/academy/accountability',
-    is_read:    false,
-  }).then(({ error }) => {
-    if (error) console.warn('[POST /api/accountability/invite] notification error:', error)
+  // accountability_invite is not in the notifications.type CHECK — it never
+  // landed. Reuse the existing factory + system_general so the invite
+  // actually reaches the bell.
+  void createNotification({
+    userId:    partner.id,
+    type:      'system_general',
+    title:     'Accountability Partner Invite',
+    body:      `${inviterName} wants to be your accountability partner`,
+    actionUrl: '/academy/accountability',
   })
 
   return NextResponse.json({ pair, partner }, { status: 201 })

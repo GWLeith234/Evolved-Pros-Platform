@@ -2,6 +2,7 @@ import {
   Body, Button, Container, Head, Heading, Hr, Html, Preview, Section, Text,
 } from '@react-email/components'
 import React from 'react'
+import { notificationIntent } from '@/lib/notifications/intents'
 
 export interface DigestNotification {
   id: string
@@ -32,19 +33,29 @@ const TYPE_LABEL: Record<string, string> = {
   event_reminder:    'Events',
   course_unlock:     'Academy',
   system_billing:    'System',
+  system_general:    'System',
 }
 
 export function DigestEmail({ displayName, notifications, date }: DigestEmailProps) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://evolvedpros.up.railway.app'
   const firstName = displayName.split(' ')[0] ?? displayName
 
-  // Group notifications by category
+  // Group notifications by category — intent labels first so WIG / daily /
+  // content drops don't fall through as unlabeled system_general rows.
+  const wig      = notifications.filter(n => notificationIntent(n) === 'wig')
+  const progress = notifications.filter(n => notificationIntent(n) === 'progress')
+  const content  = notifications.filter(n => notificationIntent(n) === 'content')
   const community = notifications.filter(n => n.type === 'community_reply' || n.type === 'community_mention')
-  const events     = notifications.filter(n => n.type === 'event_reminder')
-  const academy    = notifications.filter(n => n.type === 'course_unlock')
-  const system     = notifications.filter(n => n.type === 'system_billing')
+  const events     = notifications.filter(n => n.type === 'event_reminder' && notificationIntent(n) !== 'content')
+  const academy    = notifications.filter(n => n.type === 'course_unlock' && notificationIntent(n) !== 'content')
+  const system     = notifications.filter(n =>
+    (n.type === 'system_billing' || n.type === 'system_general') && notificationIntent(n) === 'other',
+  )
 
   const sections = [
+    { label: 'WIG',       items: wig,      color: '#c9a84c' },
+    { label: 'Progress',  items: progress, color: '#68a2b9' },
+    { label: 'Content',   items: content,  color: '#ef0e30' },
     { label: 'Community', items: community, color: '#68a2b9' },
     { label: 'Events',    items: events,    color: '#c9a84c' },
     { label: 'Academy',   items: academy,   color: '#ef0e30' },
@@ -80,7 +91,10 @@ export function DigestEmail({ displayName, notifications, date }: DigestEmailPro
                       <Text style={notifTitleStyle}>{notif.title}</Text>
                       <Text style={notifBodyStyle}>{stripBold(notif.body)}</Text>
                       <Text style={notifMetaStyle}>
-                        {TYPE_LABEL[notif.type] ?? notif.type} · {formatDate(notif.createdAt)}
+                        {(notificationIntent(notif) === 'wig' ? 'WIG'
+                          : notificationIntent(notif) === 'progress' ? 'Progress'
+                          : notificationIntent(notif) === 'content' ? 'Content'
+                          : TYPE_LABEL[notif.type] ?? notif.type)} · {formatDate(notif.createdAt)}
                       </Text>
                     </Section>
                     {i < section.items.length - 1 && (

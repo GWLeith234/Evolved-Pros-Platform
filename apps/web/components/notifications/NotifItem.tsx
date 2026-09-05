@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import type { Database } from '@evolved-pros/db'
+import { INTENT_META, notificationIntent } from '@/lib/notifications/intents'
 
 type NotifType = Database['public']['Tables']['notifications']['Row']['type']
 
@@ -23,7 +24,7 @@ interface NotifItemProps {
 // Type metadata. `accent` is a theme-aware CSS variable so the eyebrow label,
 // unread dot, and left border all pass WCAG AA in both light and dark (the raw
 // brand hues fail on a white card — see the --notif-* tokens in globals.css).
-const TYPE_META: Record<NotifType, { label: string; accent: string }> = {
+const TYPE_META: Record<string, { label: string; accent: string }> = {
   community_reply:   { label: 'Community', accent: 'var(--notif-community)' },
   community_mention: { label: 'Community', accent: 'var(--notif-community)' },
   event_reminder:    { label: 'Event',     accent: 'var(--notif-event)' },
@@ -64,7 +65,13 @@ function RichBody({ text }: { text: string }) {
 
 export function NotifItem({ notification, onRead }: NotifItemProps) {
   const router = useRouter()
-  const meta = TYPE_META[notification.type]
+  const intent = notificationIntent({
+    type: notification.type,
+    title: notification.title,
+    actionUrl: notification.actionUrl,
+  })
+  const meta = (intent !== 'other' ? INTENT_META[intent] : TYPE_META[notification.type])
+    ?? TYPE_META.system_general
 
   async function handleClick() {
     if (!notification.isRead) {
@@ -100,7 +107,7 @@ export function NotifItem({ notification, onRead }: NotifItemProps) {
         className="w-9 h-9 rounded flex items-center justify-center flex-shrink-0 mt-0.5"
         style={{ backgroundColor: 'var(--btn-ghost-bg)' }}
       >
-        <TypeIcon type={notification.type} color={meta.accent} />
+        <TypeIcon type={notification.type} intent={intent} color={meta.accent} />
       </div>
 
       {/* Body */}
@@ -146,7 +153,28 @@ export function NotifItem({ notification, onRead }: NotifItemProps) {
   )
 }
 
-function TypeIcon({ type, color }: { type: NotifType; color: string }) {
+function TypeIcon({ type, intent, color }: { type: NotifType; intent: ReturnType<typeof notificationIntent>; color: string }) {
+  if (intent === 'wig') {
+    return (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" />
+      </svg>
+    )
+  }
+  if (intent === 'progress') {
+    return (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+      </svg>
+    )
+  }
+  if (intent === 'content') {
+    return (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M4 4.5A2.5 2.5 0 0 1 6.5 7H20v13H6.5A2.5 2.5 0 0 1 4 17.5z" />
+      </svg>
+    )
+  }
   if (type === 'community_reply' || type === 'community_mention') {
     return (
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

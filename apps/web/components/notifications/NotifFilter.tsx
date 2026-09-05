@@ -3,7 +3,7 @@
 import type { Database } from '@evolved-pros/db'
 
 type NotifType = Database['public']['Tables']['notifications']['Row']['type']
-type FilterValue = NotifType | 'all'
+export type FilterValue = NotifType | 'all' | 'wig' | 'progress' | 'content'
 
 interface FilterItem {
   value: FilterValue
@@ -19,6 +19,9 @@ interface NotifFilterProps {
 
 const FILTERS: { value: FilterValue; label: string }[] = [
   { value: 'all',               label: 'All Notifications' },
+  { value: 'wig',               label: 'WIG' },
+  { value: 'progress',          label: 'Progress' },
+  { value: 'content',           label: 'Content' },
   { value: 'community_reply',   label: 'Community' },
   { value: 'course_unlock',     label: 'Academy' },
   { value: 'event_reminder',    label: 'Events' },

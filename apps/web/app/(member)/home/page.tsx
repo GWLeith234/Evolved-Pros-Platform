@@ -36,6 +36,7 @@ import {
 import { adMatchesSurface } from '@/lib/ads/iab'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { formatRelative, formatDuration as formatMinutes, formatDate } from '@/lib/format'
+import { enqueueSessionNudges } from '@/lib/notifications/nudges'
 
 async function fetchUpcomingEvents(supabase: ReturnType<typeof createClient>, userId: string) {
   const [events, registrations] = await Promise.all([
@@ -720,6 +721,11 @@ export default async function MemberHomePage() {
       primary: true,
     },
   ]
+
+  // On-open: reuse Home's already-fetched session to enqueue WIG / evening
+  // daily nudges into the existing notifications table. Fire-and-forget so
+  // the RSC is not blocked on the insert.
+  void enqueueSessionNudges(profile.id)
 
   return (
     <div className="ep-page-gutter ep-surface-mobile ep-stack pb-6">

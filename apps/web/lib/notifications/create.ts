@@ -25,6 +25,38 @@ export async function createNotification(params: CreateNotificationParams) {
     })
 
   if (error) console.error('[createNotification]', error)
+  return !error
+}
+
+/**
+ * Same insert as createNotification, skipped when this user already has a
+ * row of the same type + action_url inside the window. The table has no
+ * unique key for this — we query first, matching how event-reminders
+ * later mark a URL-scoped batch read.
+ */
+export async function createNotificationIfFresh(
+  params: CreateNotificationParams & { sinceMs: number },
+): Promise<boolean> {
+  const since = new Date(Date.now() - params.sinceMs).toISOString()
+  let query = adminClient
+    .from('notifications')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', params.userId)
+    .eq('type', params.type)
+    .gte('created_at', since)
+
+  if (params.actionUrl) {
+    query = query.eq('action_url', params.actionUrl)
+  }
+
+  const { count, error: lookupErr } = await query
+  if (lookupErr) {
+    console.error('[createNotificationIfFresh] lookup', lookupErr)
+  } else if ((count ?? 0) > 0) {
+    return false
+  }
+
+  return createNotification(params)
 }
 
 // ── Convenience functions ──────────────────────────────────────────────
@@ -111,5 +143,39 @@ export async function notifyNewDm(params: {
     title:     'New direct message',
     body:      `**${params.senderName}** sent you a direct message`,
     actionUrl: `/messages?c=${params.conversationId}`,
+  })
+}
+
+export async function notifyWigNudge(params: {
+  userId: string
+  title: string
+  body: string
+  actionUrl: string
+  sinceMs: number
+}) {
+  return createNotificationIfFresh({
+    userId:    params.userId,
+    type:      'system_general',
+    title:     params.title,
+    body:      params.body,
+    actionUrl: params.actionUrl,
+    sinceMs:   params.sinceMs,
+  })
+}
+
+export async function notifyDailyProgress(params: {
+  userId: string
+  title: string
+  body: string
+  actionUrl: string
+  sinceMs: number
+}) {
+  return createNotificationIfFresh({
+    userId:    params.userId,
+    type:      'system_general',
+    title:     params.title,
+    body:      params.body,
+    actionUrl: params.actionUrl,
+    sinceMs:   params.sinceMs,
   })
 }

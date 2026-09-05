@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { asTranscriptSegments } from '@/lib/academy/transcript'
 import { asKeyTakeaways } from '@/lib/academy/takeaways'
+import { notifyLessonPublished } from '@/lib/notifications/fanout'
 
 export const dynamic = 'force-dynamic'
 
@@ -80,5 +81,8 @@ export async function POST(req: Request) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (data.is_published) {
+    void notifyLessonPublished(data.id)
+  }
   return NextResponse.json({ lesson: data }, { status: 201 })
 }

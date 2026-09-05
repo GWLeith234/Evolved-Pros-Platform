@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { adminClient } from '@/lib/supabase/admin'
+import { notifyMediaPublished } from '@/lib/notifications/fanout'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,6 +39,11 @@ export async function PATCH(
     body.published_at = new Date().toISOString()
   }
 
+  const publishing = body.is_published === true
+  const { data: current } = publishing
+    ? await adminClient.from('media_stories').select('is_published').eq('id', params.id).maybeSingle()
+    : { data: null }
+
   const { data, error } = await adminClient
     .from('media_stories')
     .update(body)
@@ -46,6 +52,13 @@ export async function PATCH(
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (publishing && current && !current.is_published && data.is_published) {
+    void notifyMediaPublished({
+      title: data.title,
+      slug: data.slug,
+      pillar: data.pillar,
+    })
+  }
   return NextResponse.json(data)
 }
 
