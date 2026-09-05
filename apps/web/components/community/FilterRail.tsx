@@ -1,9 +1,15 @@
 'use client'
 
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import {
+  PILLAR_NUMBERS,
+  PillarNumberBadge,
+  PillarNumberBadgeStyles,
+  type PillarNumber,
+} from './PillarNumberBadge'
 
 export type KindFilter = 'all' | 'update' | 'question' | 'win' | 'poll'
-export type Pillar = 1 | 2 | 3 | 4 | 5 | 6
+export type Pillar = PillarNumber
 export type SortBy = 'newest' | 'oldest' | 'most_reacted'
 
 // Reduced from 5 → 3 to remove the 1:1 label collision with the
@@ -14,19 +20,6 @@ const KIND_TABS: Array<{ id: KindFilter; label: string }> = [
   { id: 'win',      label: 'Wins' },
   { id: 'question', label: 'Questions' },
 ]
-
-const PILLARS: Pillar[] = [1, 2, 3, 4, 5, 6]
-
-// Mobile-only short labels under each pillar dot so users can tell pillars apart
-// without prior context. Hidden at sm+ to keep the desktop rail compact.
-const PILLAR_ABBREV: Record<Pillar, string> = {
-  1: 'FOUND.',
-  2: 'IDENT.',
-  3: 'MENTAL',
-  4: 'STRAT.',
-  5: 'ACCT.',
-  6: 'EXEC.',
-}
 
 const SORT_OPTIONS: Array<{ value: SortBy; label: string }> = [
   { value: 'newest',       label: 'Newest' },
@@ -93,26 +86,8 @@ export function FilterRail({
         }
         .filter-rail-scroll-row::-webkit-scrollbar { display: none; }
         .filter-rail-scroll-row > * { flex-shrink: 0; }
-        .pillar-cell {
-          display: inline-flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 2px;
-        }
-        .pillar-abbrev {
-          display: none;
-          font-family: "Barlow Condensed", sans-serif;
-          font-weight: 700;
-          font-size: 12px;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-          color: var(--text-tertiary);
-          line-height: 1;
-        }
-        @media (max-width: 639px) {
-          .pillar-abbrev { display: block; }
-        }
       `}</style>
+      <PillarNumberBadgeStyles />
 
       {/* LEFT — kind filter (small outlined pills, distinct from composer tabs) */}
       <div
@@ -185,50 +160,15 @@ export function FilterRail({
         >
           Pillar:
         </span>
-        {PILLARS.map(p => {
-          const color = PILLAR_CONFIG[p].color
-          const active = activePillars.includes(p)
-          return (
-            <button
-              key={p}
-              type="button"
-              onClick={() => togglePillar(p)}
-              aria-pressed={active}
-              aria-label={`Filter by ${PILLAR_CONFIG[p].label}`}
-              title={PILLAR_CONFIG[p].label}
-              className="pillar-cell"
-              style={{
-                minHeight: 44,
-                background: 'transparent',
-                border: 'none',
-                padding: 0,
-                cursor: 'pointer',
-              }}
-            >
-              <span
-                aria-hidden="true"
-                style={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: '50%',
-                  background: color,
-                  border: `2px solid ${active ? color : 'transparent'}`,
-                  opacity: active ? 1 : 0.4,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontFamily: '"Bebas Neue", sans-serif',
-                  fontSize: 12,
-                  color: '#0A0F18',
-                  transition: 'opacity 120ms ease, border-color 120ms ease',
-                }}
-              >
-                {p}
-              </span>
-              <span className="pillar-abbrev" aria-hidden="true">{PILLAR_ABBREV[p]}</span>
-            </button>
-          )
-        })}
+        {PILLAR_NUMBERS.map(p => (
+          <PillarNumberBadge
+            key={p}
+            n={p}
+            selected={activePillars.includes(p)}
+            onClick={() => togglePillar(p)}
+            ariaLabel={`Filter by ${PILLAR_CONFIG[p].label}`}
+          />
+        ))}
         {activePillars.length > 0 && (
           <button
             type="button"

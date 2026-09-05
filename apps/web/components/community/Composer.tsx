@@ -4,8 +4,14 @@ import { useEffect, useRef, useState } from 'react'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { MediaAttachControl } from './MediaAttachControl'
 import { canSubmitPost, type ComposerKind } from '@/lib/community/composer'
+import {
+  PILLAR_NUMBERS,
+  PillarNumberBadge,
+  PillarNumberBadgeStyles,
+  type PillarNumber,
+} from './PillarNumberBadge'
 
-type Pillar = 1 | 2 | 3 | 4 | 5 | 6
+type Pillar = PillarNumber
 
 interface ComposerProps {
   currentUser: {
@@ -52,19 +58,8 @@ const TABS: TabConfig[] = [
   },
 ]
 
-const PILLAR_LABELS: Record<Pillar, string> = {
-  1: 'Foundation',
-  2: 'Identity',
-  3: 'Mental',
-  4: 'Strategy',
-  5: 'Accountability',
-  6: 'Execution',
-}
-
-const PILLARS: Pillar[] = [1, 2, 3, 4, 5, 6]
-
 // AI returns canonical pillar slugs ('mental') — map to the composer's
-// numeric pillar identity so the chip auto-selects post-generation.
+// numeric pillar identity so the badge auto-selects post-generation.
 const PILLAR_SLUG_TO_NUMBER: Record<string, Pillar> = {
   foundation:     1,
   identity:       2,
@@ -523,7 +518,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
         }
       `}</style>
 
-      {/* Pillar tag row */}
+      {/* Pillar tag row — same numbered circles as the feed PILLAR filter */}
       <div
         style={{
           padding: '12px 20px',
@@ -534,6 +529,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
           flexWrap: 'wrap',
         }}
       >
+        <PillarNumberBadgeStyles />
         <span
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',
@@ -547,32 +543,16 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
           Tag Pillar
         </span>
 
-        {PILLARS.map(p => {
-          const color = PILLAR_CONFIG[p].color
-          const active = selectedPillar === p
-          return (
-            <button
-              key={p}
-              type="button"
-              onClick={() => setSelectedPillar(active ? null : p)}
-              style={{
-                padding: '4px 10px',
-                fontFamily: '"Barlow Condensed", sans-serif',
-                fontSize: 12,
-                fontWeight: 700,
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                background: active ? color : 'var(--composer-pillar-chip-bg)',
-                color: active ? 'var(--composer-pillar-chip-active-text)' : 'var(--composer-pillar-label)',
-                border: `1px solid ${active ? color : `${color}55`}`,
-                cursor: 'pointer',
-                transition: 'all 140ms ease',
-              }}
-            >
-              {PILLAR_LABELS[p]}
-            </button>
-          )
-        })}
+        {PILLAR_NUMBERS.map(p => (
+          <PillarNumberBadge
+            key={p}
+            n={p}
+            selected={selectedPillar === p}
+            onClick={() => setSelectedPillar(selectedPillar === p ? null : p)}
+            ariaLabel={`Tag ${PILLAR_CONFIG[p].label}`}
+            abbrev="always"
+          />
+        ))}
 
         <button
           type="button"
