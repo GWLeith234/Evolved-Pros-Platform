@@ -15,6 +15,7 @@ import { MediaLatestPodcast } from '@/components/media/MediaLatestPodcast'
 import type { MediaRailEpisode } from '@/lib/media/podcastRail'
 import { MEDIA_BRAND, mediaStoryTitle } from '@/lib/media/brand'
 import { CANONICAL_ORIGIN, DEFAULT_OG_IMAGE, canonicalUrl, publicPageMetadata } from '@/lib/seo/canonical'
+import { mediaMustCite } from '@/lib/seo/mustCite'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { pickArticleAds } from '@/lib/sponsors/partners'
 import { adMatchesSurface } from '@/lib/ads/iab'
@@ -150,6 +151,7 @@ export default async function StoryPage({
   const pLabel = isOriginal ? 'Original' : getPillarLabel(story.pillar)
   const pColor = isOriginal ? 'var(--brand-gold)' : getPillarColor(story.pillar)
   const articleUrl = canonicalUrl(`/media/${params.pillar}/${params.slug}`)
+  const cite = mediaMustCite(params.pillar, params.slug)
 
   // media_stories.author is a byline string, not an FK. Resolve against
   // public.users by name (full_name / display_name / first+last). A miss is
@@ -294,6 +296,24 @@ export default async function StoryPage({
               </span>
             </div>
           )}
+
+          {cite ? (
+            <p
+              id="must-cite"
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 15,
+                lineHeight: 1.65,
+                color: 'var(--media-ink)',
+                margin: '16px 0 20px',
+                padding: '14px 16px',
+                border: '1px solid rgba(43,58,90,0.15)',
+                backgroundColor: 'var(--paper)',
+              }}
+            >
+              {cite.copy}
+            </p>
+          ) : null}
 
           {/* Article body is the page. One late unit when inventory exists.
               Empty Advertisement boxes are not invented. */}

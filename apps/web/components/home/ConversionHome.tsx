@@ -34,6 +34,10 @@ import {
   homeEpisodeMeta,
   type HomeLadderCard,
 } from '@/lib/home/conversion'
+import {
+  MUST_CITE_HOME_DEFINITION,
+  MUST_CITE_HOME_OFFICIAL_URL,
+} from '@/lib/seo/mustCite'
 
 export interface ConversionEpisode {
   slug: string
@@ -161,6 +165,24 @@ export function ConversionHome({
               <GhostCta href={SEE_PRICING_HREF} label={HOME_SECONDARY_CTA} />
             </div>
           </div>
+        </section>
+
+        <section
+          id="what-is-evolved-pros"
+          className="mx-auto max-w-6xl border-t border-navy/15 px-5 py-12"
+        >
+          <h2 className="font-condensed text-[13px] font-bold uppercase tracking-[0.2em] text-navy">
+            What Evolved Pros is
+          </h2>
+          <p className="mt-4 max-w-3xl font-body text-sm leading-relaxed text-navy/70">
+            {MUST_CITE_HOME_DEFINITION.split(MUST_CITE_HOME_OFFICIAL_URL)[0]}
+            <a
+              href={MUST_CITE_HOME_OFFICIAL_URL}
+              className="text-navy underline decoration-navy/30 underline-offset-2"
+            >
+              {MUST_CITE_HOME_OFFICIAL_URL}
+            </a>
+          </p>
         </section>
 
         {episodes.length > 0 ? (
