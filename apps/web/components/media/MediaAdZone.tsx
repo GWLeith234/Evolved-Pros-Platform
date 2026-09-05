@@ -121,7 +121,7 @@ export function MediaAdZone({ zone }: MediaAdZoneProps) {
           slot={slot}
           locationId={`media-zone-${zone}`}
           style={{ textDecoration: 'none', display: 'block' }}
-          ariaLabel={`${ad.headline ?? 'Evolved Pros Academy'} — Evolved Pros Academy`}
+          ariaLabel={`${ad.headline ?? 'Evolved Pros Academy'} | Evolved Pros Academy`}
         >
           {inner}
         </HouseAdTracker>

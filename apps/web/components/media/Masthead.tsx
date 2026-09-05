@@ -1,7 +1,9 @@
-// Editorial masthead for /media — live chrome only.
+// Editorial masthead for /media. Live chrome only.
 // Section-hash nav, issue counter, and Search control are gone.
 
 import Link from 'next/link'
+import { MEDIA_DESK_TAGLINE } from '@/lib/media/brand'
+import { MEDIA_NAVY, MEDIA_RED } from '@/lib/media/desk'
 
 const NETWORK_LINKS: ReadonlyArray<{ label: string; href: string }> = [
   { label: 'Community', href: '/community' },
@@ -44,7 +46,7 @@ export function Masthead() {
           <span aria-hidden="true" className="hidden sm:inline" style={{ color: '#C9A84C' }}>·</span>
           <Link
             href="/home"
-            style={{ color: '#112535', textDecoration: 'none' }}
+            style={{ color: MEDIA_NAVY, textDecoration: 'none' }}
           >
             Back to platform
           </Link>
@@ -52,7 +54,7 @@ export function Masthead() {
           <Link
             href="/pricing"
             className="hidden sm:inline"
-            style={{ color: '#112535', textDecoration: 'none' }}
+            style={{ color: MEDIA_NAVY, textDecoration: 'none' }}
           >
             Join Evolved Pros
           </Link>
@@ -74,7 +76,7 @@ export function Masthead() {
             <a
               key={link.href}
               href={link.href}
-              style={{ color: '#112535', textDecoration: 'none', flexShrink: 0 }}
+              style={{ color: MEDIA_NAVY, textDecoration: 'none', flexShrink: 0 }}
             >
               {link.label}
             </a>
@@ -107,24 +109,25 @@ export function Masthead() {
             fontSize: 'clamp(40px, 9vw, 108px)',
             lineHeight: 0.95,
             letterSpacing: '0.005em',
-            color: '#112535',
+            color: MEDIA_NAVY,
           }}
         >
           <Link href="/media" style={{ color: 'inherit', textDecoration: 'none' }}>
             <span
               data-masthead-evolved
               style={{
-                color: '#C9302A',
+                color: MEDIA_RED,
                 fontFamily: '"Playfair Display", Georgia, serif',
                 fontWeight: 900,
               }}
             >
               Evolved
             </span>{' '}
-            <span data-masthead-media style={{ color: '#112535' }}>Pros Media</span>
+            <span data-masthead-media style={{ color: MEDIA_NAVY }}>Pros Media</span>
           </Link>
         </h1>
         <p
+          data-media-desk-tagline
           style={{
             margin: '10px 0 0',
             fontFamily: '"Playfair Display", Georgia, serif',
@@ -133,7 +136,7 @@ export function Masthead() {
             color: '#6B7280',
           }}
         >
-          Promoting evolution. The topics George is actively researching, learning, and teaching.
+          {MEDIA_DESK_TAGLINE}
         </p>
       </div>
 

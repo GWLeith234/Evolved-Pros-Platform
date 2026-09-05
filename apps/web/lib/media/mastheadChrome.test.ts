@@ -20,13 +20,14 @@ describe('Media masthead chrome', () => {
   it('names the H1 Evolved Pros Media', () => {
     expect(src).toMatch(/data-masthead-evolved[\s\S]*Evolved/)
     expect(src).toMatch(/data-masthead-media[\s\S]*Pros Media/)
-    expect(src).toMatch(/Promoting evolution\. The topics George/)
+    expect(src).toMatch(/MEDIA_DESK_TAGLINE/)
+    expect(src).not.toMatch(/Promoting evolution/)
     expect(src).not.toMatch(/Promoting evolution &mdash;/)
   })
 
   it('keeps the red / navy split and thickens Evolved by weight, not size', () => {
-    expect(src).toMatch(/data-masthead-evolved[\s\S]*color: '#C9302A'[\s\S]*fontWeight: 900/)
-    expect(src).toMatch(/data-masthead-media[\s\S]*color: '#112535'/)
+    expect(src).toMatch(/data-masthead-evolved[\s\S]*color: MEDIA_RED[\s\S]*fontWeight: 900/)
+    expect(src).toMatch(/data-masthead-media[\s\S]*color: MEDIA_NAVY/)
     expect(src).toMatch(/fontSize: 'clamp\(40px, 9vw, 108px\)'/)
     const evolved = src.slice(src.indexOf('data-masthead-evolved'), src.indexOf('data-masthead-media'))
     expect(evolved).toMatch(/fontWeight: 900/)

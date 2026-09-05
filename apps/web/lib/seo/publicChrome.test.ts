@@ -42,6 +42,16 @@ describe('public chrome copy', () => {
     expect(src).not.toMatch(/Evolved Media/)
   })
 
+  it('ships a denser Media desk: named sections, list module, useful rail, title clamp', () => {
+    const src = read('../../app/(public)/media/MediaPortalClient.tsx')
+    expect(src).toMatch(/data-media-module="latest-list"/)
+    expect(src).toMatch(/data-media-section/)
+    expect(src).toMatch(/On Air/)
+    expect(src).toMatch(/Popular/)
+    expect(src).toMatch(/moreInLabel/)
+    expect(src).toMatch(/WebkitLineClamp: 2|WebkitLineClamp: lines/)
+  })
+
   it('emits home WebSite JSON-LD', () => {
     const src = read('../../app/(public)/page.tsx')
     expect(src).toMatch(/homeJsonLd/)

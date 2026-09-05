@@ -317,16 +317,16 @@ describe('first-party adjacency + media magazine feed', () => {
     }
   })
 
-  it('article layout fills the story column with centered 300×250 units', () => {
+  it('article layout keeps a single late 300×250 unit, not a mid-piece stack', () => {
     const article = pickArticleAds(catalog)
     expect(article.sidebar).toBeTruthy()
-    expect(article.inBody.length).toBeGreaterThanOrEqual(2)
+    expect(article.inBody.length).toBeGreaterThanOrEqual(1)
     expect(article.inBody.length).toBeLessThanOrEqual(ARTICLE_IN_BODY_MAX)
+    expect(ARTICLE_IN_BODY_MAX).toBe(1)
     expect(article.inBody.every(a => a.zone === 'A')).toBe(true)
     if (article.sidebar && article.inBody[0]) {
       expect(advertiserFamilyKey(article.inBody[0])).not.toBe(advertiserFamilyKey(article.sidebar))
     }
-    expect(adsConflictAdjacent(article.inBody[0], article.inBody[1])).toBe(false)
     for (const ad of article.inBody) {
       expect(advertiserFamilyKey(ad)).not.toBe(advertiserFamilyKey(article.sidebar!))
     }

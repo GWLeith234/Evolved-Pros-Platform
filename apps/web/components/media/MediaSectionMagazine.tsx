@@ -2,6 +2,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { MediaCenteredAd } from '@/components/media/MediaIabSlot'
 import { MEDIA_BRAND } from '@/lib/media/brand'
+import { MEDIA_NAVY } from '@/lib/media/desk'
+import { getPillarLabel } from '@/lib/pillars'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { layoutMediaFeed } from '@/lib/media/feedAds'
 import { pickMediaFeedAds } from '@/lib/sponsors/partners'
@@ -61,7 +63,7 @@ export async function MediaSectionMagazine({
         <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 10, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>
           {MEDIA_BRAND}
         </p>
-        <h1 style={{ fontFamily: 'var(--font-abril, var(--font-condensed))', fontWeight: 400, fontSize: 36, color: '#2B3A5A', lineHeight: 1.1, margin: 0 }}>
+        <h1 style={{ fontFamily: 'var(--font-abril, var(--font-condensed))', fontWeight: 400, fontSize: 36, color: MEDIA_NAVY, lineHeight: 1.1, margin: 0 }}>
           {title}
         </h1>
         {subtitle ? (
@@ -80,7 +82,7 @@ export async function MediaSectionMagazine({
               <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1a2540)' }} />
             )}
             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '40px 20px 16px', background: 'linear-gradient(transparent, rgba(0,0,0,0.7))' }}>
-              <h2 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 24, color: '#fff', lineHeight: 1.15, margin: '0 0 6px', maxWidth: 600 }}>{featured.title}</h2>
+              <h2 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 24, color: '#fff', lineHeight: 1.15, margin: '0 0 6px', maxWidth: 600, display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden' }}>{featured.title}</h2>
               <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', fontFamily: 'var(--font-body)' }}>
                 {featured.author ?? 'George Leith'} · {fmtDate(featured.published_at)} · {readTime(featured.body)} read
               </span>
@@ -124,7 +126,10 @@ export async function MediaSectionMagazine({
                       )}
                     </div>
                     <div style={{ padding: '10px 12px 12px' }}>
-                      <h3 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 15, color: '#2B3A5A', lineHeight: 1.3, margin: '0 0 4px' }}>{a.title}</h3>
+                      <p style={{ fontSize: 9, textTransform: 'uppercase', fontWeight: 700, fontFamily: 'var(--font-condensed)', color: MEDIA_NAVY, letterSpacing: '0.08em', margin: '0 0 4px' }}>
+                        {getPillarLabel(a.pillar) || 'Original'}
+                      </p>
+                      <h3 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 15, color: MEDIA_NAVY, lineHeight: 1.3, margin: '0 0 4px', display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden' }}>{a.title}</h3>
                       {a.excerpt && (
                         <p style={{ fontSize: 11, color: 'rgba(43,58,90,0.55)', lineHeight: 1.5, margin: '0 0 6px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                           {a.excerpt}

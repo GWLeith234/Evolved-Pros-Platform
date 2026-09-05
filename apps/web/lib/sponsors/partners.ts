@@ -23,8 +23,8 @@ export const FOOTER_IAB_MAX = PAGE_IAB_MAX
 export const IN_FEED_IAB_MAX = 8
 /** Media magazine: one unit per row, then denser deeper. Recycle with a gap. */
 export const MEDIA_IN_FEED_MAX = 16
-/** Story column: 300×250 units through the piece, more as it gets longer. */
-export const ARTICLE_IN_BODY_MAX = 6
+/** Story column: one late unit. Prefer end-of-article over a mid-piece stack. */
+export const ARTICLE_IN_BODY_MAX = 1
 /** Six Academy pillar threads — enough units for an ad every three cards, then every two. */
 export const ACADEMY_THREAD_IAB_MAX = 16
 /** Podcast archive + episode: 300×600 boxes through the list, recycled with a gap. */
