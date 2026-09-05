@@ -2098,6 +2098,137 @@ a.ep-text-link:focus-visible {
   color: var(--brand-navy);
 }
 
+/* Media platform wordmark: EP lockup + section label. Theme-aware chrome
+   (same tokens / 16-24-32-40 rhythm as TopNav + footer). Desk body stays
+   paper so #108 navy-on-cream cards remain readable. */
+.ep-media-masthead {
+  background: var(--bg-nav);
+  border-bottom: 1px solid var(--border-color);
+  max-width: 100%;
+  overflow-x: clip;
+}
+.ep-media-masthead-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-4) 0;
+}
+@media (min-width: 640px) {
+  .ep-media-masthead-inner {
+    padding-left: var(--space-6);
+    padding-right: var(--space-6);
+  }
+}
+.ep-media-masthead-utility {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.ep-media-masthead-back,
+.ep-media-masthead-join {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-size: var(--type-eyebrow-size);
+  font-weight: 600;
+  letter-spacing: var(--type-eyebrow-track);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  text-decoration: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.ep-media-masthead-join {
+  display: none;
+}
+@media (min-width: 640px) {
+  .ep-media-masthead-join {
+    display: inline-flex;
+  }
+}
+.ep-media-masthead-back:hover,
+.ep-media-masthead-back:focus-visible,
+.ep-media-masthead-join:hover,
+.ep-media-masthead-join:focus-visible {
+  color: var(--text-primary);
+}
+.ep-media-masthead-wordmark {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+.ep-media-masthead-wordmark a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+  max-width: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+.ep-media-masthead-logo {
+  height: 28px;
+  width: auto;
+  max-width: min(180px, 58vw);
+  object-fit: contain;
+  flex-shrink: 1;
+}
+@media (min-width: 640px) {
+  .ep-media-masthead-logo {
+    height: 36px;
+    max-width: 220px;
+  }
+}
+.ep-media-masthead-logo--on-dark { display: block; }
+.ep-media-masthead-logo--on-light { display: none; }
+html.light-mode .ep-media-masthead-logo--on-dark { display: none; }
+html.light-mode .ep-media-masthead-logo--on-light { display: block; }
+.ep-media-masthead-section {
+  font-family: var(--font-bebas), "Bebas Neue", sans-serif;
+  font-size: clamp(1.75rem, 7vw, 2.25rem);
+  font-weight: 400;
+  letter-spacing: var(--type-nav-track);
+  text-transform: uppercase;
+  color: var(--text-primary);
+  line-height: 1;
+  border-left: 2px solid var(--brand-red-hot);
+  padding-left: var(--space-4);
+  flex-shrink: 0;
+}
+.ep-media-masthead-rail {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  margin-top: var(--space-6);
+  padding-bottom: var(--space-4);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.ep-media-masthead-rail::-webkit-scrollbar { display: none; }
+.ep-media-masthead-rail a {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-decoration: none;
+  flex-shrink: 0;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.ep-media-masthead-rail a:hover,
+.ep-media-masthead-rail a:focus-visible,
+.ep-media-masthead-rail a[aria-current="page"] {
+  color: var(--text-primary);
+}
+.media-desk-shell {
+  background: var(--paper);
+  color: var(--navy);
+}
+
 /* Footer brand lockup: white wordmark on dark, navy wordmark on light.
    Force-dark shells (/login, /live) keep the white mark even when html is
    light-mode, matching the token re-declare on .ep-force-dark / .live-force-dark.
