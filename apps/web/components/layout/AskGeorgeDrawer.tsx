@@ -2,18 +2,16 @@
 
 import { useEffect, useState } from 'react'
 import Script from 'next/script'
+import {
+  AI_GEORGE_WEBCHAT_CONTAINER_ID,
+  AI_GEORGE_WEBCHAT_SDK_SRC,
+  AI_GEORGE_WEBCHAT_WIDGET_ID,
+} from '@/lib/crm/aiGeorgeWidget'
 
 interface AskGeorgeDrawerProps {
   isOpen: boolean
   onClose: () => void
 }
-
-// Third-party apigateway webchat SDK (George's embedded assistant). The SDK is
-// served from cdn.apigateway.co (already CSP-allowed) and renders the widget
-// into the element whose id matches data-embed-target.
-const WEBCHAT_SDK_SRC = 'https://cdn.apigateway.co/webchat-client..prod/sdk.js'
-const WEBCHAT_WIDGET_ID = '96dd7dbb-2a14-11f1-93eb-72103b668f62'
-const WEBCHAT_CONTAINER_ID = 'ask-george-webchat'
 
 export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
   // Lazy-mount the SDK + container on first open so the third-party webchat
@@ -150,7 +148,7 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
           style={{ backgroundColor: 'var(--bg-page)' }}
         >
           {hasOpened && (
-            <div id={WEBCHAT_CONTAINER_ID} style={{ height: '100%', width: '100%' }} />
+            <div id={AI_GEORGE_WEBCHAT_CONTAINER_ID} style={{ height: '100%', width: '100%' }} />
           )}
         </div>
       </div>
@@ -160,11 +158,11 @@ export function AskGeorgeDrawer({ isOpen, onClose }: AskGeorgeDrawerProps) {
           them to render the widget into #ask-george-webchat. */}
       {hasOpened && (
         <Script
-          src={WEBCHAT_SDK_SRC}
+          src={AI_GEORGE_WEBCHAT_SDK_SRC}
           strategy="afterInteractive"
-          data-widget-id={WEBCHAT_WIDGET_ID}
+          data-widget-id={AI_GEORGE_WEBCHAT_WIDGET_ID}
           data-embed-mode="embedded"
-          data-embed-target={WEBCHAT_CONTAINER_ID}
+          data-embed-target={AI_GEORGE_WEBCHAT_CONTAINER_ID}
         />
       )}
     </>

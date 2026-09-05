@@ -6,6 +6,9 @@
  * tag `AI George`, then the same admin notifications insert Inquire uses
  * (`system_general` / createNotification path).
  *
+ * Widget surface (not this route): member TopNav Ask George drawer at
+ * /home?ask=george on platform.evolvedpros.com. No /ask-george page.
+ *
  * PII: nothing in this file logs a name, an email, a phone or message content.
  */
 

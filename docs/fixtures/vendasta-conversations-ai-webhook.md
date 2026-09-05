@@ -27,6 +27,16 @@ to these flat keys in the Automations UI.
 
 PII in the example JSON is fake (`alex@example.com`, `+1 555 0100`).
 
+## Widget surface
+
+Leads are expected from the Evolved Pros **Ask George** drawer (Conversations
+AI webchat), not a dedicated path:
+
+`https://platform.evolvedpros.com/home?ask=george`
+
+Anonymous public chrome does not mount the widget. Ingress remains
+`POST /api/webhooks/vendasta-conversations`.
+
 ## SMS-only rows
 
 A payload with phone and no email is accepted. `crm_prospects.email` is
