@@ -2,61 +2,39 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
-import { CommitmentTracker } from '@/components/academy/CommitmentTracker'
-import { HomeContextStrip } from '@/components/home/HomeContextStrip'
-import { countUserPosts } from '@/lib/community/postCount'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
-import { getGreetingQuotes, getActivePlatformAds } from '@/lib/cache/shared'
-
-export const metadata: Metadata = { title: 'Home — Evolved Pros' }
-import { WelcomeBanner } from '@/components/home/WelcomeBanner'
-import { TodaysEvolution, type TodaysEvolutionAction } from '@/components/home/TodaysEvolution'
+import { getActivePlatformAds } from '@/lib/cache/shared'
+import { PublicFooter } from '@/components/layout/PublicFooter'
 import { ProfileCompletePrompt } from '@/components/home/ProfileCompletePrompt'
-import { InProgressPillarHero } from '@/components/home/InProgressPillarHero'
-import { ClimbingTowardCard } from '@/components/home/ClimbingTowardCard'
-import { GoalCard, type GoalForCard } from '@/components/home/GoalCard'
-import { AccountabilityHub } from '@/components/home/AccountabilityHub'
-import { CommunityPulseTile, type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
-import { TopStoriesTile, type PulseStory } from '@/components/home/tiles/TopStoriesTile'
-import { type PulseEpisode } from '@/components/home/tiles/PodcastReelTile'
-import {
-  HomeContentAdGrid,
-  HomeEditorialCard,
-  HomeEndBox,
-} from '@/components/home/HomeContentAdGrid'
+import { type GoalForCard } from '@/components/home/GoalCard'
+import { HomeBannerBand, type HomeWinChip } from '@/components/home/HomeBannerBand'
+import { HomeAccountabilityBand } from '@/components/home/HomeAccountabilityBand'
+import { HomeFuelBand, academyFuelFromProgress } from '@/components/home/HomeFuelBand'
+import { HomeEpisodeCard } from '@/components/home/HomeEpisodeCard'
+import { type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
+import { HomeContentAdGrid } from '@/components/home/HomeContentAdGrid'
 import { type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/DailyPulseCard'
+import { type SponsorAd } from '@/components/home/HomeSponsorAd'
 import {
-  HomeSponsorAd,
-  type SponsorAd,
-} from '@/components/home/HomeSponsorAd'
-import {
+  isAcademyAd,
   pickHomePageAds,
   type HomePageAds,
 } from '@/lib/sponsors/partners'
 import { adMatchesSurface } from '@/lib/ads/iab'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
-import { formatRelative, formatDuration as formatMinutes, formatDate } from '@/lib/format'
+import { formatRelative, formatDate } from '@/lib/format'
+import { parseYouTubeId } from '@/lib/podcast/public'
+import {
+  computeCheckInStreak,
+  homeEpisodeStill,
+  isEventHappeningNow,
+  isVisibleWin,
+  pickFuelLiveEvent,
+} from '@/lib/home/bands'
+
 import { enqueueSessionNudges } from '@/lib/notifications/nudges'
 
-async function fetchUpcomingEvents(supabase: ReturnType<typeof createClient>, userId: string) {
-  const [events, registrations] = await Promise.all([
-    supabase
-      .from('events')
-      .select('id, title, description, event_type, starts_at, ends_at, required_tier')
-      .eq('is_published', true)
-      .gt('starts_at', new Date().toISOString())
-      .order('starts_at', { ascending: true })
-      .limit(2),
-    // SPRINT B — event RSVPs live in event_rsvps (event_registrations is the
-    // legacy table, left in place for the Admin lane's migration queue).
-    supabase
-      .from('event_rsvps')
-      .select('event_id')
-      .eq('user_id', userId),
-  ])
-  const registeredIds = new Set((registrations.data ?? []).map(r => r.event_id))
-  return (events.data ?? []).map(e => ({ ...e, isRegistered: registeredIds.has(e.id) }))
-}
+export const metadata: Metadata = { title: 'Home - Evolved Pros' }
 
 async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, userId: string) {
   const [courses, lessonsResult, progress] = await Promise.all([
@@ -69,7 +47,7 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
     // 'locked' and the dots stayed grey. is_published=true keeps this count
     // aligned with the academy detail page (which also filters) — without it
     // home reported 4 for Foundation while the detail page showed 3.
-    adminClient.from('lessons').select('id, course_id, title, slug, sort_order').eq('is_published', true),
+    adminClient.from('lessons').select('id, course_id, title, slug, sort_order, duration_seconds').eq('is_published', true),
     // adminClient: lesson_progress.user_id = public.users.id, but the RLS
     // policy gates on auth.uid(). Reading via the SSR client returns []
     // for accounts where auth.uid() ≠ public.users.id, which is what was
@@ -93,15 +71,15 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
     )
     const fallback = await supabase
       .from('lessons')
-      .select('id, course_id, title, slug, sort_order')
+      .select('id, course_id, title, slug, sort_order, duration_seconds')
       .eq('is_published', true)
     lessonRows = fallback.data ?? []
   }
   const lessons = { data: lessonRows }
 
   // Lessons grouped by course, sorted so we can pick the first uncompleted.
-  const lessonsByCourse: Record<string, { id: string; title: string | null; slug: string | null; sort_order: number | null }[]> = {}
-  for (const l of (lessons.data ?? []) as { id: string; course_id: string; title: string | null; slug: string | null; sort_order: number | null }[]) {
+  const lessonsByCourse: Record<string, { id: string; title: string | null; slug: string | null; sort_order: number | null; duration_seconds: number | null }[]> = {}
+  for (const l of (lessons.data ?? []) as { id: string; course_id: string; title: string | null; slug: string | null; sort_order: number | null; duration_seconds: number | null }[]) {
     if (!lessonsByCourse[l.course_id]) lessonsByCourse[l.course_id] = []
     lessonsByCourse[l.course_id].push(l)
   }
@@ -146,34 +124,46 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
       lastCompletedAt,
       nextLessonTitle: nextLesson?.title ?? null,
       nextLessonSlug:  nextLesson?.slug  ?? null,
+      nextLessonDurationSeconds: nextLesson?.duration_seconds ?? null,
     }
   })
 }
 
-// Scoreboard counts — all keyed on public.users.id (profile.id, resolved by
-// email in fetchCurrentUser) and read via adminClient, because every one of
-// these tables now FKs public.users(id) while RLS still gates on auth.uid().
-// The Posts cell previously counted unread notifications (wrong table) and
-// Podcast/Stories were hardcoded 0 — a member with 38 posts saw "Posts 0".
-async function fetchScoreboardCounts(userId: string) {
-  const [postCount, episodes, storyComments] = await Promise.all([
-    // Post count goes through the shared countUserPosts helper — the exact rule
-    // the Profile uses (excludes `rejected`), so Home's inline count and the
-    // Profile count land on the same number for a given user.
-    countUserPosts(adminClient, userId),
-    adminClient
-      .from('user_episode_progress')
-      .select('episode_id', { count: 'exact', head: true })
-      .eq('user_id', userId),
-    adminClient
-      .from('story_comments')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', userId),
-  ])
-  return {
-    postCount,
-    podcastCount: episodes.count ?? 0,
-    storyCount: storyComments.count ?? 0,
+async function fetchWeeklyWins(userId: string): Promise<HomeWinChip[]> {
+  const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString()
+  try {
+    // Query wins directly so a busy week of updates cannot hide them.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: rows } = await (adminClient as any)
+      .from('posts')
+      .select('id, body, kind, post_type, status, created_at, channels(slug)')
+      .eq('author_id', userId)
+      .or('kind.eq.win,post_type.eq.win')
+      .gte('created_at', weekAgo)
+      .order('created_at', { ascending: false })
+      .limit(8) as { data: Array<{
+        id: string
+        body: string | null
+        kind: string | null
+        post_type: string | null
+        status: string | null
+        created_at: string
+        channels: { slug: string | null } | null
+      }> | null }
+
+    return (rows ?? [])
+      .filter(isVisibleWin)
+      .slice(0, 3)
+      .map(r => ({
+        id: r.id,
+        label: (r.body ?? '').replace(/\s+/g, ' ').trim() || 'Win logged',
+        href: r.channels?.slug
+          ? `/community/${r.channels.slug}?post=${r.id}`
+          : '/community',
+      }))
+  } catch (err) {
+    console.error('[home.fetchWeeklyWins] failed:', err instanceof Error ? err.message : err)
+    return []
   }
 }
 
@@ -237,31 +227,8 @@ function pillarColorFromTag(tag: string | null): string | null {
   return null
 }
 
-function readTimeForBody(body: string | null): string {
-  const words = body ? body.trim().split(/\s+/).length : 0
-  const minutes = Math.max(1, Math.ceil(words / 220))
-  // Read time is always ≥1 min, so formatMinutes never returns null here.
-  return formatMinutes(minutes) ?? ''
-}
-
-// Episode duration: seconds → "N min", or null so the tile hides the slot
-// (never a bare "—").
-function episodeDurationLabel(seconds: number | null): string | null {
-  if (!seconds || seconds <= 0) return null
-  return formatMinutes(Math.round(seconds / 60))
-}
-
-const TILE_PILLAR_ROTATION = [
-  PILLAR_CONFIG[4].color, // strategy blue
-  PILLAR_CONFIG[2].color, // identity violet
-  PILLAR_CONFIG[6].color, // execution teal
-  PILLAR_CONFIG[5].color, // accountability gold
-  PILLAR_CONFIG[1].color, // foundation orange
-  PILLAR_CONFIG[3].color, // mental toughness red
-]
-
-// HOME-4UP-TILES fetchers — adminClient reads (RLS pattern, public ISR
-// rule). Each returns the tile's own prop shape so the page just plumbs.
+// HOME fetchers — adminClient reads (RLS pattern). Each returns the
+// band's own prop shape so the page just plumbs.
 
 async function fetchLatestPulsePosts(limit = 3): Promise<PulsePost[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -327,22 +294,46 @@ async function fetchLatestPulsePosts(limit = 3): Promise<PulsePost[]> {
   })
 }
 
-async function fetchPinnedLiveEvent(userId: string | null): Promise<PulseEvent | null> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: row } = await (adminClient as any)
-    .from('events')
-    .select('id, title, format, starts_at, attending_count')
-    .eq('is_published', true)
-    .gt('starts_at', new Date().toISOString())
-    .order('starts_at', { ascending: true })
-    .limit(1)
-    .maybeSingle() as { data: {
-      id: string
-      title: string
-      format: string | null
-      starts_at: string
-      attending_count: number | null
-    } | null }
+type FuelLiveRow = {
+  id: string
+  title: string
+  format: string | null
+  event_type: string | null
+  starts_at: string
+  ends_at: string | null
+  attending_count: number | null
+}
+
+async function fetchPinnedLiveEvent(userId: string | null): Promise<(PulseEvent & {
+  endsAt: string | null
+  eventType: string | null
+  startsAt: string
+}) | null> {
+  const nowIso = new Date().toISOString()
+  const eventSelect = 'id, title, format, event_type, starts_at, ends_at, attending_count'
+  // Recent started rows + the next upcoming. Live vs stale is decided in
+  // pickFuelLiveEvent so a missing ends_at cannot pin an old workshop.
+  const [startedRes, upcomingRes] = await Promise.all([
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (adminClient as any)
+      .from('events')
+      .select(eventSelect)
+      .eq('is_published', true)
+      .lte('starts_at', nowIso)
+      .order('starts_at', { ascending: false })
+      .limit(8) as Promise<{ data: FuelLiveRow[] | null }>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (adminClient as any)
+      .from('events')
+      .select(eventSelect)
+      .eq('is_published', true)
+      .gt('starts_at', nowIso)
+      .order('starts_at', { ascending: true })
+      .limit(1)
+      .maybeSingle() as Promise<{ data: FuelLiveRow | null }>,
+  ])
+
+  const row = pickFuelLiveEvent(startedRes.data ?? [], upcomingRes.data ?? null)
   if (!row) return null
 
   let initiallyRsvpd = false
@@ -364,53 +355,43 @@ async function fetchPinnedLiveEvent(userId: string | null): Promise<PulseEvent |
     timeLabel: formatTimeLabel(row.starts_at),
     attendingCount: row.attending_count ?? 0,
     initiallyRsvpd,
+    endsAt: row.ends_at,
+    eventType: row.event_type ?? row.format,
+    startsAt: row.starts_at,
   }
 }
 
-async function fetchTopStories(limit = 3): Promise<PulseStory[]> {
-  const { data: rows } = await adminClient
-    .from('media_stories')
-    .select('id, slug, title, body, pillar, views, is_featured, published_at')
-    .eq('is_published', true)
-    .order('views', { ascending: false, nullsFirst: false })
-    .order('published_at', { ascending: false, nullsFirst: false })
-    .limit(limit)
-
-  return (rows ?? []).map(r => {
-    const pillarColor = pillarColorFromTag(r.pillar)
-    return {
-      id: r.id,
-      slug: r.slug,
-      pillar: r.pillar ?? null,
-      category: r.pillar ?? 'Story',
-      categoryColor: pillarColor,
-      title: r.title,
-      readTime: readTimeForBody(r.body),
-      isHot: Boolean(r.is_featured) || (r.views ?? 0) >= 500,
-    }
-  })
+type HomeEpisodeRow = {
+  id: string
+  slug: string
+  title: string
+  episodeNumber: number | null
+  guestName: string | null
+  guestImageUrl: string | null
 }
 
-async function fetchLatestEpisodes(limit = 3): Promise<{ episodes: PulseEpisode[]; latestNumber: number | null }> {
+async function fetchLatestEpisodes(limit = 3): Promise<{ episodes: HomeEpisodeRow[]; latestNumber: number | null }> {
   const { data: rows } = await adminClient
     .from('episodes')
-    .select('id, slug, title, episode_number, guest_name, guest_title, guest_company, duration_seconds, is_published, published_at')
+    .select('id, slug, title, episode_number, guest_name, guest_title, guest_company, guest_image_url, thumbnail_url, youtube_url, duration_seconds, is_published, published_at')
     .eq('is_published', true)
     .order('published_at', { ascending: false, nullsFirst: false })
     .limit(limit)
 
-  const sevenDaysAgo = Date.now() - 7 * 86_400_000
-  const eps = (rows ?? []).map((r, i) => ({
+  const eps = (rows ?? []).map(r => ({
     id: r.id,
     slug: r.slug,
     episodeNumber: r.episode_number,
     title: r.title,
     guestName: r.guest_name,
-    guestTitle: r.guest_title,
-    guestCompany: r.guest_company,
-    durationLabel: episodeDurationLabel(r.duration_seconds),
-    isNew: r.published_at ? new Date(r.published_at).getTime() > sevenDaysAgo : false,
-    accent: TILE_PILLAR_ROTATION[i % TILE_PILLAR_ROTATION.length],
+    guestImageUrl: homeEpisodeStill({
+      guest_image_url: r.guest_image_url,
+      thumbnail_url: r.thumbnail_url,
+      youtube_id: parseYouTubeId(r.youtube_url),
+      slug: r.slug,
+      episode_number: r.episode_number,
+      guest_name: r.guest_name,
+    }),
   }))
   const latestNumber = eps[0]?.episodeNumber ?? null
   return { episodes: eps, latestNumber }
@@ -421,11 +402,12 @@ async function fetchLatestEpisodes(limit = 3): Promise<{ episodes: PulseEpisode[
 // auth UID. auth.uid() === public.users.id is not guaranteed for accounts
 // provisioned by billing webhooks.
 
-async function fetchTodaysHabits(profileId: string): Promise<DailyPulseHabit[]> {
-  // Wrapped in try/catch so a transient network blip or unexpected RLS
-  // change returns [] instead of bubbling up. An undefined return here
-  // used to trip the Daily Pulse card's Suspense boundary (#422) and
-  // remove the entire 4th tile silently.
+async function fetchTodaysHabits(profileId: string): Promise<{
+  habits: DailyPulseHabit[]
+  streakDays: number
+  checkedInToday: boolean
+}> {
+  const empty = { habits: [] as DailyPulseHabit[], streakDays: 0, checkedInToday: false }
   try {
     const today = new Date().toISOString().split('T')[0]
     const sixtyDaysAgo = new Date(Date.now() - 60 * 86_400_000).toISOString().split('T')[0]
@@ -447,22 +429,29 @@ async function fetchTodaysHabits(profileId: string): Promise<DailyPulseHabit[]> 
 
     const completedToday = new Set<string>()
     const recentCount: Record<string, number> = {}
+    const completedDates: string[] = []
     for (const c of completionsRes.data ?? []) {
       if (!c.habit_id) continue
       recentCount[c.habit_id] = (recentCount[c.habit_id] ?? 0) + 1
       if (c.completed_date === today) completedToday.add(c.habit_id)
+      if (c.completed_date) completedDates.push(c.completed_date)
     }
 
-    return (habitsRes.data ?? []).map(h => ({
-      id: h.id,
-      name: h.name,
-      pillar: h.pillar,
-      completedToday: completedToday.has(h.id),
-      recentCount: recentCount[h.id] ?? 0,
-    }))
+    const streak = computeCheckInStreak(completedDates, today)
+    return {
+      habits: (habitsRes.data ?? []).map(h => ({
+        id: h.id,
+        name: h.name,
+        pillar: h.pillar,
+        completedToday: completedToday.has(h.id),
+        recentCount: recentCount[h.id] ?? 0,
+      })),
+      streakDays: streak.days,
+      checkedInToday: streak.checkedInToday,
+    }
   } catch (err) {
     console.error('[home.fetchTodaysHabits] failed:', err instanceof Error ? err.message : err)
-    return []
+    return empty
   }
 }
 
@@ -512,41 +501,25 @@ export default async function MemberHomePage() {
   const profile = await resolveCurrentUser()
   if (!profile) redirect('/login')
 
-  const dayOfYear = Math.floor(
-    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
-  )
-
   const weekStart = getCurrentMonday()
   const supabase = createClient()
 
   const [
-    events,
     courseProgress,
-    scoreboardCounts,
-    quotes,
     badgeData,
-    // HOME-4UP-TILES fetchers
     pulsePosts,
     pinnedLiveEvent,
-    topStories,
     latestEpisodesResult,
     quarterlyGoalsResult,
-    // HOME-DAILY-PULSE fetchers
-    dailyHabits,
+    habitsResult,
     weekCommitments,
+    weeklyWins,
     sponsors,
   ] = await Promise.all([
-    // MR-HOME-1: member_badges / lesson-derived queries store rows under
-    // public.users.id, NOT auth.uid(). Pass profile.id so they return data for
-    // accounts where auth.uid() ≠ public.users.id.
-    fetchUpcomingEvents(supabase, profile.id),
     fetchCourseProgress(supabase, profile.id),
-    fetchScoreboardCounts(profile.id),
-    getGreetingQuotes(),
     supabase.from('member_badges').select('pillar_number, awarded_at').eq('user_id', profile.id),
-    fetchLatestPulsePosts(3),
+    fetchLatestPulsePosts(1),
     fetchPinnedLiveEvent(profile.id),
-    fetchTopStories(3),
     fetchLatestEpisodes(2),
     supabase
       .from('quarterly_goals')
@@ -555,44 +528,18 @@ export default async function MemberHomePage() {
       .eq('is_active', true)
       .order('created_at', { ascending: true })
       .limit(5),
-    // HOME-DAILY-PULSE — habits, habit_completions, and weekly_commitments all
-    // FK their user_id to public.users.id, so key on profile.id (email-resolved).
     fetchTodaysHabits(profile.id),
     fetchWeekCommitments(profile.id, weekStart),
-    // Sponsor ads SSR — avoids client waterfall after paint
+    fetchWeeklyWins(profile.id),
     fetchHomeSponsors(),
   ])
 
   const quarterlyGoals = (quarterlyGoalsResult.data ?? []) as GoalForCard[]
-
-  const quote = quotes?.length ? quotes[dayOfYear % quotes.length] : null
+  const dailyHabits = habitsResult.habits
   const earnedBadges = badgeData.data?.map(b => b.pillar_number) ?? []
   const awardedAtByPillar = new Map(
     (badgeData.data ?? []).map(b => [b.pillar_number, b.awarded_at]),
   )
-
-  const displayName = (profile.full_name ? profile.full_name.split(' ')[0] : null) ?? profile.display_name ?? 'Member'
-  const upcomingEventCount = events.filter(e => !e.isRegistered).length
-
-  // SPRINT A — single Home context strip (event + episode) from data already
-  // fetched above; no new queries.
-  const nextEvent = events[0] ?? null
-  const latestEp = latestEpisodesResult.episodes[0] ?? null
-  const homeContextEvent = nextEvent
-    ? {
-        title: nextEvent.title,
-        dateLabel: new Date(nextEvent.starts_at).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-        }),
-        href: `/events/${nextEvent.id}`,
-      }
-    : null
-  const homeContextEpisode = latestEp
-    ? { title: latestEp.title, href: `/podcast/${latestEp.slug}` }
-    : null
-  const homeContextSignature = `${nextEvent?.id ?? 'none'}:${latestEp?.id ?? 'none'}`
-
   const earnedSet = new Set(earnedBadges)
 
   // Index courses by pillar_number so the Architecture column can read
@@ -658,26 +605,6 @@ export default async function MemberHomePage() {
       }
     : null
 
-  const climbingEntry = pillars.find(p => p.state === 'locked')
-  const climbingCourse = climbingEntry ? courseByPillar.get(climbingEntry.number) : null
-  const climbingData = climbingEntry
-    ? {
-        number: climbingEntry.number,
-        name:   climbingEntry.name,
-        totalLessons: climbingCourse?.total ?? 0,
-        courseSlug:   climbingCourse?.slug ?? PILLAR_NUM_TO_SLUG[climbingEntry.number],
-      }
-    : null
-
-  // The accountability mirror: a goal whose pillar slug matches the
-  // in-progress pillar gets a "↳ TIED TO PATH FORWARD" footer linking
-  // to the same lesson the InProgressPillarHero CTA points at.
-  const inProgressPillarSlug = inProgressData?.courseSlug ?? null
-  const inProgressContinueHref = inProgressData
-    ? (inProgressData.nextLessonSlug
-        ? `/academy/${inProgressData.courseSlug}/${inProgressData.nextLessonSlug}`
-        : `/academy/${inProgressData.courseSlug}`)
-    : null
   const goalsForCards: GoalForCard[] = quarterlyGoals.map(g => ({
     id: g.id,
     title: g.title,
@@ -686,226 +613,102 @@ export default async function MemberHomePage() {
     weekly_delta: g.weekly_delta,
     pillar: g.pillar,
   }))
+  const wig = goalsForCards[0] ?? null
 
-  // Today's Evolution — one-click DAU loop (course, accountability, community)
-  const habitsDone = dailyHabits.filter(h => h.completedToday).length
-  const commitsDone = weekCommitments.filter(c => c.is_completed).length
-  // Academy CTA state: a member mid-course continues; a member who has
-  // finished at least one pillar (and has nothing in progress) reviews rather
-  // than "starting" — only a member with no progress at all sees Start.
-  const anyPillarEarned = pillars.some(p => p.state === 'earned')
-  const courseHref = inProgressData
-    ? (inProgressData.nextLessonSlug
-        ? `/academy/${inProgressData.courseSlug}/${inProgressData.nextLessonSlug}`
-        : `/academy/${inProgressData.courseSlug}`)
-    : anyPillarEarned
-      ? '/academy'
-      : '/academy/foundation'
-  const courseLabel = inProgressData
-    ? `Continue ${inProgressData.name}`
-    : anyPillarEarned
-      ? 'Review Academy'
-      : 'Start Foundation'
-  // SPRINT M: one engagement nudge only. The Learn / Accountability / Daily
-  // Pulse cards each restated a metric already shown in the Accountability Hub
-  // (habits, commitments, course progress), so they were dropped.
-  const todaysActions: TodaysEvolutionAction[] = [
-    {
-      id: 'community',
-      eyebrow: 'Community',
-      title: 'Show up in the feed',
-      description: 'Post a win, ask a hard question, or vote on today’s poll.',
-      href: '/community',
-      cta: 'Open feed',
-      accent: '#A78BFA',
-      primary: true,
-    },
-  ]
+  const fuelAcademy = inProgressData
+    ? academyFuelFromProgress({
+        nextLessonTitle: inProgressData.nextLessonTitle,
+        pillarName: inProgressData.name,
+        courseSlug: inProgressData.courseSlug,
+        nextLessonSlug: inProgressData.nextLessonSlug,
+        completedLessons: inProgressData.completedLessons,
+        totalLessons: inProgressData.totalLessons,
+        progressPct: inProgressData.progressPct,
+        nextLessonDurationSeconds: inProgressCourse?.nextLessonDurationSeconds ?? null,
+      })
+    : null
+
+  const fuelThread = pulsePosts[0]
+    ? {
+        title: pulsePosts[0].preview || 'Join the conversation',
+        href: pulsePosts[0].href,
+        authorName: pulsePosts[0].authorName,
+        replyLabel:
+          pulsePosts[0].commentCount === 1
+            ? '1 reply'
+            : `${pulsePosts[0].commentCount} replies`,
+        age: pulsePosts[0].age,
+      }
+    : null
+
+  const fuelLive = pinnedLiveEvent
+    ? {
+        title: pinnedLiveEvent.title,
+        href: `/events/${pinnedLiveEvent.id}`,
+        whenLabel: `${pinnedLiveEvent.dayLabel} · ${pinnedLiveEvent.timeLabel}`,
+        isLive: isEventHappeningNow(pinnedLiveEvent.startsAt, pinnedLiveEvent.endsAt),
+      }
+    : null
+
+  const foldAd = [sponsors.mid[0], sponsors.tileRow, sponsors.episodeRow, sponsors.mid[1]]
+    .filter((ad): ad is SponsorAd => Boolean(ad))
+    .find(ad => !isAcademyAd(ad)) ?? null
 
   // On-open: reuse Home's already-fetched session to enqueue WIG / evening
   // daily nudges into the existing notifications table. Fire-and-forget so
-  // the RSC is not blocked on the insert.
+  // the RSC is not blocked on the insert. NotifBell in TopNav stays the UI.
   void enqueueSessionNudges(profile.id)
 
   return (
-    <div className="ep-page-gutter ep-surface-mobile ep-stack pb-6">
-      <HomeContextStrip
-        event={homeContextEvent}
-        episode={homeContextEpisode}
-        signature={homeContextSignature}
-      />
-      <WelcomeBanner
-        displayName={displayName}
-        tier={profile.tier}
-        avatarUrl={profile.avatar_url}
-        quote={quote}
-        scoreboard={{
-          postCount: scoreboardCounts.postCount,
-          upcomingEventCount,
-          podcastCount: scoreboardCounts.podcastCount,
-          storyCount: scoreboardCounts.storyCount,
-        }}
-        pillars={pillars}
-        academyHref={inProgressContinueHref ?? courseHref}
-      />
+    <>
+      <div className="ep-page-gutter ep-surface-mobile ep-stack pb-6">
+        <HomeBannerBand
+          wig={wig}
+          pillars={pillars}
+          streakDays={habitsResult.streakDays}
+          checkedInToday={habitsResult.checkedInToday}
+          wins={weeklyWins}
+        />
 
-      {/* ABOVE THE FOLD — the single canonical daily accountability block, and
-          the first interactive thing a returning member sees: current streak,
-          today's habits (n/N) + log, today's Daily Pulse ring, today's
-          commitment. SPRINT 2: deduped to one instance; the daily rings live
-          only here. */}
-      <AccountabilityHub
-        variant="compact"
-        habits={dailyHabits}
-        commitments={weekCommitments}
-        goals={goalsForCards}
-        courseHref={courseHref}
-        courseLabel={courseLabel}
-        // Single source of truth on Home: the standalone CommitmentTracker owns
-        // weekly commitments and the GoalCard grid owns goals. The hub keeps the
-        // rings, KPI summary, and today's checkable habits only.
-        showCommitmentsList={false}
-        showGoalsList={false}
-      />
+        <HomeAccountabilityBand
+          habits={dailyHabits}
+          commitments={weekCommitments}
+        />
 
-      {sponsors.mid[0] ? <HomeSponsorAd ad={sponsors.mid[0]} /> : null}
+        <HomeFuelBand
+          academy={fuelAcademy}
+          thread={fuelThread}
+          live={fuelLive}
+        />
 
-      {/* BELOW THE FOLD — commitments + goals only. SPRINT M removed the
-          duplicate KPI/scoreboard strip and the pillar-overview: the daily
-          metrics (pulse %, streak, habits/commits/goals) live only in the hub
-          above, and the six-pillar list only in "The Architecture" hero. */}
-
-      {/* Weekly commitments + editor */}
-      <CommitmentTracker weekStart={getCurrentMonday()} />
-
-      {/* The Long Game — quarterly goals (the single goals module) */}
-      <section aria-label="Quarterly goals" className="ep-stack--tight">
-        <div className="flex items-center justify-between gap-2">
-          <p
-            className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px]"
-            style={{ color: 'var(--text-tertiary)' }}
+        {latestEpisodesResult.episodes.length > 0 ? (
+          <HomeContentAdGrid
+            title="Latest episodes"
+            href="/podcast"
+            linkLabel="All episodes"
+            ad={foldAd && !isAcademyAd(foldAd) ? foldAd : null}
           >
-            The Long Game
-          </p>
-          <a
-            href="/leaderboard"
-            className="ep-btn ep-btn--tertiary font-condensed font-bold uppercase tracking-[0.14em] text-[10px]"
-            style={{ color: 'var(--brand-gold, #C9A84C)', textDecoration: 'none' }}
-          >
-            Scoreboard →
-          </a>
-        </div>
-        {goalsForCards.length === 0 ? (
-          <div
-            className="rounded-lg p-5 text-center"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-color)' }}
-          >
-            <p className="font-condensed text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
-              No active goals yet.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {goalsForCards.map(g => (
-              <GoalCard
-                key={g.id}
-                goal={g}
-                inProgressPillarSlug={inProgressPillarSlug}
-                inProgressContinueHref={inProgressContinueHref}
+            {latestEpisodesResult.episodes.map(ep => (
+              <HomeEpisodeCard
+                key={ep.id}
+                href={`/podcast/${ep.slug}`}
+                title={ep.title}
+                guestName={ep.guestName}
+                episodeNumber={ep.episodeNumber}
+                guestImageUrl={ep.guestImageUrl}
               />
             ))}
-          </div>
-        )}
-      </section>
-
-      {sponsors.mid[1] ? <HomeSponsorAd ad={sponsors.mid[1]} /> : null}
-
-      {/* ——— The rest: one-click nudge, community & media ——— */}
-
-      {/* Today's Evolution — a single engagement nudge (SPRINT M: the metric
-          cards were dropped; habit/commit/goal progress lives in the hub). */}
-      <TodaysEvolution actions={todaysActions} />
-
-      {/* Two tiles, then an IAB — never a third editorial card, never a row of four. */}
-      <div
-        className="home-4up-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-ep-section"
-        data-home-content-row
-        style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }}
-      >
-        <CommunityPulseTile posts={pulsePosts} pinnedEvent={pinnedLiveEvent} />
-        <TopStoriesTile stories={topStories} />
-        {sponsors.tileRow ? (
-          <div
-            data-home-ads="in-row"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 250 }}
-          >
-            <HomeSponsorAd ad={sponsors.tileRow} />
-          </div>
+          </HomeContentAdGrid>
         ) : null}
+
+        <ProfileCompletePrompt
+          hasAvatar={Boolean(profile.avatar_url)}
+          hasBio={Boolean(profile.bio)}
+          hasTitle={Boolean(profile.role_title)}
+          hasName={Boolean(profile.display_name || profile.full_name)}
+        />
       </div>
-
-      {latestEpisodesResult.episodes.length > 0 ? (
-        <HomeContentAdGrid title="Latest episodes" href="/podcast" linkLabel="All episodes" ad={sponsors.episodeRow}>
-          {latestEpisodesResult.episodes.map(ep => (
-            <HomeEditorialCard
-              key={ep.id}
-              href={`/podcast/${ep.slug}`}
-              title={ep.title}
-              meta={ep.guestName}
-            />
-          ))}
-        </HomeContentAdGrid>
-      ) : null}
-
-      <ProfileCompletePrompt
-        hasAvatar={Boolean(profile.avatar_url)}
-        hasBio={Boolean(profile.bio)}
-        hasTitle={Boolean(profile.role_title)}
-        hasName={Boolean(profile.display_name || profile.full_name)}
-      />
-
-      {/* SPRINT J — Section divider: "The Path Forward". */}
-      <div className="ep-section-eyebrow">
-        <span className="ep-section-eyebrow__rule" aria-hidden />
-        <span className="ep-section-eyebrow__label">The Path Forward</span>
-        <span className="ep-section-eyebrow__grow" aria-hidden />
-      </div>
-
-      {/* Path Forward — the "continue learning" actions. SPRINT M: the
-          PillarJourneyStrip ("N of 6 pillars earned") was removed — the six
-          pillars already render once in "The Architecture" hero. */}
-      <div className="ep-stack">
-        {inProgressData && (
-          <InProgressPillarHero
-            pillar={{
-              number: inProgressData.number,
-              name: inProgressData.name,
-              progressPct: inProgressData.progressPct,
-              completedLessons: inProgressData.completedLessons,
-              totalLessons: inProgressData.totalLessons,
-            }}
-            courseSlug={inProgressData.courseSlug}
-            dayOfTwentyOne={inProgressData.dayOfTwentyOne}
-            nextLessonTitle={inProgressData.nextLessonTitle}
-            nextLessonSlug={inProgressData.nextLessonSlug}
-          />
-        )}
-        {climbingData && (
-          <ClimbingTowardCard
-            pillar={{
-              number: climbingData.number,
-              name: climbingData.name,
-              totalLessons: climbingData.totalLessons,
-            }}
-            courseSlug={climbingData.courseSlug}
-          />
-        )}
-      </div>
-
-      {sponsors.storyRow ? <HomeSponsorAd ad={sponsors.storyRow} /> : null}
-
-      <HomeEndBox ad={sponsors.endBox} />
-
-    </div>
+      <PublicFooter />
+    </>
   )
 }
