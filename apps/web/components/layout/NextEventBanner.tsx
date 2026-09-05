@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+import { pickNextBannerEvent } from '@/lib/events/nextEvent'
 
 type NextEvent = { id: string; title: string; starts_at: string } | null
 
@@ -47,9 +48,8 @@ export function NextEventBanner() {
         .eq('is_published', true)
         .gt('starts_at', new Date().toISOString())
         .order('starts_at', { ascending: true })
-        .limit(1)
-        .maybeSingle()
-      if (!cancelled && data) setEvent(data)
+        .limit(20)
+      if (!cancelled) setEvent(pickNextBannerEvent(data ?? []))
     })()
     return () => {
       cancelled = true
