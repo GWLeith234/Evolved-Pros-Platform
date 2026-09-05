@@ -6,8 +6,9 @@
  * tag `book preorder`. All writes use adminClient because the submitter has
  * no session and crm_prospects has RLS with no public policies.
  *
- * Does not email George, does not send marketing mail, does not charge, does
- * not create a membership, does not touch Stripe.
+ * Notifies admins via the existing NotifBell (system_general). Does not email
+ * George, does not send marketing mail, does not charge, does not create a
+ * membership, does not touch Stripe.
  *
  * PII: nothing in this file logs a name or an email. Postgres puts the
  * conflicting value straight into a unique-violation message, so even error
@@ -18,7 +19,12 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { supabasePreorderDb } from '@/lib/book/preorderDb'
-import { upsertBookPreorderProspect, validatePreorder, type PreorderInput } from '@/lib/book/preorder'
+import {
+  notifyPreorderAdmins,
+  upsertBookPreorderProspect,
+  validatePreorder,
+  type PreorderInput,
+} from '@/lib/book/preorder'
 import { clientIpFrom, createRateLimiter } from '@/lib/speaking/inquiry'
 
 /**
@@ -62,6 +68,11 @@ export async function POST(request: Request) {
       { error: 'Something went wrong on our end. Please try again shortly.' },
       { status: 500 },
     )
+  }
+
+  const notified = await notifyPreorderAdmins(supabasePreorderDb, result.value)
+  if (notified.code) {
+    console.error('[POST /api/book/preorder] admin notify failed', notified.code)
   }
 
   return NextResponse.json({ ok: true })

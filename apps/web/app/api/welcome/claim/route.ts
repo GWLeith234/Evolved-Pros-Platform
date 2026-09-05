@@ -3,6 +3,12 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { redeemComp } from '@/lib/promo/redeemComp'
+import {
+  bestEffortConversion,
+  notifyWelcomeAdmins,
+  upsertWelcomeProspect,
+} from '@/lib/crm/conversion'
+import { supabaseIntakeDb } from '@/lib/crm/intakeDb'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://platform.evolvedpros.com'
 
@@ -107,6 +113,18 @@ export async function POST(request: Request) {
     .update({ status: 'redeemed', redeemed_at: new Date().toISOString() })
     .eq('id', invite.invite_id)
     .neq('status', 'revoked')
+
+  const welcomeWrite = {
+    email,
+    user_id: authUserId,
+    tier: result.grantsTier,
+  }
+  await bestEffortConversion(
+    'POST /api/welcome/claim',
+    () => upsertWelcomeProspect(supabaseIntakeDb, welcomeWrite),
+    () => notifyWelcomeAdmins(supabaseIntakeDb, welcomeWrite),
+    !result.alreadyRedeemed,
+  )
 
   // 7. Hand back a callback URL carrying the token_hash. The client navigates
   //    to it (top-level GET); /auth/callback verifyOtp's it into a session and

@@ -1,6 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { supabaseIntakeDb } from '@/lib/crm/intakeDb'
+import {
+  displayNameFromEmail,
+  notifyJoinAdmins,
+  shouldNotifyJoinBackstop,
+  upsertJoinProspect,
+} from '@/lib/crm/join'
 
 export async function PATCH() {
   const supabase = createClient()
@@ -41,5 +48,37 @@ export async function PATCH() {
     console.error('[onboarding/complete] wrote zero rows for email=', user.email)
     return NextResponse.json({ error: 'No user record was written' }, { status: 404 })
   }
+
+  // Backstop for join CRM when the client provision hook was skipped.
+  try {
+    const { data: profile } = await adminClient
+      .from('users')
+      .select('id, email, full_name, first_name, last_name')
+      .eq('id', user.id)
+      .maybeSingle()
+    const fullName =
+      (profile as { full_name?: string | null } | null)?.full_name?.trim() ||
+      [
+        (profile as { first_name?: string | null } | null)?.first_name,
+        (profile as { last_name?: string | null } | null)?.last_name,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .trim() ||
+      displayNameFromEmail(user.email)
+    const joinWrite = { email: user.email.toLowerCase(), full_name: fullName, user_id: user.id }
+    const crm = await upsertJoinProspect(supabaseIntakeDb, joinWrite)
+    if (crm.kind === 'error') {
+      console.error('[onboarding/complete] join crm failed', crm.code ?? 'unknown')
+    } else if (shouldNotifyJoinBackstop(crm)) {
+      const notified = await notifyJoinAdmins(supabaseIntakeDb, joinWrite)
+      if (notified.code) {
+        console.error('[onboarding/complete] join notify failed', notified.code)
+      }
+    }
+  } catch {
+    console.error('[onboarding/complete] join crm threw')
+  }
+
   return NextResponse.json({ ok: true })
 }

@@ -24,8 +24,14 @@ import type Stripe from 'stripe'
 import { adminClient } from '@/lib/supabase/admin'
 import { getStripe, tierForPriceId, type Tier } from '@/lib/stripe/config'
 import { tierForStripePriceId } from '@/lib/commerce/catalogue'
+import {
+  bestEffortConversion,
+  notifyPaidAdmins,
+  upsertPaidProspect,
+} from '@/lib/crm/conversion'
+import { supabaseIntakeDb } from '@/lib/crm/intakeDb'
 
-type UserRow = { id: string; tier: string | null }
+type UserRow = { id: string; tier: string | null; email?: string | null; full_name?: string | null }
 
 // --- helpers --------------------------------------------------------------
 
@@ -124,10 +130,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
 
   const existing = await (adminClient as any)
     .from('users')
-    .select('id, tier')
+    .select('id, tier, email, full_name')
     .eq('id', userId)
     .maybeSingle()
-  const oldTier = (existing.data as UserRow | null)?.tier ?? null
+  const existingUser = existing.data as UserRow | null
+  const oldTier = existingUser?.tier ?? null
 
   const { error } = await (adminClient as any)
     .from('users')
@@ -142,6 +149,28 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   if (error) throw new Error(`users update (checkout) failed: ${error.message}`)
 
   await logTierChange(userId, oldTier, tier, 'stripe_checkout')
+
+  const email = (
+    existingUser?.email ||
+    session.customer_details?.email ||
+    (session as { customer_email?: string | null }).customer_email ||
+    ''
+  )
+    .trim()
+    .toLowerCase()
+  if (email) {
+    const paidWrite = {
+      email,
+      full_name: existingUser?.full_name ?? null,
+      user_id: userId,
+      tier,
+    }
+    await bestEffortConversion(
+      'Stripe Webhook checkout.session.completed',
+      () => upsertPaidProspect(supabaseIntakeDb, paidWrite),
+      () => notifyPaidAdmins(supabaseIntakeDb, paidWrite),
+    )
+  }
 }
 
 async function handleSubscriptionUpdated(sub: Stripe.Subscription): Promise<void> {

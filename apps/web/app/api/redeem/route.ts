@@ -1,6 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { redeemComp } from '@/lib/promo/redeemComp'
+import {
+  bestEffortConversion,
+  notifyRedeemAdmins,
+  upsertRedeemProspect,
+} from '@/lib/crm/conversion'
+import { supabaseIntakeDb } from '@/lib/crm/intakeDb'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,6 +44,18 @@ export async function POST(request: Request) {
       { status: 500 },
     )
   }
+
+  const redeemWrite = {
+    email: user.email.toLowerCase(),
+    user_id: user.id,
+    tier: result.grantsTier,
+  }
+  await bestEffortConversion(
+    'POST /api/redeem',
+    () => upsertRedeemProspect(supabaseIntakeDb, redeemWrite),
+    () => notifyRedeemAdmins(supabaseIntakeDb, redeemWrite),
+    !result.alreadyRedeemed,
+  )
 
   return NextResponse.json({
     ok: true,
