@@ -12,6 +12,7 @@
 import { BOOK_PREORDER_PATH } from '@/lib/book/preorder'
 import { TIERS } from '@/lib/pricing'
 import { formatDate, formatDuration } from '@/lib/format'
+import { MUST_CITE_HOME_DEFINITION } from '@/lib/seo/mustCite'
 
 export const JOIN_FREE_HREF = '/login?mode=signup' as const
 export const SEE_PRICING_HREF = '/pricing' as const
@@ -133,6 +134,7 @@ export function conversionCopyStrings(): string[] {
     HOME_JOIN_FREE_TOOLTIP,
     HOME_ACADEMY_TOOLTIP,
     HOME_OPEN_PLATFORM,
+    MUST_CITE_HOME_DEFINITION,
     HOME_BOOK.kicker,
     HOME_BOOK.title,
     HOME_BOOK.release,

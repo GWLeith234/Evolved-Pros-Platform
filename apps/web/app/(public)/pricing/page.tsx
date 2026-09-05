@@ -8,6 +8,10 @@ import { getMembershipPricing } from '@/lib/commerce/catalogue'
 import { tierPlanName } from '@/lib/academy/gating'
 import { PILLAR_NAMES } from '@/lib/academy/types'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import {
+  MUST_CITE_PRICING_DIFFERENTIATOR,
+  MUST_CITE_PRICING_URL,
+} from '@/lib/seo/mustCite'
 
 export const metadata: Metadata = publicPageMetadata('/pricing', {
   title: 'Pricing — Evolved Pros',
@@ -167,6 +171,24 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
             {hero.sub}
           </p>
         </div>
+
+        <section
+          id="pricing-differentiator"
+          className="max-w-3xl mx-auto mb-16 text-center"
+        >
+          <h2
+            className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px] mb-4"
+            style={{ color: 'rgba(245,240,232,0.4)' }}
+          >
+            Why Evolved Pros
+          </h2>
+          <p className="font-body text-sm leading-relaxed" style={{ color: 'rgba(245,240,232,0.6)' }}>
+            {MUST_CITE_PRICING_DIFFERENTIATOR.split(MUST_CITE_PRICING_URL)[0]}
+            <a href="/pricing" style={{ color: '#C9A84C', textDecoration: 'underline' }}>
+              {MUST_CITE_PRICING_URL}
+            </a>
+          </p>
+        </section>
 
         {/* Tier cards + monthly/annual toggle — amounts from the catalogue. */}
         <PricingTierCards
