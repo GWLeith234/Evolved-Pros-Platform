@@ -7,6 +7,7 @@ import {
   MASTERMIND_EVENT_TITLE,
   isConquerLocalTitle,
   pickNextBannerEvent,
+  pickUpcomingLockedEvent,
 } from './nextEvent'
 
 const now = new Date('2026-09-05T12:00:00.000Z')
@@ -28,34 +29,43 @@ describe('George-locked event copy', () => {
   })
 })
 
+const catalog = [
+  {
+    title: 'Conquer Local Podcast launches',
+    starts_at: '2026-09-10T00:00:00.000Z',
+  },
+  {
+    title: 'GTM 2026 — Pavilion Annual Conference',
+    starts_at: '2026-09-29T21:00:00.000Z',
+  },
+  {
+    title: MASTERMIND_EVENT_TITLE,
+    starts_at: '2026-10-02T19:00:00.000Z',
+  },
+  {
+    title: BOOK_EVENT_TITLE,
+    starts_at: '2026-10-15T12:00:00.000Z',
+  },
+  {
+    title: LAUNCH_EVENT_TITLE,
+    starts_at: '2026-04-28T19:00:00.000Z',
+  },
+]
+
 describe('pickNextBannerEvent', () => {
-  it('never surfaces Conquer Local and prefers the next locked event', () => {
-    const picked = pickNextBannerEvent(
-      [
-        {
-          title: 'Conquer Local Podcast launches',
-          starts_at: '2026-09-10T00:00:00.000Z',
-        },
-        {
-          title: 'GTM 2026 — Pavilion Annual Conference',
-          starts_at: '2026-09-29T21:00:00.000Z',
-        },
-        {
-          title: MASTERMIND_EVENT_TITLE,
-          starts_at: '2026-10-02T19:00:00.000Z',
-        },
-        {
-          title: BOOK_EVENT_TITLE,
-          starts_at: '2026-10-15T12:00:00.000Z',
-        },
-        {
-          title: LAUNCH_EVENT_TITLE,
-          starts_at: '2026-04-28T19:00:00.000Z',
-        },
-      ],
+  it('paints the April 28 launch on NEXT EVENT and never Conquer Local', () => {
+    const picked = pickNextBannerEvent(catalog, now)
+    expect(picked?.title).toBe(LAUNCH_EVENT_TITLE)
+  })
+
+  it('puts the October 15 book on upcoming after the launch date', () => {
+    const upcoming = pickUpcomingLockedEvent(catalog, now)
+    expect(upcoming?.title).toBe(MASTERMIND_EVENT_TITLE)
+    const afterMasterminds = pickUpcomingLockedEvent(
+      catalog.filter(e => e.title !== MASTERMIND_EVENT_TITLE),
       now,
     )
-    expect(picked?.title).toBe(MASTERMIND_EVENT_TITLE)
+    expect(afterMasterminds?.title).toBe(BOOK_EVENT_TITLE)
   })
 
   it('falls through to the soonest non-Conquer upcoming when no lock is future', () => {

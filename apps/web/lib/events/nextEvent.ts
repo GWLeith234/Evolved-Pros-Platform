@@ -1,6 +1,8 @@
 /**
- * George-locked event copy and the picker for NEXT EVENT / upcoming pins.
- * Titles are the source of truth so banners stay aligned with seed/CMS rows.
+ * CoS lock EP-EVENTS-APR28-BOOK-OCT15: NEXT EVENT is the April 28 launch
+ * line (never Conquer Local). Upcoming includes the October 15 book.
+ * George also locked weekly Masterminds as extra upcoming rows.
+ * Titles are the source of truth so banners stay aligned with seed/CMS.
  * No recurrence engine: weekly Masterminds are stored as dated rows.
  */
 
@@ -32,8 +34,12 @@ export function pickNextBannerEvent<T extends { title: string; starts_at: string
   events: readonly T[],
   now: Date = new Date(),
 ): T | null {
-  const upcoming = events
-    .filter(e => !isConquerLocalTitle(e.title) && new Date(e.starts_at).getTime() > now.getTime())
+  const usable = events.filter(e => !isConquerLocalTitle(e.title))
+  const launch = usable.find(e => e.title === LAUNCH_EVENT_TITLE)
+  if (launch) return launch
+
+  const upcoming = usable
+    .filter(e => new Date(e.starts_at).getTime() > now.getTime())
     .slice()
     .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
 
@@ -42,4 +48,16 @@ export function pickNextBannerEvent<T extends { title: string; starts_at: string
 
   const featured = upcoming.find(e => e.is_featured)
   return featured ?? upcoming[0] ?? null
+}
+
+/** Home / lists: next future lock (book, Masterminds) after the launch date. */
+export function pickUpcomingLockedEvent<T extends { title: string; starts_at: string }>(
+  events: readonly T[],
+  now: Date = new Date(),
+): T | null {
+  const upcoming = events
+    .filter(e => !isConquerLocalTitle(e.title) && new Date(e.starts_at).getTime() > now.getTime())
+    .slice()
+    .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime())
+  return upcoming.find(e => isLockedEventTitle(e.title)) ?? upcoming[0] ?? null
 }

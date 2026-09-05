@@ -31,7 +31,7 @@ import {
   isVisibleWin,
   pickFuelLiveEvent,
 } from '@/lib/home/bands'
-import { pickNextBannerEvent } from '@/lib/events/nextEvent'
+import { pickUpcomingLockedEvent } from '@/lib/events/nextEvent'
 
 import { enqueueSessionNudges } from '@/lib/notifications/nudges'
 
@@ -312,10 +312,10 @@ async function fetchPinnedLiveEvent(userId: string | null): Promise<(PulseEvent 
 }) | null> {
   const nowIso = new Date().toISOString()
   const eventSelect = 'id, title, format, event_type, starts_at, ends_at, attending_count'
-  // Recent started rows + upcoming. pickNextBannerEvent prefers George-locked
-  // titles (launch / Masterminds / book) and drops Conquer Local. Live vs stale
-  // is then decided in pickFuelLiveEvent so a missing ends_at cannot pin an
-  // old workshop.
+  // Recent started rows + upcoming. pickUpcomingLockedEvent prefers the
+  // CoS/George locks (book / Masterminds) and drops Conquer Local. Live vs
+  // stale is then decided in pickFuelLiveEvent so a missing ends_at cannot
+  // pin an old workshop.
   const [startedRes, upcomingRes] = await Promise.all([
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (adminClient as any)
@@ -335,7 +335,7 @@ async function fetchPinnedLiveEvent(userId: string | null): Promise<(PulseEvent 
       .limit(20) as Promise<{ data: FuelLiveRow[] | null }>,
   ])
 
-  const nextLocked = pickNextBannerEvent(upcomingRes.data ?? [])
+  const nextLocked = pickUpcomingLockedEvent(upcomingRes.data ?? [])
   const row = pickFuelLiveEvent(startedRes.data ?? [], nextLocked)
   if (!row) return null
 

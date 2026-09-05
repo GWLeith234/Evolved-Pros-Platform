@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { pickNextBannerEvent } from '@/lib/events/nextEvent'
+import { LAUNCH_EVENT_TITLE, pickNextBannerEvent } from '@/lib/events/nextEvent'
 
 type NextEvent = { id: string; title: string; starts_at: string } | null
 
@@ -42,14 +42,28 @@ export function NextEventBanner() {
       // Defer supabase client so this module can SSR without realtime-js eval.
       const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
-      const { data } = await supabase
-        .from('events')
-        .select('id, title, starts_at')
-        .eq('is_published', true)
-        .gt('starts_at', new Date().toISOString())
-        .order('starts_at', { ascending: true })
-        .limit(20)
-      if (!cancelled) setEvent(pickNextBannerEvent(data ?? []))
+      const nowIso = new Date().toISOString()
+      const select = 'id, title, starts_at'
+      // Include the April 28 launch lock even if the date has passed so
+      // NEXT EVENT stays on the CoS line (EP-EVENTS-APR28-BOOK-OCT15).
+      const [launchRes, upcomingRes] = await Promise.all([
+        supabase
+          .from('events')
+          .select(select)
+          .eq('is_published', true)
+          .eq('title', LAUNCH_EVENT_TITLE)
+          .limit(1),
+        supabase
+          .from('events')
+          .select(select)
+          .eq('is_published', true)
+          .gt('starts_at', nowIso)
+          .order('starts_at', { ascending: true })
+          .limit(20),
+      ])
+      if (!cancelled) {
+        setEvent(pickNextBannerEvent([...(launchRes.data ?? []), ...(upcomingRes.data ?? [])]))
+      }
     })()
     return () => {
       cancelled = true

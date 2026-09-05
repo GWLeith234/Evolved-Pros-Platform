@@ -138,8 +138,8 @@ WHERE NOT EXISTS (
     AND e.starts_at = ts
 );
 
--- One featured upcoming lock so hero / admin featured stays on Masterminds
--- (April 28 is already past). Unique partial index allows only one featured.
+-- CoS featured lock is the April 28 launch (EP-EVENTS-APR28-BOOK-OCT15).
+-- Unique partial index allows only one featured row.
 UPDATE public.events SET is_featured = false WHERE is_featured = true;
 
 UPDATE public.events
@@ -147,7 +147,6 @@ SET is_featured = true
 WHERE id = (
   SELECT id
   FROM public.events
-  WHERE title = 'AI Masterminds for Senior Execs'
-    AND starts_at = TIMESTAMPTZ '2026-10-02 14:00:00 America/Chicago'
+  WHERE title = 'Evolved Pros launches April 28 in Las Vegas with special guest Dennis Yu'
   LIMIT 1
 );
