@@ -1,3 +1,5 @@
+import { InquireBookingButton } from './InquireBookingButton'
+
 const FB = 'Barlow, sans-serif'
 const FBC = 'Barlow Condensed, sans-serif'
 const FBN = 'Bebas Neue, sans-serif'
@@ -62,8 +64,7 @@ export function LiveFinalCTA() {
             </p>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 320 }}>
-            <a
-              href="#book-george"
+            <InquireBookingButton
               className="ep-pressable ep-touch-target"
               style={{
                 padding: '16px 32px',
@@ -71,21 +72,21 @@ export function LiveFinalCTA() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: '#ef0e30',
-                color: '#fff',
-                border: '1px solid #ef0e30',
+                width: '100%',
+                background: 'var(--brand-red-hot)',
+                color: 'var(--white)',
+                border: '1px solid var(--brand-red-hot)',
                 fontFamily: FBC,
                 fontWeight: 800,
                 fontSize: 13,
                 letterSpacing: '0.22em',
                 textTransform: 'uppercase',
                 cursor: 'pointer',
-                textDecoration: 'none',
                 textAlign: 'center',
               }}
             >
               Request a date
-            </a>
+            </InquireBookingButton>
             <a
               href="https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/Media%20Kit%202026.pdf"
               download="George-Leith-Media-Kit-2026.pdf"

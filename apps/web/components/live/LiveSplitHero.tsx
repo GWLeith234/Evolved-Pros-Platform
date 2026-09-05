@@ -1,4 +1,5 @@
 import { SPEAKING_STATS } from '@/lib/live/speaking-pins'
+import { InquireBookingButton } from './InquireBookingButton'
 
 const FB = 'Barlow, sans-serif'
 const FBC = 'Barlow Condensed, sans-serif'
@@ -125,31 +126,25 @@ export function LiveSplitHero({ photo = '/live/george-stage-blue-jacket.jpg' }: 
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 28, flexWrap: 'wrap' }}>
-            <a
-              href="mailto:george@evolvex360.com?subject=Keynote%20Speaking%20Inquiry"
-              target="_blank"
-              rel="noopener noreferrer"
+            <InquireBookingButton
               className="ep-pressable ep-touch-target"
               style={{
                 padding: '14px 28px',
                 minHeight: 48,
-                background: '#ef0e30',
-                color: '#fff',
-                border: '1px solid #ef0e30',
+                background: 'var(--brand-red-hot)',
+                color: 'var(--white)',
+                border: '1px solid var(--brand-red-hot)',
                 fontFamily: FBC,
                 fontWeight: 800,
                 fontSize: 13,
                 letterSpacing: '0.22em',
                 textTransform: 'uppercase',
-                textDecoration: 'none',
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
-            >
-              Inquire about booking
-            </a>
+            />
           </div>
         </div>
 

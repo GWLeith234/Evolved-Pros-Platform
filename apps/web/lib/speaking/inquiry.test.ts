@@ -1,11 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
-  INQUIRY_MESSAGE_MAX,
   PG_UNIQUE_VIOLATION,
   buildNotesBlock,
   clientIpFrom,
   createRateLimiter,
-  inquiryLabel,
+  formatEventDate,
+  inquiryFieldLines,
+  inquiryFieldSummary,
+  inquiryNotificationCopy,
   notifyAdmins,
   prependNotes,
   upsertKeynoteProspect,
@@ -18,22 +20,20 @@ import {
 const NOW = new Date('2026-08-16T15:04:05.000Z')
 
 const GOOD = {
-  full_name: 'Dana Whitfield',
+  name: 'Dana Whitfield',
   email: 'Dana@Northgate.Example ',
+  event_date: '2027-03-12',
+  sms: '+1 555 0100',
   company: 'Northgate Media',
-  event_name: 'Northgate Summit',
-  event_timeframe: 'Q1 2027',
-  message: 'We want a closing keynote for 400 sales leaders.',
 }
 
 function clean(overrides: Partial<CleanInquiry> = {}): CleanInquiry {
   return {
     full_name: 'Dana Whitfield',
     email: 'dana@northgate.example',
+    event_date: '2027-03-12',
+    sms: '+1 555 0100',
     company: 'Northgate Media',
-    event_name: 'Northgate Summit',
-    event_timeframe: 'Q1 2027',
-    message: 'We want a closing keynote.',
     ...overrides,
   }
 }
@@ -57,24 +57,39 @@ describe('validateInquiry', () => {
     if (res.kind !== 'ok') return
     expect(res.value.email).toBe('dana@northgate.example')
     expect(res.value.full_name).toBe('Dana Whitfield')
-    expect(res.value.event_timeframe).toBe('Q1 2027')
+    expect(res.value.event_date).toBe('2027-03-12')
+    expect(res.value.sms).toBe('+1 555 0100')
+    expect(res.value.company).toBe('Northgate Media')
+  })
+
+  it('accepts full_name as an alias for name', () => {
+    const res = validateInquiry({ ...GOOD, name: undefined, full_name: 'Pat Cole' })
+    expect(res.kind).toBe('ok')
+    if (res.kind !== 'ok') return
+    expect(res.value.full_name).toBe('Pat Cole')
   })
 
   it('treats blank optional fields as null rather than empty strings', () => {
-    const res = validateInquiry({ ...GOOD, company: '   ', event_name: '', event_timeframe: undefined })
+    const res = validateInquiry({ ...GOOD, company: '   ', event_date: '', sms: undefined })
     expect(res.kind).toBe('ok')
     if (res.kind !== 'ok') return
     expect(res.value.company).toBeNull()
-    expect(res.value.event_name).toBeNull()
-    expect(res.value.event_timeframe).toBeNull()
+    expect(res.value.event_date).toBeNull()
+    expect(res.value.sms).toBeNull()
+  })
+
+  it('does not require a message or event name', () => {
+    expect(validateInquiry({ name: 'Ada', email: 'ada@example.com' }).kind).toBe('ok')
   })
 
   it.each([
-    ['missing name', { ...GOOD, full_name: '  ' }, 'Your name is required.'],
+    ['missing name', { ...GOOD, name: '  ' }, 'Name is required.'],
     ['missing email', { ...GOOD, email: '' }, 'A valid email address is required.'],
     ['malformed email', { ...GOOD, email: 'nope' }, 'A valid email address is required.'],
     ['no domain dot', { ...GOOD, email: 'a@b' }, 'A valid email address is required.'],
-    ['missing message', { ...GOOD, message: '   ' }, 'Tell us a little about the event.'],
+    ['bad date', { ...GOOD, event_date: '2027-13-40' }, 'Date of event must be a real calendar date.'],
+    ['not a date', { ...GOOD, event_date: 'Q1 2027' }, 'Date of event must be a real calendar date.'],
+    ['bad sms', { ...GOOD, sms: 'call me' }, 'SMS must be a phone number.'],
   ])('rejects %s', (_label, body, error) => {
     const res = validateInquiry(body)
     expect(res.kind).toBe('invalid')
@@ -82,19 +97,8 @@ describe('validateInquiry', () => {
     expect(res.error).toBe(error)
   })
 
-  it('rejects an over-long message instead of silently truncating it', () => {
-    const res = validateInquiry({ ...GOOD, message: 'x'.repeat(INQUIRY_MESSAGE_MAX + 1) })
-    expect(res.kind).toBe('invalid')
-    if (res.kind !== 'invalid') return
-    expect(res.error).toContain('too long')
-  })
-
-  it('accepts a message exactly at the limit', () => {
-    expect(validateInquiry({ ...GOOD, message: 'x'.repeat(INQUIRY_MESSAGE_MAX) }).kind).toBe('ok')
-  })
-
   it('ignores non-string field types rather than throwing', () => {
-    const res = validateInquiry({ full_name: 42, email: null, message: [] })
+    const res = validateInquiry({ name: 42, email: null, sms: [] })
     expect(res.kind).toBe('invalid')
   })
 })
@@ -115,19 +119,54 @@ describe('validateInquiry — honeypot', () => {
   })
 })
 
+describe('inquiryFieldLines / notification copy', () => {
+  it('includes Name, Email, Date of event, SMS, and Company when present', () => {
+    const lines = inquiryFieldLines(clean())
+    expect(lines.map(l => l.label)).toEqual(['Name', 'Email', 'Date of event', 'SMS', 'Company'])
+    expect(inquiryFieldSummary(clean())).toContain('Name: Dana Whitfield')
+    expect(inquiryFieldSummary(clean())).toContain('Email: dana@northgate.example')
+    expect(inquiryFieldSummary(clean())).toContain('Date of event: Mar 12, 2027')
+    expect(inquiryFieldSummary(clean())).toContain('SMS: +1 555 0100')
+    expect(inquiryFieldSummary(clean())).toContain('Company: Northgate Media')
+  })
+
+  it('omits blank optionals without leaving empty labels', () => {
+    const summary = inquiryFieldSummary(clean({ event_date: null, sms: null, company: null }))
+    expect(summary).toBe('Name: Dana Whitfield · Email: dana@northgate.example')
+    expect(summary).not.toContain('Date of event')
+    expect(summary).not.toContain('SMS')
+    expect(summary).not.toContain('Company')
+  })
+
+  it('puts the same field summary on title and body so the bell shows all five', () => {
+    const copy = inquiryNotificationCopy(clean())
+    expect(copy.title.startsWith('Booking inquiry: ')).toBe(true)
+    expect(copy.title).toContain('Name: Dana Whitfield')
+    expect(copy.title).toContain('Email: dana@northgate.example')
+    expect(copy.body).toBe(inquiryFieldSummary(clean()))
+    expect(copy.title).not.toContain('—')
+    expect(copy.body).not.toContain('—')
+  })
+
+  it('formats a date-only value without timezone shift', () => {
+    expect(formatEventDate('2027-03-12')).toBe('Mar 12, 2027')
+  })
+})
+
 describe('buildNotesBlock / prependNotes', () => {
-  it('dates the block and includes event, timeframe and company', () => {
+  it('dates the block and includes the five filled fields', () => {
     const block = buildNotesBlock(clean(), NOW)
-    expect(block).toContain('[2026-08-16] Keynote inquiry')
-    expect(block).toContain('Event: Northgate Summit')
-    expect(block).toContain('Timeframe: Q1 2027')
+    expect(block).toContain('[2026-08-16] Booking inquiry')
+    expect(block).toContain('Name: Dana Whitfield')
+    expect(block).toContain('Date of event: Mar 12, 2027')
+    expect(block).toContain('SMS: +1 555 0100')
     expect(block).toContain('Company: Northgate Media')
-    expect(block).toContain('We want a closing keynote.')
+    expect(block).not.toContain('—')
   })
 
   it('omits absent metadata without leaving a dangling separator', () => {
-    const block = buildNotesBlock(clean({ event_name: null, event_timeframe: null, company: null }), NOW)
-    expect(block.split('\n')[0]).toBe('[2026-08-16] Keynote inquiry')
+    const block = buildNotesBlock(clean({ event_date: null, sms: null, company: null }), NOW)
+    expect(block.split('\n')[1]).toBe('Name: Dana Whitfield · Email: dana@northgate.example')
   })
 
   it('prepends the newest block above existing notes', () => {
@@ -141,16 +180,8 @@ describe('buildNotesBlock / prependNotes', () => {
   })
 })
 
-describe('inquiryLabel', () => {
-  it('prefers event, then company, then name', () => {
-    expect(inquiryLabel(clean())).toBe('Northgate Summit')
-    expect(inquiryLabel(clean({ event_name: null }))).toBe('Northgate Media')
-    expect(inquiryLabel(clean({ event_name: null, company: null }))).toBe('Dana Whitfield')
-  })
-})
-
 describe('upsertKeynoteProspect — new contact', () => {
-  it('inserts a keynote-interested lead with express consent', async () => {
+  it('inserts a keynote-interested lead with express consent and SMS as phone', async () => {
     const db = mockDb()
     const out = await upsertKeynoteProspect(db, clean(), NOW)
 
@@ -159,6 +190,8 @@ describe('upsertKeynoteProspect — new contact', () => {
     const row = vi.mocked(db.insertProspect).mock.calls[0][0]
     expect(row).toMatchObject({
       email: 'dana@northgate.example',
+      phone: '+1 555 0100',
+      company: 'Northgate Media',
       stage: 'lead',
       status: 'active',
       keynote_interest: true,
@@ -166,7 +199,7 @@ describe('upsertKeynoteProspect — new contact', () => {
       source: 'keynote-inquiry',
       enrichment_status: 'none',
     })
-    expect(String(row.notes)).toContain('[2026-08-16] Keynote inquiry')
+    expect(String(row.notes)).toContain('[2026-08-16] Booking inquiry')
   })
 
   it('reports a non-conflict insert error by code', async () => {
@@ -185,7 +218,12 @@ describe('upsertKeynoteProspect — existing contact (23505 conflict)', () => {
   }
 
   it('patches the existing row instead of failing', async () => {
-    const db = conflictDb({ id: 'p-1', notes: 'Met at the Regina keynote.' })
+    const db = conflictDb({
+      id: 'p-1',
+      notes: 'Met at the Regina keynote.',
+      phone: null,
+      company: null,
+    })
     const out = await upsertKeynoteProspect(db, clean(), NOW)
 
     expect(out).toEqual({ kind: 'updated' })
@@ -193,15 +231,30 @@ describe('upsertKeynoteProspect — existing contact (23505 conflict)', () => {
     const [id, patch] = vi.mocked(db.updateProspect).mock.calls[0]
     expect(id).toBe('p-1')
     expect(patch.keynote_interest).toBe(true)
+    expect(patch.phone).toBe('+1 555 0100')
+    expect(patch.company).toBe('Northgate Media')
     expect(patch.last_contacted_at).toBe(NOW.toISOString())
     expect(String(patch.notes)).toContain('Met at the Regina keynote.')
-    expect(String(patch.notes).indexOf('Keynote inquiry')).toBeLessThan(
+    expect(String(patch.notes).indexOf('Booking inquiry')).toBeLessThan(
       String(patch.notes).indexOf('Met at the Regina keynote.'),
     )
   })
 
+  it('does not blank phone or company when those fields were omitted', async () => {
+    const db = conflictDb({
+      id: 'p-1',
+      notes: null,
+      phone: '204-555-0100',
+      company: 'Existing Co',
+    })
+    await upsertKeynoteProspect(db, clean({ sms: null, company: null }), NOW)
+    const patch = vi.mocked(db.updateProspect).mock.calls[0][1]
+    expect(patch).not.toHaveProperty('phone')
+    expect(patch).not.toHaveProperty('company')
+  })
+
   it('NEVER overwrites stage, status or consent_basis on an existing prospect', async () => {
-    const db = conflictDb({ id: 'p-1', notes: null })
+    const db = conflictDb({ id: 'p-1', notes: null, phone: null, company: null })
     await upsertKeynoteProspect(db, clean(), NOW)
     const patch = vi.mocked(db.updateProspect).mock.calls[0][1]
     expect(patch).not.toHaveProperty('stage')
@@ -226,7 +279,7 @@ describe('upsertKeynoteProspect — existing contact (23505 conflict)', () => {
   })
 
   it('reports an update failure by code', async () => {
-    const db = conflictDb({ id: 'p-1', notes: null }, {
+    const db = conflictDb({ id: 'p-1', notes: null, phone: null, company: null }, {
       updateProspect: vi.fn(async () => ({ error: { code: '23514' } })),
     })
     expect(await upsertKeynoteProspect(db, clean(), NOW)).toEqual({ kind: 'error', code: '23514' })
@@ -234,7 +287,7 @@ describe('upsertKeynoteProspect — existing contact (23505 conflict)', () => {
 })
 
 describe('notifyAdmins', () => {
-  it('inserts one notification per admin pointing at the CRM', async () => {
+  it('inserts one notification per admin pointing at the CRM with all five fields', async () => {
     const db = mockDb({
       listAdminIds: vi.fn(async () => ({ data: [{ id: 'a1' }, { id: 'a2' }], error: null })),
     })
@@ -246,10 +299,14 @@ describe('notifyAdmins', () => {
     expect(rows[0]).toMatchObject({
       user_id: 'a1',
       type: 'system_general',
-      title: 'Keynote inquiry: Northgate Summit',
       action_url: '/admin/crm',
       is_read: false,
     })
+    expect(String(rows[0].title)).toContain('Name: Dana Whitfield')
+    expect(String(rows[0].title)).toContain('Email: dana@northgate.example')
+    expect(String(rows[0].body)).toContain('Date of event: Mar 12, 2027')
+    expect(String(rows[0].body)).toContain('SMS: +1 555 0100')
+    expect(String(rows[0].body)).toContain('Company: Northgate Media')
   })
 
   it('no-ops cleanly when there are no admins', async () => {

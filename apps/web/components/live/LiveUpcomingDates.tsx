@@ -1,14 +1,12 @@
 import { getUpcomingSpeakingDates, type UpcomingDate } from '@/lib/live/upcoming-dates'
 import { sanitizeSpeakingLinkUrl } from '@/lib/live/upcoming-dates-shared'
+import { InquireBookingButton } from './InquireBookingButton'
 import { LiveSectionHeader } from './LiveSectionHeader'
 
 const FB = 'Barlow, sans-serif'
 const FBC = 'Barlow Condensed, sans-serif'
 const FBN = 'Bebas Neue, sans-serif'
 const FP = 'Playfair Display, Georgia, serif'
-
-const BOOKING_HREF =
-  'mailto:george@evolvex360.com?subject=Keynote%20Speaking%20Inquiry'
 
 function DateRow({ d, index }: { d: UpcomingDate; index: number }) {
   return (
@@ -208,8 +206,7 @@ export async function LiveUpcomingDates() {
             When a keynote, panel, or workshop is locked, it shows up here with the city.
             Past stages live on the map below — cities only, no long write-ups.
           </p>
-          <a
-            href={BOOKING_HREF}
+          <InquireBookingButton
             className="ep-pressable ep-touch-target"
             style={{
               marginTop: 4,
@@ -226,11 +223,8 @@ export async function LiveUpcomingDates() {
               fontSize: 12,
               letterSpacing: '0.22em',
               textTransform: 'uppercase',
-              textDecoration: 'none',
             }}
-          >
-            Inquire about booking
-          </a>
+          />
         </div>
       ) : (
         <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 28 }}>

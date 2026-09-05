@@ -47,14 +47,9 @@ export async function sendKeynoteInquiryEmail(inq: CleanInquiry): Promise<boolea
       // Resend v3 spells this snake_case. Replying in the inbox goes straight
       // to the inquirer rather than to the from-address.
       reply_to: inq.email,
-      subject: `Keynote inquiry: ${inq.event_name || inq.company || inq.full_name}`,
+      subject: `Booking inquiry: ${inq.full_name}`,
       react: KeynoteInquiryEmail({
-        fullName: inq.full_name,
-        email: inq.email,
-        company: inq.company,
-        eventName: inq.event_name,
-        eventTimeframe: inq.event_timeframe,
-        message: inq.message,
+        inquiry: inq,
         crmUrl: `${APP_URL}/admin/crm`,
       }),
     })
