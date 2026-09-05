@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -8,6 +9,7 @@ import {
   EM_DASH,
   HERO_IMAGE_ALT,
   HERO_IMAGE_HEIGHT,
+  HERO_IMAGE_MD5,
   HERO_IMAGE_SRC,
   HERO_IMAGE_WIDTH,
   HOME_ARIA,
@@ -46,6 +48,7 @@ describe('conversion homepage locks', () => {
     expect(HOME_ARIA).toBe('Evolved Pros home')
     expect(HERO_IMAGE_ALT).toBe('The Evolved Architecture')
     expect(HERO_IMAGE_SRC).toBe('/brand/hero-evolved-architecture.png')
+    expect(HERO_IMAGE_MD5).toBe('f85975f745840817929c6b474dabbfc8')
     expect(HERO_IMAGE_WIDTH / HERO_IMAGE_HEIGHT).toBe(1.5)
   })
 
@@ -115,6 +118,22 @@ describe('conversion homepage layout contracts', () => {
     expect(conversionHomeSrc).not.toMatch(
       /header[\s\S]{0,80}flex max-w-6xl flex-wrap items-center justify-between/,
     )
+  })
+
+  it('uses one GOLD still in both themes with no invert or theme-switched src', () => {
+    expect(conversionHomeSrc).toMatch(/src=\{HERO_IMAGE_SRC\}/)
+    expect(conversionHomeSrc).not.toMatch(/dark:.*HERO_IMAGE|HERO_IMAGE.*dark:/)
+    expect(conversionHomeSrc).not.toMatch(/invert|brightness-|hue-rotate|filter:/)
+    expect(conversionHomeSrc.match(/src=\{HERO_IMAGE_SRC\}/g)?.length).toBe(1)
+    expect(conversionPageSrc).toMatch(/url: HERO_IMAGE_SRC/)
+    expect(conversionPageSrc).toMatch(/images: \[HERO_IMAGE_SRC\]/)
+  })
+
+  it('ships the locked GOLD Architecture still at the public brand path', () => {
+    const bytes = readFileSync(
+      resolve(root, '../../public/brand/hero-evolved-architecture.png'),
+    )
+    expect(createHash('md5').update(bytes).digest('hex')).toBe(HERO_IMAGE_MD5)
   })
 
   it('keeps conversion `/` ad-free — no IAB, slots, or platform_ads', () => {

@@ -19,6 +19,8 @@ export const HOME_PATH = '/' as const
 
 /** Public still. Not under /home: middleware treats /home/* as the member app. */
 export const HERO_IMAGE_SRC = '/brand/hero-evolved-architecture.png' as const
+/** Locked GOLD still: hero-v4-cauldrons-02.png. Not pilot 01. */
+export const HERO_IMAGE_MD5 = 'f85975f745840817929c6b474dabbfc8' as const
 export const HERO_IMAGE_ALT = 'The Evolved Architecture' as const
 export const HERO_IMAGE_WIDTH = 1536
 export const HERO_IMAGE_HEIGHT = 1024
