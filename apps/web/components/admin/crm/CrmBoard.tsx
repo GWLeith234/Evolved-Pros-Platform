@@ -61,7 +61,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
     return prospects.filter(
       p =>
         p.full_name.toLowerCase().includes(q) ||
-        p.email.toLowerCase().includes(q) ||
+        (p.email ?? '').toLowerCase().includes(q) ||
         (p.company ?? '').toLowerCase().includes(q) ||
         (p.notes ?? '').toLowerCase().includes(q),
     )

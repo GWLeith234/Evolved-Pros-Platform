@@ -65,12 +65,14 @@ export async function POST(request: Request) {
   }
 
   const fullName = typeof body.full_name === 'string' ? body.full_name.trim() : ''
-  const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
+  const emailRaw = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
+  const email = emailRaw && emailRaw.includes('@') ? emailRaw : null
+  const phone = typeof body.phone === 'string' ? body.phone.trim() : ''
   if (!fullName) {
     return NextResponse.json({ error: 'full_name is required' }, { status: 422 })
   }
-  if (!email || !email.includes('@')) {
-    return NextResponse.json({ error: 'Valid email is required' }, { status: 422 })
+  if (!email && !phone) {
+    return NextResponse.json({ error: 'Valid email or SMS is required' }, { status: 422 })
   }
 
   const stage: CrmStage =
@@ -122,7 +124,7 @@ export async function POST(request: Request) {
   const row = {
     full_name: fullName,
     email,
-    phone: typeof body.phone === 'string' ? body.phone.trim() || null : null,
+    phone: phone || null,
     company: typeof body.company === 'string' ? body.company.trim() || null : null,
     notes: typeof body.notes === 'string' ? body.notes.trim() || null : null,
     source: typeof body.source === 'string' ? body.source.trim() || null : null,

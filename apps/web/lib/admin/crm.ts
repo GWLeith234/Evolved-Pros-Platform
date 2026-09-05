@@ -2,6 +2,9 @@
 
 import { TIERS } from '@/lib/pricing'
 
+/** Exact product tag for Conversations AI leads. Must survive lowercase normalize. */
+export const AI_GEORGE_TAG = 'AI George'
+
 export const CRM_STAGES = [
   'lead',
   'prospect',
@@ -148,6 +151,8 @@ export function isEnrichmentStatus(v: unknown): v is CrmEnrichmentStatus {
  * Normalize a free-form tag list: trim, drop blanks, lowercase, dedupe, and
  * preserve first-seen order. Shared by the API layer and the edit form so a
  * round-trip through the modal can't silently reorder or duplicate tags.
+ *
+ * Exception: `AI George` keeps that exact casing (sprint S3 lock).
  */
 export function normalizeTags(input: unknown): string[] {
   if (!Array.isArray(input)) return []
@@ -155,10 +160,12 @@ export function normalizeTags(input: unknown): string[] {
   const out: string[] = []
   for (const raw of input) {
     if (typeof raw !== 'string') continue
-    const t = raw.trim().toLowerCase()
-    if (!t || seen.has(t)) continue
-    seen.add(t)
-    out.push(t)
+    const trimmed = raw.trim()
+    if (!trimmed) continue
+    const key = trimmed.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(key === AI_GEORGE_TAG.toLowerCase() ? AI_GEORGE_TAG : key)
   }
   return out
 }
@@ -251,7 +258,10 @@ export function communityUpgradeTargets(): CrmStage[] {
 }
 
 export function parseCrmProspect(r: Record<string, unknown>): CrmProspect | null {
-  if (typeof r.id !== 'string' || typeof r.email !== 'string') return null
+  // Email is optional after 087 (SMS-only AI George rows). A null email must
+  // still parse so the board does not drop the prospect.
+  if (typeof r.id !== 'string') return null
+  if (r.email != null && typeof r.email !== 'string') return null
   const valueRaw = r.value_monthly
   const value =
     typeof valueRaw === 'number'
