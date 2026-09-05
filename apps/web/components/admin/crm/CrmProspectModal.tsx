@@ -126,8 +126,8 @@ export function CrmProspectModal({
       setError('Name is required.')
       return
     }
-    if (!email.trim() || !email.includes('@')) {
-      setError('Valid email is required.')
+    if ((!email.trim() || !email.includes('@')) && !phone.trim()) {
+      setError('Valid email or SMS is required.')
       return
     }
     let value: number | null | undefined
@@ -255,7 +255,7 @@ export function CrmProspectModal({
           </div>
           <div>
             <label style={labelStyle} htmlFor="crm-email">Email</label>
-            <input id="crm-email" type="email" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} required />
+            <input id="crm-email" type="email" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>

@@ -8,6 +8,7 @@ import { AskGeorgeDrawer } from '@/components/layout/AskGeorgeDrawer'
 import { LogoMark } from '@/components/ui/LogoMark'
 import { useTheme } from '@/components/theme/ThemeProvider'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
+import { shouldOpenAskGeorgeFromSearch } from '@/lib/crm/aiGeorgeWidget'
 import { hasTierAccess } from '@/lib/tier'
 
 // The bell links straight to the /notifications feed (single destination —
@@ -102,6 +103,13 @@ export function TopNav({
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const displayName = profile.display_name ?? profile.full_name ?? ''
+
+  // CoS deep link: /home?ask=george opens the Conversations AI drawer.
+  // Read window.location so we do not wrap TopNav in a Suspense boundary.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (shouldOpenAskGeorgeFromSearch(window.location.search)) setAiOpen(true)
+  }, [])
 
   // Close dropdown when clicking / tapping outside (touch-friendly on mobile)
   useEffect(() => {

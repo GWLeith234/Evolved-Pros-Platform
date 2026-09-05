@@ -129,14 +129,23 @@ export function CrmCard({
           </span>
         </div>
 
-        <a
-          href={mailto}
-          className="font-condensed text-[12px] block truncate mb-2 hover:underline"
-          style={{ color: 'var(--admin-text-2)' }}
-          onClick={e => e.stopPropagation()}
-        >
-          {prospect.email}
-        </a>
+        {prospect.email ? (
+          <a
+            href={mailto}
+            className="font-condensed text-[12px] block truncate mb-2 hover:underline"
+            style={{ color: 'var(--admin-text-2)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {prospect.email}
+          </a>
+        ) : prospect.phone ? (
+          <p
+            className="font-condensed text-[12px] truncate mb-2"
+            style={{ color: 'var(--admin-text-2)', margin: '0 0 8px' }}
+          >
+            {prospect.phone}
+          </p>
+        ) : null}
 
         {prospect.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-2">
