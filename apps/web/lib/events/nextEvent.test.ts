@@ -8,6 +8,7 @@ import {
   isConquerLocalTitle,
   pickNextBannerEvent,
   pickUpcomingLockedEvent,
+  withoutConquerLocal,
 } from './nextEvent'
 
 const now = new Date('2026-09-05T12:00:00.000Z')
@@ -66,6 +67,13 @@ describe('pickNextBannerEvent', () => {
       now,
     )
     expect(afterMasterminds?.title).toBe(BOOK_EVENT_TITLE)
+  })
+
+  it('strips Conquer Local from any upcoming list', () => {
+    expect(withoutConquerLocal(catalog).map(e => e.title)).not.toContain(
+      'Conquer Local Podcast launches',
+    )
+    expect(withoutConquerLocal(catalog).some(e => e.title === BOOK_EVENT_TITLE)).toBe(true)
   })
 
   it('falls through to the soonest non-Conquer upcoming when no lock is future', () => {

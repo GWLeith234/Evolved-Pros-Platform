@@ -9,6 +9,7 @@ import { pickCommunityFeedAds } from '@/lib/sponsors/partners'
 import { adMatchesSurface } from '@/lib/ads/iab'
 import { COMMUNITY_AD_EVERY, interleaveAds } from '@/lib/ads/rhythm'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import { withoutConquerLocal } from '@/lib/events/nextEvent'
 
 export const revalidate = 120
 
@@ -151,8 +152,8 @@ export default async function MediaEventsPage() {
       .limit(5),
   ])
 
-  const upcomingEvents = (upcoming ?? []) as EventRow[]
-  const pastEvents = (past ?? []) as EventRow[]
+  const upcomingEvents = withoutConquerLocal((upcoming ?? []) as EventRow[])
+  const pastEvents = withoutConquerLocal((past ?? []) as EventRow[])
   const catalog = ((await getActivePlatformAds()) as SponsorAd[]).filter(a =>
     adMatchesSurface(a, 'events') || adMatchesSurface(a, 'media'),
   )

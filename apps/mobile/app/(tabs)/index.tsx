@@ -69,7 +69,9 @@ async function loadHomeData(userId: string): Promise<HomeData> {
     week:           joinedWeek,
     stats,
     recentActivity,
-    upcomingEvents: (eventsRes.data ?? []) as HomeData['upcomingEvents'],
+    upcomingEvents: ((eventsRes.data ?? []) as HomeData['upcomingEvents']).filter(
+      e => !/conquer local/i.test(e.title),
+    ),
   }
 }
 

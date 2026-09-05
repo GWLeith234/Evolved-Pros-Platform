@@ -1,5 +1,6 @@
 import { adminClient } from '@/lib/supabase/admin'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
+import { withoutConquerLocal } from '@/lib/events/nextEvent'
 
 interface Props {
   pillarId: string
@@ -40,7 +41,7 @@ export async function LiveSessionCard({ pillarNumber }: Props) {
     .order('starts_at', { ascending: true })
     .limit(3)
 
-  const upcoming = (events ?? []) as EventRow[]
+  const upcoming = withoutConquerLocal((events ?? []) as EventRow[])
 
   return (
     <div

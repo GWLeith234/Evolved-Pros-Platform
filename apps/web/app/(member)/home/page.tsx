@@ -31,7 +31,7 @@ import {
   isVisibleWin,
   pickFuelLiveEvent,
 } from '@/lib/home/bands'
-import { pickUpcomingLockedEvent } from '@/lib/events/nextEvent'
+import { pickUpcomingLockedEvent, withoutConquerLocal } from '@/lib/events/nextEvent'
 
 import { enqueueSessionNudges } from '@/lib/notifications/nudges'
 
@@ -335,8 +335,8 @@ async function fetchPinnedLiveEvent(userId: string | null): Promise<(PulseEvent 
       .limit(20) as Promise<{ data: FuelLiveRow[] | null }>,
   ])
 
-  const nextLocked = pickUpcomingLockedEvent(upcomingRes.data ?? [])
-  const row = pickFuelLiveEvent(startedRes.data ?? [], nextLocked)
+  const nextLocked = pickUpcomingLockedEvent(withoutConquerLocal(upcomingRes.data ?? []))
+  const row = pickFuelLiveEvent(withoutConquerLocal(startedRes.data ?? []), nextLocked)
   if (!row) return null
 
   let initiallyRsvpd = false

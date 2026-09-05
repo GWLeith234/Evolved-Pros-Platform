@@ -7,6 +7,7 @@ import { eventTypeBadge } from '@/lib/events/types'
 import { hasTierAccess } from '@/lib/tier'
 import { buildUpgradeHref, tierBadgeLabel } from '@/lib/academy/gating'
 import type { HeroEvent } from './CinematicHero'
+import { withoutConquerLocal } from '@/lib/events/nextEvent'
 
 interface UpcomingEventsListProps {
   events: HeroEvent[]
@@ -48,7 +49,7 @@ export function UpcomingEventsList({ events, registeredIds, viewerTier }: Upcomi
   const [inflightId, setInflightId] = useState<string | null>(null)
 
   const sorted = useMemo(
-    () => [...events].sort((a, b) =>
+    () => withoutConquerLocal(events).sort((a, b) =>
       new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime(),
     ),
     [events],
