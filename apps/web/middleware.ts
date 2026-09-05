@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
+import { RETURN_PATH_HEADER, loginHrefFor, returnPathFromRequest } from '@/lib/auth/gatedIntent'
 
 const PUBLIC_ROUTES = [
   '/login',
@@ -38,8 +39,16 @@ const PUBLIC_ROUTES = [
 const SESSION_OPTIONAL_ROUTES = ['/membership', '/pricing', '/live']
 const ADMIN_ROUTES = ['/admin', '/api/admin']
 
+function returnPathHeaders(request: NextRequest): { returnPath: string; headers: Headers } {
+  const returnPath = returnPathFromRequest(request.nextUrl.pathname, request.nextUrl.search)
+  const headers = new Headers(request.headers)
+  headers.set(RETURN_PATH_HEADER, returnPath)
+  return { returnPath, headers }
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const { returnPath, headers: requestHeaders } = returnPathHeaders(request)
 
   // Media subdomain: skip all auth — entire site is public
   const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? ''
@@ -88,7 +97,9 @@ export async function middleware(request: NextRequest) {
   }
 
   // Official Supabase SSR pattern: refresh session and protect routes
-  let supabaseResponse = NextResponse.next({ request })
+  let supabaseResponse = NextResponse.next({
+    request: { headers: requestHeaders },
+  })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -102,7 +113,9 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           )
-          supabaseResponse = NextResponse.next({ request })
+          supabaseResponse = NextResponse.next({
+            request: { headers: requestHeaders },
+          })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options as any)
           )
@@ -144,8 +157,7 @@ export async function middleware(request: NextRequest) {
     // token-refresh attempt). A bare NextResponse.redirect() drops them, which
     // can drop the user's session on the very next request — the symptom QA hit
     // when /home → /podcast or /home → /live unexpectedly bounced to /login.
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    const url = new URL(loginHrefFor(returnPath), request.url)
     const redirect = NextResponse.redirect(url)
     supabaseResponse.cookies.getAll().forEach(c => {
       redirect.cookies.set(c.name, c.value, c)

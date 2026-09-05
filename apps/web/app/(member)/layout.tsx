@@ -11,6 +11,7 @@ import {
 import { ToastProvider } from '@/lib/toast'
 import { SkipToContent } from '@/components/a11y/SkipToContent'
 import { LiveAnnouncerProvider } from '@/components/a11y/LiveAnnouncer'
+import { RETURN_PATH_HEADER, loginHrefFor } from '@/lib/auth/gatedIntent'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { getPlatformSettingsMap } from '@/lib/cache/shared'
 import { ThemeSync } from '@/components/theme/ThemeSync'
@@ -72,7 +73,10 @@ export default async function MemberLayout({ children }: { children: React.React
   // /login — the bug QA hit on /podcast nav. resolveCurrentUser also goes
   // through adminClient so RLS on public.users can't shadow the read.
   const profile = await resolveCurrentUser(supabase)
-  if (!profile) redirect('/login')
+  if (!profile) {
+    const returnPath = h.get(RETURN_PATH_HEADER) ?? '/home'
+    redirect(loginHrefFor(returnPath))
+  }
 
   // Normalize tier and role to lowercase so all downstream comparisons work
   // regardless of how values were stored (e.g. 'Pro' vs 'pro', 'Admin' vs 'admin')

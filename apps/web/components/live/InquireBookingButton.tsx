@@ -2,11 +2,13 @@
 
 import { useId, useState } from 'react'
 import { Modal } from '@/components/ui/Modal'
+import { Tooltip } from '@/components/ui/Tooltip'
+import { INQUIRE_BOOKING_LABEL, INQUIRE_BOOKING_TOOLTIP } from '@/lib/live/s4-cta'
 import { BookingInquiryForm, BookingInquiryHeading } from './BookingInquiryForm'
 
 const FBC = 'Barlow Condensed, sans-serif'
 
-export const INQUIRE_BOOKING_LABEL = 'Inquire about booking'
+export { INQUIRE_BOOKING_LABEL, INQUIRE_BOOKING_TOOLTIP }
 
 export function BookingInquiryModal({
   open,
@@ -67,23 +69,29 @@ export function InquireBookingButton({
   children = INQUIRE_BOOKING_LABEL,
   className,
   style,
+  tooltip = INQUIRE_BOOKING_TOOLTIP,
 }: {
   children?: React.ReactNode
   className?: string
   style?: React.CSSProperties
+  tooltip?: string | null
 }) {
   const [open, setOpen] = useState(false)
 
+  const button = (
+    <button
+      type="button"
+      className={className}
+      style={style}
+      onClick={() => setOpen(true)}
+    >
+      {children}
+    </button>
+  )
+
   return (
     <>
-      <button
-        type="button"
-        className={className}
-        style={style}
-        onClick={() => setOpen(true)}
-      >
-        {children}
-      </button>
+      {tooltip ? <Tooltip content={tooltip}>{button}</Tooltip> : button}
       <BookingInquiryModal open={open} onClose={() => setOpen(false)} />
     </>
   )

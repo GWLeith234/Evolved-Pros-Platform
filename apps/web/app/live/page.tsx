@@ -64,13 +64,13 @@ export default async function LivePage() {
 
   return (
     <div
-      className="live-force-dark"
+      className="live-force-dark live-page-shell"
       style={{
         minHeight: '100vh',
         background: 'var(--bg-page)',
         color: 'var(--text-strong)',
-        /* When members arrive via bottom tab they still need bottom inset room */
-        paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))',
+        /* Bottom inset lives on .live-page-shell so the mobile inquire bar
+           can raise it without an inline style fight. */
       }}
     >
       {user && (
