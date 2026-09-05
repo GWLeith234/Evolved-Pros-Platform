@@ -6,15 +6,19 @@ export type PillarNumber = 1 | 2 | 3 | 4 | 5 | 6
 
 export const PILLAR_NUMBERS: PillarNumber[] = [1, 2, 3, 4, 5, 6]
 
-// Same short labels as the Community feed PILLAR filter (and the mobile
-// screenshot). Kept here so compose tagging and the filter cannot drift.
+// CoS lock: same short labels as the feed PILLAR row / Home badge language.
+// Number lives in the circle; this is the caption under it. No trailing period.
 export const PILLAR_ABBREV: Record<PillarNumber, string> = {
-  1: 'FOUND.',
-  2: 'IDENT.',
+  1: 'FOUND',
+  2: 'IDENT',
   3: 'MENTAL',
-  4: 'STRAT.',
-  5: 'ACCT.',
-  6: 'EXEC.',
+  4: 'STRAT',
+  5: 'ACCT',
+  6: 'EXEC',
+}
+
+export function pillarFillToken(n: PillarNumber): string {
+  return `var(--pillar-${n})`
 }
 
 /**
@@ -52,7 +56,7 @@ const BADGE_STYLES = `
   .pillar-number-badge-row > * { flex-shrink: 0; }
   .pillar-number-badge-abbrev {
     display: none;
-    font-family: "Barlow Condensed", sans-serif;
+    font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
     font-weight: 700;
     font-size: 12px;
     letter-spacing: 0.06em;
@@ -87,7 +91,7 @@ export function PillarNumberBadge({
   ariaLabel,
   abbrev = 'mobile',
 }: PillarNumberBadgeProps) {
-  const color = PILLAR_CONFIG[n].color
+  const color = pillarFillToken(n)
   const className = abbrev === 'always'
     ? 'pillar-number-badge pillar-number-badge--abbrev-always'
     : 'pillar-number-badge'
@@ -113,9 +117,9 @@ export function PillarNumberBadge({
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: '"Bebas Neue", sans-serif',
+          fontFamily: 'var(--font-bebas), "Bebas Neue", sans-serif',
           fontSize: 12,
-          color: '#0A0F18',
+          color: 'var(--navy-abyss)',
           transition: 'opacity 120ms ease, border-color 120ms ease',
         }}
       >
