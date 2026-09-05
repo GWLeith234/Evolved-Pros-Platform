@@ -14,7 +14,7 @@ export const BOOK_EVENT_TITLE = 'EVOLVED book launches October 15'
 export const MASTERMIND_EVENT_TITLE = 'AI Masterminds for Senior Execs'
 
 export const MASTERMIND_EVENT_DETAIL =
-  'Starts Oct 2, then every Friday after at 2:00 PM America/Chicago (CST). Professional Tier only.'
+  'Starts October 2, then every Friday at 2:00 PM America/Chicago (CST). Professional Tier only.'
 
 export const LOCKED_EVENT_TITLES = [
   LAUNCH_EVENT_TITLE,

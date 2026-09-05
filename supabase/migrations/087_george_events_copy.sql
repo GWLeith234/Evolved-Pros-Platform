@@ -115,7 +115,7 @@ INSERT INTO public.events (
 )
 SELECT
   'AI Masterminds for Senior Execs',
-  'Starts Oct 2, then every Friday after at 2:00 PM America/Chicago (CST). Professional Tier only.',
+  'Starts October 2, then every Friday at 2:00 PM America/Chicago (CST). Professional Tier only.',
   'Every Friday at 2:00 PM America/Chicago. Professional Tier only.',
   'live',
   'live',
@@ -137,6 +137,12 @@ WHERE NOT EXISTS (
   WHERE e.title = 'AI Masterminds for Senior Execs'
     AND e.starts_at = ts
 );
+
+UPDATE public.events
+SET
+  description = 'Starts October 2, then every Friday at 2:00 PM America/Chicago (CST). Professional Tier only.',
+  tagline = 'Every Friday at 2:00 PM America/Chicago. Professional Tier only.'
+WHERE title = 'AI Masterminds for Senior Execs';
 
 -- CoS featured lock is the April 28 launch (EP-EVENTS-APR28-BOOK-OCT15).
 -- Unique partial index allows only one featured row.
