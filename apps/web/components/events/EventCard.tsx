@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { formatEventDate, formatDuration, EVENT_TYPE_LABELS } from '@/lib/events/types'
 import type { EventItem } from '@/lib/events/types'
 import { buildUpgradeHref, tierBadgeLabel, tierPlanName } from '@/lib/academy/gating'
+import { eventCardImageAlt, eventCardImageUrl } from '@/lib/events/cityStock'
 
 const TYPE_GRADIENTS: Record<string, string> = {
   live:     'linear-gradient(135deg, #1a0a0a, #3d1515, #1B2A4A)',
@@ -131,17 +132,13 @@ export function EventCard({ event, isRegistered: initialRegistered, hasAccess, o
     >
       {/* Banner */}
       <Link href={`/events/${event.id}`} tabIndex={-1}>
-        <div className="relative w-full overflow-hidden" style={{ height: '160px' }}>
-          {event.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={event.imageUrl}
-              alt={event.title}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          ) : (
-            <div className="absolute inset-0" style={{ background: gradient }} />
-          )}
+        <div className="relative w-full overflow-hidden" style={{ height: '160px', background: gradient }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={eventCardImageUrl(event.imageUrl)}
+            alt={eventCardImageAlt(event.city)}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
           {/* Darkening overlay */}
           <div
             className="absolute inset-0"

@@ -81,18 +81,51 @@ describe('Home band markup', () => {
           age: '2h',
         }}
         live={{
-          title: 'Pipeline Sprint Workshop',
+          title: 'GTM 2026 — Pavilion Annual Conference',
           href: '/events/1',
           whenLabel: 'Thu Sep 11 · 12:00 PM CT',
           isLive: true,
+          imageUrl: 'https://images.unsplash.com/photo-1605833556294-ea5c7a74f57d?auto=format&fit=crop&w=1400&q=80',
+          city: 'Las Vegas',
         }}
       />,
     )
     expect(fuel).toContain('Resume lesson')
     expect(fuel).toContain('Join thread')
     expect(fuel).toContain('Save my seat')
-    expect(fuel).toContain('Pipeline Sprint Workshop')
+    expect(fuel).toContain('GTM 2026. Pavilion Annual Conference')
+    expect(fuel).toContain('/academy/architecture-still-light.svg')
+    expect(fuel).toContain('/academy/architecture-still-dark.svg')
+    expect(fuel).toContain('Evolved Pros Academy architecture')
+    expect(fuel).toContain('photo-1605833556294-ea5c7a74f57d')
+    expect(fuel).toContain('Stock photo of Las Vegas')
     expect(fuel).not.toMatch(/\u2014|\u2013/)
+
+    const empty = renderToStaticMarkup(<HomeFuelBand academy={null} thread={null} live={null} />)
+    expect(empty).toContain('Open the Academy')
+    expect(empty).toContain('Start Foundation when you are ready.')
+    expect(empty).toContain('/academy/architecture-still-light.svg')
+    expect(empty).not.toContain('/events/city-fallback.svg')
+    expect(empty).toContain('Watch the calendar for the next workshop.')
+    expect(empty).not.toMatch(/\u2014|\u2013/)
+
+    const unknownCity = renderToStaticMarkup(
+      <HomeFuelBand
+        academy={null}
+        thread={null}
+        live={{
+          title: 'Friday Mastermind',
+          href: '/events/2',
+          whenLabel: 'Fri Oct 2 · 2:00 PM CT',
+          isLive: false,
+          imageUrl: null,
+          city: null,
+        }}
+      />,
+    )
+    expect(unknownCity).toContain('/events/city-fallback.svg')
+    expect(unknownCity).toContain('alt="Event"')
+    expect(unknownCity).not.toMatch(/\u2014|\u2013/)
   })
 
   it('shows the guest still on episode cards and keeps Juan on the public path', () => {

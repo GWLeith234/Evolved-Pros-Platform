@@ -303,15 +303,19 @@ type FuelLiveRow = {
   starts_at: string
   ends_at: string | null
   attending_count: number | null
+  image_url: string | null
+  city: string | null
 }
 
 async function fetchPinnedLiveEvent(userId: string | null): Promise<(PulseEvent & {
   endsAt: string | null
   eventType: string | null
   startsAt: string
+  imageUrl: string | null
+  city: string | null
 }) | null> {
   const nowIso = new Date().toISOString()
-  const eventSelect = 'id, title, format, event_type, starts_at, ends_at, attending_count'
+  const eventSelect = 'id, title, format, event_type, starts_at, ends_at, attending_count, image_url, city'
   // Recent started rows + upcoming. pickUpcomingLockedEvent prefers the
   // CoS/George locks (book / Masterminds) and drops Conquer Local. Live vs
   // stale is then decided in pickFuelLiveEvent so a missing ends_at cannot
@@ -361,6 +365,8 @@ async function fetchPinnedLiveEvent(userId: string | null): Promise<(PulseEvent 
     endsAt: row.ends_at,
     eventType: row.event_type ?? row.format,
     startsAt: row.starts_at,
+    imageUrl: row.image_url ?? null,
+    city: row.city ?? null,
   }
 }
 
@@ -650,6 +656,8 @@ export default async function MemberHomePage() {
         href: `/events/${pinnedLiveEvent.id}`,
         whenLabel: `${pinnedLiveEvent.dayLabel} · ${pinnedLiveEvent.timeLabel}`,
         isLive: isEventHappeningNow(pinnedLiveEvent.startsAt, pinnedLiveEvent.endsAt),
+        imageUrl: pinnedLiveEvent.imageUrl,
+        city: pinnedLiveEvent.city,
       }
     : null
 

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ImagePicker } from '@/components/admin/ImagePicker'
+import { isManagedEventImage } from '@/lib/events/cityStock'
 
 interface EventFormValues {
   title: string
@@ -16,6 +17,7 @@ interface EventFormValues {
   zoomUrl: string
   recordingUrl: string
   imageUrl: string
+  city: string
   requiredTier: 'community' | 'vip' | 'pro' | ''
   tierAccess: 'all' | 'vip' | 'pro'
   isPublished: boolean
@@ -38,6 +40,7 @@ const DEFAULT_VALUES: EventFormValues = {
   zoomUrl: '',
   recordingUrl: '',
   imageUrl: '',
+  city: '',
   requiredTier: '',
   tierAccess: 'all',
   isPublished: false,
@@ -71,6 +74,12 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState<string | null>(null)
   const [aiImagePrompt, setAiImagePrompt] = useState<string>('')
+  const [cityHint, setCityHint] = useState<string | null>(null)
+  const [cityLoading, setCityLoading] = useState(false)
+  const [imageLocked, setImageLocked] = useState(() => {
+    const url = initialValues?.imageUrl ?? ''
+    return Boolean(url) && !isManagedEventImage(url)
+  })
 
   async function handleAIWrite() {
     if (!values.title.trim()) {
@@ -101,7 +110,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
       }))
       setAiImagePrompt(ev.image_prompt ?? '')
     } catch (err) {
-      setAiError(err instanceof Error ? err.message : 'Could not generate — try again')
+      setAiError(err instanceof Error ? err.message : 'Could not generate. Try again.')
     } finally {
       setAiLoading(false)
     }
@@ -109,6 +118,38 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
 
   function set<K extends keyof EventFormValues>(key: K, value: EventFormValues[K]) {
     setValues(prev => ({ ...prev, [key]: value }))
+  }
+
+  async function fetchCityStock(rawCity: string) {
+    setCityLoading(true)
+    setCityHint(null)
+    try {
+      const res = await fetch(`/api/admin/events/city-image?city=${encodeURIComponent(rawCity.trim())}`)
+      const data = await res.json() as {
+        city: string | null
+        imageUrl: string
+        fallback: boolean
+      }
+      if (!res.ok) throw new Error('Could not look up city photo')
+      if (!imageLocked) {
+        setValues(prev => ({
+          ...prev,
+          city: data.city ?? prev.city,
+          imageUrl: data.imageUrl,
+        }))
+      } else if (data.city) {
+        setValues(prev => ({ ...prev, city: data.city ?? prev.city }))
+      }
+      setCityHint(
+        data.fallback
+          ? 'City unknown or not in the catalog. Using the fallback still.'
+          : `Using a stock photo of ${data.city}.`,
+      )
+    } catch {
+      setCityHint('Could not look up a city photo. The fallback still will be used.')
+    } finally {
+      setCityLoading(false)
+    }
   }
 
   async function save(asDraft: boolean) {
@@ -127,6 +168,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
       zoom_url: values.zoomUrl.trim() || null,
       recording_url: values.recordingUrl.trim() || null,
       image_url: values.imageUrl.trim() || null,
+      city: values.city.trim() || null,
       required_tier: values.requiredTier || null,
       tier_access: values.tierAccess,
       is_published: !asDraft,
@@ -173,10 +215,10 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
         router.push('/admin/events')
         router.refresh()
       } else {
-        window.alert('Delete failed — please try again')
+        window.alert('Delete failed. Please try again.')
       }
     } catch {
-      window.alert('Delete failed — please try again')
+      window.alert('Delete failed. Please try again.')
     }
   }
 
@@ -240,7 +282,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
             {aiImagePrompt}
           </p>
           <p className="font-condensed text-[10px] mt-1" style={{ color: 'var(--admin-text-2)' }}>
-            Tagline, CTA, description and pillar were filled in below — this prompt is for the image generator.
+            Tagline, CTA, description and pillar were filled in below. This prompt is for the image generator.
           </p>
         </div>
       )}
@@ -294,7 +336,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
             className={inputClass}
             style={inputStyle}
           >
-            <option value="">— none —</option>
+            <option value="">None</option>
             <option value="foundation">Foundation</option>
             <option value="identity">Identity</option>
             <option value="mental">Mental Toughness</option>
@@ -325,6 +367,27 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* City (stock photo on add / edit) */}
+      <div>
+        <label className={labelClass}>City</label>
+        <input
+          type="text"
+          value={values.city}
+          onChange={e => set('city', e.target.value)}
+          onBlur={() => { void fetchCityStock(values.city) }}
+          maxLength={80}
+          className={inputClass}
+          style={inputStyle}
+          placeholder="Leave blank if the city is unknown"
+        />
+        <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)] mt-1">
+          {cityLoading
+            ? 'Looking up a stock photo of this city…'
+            : cityHint
+              ?? 'A stock photo of this city fills the event card. Do not invent a city.'}
+        </p>
       </div>
 
       {/* Dates */}
@@ -382,7 +445,10 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
       <ImagePicker
         label="Event Cover Image"
         value={values.imageUrl || null}
-        onChange={url => set('imageUrl', url)}
+        onChange={url => {
+          setImageLocked(Boolean(url))
+          set('imageUrl', url)
+        }}
       />
 
       {/* Tier Access */}
