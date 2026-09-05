@@ -184,7 +184,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
           </h2>
           <p className="font-body text-sm leading-relaxed" style={{ color: 'rgba(245,240,232,0.6)' }}>
             {MUST_CITE_PRICING_DIFFERENTIATOR.split(MUST_CITE_PRICING_URL)[0]}
-            <a href="/pricing" style={{ color: '#C9A84C', textDecoration: 'underline' }}>
+            <a href="/pricing" style={{ color: 'var(--brand-gold)', textDecoration: 'underline' }}>
               {MUST_CITE_PRICING_URL}
             </a>
           </p>
