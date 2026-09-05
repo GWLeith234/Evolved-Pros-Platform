@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
@@ -8,6 +7,7 @@ import {
   NextEventBannerClient,
   RightRailClient,
 } from '@/components/layout/MemberChromeClient'
+import { PublicChromeHeader } from '@/components/layout/PublicChromeHeader'
 import { ToastProvider } from '@/lib/toast'
 import { SkipToContent } from '@/components/a11y/SkipToContent'
 import { LiveAnnouncerProvider } from '@/components/a11y/LiveAnnouncer'
@@ -31,21 +31,7 @@ export default async function PodcastLayout({ children }: { children: React.Reac
   if (!profile) {
     return (
       <div style={{ minHeight: '100dvh', background: '#0A0F18' }}>
-        <header
-          className="flex items-center justify-between px-6 py-4"
-          style={{ borderBottom: '1px solid rgba(245,240,232,0.06)' }}
-        >
-          <Link href="/podcast" className="font-condensed text-[14px] font-bold tracking-[0.18em]" style={{ color: '#F5F0E8', textDecoration: 'none' }}>
-            EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS
-          </Link>
-          <Link
-            href="/login"
-            className="rounded px-4 py-2 font-condensed text-[11px] font-bold uppercase tracking-[0.1em] transition-opacity hover:opacity-80"
-            style={{ color: '#F5F0E8', border: '1px solid rgba(245,240,232,0.15)', textDecoration: 'none' }}
-          >
-            Sign in
-          </Link>
-        </header>
+        <PublicChromeHeader signInHref="/login" />
         <main id="main-content" tabIndex={-1}>{children}</main>
       </div>
     )

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { adminClient } from '@/lib/supabase/admin'
+import { PublicChromeHeader } from '@/components/layout/PublicChromeHeader'
 import { WelcomeClaim } from './WelcomeClaim'
 
 export const metadata: Metadata = {
@@ -37,18 +38,7 @@ export default async function WelcomePage({
       style={{ backgroundColor: '#0A0F18', minHeight: '100vh' }}
       className="flex flex-col"
     >
-      <header
-        className="flex items-center justify-between px-6 py-4"
-        style={{ borderBottom: '1px solid rgba(245,240,232,0.06)' }}
-      >
-        <Link
-          href="/"
-          className="font-condensed font-bold tracking-[0.18em] text-[14px]"
-          style={{ color: '#F5F0E8', textDecoration: 'none' }}
-        >
-          EVOLVED<span style={{ color: '#C9302A' }}>·</span>PROS
-        </Link>
-      </header>
+      <PublicChromeHeader />
 
       <div className="flex-1 flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-lg text-center">
