@@ -2,7 +2,7 @@ import { logos } from '@evolved-pros/ui'
 
 /**
  * Footer lockup: the shipped horizontal PNG has ~125px of empty canvas on
- * the left, so a raw <img> sits indented of JOIN FREE / Privacy. The red
+ * the left, so a raw image sits indented of JOIN FREE / Privacy. The red
  * disc is also taller than the wordmark and, on the white-on-dark file,
  * sits high of the cap-height.
  *

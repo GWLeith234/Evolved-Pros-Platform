@@ -94,7 +94,7 @@ describe('footer logo lockup', () => {
   it('crops the shipped horizontal PNG instead of inventing a new mark', () => {
     expect(logoTsx).toContain('logos.horizontalDark')
     expect(logoTsx).toContain('logos.horizontalNavy')
-    expect(logoTsx).not.toContain('<img')
+    expect(logoTsx).not.toMatch(/<img[\s>/]/)
     expect(footerTsx).toContain('<FooterLogo')
     expect(footerTsx).not.toContain('next/image')
   })
