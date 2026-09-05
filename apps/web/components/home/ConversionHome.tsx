@@ -110,7 +110,7 @@ export function ConversionHome({
       <main>
         <section
           aria-label={HERO_IMAGE_ALT}
-          className="relative aspect-[3/2] w-full overflow-hidden bg-paper"
+          className="relative aspect-[3/2] w-full overflow-hidden bg-page"
         >
           <Image
             src={HERO_IMAGE_SRC}
