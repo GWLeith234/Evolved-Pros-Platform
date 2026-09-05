@@ -15,7 +15,7 @@ interface FeedAdUnitProps {
 export function FeedAdUnit({ ad }: FeedAdUnitProps) {
   if (isIabImageStill(ad) && ad.image_url) {
     return (
-      <div style={{ marginBottom: 10 }}>
+      <div className="ep-ad-slot">
         <IabAdvertisementSlot ad={{ ...ad, image_url: ad.image_url }} locationId="community-feed" />
       </div>
     )
@@ -35,11 +35,11 @@ export function FeedAdUnit({ ad }: FeedAdUnitProps) {
         border: '1px solid var(--border-color)',
         borderLeft: '3px solid var(--brand-red, #C9302A)',
         borderRadius: 0,
-        padding: '14px 16px',
+        padding: '16px',
         display: 'flex',
         alignItems: 'center',
         gap: 14,
-        marginBottom: 10,
+        marginBlock: 'var(--space-ad)',
         transition: 'border-color 160ms ease, box-shadow 160ms ease',
       }}
     >

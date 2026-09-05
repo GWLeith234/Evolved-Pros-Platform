@@ -7,6 +7,7 @@ import {
   colors,
   themes,
   spacing,
+  rhythm,
   radii,
   shadows,
   gradients,
@@ -40,6 +41,19 @@ describe('design tokens', () => {
     expect(shadows.md).toContain('--shadow-md')
     expect(gradients.primary).toContain('linear-gradient')
     expect(gradients.success).toContain('#0ABFA3')
+  })
+
+  it('locks semantic vertical rhythm on the 16/24/32/40 scale', () => {
+    expect(rhythm.stack).toBe('24px')
+    expect(rhythm.stackLg).toBe('32px')
+    expect(rhythm.ad).toBe('24px')
+    expect(rhythm.adLean).toBe('16px')
+    expect(rhythm.section).toBe('16px')
+    expect(rhythm.rule).toBe('16px')
+    expect(rhythm.pageTop).toBe('16px')
+    expect(rhythm.pageTopMd).toBe('24px')
+    expect(rhythm.card).toBe('16px')
+    expect(rhythm.cardLg).toBe('24px')
   })
 
   it('locks all six pillar colors', () => {

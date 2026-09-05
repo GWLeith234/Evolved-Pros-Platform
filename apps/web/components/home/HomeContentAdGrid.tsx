@@ -143,7 +143,6 @@ export function HomeEndBox({ ad }: { ad: SponsorAd | null }) {
       style={{
         display: 'flex',
         justifyContent: 'center',
-        padding: '28px 0 8px',
         minHeight: 600,
       }}
     >

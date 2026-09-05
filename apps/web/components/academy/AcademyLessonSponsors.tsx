@@ -35,10 +35,11 @@ export function AcademyLessonSponsors({
     <section
       aria-label={aria}
       data-ad-rhythm="unit"
+      className={hideHeader ? undefined : 'ep-ad-slot'}
       style={{
-        marginTop: hideHeader ? 0 : 8,
-        marginBottom: hideHeader ? 0 : 40,
-        paddingTop: hideHeader ? 0 : 28,
+        marginTop: hideHeader ? 0 : undefined,
+        marginBottom: hideHeader ? 0 : undefined,
+        paddingTop: hideHeader ? 0 : undefined,
         borderTop: hideHeader ? 'none' : '1px solid var(--border-color, rgba(255,255,255,0.08))',
         display: 'flex',
         justifyContent: 'center',

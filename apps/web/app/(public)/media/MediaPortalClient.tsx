@@ -624,7 +624,7 @@ function MediaScrollBanner({ ad }: { ad: SponsorAd }) {
         display: 'flex',
         justifyContent: 'center',
         width: '100%',
-        padding: '8px 0 4px',
+        paddingBlock: 'var(--space-ad-lean)',
       }}
     >
       <MediaIabSlot ad={ad} locationId="media-scroll" />

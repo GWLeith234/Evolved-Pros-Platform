@@ -10,10 +10,10 @@ export default function HomeLoading() {
     <div
       role="status"
       aria-label="Loading home"
-      className="ep-page-gutter space-y-5 px-6 pb-6"
+      className="ep-page-gutter ep-stack px-6 pb-6"
       style={{ background: 'var(--bg-page)', minHeight: '60vh' }}
     >
-      <div style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }} className="space-y-5 pt-2">
+      <div style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }} className="ep-stack">
         {/* Welcome banner */}
         <div
           style={{

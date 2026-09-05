@@ -71,7 +71,6 @@ export function SponsorAdCard({ ad, locationId = 'home' }: { ad: SponsorAd; loca
       <IabAdvertisementSlot
         ad={{ ...ad, image_url: ad.image_url }}
         locationId={locationId}
-        className="pt-3"
       />
     )
   }
@@ -81,12 +80,11 @@ export function SponsorAdCard({ ad, locationId = 'home' }: { ad: SponsorAd; loca
       <IabAdvertisementSlot
         ad={{ ...ad, image_url: ad.image_url }}
         locationId={locationId}
-        className="pt-3"
       />
     )
   }
 
-  if (isAcademyAd(ad)) return <AcademyArchitectureCard ad={ad} className="pt-3" locationId={locationId} />
+  if (isAcademyAd(ad)) return <AcademyArchitectureCard ad={ad} locationId={locationId} />
 
   const href = [ad.click_url, ad.link_url].find(u => u && u !== '#') ?? null
   const name = ad.sponsor_name ?? ad.tool_name ?? 'Advertisement'
@@ -174,14 +172,14 @@ export function SponsorAdCard({ ad, locationId = 'home' }: { ad: SponsorAd; loca
         href={href}
         target="_blank"
         rel="noopener noreferrer sponsored"
-        className="group block h-full pt-3 no-underline"
+        className="group block h-full no-underline"
       >
         {card}
       </a>
     )
   }
 
-  return <div className="group h-full pt-3">{card}</div>
+  return <div className="group h-full">{card}</div>
 }
 
 export function SponsoredEyebrow() {
@@ -217,7 +215,7 @@ export function HomeSponsorAd({ ad }: { ad: SponsorAd | null }) {
 
   if (isIabImageStill(ad)) {
     return (
-      <section aria-label="Advertisement">
+      <section aria-label="Advertisement" className="ep-ad-slot">
         <SponsorAdCard ad={ad} locationId="home" />
       </section>
     )
@@ -225,14 +223,14 @@ export function HomeSponsorAd({ ad }: { ad: SponsorAd | null }) {
 
   if (isAcademyAd(ad)) {
     return (
-      <section aria-label="Evolved Pros Academy">
+      <section aria-label="Evolved Pros Academy" className="ep-ad-slot">
         <SponsorAdCard ad={ad} locationId="home" />
       </section>
     )
   }
 
   return (
-    <section aria-label="Sponsored">
+    <section aria-label="Sponsored" className="ep-ad-slot">
       <SponsoredEyebrow />
       <SponsorAdCard ad={ad} locationId="home" />
     </section>

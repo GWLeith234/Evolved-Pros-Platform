@@ -12,7 +12,7 @@ export default function CommunityLoading() {
       className="flex-1"
       style={{ background: 'var(--bg-page)', minHeight: '60vh' }}
     >
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '16px 16px 32px' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 16px 32px' }}>
         {/* Header */}
         <div style={{ padding: '16px 8px 20px' }}>
           <Skeleton height={12} width={100} className="mb-3" />

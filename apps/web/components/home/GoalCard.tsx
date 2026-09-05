@@ -110,7 +110,7 @@ export function GoalCard({ goal, inProgressPillarSlug, inProgressContinueHref }:
         borderLeft: `3px solid ${accentColor}`,
       }}
     >
-      <div className="px-4 py-3">
+      <div className="px-4 py-4">
         <div className="flex items-start justify-between gap-2 mb-1">
           <span className="font-body font-bold text-[13px] leading-snug" style={{ color: 'var(--text-primary)' }}>
             {goal.title}

@@ -58,7 +58,7 @@ export function TileCard({ accent, eyebrowColor, eyebrow, title, newCount, child
           display: 'flex',
           alignItems: 'flex-start',
           justifyContent: 'space-between',
-          padding: '16px 16px 12px',
+          padding: '20px 16px 16px',
           gap: 8,
         }}
       >
@@ -78,7 +78,7 @@ export function TileCard({ accent, eyebrowColor, eyebrow, title, newCount, child
           </p>
           <h3
             style={{
-              margin: '4px 0 0',
+              margin: '8px 0 0',
               fontFamily: '"Bebas Neue", sans-serif',
               fontSize: 22,
               letterSpacing: '0.04em',
@@ -117,7 +117,7 @@ export function TileCard({ accent, eyebrowColor, eyebrow, title, newCount, child
       {footer && (
         <footer
           style={{
-            padding: '10px 16px',
+            padding: '16px',
             borderTop: '1px solid var(--border-color)',
           }}
         >

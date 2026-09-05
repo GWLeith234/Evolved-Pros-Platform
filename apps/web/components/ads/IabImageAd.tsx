@@ -152,7 +152,7 @@ export function IabAdvertisementSlot({
             color: labelColor,
             textTransform: 'uppercase',
             letterSpacing: '0.10em',
-            margin: '0 0 6px',
+            margin: '0 0 8px',
           }}
         >
           Advertisement
