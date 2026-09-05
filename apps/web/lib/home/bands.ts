@@ -104,6 +104,9 @@ export function remainingLessonLabel(
   return null
 }
 
+/** Default live window when an event has no ends_at. */
+export const LIVE_FALLBACK_MS = 60 * 60 * 1000
+
 export function isEventHappeningNow(
   startsAt: string,
   endsAt: string | null | undefined,
@@ -111,11 +114,27 @@ export function isEventHappeningNow(
 ): boolean {
   const start = new Date(startsAt).getTime()
   if (!Number.isFinite(start)) return false
-  const end = endsAt
-    ? new Date(endsAt).getTime()
-    : start + 60 * 60 * 1000
+  const parsedEnd = endsAt ? new Date(endsAt).getTime() : NaN
+  const end = Number.isFinite(parsedEnd) ? parsedEnd : start + LIVE_FALLBACK_MS
   const t = now.getTime()
   return t >= start && t <= end
+}
+
+export function pickFuelLiveEvent<T extends { starts_at: string; ends_at: string | null }>(
+  started: readonly T[],
+  upcoming: T | null,
+  now: Date = new Date(),
+): T | null {
+  return started.find(e => isEventHappeningNow(e.starts_at, e.ends_at, now)) ?? upcoming
+}
+
+export function isVisibleWin(row: {
+  kind?: string | null
+  post_type?: string | null
+  status?: string | null
+}): boolean {
+  if (row.status === 'rejected') return false
+  return row.kind === 'win' || row.post_type === 'win'
 }
 
 /** Guest still first. Juan EP010 stays on the public guest path. */

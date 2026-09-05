@@ -28,6 +28,8 @@ import {
   computeCheckInStreak,
   homeEpisodeStill,
   isEventHappeningNow,
+  isVisibleWin,
+  pickFuelLiveEvent,
 } from '@/lib/home/bands'
 
 import { enqueueSessionNudges } from '@/lib/notifications/nudges'
@@ -130,24 +132,27 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
 async function fetchWeeklyWins(userId: string): Promise<HomeWinChip[]> {
   const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString()
   try {
+    // Query wins directly so a busy week of updates cannot hide them.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: rows } = await (adminClient as any)
       .from('posts')
-      .select('id, body, kind, post_type, created_at, channels(slug)')
+      .select('id, body, kind, post_type, status, created_at, channels(slug)')
       .eq('author_id', userId)
+      .or('kind.eq.win,post_type.eq.win')
       .gte('created_at', weekAgo)
       .order('created_at', { ascending: false })
-      .limit(12) as { data: Array<{
+      .limit(8) as { data: Array<{
         id: string
         body: string | null
         kind: string | null
         post_type: string | null
+        status: string | null
         created_at: string
         channels: { slug: string | null } | null
       }> | null }
 
     return (rows ?? [])
-      .filter(r => r.kind === 'win' || r.post_type === 'win')
+      .filter(isVisibleWin)
       .slice(0, 3)
       .map(r => ({
         id: r.id,
@@ -304,32 +309,31 @@ async function fetchPinnedLiveEvent(userId: string | null): Promise<(PulseEvent 
   eventType: string | null
   startsAt: string
 }) | null> {
-  const now = new Date().toISOString()
-  // Prefer a session already in progress, then the next published date.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const liveRes = await (adminClient as any)
-    .from('events')
-    .select('id, title, format, event_type, starts_at, ends_at, attending_count')
-    .eq('is_published', true)
-    .lte('starts_at', now)
-    .or(`ends_at.is.null,ends_at.gte.${now}`)
-    .order('starts_at', { ascending: false })
-    .limit(1)
-    .maybeSingle() as { data: FuelLiveRow | null }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const upcomingRes = liveRes.data
-    ? { data: liveRes.data }
-    : await (adminClient as any)
+  const nowIso = new Date().toISOString()
+  const eventSelect = 'id, title, format, event_type, starts_at, ends_at, attending_count'
+  // Recent started rows + the next upcoming. Live vs stale is decided in
+  // pickFuelLiveEvent so a missing ends_at cannot pin an old workshop.
+  const [startedRes, upcomingRes] = await Promise.all([
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (adminClient as any)
       .from('events')
-      .select('id, title, format, event_type, starts_at, ends_at, attending_count')
+      .select(eventSelect)
       .eq('is_published', true)
-      .gt('starts_at', now)
+      .lte('starts_at', nowIso)
+      .order('starts_at', { ascending: false })
+      .limit(8) as Promise<{ data: FuelLiveRow[] | null }>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (adminClient as any)
+      .from('events')
+      .select(eventSelect)
+      .eq('is_published', true)
+      .gt('starts_at', nowIso)
       .order('starts_at', { ascending: true })
       .limit(1)
-      .maybeSingle() as { data: FuelLiveRow | null }
+      .maybeSingle() as Promise<{ data: FuelLiveRow | null }>,
+  ])
 
-  const row = upcomingRes.data
+  const row = pickFuelLiveEvent(startedRes.data ?? [], upcomingRes.data ?? null)
   if (!row) return null
 
   let initiallyRsvpd = false

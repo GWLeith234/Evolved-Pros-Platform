@@ -10,7 +10,9 @@ import {
   formatQuarterChip,
   homeEpisodeStill,
   isEventHappeningNow,
+  isVisibleWin,
   leadingMeasureStatus,
+  pickFuelLiveEvent,
   remainingLessonLabel,
   weeklyCommitPulse,
   winChipLabel,
@@ -85,6 +87,32 @@ describe('locked Home IA helpers', () => {
     expect(
       isEventHappeningNow('2026-09-11T18:00:00.000Z', '2026-09-11T19:00:00.000Z', now),
     ).toBe(false)
+    expect(
+      isEventHappeningNow('2026-09-11T16:00:00.000Z', null, now),
+    ).toBe(false)
+    expect(
+      isEventHappeningNow('2026-09-11T16:40:00.000Z', null, now),
+    ).toBe(true)
+  })
+
+  it('does not pin a stale open-ended event over the next session', () => {
+    const now = new Date('2026-09-11T17:10:00.000Z')
+    const stale = { id: 'old', starts_at: '2026-08-01T17:00:00.000Z', ends_at: null }
+    const upcoming = { id: 'next', starts_at: '2026-09-18T17:00:00.000Z', ends_at: null }
+    const live = {
+      id: 'now',
+      starts_at: '2026-09-11T17:00:00.000Z',
+      ends_at: '2026-09-11T18:00:00.000Z',
+    }
+    expect(pickFuelLiveEvent([stale], upcoming, now)?.id).toBe('next')
+    expect(pickFuelLiveEvent([live, stale], upcoming, now)?.id).toBe('now')
+  })
+
+  it('keeps only visible wins', () => {
+    expect(isVisibleWin({ kind: 'win', status: 'published' })).toBe(true)
+    expect(isVisibleWin({ post_type: 'win', status: null })).toBe(true)
+    expect(isVisibleWin({ kind: 'update', status: null })).toBe(false)
+    expect(isVisibleWin({ kind: 'win', status: 'rejected' })).toBe(false)
   })
 
   it('prefers guest_image_url and keeps Juan on the public guest path', () => {
@@ -126,6 +154,9 @@ describe('Home surfaces wire guest stills', () => {
     expect(page).toMatch(/HomeAccountabilityBand/)
     expect(page).toMatch(/HomeFuelBand/)
     expect(page).toMatch(/PublicFooter/)
+    expect(page).toMatch(/kind\.eq\.win,post_type\.eq\.win/)
+    expect(page).toMatch(/pickFuelLiveEvent/)
+    expect(page).toMatch(/isVisibleWin/)
   })
 
   it('keeps new Home band copy free of em dashes', () => {
