@@ -14,6 +14,8 @@ import {
   HOME_BOOK,
   HOME_H1,
   HOME_JOIN_FREE,
+  HOME_JOIN_FREE_TOOLTIP,
+  HOME_ACADEMY_TOOLTIP,
   HOME_LADDER,
   HOME_LADDER_LINE,
   HOME_NAV_LINKS,
@@ -39,6 +41,10 @@ describe('conversion homepage locks', () => {
       'Everything but the curriculum is free. The Academy is what you upgrade for.',
     )
     expect(HOME_PRIMARY_CTA).toBe('Join free. Full community, no card')
+    expect(HOME_JOIN_FREE_TOOLTIP).toBe('Free community access. No card required.')
+    expect(HOME_ACADEMY_TOOLTIP).toBe(
+      'Academy curriculum is for members. Preview the pillars or sign in to continue.',
+    )
     expect(HOME_SECONDARY_CTA).toBe('See pricing')
     expect(HOME_LADDER_LINE).toBe(
       'Start free. Upgrade when the Academy is the next step.',
@@ -115,6 +121,14 @@ describe('conversion homepage layout contracts', () => {
     expect(conversionHomeSrc).not.toMatch(
       /header[\s\S]{0,80}flex max-w-6xl flex-wrap items-center justify-between/,
     )
+  })
+
+  it('keeps the desktop value prop and Join free in the first viewport', () => {
+    expect(conversionHomeSrc).toMatch(/ep-home-fold/)
+    expect(conversionHomeSrc).toMatch(/100svh/)
+    expect(conversionHomeSrc).toMatch(/HOME_JOIN_FREE_TOOLTIP/)
+    expect(conversionHomeSrc).toMatch(/HOME_ACADEMY_TOOLTIP/)
+    expect(conversionHomeSrc).toMatch(/loginHrefFor\('\/academy'\)/)
   })
 
   it('keeps conversion `/` ad-free — no IAB, slots, or platform_ads', () => {

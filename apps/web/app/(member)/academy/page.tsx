@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { loginHrefFor } from '@/lib/auth/gatedIntent'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { AcademyMobileProgress } from '@/components/academy/AcademyMobileProgress'
@@ -49,7 +50,7 @@ function AcademyAdBreak({ unit }: { unit: AcademyUnit }) {
 export default async function AcademyPage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  if (!user) redirect(loginHrefFor('/academy'))
 
   const profile = await fetchUserProfile(supabase, user.id)
 

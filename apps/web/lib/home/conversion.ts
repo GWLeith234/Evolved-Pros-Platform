@@ -106,6 +106,9 @@ export const HOME_EPISODES_TITLE = 'Latest episodes'
 export const HOME_EPISODES_LINK = 'All episodes'
 export const HOME_SIGN_IN = 'Sign in'
 export const HOME_JOIN_FREE = 'Join free'
+export const HOME_JOIN_FREE_TOOLTIP = 'Free community access. No card required.'
+export const HOME_ACADEMY_TOOLTIP =
+  'Academy curriculum is for members. Preview the pillars or sign in to continue.'
 export const HOME_OPEN_PLATFORM = 'Open the platform'
 export const HOME_OPEN_PLATFORM_HREF = '/home'
 
@@ -127,6 +130,8 @@ export function conversionCopyStrings(): string[] {
     HOME_EPISODES_LINK,
     HOME_SIGN_IN,
     HOME_JOIN_FREE,
+    HOME_JOIN_FREE_TOOLTIP,
+    HOME_ACADEMY_TOOLTIP,
     HOME_OPEN_PLATFORM,
     HOME_BOOK.kicker,
     HOME_BOOK.title,

@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+import { INQUIRE_BOOKING_TOOLTIP } from '@/lib/live/s4-cta'
 import { SPEAKING_STATS } from '@/lib/live/speaking-pins'
 import { InquireBookingButton } from './InquireBookingButton'
 
@@ -75,6 +77,12 @@ export function LiveSplitHero({ photo = '/live/george-stage-blue-jacket.jpg' }: 
             Bring the <span style={{ color: '#C9A84C' }}>EVOLVED</span> system to your stage.
           </h2>
 
+          {/* S4 FINDING 05: mobile inquire sits above the proof row so the
+              first viewport has a booking CTA. Desktop keeps the late CTA. */}
+          <div className="live-hero-inquire-early" id="inquire">
+            <HeroInquireButton />
+          </div>
+
           <p
             style={{
               margin: '18px 0 0',
@@ -88,8 +96,9 @@ export function LiveSplitHero({ photo = '/live/george-stage-blue-jacket.jpg' }: 
             High-energy keynotes, workshops, and mastermind formats for sales conferences, SKOs, and revenue leadership summits. Powered by the EVOLVED Architecture™.
           </p>
 
-          {/* Stats row */}
+          {/* Stats / proof row */}
           <div
+            className="live-hero-proof"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
@@ -125,26 +134,8 @@ export function LiveSplitHero({ photo = '/live/george-stage-blue-jacket.jpg' }: 
             ))}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 28, flexWrap: 'wrap' }}>
-            <InquireBookingButton
-              className="ep-pressable ep-touch-target"
-              style={{
-                padding: '14px 28px',
-                minHeight: 48,
-                background: 'var(--brand-red-hot)',
-                color: 'var(--white)',
-                border: '1px solid var(--brand-red-hot)',
-                fontFamily: FBC,
-                fontWeight: 800,
-                fontSize: 13,
-                letterSpacing: '0.22em',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            />
+          <div className="live-hero-inquire-late">
+            <HeroInquireButton />
           </div>
         </div>
 
@@ -188,6 +179,37 @@ export function LiveSplitHero({ photo = '/live/george-stage-blue-jacket.jpg' }: 
           </div>
         </div>
       </div>
+
+      <div className="live-mobile-inquire-bar" aria-label={INQUIRE_BOOKING_TOOLTIP}>
+        <HeroInquireButton />
+      </div>
     </section>
+  )
+}
+
+const HERO_INQUIRE_STYLE: CSSProperties = {
+  padding: '14px 28px',
+  minHeight: 48,
+  background: 'var(--brand-red-hot)',
+  color: 'var(--white)',
+  border: '1px solid var(--brand-red-hot)',
+  fontFamily: FBC,
+  fontWeight: 800,
+  fontSize: 13,
+  letterSpacing: '0.22em',
+  textTransform: 'uppercase',
+  cursor: 'pointer',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}
+
+function HeroInquireButton() {
+  return (
+    <InquireBookingButton
+      className="ep-pressable ep-touch-target"
+      style={HERO_INQUIRE_STYLE}
+      tooltip={INQUIRE_BOOKING_TOOLTIP}
+    />
   )
 }

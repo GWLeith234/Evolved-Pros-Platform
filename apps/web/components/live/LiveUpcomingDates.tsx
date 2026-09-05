@@ -1,5 +1,11 @@
+import {
+  SEE_EVENTS_HREF,
+  SEE_EVENTS_LABEL,
+  SEE_EVENTS_TOOLTIP,
+} from '@/lib/live/s4-cta'
 import { getUpcomingSpeakingDates, type UpcomingDate } from '@/lib/live/upcoming-dates'
 import { sanitizeSpeakingLinkUrl } from '@/lib/live/upcoming-dates-shared'
+import { Tooltip } from '@/components/ui/Tooltip'
 import { InquireBookingButton } from './InquireBookingButton'
 import { LiveSectionHeader } from './LiveSectionHeader'
 
@@ -157,15 +163,45 @@ export async function LiveUpcomingDates() {
 
   return (
     <section className="live-section-pad" style={{ margin: '64px auto 0' }}>
-      <LiveSectionHeader
-        eyebrow="Where He's Headed"
-        title="Upcoming speaking events"
-        kicker={
-          dates.length
-            ? 'Confirmed dates first — holds underneath when we have them.'
-            : 'This is where confirmed dates and holds land — city and country on every row.'
-        }
-      />
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'space-between',
+          gap: 16,
+          flexWrap: 'wrap',
+        }}
+      >
+        <LiveSectionHeader
+          eyebrow="Where He's Headed"
+          title="Upcoming speaking events"
+          kicker={
+            dates.length
+              ? 'Confirmed dates first — holds underneath when we have them.'
+              : 'This is where confirmed dates and holds land — city and country on every row.'
+          }
+        />
+        <Tooltip content={SEE_EVENTS_TOOLTIP}>
+          <a
+            href={SEE_EVENTS_HREF}
+            className="ep-pressable ep-touch-target"
+            style={{
+              fontFamily: FBC,
+              fontWeight: 800,
+              fontSize: 12,
+              letterSpacing: '0.22em',
+              textTransform: 'uppercase',
+              color: 'var(--brand-gold)',
+              textDecoration: 'none',
+              minHeight: 44,
+              display: 'inline-flex',
+              alignItems: 'center',
+            }}
+          >
+            {SEE_EVENTS_LABEL}
+          </a>
+        </Tooltip>
+      </div>
 
       {dates.length === 0 ? (
         <div

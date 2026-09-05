@@ -1,19 +1,23 @@
 import type { ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { loginHrefFor } from '@/lib/auth/gatedIntent'
 import { LogoMark } from '@/components/ui/LogoMark'
+import { Tooltip } from '@/components/ui/Tooltip'
 import { footerCopyright } from '@/lib/layout/publicFooter'
 import {
   HERO_IMAGE_ALT,
   HERO_IMAGE_HEIGHT,
   HERO_IMAGE_SRC,
   HERO_IMAGE_WIDTH,
+  HOME_ACADEMY_TOOLTIP,
   HOME_ARIA,
   HOME_BOOK,
   HOME_EPISODES_LINK,
   HOME_EPISODES_TITLE,
   HOME_H1,
   HOME_JOIN_FREE,
+  HOME_JOIN_FREE_TOOLTIP,
   HOME_LADDER,
   HOME_LADDER_LINE,
   HOME_LADDER_SUB,
@@ -62,7 +66,12 @@ export function ConversionHome({
                 className="hidden min-w-0 items-center gap-x-3.5 md:flex"
               >
                 {HOME_NAV_LINKS.map(link => (
-                  <NavLink key={link.href} href={link.href} live={'live' in link && link.live}>
+                  <NavLink
+                    key={link.href}
+                    href={homeNavHref(link, signedIn)}
+                    live={'live' in link && link.live}
+                    tooltip={link.label === 'Academy' ? HOME_ACADEMY_TOOLTIP : undefined}
+                  >
                     {link.label}
                   </NavLink>
                 ))}
@@ -80,12 +89,14 @@ export function ConversionHome({
                   {HOME_OPEN_PLATFORM}
                 </Link>
               ) : (
-                <Link
-                  href={JOIN_FREE_HREF}
-                  className="inline-flex min-h-10 shrink-0 items-center bg-red px-4 font-condensed text-[13px] font-bold uppercase tracking-[0.14em] text-white no-underline"
-                >
-                  {HOME_JOIN_FREE}
-                </Link>
+                <Tooltip content={HOME_JOIN_FREE_TOOLTIP}>
+                  <Link
+                    href={JOIN_FREE_HREF}
+                    className="inline-flex min-h-10 shrink-0 items-center bg-red px-4 font-condensed text-[13px] font-bold uppercase tracking-[0.14em] text-white no-underline"
+                  >
+                    {HOME_JOIN_FREE}
+                  </Link>
+                </Tooltip>
               )}
             </div>
           </div>
@@ -94,7 +105,13 @@ export function ConversionHome({
             className="mt-1 flex h-9 items-center gap-x-3 overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden"
           >
             {HOME_NAV_LINKS.map(link => (
-              <NavLink key={link.href} href={link.href} live={'live' in link && link.live} compact>
+              <NavLink
+                key={link.href}
+                href={homeNavHref(link, signedIn)}
+                live={'live' in link && link.live}
+                compact
+                tooltip={link.label === 'Academy' ? HOME_ACADEMY_TOOLTIP : undefined}
+              >
                 {link.label}
               </NavLink>
             ))}
@@ -110,33 +127,39 @@ export function ConversionHome({
       <main>
         <section
           aria-label={HERO_IMAGE_ALT}
-          className="relative aspect-[3/2] w-full overflow-hidden bg-paper"
+          className="ep-home-fold relative w-full overflow-hidden bg-paper md:min-h-[calc(100svh-5.5rem)]"
         >
-          <Image
-            src={HERO_IMAGE_SRC}
-            alt={HERO_IMAGE_ALT}
-            width={HERO_IMAGE_WIDTH}
-            height={HERO_IMAGE_HEIGHT}
-            priority
-            className="h-full w-full object-cover"
-            sizes="100vw"
-          />
-        </section>
-
-        <section className="mx-auto max-w-3xl px-5 pb-12 pt-10 text-center">
-          <h1 className="font-display text-[clamp(1.75rem,4.5vw,2.75rem)] font-bold leading-tight text-navy">
-            {HOME_H1}
-          </h1>
-          <p className="mx-auto mt-4 max-w-xl font-body text-lg leading-relaxed text-navy/70">
-            {HOME_SUB}
-          </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            {signedIn ? (
-              <PrimaryCta href={HOME_OPEN_PLATFORM_HREF} label={HOME_OPEN_PLATFORM} />
-            ) : (
-              <PrimaryCta href={JOIN_FREE_HREF} label={HOME_PRIMARY_CTA} />
-            )}
-            <GhostCta href={SEE_PRICING_HREF} label={HOME_SECONDARY_CTA} />
+          <div className="relative aspect-[3/2] w-full md:absolute md:inset-0 md:aspect-auto">
+            <Image
+              src={HERO_IMAGE_SRC}
+              alt={HERO_IMAGE_ALT}
+              width={HERO_IMAGE_WIDTH}
+              height={HERO_IMAGE_HEIGHT}
+              priority
+              className="h-full w-full object-cover"
+              sizes="100vw"
+            />
+          </div>
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-2/3 bg-gradient-to-t from-paper via-paper/85 to-transparent md:block" />
+          <div className="ep-home-fold-copy relative mx-auto max-w-3xl px-5 pb-12 pt-10 text-center md:flex md:min-h-[calc(100svh-5.5rem)] md:flex-col md:items-center md:justify-end md:pb-14 md:pt-24">
+            <h1 className="font-display text-[clamp(1.75rem,4.5vw,2.75rem)] font-bold leading-tight text-navy">
+              {HOME_H1}
+            </h1>
+            <p className="mx-auto mt-4 max-w-xl font-body text-lg leading-relaxed text-navy/70">
+              {HOME_SUB}
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              {signedIn ? (
+                <PrimaryCta href={HOME_OPEN_PLATFORM_HREF} label={HOME_OPEN_PLATFORM} />
+              ) : (
+                <PrimaryCta
+                  href={JOIN_FREE_HREF}
+                  label={HOME_PRIMARY_CTA}
+                  tooltip={HOME_JOIN_FREE_TOOLTIP}
+                />
+              )}
+              <GhostCta href={SEE_PRICING_HREF} label={HOME_SECONDARY_CTA} />
+            </div>
           </div>
         </section>
 
@@ -244,18 +267,28 @@ export function ConversionHome({
   )
 }
 
+function homeNavHref(
+  link: (typeof HOME_NAV_LINKS)[number],
+  signedIn: boolean,
+): string {
+  if (link.label === 'Academy' && !signedIn) return loginHrefFor('/academy')
+  return link.href
+}
+
 function NavLink({
   href,
   children,
   live,
   compact,
+  tooltip,
 }: {
   href: string
   children: ReactNode
   live?: boolean
   compact?: boolean
+  tooltip?: string
 }) {
-  return (
+  const link = (
     <Link
       href={href}
       className={`inline-flex items-center font-condensed font-bold uppercase text-navy no-underline ${
@@ -272,6 +305,7 @@ function NavLink({
       {children}
     </Link>
   )
+  return tooltip ? <Tooltip content={tooltip}>{link}</Tooltip> : link
 }
 
 function LadderCard({ card }: { card: HomeLadderCard }) {
@@ -304,12 +338,14 @@ function PrimaryCta({
   href,
   label,
   wide,
+  tooltip,
 }: {
   href: string
   label: string
   wide?: boolean
+  tooltip?: string
 }) {
-  return (
+  const link = (
     <Link
       href={href}
       className={`inline-flex min-h-12 items-center justify-center bg-red px-6 text-center font-condensed text-sm font-bold uppercase tracking-[0.14em] text-white no-underline ${
@@ -319,6 +355,7 @@ function PrimaryCta({
       {label}
     </Link>
   )
+  return tooltip ? <Tooltip content={tooltip}>{link}</Tooltip> : link
 }
 
 function GhostCta({

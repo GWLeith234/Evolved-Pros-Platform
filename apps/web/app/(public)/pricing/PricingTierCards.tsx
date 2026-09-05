@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { Tooltip } from '@/components/ui/Tooltip'
+import { ANNUAL_BILLING_TOOLTIP } from '@/lib/live/s4-cta'
 import { PricingCtaButton } from './PricingCtaButton'
 import {
   ANNUAL_FREE_MONTHS,
@@ -177,7 +179,7 @@ export function PricingTierCards({
       <div className="flex items-center justify-center gap-2 mb-10">
         {(['monthly', 'annual'] as const).map(mode => {
           const active = billing === mode
-          return (
+          const toggle = (
             <button
               key={mode}
               type="button"
@@ -204,6 +206,13 @@ export function PricingTierCards({
                 </span>
               )}
             </button>
+          )
+          return mode === 'annual' ? (
+            <Tooltip key={mode} content={ANNUAL_BILLING_TOOLTIP}>
+              {toggle}
+            </Tooltip>
+          ) : (
+            toggle
           )
         })}
       </div>
