@@ -1,11 +1,6 @@
-import Image from 'next/image'
 import Link from 'next/link'
-import { logos } from '@evolved-pros/ui'
 import { PUBLIC_FOOTER_LINKS, footerCopyright } from '@/lib/layout/publicFooter'
-
-/** Display height for the footer lockup. Intrinsic asset is 800x160 (5:1). */
-const FOOTER_LOGO_HEIGHT = 32
-const FOOTER_LOGO_WIDTH = FOOTER_LOGO_HEIGHT * 5
+import { FooterLogo } from '@/components/layout/FooterLogo'
 
 /**
  * Global public footer (SPRINT FOOTER-1).
@@ -43,19 +38,18 @@ export function PublicFooter({
       }}
     >
       <div
+        className="ep-stack"
         style={{
           maxWidth: 1100,
           margin: '0 auto',
-          padding: '36px 20px calc(32px + env(safe-area-inset-bottom, 0px))',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 22,
+          padding: '32px 16px calc(32px + env(safe-area-inset-bottom, 0px))',
           minWidth: 0,
         }}
       >
         {/* Same horizontal lockup as header/nav (white on dark, navy on light).
             Swap is CSS so this stays a server component and force-dark shells
-            keep the white mark. */}
+            keep the white mark. Cropped in FooterLogo so the E is flush with
+            this column and the red disc sits on the wordmark cap-height. */}
         <Link
           href="/"
           aria-label="Evolved Pros home"
@@ -67,24 +61,7 @@ export function PublicFooter({
             textDecoration: 'none',
           }}
         >
-          <Image
-            src={logos.horizontalDark}
-            alt=""
-            width={800}
-            height={160}
-            sizes={`${FOOTER_LOGO_WIDTH}px`}
-            className="ep-public-footer-logo ep-public-footer-logo--on-dark"
-            style={{ height: FOOTER_LOGO_HEIGHT, width: 'auto' }}
-          />
-          <Image
-            src={logos.horizontalNavy}
-            alt=""
-            width={800}
-            height={160}
-            sizes={`${FOOTER_LOGO_WIDTH}px`}
-            className="ep-public-footer-logo ep-public-footer-logo--on-light"
-            style={{ height: FOOTER_LOGO_HEIGHT, width: 'auto' }}
-          />
+          <FooterLogo />
         </Link>
 
         <nav aria-label="Footer" style={{ minWidth: 0 }}>

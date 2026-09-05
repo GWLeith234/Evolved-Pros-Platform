@@ -2100,12 +2100,15 @@ a.ep-text-link:focus-visible {
 
 /* Footer brand lockup: white wordmark on dark, navy wordmark on light.
    Force-dark shells (/login, /live) keep the white mark even when html is
-   light-mode, matching the token re-declare on .ep-force-dark / .live-force-dark. */
+   light-mode, matching the token re-declare on .ep-force-dark / .live-force-dark.
+
+   The shipped 800x160 PNGs have ~125px of empty canvas on the left and a
+   red disc that sits high of the wordmark (white-on-dark especially).
+   Crop the same assets into letters / disc / S so the E is flush with the
+   footer column and the disc centers on the 16px cap-height (24px disc). */
 .ep-public-footer-logo {
-  height: 32px;
-  width: auto;
-  max-width: min(220px, 100%);
-  object-fit: contain;
+  display: block;
+  line-height: 0;
 }
 .ep-public-footer-logo--on-dark { display: block; }
 .ep-public-footer-logo--on-light { display: none; }
@@ -2118,6 +2121,58 @@ html.light-mode .live-force-dark .ep-public-footer-logo--on-dark {
 html.light-mode .ep-force-dark .ep-public-footer-logo--on-light,
 html.light-mode .live-force-dark .ep-public-footer-logo--on-light {
   display: none;
+}
+
+.ep-public-footer-lockup {
+  /* 80px letters / 121px disc in the PNG → 16 / 24 (rhythm). */
+  --s: 0.2;
+  --sheet-w: calc(800px * var(--s));
+  --sheet-h: calc(160px * var(--s));
+  display: inline-flex;
+  align-items: center;
+  height: calc(121px * var(--s));
+  max-width: 100%;
+}
+.ep-public-footer-lockup__tile {
+  display: block;
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+  background-size: var(--sheet-w) var(--sheet-h);
+}
+/* White-on-dark lockup (logo_horizontal_dark.png) */
+.ep-public-footer-logo--on-dark .ep-public-footer-lockup__letters {
+  width: calc(383px * var(--s));
+  height: calc(80px * var(--s));
+  background-position: calc(-130px * var(--s)) calc(-46px * var(--s));
+}
+.ep-public-footer-logo--on-dark .ep-public-footer-lockup__disc {
+  width: calc(121px * var(--s));
+  height: calc(121px * var(--s));
+  margin-left: calc(1px * var(--s));
+  background-position: calc(-514px * var(--s)) calc(-16px * var(--s));
+}
+.ep-public-footer-logo--on-dark .ep-public-footer-lockup__ess {
+  width: calc(37px * var(--s));
+  height: calc(80px * var(--s));
+  background-position: calc(-635px * var(--s)) calc(-46px * var(--s));
+}
+/* Navy-on-light lockup (logo_horizontal_navy.png) */
+.ep-public-footer-logo--on-light .ep-public-footer-lockup__letters {
+  width: calc(386px * var(--s));
+  height: calc(80px * var(--s));
+  background-position: calc(-126px * var(--s)) calc(-42px * var(--s));
+}
+.ep-public-footer-logo--on-light .ep-public-footer-lockup__disc {
+  width: calc(120px * var(--s));
+  height: calc(120px * var(--s));
+  margin-left: calc(4px * var(--s));
+  background-position: calc(-516px * var(--s)) calc(-23px * var(--s));
+}
+.ep-public-footer-logo--on-light .ep-public-footer-lockup__ess {
+  width: calc(36px * var(--s));
+  height: calc(80px * var(--s));
+  margin-left: calc(4px * var(--s));
+  background-position: calc(-640px * var(--s)) calc(-42px * var(--s));
 }
 
 /* Ghost footer links lift to full-strength ink on hover/focus. The single red

@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
   FOOTER_LEGAL_ENTITY,
@@ -6,6 +8,16 @@ import {
   SUPPORT_EMAIL,
   footerCopyright,
 } from './publicFooter'
+
+const footerCss = readFileSync(resolve(__dirname, '../../app/globals.css'), 'utf8')
+const footerTsx = readFileSync(
+  resolve(__dirname, '../../components/layout/PublicFooter.tsx'),
+  'utf8',
+)
+const logoTsx = readFileSync(
+  resolve(__dirname, '../../components/layout/FooterLogo.tsx'),
+  'utf8',
+)
 
 describe('PUBLIC_FOOTER_LINKS', () => {
   it('renders the eight approved links, in order, with the exact labels', () => {
@@ -75,5 +87,27 @@ describe('contact inboxes', () => {
 
   it('never surfaces the personal evolvex360 address', () => {
     expect([SUPPORT_EMAIL, SPEAKING_EMAIL].join(' ')).not.toContain('evolvex360')
+  })
+})
+
+describe('footer logo lockup', () => {
+  it('crops the shipped horizontal PNG instead of inventing a new mark', () => {
+    expect(logoTsx).toContain('logos.horizontalDark')
+    expect(logoTsx).toContain('logos.horizontalNavy')
+    expect(logoTsx).not.toContain('<img')
+    expect(footerTsx).toContain('<FooterLogo')
+    expect(footerTsx).not.toContain('next/image')
+  })
+
+  it('optically centers the disc on the wordmark and flush-lefts the E', () => {
+    expect(footerCss).toContain('.ep-public-footer-lockup')
+    expect(footerCss).toContain('align-items: center')
+    expect(footerCss).toContain('calc(-130px * var(--s))')
+    expect(footerCss).toContain('calc(-126px * var(--s))')
+  })
+
+  it('stacks the footer column on the 16/24/32 rhythm', () => {
+    expect(footerTsx).toContain('className="ep-stack"')
+    expect(footerTsx).toContain("padding: '32px 16px calc(32px + env(safe-area-inset-bottom, 0px))'")
   })
 })
