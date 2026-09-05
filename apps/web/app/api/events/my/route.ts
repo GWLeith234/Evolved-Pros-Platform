@@ -5,6 +5,7 @@ import { hasTierAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { EVENT_PRIVILEGED_COLUMNS, privilegedEventUrls } from '@/lib/events/privilegedUrls'
+import { withoutConquerLocal } from '@/lib/events/nextEvent'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,6 +54,7 @@ export async function GET() {
     })
     .filter((e): e is EventItem => e !== null)
     .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime())
+  const visible = withoutConquerLocal(events)
 
-  return NextResponse.json({ events })
+  return NextResponse.json({ events: visible })
 }

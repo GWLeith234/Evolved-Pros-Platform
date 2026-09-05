@@ -5,6 +5,7 @@ import { hasTierAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { EVENT_PRIVILEGED_COLUMNS, privilegedEventUrls } from '@/lib/events/privilegedUrls'
+import { withoutConquerLocal } from '@/lib/events/nextEvent'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,7 +43,7 @@ export async function GET(request: Request) {
   const { data: rows, error } = await query
   if (error) return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 })
 
-  const allRows = rows ?? []
+  const allRows = withoutConquerLocal(rows ?? [])
   const hasMore = allRows.length > limit
   const page = allRows.slice(0, limit)
   const nextCursor = hasMore && page.length > 0 ? page[page.length - 1].starts_at : null

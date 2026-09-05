@@ -3,6 +3,13 @@
  * Shown in a compact strip on /live, separate from the stage calendar.
  */
 
+import {
+  BOOK_EVENT_TITLE,
+  LAUNCH_EVENT_TITLE,
+  MASTERMIND_EVENT_DETAIL,
+  MASTERMIND_EVENT_TITLE,
+} from '@/lib/events/nextEvent'
+
 export interface ProductMilestone {
   date: Date
   title: string
@@ -14,8 +21,8 @@ export interface ProductMilestone {
 export const PRODUCT_MILESTONES: ProductMilestone[] = [
   {
     date: new Date(2026, 3, 28),
-    title: 'Conquer Local Podcast launches',
-    detail: 'Season 1 on Apple, Spotify, and YouTube.',
+    title: LAUNCH_EVENT_TITLE,
+    detail: 'Las Vegas launch with special guest Dennis Yu.',
     linkLabel: 'Listen',
     linkUrl: '/podcast',
   },
@@ -27,9 +34,16 @@ export const PRODUCT_MILESTONES: ProductMilestone[] = [
     linkUrl: '/home',
   },
   {
-    date: new Date(2026, 6, 15),
-    title: 'EVOLVED book launch',
-    detail: 'Hardcover, ebook, and audio — search “Evolved by George Leith.”',
+    date: new Date(2026, 9, 2),
+    title: MASTERMIND_EVENT_TITLE,
+    detail: MASTERMIND_EVENT_DETAIL,
+    linkLabel: 'See events',
+    linkUrl: '/events',
+  },
+  {
+    date: new Date(2026, 9, 15),
+    title: BOOK_EVENT_TITLE,
+    detail: 'Hardcover, ebook, and audio. Search Evolved by George Leith.',
     linkLabel: 'Find on Amazon',
     linkUrl: 'https://www.amazon.com/s?k=Evolved+by+George+Leith',
   },

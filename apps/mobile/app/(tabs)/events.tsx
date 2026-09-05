@@ -27,8 +27,10 @@ export default function EventsScreen() {
         .order('starts_at', { ascending: false })
         .limit(5),
     ])
-    setEvents((upcoming.data ?? []) as Event[])
-    setPast((previous.data ?? []) as Event[])
+    const hideConquer = <T extends { title: string }>(rows: T[]) =>
+      rows.filter(e => !/conquer local/i.test(e.title))
+    setEvents(hideConquer((upcoming.data ?? []) as Event[]))
+    setPast(hideConquer((previous.data ?? []) as Event[]))
   }, [])
 
   useEffect(() => { load() }, [load])
