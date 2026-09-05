@@ -19,7 +19,7 @@ export default async function EditEventPage({ params }: Props) {
   // causing false 404s when an admin opens an unpublished event.
   const { data: row } = await adminClient
     .from('events')
-    .select('id, title, description, tagline, cta_text, pillar, event_type, starts_at, ends_at, zoom_url, recording_url, image_url, required_tier, tier_access, is_published')
+    .select('id, title, description, tagline, cta_text, pillar, event_type, starts_at, ends_at, zoom_url, recording_url, image_url, city, required_tier, tier_access, is_published')
     .eq('id', params.eventId)
     .single()
 
@@ -59,6 +59,7 @@ export default async function EditEventPage({ params }: Props) {
           zoomUrl: row.zoom_url ?? '',
           recordingUrl: row.recording_url ?? '',
           imageUrl: row.image_url ?? '',
+          city: (row as { city?: string | null }).city ?? '',
           requiredTier: (row.required_tier as 'community' | 'vip' | 'pro' | '') ?? '',
           tierAccess: ((row as { tier_access?: string }).tier_access as 'all' | 'vip' | 'pro' | undefined) ?? 'all',
           isPublished: row.is_published,

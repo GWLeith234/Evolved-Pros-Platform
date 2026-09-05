@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Evolved Pros Academy architecture">
+  <defs>
+    <radialGradient id="ep-acad-dark-bg" cx="18%" cy="0%" r="120%">
+      <stop offset="0%" stop-color="#17324A"/>
+      <stop offset="45%" stop-color="#112535"/>
+      <stop offset="100%" stop-color="#0A0F18"/>
+    </radialGradient>
+    <linearGradient id="ep-acad-dark-gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#C9A84C"/>
+      <stop offset="50%" stop-color="#E7CE86"/>
+      <stop offset="100%" stop-color="#C9A84C"/>
+    </linearGradient>
+    <filter id="ep-acad-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#ep-acad-dark-bg)"/>
+  <rect width="640" height="6" fill="url(#ep-acad-dark-gold)"/>
+  <text x="40" y="56" fill="#E7CE86" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" letter-spacing="3.2">EVOLVED ARCHITECTURE</text>
+  <text x="40" y="92" fill="#F5F0E8" font-family="Georgia, Times, serif" font-size="28" font-weight="700">Six pillars. One system.</text>
+  <g transform="translate(40 128)" filter="url(#ep-acad-glow)">
+    <rect x="0" y="86" width="84" height="110" rx="6" fill="#FFA538"/>
+    <rect x="94" y="64" width="84" height="132" rx="6" fill="#A78BFA"/>
+    <rect x="188" y="40" width="84" height="156" rx="6" fill="#F87171"/>
+    <rect x="282" y="22" width="84" height="174" rx="6" fill="#60A5FA"/>
+    <rect x="376" y="48" width="84" height="148" rx="6" fill="#C9A84C"/>
+    <rect x="470" y="8" width="84" height="188" rx="6" fill="#0ABFA3"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" fill="rgba(245,240,232,0.62)">
+    <text x="82" y="338" text-anchor="middle">FOUNDATION</text>
+    <text x="176" y="338" text-anchor="middle">IDENTITY</text>
+    <text x="270" y="338" text-anchor="middle">MENTAL</text>
+    <text x="364" y="338" text-anchor="middle">STRATEGY</text>
+    <text x="458" y="338" text-anchor="middle">ACCT.</text>
+    <text x="552" y="338" text-anchor="middle">EXEC.</text>
+  </g>
+</svg>

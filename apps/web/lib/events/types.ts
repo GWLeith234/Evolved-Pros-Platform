@@ -10,6 +10,8 @@ export type EventItem = {
   zoomUrl: string | null      // only present when user is registered
   recordingUrl: string | null
   imageUrl: string | null
+  /** Admin-entered city. Never inferred from the title. */
+  city?: string | null
   requiredTier: 'community' | 'vip' | 'pro' | null
   registrationCount: number
   isRegistered: boolean

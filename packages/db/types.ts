@@ -670,6 +670,7 @@ export type Database = {
       events: {
         Row: {
           attending_count: number
+          city: string | null
           created_at: string
           cta_text: string | null
           description: string | null
@@ -700,6 +701,7 @@ export type Database = {
         }
         Insert: {
           attending_count?: number
+          city?: string | null
           created_at?: string
           cta_text?: string | null
           description?: string | null
@@ -730,6 +732,7 @@ export type Database = {
         }
         Update: {
           attending_count?: number
+          city?: string | null
           created_at?: string
           cta_text?: string | null
           description?: string | null

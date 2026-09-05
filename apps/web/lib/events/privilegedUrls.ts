@@ -24,7 +24,7 @@ export function privilegedEventUrls(
 }
 
 export const EVENT_CATALOG_COLUMNS =
-  'id, title, description, event_type, starts_at, ends_at, required_tier, registration_count, is_published, image_url' as const
+  'id, title, description, event_type, starts_at, ends_at, required_tier, registration_count, is_published, image_url, city' as const
 
 export const EVENT_PRIVILEGED_COLUMNS =
   `${EVENT_CATALOG_COLUMNS}, zoom_url, recording_url` as const

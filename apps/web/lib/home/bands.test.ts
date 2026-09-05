@@ -144,6 +144,12 @@ describe('Home surfaces wire guest stills', () => {
       'utf8',
     )
     expect(card).toMatch(/guestImageUrl|guest still/)
+    const fuel = readFileSync(
+      resolve(__dirname, '../../components/home/HomeFuelBand.tsx'),
+      'utf8',
+    )
+    expect(fuel).toMatch(/ACADEMY_STILL_LIGHT/)
+    expect(fuel).toMatch(/eventCardImageUrl/)
   })
 
   it('does not mount the Architecture ad grid or WelcomeBanner on Home', () => {
@@ -157,11 +163,14 @@ describe('Home surfaces wire guest stills', () => {
     expect(page).toMatch(/kind\.eq\.win,post_type\.eq\.win/)
     expect(page).toMatch(/pickFuelLiveEvent/)
     expect(page).toMatch(/isVisibleWin/)
+    expect(page).toMatch(/image_url, city/)
   })
 
   it('keeps new Home band copy free of em dashes', () => {
     const files = [
       'bands.ts',
+      'cardImagery.ts',
+      '../events/cityStock.ts',
       '../../components/home/HomeBannerBand.tsx',
       '../../components/home/HomeAccountabilityBand.tsx',
       '../../components/home/HomeFuelBand.tsx',

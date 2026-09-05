@@ -4,6 +4,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { notifyEventPublished } from '@/lib/notifications/fanout'
+import { resolveCityStockWithSearch } from '@/lib/events/cityStockFetch'
 
 export async function PATCH(
   request: Request,
@@ -16,20 +17,34 @@ export async function PATCH(
   try { body = await request.json() } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }) }
 
   // required_tier excluded — tier_access is the new standard
-  const allowed = ['title', 'description', 'tagline', 'cta_text', 'pillar', 'event_type', 'starts_at', 'ends_at', 'zoom_url', 'recording_url', 'image_url', 'tier_access', 'is_published', 'is_draft'] as const
+  const allowed = ['title', 'description', 'tagline', 'cta_text', 'pillar', 'event_type', 'starts_at', 'ends_at', 'zoom_url', 'recording_url', 'image_url', 'city', 'tier_access', 'is_published', 'is_draft'] as const
   const update: Record<string, unknown> = {}
   for (const key of allowed) {
     if (key in body) update[key] = body[key]
   }
 
+  const needsCityResolve = 'city' in update || 'image_url' in update
+  const publishing = update.is_published === true
+  const { data: current } = needsCityResolve || publishing
+    ? await adminClient.from('events').select('is_published, city, image_url').eq('id', params.id).maybeSingle()
+    : { data: null }
+
+  if (needsCityResolve) {
+    const cityStock = await resolveCityStockWithSearch({
+      city: 'city' in update
+        ? (typeof update.city === 'string' ? update.city : null)
+        : current?.city ?? null,
+      imageUrl: 'image_url' in update
+        ? (typeof update.image_url === 'string' ? update.image_url : null)
+        : current?.image_url ?? null,
+    })
+    update.city = cityStock.city
+    update.image_url = cityStock.imageUrl
+  }
+
   if (Object.keys(update).length === 0) {
     return NextResponse.json({ error: 'No valid fields' }, { status: 422 })
   }
-
-  const publishing = update.is_published === true
-  const { data: current } = publishing
-    ? await adminClient.from('events').select('is_published').eq('id', params.id).maybeSingle()
-    : { data: null }
 
   // RLS-FIX: adminClient — see events/route.ts.
   const { data, error } = await adminClient

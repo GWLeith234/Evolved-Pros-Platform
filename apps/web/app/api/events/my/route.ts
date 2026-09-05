@@ -28,6 +28,7 @@ export async function GET() {
         zoom_url: string | null; recording_url: string | null
         required_tier: string | null; registration_count: number; is_published: boolean
         image_url: string | null
+        city: string | null
       } | null
       if (!e || !e.is_published) return null
       const urls = privilegedEventUrls(e, {
@@ -45,6 +46,7 @@ export async function GET() {
         zoomUrl: urls.zoomUrl,
         recordingUrl: urls.recordingUrl,
         imageUrl: e.image_url,
+        city: e.city ?? null,
         requiredTier: e.required_tier as 'community' | 'vip' | 'pro' | null,
         registrationCount: e.registration_count,
         isRegistered: true,

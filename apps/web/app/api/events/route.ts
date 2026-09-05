@@ -78,6 +78,7 @@ export async function GET(request: Request) {
       zoomUrl: urls.zoomUrl,
       recordingUrl: urls.recordingUrl,
       imageUrl: e.image_url,
+      city: e.city ?? null,
       requiredTier: e.required_tier as 'community' | 'vip' | 'pro' | null,
       registrationCount: e.registration_count,
       isRegistered,

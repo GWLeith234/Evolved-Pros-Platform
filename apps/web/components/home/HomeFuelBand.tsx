@@ -1,6 +1,13 @@
 import Link from 'next/link'
 import { ProgressBar } from '@evolved-pros/ui'
 import { remainingLessonLabel } from '@/lib/home/bands'
+import {
+  ACADEMY_STILL_ALT,
+  ACADEMY_STILL_DARK,
+  ACADEMY_STILL_LIGHT,
+  stripEmDashCopy,
+} from '@/lib/home/cardImagery'
+import { eventCardImageAlt, eventCardImageUrl } from '@/lib/events/cityStock'
 
 export interface HomeFuelAcademy {
   title: string
@@ -24,6 +31,8 @@ export interface HomeFuelLive {
   href: string
   whenLabel: string
   isLive: boolean
+  imageUrl: string | null
+  city: string | null
 }
 
 interface HomeFuelBandProps {
@@ -33,6 +42,10 @@ interface HomeFuelBandProps {
 }
 
 export function HomeFuelBand({ academy, thread, live }: HomeFuelBandProps) {
+  const liveTitle = live ? stripEmDashCopy(live.title) : 'No live session on the board'
+  const liveImage = eventCardImageUrl(live?.imageUrl)
+  const liveAlt = eventCardImageAlt(live?.city)
+
   return (
     <section aria-label="Fuel" className="ep-stack--tight">
       <div>
@@ -47,7 +60,7 @@ export function HomeFuelBand({ academy, thread, live }: HomeFuelBandProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <FuelCard
           eyebrow="Academy"
-          title={academy ? `Continue: ${academy.title}` : 'Open the Academy'}
+          title={academy ? `Continue: ${stripEmDashCopy(academy.title)}` : 'Open the Academy'}
           meta={
             academy
               ? [academy.moduleLabel, academy.pillarName, academy.remainingLabel]
@@ -59,10 +72,15 @@ export function HomeFuelBand({ academy, thread, live }: HomeFuelBandProps) {
           cta="Resume lesson"
           accent="var(--teal)"
           progress={academy?.progressPct}
+          image={{
+            src: ACADEMY_STILL_LIGHT,
+            srcDark: ACADEMY_STILL_DARK,
+            alt: ACADEMY_STILL_ALT,
+          }}
         />
         <FuelCard
           eyebrow="Community"
-          title={thread?.title ?? 'Share a question or a win'}
+          title={thread ? stripEmDashCopy(thread.title) : 'Share a question or a win'}
           meta={
             thread
               ? `${thread.authorName} · ${thread.replyLabel} · ${thread.age}`
@@ -74,12 +92,13 @@ export function HomeFuelBand({ academy, thread, live }: HomeFuelBandProps) {
         />
         <FuelCard
           eyebrow="Live"
-          title={live?.title ?? 'No live session on the board'}
+          title={liveTitle}
           meta={live?.whenLabel ?? 'Watch the calendar for the next workshop.'}
           href={live?.href ?? '/events'}
           cta={live ? 'Save my seat' : 'View events'}
           accent="var(--red)"
           live={live?.isLive}
+          image={live ? { src: liveImage, alt: liveAlt } : undefined}
         />
       </div>
     </section>
@@ -95,6 +114,7 @@ function FuelCard({
   accent,
   progress,
   live,
+  image,
 }: {
   eyebrow: string
   title: string
@@ -104,6 +124,7 @@ function FuelCard({
   accent: string
   progress?: number
   live?: boolean
+  image?: { src: string; srcDark?: string; alt: string }
 }) {
   return (
     <article
@@ -139,6 +160,44 @@ function FuelCard({
       {progress != null && (
         <div className="mt-3">
           <ProgressBar value={progress} color="var(--teal)" size="sm" showPercent={false} />
+        </div>
+      )}
+      {image && (
+        <div
+          className="relative mt-4 overflow-hidden"
+          style={{
+            aspectRatio: '16 / 9',
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border-color)',
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={image.src}
+            alt={image.alt}
+            width={640}
+            height={360}
+            loading="lazy"
+            decoding="async"
+            className={
+              image.srcDark
+                ? 'absolute inset-0 h-full w-full object-cover dark:hidden'
+                : 'absolute inset-0 h-full w-full object-cover'
+            }
+          />
+          {image.srcDark ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={image.srcDark}
+              alt=""
+              width={640}
+              height={360}
+              loading="lazy"
+              decoding="async"
+              aria-hidden
+              className="absolute inset-0 hidden h-full w-full object-cover dark:block"
+            />
+          ) : null}
         </div>
       )}
       <Link

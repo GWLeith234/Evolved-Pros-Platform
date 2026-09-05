@@ -4,6 +4,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { notifyEventPublished } from '@/lib/notifications/fanout'
+import { resolveCityStockWithSearch } from '@/lib/events/cityStockFetch'
 
 export async function GET() {
   const auth = await requireAdminApi()
@@ -11,7 +12,7 @@ export async function GET() {
 
   const { data, error } = await adminClient
     .from('events')
-    .select('id, title, event_type, starts_at, ends_at, required_tier, tier_access, registration_count, is_published, is_draft, recording_url, zoom_url, description, image_url')
+    .select('id, title, event_type, starts_at, ends_at, required_tier, tier_access, registration_count, is_published, is_draft, recording_url, zoom_url, description, image_url, city')
     .order('starts_at', { ascending: false })
 
   if (error) {
@@ -49,6 +50,11 @@ export async function POST(request: Request) {
     ? body.pillar
     : null
 
+  const cityStock = await resolveCityStockWithSearch({
+    city: typeof body.city === 'string' ? body.city : null,
+    imageUrl: typeof body.image_url === 'string' ? body.image_url : null,
+  })
+
   const { data, error } = await adminClient
     .from('events')
     .insert({
@@ -61,7 +67,8 @@ export async function POST(request: Request) {
       starts_at: startsAt,
       ends_at: typeof body.ends_at === 'string' ? body.ends_at : null,
       zoom_url: typeof body.zoom_url === 'string' ? body.zoom_url : null,
-      image_url: typeof body.image_url === 'string' ? body.image_url : null,
+      image_url: cityStock.imageUrl,
+      city: cityStock.city,
       required_tier: (body.required_tier as 'community' | 'vip' | 'pro' | null) ?? null,
       tier_access: tierAccess,
       is_published: body.is_published === true,

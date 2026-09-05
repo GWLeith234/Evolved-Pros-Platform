@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Event">
+  <defs>
+    <linearGradient id="ep-city-fb-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#17324A"/>
+      <stop offset="50%" stop-color="#112535"/>
+      <stop offset="100%" stop-color="#0A0F18"/>
+    </linearGradient>
+    <linearGradient id="ep-city-fb-gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#C9A84C"/>
+      <stop offset="100%" stop-color="#E7CE86"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#ep-city-fb-bg)"/>
+  <rect y="248" width="640" height="112" fill="#0A0F18"/>
+  <g fill="#1B2A4A">
+    <rect x="28" y="168" width="72" height="80"/>
+    <rect x="108" y="132" width="54" height="116"/>
+    <rect x="170" y="150" width="88" height="98"/>
+    <rect x="268" y="108" width="64" height="140"/>
+    <rect x="340" y="142" width="78" height="106"/>
+    <rect x="428" y="120" width="52" height="128"/>
+    <rect x="488" y="156" width="96" height="92"/>
+  </g>
+  <g fill="#C9A84C" opacity="0.35">
+    <rect x="40" y="186" width="8" height="8"/>
+    <rect x="58" y="204" width="8" height="8"/>
+    <rect x="122" y="154" width="8" height="8"/>
+    <rect x="190" y="172" width="8" height="8"/>
+    <rect x="282" y="128" width="8" height="8"/>
+    <rect x="360" y="164" width="8" height="8"/>
+    <rect x="444" y="140" width="8" height="8"/>
+    <rect x="520" y="178" width="8" height="8"/>
+  </g>
+  <rect y="248" width="640" height="3" fill="url(#ep-city-fb-gold)"/>
+  <text x="40" y="292" fill="#E7CE86" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="700" letter-spacing="3">EVENT</text>
+  <text x="40" y="322" fill="#F5F0E8" font-family="Georgia, Times, serif" font-size="22" font-weight="700">Location to be announced.</text>
+</svg>

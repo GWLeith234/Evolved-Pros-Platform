@@ -51,6 +51,7 @@ export default async function EventDetailPage({ params }: Props) {
     zoomUrl: urls.zoomUrl,
     recordingUrl: urls.recordingUrl,
     imageUrl: row.image_url ?? null,
+    city: row.city ?? null,
     requiredTier: row.required_tier as 'community' | 'vip' | 'pro' | null,
     registrationCount: row.registration_count,
     isRegistered,
