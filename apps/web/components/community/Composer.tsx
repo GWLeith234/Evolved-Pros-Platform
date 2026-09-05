@@ -543,16 +543,18 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
           Tag Pillar
         </span>
 
-        {PILLAR_NUMBERS.map(p => (
-          <PillarNumberBadge
-            key={p}
-            n={p}
-            selected={selectedPillar === p}
-            onClick={() => setSelectedPillar(selectedPillar === p ? null : p)}
-            ariaLabel={`Tag ${PILLAR_CONFIG[p].label}`}
-            abbrev="always"
-          />
-        ))}
+        <div className="pillar-number-badge-row" style={{ flex: '1 1 160px' }}>
+          {PILLAR_NUMBERS.map(p => (
+            <PillarNumberBadge
+              key={p}
+              n={p}
+              selected={selectedPillar === p}
+              onClick={() => setSelectedPillar(selectedPillar === p ? null : p)}
+              ariaLabel={`Tag ${PILLAR_CONFIG[p].label}`}
+              abbrev="always"
+            />
+          ))}
+        </div>
 
         <button
           type="button"

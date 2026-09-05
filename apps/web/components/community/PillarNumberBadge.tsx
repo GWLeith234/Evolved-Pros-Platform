@@ -36,6 +36,20 @@ const BADGE_STYLES = `
     padding: 0;
     cursor: pointer;
   }
+  .pillar-number-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    max-width: 100%;
+    min-width: 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  .pillar-number-badge-row::-webkit-scrollbar { display: none; }
+  .pillar-number-badge-row > * { flex-shrink: 0; }
   .pillar-number-badge-abbrev {
     display: none;
     font-family: "Barlow Condensed", sans-serif;

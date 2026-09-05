@@ -24,6 +24,7 @@ describe('composer TAG PILLAR', () => {
     }
     expect(html).toContain('border-radius:50%')
     expect(html).toContain('pillar-number-badge--abbrev-always')
+    expect(html).toContain('pillar-number-badge-row')
   })
 
   it('does not render the old outlined full-name chips', () => {
