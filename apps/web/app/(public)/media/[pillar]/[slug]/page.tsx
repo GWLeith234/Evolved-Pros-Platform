@@ -295,8 +295,8 @@ export default async function StoryPage({
             </div>
           )}
 
-          {/* Article body — story is the page; 300×250 units after a few
-              paragraphs, then more often as the piece gets longer. */}
+          {/* Article body is the page. One late unit when inventory exists.
+              Empty Advertisement boxes are not invented. */}
           <div className="media-prose">
             {articleChunks.length > 0 ? (
               articleChunks.map((chunk, idx) =>
@@ -322,6 +322,18 @@ export default async function StoryPage({
             ) : (
               <div dangerouslySetInnerHTML={{ __html: html }} />
             )}
+            {!insertedInBody && articleAds.inBody[0]?.image_url ? (
+              <div
+                data-media-ads="in-article-end"
+                style={{
+                  margin: '28px 0',
+                  display: 'flex',
+                  justifyContent: 'center',
+                }}
+              >
+                <MediaIabSlot ad={articleAds.inBody[0]} locationId="media-article-end" />
+              </div>
+            ) : null}
           </div>
 
           {/* Comments */}

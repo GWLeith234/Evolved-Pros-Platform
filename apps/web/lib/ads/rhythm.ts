@@ -129,21 +129,14 @@ export function splitHtmlBlocks(html: string): string[] {
 }
 
 /**
- * In-body break points that grow with the piece. Short copy stays clean.
- * A long story gets a unit every few blocks, then every other block.
+ * Prefer a single late slot so mid-article does not fill with empty
+ * Advertisement chrome. Short copy stays clean. Real Village/house
+ * units still render when inventory exists (related / end slot).
  */
-export function articleAdBreaks(blockCount: number, firstEvery = 3): number[] {
+export function articleAdBreaks(blockCount: number, firstEvery = 8): number[] {
   const start = Math.max(1, firstEvery)
   if (blockCount < start + 1) return []
-  const breaks: number[] = []
-  let n = start
-  let step = start
-  while (n < blockCount) {
-    breaks.push(n)
-    if (n >= start * 3) step = Math.max(2, start - 1)
-    n += step
-  }
-  return breaks
+  return [blockCount - 1]
 }
 
 /**

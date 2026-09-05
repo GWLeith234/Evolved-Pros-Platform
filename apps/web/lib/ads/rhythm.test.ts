@@ -78,8 +78,8 @@ describe('articleAdBreaks', () => {
     expect(articleAdBreaks(3)).toEqual([])
   })
 
-  it('marks every few blocks, then every other on a long story', () => {
-    expect(articleAdBreaks(16)).toEqual([3, 6, 9, 11, 13, 15])
+  it('marks a single late slot on a long story', () => {
+    expect(articleAdBreaks(16)).toEqual([15])
   })
 })
 
@@ -105,11 +105,11 @@ describe('layoutArticleBody', () => {
     expect(chunks.every(c => c.kind === 'html')).toBe(true)
   })
 
-  it('uses depth-aware breaks when none are passed', () => {
+  it('uses a single late break when none are passed', () => {
     const blocks = Array.from({ length: 16 }, (_, i) => `<p>${i + 1}</p>`)
     const ads = ['a1', 'a2', 'a3', 'a4', 'a5', 'a6']
     const chunks = layoutArticleBody(blocks, ads)
-    expect(chunks.filter(c => c.kind === 'ad')).toHaveLength(6)
+    expect(chunks.filter(c => c.kind === 'ad')).toHaveLength(1)
     expect(hasAdjacentAds(chunks)).toBe(false)
     expect(chunks[chunks.length - 1]?.kind).toBe('html')
   })

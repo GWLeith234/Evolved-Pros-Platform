@@ -8,7 +8,7 @@ export const revalidate = 120
 
 export const metadata: Metadata = publicPageMetadata('/media/evolved-architecture', {
   title: mediaSectionTitle('Evolved Architecture'),
-  description: 'All 6 pillars of the EVOLVED Architecture™ — Foundation, Identity, Mental Toughness, Strategy, Accountability, Execution.',
+  description: 'All 6 pillars of the EVOLVED Architecture: Foundation, Identity, Mental Toughness, Strategy, Accountability, Execution.',
 })
 
 async function fetchArticles(): Promise<MediaSectionArticle[]> {
