@@ -1,9 +1,8 @@
-import Link from 'next/link'
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { getPlatformSettingsMap } from '@/lib/cache/shared'
-import { LogoMark } from '@/components/ui/LogoMark'
+import { PublicChromeHeader } from '@/components/layout/PublicChromeHeader'
 import { SkipToContent } from '@/components/a11y/SkipToContent'
 import { LiveAnnouncerProvider } from '@/components/a11y/LiveAnnouncer'
 import { ToastProvider } from '@/lib/toast'
@@ -36,29 +35,7 @@ export async function SessionOptionalShell({
   if (!profile) {
     return (
       <div style={{ minHeight: '100dvh', backgroundColor: 'var(--navy-abyss)' }}>
-        <header
-          className="flex items-center justify-between px-6 py-4"
-          style={{ borderBottom: '1px solid var(--topnav-border)' }}
-        >
-          <Link
-            href="/"
-            aria-label="Evolved Pros — home"
-            style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
-          >
-            <LogoMark variant="light" height={32} alt="Evolved Pros" />
-          </Link>
-          <Link
-            href={signInHref}
-            className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] px-4 py-2 rounded transition-opacity hover:opacity-80"
-            style={{
-              color: 'var(--paper)',
-              border: '1px solid var(--topnav-border)',
-              textDecoration: 'none',
-            }}
-          >
-            Sign in
-          </Link>
-        </header>
+        <PublicChromeHeader signInHref={signInHref} />
         <main id="main-content" tabIndex={-1}>
           {children}
         </main>
