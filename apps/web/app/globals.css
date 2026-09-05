@@ -2168,15 +2168,14 @@ a.ep-text-link:focus-visible {
 }
 .ep-media-masthead-logo {
   height: 28px;
-  width: auto;
-  max-width: min(180px, 58vw);
+  width: 140px;
   object-fit: contain;
-  flex-shrink: 1;
+  flex-shrink: 0;
 }
 @media (min-width: 640px) {
   .ep-media-masthead-logo {
     height: 36px;
-    max-width: 220px;
+    width: 180px;
   }
 }
 .ep-media-masthead-logo--on-dark { display: block; }

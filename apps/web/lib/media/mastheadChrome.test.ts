@@ -24,7 +24,8 @@ describe('Media masthead chrome', () => {
     expect(src).toMatch(/data-masthead-section[\s\S]*Media/)
     expect(src).toMatch(/aria-label="Evolved Pros Media"/)
     expect(src).not.toMatch(/data-masthead-evolved/)
-    expect(src).not.toMatch(/Pros Media/)
+    expect(src).not.toMatch(/data-masthead-media/)
+    expect(src).not.toMatch(/>Pros Media</)
     expect(src).not.toMatch(/Abril Fatface|Playfair Display|font-abril/)
     expect(src).not.toMatch(/MEDIA_DESK_TAGLINE/)
     expect(src).not.toMatch(/Promoting evolution/)
@@ -49,7 +50,9 @@ describe('Media masthead chrome', () => {
     expect(src).toMatch(/Back to platform/)
     expect(src).toMatch(/href="\/home"/)
     expect(src).toMatch(/MediaMastheadRail/)
-    expect(src.indexOf('ep-media-masthead-wordmark')).toBeLessThan(src.indexOf('MediaMastheadRail'))
+    expect(src.indexOf('<h1 className="ep-media-masthead-wordmark">')).toBeLessThan(
+      src.lastIndexOf('<MediaMastheadRail'),
+    )
   })
 
   it('uses platform chrome tokens with light and dark parity', () => {
