@@ -28,15 +28,17 @@ export function TodaysEvolution({ actions }: TodaysEvolutionProps) {
   return (
     <section
       aria-label="Today's Evolution"
-      style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }}
+      className="ep-stack--tight"
+      style={{ width: '100%', maxWidth: 1440, margin: '0 auto', display: 'flex', flexDirection: 'column' }}
     >
       <div
+        className="ep-section-head"
         style={{
           display: 'flex',
           alignItems: 'baseline',
           justifyContent: 'space-between',
-          gap: 12,
-          marginBottom: 12,
+          gap: 16,
+          marginBottom: 0,
         }}
       >
         <div>
@@ -55,7 +57,7 @@ export function TodaysEvolution({ actions }: TodaysEvolutionProps) {
           </p>
           <h2
             style={{
-              margin: '4px 0 0',
+              margin: '8px 0 0',
               fontFamily: '"Bebas Neue", sans-serif',
               fontSize: 28,
               letterSpacing: '0.04em',
@@ -69,18 +71,17 @@ export function TodaysEvolution({ actions }: TodaysEvolutionProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-ep-section">
         {actions.map(a => (
           <Link
             key={a.id}
             href={a.href}
-            className="ep-surface-card group"
+            className="ep-surface-card ep-card-pad group"
             style={{
               position: 'relative',
               display: 'flex',
               flexDirection: 'column',
-              gap: 8,
-              padding: '16px 16px 14px',
+              gap: 12,
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-color)',
               textDecoration: 'none',
@@ -144,7 +145,7 @@ export function TodaysEvolution({ actions }: TodaysEvolutionProps) {
               className={a.primary ? 'ep-btn ep-btn--primary' : 'ep-btn ep-btn--secondary'}
               style={{
                 alignSelf: 'flex-start',
-                marginTop: 4,
+                marginTop: 12,
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 6,

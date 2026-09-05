@@ -255,7 +255,7 @@ export function PodcastGrid({ episodes, fallbackEpisode, sponsorAds = [] }: Podc
         .podcast-sponsor-bigbox {
           min-width: 0;
           width: 100%;
-          padding: 8px 0 16px;
+          padding-block: var(--space-ad);
         }
         @media (max-width: 600px) {
           .podcast-archive-grid {

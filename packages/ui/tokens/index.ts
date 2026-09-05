@@ -162,6 +162,34 @@ export const spacing = {
   16: '64px',
 } as const
 
+/**
+ * Semantic vertical rhythm — use these instead of one-off magic numbers
+ * between stacked cards, ad slots, section headers, and separators.
+ * Mirrored as --space-stack / --space-ad / … in apps/web/app/globals.css
+ * and as `.ep-stack`, `.ep-ad-slot`, `.ep-section-head`, `.ep-rule`,
+ * `.ep-page-pad`, `.ep-card-pad` utilities.
+ */
+export const rhythm = {
+  /** Gap between stacked cards / major page blocks */
+  stack: spacing[6],
+  /** Same stack on sm+ viewports */
+  stackLg: spacing[8],
+  /** Ad unit breathing room above AND below */
+  ad: spacing[6],
+  /** Lean ad gap — media hub / article only (do not undo SooToday density) */
+  adLean: spacing[4],
+  /** Section label → following content */
+  section: spacing[4],
+  /** Equal padding around horizontal rules / separators */
+  rule: spacing[4],
+  /** First content under top chrome / icons */
+  pageTop: spacing[4],
+  pageTopMd: spacing[6],
+  /** Internal card padding */
+  card: spacing[4],
+  cardLg: spacing[6],
+} as const
+
 export const radii = {
   none: '0px',
   sm: '2px',

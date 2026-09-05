@@ -722,7 +722,7 @@ export default async function MemberHomePage() {
   ]
 
   return (
-    <div className="ep-page-gutter ep-surface-mobile pb-6 space-y-4 sm:space-y-5">
+    <div className="ep-page-gutter ep-surface-mobile ep-stack pb-6">
       <HomeContextStrip
         event={homeContextEvent}
         episode={homeContextEpisode}
@@ -773,7 +773,7 @@ export default async function MemberHomePage() {
       <CommitmentTracker weekStart={getCurrentMonday()} />
 
       {/* The Long Game — quarterly goals (the single goals module) */}
-      <section aria-label="Quarterly goals" className="space-y-3">
+      <section aria-label="Quarterly goals" className="ep-stack--tight">
         <div className="flex items-center justify-between gap-2">
           <p
             className="font-condensed font-bold uppercase tracking-[0.18em] text-[10px]"
@@ -822,7 +822,7 @@ export default async function MemberHomePage() {
 
       {/* Two tiles, then an IAB — never a third editorial card, never a row of four. */}
       <div
-        className="home-4up-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"
+        className="home-4up-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-ep-section"
         data-home-content-row
         style={{ width: '100%', maxWidth: 1440, margin: '0 auto' }}
       >
@@ -859,7 +859,7 @@ export default async function MemberHomePage() {
       />
 
       {/* SPRINT J — Section divider: "The Path Forward". */}
-      <div className="ep-section-eyebrow pt-3">
+      <div className="ep-section-eyebrow">
         <span className="ep-section-eyebrow__rule" aria-hidden />
         <span className="ep-section-eyebrow__label">The Path Forward</span>
         <span className="ep-section-eyebrow__grow" aria-hidden />
@@ -868,7 +868,7 @@ export default async function MemberHomePage() {
       {/* Path Forward — the "continue learning" actions. SPRINT M: the
           PillarJourneyStrip ("N of 6 pillars earned") was removed — the six
           pillars already render once in "The Architecture" hero. */}
-      <div className="space-y-4">
+      <div className="ep-stack">
         {inProgressData && (
           <InProgressPillarHero
             pillar={{

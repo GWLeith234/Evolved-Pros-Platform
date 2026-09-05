@@ -297,10 +297,10 @@ export function UnifiedCommunityPage({
       {/* Feed (left) + weekly leaderboard rail (right) */}
       <div style={{ background: 'var(--community-page-bg)' }}>
         <div
-          className="w-full mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4 grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(280px,35fr)] gap-4 sm:gap-6 ep-no-x-scroll"
+          className="w-full mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 grid grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(280px,35fr)] gap-ep-section sm:gap-ep-stack ep-no-x-scroll"
           style={{ maxWidth: 1280 }}
         >
-          <div className="community-feed-col" style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
+          <div className="community-feed-col ep-stack--tight" style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
 
           {/* Mobile engagement: poll + compact Learn/Listen chips */}
           <CommunityMobileEngagement
@@ -312,7 +312,7 @@ export function UnifiedCommunityPage({
           {pinnedPost && (
             <div
               className="community-pinned"
-              style={{ padding: '14px 16px' }}
+              style={{ padding: '16px' }}
             >
               <p
                 className="community-pinned-label font-condensed font-bold uppercase tracking-[0.18em] text-[12px] mb-2"

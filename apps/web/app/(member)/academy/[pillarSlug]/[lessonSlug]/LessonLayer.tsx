@@ -478,7 +478,7 @@ export function LessonLayer({
       {/* One mid-scroll unit after notes. The second unit waits until
           discussion copy has given it a content spacer. */}
       {scrollBanner?.image_url && (
-        <div data-ad-rhythm="unit" style={{ marginBottom: 28 }}>
+        <div data-ad-rhythm="unit" className="ep-ad-slot">
           <IabAdvertisementSlot
             ad={{ ...scrollBanner, image_url: scrollBanner.image_url }}
             locationId="academy"

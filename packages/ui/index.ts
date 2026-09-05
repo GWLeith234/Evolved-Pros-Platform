@@ -16,6 +16,7 @@ export {
   pillars,
   logos,
   spacing,
+  rhythm,
   radii,
   shadows,
   gradients,

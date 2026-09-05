@@ -20,7 +20,7 @@ export function MediaCenteredAd({
         display: 'flex',
         justifyContent: 'center',
         width: '100%',
-        padding: '12px 0',
+        paddingBlock: 'var(--space-ad-lean)',
       }}
     >
       <MediaIabSlot ad={ad} locationId={locationId} />

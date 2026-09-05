@@ -59,7 +59,7 @@ export default async function EventDetailPage({ params }: Props) {
   }
 
   return (
-    <div className="px-8 py-6 max-w-4xl mx-auto w-full" style={{ backgroundColor: '#faf9f7', minHeight: '100%' }}>
+    <div className="ep-page-pad px-8 pb-6 max-w-4xl mx-auto w-full" style={{ backgroundColor: '#faf9f7', minHeight: '100%' }}>
       <div className="mb-4">
         <a
           href="/live"

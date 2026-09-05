@@ -280,6 +280,17 @@
   --space-12: 48px;
   --space-16: 64px;
 
+  /* Semantic vertical rhythm (mirrors packages/ui/tokens `rhythm`) */
+  --space-stack:    var(--space-6);
+  --space-stack-lg: var(--space-8);
+  --space-ad:       var(--space-6);
+  --space-ad-lean:  var(--space-4);
+  --space-section:  var(--space-4);
+  --space-rule:     var(--space-4);
+  --space-page-top: var(--space-4);
+  --space-card:     var(--space-4);
+  --space-card-lg:  var(--space-6);
+
   /* Radii — sharp editorial default; pill only for CTAs / tracks */
   --radius-none: 0px;
   --radius-sm:   2px;
@@ -729,8 +740,9 @@ textarea {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
-  /* Bottom tabs (fixed) + home indicator — content never sits under the bar */
-  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  /* First card sits off the top chrome; bottom tabs + home indicator */
+  padding-top: var(--space-page-top);
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
 }
 @media (min-width: 1024px) {
   .ep-main-scroll {
@@ -1575,7 +1587,7 @@ html.cream-mode body {
     padding-right: 14px !important;
   }
   .home-4up-grid {
-    gap: 12px !important;
+    gap: var(--space-section) !important;
   }
   .ep-stat-card .ep-stat-value {
     font-size: 1.65rem !important;
@@ -1613,6 +1625,62 @@ html.light-mode .ep-bottom-tabs {
   box-sizing: border-box;
   padding-left: max(24px, env(safe-area-inset-left, 0px));
   padding-right: max(24px, env(safe-area-inset-right, 0px));
+}
+
+/* ── Vertical rhythm utilities ─────────────────────────────────────────────
+   Use these instead of one-off space-y / py / margin magic numbers.
+   Scale: 16 / 24 / 32 / 40 (see --space-section / --space-stack / --space-ad). */
+.ep-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack);
+}
+.ep-stack--tight {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-section);
+}
+@media (min-width: 640px) {
+  .ep-stack:not(.ep-stack--tight) {
+    gap: var(--space-stack-lg);
+  }
+}
+.ep-ad-slot {
+  padding-block: var(--space-ad);
+  box-sizing: border-box;
+}
+.ep-ad-slot--lean {
+  padding-block: var(--space-ad-lean);
+}
+/* Stack gap already supplies 24/32 — don't add a second 24 on the ad. */
+.ep-stack:not(.ep-stack--tight) > .ep-ad-slot,
+.ep-stack:not(.ep-stack--tight) > .ep-ad-slot--lean {
+  padding-block: 0;
+}
+.ep-section-head {
+  margin: 0 0 var(--space-section);
+}
+.ep-rule {
+  display: block;
+  height: 1px;
+  width: 100%;
+  margin-block: var(--space-rule);
+  background: var(--border-color);
+  border: 0;
+}
+.ep-page-pad {
+  padding-top: var(--space-page-top);
+}
+.ep-card-pad {
+  padding: var(--space-card);
+}
+@media (min-width: 640px) {
+  .ep-page-pad {
+    padding-top: var(--space-6);
+  }
+  .ep-card-pad {
+    padding: var(--space-card-lg);
+  }
 }
 .ep-no-x-scroll {
   /* clip (not hidden) prevents horizontal scroll without establishing a scroll
@@ -1801,7 +1869,7 @@ html.light-mode .podcast-force-dark {
   }
   .home-4up-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 14px !important;
+    gap: var(--space-section) !important;
   }
   .academy-course-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -1891,7 +1959,7 @@ html.light-mode .podcast-force-dark {
 /* Landscape phones: keep bottom tabs usable; reduce main bottom pad slightly */
 @media (max-height: 480px) and (orientation: landscape) {
   .ep-main-scroll {
-    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
   }
   .ep-bottom-tabs {
     min-height: calc(48px + env(safe-area-inset-bottom, 0px));
@@ -1924,7 +1992,7 @@ html.light-mode .podcast-force-dark {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin: 12px 0 4px;
+  margin: var(--space-rule) 0 var(--space-section);
 }
 .ep-section-eyebrow__rule {
   width: 28px;

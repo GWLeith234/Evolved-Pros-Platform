@@ -28,7 +28,7 @@ type AcademyUnit =
 function AcademyAdBreak({ unit }: { unit: AcademyUnit }) {
   if (unit.kind === 'upgrade') {
     return (
-      <div data-ad-rhythm="unit" className="flex justify-center py-2">
+      <div data-ad-rhythm="unit" className="ep-ad-slot flex justify-center">
         <div className="w-full max-w-xl">
           <AcademyArchitectureCard ad={ACADEMY_UPGRADE_AD} locationId="academy-upgrade" />
         </div>
@@ -37,7 +37,7 @@ function AcademyAdBreak({ unit }: { unit: AcademyUnit }) {
   }
   if (!unit.ad.image_url) return null
   return (
-    <div data-ad-rhythm="unit" className="flex justify-center py-2">
+    <div data-ad-rhythm="unit" className="ep-ad-slot flex justify-center">
       <IabAdvertisementSlot
         ad={{ ...unit.ad, image_url: unit.ad.image_url }}
         locationId="academy"
@@ -84,7 +84,7 @@ export default async function AcademyPage() {
 
   return (
     <div className="academy-page ep-surface-mobile">
-      <div className="academy-page-header px-4 md:px-8 py-5 sm:py-6">
+      <div className="academy-page-header px-4 md:px-8 py-6 sm:py-8">
         <p
           className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-1"
           style={{ color: 'var(--brand-teal, #0ABFA3)' }}
@@ -122,15 +122,15 @@ export default async function AcademyPage() {
         overallPct={overallPct}
       />
 
-      <div className="px-4 md:px-8 py-5 sm:py-6">
-        <div className="flex flex-col gap-6">
+      <div className="px-4 md:px-8 py-6 sm:py-8">
+        <div className="ep-stack">
           {chunks.map((chunk, idx) =>
             chunk.kind === 'ad' ? (
               <AcademyAdBreak key={`${chunk.ad.id}-${idx}`} unit={chunk.ad} />
             ) : (
               <div
                 key={chunk.items.map(c => c.id).join('-') || `row-${idx}`}
-                className="academy-course-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
+                className="academy-course-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-ep-section sm:gap-ep-stack"
               >
                 {chunk.items.map(course => (
                   <CourseCard
