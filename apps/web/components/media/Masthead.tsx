@@ -1,13 +1,35 @@
-// Platform wordmark for /media. Shared by the hub and every article shell.
-// EP lockup + Media section label. No newspaper nameplate.
+// Centered Media lockup for /media. Shared by the hub and every article shell.
+// EVOLVED PROS [megaphone in red circle] MEDIA. No newspaper nameplate.
 
-import Image from 'next/image'
 import Link from 'next/link'
-import { logos } from '@evolved-pros/ui'
 import { MediaMastheadRail } from '@/components/media/MediaMastheadRail'
 
-const WORDMARK_HEIGHT = 36
-const WORDMARK_WIDTH = WORDMARK_HEIGHT * 5
+function MegaphoneMark() {
+  return (
+    <span data-masthead-mark className="ep-media-masthead-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" focusable="false">
+        <path d="M16.881 4.317A2.25 2.25 0 0 1 21 6.196v11.608a2.25 2.25 0 0 1-4.119 1.88L13.5 16.5H8.25A5.25 5.25 0 0 1 3 11.25v-1.5A5.25 5.25 0 0 1 8.25 4.5h5.25l3.381-2.183Z" />
+        <path d="M5.653 16.5h1.122a8.96 8.96 0 0 0-.252 1.44 2.25 2.25 0 0 1-2.365 2.054A2.25 2.25 0 0 1 2.25 17.79c0-.332.034-.658.099-.976a.75.75 0 0 1 .743-.624h2.56Z" />
+      </svg>
+    </span>
+  )
+}
+
+export function MediaMastheadLockup() {
+  return (
+    <h1 className="ep-media-masthead-wordmark">
+      <Link href="/media" aria-label="Evolved Pros Media">
+        <span data-masthead-evolved className="ep-media-masthead-brand">
+          Evolved Pros
+        </span>
+        <MegaphoneMark />
+        <span data-masthead-section className="ep-media-masthead-section">
+          Media
+        </span>
+      </Link>
+    </h1>
+  )
+}
 
 export function Masthead() {
   return (
@@ -22,31 +44,7 @@ export function Masthead() {
           </Link>
         </div>
 
-        <h1 className="ep-media-masthead-wordmark">
-          <Link href="/media" aria-label="Evolved Pros Media">
-            <Image
-              src={logos.horizontalDark}
-              alt=""
-              width={WORDMARK_WIDTH}
-              height={WORDMARK_HEIGHT}
-              sizes={`${WORDMARK_WIDTH}px`}
-              className="ep-media-masthead-logo ep-media-masthead-logo--on-dark"
-              priority
-            />
-            <Image
-              src={logos.horizontalNavy}
-              alt=""
-              width={WORDMARK_WIDTH}
-              height={WORDMARK_HEIGHT}
-              sizes={`${WORDMARK_WIDTH}px`}
-              className="ep-media-masthead-logo ep-media-masthead-logo--on-light"
-              priority
-            />
-            <span data-masthead-section className="ep-media-masthead-section">
-              Media
-            </span>
-          </Link>
-        </h1>
+        <MediaMastheadLockup />
 
         <MediaMastheadRail />
       </div>

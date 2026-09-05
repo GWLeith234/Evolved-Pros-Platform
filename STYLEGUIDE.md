@@ -38,7 +38,7 @@ Every UI change must comply. CI enforces the hex ratchet; reviewers enforce the 
 
 - `font-serif` (Merriweather): long-form article body.
 
-- Abril Fatface: do not use for new chrome. Media uses the platform wordmark plus a Media section label, not a newspaper masthead.
+- Abril Fatface: do not use for new chrome. Media uses a centered EVOLVED PROS [megaphone] MEDIA lockup, not a newspaper nameplate.
 
 - Use the `ep-*` type scale (ep-display, ep-h1..h3, ep-body, ep-eyebrow, ep-label). Do not invent ad-hoc font sizes.
 

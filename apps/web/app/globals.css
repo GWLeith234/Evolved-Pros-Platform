@@ -2099,7 +2099,7 @@ a.ep-text-link:focus-visible {
   color: var(--brand-navy);
 }
 
-/* Media platform wordmark: EP lockup + section label. Theme-aware chrome
+/* Media lockup: centered EVOLVED PROS [megaphone] MEDIA. Theme-aware chrome
    (same tokens / 16-24-32-40 rhythm as TopNav + footer). Desk body stays
    paper so #108 navy-on-cream cards remain readable. */
 .ep-media-masthead {
@@ -2155,45 +2155,49 @@ a.ep-text-link:focus-visible {
 }
 .ep-media-masthead-wordmark {
   margin: 0;
+  display: flex;
+  justify-content: center;
   font-size: inherit;
   font-weight: inherit;
 }
 .ep-media-masthead-wordmark a {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-4);
+  justify-content: center;
+  gap: clamp(var(--space-2), 2vw, var(--space-4));
   min-width: 0;
   max-width: 100%;
+  font-size: clamp(1.5rem, 5.5vw, 2.75rem);
   text-decoration: none;
   color: inherit;
+  white-space: nowrap;
 }
-.ep-media-masthead-logo {
-  height: 28px;
-  width: 140px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-@media (min-width: 640px) {
-  .ep-media-masthead-logo {
-    height: 36px;
-    width: 180px;
-  }
-}
-.ep-media-masthead-logo--on-dark { display: block; }
-.ep-media-masthead-logo--on-light { display: none; }
-html.light-mode .ep-media-masthead-logo--on-dark { display: none; }
-html.light-mode .ep-media-masthead-logo--on-light { display: block; }
+.ep-media-masthead-brand,
 .ep-media-masthead-section {
   font-family: var(--font-bebas), "Bebas Neue", sans-serif;
-  font-size: clamp(1.75rem, 7vw, 2.25rem);
+  font-size: 1em;
   font-weight: 400;
   letter-spacing: var(--type-nav-track);
   text-transform: uppercase;
   color: var(--text-primary);
   line-height: 1;
-  border-left: 2px solid var(--brand-red-hot);
-  padding-left: var(--space-4);
+}
+.ep-media-masthead-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.86em;
+  height: 0.86em;
   flex-shrink: 0;
+  background: var(--brand-red);
+  color: var(--white);
+  border-radius: 50%;
+}
+.ep-media-masthead-mark svg {
+  display: block;
+  width: 0.58em;
+  height: 0.58em;
+  fill: currentColor;
 }
 .ep-media-masthead-rail {
   display: flex;
