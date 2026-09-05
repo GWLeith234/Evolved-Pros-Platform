@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { captureWeeklySnapshots } from '@/lib/goals/snapshot'
+import { enqueueWeeklyWigNudges } from '@/lib/notifications/nudges'
 
 /**
  * Weekly cron: writes a goal_snapshots row per active goal at the
@@ -27,7 +28,10 @@ export async function GET(request: Request) {
 
   try {
     const snapshotsWritten = await captureWeeklySnapshots()
-    return NextResponse.json({ ok: true, snapshotsWritten })
+    // Existing snapshot cron is the weekly WIG cadence — reuse it so the
+    // bell gets a check-in without a second scheduler.
+    const weeklyWigNudges = await enqueueWeeklyWigNudges()
+    return NextResponse.json({ ok: true, snapshotsWritten, weeklyWigNudges })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Snapshot run failed'
     console.error('[cron/goal-snapshots] error:', message)

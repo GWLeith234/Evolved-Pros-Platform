@@ -4,6 +4,8 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { adminClient } from '@/lib/supabase/admin'
+import { notifyWigNudge } from '@/lib/notifications/create'
+import { WIG_DEDUPE_MS, crossedMilestones, wigActionUrl, wigCopy } from '@/lib/notifications/intents'
 
 /**
  * PATCH /api/goals/[id]
@@ -74,6 +76,18 @@ export async function PATCH(
   if (error) {
     console.error('[PATCH /api/goals/[id]] update', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  const title = typeof data.title === 'string' ? data.title : 'your WIG'
+  for (const mark of crossedMilestones(prev, next)) {
+    const copy = wigCopy('milestone', { title, milestone: mark })
+    void notifyWigNudge({
+      userId:    profile.id,
+      title:     copy.title,
+      body:      copy.body,
+      actionUrl: wigActionUrl('milestone', { milestone: mark }),
+      sinceMs:   WIG_DEDUPE_MS,
+    })
   }
 
   return NextResponse.json({ goal: data })

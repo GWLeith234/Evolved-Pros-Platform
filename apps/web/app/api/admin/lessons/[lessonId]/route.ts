@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { asTranscriptSegments } from '@/lib/academy/transcript'
 import { asKeyTakeaways } from '@/lib/academy/takeaways'
+import { notifyLessonPublished } from '@/lib/notifications/fanout'
 
 export const dynamic = 'force-dynamic'
 
@@ -81,6 +82,11 @@ export async function PATCH(
       .map(k => [k, body[k as AllowedKey]])
   )
 
+  const publishing = update.is_published === true
+  const { data: current } = publishing
+    ? await adminClient.from('lessons').select('is_published').eq('id', params.lessonId).maybeSingle()
+    : { data: null }
+
   // RLS-FIX: adminClient — see lessons/route.ts.
   const { data, error } = await adminClient
     .from('lessons')
@@ -90,6 +96,9 @@ export async function PATCH(
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (publishing && current && !current.is_published && data.is_published) {
+    void notifyLessonPublished(params.lessonId)
+  }
   return NextResponse.json({ lesson: data })
 }
 

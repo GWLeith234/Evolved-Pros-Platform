@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { notifyEventPublished } from '@/lib/notifications/fanout'
 
 export async function PATCH(
   request: Request,
@@ -25,6 +26,11 @@ export async function PATCH(
     return NextResponse.json({ error: 'No valid fields' }, { status: 422 })
   }
 
+  const publishing = update.is_published === true
+  const { data: current } = publishing
+    ? await adminClient.from('events').select('is_published').eq('id', params.id).maybeSingle()
+    : { data: null }
+
   // RLS-FIX: adminClient — see events/route.ts.
   const { data, error } = await adminClient
     .from('events')
@@ -36,6 +42,13 @@ export async function PATCH(
   if (error || !data) {
     console.error('[PATCH /api/admin/events/[id]]', error)
     return NextResponse.json({ error: error?.message ?? 'Update failed' }, { status: 500 })
+  }
+  if (publishing && current && !current.is_published && data.is_published) {
+    void notifyEventPublished({
+      eventId: data.id,
+      title: data.title,
+      eventType: data.event_type,
+    })
   }
   return NextResponse.json(data)
 }

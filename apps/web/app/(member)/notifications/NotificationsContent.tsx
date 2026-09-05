@@ -2,21 +2,30 @@
 
 import { useState, useCallback } from 'react'
 import { NotifFilter } from '@/components/notifications/NotifFilter'
+import type { FilterValue } from '@/components/notifications/NotifFilter'
 import { NotifItem } from '@/components/notifications/NotifItem'
 import { NotifLessonGroup } from '@/components/notifications/NotifLessonGroup'
 import type { NotifItemData } from '@/components/notifications/NotifItem'
-import type { Database } from '@evolved-pros/db'
-
-type NotifType = Database['public']['Tables']['notifications']['Row']['type']
-type FilterValue = NotifType | 'all'
+import { notificationIntent } from '@/lib/notifications/intents'
 
 const MOBILE_FILTERS: { value: FilterValue; label: string }[] = [
   { value: 'all',             label: 'All' },
+  { value: 'wig',             label: 'WIG' },
+  { value: 'progress',        label: 'Progress' },
+  { value: 'content',         label: 'Content' },
   { value: 'community_reply', label: 'Community' },
   { value: 'course_unlock',   label: 'Academy' },
   { value: 'event_reminder',  label: 'Events' },
   { value: 'system_billing',  label: 'System' },
 ]
+
+function matchesFilter(n: NotifItemData, filter: FilterValue): boolean {
+  if (filter === 'all') return true
+  const intent = notificationIntent({ type: n.type, title: n.title, actionUrl: n.actionUrl })
+  if (filter === 'wig' || filter === 'progress' || filter === 'content') return intent === filter
+  if (filter === 'community_reply') return n.type === 'community_reply' || n.type === 'community_mention'
+  return n.type === filter
+}
 
 interface NotificationsContentProps {
   initialNotifications: NotifItemData[]
@@ -34,11 +43,17 @@ export function NotificationsContent({
   const [markingAll, setMarkingAll] = useState(false)
   const [unreadCount, setUnreadCount] = useState(initialUnread)
 
-  const filtered = notifications.filter(n => {
-    if (filter === 'all') return true
-    if (filter === 'community_reply') return n.type === 'community_reply' || n.type === 'community_mention'
-    return n.type === filter
-  })
+  const filtered = notifications.filter(n => matchesFilter(n, filter))
+
+  const filterCounts = notifications.reduce<Partial<Record<FilterValue, number>>>((acc, n) => {
+    if (n.isRead) return acc
+    acc.all = (acc.all ?? 0) + 1
+    const intent = notificationIntent({ type: n.type, title: n.title, actionUrl: n.actionUrl })
+    if (intent !== 'other') acc[intent] = (acc[intent] ?? 0) + 1
+    const key = n.type === 'community_mention' ? 'community_reply' : n.type
+    acc[key] = (acc[key] ?? 0) + 1
+    return acc
+  }, {})
 
   const unread = filtered.filter(n => !n.isRead)
   const read = filtered.filter(n => n.isRead)
@@ -99,7 +114,7 @@ export function NotificationsContent({
       <div className="hidden md:flex">
         <NotifFilter
           active={filter}
-          counts={typeCounts as Partial<Record<FilterValue, number>>}
+          counts={{ ...typeCounts, ...filterCounts } as Partial<Record<FilterValue, number>>}
           onChange={setFilter}
         />
       </div>

@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { notificationIntent } from '@/lib/notifications/intents'
 
 export const revalidate = 60
 
@@ -35,7 +36,20 @@ export async function GET() {
     let dotColor: ActivityItem['dotColor'] = 'teal'
     let actionUrl = n.action_url ?? '/home'
 
-    if (n.type === 'community_reply' || n.type === 'community_mention') {
+    const intent = notificationIntent({ type: n.type, title: n.title, actionUrl: n.action_url })
+    if (intent === 'wig') {
+      type = 'lesson_unlocked'
+      dotColor = 'gold'
+      actionUrl = n.action_url ?? '/home'
+    } else if (intent === 'progress') {
+      type = 'lesson_unlocked'
+      dotColor = 'teal'
+      actionUrl = n.action_url ?? '/home'
+    } else if (intent === 'content') {
+      type = n.type === 'event_reminder' ? 'event_reminder' : 'lesson_unlocked'
+      dotColor = n.type === 'event_reminder' ? 'red' : 'gold'
+      actionUrl = n.action_url ?? '/home'
+    } else if (n.type === 'community_reply' || n.type === 'community_mention') {
       type = 'community_reply'
       dotColor = 'teal'
       actionUrl = n.action_url ?? '/community'

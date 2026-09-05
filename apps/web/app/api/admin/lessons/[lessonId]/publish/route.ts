@@ -1,6 +1,7 @@
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { notifyLessonPublished } from '@/lib/notifications/fanout'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,5 +29,8 @@ export async function PATCH(
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!current.is_published && data.is_published) {
+    void notifyLessonPublished(params.lessonId)
+  }
   return NextResponse.json({ isPublished: data.is_published })
 }
