@@ -828,6 +828,171 @@ body.ask-george-open .ep-bottom-tabs {
   align-items: start;
   gap: 24px;
 }
+
+/* Product launches Timeline (GOLD mock language, dual theme).
+   Dark defaults match /live navy. Light remaps when html.light-mode
+   is set and the section is not inside .live-force-dark. */
+.live-milestones {
+  --ms-gold: var(--brand-gold);
+  --ms-title: var(--text-strong);
+  --ms-dek: var(--text-2);
+  --ms-surface: var(--bg-surface);
+  --ms-page: var(--bg-page);
+  --ms-border: var(--border-soft2);
+  --ms-rule: var(--border-soft);
+}
+html.light-mode .live-milestones {
+  --ms-gold: #8B6A00;
+  --ms-title: #1B2A4A;
+  --ms-dek: rgba(27, 42, 74, 0.72);
+  --ms-surface: #FFFFFF;
+  --ms-page: #F5F0E8;
+  --ms-border: rgba(27, 42, 74, 0.14);
+  --ms-rule: rgba(27, 42, 74, 0.10);
+}
+.live-force-dark .live-milestones,
+html.light-mode .live-force-dark .live-milestones {
+  --ms-gold: #C9A84C;
+  --ms-title: #fff;
+  --ms-dek: rgba(255, 255, 255, 0.72);
+  --ms-surface: #111926;
+  --ms-page: #0A0F18;
+  --ms-border: rgba(255, 255, 255, 0.08);
+  --ms-rule: rgba(255, 255, 255, 0.05);
+}
+.live-milestones[data-preview="light"],
+html.light-mode .live-force-dark .live-milestones[data-preview="light"] {
+  --ms-gold: #8B6A00;
+  --ms-title: #1B2A4A;
+  --ms-dek: rgba(27, 42, 74, 0.72);
+  --ms-surface: #FFFFFF;
+  --ms-page: #F5F0E8;
+  --ms-border: rgba(27, 42, 74, 0.14);
+  --ms-rule: rgba(27, 42, 74, 0.10);
+  --text-strong: #1B2A4A;
+  --text-2: rgba(27, 42, 74, 0.72);
+  --brand-gold: #8B6A00;
+  background: var(--ms-page);
+  color-scheme: light;
+}
+.live-milestones-timeline {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 8px 18px 8px 16px;
+  border: 1px solid var(--ms-border);
+  border-top: 3px solid var(--ms-gold);
+  background: var(--ms-surface);
+}
+.live-milestones-item {
+  list-style: none;
+}
+.live-milestones-item + .live-milestones-item .live-milestones-row {
+  border-top: 1px solid var(--ms-rule);
+}
+.live-milestones-row {
+  display: grid;
+  grid-template-columns: 148px 16px minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: 16px;
+  padding: 18px 4px;
+  text-decoration: none;
+  color: inherit;
+  min-height: 44px;
+}
+a.live-milestones-row:hover .live-milestones-cta,
+a.live-milestones-row:focus-visible .live-milestones-cta {
+  color: var(--brand-gold-bright, #E7CE86);
+}
+.live-milestones[data-preview="light"] a.live-milestones-row:hover .live-milestones-cta,
+.live-milestones[data-preview="light"] a.live-milestones-row:focus-visible .live-milestones-cta,
+html.light-mode .live-milestones a.live-milestones-row:hover .live-milestones-cta,
+html.light-mode .live-milestones a.live-milestones-row:focus-visible .live-milestones-cta,
+html.light-mode .live-force-dark .live-milestones[data-preview="light"] a.live-milestones-row:hover .live-milestones-cta,
+html.light-mode .live-force-dark .live-milestones[data-preview="light"] a.live-milestones-row:focus-visible .live-milestones-cta {
+  color: #6B5200;
+}
+.live-force-dark .live-milestones a.live-milestones-row:hover .live-milestones-cta,
+.live-force-dark .live-milestones a.live-milestones-row:focus-visible .live-milestones-cta,
+html.light-mode .live-force-dark .live-milestones a.live-milestones-row:hover .live-milestones-cta,
+html.light-mode .live-force-dark .live-milestones a.live-milestones-row:focus-visible .live-milestones-cta {
+  color: var(--brand-gold-bright, #E7CE86);
+}
+.live-milestones-date {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  color: var(--ms-gold);
+  white-space: nowrap;
+  line-height: 1.2;
+  padding-top: 2px;
+}
+.live-milestones-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: stretch;
+  position: relative;
+  margin-top: -18px;
+  margin-bottom: -18px;
+  padding-top: 23px;
+}
+.live-milestones-node {
+  width: 11px;
+  height: 11px;
+  margin-top: 0;
+  border: 2px solid var(--ms-gold);
+  border-radius: 50%;
+  background: var(--ms-page);
+  box-shadow: 0 0 0 3px var(--ms-surface);
+  flex-shrink: 0;
+  z-index: 1;
+}
+.live-milestones-rail::after {
+  content: '';
+  width: 2px;
+  flex: 1 1 auto;
+  min-height: 12px;
+  background: color-mix(in srgb, var(--ms-gold) 55%, transparent);
+}
+.live-milestones-item:last-child .live-milestones-rail::after {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--ms-gold) 45%, transparent),
+    transparent
+  );
+}
+.live-milestones-body {
+  min-width: 0;
+}
+.live-milestones-title {
+  display: block;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  color: var(--ms-title);
+  line-height: 1.25;
+}
+.live-milestones-dek {
+  display: block;
+  margin-top: 4px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ms-dek);
+}
+.live-milestones-cta {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ms-gold);
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding-top: 4px;
+  align-self: start;
+}
 .live-pillar-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -906,6 +1071,34 @@ body.ask-george-open .ep-bottom-tabs {
     grid-template-columns: 1fr !important;
     gap: 10px !important;
     padding: 18px 16px !important;
+  }
+  .live-milestones-timeline {
+    padding: 4px 12px 8px 10px;
+  }
+  .live-milestones-row {
+    grid-template-columns: 16px minmax(0, 1fr);
+    grid-template-areas:
+      'rail date'
+      'rail body'
+      'rail cta';
+    column-gap: 12px;
+    row-gap: 4px;
+    padding: 16px 2px;
+  }
+  .live-milestones-rail {
+    grid-area: rail;
+    margin-top: -16px;
+    margin-bottom: -16px;
+    padding-top: 20px;
+  }
+  .live-milestones-date { grid-area: date; }
+  .live-milestones-body { grid-area: body; }
+  .live-milestones-cta {
+    grid-area: cta;
+    padding-top: 6px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
   }
   .live-pillar-grid {
     grid-template-columns: 1fr !important;
