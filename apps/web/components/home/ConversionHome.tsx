@@ -133,11 +133,17 @@ export function ConversionHome({
       </header>
 
       <main>
+        {/*
+          Mobile fold is viewport-tall (100svh minus the two-row header).
+          The GOLD Architecture still stays; object-cover crops it so the
+          signed-out primary Join free sits in the first viewport instead
+          of below a stacked 3/2 still. Open the platform is signed-in only.
+        */}
         <section
           aria-label={HERO_IMAGE_ALT}
-          className="ep-home-fold relative w-full overflow-hidden bg-page md:min-h-[calc(100svh-5.5rem)]"
+          className="ep-home-fold relative w-full overflow-hidden bg-page min-h-[calc(100svh-7rem)] md:min-h-[calc(100svh-5.5rem)]"
         >
-          <div className="relative aspect-[3/2] w-full md:absolute md:inset-0 md:aspect-auto">
+          <div className="absolute inset-0 aspect-[3/2] w-full">
             <Image
               src={HERO_IMAGE_SRC}
               alt={HERO_IMAGE_ALT}
@@ -148,15 +154,15 @@ export function ConversionHome({
               sizes="100vw"
             />
           </div>
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-2/3 bg-gradient-to-t from-paper via-paper/85 to-transparent md:block" />
-          <div className="ep-home-fold-copy relative mx-auto max-w-3xl px-5 pb-12 pt-10 text-center md:flex md:min-h-[calc(100svh-5.5rem)] md:flex-col md:items-center md:justify-end md:pb-14 md:pt-24">
-            <h1 className="font-display text-[clamp(1.75rem,4.5vw,2.75rem)] font-bold leading-tight text-navy">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-paper via-paper/85 to-transparent" />
+          <div className="ep-home-fold-copy relative mx-auto flex min-h-[calc(100svh-7rem)] max-w-3xl flex-col items-center justify-end px-5 pb-6 pt-12 text-center md:min-h-[calc(100svh-5.5rem)] md:pb-14 md:pt-24">
+            <h1 className="font-display text-[clamp(1.5rem,4.5vw,2.75rem)] font-bold leading-tight text-navy">
               {HOME_H1}
             </h1>
-            <p className="mx-auto mt-4 max-w-xl font-body text-lg leading-relaxed text-navy/70">
+            <p className="mx-auto mt-3 max-w-xl font-body text-base leading-relaxed text-navy/70 md:mt-4 md:text-lg">
               {HOME_SUB}
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-3 md:mt-8">
               {signedIn ? (
                 <PrimaryCta href={HOME_OPEN_PLATFORM_HREF} label={HOME_OPEN_PLATFORM} />
               ) : (

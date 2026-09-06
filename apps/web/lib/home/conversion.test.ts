@@ -149,6 +149,22 @@ describe('conversion homepage layout contracts', () => {
     expect(conversionHomeSrc).toMatch(/loginHrefFor\('\/academy'\)/)
   })
 
+  it('puts signed-out primary Join free in the first mobile viewport over the GOLD still', () => {
+    expect(conversionHomeSrc).toMatch(/min-h-\[calc\(100svh-7rem\)\]/)
+    expect(conversionHomeSrc).toMatch(/md:min-h-\[calc\(100svh-5\.5rem\)\]/)
+    expect(conversionHomeSrc).toMatch(/absolute inset-0 aspect-\[3\/2\]/)
+    expect(conversionHomeSrc).toMatch(/flex-col items-center justify-end/)
+    expect(conversionHomeSrc).toMatch(/bg-gradient-to-t from-paper/)
+    expect(conversionHomeSrc).not.toMatch(/hidden h-2\/3 bg-gradient-to-t/)
+    expect(conversionHomeSrc).not.toMatch(
+      /relative aspect-\[3\/2\] w-full md:absolute md:inset-0/,
+    )
+    expect(conversionHomeSrc).toMatch(/label=\{HOME_PRIMARY_CTA\}/)
+    expect(conversionHomeSrc).toMatch(/href=\{JOIN_FREE_HREF\}/)
+    expect(conversionHomeSrc).toMatch(/HOME_OPEN_PLATFORM_HREF/)
+    expect(conversionHomeSrc.indexOf('signedIn ?')).toBeGreaterThan(-1)
+  })
+
   it('uses one GOLD still in both themes with no invert or theme-switched src', () => {
     expect(conversionHomeSrc).toMatch(/src=\{HERO_IMAGE_SRC\}/)
     expect(conversionHomeSrc).not.toMatch(/dark:.*HERO_IMAGE|HERO_IMAGE.*dark:/)
