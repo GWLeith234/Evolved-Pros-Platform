@@ -14,6 +14,11 @@ import {
   HERO_IMAGE_WIDTH,
   HOME_ARIA,
   HOME_BOOK,
+  HOME_BOOK_COVER_ALT,
+  HOME_BOOK_COVER_HEIGHT,
+  HOME_BOOK_COVER_MD5,
+  HOME_BOOK_COVER_SRC,
+  HOME_BOOK_COVER_WIDTH,
   HOME_H1,
   HOME_JOIN_FREE,
   HOME_JOIN_FREE_TOOLTIP,
@@ -93,7 +98,17 @@ describe('conversion homepage locks', () => {
     expect(blob).not.toContain('book george')
     expect(blob).not.toContain('keynote')
     expect(HOME_BOOK.href).toBe(BOOK_PREORDER_PATH)
+    expect(HOME_BOOK.href).toBe('/evolved')
     expect(HOME_BOOK.release).toBe('Out 15 Sep.')
+    expect(HOME_BOOK_COVER_SRC).toBe('/brand/book-cover.png')
+    expect(HOME_BOOK_COVER_ALT).toBe('EVOLVED by George Leith')
+    expect(HOME_BOOK_COVER_MD5).toBe('4217c015014403ae50cc5dc92ac36ceb')
+    expect(HOME_BOOK_COVER_WIDTH).toBe(1800)
+    expect(HOME_BOOK_COVER_HEIGHT).toBe(2700)
+    expect(HOME_BOOK_COVER_WIDTH / HOME_BOOK_COVER_HEIGHT).toBe(2 / 3)
+    expect(HOME_BOOK_COVER_SRC).not.toBe('/ads/book-cover.png')
+    expect(HOME_BOOK.href).not.toContain('amazon')
+    expect(HOME_BOOK.href).not.toContain('B0')
   })
 
   it('has zero U+2014 on title, meta, copy, and aria', () => {
@@ -148,6 +163,18 @@ describe('conversion homepage layout contracts', () => {
       resolve(root, '../../public/brand/hero-evolved-architecture.png'),
     )
     expect(createHash('md5').update(bytes).digest('hex')).toBe(HERO_IMAGE_MD5)
+  })
+
+  it('puts the FINAL EVOLVED cover on the book card from public /brand, not ads', () => {
+    expect(conversionHomeSrc).toMatch(/src=\{HOME_BOOK_COVER_SRC\}/)
+    expect(conversionHomeSrc).toMatch(/alt=\{HOME_BOOK_COVER_ALT\}/)
+    expect(conversionHomeSrc).toMatch(/HOME_BOOK_COVER_WIDTH/)
+    expect(conversionHomeSrc).toMatch(/HOME_BOOK_COVER_HEIGHT/)
+    expect(conversionHomeSrc).toMatch(/h-auto w-full/)
+    expect(conversionHomeSrc).not.toMatch(/\/ads\/book-cover/)
+    expect(conversionHomeSrc).not.toMatch(/lib\/book\/preorder/)
+    const bytes = readFileSync(resolve(root, '../../public/brand/book-cover.png'))
+    expect(createHash('md5').update(bytes).digest('hex')).toBe(HOME_BOOK_COVER_MD5)
   })
 
   it('keeps conversion `/` ad-free — no IAB, slots, or platform_ads', () => {

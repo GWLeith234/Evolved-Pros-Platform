@@ -105,6 +105,18 @@ export const HOME_BOOK = {
   href: BOOK_PREORDER_PATH,
 } as const
 
+/**
+ * FINAL front cover for the conversion `/` book card.
+ * Public /brand path (same bar as the Architecture hero). Not the
+ * /ads/book-cover.png house-ad reconstruction. Do not put this under
+ * /academy or /events.
+ */
+export const HOME_BOOK_COVER_SRC = '/brand/book-cover.png' as const
+export const HOME_BOOK_COVER_MD5 = '4217c015014403ae50cc5dc92ac36ceb' as const
+export const HOME_BOOK_COVER_ALT = 'EVOLVED by George Leith' as const
+export const HOME_BOOK_COVER_WIDTH = 1800
+export const HOME_BOOK_COVER_HEIGHT = 2700
+
 export const HOME_EPISODES_TITLE = 'Latest episodes'
 export const HOME_EPISODES_LINK = 'All episodes'
 export const HOME_SIGN_IN = 'Sign in'
@@ -141,6 +153,7 @@ export function conversionCopyStrings(): string[] {
     HOME_BOOK.title,
     HOME_BOOK.release,
     HOME_BOOK.cta,
+    HOME_BOOK_COVER_ALT,
     ...HOME_NAV_LINKS.map(l => l.label),
     ...HOME_LADDER.flatMap(card => [
       card.step,
