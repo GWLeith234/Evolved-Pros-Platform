@@ -5,6 +5,7 @@ import { ensurePodcastSponsors } from '@/lib/sponsors/partners'
 import { adMatchesSurface, filterLiveAds } from '@/lib/ads/iab'
 import { resolveCanonicalOrigin } from '@/lib/seo/canonical'
 import { allowedEpisodeStillUrl } from '@/lib/podcast/stillUrl'
+import { stripEmDashCopy } from '@/lib/home/cardImagery'
 
 // ---------------------------------------------------------------------------
 // Public podcast data + SEO helpers (SPRINT — Public SEO Podcast Pages).
@@ -104,7 +105,7 @@ function normalize(row: any): PublicEpisode {
     id: row.id,
     slug: row.slug,
     episode_number: row.episode_number ?? null,
-    title: row.title,
+    title: stripEmDashCopy(row.title ?? ''),
     guest_name: row.guest_name ?? null,
     guest_bio: row.guest_bio ?? null,
     guest_title: row.guest_title ?? null,
@@ -117,12 +118,15 @@ function normalize(row: any): PublicEpisode {
     apple_url: row.apple_url ?? null,
     duration_seconds: row.duration_seconds ?? null,
     location: row.location ?? null,
-    summary: row.summary ?? row.description ?? null,
+    summary: stripEmDashCopy(row.summary ?? row.description ?? '') || null,
     tags: asArray<string>(row.tags),
     pillar: row.pillar ?? null,
     // `pillars` is string[] | null in the schema — coerce the null to [].
     pillars: asArray<string>(row.pillars),
-    chapters: asArray<Chapter>(row.chapters),
+    chapters: asArray<Chapter>(row.chapters).map(chapter => ({
+      ...chapter,
+      title: stripEmDashCopy(String(chapter.title ?? '')),
+    })),
     pull_quotes: asArray<PullQuote>(row.pull_quotes),
     transcript_text: transcriptText,
     transcript_segments: asArray<TranscriptSegment>(row.transcript_segments),

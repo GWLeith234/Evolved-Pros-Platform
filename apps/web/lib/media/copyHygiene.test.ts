@@ -17,6 +17,21 @@ const USER_FACING = [
 ]
 
 describe('Media copy hygiene', () => {
+  it('strips media OG and podcast titles at the render boundary', () => {
+    const article = readFileSync(
+      resolve(here, '../../app/(public)/media/[pillar]/[slug]/page.tsx'),
+      'utf8',
+    )
+    expect(article).toMatch(/stripEmDashCopy\(story\.seo_title/)
+    expect(article).toMatch(/stripEmDashCopy\(story\.seo_description/)
+    const podcast = readFileSync(resolve(here, '../podcast/public.ts'), 'utf8')
+    expect(podcast).toMatch(/stripEmDashCopy\(row\.title/)
+    expect(podcast).toMatch(/title: stripEmDashCopy\(String\(chapter\.title/)
+    const transforms = readFileSync(resolve(here, '../podcast/transforms.ts'), 'utf8')
+    expect(transforms).toMatch(/title: stripEmDashCopy\(row\.title/)
+    expect(transforms).toMatch(/blurb: stripEmDashCopy\(row\.description/)
+  })
+
   it('keeps leftover desk copy free of manifesto language and em dashes', () => {
     expect(MEDIA_DESK_TAGLINE).toBe(
       'The Evolved Pros desk for sales, identity, and execution stories.',
@@ -49,6 +64,36 @@ describe('Media copy hygiene', () => {
       expect(src, file).not.toMatch(/THE CONFESSION BEFORE THE PRINCIPLE/)
       expect(src, file).not.toMatch(/watch your numbers transform/)
     }
+  })
+
+  it('keeps podcast title, dek, and chapter seed copy free of em dashes', () => {
+    const dir = join(repoRoot, 'data/episodes')
+    const files = readdirSync(dir).filter(f => f.endsWith('.json'))
+    expect(files.length).toBeGreaterThanOrEqual(4)
+    for (const file of files) {
+      const payload = JSON.parse(readFileSync(join(dir, file), 'utf8')) as {
+        title?: string
+        summary?: string
+        chapters?: { title?: string }[]
+      }
+      expect(payload.title ?? '', file).not.toContain(EM_DASH)
+      expect(payload.title ?? '', file).not.toContain('\u2013')
+      expect(payload.summary ?? '', file).not.toContain(EM_DASH)
+      for (const chapter of payload.chapters ?? []) {
+        expect(chapter.title ?? '', `${file} chapter`).not.toContain(EM_DASH)
+      }
+    }
+  })
+
+  it('persists the seo_description and episode em-dash cull', () => {
+    const sql = readFileSync(
+      join(repoRoot, 'supabase/migrations/089_media_podcast_copy_emdash.sql'),
+      'utf8',
+    )
+    expect(sql).toContain('seo_description')
+    expect(sql).toContain('public.episodes')
+    expect(sql).toContain('chapters')
+    expect(sql).not.toContain('&amp;quot;')
   })
 
   it('rewrites the five live card titles without em dashes', () => {

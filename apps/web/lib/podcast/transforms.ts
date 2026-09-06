@@ -1,4 +1,5 @@
 import { allowedEpisodeStillUrl } from '@/lib/podcast/stillUrl'
+import { stripEmDashCopy } from '@/lib/home/cardImagery'
 
 export type PodcastPillar =
   | 'foundation'
@@ -89,8 +90,8 @@ export function dbRowToEpisode(row: EpisodeRow, progress?: ProgressRow): Podcast
     id: row.id,
     slug: row.slug,
     episode: row.episode_number ?? 0,
-    title: row.title,
-    blurb: row.description ?? '',
+    title: stripEmDashCopy(row.title ?? ''),
+    blurb: stripEmDashCopy(row.description ?? ''),
     pillar,
     guest: {
       name: row.guest_name ?? '',
@@ -128,8 +129,8 @@ export function displayEpisodeTitle(
   const g = (guestName ?? '').trim()
   if (!g || !title) return title
   const escaped = g.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  // Optional em-dash / en-dash / hyphen separator before "with <guest>" at end.
-  const re = new RegExp(`\\s*(?:[—–-]\\s*)?with\\s+${escaped}\\s*$`, 'i')
+  // Optional dash / leftover period or comma before "with <guest>" at end.
+  const re = new RegExp(`\\s*(?:[—–.,-]\\s*)?with\\s+${escaped}\\s*$`, 'i')
   return title.replace(re, '').trim()
 }
 

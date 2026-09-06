@@ -31,6 +31,25 @@ export function escapeHtml(raw: string): string {
     .replace(/'/g, '&#39;')
 }
 
+/**
+ * Undo one layer of common entities. Marked (and some CMS rows) already
+ * encode quotes before sanitizeMediaHtml runs. Escape without this step
+ * turns &quot; into &amp;quot;, which browsers then show as literal &quot;.
+ */
+export function decodeHtmlEntities(raw: string): string {
+  return raw
+    .replace(/&nbsp;/gi, '\u00a0')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#0*34;/g, '"')
+    .replace(/&#x0*22;/gi, '"')
+    .replace(/&apos;/gi, "'")
+    .replace(/&#0*39;/g, "'")
+    .replace(/&#x0*27;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&amp;/gi, '&')
+}
+
 /** Escape the pinned body, then restore **bold** as <strong> only. */
 export function pinnedBodyToHtml(body: string): string {
   return escapeHtml(body).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -89,7 +108,7 @@ export function sanitizeMediaHtml(html: string): string {
   for (const part of parts) {
     if (!part) continue
     if (part[0] !== '<') {
-      out += escapeHtml(part)
+      out += escapeHtml(decodeHtmlEntities(part))
       continue
     }
 

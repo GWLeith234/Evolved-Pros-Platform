@@ -214,7 +214,7 @@ describe('related', () => {
 
 describe('reason', () => {
   it('names the shared tag', () => {
-    expect(relatedReason(ep({ tags: ['sales'] }), ep({ tags: ['sales'] }))).toBe('Same theme — sales')
+    expect(relatedReason(ep({ tags: ['sales'] }), ep({ tags: ['sales'] }))).toBe('Same theme: sales')
   })
 
   it('falls back to the shared pillar, using the display label', () => {
@@ -223,7 +223,7 @@ describe('reason', () => {
         ep({ tags: [], pillar: 'mental-toughness' }),
         ep({ tags: [], pillar: 'mental-toughness' }),
       ),
-    ).toBe('Same pillar — Mental Toughness')
+    ).toBe('Same pillar: Mental Toughness')
   })
 
   it('matches a pillar carried only in the secondary array', () => {
@@ -232,7 +232,7 @@ describe('reason', () => {
         ep({ tags: [], pillar: 'identity', pillars: ['strategy'] }),
         ep({ tags: [], pillar: 'strategy', pillars: [] }),
       ),
-    ).toBe('Same pillar — Strategy')
+    ).toBe('Same pillar: Strategy')
   })
 
   it('is honest when nothing matched', () => {
