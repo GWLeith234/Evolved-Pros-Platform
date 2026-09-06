@@ -221,12 +221,12 @@ const PILLAR_LABEL = new Map(PILLARS.map(p => [p.slug, p.name]))
  */
 export function relatedReason(ep: PublicEpisode, other: PublicEpisode): string {
   const sharedTag = other.tags.find(t => ep.tags.includes(t))
-  if (sharedTag) return truncateWords(`Same theme — ${sharedTag}`, REASON_MAX)
+  if (sharedTag) return truncateWords(`Same theme: ${sharedTag}`, REASON_MAX)
 
   const mine = pillarSlugs(ep)
   const sharedPillar = pillarSlugs(other).find(p => mine.includes(p))
   if (sharedPillar) {
-    return truncateWords(`Same pillar — ${PILLAR_LABEL.get(sharedPillar) ?? sharedPillar}`, REASON_MAX)
+    return truncateWords(`Same pillar: ${PILLAR_LABEL.get(sharedPillar) ?? sharedPillar}`, REASON_MAX)
   }
 
   return 'More from the show'

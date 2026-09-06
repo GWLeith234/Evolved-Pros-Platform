@@ -14,6 +14,7 @@ import { MediaIabSlot } from '@/components/media/MediaIabSlot'
 import { MediaLatestPodcast } from '@/components/media/MediaLatestPodcast'
 import type { MediaRailEpisode } from '@/lib/media/podcastRail'
 import { MEDIA_BRAND, mediaStoryTitle } from '@/lib/media/brand'
+import { stripEmDashCopy } from '@/lib/home/cardImagery'
 import { CANONICAL_ORIGIN, DEFAULT_OG_IMAGE, canonicalUrl, publicPageMetadata } from '@/lib/seo/canonical'
 import { mediaMustCite } from '@/lib/seo/mustCite'
 import { getActivePlatformAds } from '@/lib/cache/shared'
@@ -107,8 +108,8 @@ export async function generateMetadata(
   const story = await fetchStory(params.pillar, params.slug)
   if (!story) return {}
 
-  const title = story.seo_title || mediaStoryTitle(story.title)
-  const description = story.seo_description || story.excerpt || ''
+  const title = stripEmDashCopy(story.seo_title || mediaStoryTitle(story.title))
+  const description = stripEmDashCopy(story.seo_description || story.excerpt || '')
   const image = story.featured_image_url || DEFAULT_OG_IMAGE
 
   return publicPageMetadata(`/media/${params.pillar}/${params.slug}`, {

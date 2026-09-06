@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { escapeHtml, pinnedBodyToHtml, sanitizeMediaHtml } from './html'
+import { marked } from 'marked'
+import { decodeHtmlEntities, escapeHtml, pinnedBodyToHtml, sanitizeMediaHtml } from './html'
 
 describe('escapeHtml', () => {
   it('escapes markup and quotes', () => {
@@ -55,5 +56,33 @@ describe('sanitizeMediaHtml', () => {
   it('escapes text so stray markup cannot land', () => {
     expect(sanitizeMediaHtml('<p>a & b</p>')).toBe('<p>a &amp; b</p>')
     expect(sanitizeMediaHtml('<p>ok</p><bogus>x</bogus>')).toBe('<p>ok</p>x')
+  })
+
+  it('decodes one entity layer before escaping so quotes are not double-encoded', () => {
+    expect(
+      sanitizeMediaHtml('<h2>From cowboy boots to &quot;a good pair of boots&quot;</h2>'),
+    ).toBe('<h2>From cowboy boots to &quot;a good pair of boots&quot;</h2>')
+    expect(sanitizeMediaHtml('<p>else&#39;s opinion</p>')).toBe("<p>else&#39;s opinion</p>")
+    expect(sanitizeMediaHtml('<p>a &amp; b</p>')).toBe('<p>a &amp; b</p>')
+    expect(sanitizeMediaHtml('<h2>From cowboy boots to &quot;a good pair of boots&quot;</h2>')).not.toContain('&amp;quot;')
+  })
+
+  it('keeps Tecovas marked output as real quotes after inject', async () => {
+    const html = sanitizeMediaHtml(
+      await marked.parse('## From cowboy boots to "a good pair of boots"'),
+    )
+    expect(html).toContain('From cowboy boots to &quot;a good pair of boots&quot;')
+    expect(html).not.toContain('&amp;quot;')
+    expect(html).not.toContain('&amp;#39;')
+  })
+})
+
+describe('decodeHtmlEntities', () => {
+  it('decodes one layer and leaves a second layer for escapeHtml', () => {
+    expect(decodeHtmlEntities('From cowboy boots to &quot;a good pair of boots&quot;')).toBe(
+      'From cowboy boots to "a good pair of boots"',
+    )
+    expect(decodeHtmlEntities('else&#39;s')).toBe("else's")
+    expect(escapeHtml(decodeHtmlEntities('a &amp; b'))).toBe('a &amp; b')
   })
 })
