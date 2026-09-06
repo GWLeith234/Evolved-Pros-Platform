@@ -13,6 +13,10 @@ import {
   HOME_ACADEMY_TOOLTIP,
   HOME_ARIA,
   HOME_BOOK,
+  HOME_BOOK_COVER_ALT,
+  HOME_BOOK_COVER_HEIGHT,
+  HOME_BOOK_COVER_SRC,
+  HOME_BOOK_COVER_WIDTH,
   HOME_EPISODES_LINK,
   HOME_EPISODES_TITLE,
   HOME_H1,
@@ -253,13 +257,24 @@ export function ConversionHome({
         </section>
 
         <section className="mx-auto max-w-6xl px-5 pb-16">
-          <div className="flex flex-wrap items-center justify-between gap-6 border border-navy/15 bg-paper-card px-6 py-8">
-            <div>
-              <p className="font-condensed text-[11px] font-bold uppercase tracking-[0.2em] text-red">
-                {HOME_BOOK.kicker}
-              </p>
-              <h2 className="mt-1 font-bebas text-5xl tracking-wide text-navy">{HOME_BOOK.title}</h2>
-              <p className="mt-1 font-body text-sm text-navy/65">{HOME_BOOK.release}</p>
+          <div className="flex flex-col items-center gap-6 border border-navy/15 bg-paper-card px-6 py-8 md:flex-row md:items-center md:justify-between">
+            <div className="flex w-full flex-col items-center gap-6 md:w-auto md:flex-row md:items-center md:gap-8">
+              <div className="w-[148px] shrink-0 md:w-[168px]">
+                <Image
+                  src={HOME_BOOK_COVER_SRC}
+                  alt={HOME_BOOK_COVER_ALT}
+                  width={HOME_BOOK_COVER_WIDTH}
+                  height={HOME_BOOK_COVER_HEIGHT}
+                  className="h-auto w-full border border-navy/15"
+                />
+              </div>
+              <div className="text-center md:text-left">
+                <p className="font-condensed text-[11px] font-bold uppercase tracking-[0.2em] text-red">
+                  {HOME_BOOK.kicker}
+                </p>
+                <h2 className="mt-1 font-bebas text-5xl tracking-wide text-navy">{HOME_BOOK.title}</h2>
+                <p className="mt-1 font-body text-sm text-navy/65">{HOME_BOOK.release}</p>
+              </div>
             </div>
             <GhostCta href={HOME_BOOK.href} label={HOME_BOOK.cta} />
           </div>
