@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { THANKS_V12_HTML_FILES } from './v12Html'
-import { applyThanksV12Vars, escapeThanksHtml, loadThanksV12Html, renderThanksV12Html } from './v12Html'
+import {
+  applyThanksV12Vars,
+  escapeThanksHtml,
+  landedThanksV12Steps,
+  loadThanksV12Html,
+  renderThanksV12Html,
+  thanksV12GmailSafeViolations,
+} from './v12Html'
 import { THANKS_CADENCE_STEPS } from './constants'
 
 const CLAIM = 'https://www.evolvedpros.com/invite/thanks?token=abc'
@@ -71,6 +78,41 @@ describe('send-ready-v12 HTML wiring', () => {
     expect(html).toContain('https://www.evolvedpros.com/media/identity/why-i-created-evolved-pros')
     expect(html).toContain('https://www.evolvedpros.com/podcast/evolved-pros-pilot-episode')
     expect(html).toContain('>George<')
+  })
+
+  it('lands E02 verbatim and wires claim_url + first_name at send time', () => {
+    const raw = loadThanksV12Html(1)
+    expect(raw).toBeTruthy()
+    expect(raw).toContain('Start with the basics.')
+    expect(raw).toContain('Hey {{George}},')
+    expect(raw).toContain('cid:logo')
+    expect(raw).toContain('cid:george-headshot')
+    expect(raw).toContain('href="https://www.evolvedpros.com/"')
+    expect(raw).toContain('https://www.evolvedpros.com/media/foundation/hard-boiled-eggs-protein-snack-hack')
+    expect(raw).toContain('https://www.evolvedpros.com/podcast/fitness-nutrition-evolved-pros-carson-teagarden')
+    expect(raw).not.toMatch(/\sclass\s*=/i)
+    expect(raw).not.toMatch(/<style[\s>]/i)
+
+    const html = renderThanksV12Html(1, { first_name: 'Ada', claim_url: CLAIM })
+    expect(html).toContain('Hey Ada,')
+    expect(html).not.toContain('{{George}}')
+    expect(html).toContain(`href="${CLAIM}"`)
+    expect(html).toContain(`>${CLAIM}</a>`)
+    expect(html).not.toMatch(/href=["']https:\/\/www\.evolvedpros\.com\/["']/)
+    expect(html).toContain('cid:logo')
+    expect(html).toContain('cid:george-headshot')
+    expect(html).toContain('https://www.evolvedpros.com/media/foundation/hard-boiled-eggs-protein-snack-hack')
+    expect(html).toContain('>George<')
+  })
+
+  it('keeps every landed v12 file Gmail-safe: tables, inline styles, CID, no classes', () => {
+    const landed = landedThanksV12Steps()
+    expect(landed).toEqual(expect.arrayContaining([0, 1]))
+    for (const step of landed) {
+      const raw = loadThanksV12Html(step)
+      expect(raw, THANKS_V12_HTML_FILES[step]).toBeTruthy()
+      expect(thanksV12GmailSafeViolations(raw!), THANKS_V12_HTML_FILES[step]).toEqual([])
+    }
   })
 
   it('leaves path-bearing www links alone (podcast, invite path)', () => {

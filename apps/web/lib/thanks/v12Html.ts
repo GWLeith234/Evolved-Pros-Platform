@@ -1,11 +1,13 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { THANKS_WWW_ORIGIN, type ThanksCadenceStep } from './constants'
+import { THANKS_CADENCE_STEPS, THANKS_WWW_ORIGIN, type ThanksCadenceStep } from './constants'
 import type { ThanksEmailVars } from './copy'
 
 /**
- * send-ready-v12 raw HTML. Drop files here; the sender prefers them over the
- * React scaffold. Keep cid:logo and cid:george-headshot as-is.
+ * send-ready-v12 Creative SoT: Gmail-safe HTML only.
+ * TABLES + INLINE STYLES. Do not use CSS classes (v11 class CSS failed in Gmail).
+ * Logo + headshot stay CID: cid:logo and cid:george-headshot.
+ * Sender substitutes {{George}} → first_name and bare www CTA/copy-link → claim_url.
  */
 export const THANKS_V12_DIR_REL = 'lib/resend/emails/community-thanks/v12'
 export const THANKS_V12_ASSETS_REL = `${THANKS_V12_DIR_REL}/assets`
@@ -138,4 +140,23 @@ export function renderThanksV12Html(
   const raw = loadThanksV12Html(step)
   if (!raw) return null
   return applyThanksV12Vars(raw, vars)
+}
+
+export function landedThanksV12Steps(): ThanksCadenceStep[] {
+  return THANKS_CADENCE_STEPS.filter(step => loadThanksV12Html(step))
+}
+
+/** Gmail-safe SoT. v11 class CSS failed in Gmail. */
+export function thanksV12GmailSafeViolations(html: string): string[] {
+  const hits: string[] = []
+  if (/\sclass\s*=/i.test(html)) hits.push('css_class')
+  if (/<style[\s>]/i.test(html)) hits.push('style_block')
+  if (!/<table[\s>]/i.test(html)) hits.push('missing_table')
+  if (!/\sstyle\s*=/i.test(html)) hits.push('missing_inline_style')
+  if (!html.includes(CID_LOGO)) hits.push('missing_cid_logo')
+  if (!html.includes(CID_HEADSHOT)) hits.push('missing_cid_headshot')
+  if (/<img[^>]+src=["']https?:/i.test(html) && /alt=["'][^"']*EVOLVED/i.test(html)) {
+    if (!/src=["']cid:logo["']/.test(html)) hits.push('remote_logo')
+  }
+  return hits
 }
