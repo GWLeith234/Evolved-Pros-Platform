@@ -212,14 +212,22 @@ export function CrmCard({
           />
         </div>
 
-        {prospect.notes && (
+        {prospect.conversation_summary ? (
+          <p
+            className="font-body text-[12px] leading-snug mb-2 line-clamp-2"
+            style={{ color: 'var(--admin-text-2)', margin: '0 0 8px' }}
+            title="Conversation summary"
+          >
+            {prospect.conversation_summary}
+          </p>
+        ) : prospect.notes ? (
           <p
             className="font-body text-[12px] leading-snug mb-2 line-clamp-2"
             style={{ color: 'var(--admin-text-2)', margin: '0 0 8px' }}
           >
             {prospect.notes}
           </p>
-        )}
+        ) : null}
 
         {/* Quick actions */}
         <div

@@ -43,6 +43,9 @@ export async function POST(request: Request) {
   }
 
   const outcome = await upsertAiGeorgeProspect(supabaseAiGeorgeDb, mapped.value)
+  if (outcome.kind === 'rejected') {
+    return NextResponse.json({ error: outcome.error }, { status: 422 })
+  }
   if (outcome.kind === 'error') {
     console.error(
       '[POST /api/webhooks/vendasta-conversations] prospect write failed',

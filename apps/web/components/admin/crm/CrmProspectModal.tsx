@@ -20,6 +20,7 @@ export interface CrmSavePayload {
   phone?: string
   company?: string
   notes?: string
+  conversation_summary?: string
   source?: string
   stage: CrmStage
   status: CrmStatus
@@ -97,6 +98,9 @@ export function CrmProspectModal({
   const [phone, setPhone] = useState(prospect?.phone ?? '')
   const [company, setCompany] = useState(prospect?.company ?? '')
   const [notes, setNotes] = useState(prospect?.notes ?? '')
+  const [conversationSummary, setConversationSummary] = useState(
+    prospect?.conversation_summary ?? '',
+  )
   const [source, setSource] = useState(prospect?.source ?? '')
   const [stage, setStage] = useState<CrmStage>(prospect?.stage ?? 'lead')
   const [status, setStatus] = useState<CrmStatus>(prospect?.status ?? 'active')
@@ -160,6 +164,7 @@ export function CrmProspectModal({
       phone: phone.trim() || undefined,
       company: company.trim() || undefined,
       notes: notes.trim() || undefined,
+      conversation_summary: conversationSummary.trim(),
       source: source.trim() || undefined,
       stage,
       status,
@@ -418,6 +423,17 @@ export function CrmProspectModal({
               onChange={e => setSource(e.target.value)}
               placeholder="e.g. Live keynote, LinkedIn, referral"
               style={inputStyle}
+            />
+          </div>
+          <div>
+            <label style={labelStyle} htmlFor="crm-conversation-summary">Conversation summary</label>
+            <textarea
+              id="crm-conversation-summary"
+              value={conversationSummary}
+              onChange={e => setConversationSummary(e.target.value)}
+              rows={3}
+              style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }}
+              placeholder="Ask George / Conversations AI summary"
             />
           </div>
           <div>

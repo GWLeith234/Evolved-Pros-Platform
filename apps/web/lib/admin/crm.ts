@@ -95,6 +95,11 @@ export const CRM_STAGE_META: Record<CrmStage, CrmStageMeta> = {
 export const CRM_COLUMNS: CrmStageMeta[] = CRM_STAGES.map(s => CRM_STAGE_META[s])
 
 export const CRM_SELECT_COLS =
+  'id, full_name, email, phone, company, notes, conversation_summary, stage, status, source, last_contacted_at, next_follow_up_at, value_monthly, user_id, created_by, created_at, updated_at, ' +
+  'title, linkedin_url, avatar_url, location, tags, consent_basis, keynote_interest, enrichment_status, enriched_at, unsubscribed_at'
+
+/** Pre-090 select when conversation_summary is not on the table yet. */
+export const CRM_SELECT_COLS_WITHOUT_SUMMARY =
   'id, full_name, email, phone, company, notes, stage, status, source, last_contacted_at, next_follow_up_at, value_monthly, user_id, created_by, created_at, updated_at, ' +
   'title, linkedin_url, avatar_url, location, tags, consent_basis, keynote_interest, enrichment_status, enriched_at, unsubscribed_at'
 
@@ -105,6 +110,7 @@ export interface CrmProspect {
   phone: string | null
   company: string | null
   notes: string | null
+  conversation_summary: string | null
   stage: CrmStage
   status: CrmStatus
   source: string | null
@@ -276,6 +282,10 @@ export function parseCrmProspect(r: Record<string, unknown>): CrmProspect | null
     phone: (r.phone as string | null) ?? null,
     company: (r.company as string | null) ?? null,
     notes: (r.notes as string | null) ?? null,
+    conversation_summary:
+      typeof r.conversation_summary === 'string' && r.conversation_summary.trim()
+        ? r.conversation_summary
+        : null,
     stage: isCrmStage(r.stage) ? r.stage : 'lead',
     status: isCrmStatus(r.status) ? r.status : 'active',
     source: (r.source as string | null) ?? null,
