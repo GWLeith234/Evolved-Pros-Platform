@@ -59,6 +59,27 @@ export function loginSwitchHref(
   return loginHrefFor(currentRedirect, targetMode === 'signup' ? 'signup' : undefined)
 }
 
+/**
+ * First query value from Next searchParams (plain string or repeated string[]).
+ */
+export function firstSearchParam(raw: unknown): string | undefined {
+  if (typeof raw === 'string' && raw) return raw
+  if (Array.isArray(raw) && typeof raw[0] === 'string' && raw[0]) return raw[0]
+  return undefined
+}
+
+/**
+ * Post-auth return path on /login. Middleware and loginHrefFor write ?redirect=.
+ * Shared links and the auth callback sometimes use ?next=. Prefer redirect.
+ */
+export function loginReturnPath(redirectRaw: unknown, nextRaw?: unknown): string {
+  const fromRedirect = firstSearchParam(redirectRaw)
+  if (fromRedirect) return safeRedirectPath(fromRedirect)
+  const fromNext = firstSearchParam(nextRaw)
+  if (fromNext) return safeRedirectPath(fromNext)
+  return '/home'
+}
+
 export function gatedIntentFor(redirectPath: unknown): GatedIntent | null {
   const path = safeRedirectPath(redirectPath, '')
   if (!path) return null

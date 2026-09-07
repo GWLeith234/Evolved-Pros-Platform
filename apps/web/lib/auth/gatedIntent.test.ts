@@ -13,7 +13,9 @@ import {
   SIGNUP_ALREADY_MEMBER,
   gatedIntentCopyStrings,
   gatedIntentFor,
+  firstSearchParam,
   loginHrefFor,
+  loginReturnPath,
   loginSwitchHref,
   returnPathFromRequest,
 } from './gatedIntent'
@@ -86,6 +88,30 @@ describe('returnPathFromRequest', () => {
   })
 })
 
+describe('loginReturnPath', () => {
+  it('prefers ?redirect= over ?next=', () => {
+    expect(loginReturnPath('/events', '/academy')).toBe('/events')
+    expect(loginReturnPath('/events')).toBe('/events')
+  })
+
+  it('reads ?next=/events when redirect is absent', () => {
+    expect(loginReturnPath(undefined, '/events')).toBe('/events')
+    expect(loginReturnPath(null, '/events/1')).toBe('/events/1')
+    expect(loginReturnPath('', '/events')).toBe('/events')
+  })
+
+  it('unwraps Next repeated string[] params', () => {
+    expect(firstSearchParam(['/events', '/home'])).toBe('/events')
+    expect(loginReturnPath(['/events'])).toBe('/events')
+    expect(loginReturnPath(undefined, ['/events'])).toBe('/events')
+  })
+
+  it('falls back to /home and refuses off-origin values', () => {
+    expect(loginReturnPath(undefined, undefined)).toBe('/home')
+    expect(loginReturnPath('https://evil.com', '/events')).toBe('/home')
+  })
+})
+
 describe('S4 auth copy lock', () => {
   it('uses the locked reciprocal lines with no em dash', () => {
     expect(LOGIN_NEW_HERE).toBe('New here? Create a free account. No card required.')
@@ -110,6 +136,16 @@ describe('S4 auth wiring (source)', () => {
   const memberLayout = readFileSync(resolve(root, 'app/(member)/layout.tsx'), 'utf8')
   const loginForm = readFileSync(resolve(root, 'app/(auth)/login/LoginForm.tsx'), 'utf8')
   const academyPage = readFileSync(resolve(root, 'app/(member)/academy/page.tsx'), 'utf8')
+  const eventsPage = readFileSync(resolve(root, 'app/(member)/events/page.tsx'), 'utf8')
+  const eventDetailPage = readFileSync(
+    resolve(root, 'app/(member)/events/[eventId]/page.tsx'),
+    'utf8',
+  )
+  const loginPage = readFileSync(resolve(root, 'app/(auth)/login/page.tsx'), 'utf8')
+  const intentWall = readFileSync(
+    resolve(root, 'components/auth/GatedIntentWall.tsx'),
+    'utf8',
+  )
 
   it('middleware and member layout preserve the return path', () => {
     expect(middleware).toContain('loginHrefFor')
@@ -117,6 +153,14 @@ describe('S4 auth wiring (source)', () => {
     expect(memberLayout).toContain('loginHrefFor')
     expect(memberLayout).toContain('RETURN_PATH_HEADER')
     expect(academyPage).toContain("loginHrefFor('/academy')")
+  })
+
+  it('keeps /events auth-gated and sends anon visitors through loginHrefFor', () => {
+    expect(middleware).toContain("'/events'")
+    expect(middleware).toContain("'/events/:path*'")
+    expect(eventsPage).toContain("loginHrefFor('/events')")
+    expect(eventDetailPage).toContain('loginHrefFor(`/events/${params.eventId}`)')
+    expect(eventDetailPage).not.toContain("redirect('/login')")
   })
 
   it('keeps /brand stills public and off the /academy and /events matchers', () => {
@@ -130,5 +174,10 @@ describe('S4 auth wiring (source)', () => {
     expect(loginForm).toContain('SIGNUP_ALREADY_MEMBER')
     expect(loginForm).toMatch(/mode !== 'signup'[\s\S]+Forgot password\?/)
     expect(loginForm).toContain('gatedIntentFor')
+    expect(loginForm).toContain('loginReturnPath')
+    expect(loginForm).toContain('GatedIntentWall')
+    expect(loginForm).toContain("intent?.id === 'events'")
+    expect(loginPage).toContain('loginReturnPath')
+    expect(intentWall).toContain('data-gated-intent')
   })
 })

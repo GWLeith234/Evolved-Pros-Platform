@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { safeRedirectPath } from '@/lib/auth/safeRedirect'
+import { loginReturnPath } from '@/lib/auth/gatedIntent'
 import { loginCopyFor } from '@/lib/auth/loginCopy'
 import { LOGIN_DOCUMENT_ROBOTS } from '@/lib/seo/publicRoutes'
 import { PublicFooter } from '@/components/layout/PublicFooter'
@@ -13,6 +13,7 @@ interface LoginSearchParams {
   // either of these as plain string compiles fine and then misbehaves at
   // request time.
   redirect?: string | string[]
+  next?: string | string[]
   mode?: string | string[]
 }
 
@@ -45,7 +46,7 @@ export default async function LoginPage({
   // Already signed in — honour ?redirect= too, so a member who lands here with
   // a live session (stale 401, back button, shared link) still reaches the page
   // they were headed for rather than /home.
-  if (user) redirect(safeRedirectPath(searchParams.redirect))
+  if (user) redirect(loginReturnPath(searchParams.redirect, searchParams.next))
 
   // Wraps LoginForm so its useSearchParams() read of ?mode=signup
   // can't make the prerendered HTML disagree with the hydrated client (#425).
