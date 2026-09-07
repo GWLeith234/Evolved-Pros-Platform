@@ -18,9 +18,10 @@ export type ThanksSendResult = {
  * Callers MUST collect an explicit YES before invoking this.
  * Delivery is best-effort. Admin UI always exposes copy-link.
  *
- * Prefers send-ready-v12 raw HTML when eNN-dDD.html is on disk.
- * Substitutes first_name + claim_url. Keeps cid:logo + cid:george-headshot.
- * Falls back to the React scaffold when that file is not landed yet.
+ * Prefers send-ready-v13 raw HTML when eNN-dDD.html is on disk.
+ * Substitutes {{first_name}} and {{claim_url}} only. Headshot is
+ * cid:george-headshot. Never cid:logo. Falls back to the React scaffold
+ * when that file is not landed yet.
  *
  * From address: RESEND_FROM_EMAIL must be *@evolvedpros.com or
  * *@mail.evolvedpros.com. No EVX / resend.dev fallback.
