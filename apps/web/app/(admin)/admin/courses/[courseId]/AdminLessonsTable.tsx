@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { formatDurationSeconds } from '@/lib/academy/types'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 interface Lesson {
   id: string
@@ -26,8 +28,11 @@ export function AdminLessonsTable({ lessons: initial, courseId }: AdminLessonsTa
   const [toggling, setToggling] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
   const router = useRouter()
+  const { confirm, dialog } = useConfirmDialog()
 
   async function togglePublish(id: string, current: boolean) {
+    const ok = await confirm(current ? CONFIRM.unpublishLesson() : CONFIRM.publishLesson())
+    if (!ok) return
     setToggling(id)
     try {
       const res = await fetch(`/api/admin/lessons/${id}/publish`, { method: 'PATCH' })
@@ -40,7 +45,7 @@ export function AdminLessonsTable({ lessons: initial, courseId }: AdminLessonsTa
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this lesson? This cannot be undone.')) return
+    if (!(await confirm(CONFIRM.deleteLesson()))) return
     setDeleting(id)
     try {
       const res = await fetch(`/api/admin/lessons/${id}`, { method: 'DELETE' })
@@ -55,6 +60,7 @@ export function AdminLessonsTable({ lessons: initial, courseId }: AdminLessonsTa
 
   return (
     <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.12)' }}>
+      {dialog}
       <table className="w-full">
         <thead>
           <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.03)' }}>
@@ -123,7 +129,7 @@ export function AdminLessonsTable({ lessons: initial, courseId }: AdminLessonsTa
                 <td className="px-5 py-3 text-right">
                   <div className="flex items-center justify-end gap-3">
                     <button
-                      onClick={() => togglePublish(lesson.id, lesson.is_published)}
+                      onClick={() => void togglePublish(lesson.id, lesson.is_published)}
                       disabled={toggling === lesson.id}
                       className="font-condensed font-semibold uppercase tracking-wide text-[10px] transition-colors disabled:opacity-50"
                       style={{ color: lesson.is_published ? '#ef0e30' : '#68a2b9' }}
@@ -137,7 +143,7 @@ export function AdminLessonsTable({ lessons: initial, courseId }: AdminLessonsTa
                       Edit
                     </Link>
                     <button
-                      onClick={() => handleDelete(lesson.id)}
+                      onClick={() => void handleDelete(lesson.id)}
                       disabled={deleting === lesson.id}
                       className="font-condensed font-semibold uppercase tracking-wide text-[10px] text-[#ef0e30] disabled:opacity-50"
                     >

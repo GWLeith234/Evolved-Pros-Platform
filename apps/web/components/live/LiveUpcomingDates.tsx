@@ -204,6 +204,7 @@ export async function LiveUpcomingDates() {
       </div>
 
       {dates.length === 0 ? (
+        // M3 KEEP AS BAR: public speaking empty. Do not redesign. See docs/ADMIN-BUTTON-SAFETY-2026-09-06.md.
         <div
           style={{
             marginTop: 24,

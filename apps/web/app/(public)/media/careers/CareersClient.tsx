@@ -213,6 +213,7 @@ export function CareersClient({ jobs, ads = [] }: { jobs: Job[]; ads?: SponsorAd
           </div>
         ) : (
           <div style={{ backgroundColor: '#fff', border: '1px solid #E0D8CC', borderRadius: 4, padding: '40px 20px', textAlign: 'center' }}>
+            {/* M3 KEEP AS BAR: careers empty. Do not redesign. See docs/ADMIN-BUTTON-SAFETY-2026-09-06.md. */}
             <p style={{ fontSize: 13, color: 'rgba(43,58,90,0.4)', fontFamily: FB }}>
               No listings right now. Check back soon.
             </p>

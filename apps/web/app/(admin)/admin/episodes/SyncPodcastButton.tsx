@@ -2,6 +2,9 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { OwnerOnlyBadge } from '@/components/admin/safety/OwnerOnlyBadge'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 interface SyncResponse {
   inserted?: number
@@ -16,8 +19,10 @@ export function SyncPodcastButton() {
   const router = useRouter()
   const [syncing, setSyncing] = useState(false)
   const [status, setStatus] = useState<{ tone: 'success' | 'error'; message: string } | null>(null)
+  const { confirm, dialog } = useConfirmDialog()
 
   async function handleSync() {
+    if (!(await confirm(CONFIRM.syncPodcast()))) return
     setSyncing(true)
     setStatus(null)
     try {
@@ -46,21 +51,23 @@ export function SyncPodcastButton() {
 
   return (
     <div className="flex flex-col items-end gap-1">
-      <button
-        type="button"
-        onClick={handleSync}
-        disabled={syncing}
-        aria-busy={syncing}
-        className="font-condensed font-bold uppercase tracking-wide text-[12px] rounded px-5 py-2.5 transition-opacity"
-        style={{
-          backgroundColor: '#68a2b9',
-          color: 'white',
-          opacity: syncing ? 0.6 : 1,
-          cursor: syncing ? 'not-allowed' : 'pointer',
-        }}
-      >
-        {syncing ? 'Syncing…' : 'Sync Podcast'}
-      </button>
+      {dialog}
+      <div className="flex items-center gap-2">
+        <OwnerOnlyBadge />
+        <button
+          type="button"
+          onClick={() => void handleSync()}
+          disabled={syncing}
+          aria-busy={syncing}
+          className="bg-navy px-5 py-2.5 font-condensed text-[12px] font-bold uppercase tracking-wide text-white transition-opacity"
+          style={{
+            opacity: syncing ? 0.6 : 1,
+            cursor: syncing ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {syncing ? 'Syncing…' : 'Sync Podcast'}
+        </button>
+      </div>
       {status && (
         <p
           className="font-condensed text-[11px] tracking-wide"

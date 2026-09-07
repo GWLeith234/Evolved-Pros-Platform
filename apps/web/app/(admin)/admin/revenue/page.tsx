@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic'
  * Do not invent MRR from active tier counts × list price, and do not
  * synthesize a 6-month chart. The previous page did both; this stub
  * is the correct empty state.
+ * M3 KEEP AS BAR: do not redesign this empty. See docs/ADMIN-BUTTON-SAFETY-2026-09-06.md.
  */
 export default async function AdminRevenuePage() {
   const h = headers()

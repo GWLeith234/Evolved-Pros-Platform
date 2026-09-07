@@ -21,6 +21,8 @@ interface CrmCardProps {
   onUpgrade: (id: string, to: CrmStage) => void
   onEdit: (prospect: CrmProspect) => void
   busy?: boolean
+  testMode?: boolean
+  qaTest?: boolean
 }
 
 export function CrmCard({
@@ -29,6 +31,8 @@ export function CrmCard({
   onUpgrade,
   onEdit,
   busy = false,
+  testMode = false,
+  qaTest = false,
 }: CrmCardProps) {
   const meta = CRM_STAGE_META[prospect.stage]
   const value = prospectValue(prospect)
@@ -44,6 +48,7 @@ export function CrmCard({
   // Suppressed prospects stay visible (they're still pipeline) but read as
   // inert, so nobody reaches for Email on a contact they must not email.
   const unsubscribed = !!prospect.unsubscribed_at
+  const mutedQa = testMode && qaTest
   // title · company — either half may be missing.
   const subtitle = [prospect.title, prospect.company].filter(Boolean).join(' · ')
   const shownTags = prospect.tags.slice(0, CRM_TAG_DISPLAY_LIMIT)
@@ -51,16 +56,26 @@ export function CrmCard({
 
   return (
     <article
-      className="rounded-md mb-2 transition-shadow"
+      className="mb-2"
+      data-qa-test={qaTest ? 'true' : undefined}
       style={{
         background: 'var(--admin-card)',
-        border: '1px solid var(--border-color, rgba(27,60,90,0.10))',
-        borderLeft: `3px solid ${unsubscribed ? 'var(--admin-border)' : meta.accent}`,
-        opacity: busy ? 0.55 : unsubscribed ? 0.72 : 1,
-        boxShadow: '0 1px 0 rgba(17,37,53,0.04)',
+        border: mutedQa
+          ? '1px dashed rgba(122,138,150,0.55)'
+          : '1px solid var(--border-color, rgba(27,60,90,0.10))',
+        borderLeft: `3px solid ${mutedQa || unsubscribed ? 'var(--admin-border)' : meta.accent}`,
+        opacity: busy ? 0.55 : mutedQa ? 0.62 : unsubscribed ? 0.72 : 1,
       }}
     >
       <div className="p-3">
+        {mutedQa && (
+          <span
+            data-testid="qa-test-badge"
+            className="mb-2 inline-flex bg-gold px-1.5 py-0.5 font-condensed text-[9px] font-bold uppercase tracking-[0.12em] text-white"
+          >
+            QA / Test
+          </span>
+        )}
         <div className="flex items-start justify-between gap-2 mb-1">
           <button
             type="button"
@@ -212,18 +227,18 @@ export function CrmCard({
           onClick={e => e.stopPropagation()}
           onPointerDown={e => e.stopPropagation()}
         >
-          {unsubscribed ? (
+          {unsubscribed || mutedQa ? (
             <span
               className="crm-qa"
               style={{
                 ...qaStyle('var(--admin-text-2)', 'var(--admin-border)'),
                 cursor: 'not-allowed',
-                opacity: 0.7,
+                opacity: 0.55,
               }}
-              title="Suppressed — this prospect has unsubscribed"
+              title={mutedQa ? 'Test Mode: QA card actions are muted' : 'Suppressed — this prospect has unsubscribed'}
               aria-disabled="true"
             >
-              No email
+              {mutedQa ? 'Email' : 'No email'}
             </span>
           ) : (
             <a href={mailto} className="crm-qa" style={qaStyle(meta.accent)} title="Send email">
@@ -233,10 +248,10 @@ export function CrmCard({
           <button
             type="button"
             className="crm-qa"
-            style={qaStyle('#68a2b9')}
-            disabled={busy}
+            style={qaStyle(mutedQa ? 'var(--admin-text-2)' : '#68a2b9')}
+            disabled={busy || mutedQa}
             onClick={() => onMarkContacted(prospect.id)}
-            title="Mark as contacted"
+            title={mutedQa ? 'Test Mode: muted' : 'Mark as contacted'}
           >
             Contacted
           </button>
@@ -248,10 +263,10 @@ export function CrmCard({
                 key={to}
                 type="button"
                 className="crm-qa"
-                style={qaStyle(CRM_STAGE_META[to].accent)}
-                disabled={busy}
+                style={qaStyle(mutedQa ? 'var(--admin-text-2)' : CRM_STAGE_META[to].accent)}
+                disabled={busy || mutedQa}
                 onClick={() => onUpgrade(prospect.id, to)}
-                title={`Upgrade to ${CRM_STAGE_META[to].label} (${CRM_STAGE_META[to].desc})`}
+                title={mutedQa ? 'Test Mode: upgrade muted' : `Upgrade to ${CRM_STAGE_META[to].label} (${CRM_STAGE_META[to].desc})`}
               >
                 → {CRM_STAGE_META[to].label}
               </button>
@@ -261,10 +276,10 @@ export function CrmCard({
               <button
                 type="button"
                 className="crm-qa"
-                style={qaStyle('#C9A84C')}
-                disabled={busy}
+                style={qaStyle(mutedQa ? 'var(--admin-text-2)' : '#C9A84C')}
+                disabled={busy || mutedQa}
                 onClick={() => onUpgrade(prospect.id, genericUpgrade)}
-                title={`Move to ${CRM_STAGE_META[genericUpgrade].label}`}
+                title={mutedQa ? 'Test Mode: upgrade muted' : `Move to ${CRM_STAGE_META[genericUpgrade].label}`}
               >
                 Upgrade
               </button>

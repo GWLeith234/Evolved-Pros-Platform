@@ -2,13 +2,16 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 export function DeleteEpisodeButton({ episodeId, title }: { episodeId: string; title: string }) {
   const router = useRouter()
   const [deleting, setDeleting] = useState(false)
+  const { confirm, dialog } = useConfirmDialog()
 
   async function handleDelete() {
-    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return
+    if (!(await confirm(CONFIRM.deleteEpisode(title)))) return
     setDeleting(true)
     try {
       const res = await fetch(`/api/admin/episodes/${episodeId}`, { method: 'DELETE' })
@@ -24,14 +27,17 @@ export function DeleteEpisodeButton({ episodeId, title }: { episodeId: string; t
   }
 
   return (
+    <>
+    {dialog}
     <button
       type="button"
-      onClick={handleDelete}
+      onClick={() => void handleDelete()}
       disabled={deleting}
       className="font-condensed font-semibold uppercase tracking-wide text-[10px] transition-colors disabled:opacity-50"
       style={{ color: '#ef0e30' }}
     >
       {deleting ? '…' : 'Delete'}
     </button>
+    </>
   )
 }

@@ -1,6 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { OwnerOnlyBadge } from '@/components/admin/safety/OwnerOnlyBadge'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 type Audience = 'all' | 'vip' | 'pro'
 type NotifType = 'system_general' | 'event_reminder' | 'course_unlock' | 'system_billing'
@@ -26,6 +29,7 @@ const TYPE_META: Record<NotifType, { color: string; bg: string; border: string }
 }
 
 export function BroadcastForm() {
+  const { confirm, dialog } = useConfirmDialog()
   const [title,     setTitle]     = useState('')
   const [message,   setMessage]   = useState('')
   const [audience,  setAudience]  = useState<Audience>('all')
@@ -48,6 +52,10 @@ export function BroadcastForm() {
 
   async function handleSend() {
     if (!title.trim() || !message.trim()) return
+    const audienceLabel = audienceCount != null
+      ? `all ${audienceCount} selected audience member${audienceCount === 1 ? '' : 's'}`
+      : 'all selected audience members'
+    if (!(await confirm(CONFIRM.sendBroadcast(audienceLabel)))) return
     setSending(true)
     setResult(null)
     try {
@@ -81,6 +89,7 @@ export function BroadcastForm() {
 
   return (
     <div className="grid grid-cols-[1fr_360px] gap-6 items-start">
+      {dialog}
       {/* Form */}
       <div
         className="rounded-lg p-6"
@@ -185,11 +194,11 @@ export function BroadcastForm() {
 
         {/* Send */}
         <div className="flex items-center gap-4">
+          <OwnerOnlyBadge />
           <button
-            onClick={handleSend}
+            onClick={() => void handleSend()}
             disabled={sending || !title.trim() || !message.trim()}
-            className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] px-6 py-2.5 rounded transition-all disabled:opacity-40"
-            style={{ backgroundColor: '#1b3c5a', color: 'white' }}
+            className="bg-red px-6 py-2.5 font-condensed text-[12px] font-bold uppercase tracking-[0.12em] text-white transition-all disabled:opacity-40"
           >
             {sending ? 'Sending\u2026' : 'Send Broadcast'}
           </button>

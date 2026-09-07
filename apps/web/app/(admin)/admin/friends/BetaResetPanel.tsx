@@ -2,6 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { OwnerOnlyBadge } from '@/components/admin/safety/OwnerOnlyBadge'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 export interface SuspendedMember {
   id: string
@@ -33,6 +36,7 @@ export function BetaResetPanel({
   const [busy, setBusy] = useState<string | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
+  const { confirm, dialog } = useConfirmDialog()
 
   async function run(bodyObj: Record<string, unknown>, key: string, ok: (data: any) => string) {
     if (busy) return
@@ -59,20 +63,13 @@ export function BetaResetPanel({
     }
   }
 
-  function pauseAll() {
-    if (
-      !window.confirm(
-        `Pause access for ${activeCount} non-admin, non-comped member(s)?\n\n` +
-          'Admins and comped Friends of George keep full access. No data is deleted — ' +
-          'this is fully reversible with Restore.',
-      )
-    )
-      return
+  async function pauseAll() {
+    if (!(await confirm(CONFIRM.pauseFriends(activeCount)))) return
     void run({ action: 'pause' }, 'pause', d => `Paused ${d.affected ?? 0} member(s).`)
   }
 
-  function restoreAll() {
-    if (!window.confirm(`Restore access for all ${suspended.length} suspended member(s)?`)) return
+  async function restoreAll() {
+    if (!(await confirm(CONFIRM.restoreFriends(suspended.length)))) return
     void run({ action: 'restore-all' }, 'restore-all', d => `Restored ${d.restored ?? 0} member(s).`)
   }
 
@@ -88,6 +85,7 @@ export function BetaResetPanel({
       className="rounded-lg p-5 bg-[var(--admin-card)]"
       style={{ border: '1px solid var(--admin-border)' }}
     >
+      {dialog}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <p
@@ -117,9 +115,10 @@ export function BetaResetPanel({
       </div>
 
       <div className="flex items-center gap-3 mt-4 flex-wrap">
+        <OwnerOnlyBadge />
         <button
           type="button"
-          onClick={pauseAll}
+          onClick={() => void pauseAll()}
           disabled={busy != null || activeCount === 0}
           className={btn}
           style={{ backgroundColor: RED, color: '#fff', opacity: busy != null || activeCount === 0 ? 0.5 : 1 }}
@@ -129,7 +128,7 @@ export function BetaResetPanel({
         {suspended.length > 0 && (
           <button
             type="button"
-            onClick={restoreAll}
+            onClick={() => void restoreAll()}
             disabled={busy != null}
             className={btn}
             style={{ border: `1px solid ${GREEN}`, color: GREEN, opacity: busy != null ? 0.5 : 1 }}

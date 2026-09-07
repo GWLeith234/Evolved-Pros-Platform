@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 import { MuxUploader } from '@/components/admin/MuxUploader'
 import { parseTranscriptJson } from '@/lib/academy/transcript'
 import { MAX_TAKEAWAYS, MAX_TAKEAWAY_LENGTH } from '@/lib/academy/takeaways'
@@ -46,6 +48,8 @@ function slugify(str: string) {
 
 export function LessonForm({ courseId, lessonId, initialValues, existingPlaybackId }: LessonFormProps) {
   const router = useRouter()
+  const { confirm, dialog } = useConfirmDialog()
+  const startedPublished = initialValues?.isPublished === true
   const [values, setValues] = useState<LessonFormValues>({ ...DEFAULT_VALUES, ...initialValues })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -85,6 +89,9 @@ export function LessonForm({ courseId, lessonId, initialValues, existingPlayback
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (values.isPublished && !startedPublished) {
+      if (!(await confirm(CONFIRM.publishLesson()))) return
+    }
     setSaving(true)
     setError(null)
 
@@ -141,6 +148,7 @@ export function LessonForm({ courseId, lessonId, initialValues, existingPlayback
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5 max-w-xl">
+      {dialog}
       {error && (
         <div
           className="rounded px-4 py-3 font-condensed text-[12px]"

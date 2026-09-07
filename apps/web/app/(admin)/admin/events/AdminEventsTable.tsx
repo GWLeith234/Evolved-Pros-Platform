@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { EVENT_TYPE_LABELS } from '@/lib/events/types'
 import type { EventType } from '@/lib/events/types'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 interface AdminEvent {
   id: string
@@ -30,9 +32,12 @@ export function AdminEventsTable({ events: initialEvents }: AdminEventsTableProp
   const [events, setEvents] = useState(initialEvents)
   const [toggling, setToggling] = useState<string | null>(null)
   const [now, setNow] = useState<Date | null>(null)
+  const { confirm, dialog } = useConfirmDialog()
   useEffect(() => { setNow(new Date()) }, [])
 
   async function togglePublish(eventId: string, currentlyPublished: boolean) {
+    const ok = await confirm(currentlyPublished ? CONFIRM.unpublishEvent() : CONFIRM.publishEvent())
+    if (!ok) return
     setToggling(eventId)
     try {
       const res = await fetch(`/api/admin/events/${eventId}/publish`, { method: 'PATCH' })
@@ -47,6 +52,7 @@ export function AdminEventsTable({ events: initialEvents }: AdminEventsTableProp
 
   return (
     <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.12)' }}>
+      {dialog}
       <table className="w-full">
         <thead>
           <tr style={{ borderBottom: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.03)' }}>
@@ -113,7 +119,7 @@ export function AdminEventsTable({ events: initialEvents }: AdminEventsTableProp
                   <td className="px-5 py-3 text-right">
                     <div className="flex items-center justify-end gap-3">
                       <button
-                        onClick={() => togglePublish(event.id, event.is_published)}
+                        onClick={() => void togglePublish(event.id, event.is_published)}
                         disabled={isToggling}
                         className="font-condensed font-semibold uppercase tracking-wide text-[10px] transition-colors disabled:opacity-50"
                         style={{ color: event.is_published ? '#ef0e30' : '#68a2b9' }}

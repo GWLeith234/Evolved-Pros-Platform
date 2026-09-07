@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
   CRM_COLUMNS,
@@ -17,6 +17,9 @@ import {
 } from '@/lib/admin/crm'
 import { CrmCard } from './CrmCard'
 import { CrmProspectModal, type CrmSavePayload } from './CrmProspectModal'
+import { CRM_TEST_MODE_KEY, isQaTestProspect } from '@/lib/admin/crmQa'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 type BoardData = Record<CrmStage, CrmProspect[]>
 type ViewMode = 'board' | 'table'
@@ -54,6 +57,26 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
   // filtered in memory, so it still finds rows beyond the page's initial 500.
   const [keynoteOnly, setKeynoteOnly] = useState(false)
   const [keynoteBusy, setKeynoteBusy] = useState(false)
+  const [testMode, setTestMode] = useState(false)
+  const [cleanupBusy, setCleanupBusy] = useState(false)
+  const { confirm, dialog } = useConfirmDialog()
+
+  useEffect(() => {
+    try {
+      setTestMode(window.localStorage.getItem(CRM_TEST_MODE_KEY) === '1')
+    } catch {
+      // localStorage blocked
+    }
+  }, [])
+
+  function persistTestMode(next: boolean) {
+    setTestMode(next)
+    try {
+      window.localStorage.setItem(CRM_TEST_MODE_KEY, next ? '1' : '0')
+    } catch {
+      // localStorage blocked
+    }
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -71,6 +94,11 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
 
   const keynoteCount = useMemo(
     () => prospects.filter(p => p.keynote_interest).length,
+    [prospects],
+  )
+
+  const qaProspects = useMemo(
+    () => prospects.filter(p => isQaTestProspect(p)),
     [prospects],
   )
 
@@ -172,6 +200,11 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
   }
 
   async function handleUpgrade(id: string, to: CrmStage) {
+    const row = prospects.find(p => p.id === id)
+    if (testMode && row && isQaTestProspect(row)) {
+      showFlash('Test Mode: QA upgrade is muted')
+      return
+    }
     const result = await patchProspect(
       id,
       { stage: to, value_monthly: CRM_STAGE_META[to].mrr },
@@ -215,6 +248,31 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
     }
   }
 
+  async function handleCleanupQa() {
+    if (qaProspects.length === 0 || cleanupBusy) return
+    if (!(await confirm(CONFIRM.cleanupQa(qaProspects.length)))) return
+    setCleanupBusy(true)
+    const prev = prospects
+    const ids = new Set(qaProspects.map(p => p.id))
+    setProspects(list => list.filter(p => !ids.has(p.id)))
+    try {
+      const results = await Promise.all(
+        qaProspects.map(p => fetch(`/api/admin/crm/prospects/${p.id}`, { method: 'DELETE' })),
+      )
+      if (results.some(r => !r.ok)) {
+        setProspects(prev)
+        showFlash('Cleanup failed for some QA rows')
+        return
+      }
+      showFlash(`Removed ${qaProspects.length} QA prospect${qaProspects.length === 1 ? '' : 's'}`)
+    } catch {
+      setProspects(prev)
+      showFlash('Network error')
+    } finally {
+      setCleanupBusy(false)
+    }
+  }
+
   async function handleDelete(id: string) {
     setBusyId(id)
     const prev = prospects
@@ -239,6 +297,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
 
   return (
     <div>
+      {dialog}
       {/* Header controls */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
         <div>
@@ -330,6 +389,45 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
               {keynoteCount}
             </span>
           </button>
+
+          {testMode && (
+            <button
+              type="button"
+              onClick={() => void handleCleanupQa()}
+              disabled={cleanupBusy || qaProspects.length === 0}
+              className="border border-red px-3 py-2 font-condensed text-[11px] font-bold uppercase tracking-wider text-red"
+              style={{ minHeight: 40, opacity: cleanupBusy || qaProspects.length === 0 ? 0.45 : 1 }}
+            >
+              {cleanupBusy ? 'Cleaning…' : `Cleanup QA${qaProspects.length ? ` · ${qaProspects.length}` : ''}`}
+            </button>
+          )}
+          <div
+            className="inline-flex overflow-hidden border border-teal"
+            role="group"
+            aria-label="Test Mode"
+          >
+            <span className="px-2 py-2 font-condensed text-[10px] font-bold uppercase tracking-wider text-teal">
+              Test Mode
+            </span>
+            <button
+              type="button"
+              aria-pressed={!testMode}
+              onClick={() => persistTestMode(false)}
+              className={`px-2.5 py-2 font-condensed text-[11px] font-bold uppercase tracking-wider ${testMode ? 'bg-transparent text-teal' : 'bg-teal text-navy'}`}
+              style={{ minHeight: 40 }}
+            >
+              Off
+            </button>
+            <button
+              type="button"
+              aria-pressed={testMode}
+              onClick={() => persistTestMode(true)}
+              className={`px-2.5 py-2 font-condensed text-[11px] font-bold uppercase tracking-wider ${testMode ? 'bg-teal text-navy' : 'bg-transparent text-teal'}`}
+              style={{ minHeight: 40 }}
+            >
+              On
+            </button>
+          </div>
 
           {/* View toggle */}
           <div
@@ -482,6 +580,8 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                         <CrmCard
                           prospect={p}
                           busy={busyId === p.id}
+                          testMode={testMode}
+                          qaTest={isQaTestProspect(p)}
                           onMarkContacted={handleMarkContacted}
                           onUpgrade={handleUpgrade}
                           onEdit={pr => {
@@ -529,6 +629,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                   const meta = CRM_STAGE_META[p.stage]
                   const val = prospectValue(p)
                   const follow = followUpLabel(p.next_follow_up_at)
+                  const qaMuted = testMode && isQaTestProspect(p)
                   return (
                     <tr key={p.id} style={{ opacity: busyId === p.id ? 0.5 : 1 }}>
                       <td className="px-3 py-2.5" style={{ borderBottom: '1px solid rgba(27,60,90,0.06)' }}>
@@ -576,7 +677,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                             type="button"
                             className="crm-qa"
                             style={tableQa}
-                            disabled={busyId === p.id}
+                            disabled={busyId === p.id || qaMuted}
                             onClick={() => void handleMarkContacted(p.id)}
                           >
                             Contacted
@@ -586,8 +687,8 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                               <button
                                 type="button"
                                 className="crm-qa"
-                                style={{ ...tableQa, color: '#C9A84C', borderColor: 'rgba(201,168,76,0.4)' }}
-                                disabled={busyId === p.id}
+                                style={{ ...tableQa, color: qaMuted ? 'var(--admin-text-2)' : '#C9A84C', borderColor: 'rgba(201,168,76,0.4)' }}
+                                disabled={busyId === p.id || qaMuted}
                                 onClick={() => void handleUpgrade(p.id, 'vip')}
                               >
                                 → VIP
@@ -595,8 +696,8 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                               <button
                                 type="button"
                                 className="crm-qa"
-                                style={{ ...tableQa, color: '#C9302A', borderColor: 'rgba(201,48,42,0.35)' }}
-                                disabled={busyId === p.id}
+                                style={{ ...tableQa, color: qaMuted ? 'var(--admin-text-2)' : '#C9302A', borderColor: 'rgba(201,48,42,0.35)' }}
+                                disabled={busyId === p.id || qaMuted}
                                 onClick={() => void handleUpgrade(p.id, 'professional')}
                               >
                                 → Pro

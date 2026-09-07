@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ImagePicker } from '@/components/admin/ImagePicker'
 import { isManagedEventImage } from '@/lib/events/cityStock'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 interface EventFormValues {
   title: string
@@ -59,6 +61,7 @@ const PILLAR_SLUG_TO_NUMBER: Record<string, number> = {
 
 export function EventForm({ initialValues, eventId }: EventFormProps) {
   const router = useRouter()
+  const { confirm, dialog } = useConfirmDialog()
   const [values, setValues] = useState<EventFormValues>({
     ...DEFAULT_VALUES,
     ...initialValues,
@@ -153,6 +156,9 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
   }
 
   async function save(asDraft: boolean) {
+    if (!asDraft) {
+      if (!(await confirm(CONFIRM.publishEvent()))) return
+    }
     setSaving(true)
     setError(null)
 
@@ -208,7 +214,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
     if (!eventId) return
     // Use window.confirm/alert explicitly so this works even in browser
     // contexts that strip the global shorthand (e.g. some embed wrappers).
-    if (!window.confirm('Delete this event? This cannot be undone.')) return
+    if (!(await confirm(CONFIRM.deleteEvent()))) return
     try {
       const res = await fetch(`/api/admin/events/${eventId}`, { method: 'DELETE' })
       if (res.ok) {
@@ -228,6 +234,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
 
   return (
     <div className="space-y-6 max-w-2xl">
+      {dialog}
       {error && (
         <div
           className="rounded px-4 py-3 font-condensed text-[12px]"

@@ -2,6 +2,9 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { OwnerOnlyBadge } from '@/components/admin/safety/OwnerOnlyBadge'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 type Banner = {
   id: string
@@ -55,16 +58,23 @@ function SectionCard({ title, children }: { title: string; children: React.React
 }
 
 function SaveButton({ loading, onClick }: { loading?: boolean; onClick: () => void }) {
+  const { confirm, dialog } = useConfirmDialog()
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={loading}
-      className="rounded px-5 py-2.5 font-condensed font-bold uppercase tracking-wider text-[12px] transition-opacity"
-      style={{ backgroundColor: '#1b3c5a', color: 'white', opacity: loading ? 0.6 : 1 }}
-    >
-      {loading ? 'Saving…' : 'Save Changes'}
-    </button>
+    <>
+      {dialog}
+      <button
+        type="button"
+        onClick={async () => {
+          if (!(await confirm(CONFIRM.saveBranding()))) return
+          onClick()
+        }}
+        disabled={loading}
+        className="bg-navy px-5 py-2.5 font-condensed text-[12px] font-bold uppercase tracking-wider text-white transition-opacity"
+        style={{ opacity: loading ? 0.6 : 1 }}
+      >
+        {loading ? 'Saving…' : 'Save Changes'}
+      </button>
+    </>
   )
 }
 
@@ -506,7 +516,7 @@ export function BrandingPortalClient({ initialSettings, initialBanners }: Props)
           Platform
         </p>
         <h1 className="font-display font-black" style={{ fontSize: '28px', color: 'var(--admin-text-strong)' }}>
-          Branding
+          Branding <OwnerOnlyBadge className="ml-3 align-middle" />
         </h1>
         <p className="font-body text-[14px] mt-1" style={{ color: 'var(--admin-text-2)' }}>
           Manage logos, colors, and member-facing appearance.

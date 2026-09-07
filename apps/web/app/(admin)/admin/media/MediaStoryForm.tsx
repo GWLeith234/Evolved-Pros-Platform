@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ImagePicker } from '@/components/admin/ImagePicker'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 interface StoryData {
   id?: string
@@ -48,6 +50,7 @@ const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] t
 
 export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryData>; isEdit?: boolean }) {
   const router = useRouter()
+  const { confirm, dialog } = useConfirmDialog()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -73,6 +76,7 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
       setError('Title and slug are required.')
       return
     }
+    if (publish && !(await confirm(CONFIRM.publishStory()))) return
     setSaving(true)
     setError(null)
 
@@ -119,7 +123,7 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
 
   async function handleDelete() {
     if (!initial?.id) return
-    if (!window.confirm('Delete this story? This cannot be undone.')) return
+    if (!(await confirm(CONFIRM.deleteStory()))) return
     setSaving(true)
     await fetch(`/api/admin/media/${initial.id}`, { method: 'DELETE' })
     router.push('/admin/media?toast=deleted')
@@ -128,6 +132,7 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
 
   return (
     <div className="max-w-3xl">
+      {dialog}
       {error && (
         <div className="mb-4 px-4 py-3 rounded text-[13px] font-body" style={{ backgroundColor: 'rgba(239,14,48,0.06)', color: '#ef0e30', border: '1px solid rgba(239,14,48,0.15)' }}>
           {error}
@@ -229,24 +234,30 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
         <span className="font-condensed font-semibold text-[12px] text-[color:var(--admin-text)]">Featured story</span>
       </label>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-end gap-3">
         <button
-          type="button" onClick={() => handleSave(false)} disabled={saving}
-          className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-6 py-2.5 rounded transition-all disabled:opacity-40"
-          style={{ backgroundColor: 'rgba(27,60,90,0.08)', color: 'var(--admin-text)', border: '1px solid rgba(27,60,90,0.15)' }}
+          type="button"
+          onClick={() => router.push('/admin/media')}
+          disabled={saving}
+          className="border border-navy bg-white px-6 py-2.5 font-condensed text-[12px] font-bold uppercase tracking-[0.1em] text-navy transition-all disabled:opacity-40"
+        >
+          Cancel
+        </button>
+        <button
+          type="button" onClick={() => void handleSave(false)} disabled={saving}
+          className="border border-navy bg-white px-6 py-2.5 font-condensed text-[12px] font-bold uppercase tracking-[0.1em] text-navy transition-all disabled:opacity-40"
         >
           {saving ? 'Saving...' : 'Save as Draft'}
         </button>
         <button
-          type="button" onClick={() => handleSave(true)} disabled={saving}
-          className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-6 py-2.5 rounded transition-all disabled:opacity-40"
-          style={{ backgroundColor: '#1b3c5a', color: '#fff' }}
+          type="button" onClick={() => void handleSave(true)} disabled={saving}
+          className="bg-red px-6 py-2.5 font-condensed text-[12px] font-bold uppercase tracking-[0.1em] text-white transition-all disabled:opacity-40"
         >
           {saving ? 'Publishing...' : 'Publish Now'}
         </button>
         {isEdit && (
           <button
-            type="button" onClick={handleDelete} disabled={saving}
+            type="button" onClick={() => void handleDelete()} disabled={saving}
             className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-4 py-2.5 rounded ml-auto transition-all disabled:opacity-40"
             style={{ color: '#ef0e30', border: '1px solid rgba(239,14,48,0.2)' }}
           >
