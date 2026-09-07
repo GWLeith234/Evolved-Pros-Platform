@@ -4,6 +4,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { Resend } from 'resend'
 import { MagicLinkEmail } from '@/lib/resend/emails/MagicLink'
+import { authCallbackUrl, magicLinkCallbackUrl } from '@/lib/auth/authOrigin'
 
 // Use RESEND_FROM_EMAIL env var (set to hello@evolvedpros.com once domain is verified in Resend)
 // Falls back to sandbox sender so invites never silently break if env var is missing
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
     type: 'invite',
     email: email.toLowerCase().trim(),
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/onboard`,
+      redirectTo: authCallbackUrl('/onboard'),
       data: { full_name: fullName },
     },
   })
@@ -57,10 +58,13 @@ export async function POST(request: Request) {
     return Response.json({ error: linkError?.message ?? 'Failed to generate invite link' }, { status: 500 })
   }
 
-  const inviteUrl = linkData.properties?.action_link
-  if (!inviteUrl) {
+  // hashed_token, not action_link: the verify URL's implicit fragment is
+  // unreadable by /auth/callback and a platform→www 308 drops it.
+  const hashedToken = linkData.properties?.hashed_token
+  if (!hashedToken) {
     return Response.json({ error: 'No invite link returned from auth service' }, { status: 500 })
   }
+  const inviteUrl = magicLinkCallbackUrl(hashedToken, 'invite', '/onboard')
 
   // Send invite email via Resend using verified sandbox sender
   const resend = new Resend(process.env.RESEND_API_KEY)

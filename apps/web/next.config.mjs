@@ -69,7 +69,10 @@ const nextConfig = {
       // /podcast (so crawlers get the server-rendered page rather than an auth
       // redirect), and a host redirect has to fire on every path. redirects()
       // resolves in the Next router before middleware and needs no matcher
-      // change, so it cannot touch the auth path.
+      // change. /auth/callback is included so a stale platform magic-link
+      // lands on www before cookies are written. Do NOT exclude it — completing
+      // auth on platform would Set-Cookie for platform, then 308 /home to www
+      // and drop the session.
       //
       // *** THE /api EXCLUSION IS LOAD-BEARING — DO NOT "SIMPLIFY" IT AWAY ***
       // Stripe (LIVE MODE), Mux and the external cron scheduler are
