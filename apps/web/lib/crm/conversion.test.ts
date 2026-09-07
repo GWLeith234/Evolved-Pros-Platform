@@ -1,12 +1,15 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
+  COMMUNITY_THANKS_TAG,
   COMP_TAG,
   FRIEND_OF_GEORGE_TAG,
   PAID_TAG,
   paidNotificationCopy,
   redeemNotificationCopy,
+  thanksNotificationCopy,
   upsertPaidProspect,
   upsertRedeemProspect,
+  upsertThanksProspect,
   upsertWelcomeProspect,
   welcomeNotificationCopy,
 } from './conversion'
@@ -89,6 +92,24 @@ describe('upsertRedeemProspect', () => {
     })
     await upsertRedeemProspect(db, { ...PERSON, tier: 'vip' }, NOW)
     expect(vi.mocked(db.updateProspect).mock.calls[0][1].stage).toBe('vip')
+  })
+})
+
+describe('upsertThanksProspect', () => {
+  it('tags community thanks and never friend of george', async () => {
+    const db = mockDb()
+    const out = await upsertThanksProspect(
+      db,
+      { email: 'thanks@example.com', full_name: 'Ada', user_id: 'u-1', tier: 'community' },
+      NOW,
+    )
+    expect(out.kind).toBe('created')
+    const row = vi.mocked(db.insertProspect).mock.calls[0][0]
+    expect(row.tags).toEqual([COMMUNITY_THANKS_TAG])
+    expect(row.tags).not.toContain(FRIEND_OF_GEORGE_TAG)
+    expect(row.stage).toBe('community')
+    expect(row.source).toBe('thanks-claim')
+    expect(thanksNotificationCopy({ email: 'thanks@example.com', tier: 'community' }).title).not.toContain('\u2014')
   })
 })
 

@@ -11,6 +11,7 @@ function src(rel: string) {
 const CHROME_FILES = [
   'app/(public)/podcast/layout.tsx',
   'app/welcome/page.tsx',
+  'app/invite/thanks/page.tsx',
   'components/layout/SessionOptionalShell.tsx',
   'components/layout/PublicChromeHeader.tsx',
   'components/layout/TopNav.tsx',
@@ -35,6 +36,7 @@ describe('public chrome wordmark', () => {
     expect(src('app/(public)/podcast/layout.tsx')).toContain('<PublicChromeHeader')
     expect(src('components/layout/SessionOptionalShell.tsx')).toContain('<PublicChromeHeader')
     expect(src('app/welcome/page.tsx')).toContain('<PublicChromeHeader')
+    expect(src('app/invite/thanks/page.tsx')).toContain('<PublicChromeHeader')
   })
 
   it('keeps member TopNav and conversion home on LogoMark', () => {

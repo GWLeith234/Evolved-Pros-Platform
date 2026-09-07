@@ -27,6 +27,9 @@ const PUBLIC_ROUTES = [
   // service role after token + signature + expiry validation.
   '/guest',
   '/api/guest',
+  // Thank-you Community claim. Token is the credential; /welcome stays FOG.
+  '/invite',
+  '/api/invite',
 ]
 
 // Routes that are publicly accessible but still need session refresh so server

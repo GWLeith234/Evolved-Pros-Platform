@@ -12,6 +12,24 @@ export const CONFIRM = {
     consequence: `This will deliver the message to ${audienceLabel} immediately. This cannot be undone from admin.`,
     emphasis: audienceLabel,
   }),
+  sendThanksD0: (count: number | string): ConfirmRequest => ({
+    title: 'Send thank-you D0 emails?',
+    consequence: `YES sends the D0 Community thank-you to ${count} inviteable address(es) only. Already paid, already members, and Friends of George stays excluded. This cannot be undone from admin.`,
+    emphasis: String(count),
+    confirmLabel: 'YES send D0',
+  }),
+  queueThanksD0: (count: number | string): ConfirmRequest => ({
+    title: 'Queue thank-you D0 without sending?',
+    consequence: `YES creates ${count} Community invite(s) and parks D0 in the pending approval queue. No email goes out.`,
+    emphasis: String(count),
+    confirmLabel: 'YES queue D0',
+  }),
+  sendThanksNudge: (count: number): ConfirmRequest => ({
+    title: 'Send queued Community thank-you?',
+    consequence: `YES sends ${count} queued cadence email(s). Nothing else in the cadence fires. Copy link stays available if delivery fails.`,
+    emphasis: String(count),
+    confirmLabel: 'YES send',
+  }),
   revokeFriend: (email: string, redeemed: boolean): ConfirmRequest => ({
     title: 'Revoke friend access?',
     consequence: redeemed

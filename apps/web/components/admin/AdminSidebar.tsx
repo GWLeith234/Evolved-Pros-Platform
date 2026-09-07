@@ -31,6 +31,7 @@ const SECTIONS: ReadonlyArray<SidebarSectionData> = [
     title: 'Beta',
     items: [
       { label: 'Friends of George', href: '/admin/friends', match: /^\/admin\/friends/ },
+      { label: 'Thank-you Community', href: '/admin/thanks', match: /^\/admin\/thanks/ },
     ],
   },
   {

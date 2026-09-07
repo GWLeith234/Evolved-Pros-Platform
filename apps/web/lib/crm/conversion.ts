@@ -9,11 +9,13 @@
  */
 
 import {
+  COMMUNITY_THANKS_TAG,
   COMP_TAG,
   FRIEND_OF_GEORGE_TAG,
   PAID_SOURCE,
   PAID_TAG,
   REDEEM_SOURCE,
+  THANKS_SOURCE,
   WELCOME_SOURCE,
   crmStageForTier,
   isoDay,
@@ -25,7 +27,7 @@ import {
 } from './intake'
 import { displayNameFromEmail } from './join'
 
-export { COMP_TAG, FRIEND_OF_GEORGE_TAG, PAID_TAG }
+export { COMMUNITY_THANKS_TAG, COMP_TAG, FRIEND_OF_GEORGE_TAG, PAID_TAG }
 
 export interface ConversionWrite {
   email: string
@@ -163,6 +165,36 @@ export async function notifyRedeemAdmins(db: IntakeDb, input: ConversionWrite): 
 
 export async function notifyPaidAdmins(db: IntakeDb, input: ConversionWrite): Promise<NotifyOutcome> {
   return notifyIntakeAdmins(db, paidNotificationCopy(input))
+}
+
+export function thanksNotificationCopy(input: ConversionWrite): { title: string; body: string } {
+  const summary = conversionSummary(input)
+  return { title: `Community thank you claim: ${summary}`, body: summary }
+}
+
+export function buildThanksNotesBlock(input: ConversionWrite, now: Date): string {
+  return [`[${isoDay(now)}] Community thank you claim`, conversionSummary(input)].join('\n')
+}
+
+export async function upsertThanksProspect(
+  db: IntakeDb,
+  input: ConversionWrite,
+  now: Date = new Date(),
+): Promise<IntakeUpsertOutcome> {
+  return upsertConversion(
+    db,
+    { ...input, tier: input.tier ?? 'community' },
+    {
+      source: THANKS_SOURCE,
+      tags: [COMMUNITY_THANKS_TAG],
+      notesBlock: buildThanksNotesBlock(input, now),
+    },
+    now,
+  )
+}
+
+export async function notifyThanksAdmins(db: IntakeDb, input: ConversionWrite): Promise<NotifyOutcome> {
+  return notifyIntakeAdmins(db, thanksNotificationCopy(input))
 }
 
 /** Swallow CRM failures so the primary grant / payment path still succeeds. */
