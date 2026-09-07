@@ -88,6 +88,16 @@ const nextConfig = {
         destination: 'https://www.evolvedpros.com/:path',
         permanent: true,
       },
+      // Same trap as platform: the public *.up.railway.app host still 200s
+      // the login form and would mint a PKCE verifier cookie on the wrong
+      // host. Keep /api on the Railway host so healthchecks and any leftover
+      // webhook URLs keep working (same load-bearing exclusion as GATE-1b).
+      {
+        source: '/:path((?!api/).*)',
+        has: [{ type: 'host', value: 'web-production-db912.up.railway.app' }],
+        destination: 'https://www.evolvedpros.com/:path',
+        permanent: true,
+      },
       // /scoreboard was folded into /home (Goals → Home consolidation).
       // Permanent 308 so bookmarks, shared links, and old in-app buttons land
       // on the Home dashboard that now hosts the scoreboard.

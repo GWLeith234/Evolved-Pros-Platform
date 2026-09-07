@@ -25,11 +25,9 @@ describe('resolveAuthOrigin', () => {
     expect(resolveAuthOrigin('https://media.evolvedpros.com')).toBe(AUTH_ORIGIN)
   })
 
-  it('keeps localhost and Railway preview hosts for non-prod', () => {
+  it('keeps localhost for next dev and canonicalizes the public Railway host', () => {
     expect(resolveAuthOrigin('http://localhost:3000')).toBe('http://localhost:3000')
-    expect(resolveAuthOrigin('https://web-production-db912.up.railway.app')).toBe(
-      'https://web-production-db912.up.railway.app',
-    )
+    expect(resolveAuthOrigin('https://web-production-db912.up.railway.app')).toBe(AUTH_ORIGIN)
   })
 
   it('falls back to www when both env values are blank', () => {

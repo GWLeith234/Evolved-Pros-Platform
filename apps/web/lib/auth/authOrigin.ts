@@ -9,8 +9,8 @@
  * exchangeCodeForSession then fails and the callback 307s to
  * /login?error=auth_failed.
  *
- * Auth links always canonicalize the brand hosts to www. Local / preview
- * origins (localhost, *.up.railway.app) are left alone so dev still works.
+ * Auth links always canonicalize brand hosts AND the public Railway host
+ * to www. localhost is left alone so local `next dev` still works.
  */
 
 import { CANONICAL_ORIGIN } from '@/lib/seo/canonical'
@@ -38,7 +38,11 @@ export function resolveAuthOrigin(
   try {
     const url = new URL(value.includes('://') ? value : `https://${value}`)
     const host = url.hostname.toLowerCase()
-    if (CANONICALIZE_HOSTS.has(host) || host.endsWith('.evolvedpros.com')) {
+    if (
+      CANONICALIZE_HOSTS.has(host) ||
+      host.endsWith('.evolvedpros.com') ||
+      host.endsWith('.up.railway.app')
+    ) {
       return AUTH_ORIGIN
     }
     return `${url.protocol}//${url.host}`
