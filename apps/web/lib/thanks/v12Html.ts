@@ -4,10 +4,12 @@ import { THANKS_CADENCE_STEPS, THANKS_WWW_ORIGIN, type ThanksCadenceStep } from 
 import type { ThanksEmailVars } from './copy'
 
 /**
- * send-ready-v12 Creative SoT: Gmail-safe HTML only.
- * TABLES + INLINE STYLES. Do not use CSS classes (v11 class CSS failed in Gmail).
- * Logo + headshot stay CID: cid:logo and cid:george-headshot.
- * Sender substitutes {{George}} → first_name and bare www CTA/copy-link → claim_url.
+ * send-ready-v13 Creative SoT: Gmail-safe HTML only.
+ * TABLES + INLINE STYLES. No CSS classes (v11 class CSS failed in Gmail).
+ * Header is the Magic Link text wordmark. NEVER cid:logo / image wordmark.
+ * Greeting is exactly {{first_name}}. NEVER {{George}} or {{{{first_name}}}}.
+ * cid:george-headshot is OK for the headshot only.
+ * claim_url is only the CTA + footer copy-link. Never prefix /media or /podcast.
  */
 export const THANKS_V12_DIR_REL = 'lib/resend/emails/community-thanks/v12'
 export const THANKS_V12_ASSETS_REL = `${THANKS_V12_DIR_REL}/assets`
@@ -29,9 +31,10 @@ export const THANKS_V12_HTML_FILES = {
 
 const CID_LOGO = 'cid:logo'
 const CID_HEADSHOT = 'cid:george-headshot'
-
-/** Bare www origin used as CTA / copy-link. Do not eat /podcast/… paths. */
-const BARE_WWW_ORIGIN = /https:\/\/www\.evolvedpros\.com\/?(?=["'\s<>]|$)/gi
+const TEXT_WORDMARK = 'EVOLVED<span style="color:#ef0e30;">·</span>PROS'
+const RESOURCE_HREF = /href="(https:\/\/www\.evolvedpros\.com\/(?:media|podcast)\/[^"]+)"/g
+const BARE_HOMEPAGE_HREF = /href=["']https:\/\/www\.evolvedpros\.com\/["']/g
+const BARE_HOMEPAGE_TEXT = />https:\/\/www\.evolvedpros\.com\/</g
 
 export function escapeThanksHtml(value: string): string {
   return value
@@ -85,50 +88,63 @@ function readFirstExisting(dir: string, names: string[]): { filename: string; co
   return null
 }
 
+/** Headshot only. CID logo is retired (failed in inbox). */
 export function loadThanksV12CidAttachments(): ThanksCidAttachment[] {
   const dir = resolveThanksV12Dir()
   if (!dir) return []
   const assets = join(dir, 'assets')
-  const out: ThanksCidAttachment[] = []
-  const logo = readFirstExisting(assets, ['logo.png', 'logo.jpg', 'logo.jpeg', 'logo.gif', 'logo.webp'])
-  if (logo) {
-    out.push({ ...logo, content_id: 'logo', contentId: 'logo' })
-  }
   const head = readFirstExisting(assets, [
     'george-headshot.jpg',
     'george-headshot.jpeg',
     'george-headshot.png',
     'george-headshot.webp',
   ])
-  if (head) {
-    out.push({ ...head, content_id: 'george-headshot', contentId: 'george-headshot' })
-  }
-  return out
+  if (!head) return []
+  return [{ ...head, content_id: 'george-headshot', contentId: 'george-headshot' }]
+}
+
+function resourceHrefs(html: string): string[] {
+  return [...html.matchAll(RESOURCE_HREF)].map(match => match[1])
 }
 
 /**
- * Wire send-ready-v12 HTML to this invite:
- * - {{George}} / {{first_name}} → first_name
- * - {{claim_url}} and bare https://www.evolvedpros.com/ CTA + copy-link → claim_url
- * - cid:logo and cid:george-headshot stay untouched
+ * Wire v13 HTML to this invite:
+ * - {{first_name}} → first_name (never {{{{first_name}}}})
+ * - {{claim_url}} → claim_url on CTA + copy-link only
+ * - leftover bare homepage href/text → claim_url
+ * - /media and /podcast hrefs stay absolute www paths
+ * - cid:george-headshot stays; cid:logo is forbidden
  */
 export function applyThanksV12Vars(html: string, vars: Pick<ThanksEmailVars, 'first_name' | 'claim_url'>): string {
+  if (html.includes(CID_LOGO)) {
+    throw new Error('v13 forbids cid:logo; use the text wordmark')
+  }
+  if (html.includes('{{{{first_name}}}}') || html.includes('{{George}}')) {
+    throw new Error('v13 greeting must be exactly {{first_name}}')
+  }
+
   const first = escapeThanksHtml(vars.first_name)
   const claim = escapeThanksHtml(vars.claim_url)
-  let out = html.replaceAll('{{George}}', first)
-  out = out.replaceAll('{{first_name}}', first)
-  out = out.replaceAll('{{claim_url}}', claim)
-  out = out.replace(BARE_WWW_ORIGIN, claim)
+  const kept = resourceHrefs(html)
 
-  if (!out.includes(CID_LOGO) && html.includes(CID_LOGO)) {
-    throw new Error('v12 substitution dropped cid:logo')
-  }
-  if (!out.includes(CID_HEADSHOT) && html.includes(CID_HEADSHOT)) {
-    throw new Error('v12 substitution dropped cid:george-headshot')
+  let out = html.replaceAll('{{first_name}}', first)
+  out = out.replaceAll('{{claim_url}}', claim)
+  out = out.replace(BARE_HOMEPAGE_HREF, `href="${claim}"`)
+  out = out.replace(BARE_HOMEPAGE_TEXT, `>${claim}<`)
+
+  if (html.includes(CID_HEADSHOT) && !out.includes(CID_HEADSHOT)) {
+    throw new Error('v13 substitution dropped cid:george-headshot')
   }
   if (out.includes(`${THANKS_WWW_ORIGIN}/"`) || /href=["']https:\/\/www\.evolvedpros\.com\/["']/.test(out)) {
-    // Bare origin CTA survived. Fail closed so we never send a homepage link.
-    throw new Error('v12 HTML still has a bare www.evolvedpros.com/ CTA')
+    throw new Error('v13 HTML still has a bare www.evolvedpros.com/ CTA')
+  }
+  if (out.includes('/invite/thanks') && /\/invite\/thanks[^"']*\/(media|podcast)\//.test(out)) {
+    throw new Error('v13 substitution prefixed a story/podcast URL with claim_url')
+  }
+  for (const href of kept) {
+    if (!out.includes(`href="${href}"`)) {
+      throw new Error(`v13 substitution rewrote resource URL ${href}`)
+    }
   }
   return out
 }
@@ -146,17 +162,20 @@ export function landedThanksV12Steps(): ThanksCadenceStep[] {
   return THANKS_CADENCE_STEPS.filter(step => loadThanksV12Html(step))
 }
 
-/** Gmail-safe SoT. v11 class CSS failed in Gmail. */
+/** Gmail-safe v13 SoT. */
 export function thanksV12GmailSafeViolations(html: string): string[] {
   const hits: string[] = []
   if (/\sclass\s*=/i.test(html)) hits.push('css_class')
   if (/<style[\s>]/i.test(html)) hits.push('style_block')
   if (!/<table[\s>]/i.test(html)) hits.push('missing_table')
   if (!/\sstyle\s*=/i.test(html)) hits.push('missing_inline_style')
-  if (!html.includes(CID_LOGO)) hits.push('missing_cid_logo')
+  if (!html.includes(TEXT_WORDMARK)) hits.push('missing_text_wordmark')
+  if (html.includes(CID_LOGO)) hits.push('cid_logo_forbidden')
   if (!html.includes(CID_HEADSHOT)) hits.push('missing_cid_headshot')
-  if (/<img[^>]+src=["']https?:/i.test(html) && /alt=["'][^"']*EVOLVED/i.test(html)) {
-    if (!/src=["']cid:logo["']/.test(html)) hits.push('remote_logo')
-  }
+  if (!html.includes('{{first_name}}')) hits.push('missing_first_name_token')
+  if (html.includes('{{George}}')) hits.push('george_token_forbidden')
+  if (html.includes('{{{{first_name}}}}')) hits.push('quad_first_name_token')
+  if (!html.includes('{{claim_url}}')) hits.push('missing_claim_url_token')
+  if (/href=["']https:\/\/www\.evolvedpros\.com\/["']/.test(html)) hits.push('bare_homepage_cta')
   return hits
 }

@@ -36,7 +36,8 @@ describe('standing mandate: EVOLVED·PROS wordmark on every thanks surface', () 
   })
 
   it('is wired into emails, claim page, and admin chrome', () => {
-    expect(src('lib/resend/emails/CommunityThanks.tsx')).toContain('<EpWordmarkMark')
+    expect(src('lib/resend/emails/CommunityThanks.tsx')).toContain(MAGIC_SPAN)
+    expect(src('lib/resend/emails/CommunityThanks.tsx')).not.toContain('cid:logo')
     expect(src('app/invite/thanks/page.tsx')).toContain('<EpWordmark')
     expect(src('app/(admin)/admin/thanks/page.tsx')).toContain('<EpWordmark')
     for (const file of FEATURE_CHROME) {
