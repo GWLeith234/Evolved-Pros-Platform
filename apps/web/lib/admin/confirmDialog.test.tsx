@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { ConfirmDialog } from './ConfirmDialog'
-import { OwnerOnlyBadge } from './OwnerOnlyBadge'
-import { CONFIRM } from './confirmCopy'
+import { ConfirmDialog } from '@/components/admin/safety/ConfirmDialog'
+import { OwnerOnlyBadge } from '@/components/admin/safety/OwnerOnlyBadge'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
 
 describe('ConfirmDialog (M1 shell)', () => {
   it('renders the question title, consequence, and Cancel left of Confirm', () => {
@@ -63,8 +63,8 @@ describe('CONFIRM copy', () => {
     ]
     for (const s of samples) {
       expect(s.title.endsWith('?')).toBe(true)
-      expect(s.title + s.consequence).not.toContain('—')
-      expect(s.title + s.consequence).not.toContain('–')
+      expect(s.title + s.consequence).not.toContain('\u2014')
+      expect(s.title + s.consequence).not.toContain('\u2013')
     }
   })
 })
