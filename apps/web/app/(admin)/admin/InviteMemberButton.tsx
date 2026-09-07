@@ -1,6 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { OwnerOnlyBadge } from '@/components/admin/safety/OwnerOnlyBadge'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 type Tier = 'community' | 'vip' | 'pro'
 
@@ -24,6 +27,7 @@ const TIER_BG_ACTIVE: Record<Tier, string> = {
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
 export function InviteMemberButton() {
+  const { confirm, dialog } = useConfirmDialog()
   const [open, setOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [fullName, setFullName] = useState('')
@@ -46,6 +50,7 @@ export function InviteMemberButton() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!(await confirm(CONFIRM.inviteMember()))) return
     setStatus('loading')
     setErrorMsg('')
 
@@ -93,13 +98,13 @@ export function InviteMemberButton() {
 
   return (
     <>
+      {dialog}
       {/* Trigger button */}
+      <span className="inline-flex items-center gap-2">
+      <OwnerOnlyBadge />
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 font-condensed font-bold uppercase tracking-[0.12em] text-[11px] px-4 py-2 rounded transition-colors"
-        style={{ backgroundColor: '#1b3c5a', color: '#fff' }}
-        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#112535')}
-        onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#1b3c5a')}
+        className="flex items-center gap-1.5 bg-red px-4 py-2 font-condensed text-[11px] font-bold uppercase tracking-[0.12em] text-white transition-colors"
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
@@ -107,6 +112,7 @@ export function InviteMemberButton() {
         </svg>
         Invite Member
       </button>
+      </span>
 
       {/* Modal backdrop */}
       {open && (

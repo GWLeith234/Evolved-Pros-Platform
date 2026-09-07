@@ -493,6 +493,7 @@ export default function AdminSpeakingPage() {
         </p>
       ) : tab === 'dates' ? (
         dates.length === 0 ? (
+          // M3 KEEP AS BAR: speaking empty. Do not redesign. See docs/ADMIN-BUTTON-SAFETY-2026-09-06.md.
           <p className="font-condensed text-[12px]" style={{ color: 'rgba(27,60,90,0.4)' }}>
             No speaking dates yet. Add a confirmed or hold date when a stage is locked.
           </p>

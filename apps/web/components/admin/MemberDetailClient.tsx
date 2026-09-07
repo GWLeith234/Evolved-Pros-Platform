@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MemberPlanBadges } from './MemberPlanBadges'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 interface Post {
   id: string
@@ -115,6 +117,7 @@ function GuestField({ label, children }: { label: string; children: React.ReactN
 
 export function MemberDetailClient({ member }: { member: MemberDetail }) {
   const router = useRouter()
+  const { confirm, dialog } = useConfirmDialog()
   const [tab, setTab] = useState<Tab>('overview')
   const [tier, setTier]             = useState(member.tier ?? 'vip')
   const [tierStatus, setTierStatus] = useState(member.tierStatus ?? 'active')
@@ -199,6 +202,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
 
   return (
     <div className="px-8 py-6 max-w-4xl">
+      {dialog}
       {/* Header */}
       <div
         className="rounded-lg p-6 mb-6 flex items-start justify-between"
@@ -295,12 +299,12 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
           {member.tierStatus !== 'cancelled' && (
             <button
               onClick={() => {
-                const confirmed = window.confirm(
-                  `Are you sure you want to suspend ${member.displayName ?? member.fullName ?? member.email}? This will set their membership to cancelled.`
-                )
-                if (!confirmed) return
-                setTierStatus('cancelled')
-                void handleSaveTier()
+                void (async () => {
+                  const name = member.displayName ?? member.fullName ?? member.email ?? 'this member'
+                  if (!(await confirm(CONFIRM.suspendMember(name)))) return
+                  setTierStatus('cancelled')
+                  void handleSaveTier()
+                })()
               }}
               className="font-condensed font-bold uppercase tracking-wide text-[12px] px-4 py-2 rounded transition-all ml-auto"
               style={{ color: '#ef0e30', border: '1px solid rgba(239,14,48,0.3)' }}

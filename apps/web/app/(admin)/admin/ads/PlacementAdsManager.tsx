@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 // Placement-model ad (sidebar / endorsement style). Distinct from the zone
 // model in AdsManager — both live in the single `platform_ads` table and both
@@ -58,6 +60,7 @@ export function PlacementAdsManager({
   const [newAd, setNewAd] = useState({ placement: 'sidebar', image_url: '', headline: '', tool_name: '', endorsement_quote: '', special_offer: '', cta_text: '', link_url: '' })
   const [uploading, setUploading] = useState(false)
   const [savingInterval, setSavingInterval] = useState(false)
+  const { confirm, dialog } = useConfirmDialog()
 
   async function handleSaveInterval() {
     setSavingInterval(true)
@@ -73,7 +76,7 @@ export function PlacementAdsManager({
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this ad?')) return
+    if (!(await confirm(CONFIRM.deleteAd()))) return
     const supabase = createClient()
     await supabase.from('platform_ads').delete().eq('id', id)
     setAds(prev => prev.filter(a => a.id !== id))
@@ -96,6 +99,7 @@ export function PlacementAdsManager({
   }
 
   async function handleAddAd() {
+    if (!(await confirm(CONFIRM.createAd()))) return
     const supabase = createClient()
     const { data } = await supabase
       .from('platform_ads')
@@ -125,6 +129,7 @@ export function PlacementAdsManager({
 
   return (
     <>
+      {dialog}
       <SectionCard title="Sponsored Ads">
         {/* Rotation interval */}
         <div className="flex items-center gap-3 mb-5">
@@ -203,7 +208,7 @@ export function PlacementAdsManager({
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleDelete(ad.id)}
+                  onClick={() => void handleDelete(ad.id)}
                   className="font-condensed text-[11px] uppercase tracking-wide transition-colors flex-shrink-0"
                   style={{ color: '#ef0e30' }}
                 >
@@ -326,7 +331,7 @@ export function PlacementAdsManager({
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={handleAddAd}
+                onClick={() => void handleAddAd()}
                 className="rounded px-4 py-2 font-condensed font-bold uppercase text-[12px] tracking-wide"
                 style={{ backgroundColor: '#1b3c5a', color: 'white' }}
               >

@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ImagePicker } from '@/components/admin/ImagePicker'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 export type Pillar =
   | 'foundation'
@@ -121,6 +123,8 @@ const inputStyle = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'v
 
 export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
   const router = useRouter()
+  const { confirm, dialog } = useConfirmDialog()
+  const startedPublished = initialValues?.isPublished === true
   const [values, setValues] = useState<EpisodeFormValues>({
     ...DEFAULT_VALUES,
     ...initialValues,
@@ -324,6 +328,9 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (values.isPublished && !startedPublished) {
+      if (!(await confirm(CONFIRM.publishEpisode()))) return
+    }
     setSaving(true)
     setError(null)
 
@@ -389,7 +396,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
 
   async function handleDelete() {
     if (!episodeId) return
-    if (!confirm('Delete this episode? This cannot be undone.')) return
+    if (!(await confirm(CONFIRM.deleteEpisode(values.title || 'this episode')))) return
     setSaving(true)
     try {
       const res = await fetch(`/api/admin/episodes/${episodeId}`, { method: 'DELETE' })
@@ -407,6 +414,7 @@ export function EpisodeForm({ initialValues, episodeId }: EpisodeFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+      {dialog}
       {/* Fixed-position save toast — unmissable, auto-dismissed with the redirect */}
       {toast && (
         <div

@@ -1,6 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { OwnerOnlyBadge } from '@/components/admin/safety/OwnerOnlyBadge'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 interface InviteMemberButtonProps {
   variant?: 'header'
@@ -11,14 +14,16 @@ export function InviteMemberButton({ variant: _variant = 'header' }: InviteMembe
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] rounded px-4 py-2 transition-all"
-        style={{ backgroundColor: '#1b3c5a', color: 'white' }}
-      >
-        + Invite Member
-      </button>
+      <span className="inline-flex items-center gap-2">
+        <OwnerOnlyBadge />
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="bg-red px-4 py-2 font-condensed text-[12px] font-bold uppercase tracking-[0.12em] text-white transition-all"
+        >
+          + Invite Member
+        </button>
+      </span>
       {open && <InviteMemberModal onClose={() => setOpen(false)} />}
     </>
   )
@@ -31,12 +36,14 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sentTo, setSentTo] = useState<string | null>(null)
+  const { confirm, dialog } = useConfirmDialog()
 
   async function send() {
     if (!email.trim() || !fullName.trim()) {
       setError('Enter both an email and a name.')
       return
     }
+    if (!(await confirm(CONFIRM.inviteMember()))) return
     setBusy(true)
     setError(null)
     try {
@@ -58,6 +65,8 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
+    <>
+    {dialog}
     <div
       role="dialog"
       aria-modal="true"
@@ -212,5 +221,6 @@ function InviteMemberModal({ onClose }: { onClose: () => void }) {
         )}
       </div>
     </div>
+    </>
   )
 }

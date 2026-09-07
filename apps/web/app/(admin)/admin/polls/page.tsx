@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 interface PollOption { id: string; option_text: string; vote_count: number; display_order: number }
 interface Poll {
@@ -14,6 +16,7 @@ export default function AdminPollsPage() {
   const [editing, setEditing] = useState<{ question: string; context: string; options: string[]; closes_at: string; status: string; id?: string } | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const { confirm, dialog } = useConfirmDialog()
 
   const fetchPolls = useCallback(async () => {
     setLoading(true)
@@ -47,12 +50,13 @@ export default function AdminPollsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this poll and all its votes?')) return
+    if (!(await confirm(CONFIRM.deletePoll()))) return
     await fetch(`/api/admin/polls/${id}`, { method: 'DELETE' })
     await fetchPolls()
   }
 
   async function handleClose(id: string) {
+    if (!(await confirm(CONFIRM.closePoll()))) return
     await fetch(`/api/admin/polls/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -69,6 +73,7 @@ export default function AdminPollsPage() {
 
   return (
     <div style={{ padding: '24px 32px', maxWidth: 960 }}>
+      {dialog}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h1 className="font-condensed font-bold text-[22px]" style={{ color: 'var(--admin-text)' }}>Polls</h1>
         <button
@@ -173,9 +178,9 @@ export default function AdminPollsPage() {
                       <div style={{ display: 'flex', gap: 6 }}>
                         <button type="button" onClick={() => setEditing({ question: p.question, context: p.context, options: (p.poll_options ?? []).map(o => o.option_text), closes_at: p.closes_at ?? '', status: p.status, id: p.id })} style={{ fontSize: 10, color: '#68a2b9', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600 }}>Edit</button>
                         {p.status === 'active' && (
-                          <button type="button" onClick={() => handleClose(p.id)} style={{ fontSize: 10, color: '#C9A84C', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600 }}>Close</button>
+                          <button type="button" onClick={() => void handleClose(p.id)} style={{ fontSize: 10, color: '#C9A84C', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600 }}>Close</button>
                         )}
-                        <button type="button" onClick={() => handleDelete(p.id)} style={{ fontSize: 10, color: '#ef0e30', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600 }}>Del</button>
+                        <button type="button" onClick={() => void handleDelete(p.id)} style={{ fontSize: 10, color: '#ef0e30', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-condensed)', fontWeight: 600 }}>Del</button>
                       </div>
                     </td>
                   </tr>

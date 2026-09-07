@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { ImagePicker } from '@/components/admin/ImagePicker'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 type Zone = 'A' | 'B' | 'C' | 'D' | 'E'
 type AdType = 'image' | 'video' | 'native'
@@ -126,6 +128,7 @@ function AdForm({
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { confirm, dialog } = useConfirmDialog()
 
   function set<K extends keyof AdFormValues>(key: K, val: AdFormValues[K]) {
     setValues(prev => ({ ...prev, [key]: val }))
@@ -133,6 +136,7 @@ function AdForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!adId && !(await confirm(CONFIRM.createAd()))) return
     setSaving(true)
     setError(null)
 
@@ -175,6 +179,7 @@ function AdForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {dialog}
       {error && (
         <div
           className="rounded px-4 py-3 font-condensed text-[12px]"
@@ -397,6 +402,7 @@ function ZonePanel({
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const { confirm, dialog } = useConfirmDialog()
 
   const zoneAds = ads.filter(a => (a.zone ?? 'A') === zone)
 
@@ -411,7 +417,7 @@ function ZonePanel({
   }
 
   async function handleDelete(adId: string) {
-    if (!confirm('Delete this ad? This cannot be undone.')) return
+    if (!(await confirm(CONFIRM.deleteAd()))) return
     setDeletingId(adId)
     try {
       const res = await fetch(`/api/admin/ads/${adId}`, { method: 'DELETE' })
@@ -431,6 +437,7 @@ function ZonePanel({
 
   return (
     <div className="space-y-4">
+      {dialog}
       {/* Zone description pill */}
       <div className="flex items-center justify-between">
         <span className="font-condensed text-[11px]" style={{ color: 'var(--admin-text-2)' }}>
@@ -576,7 +583,7 @@ function ZonePanel({
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(ad.id)}
+                          onClick={() => void handleDelete(ad.id)}
                           disabled={deletingId === ad.id}
                           className="font-condensed font-semibold uppercase tracking-wide text-[10px] transition-colors"
                           style={{ color: '#ef0e30', opacity: deletingId === ad.id ? 0.5 : 1 }}

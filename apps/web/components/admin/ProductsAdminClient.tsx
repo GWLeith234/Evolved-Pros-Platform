@@ -2,6 +2,9 @@
 
 import { useMemo, useState } from 'react'
 import type { CatalogueProduct } from '@/lib/commerce/catalogue'
+import { OwnerOnlyBadge } from '@/components/admin/safety/OwnerOnlyBadge'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 // SPRINT I Phase 2 — admin Products screen driven by our own products/prices
 // catalogue (source of truth). Edit amounts / active / Stripe price-id links,
@@ -64,6 +67,7 @@ export function ProductsAdminClient({
   const [syncing, setSyncing] = useState(false)
   const [flash, setFlash] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const { confirm, dialog } = useConfirmDialog()
 
   function reset(next: CatalogueProduct[]) {
     setProducts(next)
@@ -86,6 +90,7 @@ export function ProductsAdminClient({
   }, [products, priceDrafts, productActive])
 
   async function save() {
+    if (!(await confirm(CONFIRM.saveCatalogue()))) return
     setBusy(true)
     setError(null)
     setFlash(null)
@@ -134,6 +139,7 @@ export function ProductsAdminClient({
   }
 
   async function syncStripe() {
+    if (!(await confirm(CONFIRM.syncStripe()))) return
     setSyncing(true)
     setError(null)
     setFlash(null)
@@ -167,6 +173,7 @@ export function ProductsAdminClient({
 
   return (
     <div>
+      {dialog}
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
@@ -187,24 +194,22 @@ export function ProductsAdminClient({
             </span>
           )}
           <span
-            className="font-condensed font-bold uppercase text-[10px] tracking-wider px-2.5 py-1.5 rounded"
+            className="font-condensed font-bold uppercase text-[10px] tracking-wider px-2.5 py-1.5"
             style={{
-              background: stripeConfigured ? 'rgba(21,128,61,0.1)' : 'rgba(239,14,48,0.08)',
-              color: stripeConfigured ? GREEN : RED,
+              background: stripeConfigured ? 'rgba(10,191,163,0.14)' : 'rgba(239,14,48,0.08)',
+              color: stripeConfigured ? '#0ABFA3' : RED,
             }}
             title={stripeConfigured ? 'STRIPE_SECRET_KEY is set' : 'STRIPE_SECRET_KEY is not set'}
           >
-            {stripeConfigured ? '● Stripe connected' : '○ Stripe not configured'}
+            {stripeConfigured ? '■ Stripe connected' : '○ Stripe not configured'}
           </span>
+          <OwnerOnlyBadge />
           <button
             type="button"
             disabled={syncing || !stripeConfigured}
             onClick={() => void syncStripe()}
-            className="font-condensed font-bold uppercase text-[11px] tracking-wider px-3 py-2 rounded"
+            className="bg-navy px-3 py-2 font-condensed text-[11px] font-bold uppercase tracking-wider text-white"
             style={{
-              border: `1px solid ${NAVY}`,
-              color: NAVY,
-              background: 'transparent',
               minHeight: 40,
               cursor: syncing || !stripeConfigured ? 'not-allowed' : 'pointer',
               opacity: syncing || !stripeConfigured ? 0.5 : 1,
@@ -323,23 +328,24 @@ export function ProductsAdminClient({
       </div>
 
       {/* Save bar */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           disabled={busy || !dirty}
           onClick={() => void save()}
-          className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] rounded px-5 py-2.5"
+          className="bg-navy px-5 py-2.5 font-condensed text-[12px] font-bold uppercase tracking-[0.12em] text-white"
           style={{
-            background: NAVY,
-            color: '#fff',
             border: 'none',
             cursor: busy || !dirty ? 'not-allowed' : 'pointer',
             minHeight: 44,
-            opacity: busy || !dirty ? 0.6 : 1,
+            opacity: busy || !dirty ? 0.45 : 1,
           }}
         >
           {busy ? 'Saving…' : 'Save catalogue'}
         </button>
+        <p className="font-condensed text-[12px]" style={{ color: 'var(--admin-text-2)' }}>
+          {dirty ? 'Dirty. Save enabled. Sync still asks for confirm.' : 'Disabled until a price or active flag changes.'}
+        </p>
         {error && <span className="font-body text-[13px]" style={{ color: RED }}>{error}</span>}
       </div>
     </div>
