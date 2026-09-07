@@ -13,9 +13,17 @@ import React from 'react'
 import {
   THANKS_GEORGE_SIGNOFF,
   THANKS_TEMPLATE_IDS,
+  THANKS_WWW_ORIGIN,
   type ThanksCadenceStep,
 } from '@/lib/thanks/constants'
 import { buildThanksEmailCopy, type ThanksEmailVars } from '@/lib/thanks/copy'
+
+/** Magic Link bar: EVOLVED + red interpunct + PROS. Required on every thanks template. */
+export const EP_EMAIL_WORDMARK = (
+  <>
+    EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS
+  </>
+)
 
 export type CommunityThanksEmailProps = ThanksEmailVars & {
   step: ThanksCadenceStep
@@ -35,9 +43,7 @@ export function CommunityThanksEmail({
       <Preview>{copy.preview}</Preview>
       <Body style={bodyStyle}>
         <Section style={headerStyle}>
-          <Text style={logoStyle}>
-            EVOLVED<span style={{ color: '#ef0e30' }}>.</span>PROS
-          </Text>
+          <Text style={logoStyle}>{EP_EMAIL_WORDMARK}</Text>
         </Section>
 
         <Container style={containerStyle}>
@@ -66,11 +72,17 @@ export function CommunityThanksEmail({
         </Container>
 
         <Section style={footerStyle}>
+          <Text style={logoStyle}>{EP_EMAIL_WORDMARK}</Text>
           <Text style={footerTextStyle}>
             {`© ${new Date().getFullYear()} Evolved Pros · evolvedpros.com`}
           </Text>
           <Text style={footerTextStyle}>
             You are receiving this because George sent a personal thank-you Community invite.
+          </Text>
+          <Text style={{ ...footerTextStyle, marginTop: 8 }}>
+            <a href={THANKS_WWW_ORIGIN} style={{ color: '#68a2b9', textDecoration: 'none' }}>
+              {THANKS_WWW_ORIGIN}
+            </a>
           </Text>
         </Section>
       </Body>
