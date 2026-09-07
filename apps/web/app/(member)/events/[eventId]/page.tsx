@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation'
 import { EventDetailHero } from '@/components/events/EventDetailHero'
 import { hasTierAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
+import { loginHrefFor } from '@/lib/auth/gatedIntent'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { EVENT_PRIVILEGED_COLUMNS, privilegedEventUrls } from '@/lib/events/privilegedUrls'
 
@@ -16,7 +17,7 @@ interface Props {
 export default async function EventDetailPage({ params }: Props) {
   const supabase = createClient()
   const profile = await resolveCurrentUser(supabase)
-  if (!profile) redirect('/login')
+  if (!profile) redirect(loginHrefFor(`/events/${params.eventId}`))
 
   const [{ data: row }, regResult] = await Promise.all([
     adminClient

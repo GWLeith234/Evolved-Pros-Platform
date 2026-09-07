@@ -8,10 +8,11 @@ import {
   SIGNUP_ALREADY_MEMBER_ACTION,
   SIGNUP_ALREADY_MEMBER_PROMPT,
   gatedIntentFor,
+  loginReturnPath,
   loginSwitchHref,
 } from '@/lib/auth/gatedIntent'
 import { loginCopyFor, resolveLoginMode } from '@/lib/auth/loginCopy'
-import { PILLARS } from '@/lib/pillars'
+import { GatedIntentWall } from '@/components/auth/GatedIntentWall'
 import {
   EMAIL_ALREADY_REGISTERED,
   SIGNUP_CONFIRM_EMAIL,
@@ -50,16 +51,12 @@ export function LoginForm() {
   // never drift apart.
   const mode = resolveLoginMode(searchParams.get('mode'))
   const copy = loginCopyFor(mode)
-  const intent = gatedIntentFor(searchParams.get('redirect'))
-
-  // SPRINT I Phase 2 follow-up — return the member to where they came from.
-  // /pricing sends ?redirect=/pricing when a paid CTA gets a 401 for an
-  // anonymous visitor; the callback reads ?next=. The two names never agreed,
-  // so the value was silently dropped and everyone landed on /home. Map it
-  // here. Deliberately NOT re-sanitized: /auth/callback already rejects
-  // anything that isn't a relative path (route.ts:16), and a second guard here
-  // is how the two copies drift apart later.
-  const nextPath = searchParams.get('redirect') ?? '/home'
+  // Middleware writes ?redirect=. Shared /events links may use ?next=.
+  const nextPath = loginReturnPath(
+    searchParams.get('redirect'),
+    searchParams.get('next'),
+  )
+  const intent = gatedIntentFor(nextPath)
   const callbackUrl = `/auth/callback?next=${encodeURIComponent(nextPath)}`
   const [tab, setTab] = useState<'password' | 'magic'>('password')
   const [email, setEmail] = useState('')
@@ -193,32 +190,10 @@ export function LoginForm() {
                 className="text-navy-dark text-3xl font-bold mb-6"
                 style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
               >
-                {copy.heading}
+                {intent?.id === 'events' ? intent.headline : copy.heading}
               </h2>
 
-              {intent ? (
-                <div
-                  role="status"
-                  className="mb-6 rounded px-3 py-3"
-                  style={{
-                    backgroundColor: 'rgba(27,60,90,0.05)',
-                    border: '1px solid rgba(27,60,90,0.12)',
-                  }}
-                >
-                  <p
-                    className="text-[color:var(--navy)] text-sm font-bold"
-                    style={{ fontFamily: '"Playfair Display", Georgia, serif' }}
-                  >
-                    {intent.headline}
-                  </p>
-                  <p className="text-muted text-xs mt-1 leading-relaxed">{intent.body}</p>
-                  {intent.id === 'academy' ? (
-                    <p className="text-[10px] mt-2 leading-relaxed" style={{ color: 'rgba(27,60,90,0.55)' }}>
-                      {PILLARS.map(p => p.name).join(' · ')}
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
+              {intent ? <GatedIntentWall intent={intent} /> : null}
 
               {/* Tabs */}
               <div className="flex mb-6 border border-[rgba(27,60,90,0.12)] rounded overflow-hidden">
