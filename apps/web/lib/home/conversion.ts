@@ -106,12 +106,12 @@ export const HOME_LADDER: readonly HomeLadderCard[] = [
   },
 ]
 
-/** Writer #1. George locked 2026-09-07. Do not paraphrase. */
+// TODO(George): book body HOLD. Writer options pending. Chrome only.
+// Do not invent final body paragraphs.
 export const HOME_BOOK = {
   kicker: 'The book',
   title: 'EVOLVED',
   release: 'On Amazon Oct 15.',
-  body: 'I left the old game on purpose. EVOLVED is the transition I designed: Book, Podcast, Platform, Academy, Fit & Health, LIVE. Learn the system before the room fills.',
   cta: 'Pre-order now',
   href: BOOK_PREORDER_PATH,
 } as const
@@ -184,7 +184,6 @@ export function conversionCopyStrings(): string[] {
     HOME_BOOK.kicker,
     HOME_BOOK.title,
     HOME_BOOK.release,
-    HOME_BOOK.body,
     HOME_BOOK.cta,
     HOME_BOOK_COVER_ALT,
     ...HOME_NAV_LINKS.map(l => l.label),

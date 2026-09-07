@@ -112,9 +112,7 @@ describe('conversion homepage locks', () => {
     expect(HOME_BOOK.href).toBe('/evolved')
     expect(HOME_BOOK.release).toBe('On Amazon Oct 15.')
     expect(HOME_BOOK.cta).toBe('Pre-order now')
-    expect(HOME_BOOK.body).toBe(
-      'I left the old game on purpose. EVOLVED is the transition I designed: Book, Podcast, Platform, Academy, Fit & Health, LIVE. Learn the system before the room fills.',
-    )
+    expect(HOME_BOOK).not.toHaveProperty('body')
     expect(HOME_BOOK_COVER_SRC).toBe('/brand/book-cover.png')
     expect(HOME_BOOK_COVER_ALT).toBe('EVOLVED by George Leith')
     expect(HOME_BOOK_COVER_MD5).toBe('5b2cc6bea409220017f93e055f51f779')
@@ -236,9 +234,11 @@ describe('conversion homepage layout contracts', () => {
     expect(conversionHomeSrc).toMatch(/objectPosition: HERO_IMAGE_OBJECT_POSITION/)
   })
 
-  it('renders the locked Writer #1 book body and keeps Official site off `/`', () => {
-    expect(conversionHomeSrc).toMatch(/HOME_BOOK\.body/)
-    expect(conversionHomeSrc).not.toMatch(/TODO\(George\): body sizzle/)
+  it('holds book body copy and keeps Official site off `/`', () => {
+    expect(conversionHomeSrc).toMatch(/TODO\(George\): body HOLD/)
+    expect(conversionHomeSrc).not.toMatch(/HOME_BOOK\.body/)
+    expect(conversionHomeSrc).not.toMatch(/I left the old game on purpose/)
+    expect(conversionHomeSrc).not.toMatch(/Learn the system before the room fills/)
     expect(conversionHomeSrc).not.toMatch(/MUST_CITE_HOME_OFFICIAL_URL/)
     expect(conversionHomeSrc).toMatch(/homeWhatEvolvedProsCopy/)
   })

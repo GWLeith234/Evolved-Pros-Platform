@@ -2,14 +2,14 @@
 
 Conversion `/` only. ASK-ALWAYS. No merge. No ads on `/`. No keynote card.
 
-## 1) Book card chrome + Writer #1 body
+## 1) Book card chrome (body HOLD)
 
 - Label: The book
 - Title: EVOLVED
 - Cover: `/brand/book-cover.png`
 - Release: `On Amazon Oct 15.`
 - CTA: `Pre-order now` → `/evolved`
-- Body (George lock, Writer #1): `I left the old game on purpose. EVOLVED is the transition I designed: Book, Podcast, Platform, Academy, Fit & Health, LIVE. Learn the system before the room fills.`
+- Body: HOLD. Writer options pending. Chrome only. Do not invent paragraphs.
 
 Files: `apps/web/lib/home/conversion.ts`, `apps/web/components/home/ConversionHome.tsx`, `apps/web/lib/home/conversion.test.ts`
 

@@ -315,10 +315,8 @@ export function ConversionHome({
                   {HOME_BOOK.kicker}
                 </p>
                 <h2 className="mt-1 font-bebas text-5xl tracking-wide text-navy">{HOME_BOOK.title}</h2>
+                {/* TODO(George): body HOLD. Writer options pending. Chrome only. */}
                 <p className="mt-1 font-body text-sm text-navy/65">{HOME_BOOK.release}</p>
-                <p className="mt-3 max-w-md font-body text-sm leading-relaxed text-navy/70">
-                  {HOME_BOOK.body}
-                </p>
               </div>
             </div>
             <GhostCta href={HOME_BOOK.href} label={HOME_BOOK.cta} />
