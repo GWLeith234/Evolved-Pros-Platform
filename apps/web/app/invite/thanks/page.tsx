@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { adminClient } from '@/lib/supabase/admin'
-import { PublicChromeHeader } from '@/components/layout/PublicChromeHeader'
+import { EpWordmark } from '@/components/brand/EpWordmark'
 import { ThanksClaim } from './ThanksClaim'
 
 export const metadata: Metadata = {
@@ -45,7 +45,14 @@ export default async function ThanksInvitePage({
       style={{ backgroundColor: '#0A0F18', minHeight: '100vh' }}
       className="flex flex-col"
     >
-      <PublicChromeHeader />
+      <header
+        className="flex items-center px-6 py-4"
+        style={{ borderBottom: '1px solid rgba(245,240,232,0.06)', backgroundColor: '#0d1c27' }}
+      >
+        <Link href="/" aria-label="Evolved Pros home" style={{ textDecoration: 'none' }}>
+          <EpWordmark tone="light" />
+        </Link>
+      </header>
 
       <div className="flex-1 flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-lg text-center">
@@ -102,6 +109,13 @@ export default async function ThanksInvitePage({
           )}
         </div>
       </div>
+
+      <footer
+        className="flex justify-center px-6 py-6"
+        style={{ borderTop: '1px solid rgba(245,240,232,0.06)', backgroundColor: '#0d1c27' }}
+      >
+        <EpWordmark tone="light" />
+      </footer>
     </div>
   )
 }

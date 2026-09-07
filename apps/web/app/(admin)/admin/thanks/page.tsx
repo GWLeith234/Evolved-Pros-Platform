@@ -1,5 +1,6 @@
 import { headers } from 'next/headers'
 import { adminClient } from '@/lib/supabase/admin'
+import { EpWordmark } from '@/components/brand/EpWordmark'
 import { computeThanksCounts } from '@/lib/thanks/counts'
 import { THANKS_PROMO_CODE, THANKS_WWW_ORIGIN } from '@/lib/thanks/constants'
 import { ThanksClient, type ThanksInvite, type ThanksNudge, type ThanksPromo } from './ThanksClient'
@@ -38,6 +39,7 @@ export default async function AdminThanksPage() {
   return (
     <div className="px-4 sm:px-8 py-6">
       <div className="mb-6">
+        <EpWordmark tone="dark" style={{ marginBottom: 12 }} />
         <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)]">
           Thank-you Community
         </h1>

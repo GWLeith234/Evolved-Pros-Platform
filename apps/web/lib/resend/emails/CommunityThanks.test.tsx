@@ -41,10 +41,8 @@ describe('CommunityThanksEmail', () => {
     const magic = src('lib/resend/emails/MagicLink.tsx')
     const thanks = src('lib/resend/emails/CommunityThanks.tsx')
     expect(magic).toContain(WORDMARK)
-    expect(thanks).toContain(WORDMARK)
-    expect(thanks.split(WORDMARK).length - 1).toBeGreaterThanOrEqual(1)
-    expect(thanks).toContain('{EP_EMAIL_WORDMARK}')
-    expect(thanks.split('{EP_EMAIL_WORDMARK}').length - 1).toBeGreaterThanOrEqual(2)
+    expect(thanks).toContain('<EpWordmarkMark')
+    expect(thanks.split('<EpWordmarkMark').length - 1).toBeGreaterThanOrEqual(2)
     expect(thanks).not.toContain("'>.</span>PROS")
     expect(thanks).not.toMatch(/EVOLVED<span[^>]*>\.<\/span>PROS/)
 
