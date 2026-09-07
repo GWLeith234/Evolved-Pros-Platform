@@ -46,4 +46,16 @@ describe('ASK-ALWAYS send lock', () => {
     expect(sender).not.toContain('onboarding@resend.dev')
     expect(sender).not.toContain('evolvex360.com')
   })
+
+  it('prefers send-ready-v12 HTML with claim_url and first_name substitution', () => {
+    const sender = src('lib/resend/emails/community-thanks.ts')
+    expect(sender).toContain('renderThanksV12Html')
+    expect(sender).toContain('loadThanksV12CidAttachments')
+    expect(sender).toContain('html')
+    const v12 = src('lib/thanks/v12Html.ts')
+    expect(v12).toContain("{{George}}")
+    expect(v12).toContain('cid:logo')
+    expect(v12).toContain('cid:george-headshot')
+    expect(v12).toContain('claim_url')
+  })
 })
