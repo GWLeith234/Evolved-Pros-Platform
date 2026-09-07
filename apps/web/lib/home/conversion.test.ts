@@ -6,10 +6,15 @@ import { describe, expect, it } from 'vitest'
 import { BOOK_PREORDER_PATH } from '@/lib/book/preorder'
 import { TIERS } from '@/lib/pricing'
 import {
+  MUST_CITE_HOME_DEFINITION,
+  MUST_CITE_HOME_OFFICIAL_URL,
+} from '@/lib/seo/mustCite'
+import {
   EM_DASH,
   HERO_IMAGE_ALT,
   HERO_IMAGE_HEIGHT,
   HERO_IMAGE_MD5,
+  HERO_IMAGE_OBJECT_POSITION,
   HERO_IMAGE_SRC,
   HERO_IMAGE_WIDTH,
   HOME_ARIA,
@@ -25,6 +30,10 @@ import {
   HOME_ACADEMY_TOOLTIP,
   HOME_LADDER,
   HOME_LADDER_LINE,
+  HOME_MEDIA_HREF,
+  HOME_MEDIA_LINK,
+  HOME_MEDIA_STORY_COUNT,
+  HOME_MEDIA_TITLE,
   HOME_NAV_LINKS,
   HOME_PRIMARY_CTA,
   HOME_SECONDARY_CTA,
@@ -36,6 +45,7 @@ import {
   hasEmDash,
   homeEpisodeKicker,
   homeEpisodeMeta,
+  homeWhatEvolvedProsCopy,
 } from './conversion'
 
 describe('conversion homepage locks', () => {
@@ -60,6 +70,7 @@ describe('conversion homepage locks', () => {
     expect(HERO_IMAGE_ALT).toBe('The Evolved Architecture')
     expect(HERO_IMAGE_SRC).toBe('/brand/hero-evolved-architecture.png')
     expect(HERO_IMAGE_MD5).toBe('f85975f745840817929c6b474dabbfc8')
+    expect(HERO_IMAGE_OBJECT_POSITION).toBe('center 20%')
     expect(HERO_IMAGE_WIDTH / HERO_IMAGE_HEIGHT).toBe(1.5)
   })
 
@@ -99,7 +110,9 @@ describe('conversion homepage locks', () => {
     expect(blob).not.toContain('keynote')
     expect(HOME_BOOK.href).toBe(BOOK_PREORDER_PATH)
     expect(HOME_BOOK.href).toBe('/evolved')
-    expect(HOME_BOOK.release).toBe('Out 15 Oct.')
+    expect(HOME_BOOK.release).toBe('On Amazon Oct 15.')
+    expect(HOME_BOOK.cta).toBe('Pre-order now')
+    expect(HOME_BOOK).not.toHaveProperty('body')
     expect(HOME_BOOK_COVER_SRC).toBe('/brand/book-cover.png')
     expect(HOME_BOOK_COVER_ALT).toBe('EVOLVED by George Leith')
     expect(HOME_BOOK_COVER_MD5).toBe('5b2cc6bea409220017f93e055f51f779')
@@ -108,6 +121,21 @@ describe('conversion homepage locks', () => {
     expect(HOME_BOOK_COVER_SRC).not.toBe('/ads/book-cover.png')
     expect(HOME_BOOK.href).not.toContain('amazon')
     expect(HOME_BOOK.href).not.toContain('B0')
+  })
+
+  it('strips only the Official site line from What Evolved Pros is', () => {
+    expect(MUST_CITE_HOME_DEFINITION).toContain(MUST_CITE_HOME_OFFICIAL_URL)
+    expect(homeWhatEvolvedProsCopy()).toContain('not a podcast alone')
+    expect(homeWhatEvolvedProsCopy()).toContain('Everything but the curriculum is designed to be open.')
+    expect(homeWhatEvolvedProsCopy()).not.toContain('Official site:')
+    expect(homeWhatEvolvedProsCopy()).not.toContain(MUST_CITE_HOME_OFFICIAL_URL)
+  })
+
+  it('pins Evolved Media to the three newest desk stories', () => {
+    expect(HOME_MEDIA_TITLE).toBe('Evolved Media')
+    expect(HOME_MEDIA_LINK).toBe('All stories')
+    expect(HOME_MEDIA_HREF).toBe('/media')
+    expect(HOME_MEDIA_STORY_COUNT).toBe(3)
   })
 
   it('has zero U+2014 on title, meta, copy, and aria', () => {
@@ -198,6 +226,29 @@ describe('conversion homepage layout contracts', () => {
         /IabAdvertisementSlot|IabImageAd|HomeSponsorAd|AdSlot|interleaveAds|platform_ads/,
       )
     }
+  })
+
+  it('crops the GOLD Architecture still toward pillars and named elements', () => {
+    expect(conversionHomeSrc).toMatch(/HERO_IMAGE_OBJECT_POSITION/)
+    expect(conversionHomeSrc).toMatch(/object-\[center_20%\]/)
+    expect(conversionHomeSrc).toMatch(/objectPosition: HERO_IMAGE_OBJECT_POSITION/)
+  })
+
+  it('does not invent book body sizzle while chrome is locked', () => {
+    expect(conversionHomeSrc).toMatch(/TODO\(George\): body sizzle/)
+    expect(conversionHomeSrc).not.toMatch(/The transition I designed/)
+    expect(conversionHomeSrc).not.toMatch(/Learn the system before the room fills/)
+    expect(conversionHomeSrc).not.toMatch(/MUST_CITE_HOME_OFFICIAL_URL/)
+    expect(conversionHomeSrc).toMatch(/homeWhatEvolvedProsCopy/)
+  })
+
+  it('shows Evolved Media titles from the desk and face-crops guest stills', () => {
+    expect(conversionHomeSrc).toMatch(/HOME_MEDIA_TITLE/)
+    expect(conversionHomeSrc).toMatch(/HOME_MEDIA_HREF/)
+    expect(conversionHomeSrc).toMatch(/homeGuestStillObjectPosition/)
+    expect(conversionPageSrc).toMatch(/getPublishedMediaStoriesForHub/)
+    expect(conversionPageSrc).toMatch(/HOME_MEDIA_STORY_COUNT/)
+    expect(conversionPageSrc).toMatch(/mediaStoryHref/)
   })
 })
 
