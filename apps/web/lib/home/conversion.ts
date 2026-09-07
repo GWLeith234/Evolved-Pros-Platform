@@ -100,7 +100,7 @@ export const HOME_LADDER: readonly HomeLadderCard[] = [
 export const HOME_BOOK = {
   kicker: 'The book',
   title: 'EVOLVED',
-  release: 'Out 15 Sep.',
+  release: 'Out 15 Oct.',
   cta: 'Pre-order',
   href: BOOK_PREORDER_PATH,
 } as const

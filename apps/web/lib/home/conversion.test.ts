@@ -99,7 +99,7 @@ describe('conversion homepage locks', () => {
     expect(blob).not.toContain('keynote')
     expect(HOME_BOOK.href).toBe(BOOK_PREORDER_PATH)
     expect(HOME_BOOK.href).toBe('/evolved')
-    expect(HOME_BOOK.release).toBe('Out 15 Sep.')
+    expect(HOME_BOOK.release).toBe('Out 15 Oct.')
     expect(HOME_BOOK_COVER_SRC).toBe('/brand/book-cover.png')
     expect(HOME_BOOK_COVER_ALT).toBe('EVOLVED by George Leith')
     expect(HOME_BOOK_COVER_MD5).toBe('5b2cc6bea409220017f93e055f51f779')
