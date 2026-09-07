@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { THANKS_V12_HTML_FILES } from './v12Html'
+import { THANKS_V12_HTML_FILES, THANKS_V14_HOSTED_LOGO } from './v12Html'
 import {
   applyThanksV12Vars,
   escapeThanksHtml,
@@ -26,7 +26,7 @@ const FIXTURE = `<!doctype html>
 </body>
 </html>`
 
-describe('send-ready-v13 HTML wiring', () => {
+describe('send-ready-v14 HTML wiring', () => {
   it('maps all 12 steps onto eNN-dDD filenames', () => {
     expect(THANKS_V12_HTML_FILES[0]).toBe('e01-d00.html')
     expect(THANKS_V12_HTML_FILES[1]).toBe('e02-d03.html')
@@ -61,16 +61,25 @@ describe('send-ready-v13 HTML wiring', () => {
     expect(() => applyThanksV12Vars('<img src="cid:logo">', { first_name: 'Ada', claim_url: CLAIM })).toThrow(/cid:logo/)
   })
 
-  it('lands E01 v13 with text wordmark, {{first_name}}, and claim_url tokens', () => {
+  it('lands E01 v14 with hosted logo, {{first_name}}, circular 2-col sig, and claim_url tokens', () => {
     const raw = loadThanksV12Html(0)
     expect(raw).toBeTruthy()
     expect(raw).toContain("You've been in my corner")
     expect(raw).toContain('Hey {{first_name}},')
     expect(raw).not.toContain('{{George}}')
     expect(raw).not.toContain('{{{{first_name}}}}')
-    expect(raw).toContain(WORDMARK)
+    expect(raw).toContain(THANKS_V14_HOSTED_LOGO)
+    expect(raw).toContain('width="180"')
+    expect(raw).toContain('height="36"')
+    expect(raw).not.toContain(WORDMARK)
     expect(raw).not.toContain('cid:logo')
     expect(raw).toContain('cid:george-headshot')
+    expect(raw).toContain('width="48"')
+    expect(raw).toContain('height="48"')
+    expect(raw).toContain('border-radius:50%')
+    expect(raw).toMatch(
+      /<td[^>]*>[\s\S]*cid:george-headshot[\s\S]*<\/td>\s*<td[^>]*>[\s\S]*George/,
+    )
     expect(raw).toContain('href="{{claim_url}}"')
     expect(raw).toContain('https://www.evolvedpros.com/media/identity/why-i-created-evolved-pros')
     expect(raw).toContain('https://www.evolvedpros.com/podcast/evolved-pros-pilot-episode')
@@ -85,7 +94,8 @@ describe('send-ready-v13 HTML wiring', () => {
     expect(html).toContain('https://www.evolvedpros.com/podcast/evolved-pros-pilot-episode')
     expect(html).not.toContain(`${CLAIM}/media`)
     expect(html).not.toContain(`${CLAIM}/podcast`)
-    expect(html).toContain(WORDMARK)
+    expect(html).toContain(THANKS_V14_HOSTED_LOGO)
+    expect(html).not.toContain(WORDMARK)
     expect(html).toContain('cid:george-headshot')
     expect(html).toContain('>George<')
   })
@@ -126,7 +136,7 @@ describe('send-ready-v13 HTML wiring', () => {
     expect(html).not.toContain(`${CLAIM}/podcast`)
   })
 
-  it('keeps every landed file Gmail-safe: tables, inline styles, text wordmark, no cid:logo', () => {
+  it('keeps every landed file Gmail-safe: tables, inline styles, header mark, no cid:logo', () => {
     const landed = landedThanksV12Steps()
     expect(landed).toEqual(expect.arrayContaining([0, 1, 2]))
     for (const step of landed) {

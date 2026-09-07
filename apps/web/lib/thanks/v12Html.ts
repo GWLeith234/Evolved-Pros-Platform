@@ -4,12 +4,13 @@ import { THANKS_CADENCE_STEPS, THANKS_WWW_ORIGIN, type ThanksCadenceStep } from 
 import type { ThanksEmailVars } from './copy'
 
 /**
- * send-ready-v13 Creative SoT: Gmail-safe HTML only.
+ * send-ready-v14 Creative SoT: Gmail-safe HTML only.
  * TABLES + INLINE STYLES. No CSS classes (v11 class CSS failed in Gmail).
- * Header is the Magic Link text wordmark. NEVER cid:logo / image wordmark.
+ * E01 header is the hosted PNG (180×36). NEVER cid:logo. NEVER a text wordmark on E01.
  * Greeting is exactly {{first_name}}. NEVER {{George}} or {{{{first_name}}}}.
- * cid:george-headshot is OK for the headshot only.
+ * cid:george-headshot is the only CID (circular 48px beside George on E01).
  * claim_url is only the CTA + footer copy-link. Never prefix /media or /podcast.
+ * Residual E02/E03 may still carry the v13 text wordmark; do not expand that.
  */
 export const THANKS_V12_DIR_REL = 'lib/resend/emails/community-thanks/v12'
 export const THANKS_V12_ASSETS_REL = `${THANKS_V12_DIR_REL}/assets`
@@ -32,6 +33,8 @@ export const THANKS_V12_HTML_FILES = {
 const CID_LOGO = 'cid:logo'
 const CID_HEADSHOT = 'cid:george-headshot'
 const TEXT_WORDMARK = 'EVOLVED<span style="color:#ef0e30;">·</span>PROS'
+export const THANKS_V14_HOSTED_LOGO =
+  'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_horizontal_dark.png'
 const RESOURCE_HREF = /href="(https:\/\/www\.evolvedpros\.com\/(?:media|podcast)\/[^"]+)"/g
 const BARE_HOMEPAGE_HREF = /href=["']https:\/\/www\.evolvedpros\.com\/["']/g
 const BARE_HOMEPAGE_TEXT = />https:\/\/www\.evolvedpros\.com\/</g
@@ -108,7 +111,7 @@ function resourceHrefs(html: string): string[] {
 }
 
 /**
- * Wire v13 HTML to this invite:
+ * Wire v14 HTML to this invite:
  * - {{first_name}} → first_name (never {{{{first_name}}}})
  * - {{claim_url}} → claim_url on CTA + copy-link only
  * - leftover bare homepage href/text → claim_url
@@ -117,10 +120,10 @@ function resourceHrefs(html: string): string[] {
  */
 export function applyThanksV12Vars(html: string, vars: Pick<ThanksEmailVars, 'first_name' | 'claim_url'>): string {
   if (html.includes(CID_LOGO)) {
-    throw new Error('v13 forbids cid:logo; use the text wordmark')
+    throw new Error('v14 forbids cid:logo; use the hosted header PNG')
   }
   if (html.includes('{{{{first_name}}}}') || html.includes('{{George}}')) {
-    throw new Error('v13 greeting must be exactly {{first_name}}')
+    throw new Error('v14 greeting must be exactly {{first_name}}')
   }
 
   const first = escapeThanksHtml(vars.first_name)
@@ -133,17 +136,17 @@ export function applyThanksV12Vars(html: string, vars: Pick<ThanksEmailVars, 'fi
   out = out.replace(BARE_HOMEPAGE_TEXT, `>${claim}<`)
 
   if (html.includes(CID_HEADSHOT) && !out.includes(CID_HEADSHOT)) {
-    throw new Error('v13 substitution dropped cid:george-headshot')
+    throw new Error('v14 substitution dropped cid:george-headshot')
   }
   if (out.includes(`${THANKS_WWW_ORIGIN}/"`) || /href=["']https:\/\/www\.evolvedpros\.com\/["']/.test(out)) {
-    throw new Error('v13 HTML still has a bare www.evolvedpros.com/ CTA')
+    throw new Error('v14 HTML still has a bare www.evolvedpros.com/ CTA')
   }
   if (out.includes('/invite/thanks') && /\/invite\/thanks[^"']*\/(media|podcast)\//.test(out)) {
-    throw new Error('v13 substitution prefixed a story/podcast URL with claim_url')
+    throw new Error('v14 substitution prefixed a story/podcast URL with claim_url')
   }
   for (const href of kept) {
     if (!out.includes(`href="${href}"`)) {
-      throw new Error(`v13 substitution rewrote resource URL ${href}`)
+      throw new Error(`v14 substitution rewrote resource URL ${href}`)
     }
   }
   return out
@@ -162,14 +165,16 @@ export function landedThanksV12Steps(): ThanksCadenceStep[] {
   return THANKS_CADENCE_STEPS.filter(step => loadThanksV12Html(step))
 }
 
-/** Gmail-safe v13 SoT. */
+/** Gmail-safe v14 SoT. E01 uses hosted PNG; residual E02/E03 may still use text wordmark. */
 export function thanksV12GmailSafeViolations(html: string): string[] {
   const hits: string[] = []
   if (/\sclass\s*=/i.test(html)) hits.push('css_class')
   if (/<style[\s>]/i.test(html)) hits.push('style_block')
   if (!/<table[\s>]/i.test(html)) hits.push('missing_table')
   if (!/\sstyle\s*=/i.test(html)) hits.push('missing_inline_style')
-  if (!html.includes(TEXT_WORDMARK)) hits.push('missing_text_wordmark')
+  if (!html.includes(THANKS_V14_HOSTED_LOGO) && !html.includes(TEXT_WORDMARK)) {
+    hits.push('missing_header_mark')
+  }
   if (html.includes(CID_LOGO)) hits.push('cid_logo_forbidden')
   if (!html.includes(CID_HEADSHOT)) hits.push('missing_cid_headshot')
   if (!html.includes('{{first_name}}')) hits.push('missing_first_name_token')

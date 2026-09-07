@@ -47,16 +47,19 @@ describe('ASK-ALWAYS send lock', () => {
     expect(sender).not.toContain('evolvex360.com')
   })
 
-  it('prefers send-ready-v12 HTML with claim_url and first_name substitution', () => {
+  it('prefers send-ready-v14 HTML with claim_url and first_name substitution', () => {
     const sender = src('lib/resend/emails/community-thanks.ts')
     expect(sender).toContain('renderThanksV12Html')
     expect(sender).toContain('loadThanksV12CidAttachments')
     expect(sender).toContain('html')
+    expect(sender).toContain('hosted PNG')
     const v12 = src('lib/thanks/v12Html.ts')
     expect(v12).toContain('{{first_name}}')
     expect(v12).toContain('cid:george-headshot')
     expect(v12).toContain('claim_url')
     expect(v12).toContain('cid:logo')
     expect(v12).toContain('forbids cid:logo')
+    expect(v12).toContain('logo_horizontal_dark.png')
+    expect(v12).not.toContain('use the text wordmark')
   })
 })
