@@ -107,15 +107,14 @@ export const HOME_BOOK = {
 
 /**
  * FINAL front cover for the conversion `/` book card.
- * Public /brand path (same bar as the Architecture hero). Not the
- * /ads/book-cover.png house-ad reconstruction. Do not put this under
- * /academy or /events.
+ * Public /brand path (same bar as the Architecture hero). Gold V3 Kindle
+ * bytes (Drive ferry). Do not put this under /academy or /events.
  */
 export const HOME_BOOK_COVER_SRC = '/brand/book-cover.png' as const
-export const HOME_BOOK_COVER_MD5 = '4217c015014403ae50cc5dc92ac36ceb' as const
+export const HOME_BOOK_COVER_MD5 = '5b2cc6bea409220017f93e055f51f779' as const
 export const HOME_BOOK_COVER_ALT = 'EVOLVED by George Leith' as const
-export const HOME_BOOK_COVER_WIDTH = 1800
-export const HOME_BOOK_COVER_HEIGHT = 2700
+export const HOME_BOOK_COVER_WIDTH = 3334
+export const HOME_BOOK_COVER_HEIGHT = 5334
 
 export const HOME_EPISODES_TITLE = 'Latest episodes'
 export const HOME_EPISODES_LINK = 'All episodes'

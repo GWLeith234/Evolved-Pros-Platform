@@ -2,8 +2,8 @@
  * Public EVOLVED book preorder landing page.
  *
  * House IAB book ads dest here. Charcoal/gold only — this page must not use
- * Evolved Pros navy or red. Cover art is the existing repo reconstruction
- * at /ads/book-cover.png; do not invent a new cover or an Amazon/ASIN link.
+ * Evolved Pros navy or red. Cover art is /ads/book-cover.png (Gold V3 Kindle);
+ * do not invent a new cover or an Amazon/ASIN link.
  *
  * Lives outside app/(public) so it does not inherit the navy/red PublicFooter
  * (Join free). Not in the middleware matcher, so anonymous visitors render
@@ -32,7 +32,7 @@ export const metadata: Metadata = publicPageMetadata(BOOK_PREORDER_PATH, {
   title: 'EVOLVED — George Leith',
   description: 'Get the book. Leave your name for the EVOLVED preorder list. No charge, no membership.',
   openGraph: {
-    images: [{ url: BOOK_COVER_SRC, width: 1200, height: 1920, alt: 'EVOLVED by George Leith' }],
+    images: [{ url: BOOK_COVER_SRC, width: 3334, height: 5334, alt: 'EVOLVED by George Leith' }],
   },
   twitter: {
     card: 'summary_large_image',
