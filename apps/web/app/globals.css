@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Committed Bebas Neue Regular — same cut Podcast uses via next/font + Google.
+   Local src keeps Media / Fit lockups on the ship-pack file if the CDN is down. */
+@font-face {
+  font-family: 'Bebas Neue';
+  src: url('/fonts/static/BebasNeue-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --navy:         #1b3c5a;
   --navy-dark:    #112535;
@@ -2335,27 +2345,31 @@ a.ep-text-link:focus-visible {
   color: var(--brand-navy);
 }
 
-/* Media lockup: centered EVOLVED PROS [megaphone] MEDIA. Theme-aware chrome
-   (same tokens / 16-24-32-40 rhythm as TopNav + footer). Desk body stays
+/* Media + Fit lockups: Bebas Neue + Podcast-family discs. Theme-aware chrome
+   (same tokens / 16-24-32-40 rhythm as TopNav + footer). Media desk body stays
    paper so #108 navy-on-cream cards remain readable. */
-.ep-media-masthead {
+.ep-media-masthead,
+.ep-fit-masthead {
   background: var(--bg-nav);
   border-bottom: 1px solid var(--border-color);
   max-width: 100%;
   overflow-x: clip;
 }
-.ep-media-masthead-inner {
+.ep-media-masthead-inner,
+.ep-fit-masthead-inner {
   max-width: 1280px;
   margin: 0 auto;
   padding: var(--space-4) var(--space-4) 0;
 }
 @media (min-width: 640px) {
-  .ep-media-masthead-inner {
+  .ep-media-masthead-inner,
+  .ep-fit-masthead-inner {
     padding-left: var(--space-6);
     padding-right: var(--space-6);
   }
 }
-.ep-media-masthead-utility {
+.ep-media-masthead-utility,
+.ep-fit-masthead-utility {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2363,7 +2377,9 @@ a.ep-text-link:focus-visible {
   margin-bottom: var(--space-4);
 }
 .ep-media-masthead-back,
-.ep-media-masthead-join {
+.ep-media-masthead-join,
+.ep-fit-masthead-back,
+.ep-fit-masthead-join {
   font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
   font-size: var(--type-eyebrow-size);
   font-weight: 600;
@@ -2375,65 +2391,93 @@ a.ep-text-link:focus-visible {
   display: inline-flex;
   align-items: center;
 }
-.ep-media-masthead-join {
+.ep-media-masthead-join,
+.ep-fit-masthead-join {
   display: none;
 }
 @media (min-width: 640px) {
-  .ep-media-masthead-join {
+  .ep-media-masthead-join,
+  .ep-fit-masthead-join {
     display: inline-flex;
   }
 }
 .ep-media-masthead-back:hover,
 .ep-media-masthead-back:focus-visible,
 .ep-media-masthead-join:hover,
-.ep-media-masthead-join:focus-visible {
+.ep-media-masthead-join:focus-visible,
+.ep-fit-masthead-back:hover,
+.ep-fit-masthead-back:focus-visible,
+.ep-fit-masthead-join:hover,
+.ep-fit-masthead-join:focus-visible {
   color: var(--text-primary);
 }
-.ep-media-masthead-wordmark {
+.ep-media-masthead-wordmark,
+.ep-fit-masthead-wordmark {
   margin: 0;
   display: flex;
   justify-content: center;
   font-size: inherit;
   font-weight: inherit;
 }
-.ep-media-masthead-wordmark a {
+.ep-media-masthead-wordmark a,
+.ep-fit-masthead-wordmark a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: clamp(var(--space-2), 2vw, var(--space-4));
   min-width: 0;
   max-width: 100%;
-  font-size: clamp(1.5rem, 5.5vw, 2.75rem);
+  font-size: clamp(1.75rem, 6vw, 3.25rem);
   text-decoration: none;
   color: inherit;
   white-space: nowrap;
 }
 .ep-media-masthead-brand,
-.ep-media-masthead-section {
+.ep-media-masthead-section,
+.ep-fit-masthead-brand,
+.ep-fit-masthead-section,
+.ep-fit-masthead-pros {
   font-family: var(--font-bebas), "Bebas Neue", sans-serif;
   font-size: 1em;
   font-weight: 400;
-  letter-spacing: var(--type-nav-track);
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--text-primary);
   line-height: 1;
 }
-.ep-media-masthead-mark {
+.ep-media-masthead-disc,
+.ep-fit-masthead-disc {
+  display: block;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+.ep-fit-masthead-disc {
+  width: 1.18em;
+  height: 1.18em;
+}
+.ep-fit-masthead-pros {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 0.86em;
-  height: 0.86em;
-  flex-shrink: 0;
-  background: var(--brand-red);
-  color: var(--white);
-  border-radius: 50%;
+  gap: 0.04em;
+  letter-spacing: 0.04em;
 }
-.ep-media-masthead-mark svg {
-  display: block;
-  width: 0.58em;
-  height: 0.58em;
-  fill: currentColor;
+.ep-fit-masthead-inner {
+  padding-bottom: var(--space-6);
+}
+.ep-fit-shell {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-4) var(--space-10);
+}
+.ep-fit-dek {
+  margin: 0;
+  font-family: var(--font-barlow), Barlow, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  text-align: center;
 }
 .ep-media-masthead-rail {
   display: flex;
