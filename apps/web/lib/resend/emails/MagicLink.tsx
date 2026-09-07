@@ -10,12 +10,13 @@ import {
   Hr,
 } from '@react-email/components'
 import React from 'react'
+import { AUTH_ORIGIN, resolveAuthOrigin } from '@/lib/auth/authOrigin'
 
 interface MagicLinkEmailProps {
   magicLink: string
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://platform.evolvedpros.com'
+const APP_URL = resolveAuthOrigin() || AUTH_ORIGIN
 
 export function MagicLinkEmail({ magicLink }: MagicLinkEmailProps) {
   return (

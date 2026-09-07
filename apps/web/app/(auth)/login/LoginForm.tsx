@@ -21,6 +21,8 @@ import {
   passwordAuthMethodFor,
 } from '@/lib/auth/passwordAuth'
 import { requestJoinProvision, shouldProvisionJoin } from '@/lib/crm/join'
+import { authCallbackUrl } from '@/lib/auth/authOrigin'
+import { MAGIC_LINK_SEND_FAILED, loginErrorFromQuery } from '@/lib/auth/magicLink'
 import { LogoMark } from '@/components/ui/LogoMark'
 
 function Spinner() {
@@ -58,13 +60,19 @@ export function LoginForm() {
   )
   const intent = gatedIntentFor(nextPath)
   const callbackUrl = `/auth/callback?next=${encodeURIComponent(nextPath)}`
+  // Always www on the brand hosts. window.location.origin is how a
+  // platform (or apex) session wrote a PKCE cookie the callback on www
+  // could not read.
+  const emailRedirectTo = authCallbackUrl(nextPath)
   const [tab, setTab] = useState<'password' | 'magic'>('password')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [sent, setSent] = useState<'magic' | 'confirm' | false>(false)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(() =>
+    loginErrorFromQuery(searchParams.get('error')),
+  )
   const [forgotSent, setForgotSent] = useState(false)
   const [forgotError, setForgotError] = useState<string | null>(null)
 
@@ -83,7 +91,7 @@ export function LoginForm() {
         email: emailNorm,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}${callbackUrl}`,
+          emailRedirectTo,
         },
       })
       setLoading(false)
@@ -128,18 +136,28 @@ export function LoginForm() {
     if (!email.trim()) return
     setLoading(true)
     setError(null)
-    const supabase = createClient()
-    const { error: err } = await supabase.auth.signInWithOtp({
-      email: email.trim().toLowerCase(),
-      options: {
-        emailRedirectTo: `${window.location.origin}${callbackUrl}`,
-        shouldCreateUser: true,
-      },
-    })
-    setLoading(false)
-    if (err) { setError(humanizeAuthError(err.message, mode)); return }
+    const emailNorm = email.trim().toLowerCase()
+    let sendFailed = false
+    try {
+      const res = await fetch('/api/auth/magic-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailNorm, next: nextPath }),
+      })
+      setLoading(false)
+      if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as { error?: string } | null
+        setError(data?.error ? humanizeAuthError(data.error, mode) : MAGIC_LINK_SEND_FAILED)
+        sendFailed = true
+      }
+    } catch {
+      setLoading(false)
+      setError(MAGIC_LINK_SEND_FAILED)
+      sendFailed = true
+    }
+    if (sendFailed) return
     if (shouldProvisionJoin({ mode, kind: 'magic-otp' })) {
-      void requestJoinProvision(email.trim().toLowerCase())
+      void requestJoinProvision(emailNorm)
     }
     setSent('magic')
   }
@@ -154,7 +172,7 @@ export function LoginForm() {
     const supabase = createClient()
     const { error: err } = await supabase.auth.resetPasswordForEmail(
       email.trim().toLowerCase(),
-      { redirectTo: `${window.location.origin}${callbackUrl}` }
+      { redirectTo: emailRedirectTo }
     )
     if (err) {
       setForgotError(err.message)

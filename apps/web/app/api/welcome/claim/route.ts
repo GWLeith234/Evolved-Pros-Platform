@@ -9,8 +9,7 @@ import {
   upsertWelcomeProspect,
 } from '@/lib/crm/conversion'
 import { supabaseIntakeDb } from '@/lib/crm/intakeDb'
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://platform.evolvedpros.com'
+import { authCallbackUrl, magicLinkCallbackUrl } from '@/lib/auth/authOrigin'
 
 // POST /api/welcome/claim — redeem a Friends of George invite by token.
 // Body: { token: string }.
@@ -71,7 +70,7 @@ export async function POST(request: Request) {
   const { data: linkData, error: linkErr } = await adminClient.auth.admin.generateLink({
     type: 'magiclink',
     email,
-    options: { redirectTo: `${APP_URL}/auth/callback?next=%2Fhome` },
+    options: { redirectTo: authCallbackUrl('/home') },
   })
   // We use the hashed_token (NOT the action_link): the action_link's verify step
   // redirects with the session in the URL *fragment* (implicit flow), which the
@@ -129,7 +128,7 @@ export async function POST(request: Request) {
   // 7. Hand back a callback URL carrying the token_hash. The client navigates
   //    to it (top-level GET); /auth/callback verifyOtp's it into a session and
   //    lands the invitee on /home, now logged in with their new Pro access.
-  const loginUrl = `${APP_URL}/auth/callback?token_hash=${encodeURIComponent(hashedToken)}&type=magiclink&next=${encodeURIComponent('/home')}`
+  const loginUrl = magicLinkCallbackUrl(hashedToken, 'magiclink', '/home')
   return NextResponse.json({
     ok: true,
     tier: result.grantsTier,

@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
+import { resolveAuthOrigin } from '@/lib/auth/authOrigin'
 import { safeRedirectPath } from '@/lib/auth/safeRedirect'
 
 export const dynamic = 'force-dynamic'
@@ -19,10 +20,12 @@ export async function GET(request: Request) {
   const next       = safeRedirectPath(searchParams.get('next'))
 
   // Use forwarded headers to get the real public URL (request.url is the
-  // internal Railway address, e.g. http://localhost:8080/...)
+  // internal Railway address, e.g. http://localhost:8080/...). Brand hosts
+  // (platform / apex / www) collapse to www so Set-Cookie and Location never
+  // disagree with GATE-1b's 308.
   const host    = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'web-production-db912.up.railway.app'
   const proto   = request.headers.get('x-forwarded-proto') || 'https'
-  const baseUrl = `${proto}://${host}`
+  const baseUrl = resolveAuthOrigin(`${proto}://${host}`)
 
   const cookieStore = cookies()
   const allCookies = cookieStore.getAll()
@@ -55,16 +58,18 @@ export async function GET(request: Request) {
     return res
   }
 
-  // PKCE OAuth code exchange
+  // PKCE OAuth code exchange (password confirm / leftover SMTP links)
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) return buildRedirect(resolveNext(baseUrl, next))
+    console.error('[auth/callback] exchangeCodeForSession failed', error.message)
   }
 
-  // Magic-link / OTP token hash
+  // Magic-link / OTP token hash — no PKCE cookie required
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({ token_hash, type })
     if (!error) return buildRedirect(resolveNext(baseUrl, next))
+    console.error('[auth/callback] verifyOtp failed', error.message)
   }
 
   // Post-password-login: browser already stored session cookies via document.cookie.

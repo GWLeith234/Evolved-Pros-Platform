@@ -69,7 +69,10 @@ const nextConfig = {
       // /podcast (so crawlers get the server-rendered page rather than an auth
       // redirect), and a host redirect has to fire on every path. redirects()
       // resolves in the Next router before middleware and needs no matcher
-      // change, so it cannot touch the auth path.
+      // change. /auth/callback is included so a stale platform magic-link
+      // lands on www before cookies are written. Do NOT exclude it — completing
+      // auth on platform would Set-Cookie for platform, then 308 /home to www
+      // and drop the session.
       //
       // *** THE /api EXCLUSION IS LOAD-BEARING — DO NOT "SIMPLIFY" IT AWAY ***
       // Stripe (LIVE MODE), Mux and the external cron scheduler are
@@ -82,6 +85,16 @@ const nextConfig = {
       {
         source: '/:path((?!api/).*)',
         has: [{ type: 'host', value: 'platform.evolvedpros.com' }],
+        destination: 'https://www.evolvedpros.com/:path',
+        permanent: true,
+      },
+      // Same trap as platform: the public *.up.railway.app host still 200s
+      // the login form and would mint a PKCE verifier cookie on the wrong
+      // host. Keep /api on the Railway host so healthchecks and any leftover
+      // webhook URLs keep working (same load-bearing exclusion as GATE-1b).
+      {
+        source: '/:path((?!api/).*)',
+        has: [{ type: 'host', value: 'web-production-db912.up.railway.app' }],
         destination: 'https://www.evolvedpros.com/:path',
         permanent: true,
       },
