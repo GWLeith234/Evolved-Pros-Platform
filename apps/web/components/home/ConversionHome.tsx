@@ -8,6 +8,7 @@ import { footerCopyright } from '@/lib/layout/publicFooter'
 import {
   HERO_IMAGE_ALT,
   HERO_IMAGE_HEIGHT,
+  HERO_IMAGE_OBJECT_POSITION,
   HERO_IMAGE_SRC,
   HERO_IMAGE_WIDTH,
   HOME_ACADEMY_TOOLTIP,
@@ -25,6 +26,9 @@ import {
   HOME_LADDER,
   HOME_LADDER_LINE,
   HOME_LADDER_SUB,
+  HOME_MEDIA_HREF,
+  HOME_MEDIA_LINK,
+  HOME_MEDIA_TITLE,
   HOME_NAV_LINKS,
   HOME_OPEN_PLATFORM,
   HOME_OPEN_PLATFORM_HREF,
@@ -36,12 +40,10 @@ import {
   SEE_PRICING_HREF,
   homeEpisodeKicker,
   homeEpisodeMeta,
+  homeWhatEvolvedProsCopy,
   type HomeLadderCard,
 } from '@/lib/home/conversion'
-import {
-  MUST_CITE_HOME_DEFINITION,
-  MUST_CITE_HOME_OFFICIAL_URL,
-} from '@/lib/seo/mustCite'
+import { homeGuestStillObjectPosition } from '@/lib/podcast/stillUrl'
 
 export interface ConversionEpisode {
   slug: string
@@ -53,12 +55,20 @@ export interface ConversionEpisode {
   stillUrl: string | null
 }
 
+export interface ConversionStory {
+  slug: string
+  title: string
+  href: string
+}
+
 export function ConversionHome({
   signedIn,
   episodes,
+  stories = [],
 }: {
   signedIn: boolean
   episodes: ConversionEpisode[]
+  stories?: ConversionStory[]
 }) {
   return (
     <div className="ep-conversion-home min-h-dvh bg-paper text-navy">
@@ -150,7 +160,8 @@ export function ConversionHome({
               width={HERO_IMAGE_WIDTH}
               height={HERO_IMAGE_HEIGHT}
               priority
-              className="h-full w-full object-cover"
+              className="h-full w-full origin-top object-cover object-[center_20%] max-md:scale-[1.32]"
+              style={{ objectPosition: HERO_IMAGE_OBJECT_POSITION }}
               sizes="100vw"
             />
           </div>
@@ -185,15 +196,39 @@ export function ConversionHome({
             What Evolved Pros is
           </h2>
           <p className="mt-4 max-w-3xl font-body text-sm leading-relaxed text-navy/70">
-            {MUST_CITE_HOME_DEFINITION.split(MUST_CITE_HOME_OFFICIAL_URL)[0]}
-            <a
-              href={MUST_CITE_HOME_OFFICIAL_URL}
-              className="text-navy underline decoration-navy/30 underline-offset-2"
-            >
-              {MUST_CITE_HOME_OFFICIAL_URL}
-            </a>
+            {homeWhatEvolvedProsCopy()}
           </p>
         </section>
+
+        {stories.length > 0 ? (
+          <section className="mx-auto max-w-6xl border-t border-navy/15 px-5 py-12">
+            <div className="mb-5 flex items-baseline justify-between gap-4">
+              <h2 className="font-condensed text-[13px] font-bold uppercase tracking-[0.2em] text-navy">
+                {HOME_MEDIA_TITLE}
+              </h2>
+              <Link
+                href={HOME_MEDIA_HREF}
+                className="font-condensed text-xs font-bold uppercase tracking-[0.14em] text-teal no-underline"
+              >
+                {HOME_MEDIA_LINK}
+              </Link>
+            </div>
+            <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0">
+              {stories.map(story => (
+                <li key={story.slug} className="min-w-0">
+                  <Link
+                    href={story.href}
+                    className="block border border-navy/15 bg-paper-card px-4 py-4 no-underline"
+                  >
+                    <h3 className="font-display text-xl font-bold leading-snug text-navy">
+                      {story.title}
+                    </h3>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         {episodes.length > 0 ? (
           <section className="mx-auto max-w-6xl border-t border-navy/15 px-5 py-12">
@@ -222,6 +257,7 @@ export function ConversionHome({
                             src={episode.stillUrl}
                             alt=""
                             className="h-full w-full object-cover"
+                            style={{ objectPosition: homeGuestStillObjectPosition(episode) }}
                           />
                         ) : null}
                       </div>
@@ -280,6 +316,9 @@ export function ConversionHome({
                 </p>
                 <h2 className="mt-1 font-bebas text-5xl tracking-wide text-navy">{HOME_BOOK.title}</h2>
                 <p className="mt-1 font-body text-sm text-navy/65">{HOME_BOOK.release}</p>
+                <p className="mt-3 max-w-md font-body text-sm leading-relaxed text-navy/70">
+                  {HOME_BOOK.body}
+                </p>
               </div>
             </div>
             <GhostCta href={HOME_BOOK.href} label={HOME_BOOK.cta} />

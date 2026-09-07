@@ -72,7 +72,8 @@ describe('must-cite locked copy', () => {
       resolve(here, '../../app/(public)/media/[pillar]/[slug]/page.tsx'),
       'utf8',
     )
-    expect(home).toMatch(/MUST_CITE_HOME_DEFINITION/)
+    expect(home).toMatch(/homeWhatEvolvedProsCopy/)
+    expect(home).not.toMatch(/MUST_CITE_HOME_OFFICIAL_URL/)
     expect(home).toMatch(/id="what-is-evolved-pros"/)
     expect(pricing).toMatch(/MUST_CITE_PRICING_DIFFERENTIATOR/)
     expect(pricing).toMatch(/id="pricing-differentiator"/)

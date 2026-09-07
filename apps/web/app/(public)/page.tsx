@@ -1,13 +1,20 @@
 import type { Metadata } from 'next'
-import { ConversionHome, type ConversionEpisode } from '@/components/home/ConversionHome'
+import {
+  ConversionHome,
+  type ConversionEpisode,
+  type ConversionStory,
+} from '@/components/home/ConversionHome'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { takeHomeContentRow } from '@/lib/home/contentRow'
 import {
   HERO_IMAGE_ALT,
   HERO_IMAGE_SRC,
+  HOME_MEDIA_STORY_COUNT,
   HOME_SUB,
   HOME_TITLE,
 } from '@/lib/home/conversion'
+import { getPublishedMediaStoriesForHub } from '@/lib/media/public'
+import { mediaStoryHref } from '@/lib/media/paths'
 import { getPublishedEpisodes } from '@/lib/podcast/public'
 import { allowedEpisodeStillUrl } from '@/lib/podcast/stillUrl'
 import { publicPageMetadata } from '@/lib/seo/canonical'
@@ -55,8 +62,25 @@ async function loadEpisodes(): Promise<ConversionEpisode[]> {
   }
 }
 
+async function loadStories(): Promise<ConversionStory[]> {
+  try {
+    const stories = await getPublishedMediaStoriesForHub()
+    return takeHomeContentRow(stories, HOME_MEDIA_STORY_COUNT).map(s => ({
+      slug: s.slug,
+      title: s.title,
+      href: mediaStoryHref(s.pillar, s.slug),
+    }))
+  } catch {
+    return []
+  }
+}
+
 export default async function LandingPage() {
-  const [profile, episodes] = await Promise.all([resolveCurrentUser(), loadEpisodes()])
+  const [profile, episodes, stories] = await Promise.all([
+    resolveCurrentUser(),
+    loadEpisodes(),
+    loadStories(),
+  ])
   return (
     <>
       <script
@@ -64,7 +88,7 @@ export default async function LandingPage() {
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd()) }}
       />
-      <ConversionHome signedIn={profile !== null} episodes={episodes} />
+      <ConversionHome signedIn={profile !== null} episodes={episodes} stories={stories} />
     </>
   )
 }

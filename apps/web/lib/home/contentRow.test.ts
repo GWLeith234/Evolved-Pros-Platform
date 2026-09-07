@@ -6,6 +6,7 @@ describe('takeHomeContentRow', () => {
   it('caps a home editorial row at two cards', () => {
     expect(HOME_CONTENT_CARDS).toBe(2)
     expect(takeHomeContentRow(['a', 'b', 'c'])).toEqual(['a', 'b'])
+    expect(takeHomeContentRow(['a', 'b', 'c', 'd'], 3)).toEqual(['a', 'b', 'c'])
     expect(takeHomeContentRow(['a'])).toEqual(['a'])
     expect(takeHomeContentRow([])).toEqual([])
   })

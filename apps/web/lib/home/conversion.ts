@@ -12,7 +12,10 @@
 import { BOOK_PREORDER_PATH } from '@/lib/book/preorder'
 import { TIERS } from '@/lib/pricing'
 import { formatDate, formatDuration } from '@/lib/format'
-import { MUST_CITE_HOME_DEFINITION } from '@/lib/seo/mustCite'
+import {
+  MUST_CITE_HOME_DEFINITION,
+  MUST_CITE_HOME_OFFICIAL_URL,
+} from '@/lib/seo/mustCite'
 
 export const JOIN_FREE_HREF = '/login?mode=signup' as const
 export const SEE_PRICING_HREF = '/pricing' as const
@@ -25,6 +28,12 @@ export const HERO_IMAGE_MD5 = 'f85975f745840817929c6b474dabbfc8' as const
 export const HERO_IMAGE_ALT = 'The Evolved Architecture' as const
 export const HERO_IMAGE_WIDTH = 1536
 export const HERO_IMAGE_HEIGHT = 1024
+/**
+ * Pin pillars and the named Architecture band (cauldrons + title) above the
+ * paper gradient. The GOLD still is 3:2; the fold is taller and the gradient
+ * covers the lower two thirds, so a default center crop buries the system.
+ */
+export const HERO_IMAGE_OBJECT_POSITION = 'center 20%' as const
 export const HOME_ARIA = 'Evolved Pros home' as const
 
 export const HOME_TITLE =
@@ -97,11 +106,13 @@ export const HOME_LADDER: readonly HomeLadderCard[] = [
   },
 ]
 
+/** Writer #1. George lock. Do not paraphrase. */
 export const HOME_BOOK = {
   kicker: 'The book',
   title: 'EVOLVED',
-  release: 'Out 15 Oct.',
-  cta: 'Pre-order',
+  release: 'On Amazon Oct 15.',
+  body: 'I left the old game on purpose. EVOLVED is the transition I designed: Book, Podcast, Platform, Academy, Fit & Health, LIVE. Learn the system before the room fills.',
+  cta: 'Pre-order now',
   href: BOOK_PREORDER_PATH,
 } as const
 
@@ -118,6 +129,11 @@ export const HOME_BOOK_COVER_HEIGHT = 5334
 
 export const HOME_EPISODES_TITLE = 'Latest episodes'
 export const HOME_EPISODES_LINK = 'All episodes'
+export const HOME_MEDIA_TITLE = 'Evolved Media'
+export const HOME_MEDIA_LINK = 'All stories'
+export const HOME_MEDIA_HREF = '/media' as const
+/** Newest Media desk stories on conversion `/`. Not the ad-capped episode row. */
+export const HOME_MEDIA_STORY_COUNT = 3
 export const HOME_SIGN_IN = 'Sign in'
 export const HOME_JOIN_FREE = 'Join free'
 export const HOME_JOIN_FREE_TOOLTIP = 'Free community access. No card required.'
@@ -128,6 +144,20 @@ export const HOME_OPEN_PLATFORM_HREF = '/home'
 
 /** U+2014. Homepage title, meta, copy, and aria must never contain it. */
 export const EM_DASH = '\u2014'
+
+const OFFICIAL_SITE_LINE = `Official site: ${MUST_CITE_HOME_OFFICIAL_URL}`
+
+/**
+ * What Evolved Pros is on conversion `/`.
+ * Keep the must-cite paragraph. Drop only the trailing Official site line.
+ */
+export function homeWhatEvolvedProsCopy(): string {
+  const src = MUST_CITE_HOME_DEFINITION
+  if (src.endsWith(OFFICIAL_SITE_LINE)) {
+    return src.slice(0, -OFFICIAL_SITE_LINE.length).trimEnd()
+  }
+  return src.replace(/\s*Official site:\s*https:\/\/www\.evolvedpros\.com\/?\s*$/u, '').trimEnd()
+}
 
 export function conversionCopyStrings(): string[] {
   return [
@@ -142,15 +172,19 @@ export function conversionCopyStrings(): string[] {
     HERO_IMAGE_ALT,
     HOME_EPISODES_TITLE,
     HOME_EPISODES_LINK,
+    HOME_MEDIA_TITLE,
+    HOME_MEDIA_LINK,
     HOME_SIGN_IN,
     HOME_JOIN_FREE,
     HOME_JOIN_FREE_TOOLTIP,
     HOME_ACADEMY_TOOLTIP,
     HOME_OPEN_PLATFORM,
     MUST_CITE_HOME_DEFINITION,
+    homeWhatEvolvedProsCopy(),
     HOME_BOOK.kicker,
     HOME_BOOK.title,
     HOME_BOOK.release,
+    HOME_BOOK.body,
     HOME_BOOK.cta,
     HOME_BOOK_COVER_ALT,
     ...HOME_NAV_LINKS.map(l => l.label),
