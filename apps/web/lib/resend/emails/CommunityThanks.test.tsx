@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { CommunityThanksEmail } from './CommunityThanks'
-import { THANKS_CADENCE_STEPS } from '@/lib/thanks/constants'
+import { THANKS_CADENCE_STEPS, THANKS_TEMPLATE_IDS } from '@/lib/thanks/constants'
 
 const CLAIM = 'https://www.evolvedpros.com/invite/thanks?token=abc'
 const root = resolve(__dirname, '../../..')
@@ -29,7 +29,9 @@ describe('CommunityThanksEmail', () => {
       expect(html).toContain(CLAIM)
       expect(html).toContain('Ada')
       expect(html).toContain('George')
-      expect(html).toContain(`ep-community-thanks-${step}`)
+      expect(html).toContain(THANKS_TEMPLATE_IDS[step])
+      expect(html).toContain('George Leith')
+      expect(html).toContain('george-stage-blue-jacket.jpg')
       expect(html).not.toContain('\u2014')
       expect(html.toLowerCase()).not.toMatch(/vip|professional|upgrade|stripe|mastermind/)
       expect(html).not.toContain('/welcome')

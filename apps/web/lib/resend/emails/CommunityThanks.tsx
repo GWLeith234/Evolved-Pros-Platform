@@ -4,6 +4,7 @@ import {
   Container,
   Head,
   Html,
+  Img,
   Preview,
   Section,
   Text,
@@ -15,9 +16,13 @@ import {
   THANKS_GEORGE_SIGNOFF,
   THANKS_TEMPLATE_IDS,
   THANKS_WWW_ORIGIN,
+  thanksCadenceLabel,
   type ThanksCadenceStep,
 } from '@/lib/thanks/constants'
 import { buildThanksEmailCopy, type ThanksEmailVars } from '@/lib/thanks/copy'
+
+/** Scaffold headshot. Full send-ready-v12 HTML may replace this asset. */
+const GEORGE_HEADSHOT_URL = `${THANKS_WWW_ORIGIN}/live/george-stage-blue-jacket.jpg`
 
 export type CommunityThanksEmailProps = ThanksEmailVars & {
   step: ThanksCadenceStep
@@ -43,7 +48,16 @@ export function CommunityThanksEmail({
         </Section>
 
         <Container style={containerStyle}>
-          <Text style={labelStyle}>Community thank you</Text>
+          <Text style={labelStyle}>Community thank you · {thanksCadenceLabel(step)}</Text>
+          <Section style={headshotWrapStyle}>
+            <Img
+              src={GEORGE_HEADSHOT_URL}
+              alt="George Leith"
+              width={96}
+              height={96}
+              style={headshotStyle}
+            />
+          </Section>
           <Text style={headingStyle}>You are invited.</Text>
 
           {copy.paragraphs.map(p => (
@@ -111,6 +125,15 @@ const containerStyle: React.CSSProperties = {
   maxWidth: '560px',
   margin: '0 auto',
   padding: '40px',
+}
+const headshotWrapStyle: React.CSSProperties = {
+  textAlign: 'center',
+  margin: '0 0 20px',
+}
+const headshotStyle: React.CSSProperties = {
+  borderRadius: '48px',
+  objectFit: 'cover',
+  display: 'inline-block',
 }
 const labelStyle: React.CSSProperties = {
   fontFamily: '"Barlow Condensed", sans-serif',

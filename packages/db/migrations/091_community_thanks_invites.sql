@@ -1,6 +1,8 @@
 -- Migration 091: Thank-you free Community invite cadence (THANKS_COMMUNITY).
 -- NEW lane. Does not alter friend_invites, lookup_friend_invite, or
 -- FRIENDSOFGEORGE. FOG /welcome stays the Friends of George claim path.
+-- Cadence: 12 emails, cadence_step 0-11 (E01 D0 ... E12 D56).
+-- Stop on redeem OR after step 11. App expiry is 90 days from create.
 --
 -- Security model (house style, mirrors friend_invites): RLS enabled, NO
 -- member-facing policies. Admin manages through the service-role adminClient.
@@ -22,8 +24,8 @@ CREATE TABLE IF NOT EXISTS public.community_thanks_invites (
   token                UUID UNIQUE NOT NULL DEFAULT gen_random_uuid(),
   status               TEXT NOT NULL DEFAULT 'pending'
                          CHECK (status IN ('pending', 'sent', 'redeemed', 'stopped', 'expired')),
-  cadence_step         TEXT NOT NULL DEFAULT 'd0'
-                         CHECK (cadence_step IN ('d0', 'd7', 'd14', 'd28')),
+  cadence_step         SMALLINT NOT NULL DEFAULT 0
+                         CHECK (cadence_step BETWEEN 0 AND 11),
   expires_at           TIMESTAMPTZ NOT NULL,
   next_send_at         TIMESTAMPTZ,
   last_sent_at         TIMESTAMPTZ,
@@ -55,7 +57,7 @@ CREATE INDEX IF NOT EXISTS idx_community_thanks_invites_batch
 CREATE TABLE IF NOT EXISTS public.community_thanks_sends (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   invite_id     UUID NOT NULL REFERENCES public.community_thanks_invites(id) ON DELETE CASCADE,
-  cadence_step  TEXT NOT NULL CHECK (cadence_step IN ('d0', 'd7', 'd14', 'd28')),
+  cadence_step  SMALLINT NOT NULL CHECK (cadence_step BETWEEN 0 AND 11),
   resend_id     TEXT,
   status        TEXT NOT NULL CHECK (status IN ('sent', 'failed')),
   opened_at     TIMESTAMPTZ,
@@ -69,7 +71,7 @@ CREATE INDEX IF NOT EXISTS idx_community_thanks_sends_invite
 CREATE TABLE IF NOT EXISTS public.community_thanks_nudge_queue (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   invite_id    UUID NOT NULL REFERENCES public.community_thanks_invites(id) ON DELETE CASCADE,
-  cadence_step TEXT NOT NULL CHECK (cadence_step IN ('d0', 'd7', 'd14', 'd28')),
+  cadence_step SMALLINT NOT NULL CHECK (cadence_step BETWEEN 0 AND 11),
   due_at       TIMESTAMPTZ NOT NULL,
   status       TEXT NOT NULL DEFAULT 'pending_approval'
                  CHECK (status IN ('pending_approval', 'approved', 'sent', 'cancelled')),

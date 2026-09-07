@@ -15,58 +15,22 @@ describe('cadence math', () => {
     expect(thanksExpiresAt(created).toISOString()).toBe('2026-12-06T12:00:00.000Z')
   })
 
-  it('only advances D0 -> D7 -> D14 -> D28', () => {
-    expect(nextStepAfter('d0')).toBe('d7')
-    expect(nextStepAfter('d7')).toBe('d14')
-    expect(nextStepAfter('d14')).toBe('d28')
-    expect(nextStepAfter('d28')).toBeNull()
-    expect(nextSendAtAfter(created, 'd0')?.toISOString()).toBe('2026-09-14T12:00:00.000Z')
-    expect(nextSendAtAfter(created, 'd28')).toBeNull()
+  it('advances 0-11 on the 12-step day map and stops after E12', () => {
+    expect(nextStepAfter(0)).toBe(1)
+    expect(nextStepAfter(1)).toBe(2)
+    expect(nextStepAfter(10)).toBe(11)
+    expect(nextStepAfter(11)).toBeNull()
+    expect(nextSendAtAfter(created, 0)?.toISOString()).toBe('2026-09-10T12:00:00.000Z')
+    expect(nextSendAtAfter(created, 8)?.toISOString()).toBe('2026-10-12T12:00:00.000Z')
+    expect(nextSendAtAfter(created, 11)).toBeNull()
   })
 
-  it('stops on redeem, expiry, or after D28', () => {
-    expect(
-      shouldStopCadence({
-        redeemed: true,
-        lastSentStep: 'd0',
-        now: created,
-        expiresAt: thanksExpiresAt(created),
-      }),
-    ).toEqual({ stop: true, reason: 'redeemed' })
-    expect(
-      shouldStopCadence({
-        redeemed: false,
-        lastSentStep: 'd28',
-        now: created,
-        expiresAt: thanksExpiresAt(created),
-      }),
-    ).toEqual({ stop: true, reason: 'cadence_complete' })
-    expect(
-      shouldStopCadence({
-        redeemed: false,
-        lastSentStep: 'd14',
-        now: new Date('2026-12-07T12:00:00.000Z'),
-        expiresAt: thanksExpiresAt(created),
-      }),
-    ).toEqual({ stop: true, reason: 'expired' })
-  })
-
-  it('returns the next due step and nothing after D28', () => {
+  it('treats lastSentStep 0 as a real E01 send, not missing', () => {
     expect(
       dueCadenceStep({
         createdAt: created,
-        lastSentStep: 'd0',
-        now: new Date('2026-09-14T12:00:00.000Z'),
-        redeemed: false,
-        expiresAt: thanksExpiresAt(created),
-        status: 'sent',
-      }),
-    ).toBe('d7')
-    expect(
-      dueCadenceStep({
-        createdAt: created,
-        lastSentStep: 'd28',
-        now: new Date('2026-10-10T12:00:00.000Z'),
+        lastSentStep: 0,
+        now: new Date('2026-09-07T12:00:00.000Z'),
         redeemed: false,
         expiresAt: thanksExpiresAt(created),
         status: 'sent',
@@ -75,8 +39,68 @@ describe('cadence math', () => {
     expect(
       dueCadenceStep({
         createdAt: created,
-        lastSentStep: 'd7',
-        now: new Date('2026-09-14T12:00:00.000Z'),
+        lastSentStep: 0,
+        now: new Date('2026-09-10T12:00:00.000Z'),
+        redeemed: false,
+        expiresAt: thanksExpiresAt(created),
+        status: 'sent',
+      }),
+    ).toBe(1)
+  })
+
+  it('stops on redeem, expiry, or after E12', () => {
+    expect(
+      shouldStopCadence({
+        redeemed: true,
+        lastSentStep: 0,
+        now: created,
+        expiresAt: thanksExpiresAt(created),
+      }),
+    ).toEqual({ stop: true, reason: 'redeemed' })
+    expect(
+      shouldStopCadence({
+        redeemed: false,
+        lastSentStep: 11,
+        now: created,
+        expiresAt: thanksExpiresAt(created),
+      }),
+    ).toEqual({ stop: true, reason: 'cadence_complete' })
+    expect(
+      shouldStopCadence({
+        redeemed: false,
+        lastSentStep: 8,
+        now: new Date('2026-12-07T12:00:00.000Z'),
+        expiresAt: thanksExpiresAt(created),
+      }),
+    ).toEqual({ stop: true, reason: 'expired' })
+  })
+
+  it('returns the next due step and nothing after E12', () => {
+    expect(
+      dueCadenceStep({
+        createdAt: created,
+        lastSentStep: 0,
+        now: new Date('2026-09-10T12:00:00.000Z'),
+        redeemed: false,
+        expiresAt: thanksExpiresAt(created),
+        status: 'sent',
+      }),
+    ).toBe(1)
+    expect(
+      dueCadenceStep({
+        createdAt: created,
+        lastSentStep: 11,
+        now: new Date('2026-11-10T12:00:00.000Z'),
+        redeemed: false,
+        expiresAt: thanksExpiresAt(created),
+        status: 'sent',
+      }),
+    ).toBeNull()
+    expect(
+      dueCadenceStep({
+        createdAt: created,
+        lastSentStep: 1,
+        now: new Date('2026-09-10T12:00:00.000Z'),
         redeemed: true,
         expiresAt: thanksExpiresAt(created),
         status: 'redeemed',

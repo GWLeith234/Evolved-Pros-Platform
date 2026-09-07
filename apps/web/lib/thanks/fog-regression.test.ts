@@ -105,6 +105,8 @@ describe('thank-you lane stays off FOG rails', () => {
     expect(sql).toContain("CHECK (status IN ('pending', 'sent', 'redeemed', 'stopped', 'expired'))")
     expect(sql).toContain('lookup_thanks_invite')
     expect(sql).toContain('ENABLE ROW LEVEL SECURITY')
+    expect(sql).toContain('CHECK (cadence_step BETWEEN 0 AND 11)')
+    expect(sql).not.toContain("'d0'")
     expect(sql).not.toContain('CREATE POLICY')
     expect(sql).not.toContain('ALTER TABLE public.friend_invites')
     expect(sql).not.toMatch(/VALUES\s*\(\s*'FRIENDSOFGEORGE'/)

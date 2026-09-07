@@ -30,9 +30,20 @@ describe('ASK-ALWAYS send lock', () => {
     expect(cron).not.toContain('resend.emails.send')
   })
 
-  it('queue-without-send parks D0 as pending_approval', () => {
+  it('queue-without-send parks E01 as pending_approval', () => {
     const batch = src('app/api/admin/thanks/batch/route.ts')
     expect(batch).toContain("status: 'pending_approval'")
     expect(batch).toContain('sendD0')
+    expect(batch).toContain('THANKS_E01_STEP')
+    expect(batch).not.toContain("'d0'")
+    expect(batch).not.toContain("'d28'")
+  })
+
+  it('thanks sender refuses a missing or non-evolvedpros.com from address', () => {
+    const sender = src('lib/resend/emails/community-thanks.ts')
+    expect(sender).toContain('resolveThanksFromAddress')
+    expect(sender).toContain('RESEND_FROM_EMAIL')
+    expect(sender).not.toContain('onboarding@resend.dev')
+    expect(sender).not.toContain('evolvex360.com')
   })
 })

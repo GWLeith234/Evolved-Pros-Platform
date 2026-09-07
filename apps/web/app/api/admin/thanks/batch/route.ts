@@ -7,7 +7,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { parseThanksRecipients, previewThanksBatch } from '@/lib/thanks/batch'
 import { explicitYes, nextSendAtAfter, thanksExpiresAt } from '@/lib/thanks/cadence'
-import { THANKS_GEORGE_SIGNOFF, THANKS_PROMO_CODE } from '@/lib/thanks/constants'
+import { THANKS_E01_STEP, THANKS_GEORGE_SIGNOFF, THANKS_PROMO_CODE } from '@/lib/thanks/constants'
 import { fogOverrideAllowed } from '@/lib/thanks/eligibility'
 import { loadExistingThanksEmails, loadFogByEmail, loadMembersByEmail } from '@/lib/thanks/serverLookups'
 import { thanksClaimUrl } from '@/lib/thanks/urls'
@@ -16,7 +16,7 @@ import { thanksFirstName } from '@/lib/thanks/copy'
 
 // POST /api/admin/thanks/batch
 // Body: { raw, confirm: true|'YES', sendD0?: boolean, fogOverride?, fogOverrideReason? }
-// Creates invite rows (D0 only). Sends D0 only when confirm + sendD0 are set.
+// Creates invite rows (E01 / step 0 only). Sends E01 only when confirm + sendD0 are set.
 // Queue-without-send is confirm + sendD0 false.
 export async function POST(request: Request) {
   const guard = await requireAdminApi()
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
   const createdAt = new Date()
   const now = createdAt.toISOString()
   const expiresAt = thanksExpiresAt(createdAt).toISOString()
-  const nextSendAt = nextSendAtAfter(createdAt, 'd0')?.toISOString() ?? null
+  const nextSendAt = nextSendAtAfter(createdAt, THANKS_E01_STEP)?.toISOString() ?? null
 
   const created: Array<{
     id: string
@@ -116,7 +116,7 @@ export async function POST(request: Request) {
         invited_by: adminUser?.id ?? null,
         token,
         status: 'pending',
-        cadence_step: 'd0',
+        cadence_step: THANKS_E01_STEP,
         expires_at: expiresAt,
         next_send_at: nextSendAt,
         batch_id: batchId,
@@ -136,7 +136,7 @@ export async function POST(request: Request) {
     let delivered = false
     if (sendD0) {
       const claimUrl = thanksClaimUrl(inserted.token)
-      const send = await sendCommunityThanksEmail(row.email, 'd0', {
+      const send = await sendCommunityThanksEmail(row.email, THANKS_E01_STEP, {
         first_name: thanksFirstName(row.firstName),
         claim_url: claimUrl,
         george_signoff: THANKS_GEORGE_SIGNOFF,
@@ -148,7 +148,7 @@ export async function POST(request: Request) {
           status: 'sent',
           sent_at: now,
           last_sent_at: now,
-          cadence_step: 'd0',
+          cadence_step: THANKS_E01_STEP,
           delivered_count: delivered ? 1 : 0,
           last_resend_id: send.resendId ?? null,
           updated_at: now,
@@ -156,7 +156,7 @@ export async function POST(request: Request) {
         .eq('id', inserted.id)
       await (adminClient as any).from('community_thanks_sends').insert({
         invite_id: inserted.id,
-        cadence_step: 'd0',
+        cadence_step: THANKS_E01_STEP,
         resend_id: send.resendId ?? null,
         status: delivered ? 'sent' : 'failed',
       })
@@ -164,7 +164,7 @@ export async function POST(request: Request) {
       await (adminClient as any).from('community_thanks_nudge_queue').upsert(
         {
           invite_id: inserted.id,
-          cadence_step: 'd0',
+          cadence_step: THANKS_E01_STEP,
           due_at: now,
           status: 'pending_approval',
         },

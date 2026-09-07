@@ -44,7 +44,7 @@ export default async function AdminThanksPage() {
           Thank-you Community
         </h1>
         <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mt-0.5">
-          Free Community invites · D0 / D7 / D14 / D28 · explicit YES to send · never auto-fire
+          Free Community invites · 12 emails · D0 to D56 · explicit YES to send · never auto-fire
         </p>
       </div>
       <ThanksClient

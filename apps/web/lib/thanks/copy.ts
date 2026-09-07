@@ -37,6 +37,10 @@ export function thanksFirstName(raw: string | null | undefined): string {
   return trimmed.split(/\s+/)[0] ?? 'there'
 }
 
+export function stripPreviewSubjectPrefix(subject: string): string {
+  return subject.replace(/^\[PREVIEW[^\]]*\]\s*/i, '').trim()
+}
+
 export function buildThanksEmailCopy(
   step: ThanksCadenceStep,
   vars: Partial<ThanksEmailVars> & { claim_url: string },
@@ -50,35 +54,99 @@ export function buildThanksEmailCopy(
   }
 
   const bodies: Record<ThanksCadenceStep, { subject: string; preview: string; paragraphs: string[] }> = {
-    d0: {
-      subject: 'A thank you from George, and your Community invite',
-      preview: 'Your free Community seat is ready.',
+    0: {
+      subject: "You've been in my corner",
+      preview: 'A thank you, and your Community invite.',
       paragraphs: [
-        `${first}, thank you. I wanted you here, in Community, with no card and no catch.`,
+        `${first}, thank you. You have been in my corner, and I wanted you here in Community with no card and no catch.`,
         'Claim your free Community access when you are ready. This note is a thank you, not a pitch.',
       ],
     },
-    d7: {
-      subject: 'Still holding your Community spot',
-      preview: 'Your Community invite is still open.',
+    1: {
+      subject: 'Foundation: start with the basics',
+      preview: 'Start with the basics.',
       paragraphs: [
-        `${first}, your Community invite is still open. Tap the link when you are ready.`,
-        'No new offer. Same thank you. Same Community seat.',
+        `${first}, start with the basics. Foundation is the first of the six pillars.`,
+        'Same Community seat. Same thank you. Claim when you are ready.',
       ],
     },
-    d14: {
-      subject: 'Your Community invite is still open',
-      preview: 'Still holding your Community seat.',
+    2: {
+      subject: 'Identity: stand for something',
+      preview: 'Stand for something people can feel.',
       paragraphs: [
-        `${first}, just a note that your Community seat is waiting.`,
-        'No rush, and no pitch. The invite is still yours.',
+        `${first}, identity is standing for something people can feel.`,
+        'Your Community invite is still open.',
       ],
     },
-    d28: {
-      subject: 'Last note on your Community invite',
+    3: {
+      subject: 'Mental Toughness: ritual over mood',
+      preview: 'Ritual over mood.',
+      paragraphs: [
+        `${first}, mental toughness is ritual over mood.`,
+        'No new offer. Same Community seat.',
+      ],
+    },
+    4: {
+      subject: 'Strategy: decide where attention goes',
+      preview: 'Decide where attention goes.',
+      paragraphs: [
+        `${first}, strategy is deciding where attention goes.`,
+        'Your Community invite is still waiting.',
+      ],
+    },
+    5: {
+      subject: 'Accountability: pipeline is not a wish list',
+      preview: 'A pipeline is not a wish list.',
+      paragraphs: [
+        `${first}, a pipeline is not a wish list. Accountability keeps the list honest.`,
+        'Same thank you. Same Community seat.',
+      ],
+    },
+    6: {
+      subject: 'Execution: make the next call better',
+      preview: 'Make the next call better.',
+      paragraphs: [
+        `${first}, execution is making the next call better than the last one.`,
+        'Claim when you are ready. No rush.',
+      ],
+    },
+    7: {
+      subject: 'How the six pillars fit together',
+      preview: 'How the six pillars fit together.',
+      paragraphs: [
+        `${first}, the six pillars fit together as one way of working.`,
+        'Your Community seat is still yours.',
+      ],
+    },
+    8: {
+      subject: 'If you want to go deeper',
+      preview: 'If you want to go deeper.',
+      paragraphs: [
+        `${first}, if you want to go deeper, Community is the door.`,
+        'No new offer. The invite is still open.',
+      ],
+    },
+    9: {
+      subject: 'LIVE and the AI conversation',
+      preview: 'LIVE and the AI conversation.',
+      paragraphs: [
+        `${first}, LIVE is where the AI conversation gets real.`,
+        'Your Community invite is still open.',
+      ],
+    },
+    10: {
+      subject: 'EVOLVED on Amazon Oct 15',
+      preview: 'EVOLVED on Amazon October 15.',
+      paragraphs: [
+        `${first}, EVOLVED lands on Amazon October 15.`,
+        'This is still a thank you, not a pitch. Your Community seat stays open.',
+      ],
+    },
+    11: {
+      subject: 'Last note from me on this',
       preview: 'This is the last cadence note I will send.',
       paragraphs: [
-        `${first}, this is the last note I will send.`,
+        `${first}, this is the last note I will send on this invite.`,
         'Your Community invite stays good until the date on the claim page. I would love to see you inside.',
       ],
     },
@@ -87,7 +155,7 @@ export function buildThanksEmailCopy(
   const body = bodies[step]
   return {
     templateId: THANKS_TEMPLATE_IDS[step],
-    subject: body.subject,
+    subject: stripPreviewSubjectPrefix(body.subject),
     preview: body.preview,
     paragraphs: body.paragraphs,
     cta: 'Claim your Community access',

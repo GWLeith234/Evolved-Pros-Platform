@@ -5,16 +5,10 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { explicitYes, isTerminalCadence, nextSendAtAfter } from '@/lib/thanks/cadence'
-import { THANKS_CADENCE_STEPS, THANKS_GEORGE_SIGNOFF, type ThanksCadenceStep } from '@/lib/thanks/constants'
+import { THANKS_E01_STEP, THANKS_GEORGE_SIGNOFF, parseThanksCadenceStep, type ThanksCadenceStep } from '@/lib/thanks/constants'
 import { thanksFirstName } from '@/lib/thanks/copy'
 import { sendCommunityThanksEmail } from '@/lib/resend/emails/community-thanks'
 import { thanksClaimUrl } from '@/lib/thanks/urls'
-
-function asStep(value: unknown): ThanksCadenceStep | null {
-  return (THANKS_CADENCE_STEPS as readonly string[]).includes(String(value))
-    ? (value as ThanksCadenceStep)
-    : null
-}
 
 type Target = {
   inviteId: string
@@ -76,7 +70,7 @@ export async function POST(request: Request) {
         status: string
         delivered_count: number | null
       } | null
-      const step = asStep(row.cadence_step)
+      const step = parseThanksCadenceStep(row.cadence_step)
       if (!invite || !step) continue
       if (invite.status === 'redeemed' || invite.status === 'stopped' || invite.status === 'expired') continue
       if (row.status !== 'pending_approval' && row.status !== 'approved') continue
@@ -101,7 +95,7 @@ export async function POST(request: Request) {
       .in('id', inviteIds)
     for (const row of invites ?? []) {
       if (row.status === 'redeemed' || row.status === 'stopped' || row.status === 'expired') continue
-      const step: ThanksCadenceStep = row.status === 'pending' ? 'd0' : (asStep(row.cadence_step) ?? 'd0')
+      const step: ThanksCadenceStep = row.status === 'pending' ? THANKS_E01_STEP : (parseThanksCadenceStep(row.cadence_step) ?? THANKS_E01_STEP)
       targets.push({
         inviteId: row.id,
         email: row.email,

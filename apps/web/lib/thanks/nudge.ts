@@ -1,4 +1,4 @@
-import { THANKS_CADENCE_STEPS, type ThanksCadenceStep, type ThanksInviteStatus } from './constants'
+import { THANKS_CADENCE_STEPS, parseThanksCadenceStep, type ThanksCadenceStep, type ThanksInviteStatus } from './constants'
 import { dueCadenceStep, shouldStopCadence } from './cadence'
 
 export type NudgeInviteRow = {
@@ -41,7 +41,8 @@ export function planThanksNudgeSweep(
     const createdAt = new Date(invite.created_at)
     const expiresAt = new Date(invite.expires_at)
     const redeemed = Boolean(invite.redeemed_at) || invite.status === 'redeemed'
-    const lastSent = invite.status === 'pending' ? null : invite.cadence_step
+    const parsedStep = parseThanksCadenceStep(invite.cadence_step)
+    const lastSent = invite.status === 'pending' ? null : parsedStep
 
     const stop = shouldStopCadence({
       redeemed,

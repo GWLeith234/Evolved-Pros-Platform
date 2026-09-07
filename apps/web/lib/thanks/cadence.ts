@@ -2,6 +2,7 @@ import {
   THANKS_CADENCE_OFFSET_DAYS,
   THANKS_CADENCE_STEPS,
   THANKS_EXPIRY_DAYS,
+  THANKS_TERMINAL_STEP,
   type ThanksCadenceStep,
 } from './constants'
 
@@ -36,7 +37,7 @@ export function nextSendAtAfter(createdAt: Date, sentStep: ThanksCadenceStep): D
 }
 
 export function isTerminalCadence(step: ThanksCadenceStep): boolean {
-  return step === 'd28'
+  return step === THANKS_TERMINAL_STEP
 }
 
 export type CadenceStopReason = 'redeemed' | 'cadence_complete' | 'expired'
@@ -49,13 +50,15 @@ export function shouldStopCadence(input: {
 }): { stop: boolean; reason?: CadenceStopReason } {
   if (input.redeemed) return { stop: true, reason: 'redeemed' }
   if (input.expiresAt.getTime() <= input.now.getTime()) return { stop: true, reason: 'expired' }
-  if (input.lastSentStep === 'd28') return { stop: true, reason: 'cadence_complete' }
+  if (input.lastSentStep === THANKS_TERMINAL_STEP) return { stop: true, reason: 'cadence_complete' }
   return { stop: false }
 }
 
 /**
- * Which cadence step is due now, if any. Only D0/D7/D14/D28.
+ * Which cadence step is due now, if any (0-11 / E01-E12).
  * Does not send. Caller queues pending_approval.
+ *
+ * lastSentStep 0 is a real sent E01. Do not treat 0 as missing.
  */
 export function dueCadenceStep(input: {
   createdAt: Date
@@ -69,7 +72,7 @@ export function dueCadenceStep(input: {
     return null
   }
   if (input.expiresAt.getTime() <= input.now.getTime()) return null
-  const lastIdx = input.lastSentStep ? THANKS_CADENCE_STEPS.indexOf(input.lastSentStep) : -1
+  const lastIdx = input.lastSentStep == null ? -1 : THANKS_CADENCE_STEPS.indexOf(input.lastSentStep)
   for (const step of THANKS_CADENCE_STEPS) {
     const idx = THANKS_CADENCE_STEPS.indexOf(step)
     if (idx <= lastIdx) continue

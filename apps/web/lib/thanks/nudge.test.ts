@@ -4,57 +4,57 @@ import { planThanksNudgeSweep } from './nudge'
 const created = '2026-09-07T12:00:00.000Z'
 
 describe('planThanksNudgeSweep', () => {
-  it('queues due steps as pending_approval and never marks a send', () => {
+  it('queues due E02 as pending_approval and never marks a send', () => {
     const plan = planThanksNudgeSweep(
       [
         {
           id: 'inv-1',
           status: 'sent',
-          cadence_step: 'd0',
+          cadence_step: 0,
           created_at: created,
           expires_at: '2026-12-06T12:00:00.000Z',
-          next_send_at: '2026-09-14T12:00:00.000Z',
+          next_send_at: '2026-09-10T12:00:00.000Z',
           redeemed_at: null,
         },
       ],
       new Set(),
-      new Date('2026-09-14T13:00:00.000Z'),
+      new Date('2026-09-10T13:00:00.000Z'),
     )
     expect(plan.enqueue).toEqual([
       {
         invite_id: 'inv-1',
-        cadence_step: 'd7',
-        due_at: '2026-09-14T13:00:00.000Z',
+        cadence_step: 1,
+        due_at: '2026-09-10T13:00:00.000Z',
         status: 'pending_approval',
       },
     ])
     expect(plan.expireIds).toEqual([])
   })
 
-  it('stops after redeem and after D28, and expires at 90 days', () => {
+  it('stops after redeem and after E12, and expires at 90 days', () => {
     const redeemed = planThanksNudgeSweep(
       [
         {
           id: 'inv-r',
           status: 'redeemed',
-          cadence_step: 'd7',
+          cadence_step: 1,
           created_at: created,
           expires_at: '2026-12-06T12:00:00.000Z',
-          next_send_at: '2026-09-21T12:00:00.000Z',
+          next_send_at: '2026-09-13T12:00:00.000Z',
           redeemed_at: '2026-09-10T12:00:00.000Z',
         },
       ],
       new Set(),
-      new Date('2026-09-21T12:00:00.000Z'),
+      new Date('2026-09-13T12:00:00.000Z'),
     )
     expect(redeemed.enqueue).toEqual([])
 
-    const afterD28 = planThanksNudgeSweep(
+    const afterE12 = planThanksNudgeSweep(
       [
         {
-          id: 'inv-28',
+          id: 'inv-12',
           status: 'sent',
-          cadence_step: 'd28',
+          cadence_step: 11,
           created_at: created,
           expires_at: '2026-12-06T12:00:00.000Z',
           next_send_at: null,
@@ -62,19 +62,19 @@ describe('planThanksNudgeSweep', () => {
         },
       ],
       new Set(),
-      new Date('2026-10-20T12:00:00.000Z'),
+      new Date('2026-11-10T12:00:00.000Z'),
     )
-    expect(afterD28.enqueue).toEqual([])
+    expect(afterE12.enqueue).toEqual([])
 
     const expired = planThanksNudgeSweep(
       [
         {
           id: 'inv-x',
           status: 'sent',
-          cadence_step: 'd14',
+          cadence_step: 8,
           created_at: created,
           expires_at: '2026-12-06T12:00:00.000Z',
-          next_send_at: '2026-10-05T12:00:00.000Z',
+          next_send_at: '2026-10-12T12:00:00.000Z',
           redeemed_at: null,
         },
       ],
@@ -91,15 +91,15 @@ describe('planThanksNudgeSweep', () => {
         {
           id: 'inv-1',
           status: 'sent',
-          cadence_step: 'd0',
+          cadence_step: 0,
           created_at: created,
           expires_at: '2026-12-06T12:00:00.000Z',
-          next_send_at: '2026-09-14T12:00:00.000Z',
+          next_send_at: '2026-09-10T12:00:00.000Z',
           redeemed_at: null,
         },
       ],
-      new Set(['inv-1:d7']),
-      new Date('2026-09-14T13:00:00.000Z'),
+      new Set(['inv-1:1']),
+      new Date('2026-09-10T13:00:00.000Z'),
     )
     expect(plan.enqueue).toEqual([])
   })

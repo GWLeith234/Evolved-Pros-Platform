@@ -64,7 +64,7 @@ describe('standing mandate: EVOLVED·PROS wordmark on every thanks surface', () 
         />,
       )
       const marks = html.match(/EVOLVED[\s\S]*?·[\s\S]*?PROS/g) ?? []
-      expect(marks.length, `d${step} missing header+footer wordmark`).toBeGreaterThanOrEqual(2)
+      expect(marks.length, `e${step + 1} missing header+footer wordmark`).toBeGreaterThanOrEqual(2)
       expect(html).toContain('#ef0e30')
       expect(html).not.toMatch(PERIOD_SPAN)
     }

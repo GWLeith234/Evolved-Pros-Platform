@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { CONFIRM } from '@/components/admin/safety/confirmCopy'
 import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 import type { ThanksAdminCounts } from '@/lib/thanks/counts'
-import type { ThanksCadenceStep, ThanksInviteStatus } from '@/lib/thanks/constants'
+import { THANKS_E01_STEP, thanksCadenceLabel, parseThanksCadenceStep, type ThanksCadenceStep, type ThanksInviteStatus } from '@/lib/thanks/constants'
 import { thanksClaimUrl } from '@/lib/thanks/urls'
 import type { PreviewDisposition } from '@/lib/thanks/eligibility'
 
@@ -219,7 +219,7 @@ export function ThanksClient({
             first_name: null,
             status: r.status,
             token: r.token,
-            cadence_step: 'd0',
+            cadence_step: THANKS_E01_STEP,
             expires_at: '',
             next_send_at: null,
             last_sent_at: sendD0 ? new Date().toISOString() : null,
@@ -356,7 +356,7 @@ export function ThanksClient({
       <div className="rounded-lg p-5 bg-[var(--admin-card)]" style={{ border: '1px solid var(--admin-border)' }}>
         <p className="font-display font-bold text-[16px]" style={{ color: NAVY }}>Batch invite</p>
         <p className="font-condensed text-[12px] mt-0.5 mb-3" style={{ color: SLATE }}>
-          Paste emails or a CSV. Preview first. YES creates D0 only. Nothing sends without YES.
+          Paste emails or a CSV. Preview first. YES creates E01 / D0 only. Nothing sends without YES.
           Friends of George pending or redeemed addresses stay out unless you override with a reason.
         </p>
         <textarea
@@ -404,7 +404,7 @@ export function ThanksClient({
             className={btnBase}
             style={{ border: `1px solid ${BLUE}`, color: BLUE, opacity: busy || !composer.trim() ? 0.55 : 1 }}
           >
-            Queue D0 (no send)
+            Queue E01 (no send)
           </button>
           <button
             type="button"
@@ -413,7 +413,7 @@ export function ThanksClient({
             className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] rounded px-4 py-2"
             style={{ backgroundColor: BLUE, color: 'white', opacity: busy || !composer.trim() ? 0.55 : 1 }}
           >
-            YES send D0
+            YES send E01
           </button>
         </div>
         {msg && <p className="font-condensed text-[12px] mt-3" style={{ color: '#15803d' }}>{msg}</p>}
@@ -443,7 +443,7 @@ export function ThanksClient({
               </tbody>
             </table>
             <p className="font-condensed text-[12px] mt-2" style={{ color: SLATE }}>
-              {inviteableCount} ready for D0. Already paid, already members, FOG, and invalids stay out.
+              {inviteableCount} ready for E01. Already paid, already members, FOG, and invalids stay out.
             </p>
           </div>
         )}
@@ -454,7 +454,7 @@ export function ThanksClient({
           <div>
             <p className="font-display font-bold text-[16px]" style={{ color: NAVY }}>Nudge queue</p>
             <p className="font-condensed text-[12px]" style={{ color: SLATE }}>
-              Due D7 / D14 / D28 land here as pending approval. Sweep never sends.
+              Due E02-E12 land here as pending approval. Sweep never sends.
             </p>
           </div>
           <button type="button" onClick={() => void enqueueDue()} disabled={busy} className={btnBase} style={{ border: `1px solid ${TEAL}`, color: TEAL }}>
@@ -482,7 +482,7 @@ export function ThanksClient({
                   return (
                     <tr key={row.id} style={{ borderBottom: '1px solid var(--admin-border)' }}>
                       <td className="px-3 py-2 font-body text-[13px]" style={{ color: NAVY }}>{email}</td>
-                      <td className="px-3 py-2"><StatusPill status="pending_approval" /> <span className="font-condensed text-[11px] ml-1" style={{ color: SLATE }}>{row.cadence_step}</span></td>
+                      <td className="px-3 py-2"><StatusPill status="pending_approval" /> <span className="font-condensed text-[11px] ml-1" style={{ color: SLATE }}>{thanksCadenceLabel(parseThanksCadenceStep(row.cadence_step) ?? THANKS_E01_STEP)}</span></td>
                       <td className="px-3 py-2 font-condensed text-[12px]" style={{ color: SLATE }}>{fmtDate(row.due_at)}</td>
                       <td className="px-3 py-2">
                         <div className="flex items-center justify-end gap-2">
@@ -533,7 +533,7 @@ export function ThanksClient({
                   <tr key={row.id} style={{ borderBottom: '1px solid var(--admin-border)' }}>
                     <td className="px-4 py-3 font-body text-[13px]" style={{ color: NAVY }}>{row.email}</td>
                     <td className="px-4 py-3"><StatusPill status={row.status} /></td>
-                    <td className="px-4 py-3 font-condensed text-[12px]" style={{ color: SLATE }}>{row.cadence_step}</td>
+                    <td className="px-4 py-3 font-condensed text-[12px]" style={{ color: SLATE }}>{thanksCadenceLabel(parseThanksCadenceStep(row.cadence_step) ?? THANKS_E01_STEP)}</td>
                     <td className="px-4 py-3 font-condensed text-[12px]" style={{ color: SLATE }}>{row.delivered_count ?? 0}</td>
                     <td className="px-4 py-3 font-condensed text-[12px]" style={{ color: SLATE }}>{fmtDate(row.redeemed_at)}</td>
                     <td className="px-4 py-3">

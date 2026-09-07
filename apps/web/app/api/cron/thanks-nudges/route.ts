@@ -5,7 +5,7 @@ import { enqueueDueThanksNudges } from '@/lib/thanks/enqueue'
 
 /**
  * Enqueue due thank-you Community cadence steps into pending_approval.
- * NEVER calls Resend. Redeemed and post-D28 invites are skipped / stopped.
+ * NEVER calls Resend. Redeemed and post-E12 invites are skipped / stopped.
  *
  * Auth: Bearer ${CRON_SECRET} OR header x-cron-secret: ${CRON_SECRET}
  */
