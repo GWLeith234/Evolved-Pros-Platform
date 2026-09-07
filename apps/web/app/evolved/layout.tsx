@@ -4,7 +4,7 @@ import { Montserrat } from 'next/font/google'
  * Standalone charcoal/gold shell for the EVOLVED book preorder.
  *
  * Must not inherit the (public) navy/red footer. Montserrat matches the
- * existing cover reconstruction (design/sponsor-creatives/book-cover.html).
+ * Gold V3 Kindle cover (design/sponsor-creatives/book-cover.png).
  */
 const montserrat = Montserrat({
   subsets: ['latin'],

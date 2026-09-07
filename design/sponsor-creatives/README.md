@@ -43,13 +43,11 @@ Portrait is the primary in-app creative; banners keep the same story for
 August 15" / George Leith / Pre-order, black+gold) and the portrait cover for
 the podcast slot.
 
-Real cover: `Branding/Evolved%20Book%20Cover.jpg` (Supabase Storage, public).
-The banner HTML `<img class="cover">` now points at that URL — spaces MUST stay
-percent-encoded (`%20`) or Storage 404s.
+Real cover: `book-cover.png` (Gold V3 Kindle, same bytes as
+`apps/web/public/ads/book-cover.png` and `apps/web/public/brand/book-cover.png`).
+Banner HTML `<img class="cover">` points at that local file.
 
-- **Podcast slot** renders the cover as a live `image_url` (platform_ads row
-  `134800d3`), so it already uses the real cover on the server.
+- **Podcast slot** can use `/ads/book-cover.png` as `image_url`.
 - **Baked banners** (`book-300x250.png`, `book-728x90.png`) still contain the
-  earlier *reconstruction* — the build sandbox can't reach Storage, so re-run
-  `render.js` from an env that can (a normal dev machine) to bake the real cover
-  into the PNGs, then commit them.
+  earlier *reconstruction* until `render.js` is re-run against the book HTML
+  (default `render.js` jobs are Academy-only).
