@@ -45,13 +45,31 @@ Do **not** reuse `VENDASTA_WEBHOOK_SECRET` (HMAC from #80).
 Map these keys in the Automations UI (aliases in
 `docs/fixtures/vendasta-conversations-ai-webhook.md`):
 
-`name`, `first_name`, `last_name`, `email`, `phone`, `company`, `message`, `contact_id`
+`name`, `first_name`, `last_name`, `email`, `phone`, `company`, `message`,
+`summary` (or `conversation_summary` / `conversationSummary`), `contact_id`
+
+**Summary mapping (CoS):** map the conversation summary token to `summary`
+or `conversation_summary`. If that token is unavailable, map the last
+message / transcript snippet to `message`, `conversation`, or `snippet`.
+Those aliases still land in `crm_prospects.conversation_summary`.
 
 SMS-only (phone, no email) is accepted. Neither identity is `422`.
+Empty or whitespace-only identity fields are `422`. The display fallback
+`AI George lead` cannot create a CRM row by itself.
 
 CRM: `public.crm_prospects` with `source = ai-george` and exact tag `AI George`.
+Column `conversation_summary` (migration `090_crm_prospects_conversation_summary.sql`).
+CoS must apply that SQL in the Supabase SQL Editor. If the column is not
+there yet, the webhook still writes a labelled `Conversation summary:`
+block into notes and retries the row write without the column.
+Admin CRM shows the summary on the card and in the prospect modal.
 Admin bell title: `New AI George lead`. Type: `system_general`. Action:
 `/admin/crm?prospect=<id>` when the upsert returns an id.
+
+## Widget / Automation prompt (locked)
+
+Collect in this order: **name → phone → email**. Do not pitch a business
+email. This repo does not change the live widget system prompt.
 
 ## Synthetic lead (after the env secret is set)
 

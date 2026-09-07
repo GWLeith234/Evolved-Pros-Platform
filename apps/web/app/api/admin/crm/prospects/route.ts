@@ -5,6 +5,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import {
   CRM_SELECT_COLS,
+  CRM_SELECT_COLS_WITHOUT_SUMMARY,
   CRM_STAGE_META,
   isConsentBasis,
   isCrmStage,
@@ -43,6 +44,18 @@ export async function GET(request: Request) {
 
   const { data, error } = await query
   if (error) {
+    const msg = String(error.message ?? '')
+    if (msg.includes('conversation_summary')) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let fallback = (adminClient as any)
+        .from('crm_prospects')
+        .select(CRM_SELECT_COLS_WITHOUT_SUMMARY)
+        .order('updated_at', { ascending: false })
+      if (stageParam && isCrmStage(stageParam)) fallback = fallback.eq('stage', stageParam)
+      if (keynoteOnly) fallback = fallback.eq('keynote_interest', true)
+      const retry = await fallback
+      if (!retry.error) return NextResponse.json({ prospects: retry.data ?? [] })
+    }
     // Code only — Postgres error messages can embed row values (a
     // unique-violation names the conflicting email address).
     console.error('[GET /api/admin/crm/prospects]', error.code ?? 'unknown')
@@ -127,6 +140,8 @@ export async function POST(request: Request) {
     phone: phone || null,
     company: typeof body.company === 'string' ? body.company.trim() || null : null,
     notes: typeof body.notes === 'string' ? body.notes.trim() || null : null,
+    conversation_summary:
+      typeof body.conversation_summary === 'string' ? body.conversation_summary.trim() || null : null,
     source: typeof body.source === 'string' ? body.source.trim() || null : null,
     stage,
     status,

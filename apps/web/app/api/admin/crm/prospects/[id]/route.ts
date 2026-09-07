@@ -53,6 +53,9 @@ export async function PATCH(request: Request, { params }: RouteCtx) {
   if (typeof body.notes === 'string') {
     patch.notes = body.notes.trim() || null
   }
+  if (typeof body.conversation_summary === 'string') {
+    patch.conversation_summary = body.conversation_summary.trim() || null
+  }
   if (typeof body.source === 'string') {
     patch.source = body.source.trim() || null
   }

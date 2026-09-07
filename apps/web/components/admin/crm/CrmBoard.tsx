@@ -63,7 +63,8 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
         p.full_name.toLowerCase().includes(q) ||
         (p.email ?? '').toLowerCase().includes(q) ||
         (p.company ?? '').toLowerCase().includes(q) ||
-        (p.notes ?? '').toLowerCase().includes(q),
+        (p.notes ?? '').toLowerCase().includes(q) ||
+        (p.conversation_summary ?? '').toLowerCase().includes(q),
     )
   }, [prospects, query])
 
@@ -545,6 +546,15 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                         </button>
                         {p.company && (
                           <p className="font-condensed text-[11px] m-0" style={{ color: 'var(--admin-text-2)' }}>{p.company}</p>
+                        )}
+                        {p.conversation_summary && (
+                          <p
+                            className="font-condensed text-[11px] m-0 line-clamp-1"
+                            style={{ color: 'var(--admin-text-2)' }}
+                            title="Conversation summary"
+                          >
+                            {p.conversation_summary}
+                          </p>
                         )}
                       </td>
                       <td className="px-3 py-2.5 font-condensed text-[12px]" style={{ borderBottom: '1px solid rgba(27,60,90,0.06)', color: '#5a6a76' }}>

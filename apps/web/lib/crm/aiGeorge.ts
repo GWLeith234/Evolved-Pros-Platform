@@ -15,10 +15,25 @@ const FIELD_MAX = 200
 const EMAIL_MAX = 320
 const SMS_MAX = 40
 const MESSAGE_MAX = 2000
+const SUMMARY_MAX = 4000
 const ID_MAX = 120
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 const SMS_RE = /^[+\d][\d\s().-]{5,}$/
+
+const NAME_KEYS = ['name', 'full_name', 'fullName', 'display_name', 'displayName'] as const
+const FIRST_NAME_KEYS = ['first_name', 'firstName'] as const
+const LAST_NAME_KEYS = ['last_name', 'lastName'] as const
+const EMAIL_KEYS = ['email', 'email_address', 'emailAddress', 'contact_email'] as const
+const PHONE_KEYS = ['phone', 'sms', 'phone_number', 'phoneNumber', 'mobile', 'mobile_phone'] as const
+const COMPANY_KEYS = ['company', 'company_name', 'companyName', 'account_name'] as const
+const MESSAGE_KEYS = ['message', 'last_message', 'lastMessage', 'conversation', 'snippet', 'notes'] as const
+const SUMMARY_KEYS = ['summary', 'conversation_summary', 'conversationSummary'] as const
+const SUMMARY_ALIAS_KEYS = ['message', 'last_message', 'lastMessage', 'conversation', 'snippet'] as const
+const CONTACT_ID_KEYS = ['contact_id', 'contactId', 'entityId', 'entity_id'] as const
+
+/** Postgres undefined_column. Used when 090 has not been applied yet. */
+export const PG_UNDEFINED_COLUMN = '42703'
 
 /** Exact CRM tag. Never lowercase, never "conversations-ai", never "external-api". */
 export const AI_GEORGE_TAG = 'AI George' as const
@@ -40,6 +55,8 @@ export interface CleanAiGeorgeLead {
   company: string | null
   message: string | null
   contact_id: string | null
+  /** Dedicated CRM column. Also labelled in notes. */
+  summary: string | null
 }
 
 export type MapResult =
@@ -75,35 +92,32 @@ export function mapConversationsPayload(body: unknown): MapResult {
   }
   const rec = body as Record<string, unknown>
 
-  const named = firstString(
-    rec,
-    ['name', 'full_name', 'fullName', 'display_name', 'displayName'],
-    NAME_MAX,
-  )
-  const first = firstString(rec, ['first_name', 'firstName'], NAME_MAX)
-  const last = firstString(rec, ['last_name', 'lastName'], NAME_MAX)
+  const named = firstString(rec, NAME_KEYS, NAME_MAX)
+  const first = firstString(rec, FIRST_NAME_KEYS, NAME_MAX)
+  const last = firstString(rec, LAST_NAME_KEYS, NAME_MAX)
   const joined = [first, last].filter(Boolean).join(' ')
-  const full_name = named || joined || AI_GEORGE_FALLBACK_NAME
+  const collectedName = named || joined
+  const full_name = collectedName || AI_GEORGE_FALLBACK_NAME
 
-  const emailRaw = firstString(
-    rec,
-    ['email', 'email_address', 'emailAddress', 'contact_email'],
-    EMAIL_MAX,
-  ).toLowerCase()
+  const emailRaw = firstString(rec, EMAIL_KEYS, EMAIL_MAX).toLowerCase()
   const email = emailRaw && EMAIL_RE.test(emailRaw) ? emailRaw : null
 
-  const smsRaw = firstString(
-    rec,
-    ['phone', 'sms', 'phone_number', 'phoneNumber', 'mobile', 'mobile_phone'],
-    SMS_MAX,
-  )
+  const smsRaw = firstString(rec, PHONE_KEYS, SMS_MAX)
   const sms = smsRaw && SMS_RE.test(smsRaw) ? smsRaw : null
 
+  // Fallback name is display-only. It cannot satisfy identity. Empty or
+  // whitespace-only email/phone are already '' after trim.
   if (!email && !sms) {
     if (emailRaw) return { kind: 'invalid', error: 'A valid email address or SMS is required.' }
     if (smsRaw) return { kind: 'invalid', error: 'SMS must be a phone number.' }
     return { kind: 'invalid', error: 'Email or SMS is required.' }
   }
+
+  const dedicatedSummary = firstString(rec, SUMMARY_KEYS, SUMMARY_MAX)
+  const message =
+    firstString(rec, MESSAGE_KEYS, MESSAGE_MAX) || null
+  const summary =
+    dedicatedSummary || firstString(rec, SUMMARY_ALIAS_KEYS, SUMMARY_MAX) || null
 
   return {
     kind: 'ok',
@@ -111,21 +125,17 @@ export function mapConversationsPayload(body: unknown): MapResult {
       full_name,
       email,
       sms,
-      company:
-        firstString(rec, ['company', 'company_name', 'companyName', 'account_name'], FIELD_MAX) ||
-        null,
-      message: firstString(
-        rec,
-        ['message', 'last_message', 'lastMessage', 'conversation', 'snippet', 'notes'],
-        MESSAGE_MAX,
-      ) || null,
-      contact_id: firstString(
-        rec,
-        ['contact_id', 'contactId', 'entityId', 'entity_id'],
-        ID_MAX,
-      ) || null,
+      company: firstString(rec, COMPANY_KEYS, FIELD_MAX) || null,
+      message,
+      contact_id: firstString(rec, CONTACT_ID_KEYS, ID_MAX) || null,
+      summary,
     },
   }
+}
+
+/** Usable email or usable phone. Fallback name is not identity. */
+export function hasUsableIdentity(lead: Pick<CleanAiGeorgeLead, 'email' | 'sms'>): boolean {
+  return Boolean(lead.email || lead.sms)
 }
 
 export function aiGeorgeFieldLines(lead: CleanAiGeorgeLead): AiGeorgeFieldLine[] {
@@ -161,7 +171,11 @@ function isoDay(now: Date): string {
 export function buildAiGeorgeNotesBlock(lead: CleanAiGeorgeLead, now: Date): string {
   const lines = [`[${isoDay(now)}] AI George`, aiGeorgeFieldSummary(lead)]
   if (lead.contact_id) lines.push(`Contact id: ${lead.contact_id}`)
-  if (lead.message) lines.push(lead.message)
+  if (lead.summary) {
+    lines.push('Conversation summary:')
+    lines.push(lead.summary)
+  }
+  if (lead.message && lead.message !== lead.summary) lines.push(lead.message)
   return lines.join('\n')
 }
 
@@ -204,6 +218,7 @@ export interface ProspectRow {
   company: string | null
   email: string | null
   tags: string[] | null
+  conversation_summary?: string | null
 }
 
 export interface DbError {
@@ -230,7 +245,35 @@ export const PG_UNIQUE_VIOLATION = '23505'
 export type UpsertOutcome =
   | { kind: 'created'; id: string }
   | { kind: 'updated'; id: string }
+  | { kind: 'rejected'; error: string }
   | { kind: 'error'; code?: string }
+
+function stripConversationSummary(row: Record<string, unknown>): Record<string, unknown> {
+  const next = { ...row }
+  delete next.conversation_summary
+  return next
+}
+
+async function insertProspectCompat(
+  db: AiGeorgeDb,
+  row: Record<string, unknown>,
+): Promise<{ data: { id: string } | null; error: DbError | null }> {
+  const first = await db.insertProspect(row)
+  if (!first.error || first.error.code !== PG_UNDEFINED_COLUMN) return first
+  if (!('conversation_summary' in row)) return first
+  return db.insertProspect(stripConversationSummary(row))
+}
+
+async function updateProspectCompat(
+  db: AiGeorgeDb,
+  id: string,
+  patch: Record<string, unknown>,
+): Promise<{ error: DbError | null }> {
+  const first = await db.updateProspect(id, patch)
+  if (!first.error || first.error.code !== PG_UNDEFINED_COLUMN) return first
+  if (!('conversation_summary' in patch)) return first
+  return db.updateProspect(id, stripConversationSummary(patch))
+}
 
 async function findExisting(
   db: AiGeorgeDb,
@@ -246,14 +289,19 @@ async function findExisting(
  *
  * New contact  → insert as a lead with express consent, source `ai-george`,
  *                and exact tag `AI George`. Email may be null (SMS-only).
- * Known contact→ PATCH notes / phone / company / tag. Stage, status,
+ * Known contact→ PATCH notes / phone / company / tag / summary. Stage, status,
  *                consent_basis and source are left alone.
+ * No identity  → rejected. Fallback name alone cannot create a row.
  */
 export async function upsertAiGeorgeProspect(
   db: AiGeorgeDb,
   lead: CleanAiGeorgeLead,
   now: Date = new Date(),
 ): Promise<UpsertOutcome> {
+  if (!hasUsableIdentity(lead)) {
+    return { kind: 'rejected', error: 'Email or SMS is required.' }
+  }
+
   const block = buildAiGeorgeNotesBlock(lead, now)
   const iso = now.toISOString()
 
@@ -270,19 +318,21 @@ export async function upsertAiGeorgeProspect(
     if (lead.sms) patch.phone = lead.sms
     if (lead.company) patch.company = lead.company
     if (lead.email && !existing.email) patch.email = lead.email
+    if (lead.summary) patch.conversation_summary = lead.summary
 
-    const { error: updateErr } = await db.updateProspect(existing.id, patch)
+    const { error: updateErr } = await updateProspectCompat(db, existing.id, patch)
     if (updateErr) return { kind: 'error', code: updateErr.code }
     return { kind: 'updated', id: existing.id }
   }
 
-  const { data, error: insertErr } = await db.insertProspect({
+  const { data, error: insertErr } = await insertProspectCompat(db, {
     full_name: lead.full_name,
     email: lead.email,
     phone: lead.sms,
     company: lead.company,
     title: null,
     notes: block,
+    conversation_summary: lead.summary,
     stage: 'lead',
     status: 'active',
     source: AI_GEORGE_SOURCE,
@@ -302,12 +352,15 @@ export async function upsertAiGeorgeProspect(
   if (raceErr) return { kind: 'error', code: raceErr.code }
   if (!raced) return { kind: 'error', code: 'not_found_after_conflict' }
 
-  const { error: updateErr } = await db.updateProspect(raced.id, {
+  const racePatch: Record<string, unknown> = {
     notes: prependNotes(raced.notes, block),
     tags: withAiGeorgeTag(raced.tags),
     last_contacted_at: iso,
     updated_at: iso,
-  })
+  }
+  if (lead.summary) racePatch.conversation_summary = lead.summary
+
+  const { error: updateErr } = await updateProspectCompat(db, raced.id, racePatch)
   if (updateErr) return { kind: 'error', code: updateErr.code }
   return { kind: 'updated', id: raced.id }
 }

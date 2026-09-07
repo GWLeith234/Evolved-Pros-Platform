@@ -8,10 +8,12 @@ import {
   AI_GEORGE_NOTIFY_TITLE,
   AI_GEORGE_SOURCE,
   AI_GEORGE_TAG,
+  PG_UNDEFINED_COLUMN,
   PG_UNIQUE_VIOLATION,
   aiGeorgeFieldLines,
   aiGeorgeNotificationCopy,
   buildAiGeorgeNotesBlock,
+  hasUsableIdentity,
   mapConversationsPayload,
   notifyAdminsOfAiGeorgeLead,
   prependNotes,
@@ -41,6 +43,7 @@ function clean(overrides: Partial<CleanAiGeorgeLead> = {}): CleanAiGeorgeLead {
     company: 'Northgate Media',
     message: 'Asked about booking George for a sales kickoff in Q1.',
     contact_id: 'cnt_01EXAMPLE',
+    summary: 'Alex asked about booking George for a Q1 sales kickoff and left a callback number.',
     ...overrides,
   }
 }
@@ -81,7 +84,53 @@ describe('mapConversationsPayload — fixture + aliases', () => {
     expect(res.value.sms).toBe('+1 555 0199')
     expect(res.value.company).toBe('Cole Co')
     expect(res.value.message).toBe('Ready to talk.')
+    expect(res.value.summary).toBe('Ready to talk.')
     expect(res.value.contact_id).toBe('AG-1:CNT-9')
+  })
+
+  it('maps dedicated summary keys ahead of message aliases', () => {
+    const snake = mapConversationsPayload({
+      email: 'pat@example.com',
+      message: 'Latest chat line.',
+      conversation_summary: 'Pat wants a keynote quote.',
+    })
+    expect(snake.kind).toBe('ok')
+    if (snake.kind !== 'ok') return
+    expect(snake.value.message).toBe('Latest chat line.')
+    expect(snake.value.summary).toBe('Pat wants a keynote quote.')
+
+    const camel = mapConversationsPayload({
+      email: 'pat@example.com',
+      conversationSummary: 'Camel summary from Automation.',
+      snippet: 'ignored when dedicated summary is present',
+    })
+    expect(camel.kind).toBe('ok')
+    if (camel.kind !== 'ok') return
+    expect(camel.value.summary).toBe('Camel summary from Automation.')
+  })
+
+  it('fills summary from conversation / snippet when dedicated keys are blank', () => {
+    const res = mapConversationsPayload({
+      email: 'pat@example.com',
+      conversation: 'Walked through the Architecture pillars.',
+    })
+    expect(res.kind).toBe('ok')
+    if (res.kind !== 'ok') return
+    expect(res.value.summary).toBe('Walked through the Architecture pillars.')
+    expect(res.value.message).toBe('Walked through the Architecture pillars.')
+  })
+
+  it('treats whitespace-only summary keys as missing', () => {
+    const res = mapConversationsPayload({
+      email: 'pat@example.com',
+      summary: '   ',
+      conversationSummary: '\n\t',
+      message: '  Kept this line.  ',
+    })
+    expect(res.kind).toBe('ok')
+    if (res.kind !== 'ok') return
+    expect(res.value.summary).toBe('Kept this line.')
+    expect(res.value.message).toBe('Kept this line.')
   })
 
   it('joins first_name + last_name when name is absent', () => {
@@ -127,6 +176,9 @@ describe('mapConversationsPayload — fixture + aliases', () => {
 
   it.each([
     ['neither identity', { name: 'Sam' }, 'Email or SMS is required.'],
+    ['empty object', {}, 'Email or SMS is required.'],
+    ['whitespace-only fields', { name: '  ', email: ' \n', phone: '\t' }, 'Email or SMS is required.'],
+    ['fallback name alone', { name: AI_GEORGE_FALLBACK_NAME }, 'Email or SMS is required.'],
     ['bad email only', { email: 'nope' }, 'A valid email address or SMS is required.'],
     ['bad sms only', { sms: 'call me' }, 'SMS must be a phone number.'],
     ['not an object', ['x'], 'Expected a flat JSON object.'],
@@ -136,6 +188,14 @@ describe('mapConversationsPayload — fixture + aliases', () => {
     if (res.kind !== 'invalid') return
     expect(res.error).toBe(error)
     expect(res.error).not.toContain('—')
+  })
+
+  it('does not treat the fallback name as usable identity', () => {
+    expect(hasUsableIdentity({ email: null, sms: null })).toBe(false)
+    expect(hasUsableIdentity({ email: 'ada@example.com', sms: null })).toBe(true)
+    expect(hasUsableIdentity({ email: null, sms: '+1 555 0100' })).toBe(true)
+    const res = mapConversationsPayload({ name: AI_GEORGE_FALLBACK_NAME, email: '   ' })
+    expect(res.kind).toBe('invalid')
   })
 })
 
@@ -173,6 +233,37 @@ describe('AI George tag lock', () => {
     expect(parsed?.email).toBe('')
     expect(parsed?.phone).toBe('+1 555 0100')
     expect(parsed?.tags).toEqual(['AI George'])
+    expect(parsed?.conversation_summary).toBeNull()
+  })
+
+  it('round-trips conversation_summary onto the CRM prospect', () => {
+    const parsed = parseCrmProspect({
+      id: 'p-sum',
+      full_name: 'Alex Rivera',
+      email: 'alex@example.com',
+      phone: '+1 555 0100',
+      tags: ['AI George'],
+      stage: 'lead',
+      status: 'active',
+      source: 'ai-george',
+      conversation_summary:
+        'Alex asked about booking George for a Q1 sales kickoff and left a callback number.',
+      created_at: NOW.toISOString(),
+      updated_at: NOW.toISOString(),
+    })
+    expect(parsed).not.toBeNull()
+    expect(parsed?.source).toBe(AI_GEORGE_SOURCE)
+    expect(parsed?.conversation_summary).toBe(
+      'Alex asked about booking George for a Q1 sales kickoff and left a callback number.',
+    )
+    expect(parseCrmProspect({
+      id: 'p-ws',
+      full_name: 'Sam',
+      email: 'sam@example.com',
+      conversation_summary: '   ',
+      created_at: NOW.toISOString(),
+      updated_at: NOW.toISOString(),
+    })?.conversation_summary).toBeNull()
   })
 })
 
@@ -202,10 +293,25 @@ describe('notification + notes copy', () => {
     expect(block).toContain('[2026-09-05] AI George')
     expect(block).toContain('Name: Alex Rivera · Email: alex@example.com')
     expect(block).toContain('Contact id: cnt_01EXAMPLE')
+    expect(block).toContain('Conversation summary:')
+    expect(block).toContain('Alex asked about booking George for a Q1 sales kickoff')
     expect(block).toContain('Asked about booking George')
     expect(block).not.toContain('—')
     expect(aiGeorgeNotificationCopy(clean()).body).not.toContain('Contact id')
     expect(aiGeorgeNotificationCopy(clean()).body).not.toContain('Asked about booking')
+    expect(aiGeorgeNotificationCopy(clean()).body).not.toContain('Conversation summary')
+  })
+
+  it('does not duplicate message when it already filled the summary', () => {
+    const block = buildAiGeorgeNotesBlock(
+      clean({
+        message: 'Same line.',
+        summary: 'Same line.',
+      }),
+      NOW,
+    )
+    expect(block).toContain('Conversation summary:')
+    expect(block.split('Same line.').length - 1).toBe(1)
   })
 
   it('prepends the newest block above existing notes', () => {
@@ -238,6 +344,43 @@ describe('upsertAiGeorgeProspect — new contact', () => {
     })
     expect(row.tags).toEqual(['AI George'])
     expect(String(row.notes)).toContain('[2026-09-05] AI George')
+    expect(String(row.notes)).toContain('Conversation summary:')
+    expect(row.conversation_summary).toBe(
+      'Alex asked about booking George for a Q1 sales kickoff and left a callback number.',
+    )
+  })
+
+  it('rejects an upsert that has no usable email or phone', async () => {
+    const db = mockDb()
+    const out = await upsertAiGeorgeProspect(
+      db,
+      clean({
+        full_name: AI_GEORGE_FALLBACK_NAME,
+        email: null,
+        sms: null,
+      }),
+      NOW,
+    )
+    expect(out).toEqual({ kind: 'rejected', error: 'Email or SMS is required.' })
+    expect(db.insertProspect).not.toHaveBeenCalled()
+    expect(db.updateProspect).not.toHaveBeenCalled()
+  })
+
+  it('retries insert without conversation_summary when the column is missing', async () => {
+    const db = mockDb({
+      insertProspect: vi
+        .fn()
+        .mockResolvedValueOnce({ data: null, error: { code: PG_UNDEFINED_COLUMN } })
+        .mockResolvedValueOnce({ data: { id: 'p-legacy' }, error: null }),
+    })
+    const out = await upsertAiGeorgeProspect(db, clean(), NOW)
+    expect(out).toEqual({ kind: 'created', id: 'p-legacy' })
+    expect(db.insertProspect).toHaveBeenCalledTimes(2)
+    expect(vi.mocked(db.insertProspect).mock.calls[0][0]).toHaveProperty('conversation_summary')
+    expect(vi.mocked(db.insertProspect).mock.calls[1][0]).not.toHaveProperty('conversation_summary')
+    expect(String(vi.mocked(db.insertProspect).mock.calls[1][0].notes)).toContain(
+      'Conversation summary:',
+    )
   })
 
   it('inserts SMS-only rows with a null email instead of a placeholder', async () => {
@@ -294,6 +437,9 @@ describe('upsertAiGeorgeProspect — existing contact', () => {
     expect(patch.tags).toEqual(['vip', 'AI George'])
     expect(String(patch.notes).indexOf('AI George')).toBeLessThan(
       String(patch.notes).indexOf('Met at the Regina keynote.'),
+    )
+    expect(patch.conversation_summary).toBe(
+      'Alex asked about booking George for a Q1 sales kickoff and left a callback number.',
     )
   })
 

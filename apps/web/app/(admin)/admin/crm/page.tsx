@@ -1,7 +1,12 @@
 import { headers } from 'next/headers'
 import { adminClient } from '@/lib/supabase/admin'
 import { CrmBoard } from '@/components/admin/crm/CrmBoard'
-import { CRM_SELECT_COLS, parseCrmProspect, type CrmProspect } from '@/lib/admin/crm'
+import {
+  CRM_SELECT_COLS,
+  CRM_SELECT_COLS_WITHOUT_SUMMARY,
+  parseCrmProspect,
+  type CrmProspect,
+} from '@/lib/admin/crm'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,7 +27,14 @@ export default async function AdminCrmPage() {
   let migration061Missing = false
   if (result.error) {
     const msg = String(result.error.message ?? '')
-    if (msg.includes('value_monthly') || msg.includes('next_follow_up') || msg.includes('schema cache')) {
+    if (msg.includes('conversation_summary')) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      result = await (adminClient as any)
+        .from('crm_prospects')
+        .select(CRM_SELECT_COLS_WITHOUT_SUMMARY)
+        .order('updated_at', { ascending: false })
+        .limit(500)
+    } else if (msg.includes('value_monthly') || msg.includes('next_follow_up') || msg.includes('schema cache')) {
       migration061Missing = true
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       result = await (adminClient as any)
