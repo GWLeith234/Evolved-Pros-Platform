@@ -2,16 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Committed Bebas Neue Regular — same cut Podcast uses via next/font + Google.
-   Local src keeps Media / Fit lockups on the ship-pack file if the CDN is down. */
-@font-face {
-  font-family: 'Bebas Neue';
-  src: url('/fonts/static/BebasNeue-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
   --navy:         #1b3c5a;
   --navy-dark:    #112535;
@@ -2345,9 +2335,9 @@ a.ep-text-link:focus-visible {
   color: var(--brand-navy);
 }
 
-/* Media + Fit lockups: Bebas Neue + Podcast-family discs. Theme-aware chrome
-   (same tokens / 16-24-32-40 rhythm as TopNav + footer). Media desk body stays
-   paper so #108 navy-on-cream cards remain readable. */
+/* Media + Fit lockups: theme-pair PNG marks (FooterLogo / loader CSS swap).
+   Chrome uses the same tokens / 16-24-32-40 rhythm as TopNav + footer. Media
+   desk body stays paper so #108 navy-on-cream cards remain readable. */
 .ep-media-masthead,
 .ep-fit-masthead {
   background: var(--bg-nav);
@@ -2421,48 +2411,29 @@ a.ep-text-link:focus-visible {
 }
 .ep-media-masthead-wordmark a,
 .ep-fit-masthead-wordmark a {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(var(--space-2), 2vw, var(--space-4));
   min-width: 0;
   max-width: 100%;
-  font-size: clamp(1.75rem, 6vw, 3.25rem);
   text-decoration: none;
-  color: inherit;
-  white-space: nowrap;
+  line-height: 0;
 }
-.ep-media-masthead-brand,
-.ep-media-masthead-section,
-.ep-fit-masthead-brand,
-.ep-fit-masthead-section,
-.ep-fit-masthead-pros {
-  font-family: var(--font-bebas), "Bebas Neue", sans-serif;
-  font-size: 1em;
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--text-primary);
-  line-height: 1;
-}
-.ep-media-masthead-disc,
-.ep-fit-masthead-disc {
-  display: block;
-  width: 1em;
-  height: 1em;
-  flex-shrink: 0;
+.ep-media-masthead-logo,
+.ep-fit-masthead-logo {
+  height: clamp(56px, 12vw, 96px);
+  width: auto;
+  max-width: 100%;
   object-fit: contain;
 }
-.ep-fit-masthead-disc {
-  width: 1.18em;
-  height: 1.18em;
-}
-.ep-fit-masthead-pros {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.04em;
-  letter-spacing: 0.04em;
-}
+.ep-media-masthead-logo--on-dark,
+.ep-fit-masthead-logo--on-dark { display: block; }
+.ep-media-masthead-logo--on-light,
+.ep-fit-masthead-logo--on-light { display: none; }
+html.light-mode .ep-media-masthead-logo--on-dark,
+html.light-mode .ep-fit-masthead-logo--on-dark { display: none; }
+html.light-mode .ep-media-masthead-logo--on-light,
+html.light-mode .ep-fit-masthead-logo--on-light { display: block; }
 .ep-fit-masthead-inner {
   padding-bottom: var(--space-6);
 }

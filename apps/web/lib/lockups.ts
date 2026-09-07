@@ -1,12 +1,15 @@
 /**
- * Media + Fit masthead lockups. Discs are the Podcast mic illustration family
- * (red ring, white field, sunburst, white arcs). Type is Bebas Neue Regular.
+ * Media + Fit masthead lockups. Canonical assets are the theme-pair PNGs
+ * (dark = white type on #0A0F18, light = navy type on #FAF9F7). Discs are
+ * the Podcast mic illustration family companions. Type in the lockups is
+ * Bebas Neue Regular — the same cut Podcast loads via next/font, vendored
+ * at public/social-fonts for the path cover/OG already reads from disk.
  *
- * Podcast masthead stays composed HTML. These surfaces match that pattern:
- * Bebas wordmarks + disc PNGs, not the platform LogoMark.
+ * Live marks swap the full lockup PNGs the same way FooterLogo / the loader
+ * do (CSS --on-dark / --on-light). Do not compose a third HTML+disc pattern.
  */
 
-export const BEBAS_NEUE_STATIC = '/fonts/static/BebasNeue-Regular.ttf' as const
+export const BEBAS_NEUE_STATIC = '/social-fonts/BebasNeue-Regular.ttf' as const
 
 export const MEDIA_MEGAPHONE_DISC = '/brand/masthead/megaphone-disc.png' as const
 export const FIT_BARBELL_DISC = '/brand/masthead/barbell-disc.png' as const

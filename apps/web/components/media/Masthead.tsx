@@ -1,30 +1,37 @@
 // Centered Media lockup for /media. Shared by the hub and every article shell.
-// EVOLVED [megaphone disc] MEDIA. Bebas Neue + Podcast-family disc. No newspaper nameplate.
+// Theme-swapped media-lockup PNG (EVOLVED [megaphone disc] MEDIA). Same
+// FooterLogo / loader CSS pair — not a composed HTML+disc mark.
 
 import Link from 'next/link'
-import { MEDIA_LOCKUP_LABEL, MEDIA_MEGAPHONE_DISC } from '@/lib/lockups'
+import {
+  MEDIA_LOCKUP_DARK,
+  MEDIA_LOCKUP_LABEL,
+  MEDIA_LOCKUP_LIGHT,
+} from '@/lib/lockups'
 import { MediaMastheadRail } from '@/components/media/MediaMastheadRail'
 
 export function MediaMastheadLockup() {
   return (
     <h1 className="ep-media-masthead-wordmark">
       <Link href="/media" aria-label={MEDIA_LOCKUP_LABEL}>
-        <span data-masthead-evolved className="ep-media-masthead-brand">
-          EVOLVED
-        </span>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          data-masthead-mark
-          className="ep-media-masthead-disc"
-          src={MEDIA_MEGAPHONE_DISC}
+          data-masthead-lockup-dark
+          className="ep-media-masthead-logo ep-media-masthead-logo--on-dark"
+          src={MEDIA_LOCKUP_DARK}
           alt=""
-          width={512}
-          height={512}
-          aria-hidden="true"
+          width={2400}
+          height={600}
         />
-        <span data-masthead-section className="ep-media-masthead-section">
-          MEDIA
-        </span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          data-masthead-lockup-light
+          className="ep-media-masthead-logo ep-media-masthead-logo--on-light"
+          src={MEDIA_LOCKUP_LIGHT}
+          alt=""
+          width={2400}
+          height={600}
+        />
       </Link>
     </h1>
   )

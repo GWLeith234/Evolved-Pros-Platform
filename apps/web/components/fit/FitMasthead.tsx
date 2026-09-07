@@ -1,33 +1,31 @@
-// Fit lockup: EVOLVED PR[barbell disc]S FIT. Bebas Neue + Podcast-family disc.
-// The disc replaces the O in PROS. Theme-aware type via --text-primary.
+// Fit lockup: theme-swapped fit-lockup PNG (EVOLVED PR[barbell disc]S FIT).
+// Same FooterLogo / loader CSS pair as Media. Disc replaces the O in PROS.
 
 import Link from 'next/link'
-import { FIT_BARBELL_DISC, FIT_LOCKUP_LABEL } from '@/lib/lockups'
+import { FIT_LOCKUP_DARK, FIT_LOCKUP_LABEL, FIT_LOCKUP_LIGHT } from '@/lib/lockups'
 
 export function FitMastheadLockup({ href = '/fit' }: { href?: string }) {
   return (
     <h1 className="ep-fit-masthead-wordmark">
       <Link href={href} aria-label={FIT_LOCKUP_LABEL}>
-        <span data-fit-evolved className="ep-fit-masthead-brand">
-          EVOLVED
-        </span>
-        <span data-fit-pros className="ep-fit-masthead-pros">
-          <span>PR</span>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            data-fit-mark
-            className="ep-fit-masthead-disc"
-            src={FIT_BARBELL_DISC}
-            alt=""
-            width={512}
-            height={512}
-            aria-hidden="true"
-          />
-          <span>S</span>
-        </span>
-        <span data-fit-section className="ep-fit-masthead-section">
-          FIT
-        </span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          data-fit-lockup-dark
+          className="ep-fit-masthead-logo ep-fit-masthead-logo--on-dark"
+          src={FIT_LOCKUP_DARK}
+          alt=""
+          width={2400}
+          height={600}
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          data-fit-lockup-light
+          className="ep-fit-masthead-logo ep-fit-masthead-logo--on-light"
+          src={FIT_LOCKUP_LIGHT}
+          alt=""
+          width={2400}
+          height={600}
+        />
       </Link>
     </h1>
   )

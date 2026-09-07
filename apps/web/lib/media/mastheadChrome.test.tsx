@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { MediaMastheadLockup } from '@/components/media/Masthead'
-import { MEDIA_LOCKUP_LABEL, MEDIA_MEGAPHONE_DISC } from '@/lib/lockups'
+import { MEDIA_LOCKUP_DARK, MEDIA_LOCKUP_LABEL, MEDIA_LOCKUP_LIGHT } from '@/lib/lockups'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const src = readFileSync(resolve(here, '../../components/media/Masthead.tsx'), 'utf8')
@@ -21,12 +21,12 @@ describe('Media masthead chrome', () => {
     expect(src).not.toMatch(/George.?s Desk/)
   })
 
-  it('uses a centered EVOLVED megaphone-disc MEDIA lockup', () => {
-    expect(src).toMatch(/data-masthead-evolved[\s\S]*EVOLVED/)
-    expect(src).toMatch(/data-masthead-mark/)
-    expect(src).toMatch(/data-masthead-section[\s\S]*MEDIA/)
-    expect(src).toContain(`aria-label={MEDIA_LOCKUP_LABEL}`)
-    expect(src).toContain('MEDIA_MEGAPHONE_DISC')
+  it('uses the theme-swapped media-lockup PNG pair', () => {
+    expect(src).toContain('MEDIA_LOCKUP_DARK')
+    expect(src).toContain('MEDIA_LOCKUP_LIGHT')
+    expect(src).toContain('aria-label={MEDIA_LOCKUP_LABEL}')
+    expect(src).toContain('ep-media-masthead-logo--on-dark')
+    expect(src).toContain('ep-media-masthead-logo--on-light')
     expect(src).not.toMatch(/<svg /)
     expect(src).not.toMatch(/logos\.horizontalDark|logos\.horizontalNavy/)
     expect(src).not.toMatch(/next\/image/)
@@ -39,16 +39,12 @@ describe('Media masthead chrome', () => {
     expect(src).not.toMatch(/Arial Black/)
   })
 
-  it('renders the lockup as EVOLVED, megaphone disc, then MEDIA', () => {
+  it('renders both theme lockups with the Media label', () => {
     const html = renderToStaticMarkup(<MediaMastheadLockup />)
-    const evolved = html.indexOf('EVOLVED')
-    const mark = html.indexOf('data-masthead-mark')
-    const media = html.indexOf('>MEDIA<')
-    expect(evolved).toBeGreaterThan(-1)
-    expect(mark).toBeGreaterThan(evolved)
-    expect(media).toBeGreaterThan(mark)
     expect(html).toContain(`aria-label="${MEDIA_LOCKUP_LABEL}"`)
-    expect(html).toContain(MEDIA_MEGAPHONE_DISC)
+    expect(html).toContain(MEDIA_LOCKUP_DARK)
+    expect(html).toContain(MEDIA_LOCKUP_LIGHT)
+    expect(html.indexOf(MEDIA_LOCKUP_DARK)).toBeLessThan(html.indexOf(MEDIA_LOCKUP_LIGHT))
     expect(html).not.toContain('<svg')
     expect(html).not.toContain('#60A5FA')
     expect(html).not.toContain('logo_horizontal')
@@ -86,14 +82,12 @@ describe('Media masthead chrome', () => {
     expect(layout).not.toMatch(/bg-\[#F5F0E8\]/)
     expect(css).toMatch(/\.ep-media-masthead,[\s\S]*\.ep-fit-masthead \{[\s\S]*background: var\(--bg-nav\)/)
     expect(css).toMatch(/\.ep-media-masthead-wordmark,[\s\S]*justify-content: center/)
-    expect(css).toMatch(/\.ep-media-masthead-brand,[\s\S]*color: var\(--text-primary\)/)
-    expect(css).toMatch(/\.ep-media-masthead-disc,[\s\S]*object-fit: contain/)
+    expect(css).toMatch(/\.ep-media-masthead-logo--on-dark,[\s\S]*display: block/)
+    expect(css).toMatch(/html\.light-mode \.ep-media-masthead-logo--on-light,[\s\S]*display: block/)
     expect(css).toMatch(/\.media-desk-shell \{[\s\S]*background: var\(--paper\)/)
     expect(css).not.toMatch(/\.ep-media-masthead[\s\S]{0,1800}box-shadow/)
     expect(css).not.toMatch(/\.ep-media-masthead[\s\S]{0,1800}#60A5FA/)
     expect(css).not.toMatch(/\.ep-media-masthead[\s\S]{0,1800}--brand-blue/)
-    expect(css).not.toMatch(/\.ep-media-masthead-logo--on-dark/)
-    expect(css).not.toMatch(/\.ep-media-masthead-logo--on-light/)
     expect(css).not.toMatch(/\.ep-media-masthead-mark \{[\s\S]*background: var\(--brand-red\)/)
   })
 })
