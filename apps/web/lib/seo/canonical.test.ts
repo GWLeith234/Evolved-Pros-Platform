@@ -20,16 +20,17 @@ describe('resolveCanonicalOrigin', () => {
     expect(resolveCanonicalOrigin('')).toBe(CANONICAL_ORIGIN)
   })
 
-  it('collapses apex and platform to www', () => {
+  it('keeps the platform conversion host and collapses apex to www', () => {
     expect(resolveCanonicalOrigin('https://evolvedpros.com')).toBe(CANONICAL_ORIGIN)
     expect(resolveCanonicalOrigin('https://evolvedpros.com/')).toBe(CANONICAL_ORIGIN)
-    expect(resolveCanonicalOrigin('https://platform.evolvedpros.com')).toBe(CANONICAL_ORIGIN)
+    expect(resolveCanonicalOrigin('https://platform.evolvedpros.com')).toBe(
+      'https://platform.evolvedpros.com',
+    )
     expect(resolveCanonicalOrigin('https://www.evolvedpros.com')).toBe(CANONICAL_ORIGIN)
   })
 
-  it('never emits the platform host, including preview / localhost / junk', () => {
+  it('does not collapse preview / localhost / junk onto the platform host', () => {
     const inputs = [
-      'https://platform.evolvedpros.com',
       'http://localhost:3000',
       'https://evolved-pros-platform-production.up.railway.app',
       'not a url',

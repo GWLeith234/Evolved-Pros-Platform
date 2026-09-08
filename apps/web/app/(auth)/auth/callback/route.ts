@@ -21,8 +21,8 @@ export async function GET(request: Request) {
 
   // Use forwarded headers to get the real public URL (request.url is the
   // internal Railway address, e.g. http://localhost:8080/...). Brand hosts
-  // (platform / apex / www) collapse to www so Set-Cookie and Location never
-  // disagree with GATE-1b's 308.
+  // (platform / apex / www) collapse to platform so Set-Cookie and Location
+  // stay on this app — www is still WordPress until the DNS cutover.
   const host    = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'web-production-db912.up.railway.app'
   const proto   = request.headers.get('x-forwarded-proto') || 'https'
   const baseUrl = resolveAuthOrigin(`${proto}://${host}`)
