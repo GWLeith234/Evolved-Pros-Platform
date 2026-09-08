@@ -5,10 +5,10 @@ import type { CSSProperties, ElementType } from 'react'
  * middle interpunct. Magic Link email is the bar. Never a space-separated
  * lockup and never a period in place of ·.
  */
-export const EP_WORDMARK_DOT_COLOR = '#ef0e30'
+export const EP_WORDMARK_DOT_COLOR = 'var(--brand-red-hot)'
 
 export const EP_WORDMARK_SNIPPET =
-  "EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS" as const
+  "EVOLVED<span style={{ color: 'var(--brand-red-hot)' }}>·</span>PROS" as const
 
 /** Shared mark children. Emails and UI both render this exact span. */
 export function EpWordmarkMark() {
@@ -30,7 +30,7 @@ export function EpWordmark({
   className?: string
   style?: CSSProperties
 }) {
-  const color = tone === 'light' ? '#ffffff' : '#112535'
+  const color = tone === 'light' ? 'var(--text-primary)' : 'var(--navy-dark)'
   return (
     <Tag
       data-testid="ep-wordmark"

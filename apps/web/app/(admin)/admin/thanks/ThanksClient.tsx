@@ -60,9 +60,11 @@ type PreviewRow = {
 
 const NAVY = 'var(--admin-text-strong)'
 const SLATE = 'var(--admin-text-2)'
-const TEAL = '#68a2b9'
-const BLUE = '#1b3c5a'
-const RED = '#ef0e30'
+const TEAL = 'var(--teal)'
+const BLUE = 'var(--navy)'
+const RED = 'var(--brand-red-hot)'
+const OK = 'var(--success-green)'
+const WAIT = 'var(--brand-gold)'
 
 function fmtDate(iso: string | null): string {
   if (!iso) return '-'
@@ -75,10 +77,10 @@ function StatusPill({ status }: { status: string }) {
   const map: Record<string, { bg: string; fg: string; label: string }> = {
     pending: { bg: 'rgba(104,162,185,0.12)', fg: TEAL, label: 'Pending' },
     sent: { bg: 'rgba(27,60,90,0.1)', fg: BLUE, label: 'Sent' },
-    redeemed: { bg: 'rgba(34,197,94,0.1)', fg: '#15803d', label: 'Redeemed' },
+    redeemed: { bg: 'rgba(34,197,94,0.1)', fg: OK, label: 'Redeemed' },
     stopped: { bg: 'rgba(239,14,48,0.08)', fg: RED, label: 'Stopped' },
     expired: { bg: 'rgba(17,37,53,0.08)', fg: SLATE, label: 'Expired' },
-    pending_approval: { bg: 'rgba(201,168,76,0.15)', fg: '#a07c1e', label: 'Needs YES' },
+    pending_approval: { bg: 'rgba(201,168,76,0.15)', fg: WAIT, label: 'Needs YES' },
   }
   const style = map[status] ?? { bg: 'rgba(17,37,53,0.08)', fg: SLATE, label: status }
   return (
@@ -416,7 +418,7 @@ export function ThanksClient({
             YES send E01
           </button>
         </div>
-        {msg && <p className="font-condensed text-[12px] mt-3" style={{ color: '#15803d' }}>{msg}</p>}
+        {msg && <p className="font-condensed text-[12px] mt-3" style={{ color: OK }}>{msg}</p>}
         {err && <p className="font-condensed text-[12px] mt-3" style={{ color: RED }}>{err}</p>}
 
         {preview && (

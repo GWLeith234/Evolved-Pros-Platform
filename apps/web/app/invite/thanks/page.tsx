@@ -42,12 +42,12 @@ export default async function ThanksInvitePage({
 
   return (
     <div
-      style={{ backgroundColor: '#0A0F18', minHeight: '100vh' }}
+      style={{ backgroundColor: 'var(--navy-abyss)', minHeight: '100vh' }}
       className="flex flex-col"
     >
       <header
         className="flex items-center px-6 py-4"
-        style={{ borderBottom: '1px solid rgba(245,240,232,0.06)', backgroundColor: '#0d1c27' }}
+        style={{ borderBottom: '1px solid rgba(245,240,232,0.06)', backgroundColor: 'var(--navy-deep)' }}
       >
         <Link href="/" aria-label="Evolved Pros home" style={{ textDecoration: 'none' }}>
           <EpWordmark tone="light" />
@@ -60,11 +60,11 @@ export default async function ThanksInvitePage({
             <>
               <p
                 className="font-condensed font-bold uppercase tracking-[0.2em] text-[10px] mb-3"
-                style={{ color: '#C9302A' }}
+                style={{ color: 'var(--brand-red)' }}
               >
                 {stopped ? 'Invite closed' : expired ? 'Invite expired' : 'Invite not found'}
               </p>
-              <h1 className="font-display font-bold text-3xl sm:text-4xl mb-4" style={{ color: '#F5F0E8' }}>
+              <h1 className="font-display font-bold text-3xl sm:text-4xl mb-4" style={{ color: 'var(--paper)' }}>
                 {stopped
                   ? 'This Community invite is no longer active.'
                   : expired
@@ -81,7 +81,7 @@ export default async function ThanksInvitePage({
               <Link
                 href="/"
                 className="inline-block py-3 px-6 rounded-lg font-condensed font-bold uppercase tracking-[0.1em] text-[12px] transition-opacity hover:opacity-90"
-                style={{ backgroundColor: 'rgba(245,240,232,0.08)', color: '#F5F0E8', border: '1px solid rgba(245,240,232,0.14)' }}
+                style={{ backgroundColor: 'rgba(245,240,232,0.08)', color: 'var(--paper)', border: '1px solid rgba(245,240,232,0.14)' }}
               >
                 Back to Evolved Pros
               </Link>
@@ -90,11 +90,11 @@ export default async function ThanksInvitePage({
             <>
               <p
                 className="font-condensed font-bold uppercase tracking-[0.2em] text-[10px] mb-3"
-                style={{ color: '#C9A84C' }}
+                style={{ color: 'var(--brand-gold)' }}
               >
                 Thank you Community
               </p>
-              <h1 className="font-display font-bold text-3xl sm:text-5xl mb-5" style={{ color: '#F5F0E8' }}>
+              <h1 className="font-display font-bold text-3xl sm:text-5xl mb-5" style={{ color: 'var(--paper)' }}>
                 {firstName ? `${firstName}, you are invited.` : 'You are invited.'}
               </h1>
               <p className="font-body text-[15px] leading-relaxed mb-2" style={{ color: 'rgba(245,240,232,0.65)' }}>
@@ -112,7 +112,7 @@ export default async function ThanksInvitePage({
 
       <footer
         className="flex justify-center px-6 py-6"
-        style={{ borderTop: '1px solid rgba(245,240,232,0.06)', backgroundColor: '#0d1c27' }}
+        style={{ borderTop: '1px solid rgba(245,240,232,0.06)', backgroundColor: 'var(--navy-deep)' }}
       >
         <EpWordmark tone="light" />
       </footer>

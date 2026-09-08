@@ -13,6 +13,7 @@ function src(rel: string) {
 }
 
 const MAGIC_SPAN = "EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS"
+const UI_DOT = "EVOLVED<span style={{ color: 'var(--brand-red-hot)' }}>·</span>PROS"
 const PERIOD_SPAN = /EVOLVED<span[^>]*>\.<\/span>PROS/
 const PLAIN_LOCKUPS = ['EVOLVED PROS', 'EVOLVED.PROS']
 
@@ -27,8 +28,9 @@ describe('standing mandate: EVOLVED·PROS wordmark on every thanks surface', () 
   it('matches the Magic Link span (red ·) and never a period or plain lockup', () => {
     expect(src('lib/resend/emails/MagicLink.tsx')).toContain(MAGIC_SPAN)
     const mark = src('components/brand/EpWordmark.tsx')
-    expect(mark).toContain(MAGIC_SPAN)
+    expect(mark).toContain(UI_DOT)
     expect(mark).toContain("data-testid=\"ep-wordmark\"")
+    expect(mark).not.toMatch(/#[0-9a-fA-F]{6}\b/)
     expect(mark).not.toMatch(PERIOD_SPAN)
     for (const plain of PLAIN_LOCKUPS) {
       expect(mark).not.toContain(plain)
@@ -52,7 +54,7 @@ describe('standing mandate: EVOLVED·PROS wordmark on every thanks surface', () 
     expect(ui).toContain('EVOLVED')
     expect(ui).toContain('PROS')
     expect(ui).toContain('·')
-    expect(ui).toContain('#ef0e30')
+    expect(ui).toContain('var(--brand-red-hot)')
     expect(ui).not.toMatch(PERIOD_SPAN)
 
     for (const step of THANKS_CADENCE_STEPS) {

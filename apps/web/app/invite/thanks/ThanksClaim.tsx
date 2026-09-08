@@ -41,8 +41,8 @@ export function ThanksClaim({ token }: { token: string }) {
         disabled={status === 'loading'}
         className="inline-block py-3.5 px-8 rounded-lg font-condensed font-bold uppercase tracking-[0.1em] text-[13px] transition-opacity hover:opacity-90"
         style={{
-          backgroundColor: '#C9302A',
-          color: '#fff',
+          backgroundColor: 'var(--brand-red)',
+          color: 'var(--text-primary)',
           opacity: status === 'loading' ? 0.6 : 1,
           cursor: status === 'loading' ? 'wait' : 'pointer',
         }}
@@ -50,7 +50,7 @@ export function ThanksClaim({ token }: { token: string }) {
         {status === 'loading' ? 'Setting up your access...' : 'Claim Community access'}
       </button>
       {status === 'error' && error && (
-        <p className="font-body text-[13px] mt-4" style={{ color: '#C9302A' }}>
+        <p className="font-body text-[13px] mt-4" style={{ color: 'var(--brand-red)' }}>
           {error}
         </p>
       )}
