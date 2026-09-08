@@ -17,8 +17,8 @@ import { stripEmDashCopy } from '@/lib/home/cardImagery'
 // server-side (no cookie coupling, works during ISR/build).
 // ---------------------------------------------------------------------------
 
-/** Brand domain for canonical / OG / sitemap / RSS URLs. Always www —
- *  platform / apex / preview hosts are collapsed by resolveCanonicalOrigin. */
+/** Brand domain for canonical / OG / sitemap / RSS URLs.
+ *  platform.evolvedpros.com is kept; apex / preview collapse to www. */
 export const SITE_URL = resolveCanonicalOrigin(process.env.NEXT_PUBLIC_SITE_URL)
 
 export const SERIES_NAME = 'The Evolved Pros Podcast'

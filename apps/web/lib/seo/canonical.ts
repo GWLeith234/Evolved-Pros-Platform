@@ -1,10 +1,14 @@
 /**
- * Site-wide public URL helpers for the www cutover.
+ * Site-wide public URL helpers.
  *
- * Dual host (platform.evolvedpros.com + www.evolvedpros.com) serves the same
- * public pages. Canonicals and og:url must always name the www brand host so
- * Google does not index both. Do not hardcode platform here, and do not read
- * the request host — a preview or platform request still canonicalizes to www.
+ * LIVE host split: platform.evolvedpros.com is this Next app. Apex / www
+ * stay on Bluehost WordPress until George YES on DNS. HTTP must never 308
+ * the platform host to www (see lib/seo/appRedirects.mjs).
+ *
+ * HTML rel=canonical / og:url still name www for public indexable pages
+ * that already ship that way (media, podcast). resolveCanonicalOrigin
+ * gates the conversion host: an env value of platform.evolvedpros.com is
+ * kept, not collapsed to www.
  *
  * Runtime-dependency-free (type-only `next` import). Same reason as
  * publicRoutes.ts: anything that touches @/lib/supabase/admin throws at
@@ -13,8 +17,11 @@
 
 import type { Metadata } from 'next'
 
-/** Brand origin for every public indexable URL. Apex 301s here. */
+/** Brand origin used by existing public HTML canonical / og:url tags. */
 export const CANONICAL_ORIGIN = 'https://www.evolvedpros.com'
+
+/** Conversion / app origin. Auth and APP_URL / SITE_URL default here. */
+export const PLATFORM_ORIGIN = 'https://platform.evolvedpros.com'
 
 const EVOLVED_PROS_HOSTS = new Set([
   'www.evolvedpros.com',
@@ -25,8 +32,9 @@ const EVOLVED_PROS_HOSTS = new Set([
 /**
  * Resolve the public canonical origin from an env value.
  *
- * platform / apex / missing / unparseable / preview hosts all collapse to
- * www.evolvedpros.com. App/email links that must stay on platform should use
+ * platform.evolvedpros.com is allowed (conversion host). Apex / www /
+ * missing / unparseable / preview hosts still collapse to www for HTML
+ * canonical tags. App/email links that must stay on platform should use
  * NEXT_PUBLIC_APP_URL, not this helper.
  */
 export function resolveCanonicalOrigin(raw?: string | null): string {
@@ -34,6 +42,7 @@ export function resolveCanonicalOrigin(raw?: string | null): string {
   try {
     const url = new URL(raw.includes('://') ? raw : `https://${raw}`)
     const host = url.hostname.toLowerCase()
+    if (host === 'platform.evolvedpros.com') return PLATFORM_ORIGIN
     if (EVOLVED_PROS_HOSTS.has(host) || host.endsWith('.evolvedpros.com')) {
       return CANONICAL_ORIGIN
     }

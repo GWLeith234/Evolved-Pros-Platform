@@ -10,16 +10,16 @@
  *
  *   NEXT_PUBLIC_SITE_URL — brand / SEO origin for canonical, OG, sitemap, RSS.
  *                          Falls back to APP_URL when unset so a missing
- *                          SITE_URL cannot break callers. Production may be
- *                          https://evolvedpros.com (marketing) or the app
- *                          origin if podcast/media SEO should stay on-app.
+ *                          SITE_URL cannot break callers. Until apex / www
+ *                          DNS leaves WordPress, production is the app
+ *                          origin: https://platform.evolvedpros.com
  *
  * Each helper accepts the other as a fallback alias so existing callers that
  * only set one var keep working. Do not invent a third name.
  */
 
 const DEFAULT_APP_URL = 'https://platform.evolvedpros.com'
-const DEFAULT_SITE_URL = 'https://evolvedpros.com'
+const DEFAULT_SITE_URL = 'https://platform.evolvedpros.com'
 
 function trimOrigin(value: string | undefined): string | undefined {
   const trimmed = value?.trim().replace(/\/+$/, '')

@@ -13,7 +13,8 @@ afterEach(() => {
 })
 
 describe('resolveAuthOrigin', () => {
-  it('canonicalizes platform, apex, and www to the www brand host', () => {
+  it('canonicalizes platform, apex, and www to the platform conversion host', () => {
+    expect(AUTH_ORIGIN).toBe('https://platform.evolvedpros.com')
     expect(resolveAuthOrigin('https://platform.evolvedpros.com')).toBe(AUTH_ORIGIN)
     expect(resolveAuthOrigin('https://platform.evolvedpros.com/')).toBe(AUTH_ORIGIN)
     expect(resolveAuthOrigin('https://evolvedpros.com')).toBe(AUTH_ORIGIN)
@@ -30,7 +31,7 @@ describe('resolveAuthOrigin', () => {
     expect(resolveAuthOrigin('https://web-production-db912.up.railway.app')).toBe(AUTH_ORIGIN)
   })
 
-  it('falls back to www when both env values are blank', () => {
+  it('falls back to platform when both env values are blank', () => {
     expect(resolveAuthOrigin(undefined, undefined)).toBe(AUTH_ORIGIN)
     expect(resolveAuthOrigin('  ', '')).toBe(AUTH_ORIGIN)
   })
@@ -43,10 +44,10 @@ describe('resolveAuthOrigin', () => {
 })
 
 describe('authCallbackUrl', () => {
-  it('is always www in production and never names platform', () => {
+  it('is always platform in production and never names www (WordPress)', () => {
     const url = authCallbackUrl('/home', AUTH_ORIGIN)
-    expect(url).toBe('https://www.evolvedpros.com/auth/callback?next=%2Fhome')
-    expect(url).not.toContain('platform.evolvedpros.com')
+    expect(url).toBe('https://platform.evolvedpros.com/auth/callback?next=%2Fhome')
+    expect(url).not.toContain('www.evolvedpros.com')
   })
 
   it('sanitizes next the same way the callback does', () => {
@@ -67,6 +68,6 @@ describe('magicLinkCallbackUrl', () => {
     expect(parsed.searchParams.get('type')).toBe('magiclink')
     expect(parsed.searchParams.get('next')).toBe('/home')
     expect(url).not.toContain('token=pkce_')
-    expect(url).not.toContain('platform.evolvedpros.com')
+    expect(url).not.toContain('www.evolvedpros.com')
   })
 })

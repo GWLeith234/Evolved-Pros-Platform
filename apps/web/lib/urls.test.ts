@@ -36,7 +36,7 @@ describe('getSiteUrl', () => {
     )
   })
 
-  it('uses the brand default when both are unset', () => {
-    expect(getSiteUrl(undefined, undefined)).toBe('https://evolvedpros.com')
+  it('uses the platform conversion host when both are unset', () => {
+    expect(getSiteUrl(undefined, undefined)).toBe('https://platform.evolvedpros.com')
   })
 })

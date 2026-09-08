@@ -3,20 +3,19 @@
  *
  * LoginForm used to pass window.location.origin as emailRedirectTo. That is
  * host-scoped: a PKCE verifier cookie set on www is invisible on platform
- * (and the reverse). GATE-1b 308s platform → www for every non-/api path,
- * including /auth/callback, so a magic link whose redirect_to still names
- * platform.evolvedpros.com lands on www without the verifier.
- * exchangeCodeForSession then fails and the callback 307s to
- * /login?error=auth_failed.
+ * (and the reverse).
  *
- * Auth links always canonicalize brand hosts AND the public Railway host
- * to www. localhost is left alone so local `next dev` still works.
+ * LIVE host split: www / apex stay on Bluehost WordPress until George YES
+ * on DNS. Auth must stay on platform.evolvedpros.com — a magic link whose
+ * redirect_to names www lands on WordPress, not this app.
+ *
+ * Brand hosts AND the public Railway host canonicalize to platform.
+ * localhost is left alone so local `next dev` still works.
  */
 
-import { CANONICAL_ORIGIN } from '@/lib/seo/canonical'
 import { safeRedirectPath } from './safeRedirect'
 
-export const AUTH_ORIGIN = CANONICAL_ORIGIN
+export const AUTH_ORIGIN = 'https://platform.evolvedpros.com'
 
 const CANONICALIZE_HOSTS = new Set([
   'www.evolvedpros.com',

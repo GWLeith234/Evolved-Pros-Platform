@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { appRedirects } from './lib/seo/appRedirects.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -61,88 +62,10 @@ const nextConfig = {
     }
   },
   async redirects() {
-    return [
-      // GATE-1b — retire platform.evolvedpros.com. Every page already emits a
-      // canonical on www, but the platform host still served the identical app
-      // with a 200, so we were telling Google "this is really a www URL" while
-      // continuing to serve the duplicate. A canonical without a redirect is a
-      // hint, not a directive; this closes it with a real 308.
-      //
-      // This lives in next.config, NOT middleware, on purpose: middleware.ts
-      // uses an explicit matcher allow-list that deliberately does not match
-      // /podcast (so crawlers get the server-rendered page rather than an auth
-      // redirect), and a host redirect has to fire on every path. redirects()
-      // resolves in the Next router before middleware and needs no matcher
-      // change. /auth/callback is included so a stale platform magic-link
-      // lands on www before cookies are written. Do NOT exclude it — completing
-      // auth on platform would Set-Cookie for platform, then 308 /home to www
-      // and drop the session.
-      //
-      // *** THE /api EXCLUSION IS LOAD-BEARING — DO NOT "SIMPLIFY" IT AWAY ***
-      // Stripe (LIVE MODE), Mux and the external cron scheduler are
-      // all configured TODAY against platform.evolvedpros.com. Webhook senders
-      // generally do not follow redirects — Stripe does not. A blanket host
-      // redirect would silently break live payment webhooks, tier changes and
-      // every cron job, and the failure is silent: the sender records the 308
-      // and moves on. /api/* keeps serving normally on the platform host until
-      // those URLs are repointed provider-side, which is a separate manual task.
-      {
-        source: '/:path((?!api/).*)',
-        has: [{ type: 'host', value: 'platform.evolvedpros.com' }],
-        destination: 'https://www.evolvedpros.com/:path',
-        permanent: true,
-      },
-      // Same trap as platform: the public *.up.railway.app host still 200s
-      // the login form and would mint a PKCE verifier cookie on the wrong
-      // host. Keep /api on the Railway host so healthchecks and any leftover
-      // webhook URLs keep working (same load-bearing exclusion as GATE-1b).
-      {
-        source: '/:path((?!api/).*)',
-        has: [{ type: 'host', value: 'web-production-db912.up.railway.app' }],
-        destination: 'https://www.evolvedpros.com/:path',
-        permanent: true,
-      },
-      // /scoreboard was folded into /home (Goals → Home consolidation).
-      // Permanent 308 so bookmarks, shared links, and old in-app buttons land
-      // on the Home dashboard that now hosts the scoreboard.
-      { source: '/scoreboard', destination: '/home', permanent: true },
-
-      // ── SPRINT DOORS-1 — the front door actually opens ──────────────────
-      //
-      // ORDER MATTERS, AND THE TWO-HOP IS DELIBERATE. These sit AFTER the
-      // platform->www host block above, so a request to
-      // platform.evolvedpros.com/join resolves as:
-      //
-      //   platform/join  -308->  https://www.evolvedpros.com/join
-      //                  -308->  /login?mode=signup
-      //
-      // Two hops is CORRECT. Collapsing it into one would put a platform-host
-      // URL in the final Location header — i.e. hand out a non-canonical
-      // destination, exactly what GATE-1b closed. Do not "optimise" these
-      // above the host block.
-      //
-      // /join is the URL George says on stage, on the podcast and in the book;
-      // /signup is what people type instead. Both are the free-tier door,
-      // which is the signup mode of /login.
-      { source: '/join', destination: '/login?mode=signup', permanent: true },
-      { source: '/signup', destination: '/login?mode=signup', permanent: true },
-
-      // /membership was a route file whose entire body was redirect('/pricing').
-      // Next prerendered that statically, so the server answered 200 with a
-      // shell that redirected on the client — a real page to a crawler, a flash
-      // of nothing to a member, and the query string dropped on the way. A
-      // config redirect answers 308 before rendering and carries ?checkout=…
-      // (Stripe's return URL) and ?tier=… through to /pricing intact. The route
-      // file is deleted in this commit.
-      { source: '/membership', destination: '/pricing', permanent: true },
-
-      // The only Strategy pillar page that exists is /academy/strategic-approach.
-      // /academy/strategy is the shorter name people (and older in-app links)
-      // reach for; it resolves to the [pillarSlug] route, finds no course with
-      // that slug, and notFound()s. Still member-gated after the hop —
-      // middleware runs on the destination exactly as before.
-      { source: '/academy/strategy', destination: '/academy/strategic-approach', permanent: true },
-    ]
+    // Host + path redirects live in lib/seo/appRedirects.mjs so they can be
+    // unit-tested. Do not re-add a platform.evolvedpros.com → www 308:
+    // www is still Bluehost WordPress until George YES on DNS.
+    return appRedirects()
   },
   async headers() {
     return [
