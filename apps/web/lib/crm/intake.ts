@@ -26,6 +26,7 @@ export const PODCAST_GUEST_TAG = 'podcast guest' as const
 export const FRIEND_OF_GEORGE_TAG = 'friend of george' as const
 export const COMP_TAG = 'comp' as const
 export const PAID_TAG = 'paid' as const
+export const COMMUNITY_THANKS_TAG = 'community thanks' as const
 
 export const LIVE_INQUIRE_SOURCE = 'keynote-inquiry' as const
 export const JOIN_SOURCE = 'join' as const
@@ -33,6 +34,7 @@ export const GUEST_SOURCE = 'podcast-guest' as const
 export const WELCOME_SOURCE = 'welcome-claim' as const
 export const REDEEM_SOURCE = 'redeem' as const
 export const PAID_SOURCE = 'stripe-checkout' as const
+export const THANKS_SOURCE = 'thanks-claim' as const
 
 export type CrmIntakeStage = 'lead' | 'prospect' | 'community' | 'vip' | 'professional'
 

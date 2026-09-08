@@ -60,6 +60,9 @@ describe('CONFIRM copy', () => {
       CONFIRM.publishStory(),
       CONFIRM.deleteAd(),
       CONFIRM.cleanupQa(3),
+      CONFIRM.sendThanksD0(4),
+      CONFIRM.queueThanksD0(4),
+      CONFIRM.sendThanksNudge(2),
     ]
     for (const s of samples) {
       expect(s.title.endsWith('?')).toBe(true)

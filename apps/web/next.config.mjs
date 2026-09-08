@@ -17,6 +17,10 @@ const nextConfig = {
   // Sprint 4C — tree-shake barrel imports from the design system.
   experimental: {
     optimizePackageImports: ['@evolved-pros/ui'],
+    outputFileTracingIncludes: {
+      '/api/admin/thanks/send': ['./lib/resend/emails/community-thanks/v12/**/*'],
+      '/api/admin/thanks/batch': ['./lib/resend/emails/community-thanks/v12/**/*'],
+    },
   },
 
   images: {

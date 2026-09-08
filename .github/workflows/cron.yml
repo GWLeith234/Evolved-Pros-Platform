@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       job:
-        description: 'Which job to run (all, expire-tiers, renewal-reminders, event-reminders, daily-digest, member-nudges, goal-snapshots)'
+        description: 'Which job to run (all, expire-tiers, renewal-reminders, event-reminders, daily-digest, member-nudges, goal-snapshots, thanks-nudges)'
         required: false
         default: 'all'
 
@@ -68,6 +68,18 @@ jobs:
       - name: Send daily digest emails
         run: |
           curl -sf -X GET "$APP_URL/api/cron/daily-digest" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            | jq .
+
+  thanks-nudges:
+    runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '0 8 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'thanks-nudges'))
+    steps:
+      - name: Queue due thank-you Community nudges (never send)
+        run: |
+          curl -sf -X GET "$APP_URL/api/cron/thanks-nudges" \
             -H "Authorization: Bearer $CRON_SECRET" \
             | jq .
 

@@ -31,4 +31,11 @@ describe('notification cron schedule lock', () => {
     expect(railway).toMatch(/cronSchedule is intentionally unset/)
     expect(railway).not.toMatch(/^cronSchedule\s*=/m)
   })
+
+  it('queues thank-you Community nudges on the morning tick and never names a send job', () => {
+    expect(workflow).toContain('/api/cron/thanks-nudges')
+    expect(workflow).toContain("github.event.inputs.job == 'thanks-nudges'")
+    expect(workflow).toContain('never send')
+    expect(workflow).not.toContain('/api/cron/thanks-send')
+  })
 })
