@@ -5,9 +5,12 @@ import type { FogInviteSnapshot, MemberSnapshot } from './eligibility'
 export async function loadMembersByEmail(emails: string[]): Promise<Map<string, MemberSnapshot>> {
   const map = new Map<string, MemberSnapshot>()
   if (emails.length === 0) return map
+  // Generated Database types omit stripe_* (migration 065). Select typed
+  // columns only so tsc stays green. Paid still maps to already_member /
+  // leave_alone because any existing users row is already_member.
   const { data } = await adminClient
     .from('users')
-    .select('email, tier, tier_status, stripe_subscription_id, stripe_customer_id, role')
+    .select('email, tier, tier_status, role')
     .in('email', emails)
   for (const row of data ?? []) {
     const email = (row.email ?? '').toLowerCase()
@@ -16,8 +19,6 @@ export async function loadMembersByEmail(emails: string[]): Promise<Map<string, 
       email,
       tier: row.tier,
       tier_status: row.tier_status,
-      stripe_subscription_id: (row as { stripe_subscription_id?: string | null }).stripe_subscription_id ?? null,
-      stripe_customer_id: (row as { stripe_customer_id?: string | null }).stripe_customer_id ?? null,
       role: row.role,
     })
   }
