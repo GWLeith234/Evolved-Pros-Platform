@@ -11,7 +11,8 @@ import {
   HERO_IMAGE_OBJECT_POSITION,
   HERO_IMAGE_SRC,
   HERO_IMAGE_WIDTH,
-  HOME_ACADEMY_TOOLTIP,
+  HOME_ARCHITECTURE_LABEL,
+  HOME_ARCHITECTURE_TOOLTIP,
   HOME_ARIA,
   HOME_BOOK,
   HOME_BOOK_COVER_ALT,
@@ -34,12 +35,15 @@ import {
   HOME_OPEN_PLATFORM_HREF,
   HOME_PRIMARY_CTA,
   HOME_SECONDARY_CTA,
+  HOME_SEE_PRICING_TOOLTIP,
   HOME_SIGN_IN,
+  HOME_SIGN_IN_TOOLTIP,
   HOME_SUB,
   JOIN_FREE_HREF,
   SEE_PRICING_HREF,
   homeEpisodeKicker,
   homeEpisodeMeta,
+  homeNavTooltip,
   homeWhatEvolvedProsCopy,
   type HomeLadderCard,
 } from '@/lib/home/conversion'
@@ -88,7 +92,7 @@ export function ConversionHome({
                     key={link.href}
                     href={homeNavHref(link, signedIn)}
                     live={'live' in link && link.live}
-                    tooltip={link.label === 'Academy' ? HOME_ACADEMY_TOOLTIP : undefined}
+                    tooltip={homeNavTooltip(link.label)}
                   >
                     {link.label}
                   </NavLink>
@@ -96,7 +100,9 @@ export function ConversionHome({
                 {signedIn ? (
                   <NavLink href={HOME_OPEN_PLATFORM_HREF}>{HOME_OPEN_PLATFORM}</NavLink>
                 ) : (
-                  <NavLink href="/login">{HOME_SIGN_IN}</NavLink>
+                  <NavLink href="/login" tooltip={HOME_SIGN_IN_TOOLTIP}>
+                    {HOME_SIGN_IN}
+                  </NavLink>
                 )}
               </nav>
               {signedIn ? (
@@ -128,13 +134,13 @@ export function ConversionHome({
                 href={homeNavHref(link, signedIn)}
                 live={'live' in link && link.live}
                 compact
-                tooltip={link.label === 'Academy' ? HOME_ACADEMY_TOOLTIP : undefined}
+                tooltip={homeNavTooltip(link.label)}
               >
                 {link.label}
               </NavLink>
             ))}
             {signedIn ? null : (
-              <NavLink href="/login" compact>
+              <NavLink href="/login" compact tooltip={HOME_SIGN_IN_TOOLTIP}>
                 {HOME_SIGN_IN}
               </NavLink>
             )}
@@ -145,29 +151,34 @@ export function ConversionHome({
       <main>
         {/*
           Mobile fold is viewport-tall (100svh minus the two-row header).
-          The GOLD Architecture still stays; object-cover crops it so the
-          signed-out primary Join free sits in the first viewport instead
-          of below a stacked 3/2 still. Open the platform is signed-in only.
+          The GOLD Architecture still stays (same bytes). F1 clips the still
+          to the upper band so THE EVOLVED ARCHITECTURE is an HTML label
+          above the H1 instead of baked-in type colliding at 390-400px.
+          Join free stays in the first viewport. Open the platform is
+          signed-in only.
         */}
         <section
           aria-label={HERO_IMAGE_ALT}
           className="ep-home-fold relative w-full overflow-hidden bg-page min-h-[calc(100svh-7rem)] md:min-h-[calc(100svh-5.5rem)]"
         >
-          <div className="absolute inset-0 aspect-[3/2] w-full">
+          <div className="ep-home-fold-still">
             <Image
               src={HERO_IMAGE_SRC}
               alt={HERO_IMAGE_ALT}
               width={HERO_IMAGE_WIDTH}
               height={HERO_IMAGE_HEIGHT}
               priority
-              className="h-full w-full origin-top object-cover object-[center_20%] max-md:scale-[1.32]"
+              className="h-full w-full origin-top object-cover object-[center_20%]"
               style={{ objectPosition: HERO_IMAGE_OBJECT_POSITION }}
               sizes="100vw"
             />
           </div>
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-paper via-paper/85 to-transparent" />
           <div className="ep-home-fold-copy relative mx-auto flex min-h-[calc(100svh-7rem)] max-w-3xl flex-col items-center justify-end px-5 pb-6 pt-12 text-center md:min-h-[calc(100svh-5.5rem)] md:pb-14 md:pt-24">
-            <h1 className="font-display text-[clamp(1.5rem,4.5vw,2.75rem)] font-bold leading-tight text-navy">
+            <Tooltip content={HOME_ARCHITECTURE_TOOLTIP} className="mb-3 md:mb-4">
+              <p className="ep-home-arch-label">{HOME_ARCHITECTURE_LABEL}</p>
+            </Tooltip>
+            <h1 className="font-display text-[clamp(1.35rem,4.2vw,2.75rem)] font-bold leading-tight text-navy">
               {HOME_H1}
             </h1>
             <p className="mx-auto mt-3 max-w-xl font-body text-base leading-relaxed text-navy/70 md:mt-4 md:text-lg">
@@ -183,7 +194,11 @@ export function ConversionHome({
                   tooltip={HOME_JOIN_FREE_TOOLTIP}
                 />
               )}
-              <GhostCta href={SEE_PRICING_HREF} label={HOME_SECONDARY_CTA} />
+              <GhostCta
+                href={SEE_PRICING_HREF}
+                label={HOME_SECONDARY_CTA}
+                tooltip={HOME_SEE_PRICING_TOOLTIP}
+              />
             </div>
           </div>
         </section>
@@ -444,12 +459,14 @@ function GhostCta({
   href,
   label,
   wide,
+  tooltip,
 }: {
   href: string
   label: string
   wide?: boolean
+  tooltip?: string
 }) {
-  return (
+  const link = (
     <Link
       href={href}
       className={`inline-flex min-h-12 items-center justify-center border border-navy px-6 text-center font-condensed text-sm font-bold uppercase tracking-[0.14em] text-navy no-underline ${
@@ -459,4 +476,5 @@ function GhostCta({
       {label}
     </Link>
   )
+  return tooltip ? <Tooltip content={tooltip}>{link}</Tooltip> : link
 }
