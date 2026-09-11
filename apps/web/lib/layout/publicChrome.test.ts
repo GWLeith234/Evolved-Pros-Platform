@@ -16,6 +16,7 @@ const CHROME_FILES = [
   'components/layout/TopNav.tsx',
   'components/home/ConversionHome.tsx',
   'components/media/Masthead.tsx',
+  'components/fit/FitMasthead.tsx',
 ]
 
 describe('public chrome wordmark', () => {
