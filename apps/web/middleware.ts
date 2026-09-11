@@ -259,6 +259,8 @@ export const config = {
     '/settings/:path*',
     '/notifications',
     '/notifications/:path*',
+    '/leaderboard',
+    '/leaderboard/:path*',
     '/membership',
     '/pricing',
     '/onboarding',
