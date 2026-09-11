@@ -25,9 +25,15 @@ import {
   HOME_BOOK_COVER_SRC,
   HOME_BOOK_COVER_WIDTH,
   HOME_H1,
+  HOME_ARCHITECTURE_LABEL,
+  HOME_ARCHITECTURE_TOOLTIP,
   HOME_JOIN_FREE,
   HOME_JOIN_FREE_TOOLTIP,
   HOME_ACADEMY_TOOLTIP,
+  HOME_MEDIA_TOOLTIP,
+  HOME_PODCAST_TOOLTIP,
+  HOME_SEE_PRICING_TOOLTIP,
+  HOME_SIGN_IN_TOOLTIP,
   HOME_LADDER,
   HOME_LADDER_LINE,
   HOME_MEDIA_HREF,
@@ -45,6 +51,7 @@ import {
   hasEmDash,
   homeEpisodeKicker,
   homeEpisodeMeta,
+  homeNavTooltip,
   homeWhatEvolvedProsCopy,
 } from './conversion'
 
@@ -58,10 +65,24 @@ describe('conversion homepage locks', () => {
       'Everything but the curriculum is free. The Academy is what you upgrade for.',
     )
     expect(HOME_PRIMARY_CTA).toBe('Join free. Full community, no card')
-    expect(HOME_JOIN_FREE_TOOLTIP).toBe('Free community access. No card required.')
+    expect(HOME_PODCAST_TOOLTIP).toBe('The Evolved Pros Podcast. Free for everyone.')
+    expect(HOME_MEDIA_TOOLTIP).toBe('Evolved Media. Essays and stories from the desk.')
     expect(HOME_ACADEMY_TOOLTIP).toBe(
       'Academy curriculum is for members. Preview the pillars or sign in to continue.',
     )
+    expect(HOME_SIGN_IN_TOOLTIP).toBe('Already a member? Sign in to continue.')
+    expect(HOME_JOIN_FREE_TOOLTIP).toBe('Free community access. No card required.')
+    expect(HOME_SEE_PRICING_TOOLTIP).toBe(
+      'Community is free forever. See VIP and Professional when you are ready.',
+    )
+    expect(HOME_ARCHITECTURE_LABEL).toBe('THE EVOLVED ARCHITECTURE')
+    expect(HOME_ARCHITECTURE_TOOLTIP).toBe(
+      'The six-pillar operating system. Foundation through Execution.',
+    )
+    expect(homeNavTooltip('Podcast')).toBe(HOME_PODCAST_TOOLTIP)
+    expect(homeNavTooltip('Media')).toBe(HOME_MEDIA_TOOLTIP)
+    expect(homeNavTooltip('Academy')).toBe(HOME_ACADEMY_TOOLTIP)
+    expect(homeNavTooltip('LIVE')).toBeUndefined()
     expect(HOME_SECONDARY_CTA).toBe('See pricing')
     expect(HOME_LADDER_LINE).toBe(
       'Start free. Upgrade when the Academy is the next step.',
@@ -158,9 +179,10 @@ describe('conversion homepage layout contracts', () => {
     resolve(root, '../../app/(public)/page.tsx'),
     'utf8',
   )
+  const globalsSrc = readFileSync(resolve(root, '../../app/globals.css'), 'utf8')
 
   it('reserves the architecture hero box and keeps JOIN FREE off the wrapping nav', () => {
-    expect(conversionHomeSrc).toMatch(/aspect-\[3\/2\]/)
+    expect(conversionHomeSrc).toMatch(/ep-home-fold-still/)
     expect(conversionHomeSrc).toMatch(/HERO_IMAGE_WIDTH/)
     expect(conversionHomeSrc).toMatch(/JOIN_FREE_HREF/)
     expect(conversionHomeSrc).toMatch(/shrink-0 items-center bg-red/)
@@ -174,16 +196,22 @@ describe('conversion homepage layout contracts', () => {
     expect(conversionHomeSrc).toMatch(/ep-home-fold/)
     expect(conversionHomeSrc).toMatch(/100svh/)
     expect(conversionHomeSrc).toMatch(/HOME_JOIN_FREE_TOOLTIP/)
-    expect(conversionHomeSrc).toMatch(/HOME_ACADEMY_TOOLTIP/)
+    expect(conversionHomeSrc).toMatch(/homeNavTooltip/)
+    expect(conversionHomeSrc).toMatch(/HOME_SIGN_IN_TOOLTIP/)
+    expect(conversionHomeSrc).toMatch(/HOME_SEE_PRICING_TOOLTIP/)
+    expect(conversionHomeSrc).toMatch(/HOME_ARCHITECTURE_LABEL/)
+    expect(conversionHomeSrc).toMatch(/HOME_ARCHITECTURE_TOOLTIP/)
+    expect(conversionHomeSrc).not.toMatch(/homeNavTooltip\('LIVE'\)|label === 'LIVE' \?/)
     expect(conversionHomeSrc).toMatch(/loginHrefFor\('\/academy'\)/)
   })
 
   it('puts signed-out primary Join free in the first mobile viewport over the GOLD still', () => {
     expect(conversionHomeSrc).toMatch(/min-h-\[calc\(100svh-7rem\)\]/)
     expect(conversionHomeSrc).toMatch(/md:min-h-\[calc\(100svh-5\.5rem\)\]/)
-    expect(conversionHomeSrc).toMatch(/absolute inset-0 aspect-\[3\/2\]/)
+    expect(conversionHomeSrc).toMatch(/ep-home-fold-still/)
     expect(conversionHomeSrc).toMatch(/flex-col items-center justify-end/)
     expect(conversionHomeSrc).toMatch(/bg-gradient-to-t from-paper/)
+    expect(conversionHomeSrc).not.toMatch(/max-md:scale-\[1\.32\]/)
     expect(conversionHomeSrc).not.toMatch(/hidden h-2\/3 bg-gradient-to-t/)
     expect(conversionHomeSrc).not.toMatch(
       /relative aspect-\[3\/2\] w-full md:absolute md:inset-0/,
@@ -234,6 +262,11 @@ describe('conversion homepage layout contracts', () => {
     expect(conversionHomeSrc).toMatch(/HERO_IMAGE_OBJECT_POSITION/)
     expect(conversionHomeSrc).toMatch(/object-\[center_20%\]/)
     expect(conversionHomeSrc).toMatch(/objectPosition: HERO_IMAGE_OBJECT_POSITION/)
+    expect(conversionHomeSrc).toMatch(/ep-home-arch-label/)
+    expect(conversionHomeSrc).toMatch(/HOME_ARCHITECTURE_LABEL/)
+    expect(globalsSrc).toMatch(/\.ep-home-fold-still/)
+    expect(globalsSrc).toMatch(/height: 48%/)
+    expect(globalsSrc).toMatch(/max-width: 430px/)
   })
 
   it('renders the locked Writer #1 book body and keeps Official site off `/`', () => {

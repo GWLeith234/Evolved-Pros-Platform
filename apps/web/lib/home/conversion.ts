@@ -29,9 +29,9 @@ export const HERO_IMAGE_ALT = 'The Evolved Architecture' as const
 export const HERO_IMAGE_WIDTH = 1536
 export const HERO_IMAGE_HEIGHT = 1024
 /**
- * Pin pillars and the named Architecture band (cauldrons + title) above the
- * paper gradient. The GOLD still is 3:2; the fold is taller and the gradient
- * covers the lower two thirds, so a default center crop buries the system.
+ * Pin pillars and cauldrons above the paper gradient. F1: the named
+ * Architecture title is HTML (HOME_ARCHITECTURE_LABEL) so baked-in
+ * lettering cannot collide with the H1 at 390-400px. Same GOLD bytes.
  */
 export const HERO_IMAGE_OBJECT_POSITION = 'center 20%' as const
 export const HOME_ARIA = 'Evolved Pros home' as const
@@ -136,11 +136,41 @@ export const HOME_MEDIA_HREF = '/media' as const
 export const HOME_MEDIA_STORY_COUNT = 3
 export const HOME_SIGN_IN = 'Sign in'
 export const HOME_JOIN_FREE = 'Join free'
-export const HOME_JOIN_FREE_TOOLTIP = 'Free community access. No card required.'
+/**
+ * Launch UI/UX tooltips (George YES 2026-09-11). Numbered to the packet.
+ * 1 Podcast, 2 Media, 3 Academy, 4 LIVE skip (#136 already live),
+ * 5 Sign in, 6 Join free, 7 See pricing, 8 Architecture label.
+ * Do not paraphrase. No em dashes.
+ */
+export const HOME_PODCAST_TOOLTIP = 'The Evolved Pros Podcast. Free for everyone.'
+export const HOME_MEDIA_TOOLTIP = 'Evolved Media. Essays and stories from the desk.'
 export const HOME_ACADEMY_TOOLTIP =
   'Academy curriculum is for members. Preview the pillars or sign in to continue.'
+export const HOME_SIGN_IN_TOOLTIP = 'Already a member? Sign in to continue.'
+export const HOME_JOIN_FREE_TOOLTIP = 'Free community access. No card required.'
+export const HOME_SEE_PRICING_TOOLTIP =
+  'Community is free forever. See VIP and Professional when you are ready.'
+/** Visible Architecture band. Matches the GOLD still lettering. */
+export const HOME_ARCHITECTURE_LABEL = 'THE EVOLVED ARCHITECTURE'
+export const HOME_ARCHITECTURE_TOOLTIP =
+  'The six-pillar operating system. Foundation through Execution.'
 export const HOME_OPEN_PLATFORM = 'Open the platform'
 export const HOME_OPEN_PLATFORM_HREF = '/home'
+
+export function homeNavTooltip(label: string): string | undefined {
+  switch (label) {
+    case 'Podcast':
+      return HOME_PODCAST_TOOLTIP
+    case 'Media':
+      return HOME_MEDIA_TOOLTIP
+    case 'Academy':
+      return HOME_ACADEMY_TOOLTIP
+    case 'LIVE':
+      return undefined
+    default:
+      return undefined
+  }
+}
 
 /** U+2014. Homepage title, meta, copy, and aria must never contain it. */
 export const EM_DASH = '\u2014'
@@ -176,8 +206,14 @@ export function conversionCopyStrings(): string[] {
     HOME_MEDIA_LINK,
     HOME_SIGN_IN,
     HOME_JOIN_FREE,
-    HOME_JOIN_FREE_TOOLTIP,
+    HOME_PODCAST_TOOLTIP,
+    HOME_MEDIA_TOOLTIP,
     HOME_ACADEMY_TOOLTIP,
+    HOME_SIGN_IN_TOOLTIP,
+    HOME_JOIN_FREE_TOOLTIP,
+    HOME_SEE_PRICING_TOOLTIP,
+    HOME_ARCHITECTURE_LABEL,
+    HOME_ARCHITECTURE_TOOLTIP,
     HOME_OPEN_PLATFORM,
     MUST_CITE_HOME_DEFINITION,
     homeWhatEvolvedProsCopy(),
