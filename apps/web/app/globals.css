@@ -2345,7 +2345,7 @@ a.ep-text-link:focus-visible {
   left: 0;
   right: 0;
   top: 0;
-  height: 54%;
+  height: 50%;
   overflow: hidden;
 }
 @media (min-width: 768px) {
@@ -2364,8 +2364,10 @@ a.ep-text-link:focus-visible {
   color: var(--brand-navy);
 }
 @media (max-width: 430px) {
+  /* Clip the baked-in still title so the HTML label is the only readable
+     Architecture line above the H1 at 390-400px. */
   .ep-home-fold-still {
-    height: 48%;
+    height: 38%;
   }
   .ep-home-fold-copy {
     padding-top: var(--space-4);

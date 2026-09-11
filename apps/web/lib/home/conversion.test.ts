@@ -265,7 +265,7 @@ describe('conversion homepage layout contracts', () => {
     expect(conversionHomeSrc).toMatch(/ep-home-arch-label/)
     expect(conversionHomeSrc).toMatch(/HOME_ARCHITECTURE_LABEL/)
     expect(globalsSrc).toMatch(/\.ep-home-fold-still/)
-    expect(globalsSrc).toMatch(/height: 48%/)
+    expect(globalsSrc).toMatch(/height: 38%/)
     expect(globalsSrc).toMatch(/max-width: 430px/)
   })
 
