@@ -6,11 +6,10 @@ import type { ThanksEmailVars } from './copy'
 /**
  * send-ready-v14 Creative SoT: Gmail-safe HTML only.
  * TABLES + INLINE STYLES. No CSS classes (v11 class CSS failed in Gmail).
- * E01 header is the hosted PNG (180×36). NEVER cid:logo. NEVER a text wordmark on E01.
+ * Every cadence file uses the hosted PNG (180×36). NEVER cid:logo. NEVER a text wordmark.
  * Greeting is exactly {{first_name}}. NEVER {{George}} or {{{{first_name}}}}.
- * cid:george-headshot is the only CID (circular 48px beside George on E01).
+ * cid:george-headshot is the only CID (circular 48px beside George).
  * claim_url is only the CTA + footer copy-link. Never prefix /media or /podcast.
- * Residual E02/E03 may still carry the v13 text wordmark; do not expand that.
  */
 export const THANKS_V12_DIR_REL = 'lib/resend/emails/community-thanks/v12'
 export const THANKS_V12_ASSETS_REL = `${THANKS_V12_DIR_REL}/assets`
@@ -165,16 +164,15 @@ export function landedThanksV12Steps(): ThanksCadenceStep[] {
   return THANKS_CADENCE_STEPS.filter(step => loadThanksV12Html(step))
 }
 
-/** Gmail-safe v14 SoT. E01 uses hosted PNG; residual E02/E03 may still use text wordmark. */
+/** Gmail-safe v14 SoT. Hosted PNG header required. Text wordmark is retired. */
 export function thanksV12GmailSafeViolations(html: string): string[] {
   const hits: string[] = []
   if (/\sclass\s*=/i.test(html)) hits.push('css_class')
   if (/<style[\s>]/i.test(html)) hits.push('style_block')
   if (!/<table[\s>]/i.test(html)) hits.push('missing_table')
   if (!/\sstyle\s*=/i.test(html)) hits.push('missing_inline_style')
-  if (!html.includes(THANKS_V14_HOSTED_LOGO) && !html.includes(TEXT_WORDMARK)) {
-    hits.push('missing_header_mark')
-  }
+  if (!html.includes(THANKS_V14_HOSTED_LOGO)) hits.push('missing_hosted_logo')
+  if (html.includes(TEXT_WORDMARK)) hits.push('text_wordmark_forbidden')
   if (html.includes(CID_LOGO)) hits.push('cid_logo_forbidden')
   if (!html.includes(CID_HEADSHOT)) hits.push('missing_cid_headshot')
   if (!html.includes('{{first_name}}')) hits.push('missing_first_name_token')
