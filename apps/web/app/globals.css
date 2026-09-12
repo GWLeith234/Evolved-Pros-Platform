@@ -2936,6 +2936,19 @@ html.light-mode .ep-fit-page-footer-mark img:last-child { display: block; }
 }
 .ep-fit-home .ep-fit-tease { padding-top: 0; }
 
+/* Conversion `/` is always paper/navy. Show the light Fit lockup and
+   keep the tease readable even when html is in the default dark theme. */
+.ep-conversion-home .ep-fit-masthead-logo--on-dark { display: none; }
+.ep-conversion-home .ep-fit-masthead-logo--on-light { display: block; }
+.ep-conversion-home .ep-fit-home {
+  --text-primary: var(--brand-navy);
+  --text-secondary: #4A5868;
+  --text-tertiary: #5C6A7C;
+  --bg-surface: #ffffff;
+  --bg-elevated: #F0EBE3;
+  --border-color: rgba(27, 42, 74, 0.14);
+}
+
 /* Admin Pros Fit: light Kajabi tokens only. */
 .ep-fit-admin { padding: 24px 16px 40px; }
 @media (min-width: 640px) {

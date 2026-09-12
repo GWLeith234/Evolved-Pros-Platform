@@ -48,6 +48,7 @@ import {
   type HomeLadderCard,
 } from '@/lib/home/conversion'
 import { homeGuestStillObjectPosition } from '@/lib/podcast/stillUrl'
+import { HomeFitTeaseBand } from '@/components/home/HomeFitTeaseBand'
 
 export interface ConversionEpisode {
   slug: string
@@ -67,10 +68,12 @@ export interface ConversionStory {
 
 export function ConversionHome({
   signedIn,
+  viewerTier = null,
   episodes,
   stories = [],
 }: {
   signedIn: boolean
+  viewerTier?: string | null
   episodes: ConversionEpisode[]
   stories?: ConversionStory[]
 }) {
@@ -214,6 +217,10 @@ export function ConversionHome({
             {homeWhatEvolvedProsCopy()}
           </p>
         </section>
+
+        <div className="mx-auto max-w-6xl border-t border-navy/15 px-5 py-12">
+          <HomeFitTeaseBand viewerTier={viewerTier} />
+        </div>
 
         {stories.length > 0 ? (
           <section className="mx-auto max-w-6xl border-t border-navy/15 px-5 py-12">
