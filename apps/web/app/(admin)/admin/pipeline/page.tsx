@@ -29,8 +29,8 @@ export default async function AdminPipelinePage() {
   const memberList = members ?? []
   if (memberList.length === 0) {
     return (
-      <div className="px-8 py-6">
-        <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)] mb-2">Pipeline</h1>
+      <div className="px-4 sm:px-8 py-6">
+        <h1 className="font-condensed font-bold text-[28px] text-[color:var(--admin-text-strong)] mb-2">Member upgrades</h1>
         <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">No active members yet.</p>
       </div>
     )
@@ -119,17 +119,17 @@ export default async function AdminPipelinePage() {
   ].reduce((sum, m) => sum + m.estimatedValue, 0)
 
   return (
-    <div className="px-8 py-6">
-      <div className="mb-6 flex items-start justify-between">
+    <div className="px-4 sm:px-8 py-6">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)]">Pipeline</h1>
-          <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mt-0.5">
-            Upgrade pipeline — drag cards to reclassify members
+          <h1 className="font-condensed font-bold text-[28px] text-[color:var(--admin-text-strong)]">Member upgrades</h1>
+          <p className="font-body text-[14px] text-[color:var(--admin-text-2)] mt-0.5">
+            Drag cards to reclassify members
           </p>
         </div>
-        <div className="text-right">
-          <p className="font-condensed font-bold text-[10px] uppercase tracking-[0.16em] text-[color:var(--admin-text-2)]">Pipeline Value</p>
-          <p className="font-display font-black text-[24px] text-[#c9a84c]">${totalValue.toLocaleString('en-US')}</p>
+        <div className="sm:text-right">
+          <p className="font-body text-[13px] text-[color:var(--admin-text-2)]">Upgrade value</p>
+          <p className="font-condensed font-bold text-[24px] text-[color:var(--admin-text-strong)]">${totalValue.toLocaleString('en-US')}</p>
           <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)]">upgrade ready + closed · annual</p>
         </div>
       </div>

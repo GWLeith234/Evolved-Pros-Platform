@@ -4,6 +4,7 @@ import type { CrmProspect, CrmStage } from '@/lib/admin/crm'
 import {
   CRM_STAGE_META,
   CRM_TAG_DISPLAY_LIMIT,
+  displayCrmTag,
   communityUpgradeTargets,
   followUpLabel,
   formatMoney,
@@ -174,14 +175,14 @@ export function CrmCard({
                   border: '1px solid var(--admin-border)',
                 }}
               >
-                {tag}
+                {displayCrmTag(tag)}
               </span>
             ))}
             {overflowTags > 0 && (
               <span
                 className="font-condensed font-bold uppercase text-[9px] tracking-wider px-1.5 py-0.5 rounded"
                 style={{ color: 'var(--admin-text-2)' }}
-                title={prospect.tags.join(', ')}
+                title={prospect.tags.map(displayCrmTag).join(', ')}
               >
                 +{overflowTags}
               </span>

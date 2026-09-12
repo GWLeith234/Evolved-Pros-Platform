@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { LogoMark } from '@/components/ui/LogoMark'
 import { OwnerOnlyBadge } from '@/components/admin/safety/OwnerOnlyBadge'
 import { CONFIRM } from '@/components/admin/safety/confirmCopy'
 import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
@@ -126,7 +127,7 @@ function IdentityTab({ settings }: { settings: Record<string, string> }) {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={logoDark} alt="Dark logo" style={{ height: '36px', width: 'auto', maxWidth: '160px', objectFit: 'contain' }} />
               ) : (
-                <span className="font-condensed font-bold text-white text-sm tracking-[0.14em]">EVOLVED·PROS</span>
+                <LogoMark variant="light" height={28} />
               )}
             </div>
             <label className="cursor-pointer rounded px-3 py-1.5 font-condensed font-semibold uppercase text-[11px] tracking-wide inline-flex" style={{ border: '1px solid rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}>
@@ -145,7 +146,7 @@ function IdentityTab({ settings }: { settings: Record<string, string> }) {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={logoLight} alt="Light logo" style={{ height: '36px', width: 'auto', maxWidth: '160px', objectFit: 'contain' }} />
               ) : (
-                <span className="font-condensed font-bold text-[color:var(--admin-text-strong)] text-sm tracking-[0.14em]">EVOLVED·PROS</span>
+                <LogoMark variant="dark" height={28} />
               )}
             </div>
             <label className="cursor-pointer rounded px-3 py-1.5 font-condensed font-semibold uppercase text-[11px] tracking-wide inline-flex" style={{ border: '1px solid rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}>
@@ -244,7 +245,7 @@ function ColorsTab({ settings }: { settings: Record<string, string> }) {
             className="rounded overflow-hidden flex items-center justify-between px-5 h-12"
             style={{ backgroundColor: primary, width: '300px', border: '1px solid rgba(255,255,255,0.1)' }}
           >
-            <span className="font-condensed font-bold text-white text-sm tracking-[0.14em]">EVOLVED·PROS</span>
+            <LogoMark variant="light" height={24} />
             <button
               type="button"
               className="rounded px-3 py-1 font-condensed font-bold uppercase text-[10px] tracking-wide text-white"

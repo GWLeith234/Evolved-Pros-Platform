@@ -71,53 +71,12 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // AI writer state. Image prompt is the only field that doesn't have a
-  // dedicated form input — it's a hint for the ImagePicker generator and
-  // stays in component state for the user to copy into that flow.
-  const [aiLoading, setAiLoading] = useState(false)
-  const [aiError, setAiError] = useState<string | null>(null)
-  const [aiImagePrompt, setAiImagePrompt] = useState<string>('')
   const [cityHint, setCityHint] = useState<string | null>(null)
   const [cityLoading, setCityLoading] = useState(false)
   const [imageLocked, setImageLocked] = useState(() => {
     const url = initialValues?.imageUrl ?? ''
     return Boolean(url) && !isManagedEventImage(url)
   })
-
-  async function handleAIWrite() {
-    if (!values.title.trim()) {
-      setAiError('Enter a title first.')
-      return
-    }
-    setAiLoading(true)
-    setAiError(null)
-    try {
-      const res = await fetch('/api/admin/ai/write-event', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: values.title.trim(),
-          format: values.eventType,
-          date: values.startsAt || undefined,
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Could not generate')
-      const ev = data.event ?? {}
-      setValues(prev => ({
-        ...prev,
-        description: ev.description ?? prev.description,
-        tagline:     ev.tagline     ?? prev.tagline,
-        ctaText:     ev.cta_text    ?? prev.ctaText,
-        pillar:      ev.pillar      ?? prev.pillar,
-      }))
-      setAiImagePrompt(ev.image_prompt ?? '')
-    } catch (err) {
-      setAiError(err instanceof Error ? err.message : 'Could not generate. Try again.')
-    } finally {
-      setAiLoading(false)
-    }
-  }
 
   function set<K extends keyof EventFormValues>(key: K, value: EventFormValues[K]) {
     setValues(prev => ({ ...prev, [key]: value }))
@@ -256,43 +215,7 @@ export function EventForm({ initialValues, eventId }: EventFormProps) {
           style={inputStyle}
           placeholder="Event title"
         />
-        <div className="flex items-center gap-3 mt-2">
-          <button
-            type="button"
-            onClick={handleAIWrite}
-            disabled={aiLoading || !values.title.trim()}
-            className="font-condensed font-bold uppercase tracking-wide text-[11px] rounded px-3 py-1.5 transition-all disabled:opacity-50"
-            style={{ border: '1px solid #0ABFA3', color: '#0ABFA3', backgroundColor: 'transparent' }}
-          >
-            {aiLoading ? (
-              <span className="inline-flex items-center gap-1.5">
-                <span className="inline-block w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#0ABFA3' }} />
-                Writing…
-              </span>
-            ) : 'Write with AI'}
-          </button>
-          {aiError && (
-            <span className="font-condensed text-[11px]" style={{ color: '#ef0e30' }}>{aiError}</span>
-          )}
-        </div>
       </div>
-
-      {aiImagePrompt && (
-        <div
-          className="rounded-lg p-4"
-          style={{ backgroundColor: 'rgba(10,191,163,0.06)', border: '1px solid rgba(10,191,163,0.2)' }}
-        >
-          <p className="font-condensed font-bold uppercase tracking-[0.18em] text-[9px] mb-1" style={{ color: '#0ABFA3' }}>
-            AI image prompt
-          </p>
-          <p className="font-body text-[12px] leading-relaxed" style={{ color: 'var(--admin-text)' }}>
-            {aiImagePrompt}
-          </p>
-          <p className="font-condensed text-[10px] mt-1" style={{ color: 'var(--admin-text-2)' }}>
-            Tagline, CTA, description and pillar were filled in below. This prompt is for the image generator.
-          </p>
-        </div>
-      )}
 
       {/* Tagline */}
       <div>

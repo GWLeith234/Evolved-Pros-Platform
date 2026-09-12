@@ -5,6 +5,11 @@ import { TIERS } from '@/lib/pricing'
 /** Exact product tag for Conversations AI leads. Must survive lowercase normalize. */
 export const AI_GEORGE_TAG = 'AI George'
 
+/** UI label only. Stored tag stays `AI George`. */
+export function displayCrmTag(tag: string): string {
+  return tag === AI_GEORGE_TAG ? 'Ask George' : tag
+}
+
 export const CRM_STAGES = [
   'lead',
   'prospect',

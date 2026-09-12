@@ -46,18 +46,15 @@
   --notif-card-border:  var(--border-color);
   --notif-unread-wash:  rgba(121,176,198,0.10);
 
-  /* SPRINT N — admin dual-theme tokens. Admin was a fixed light palette built
-     from hardcoded hex; these neutral tokens let it follow the global theme.
-     Dark defaults here; light values in the html.light-mode block below.
-     Accent/brand colors (red/teal/gold/green) stay constant and are NOT
-     tokenized — only neutrals (page/card/surface/text/border) flip. */
-  --admin-page:        #0F1720;
-  --admin-card:        #182233;
-  --admin-subtle:      #202C3D;
-  --admin-text:        #E6EDF3;
-  --admin-text-strong: #FFFFFF;
-  --admin-text-2:      #9FB2C2;
-  --admin-border:      rgba(255,255,255,0.09);
+  /* Admin lock 2026-09-11: light-only admin shell. Tokens stay light even when
+     the rest of the app is dark. .ep-admin-shell re-asserts the same values. */
+  --admin-page:        #f4f6f8;
+  --admin-card:        #ffffff;
+  --admin-subtle:      #eef1f4;
+  --admin-text:        #1b3c5a;
+  --admin-text-strong: #112535;
+  --admin-text-2:      #4a5d6e;
+  --admin-border:      rgba(17,37,53,0.12);
 
   /* DS2 — TopNav v2 + brand (FOUNDATION-TOPNAV-V2) */
   --bg-topnav:     #0D1B2A;
@@ -354,14 +351,14 @@ html.light-mode {
   --text-secondary: #4A5868;   /* 7.4:1 on #fff — AAA */
   --text-tertiary:  #5C6A7C;   /* 5.0:1 on #fff — AA */
 
-  /* SPRINT N — admin light palette (the original fixed admin colors). */
-  --admin-page:        #faf9f7;
+  /* Admin lock 2026-09-11: same light palette as :root (admin never goes dark). */
+  --admin-page:        #f4f6f8;
   --admin-card:        #ffffff;
-  --admin-subtle:      #f5f7f9;
+  --admin-subtle:      #eef1f4;
   --admin-text:        #1b3c5a;
   --admin-text-strong: #112535;
-  --admin-text-2:      #7a8a96;
-  --admin-border:      rgba(17,37,53,0.10);
+  --admin-text-2:      #4a5d6e;
+  --admin-border:      rgba(17,37,53,0.12);
 
   /* DS2 light variants (FOUNDATION-TOPNAV-V2 + SPRINT-1 nav contrast) */
   --bg-topnav:     #FAF7F2;
@@ -518,11 +515,42 @@ html.light-mode body {
    is gone: it forced EVERY aside (notif filter, channel rail, leaderboard,
    community right rail) to stay navy in light mode and defeated their
    token-driven backgrounds. Rails now style themselves via --bg-surface /
-   --card-bg; always-dark chrome (AdminSidebar) carries its own fixed color. */
+   --card-bg; AdminSidebar is light-only (George lock 2026-09-11). */
 
 /* Main content area */
 html.light-mode main {
   background-color: #F5F0E8 !important;
+}
+
+/* Admin lock 2026-09-11: light-only shell. Beats html.light-mode parchment
+   on main, remaps serif display headings, and keeps tokens light even if
+   the rest of the app is in dark mode. */
+.ep-admin-shell {
+  --admin-page:        #f4f6f8;
+  --admin-card:        #ffffff;
+  --admin-subtle:      #eef1f4;
+  --admin-text:        #1b3c5a;
+  --admin-text-strong: #112535;
+  --admin-text-2:      #4a5d6e;
+  --admin-border:      rgba(17,37,53,0.12);
+  --bg-page:           #f4f6f8;
+  --bg-surface:        #ffffff;
+  --bg-elevated:       #eef1f4;
+  --text-primary:      #112535;
+  --text-secondary:    #4a5d6e;
+  --border-color:      rgba(17,37,53,0.12);
+  --page-bg:           #f4f6f8;
+  --card-bg:           #ffffff;
+  color-scheme: light;
+  background: var(--admin-page);
+  color: var(--admin-text);
+}
+.ep-admin-shell .font-display {
+  font-family: "Barlow Condensed", Barlow, ui-sans-serif, sans-serif !important;
+}
+html .ep-admin-shell main,
+html.light-mode .ep-admin-shell main {
+  background-color: var(--admin-page) !important;
 }
 
 /* Tailwind bg-white → card ivory */
