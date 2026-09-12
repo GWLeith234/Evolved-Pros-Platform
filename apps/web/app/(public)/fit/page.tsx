@@ -11,11 +11,17 @@ export const metadata: Metadata = publicPageMetadata('/fit', {
 })
 
 export default async function FitPage() {
-  const profile = await resolveCurrentUser()
+  let viewerTier: string | null = null
+  try {
+    const profile = await resolveCurrentUser()
+    viewerTier = profile?.tier ?? null
+  } catch {
+    viewerTier = null
+  }
   return (
     <div className="min-h-screen bg-page text-primary ep-no-x-scroll" style={{ maxWidth: '100vw' }}>
       <FitMasthead />
-      <FitMarketing viewerTier={profile?.tier ?? null} />
+      <FitMarketing viewerTier={viewerTier} />
     </div>
   )
 }
