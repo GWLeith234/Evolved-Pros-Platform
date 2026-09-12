@@ -10,6 +10,6 @@ import { PublicFooter } from '@/components/layout/PublicFooter'
  */
 export function ConversionFooterGate() {
   const pathname = usePathname()
-  if (pathname === '/') return null
+  if (pathname === '/' || pathname === '/fit') return null
   return <PublicFooter />
 }

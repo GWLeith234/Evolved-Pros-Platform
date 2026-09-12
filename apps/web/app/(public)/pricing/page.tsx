@@ -126,6 +126,14 @@ function contextualHero(searchParams: Record<string, string | string[] | undefin
     }
   }
 
+  if (from === 'fit') {
+    return {
+      eyebrow: 'Instructional guides',
+      title: 'Unlock the Fit library with VIP.',
+      sub: 'Hip-aware video guides for 55+. Phone, iPad, or cast to TV. Full programs unlock at VIP.',
+    }
+  }
+
   return DEFAULT
 }
 

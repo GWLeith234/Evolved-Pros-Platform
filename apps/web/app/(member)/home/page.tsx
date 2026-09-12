@@ -13,6 +13,7 @@ import { HomeFuelBand, academyFuelFromProgress } from '@/components/home/HomeFue
 import { HomeEpisodeCard } from '@/components/home/HomeEpisodeCard'
 import { type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
 import { HomeContentAdGrid } from '@/components/home/HomeContentAdGrid'
+import { HomeFitTeaseBand } from '@/components/home/HomeFitTeaseBand'
 import { type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/DailyPulseCard'
 import { type SponsorAd } from '@/components/home/HomeSponsorAd'
 import {
@@ -691,6 +692,8 @@ export default async function MemberHomePage() {
           thread={fuelThread}
           live={fuelLive}
         />
+
+        <HomeFitTeaseBand viewerTier={profile.tier} />
 
         {latestEpisodesResult.episodes.length > 0 ? (
           <HomeContentAdGrid

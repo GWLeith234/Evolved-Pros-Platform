@@ -64,6 +64,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'LIVE',      href: '/live' },
   { label: 'Podcast',   href: '/podcast' },
   { label: 'Media',     href: '/media',    highlight: true },
+  { label: 'Fit',       href: '/fit' },
 ]
 
 // Tier comparisons go through hasTierAccess — this file used to carry its own

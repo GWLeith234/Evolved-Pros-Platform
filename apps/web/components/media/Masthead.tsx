@@ -20,8 +20,8 @@ export function MediaMastheadLockup() {
           className="ep-media-masthead-logo ep-media-masthead-logo--on-dark"
           src={MEDIA_LOCKUP_DARK}
           alt=""
-          width={2400}
-          height={600}
+          width={1239}
+          height={207}
         />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -29,8 +29,8 @@ export function MediaMastheadLockup() {
           className="ep-media-masthead-logo ep-media-masthead-logo--on-light"
           src={MEDIA_LOCKUP_LIGHT}
           alt=""
-          width={2400}
-          height={600}
+          width={1239}
+          height={207}
         />
       </Link>
     </h1>

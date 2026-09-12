@@ -17,12 +17,13 @@ import {
 const GATED_PATHS = ['/community', '/events', '/academy', '/leaderboard']
 
 describe('PUBLIC_SITEMAP_PATHS', () => {
-  it('is exactly the nine anon-reachable paths', () => {
+  it('is exactly the ten anon-reachable paths', () => {
     expect([...PUBLIC_SITEMAP_PATHS]).toEqual([
       '/',
       '/podcast',
       '/live',
       '/media',
+      '/fit',
       '/pricing',
       '/terms',
       '/privacy',

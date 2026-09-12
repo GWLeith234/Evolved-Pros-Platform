@@ -99,6 +99,12 @@ describe('admin chrome copy locks', () => {
     expect(page).not.toContain("href: '/admin/pipeline'")
   })
 
+  it('puts Pros Fit under Products', () => {
+    const products = ADMIN_NAV_SECTIONS.find(s => s.title === 'Products')
+    expect(products?.items.some(i => i.label === 'Pros Fit' && i.href === '/admin/fit')).toBe(true)
+    expect(src('app/(admin)/admin/fit/page.tsx')).toContain('FitAdminClient')
+  })
+
   it('labels Media as Pros Media and Careers as Careers', () => {
     expect(src('app/(admin)/admin/media/page.tsx')).toContain('Pros Media')
     expect(src('app/(admin)/admin/media/page.tsx')).not.toContain('Evolved Media')

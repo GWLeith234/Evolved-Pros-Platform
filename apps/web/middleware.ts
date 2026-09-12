@@ -43,7 +43,7 @@ const PUBLIC_ROUTES = [
 // writes via the service role for exactly that reason). It sits here rather than
 // in PUBLIC_ROUTES because the page still reads the session — it renders a
 // "back to platform" link for signed-in members and nothing else auth-dependent.
-const SESSION_OPTIONAL_ROUTES = ['/membership', '/pricing', '/live']
+const SESSION_OPTIONAL_ROUTES = ['/membership', '/pricing', '/live', '/fit']
 const ADMIN_ROUTES = ['/admin', '/api/admin']
 
 function returnPathHeaders(request: NextRequest): { returnPath: string; headers: Headers } {
@@ -252,6 +252,8 @@ export const config = {
     // and crawlers get the server-rendered page instead of an auth redirect.
     '/live',
     '/live/:path*',
+    '/fit',
+    '/fit/:path*',
     '/profile/:path*',
     '/messages',
     '/messages/:path*',

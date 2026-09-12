@@ -1,12 +1,13 @@
 /**
  * Media + Fit masthead lockups. Canonical assets are the theme-pair PNGs
- * (dark = white type on #0A0F18, light = navy type on #FAF9F7). Discs are
- * the Podcast mic illustration family companions. Type in the lockups is
- * Bebas Neue Regular — the same cut Podcast loads via next/font, vendored
- * at public/social-fonts for the path cover/OG already reads from disk.
+ * (v4 equal letter height, George lock 2026-09-12).
+ * Fit: EVOLVED PR + barbell disc (as O) + S FIT.
+ * Media: EVOLVED + megaphone disc + MEDIA (no Pros).
+ * Podcast LogoMark is unchanged. Type is Bebas Neue Regular.
  *
  * Live marks swap the full lockup PNGs the same way FooterLogo / the loader
  * do (CSS --on-dark / --on-light). Do not compose a third HTML+disc pattern.
+ * Do not type the family wordmark in chrome.
  */
 
 export const BEBAS_NEUE_STATIC = '/social-fonts/BebasNeue-Regular.ttf' as const

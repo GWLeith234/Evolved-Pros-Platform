@@ -55,6 +55,7 @@ export const ADMIN_NAV_SECTIONS: readonly AdminNavSection[] = [
       { label: 'Episodes', href: '/admin/episodes', match: /^\/admin\/episodes/ },
       { label: 'Events', href: '/admin/events', match: /^\/admin\/events/ },
       { label: 'Speaking', href: '/admin/speaking', match: /^\/admin\/speaking/ },
+      { label: 'Pros Fit', href: '/admin/fit', match: /^\/admin\/fit/ },
       { label: 'Media', href: '/admin/media', match: /^\/admin\/media/ },
       { label: 'Careers', href: '/admin/careers', match: /^\/admin\/careers/ },
     ],
