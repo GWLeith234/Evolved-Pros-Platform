@@ -108,6 +108,26 @@ describe('admin chrome copy locks', () => {
     expect(src('app/(admin)/admin/careers/page.tsx')).not.toContain('Job Listings')
   })
 
+  it('renders Broadcast placeholders as real ellipsis and hyphen, not escaped unicode', () => {
+    const form = src('components/admin/BroadcastForm.tsx')
+    expect(form).not.toContain('\\u2026')
+    expect(form).not.toContain('\\u2014')
+    expect(form).not.toContain('\\u2713')
+    expect(form).toContain('Notification title…')
+    expect(form).toContain('Notification body - use **bold** for emphasis…')
+  })
+
+  it('pluralizes Products member counts', () => {
+    const products = src('components/admin/ProductsAdminClient.tsx')
+    expect(products).toContain("count === 1 ? 'member' : 'members'")
+    expect(products).not.toContain('{count} members')
+  })
+
+  it('keeps Friends revoke and pause-all behind confirm dialogs', () => {
+    expect(src('app/(admin)/admin/friends/FriendsClient.tsx')).toContain('CONFIRM.revokeFriend')
+    expect(src('app/(admin)/admin/friends/BetaResetPanel.tsx')).toContain('CONFIRM.pauseFriends')
+  })
+
   it('does not invent Member upgrades ARR from stale $79/$39 or monthly * 12', () => {
     const page = src('app/(admin)/admin/pipeline/page.tsx')
     const api = src('app/api/admin/pipeline/route.ts')

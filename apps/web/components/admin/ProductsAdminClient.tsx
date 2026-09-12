@@ -249,7 +249,7 @@ export function ProductsAdminClient({
                   </div>
                   {count != null && (
                     <span className="font-condensed font-bold text-[11px] px-2 py-0.5 rounded whitespace-nowrap" style={{ background: `${accent}18`, color: accent }}>
-                      {count} members
+                      {count} {count === 1 ? 'member' : 'members'}
                     </span>
                   )}
                 </div>

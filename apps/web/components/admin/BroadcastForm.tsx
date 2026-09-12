@@ -105,7 +105,7 @@ export function BroadcastForm() {
             value={title}
             onChange={e => setTitle(e.target.value)}
             maxLength={100}
-            placeholder="Notification title\u2026"
+            placeholder="Notification title…"
             className="w-full font-condensed text-[13px] rounded px-3 py-2 outline-none transition-all"
             style={{ border: '1px solid rgba(27,60,90,0.18)', color: 'var(--admin-text-strong)' }}
             onFocus={e => (e.currentTarget.style.borderColor = '#68a2b9')}
@@ -124,7 +124,7 @@ export function BroadcastForm() {
             onChange={e => setMessage(e.target.value)}
             maxLength={500}
             rows={4}
-            placeholder="Notification body \u2014 use **bold** for emphasis\u2026"
+            placeholder="Notification body - use **bold** for emphasis…"
             className="w-full font-condensed text-[13px] rounded px-3 py-2 outline-none transition-all resize-none"
             style={{ border: '1px solid rgba(27,60,90,0.18)', color: 'var(--admin-text-strong)' }}
             onFocus={e => (e.currentTarget.style.borderColor = '#68a2b9')}
@@ -200,12 +200,12 @@ export function BroadcastForm() {
             disabled={sending || !title.trim() || !message.trim()}
             className="bg-red px-6 py-2.5 font-condensed text-[12px] font-bold uppercase tracking-[0.12em] text-white transition-all disabled:opacity-40"
           >
-            {sending ? 'Sending\u2026' : 'Send Broadcast'}
+            {sending ? 'Sending…' : 'Send Broadcast'}
           </button>
 
           {result?.sent !== undefined && (
             <p className="font-condensed font-semibold text-[12px] text-[#15803d]">
-              \u2713 Sent to {result.sent} members
+              Sent to {result.sent} members
             </p>
           )}
           {result?.error && (
@@ -270,7 +270,7 @@ export function BroadcastForm() {
           <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mt-0.5">
             {AUDIENCE_OPTIONS.find(a => a.value === audience)?.desc}
             {audienceCount !== null && (
-              <span className="font-semibold text-[color:var(--admin-text)]"> \u2014 {audienceCount} member{audienceCount !== 1 ? 's' : ''}</span>
+              <span className="font-semibold text-[color:var(--admin-text)]"> - {audienceCount} member{audienceCount !== 1 ? 's' : ''}</span>
             )}
           </p>
         </div>
