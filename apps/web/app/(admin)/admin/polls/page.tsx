@@ -72,7 +72,7 @@ export default function AdminPollsPage() {
   }
 
   return (
-    <div style={{ padding: '24px 32px', maxWidth: 960 }}>
+    <div className="px-4 sm:px-8 py-6" style={{ maxWidth: 960 }}>
       {dialog}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h1 className="font-condensed font-bold text-[22px]" style={{ color: 'var(--admin-text)' }}>Polls</h1>

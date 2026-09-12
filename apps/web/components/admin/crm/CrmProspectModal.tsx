@@ -433,7 +433,7 @@ export function CrmProspectModal({
               onChange={e => setConversationSummary(e.target.value)}
               rows={3}
               style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }}
-              placeholder="Ask George / Conversations AI summary"
+              placeholder="Conversation notes"
             />
           </div>
           <div>

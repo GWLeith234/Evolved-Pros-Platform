@@ -38,7 +38,7 @@ export default async function EditLessonPage({ params }: Props) {
   if (!course || !lesson) notFound()
 
   return (
-    <div className="px-8 py-6">
+    <div className="px-4 sm:px-8 py-6">
       <div className="mb-6">
         <Link
           href={`/admin/courses/${params.courseId}`}

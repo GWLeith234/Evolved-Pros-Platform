@@ -39,7 +39,7 @@ export default async function AdminPartnersPage() {
   const rows = sponsors ?? []
 
   return (
-    <div className="px-8 py-6">
+    <div className="px-4 sm:px-8 py-6">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)]">Partners</h1>

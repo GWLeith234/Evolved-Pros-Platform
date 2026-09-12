@@ -47,7 +47,7 @@ export function PipelineCard({ member, isUpgradeReady = false }: PipelineCardPro
             ${member.estimatedValue.toLocaleString('en-US')}/yr
           </span>
         ) : (
-          <span className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">—</span>
+          <span className="font-body text-[12px] text-[color:var(--admin-text-2)]">n/a</span>
         )}
         {member.overridden && (
           <span

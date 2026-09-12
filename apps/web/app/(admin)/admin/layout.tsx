@@ -26,7 +26,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       const profile = JSON.parse(devSession) as { role: string; display_name: string; full_name: string }
       if (profile.role !== 'admin') redirect('/home')
       return (
-        <div className="ep-member-shell">
+        <div className="ep-member-shell ep-admin-shell">
           <AdminTopNav profile={profile} />
           <div className="ep-member-body">
             <AdminSidebar />
@@ -52,7 +52,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (profile?.role !== 'admin') redirect('/home')
 
   return (
-    <div className="ep-member-shell">
+    <div className="ep-member-shell ep-admin-shell">
       {/* Stored theme wins over the localStorage hint (see ThemeSync). */}
       <ThemeSync theme={profile.theme} />
       <AdminTopNav profile={profile} />

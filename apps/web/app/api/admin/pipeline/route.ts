@@ -98,28 +98,22 @@ export async function GET() {
 
     let stage: PipelineStage
     let stageNote: string
-    let estimatedValue: number
 
     if (overrides[m.id]) {
-      stage      = overrides[m.id].stage
-      stageNote  = overrides[m.id].note
-      estimatedValue = stage === 'upgrade_ready' || stage === 'closed' ? 249 * 12 : 79 * 12
+      stage     = overrides[m.id].stage
+      stageNote = overrides[m.id].note
     } else if (recentProIds.has(m.id)) {
-      stage          = 'closed'
-      stageNote      = 'Upgraded to Pro'
-      estimatedValue = 249 * 12
+      stage     = 'closed'
+      stageNote = 'Upgraded to Pro'
     } else if (pillar4Users.has(m.id) && m.tier === 'vip') {
-      stage          = 'upgrade_ready'
-      stageNote      = 'Hit P4 · ready for Pro'
-      estimatedValue = 249 * 12
+      stage     = 'upgrade_ready'
+      stageNote = 'Hit P4. Ready for Professional'
     } else if (m.tier === 'vip' && (engLevel === 'Med' || engLevel === 'High')) {
-      stage          = 'engaged'
-      stageNote      = 'VIP · Active'
-      estimatedValue = 79 * 12
+      stage     = 'engaged'
+      stageNote = 'VIP. Active'
     } else {
-      stage          = 'awareness'
-      stageNote      = 'Low activity'
-      estimatedValue = 0
+      stage     = 'awareness'
+      stageNote = 'Low activity'
     }
 
     result[stage].push({
@@ -135,7 +129,9 @@ export async function GET() {
       lessonsLast30,
       stage,
       stageNote,
-      estimatedValue,
+      // Do not invent ARR from list price. Canonical TIERS are VIP $49 /
+      // Professional $249; billing_events are not wired yet.
+      estimatedValue: 0,
       joinedAt:        m.created_at,
       overridden:      !!overrides[m.id],
     })

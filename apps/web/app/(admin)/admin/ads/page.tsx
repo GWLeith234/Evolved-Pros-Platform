@@ -42,7 +42,7 @@ export default async function AdminAdsPage() {
   }
 
   return (
-    <div className="px-8 py-6">
+    <div className="px-4 sm:px-8 py-6">
       <div className="mb-6">
         <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-1" style={{ color: '#68a2b9' }}>
           Platform

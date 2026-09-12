@@ -35,7 +35,7 @@ export default async function EditEventPage({ params }: Props) {
   const pillarSlug = typeof row.pillar === 'number' ? PILLAR_NUMBER_TO_SLUG[row.pillar] ?? '' : ''
 
   return (
-    <div className="px-8 py-6">
+    <div className="px-4 sm:px-8 py-6">
       <div className="mb-6">
         <a
           href="/admin/events"

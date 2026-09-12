@@ -22,7 +22,7 @@ export default async function AdminEventsPage() {
   const events = rows ?? []
 
   return (
-    <div className="px-8 py-6">
+    <div className="px-4 sm:px-8 py-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)]">Events</h1>

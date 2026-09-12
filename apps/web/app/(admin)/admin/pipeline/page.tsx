@@ -29,8 +29,8 @@ export default async function AdminPipelinePage() {
   const memberList = members ?? []
   if (memberList.length === 0) {
     return (
-      <div className="px-8 py-6">
-        <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)] mb-2">Pipeline</h1>
+      <div className="px-4 sm:px-8 py-6">
+        <h1 className="font-condensed font-bold text-[28px] text-[color:var(--admin-text-strong)] mb-2">Member upgrades</h1>
         <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">No active members yet.</p>
       </div>
     )
@@ -83,20 +83,18 @@ export default async function AdminPipelinePage() {
 
     let stage: PipelineStage
     let stageNote: string
-    let estimatedValue: number
 
     if (overrides[m.id]) {
-      stage          = overrides[m.id].stage
-      stageNote      = overrides[m.id].note
-      estimatedValue = stage === 'upgrade_ready' || stage === 'closed' ? 79 * 12 : 39 * 12
+      stage     = overrides[m.id].stage
+      stageNote = overrides[m.id].note
     } else if (recentProIds.has(m.id)) {
-      stage = 'closed'; stageNote = 'Upgraded to Pro'; estimatedValue = 79 * 12
+      stage = 'closed'; stageNote = 'Upgraded to Pro'
     } else if (pillar4Users.has(m.id) && m.tier === 'vip') {
-      stage = 'upgrade_ready'; stageNote = 'Hit P4 · ready for Pro'; estimatedValue = 79 * 12
+      stage = 'upgrade_ready'; stageNote = 'Hit P4. Ready for Professional'
     } else if (m.tier === 'vip' && (engLvl === 'Med' || engLvl === 'High')) {
-      stage = 'engaged'; stageNote = 'VIP · Active'; estimatedValue = 39 * 12
+      stage = 'engaged'; stageNote = 'VIP. Active'
     } else {
-      stage = 'awareness'; stageNote = 'Low activity'; estimatedValue = 0
+      stage = 'awareness'; stageNote = 'Low activity'
     }
 
     result[stage].push({
@@ -107,31 +105,20 @@ export default async function AdminPipelinePage() {
       tierStatus:      m.tier_status,
       stage,
       stageNote,
-      estimatedValue,
+      // Do not invent ARR from list price. Same rule as /admin/revenue.
+      estimatedValue: 0,
       engagementLevel: engLvl,
       overridden:      !!overrides[m.id],
     })
   }
 
-  const totalValue = [
-    ...result.upgrade_ready,
-    ...result.closed,
-  ].reduce((sum, m) => sum + m.estimatedValue, 0)
-
   return (
-    <div className="px-8 py-6">
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="font-display font-black text-[28px] text-[color:var(--admin-text-strong)]">Pipeline</h1>
-          <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)] mt-0.5">
-            Upgrade pipeline — drag cards to reclassify members
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="font-condensed font-bold text-[10px] uppercase tracking-[0.16em] text-[color:var(--admin-text-2)]">Pipeline Value</p>
-          <p className="font-display font-black text-[24px] text-[#c9a84c]">${totalValue.toLocaleString('en-US')}</p>
-          <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)]">upgrade ready + closed · annual</p>
-        </div>
+    <div className="px-4 sm:px-8 py-6">
+      <div className="mb-6">
+        <h1 className="font-condensed font-bold text-[28px] text-[color:var(--admin-text-strong)]">Member upgrades</h1>
+        <p className="font-body text-[14px] text-[color:var(--admin-text-2)] mt-0.5">
+          Drag cards to reclassify members. Dollar totals appear when billing is connected.
+        </p>
       </div>
 
       <PipelineBoard initialData={result} />
