@@ -17,7 +17,7 @@ const WORDMARK = 'EVOLVED<span style="color:#ef0e30;">·</span>PROS'
 const FIXTURE = `<!doctype html>
 <html>
 <body>
-  <p>${WORDMARK}</p>
+  <img src="${THANKS_V14_HOSTED_LOGO}" alt="EVOLVED·PROS" width="180" height="36" />
   <p>Hi {{first_name}},</p>
   <a href="{{claim_url}}">Claim free Community</a>
   <p>Copy this link: <a href="{{claim_url}}">{{claim_url}}</a></p>
@@ -47,7 +47,7 @@ describe('send-ready-v14 HTML wiring', () => {
 
   it('escapes first_name so markup cannot land in the greeting', () => {
     const sneaky = '<b>Ada</b>'
-    const html = applyThanksV12Vars(`Hello {{first_name}} ${WORDMARK}`, {
+    const html = applyThanksV12Vars(`Hello {{first_name}} ${THANKS_V14_HOSTED_LOGO}`, {
       first_name: sneaky,
       claim_url: CLAIM,
     })
@@ -59,6 +59,14 @@ describe('send-ready-v14 HTML wiring', () => {
     expect(() => applyThanksV12Vars('Hey {{George}},', { first_name: 'Ada', claim_url: CLAIM })).toThrow(/first_name/)
     expect(() => applyThanksV12Vars('Hey {{{{first_name}}}},', { first_name: 'Ada', claim_url: CLAIM })).toThrow(/first_name/)
     expect(() => applyThanksV12Vars('<img src="cid:logo">', { first_name: 'Ada', claim_url: CLAIM })).toThrow(/cid:logo/)
+  })
+
+  it('treats a text wordmark header as a Gmail-safe violation', () => {
+    const hits = thanksV12GmailSafeViolations(
+      `<table style="x"><img src="cid:george-headshot" /><p>${WORDMARK}</p><p>Hey {{first_name}},</p><a href="{{claim_url}}">x</a></table>`,
+    )
+    expect(hits).toContain('missing_hosted_logo')
+    expect(hits).toContain('text_wordmark_forbidden')
   })
 
   it('lands E01 v14 with hosted logo, {{first_name}}, circular 2-col sig, and claim_url tokens', () => {
@@ -100,14 +108,16 @@ describe('send-ready-v14 HTML wiring', () => {
     expect(html).toContain('>George<')
   })
 
-  it('lands E02 v13 with the same wordmark and first_name lock', () => {
+  it('lands E02 v14 with hosted logo, first_name lock, and Foundation hrefs', () => {
     const raw = loadThanksV12Html(1)
     expect(raw).toBeTruthy()
     expect(raw).toContain('Start with the basics.')
     expect(raw).toContain('Hey {{first_name}},')
-    expect(raw).toContain(WORDMARK)
+    expect(raw).toContain(THANKS_V14_HOSTED_LOGO)
+    expect(raw).not.toContain(WORDMARK)
     expect(raw).not.toContain('cid:logo')
     expect(raw).toContain('cid:george-headshot')
+    expect(raw).toContain('border-radius:50%')
     expect(raw).toContain('https://www.evolvedpros.com/media/foundation/hard-boiled-eggs-protein-snack-hack')
     expect(raw).toContain('https://www.evolvedpros.com/podcast/fitness-nutrition-evolved-pros-carson-teagarden')
 
@@ -124,9 +134,11 @@ describe('send-ready-v14 HTML wiring', () => {
     expect(raw).toBeTruthy()
     expect(raw).toContain('Stand for something.')
     expect(raw).toContain('Hey {{first_name}},')
-    expect(raw).toContain(WORDMARK)
+    expect(raw).toContain(THANKS_V14_HOSTED_LOGO)
+    expect(raw).not.toContain(WORDMARK)
     expect(raw).not.toContain('cid:logo')
     expect(raw).toContain('cid:george-headshot')
+    expect(raw).toContain('border-radius:50%')
     expect(raw).toContain('https://www.evolvedpros.com/media/identity/tecovas-denver')
     expect(raw).toContain('https://www.evolvedpros.com/podcast/dennis-yu-authority-content')
     const html = renderThanksV12Html(2, { first_name: 'Ada', claim_url: CLAIM })
@@ -136,18 +148,26 @@ describe('send-ready-v14 HTML wiring', () => {
     expect(html).not.toContain(`${CLAIM}/podcast`)
   })
 
-  it('keeps every landed file Gmail-safe: tables, inline styles, header mark, no cid:logo', () => {
-    const landed = landedThanksV12Steps()
-    expect(landed).toEqual(expect.arrayContaining([0, 1, 2]))
-    for (const step of landed) {
+  it('lands steps 0..11 so sender never falls back to the React scaffold', () => {
+    expect(landedThanksV12Steps()).toEqual([...THANKS_CADENCE_STEPS])
+    for (const step of THANKS_CADENCE_STEPS) {
       const raw = loadThanksV12Html(step)
+      expect(raw, THANKS_V12_HTML_FILES[step]).toBeTruthy()
       expect(thanksV12GmailSafeViolations(raw!), THANKS_V12_HTML_FILES[step]).toEqual([])
+      expect(raw).not.toContain('\u2014')
+      expect(raw).not.toContain('\u2013')
+      expect(raw).toContain('Hey {{first_name}},')
+      expect(raw).toContain('border-radius:50%')
+      const html = renderThanksV12Html(step, { first_name: 'Ada', claim_url: CLAIM })
+      expect(html).toBeTruthy()
+      expect(html).toContain('Hey Ada,')
+      expect(html).toContain(`href="${CLAIM}"`)
     }
   })
 
   it('leaves path-bearing www links alone', () => {
     const html = applyThanksV12Vars(
-      `<p>${WORDMARK}</p><a href="${PODCAST}">pod</a><a href="https://www.evolvedpros.com/invite/thanks">claim page</a><img src="cid:george-headshot" />`,
+      `<img src="${THANKS_V14_HOSTED_LOGO}" /><a href="${PODCAST}">pod</a><a href="https://www.evolvedpros.com/invite/thanks">claim page</a><img src="cid:george-headshot" />`,
       { first_name: 'Ada', claim_url: CLAIM },
     )
     expect(html).toContain(`href="${PODCAST}"`)
