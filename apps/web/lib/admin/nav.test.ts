@@ -77,4 +77,17 @@ describe('admin chrome copy locks', () => {
     expect(displayCrmTag('AI George')).toBe('Ask George')
     expect(displayCrmTag('vip')).toBe('vip')
   })
+
+  it('does not invent Member upgrades ARR from stale $79/$39 or monthly * 12', () => {
+    const page = src('app/(admin)/admin/pipeline/page.tsx')
+    const api = src('app/api/admin/pipeline/route.ts')
+    for (const text of [page, api]) {
+      expect(text).not.toMatch(/79 \* 12/)
+      expect(text).not.toMatch(/39 \* 12/)
+      expect(text).not.toMatch(/249 \* 12/)
+    }
+    expect(page).not.toContain('Upgrade value')
+    expect(page).toContain('Member upgrades')
+    expect(page).toContain('Dollar totals appear when billing is connected')
+  })
 })

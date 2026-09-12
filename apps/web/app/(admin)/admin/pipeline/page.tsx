@@ -83,20 +83,18 @@ export default async function AdminPipelinePage() {
 
     let stage: PipelineStage
     let stageNote: string
-    let estimatedValue: number
 
     if (overrides[m.id]) {
-      stage          = overrides[m.id].stage
-      stageNote      = overrides[m.id].note
-      estimatedValue = stage === 'upgrade_ready' || stage === 'closed' ? 79 * 12 : 39 * 12
+      stage     = overrides[m.id].stage
+      stageNote = overrides[m.id].note
     } else if (recentProIds.has(m.id)) {
-      stage = 'closed'; stageNote = 'Upgraded to Pro'; estimatedValue = 79 * 12
+      stage = 'closed'; stageNote = 'Upgraded to Pro'
     } else if (pillar4Users.has(m.id) && m.tier === 'vip') {
-      stage = 'upgrade_ready'; stageNote = 'Hit P4 · ready for Pro'; estimatedValue = 79 * 12
+      stage = 'upgrade_ready'; stageNote = 'Hit P4. Ready for Professional'
     } else if (m.tier === 'vip' && (engLvl === 'Med' || engLvl === 'High')) {
-      stage = 'engaged'; stageNote = 'VIP · Active'; estimatedValue = 39 * 12
+      stage = 'engaged'; stageNote = 'VIP. Active'
     } else {
-      stage = 'awareness'; stageNote = 'Low activity'; estimatedValue = 0
+      stage = 'awareness'; stageNote = 'Low activity'
     }
 
     result[stage].push({
@@ -107,31 +105,20 @@ export default async function AdminPipelinePage() {
       tierStatus:      m.tier_status,
       stage,
       stageNote,
-      estimatedValue,
+      // Do not invent ARR from list price. Same rule as /admin/revenue.
+      estimatedValue: 0,
       engagementLevel: engLvl,
       overridden:      !!overrides[m.id],
     })
   }
 
-  const totalValue = [
-    ...result.upgrade_ready,
-    ...result.closed,
-  ].reduce((sum, m) => sum + m.estimatedValue, 0)
-
   return (
     <div className="px-4 sm:px-8 py-6">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="font-condensed font-bold text-[28px] text-[color:var(--admin-text-strong)]">Member upgrades</h1>
-          <p className="font-body text-[14px] text-[color:var(--admin-text-2)] mt-0.5">
-            Drag cards to reclassify members
-          </p>
-        </div>
-        <div className="sm:text-right">
-          <p className="font-body text-[13px] text-[color:var(--admin-text-2)]">Upgrade value</p>
-          <p className="font-condensed font-bold text-[24px] text-[color:var(--admin-text-strong)]">${totalValue.toLocaleString('en-US')}</p>
-          <p className="font-condensed text-[10px] text-[color:var(--admin-text-2)]">upgrade ready + closed · annual</p>
-        </div>
+      <div className="mb-6">
+        <h1 className="font-condensed font-bold text-[28px] text-[color:var(--admin-text-strong)]">Member upgrades</h1>
+        <p className="font-body text-[14px] text-[color:var(--admin-text-2)] mt-0.5">
+          Drag cards to reclassify members. Dollar totals appear when billing is connected.
+        </p>
       </div>
 
       <PipelineBoard initialData={result} />
