@@ -3,7 +3,7 @@ import { PartnerForm } from '@/components/admin/PartnerForm'
 
 export default function NewPartnerPage() {
   return (
-    <div className="px-8 py-6">
+    <div className="px-4 sm:px-8 py-6">
       <Link
         href="/admin/partners"
         className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[color:var(--admin-text-2)] hover:text-[color:var(--admin-text)]"

@@ -510,7 +510,7 @@ export function BrandingPortalClient({ initialSettings, initialBanners }: Props)
   const [activeTab, setActiveTab] = useState<Tab>('Identity')
 
   return (
-    <div className="p-8">
+    <div className="px-4 sm:px-8 py-6">
       {/* Page header */}
       <div className="mb-6">
         <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-1" style={{ color: '#68a2b9' }}>

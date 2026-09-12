@@ -2,7 +2,7 @@ import { EventForm } from '../EventForm'
 
 export default function NewEventPage() {
   return (
-    <div className="px-8 py-6">
+    <div className="px-4 sm:px-8 py-6">
       <div className="mb-6">
         <a
           href="/admin/events"

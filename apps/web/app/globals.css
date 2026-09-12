@@ -55,6 +55,8 @@
   --admin-text-strong: #112535;
   --admin-text-2:      #4a5d6e;
   --admin-border:      rgba(17,37,53,0.12);
+  --admin-overlay:     rgba(17,37,53,0.32);
+  --admin-on-accent:   #ffffff;
 
   /* DS2 — TopNav v2 + brand (FOUNDATION-TOPNAV-V2) */
   --bg-topnav:     #0D1B2A;
@@ -359,6 +361,8 @@ html.light-mode {
   --admin-text-strong: #112535;
   --admin-text-2:      #4a5d6e;
   --admin-border:      rgba(17,37,53,0.12);
+  --admin-overlay:     rgba(17,37,53,0.32);
+  --admin-on-accent:   #ffffff;
 
   /* DS2 light variants (FOUNDATION-TOPNAV-V2 + SPRINT-1 nav contrast) */
   --bg-topnav:     #FAF7F2;
@@ -533,6 +537,8 @@ html.light-mode main {
   --admin-text-strong: #112535;
   --admin-text-2:      #4a5d6e;
   --admin-border:      rgba(17,37,53,0.12);
+  --admin-overlay:     rgba(17,37,53,0.32);
+  --admin-on-accent:   #ffffff;
   --bg-page:           #f4f6f8;
   --bg-surface:        #ffffff;
   --bg-elevated:       #eef1f4;

@@ -105,7 +105,7 @@ export function InviteMemberButton() {
       <button
         onClick={() => setOpen(true)}
         className="inline-flex items-center justify-center gap-1.5 bg-red min-h-[44px] px-4 font-condensed text-[13px] font-bold tracking-[0.06em] transition-colors"
-        style={{ color: '#fff' }}
+        style={{ color: 'var(--admin-on-accent)' }}
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>

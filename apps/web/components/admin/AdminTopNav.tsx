@@ -38,8 +38,8 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
     <header
       className="admin-topnav sticky top-0 z-40 flex items-center justify-between px-4 sm:px-6 h-14 flex-shrink-0"
       style={{
-        backgroundColor: '#ffffff',
-        borderBottom: '1px solid rgba(17,37,53,0.10)',
+        backgroundColor: 'var(--admin-card)',
+        borderBottom: '1px solid var(--admin-border)',
       }}
     >
       <div className="flex items-center gap-3">
@@ -49,7 +49,7 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
           aria-label="Open admin navigation"
           aria-expanded={mobileMenuOpen}
           className="md:hidden -ml-1 inline-flex items-center justify-center rounded"
-          style={{ color: '#1b3c5a', width: 44, height: 44 }}
+          style={{ color: 'var(--admin-text)', width: 44, height: 44 }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
             <line x1="4" y1="6" x2="20" y2="6" />
@@ -69,9 +69,9 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
         <span
           className="hidden sm:inline-flex items-center font-body text-[12px] px-2 py-0.5 rounded"
           style={{
-            color: '#1b3c5a',
-            backgroundColor: 'rgba(17,37,53,0.06)',
-            border: '1px solid rgba(17,37,53,0.10)',
+            color: 'var(--admin-text)',
+            backgroundColor: 'var(--admin-subtle)',
+            border: '1px solid var(--admin-border)',
           }}
         >
           Admin
@@ -85,14 +85,13 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
             className="absolute inset-0"
             aria-label="Close admin navigation"
             onClick={() => setMobileMenuOpen(false)}
-            style={{ backgroundColor: 'rgba(17,37,53,0.32)', border: 'none', padding: 0 }}
+            style={{ backgroundColor: 'var(--admin-overlay)', border: 'none', padding: 0 }}
           />
           <aside
             className="absolute inset-y-0 left-0 flex w-[min(280px,88vw)] flex-col py-3"
             style={{
-              backgroundColor: '#ffffff',
-              borderRight: '1px solid rgba(17,37,53,0.10)',
-              boxShadow: '4px 0 24px rgba(17,37,53,0.12)',
+              backgroundColor: 'var(--admin-card)',
+              borderRight: '1px solid var(--admin-border)',
             }}
           >
             <div className="flex items-center justify-between px-3 mb-2">
@@ -102,7 +101,7 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
                 onClick={() => setMobileMenuOpen(false)}
                 aria-label="Close admin navigation"
                 className="inline-flex items-center justify-center rounded"
-                style={{ width: 44, height: 44, color: '#1b3c5a' }}
+                style={{ width: 44, height: 44, color: 'var(--admin-text)' }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <path d="M18 6L6 18M6 6l12 12" />
@@ -121,8 +120,8 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
           href="/home"
           className="hidden sm:inline-flex items-center justify-center min-h-[44px] px-3 font-body text-[13px] rounded"
           style={{
-            color: '#1b3c5a',
-            border: '1px solid rgba(17,37,53,0.14)',
+            color: 'var(--admin-text)',
+            border: '1px solid var(--admin-border)',
             textDecoration: 'none',
             whiteSpace: 'nowrap',
           }}
@@ -139,8 +138,8 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
           style={{
             width: 44,
             height: 44,
-            color: '#1b3c5a',
-            border: '1px solid rgba(17,37,53,0.14)',
+            color: 'var(--admin-text)',
+            border: '1px solid var(--admin-border)',
           }}
         >
           {preference === 'system' ? (
@@ -165,11 +164,11 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
           style={{
             width: 36,
             height: 36,
-            backgroundColor: '#112535',
-            border: '1px solid rgba(17,37,53,0.15)',
+            backgroundColor: 'var(--admin-text-strong)',
+            border: '1px solid var(--admin-border)',
           }}
         >
-          <span className="font-condensed font-bold text-xs" style={{ color: '#fff' }}>
+          <span className="font-condensed font-bold text-xs" style={{ color: 'var(--admin-on-accent)' }}>
             {getInitials(displayName)}
           </span>
         </div>

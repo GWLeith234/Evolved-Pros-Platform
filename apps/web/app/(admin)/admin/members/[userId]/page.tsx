@@ -90,7 +90,7 @@ export default async function AdminMemberDetailPage({ params }: Props) {
 
   return (
     <div>
-      <div className="px-8 pt-6 pb-0">
+      <div className="px-4 sm:px-8 pt-6 pb-0">
         <Link
           href="/admin/members"
           className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[color:var(--admin-text-2)] hover:text-[color:var(--admin-text)] transition-colors"
