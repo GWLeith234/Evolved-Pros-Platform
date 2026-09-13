@@ -54,9 +54,9 @@ export function FitAdminClient() {
           </AdminButton>
         }
         primary={
-          <AdminButton variant="primary" aria-disabled="true">
+          <span className="ep-admin-el-btn ep-admin-el-btn--primary" aria-disabled="true">
             + {FIT_ADMIN_NEW}
-          </AdminButton>
+          </span>
         }
       />
 

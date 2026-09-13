@@ -3010,8 +3010,7 @@ html.light-mode .ep-fit-page-footer-mark img:last-child { display: block; }
   text-decoration: none;
   cursor: pointer;
 }
-.ep-admin-el-btn:disabled,
-.ep-admin-el-btn[aria-disabled="true"] {
+.ep-admin-el-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
