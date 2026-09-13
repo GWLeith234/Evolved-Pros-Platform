@@ -1,9 +1,11 @@
 // Centered Media lockup for /media. Shared by the hub and every article shell.
-// Theme-swapped media-lockup PNG (EVOLVED [megaphone disc] MEDIA). Same
-// FooterLogo / loader CSS pair — not a composed HTML+disc mark.
+// Theme-swapped media-lockup PNG (EVOLVED PR [megaphone disc] S MEDIA).
+// Layout A, same FooterLogo / loader CSS pair. Not a composed HTML+disc mark.
 
 import Link from 'next/link'
 import {
+  LOCKUP_INTRINSIC_HEIGHT,
+  LOCKUP_INTRINSIC_WIDTH,
   MEDIA_LOCKUP_DARK,
   MEDIA_LOCKUP_LABEL,
   MEDIA_LOCKUP_LIGHT,
@@ -20,8 +22,8 @@ export function MediaMastheadLockup() {
           className="ep-media-masthead-logo ep-media-masthead-logo--on-dark"
           src={MEDIA_LOCKUP_DARK}
           alt=""
-          width={1239}
-          height={207}
+          width={LOCKUP_INTRINSIC_WIDTH}
+          height={LOCKUP_INTRINSIC_HEIGHT}
         />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -29,8 +31,8 @@ export function MediaMastheadLockup() {
           className="ep-media-masthead-logo ep-media-masthead-logo--on-light"
           src={MEDIA_LOCKUP_LIGHT}
           alt=""
-          width={1239}
-          height={207}
+          width={LOCKUP_INTRINSIC_WIDTH}
+          height={LOCKUP_INTRINSIC_HEIGHT}
         />
       </Link>
     </h1>

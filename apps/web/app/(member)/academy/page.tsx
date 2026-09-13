@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { loginHrefFor } from '@/lib/auth/gatedIntent'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { AcademyMastheadLockup } from '@/components/academy/AcademyMasthead'
 import { AcademyMobileProgress } from '@/components/academy/AcademyMobileProgress'
 
 export const metadata: Metadata = { title: 'Academy — Evolved Pros' }
@@ -92,9 +93,7 @@ export default async function AcademyPage() {
         >
           The Evolved Architecture™
         </p>
-        <h1 className="font-display font-black leading-tight ep-fluid-title">
-          The Academy
-        </h1>
+        <AcademyMastheadLockup />
         <p className="academy-lede font-body text-[14px] mt-1">
           A 6-pillar professional development framework designed to transform how you work, think, and lead.
         </p>
