@@ -20,12 +20,13 @@ const logoTsx = readFileSync(
 )
 
 describe('PUBLIC_FOOTER_LINKS', () => {
-  it('renders the eight approved links, in order, with the exact labels', () => {
+  it('renders the approved links, in order, with the exact labels', () => {
     expect(PUBLIC_FOOTER_LINKS.map(l => [l.label, l.href])).toEqual([
       ['Join free', '/pricing'],
       ['Pricing', '/pricing'],
       ['Podcast', '/podcast'],
       ['Media', '/media'],
+      ['Fit', '/fit'],
       ['LIVE', '/live'],
       ['Contact', '/contact'],
       ['Privacy', '/privacy'],

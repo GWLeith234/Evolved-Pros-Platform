@@ -34,6 +34,7 @@ export const PUBLIC_FOOTER_LINKS: readonly PublicFooterLink[] = [
   { label: 'Pricing',   href: '/pricing' },
   { label: 'Podcast',   href: '/podcast' },
   { label: 'Media',     href: '/media' },
+  { label: 'Fit',       href: '/fit' },
   { label: 'LIVE',      href: '/live' },
   { label: 'Contact',   href: '/contact' },
   { label: 'Privacy',   href: '/privacy' },

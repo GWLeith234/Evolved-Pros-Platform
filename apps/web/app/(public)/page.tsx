@@ -77,7 +77,7 @@ async function loadStories(): Promise<ConversionStory[]> {
 
 export default async function LandingPage() {
   const [profile, episodes, stories] = await Promise.all([
-    resolveCurrentUser(),
+    resolveCurrentUser().catch(() => null),
     loadEpisodes(),
     loadStories(),
   ])
@@ -88,7 +88,12 @@ export default async function LandingPage() {
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd()) }}
       />
-      <ConversionHome signedIn={profile !== null} episodes={episodes} stories={stories} />
+      <ConversionHome
+        signedIn={profile !== null}
+        viewerTier={profile?.tier ?? null}
+        episodes={episodes}
+        stories={stories}
+      />
     </>
   )
 }

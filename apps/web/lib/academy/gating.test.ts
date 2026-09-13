@@ -85,6 +85,11 @@ describe('buildUpgradeHref', () => {
       .toBe('/pricing?from=assessment&pillar=2&tier=vip')
   })
 
+  it('builds the Fit VIP upsell link', () => {
+    expect(buildUpgradeHref({ from: 'fit', tier: 'vip' }))
+      .toBe('/pricing?from=fit&tier=vip')
+  })
+
   it('normalises tier casing and drops non-gating tiers', () => {
     expect(buildUpgradeHref({ from: 'academy', tier: 'VIP', pillar: 2 }))
       .toBe('/pricing?from=academy&pillar=2&tier=vip')

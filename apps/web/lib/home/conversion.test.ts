@@ -284,6 +284,13 @@ describe('conversion homepage layout contracts', () => {
     expect(conversionPageSrc).toMatch(/HOME_MEDIA_STORY_COUNT/)
     expect(conversionPageSrc).toMatch(/mediaStoryHref/)
   })
+
+  it('mounts the Fit instructional-guide tease on conversion `/`', () => {
+    expect(conversionHomeSrc).toMatch(/HomeFitTeaseBand/)
+    expect(conversionHomeSrc).toMatch(/viewerTier=\{viewerTier\}/)
+    expect(conversionPageSrc).toMatch(/viewerTier=\{profile\?\.tier \?\? null\}/)
+    expect(globalsSrc).toMatch(/\.ep-conversion-home \.ep-fit-masthead-logo--on-light/)
+  })
 })
 
 describe('home episode display', () => {

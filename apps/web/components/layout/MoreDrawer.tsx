@@ -222,6 +222,15 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
         </Link>
 
         <Link
+          href="/fit"
+          onClick={onClose}
+          className={linkClass}
+          style={{ color: 'var(--text-primary)', minHeight: 52 }}
+        >
+          Fit
+        </Link>
+
+        <Link
           href="/messages"
           onClick={onClose}
           className={linkClass}

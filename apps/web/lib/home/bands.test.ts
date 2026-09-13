@@ -159,6 +159,12 @@ describe('Home surfaces wire guest stills', () => {
     expect(page).toMatch(/HomeBannerBand/)
     expect(page).toMatch(/HomeAccountabilityBand/)
     expect(page).toMatch(/HomeFuelBand/)
+    expect(page).toMatch(/HomeFitTeaseBand/)
+    const conversionHome = readFileSync(
+      resolve(__dirname, '../../components/home/ConversionHome.tsx'),
+      'utf8',
+    )
+    expect(conversionHome).toMatch(/HomeFitTeaseBand/)
     expect(page).toMatch(/PublicFooter/)
     expect(page).toMatch(/kind\.eq\.win,post_type\.eq\.win/)
     expect(page).toMatch(/pickFuelLiveEvent/)
@@ -174,7 +180,10 @@ describe('Home surfaces wire guest stills', () => {
       '../../components/home/HomeBannerBand.tsx',
       '../../components/home/HomeAccountabilityBand.tsx',
       '../../components/home/HomeFuelBand.tsx',
+      '../../components/home/HomeFitTeaseBand.tsx',
       '../../components/home/HomeEpisodeCard.tsx',
+      '../fit/copy.ts',
+      '../fit/moves.ts',
     ]
     for (const file of files) {
       const src = readFileSync(resolve(__dirname, file), 'utf8')

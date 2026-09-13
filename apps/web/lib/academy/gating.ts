@@ -47,7 +47,7 @@ export function tierPlanName(requiredTier: string | null | undefined): string {
   return 'Community'
 }
 
-export type UpgradeSource = 'academy' | 'events' | 'assessment'
+export type UpgradeSource = 'academy' | 'events' | 'assessment' | 'fit'
 
 /**
  * Canonical upgrade link. /pricing reads these params to headline the exact

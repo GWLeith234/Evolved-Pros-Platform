@@ -19,7 +19,7 @@
  * require auth and redirect an anonymous request — Googlebot included — to
  * /login. Do not add them back without first making them anon-readable.
  *
- * /live and /pricing ARE here: both are in SESSION_OPTIONAL_ROUTES, so
+ * /live, /pricing, and /fit ARE here: they are in SESSION_OPTIONAL_ROUTES, so
  * middleware refreshes the session but never bounces an anonymous visitor.
  * /pricing is the landing page's secondary CTA (See pricing). Advertising the
  * front door but not the buy page is the same class of false signal, inverted.
@@ -42,6 +42,7 @@ export const PUBLIC_SITEMAP_PATHS = [
   '/podcast',
   '/live',
   '/media',
+  '/fit',
   '/pricing',
   '/terms',
   '/privacy',
