@@ -20,6 +20,7 @@ import { CrmProspectModal, type CrmSavePayload } from './CrmProspectModal'
 import { CRM_TEST_MODE_KEY, isQaTestProspect } from '@/lib/admin/crmQa'
 import { CONFIRM } from '@/components/admin/safety/confirmCopy'
 import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
+import { AdminButton, AdminKanbanWell, AdminPageHeader } from '@/components/admin/template'
 
 type BoardData = Record<CrmStage, CrmProspect[]>
 type ViewMode = 'board' | 'table'
@@ -275,6 +276,8 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
   }
 
   async function handleDelete(id: string) {
+    const row = prospects.find(p => p.id === id)
+    if (!(await confirm(CONFIRM.deleteProspect(row?.full_name ?? 'this prospect')))) return
     setBusyId(id)
     const prev = prospects
     setProspects(list => list.filter(p => p.id !== id))
@@ -299,44 +302,31 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
   return (
     <div>
       {dialog}
-      {/* Header controls */}
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
-        <div>
-          <h1
-            className="font-display font-black text-[28px]"
-            style={{ color: 'var(--admin-text-strong)', margin: 0 }}
+      <AdminPageHeader
+        title="Prospects CRM"
+        subline="Lead, prospect, community, VIP, then professional. Drag cards to move stages."
+        secondary={
+          <AdminButton href="/admin/crm/import">
+            Import CSV
+          </AdminButton>
+        }
+        primary={
+          <AdminButton
+            variant="primary"
+            type="button"
+            onClick={() => {
+              setEditing(null)
+              setModalOpen(true)
+            }}
           >
-            Prospects CRM
-          </h1>
-          <p
-            className="font-condensed text-[12px] mt-0.5"
-            style={{ color: 'var(--admin-text-2)', margin: 0 }}
-          >
-            Lead → Prospect → Community → VIP (${CRM_STAGE_META.vip.mrr}) → Professional (${CRM_STAGE_META.professional.mrr}) · drag to move stages
-          </p>
-          <p className="mt-1 flex flex-wrap items-center gap-3">
-            <Link
-              href="/admin/products"
-              className="font-condensed font-bold uppercase text-[11px] tracking-wider"
-              style={{ color: '#68a2b9', textDecoration: 'none' }}
-            >
-              Products & membership →
-            </Link>
-            <Link
-              href="/admin/crm/import"
-              className="font-condensed font-bold uppercase text-[11px] tracking-wider px-2.5 py-1 rounded"
-              style={{
-                color: 'var(--brand-teal)',
-                background: 'var(--admin-subtle)',
-                border: '1px solid var(--admin-border)',
-                textDecoration: 'none',
-              }}
-            >
-              Import CSV
-            </Link>
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
+            + Add Prospect
+          </AdminButton>
+        }
+      />
+      <div className="ep-admin-el-toolbar">
+          <Link href="/admin/products" className="ep-admin-el-edit">
+            Products and membership
+          </Link>
           {flash && (
             <span
               className="font-condensed font-bold uppercase text-[11px] tracking-wider px-3 py-1.5 rounded"
@@ -375,7 +365,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
               border: '1px solid var(--admin-border)',
               cursor: keynoteBusy ? 'wait' : 'pointer',
               opacity: keynoteBusy ? 0.6 : 1,
-              minHeight: 40,
+              minHeight: 44,
             }}
           >
             <MicIcon />
@@ -397,7 +387,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
               onClick={() => void handleCleanupQa()}
               disabled={cleanupBusy || qaProspects.length === 0}
               className="border border-red px-3 py-2 font-condensed text-[11px] font-bold uppercase tracking-wider text-red"
-              style={{ minHeight: 40, opacity: cleanupBusy || qaProspects.length === 0 ? 0.45 : 1 }}
+              style={{ minHeight: 44, opacity: cleanupBusy || qaProspects.length === 0 ? 0.45 : 1 }}
             >
               {cleanupBusy ? 'Cleaning…' : `Cleanup QA${qaProspects.length ? ` · ${qaProspects.length}` : ''}`}
             </button>
@@ -415,7 +405,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
               aria-pressed={!testMode}
               onClick={() => persistTestMode(false)}
               className={`px-2.5 py-2 font-condensed text-[11px] font-bold uppercase tracking-wider ${testMode ? 'bg-transparent text-teal' : 'bg-teal text-navy'}`}
-              style={{ minHeight: 40 }}
+              style={{ minHeight: 44 }}
             >
               Off
             </button>
@@ -424,7 +414,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
               aria-pressed={testMode}
               onClick={() => persistTestMode(true)}
               className={`px-2.5 py-2 font-condensed text-[11px] font-bold uppercase tracking-wider ${testMode ? 'bg-teal text-navy' : 'bg-transparent text-teal'}`}
-              style={{ minHeight: 40 }}
+              style={{ minHeight: 44 }}
             >
               On
             </button>
@@ -446,7 +436,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
                   color: view === v ? '#fff' : '#1b3c5a',
                   border: 'none',
                   cursor: 'pointer',
-                  minHeight: 40,
+                  minHeight: 44,
                 }}
               >
                 {v}
@@ -462,39 +452,16 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
             className="font-body text-[13px] rounded px-3 py-2"
             style={{
               minWidth: 180,
-              minHeight: 40,
+              minHeight: 44,
               border: '1px solid var(--border-color, rgba(27,60,90,0.14))',
               background: 'var(--admin-card)',
               color: 'var(--admin-text)',
             }}
           />
-          <button
-            type="button"
-            onClick={() => {
-              setEditing(null)
-              setModalOpen(true)
-            }}
-            className="font-condensed font-bold uppercase tracking-[0.12em] text-[12px] rounded px-4 py-2 transition-all"
-            style={{ backgroundColor: '#1b3c5a', color: 'white', minHeight: 40 }}
-          >
-            + Add Prospect
-          </button>
-        </div>
       </div>
 
       {view === 'board' ? (
-        <div
-          className="crm-board-grid"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(5, minmax(210px, 1fr))',
-            gap: 12,
-            minHeight: 420,
-            overflowX: 'auto',
-            WebkitOverflowScrolling: 'touch',
-            paddingBottom: 8,
-          }}
-        >
+        <AdminKanbanWell columns={5}>
           {CRM_COLUMNS.map(col => {
             const cards = board[col.stage]
             const isDropTarget = overStage === col.stage && dragging !== null
@@ -597,7 +564,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
               </div>
             )
           })}
-        </div>
+      </AdminKanbanWell>
       ) : (
         /* Table view with Stage · Value · Last Contacted · Next Follow-up columns */
         <div
@@ -744,7 +711,7 @@ export function CrmBoard({ initialProspects }: CrmBoardProps) {
 const tableQa: React.CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
-  minHeight: 28,
+  minHeight: 44,
   padding: '4px 8px',
   fontFamily: '"Barlow Condensed", sans-serif',
   fontWeight: 700,

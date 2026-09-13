@@ -19,7 +19,7 @@ export function InviteMemberButton({ variant: _variant = 'header' }: InviteMembe
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="bg-red px-4 py-2 font-condensed text-[12px] font-bold uppercase tracking-[0.12em] text-white transition-all"
+          className="ep-admin-el-btn ep-admin-el-btn--primary"
         >
           + Invite Member
         </button>

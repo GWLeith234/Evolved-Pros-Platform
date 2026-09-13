@@ -2,6 +2,14 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import {
+  AdminChip,
+  AdminStatusChip,
+  AdminTable,
+  AdminTd,
+  AdminTh,
+  AdminToggle,
+} from '@/components/admin/template'
 
 interface Story {
   id: string
@@ -22,7 +30,7 @@ const TYPE_LABELS: Record<string, string> = {
 }
 
 function formatDate(iso: string | null): string {
-  if (!iso) return '\u2014'
+  if (!iso) return 'Not published'
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
@@ -33,95 +41,57 @@ export function MediaListClient({
   initialStories: Story[]
   pillarLabels: Record<string, string>
 }) {
-  const [stories, setStories] = useState(initialStories)
-
-  async function togglePublish(id: string, current: boolean) {
-    const next = !current
-    setStories(prev => prev.map(s => s.id === id ? { ...s, is_published: next } : s))
-
-    const res = await fetch(`/api/admin/media/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        is_published: next,
-        published_at: next ? new Date().toISOString() : null,
-      }),
-    })
-    if (!res.ok) {
-      setStories(prev => prev.map(s => s.id === id ? { ...s, is_published: current } : s))
-    }
-  }
+  const [stories] = useState(initialStories)
 
   return (
-    <div className="rounded-lg overflow-hidden" style={{ border: '1px solid rgba(27,60,90,0.1)' }}>
-      <table className="w-full text-left">
-        <thead>
-          <tr style={{ backgroundColor: 'rgba(27,60,90,0.03)', borderBottom: '1px solid rgba(27,60,90,0.08)' }}>
-            {['Title', 'Pillar', 'Type', 'Status', 'Featured', 'Published', 'Actions'].map(h => (
-              <th key={h} className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] text-[color:var(--admin-text-2)] px-4 py-3">
-                {h}
-              </th>
-            ))}
+    <AdminTable title="Story library" count={`${stories.length} ${stories.length === 1 ? 'story' : 'stories'}`}>
+      <thead>
+        <tr>
+          {['Title', 'Pillar', 'Type', 'Status', 'Featured', 'Published', 'Edit'].map(h => (
+            <AdminTh key={h}>{h}</AdminTh>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {stories.length === 0 ? (
+          <tr>
+            <AdminTd label="Title" colSpan={7}>
+              No stories yet. Use New Story to create one.
+            </AdminTd>
           </tr>
-        </thead>
-        <tbody>
-          {stories.length === 0 ? (
-            <tr>
-              <td colSpan={7} className="px-4 py-12 text-center font-condensed text-[13px] text-[color:var(--admin-text-2)]">
-                No stories yet. Click &quot;+ New Story&quot; to create one.
-              </td>
+        ) : (
+          stories.map(story => (
+            <tr key={story.id}>
+              <AdminTd label="Title">
+                <span className="ep-admin-el-move">{story.title}</span>
+              </AdminTd>
+              <AdminTd label="Pillar">
+                {story.pillar ? (pillarLabels[story.pillar] ?? story.pillar) : 'n/a'}
+              </AdminTd>
+              <AdminTd label="Type">
+                <AdminChip tone="data">{TYPE_LABELS[story.story_type] ?? story.story_type}</AdminChip>
+              </AdminTd>
+              <AdminTd label="Status">
+                <AdminStatusChip status={story.is_published ? 'published' : 'draft'}>
+                  {story.is_published ? 'Published' : 'Draft'}
+                </AdminStatusChip>
+              </AdminTd>
+              <AdminTd label="Featured">
+                <AdminToggle
+                  on={!!story.is_featured}
+                  label={story.is_featured ? 'Featured' : 'Not featured'}
+                />
+              </AdminTd>
+              <AdminTd label="Published">{formatDate(story.published_at)}</AdminTd>
+              <AdminTd label="Edit">
+                <Link href={`/admin/media/${story.id}/edit`} className="ep-admin-el-edit">
+                  Edit
+                </Link>
+              </AdminTd>
             </tr>
-          ) : (
-            stories.map(story => (
-              <tr
-                key={story.id}
-                className="transition-colors"
-                style={{ borderBottom: '1px solid rgba(27,60,90,0.06)' }}
-                onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(27,60,90,0.02)')}
-                onMouseLeave={e => (e.currentTarget.style.backgroundColor = 'transparent')}
-              >
-                <td className="px-4 py-3 font-body text-[13px] text-[color:var(--admin-text)] font-semibold max-w-[250px] truncate">
-                  {story.title}
-                </td>
-                <td className="px-4 py-3 font-condensed text-[12px] text-[color:var(--admin-text-2)]">
-                  {story.pillar ? pillarLabels[story.pillar] ?? story.pillar : '\u2014'}
-                </td>
-                <td className="px-4 py-3 font-condensed text-[12px] text-[color:var(--admin-text-2)]">
-                  {TYPE_LABELS[story.story_type] ?? story.story_type}
-                </td>
-                <td className="px-4 py-3">
-                  <button
-                    type="button"
-                    onClick={() => togglePublish(story.id, story.is_published ?? false)}
-                    className="font-condensed font-bold uppercase tracking-[0.12em] text-[9px] px-2 py-0.5 rounded"
-                    style={{
-                      backgroundColor: story.is_published ? 'rgba(10,191,163,0.1)' : 'rgba(27,60,90,0.06)',
-                      color: story.is_published ? '#0ABFA3' : '#7a8a96',
-                      border: `1px solid ${story.is_published ? 'rgba(10,191,163,0.2)' : 'rgba(27,60,90,0.1)'}`,
-                    }}
-                  >
-                    {story.is_published ? 'Published' : 'Draft'}
-                  </button>
-                </td>
-                <td className="px-4 py-3 font-condensed text-[12px] text-[color:var(--admin-text-2)]">
-                  {story.is_featured ? '\u2605' : '\u2014'}
-                </td>
-                <td className="px-4 py-3 font-condensed text-[12px] text-[color:var(--admin-text-2)]">
-                  {formatDate(story.published_at)}
-                </td>
-                <td className="px-4 py-3">
-                  <Link
-                    href={`/admin/media/${story.id}/edit`}
-                    className="font-condensed font-semibold text-[11px] text-[#68a2b9] hover:underline"
-                  >
-                    Edit
-                  </Link>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
+          ))
+        )}
+      </tbody>
+    </AdminTable>
   )
 }

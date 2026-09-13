@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { CONFIRM } from '@/components/admin/safety/confirmCopy'
+import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
 interface Job {
   id: string
@@ -32,6 +34,7 @@ export default function AdminCareersPage() {
   const [editing, setEditing] = useState<Partial<Job> | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const { confirm, dialog } = useConfirmDialog()
 
   const fetchJobs = useCallback(async () => {
     setLoading(true)
@@ -65,7 +68,8 @@ export default function AdminCareersPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this listing?')) return
+    const listing = jobs.find(j => j.id === id)
+    if (!(await confirm(CONFIRM.deleteListing(listing?.title ?? 'this listing')))) return
     await fetch(`/api/admin/careers/${id}`, { method: 'DELETE' })
     await fetchJobs()
   }
@@ -88,6 +92,7 @@ export default function AdminCareersPage() {
 
   return (
     <div className="px-4 sm:px-8 py-6" style={{ maxWidth: 960 }}>
+      {dialog}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h1 className="font-condensed font-bold text-[22px]" style={{ color: 'var(--admin-text)' }}>Careers</h1>
         <button

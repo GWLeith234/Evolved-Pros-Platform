@@ -1,6 +1,6 @@
-import Link from 'next/link'
 import { Suspense } from 'react'
 import { adminClient } from '@/lib/supabase/admin'
+import { AdminButton, AdminPageHeader } from '@/components/admin/template'
 import { MediaListClient } from './MediaListClient'
 import { MediaToast } from './MediaToast'
 
@@ -23,25 +23,15 @@ export default async function AdminMediaPage() {
 
   return (
     <div className="px-4 sm:px-8 py-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-1" style={{ color: 'var(--admin-text-2)' }}>
-            Content
-          </p>
-          <h1 className="font-display font-bold text-xl" style={{ color: 'var(--admin-text)' }}>
-            Pros Media
-          </h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/admin/media/new"
-            className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-5 py-2.5 rounded transition-opacity hover:opacity-90"
-            style={{ backgroundColor: '#1b3c5a', color: '#fff' }}
-          >
+      <AdminPageHeader
+        title="Pros Media"
+        subline="Stories live on /media when published."
+        primary={
+          <AdminButton variant="primary" href="/admin/media/new">
             + New Story
-          </Link>
-        </div>
-      </div>
+          </AdminButton>
+        }
+      />
 
       <Suspense fallback={null}>
         <MediaToast />

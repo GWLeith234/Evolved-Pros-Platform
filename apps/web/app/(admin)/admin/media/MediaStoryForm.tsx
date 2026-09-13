@@ -234,32 +234,32 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
         <span className="font-condensed font-semibold text-[12px] text-[color:var(--admin-text)]">Featured story</span>
       </label>
 
-      <div className="flex items-center justify-end gap-3">
+      <div className="flex flex-wrap items-center justify-end gap-3">
         <button
           type="button"
           onClick={() => router.push('/admin/media')}
           disabled={saving}
-          className="border border-navy bg-white px-6 py-2.5 font-condensed text-[12px] font-bold uppercase tracking-[0.1em] text-navy transition-all disabled:opacity-40"
+          className="ep-admin-el-btn ep-admin-el-btn--ghost"
         >
           Cancel
         </button>
         <button
           type="button" onClick={() => void handleSave(false)} disabled={saving}
-          className="border border-navy bg-white px-6 py-2.5 font-condensed text-[12px] font-bold uppercase tracking-[0.1em] text-navy transition-all disabled:opacity-40"
+          className="ep-admin-el-btn"
         >
           {saving ? 'Saving...' : 'Save as Draft'}
         </button>
         <button
           type="button" onClick={() => void handleSave(true)} disabled={saving}
-          className="bg-red px-6 py-2.5 font-condensed text-[12px] font-bold uppercase tracking-[0.1em] text-white transition-all disabled:opacity-40"
+          className="ep-admin-el-btn ep-admin-el-btn--primary"
         >
           {saving ? 'Publishing...' : 'Publish Now'}
         </button>
         {isEdit && (
           <button
             type="button" onClick={() => void handleDelete()} disabled={saving}
-            className="font-condensed font-bold uppercase tracking-[0.1em] text-[12px] px-4 py-2.5 rounded ml-auto transition-all disabled:opacity-40"
-            style={{ color: '#ef0e30', border: '1px solid rgba(239,14,48,0.2)' }}
+            className="ep-admin-el-btn ep-admin-el-btn--ghost"
+            style={{ color: '#C9302A', borderColor: '#C9302A' }}
           >
             Delete
           </button>

@@ -5,8 +5,9 @@ import type { CatalogueProduct } from '@/lib/commerce/catalogue'
 import { OwnerOnlyBadge } from '@/components/admin/safety/OwnerOnlyBadge'
 import { CONFIRM } from '@/components/admin/safety/confirmCopy'
 import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
+import { AdminButton, AdminPageHeader } from '@/components/admin/template'
 
-// SPRINT I Phase 2 — admin Products screen driven by our own products/prices
+// SPRINT I Phase 2. Admin Products screen driven by our own products/prices
 // catalogue (source of truth). Edit amounts / active / Stripe price-id links,
 // then mirror the catalogue to Stripe. No legacy-vendor coupling.
 
@@ -27,8 +28,8 @@ const TIER_ACCENT: Record<string, string> = {
   vip: '#C9A84C',
   pro: '#C9302A',
 }
-const NAVY = '#1b3c5a'
-const RED = '#ef0e30'
+const NAVY = '#1B2A4A'
+const RED = '#C9302A'
 const GREEN = '#15803d'
 
 function buildPriceDrafts(products: CatalogueProduct[]): Record<string, PriceDraft> {
@@ -174,51 +175,38 @@ export function ProductsAdminClient({
   return (
     <div>
       {dialog}
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
-        <div>
-          <h1 className="font-display font-black text-[28px]" style={{ color: 'var(--admin-text-strong)', margin: 0 }}>
-            Products &amp; Membership
-          </h1>
-          <p className="font-condensed text-[12px] mt-0.5" style={{ color: 'var(--admin-text-2)', margin: 0 }}>
-            Our own catalogue — source of truth, mirrored to Stripe. Amounts in USD.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {flash && (
+      <AdminPageHeader
+        title="Products & Membership"
+        subline="Our own catalogue. Source of truth, mirrored to Stripe. Amounts in USD."
+        secondary={
+          <span className="inline-flex flex-wrap items-center gap-2">
+            {flash && (
+              <span
+                className="font-condensed font-bold uppercase text-[11px] tracking-wider px-3 py-1.5"
+                style={{ background: 'rgba(21,128,61,0.12)', color: GREEN }}
+              >
+                {flash}
+              </span>
+            )}
             <span
-              className="font-condensed font-bold uppercase text-[11px] tracking-wider px-3 py-1.5 rounded"
-              style={{ background: 'rgba(21,128,61,0.12)', color: GREEN }}
+              className={`ep-admin-el-chip ${stripeConfigured ? 'ep-admin-el-chip--teal' : 'ep-admin-el-chip--pink'}`}
+              title={stripeConfigured ? 'STRIPE_SECRET_KEY is set' : 'STRIPE_SECRET_KEY is not set'}
             >
-              {flash}
+              {stripeConfigured ? 'Stripe connected' : 'Stripe not configured'}
             </span>
-          )}
-          <span
-            className="font-condensed font-bold uppercase text-[10px] tracking-wider px-2.5 py-1.5"
-            style={{
-              background: stripeConfigured ? 'rgba(10,191,163,0.14)' : 'rgba(239,14,48,0.08)',
-              color: stripeConfigured ? '#0ABFA3' : RED,
-            }}
-            title={stripeConfigured ? 'STRIPE_SECRET_KEY is set' : 'STRIPE_SECRET_KEY is not set'}
-          >
-            {stripeConfigured ? '■ Stripe connected' : '○ Stripe not configured'}
+            <OwnerOnlyBadge />
           </span>
-          <OwnerOnlyBadge />
-          <button
+        }
+        primary={
+          <AdminButton
             type="button"
             disabled={syncing || !stripeConfigured}
             onClick={() => void syncStripe()}
-            className="bg-navy px-3 py-2 font-condensed text-[11px] font-bold uppercase tracking-wider text-white"
-            style={{
-              minHeight: 40,
-              cursor: syncing || !stripeConfigured ? 'not-allowed' : 'pointer',
-              opacity: syncing || !stripeConfigured ? 0.5 : 1,
-            }}
           >
             {syncing ? 'Syncing…' : 'Sync to Stripe'}
-          </button>
-        </div>
-      </div>
+          </AdminButton>
+        }
+      />
 
       {/* Product cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
@@ -329,20 +317,14 @@ export function ProductsAdminClient({
 
       {/* Save bar */}
       <div className="flex flex-wrap items-center gap-3">
-        <button
+        <AdminButton
+          variant="primary"
           type="button"
           disabled={busy || !dirty}
           onClick={() => void save()}
-          className="bg-navy px-5 py-2.5 font-condensed text-[12px] font-bold uppercase tracking-[0.12em] text-white"
-          style={{
-            border: 'none',
-            cursor: busy || !dirty ? 'not-allowed' : 'pointer',
-            minHeight: 44,
-            opacity: busy || !dirty ? 0.45 : 1,
-          }}
         >
           {busy ? 'Saving…' : 'Save catalogue'}
-        </button>
+        </AdminButton>
         <p className="font-condensed text-[12px]" style={{ color: 'var(--admin-text-2)' }}>
           {dirty ? 'Dirty. Save enabled. Sync still asks for confirm.' : 'Disabled until a price or active flag changes.'}
         </p>

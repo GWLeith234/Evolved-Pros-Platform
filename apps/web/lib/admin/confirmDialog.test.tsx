@@ -60,6 +60,8 @@ describe('CONFIRM copy', () => {
       CONFIRM.publishStory(),
       CONFIRM.deleteAd(),
       CONFIRM.cleanupQa(3),
+      CONFIRM.deleteProspect('QA-SWEEP Lead'),
+      CONFIRM.deleteListing('Sales lead'),
       CONFIRM.sendThanksD0(4),
       CONFIRM.queueThanksD0(4),
       CONFIRM.sendThanksNudge(2),

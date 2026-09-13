@@ -158,7 +158,7 @@ export function ConfirmDialog({
               onClick={onCancel}
               disabled={busy}
               data-testid="confirm-dialog-cancel"
-              className="border border-navy bg-white px-5 py-2 font-condensed text-[12px] font-bold uppercase tracking-[0.12em] text-navy disabled:opacity-50"
+              className="min-h-[44px] border border-navy bg-white px-5 font-condensed text-[12px] font-bold uppercase tracking-[0.12em] text-navy disabled:opacity-50"
             >
               {cancelLabel}
             </button>
@@ -167,7 +167,7 @@ export function ConfirmDialog({
               onClick={onConfirm}
               disabled={busy}
               data-testid="confirm-dialog-confirm"
-              className="bg-red px-5 py-2 font-condensed text-[12px] font-bold uppercase tracking-[0.12em] text-white disabled:opacity-50"
+              className="min-h-[44px] bg-red px-5 font-condensed text-[12px] font-bold uppercase tracking-[0.12em] text-white disabled:opacity-50"
             >
               {busy ? 'Working...' : confirmLabel}
             </button>

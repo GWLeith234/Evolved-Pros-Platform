@@ -6,6 +6,7 @@ import { LogoMark } from '@/components/ui/LogoMark'
 import { OwnerOnlyBadge } from '@/components/admin/safety/OwnerOnlyBadge'
 import { CONFIRM } from '@/components/admin/safety/confirmCopy'
 import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
+import { AdminButton, AdminPageHeader } from '@/components/admin/template'
 
 type Banner = {
   id: string
@@ -63,18 +64,17 @@ function SaveButton({ loading, onClick }: { loading?: boolean; onClick: () => vo
   return (
     <>
       {dialog}
-      <button
+      <AdminButton
+        variant="primary"
         type="button"
         onClick={async () => {
           if (!(await confirm(CONFIRM.saveBranding()))) return
           onClick()
         }}
         disabled={loading}
-        className="bg-navy px-5 py-2.5 font-condensed text-[12px] font-bold uppercase tracking-wider text-white transition-opacity"
-        style={{ opacity: loading ? 0.6 : 1 }}
       >
         {loading ? 'Saving…' : 'Save Changes'}
-      </button>
+      </AdminButton>
     </>
   )
 }
@@ -459,7 +459,7 @@ function BannersTab({ initialBanners }: { initialBanners: Banner[] }) {
                 min="1" max="6"
                 value={newPillar}
                 onChange={e => setNewPillar(e.target.value)}
-                placeholder="1–6"
+                placeholder="1 to 6"
                 className="border rounded px-3 py-1.5 font-body text-[13px] w-full"
                 style={{ borderColor: 'rgba(27,60,90,0.2)', color: 'var(--admin-text)' }}
               />
@@ -511,18 +511,11 @@ export function BrandingPortalClient({ initialSettings, initialBanners }: Props)
 
   return (
     <div className="px-4 sm:px-8 py-6">
-      {/* Page header */}
-      <div className="mb-6">
-        <p className="font-condensed font-bold uppercase tracking-[0.14em] text-[10px] mb-1" style={{ color: '#68a2b9' }}>
-          Platform
-        </p>
-        <h1 className="font-display font-black" style={{ fontSize: '28px', color: 'var(--admin-text-strong)' }}>
-          Branding <OwnerOnlyBadge className="ml-3 align-middle" />
-        </h1>
-        <p className="font-body text-[14px] mt-1" style={{ color: 'var(--admin-text-2)' }}>
-          Manage logos, colors, and member-facing appearance.
-        </p>
-      </div>
+      <AdminPageHeader
+        title="Branding"
+        subline="Logos, colors, and member-facing appearance."
+        secondary={<OwnerOnlyBadge />}
+      />
 
       {/* Tab bar */}
       <div className="flex gap-0 mb-6 border-b" style={{ borderColor: 'rgba(27,60,90,0.12)' }}>

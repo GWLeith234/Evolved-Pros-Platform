@@ -42,7 +42,7 @@ export function CrmCard({
     prospect.stage === 'community' ? communityUpgradeTargets() : []
 
   const mailto = `mailto:${encodeURIComponent(prospect.email)}?subject=${encodeURIComponent(
-    `Evolved Pros — following up with ${prospect.full_name.split(' ')[0] ?? ''}`,
+    `Evolved Pros. Following up with ${prospect.full_name.split(' ')[0] ?? ''}`,
   )}`
 
   // Suppressed prospects stay visible (they're still pipeline) but read as
