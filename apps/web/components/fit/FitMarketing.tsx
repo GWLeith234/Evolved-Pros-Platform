@@ -18,7 +18,13 @@ import {
 } from '@/lib/fit/copy'
 import { canAccessFitLibrary, fitUpgradeHref } from '@/lib/fit/gating'
 import { featuredFitMove, publishedFitMoves } from '@/lib/fit/moves'
-import { FIT_LOCKUP_DARK, FIT_LOCKUP_LABEL, FIT_LOCKUP_LIGHT } from '@/lib/lockups'
+import {
+  FIT_LOCKUP_DARK,
+  FIT_LOCKUP_LABEL,
+  FIT_LOCKUP_LIGHT,
+  LOCKUP_INTRINSIC_HEIGHT,
+  LOCKUP_INTRINSIC_WIDTH,
+} from '@/lib/lockups'
 import { FitLibrary } from '@/components/fit/FitLibrary'
 import { FitTeaseCard } from '@/components/fit/FitTeaseCard'
 import { FitTeaseRotator } from '@/components/fit/FitTeaseRotator'
@@ -121,9 +127,19 @@ function FitPageFooter() {
     <footer className="ep-fit-page-footer">
       <p className="ep-fit-page-footer-mark">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={FIT_LOCKUP_DARK} alt={FIT_LOCKUP_LABEL} width={1358} height={207} />
+        <img
+          src={FIT_LOCKUP_DARK}
+          alt={FIT_LOCKUP_LABEL}
+          width={LOCKUP_INTRINSIC_WIDTH}
+          height={LOCKUP_INTRINSIC_HEIGHT}
+        />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={FIT_LOCKUP_LIGHT} alt="" width={1358} height={207} />
+        <img
+          src={FIT_LOCKUP_LIGHT}
+          alt=""
+          width={LOCKUP_INTRINSIC_WIDTH}
+          height={LOCKUP_INTRINSIC_HEIGHT}
+        />
       </p>
       <nav aria-label="Fit">
         {FIT_FOOTER_LINKS.map(link => (
