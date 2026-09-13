@@ -2,9 +2,18 @@ import type { Metadata } from 'next'
 import { adminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
 import Link from 'next/link'
+import {
+  AdminChip,
+  AdminMetricCard,
+  AdminMetricRow,
+  AdminPageHeader,
+  AdminTable,
+  AdminTd,
+  AdminTh,
+} from '@/components/admin/template'
 import { InviteMemberButton } from './InviteMemberButton'
 
-export const metadata: Metadata = { title: 'Admin — Evolved Pros' }
+export const metadata: Metadata = { title: 'Admin. Evolved Pros' }
 
 export const dynamic = 'force-dynamic'
 
@@ -94,35 +103,17 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="px-4 sm:px-8 py-6 max-w-5xl">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-        <div>
-          <h1 className="font-condensed font-bold text-[28px] text-[color:var(--admin-text-strong)]">Home</h1>
-          <p className="font-body text-[14px] text-[color:var(--admin-text-2)] mt-0.5" suppressHydrationWarning>
-            Platform overview, {now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-          </p>
-        </div>
-        <InviteMemberButton />
-      </div>
+      <AdminPageHeader
+        title="Home"
+        subline="Platform overview."
+        primary={<InviteMemberButton />}
+      />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+      <AdminMetricRow columns={2}>
         {stats.map(s => (
-          <div
-            key={s.label}
-            className="rounded-lg p-4"
-            style={{ backgroundColor: 'var(--admin-card)', border: '1px solid var(--admin-border)' }}
-          >
-            <p className="font-body text-[13px] mb-1" style={{ color: 'var(--admin-text-2)' }}>
-              {s.label}
-            </p>
-            <p className="font-condensed font-bold text-[28px] leading-none mb-1" style={{ color: 'var(--admin-text-strong)' }}>
-              {s.value}
-            </p>
-            <p className="font-body text-[12px]" style={{ color: 'var(--admin-text-2)' }}>
-              {s.hint}
-            </p>
-          </div>
+          <AdminMetricCard key={s.label} label={s.label} value={s.value} hint={s.hint} />
         ))}
-      </div>
+      </AdminMetricRow>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
         {[
@@ -141,51 +132,45 @@ export default async function AdminDashboardPage() {
         ))}
       </div>
 
-      {/* Recent signups */}
-      <div className="rounded-lg overflow-x-auto mb-6" style={{ backgroundColor: 'var(--admin-card)', border: '1px solid var(--admin-border)' }}>
-        <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid var(--admin-border)' }}>
-          <p className="font-body font-semibold text-[13px] text-[color:var(--admin-text-strong)]">Recent signups</p>
-          <Link href="/admin/members" className="font-body text-[13px] text-[color:var(--admin-text)] hover:underline min-h-[44px] inline-flex items-center">
-            All members
-          </Link>
-        </div>
-        {(recentMembers.data ?? []).length === 0 ? (
-          <div className="px-5 py-8 text-center">
-            <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">No members yet.</p>
-          </div>
-        ) : (
-          <table className="w-full min-w-[520px]">
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--admin-border)' }}>
-                {['Name', 'Email', 'Tier', 'Joined'].map(h => (
-                  <th key={h} className="px-5 py-2 text-left font-body text-[12px] font-semibold text-[color:var(--admin-text-2)]">{h}</th>
-                ))}
+      <AdminTable title="Recent signups">
+        <thead>
+          <tr>
+            {['Name', 'Email', 'Tier', 'Joined'].map(h => (
+              <AdminTh key={h}>{h}</AdminTh>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {(recentMembers.data ?? []).length === 0 ? (
+            <tr>
+              <AdminTd label="Name" colSpan={4}>No members yet.</AdminTd>
+            </tr>
+          ) : (
+            (recentMembers.data ?? []).map(m => (
+              <tr key={m.id}>
+                <AdminTd label="Name">
+                  <Link href={`/admin/members/${m.id}`} className="ep-admin-el-edit">
+                    {m.full_name ?? m.display_name ?? 'n/a'}
+                  </Link>
+                </AdminTd>
+                <AdminTd label="Email">{m.email ?? 'n/a'}</AdminTd>
+                <AdminTd label="Tier">
+                  {m.tier === 'community' || m.tier === 'vip' || m.tier === 'pro' ? (
+                    <AdminChip tone={m.tier}>{m.tier}</AdminChip>
+                  ) : (
+                    'n/a'
+                  )}
+                </AdminTd>
+                <AdminTd label="Joined">{fmtDate(m.created_at)}</AdminTd>
               </tr>
-            </thead>
-            <tbody>
-              {(recentMembers.data ?? []).map((m, i, arr) => (
-                <tr key={m.id} style={{ borderBottom: i === arr.length - 1 ? 'none' : '1px solid var(--admin-border)' }}>
-                  <td className="px-5 py-3">
-                    <Link href={`/admin/members/${m.id}`} className="font-body text-[14px] text-[color:var(--admin-text)] hover:text-[color:var(--red)] transition-colors">
-                      {m.full_name ?? m.display_name ?? 'n/a'}
-                    </Link>
-                  </td>
-                  <td className="px-5 py-3"><p className="font-body text-[13px] text-[color:var(--admin-text-2)]">{m.email ?? 'n/a'}</p></td>
-                  <td className="px-5 py-3">
-                    {m.tier ? (
-                      <span className="font-condensed font-bold uppercase text-[9px] px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--admin-subtle)', color: 'var(--admin-text)', border: '1px solid var(--admin-border)' }}>
-                        {m.tier}
-                      </span>
-                    ) : (
-                      <span className="font-body text-[13px] text-[color:var(--admin-text-2)]">n/a</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3"><p className="font-body text-[13px] text-[color:var(--admin-text-2)]">{fmtDate(m.created_at)}</p></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+            ))
+          )}
+        </tbody>
+      </AdminTable>
+      <div className="mt-3">
+        <Link href="/admin/members" className="ep-admin-el-edit">
+          All members
+        </Link>
       </div>
     </div>
   )

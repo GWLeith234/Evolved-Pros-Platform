@@ -201,7 +201,7 @@ export function MemberDetailClient({ member }: { member: MemberDetail }) {
   ]
 
   return (
-    <div className="px-8 py-6 max-w-4xl">
+    <div className="px-4 sm:px-8 py-6 max-w-4xl">
       {dialog}
       {/* Header */}
       <div

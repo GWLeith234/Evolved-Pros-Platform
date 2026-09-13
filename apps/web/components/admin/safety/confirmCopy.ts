@@ -125,6 +125,15 @@ export const CONFIRM = {
     title: 'Cleanup QA records?',
     consequence: `Remove ${count} labelled QA test prospect(s) from the CRM? Live prospects are not touched.`,
   }),
+  deleteProspect: (name: string): ConfirmRequest => ({
+    title: 'Delete prospect?',
+    consequence: `Remove ${name} from Prospects CRM? This cannot be undone from admin.`,
+    emphasis: name,
+  }),
+  deleteListing: (title: string): ConfirmRequest => ({
+    title: 'Delete listing?',
+    consequence: `Delete "${title}"? This permanently removes the job listing. This cannot be undone from admin.`,
+  }),
   suspendMember: (name: string): ConfirmRequest => ({
     title: 'Suspend member?',
     consequence: `Suspend ${name}? This sets their membership to cancelled.`,

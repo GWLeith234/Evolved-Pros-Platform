@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { AdminKanbanColumn, AdminKanbanWell } from '@/components/admin/template'
 import { PipelineCard } from './PipelineCard'
 import type { PipelineMemberCard } from './PipelineCard'
 
@@ -60,16 +61,15 @@ export function PipelineBoard({ initialData }: { initialData: PipelineData }) {
   }
 
   return (
-    <div className="grid grid-cols-4 gap-4 min-h-[400px]">
+    <AdminKanbanWell columns={4}>
       {COLUMNS.map(col => {
         const members = data[col.stage]
         const isOver  = dragging !== null
 
         return (
+          <AdminKanbanColumn key={col.stage}>
           <div
-            key={col.stage}
-            className="flex flex-col rounded-lg overflow-hidden"
-            style={{ border: '1px solid rgba(27,60,90,0.1)', backgroundColor: 'rgba(27,60,90,0.02)' }}
+            className="flex h-full flex-col"
             onDragOver={e => e.preventDefault()}
             onDrop={() => void handleDrop(col.stage)}
           >
@@ -119,8 +119,9 @@ export function PipelineBoard({ initialData }: { initialData: PipelineData }) {
               )}
             </div>
           </div>
+          </AdminKanbanColumn>
         )
       })}
-    </div>
+    </AdminKanbanWell>
   )
 }

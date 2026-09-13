@@ -69,6 +69,9 @@ export const FIT_ADMIN_EYEBROW = 'Products'
 export const FIT_ADMIN_SYNC = 'Sync library'
 export const FIT_ADMIN_NEW = 'New move'
 export const FIT_ADMIN_MOVES_LABEL = 'Move library'
+export const FIT_ADMIN_PUBLISHED_HINT = 'Live to members in the Fit library'
+export const FIT_ADMIN_PILOT_HINT = 'Not in the public library yet'
+export const FIT_ADMIN_DRAFT_HINT = 'Not published'
 
 export const FIT_FOOTER_LINKS = [
   { label: 'Guides', href: '/fit' },
@@ -111,6 +114,9 @@ export function fitCopyStrings(): string[] {
     FIT_ADMIN_SYNC,
     FIT_ADMIN_NEW,
     FIT_ADMIN_MOVES_LABEL,
+    FIT_ADMIN_PUBLISHED_HINT,
+    FIT_ADMIN_PILOT_HINT,
+    FIT_ADMIN_DRAFT_HINT,
     ...FIT_HOW_STEPS.flatMap(s => [s.n, s.title, s.body]),
     ...FIT_FOOTER_LINKS.map(l => l.label),
   ]

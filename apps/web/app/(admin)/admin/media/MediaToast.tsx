@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 const MESSAGES: Record<string, string> = {
   saved:     'Draft saved',
-  published: 'Story published — view on /media',
+  published: 'Story published. View on /media.',
   deleted:   'Story deleted',
 }
 

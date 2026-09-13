@@ -1,6 +1,7 @@
 import { adminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
 import { getEngagementLevel } from '@/lib/admin/helpers'
+import { AdminPageHeader } from '@/components/admin/template'
 import { PipelineBoard } from '@/components/admin/PipelineBoard'
 import type { PipelineMemberCard } from '@/components/admin/PipelineCard'
 
@@ -30,8 +31,10 @@ export default async function AdminPipelinePage() {
   if (memberList.length === 0) {
     return (
       <div className="px-4 sm:px-8 py-6">
-        <h1 className="font-condensed font-bold text-[28px] text-[color:var(--admin-text-strong)] mb-2">Member upgrades</h1>
-        <p className="font-condensed text-[12px] text-[color:var(--admin-text-2)]">No active members yet.</p>
+        <AdminPageHeader
+          title="Member upgrades"
+          subline="No active members yet."
+        />
       </div>
     )
   }
@@ -114,12 +117,10 @@ export default async function AdminPipelinePage() {
 
   return (
     <div className="px-4 sm:px-8 py-6">
-      <div className="mb-6">
-        <h1 className="font-condensed font-bold text-[28px] text-[color:var(--admin-text-strong)]">Member upgrades</h1>
-        <p className="font-body text-[14px] text-[color:var(--admin-text-2)] mt-0.5">
-          Drag cards to reclassify members. Dollar totals appear when billing is connected.
-        </p>
-      </div>
+      <AdminPageHeader
+        title="Member upgrades"
+        subline="Drag cards to reclassify members. Dollar totals appear when billing is connected."
+      />
 
       <PipelineBoard initialData={result} />
     </div>
