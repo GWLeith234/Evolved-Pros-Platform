@@ -48,7 +48,9 @@ describe('Media masthead chrome', () => {
     expect(html).not.toContain('<svg')
     expect(html).not.toContain('#60A5FA')
     expect(html).not.toContain('logo_horizontal')
-    expect(html).not.toContain('Evolved Pros')
+    expect(html).toContain('Evolved Pros Media')
+    expect(html).not.toMatch(/>Pros Media</)
+    expect(html).not.toMatch(/>Evolved Media</)
   })
 
   it('drops the newspaper costume: no split-color nameplate, manifesto, or gold rules', () => {

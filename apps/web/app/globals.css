@@ -2484,7 +2484,9 @@ a.ep-text-link:focus-visible {
   color: var(--text-primary);
 }
 .ep-media-masthead-wordmark,
-.ep-fit-masthead-wordmark {
+.ep-fit-masthead-wordmark,
+.ep-podcast-masthead-wordmark,
+.ep-academy-masthead-wordmark {
   margin: 0;
   display: flex;
   justify-content: center;
@@ -2492,7 +2494,9 @@ a.ep-text-link:focus-visible {
   font-weight: inherit;
 }
 .ep-media-masthead-wordmark a,
-.ep-fit-masthead-wordmark a {
+.ep-fit-masthead-wordmark a,
+.ep-podcast-masthead-wordmark a,
+.ep-academy-masthead-wordmark a {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2502,20 +2506,30 @@ a.ep-text-link:focus-visible {
   line-height: 0;
 }
 .ep-media-masthead-logo,
-.ep-fit-masthead-logo {
+.ep-fit-masthead-logo,
+.ep-podcast-masthead-logo,
+.ep-academy-masthead-logo {
   height: clamp(56px, 12vw, 96px);
   width: auto;
   max-width: 100%;
   object-fit: contain;
 }
 .ep-media-masthead-logo--on-dark,
-.ep-fit-masthead-logo--on-dark { display: block; }
+.ep-fit-masthead-logo--on-dark,
+.ep-podcast-masthead-logo--on-dark,
+.ep-academy-masthead-logo--on-dark { display: block; }
 .ep-media-masthead-logo--on-light,
-.ep-fit-masthead-logo--on-light { display: none; }
+.ep-fit-masthead-logo--on-light,
+.ep-podcast-masthead-logo--on-light,
+.ep-academy-masthead-logo--on-light { display: none; }
 html.light-mode .ep-media-masthead-logo--on-dark,
-html.light-mode .ep-fit-masthead-logo--on-dark { display: none; }
+html.light-mode .ep-fit-masthead-logo--on-dark,
+html.light-mode .ep-podcast-masthead-logo--on-dark,
+html.light-mode .ep-academy-masthead-logo--on-dark { display: none; }
 html.light-mode .ep-media-masthead-logo--on-light,
-html.light-mode .ep-fit-masthead-logo--on-light { display: block; }
+html.light-mode .ep-fit-masthead-logo--on-light,
+html.light-mode .ep-podcast-masthead-logo--on-light,
+html.light-mode .ep-academy-masthead-logo--on-light { display: block; }
 .ep-fit-masthead-inner {
   padding-bottom: var(--space-6);
 }

@@ -38,7 +38,7 @@ Every UI change must comply. CI enforces the hex ratchet; reviewers enforce the 
 
 - `font-serif` (Merriweather): long-form article body.
 
-- Abril Fatface: do not use for new chrome. Media uses the theme-swapped media-lockup PNG (EVOLVED [megaphone disc] MEDIA), not a newspaper nameplate. Fit uses the theme-swapped fit-lockup PNG (EVOLVED PR[barbell disc]S FIT). Both lockups are Bebas Neue Regular. Swap dark/light the same way FooterLogo and the loader do.
+- Abril Fatface: do not use for new chrome. Family v5 Layout A lockups are theme-swapped PNGs (EVOLVED PR [disc] S PRODUCT): Podcast mic, Fit barbell, Media megaphone, Academy grad cap. Not a newspaper nameplate. Type is Bebas Neue Regular. Swap dark/light the same way FooterLogo and the loader do. Do not type the family wordmark in chrome.
 
 - Use the `ep-*` type scale (ep-display, ep-h1..h3, ep-body, ep-eyebrow, ep-label). Do not invent ad-hoc font sizes.
 

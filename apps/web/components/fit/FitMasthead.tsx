@@ -5,7 +5,13 @@
 import Link from 'next/link'
 import { FIT_VIP_PILL } from '@/lib/fit/copy'
 import { fitUpgradeHref } from '@/lib/fit/gating'
-import { FIT_LOCKUP_DARK, FIT_LOCKUP_LABEL, FIT_LOCKUP_LIGHT } from '@/lib/lockups'
+import {
+  FIT_LOCKUP_DARK,
+  FIT_LOCKUP_LABEL,
+  FIT_LOCKUP_LIGHT,
+  LOCKUP_INTRINSIC_HEIGHT,
+  LOCKUP_INTRINSIC_WIDTH,
+} from '@/lib/lockups'
 
 export function FitMastheadLockup({
   href = '/fit',
@@ -23,8 +29,8 @@ export function FitMastheadLockup({
           className="ep-fit-masthead-logo ep-fit-masthead-logo--on-dark"
           src={FIT_LOCKUP_DARK}
           alt=""
-          width={1358}
-          height={207}
+          width={LOCKUP_INTRINSIC_WIDTH}
+          height={LOCKUP_INTRINSIC_HEIGHT}
         />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -32,8 +38,8 @@ export function FitMastheadLockup({
           className="ep-fit-masthead-logo ep-fit-masthead-logo--on-light"
           src={FIT_LOCKUP_LIGHT}
           alt=""
-          width={1358}
-          height={207}
+          width={LOCKUP_INTRINSIC_WIDTH}
+          height={LOCKUP_INTRINSIC_HEIGHT}
         />
       </Link>
     </h1>
