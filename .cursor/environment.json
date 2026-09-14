@@ -1,0 +1,17 @@
+{
+  "name": "Evolved Pros Platform",
+  "install": "pnpm install --frozen-lockfile && { [ -f apps/web/.env.local ] || cp .env.example apps/web/.env.local; }",
+  "terminals": [
+    {
+      "name": "web",
+      "command": "cd apps/web && pnpm dev",
+      "description": "Next.js 14 web app (apps/web) dev server on http://localhost:3000. Health: GET /api/health. In development, open /dev-login and click 'Log in as Admin' to sign in as a Dev User (admin + pro) without a live Supabase backend."
+    }
+  ],
+  "ports": [
+    {
+      "name": "web",
+      "port": 3000
+    }
+  ]
+}
