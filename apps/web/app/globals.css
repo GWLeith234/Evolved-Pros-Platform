@@ -2419,7 +2419,11 @@ a.ep-text-link:focus-visible {
 
 /* Media + Fit lockups: theme-pair PNG marks (FooterLogo / loader CSS swap).
    Chrome uses the same tokens / 16-24-32-40 rhythm as TopNav + footer. Media
-   desk body stays paper so #108 navy-on-cream cards remain readable. */
+   desk body stays paper so #108 navy-on-cream cards remain readable.
+
+   Pairing (George 2026-09-14): dark chrome -> white-letter *-dark.png
+   (--on-dark). Parchment / html.light-mode -> navy-letter *-light.png
+   (--on-light). Same CSS on www and platform. Do not host-branch. */
 .ep-media-masthead,
 .ep-fit-masthead {
   background: var(--bg-nav);
@@ -3338,6 +3342,24 @@ html.light-mode .ep-fit-page-footer-mark img:last-child { display: block; }
 .media-desk-shell {
   background: var(--paper);
   color: var(--navy);
+}
+
+/* CMS stills that bake a static Pros wordmark cannot theme-swap. Zoom to the
+   photography so /media chrome stays the MEDIA lockup pair. Media-only. */
+.ed-story-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ed-story-art--crop-baked-pros {
+  object-position: center 70%;
+  transform: scale(1.34);
+  transform-origin: center 72%;
+}
+.media-detail-hero--crop-baked-pros {
+  background-size: 134% auto;
+  background-position: center 70%;
 }
 
 /* Footer brand lockup: white wordmark on dark, navy wordmark on light.

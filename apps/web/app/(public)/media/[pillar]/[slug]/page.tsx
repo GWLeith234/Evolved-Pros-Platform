@@ -14,6 +14,7 @@ import { MediaIabSlot } from '@/components/media/MediaIabSlot'
 import { MediaLatestPodcast } from '@/components/media/MediaLatestPodcast'
 import type { MediaRailEpisode } from '@/lib/media/podcastRail'
 import { MEDIA_BRAND, mediaStoryTitle } from '@/lib/media/brand'
+import { storyArtHeroBackground, storyArtHeroClass, storyArtImgClass } from '@/lib/media/storyArt'
 import { stripEmDashCopy } from '@/lib/home/cardImagery'
 import { CANONICAL_ORIGIN, DEFAULT_OG_IMAGE, canonicalUrl, publicPageMetadata } from '@/lib/seo/canonical'
 import { mediaMustCite } from '@/lib/seo/mustCite'
@@ -221,7 +222,7 @@ export default async function StoryPage({
 
       {/* 2. Wide Hero */}
       <div
-        className="media-detail-hero"
+        className={`media-detail-hero ${storyArtHeroClass(story.featured_image_url)}`.trim()}
         style={{
           position: 'relative',
           width: '100%',
@@ -232,8 +233,7 @@ export default async function StoryPage({
           backgroundImage: story.featured_image_url
             ? `url(${story.featured_image_url})`
             : 'linear-gradient(135deg, var(--media-hero-blue), var(--media-ink))',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          ...storyArtHeroBackground(story.featured_image_url),
           overflow: 'hidden',
         }}
       >
@@ -443,7 +443,7 @@ export default async function StoryPage({
               <Link key={r.id} href={mediaStoryHref(r.pillar, r.slug)} style={{ textDecoration: 'none', display: 'block', backgroundColor: '#fff', border: '0.5px solid rgba(43,58,90,0.1)', borderRadius: 2, overflow: 'hidden' }}>
                 <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: 'var(--media-ink)', overflow: 'hidden' }}>
                   {r.featured_image_url ? (
-                    <Image src={r.featured_image_url} alt="" fill sizes="(max-width: 767px) 100vw, 360px" className="object-cover" />
+                    <Image src={r.featured_image_url} alt="" fill sizes="(max-width: 767px) 100vw, 360px" className={storyArtImgClass(r.featured_image_url)} />
                   ) : (
                     <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--media-ink), var(--media-ink-deep))' }} />
                   )}

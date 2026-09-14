@@ -1,6 +1,8 @@
 // Centered Media lockup for /media. Shared by the hub and every article shell.
 // Theme-swapped media-lockup PNG (EVOLVED [megaphone disc] MEDIA). Same
-// FooterLogo / loader CSS pair — not a composed HTML+disc mark.
+// FooterLogo / loader CSS pair. Not a composed HTML+disc mark.
+// White letters (DARK file) on dark chrome. Navy letters (LIGHT file) on parchment.
+// Hosts share this pair. html.light-mode is the only swap. No host branch.
 
 import Link from 'next/link'
 import {

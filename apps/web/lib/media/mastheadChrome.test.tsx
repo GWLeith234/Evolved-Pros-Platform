@@ -90,4 +90,35 @@ describe('Media masthead chrome', () => {
     expect(css).not.toMatch(/\.ep-media-masthead[\s\S]{0,1800}--brand-blue/)
     expect(css).not.toMatch(/\.ep-media-masthead-mark \{[\s\S]*background: var\(--brand-red\)/)
   })
+
+  it('pairs white letters with dark chrome and navy letters with parchment', () => {
+    expect(src).toMatch(/className="ep-media-masthead-logo ep-media-masthead-logo--on-dark"[\s\S]*src=\{MEDIA_LOCKUP_DARK\}/)
+    expect(src).toMatch(/className="ep-media-masthead-logo ep-media-masthead-logo--on-light"[\s\S]*src=\{MEDIA_LOCKUP_LIGHT\}/)
+    expect(css).toMatch(/\.ep-media-masthead-logo--on-dark,[\s\S]*\.ep-fit-masthead-logo--on-dark \{ display: block; \}/)
+    expect(css).toMatch(/\.ep-media-masthead-logo--on-light,[\s\S]*\.ep-fit-masthead-logo--on-light \{ display: none; \}/)
+    expect(css).toMatch(/html\.light-mode \.ep-media-masthead-logo--on-dark,[\s\S]*display: none/)
+    expect(css).toMatch(/html\.light-mode \.ep-media-masthead-logo--on-light,[\s\S]*display: block/)
+    expect(css).toMatch(/dark chrome -> white-letter/)
+    expect(css).toMatch(/Parchment \/ html\.light-mode -> navy-letter/)
+  })
+
+  it('does not host-branch /media chrome and keeps utility links on theme tokens', () => {
+    expect(src).not.toMatch(/evolvedpros\.com|hostname|window\.location/)
+    expect(layout).not.toMatch(/evolvedpros\.com|hostname|window\.location/)
+    expect(src).toMatch(/ep-media-masthead-back/)
+    expect(src).toMatch(/ep-media-masthead-join/)
+    expect(css).toMatch(/\.ep-media-masthead-back,[\s\S]*color: var\(--text-tertiary\)/)
+    expect(css).toMatch(/\.ep-media-masthead-back:hover,[\s\S]*color: var\(--text-primary\)/)
+  })
+
+  it('crops baked Pros stills in media CSS without touching Fit lockup rules', () => {
+    expect(css).toMatch(/\.ed-story-art--crop-baked-pros \{[\s\S]*transform: scale\(1\.34\)/)
+    expect(css).toMatch(/\.media-detail-hero--crop-baked-pros \{[\s\S]*background-size: 134% auto/)
+    expect(css).toMatch(
+      /\.ep-media-masthead-logo--on-dark,\n\.ep-fit-masthead-logo--on-dark \{ display: block; \}/,
+    )
+    expect(css).toMatch(
+      /\.ep-media-masthead-logo--on-light,\n\.ep-fit-masthead-logo--on-light \{ display: none; \}/,
+    )
+  })
 })
