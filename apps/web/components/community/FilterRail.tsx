@@ -12,13 +12,13 @@ export type KindFilter = 'all' | 'update' | 'question' | 'win' | 'poll'
 export type Pillar = PillarNumber
 export type SortBy = 'newest' | 'oldest' | 'most_reacted'
 
-// Reduced from 5 → 3 to remove the 1:1 label collision with the
-// composer's UPDATE/QUESTION/WIN/POLL tabs. Filter is now clearly a
-// "show me" verb (All / Wins / Questions), not a "post type" verb.
+// Show-me verbs. Polls lives here as the one empty-state owner.
+// Post types are chosen in the composer sheet, not as equal chrome.
 const KIND_TABS: Array<{ id: KindFilter; label: string }> = [
   { id: 'all',      label: 'All' },
   { id: 'win',      label: 'Wins' },
   { id: 'question', label: 'Questions' },
+  { id: 'poll',     label: 'Polls' },
 ]
 
 const SORT_OPTIONS: Array<{ value: SortBy; label: string }> = [

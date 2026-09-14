@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { HomeBannerBand } from '@/components/home/HomeBannerBand'
+import { HomeNextActionBand } from '@/components/home/HomeNextActionBand'
 import { HomeAccountabilityBand } from '@/components/home/HomeAccountabilityBand'
 import { HomeFuelBand } from '@/components/home/HomeFuelBand'
 import { HomeEpisodeCard } from '@/components/home/HomeEpisodeCard'
@@ -15,6 +16,26 @@ const PILLARS = ([1, 2, 3, 4, 5, 6] as const).map(n => ({
 }))
 
 describe('Home band markup', () => {
+  it('renders one primary next action above the fold', () => {
+    const html = renderToStaticMarkup(
+      <HomeNextActionBand
+        action={{
+          eyebrow: 'Next',
+          title: 'Discovery calls',
+          cta: 'Check in',
+          href: '#home-leading-measures',
+        }}
+      />,
+    )
+    expect(html).toContain('aria-label="Next action"')
+    expect(html).toContain('Discovery calls')
+    expect(html).toContain('Check in')
+    expect(html).toContain('#home-leading-measures')
+    expect(html).not.toMatch(/\u2014|\u2013/)
+    expect(html).not.toContain('HomeContentAdGrid')
+    expect(html).not.toContain('Upgrade')
+  })
+
   it('renders the locked Banner / Accountability / Fuel anatomy', () => {
     const banner = renderToStaticMarkup(
       <HomeBannerBand
