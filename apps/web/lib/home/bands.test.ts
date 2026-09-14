@@ -13,12 +13,65 @@ import {
   isVisibleWin,
   leadingMeasureStatus,
   pickFuelLiveEvent,
+  pickMemberHomeNextAction,
   remainingLessonLabel,
   weeklyCommitPulse,
   winChipLabel,
 } from './bands'
 
 describe('locked Home IA helpers', () => {
+  it('picks one Member Home next action without inventing metrics', () => {
+    expect(
+      pickMemberHomeNextAction({
+        firstIncompleteMeasure: 'Discovery calls',
+        hasWig: true,
+        academyTitle: 'Objection Handling',
+        academyHref: '/academy/strategy/objection-handling',
+      }),
+    ).toEqual({
+      eyebrow: 'Next',
+      title: 'Discovery calls',
+      cta: 'Check in',
+      href: '#home-leading-measures',
+    })
+    expect(
+      pickMemberHomeNextAction({
+        firstIncompleteMeasure: null,
+        hasWig: false,
+        academyTitle: null,
+        academyHref: null,
+      }),
+    ).toEqual({
+      eyebrow: 'Next',
+      title: "Name this quarter's WIG",
+      cta: 'Open scoreboard',
+      href: '/leaderboard',
+    })
+    expect(
+      pickMemberHomeNextAction({
+        firstIncompleteMeasure: null,
+        hasWig: true,
+        academyTitle: 'Objection Handling',
+        academyHref: '/academy/strategy/objection-handling',
+      }),
+    ).toEqual({
+      eyebrow: 'Next',
+      title: 'Objection Handling',
+      cta: 'Resume lesson',
+      href: '/academy/strategy/objection-handling',
+    })
+    const fallback = pickMemberHomeNextAction({
+      firstIncompleteMeasure: null,
+      hasWig: true,
+      academyTitle: null,
+      academyHref: null,
+    })
+    expect(fallback.cta).toBe('Open Community')
+    expect(fallback.href).toBe('/community')
+    expect(assertNoEmDash(fallback.title)).toBe(true)
+    expect(assertNoEmDash(fallback.cta)).toBe(true)
+  })
+
   it('exposes six compact Academy pillar chips', () => {
     expect(HOME_PILLAR_CHIPS).toHaveLength(6)
     expect(HOME_PILLAR_CHIPS.map(p => p.n)).toEqual([1, 2, 3, 4, 5, 6])
@@ -156,10 +209,16 @@ describe('Home surfaces wire guest stills', () => {
     const page = readFileSync(resolve(__dirname, '../../app/(member)/home/page.tsx'), 'utf8')
     expect(page).not.toMatch(/<WelcomeBanner/)
     expect(page).not.toMatch(/AcademyArchitectureCard/)
+    expect(page).toMatch(/HomeNextActionBand/)
     expect(page).toMatch(/HomeBannerBand/)
     expect(page).toMatch(/HomeAccountabilityBand/)
     expect(page).toMatch(/HomeFuelBand/)
     expect(page).toMatch(/HomeFitTeaseBand/)
+    const jsx = page.slice(page.indexOf('return ('))
+    expect(jsx.indexOf('<HomeNextActionBand')).toBeLessThan(jsx.indexOf('<HomeBannerBand'))
+    expect(jsx.indexOf('id="home-below-fold"')).toBeGreaterThan(jsx.indexOf('<HomeFuelBand'))
+    expect(jsx.indexOf('<HomeFitTeaseBand')).toBeGreaterThan(jsx.indexOf('id="home-below-fold"'))
+    expect(jsx.indexOf('<HomeContentAdGrid')).toBeGreaterThan(jsx.indexOf('id="home-below-fold"'))
     const conversionHome = readFileSync(
       resolve(__dirname, '../../components/home/ConversionHome.tsx'),
       'utf8',
@@ -178,6 +237,7 @@ describe('Home surfaces wire guest stills', () => {
       'cardImagery.ts',
       '../events/cityStock.ts',
       '../../components/home/HomeBannerBand.tsx',
+      '../../components/home/HomeNextActionBand.tsx',
       '../../components/home/HomeAccountabilityBand.tsx',
       '../../components/home/HomeFuelBand.tsx',
       '../../components/home/HomeFitTeaseBand.tsx',

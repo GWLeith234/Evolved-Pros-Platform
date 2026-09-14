@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { canSubmitPost, type CanSubmitPostInput, type ComposerKind } from './composer'
+import {
+  canSubmitPost,
+  COMPOSER_TYPES,
+  type CanSubmitPostInput,
+  type ComposerKind,
+} from './composer'
 
 /**
  * COMPOSER-1 / FINDING 04 — the submit gate.
@@ -27,6 +32,20 @@ function gate(over: Partial<CanSubmitPostInput> = {}): boolean {
 const IMAGE = { name: 'shot.png', type: 'image/png', size: 1024 } as unknown as File
 
 const REJECTION = 'That image is 10.6 MB. Images must be 10.0 MB or smaller.'
+
+describe('composer type sheet', () => {
+  it('offers Update, Question, Win, and Poll after Post', () => {
+    expect(COMPOSER_TYPES.map(t => t.kind)).toEqual(['update', 'question', 'win', 'poll'])
+    expect(COMPOSER_TYPES.map(t => t.label)).toEqual(['Update', 'Question', 'Win', 'Poll'])
+  })
+
+  it('keeps placeholders free of em dashes', () => {
+    for (const type of COMPOSER_TYPES) {
+      expect(type.placeholder).not.toMatch(/\u2014|\u2013/)
+      expect(type.label).not.toMatch(/\u2014|\u2013/)
+    }
+  })
+})
 
 describe('canSubmitPost', () => {
   it('1. enables on body text alone', () => {

@@ -13,13 +13,42 @@
  */
 
 /**
- * The four composer tabs. Declared here, not in Composer.tsx, so there is
- * exactly one identity for this union.
+ * The four composer types. Declared here, not in Composer.tsx, so there is
+ * exactly one identity for this union. Shown after Post, not as equal chrome.
  *
  * NOT interchangeable with PostType in ./types.ts — that one also carries
  * 'announce', which the composer does not offer.
  */
 export type ComposerKind = 'update' | 'question' | 'win' | 'poll'
+
+export type ComposerPhase = 'cta' | 'sheet' | 'compose'
+
+export const COMPOSER_TYPES: ReadonlyArray<{
+  kind: ComposerKind
+  label: string
+  placeholder: string
+}> = [
+  {
+    kind: 'update',
+    label: 'Update',
+    placeholder: "Share what you're working on or applying...",
+  },
+  {
+    kind: 'question',
+    label: 'Question',
+    placeholder: 'Ask the community something...',
+  },
+  {
+    kind: 'win',
+    label: 'Win',
+    placeholder: 'Share a win, big or small...',
+  },
+  {
+    kind: 'poll',
+    label: 'Poll',
+    placeholder: 'Ask a poll question...',
+  },
+]
 
 export interface CanSubmitPostInput {
   body: string
