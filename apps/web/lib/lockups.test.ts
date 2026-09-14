@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
 import {
   BEBAS_NEUE_STATIC,
@@ -37,6 +38,34 @@ describe('Media + Fit lockup assets', () => {
     expect(FIT_LOCKUP_DARK).toBe('/brand/masthead/fit-lockup-dark.png')
     expect(FIT_LOCKUP_LIGHT).toBe('/brand/masthead/fit-lockup-light.png')
     expect(BEBAS_NEUE_STATIC).toBe('/social-fonts/BebasNeue-Regular.ttf')
+  })
+
+  it('keeps MEDIA_LOCKUP_DARK white-letter and MEDIA_LOCKUP_LIGHT navy-letter', async () => {
+    async function letterBias(urlPath: string) {
+      const { data, info } = await sharp(publicFile(urlPath))
+        .ensureAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true })
+      let dark = 0
+      let light = 0
+      for (let i = 0; i < data.length; i += info.channels) {
+        const a = info.channels === 4 ? data[i + 3] : 255
+        if (a < 20) continue
+        const r = data[i]
+        const g = data[i + 1]
+        const b = data[i + 2]
+        if (r > 180 && g < 90 && b < 90) continue
+        const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b
+        if (lum < 80) dark += 1
+        else if (lum > 200) light += 1
+      }
+      return { dark, light }
+    }
+
+    const onDark = await letterBias(MEDIA_LOCKUP_DARK)
+    const onLight = await letterBias(MEDIA_LOCKUP_LIGHT)
+    expect(onDark.light).toBeGreaterThan(onDark.dark * 8)
+    expect(onLight.dark).toBeGreaterThan(onLight.light * 2)
   })
 
   it('does not change the Podcast masthead except shared font availability', () => {

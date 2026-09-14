@@ -8,6 +8,10 @@
  * Live marks swap the full lockup PNGs the same way FooterLogo / the loader
  * do (CSS --on-dark / --on-light). Do not compose a third HTML+disc pattern.
  * Do not type the family wordmark in chrome.
+ *
+ * File names follow the chrome they sit on, not George letter-color slang:
+ *   *-dark.png  = white letters for dark --bg-nav
+ *   *-light.png = navy letters for parchment / html.light-mode
  */
 
 export const BEBAS_NEUE_STATIC = '/social-fonts/BebasNeue-Regular.ttf' as const
@@ -15,7 +19,9 @@ export const BEBAS_NEUE_STATIC = '/social-fonts/BebasNeue-Regular.ttf' as const
 export const MEDIA_MEGAPHONE_DISC = '/brand/masthead/megaphone-disc.png' as const
 export const FIT_BARBELL_DISC = '/brand/masthead/barbell-disc.png' as const
 
+/** White-letter MEDIA lockup. Pair with --on-dark (default dark chrome). */
 export const MEDIA_LOCKUP_DARK = '/brand/masthead/media-lockup-dark.png' as const
+/** Navy-letter MEDIA lockup. Pair with --on-light (parchment / light chrome). */
 export const MEDIA_LOCKUP_LIGHT = '/brand/masthead/media-lockup-light.png' as const
 export const FIT_LOCKUP_DARK = '/brand/masthead/fit-lockup-dark.png' as const
 export const FIT_LOCKUP_LIGHT = '/brand/masthead/fit-lockup-light.png' as const

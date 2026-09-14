@@ -22,6 +22,7 @@ import {
 } from '@/lib/media/desk'
 import type { MediaRailEpisode } from '@/lib/media/podcastRail'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import { featuredHeroByline, resolveStoryArtUrl, storyArtImgClass } from '@/lib/media/storyArt'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -200,12 +201,12 @@ function FeaturedCard({ story }: { story: MediaStory }) {
         background: 'var(--brand-navy)',
       }}
     >
-      {story.featured_image_url ? (
+      {resolveStoryArtUrl(story.featured_image_url) ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={story.featured_image_url}
+          src={resolveStoryArtUrl(story.featured_image_url) ?? ''}
           alt=""
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          className={storyArtImgClass(story.featured_image_url)}
         />
       ) : (
         <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--media-ink), var(--media-ink-deep))' }} />
@@ -260,6 +261,7 @@ function FeaturedCard({ story }: { story: MediaStory }) {
         <span
           suppressHydrationWarning
           className="ed-featured-meta-byline"
+          data-featured-byline="plain"
           style={{
             fontSize: 12,
             color: 'rgba(255,255,255,0.7)',
@@ -268,7 +270,7 @@ function FeaturedCard({ story }: { story: MediaStory }) {
             textAlign: 'right',
           }}
         >
-          {story.author ?? 'George Leith'}
+          {featuredHeroByline(story)}
         </span>
       </div>
     </Link>
@@ -378,14 +380,14 @@ function ArticleCard({ story }: { story: MediaStory }) {
       }}
     >
       <div style={{ aspectRatio: '4/3', background: 'var(--navy-dark)', overflow: 'hidden' }}>
-        {story.featured_image_url ? (
+        {resolveStoryArtUrl(story.featured_image_url) ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={story.featured_image_url}
+            src={resolveStoryArtUrl(story.featured_image_url) ?? ''}
             alt=""
             loading="lazy"
             decoding="async"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            className={storyArtImgClass(story.featured_image_url)}
           />
         ) : (
           <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--media-ink), var(--media-ink-deep))' }} />
