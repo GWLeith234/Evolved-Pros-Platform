@@ -2,7 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { MediaCenteredAd } from '@/components/media/MediaIabSlot'
 import { MEDIA_BRAND } from '@/lib/media/brand'
-import { storyArtImgClass } from '@/lib/media/storyArt'
+import { resolveStoryArtUrl, storyArtImgClass } from '@/lib/media/storyArt'
 import { MEDIA_NAVY } from '@/lib/media/desk'
 import { getPillarLabel } from '@/lib/pillars'
 import { getActivePlatformAds } from '@/lib/cache/shared'
@@ -78,7 +78,7 @@ export async function MediaSectionMagazine({
         <Link href={storyHref(featured)} style={{ textDecoration: 'none', display: 'block', marginBottom: 20 }}>
           <div style={{ position: 'relative', aspectRatio: '21/9', borderRadius: 4, overflow: 'hidden', backgroundColor: '#2B3A5A' }}>
             {featured.featured_image_url ? (
-              <Image src={featured.featured_image_url} alt="" fill priority sizes="(max-width: 1100px) 100vw, 1100px" className={storyArtImgClass(featured.featured_image_url)} />
+              <Image src={resolveStoryArtUrl(featured.featured_image_url) ?? featured.featured_image_url} alt="" fill priority sizes="(max-width: 1100px) 100vw, 1100px" className={storyArtImgClass(featured.featured_image_url)} />
             ) : (
               <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1a2540)' }} />
             )}
@@ -121,7 +121,7 @@ export async function MediaSectionMagazine({
                   >
                     <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: '#2B3A5A', overflow: 'hidden' }}>
                       {a.featured_image_url ? (
-                        <Image src={a.featured_image_url} alt="" fill sizes="(max-width: 767px) 100vw, 360px" className={storyArtImgClass(a.featured_image_url)} />
+                        <Image src={resolveStoryArtUrl(a.featured_image_url) ?? a.featured_image_url} alt="" fill sizes="(max-width: 767px) 100vw, 360px" className={storyArtImgClass(a.featured_image_url)} />
                       ) : (
                         <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1a2540)' }} />
                       )}

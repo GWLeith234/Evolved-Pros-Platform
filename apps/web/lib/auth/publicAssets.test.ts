@@ -12,6 +12,7 @@ describe('public brand assets', () => {
     expect(isPublicBrandAsset('/brand/city-fallback.svg')).toBe(true)
     expect(isPublicBrandAsset('/brand/hero-evolved-architecture.png')).toBe(true)
     expect(isPublicBrandAsset('/brand/book-cover.png')).toBe(true)
+    expect(isPublicBrandAsset('/brand/media/grok-bots-from-evolved-pros.png')).toBe(true)
     expect(isPublicBrandAsset('/academy/architecture-still-light.svg')).toBe(false)
     expect(isPublicBrandAsset('/events/city-fallback.svg')).toBe(false)
     expect(isPublicBrandAsset('/brand/no-extension')).toBe(false)

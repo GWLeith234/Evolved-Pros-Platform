@@ -22,7 +22,7 @@ import {
 } from '@/lib/media/desk'
 import type { MediaRailEpisode } from '@/lib/media/podcastRail'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
-import { storyArtImgClass } from '@/lib/media/storyArt'
+import { featuredHeroByline, resolveStoryArtUrl, storyArtImgClass } from '@/lib/media/storyArt'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -201,10 +201,10 @@ function FeaturedCard({ story }: { story: MediaStory }) {
         background: 'var(--brand-navy)',
       }}
     >
-      {story.featured_image_url ? (
+      {resolveStoryArtUrl(story.featured_image_url) ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={story.featured_image_url}
+          src={resolveStoryArtUrl(story.featured_image_url) ?? ''}
           alt=""
           className={storyArtImgClass(story.featured_image_url)}
         />
@@ -270,7 +270,7 @@ function FeaturedCard({ story }: { story: MediaStory }) {
             textAlign: 'right',
           }}
         >
-          {story.author ?? 'George Leith'}
+          {featuredHeroByline(story)}
         </span>
       </div>
     </Link>
@@ -380,10 +380,10 @@ function ArticleCard({ story }: { story: MediaStory }) {
       }}
     >
       <div style={{ aspectRatio: '4/3', background: 'var(--navy-dark)', overflow: 'hidden' }}>
-        {story.featured_image_url ? (
+        {resolveStoryArtUrl(story.featured_image_url) ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={story.featured_image_url}
+            src={resolveStoryArtUrl(story.featured_image_url) ?? ''}
             alt=""
             loading="lazy"
             decoding="async"

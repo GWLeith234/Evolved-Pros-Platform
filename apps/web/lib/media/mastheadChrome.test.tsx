@@ -111,9 +111,9 @@ describe('Media masthead chrome', () => {
     expect(css).toMatch(/\.ep-media-masthead-back:hover,[\s\S]*color: var\(--text-primary\)/)
   })
 
-  it('crops baked Pros stills in media CSS without touching Fit lockup rules', () => {
-    expect(css).toMatch(/\.ed-story-art--crop-baked-pros \{[\s\S]*transform: scale\(1\.34\)/)
-    expect(css).toMatch(/\.media-detail-hero--crop-baked-pros \{[\s\S]*background-size: 134% auto/)
+  it('keeps Fit lockup swap shared and does not crop media story stills', () => {
+    expect(css).toMatch(/\.ed-story-art \{[\s\S]*object-fit: cover/)
+    expect(css).not.toMatch(/ed-story-art--crop-baked-pros/)
     expect(css).toMatch(
       /\.ep-media-masthead-logo--on-dark,\n\.ep-fit-masthead-logo--on-dark \{ display: block; \}/,
     )
