@@ -182,7 +182,7 @@ export function SponsorAdCard({ ad, locationId = 'home' }: { ad: SponsorAd; loca
   return <div className="group h-full">{card}</div>
 }
 
-export function SponsoredEyebrow() {
+function SponsoredEyebrow() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
       <span
@@ -235,12 +235,4 @@ export function HomeSponsorAd({ ad }: { ad: SponsorAd | null }) {
       <SponsorAdCard ad={ad} locationId="home" />
     </section>
   )
-}
-
-export function HomeSponsorRow({ ads }: { ads: SponsorAd[] }) {
-  // Safety lock: a pair/grid of units reads as an ads board.
-  // Home places remaining inventory between sections, one at a time.
-  const ad = ads.find(a => a?.id)
-  if (!ad) return null
-  return <HomeSponsorAd ad={ad} />
 }
