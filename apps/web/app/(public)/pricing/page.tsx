@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import dynamic from 'next/dynamic'
+import nextDynamic from 'next/dynamic'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { effectiveTier } from '@/lib/tier'
 import { getMembershipPricing } from '@/lib/commerce/catalogue'
@@ -14,7 +14,7 @@ import {
 } from '@/lib/seo/mustCite'
 import { PricingTierCards } from './PricingTierCards'
 
-const RedeemCodeForm = dynamic(
+const RedeemCodeForm = nextDynamic(
   () => import('./RedeemCodeForm').then(m => m.RedeemCodeForm),
   {
     loading: () => (

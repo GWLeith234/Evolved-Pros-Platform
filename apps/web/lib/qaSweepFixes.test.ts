@@ -43,7 +43,9 @@ describe('QA sweep P0 /pricing TBT', () => {
     expect(cards).toContain('Go Professional')
     expect(cards).toContain('Book George')
     expect(page).toMatch(/next\/dynamic/)
+    expect(page).toMatch(/nextDynamic/)
     expect(page).toMatch(/RedeemCodeForm/)
+    expect(page).toMatch(/export const dynamic = 'force-dynamic'/)
   })
 })
 
