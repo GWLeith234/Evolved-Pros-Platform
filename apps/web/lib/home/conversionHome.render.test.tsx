@@ -51,6 +51,8 @@ describe('media parchment lockup', () => {
   it('ships the navy-letter Media lockup for parchment', () => {
     const html = renderToStaticMarkup(<MediaMastheadLockup />)
     expect(html).toContain(MEDIA_LOCKUP_LIGHT)
+    expect(html).toContain('width="612"')
+    expect(html).toContain('height="139"')
     expect(html).not.toContain('\u2014')
   })
 })

@@ -92,6 +92,19 @@ describe('Media masthead chrome', () => {
     expect(css).not.toMatch(/\.ep-media-masthead-mark \{[\s\S]*background: var\(--brand-red\)/)
   })
 
+  it('spans the Media lockup across the masthead content width', () => {
+    expect(css).toMatch(/\.ep-media-masthead-wordmark \{\n  width: 100%;\n\}/)
+    expect(css).toMatch(/\.ep-media-masthead-wordmark a \{\n  width: 100%;\n\}/)
+    expect(css).toMatch(/\.ep-media-masthead-logo \{\n  width: 100%;\n  max-width: 100%;\n  height: auto;\n\}/)
+    expect(css).not.toMatch(/\.ep-media-masthead-logo \{[\s\S]{0,80}clamp\(/)
+    expect(css).not.toMatch(/\.ep-media-masthead \{[\s\S]{0,240}background: var\(--bg-nav\)/)
+    expect(css).not.toMatch(/\.ep-media-masthead \{[\s\S]{0,240}background: var\(--navy/)
+    expect(src).toMatch(/width=\{612\}/)
+    expect(src).toMatch(/height=\{139\}/)
+    expect(src).not.toMatch(/width=\{1239\}/)
+    expect(src).not.toMatch(/clamp\(36px, 6\.5vw, 52px\)/)
+  })
+
   it('pairs white letters with dark chrome and navy letters with parchment', () => {
     expect(src).toMatch(/className="ep-media-masthead-logo ep-media-masthead-logo--on-dark"[\s\S]*src=\{MEDIA_LOCKUP_DARK\}/)
     expect(src).toMatch(/className="ep-media-masthead-logo ep-media-masthead-logo--on-light"[\s\S]*src=\{MEDIA_LOCKUP_LIGHT\}/)
