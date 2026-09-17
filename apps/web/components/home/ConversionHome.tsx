@@ -33,7 +33,6 @@ import {
   HOME_NAV_LINKS,
   HOME_OPEN_PLATFORM,
   HOME_OPEN_PLATFORM_HREF,
-  HOME_PRIMARY_CTA,
   HOME_SECONDARY_CTA,
   HOME_SEE_PRICING_TOOLTIP,
   HOME_SIGN_IN,
@@ -157,8 +156,9 @@ export function ConversionHome({
           The GOLD Architecture still stays (same bytes). F1 clips the still
           to the upper band so THE EVOLVED ARCHITECTURE is an HTML label
           above the H1 instead of baked-in type colliding at 390-400px.
-          Join free stays in the first viewport. Open the platform is
-          signed-in only.
+          Open the platform is the primary red CTA. Join free is the second
+          above-fold button on the same row (wraps on small screens).
+          See pricing stays as the third control.
         */}
         <section
           aria-label={HERO_IMAGE_ALT}
@@ -188,12 +188,11 @@ export function ConversionHome({
               {HOME_SUB}
             </p>
             <div className="mt-5 flex flex-wrap items-center justify-center gap-3 md:mt-8">
-              {signedIn ? (
-                <PrimaryCta href={HOME_OPEN_PLATFORM_HREF} label={HOME_OPEN_PLATFORM} />
-              ) : (
-                <PrimaryCta
+              <PrimaryCta href={HOME_OPEN_PLATFORM_HREF} label={HOME_OPEN_PLATFORM} />
+              {signedIn ? null : (
+                <GhostCta
                   href={JOIN_FREE_HREF}
-                  label={HOME_PRIMARY_CTA}
+                  label={HOME_JOIN_FREE}
                   tooltip={HOME_JOIN_FREE_TOOLTIP}
                 />
               )}

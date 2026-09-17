@@ -161,6 +161,10 @@ describe('S4 auth wiring (source)', () => {
     expect(eventsPage).toContain("loginHrefFor('/events')")
     expect(eventDetailPage).toContain('loginHrefFor(`/events/${params.eventId}`)')
     expect(eventDetailPage).not.toContain("redirect('/login')")
+    expect(eventsPage).not.toContain("redirect('/live')")
+    expect(eventDetailPage).not.toContain("redirect('/live')")
+    expect(loginForm).not.toMatch(/redirect\(['"]\/live['"]\)/)
+    expect(loginPage).not.toMatch(/redirect\(['"]\/live['"]\)/)
   })
 
   it('keeps /brand stills public and off the /academy and /events matchers', () => {
