@@ -25,6 +25,9 @@ export function MediaMastheadLockup() {
           alt=""
           width={612}
           height={139}
+          loading="lazy"
+          decoding="async"
+          {...{ fetchpriority: 'low' }}
         />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -34,6 +37,8 @@ export function MediaMastheadLockup() {
           alt=""
           width={612}
           height={139}
+          decoding="sync"
+          {...{ fetchpriority: 'high' }}
         />
       </Link>
     </h1>

@@ -3491,3 +3491,29 @@ html.light-mode .live-force-dark .ep-public-footer-logo--on-light {
 .ep-public-footer-link:focus-visible {
   color: var(--text-primary);
 }
+
+/* /pricing billing toggle — CSS :has() so the ladder is server HTML (TBT). */
+.ep-pricing-billing-btn {
+  background-color: transparent;
+  color: rgba(245, 240, 232, 0.4);
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.ep-pricing-billing:has(#ep-pricing-monthly:checked) label[for='ep-pricing-monthly'],
+.ep-pricing-billing:has(#ep-pricing-annual:checked) label[for='ep-pricing-annual'] {
+  background-color: rgba(245, 240, 232, 0.1);
+  color: #f5f0e8;
+  border: 1px solid rgba(245, 240, 232, 0.15);
+}
+.ep-pricing-billing .ep-price-annual,
+.ep-pricing-billing .ep-cta-annual {
+  display: none;
+}
+.ep-pricing-billing:has(#ep-pricing-annual:checked) .ep-price-monthly,
+.ep-pricing-billing:has(#ep-pricing-annual:checked) .ep-cta-monthly {
+  display: none;
+}
+.ep-pricing-billing:has(#ep-pricing-annual:checked) .ep-price-annual,
+.ep-pricing-billing:has(#ep-pricing-annual:checked) .ep-cta-annual {
+  display: block;
+}

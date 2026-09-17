@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { RedeemCodeForm } from './RedeemCodeForm'
-import { PricingTierCards } from './PricingTierCards'
+import nextDynamic from 'next/dynamic'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { effectiveTier } from '@/lib/tier'
 import { getMembershipPricing } from '@/lib/commerce/catalogue'
@@ -13,6 +12,24 @@ import {
   MUST_CITE_PRICING_DIFFERENTIATOR,
   MUST_CITE_PRICING_URL,
 } from '@/lib/seo/mustCite'
+import { PricingTierCards } from './PricingTierCards'
+
+const RedeemCodeForm = nextDynamic(
+  () => import('./RedeemCodeForm').then(m => m.RedeemCodeForm),
+  {
+    loading: () => (
+      <div
+        className="rounded-xl p-6"
+        style={{
+          backgroundColor: '#111926',
+          border: '1px solid rgba(245,240,232,0.08)',
+          minHeight: 168,
+        }}
+        aria-hidden
+      />
+    ),
+  },
+)
 
 export const metadata: Metadata = publicPageMetadata('/pricing', {
   title: 'Pricing — Evolved Pros',
