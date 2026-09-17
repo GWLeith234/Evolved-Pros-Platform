@@ -2425,7 +2425,9 @@ a.ep-text-link:focus-visible {
    (--on-dark). Parchment / html.light-mode -> navy-letter *-light.png
    (--on-light). Same CSS on www and platform. Do not host-branch.
 
-   /media masthead is parchment (not a navy island). Fit keeps --bg-nav. */
+   /media masthead is parchment (not a navy island). The #150 Media lockup
+   spans the content width as a top-of-page masthead, not a tiny boxed chip.
+   Fit keeps --bg-nav. */
 .ep-media-masthead,
 .ep-fit-masthead {
   max-width: 100%;
@@ -2447,7 +2449,7 @@ a.ep-text-link:focus-visible {
   padding: var(--space-4) var(--space-4) 0;
 }
 .ep-media-masthead-inner {
-  padding-top: var(--space-2);
+  padding-top: var(--space-3);
 }
 @media (min-width: 640px) {
   .ep-media-masthead-inner,
@@ -2465,7 +2467,7 @@ a.ep-text-link:focus-visible {
   margin-bottom: var(--space-4);
 }
 .ep-media-masthead-utility {
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 .ep-media-masthead-back,
 .ep-media-masthead-join,
@@ -2510,6 +2512,9 @@ a.ep-text-link:focus-visible {
   font-size: inherit;
   font-weight: inherit;
 }
+.ep-media-masthead-wordmark {
+  width: 100%;
+}
 .ep-media-masthead-wordmark a,
 .ep-fit-masthead-wordmark a {
   display: flex;
@@ -2519,6 +2524,9 @@ a.ep-text-link:focus-visible {
   max-width: 100%;
   text-decoration: none;
   line-height: 0;
+}
+.ep-media-masthead-wordmark a {
+  width: 100%;
 }
 .ep-media-masthead-logo,
 .ep-fit-masthead-logo {
@@ -2530,7 +2538,9 @@ a.ep-text-link:focus-visible {
   height: clamp(56px, 12vw, 96px);
 }
 .ep-media-masthead-logo {
-  height: clamp(36px, 6.5vw, 52px);
+  width: 100%;
+  max-width: 100%;
+  height: auto;
 }
 .ep-media-masthead-logo--on-dark,
 .ep-fit-masthead-logo--on-dark { display: block; }
@@ -3373,7 +3383,7 @@ html.light-mode .ep-fit-page-footer-mark img:last-child { display: block; }
   color: var(--text-primary);
 }
 .ep-media-masthead-rail {
-  margin-top: var(--space-3);
+  margin-top: var(--space-4);
   padding-bottom: var(--space-3);
 }
 .ep-media-masthead-rail a {

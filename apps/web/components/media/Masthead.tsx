@@ -1,8 +1,9 @@
-// Centered Media lockup for /media. Shared by the hub and every article shell.
+// Full-width Media lockup for /media. Shared by the hub and every article shell.
 // #150 theme-aware media-lockup PNG (EVOLVED [megaphone disc] MEDIA).
-// Masthead sits on parchment (not a navy island). Navy-letter LIGHT file
-// is the visible mark on paper. DARK file stays in the pair for Fit-shared
-// CSS and any future dark chrome. No host branch.
+// Masthead sits on parchment (not a navy island). The lockup spans the
+// content width across the top. Navy-letter LIGHT file is the visible mark
+// on paper. DARK file stays in the pair for Fit-shared CSS and any future
+// dark chrome. No host branch.
 
 import Link from 'next/link'
 import {
@@ -22,8 +23,8 @@ export function MediaMastheadLockup() {
           className="ep-media-masthead-logo ep-media-masthead-logo--on-dark"
           src={MEDIA_LOCKUP_DARK}
           alt=""
-          width={1239}
-          height={207}
+          width={612}
+          height={139}
         />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -31,8 +32,8 @@ export function MediaMastheadLockup() {
           className="ep-media-masthead-logo ep-media-masthead-logo--on-light"
           src={MEDIA_LOCKUP_LIGHT}
           alt=""
-          width={1239}
-          height={207}
+          width={612}
+          height={139}
         />
       </Link>
     </h1>
