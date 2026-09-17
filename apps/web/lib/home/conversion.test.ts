@@ -227,9 +227,10 @@ describe('conversion homepage layout contracts', () => {
     expect(conversionHomeSrc).toMatch(/HOME_OPEN_PLATFORM_HREF/)
     expect(conversionHomeSrc.indexOf('signedIn ?')).toBeGreaterThan(-1)
     expect(conversionHomeSrc).not.toMatch(/ThemeToggle/)
+    const leadStart = conversionHomeSrc.indexOf('ep-home-fold-ctas-lead')
     const lead = conversionHomeSrc.slice(
-      conversionHomeSrc.indexOf('ep-home-fold-ctas-lead'),
-      conversionHomeSrc.indexOf('HOME_SECONDARY_CTA'),
+      leadStart,
+      conversionHomeSrc.indexOf('HOME_SECONDARY_CTA', leadStart),
     )
     expect(lead).toMatch(/HOME_OPEN_PLATFORM/)
     expect(lead).toMatch(/HOME_JOIN_FREE/)

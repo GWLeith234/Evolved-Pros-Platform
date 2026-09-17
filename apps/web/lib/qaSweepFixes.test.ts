@@ -106,10 +106,8 @@ describe('QA sweep P1 /live + home LCP', () => {
     expect(fold.indexOf('HOME_OPEN_PLATFORM')).toBeGreaterThan(-1)
     expect(fold.indexOf('HOME_JOIN_FREE')).toBeGreaterThan(-1)
     expect(fold.indexOf('HOME_OPEN_PLATFORM')).toBeLessThan(fold.indexOf('HOME_JOIN_FREE'))
-    const lead = home.slice(
-      home.indexOf('ep-home-fold-ctas-lead'),
-      home.indexOf('HOME_SECONDARY_CTA'),
-    )
+    const leadStart = home.indexOf('ep-home-fold-ctas-lead')
+    const lead = home.slice(leadStart, home.indexOf('HOME_SECONDARY_CTA', leadStart))
     expect(lead).toContain('HOME_OPEN_PLATFORM')
     expect(lead).toContain('HOME_JOIN_FREE')
     expect(lead.indexOf('HOME_OPEN_PLATFORM')).toBeLessThan(lead.indexOf('HOME_JOIN_FREE'))
