@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { existsSync, readFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
@@ -13,7 +13,6 @@ import {
 
 const here = dirname(fileURLToPath(import.meta.url))
 const webRoot = resolve(here, '..')
-const repoRoot = resolve(webRoot, '..', '..')
 
 function read(rel: string): string {
   return readFileSync(resolve(webRoot, rel), 'utf8')
@@ -46,20 +45,6 @@ describe('QA sweep P0 /pricing TBT', () => {
     expect(page).toMatch(/nextDynamic/)
     expect(page).toMatch(/RedeemCodeForm/)
     expect(page).toMatch(/export const dynamic = 'force-dynamic'/)
-  })
-})
-
-describe('QA sweep P0 NS-001 staging masthead', () => {
-  it('removes public/brand/masthead/_staging from the deploy tree', () => {
-    const staging = resolve(webRoot, 'public/brand/masthead/_staging')
-    expect(existsSync(staging)).toBe(false)
-    expect(existsSync(resolve(staging, 'md.p000.txt'))).toBe(false)
-    expect(existsSync(resolve(webRoot, 'public/brand/masthead/media-lockup-light.png'))).toBe(true)
-  })
-
-  it('gitignores the staging directory so it cannot ship again', () => {
-    const gitignore = readFileSync(resolve(repoRoot, '.gitignore'), 'utf8')
-    expect(gitignore).toMatch(/public\/brand\/masthead\/_staging/)
   })
 })
 

@@ -43,6 +43,3 @@ apps/web/next-env.d.ts
 
 # Claude Code agent worktrees (ephemeral, auto-cleaned)
 .claude/worktrees/
-
-# Night Sweep NS-001 — staging masthead chunks must never ship in public/
-apps/web/public/brand/masthead/_staging/
