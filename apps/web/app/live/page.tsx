@@ -96,7 +96,7 @@ export default async function LivePage() {
         </Link>
       )}
 
-      <link rel="preload" as="image" href={LIVE_HERO_PHOTO} fetchPriority="high" />
+      <link rel="preload" as="image" href={LIVE_HERO_PHOTO} {...{ fetchpriority: 'high' }} />
       {/* Title: LIVE (via LiveMasthead) */}
       <LiveMasthead />
       <LiveSplitHero />

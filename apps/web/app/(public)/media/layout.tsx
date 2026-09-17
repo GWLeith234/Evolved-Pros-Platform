@@ -8,7 +8,7 @@ export default function MediaLayout({ children }: { children: React.ReactNode })
   // Preload the visible parchment lockup so LCP does not wait on desk JS.
   return (
     <div className="min-h-screen bg-paper text-navy ep-no-x-scroll" style={{ maxWidth: '100vw' }}>
-      <link rel="preload" as="image" href={MEDIA_LOCKUP_LIGHT} fetchPriority="high" />
+      <link rel="preload" as="image" href={MEDIA_LOCKUP_LIGHT} {...{ fetchpriority: 'high' }} />
       <Masthead />
       <div className="media-desk-shell">{children}</div>
     </div>

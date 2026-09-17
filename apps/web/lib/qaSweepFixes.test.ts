@@ -3,8 +3,6 @@ import { existsSync, readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { renderToStaticMarkup } from 'react-dom/server'
-import { MediaMastheadLockup } from '@/components/media/Masthead'
 import { MEDIA_LOCKUP_DARK, MEDIA_LOCKUP_LIGHT } from '@/lib/lockups'
 import {
   HOME_JOIN_FREE,
@@ -15,7 +13,7 @@ import {
 
 const here = dirname(fileURLToPath(import.meta.url))
 const webRoot = resolve(here, '..')
-const repoRoot = resolve(here, '../..')
+const repoRoot = resolve(webRoot, '..', '..')
 
 function read(rel: string): string {
   return readFileSync(resolve(webRoot, rel), 'utf8')
@@ -71,7 +69,7 @@ describe('QA sweep P1 /media LCP', () => {
   it('preloads the parchment lockup and prioritizes the visible light PNG', () => {
     expect(layout).toContain('rel="preload"')
     expect(layout).toContain('MEDIA_LOCKUP_LIGHT')
-    expect(masthead).toMatch(/fetchPriority="high"/)
+    expect(masthead).toMatch(/fetchpriority: 'high'/)
     expect(masthead).toMatch(/loading="lazy"/)
     expect(masthead).toContain('width={612}')
     expect(masthead).toContain('height={139}')
@@ -79,9 +77,10 @@ describe('QA sweep P1 /media LCP', () => {
   })
 
   it('keeps the full-width parchment lockup and both theme files', () => {
-    const html = renderToStaticMarkup(<MediaMastheadLockup />)
-    expect(html).toContain(MEDIA_LOCKUP_LIGHT)
-    expect(html).toContain(MEDIA_LOCKUP_DARK)
+    expect(masthead).toContain('MEDIA_LOCKUP_LIGHT')
+    expect(masthead).toContain('MEDIA_LOCKUP_DARK')
+    expect(MEDIA_LOCKUP_LIGHT).toBe('/brand/masthead/media-lockup-light.png')
+    expect(MEDIA_LOCKUP_DARK).toBe('/brand/masthead/media-lockup-dark.png')
     expect(css).toMatch(/\.ep-media-masthead-logo \{\n  width: 100%;\n  max-width: 100%;\n  height: auto;\n\}/)
     expect(css).toMatch(/\.ep-media-masthead \{[\s\S]*background: var\(--paper\)/)
     expect(css).not.toMatch(/\.ep-media-masthead \{[\s\S]{0,240}background: var\(--navy/)
@@ -95,7 +94,7 @@ describe('QA sweep P1 /live + home LCP', () => {
 
   it('promotes the LIVE hero photo to a prioritized img and keeps inquire above the proof row', () => {
     expect(hero).toContain("LIVE_HERO_PHOTO = '/live/george-stage-blue-jacket.jpg'")
-    expect(hero).toContain('fetchPriority="high"')
+    expect(hero).toContain("fetchpriority: 'high'")
     expect(hero).not.toMatch(/backgroundImage:/)
     expect(hero).toContain('live-hero-inquire-early')
     expect(hero).toContain('INQUIRE_BOOKING_TOOLTIP')

@@ -150,7 +150,7 @@ export function LiveSplitHero({ photo = LIVE_HERO_PHOTO }: { photo?: string }) {
             width={1040}
             height={756}
             decoding="async"
-            fetchPriority="high"
+            {...{ fetchpriority: 'high' }}
             style={{
               position: 'absolute',
               inset: 0,

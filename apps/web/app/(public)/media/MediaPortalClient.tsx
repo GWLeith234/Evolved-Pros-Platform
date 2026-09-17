@@ -214,7 +214,7 @@ function FeaturedCard({ story }: { story: MediaStory }) {
           width={1280}
           height={720}
           decoding="async"
-          fetchPriority="high"
+          {...{ fetchpriority: 'high' }}
           className={storyArtImgClass(story.featured_image_url)}
         />
       ) : (
