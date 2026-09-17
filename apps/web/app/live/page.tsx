@@ -3,11 +3,12 @@
 // globals.css). It is intentionally NOT wired to the app light/dark toggle and
 // is out of scope for the member/admin light-dark work by design.
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { LiveMasthead } from '@/components/live/LiveMasthead'
-import { LiveSplitHero } from '@/components/live/LiveSplitHero'
+import { LiveSplitHero, LIVE_HERO_PHOTO } from '@/components/live/LiveSplitHero'
 import { LiveSectionHeader } from '@/components/live/LiveSectionHeader'
 import { LiveGlobeLazy } from './LiveGlobeLazy'
 import { LiveUpcomingDates } from '@/components/live/LiveUpcomingDates'
@@ -16,7 +17,6 @@ import { LiveProductMilestones } from '@/components/live/LiveProductMilestones'
 import { LiveSponsors } from '@/components/live/LiveSponsors'
 import { LivePillarGrid } from '@/components/live/LivePillarGrid'
 import { LiveTestimonials } from '@/components/live/LiveTestimonials'
-import { LivePhotoRotator } from '@/components/live/LivePhotoRotator'
 import { LiveFinalCTA } from '@/components/live/LiveFinalCTA'
 import { LiveBookingInquiry } from '@/components/live/LiveBookingInquiry'
 import { SPEAKING_STATS } from '@/lib/live/speaking-pins'
@@ -27,6 +27,11 @@ import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
 import { adMatchesSurface, filterLiveAds, isLeaderboardStill } from '@/lib/ads/iab'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 import { PublicFooter } from '@/components/layout/PublicFooter'
+
+const LivePhotoRotator = dynamic(
+  () => import('@/components/live/LivePhotoRotator').then(m => m.LivePhotoRotator),
+  { loading: () => <div style={{ minHeight: 320 }} aria-hidden /> },
+)
 
 export const metadata: Metadata = publicPageMetadata('/live', {
   title: 'LIVE | Evolved Pros',
@@ -91,6 +96,7 @@ export default async function LivePage() {
         </Link>
       )}
 
+      <link rel="preload" as="image" href={LIVE_HERO_PHOTO} fetchPriority="high" />
       {/* Title: LIVE (via LiveMasthead) */}
       <LiveMasthead />
       <LiveSplitHero />

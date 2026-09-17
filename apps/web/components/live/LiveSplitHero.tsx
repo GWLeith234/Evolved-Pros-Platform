@@ -14,7 +14,9 @@ const STATS = [
   { k: 'mentees coached',  v: SPEAKING_STATS.mentees },
 ]
 
-export function LiveSplitHero({ photo = '/live/george-stage-blue-jacket.jpg' }: { photo?: string }) {
+export const LIVE_HERO_PHOTO = '/live/george-stage-blue-jacket.jpg' as const
+
+export function LiveSplitHero({ photo = LIVE_HERO_PHOTO }: { photo?: string }) {
   return (
     <section
       className="live-section-pad"
@@ -141,13 +143,21 @@ export function LiveSplitHero({ photo = '/live/george-stage-blue-jacket.jpg' }: 
 
         {/* RIGHT — photo */}
         <div className="live-split-hero-photo">
-          <div
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={photo}
+            alt=""
+            width={1040}
+            height={756}
+            decoding="async"
+            fetchPriority="high"
             style={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: `url(${photo})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center 30%',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center 30%',
             }}
           />
           <div

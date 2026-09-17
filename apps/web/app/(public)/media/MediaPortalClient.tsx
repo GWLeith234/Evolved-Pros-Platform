@@ -1,12 +1,12 @@
 'use client'
 
 import { useMemo, useState, type CSSProperties, type ReactNode } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import Image from 'next/image'
 import { CategoryPills } from '@/components/media/CategoryPills'
 import { MediaLatestPodcast } from '@/components/media/MediaLatestPodcast'
 import { getPillarLabel } from '@/lib/pillars'
-import { PollWidget } from '@/components/media/PollWidget'
 import { MediaIabSlot } from '@/components/media/MediaIabSlot'
 import { layoutMediaFeed } from '@/lib/media/feedAds'
 import { mediaFilterCategories } from '@/lib/media/filters'
@@ -23,6 +23,11 @@ import {
 import type { MediaRailEpisode } from '@/lib/media/podcastRail'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { featuredHeroByline, resolveStoryArtUrl, storyArtImgClass } from '@/lib/media/storyArt'
+
+const PollWidget = dynamic(
+  () => import('@/components/media/PollWidget').then(m => m.PollWidget),
+  { ssr: false },
+)
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -206,6 +211,10 @@ function FeaturedCard({ story }: { story: MediaStory }) {
         <img
           src={resolveStoryArtUrl(story.featured_image_url) ?? ''}
           alt=""
+          width={1280}
+          height={720}
+          decoding="async"
+          fetchPriority="high"
           className={storyArtImgClass(story.featured_image_url)}
         />
       ) : (

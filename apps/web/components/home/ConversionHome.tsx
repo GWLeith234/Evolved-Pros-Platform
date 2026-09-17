@@ -171,9 +171,10 @@ export function ConversionHome({
               width={HERO_IMAGE_WIDTH}
               height={HERO_IMAGE_HEIGHT}
               priority
+              quality={58}
               className="h-full w-full origin-top object-cover object-[center_20%]"
               style={{ objectPosition: HERO_IMAGE_OBJECT_POSITION }}
-              sizes="100vw"
+              sizes="(max-width: 768px) 100vw, 1200px"
             />
           </div>
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-paper via-paper/85 to-transparent" />
@@ -277,6 +278,8 @@ export function ConversionHome({
                           <img
                             src={episode.stillUrl}
                             alt=""
+                            loading="lazy"
+                            decoding="async"
                             className="h-full w-full object-cover"
                             style={{ objectPosition: homeGuestStillObjectPosition(episode) }}
                           />

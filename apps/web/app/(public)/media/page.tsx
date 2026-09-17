@@ -1,14 +1,18 @@
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { MediaStoryCrawlIndex } from '@/lib/media/crawlIndex'
 import { getPublishedMediaStoriesForHub } from '@/lib/media/public'
 import { MEDIA_HUB_DESCRIPTION, MEDIA_HUB_TITLE } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
-import { MediaPortalClient } from './MediaPortalClient'
-import type { Episode } from './MediaPortalClient'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { pickMediaFeedAds } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import type { Episode } from './MediaPortalClient'
+
+const MediaPortalClient = dynamic(
+  () => import('./MediaPortalClient').then(m => m.MediaPortalClient),
+)
 
 export const revalidate = 60
 

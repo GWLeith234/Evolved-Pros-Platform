@@ -1,3 +1,4 @@
+import dynamic from 'next/dynamic'
 import {
   FIT_ARCHITECTURE_KICKER,
   FIT_ARCHITECTURE_LINE,
@@ -6,7 +7,11 @@ import {
 import { canAccessFitLibrary } from '@/lib/fit/gating'
 import { teaseFitMoves } from '@/lib/fit/moves'
 import { FitMastheadLockup, FitVipPill } from '@/components/fit/FitMasthead'
-import { FitTeaseRotator } from '@/components/fit/FitTeaseRotator'
+
+const FitTeaseRotator = dynamic(
+  () => import('@/components/fit/FitTeaseRotator').then(m => m.FitTeaseRotator),
+  { ssr: false, loading: () => <div className="min-h-[220px]" aria-hidden /> },
+)
 
 export function HomeFitTeaseBand({
   viewerTier,
