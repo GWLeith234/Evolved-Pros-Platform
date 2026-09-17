@@ -65,6 +65,17 @@ describe('conversion home fold CTAs', () => {
     expect(lead.indexOf(HOME_OPEN_PLATFORM)).toBeLessThan(lead.indexOf(HOME_JOIN_FREE))
     expect(lead).not.toContain(HOME_SECONDARY_CTA)
   })
+
+  it('keeps Join free in the fold even when a session is present', () => {
+    const html = renderToStaticMarkup(
+      <ConversionHome signedIn episodes={[]} stories={[]} />,
+    )
+    const ctas = foldCtasHtml(html)
+    expect(ctas).toContain(HOME_JOIN_FREE)
+    expect(ctas).toContain(`href="${JOIN_FREE_HREF}"`)
+    expect(ctas.indexOf(HOME_OPEN_PLATFORM)).toBeLessThan(ctas.indexOf(HOME_JOIN_FREE))
+    expect(html).toContain(HOME_OPEN_PLATFORM)
+  })
 })
 
 describe('events login banner', () => {

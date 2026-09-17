@@ -156,10 +156,10 @@ export function ConversionHome({
           The GOLD Architecture still stays (same bytes). F1 clips the still
           to the upper band so THE EVOLVED ARCHITECTURE is an HTML label
           above the H1 instead of baked-in type colliding at 390-400px.
-          Open the platform is the primary red CTA. Join free sits beside it
-          in .ep-home-fold-ctas-lead (nowrap at 390 and desktop). See pricing
-          stays tertiary. The fold is max-height locked so the cluster cannot
-          grow below the first viewport. No public theme toggle here.
+          Open the platform is the primary red CTA. Join free always sits
+          beside it in .ep-home-fold-ctas-lead (not gated on signedIn — a
+          session cookie is the only way the third hero button vanished on
+          a "cold" prove). See pricing stays tertiary. No public theme toggle.
         */}
         <section
           aria-label={HERO_IMAGE_ALT}
@@ -196,14 +196,12 @@ export function ConversionHome({
                   label={HOME_OPEN_PLATFORM}
                   className="ep-home-fold-cta"
                 />
-                {signedIn ? null : (
-                  <GhostCta
-                    href={JOIN_FREE_HREF}
-                    label={HOME_JOIN_FREE}
-                    tooltip={HOME_JOIN_FREE_TOOLTIP}
-                    className="ep-home-fold-cta"
-                  />
-                )}
+                <GhostCta
+                  href={JOIN_FREE_HREF}
+                  label={HOME_JOIN_FREE}
+                  tooltip={HOME_JOIN_FREE_TOOLTIP}
+                  className="ep-home-fold-cta"
+                />
               </div>
               <GhostCta
                 href={SEE_PRICING_HREF}

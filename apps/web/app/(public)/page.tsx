@@ -26,10 +26,12 @@ import { homeJsonLd } from '@/lib/seo/jsonld'
  * `/` never redirects. A signed-in visitor gets the same page with the nav
  * CTA swapped. Ads stay off this route (Media / Podcast / Academy keep them).
  * Open the platform is the primary red CTA to /home. Join free is the
- * second above-fold button to /login?mode=signup. See pricing lands on
- * /pricing.
+ * second above-fold button to /login?mode=signup and is not gated on
+ * session. See pricing lands on /pricing.
  * Do not add a keynote / Book George card here.
  */
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = publicPageMetadata('/', {
   title: HOME_TITLE,

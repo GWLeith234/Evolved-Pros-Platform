@@ -226,6 +226,7 @@ describe('conversion homepage layout contracts', () => {
     expect(conversionHomeSrc).toMatch(/href=\{JOIN_FREE_HREF\}/)
     expect(conversionHomeSrc).toMatch(/HOME_OPEN_PLATFORM_HREF/)
     expect(conversionHomeSrc.indexOf('signedIn ?')).toBeGreaterThan(-1)
+    expect(conversionPageSrc).toMatch(/export const dynamic = 'force-dynamic'/)
     expect(conversionHomeSrc).not.toMatch(/ThemeToggle/)
     const leadStart = conversionHomeSrc.indexOf('ep-home-fold-ctas-lead')
     const lead = conversionHomeSrc.slice(

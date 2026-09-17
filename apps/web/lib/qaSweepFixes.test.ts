@@ -111,6 +111,7 @@ describe('QA sweep P1 /live + home LCP', () => {
     expect(lead).toContain('HOME_OPEN_PLATFORM')
     expect(lead).toContain('HOME_JOIN_FREE')
     expect(lead.indexOf('HOME_OPEN_PLATFORM')).toBeLessThan(lead.indexOf('HOME_JOIN_FREE'))
+    expect(lead).not.toMatch(/signedIn \? null/)
     expect(home).toContain('HOME_SECONDARY_CTA')
     expect(home).not.toMatch(/ThemeToggle/)
     const bytes = readFileSync(resolve(webRoot, 'public/brand/hero-evolved-architecture.png'))
