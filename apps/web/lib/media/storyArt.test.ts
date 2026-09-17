@@ -96,7 +96,7 @@ describe('Media story art typed byline', () => {
         const g = data[i + 1]
         const b = data[i + 2]
         if (r > 180 && g < 80 && b < 90) red += 1
-        if (r < 50 && 30 < g < 90 && 50 < b < 120) navy += 1
+        if (r < 50 && 30 < g && g < 90 && 50 < b && b < 120) navy += 1
       }
     }
     expect(red).toBe(0)
