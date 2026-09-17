@@ -64,7 +64,7 @@ export default async function EventDetailPage({ params }: Props) {
     <div className="ep-page-pad px-8 pb-6 max-w-4xl mx-auto w-full" style={{ backgroundColor: '#faf9f7', minHeight: '100%' }}>
       <div className="mb-4">
         <a
-          href="/live"
+          href="/events"
           className="font-condensed font-semibold uppercase tracking-wide text-[11px] text-[#7a8a96] hover:text-[#1b3c5a] transition-colors"
         >
           ← Back to Events

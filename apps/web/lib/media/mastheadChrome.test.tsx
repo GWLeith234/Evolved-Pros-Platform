@@ -76,11 +76,12 @@ describe('Media masthead chrome', () => {
 
   it('uses platform chrome tokens with light and dark parity', () => {
     expect(src).not.toMatch(/colorScheme: 'light'/)
-    expect(layout).toMatch(/bg-page/)
+    expect(layout).toMatch(/bg-paper/)
     expect(layout).toMatch(/media-desk-shell/)
     expect(layout).not.toMatch(/colorScheme: 'light'/)
     expect(layout).not.toMatch(/bg-\[#F5F0E8\]/)
-    expect(css).toMatch(/\.ep-media-masthead,[\s\S]*\.ep-fit-masthead \{[\s\S]*background: var\(--bg-nav\)/)
+    expect(css).toMatch(/\.ep-fit-masthead \{[\s\S]*background: var\(--bg-nav\)/)
+    expect(css).toMatch(/\.ep-media-masthead \{[\s\S]*background: var\(--paper\)/)
     expect(css).toMatch(/\.ep-media-masthead-wordmark,[\s\S]*justify-content: center/)
     expect(css).toMatch(/\.ep-media-masthead-logo--on-dark,[\s\S]*display: block/)
     expect(css).toMatch(/html\.light-mode \.ep-media-masthead-logo--on-light,[\s\S]*display: block/)
@@ -100,6 +101,8 @@ describe('Media masthead chrome', () => {
     expect(css).toMatch(/html\.light-mode \.ep-media-masthead-logo--on-light,[\s\S]*display: block/)
     expect(css).toMatch(/dark chrome -> white-letter/)
     expect(css).toMatch(/Parchment \/ html\.light-mode -> navy-letter/)
+    expect(css).toMatch(/\.ep-media-masthead \.ep-media-masthead-logo--on-light \{ display: block; \}/)
+    expect(css).toMatch(/\.ep-media-masthead \.ep-media-masthead-logo--on-dark \{ display: none; \}/)
   })
 
   it('does not host-branch /media chrome and keeps utility links on theme tokens', () => {

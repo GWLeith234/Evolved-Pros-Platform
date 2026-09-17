@@ -2423,19 +2423,31 @@ a.ep-text-link:focus-visible {
 
    Pairing (George 2026-09-14): dark chrome -> white-letter *-dark.png
    (--on-dark). Parchment / html.light-mode -> navy-letter *-light.png
-   (--on-light). Same CSS on www and platform. Do not host-branch. */
+   (--on-light). Same CSS on www and platform. Do not host-branch.
+
+   /media masthead is parchment (not a navy island). Fit keeps --bg-nav. */
 .ep-media-masthead,
+.ep-fit-masthead {
+  max-width: 100%;
+  overflow-x: clip;
+}
 .ep-fit-masthead {
   background: var(--bg-nav);
   border-bottom: 1px solid var(--border-color);
-  max-width: 100%;
-  overflow-x: clip;
+}
+.ep-media-masthead {
+  background: var(--paper);
+  border-bottom: 1px solid color-mix(in srgb, var(--navy) 12%, transparent);
+  color: var(--navy);
 }
 .ep-media-masthead-inner,
 .ep-fit-masthead-inner {
   max-width: 1280px;
   margin: 0 auto;
   padding: var(--space-4) var(--space-4) 0;
+}
+.ep-media-masthead-inner {
+  padding-top: var(--space-2);
 }
 @media (min-width: 640px) {
   .ep-media-masthead-inner,
@@ -2451,6 +2463,9 @@ a.ep-text-link:focus-visible {
   justify-content: space-between;
   gap: var(--space-4);
   margin-bottom: var(--space-4);
+}
+.ep-media-masthead-utility {
+  margin-bottom: var(--space-2);
 }
 .ep-media-masthead-back,
 .ep-media-masthead-join,
@@ -2507,10 +2522,15 @@ a.ep-text-link:focus-visible {
 }
 .ep-media-masthead-logo,
 .ep-fit-masthead-logo {
-  height: clamp(56px, 12vw, 96px);
   width: auto;
   max-width: 100%;
   object-fit: contain;
+}
+.ep-fit-masthead-logo {
+  height: clamp(56px, 12vw, 96px);
+}
+.ep-media-masthead-logo {
+  height: clamp(36px, 6.5vw, 52px);
 }
 .ep-media-masthead-logo--on-dark,
 .ep-fit-masthead-logo--on-dark { display: block; }
@@ -2520,6 +2540,19 @@ html.light-mode .ep-media-masthead-logo--on-dark,
 html.light-mode .ep-fit-masthead-logo--on-dark { display: none; }
 html.light-mode .ep-media-masthead-logo--on-light,
 html.light-mode .ep-fit-masthead-logo--on-light { display: block; }
+/* Parchment Media lockup: navy letters on paper, even when html is dark. */
+.ep-media-masthead .ep-media-masthead-logo--on-dark { display: none; }
+.ep-media-masthead .ep-media-masthead-logo--on-light { display: block; }
+.ep-media-masthead-back,
+.ep-media-masthead-join {
+  color: color-mix(in srgb, var(--navy) 55%, transparent);
+}
+.ep-media-masthead-back:hover,
+.ep-media-masthead-back:focus-visible,
+.ep-media-masthead-join:hover,
+.ep-media-masthead-join:focus-visible {
+  color: var(--navy);
+}
 .ep-fit-masthead-inner {
   padding-bottom: var(--space-6);
 }
@@ -3338,6 +3371,18 @@ html.light-mode .ep-fit-page-footer-mark img:last-child { display: block; }
 .ep-media-masthead-rail a:focus-visible,
 .ep-media-masthead-rail a[aria-current="page"] {
   color: var(--text-primary);
+}
+.ep-media-masthead-rail {
+  margin-top: var(--space-3);
+  padding-bottom: var(--space-3);
+}
+.ep-media-masthead-rail a {
+  color: color-mix(in srgb, var(--navy) 70%, transparent);
+}
+.ep-media-masthead-rail a:hover,
+.ep-media-masthead-rail a:focus-visible,
+.ep-media-masthead-rail a[aria-current="page"] {
+  color: var(--navy);
 }
 .media-desk-shell {
   background: var(--paper);
