@@ -15,6 +15,7 @@ const SITEMAP_FREQ: Record<PublicSitemapPath, Freq> = {
   '/podcast': 'weekly',
   '/live':    'monthly',
   '/media':   'daily',
+  '/fit':     'monthly',
   '/pricing': 'monthly',
   '/terms':   'yearly',
   '/privacy': 'yearly',
@@ -27,6 +28,7 @@ const SITEMAP_PRIORITY: Record<PublicSitemapPath, number> = {
   '/podcast': 0.9,
   '/live':    0.7,
   '/media':   0.7,
+  '/fit':     0.7,
   '/pricing': 0.8,
   '/terms':   0.3,
   '/privacy': 0.3,
@@ -43,7 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // never serve their advertised content. Do NOT add them back until they are
   // genuinely anon-readable — that needs anon-role RLS, not a sitemap entry.
   //
-  // /live and /pricing stay because both are in SESSION_OPTIONAL_ROUTES:
+  // /live, /pricing, and /fit stay because they are in SESSION_OPTIONAL_ROUTES:
   // middleware refreshes the session but never bounces an anonymous visitor.
   // The single source of truth is PUBLIC_SITEMAP_PATHS, which is unit-tested.
   const staticRoutes: MetadataRoute.Sitemap = PUBLIC_SITEMAP_PATHS.map(path => ({
