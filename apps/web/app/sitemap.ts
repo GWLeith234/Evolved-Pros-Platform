@@ -45,7 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // never serve their advertised content. Do NOT add them back until they are
   // genuinely anon-readable — that needs anon-role RLS, not a sitemap entry.
   //
-  // /live and /pricing stay because both are in SESSION_OPTIONAL_ROUTES:
+  // /live, /pricing, and /fit stay because they are in SESSION_OPTIONAL_ROUTES:
   // middleware refreshes the session but never bounces an anonymous visitor.
   // The single source of truth is PUBLIC_SITEMAP_PATHS, which is unit-tested.
   const staticRoutes: MetadataRoute.Sitemap = PUBLIC_SITEMAP_PATHS.map(path => ({

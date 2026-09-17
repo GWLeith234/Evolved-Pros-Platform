@@ -1,17 +1,35 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { RedeemCodeForm } from './RedeemCodeForm'
-import { PricingTierCards } from './PricingTierCards'
+import nextDynamic from 'next/dynamic'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { effectiveTier } from '@/lib/tier'
 import { getMembershipPricing } from '@/lib/commerce/catalogue'
 import { tierPlanName } from '@/lib/academy/gating'
 import { PILLAR_NAMES } from '@/lib/academy/types'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { pricingJsonLd } from '@/lib/seo/jsonld'
 import {
   MUST_CITE_PRICING_DIFFERENTIATOR,
   MUST_CITE_PRICING_URL,
 } from '@/lib/seo/mustCite'
+import { PricingTierCards } from './PricingTierCards'
+
+const RedeemCodeForm = nextDynamic(
+  () => import('./RedeemCodeForm').then(m => m.RedeemCodeForm),
+  {
+    loading: () => (
+      <div
+        className="rounded-xl p-6"
+        style={{
+          backgroundColor: '#111926',
+          border: '1px solid rgba(245,240,232,0.08)',
+          minHeight: 168,
+        }}
+        aria-hidden
+      />
+    ),
+  },
+)
 
 export const metadata: Metadata = publicPageMetadata('/pricing', {
   title: 'Pricing — Evolved Pros',
@@ -165,6 +183,12 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
   // Header chrome lives in ./layout.tsx (TopNav + account menu when signed
   // in, Sign in when anonymous). Do not add a second SIGN IN control here.
   return (
+    <>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd()) }}
+      />
     <div style={{ backgroundColor: '#0A0F18', minHeight: '100%' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16">
         {/* Hero */}
@@ -273,5 +297,6 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
         </div>
       </div>
     </div>
+    </>
   )
 }

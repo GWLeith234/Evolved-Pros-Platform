@@ -216,7 +216,9 @@ describe('conversion homepage layout contracts', () => {
     expect(conversionHomeSrc).not.toMatch(
       /relative aspect-\[3\/2\] w-full md:absolute md:inset-0/,
     )
-    expect(conversionHomeSrc).toMatch(/label=\{HOME_PRIMARY_CTA\}/)
+    expect(conversionHomeSrc).toMatch(/label=\{HOME_OPEN_PLATFORM\}/)
+    expect(conversionHomeSrc).toMatch(/href=\{HOME_OPEN_PLATFORM_HREF\}/)
+    expect(conversionHomeSrc).toMatch(/label=\{HOME_JOIN_FREE\}/)
     expect(conversionHomeSrc).toMatch(/href=\{JOIN_FREE_HREF\}/)
     expect(conversionHomeSrc).toMatch(/HOME_OPEN_PLATFORM_HREF/)
     expect(conversionHomeSrc.indexOf('signedIn ?')).toBeGreaterThan(-1)

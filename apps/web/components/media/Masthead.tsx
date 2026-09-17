@@ -1,8 +1,9 @@
-// Centered Media lockup for /media. Shared by the hub and every article shell.
-// Theme-swapped media-lockup PNG (EVOLVED [megaphone disc] MEDIA). Same
-// FooterLogo / loader CSS pair. Not a composed HTML+disc mark.
-// White letters (DARK file) on dark chrome. Navy letters (LIGHT file) on parchment.
-// Hosts share this pair. html.light-mode is the only swap. No host branch.
+// Full-width Media lockup for /media. Shared by the hub and every article shell.
+// #150 theme-aware media-lockup PNG (EVOLVED [megaphone disc] MEDIA).
+// Masthead sits on parchment (not a navy island). The lockup spans the
+// content width across the top. Navy-letter LIGHT file is the visible mark
+// on paper. DARK file stays in the pair for Fit-shared CSS and any future
+// dark chrome. No host branch.
 
 import Link from 'next/link'
 import {
@@ -22,8 +23,11 @@ export function MediaMastheadLockup() {
           className="ep-media-masthead-logo ep-media-masthead-logo--on-dark"
           src={MEDIA_LOCKUP_DARK}
           alt=""
-          width={1239}
-          height={207}
+          width={612}
+          height={139}
+          loading="lazy"
+          decoding="async"
+          {...{ fetchpriority: 'low' }}
         />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -31,8 +35,10 @@ export function MediaMastheadLockup() {
           className="ep-media-masthead-logo ep-media-masthead-logo--on-light"
           src={MEDIA_LOCKUP_LIGHT}
           alt=""
-          width={1239}
-          height={207}
+          width={612}
+          height={139}
+          decoding="sync"
+          {...{ fetchpriority: 'high' }}
         />
       </Link>
     </h1>

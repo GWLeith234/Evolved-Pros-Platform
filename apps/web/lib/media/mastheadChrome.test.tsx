@@ -76,11 +76,12 @@ describe('Media masthead chrome', () => {
 
   it('uses platform chrome tokens with light and dark parity', () => {
     expect(src).not.toMatch(/colorScheme: 'light'/)
-    expect(layout).toMatch(/bg-page/)
+    expect(layout).toMatch(/bg-paper/)
     expect(layout).toMatch(/media-desk-shell/)
     expect(layout).not.toMatch(/colorScheme: 'light'/)
     expect(layout).not.toMatch(/bg-\[#F5F0E8\]/)
-    expect(css).toMatch(/\.ep-media-masthead,[\s\S]*\.ep-fit-masthead \{[\s\S]*background: var\(--bg-nav\)/)
+    expect(css).toMatch(/\.ep-fit-masthead \{[\s\S]*background: var\(--bg-nav\)/)
+    expect(css).toMatch(/\.ep-media-masthead \{[\s\S]*background: var\(--paper\)/)
     expect(css).toMatch(/\.ep-media-masthead-wordmark,[\s\S]*justify-content: center/)
     expect(css).toMatch(/\.ep-media-masthead-logo--on-dark,[\s\S]*display: block/)
     expect(css).toMatch(/html\.light-mode \.ep-media-masthead-logo--on-light,[\s\S]*display: block/)
@@ -89,6 +90,19 @@ describe('Media masthead chrome', () => {
     expect(css).not.toMatch(/\.ep-media-masthead[\s\S]{0,1800}#60A5FA/)
     expect(css).not.toMatch(/\.ep-media-masthead[\s\S]{0,1800}--brand-blue/)
     expect(css).not.toMatch(/\.ep-media-masthead-mark \{[\s\S]*background: var\(--brand-red\)/)
+  })
+
+  it('spans the Media lockup across the masthead content width', () => {
+    expect(css).toMatch(/\.ep-media-masthead-wordmark \{\n  width: 100%;\n\}/)
+    expect(css).toMatch(/\.ep-media-masthead-wordmark a \{\n  width: 100%;\n\}/)
+    expect(css).toMatch(/\.ep-media-masthead-logo \{\n  width: 100%;\n  max-width: 100%;\n  height: auto;\n\}/)
+    expect(css).not.toMatch(/\.ep-media-masthead-logo \{[\s\S]{0,80}clamp\(/)
+    expect(css).not.toMatch(/\.ep-media-masthead \{[\s\S]{0,240}background: var\(--bg-nav\)/)
+    expect(css).not.toMatch(/\.ep-media-masthead \{[\s\S]{0,240}background: var\(--navy/)
+    expect(src).toMatch(/width=\{612\}/)
+    expect(src).toMatch(/height=\{139\}/)
+    expect(src).not.toMatch(/width=\{1239\}/)
+    expect(src).not.toMatch(/clamp\(36px, 6\.5vw, 52px\)/)
   })
 
   it('pairs white letters with dark chrome and navy letters with parchment', () => {
@@ -100,6 +114,8 @@ describe('Media masthead chrome', () => {
     expect(css).toMatch(/html\.light-mode \.ep-media-masthead-logo--on-light,[\s\S]*display: block/)
     expect(css).toMatch(/dark chrome -> white-letter/)
     expect(css).toMatch(/Parchment \/ html\.light-mode -> navy-letter/)
+    expect(css).toMatch(/\.ep-media-masthead \.ep-media-masthead-logo--on-light \{ display: block; \}/)
+    expect(css).toMatch(/\.ep-media-masthead \.ep-media-masthead-logo--on-dark \{ display: none; \}/)
   })
 
   it('does not host-branch /media chrome and keeps utility links on theme tokens', () => {

@@ -1,12 +1,14 @@
 import { Masthead } from '@/components/media/Masthead'
+import { MEDIA_LOCKUP_LIGHT } from '@/lib/lockups'
 
 export default function MediaLayout({ children }: { children: React.ReactNode }) {
-  // Theme-swapped media-lockup PNG (EVOLVED [megaphone] MEDIA) follows the app theme.
-  // The desk body stays on paper so the SooToday hub and article shells from
-  // #108 keep readable navy-on-cream type. Overflow is clipped here so every
-  // /media/* route inherits the mobile scrollWidth fix.
+  // Parchment masthead + desk. #150 Media lockup spans the content width
+  // (navy letters on paper). No navy island. Overflow is clipped here so
+  // every /media/* route inherits the mobile scrollWidth fix.
+  // Preload the visible parchment lockup so LCP does not wait on desk JS.
   return (
-    <div className="min-h-screen bg-page text-primary ep-no-x-scroll" style={{ maxWidth: '100vw' }}>
+    <div className="min-h-screen bg-paper text-navy ep-no-x-scroll" style={{ maxWidth: '100vw' }}>
+      <link rel="preload" as="image" href={MEDIA_LOCKUP_LIGHT} {...{ fetchpriority: 'high' }} />
       <Masthead />
       <div className="media-desk-shell">{children}</div>
     </div>

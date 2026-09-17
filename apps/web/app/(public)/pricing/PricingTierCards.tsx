@@ -1,7 +1,3 @@
-'use client'
-
-import { useState } from 'react'
-import { Tooltip } from '@/components/ui/Tooltip'
 import { ANNUAL_BILLING_TOOLTIP } from '@/lib/live/s4-cta'
 import { PricingCtaButton } from './PricingCtaButton'
 import {
@@ -13,17 +9,14 @@ import {
 } from '@/lib/pricing'
 import { hasTierAccess } from '@/lib/tier'
 
-// Tier presentation is static; only the amounts come from the catalogue
-// (passed in as `pricing`). The monthly/annual toggle switches which amount the
-// paid tiers display — the counterpart amount stays visible as the sub-note so
-// all four numbers are reachable in either toggle state.
+// Server-rendered ladder. The monthly/annual switch is CSS :has() so the
+// cards (copy + amounts) stay HTML and do not hydrate. Only checkout CTAs
+// remain client islands. Annual keeps ANNUAL_BILLING_TOOLTIP via title.
 
 interface Feature {
   text: string
   locked?: boolean
 }
-
-type Billing = 'monthly' | 'annual'
 
 interface TierDef {
   name: string
@@ -65,9 +58,6 @@ export function PricingTierCards({
    */
   currentTier?: string | null
 }) {
-  const [billing, setBilling] = useState<Billing>('monthly')
-  const isAnnual = billing === 'annual'
-
   const tiers: TierDef[] = [
     // SPRINT TIER-1 — the approved ladder. Gate the Academy, open everything
     // else: free carries the whole community/events/podcast/media/habits
@@ -163,64 +153,62 @@ export function PricingTierCards({
     return pricingLadderState(currentTier, t.tierKey, hasTierAccess)
   }
 
-  function priceParts(t: TierDef): { price: string; period?: string; note?: string } {
-    if (t.fixedPrice) return { price: t.fixedPrice, period: t.fixedPeriod }
-    const p = pricing[t.priceKey!]
-    const monthly = `$${p.monthly.toLocaleString('en-US')}`
-    const annual = `$${p.annual.toLocaleString('en-US')}`
-    return isAnnual
-      ? { price: annual, period: '/year', note: `${monthly}/mo billed monthly` }
-      : { price: monthly, period: '/month', note: `${annual}/yr · ${ANNUAL_FREE_MONTHS} months free` }
+  function cataloguePrice(t: TierDef): { monthly: string; annual: string } | null {
+    if (t.fixedPrice || !t.priceKey) return null
+    const p = pricing[t.priceKey]
+    return {
+      monthly: `$${p.monthly.toLocaleString('en-US')}`,
+      annual: `$${p.annual.toLocaleString('en-US')}`,
+    }
   }
 
   return (
-    <>
-      {/* Monthly / Annual toggle */}
-      <div className="flex items-center justify-center gap-2 mb-10">
-        {(['monthly', 'annual'] as const).map(mode => {
-          const active = billing === mode
-          const toggle = (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => setBilling(mode)}
-              aria-pressed={active}
-              className="flex items-center gap-2 font-condensed font-bold uppercase tracking-[0.12em] text-[11px] px-5 py-2 rounded transition-all"
-              style={{
-                backgroundColor: active ? 'rgba(245,240,232,0.1)' : 'transparent',
-                color: active ? '#F5F0E8' : 'rgba(245,240,232,0.4)',
-                border: active ? '1px solid rgba(245,240,232,0.15)' : '1px solid transparent',
-              }}
-            >
-              {mode === 'monthly' ? 'Monthly' : 'Annual'}
-              {mode === 'annual' && (
-                <span
-                  className="font-condensed font-black text-[8px] px-1.5 py-0.5 rounded"
-                  style={{
-                    backgroundColor: 'rgba(201,168,76,0.2)',
-                    color: '#C9A84C',
-                    border: '1px solid rgba(201,168,76,0.3)',
-                  }}
-                >
-                  {ANNUAL_FREE_MONTHS} months free
-                </span>
-              )}
-            </button>
-          )
-          return mode === 'annual' ? (
-            <Tooltip key={mode} content={ANNUAL_BILLING_TOOLTIP}>
-              {toggle}
-            </Tooltip>
-          ) : (
-            toggle
-          )
-        })}
+    <div className="ep-pricing-billing">
+      <input
+        type="radio"
+        name="ep-pricing-billing"
+        id="ep-pricing-monthly"
+        className="sr-only"
+        defaultChecked
+      />
+      <input
+        type="radio"
+        name="ep-pricing-billing"
+        id="ep-pricing-annual"
+        className="sr-only"
+      />
+
+      {/* Monthly / Annual toggle — CSS :has() flips amounts. No card hydrate. */}
+      <div className="flex items-center justify-center gap-2 mb-10" role="radiogroup" aria-label="Billing period">
+        <label
+          htmlFor="ep-pricing-monthly"
+          className="ep-pricing-billing-btn flex items-center gap-2 font-condensed font-bold uppercase tracking-[0.12em] text-[11px] px-5 py-2 rounded transition-all"
+        >
+          Monthly
+        </label>
+        <label
+          htmlFor="ep-pricing-annual"
+          title={ANNUAL_BILLING_TOOLTIP}
+          className="ep-pricing-billing-btn flex items-center gap-2 font-condensed font-bold uppercase tracking-[0.12em] text-[11px] px-5 py-2 rounded transition-all"
+        >
+          Annual
+          <span
+            className="font-condensed font-black text-[8px] px-1.5 py-0.5 rounded"
+            style={{
+              backgroundColor: 'rgba(201,168,76,0.2)',
+              color: '#C9A84C',
+              border: '1px solid rgba(201,168,76,0.3)',
+            }}
+          >
+            {ANNUAL_FREE_MONTHS} months free
+          </span>
+        </label>
       </div>
 
       {/* Tier cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-20">
         {tiers.map(tier => {
-          const { price, period, note } = priceParts(tier)
+          const catalogue = cataloguePrice(tier)
           const state = ladderState(tier)
           return (
             <div
@@ -267,23 +255,50 @@ export function PricingTierCards({
                 </p>
               )}
 
-              {/* Price */}
+              {/* Price — both periods in HTML; CSS shows the selected one. */}
               <div className="mb-5">
-                <span className="font-display font-bold text-3xl" style={{ color: '#F5F0E8' }}>
-                  {price}
-                </span>
-                {period && (
-                  <span className="font-body text-sm ml-1" style={{ color: 'rgba(245,240,232,0.4)' }}>
-                    {period}
-                  </span>
-                )}
-                {note && (
-                  <p
-                    className="font-condensed uppercase tracking-[0.1em] text-[11px] mt-1.5"
-                    style={{ color: '#0ABFA3' }}
-                  >
-                    {note}
-                  </p>
+                {tier.fixedPrice ? (
+                  <>
+                    <span className="font-display font-bold text-3xl" style={{ color: '#F5F0E8' }}>
+                      {tier.fixedPrice}
+                    </span>
+                    {tier.fixedPeriod && (
+                      <span className="font-body text-sm ml-1" style={{ color: 'rgba(245,240,232,0.4)' }}>
+                        {tier.fixedPeriod}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div className="ep-price-monthly">
+                      <span className="font-display font-bold text-3xl" style={{ color: '#F5F0E8' }}>
+                        {catalogue!.monthly}
+                      </span>
+                      <span className="font-body text-sm ml-1" style={{ color: 'rgba(245,240,232,0.4)' }}>
+                        /month
+                      </span>
+                      <p
+                        className="font-condensed uppercase tracking-[0.1em] text-[11px] mt-1.5"
+                        style={{ color: '#0ABFA3' }}
+                      >
+                        {catalogue!.annual}/yr · {ANNUAL_FREE_MONTHS} months free
+                      </p>
+                    </div>
+                    <div className="ep-price-annual">
+                      <span className="font-display font-bold text-3xl" style={{ color: '#F5F0E8' }}>
+                        {catalogue!.annual}
+                      </span>
+                      <span className="font-body text-sm ml-1" style={{ color: 'rgba(245,240,232,0.4)' }}>
+                        /year
+                      </span>
+                      <p
+                        className="font-condensed uppercase tracking-[0.1em] text-[11px] mt-1.5"
+                        style={{ color: '#0ABFA3' }}
+                      >
+                        {catalogue!.monthly}/mo billed monthly
+                      </p>
+                    </div>
+                  </>
                 )}
               </div>
 
@@ -347,15 +362,27 @@ export function PricingTierCards({
                 >
                   {state === 'owned' ? 'Current plan' : 'Included'}
                 </div>
+              ) : tier.ctaPlanBase ? (
+                <>
+                  <div className="ep-cta-monthly">
+                    <PricingCtaButton
+                      label={tier.cta}
+                      plan={`${tier.ctaPlanBase}_monthly` as const}
+                      featured={!!tier.featured}
+                    />
+                  </div>
+                  <div className="ep-cta-annual">
+                    <PricingCtaButton
+                      label={tier.cta}
+                      plan={`${tier.ctaPlanBase}_annual` as const}
+                      featured={!!tier.featured}
+                    />
+                  </div>
+                </>
               ) : (
                 <PricingCtaButton
                   label={tier.cta}
                   href={tier.ctaHref}
-                  plan={
-                    tier.ctaPlanBase
-                      ? (`${tier.ctaPlanBase}_${isAnnual ? 'annual' : 'monthly'}` as const)
-                      : undefined
-                  }
                   featured={!!tier.featured}
                 />
               )}
@@ -363,6 +390,6 @@ export function PricingTierCards({
           )
         })}
       </div>
-    </>
+    </div>
   )
 }

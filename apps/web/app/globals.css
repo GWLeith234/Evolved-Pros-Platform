@@ -2423,19 +2423,33 @@ a.ep-text-link:focus-visible {
 
    Pairing (George 2026-09-14): dark chrome -> white-letter *-dark.png
    (--on-dark). Parchment / html.light-mode -> navy-letter *-light.png
-   (--on-light). Same CSS on www and platform. Do not host-branch. */
+   (--on-light). Same CSS on www and platform. Do not host-branch.
+
+   /media masthead is parchment (not a navy island). The #150 Media lockup
+   spans the content width as a top-of-page masthead, not a tiny boxed chip.
+   Fit keeps --bg-nav. */
 .ep-media-masthead,
+.ep-fit-masthead {
+  max-width: 100%;
+  overflow-x: clip;
+}
 .ep-fit-masthead {
   background: var(--bg-nav);
   border-bottom: 1px solid var(--border-color);
-  max-width: 100%;
-  overflow-x: clip;
+}
+.ep-media-masthead {
+  background: var(--paper);
+  border-bottom: 1px solid color-mix(in srgb, var(--navy) 12%, transparent);
+  color: var(--navy);
 }
 .ep-media-masthead-inner,
 .ep-fit-masthead-inner {
   max-width: 1280px;
   margin: 0 auto;
   padding: var(--space-4) var(--space-4) 0;
+}
+.ep-media-masthead-inner {
+  padding-top: var(--space-3);
 }
 @media (min-width: 640px) {
   .ep-media-masthead-inner,
@@ -2451,6 +2465,9 @@ a.ep-text-link:focus-visible {
   justify-content: space-between;
   gap: var(--space-4);
   margin-bottom: var(--space-4);
+}
+.ep-media-masthead-utility {
+  margin-bottom: var(--space-3);
 }
 .ep-media-masthead-back,
 .ep-media-masthead-join,
@@ -2495,6 +2512,9 @@ a.ep-text-link:focus-visible {
   font-size: inherit;
   font-weight: inherit;
 }
+.ep-media-masthead-wordmark {
+  width: 100%;
+}
 .ep-media-masthead-wordmark a,
 .ep-fit-masthead-wordmark a {
   display: flex;
@@ -2505,12 +2525,22 @@ a.ep-text-link:focus-visible {
   text-decoration: none;
   line-height: 0;
 }
+.ep-media-masthead-wordmark a {
+  width: 100%;
+}
 .ep-media-masthead-logo,
 .ep-fit-masthead-logo {
-  height: clamp(56px, 12vw, 96px);
   width: auto;
   max-width: 100%;
   object-fit: contain;
+}
+.ep-fit-masthead-logo {
+  height: clamp(56px, 12vw, 96px);
+}
+.ep-media-masthead-logo {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
 }
 .ep-media-masthead-logo--on-dark,
 .ep-fit-masthead-logo--on-dark { display: block; }
@@ -2520,6 +2550,19 @@ html.light-mode .ep-media-masthead-logo--on-dark,
 html.light-mode .ep-fit-masthead-logo--on-dark { display: none; }
 html.light-mode .ep-media-masthead-logo--on-light,
 html.light-mode .ep-fit-masthead-logo--on-light { display: block; }
+/* Parchment Media lockup: navy letters on paper, even when html is dark. */
+.ep-media-masthead .ep-media-masthead-logo--on-dark { display: none; }
+.ep-media-masthead .ep-media-masthead-logo--on-light { display: block; }
+.ep-media-masthead-back,
+.ep-media-masthead-join {
+  color: color-mix(in srgb, var(--navy) 55%, transparent);
+}
+.ep-media-masthead-back:hover,
+.ep-media-masthead-back:focus-visible,
+.ep-media-masthead-join:hover,
+.ep-media-masthead-join:focus-visible {
+  color: var(--navy);
+}
 .ep-fit-masthead-inner {
   padding-bottom: var(--space-6);
 }
@@ -3339,6 +3382,18 @@ html.light-mode .ep-fit-page-footer-mark img:last-child { display: block; }
 .ep-media-masthead-rail a[aria-current="page"] {
   color: var(--text-primary);
 }
+.ep-media-masthead-rail {
+  margin-top: var(--space-4);
+  padding-bottom: var(--space-3);
+}
+.ep-media-masthead-rail a {
+  color: color-mix(in srgb, var(--navy) 70%, transparent);
+}
+.ep-media-masthead-rail a:hover,
+.ep-media-masthead-rail a:focus-visible,
+.ep-media-masthead-rail a[aria-current="page"] {
+  color: var(--navy);
+}
 .media-desk-shell {
   background: var(--paper);
   color: var(--navy);
@@ -3435,4 +3490,30 @@ html.light-mode .live-force-dark .ep-public-footer-logo--on-light {
 .ep-public-footer-link:hover,
 .ep-public-footer-link:focus-visible {
   color: var(--text-primary);
+}
+
+/* /pricing billing toggle — CSS :has() so the ladder is server HTML (TBT). */
+.ep-pricing-billing-btn {
+  background-color: transparent;
+  color: rgba(245, 240, 232, 0.4);
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.ep-pricing-billing:has(#ep-pricing-monthly:checked) label[for='ep-pricing-monthly'],
+.ep-pricing-billing:has(#ep-pricing-annual:checked) label[for='ep-pricing-annual'] {
+  background-color: rgba(245, 240, 232, 0.1);
+  color: #f5f0e8;
+  border: 1px solid rgba(245, 240, 232, 0.15);
+}
+.ep-pricing-billing .ep-price-annual,
+.ep-pricing-billing .ep-cta-annual {
+  display: none;
+}
+.ep-pricing-billing:has(#ep-pricing-annual:checked) .ep-price-monthly,
+.ep-pricing-billing:has(#ep-pricing-annual:checked) .ep-cta-monthly {
+  display: none;
+}
+.ep-pricing-billing:has(#ep-pricing-annual:checked) .ep-price-annual,
+.ep-pricing-billing:has(#ep-pricing-annual:checked) .ep-cta-annual {
+  display: block;
 }
