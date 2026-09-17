@@ -2393,6 +2393,37 @@ a.ep-text-link:focus-visible {
     height: auto;
   }
 }
+/*
+  Fold CTA cluster. OPEN THE PLATFORM + JOIN FREE stay on one nowrap row
+  at 390 and desktop so Join free cannot wrap below the first viewport.
+  See pricing may wrap on the phone; the cluster itself is shrink-locked
+  to the bottom of the max-height fold. No public theme toggle.
+*/
+.ep-home-fold-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  width: 100%;
+}
+.ep-home-fold-ctas-lead {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+.ep-home-fold-cta {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+@media (min-width: 768px) {
+  .ep-home-fold-ctas {
+    flex-wrap: nowrap;
+  }
+}
 .ep-home-arch-label {
   margin: 0;
   font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
@@ -2414,6 +2445,13 @@ a.ep-text-link:focus-visible {
   }
   .ep-home-arch-label {
     margin-bottom: 0;
+  }
+  .ep-home-fold-ctas-lead .ep-home-fold-cta {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    min-height: 2.75rem;
   }
 }
 

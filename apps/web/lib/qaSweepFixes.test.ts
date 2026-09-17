@@ -100,11 +100,21 @@ describe('QA sweep P1 /live + home LCP', () => {
     expect(home).toMatch(/label=\{HOME_JOIN_FREE\}/)
     expect(home).toMatch(/href=\{JOIN_FREE_HREF\}/)
     expect(home).toMatch(/label=\{HOME_OPEN_PLATFORM\}/)
+    expect(home).toContain('ep-home-fold-ctas')
+    expect(home).toContain('ep-home-fold-ctas-lead')
     const fold = home.slice(home.indexOf('ep-home-fold-copy'))
     expect(fold.indexOf('HOME_OPEN_PLATFORM')).toBeGreaterThan(-1)
     expect(fold.indexOf('HOME_JOIN_FREE')).toBeGreaterThan(-1)
     expect(fold.indexOf('HOME_OPEN_PLATFORM')).toBeLessThan(fold.indexOf('HOME_JOIN_FREE'))
+    const lead = home.slice(
+      home.indexOf('ep-home-fold-ctas-lead'),
+      home.indexOf('HOME_SECONDARY_CTA'),
+    )
+    expect(lead).toContain('HOME_OPEN_PLATFORM')
+    expect(lead).toContain('HOME_JOIN_FREE')
+    expect(lead.indexOf('HOME_OPEN_PLATFORM')).toBeLessThan(lead.indexOf('HOME_JOIN_FREE'))
     expect(home).toContain('HOME_SECONDARY_CTA')
+    expect(home).not.toMatch(/ThemeToggle/)
     const bytes = readFileSync(resolve(webRoot, 'public/brand/hero-evolved-architecture.png'))
     expect(createHash('md5').update(bytes).digest('hex')).toBe(HERO_IMAGE_MD5)
     expect(HERO_IMAGE_SRC).toBe('/brand/hero-evolved-architecture.png')

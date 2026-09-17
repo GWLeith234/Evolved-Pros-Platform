@@ -156,13 +156,14 @@ export function ConversionHome({
           The GOLD Architecture still stays (same bytes). F1 clips the still
           to the upper band so THE EVOLVED ARCHITECTURE is an HTML label
           above the H1 instead of baked-in type colliding at 390-400px.
-          Open the platform is the primary red CTA. Join free is the second
-          above-fold button on the same row (wraps on small screens).
-          See pricing stays as the third control.
+          Open the platform is the primary red CTA. Join free sits beside it
+          in .ep-home-fold-ctas-lead (nowrap at 390 and desktop). See pricing
+          stays tertiary. The fold is max-height locked so the cluster cannot
+          grow below the first viewport. No public theme toggle here.
         */}
         <section
           aria-label={HERO_IMAGE_ALT}
-          className="ep-home-fold relative w-full overflow-hidden bg-page min-h-[calc(100svh-7rem)] md:min-h-[calc(100svh-5.5rem)]"
+          className="ep-home-fold relative flex w-full flex-col overflow-hidden bg-page min-h-[calc(100svh-7rem)] max-h-[calc(100svh-7rem)] md:min-h-[calc(100svh-5.5rem)] md:max-h-[calc(100svh-5.5rem)]"
         >
           <div className="ep-home-fold-still">
             <Image
@@ -178,7 +179,7 @@ export function ConversionHome({
             />
           </div>
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-paper via-paper/85 to-transparent" />
-          <div className="ep-home-fold-copy relative mx-auto flex min-h-[calc(100svh-7rem)] max-w-3xl flex-col items-center justify-end px-5 pb-6 pt-12 text-center md:min-h-[calc(100svh-5.5rem)] md:pb-14 md:pt-24">
+          <div className="ep-home-fold-copy relative mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col items-center justify-end px-5 pb-6 pt-12 text-center md:pb-14 md:pt-24">
             <Tooltip content={HOME_ARCHITECTURE_TOOLTIP} className="mb-3 md:mb-4">
               <p className="ep-home-arch-label">{HOME_ARCHITECTURE_LABEL}</p>
             </Tooltip>
@@ -188,19 +189,27 @@ export function ConversionHome({
             <p className="mx-auto mt-3 max-w-xl font-body text-base leading-relaxed text-navy/70 md:mt-4 md:text-lg">
               {HOME_SUB}
             </p>
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-3 md:mt-8">
-              <PrimaryCta href={HOME_OPEN_PLATFORM_HREF} label={HOME_OPEN_PLATFORM} />
-              {signedIn ? null : (
-                <GhostCta
-                  href={JOIN_FREE_HREF}
-                  label={HOME_JOIN_FREE}
-                  tooltip={HOME_JOIN_FREE_TOOLTIP}
+            <div className="ep-home-fold-ctas mt-5 md:mt-8">
+              <div className="ep-home-fold-ctas-lead">
+                <PrimaryCta
+                  href={HOME_OPEN_PLATFORM_HREF}
+                  label={HOME_OPEN_PLATFORM}
+                  className="ep-home-fold-cta"
                 />
-              )}
+                {signedIn ? null : (
+                  <GhostCta
+                    href={JOIN_FREE_HREF}
+                    label={HOME_JOIN_FREE}
+                    tooltip={HOME_JOIN_FREE_TOOLTIP}
+                    className="ep-home-fold-cta"
+                  />
+                )}
+              </div>
               <GhostCta
                 href={SEE_PRICING_HREF}
                 label={HOME_SECONDARY_CTA}
                 tooltip={HOME_SEE_PRICING_TOOLTIP}
+                className="ep-home-fold-cta"
               />
             </div>
           </div>
@@ -445,18 +454,20 @@ function PrimaryCta({
   label,
   wide,
   tooltip,
+  className,
 }: {
   href: string
   label: string
   wide?: boolean
   tooltip?: string
+  className?: string
 }) {
   const link = (
     <Link
       href={href}
       className={`inline-flex min-h-12 items-center justify-center bg-red px-6 text-center font-condensed text-sm font-bold uppercase tracking-[0.14em] text-white no-underline ${
         wide ? 'w-full' : ''
-      }`}
+      }${className ? ` ${className}` : ''}`}
     >
       {label}
     </Link>
@@ -469,18 +480,20 @@ function GhostCta({
   label,
   wide,
   tooltip,
+  className,
 }: {
   href: string
   label: string
   wide?: boolean
   tooltip?: string
+  className?: string
 }) {
   const link = (
     <Link
       href={href}
       className={`inline-flex min-h-12 items-center justify-center border border-navy px-6 text-center font-condensed text-sm font-bold uppercase tracking-[0.14em] text-navy no-underline ${
         wide ? 'w-full' : ''
-      }`}
+      }${className ? ` ${className}` : ''}`}
     >
       {label}
     </Link>
