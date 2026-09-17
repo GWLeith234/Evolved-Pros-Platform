@@ -41,24 +41,22 @@ describe('pricing JSON-LD', () => {
     expect(schema.publisher).toEqual(publisher)
     expect(schema.mainEntity['@type']).toBe('ItemList')
 
-    const products = schema.mainEntity.itemListElement.map(
-      (entry: { item: { '@type': string; name: string; offers: Array<{ '@type': string; price: string }> } }) =>
-        entry.item,
-    )
-    expect(products.every((item: { '@type': string }) => item['@type'] === 'Product')).toBe(true)
-    expect(products.map((item: { name: string }) => item.name)).toEqual([
+    const products = schema.mainEntity.itemListElement.map((entry) => entry.item)
+    expect(products.every((item) => item['@type'] === 'Product')).toBe(true)
+    expect(products.map((item) => item.name)).toEqual([
       'Community',
       'VIP',
       'Professional',
     ])
 
-    const offers = products.flatMap(
-      (item: { offers: Array<{ '@type': string; price: string; priceCurrency: string }> }) => item.offers,
+    // membershipProduct types offers as Offer | Offer[] — flatten either shape.
+    const offers = products.flatMap((item) =>
+      Array.isArray(item.offers) ? item.offers : [item.offers],
     )
     expect(offers.length).toBeGreaterThan(0)
-    expect(offers.every((offer: { '@type': string }) => offer['@type'] === 'Offer')).toBe(true)
-    expect(offers.every((offer: { priceCurrency: string }) => offer.priceCurrency === 'USD')).toBe(true)
-    expect(offers.map((offer: { price: string }) => offer.price)).toEqual(
+    expect(offers.every((offer) => offer['@type'] === 'Offer')).toBe(true)
+    expect(offers.every((offer) => offer.priceCurrency === 'USD')).toBe(true)
+    expect(offers.map((offer) => offer.price)).toEqual(
       expect.arrayContaining([
         String(TIERS.community.monthly),
         vipMonthly,
