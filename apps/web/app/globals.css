@@ -290,6 +290,11 @@
   --space-card:     var(--space-4);
   --space-card-lg:  var(--space-6);
 
+  /* Phone-first member footer: product lanes + 5-slot thumb bar */
+  --ep-footer-lanes-height: 48px;
+  --ep-footer-tabs-height: 56px;
+  --ep-footer-chrome: calc(var(--ep-footer-lanes-height) + var(--ep-footer-tabs-height) + env(safe-area-inset-bottom, 0px));
+
   /* Radii — sharp editorial default; pill only for CTAs / tracks */
   --radius-none: 0px;
   --radius-sm:   2px;
@@ -781,7 +786,7 @@ textarea {
   overscroll-behavior-y: contain;
   /* First card sits off the top chrome; bottom tabs + home indicator */
   padding-top: var(--space-page-top);
-  padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+  padding-bottom: var(--ep-footer-chrome);
 }
 @media (min-width: 1024px) {
   .ep-main-scroll {
@@ -790,7 +795,14 @@ textarea {
 }
 .ep-bottom-tabs {
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  min-height: calc(56px + env(safe-area-inset-bottom, 0px));
+  min-height: var(--ep-footer-chrome);
+}
+.ep-footer-lanes {
+  height: var(--ep-footer-lanes-height);
+  border-bottom: 1px solid var(--border-color);
+}
+.ep-footer-tabs {
+  height: var(--ep-footer-tabs-height);
 }
 /* Ask George drawer open: hide the fixed bottom tab bar so the chat input +
    Send aren't clipped behind it on <lg viewports (the drawer sets this class
@@ -1732,11 +1744,11 @@ html.cream-mode body {
 }
 @media (max-width: 1023px) {
   .ep-toast-viewport {
-    /* Sit above the fixed bottom tab bar (56px + safe area) */
+    /* Sit above the two-row member footer (lanes + tabs + safe area) */
     left: 12px;
     right: 12px;
     width: auto;
-    bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
+    bottom: var(--ep-footer-chrome);
     align-items: stretch;
   }
 }
@@ -2234,11 +2246,12 @@ html.light-mode .podcast-force-dark {
 
 /* Landscape phones: keep bottom tabs usable; reduce main bottom pad slightly */
 @media (max-height: 480px) and (orientation: landscape) {
-  .ep-main-scroll {
-    padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+  :root {
+    --ep-footer-lanes-height: 44px;
+    --ep-footer-tabs-height: 48px;
   }
-  .ep-bottom-tabs {
-    min-height: calc(48px + env(safe-area-inset-bottom, 0px));
+  .ep-main-scroll {
+    padding-bottom: var(--ep-footer-chrome);
   }
   .ep-bottom-tabs a,
   .ep-bottom-tabs button {
