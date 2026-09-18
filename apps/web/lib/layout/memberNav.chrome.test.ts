@@ -14,7 +14,7 @@ const tabs = src('components/layout/BottomTabBar.tsx')
 const topnav = src('components/layout/TopNav.tsx')
 const css = src('app/globals.css')
 
-describe('member drawer + 5-slot footer (George IA lock 2026-09-17)', () => {
+describe('member drawer + 4-slot footer (George IA relock 2026-09-17 ~20:02)', () => {
   it('puts EpWordmark EVOLVED·PROS (red ·) in the more drawer, never a circle mark', () => {
     expect(drawer).toContain('EpWordmark')
     expect(drawer).toContain('data-testid="ep-drawer-wordmark"')
@@ -23,12 +23,16 @@ describe('member drawer + 5-slot footer (George IA lock 2026-09-17)', () => {
     expect(drawer).not.toContain('LogoMark')
   })
 
-  it('keeps Team (Community route), Academy, and account items in the drawer', () => {
+  it('keeps Community, Academy, LIVE, and account items in the drawer', () => {
     expect(drawer).toContain('href="/community"')
-    expect(drawer).toContain('Team')
-    expect(drawer).not.toContain('>Community<')
+    expect(drawer).toContain('Community')
+    expect(drawer).not.toContain('Team')
     expect(drawer).toContain('href="/academy"')
+    expect(drawer).toContain('Academy')
+    expect(drawer).toContain('href="/live"')
+    expect(drawer).toContain('LIVE')
     expect(drawer).toContain('href="/messages"')
+    expect(drawer).toContain('Messages')
     expect(drawer).toContain('My Profile')
     expect(drawer).toContain('Membership')
     expect(drawer).toContain('Settings')
@@ -37,23 +41,22 @@ describe('member drawer + 5-slot footer (George IA lock 2026-09-17)', () => {
     expect(drawer).toContain('Sign Out')
     expect(drawer).not.toMatch(/href="\/fit"/)
     expect(drawer).not.toMatch(/href="\/media"/)
-    expect(drawer).not.toMatch(/href="\/live"/)
     expect(drawer).not.toMatch(/href="\/podcast"/)
   })
 
-  it('uses the locked 5-slot bar Home | Fit | Media | LIVE | Pods', () => {
+  it('uses the locked 4-slot bar Home | Fit | Media | Pods', () => {
     expect(tabs).toContain('data-testid="ep-footer-tabs"')
     expect(tabs).toContain("label: 'Home'")
     expect(tabs).toContain("label: 'Fit'")
     expect(tabs).toContain("href: '/fit'")
     expect(tabs).toContain("label: 'Media'")
     expect(tabs).toContain("href: '/media'")
-    expect(tabs).toContain("label: 'LIVE'")
-    expect(tabs).toContain("href: '/live'")
     expect(tabs).toContain("label: 'Pods'")
     expect(tabs).toContain("href: '/podcast'")
     expect(tabs).toContain('FIT_BARBELL_DISC')
     expect(FIT_BARBELL_DISC).toBe('/brand/masthead/barbell-disc.png')
+    expect(tabs).not.toContain("label: 'LIVE'")
+    expect(tabs).not.toContain("href: '/live'")
     expect(tabs).not.toContain("label: 'More'")
     expect(tabs).not.toContain('MoreDrawer')
     expect(tabs).not.toContain('FOOTER_LANES')
@@ -61,11 +64,11 @@ describe('member drawer + 5-slot footer (George IA lock 2026-09-17)', () => {
     expect(tabs).not.toContain("label: 'Academy'")
   })
 
-  it('opens More from TopNav and labels Community as Team in nav chrome', () => {
+  it('opens the tray from existing TopNav chrome (no footer More tab)', () => {
     expect(topnav).toContain('MoreDrawer')
     expect(topnav).toContain('data-testid="ep-more-trigger"')
-    expect(topnav).toContain("{ label: 'Team', href: '/community' }")
-    expect(topnav).not.toContain("{ label: 'Community', href: '/community' }")
+    expect(topnav).toContain("{ label: 'Community', href: '/community' }")
+    expect(topnav).not.toContain("{ label: 'Team', href: '/community' }")
   })
 
   it('does not grow the footer into a two-row chrome', () => {
