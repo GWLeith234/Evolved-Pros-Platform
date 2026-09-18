@@ -208,7 +208,11 @@ describe('conversion homepage layout contracts', () => {
   it('puts signed-out primary Join free in the first mobile viewport over the GOLD still', () => {
     expect(conversionHomeSrc).toMatch(/min-h-\[calc\(100svh-7rem\)\]/)
     expect(conversionHomeSrc).toMatch(/md:min-h-\[calc\(100svh-5\.5rem\)\]/)
+    expect(conversionHomeSrc).toMatch(/max-h-\[calc\(100svh-7rem\)\]/)
+    expect(conversionHomeSrc).toMatch(/md:max-h-\[calc\(100svh-5\.5rem\)\]/)
     expect(conversionHomeSrc).toMatch(/ep-home-fold-still/)
+    expect(conversionHomeSrc).toMatch(/ep-home-fold-ctas/)
+    expect(conversionHomeSrc).toMatch(/ep-home-fold-ctas-lead/)
     expect(conversionHomeSrc).toMatch(/flex-col items-center justify-end/)
     expect(conversionHomeSrc).toMatch(/bg-gradient-to-t from-paper/)
     expect(conversionHomeSrc).not.toMatch(/max-md:scale-\[1\.32\]/)
@@ -222,6 +226,26 @@ describe('conversion homepage layout contracts', () => {
     expect(conversionHomeSrc).toMatch(/href=\{JOIN_FREE_HREF\}/)
     expect(conversionHomeSrc).toMatch(/HOME_OPEN_PLATFORM_HREF/)
     expect(conversionHomeSrc.indexOf('signedIn ?')).toBeGreaterThan(-1)
+    expect(conversionPageSrc).toMatch(/export const dynamic = 'force-dynamic'/)
+    expect(conversionHomeSrc).not.toMatch(/ThemeToggle/)
+    const leadStart = conversionHomeSrc.indexOf('ep-home-fold-ctas-lead')
+    const lead = conversionHomeSrc.slice(
+      leadStart,
+      conversionHomeSrc.indexOf('HOME_SECONDARY_CTA', leadStart),
+    )
+    expect(lead).toMatch(/HOME_OPEN_PLATFORM/)
+    expect(lead).toMatch(/HOME_JOIN_FREE/)
+    expect(lead.indexOf('HOME_OPEN_PLATFORM')).toBeLessThan(lead.indexOf('HOME_JOIN_FREE'))
+  })
+
+  it('locks JOIN FREE beside OPEN THE PLATFORM in the fold CSS at 390 and desktop', () => {
+    expect(globalsSrc).toMatch(/\.ep-home-fold-ctas-lead \{[\s\S]*flex-wrap: nowrap/)
+    expect(globalsSrc).toMatch(/\.ep-home-fold-cta \{[\s\S]*white-space: nowrap/)
+    expect(globalsSrc).toMatch(
+      /@media \(min-width: 768px\) \{\s*\.ep-home-fold-ctas \{\s*flex-wrap: nowrap/,
+    )
+    expect(globalsSrc).toMatch(/@media \(max-width: 430px\) \{[\s\S]*\.ep-home-fold-ctas-lead \.ep-home-fold-cta/)
+    expect(globalsSrc).not.toMatch(/ep-home-theme-toggle|ThemeToggle/)
   })
 
   it('uses one GOLD still in both themes with no invert or theme-switched src', () => {
