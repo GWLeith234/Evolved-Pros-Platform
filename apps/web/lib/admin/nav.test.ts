@@ -26,10 +26,12 @@ describe('admin nav IA (George lock 2026-09-11)', () => {
     ])
   })
 
-  it('renames Pipeline to Member upgrades without moving the route', () => {
-    const item = flattenAdminNav().find(i => i.href === '/admin/pipeline')
-    expect(item?.label).toBe('Member upgrades')
-    expect(item?.label).not.toBe('Pipeline')
+  it('hides Member upgrades from admin nav and leaves the route unlinked', () => {
+    const hrefs = flattenAdminNav().map(i => i.href)
+    expect(hrefs).not.toContain('/admin/pipeline')
+    expect(flattenAdminNav().some(i => i.label === 'Member upgrades')).toBe(false)
+    expect(flattenAdminNav().some(i => i.label === 'Pipeline')).toBe(false)
+    expect(src('app/(admin)/admin/pipeline/page.tsx')).toContain('Member upgrades')
   })
 
   it('keeps Prospects CRM at /admin/crm', () => {
@@ -41,7 +43,6 @@ describe('admin nav IA (George lock 2026-09-11)', () => {
     const people = ADMIN_NAV_SECTIONS.find(s => s.title === 'People')
     expect(people?.items.map(i => i.label)).toEqual([
       'Members',
-      'Member upgrades',
       'Friends',
       'Thank-you Community',
     ])

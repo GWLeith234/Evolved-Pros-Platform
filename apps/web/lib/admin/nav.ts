@@ -1,6 +1,7 @@
 /**
  * Admin sidebar IA. George lock 2026-09-11: Kajabi-style groups.
- * Route paths are unchanged (pipeline stays /admin/pipeline; CRM stays /admin/crm).
+ * 2026-09-13 TOP 3: Member upgrades (/admin/pipeline) stays off the nav.
+ * The route may remain unlinked. Prospects CRM stays under Sales.
  */
 
 export interface AdminNavItem {
@@ -26,7 +27,6 @@ export const ADMIN_NAV_SECTIONS: readonly AdminNavSection[] = [
     title: 'People',
     items: [
       { label: 'Members', href: '/admin/members', match: /^\/admin\/members/ },
-      { label: 'Member upgrades', href: '/admin/pipeline', match: /^\/admin\/pipeline/ },
       { label: 'Friends', href: '/admin/friends', match: /^\/admin\/friends/ },
       { label: 'Thank-you Community', href: '/admin/thanks', match: /^\/admin\/thanks/ },
     ],

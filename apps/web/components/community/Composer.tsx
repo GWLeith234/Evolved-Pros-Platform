@@ -3,7 +3,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { MediaAttachControl } from './MediaAttachControl'
-import { canSubmitPost, type ComposerKind } from '@/lib/community/composer'
+import {
+  canSubmitPost,
+  COMPOSER_TYPES,
+  type ComposerKind,
+  type ComposerPhase,
+} from '@/lib/community/composer'
 import {
   PILLAR_NUMBERS,
   PillarNumberBadge,
@@ -22,41 +27,10 @@ interface ComposerProps {
   }
   channelId: string
   onPostCreated?: () => void
+  /** Test / deep-link hook. Shipped /community starts on the Post CTA. */
+  initialPhase?: ComposerPhase
+  initialKind?: ComposerKind
 }
-
-interface TabConfig {
-  kind: ComposerKind
-  label: string
-  icon: React.ReactNode
-  placeholder: string
-}
-
-const TABS: TabConfig[] = [
-  {
-    kind: 'update',
-    label: 'Update',
-    icon: null,
-    placeholder: "Share what you're working on or applying...",
-  },
-  {
-    kind: 'question',
-    label: 'Question',
-    icon: <span aria-hidden="true">?</span>,
-    placeholder: 'Ask the community something...',
-  },
-  {
-    kind: 'win',
-    label: 'Win',
-    icon: <span aria-hidden="true">🏆</span>,
-    placeholder: 'Share a win — big or small...',
-  },
-  {
-    kind: 'poll',
-    label: 'Poll',
-    icon: <span aria-hidden="true">📊</span>,
-    placeholder: 'Ask a poll question...',
-  },
-]
 
 // AI returns canonical pillar slugs ('mental') — map to the composer's
 // numeric pillar identity so the badge auto-selects post-generation.
@@ -77,8 +51,15 @@ function tierAvatarBg(tier: string | null): string {
   return 'linear-gradient(135deg, #ef0e30 0%, #f87171 100%)'
 }
 
-export function Composer({ currentUser, channelId, onPostCreated }: ComposerProps) {
-  const [activeKind, setActiveKind] = useState<ComposerKind>('update')
+export function Composer({
+  currentUser,
+  channelId,
+  onPostCreated,
+  initialPhase = 'cta',
+  initialKind = 'update',
+}: ComposerProps) {
+  const [phase, setPhase] = useState<ComposerPhase>(initialPhase)
+  const [activeKind, setActiveKind] = useState<ComposerKind>(initialKind)
   const [body, setBody] = useState('')
   const [selectedPillar, setSelectedPillar] = useState<Pillar | null>(null)
   const [pollOptions, setPollOptions] = useState<string[]>(['', ''])
@@ -96,10 +77,10 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
   const [aiError, setAiError] = useState('')
   const aiInputRef = useRef<HTMLInputElement>(null)
 
-  // Refocus the textarea whenever the active tab changes.
+  // Refocus the textarea when the composer opens or the type changes.
   useEffect(() => {
-    textareaRef.current?.focus()
-  }, [activeKind])
+    if (phase === 'compose') textareaRef.current?.focus()
+  }, [activeKind, phase])
 
   // Auto-focus the idea input when the panel opens.
   useEffect(() => {
@@ -123,7 +104,7 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
         error?: string
       }
       if (!res.ok || !data.content) {
-        setAiError('Could not generate — try again')
+        setAiError('Could not generate. Try again')
         return
       }
       setBody(data.content)
@@ -134,13 +115,13 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
       // Scroll the new content into view + focus so the user can edit.
       requestAnimationFrame(() => textareaRef.current?.focus())
     } catch {
-      setAiError('Could not generate — try again')
+      setAiError('Could not generate. Try again')
     } finally {
       setAiLoading(false)
     }
   }
 
-  const activeTab = TABS.find(t => t.kind === activeKind) ?? TABS[0]
+  const activeTab = COMPOSER_TYPES.find(t => t.kind === activeKind) ?? COMPOSER_TYPES[0]
   const validPollOptionCount = pollOptions.filter(o => o.trim().length > 0).length
   // An image on its own is a valid post on the non-poll tabs; a standing
   // media rejection blocks the submit rather than silently posting text-only.
@@ -197,6 +178,8 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
       setPollOptions(['', ''])
       setFile(null)
       setMediaError(null)
+      setPhase('cta')
+      setActiveKind('update')
       onPostCreated?.()
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to post.'
@@ -219,97 +202,172 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
         flexDirection: 'column',
       }}
     >
-      {/* Tabs — horizontal scroll on narrow phones (Sprint 4A) */}
-      <div
-        role="tablist"
-        className="ep-h-scroll"
-        style={{
-          display: 'flex',
-          borderBottom: '1px solid var(--composer-border)',
-          maxWidth: '100%',
-        }}
-      >
-        {TABS.map(tab => {
-          const active = tab.kind === activeKind
-          return (
-            <button
-              key={tab.kind}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => setActiveKind(tab.kind)}
-              onMouseEnter={e => {
-                if (!active) e.currentTarget.style.color = 'var(--composer-tab-hover)'
-              }}
-              onMouseLeave={e => {
-                if (!active) e.currentTarget.style.color = 'var(--composer-tab-idle)'
-              }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '14px 16px',
-                minHeight: 48,
-                flexShrink: 0,
-                fontFamily: '"Bebas Neue", sans-serif',
-                fontSize: 13,
-                letterSpacing: '0.16em',
-                textTransform: 'uppercase',
-                color: active ? 'var(--composer-tab-active)' : 'var(--composer-tab-idle)',
-                background: 'transparent',
-                border: 'none',
-                borderBottom: active
-                  ? '2px solid var(--composer-tab-underline)'
-                  : '2px solid transparent',
-                marginBottom: -1,
-                cursor: 'pointer',
-                transition: 'color 140ms ease',
-              }}
-            >
-              {tab.icon}
-              <span>{tab.label}</span>
-            </button>
-          )
-        })}
-      </div>
-
-      {/* Body row */}
-      <div style={{ display: 'flex', gap: 14, padding: '18px 20px' }}>
-        {/* Avatar */}
+      {phase === 'cta' && (
         <div
           style={{
-            width: 38,
-            height: 38,
-            borderRadius: '50%',
-            flexShrink: 0,
-            overflow: 'hidden',
-            background: currentUser.avatarUrl ? '#1A2332' : tierAvatarBg(currentUser.tier),
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            gap: 14,
+            padding: '16px 20px',
           }}
         >
-          {currentUser.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={currentUser.avatarUrl}
-              alt=""
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            />
-          ) : (
-            <span
-              style={{
-                fontFamily: '"Barlow Condensed", sans-serif',
-                fontWeight: 800,
-                fontSize: 12,
-                color: '#0A0F18',
-                letterSpacing: '0.04em',
-              }}
-            >
-              {currentUser.initials}
-            </span>
-          )}
+          <ComposerAvatar currentUser={currentUser} />
+          <button
+            type="button"
+            onClick={() => setPhase('sheet')}
+            style={{
+              flex: 1,
+              minHeight: 44,
+              textAlign: 'left',
+              background: 'var(--composer-textarea-bg)',
+              border: '1px solid var(--composer-border)',
+              color: 'var(--composer-pillar-label)',
+              fontFamily: '"Barlow", sans-serif',
+              fontSize: 14,
+              padding: '10px 14px',
+              cursor: 'pointer',
+            }}
+          >
+            Start a post
+          </button>
+          <button
+            type="button"
+            onClick={() => setPhase('sheet')}
+            style={{
+              minHeight: 44,
+              padding: '10px 24px',
+              fontFamily: '"Bebas Neue", sans-serif',
+              fontSize: 13,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              background: 'var(--composer-post-btn-bg)',
+              color: 'var(--composer-post-btn-text)',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            Post
+          </button>
         </div>
+      )}
+
+      {phase === 'sheet' && (
+        <div style={{ padding: '18px 20px' }} role="dialog" aria-label="Choose post type">
+          <p
+            style={{
+              margin: '0 0 12px',
+              fontFamily: '"Barlow Condensed", sans-serif',
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
+              color: 'var(--composer-pillar-label)',
+            }}
+          >
+            What are you posting?
+          </p>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+              gap: 8,
+            }}
+          >
+            {COMPOSER_TYPES.map(type => (
+              <button
+                key={type.kind}
+                type="button"
+                onClick={() => {
+                  setActiveKind(type.kind)
+                  setPhase('compose')
+                }}
+                style={{
+                  minHeight: 48,
+                  padding: '12px 14px',
+                  fontFamily: '"Bebas Neue", sans-serif',
+                  fontSize: 14,
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                  textAlign: 'left',
+                  background: 'var(--composer-textarea-bg)',
+                  color: 'var(--composer-textarea-text)',
+                  border: '1px solid var(--composer-border)',
+                  cursor: 'pointer',
+                }}
+              >
+                {type.label}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setPhase('cta')}
+            style={{
+              marginTop: 12,
+              minHeight: 44,
+              padding: '8px 0',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontFamily: '"Barlow Condensed", sans-serif',
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--composer-pillar-label)',
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {/* Compose fields stay mounted so the CM-1 file input remains in the tree. */}
+      <div hidden={phase !== 'compose'}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          padding: '12px 20px 0',
+        }}
+      >
+        <p
+          style={{
+            margin: 0,
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: 'var(--composer-tab-active)',
+          }}
+        >
+          {activeTab.label}
+        </p>
+        <button
+          type="button"
+          onClick={() => setPhase('sheet')}
+          style={{
+            minHeight: 44,
+            padding: '8px 0',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            color: 'var(--composer-pillar-label)',
+          }}
+        >
+          Change type
+        </button>
+      </div>
+      <div style={{ display: 'flex', gap: 14, padding: '18px 20px' }}>
+        <ComposerAvatar currentUser={currentUser} />
 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <textarea
@@ -629,6 +687,50 @@ export function Composer({ currentUser, channelId, onPostCreated }: ComposerProp
         >
           {error}
         </p>
+      )}
+      </div>
+    </div>
+  )
+}
+
+function ComposerAvatar({
+  currentUser,
+}: {
+  currentUser: ComposerProps['currentUser']
+}) {
+  return (
+    <div
+      style={{
+        width: 38,
+        height: 38,
+        borderRadius: '50%',
+        flexShrink: 0,
+        overflow: 'hidden',
+        background: currentUser.avatarUrl ? '#1A2332' : tierAvatarBg(currentUser.tier),
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {currentUser.avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={currentUser.avatarUrl}
+          alt=""
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
+      ) : (
+        <span
+          style={{
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontWeight: 800,
+            fontSize: 12,
+            color: '#0A0F18',
+            letterSpacing: '0.04em',
+          }}
+        >
+          {currentUser.initials}
+        </span>
       )}
     </div>
   )

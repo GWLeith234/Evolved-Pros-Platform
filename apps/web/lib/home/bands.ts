@@ -145,3 +145,49 @@ export function homeEpisodeStill(ep: EpisodeStillSource): string | null {
 export function assertNoEmDash(copy: string): boolean {
   return !copy.includes('\u2014') && !copy.includes('\u2013')
 }
+
+/** One primary next action for Member Home above the fold. */
+export type MemberHomeNextAction = {
+  eyebrow: string
+  title: string
+  cta: string
+  href: string
+}
+
+export function pickMemberHomeNextAction(input: {
+  firstIncompleteMeasure: string | null
+  hasWig: boolean
+  academyTitle: string | null
+  academyHref: string | null
+}): MemberHomeNextAction {
+  if (input.firstIncompleteMeasure) {
+    return {
+      eyebrow: 'Next',
+      title: input.firstIncompleteMeasure,
+      cta: 'Check in',
+      href: '#home-leading-measures',
+    }
+  }
+  if (!input.hasWig) {
+    return {
+      eyebrow: 'Next',
+      title: "Name this quarter's WIG",
+      cta: 'Open scoreboard',
+      href: '/leaderboard',
+    }
+  }
+  if (input.academyTitle && input.academyHref) {
+    return {
+      eyebrow: 'Next',
+      title: input.academyTitle,
+      cta: 'Resume lesson',
+      href: input.academyHref,
+    }
+  }
+  return {
+    eyebrow: 'Next',
+    title: 'Share a win or a question',
+    cta: 'Open Community',
+    href: '/community',
+  }
+}
