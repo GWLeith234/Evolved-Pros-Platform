@@ -56,7 +56,7 @@ interface NavItem { label: string; href: string; minTier?: 'vip' | 'pro'; highli
 // block lives on /home). Events consolidated under LIVE.
 const NAV_ITEMS: NavItem[] = [
   { label: 'Home',      href: '/home' },
-  { label: 'Team', href: '/community' },
+  { label: 'Community', href: '/community' },
   // SPRINT TIER-1: Academy is open to every member. The grid is the
   // storefront — all six pillars are visible to all tiers, with the locked
   // ones badged and linked to /pricing. Hiding the nav item below VIP hid the
@@ -426,7 +426,7 @@ export function TopNav({
             </>
           )}
 
-          {/* Avatar — mobile opens the More sheet (footer is Home|Fit|Media|LIVE|Pods).
+          {/* Avatar — mobile opens the More sheet (footer is Home|Fit|Media|Pods).
               Desktop keeps the account dropdown. */}
           <div style={{ position: 'relative' }} ref={dropdownRef}>
             <button
