@@ -45,7 +45,7 @@ describe('member drawer + footer lanes', () => {
     expect(tabs).toContain("label: 'LIVE'")
     expect(tabs).toContain("href: '/live'")
     expect(tabs).toContain('FIT_BARBELL_DISC')
-    expect(tabs).toContain(FIT_BARBELL_DISC)
+    expect(FIT_BARBELL_DISC).toBe('/brand/masthead/barbell-disc.png')
     expect(tabs).toMatch(/FOOTER_LANES[\s\S]*Fit[\s\S]*Media[\s\S]*LIVE/)
   })
 
