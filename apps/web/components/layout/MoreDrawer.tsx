@@ -4,11 +4,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import { useTheme } from '@/components/theme/ThemeProvider'
+import { EpWordmark } from '@/components/brand/EpWordmark'
 
 interface MoreDrawerProps {
   open: boolean
   onClose: () => void
   role: string | null
+  unreadCount?: number
 }
 
 function MessageIcon() {
@@ -74,6 +76,17 @@ function LogOutIcon() {
   )
 }
 
+function UsersIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  )
+}
+
 function CalendarIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -85,23 +98,18 @@ function CalendarIcon() {
   )
 }
 
-function NewspaperIcon() {
+function BookIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
-      <path d="M18 14h-8" />
-      <path d="M15 18h-5" />
-      <path d="M10 6h8v4h-8V6Z" />
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
     </svg>
   )
 }
 
 const linkClass = "w-full flex items-center gap-3 py-4 px-6 font-condensed font-semibold text-sm transition-colors"
 
-const LOGO_CIRCLE_DARK  = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_circle_dark.png'
-const LOGO_CIRCLE_LIGHT = 'https://udbwrapkshfjkctylbmm.supabase.co/storage/v1/object/public/Branding/logo_circle_light.png'
-
-export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
+export function MoreDrawer({ open, onClose, role, unreadCount = 0 }: MoreDrawerProps) {
   const router = useRouter()
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
@@ -141,9 +149,9 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop — above the footer tabs so the tray is the only chrome */}
       <div
-        className="fixed inset-0 bg-black/50 z-40"
+        className="fixed inset-0 bg-black/50 z-[60]"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -154,11 +162,12 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
         role="dialog"
         aria-modal="true"
         aria-label="More navigation"
-        className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl"
+        className="fixed bottom-0 left-0 right-0 z-[70] rounded-t-2xl overflow-y-auto"
         style={{
           backgroundColor: 'var(--bg-surface)',
           borderTop: '1px solid var(--border-color)',
           paddingBottom: 'env(safe-area-inset-bottom)',
+          maxHeight: 'min(92dvh, 100%)',
         }}
       >
         {/* Handle bar + logo + close */}
@@ -168,13 +177,16 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
             style={{ width: '32px', height: '4px', backgroundColor: 'var(--text-tertiary)' }}
             aria-hidden="true"
           />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={isDark ? LOGO_CIRCLE_DARK : LOGO_CIRCLE_LIGHT}
-            alt=""
-            aria-hidden="true"
-            style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'contain' }}
-          />
+          <Link
+            href="/home"
+            onClick={onClose}
+            aria-label="Evolved Pros — home"
+            data-testid="ep-drawer-wordmark"
+            className="ep-touch-target"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+          >
+            <EpWordmark as="span" tone={isDark ? 'light' : 'dark'} />
+          </Link>
           <button
             ref={closeBtnRef}
             type="button"
@@ -200,7 +212,37 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
         </div>
         <p className="sr-only">More navigation</p>
 
-        {/* Destinations that left the thumb bar to keep Podcast primary */}
+        <Link
+          href="/community"
+          onClick={onClose}
+          className={linkClass}
+          style={{ color: 'var(--text-primary)', minHeight: 52 }}
+        >
+          <span className="relative" aria-hidden="true">
+            <UsersIcon />
+            {unreadCount > 0 && (
+              <span
+                className="absolute -top-0.5 -right-0.5 w-[6px] h-[6px] rounded-full"
+                style={{ backgroundColor: 'var(--brand-red-hot)' }}
+              />
+            )}
+          </span>
+          Community
+          {unreadCount > 0 && (
+            <span className="sr-only">{unreadCount} unread notifications</span>
+          )}
+        </Link>
+
+        <Link
+          href="/academy"
+          onClick={onClose}
+          className={linkClass}
+          style={{ color: 'var(--text-primary)', minHeight: 52 }}
+        >
+          <BookIcon />
+          Academy
+        </Link>
+
         <Link
           href="/live"
           onClick={onClose}
@@ -209,25 +251,6 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
         >
           <CalendarIcon />
           LIVE
-        </Link>
-
-        <Link
-          href="/media"
-          onClick={onClose}
-          className={linkClass}
-          style={{ color: 'var(--text-primary)', minHeight: 52 }}
-        >
-          <NewspaperIcon />
-          Media
-        </Link>
-
-        <Link
-          href="/fit"
-          onClick={onClose}
-          className={linkClass}
-          style={{ color: 'var(--text-primary)', minHeight: 52 }}
-        >
-          Fit
         </Link>
 
         <Link

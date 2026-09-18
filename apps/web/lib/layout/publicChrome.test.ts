@@ -42,4 +42,11 @@ describe('public chrome wordmark', () => {
     expect(src('components/layout/TopNav.tsx')).toContain('<LogoMark')
     expect(src('components/home/ConversionHome.tsx')).toContain('<LogoMark')
   })
+
+  it('keeps the more drawer on EpWordmark, never a circle mark', () => {
+    const drawer = src('components/layout/MoreDrawer.tsx')
+    expect(drawer).toContain('<EpWordmark')
+    expect(drawer).not.toMatch(/logo_circle/)
+    expect(drawer).not.toContain('LogoMark')
+  })
 })

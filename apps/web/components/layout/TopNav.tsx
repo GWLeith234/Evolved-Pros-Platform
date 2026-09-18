@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { AskGeorgeDrawer } from '@/components/layout/AskGeorgeDrawer'
+import { MoreDrawer } from '@/components/layout/MoreDrawer'
 import { LogoMark } from '@/components/ui/LogoMark'
 import { useTheme } from '@/components/theme/ThemeProvider'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
@@ -100,6 +101,7 @@ export function TopNav({
   const { resolvedTheme } = useTheme()
   const isLight = resolvedTheme === 'light'
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
   const [aiOpen, setAiOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -424,6 +426,52 @@ export function TopNav({
             </>
           )}
 
+          {/* Tray / More — mobile only. Footer is Home|Fit|Media|Pods. */}
+          <button
+            type="button"
+            onClick={() => setMoreOpen(true)}
+            className="lg:hidden ep-touch-target"
+            aria-expanded={moreOpen}
+            aria-haspopup="dialog"
+            aria-label="More navigation"
+            data-testid="ep-more-trigger"
+            style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 40,
+              height: 40,
+              minWidth: 40,
+              minHeight: 40,
+              border: 'none',
+              background: 'transparent',
+              color: 'var(--topnav-bell-icon)',
+              cursor: 'pointer',
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+            </svg>
+            {unreadCount > 0 && (
+              <span
+                className="absolute"
+                style={{
+                  top: 6,
+                  right: 6,
+                  width: 6,
+                  height: 6,
+                  borderRadius: '50%',
+                  backgroundColor: 'var(--brand-red-hot)',
+                }}
+                aria-hidden="true"
+              />
+            )}
+          </button>
+
           {/* Avatar + dropdown */}
           <div style={{ position: 'relative' }} ref={dropdownRef}>
             <button
@@ -629,6 +677,13 @@ export function TopNav({
           </div>
         </div>
       </header>
+
+      <MoreDrawer
+        open={moreOpen}
+        onClose={() => setMoreOpen(false)}
+        role={profile.role ?? null}
+        unreadCount={unreadCount}
+      />
     </>
   )
 }
