@@ -11,9 +11,10 @@ function src(rel: string) {
 
 const drawer = src('components/layout/MoreDrawer.tsx')
 const tabs = src('components/layout/BottomTabBar.tsx')
+const topnav = src('components/layout/TopNav.tsx')
 const css = src('app/globals.css')
 
-describe('member drawer + 5-slot footer (frozen 2026-09-17)', () => {
+describe('member drawer + 5-slot footer (George IA lock 2026-09-17)', () => {
   it('puts EpWordmark EVOLVED·PROS (red ·) in the more drawer, never a circle mark', () => {
     expect(drawer).toContain('EpWordmark')
     expect(drawer).toContain('data-testid="ep-drawer-wordmark"')
@@ -22,9 +23,10 @@ describe('member drawer + 5-slot footer (frozen 2026-09-17)', () => {
     expect(drawer).not.toContain('LogoMark')
   })
 
-  it('keeps Community, Podcast, Academy and account items in the drawer', () => {
+  it('keeps Team (Community route), Academy, and account items in the drawer', () => {
     expect(drawer).toContain('href="/community"')
-    expect(drawer).toContain('href="/podcast"')
+    expect(drawer).toContain('Team')
+    expect(drawer).not.toContain('>Community<')
     expect(drawer).toContain('href="/academy"')
     expect(drawer).toContain('href="/messages"')
     expect(drawer).toContain('My Profile')
@@ -36,9 +38,10 @@ describe('member drawer + 5-slot footer (frozen 2026-09-17)', () => {
     expect(drawer).not.toMatch(/href="\/fit"/)
     expect(drawer).not.toMatch(/href="\/media"/)
     expect(drawer).not.toMatch(/href="\/live"/)
+    expect(drawer).not.toMatch(/href="\/podcast"/)
   })
 
-  it('uses the frozen 5-slot bar Home | Fit | Media | LIVE | More', () => {
+  it('uses the locked 5-slot bar Home | Fit | Media | LIVE | Pods', () => {
     expect(tabs).toContain('data-testid="ep-footer-tabs"')
     expect(tabs).toContain("label: 'Home'")
     expect(tabs).toContain("label: 'Fit'")
@@ -47,13 +50,22 @@ describe('member drawer + 5-slot footer (frozen 2026-09-17)', () => {
     expect(tabs).toContain("href: '/media'")
     expect(tabs).toContain("label: 'LIVE'")
     expect(tabs).toContain("href: '/live'")
-    expect(tabs).toContain('More')
+    expect(tabs).toContain("label: 'Pods'")
+    expect(tabs).toContain("href: '/podcast'")
     expect(tabs).toContain('FIT_BARBELL_DISC')
     expect(FIT_BARBELL_DISC).toBe('/brand/masthead/barbell-disc.png')
+    expect(tabs).not.toContain("label: 'More'")
+    expect(tabs).not.toContain('MoreDrawer')
     expect(tabs).not.toContain('FOOTER_LANES')
     expect(tabs).not.toContain("label: 'Community'")
-    expect(tabs).not.toContain("label: 'Podcast'")
     expect(tabs).not.toContain("label: 'Academy'")
+  })
+
+  it('opens More from TopNav and labels Community as Team in nav chrome', () => {
+    expect(topnav).toContain('MoreDrawer')
+    expect(topnav).toContain('data-testid="ep-more-trigger"')
+    expect(topnav).toContain("{ label: 'Team', href: '/community' }")
+    expect(topnav).not.toContain("{ label: 'Community', href: '/community' }")
   })
 
   it('does not grow the footer into a two-row chrome', () => {

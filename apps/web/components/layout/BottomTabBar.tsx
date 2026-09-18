@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { MoreDrawer } from './MoreDrawer'
 import { FIT_BARBELL_DISC } from '@/lib/lockups'
 
 interface BottomTabBarProps {
@@ -17,17 +16,6 @@ function HomeIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
       <polyline points="9 22 9 12 15 12 15 22" />
-    </svg>
-  )
-}
-
-function GridIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7" />
-      <rect x="14" y="3" width="7" height="7" />
-      <rect x="14" y="14" width="7" height="7" />
-      <rect x="3" y="14" width="7" height="7" />
     </svg>
   )
 }
@@ -54,6 +42,17 @@ function NewspaperIcon() {
   )
 }
 
+function MicIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" y1="19" x2="12" y2="23" />
+      <line x1="8" y1="23" x2="16" y2="23" />
+    </svg>
+  )
+}
+
 function FitBarbellIcon() {
   return (
     // eslint-disable-next-line @next/next/no-img-element
@@ -75,13 +74,14 @@ interface TabItem {
   icon: ReactNode
 }
 
-// Frozen plan 2026-09-17: 5 slots including More.
-// Home | Fit | Media | LIVE | More. Community / Podcast / Academy live under More.
+// George IA lock 2026-09-17: Home | Fit | Media | LIVE | Pods.
+// Team (Community route) + Academy live in the overflow drawer (top-nav trigger).
 const TABS: TabItem[] = [
-  { label: 'Home',  href: '/home',  match: /^\/home$/,  icon: <HomeIcon /> },
-  { label: 'Fit',   href: '/fit',   match: /^\/fit/,    icon: <FitBarbellIcon /> },
-  { label: 'Media', href: '/media', match: /^\/media/,  icon: <NewspaperIcon /> },
-  { label: 'LIVE',  href: '/live',  match: /^\/live/,   icon: <CalendarIcon /> },
+  { label: 'Home',  href: '/home',    match: /^\/home$/,   icon: <HomeIcon /> },
+  { label: 'Fit',   href: '/fit',     match: /^\/fit/,     icon: <FitBarbellIcon /> },
+  { label: 'Media', href: '/media',   match: /^\/media/,   icon: <NewspaperIcon /> },
+  { label: 'LIVE',  href: '/live',    match: /^\/live/,    icon: <CalendarIcon /> },
+  { label: 'Pods',  href: '/podcast', match: /^\/podcast/, icon: <MicIcon /> },
 ]
 
 function tabChrome(active: boolean) {
@@ -92,90 +92,45 @@ function tabChrome(active: boolean) {
   } as const
 }
 
-export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTabBarProps) {
+export function BottomTabBar(_props: BottomTabBarProps) {
   const pathname = usePathname()
-  const [moreOpen, setMoreOpen] = useState(false)
-
-  const isMoreActive = /^\/(community|podcast|academy|messages|profile|settings|admin|leaderboard|membership)/.test(pathname)
-  const moreHasBadge = unreadCount > 0 || dmUnreadCount > 0
 
   return (
-    <>
-      <nav
-        className="ep-bottom-tabs lg:hidden flex items-stretch fixed bottom-0 left-0 right-0 z-50"
-        style={{
-          backgroundColor: 'var(--bg-nav)',
-          borderTop: '1px solid var(--border-color)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-        }}
-        aria-label="Primary"
-        data-testid="ep-footer-tabs"
+    <nav
+      className="ep-bottom-tabs lg:hidden flex items-stretch fixed bottom-0 left-0 right-0 z-50"
+      style={{
+        backgroundColor: 'var(--bg-nav)',
+        borderTop: '1px solid var(--border-color)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+      }}
+      aria-label="Primary"
+      data-testid="ep-footer-tabs"
+    >
+      <div
+        className="flex items-stretch w-full"
+        style={{ height: 56 }}
       >
-        <div
-          className="flex items-stretch w-full"
-          style={{ height: 56 }}
-        >
-          {TABS.map(tab => (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 relative ep-touch-target"
-              aria-current={tab.match.test(pathname) ? 'page' : undefined}
-              style={tabChrome(tab.match.test(pathname))}
-            >
-              <span className="relative" aria-hidden="true">
-                {tab.icon}
-              </span>
-              <span
-                className="font-condensed font-semibold uppercase tracking-wide"
-                style={{ fontSize: '9px', letterSpacing: '0.06em' }}
-              >
-                {tab.label}
-              </span>
-            </Link>
-          ))}
-
-          <button
-            type="button"
-            onClick={() => setMoreOpen(true)}
+        {TABS.map(tab => (
+          <Link
+            key={tab.href}
+            href={tab.href}
             className="flex-1 flex flex-col items-center justify-center gap-0.5 relative ep-touch-target"
-            aria-expanded={moreOpen}
-            aria-haspopup="dialog"
-            aria-label="More navigation"
-            style={tabChrome(isMoreActive)}
+            aria-current={tab.match.test(pathname) ? 'page' : undefined}
+            style={tabChrome(tab.match.test(pathname))}
           >
             <span className="relative" aria-hidden="true">
-              <GridIcon />
-              {moreHasBadge && (
-                <span
-                  className="absolute -top-0.5 -right-0.5 w-[6px] h-[6px] rounded-full"
-                  style={{ backgroundColor: 'var(--brand-red-hot)' }}
-                />
-              )}
+              {tab.icon}
             </span>
-            {unreadCount > 0 && (
-              <span className="sr-only">{unreadCount} unread notifications</span>
-            )}
-            {dmUnreadCount > 0 && (
-              <span className="sr-only">{dmUnreadCount} unread messages</span>
-            )}
             <span
               className="font-condensed font-semibold uppercase tracking-wide"
               style={{ fontSize: '9px', letterSpacing: '0.06em' }}
             >
-              More
+              {tab.label}
             </span>
-          </button>
-        </div>
-      </nav>
-
-      <MoreDrawer
-        open={moreOpen}
-        onClose={() => setMoreOpen(false)}
-        role={role}
-        unreadCount={unreadCount}
-      />
-    </>
+          </Link>
+        ))}
+      </div>
+    </nav>
   )
 }
