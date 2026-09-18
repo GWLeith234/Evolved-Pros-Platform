@@ -13,17 +13,19 @@ const drawer = src('components/layout/MoreDrawer.tsx')
 const tabs = src('components/layout/BottomTabBar.tsx')
 const css = src('app/globals.css')
 
-describe('member drawer + footer lanes', () => {
-  it('puts the official horizontal wordmark in the more drawer', () => {
-    expect(drawer).toContain('LogoMark')
+describe('member drawer + 5-slot footer (frozen 2026-09-17)', () => {
+  it('puts EpWordmark EVOLVED·PROS (red ·) in the more drawer, never a circle mark', () => {
+    expect(drawer).toContain('EpWordmark')
     expect(drawer).toContain('data-testid="ep-drawer-wordmark"')
-    expect(drawer).toContain("variant={isDark ? 'light' : 'dark'}")
+    expect(drawer).toContain("tone={isDark ? 'light' : 'dark'}")
     expect(drawer).not.toMatch(/logo_circle/)
-    expect(drawer).not.toMatch(/EVOLVED\s*<span[\s\S]*?·[\s\S]*?PROS/)
-    expect(drawer).not.toContain('EVOLVED·PROS')
+    expect(drawer).not.toContain('LogoMark')
   })
 
-  it('keeps account items in the drawer and drops Fit / Media / LIVE', () => {
+  it('keeps Community, Podcast, Academy and account items in the drawer', () => {
+    expect(drawer).toContain('href="/community"')
+    expect(drawer).toContain('href="/podcast"')
+    expect(drawer).toContain('href="/academy"')
     expect(drawer).toContain('href="/messages"')
     expect(drawer).toContain('My Profile')
     expect(drawer).toContain('Membership')
@@ -36,35 +38,27 @@ describe('member drawer + footer lanes', () => {
     expect(drawer).not.toMatch(/href="\/live"/)
   })
 
-  it('places Fit, Media, and LIVE in the mobile footer lanes with the Fit barbell', () => {
-    expect(tabs).toContain('data-testid="ep-footer-lanes"')
+  it('uses the frozen 5-slot bar Home | Fit | Media | LIVE | More', () => {
+    expect(tabs).toContain('data-testid="ep-footer-tabs"')
+    expect(tabs).toContain("label: 'Home'")
     expect(tabs).toContain("label: 'Fit'")
     expect(tabs).toContain("href: '/fit'")
     expect(tabs).toContain("label: 'Media'")
     expect(tabs).toContain("href: '/media'")
     expect(tabs).toContain("label: 'LIVE'")
     expect(tabs).toContain("href: '/live'")
+    expect(tabs).toContain('More')
     expect(tabs).toContain('FIT_BARBELL_DISC')
     expect(FIT_BARBELL_DISC).toBe('/brand/masthead/barbell-disc.png')
-    expect(tabs).toMatch(/FOOTER_LANES[\s\S]*Fit[\s\S]*Media[\s\S]*LIVE/)
+    expect(tabs).not.toContain('FOOTER_LANES')
+    expect(tabs).not.toContain("label: 'Community'")
+    expect(tabs).not.toContain("label: 'Podcast'")
+    expect(tabs).not.toContain("label: 'Academy'")
   })
 
-  it('keeps the five-slot thumb bar for Home / Community / Podcast / Academy / More', () => {
-    expect(tabs).toContain('data-testid="ep-footer-tabs"')
-    expect(tabs).toContain("label: 'Home'")
-    expect(tabs).toContain("label: 'Community'")
-    expect(tabs).toContain("label: 'Podcast'")
-    expect(tabs).toContain("label: 'Academy'")
-    expect(tabs).toContain('More')
-    expect(tabs).not.toMatch(/isMoreActive = \/\^\\\/\(messages\|profile\|settings\|admin\|leaderboard\|membership\|live\|media\)/)
-  })
-
-  it('sizes member scroll and toasts against the two-row footer tokens', () => {
-    expect(css).toContain('--ep-footer-lanes-height')
-    expect(css).toContain('--ep-footer-tabs-height')
-    expect(css).toContain('--ep-footer-chrome')
-    expect(css).toMatch(/\.ep-main-scroll \{[\s\S]*padding-bottom: var\(--ep-footer-chrome\)/)
-    expect(css).toMatch(/\.ep-bottom-tabs \{[\s\S]*min-height: var\(--ep-footer-chrome\)/)
-    expect(css).toMatch(/\.ep-toast-viewport \{[\s\S]*bottom: var\(--ep-footer-chrome\)/)
+  it('does not grow the footer into a two-row chrome', () => {
+    expect(css).not.toContain('--ep-footer-lanes-height')
+    expect(css).not.toContain('.ep-footer-lanes')
+    expect(css).toMatch(/\.ep-bottom-tabs \{[\s\S]*min-height: calc\(56px/)
   })
 })

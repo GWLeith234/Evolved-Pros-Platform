@@ -21,26 +21,6 @@ function HomeIcon() {
   )
 }
 
-function UsersIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  )
-}
-
-function BookIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-    </svg>
-  )
-}
-
 function GridIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -48,17 +28,6 @@ function GridIcon() {
       <rect x="14" y="3" width="7" height="7" />
       <rect x="14" y="14" width="7" height="7" />
       <rect x="3" y="14" width="7" height="7" />
-    </svg>
-  )
-}
-
-function MicIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-      <line x1="12" y1="19" x2="12" y2="23" />
-      <line x1="8" y1="23" x2="16" y2="23" />
     </svg>
   )
 }
@@ -106,19 +75,13 @@ interface TabItem {
   icon: ReactNode
 }
 
-// Product lanes sit above the 5-slot thumb bar so Fit / Media / LIVE stay
-// phone-first without crowding Home / Community / Podcast / Academy / More.
-const FOOTER_LANES: TabItem[] = [
-  { label: 'Fit',   href: '/fit',   match: /^\/fit/,   icon: <FitBarbellIcon /> },
-  { label: 'Media', href: '/media', match: /^\/media/, icon: <NewspaperIcon /> },
-  { label: 'LIVE',  href: '/live',  match: /^\/live/,  icon: <CalendarIcon /> },
-]
-
+// Frozen plan 2026-09-17: 5 slots including More.
+// Home | Fit | Media | LIVE | More. Community / Podcast / Academy live under More.
 const TABS: TabItem[] = [
-  { label: 'Home',      href: '/home',       match: /^\/home$/,      icon: <HomeIcon /> },
-  { label: 'Community', href: '/community',  match: /^\/community/,  icon: <UsersIcon /> },
-  { label: 'Podcast',   href: '/podcast',    match: /^\/podcast/,    icon: <MicIcon /> },
-  { label: 'Academy',   href: '/academy',    match: /^\/academy/,    icon: <BookIcon /> },
+  { label: 'Home',  href: '/home',  match: /^\/home$/,  icon: <HomeIcon /> },
+  { label: 'Fit',   href: '/fit',   match: /^\/fit/,    icon: <FitBarbellIcon /> },
+  { label: 'Media', href: '/media', match: /^\/media/,  icon: <NewspaperIcon /> },
+  { label: 'LIVE',  href: '/live',  match: /^\/live/,   icon: <CalendarIcon /> },
 ]
 
 function tabChrome(active: boolean) {
@@ -129,55 +92,17 @@ function tabChrome(active: boolean) {
   } as const
 }
 
-function FooterLink({
-  tab,
-  active,
-  badge,
-  badgeLabel,
-}: {
-  tab: TabItem
-  active: boolean
-  badge?: boolean
-  badgeLabel?: string
-}) {
-  return (
-    <Link
-      href={tab.href}
-      className="flex-1 flex flex-col items-center justify-center gap-0.5 relative ep-touch-target"
-      aria-current={active ? 'page' : undefined}
-      style={tabChrome(active)}
-    >
-      <span className="relative" aria-hidden="true">
-        {tab.icon}
-        {badge && (
-          <span
-            className="absolute -top-0.5 -right-0.5 w-[6px] h-[6px] rounded-full"
-            style={{ backgroundColor: 'var(--brand-red-hot)' }}
-            aria-hidden="true"
-          />
-        )}
-      </span>
-      {badge && badgeLabel ? <span className="sr-only">{badgeLabel}</span> : null}
-      <span
-        className="font-condensed font-semibold uppercase tracking-wide"
-        style={{ fontSize: '9px', letterSpacing: '0.06em' }}
-      >
-        {tab.label}
-      </span>
-    </Link>
-  )
-}
-
 export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTabBarProps) {
   const pathname = usePathname()
   const [moreOpen, setMoreOpen] = useState(false)
 
-  const isMoreActive = /^\/(messages|profile|settings|admin|leaderboard|membership)/.test(pathname)
+  const isMoreActive = /^\/(community|podcast|academy|messages|profile|settings|admin|leaderboard|membership)/.test(pathname)
+  const moreHasBadge = unreadCount > 0 || dmUnreadCount > 0
 
   return (
     <>
       <nav
-        className="ep-bottom-tabs lg:hidden flex flex-col fixed bottom-0 left-0 right-0 z-50"
+        className="ep-bottom-tabs lg:hidden flex items-stretch fixed bottom-0 left-0 right-0 z-50"
         style={{
           backgroundColor: 'var(--bg-nav)',
           borderTop: '1px solid var(--border-color)',
@@ -185,37 +110,31 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
           WebkitBackdropFilter: 'blur(12px)',
         }}
         aria-label="Primary"
+        data-testid="ep-footer-tabs"
       >
         <div
-          className="ep-footer-lanes flex items-stretch w-full"
-          data-testid="ep-footer-lanes"
-          aria-label="Fit, Media, and LIVE"
+          className="flex items-stretch w-full"
+          style={{ height: 56 }}
         >
-          {FOOTER_LANES.map(tab => (
-            <FooterLink
+          {TABS.map(tab => (
+            <Link
               key={tab.href}
-              tab={tab}
-              active={tab.match.test(pathname)}
-            />
+              href={tab.href}
+              className="flex-1 flex flex-col items-center justify-center gap-0.5 relative ep-touch-target"
+              aria-current={tab.match.test(pathname) ? 'page' : undefined}
+              style={tabChrome(tab.match.test(pathname))}
+            >
+              <span className="relative" aria-hidden="true">
+                {tab.icon}
+              </span>
+              <span
+                className="font-condensed font-semibold uppercase tracking-wide"
+                style={{ fontSize: '9px', letterSpacing: '0.06em' }}
+              >
+                {tab.label}
+              </span>
+            </Link>
           ))}
-        </div>
-
-        <div
-          className="ep-footer-tabs flex items-stretch w-full"
-          data-testid="ep-footer-tabs"
-        >
-          {TABS.map(tab => {
-            const isCommunity = tab.href === '/community'
-            return (
-              <FooterLink
-                key={tab.href}
-                tab={tab}
-                active={tab.match.test(pathname)}
-                badge={isCommunity && unreadCount > 0}
-                badgeLabel={isCommunity && unreadCount > 0 ? `${unreadCount} unread notifications` : undefined}
-              />
-            )
-          })}
 
           <button
             type="button"
@@ -228,13 +147,16 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
           >
             <span className="relative" aria-hidden="true">
               <GridIcon />
-              {dmUnreadCount > 0 && (
+              {moreHasBadge && (
                 <span
                   className="absolute -top-0.5 -right-0.5 w-[6px] h-[6px] rounded-full"
                   style={{ backgroundColor: 'var(--brand-red-hot)' }}
                 />
               )}
             </span>
+            {unreadCount > 0 && (
+              <span className="sr-only">{unreadCount} unread notifications</span>
+            )}
             {dmUnreadCount > 0 && (
               <span className="sr-only">{dmUnreadCount} unread messages</span>
             )}
@@ -248,7 +170,12 @@ export function BottomTabBar({ role, unreadCount, dmUnreadCount = 0 }: BottomTab
         </div>
       </nav>
 
-      <MoreDrawer open={moreOpen} onClose={() => setMoreOpen(false)} role={role} />
+      <MoreDrawer
+        open={moreOpen}
+        onClose={() => setMoreOpen(false)}
+        role={role}
+        unreadCount={unreadCount}
+      />
     </>
   )
 }

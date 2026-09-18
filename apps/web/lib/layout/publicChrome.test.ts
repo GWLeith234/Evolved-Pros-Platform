@@ -14,7 +14,6 @@ const CHROME_FILES = [
   'components/layout/SessionOptionalShell.tsx',
   'components/layout/PublicChromeHeader.tsx',
   'components/layout/TopNav.tsx',
-  'components/layout/MoreDrawer.tsx',
   'components/home/ConversionHome.tsx',
   'components/media/Masthead.tsx',
   'components/fit/FitMasthead.tsx',
@@ -39,10 +38,15 @@ describe('public chrome wordmark', () => {
     expect(src('app/welcome/page.tsx')).toContain('<PublicChromeHeader')
   })
 
-  it('keeps member TopNav, more drawer, and conversion home on LogoMark', () => {
+  it('keeps member TopNav and conversion home on LogoMark', () => {
     expect(src('components/layout/TopNav.tsx')).toContain('<LogoMark')
-    expect(src('components/layout/MoreDrawer.tsx')).toContain('<LogoMark')
-    expect(src('components/layout/MoreDrawer.tsx')).not.toMatch(/logo_circle/)
     expect(src('components/home/ConversionHome.tsx')).toContain('<LogoMark')
+  })
+
+  it('keeps the more drawer on EpWordmark, never a circle mark', () => {
+    const drawer = src('components/layout/MoreDrawer.tsx')
+    expect(drawer).toContain('<EpWordmark')
+    expect(drawer).not.toMatch(/logo_circle/)
+    expect(drawer).not.toContain('LogoMark')
   })
 })

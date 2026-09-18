@@ -4,12 +4,13 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import { useTheme } from '@/components/theme/ThemeProvider'
-import { LogoMark } from '@/components/ui/LogoMark'
+import { EpWordmark } from '@/components/brand/EpWordmark'
 
 interface MoreDrawerProps {
   open: boolean
   onClose: () => void
   role: string | null
+  unreadCount?: number
 }
 
 function MessageIcon() {
@@ -75,9 +76,40 @@ function LogOutIcon() {
   )
 }
 
+function UsersIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  )
+}
+
+function MicIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" y1="19" x2="12" y2="23" />
+      <line x1="8" y1="23" x2="16" y2="23" />
+    </svg>
+  )
+}
+
+function BookIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    </svg>
+  )
+}
+
 const linkClass = "w-full flex items-center gap-3 py-4 px-6 font-condensed font-semibold text-sm transition-colors"
 
-export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
+export function MoreDrawer({ open, onClose, role, unreadCount = 0 }: MoreDrawerProps) {
   const router = useRouter()
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
@@ -150,9 +182,9 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
             aria-label="Evolved Pros — home"
             data-testid="ep-drawer-wordmark"
             className="ep-touch-target"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
           >
-            <LogoMark variant={isDark ? 'light' : 'dark'} height={28} />
+            <EpWordmark as="span" tone={isDark ? 'light' : 'dark'} />
           </Link>
           <button
             ref={closeBtnRef}
@@ -178,6 +210,47 @@ export function MoreDrawer({ open, onClose, role }: MoreDrawerProps) {
           </button>
         </div>
         <p className="sr-only">More navigation</p>
+
+        <Link
+          href="/community"
+          onClick={onClose}
+          className={linkClass}
+          style={{ color: 'var(--text-primary)', minHeight: 52 }}
+        >
+          <span className="relative" aria-hidden="true">
+            <UsersIcon />
+            {unreadCount > 0 && (
+              <span
+                className="absolute -top-0.5 -right-0.5 w-[6px] h-[6px] rounded-full"
+                style={{ backgroundColor: 'var(--brand-red-hot)' }}
+              />
+            )}
+          </span>
+          Community
+          {unreadCount > 0 && (
+            <span className="sr-only">{unreadCount} unread notifications</span>
+          )}
+        </Link>
+
+        <Link
+          href="/podcast"
+          onClick={onClose}
+          className={linkClass}
+          style={{ color: 'var(--text-primary)', minHeight: 52 }}
+        >
+          <MicIcon />
+          Podcast
+        </Link>
+
+        <Link
+          href="/academy"
+          onClick={onClose}
+          className={linkClass}
+          style={{ color: 'var(--text-primary)', minHeight: 52 }}
+        >
+          <BookIcon />
+          Academy
+        </Link>
 
         <Link
           href="/messages"
