@@ -149,9 +149,9 @@ export function MoreDrawer({ open, onClose, role, unreadCount = 0 }: MoreDrawerP
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop — above the footer tabs so the tray is the only chrome */}
       <div
-        className="fixed inset-0 bg-black/50 z-40"
+        className="fixed inset-0 bg-black/50 z-[60]"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -162,11 +162,12 @@ export function MoreDrawer({ open, onClose, role, unreadCount = 0 }: MoreDrawerP
         role="dialog"
         aria-modal="true"
         aria-label="More navigation"
-        className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl"
+        className="fixed bottom-0 left-0 right-0 z-[70] rounded-t-2xl overflow-y-auto"
         style={{
           backgroundColor: 'var(--bg-surface)',
           borderTop: '1px solid var(--border-color)',
           paddingBottom: 'env(safe-area-inset-bottom)',
+          maxHeight: 'min(92dvh, 100%)',
         }}
       >
         {/* Handle bar + logo + close */}

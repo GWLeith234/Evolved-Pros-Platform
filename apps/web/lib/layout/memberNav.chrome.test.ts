@@ -39,6 +39,7 @@ describe('member drawer + 4-slot footer (George IA relock 2026-09-17 ~20:02)', (
     expect(drawer).toContain('Admin Dashboard')
     expect(drawer).toContain('Branding')
     expect(drawer).toContain('Sign Out')
+    expect(drawer).toContain('z-[70]')
     expect(drawer).not.toMatch(/href="\/fit"/)
     expect(drawer).not.toMatch(/href="\/media"/)
     expect(drawer).not.toMatch(/href="\/podcast"/)
