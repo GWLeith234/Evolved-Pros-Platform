@@ -426,58 +426,22 @@ export function TopNav({
             </>
           )}
 
-          {/* Tray / More — mobile only. Footer is Home|Fit|Media|Pods. */}
-          <button
-            type="button"
-            onClick={() => setMoreOpen(true)}
-            className="lg:hidden ep-touch-target"
-            aria-expanded={moreOpen}
-            aria-haspopup="dialog"
-            aria-label="More navigation"
-            data-testid="ep-more-trigger"
-            style={{
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 40,
-              height: 40,
-              minWidth: 40,
-              minHeight: 40,
-              border: 'none',
-              background: 'transparent',
-              color: 'var(--topnav-bell-icon)',
-              cursor: 'pointer',
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <rect x="3" y="3" width="7" height="7" />
-              <rect x="14" y="3" width="7" height="7" />
-              <rect x="14" y="14" width="7" height="7" />
-              <rect x="3" y="14" width="7" height="7" />
-            </svg>
-            {unreadCount > 0 && (
-              <span
-                className="absolute"
-                style={{
-                  top: 6,
-                  right: 6,
-                  width: 6,
-                  height: 6,
-                  borderRadius: '50%',
-                  backgroundColor: 'var(--brand-red-hot)',
-                }}
-                aria-hidden="true"
-              />
-            )}
-          </button>
-
-          {/* Avatar + dropdown */}
+          {/* Avatar — mobile opens the More sheet (footer is Home|Fit|Media|Pods).
+              Desktop keeps the account dropdown. */}
           <div style={{ position: 'relative' }} ref={dropdownRef}>
             <button
               type="button"
-              onClick={() => setDropdownOpen(o => !o)}
+              onClick={() => {
+                if (typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches) {
+                  setDropdownOpen(o => !o)
+                  return
+                }
+                setMoreOpen(true)
+              }}
               aria-label="Account menu"
+              aria-haspopup="dialog"
+              aria-expanded={moreOpen || dropdownOpen}
+              data-testid="ep-more-trigger"
               className="ep-pressable"
               style={{
                 position: 'relative',

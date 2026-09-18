@@ -63,8 +63,7 @@ interface TabItem {
   icon: ReactNode
 }
 
-// George IA relock 2026-09-17: Home | Fit | Media | Pods. Four slots.
-// Community, Academy, LIVE live in the overflow tray (top-nav menu).
+// George IA relock: Home | Fit | Media | Pods only. LIVE lives in the tray.
 const TABS: TabItem[] = [
   { label: 'Home',  href: '/home',    match: /^\/home$/,   icon: <HomeIcon /> },
   { label: 'Fit',   href: '/fit',     match: /^\/fit/,     icon: <FitBarbellIcon /> },

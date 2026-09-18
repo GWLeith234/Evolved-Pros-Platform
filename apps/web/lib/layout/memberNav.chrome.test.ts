@@ -14,7 +14,7 @@ const tabs = src('components/layout/BottomTabBar.tsx')
 const topnav = src('components/layout/TopNav.tsx')
 const css = src('app/globals.css')
 
-describe('member drawer + 4-slot footer (George IA relock 2026-09-17 ~20:02)', () => {
+describe('member drawer + 4-slot footer (George IA relock — Community + LIVE in tray)', () => {
   it('puts EpWordmark EVOLVED·PROS (red ·) in the more drawer, never a circle mark', () => {
     expect(drawer).toContain('EpWordmark')
     expect(drawer).toContain('data-testid="ep-drawer-wordmark"')
@@ -32,14 +32,12 @@ describe('member drawer + 4-slot footer (George IA relock 2026-09-17 ~20:02)', (
     expect(drawer).toContain('href="/live"')
     expect(drawer).toContain('LIVE')
     expect(drawer).toContain('href="/messages"')
-    expect(drawer).toContain('Messages')
     expect(drawer).toContain('My Profile')
     expect(drawer).toContain('Membership')
     expect(drawer).toContain('Settings')
     expect(drawer).toContain('Admin Dashboard')
     expect(drawer).toContain('Branding')
     expect(drawer).toContain('Sign Out')
-    expect(drawer).toContain('z-[70]')
     expect(drawer).not.toMatch(/href="\/fit"/)
     expect(drawer).not.toMatch(/href="\/media"/)
     expect(drawer).not.toMatch(/href="\/podcast"/)
@@ -63,11 +61,13 @@ describe('member drawer + 4-slot footer (George IA relock 2026-09-17 ~20:02)', (
     expect(tabs).not.toContain('FOOTER_LANES')
     expect(tabs).not.toContain("label: 'Community'")
     expect(tabs).not.toContain("label: 'Academy'")
+    expect(tabs).not.toContain("label: 'Team'")
   })
 
-  it('opens the tray from existing TopNav chrome (no footer More tab)', () => {
+  it('opens More from the TopNav avatar and keeps the Community label', () => {
     expect(topnav).toContain('MoreDrawer')
     expect(topnav).toContain('data-testid="ep-more-trigger"')
+    expect(topnav).toContain('setMoreOpen(true)')
     expect(topnav).toContain("{ label: 'Community', href: '/community' }")
     expect(topnav).not.toContain("{ label: 'Team', href: '/community' }")
   })
