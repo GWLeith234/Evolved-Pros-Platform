@@ -9,6 +9,7 @@ import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 export type PartnerSlotKind =
   | 'leaderboard'
   | 'mid-fluid'
+  | 'mid-rect'
   | 'rail'
   | 'rail-half'
   | 'sponsored-row'
@@ -17,6 +18,7 @@ export type PartnerSlotKind =
 const SLOT_PX: Record<PartnerSlotKind, { w: number; h: number }> = {
   leaderboard: { w: 728, h: 90 },
   'mid-fluid': { w: 970, h: 250 },
+  'mid-rect': { w: 300, h: 250 },
   rail: { w: 300, h: 250 },
   'rail-half': { w: 300, h: 600 },
   'sponsored-row': { w: 100, h: 67 },
@@ -26,6 +28,7 @@ const SLOT_PX: Record<PartnerSlotKind, { w: number; h: number }> = {
 const SLOT_LABEL: Record<PartnerSlotKind, string> = {
   leaderboard: 'Partner leaderboard',
   'mid-fluid': 'Partner placement',
+  'mid-rect': 'Sponsored',
   rail: 'Partner rail',
   'rail-half': 'Partner half-page',
   'sponsored-row': 'Partner story',
@@ -70,6 +73,7 @@ export function MediaPartnerSlot({
 
   return (
     <div
+      className={kind === 'mid-fluid' ? 'ep-media-partner-mid-fluid' : undefined}
       data-media-partner-slot={kind}
       data-media-partner-empty="true"
       aria-label={SLOT_LABEL[kind]}
@@ -109,6 +113,21 @@ export function MediaPartnerSlot({
           Evolved Pros Media partner inventory
         </p>
       </div>
+    </div>
+  )
+}
+
+/** Centered 300x250 scroll avail. Empty-state or house/partner creative only. */
+export function MediaScrollRect({
+  ad,
+  locationId,
+}: {
+  ad?: SponsorAd | null
+  locationId: string
+}) {
+  return (
+    <div className="ep-media-mid-rect" data-media-scroll-rect="300x250">
+      <MediaPartnerSlot kind="mid-rect" ad={ad} locationId={locationId} />
     </div>
   )
 }

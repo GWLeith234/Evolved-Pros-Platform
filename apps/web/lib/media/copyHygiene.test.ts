@@ -20,6 +20,7 @@ const USER_FACING = [
   resolve(here, '../../app/(public)/media/[pillar]/[slug]/ArticleShareBar.tsx'),
   resolve(here, './brand.ts'),
   resolve(here, './desk.ts'),
+  resolve(here, './scrollInventory.ts'),
 ]
 
 describe('Media copy hygiene', () => {

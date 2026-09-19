@@ -3519,10 +3519,21 @@ html.light-mode .ep-media-home {
   .ep-media-home-inner { padding: 16px 24px 64px; }
 }
 .ep-media-leaderboard,
-.ep-media-mid-fluid {
+.ep-media-mid-fluid,
+.ep-media-mid-rect {
   display: flex;
   justify-content: center;
   margin: 0 0 16px;
+}
+.ep-media-mid-rect {
+  margin: 16px 0;
+}
+@media (max-width: 639px) {
+  .ep-media-partner-mid-fluid {
+    max-width: 300px !important;
+    min-height: 250px !important;
+    aspect-ratio: 300 / 250 !important;
+  }
 }
 .ep-media-home-grid {
   display: grid;

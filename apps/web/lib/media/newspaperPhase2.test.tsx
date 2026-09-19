@@ -105,12 +105,15 @@ describe('Phase 2 EPM←TT article + section landings', () => {
 
   it('reserves Soo/TT partner geometry on article and section without an open ad network', () => {
     expect(slot).toContain('article-inline')
+    expect(slot).toContain('mid-rect')
     expect(slot).toMatch(/Never loads an open ad network/)
     expect(article).toContain('kind="article-inline"')
     expect(article).toContain('kind="rail-half"')
+    expect(article).toContain('NewspaperArticleBody')
     expect(landing).toContain('kind="leaderboard"')
     expect(landing).toContain('kind="mid-fluid"')
     expect(landing).toContain('kind="rail-half"')
+    expect(landing).toContain('MediaScrollRect')
     expect(article).not.toMatch(/googletag|doubleclick|gpt\.js|DFP/)
     expect(landing).not.toMatch(/googletag|doubleclick|gpt\.js|DFP/)
     expect(modules).not.toMatch(/googletag|doubleclick|gpt\.js|DFP/)

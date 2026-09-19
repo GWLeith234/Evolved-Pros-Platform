@@ -8,6 +8,7 @@ import { getPillarLabel } from '@/lib/pillars'
 import { ArticleShareBar } from './ArticleShareBar'
 import { MediaPartnerSlot } from '@/components/media/MediaPartnerSlot'
 import {
+  NewspaperArticleBody,
   NewspaperLatestRail,
   NewspaperMoreInSection,
   NewspaperMostRead,
@@ -240,15 +241,12 @@ export default async function StoryPage({
               </p>
             ) : null}
 
-            <div
-              className="media-prose"
-              dangerouslySetInnerHTML={{ __html: html }}
-            />
+            <NewspaperArticleBody html={html} ads={articleAds.inBody} />
 
             <div className="ep-media-article-slot">
               <MediaPartnerSlot
                 kind="article-inline"
-                ad={articleAds.inBody[0] ?? articleAds.related}
+                ad={articleAds.related}
                 locationId="media-article-inline"
               />
             </div>

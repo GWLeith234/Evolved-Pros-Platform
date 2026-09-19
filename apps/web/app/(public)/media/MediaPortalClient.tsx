@@ -2,7 +2,8 @@
 
 import { useMemo, type CSSProperties } from 'react'
 import Link from 'next/link'
-import { MediaPartnerSlot } from '@/components/media/MediaPartnerSlot'
+import { MediaPartnerSlot, MediaScrollRect } from '@/components/media/MediaPartnerSlot'
+import { homeMidRectBands, latestMidRectIndexes } from '@/lib/media/scrollInventory'
 import { getPillarLabel } from '@/lib/pillars'
 import {
   MEDIA_ON_AIR,
@@ -206,7 +207,15 @@ function FeaturedGrid({ stories }: { stories: MediaStory[] }) {
   )
 }
 
-function LatestRail({ stories }: { stories: MediaStory[] }) {
+function LatestRail({
+  stories,
+  midRectAt,
+  midRectAds,
+}: {
+  stories: MediaStory[]
+  midRectAt?: readonly number[]
+  midRectAds?: ReadonlyArray<SponsorAd | null | undefined>
+}) {
   if (stories.length === 0) return null
   return (
     <section className="ep-media-latest" data-media-module="latest-list">
@@ -227,6 +236,12 @@ function LatestRail({ stories }: { stories: MediaStory[] }) {
             </Link>
             {index === 1 ? (
               <MediaPartnerSlot kind="sponsored-row" locationId="media-sponsored-1" />
+            ) : null}
+            {midRectAt?.includes(index) ? (
+              <MediaScrollRect
+                ad={midRectAds?.[midRectAt.indexOf(index)] ?? null}
+                locationId={`media-home-latest-rect-${index}`}
+              />
             ) : null}
           </li>
         ))}
@@ -347,6 +362,18 @@ export function MediaPortalClient({
   const desk = useMemo(() => splitHubDesk(stories), [stories])
   const leaderboardAd = inFeedAds[0] ?? null
   const midFluidAd = inFeedAds[1] ?? null
+  const bands = homeMidRectBands({
+    featuredCount: desk.featuredGrid.length,
+    sectionCount: desk.sections.length,
+    episodeCount: episodes.length,
+  })
+  const latestRectAt = latestMidRectIndexes(desk.latestList.length, { skipTrailing: true })
+  let nextRect = 2
+  const takeRect = () => inFeedAds[nextRect++] ?? null
+  const featuredRectAd = bands.includes('after-featured') ? takeRect() : null
+  const latestRectAds = latestRectAt.map(() => takeRect())
+  const sectionsRectAd = bands.includes('after-sections') ? takeRect() : null
+  const podcastRectAd = bands.includes('after-podcast') ? takeRect() : null
 
   return (
     <div className="ep-media-home">
@@ -359,7 +386,14 @@ export function MediaPortalClient({
           <div className="ep-media-home-main">
             <DualHero lede={desk.featured} secondary={desk.secondary} />
             <FeaturedGrid stories={desk.featuredGrid} />
-            <LatestRail stories={desk.latestList} />
+            {bands.includes('after-featured') ? (
+              <MediaScrollRect ad={featuredRectAd} locationId="media-home-rect-featured" />
+            ) : null}
+            <LatestRail
+              stories={desk.latestList}
+              midRectAt={latestRectAt}
+              midRectAds={latestRectAds}
+            />
             <div className="ep-media-mid-fluid">
               <MediaPartnerSlot kind="mid-fluid" ad={midFluidAd} locationId="media-mid-fluid" />
             </div>
@@ -389,6 +423,9 @@ export function MediaPortalClient({
                 </ul>
               </section>
             ))}
+            {bands.includes('after-sections') ? (
+              <MediaScrollRect ad={sectionsRectAd} locationId="media-home-rect-sections" />
+            ) : null}
           </div>
 
           <aside className="ep-media-home-rail">
@@ -402,6 +439,9 @@ export function MediaPortalClient({
         </div>
 
         <PodcastModule episodes={episodes} />
+        {bands.includes('after-podcast') ? (
+          <MediaScrollRect ad={podcastRectAd} locationId="media-home-rect-podcast" />
+        ) : null}
       </div>
     </div>
   )
