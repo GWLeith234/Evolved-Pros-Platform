@@ -33,11 +33,11 @@ describe('Media + Fit lockup assets', () => {
   })
 
   it('ferries file-exact gold Media v5 lockup PNGs (SHA-256 MATCH)', () => {
-    const dests = {
-      'media-lockup-dark.png': MEDIA_LOCKUP_DARK,
-      'media-lockup-light.png': MEDIA_LOCKUP_LIGHT,
-    } as const
-    for (const [name, urlPath] of Object.entries(dests)) {
+    const dests = [
+      ['media-lockup-dark.png', MEDIA_LOCKUP_DARK],
+      ['media-lockup-light.png', MEDIA_LOCKUP_LIGHT],
+    ] as const
+    for (const [name, urlPath] of dests) {
       const abs = publicFile(urlPath)
       const sha = createHash('sha256').update(readFileSync(abs)).digest('hex')
       expect(sha, `${name} must be the gold v5 file`).toBe(GOLD_MEDIA_LOCKUP_SHA256[name])
