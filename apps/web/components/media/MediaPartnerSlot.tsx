@@ -6,7 +6,13 @@ import type { CSSProperties } from 'react'
 import { MediaIabSlot } from '@/components/media/MediaIabSlot'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
-export type PartnerSlotKind = 'leaderboard' | 'mid-fluid' | 'rail' | 'rail-half' | 'sponsored-row'
+export type PartnerSlotKind =
+  | 'leaderboard'
+  | 'mid-fluid'
+  | 'rail'
+  | 'rail-half'
+  | 'sponsored-row'
+  | 'article-inline'
 
 const SLOT_PX: Record<PartnerSlotKind, { w: number; h: number }> = {
   leaderboard: { w: 728, h: 90 },
@@ -14,6 +20,7 @@ const SLOT_PX: Record<PartnerSlotKind, { w: number; h: number }> = {
   rail: { w: 300, h: 250 },
   'rail-half': { w: 300, h: 600 },
   'sponsored-row': { w: 100, h: 67 },
+  'article-inline': { w: 300, h: 250 },
 }
 
 const SLOT_LABEL: Record<PartnerSlotKind, string> = {
@@ -22,6 +29,7 @@ const SLOT_LABEL: Record<PartnerSlotKind, string> = {
   rail: 'Partner rail',
   'rail-half': 'Partner half-page',
   'sponsored-row': 'Partner story',
+  'article-inline': 'Sponsored',
 }
 
 export function MediaPartnerSlot({

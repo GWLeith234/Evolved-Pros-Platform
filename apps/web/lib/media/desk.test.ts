@@ -8,6 +8,7 @@ import {
   moreInLabel,
   popularStories,
   splitHubDesk,
+  splitSectionDesk,
 } from './desk'
 
 function story(
@@ -68,6 +69,20 @@ describe('splitHubDesk', () => {
       }
     }
     expect(moreInLabel('Strategy')).toBe('More in Strategy')
+  })
+})
+
+describe('splitSectionDesk', () => {
+  it('builds a mini-hero, Featured 2-up, and Latest rail from one section list', () => {
+    const rows = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map((id, i) =>
+      story(id, 'strategy', i),
+    )
+    const desk = splitSectionDesk(rows)
+    expect(desk.featured?.id).toBe('a')
+    expect(desk.secondary?.id).toBe('b')
+    expect(desk.featuredGrid.map(s => s.id)).toEqual(['c', 'd'])
+    expect(desk.latestList.map(s => s.id)).toEqual(['e', 'f', 'g', 'h'])
+    expect(desk.latestList.length).toBeGreaterThanOrEqual(4)
   })
 })
 
