@@ -53,23 +53,20 @@ describe('QA sweep P1 /media LCP', () => {
   const layout = read('app/(public)/media/layout.tsx')
   const css = read('app/globals.css')
 
-  it('preloads the parchment lockup and prioritizes the visible light PNG', () => {
+  it('preloads the Media megaphone and prioritizes the lockup disc', () => {
     expect(layout).toContain('rel="preload"')
-    expect(layout).toContain('MEDIA_LOCKUP_LIGHT')
+    expect(layout).toContain('MEDIA_MEGAPHONE_DISC')
     expect(masthead).toMatch(/fetchpriority: 'high'/)
-    expect(masthead).toMatch(/loading="lazy"/)
-    expect(masthead).toContain('width={612}')
-    expect(masthead).toContain('height={139}')
+    expect(masthead).toContain('MEDIA_MEGAPHONE_DISC')
     expect(masthead).not.toMatch(/next\/image/)
   })
 
-  it('keeps the full-width parchment lockup and both theme files', () => {
-    expect(masthead).toContain('MEDIA_LOCKUP_LIGHT')
-    expect(masthead).toContain('MEDIA_LOCKUP_DARK')
+  it('keeps the official lockup PNG pair on disk and theme-aware Media chrome', () => {
     expect(MEDIA_LOCKUP_LIGHT).toBe('/brand/masthead/media-lockup-light.png')
     expect(MEDIA_LOCKUP_DARK).toBe('/brand/masthead/media-lockup-dark.png')
     expect(css).toMatch(/\.ep-media-masthead-logo \{\n  width: 100%;\n  max-width: 100%;\n  height: auto;\n\}/)
-    expect(css).toMatch(/\.ep-media-masthead \{[\s\S]*background: var\(--paper\)/)
+    expect(css).toMatch(/\.ep-media-masthead \{[\s\S]*background: var\(--bg-page\)/)
+    expect(css).toMatch(/html\.light-mode \.ep-media-masthead \{[\s\S]*background: var\(--paper\)/)
     expect(css).not.toMatch(/\.ep-media-masthead \{[\s\S]{0,240}background: var\(--navy/)
   })
 })

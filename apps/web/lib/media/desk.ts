@@ -1,6 +1,6 @@
 /**
- * Media hub desk layout: named sections, compact latest list, popular rail.
- * Brand stays Evolved Pros. Density is the SooToday lesson, not the palette.
+ * Media hub desk layout: newspaper module grammar, Evolved Pros brand.
+ * Density is the SooToday / Toronto Today lesson, not the palette.
  */
 
 export const MEDIA_NAVY = '#1B3C5A'
@@ -8,17 +8,17 @@ export const MEDIA_RED = '#EF0E30'
 export const MEDIA_TEAL = '#68A2B9'
 export const MEDIA_PAPER = '#F5F0E8'
 
-export type DeskSectionId = 'latest' | 'strategy' | 'execution' | 'identity' | 'foundation'
+export type DeskSectionId = 'strategy' | 'execution' | 'identity' | 'foundation'
 
 export type DeskSectionDef = {
   id: DeskSectionId
   label: string
-  pillar: string | null
+  pillar: string
   href: string
 }
 
+/** Section chips on Media chrome. Strategy / Execution / Identity / Foundation only. */
 export const MEDIA_INDEX_SECTIONS: readonly DeskSectionDef[] = [
-  { id: 'latest', label: 'Latest', pillar: null, href: '/media' },
   { id: 'strategy', label: 'Strategy', pillar: 'strategy', href: '/media/strategy' },
   { id: 'execution', label: 'Execution', pillar: 'execution', href: '/media/execution' },
   { id: 'identity', label: 'Identity', pillar: 'identity', href: '/media/identity' },
@@ -28,7 +28,7 @@ export const MEDIA_INDEX_SECTIONS: readonly DeskSectionDef[] = [
 export const MEDIA_ON_AIR: ReadonlyArray<{ label: string; href: string }> = [
   { label: 'LIVE', href: '/live' },
   { label: 'Podcast', href: '/podcast' },
-  { label: 'Events', href: '/events' },
+  { label: 'Email brief', href: '/podcast' },
 ]
 
 export type DeskStory = {
@@ -40,25 +40,40 @@ export type DeskStory = {
 
 export type DeskLayout<T extends DeskStory> = {
   featured: T | null
+  secondary: T | null
+  featuredGrid: T[]
   latestList: T[]
   sections: Array<DeskSectionDef & { stories: T[] }>
 }
 
+/**
+ * Newspaper home split: lede, half-column secondary, Featured 2-up, Latest rail.
+ * Stories are not reused across those modules.
+ */
 export function splitHubDesk<T extends DeskStory>(
   stories: readonly T[],
-  opts?: { latestList?: number; sectionSize?: number },
+  opts?: { latestList?: number; featuredGrid?: number; sectionSize?: number },
 ): DeskLayout<T> {
-  const latestListSize = opts?.latestList ?? 6
+  const featuredGridSize = opts?.featuredGrid ?? 2
+  const latestListSize = opts?.latestList ?? 8
   const sectionSize = opts?.sectionSize ?? 3
   const featured = stories[0] ?? null
-  const latestList = stories.slice(1, 1 + latestListSize)
+  const secondary = stories[1] ?? null
+  const featuredGrid = stories.slice(2, 2 + featuredGridSize)
+  const latestStart = 2 + featuredGrid.length
+  const latestList = stories.slice(latestStart, latestStart + latestListSize)
+  const used = new Set(
+    [featured, secondary, ...featuredGrid, ...latestList]
+      .filter((s): s is T => Boolean(s))
+      .map(s => s.id),
+  )
 
-  const sections = MEDIA_INDEX_SECTIONS.filter(s => s.pillar).map(section => ({
+  const sections = MEDIA_INDEX_SECTIONS.map(section => ({
     ...section,
-    stories: stories.filter(story => story.pillar === section.pillar).slice(0, sectionSize),
+    stories: stories.filter(story => story.pillar === section.pillar && !used.has(story.id)).slice(0, sectionSize),
   })).filter(section => section.stories.length > 0)
 
-  return { featured, latestList, sections }
+  return { featured, secondary, featuredGrid, latestList, sections }
 }
 
 export function popularStories<T extends DeskStory>(stories: readonly T[], limit = 5): T[] {

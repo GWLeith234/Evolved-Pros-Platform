@@ -42,14 +42,19 @@ describe('public chrome copy', () => {
     expect(src).not.toMatch(/Evolved Media/)
   })
 
-  it('ships a denser Media desk: named sections, list module, useful rail, title clamp', () => {
+  it('ships a denser Media desk: dual hero, Featured 2-up, Latest rail, Podcast', () => {
     const src = read('../../app/(public)/media/MediaPortalClient.tsx')
+    expect(src).toMatch(/data-media-module="dual-hero"/)
+    expect(src).toMatch(/data-media-module="featured-grid"/)
     expect(src).toMatch(/data-media-module="latest-list"/)
+    expect(src).toMatch(/data-media-module="podcast"/)
     expect(src).toMatch(/data-media-section/)
     expect(src).toMatch(/On Air/)
-    expect(src).toMatch(/Popular/)
+    expect(src).toMatch(/Most Read/)
     expect(src).toMatch(/moreInLabel/)
     expect(src).toMatch(/WebkitLineClamp: 2|WebkitLineClamp: lines/)
+    expect(src).not.toMatch(/Education/)
+    expect(src).not.toMatch(/googletag|doubleclick|gpt\.js|DFP/)
   })
 
   it('emits home WebSite JSON-LD', () => {

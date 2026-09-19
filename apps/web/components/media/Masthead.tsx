@@ -1,45 +1,30 @@
-// Full-width Media lockup for /media. Shared by the hub and every article shell.
-// #150 theme-aware media-lockup PNG (EVOLVED [megaphone disc] MEDIA).
-// Masthead sits on parchment (not a navy island). The lockup spans the
-// content width across the top. Navy-letter LIGHT file is the visible mark
-// on paper. DARK file stays in the pair for Fit-shared CSS and any future
-// dark chrome. No host branch.
+// Media masthead for /media. Phase 1 home: official wordmark (red interpunct)
+// plus Media lockup (Bebas MEDIA + red megaphone disc). Surface name is
+// Evolved Pros Media. Theme tokens carry light + dark. No host branch.
 
 import Link from 'next/link'
-import {
-  MEDIA_LOCKUP_DARK,
-  MEDIA_LOCKUP_LABEL,
-  MEDIA_LOCKUP_LIGHT,
-} from '@/lib/lockups'
+import { EpWordmarkMark } from '@/components/brand/EpWordmark'
+import { MEDIA_LOCKUP_LABEL, MEDIA_MEGAPHONE_DISC } from '@/lib/lockups'
 import { MediaMastheadRail } from '@/components/media/MediaMastheadRail'
 
 export function MediaMastheadLockup() {
   return (
     <h1 className="ep-media-masthead-wordmark">
-      <Link href="/media" aria-label={MEDIA_LOCKUP_LABEL}>
+      <Link href="/media" aria-label={MEDIA_LOCKUP_LABEL} className="ep-media-masthead-lockup">
+        <span className="ep-media-masthead-pros" data-testid="ep-wordmark">
+          <EpWordmarkMark />
+        </span>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          data-masthead-lockup-dark
-          className="ep-media-masthead-logo ep-media-masthead-logo--on-dark"
-          src={MEDIA_LOCKUP_DARK}
+          className="ep-media-masthead-disc"
+          src={MEDIA_MEGAPHONE_DISC}
           alt=""
-          width={612}
-          height={139}
-          loading="lazy"
-          decoding="async"
-          {...{ fetchpriority: 'low' }}
-        />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          data-masthead-lockup-light
-          className="ep-media-masthead-logo ep-media-masthead-logo--on-light"
-          src={MEDIA_LOCKUP_LIGHT}
-          alt=""
-          width={612}
-          height={139}
+          width={56}
+          height={56}
           decoding="sync"
           {...{ fetchpriority: 'high' }}
         />
+        <span className="ep-media-masthead-media">MEDIA</span>
       </Link>
     </h1>
   )

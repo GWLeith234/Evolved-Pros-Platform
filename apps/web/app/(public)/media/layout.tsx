@@ -1,14 +1,13 @@
 import { Masthead } from '@/components/media/Masthead'
-import { MEDIA_LOCKUP_LIGHT } from '@/lib/lockups'
+import { MEDIA_MEGAPHONE_DISC } from '@/lib/lockups'
 
 export default function MediaLayout({ children }: { children: React.ReactNode }) {
-  // Parchment masthead + desk. #150 Media lockup spans the content width
-  // (navy letters on paper). No navy island. Overflow is clipped here so
-  // every /media/* route inherits the mobile scrollWidth fix.
-  // Preload the visible parchment lockup so LCP does not wait on desk JS.
+  // Theme-aware desk. Light uses cream paper. Dark uses platform page tokens.
+  // Overflow is clipped here so every /media/* route inherits the mobile
+  // scrollWidth fix. Preload the megaphone disc used in the Media lockup.
   return (
-    <div className="min-h-screen bg-paper text-navy ep-no-x-scroll" style={{ maxWidth: '100vw' }}>
-      <link rel="preload" as="image" href={MEDIA_LOCKUP_LIGHT} {...{ fetchpriority: 'high' }} />
+    <div className="min-h-screen media-desk-root ep-no-x-scroll" style={{ maxWidth: '100vw' }}>
+      <link rel="preload" as="image" href={MEDIA_MEGAPHONE_DISC} {...{ fetchpriority: 'high' }} />
       <Masthead />
       <div className="media-desk-shell">{children}</div>
     </div>
