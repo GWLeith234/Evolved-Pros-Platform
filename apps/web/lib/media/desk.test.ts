@@ -29,18 +29,22 @@ describe('splitHubDesk', () => {
     story('f', 'strategy', 8),
     story('g', 'execution', 9),
     story('h', 'foundation', 7),
+    story('i', 'strategy', 2),
+    story('j', 'identity', 3),
   ]
 
-  it('puts the newest story in featured and the next six in the list module', () => {
+  it('puts the newest story in the lede, the next as secondary, then a Featured 2-up', () => {
     const desk = splitHubDesk(stories)
     expect(desk.featured?.id).toBe('a')
-    expect(desk.latestList.map(s => s.id)).toEqual(['b', 'c', 'd', 'e', 'f', 'g'])
+    expect(desk.secondary?.id).toBe('b')
+    expect(desk.featuredGrid.map(s => s.id)).toEqual(['c', 'd'])
+    expect(desk.latestList.map(s => s.id)).toEqual(['e', 'f', 'g', 'h', 'i', 'j'])
+    expect(desk.latestList.length).toBeGreaterThanOrEqual(5)
   })
 
-  it('builds named category sections with a More in exit', () => {
-    const desk = splitHubDesk(stories, { sectionSize: 2 })
+  it('builds named category sections without reusing hero or Featured stories', () => {
+    const desk = splitHubDesk(stories, { sectionSize: 2, latestList: 2 })
     expect(MEDIA_INDEX_SECTIONS.map(s => s.label)).toEqual([
-      'Latest',
       'Strategy',
       'Execution',
       'Identity',
@@ -53,7 +57,16 @@ describe('splitHubDesk', () => {
       'Foundation',
     ])
     expect(desk.sections[0]?.href).toBe('/media/strategy')
-    expect(desk.sections[0]?.stories).toHaveLength(2)
+    const used = new Set(
+      [desk.featured, desk.secondary, ...desk.featuredGrid, ...desk.latestList]
+        .filter(Boolean)
+        .map(s => s!.id),
+    )
+    for (const section of desk.sections) {
+      for (const row of section.stories) {
+        expect(used.has(row.id)).toBe(false)
+      }
+    }
     expect(moreInLabel('Strategy')).toBe('More in Strategy')
   })
 })
@@ -74,6 +87,8 @@ describe('desk chrome locks', () => {
     expect(MEDIA_NAVY).toBe('#1B3C5A')
     expect(MEDIA_RED).toBe('#EF0E30')
     expect(MEDIA_TEAL).toBe('#68A2B9')
-    expect(MEDIA_ON_AIR.map(l => l.href)).toEqual(['/live', '/podcast', '/events'])
+    expect(MEDIA_ON_AIR.map(l => l.href)).toEqual(['/live', '/podcast', '/podcast'])
+    expect(MEDIA_ON_AIR.map(l => l.label)).toEqual(['LIVE', 'Podcast', 'Email brief'])
+    expect(MEDIA_ON_AIR.some(l => l.label === 'Events' || l.href === '/events')).toBe(false)
   })
 })

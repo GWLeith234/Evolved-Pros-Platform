@@ -43,13 +43,18 @@ export default async function MediaPage() {
       .select('id, episode_number, title, slug, thumbnail_url, guest_image_url, youtube_url, duration_seconds, published_at')
       .eq('is_published', true)
       .order('published_at', { ascending: false })
-      .limit(3)
+      .limit(5)
     episodes = (data ?? []) as Episode[]
   } catch {
     // episodes table may not exist yet
   }
 
-  const mediaAds = pickMediaFeedAds((await getActivePlatformAds()) as SponsorAd[])
+  let mediaAds: ReturnType<typeof pickMediaFeedAds> = { sidebar: null, inFeed: [] }
+  try {
+    mediaAds = pickMediaFeedAds((await getActivePlatformAds()) as SponsorAd[])
+  } catch {
+    // Ads must not blank the desk when the catalog is unreachable.
+  }
 
   return (
     <>

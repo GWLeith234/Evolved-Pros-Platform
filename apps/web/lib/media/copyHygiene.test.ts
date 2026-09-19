@@ -11,6 +11,7 @@ const repoRoot = resolve(here, '../../../..')
 const USER_FACING = [
   resolve(here, '../../components/media/Masthead.tsx'),
   resolve(here, '../../components/media/MediaMastheadRail.tsx'),
+  resolve(here, '../../components/media/MediaPartnerSlot.tsx'),
   resolve(here, '../../app/(public)/media/MediaPortalClient.tsx'),
   resolve(here, './brand.ts'),
   resolve(here, './desk.ts'),

@@ -1,35 +1,24 @@
 'use client'
 
-import { useMemo, useState, type CSSProperties, type ReactNode } from 'react'
-import dynamic from 'next/dynamic'
+import { useMemo, type CSSProperties } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import { CategoryPills } from '@/components/media/CategoryPills'
-import { MediaLatestPodcast } from '@/components/media/MediaLatestPodcast'
+import { MediaPartnerSlot } from '@/components/media/MediaPartnerSlot'
 import { getPillarLabel } from '@/lib/pillars'
-import { MediaIabSlot } from '@/components/media/MediaIabSlot'
-import { layoutMediaFeed } from '@/lib/media/feedAds'
-import { mediaFilterCategories } from '@/lib/media/filters'
 import {
-  MEDIA_INDEX_SECTIONS,
-  MEDIA_NAVY,
   MEDIA_ON_AIR,
-  MEDIA_RED,
-  MEDIA_TEAL,
   moreInLabel,
   popularStories,
   splitHubDesk,
 } from '@/lib/media/desk'
-import type { MediaRailEpisode } from '@/lib/media/podcastRail'
+import {
+  episodeRailStill,
+  episodeWatchHref,
+  episodeWatchIsExternal,
+  formatRailDuration,
+  type MediaRailEpisode,
+} from '@/lib/media/podcastRail'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { featuredHeroByline, resolveStoryArtUrl, storyArtImgClass } from '@/lib/media/storyArt'
-
-const PollWidget = dynamic(
-  () => import('@/components/media/PollWidget').then(m => m.PollWidget),
-  { ssr: false },
-)
-
-// ── Types ──────────────────────────────────────────────────────────────────
 
 export interface MediaStory {
   id: string
@@ -52,52 +41,17 @@ export type Episode = MediaRailEpisode & {
 interface MediaPortalClientProps {
   stories: MediaStory[]
   episodes: Episode[]
-  /** Single sticky rail unit (300×600 / half-page preferred). */
   sidebarAd?: SponsorAd | null
-  /** In-feed units. One between story rows, never a footer pair. */
   inFeedAds?: SponsorAd[]
 }
 
-// ── Pillar / category helpers ───────────────────────────────────────────────
-
-const ALL_LABEL = 'All'
-
-/** Tag colour by pillar slug. Foundation/Identity/Mental Toughness/Strategy/
- *  Accountability/Execution use the brief's spec; everything else falls back to red. */
-const PILLAR_TAG_COLORS: Record<string, string> = {
-  foundation:         'var(--pillar-1)',
-  identity:           'var(--pillar-2)',
-  'mental-toughness': 'var(--pillar-3)',
-  strategy:           'var(--pillar-4)',
-  accountability:     'var(--pillar-5)',
-  execution:          'var(--pillar-6)',
-}
-const FALLBACK_TAG_COLOR = 'var(--brand-red)'
-
-function tagColorForStory(story: MediaStory): string {
-  return PILLAR_TAG_COLORS[story.pillar ?? ''] ?? FALLBACK_TAG_COLOR
-}
-
 function tagLabelForStory(story: MediaStory): string {
-  if (story.pillar && PILLAR_TAG_COLORS[story.pillar]) {
-    return getPillarLabel(story.pillar)
+  if (story.pillar) {
+    const label = getPillarLabel(story.pillar)
+    if (label) return label
   }
   return story.story_type ? story.story_type.toUpperCase() : 'EVOLVED'
 }
-
-function categoryToPillar(category: string): string | null {
-  switch (category) {
-    case 'Foundation':       return 'foundation'
-    case 'Identity':         return 'identity'
-    case 'Mental Toughness': return 'mental-toughness'
-    case 'Strategy':         return 'strategy'
-    case 'Accountability':   return 'accountability'
-    case 'Execution':        return 'execution'
-    default:                 return null
-  }
-}
-
-// ── Helpers ─────────────────────────────────────────────────────────────────
 
 function readTime(body: string | null): string {
   if (!body) return '1 min'
@@ -124,522 +78,263 @@ function titleClamp(lines: 2 | 3): CSSProperties {
   }
 }
 
-// ── Pillar tag chip ────────────────────────────────────────────────────────
-
-function PillarTag({
+function StoryThumb({
   story,
-  variant = 'card',
+  ratio,
+  priority = false,
 }: {
   story: MediaStory
-  variant?: 'card' | 'hero' | 'list'
+  ratio: string
+  priority?: boolean
 }) {
-  const color = tagColorForStory(story)
-  const label = tagLabelForStory(story)
-  const style: CSSProperties = variant === 'hero'
-    ? {
-        backgroundColor: color,
-        color: '#fff',
-        border: `1px solid ${color}`,
-      }
-    : {
-        backgroundColor: `color-mix(in srgb, ${color} 10%, transparent)`,
-        color,
-        border: `1px solid color-mix(in srgb, ${color} 30%, transparent)`,
-      }
+  const src = resolveStoryArtUrl(story.featured_image_url)
   return (
-    <span
-      style={{
-        ...style,
-        display: 'inline-block',
-        padding: variant === 'list' ? '2px 6px' : '3px 8px',
-        fontFamily: '"Barlow Condensed", sans-serif',
-        fontWeight: 700,
-        fontSize: variant === 'list' ? 9 : 10,
-        letterSpacing: '0.14em',
-        textTransform: 'uppercase',
-        borderRadius: 2,
-      }}
-    >
-      {label}
-    </span>
+    <div className="ep-media-thumb" style={{ aspectRatio: ratio }}>
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt=""
+          width={priority ? 1280 : 320}
+          height={priority ? 720 : 214}
+          decoding="async"
+          loading={priority ? undefined : 'lazy'}
+          {...(priority ? { fetchpriority: 'high' } : {})}
+          className={storyArtImgClass(story.featured_image_url)}
+        />
+      ) : (
+        <div className="ep-media-thumb-fallback" />
+      )}
+    </div>
   )
 }
 
-function StoryMeta({
+function PillarKicker({ story }: { story: MediaStory }) {
+  return <span className="ep-media-kicker">{tagLabelForStory(story)}</span>
+}
+
+function StoryByline({
   story,
-  tone = 'ink',
+  featured = false,
 }: {
   story: MediaStory
-  tone?: 'ink' | 'paper'
+  featured?: boolean
 }) {
-  const color = tone === 'paper' ? 'rgba(255,255,255,0.7)' : 'var(--media-ink-soft)'
-  return (
-    <p
-      suppressHydrationWarning
-      style={{
-        margin: 0,
-        fontSize: 11,
-        color,
-        fontFamily: 'var(--font-body)',
-      }}
-    >
-      {tagLabelForStory(story)}
+  const meta = (
+    <>
+      {featured ? featuredHeroByline(story) : (story.author ?? 'George Leith')}
       {story.published_at ? ` · ${formatDate(story.published_at)}` : ''}
       {` · ${readTime(story.body)} read`}
+    </>
+  )
+  if (featured) {
+    return (
+      <p
+        suppressHydrationWarning
+        className="ep-media-meta ed-featured-meta-byline"
+        data-featured-byline="plain"
+      >
+        {meta}
+      </p>
+    )
+  }
+  return (
+    <p suppressHydrationWarning className="ep-media-meta">
+      {meta}
     </p>
   )
 }
 
-// ── Featured hero card ─────────────────────────────────────────────────────
-
-function FeaturedCard({ story }: { story: MediaStory }) {
+function DualHero({
+  lede,
+  secondary,
+}: {
+  lede: MediaStory | null
+  secondary: MediaStory | null
+}) {
   return (
-    <Link
-      href={storyUrl(story)}
-      style={{
-        display: 'block',
-        textDecoration: 'none',
-        position: 'relative',
-        aspectRatio: '16/9',
-        borderRadius: 4,
-        overflow: 'hidden',
-        background: 'var(--brand-navy)',
-      }}
-    >
-      {resolveStoryArtUrl(story.featured_image_url) ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={resolveStoryArtUrl(story.featured_image_url) ?? ''}
-          alt=""
-          width={1280}
-          height={720}
-          decoding="async"
-          {...{ fetchpriority: 'high' }}
-          className={storyArtImgClass(story.featured_image_url)}
-        />
+    <div className="ep-media-dual-hero" data-media-module="dual-hero">
+      {lede ? (
+        <Link href={storyUrl(lede)} className="ep-media-lede">
+          <StoryThumb story={lede} ratio="3 / 2" priority />
+          <div className="ep-media-lede-copy ed-featured-meta">
+            <PillarKicker story={lede} />
+            <h2 className="ep-media-lede-title">{lede.title}</h2>
+            {lede.excerpt ? <p className="ep-media-lede-dek">{lede.excerpt}</p> : null}
+            <StoryByline story={lede} featured />
+          </div>
+        </Link>
       ) : (
-        <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--media-ink), var(--media-ink-deep))' }} />
+        <div className="ep-media-empty">No published stories yet.</div>
       )}
-
-      <div style={{ position: 'absolute', top: 16, left: 16 }}>
-        <PillarTag story={story} variant="hero" />
-      </div>
-
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background:
-            'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.55) 35%, rgba(0,0,0,0.0) 60%)',
-        }}
-      />
-
-      <div
-        className="ed-featured-meta"
-        style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          padding: '20px 24px 22px',
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1fr) auto',
-          gap: 16,
-          alignItems: 'end',
-          maxWidth: '100%',
-        }}
-      >
-        <div>
-          <h2
-            style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
-              fontWeight: 500,
-              fontSize: 24,
-              lineHeight: 1.2,
-              color: '#fff',
-              margin: '0 0 8px',
-              minWidth: 0,
-              ...titleClamp(2),
-            }}
-          >
-            {story.title}
-          </h2>
-          <StoryMeta story={story} tone="paper" />
-        </div>
-        <span
-          suppressHydrationWarning
-          className="ed-featured-meta-byline"
-          data-featured-byline="plain"
-          style={{
-            fontSize: 12,
-            color: 'rgba(255,255,255,0.7)',
-            fontFamily: 'var(--font-body)',
-            whiteSpace: 'nowrap',
-            textAlign: 'right',
-          }}
-        >
-          {featuredHeroByline(story)}
-        </span>
-      </div>
-    </Link>
+      {secondary ? (
+        <Link href={storyUrl(secondary)} className="ep-media-secondary">
+          <StoryThumb story={secondary} ratio="3 / 2" />
+          <div className="ep-media-secondary-copy">
+            <PillarKicker story={secondary} />
+            <h3 className="ep-media-secondary-title" style={titleClamp(3)}>
+              {secondary.title}
+            </h3>
+            <StoryByline story={secondary} />
+          </div>
+        </Link>
+      ) : null}
+    </div>
   )
 }
 
-function LatestListModule({ stories }: { stories: MediaStory[] }) {
+function FeaturedGrid({ stories }: { stories: MediaStory[] }) {
   if (stories.length === 0) return null
   return (
-    <div
-      data-media-module="latest-list"
-      style={{
-        marginTop: 16,
-        background: 'var(--paper-card)',
-        border: `1px solid ${MEDIA_NAVY}`,
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 12,
-          padding: '8px 12px',
-          borderBottom: `2px solid ${MEDIA_RED}`,
-        }}
-      >
-        <span
-          style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 700,
-            fontSize: 12,
-            color: MEDIA_NAVY,
-            textTransform: 'uppercase',
-            letterSpacing: '0.14em',
-          }}
-        >
-          Latest
-        </span>
-        <Link
-          href="/media"
-          style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 700,
-            fontSize: 11,
-            color: MEDIA_RED,
-            textDecoration: 'none',
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-          }}
-        >
-          More from Evolved Pros Media
-        </Link>
+    <section className="ep-media-featured" data-media-module="featured-grid">
+      <div className="ep-media-module-head">
+        <h2>Featured</h2>
       </div>
-      {stories.map(story => (
-        <Link
-          key={story.id}
-          href={storyUrl(story)}
-          style={{
-            display: 'block',
-            padding: '10px 12px',
-            borderBottom: '1px solid var(--paper-line-soft)',
-            textDecoration: 'none',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <PillarTag story={story} variant="list" />
-          </div>
-          <h3
-            style={{
-              margin: '0 0 4px',
-              fontFamily: '"Barlow Condensed", sans-serif',
-              fontWeight: 700,
-              fontSize: 16,
-              lineHeight: 1.25,
-              color: MEDIA_NAVY,
-              ...titleClamp(2),
-            }}
-          >
-            {story.title}
-          </h3>
-          <p
-            suppressHydrationWarning
-            style={{ margin: 0, fontSize: 11, color: MEDIA_TEAL, fontFamily: 'var(--font-body)' }}
-          >
-            {story.author ?? 'George Leith'} · {formatDate(story.published_at)} · {readTime(story.body)} read
-          </p>
-        </Link>
-      ))}
-    </div>
-  )
-}
-
-function ArticleCard({ story }: { story: MediaStory }) {
-  return (
-    <Link
-      href={storyUrl(story)}
-      className="media-card"
-      style={{
-        display: 'block',
-        textDecoration: 'none',
-        background: 'var(--paper-card)',
-        border: '1px solid var(--paper-line-soft)',
-        borderRadius: 4,
-        overflow: 'hidden',
-        transition: 'transform 160ms ease, box-shadow 160ms ease',
-      }}
-    >
-      <div style={{ aspectRatio: '4/3', background: 'var(--navy-dark)', overflow: 'hidden' }}>
-        {resolveStoryArtUrl(story.featured_image_url) ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={resolveStoryArtUrl(story.featured_image_url) ?? ''}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            className={storyArtImgClass(story.featured_image_url)}
-          />
-        ) : (
-          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--media-ink), var(--media-ink-deep))' }} />
-        )}
-      </div>
-
-      <div style={{ padding: '14px 14px 16px' }}>
-        <PillarTag story={story} />
-        <h3
-          style={{
-            margin: '10px 0 8px',
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 700,
-            fontSize: 16,
-            lineHeight: 1.3,
-            color: 'var(--navy-dark)',
-            ...titleClamp(2),
-          }}
-        >
-          {story.title}
-        </h3>
-        <StoryMeta story={story} />
-      </div>
-    </Link>
-  )
-}
-
-function SectionHead({
-  label,
-  href,
-}: {
-  label: string
-  href: string
-}) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-      <div style={{ width: 40, height: 2, background: MEDIA_NAVY }} />
-      <span
-        style={{
-          fontFamily: '"Barlow Condensed", sans-serif',
-          fontWeight: 700,
-          fontSize: 13,
-          color: MEDIA_NAVY,
-          textTransform: 'uppercase',
-          letterSpacing: '0.12em',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {label}
-      </span>
-      <div style={{ flex: 1, height: 1, background: 'var(--paper-line-soft)' }} />
-      <Link
-        href={href}
-        style={{
-          fontFamily: '"Barlow Condensed", sans-serif',
-          fontWeight: 700,
-          fontSize: 12,
-          color: MEDIA_RED,
-          textDecoration: 'none',
-          letterSpacing: '0.06em',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {moreInLabel(label)} →
-      </Link>
-    </div>
-  )
-}
-
-function RailCard({
-  title,
-  children,
-}: {
-  title: string
-  children: ReactNode
-}) {
-  return (
-    <div
-      className="ed-rail-card"
-      style={{
-        marginBottom: 16,
-        maxWidth: '100%',
-        overflow: 'hidden',
-        background: 'var(--paper-card)',
-        border: '1px solid var(--paper-line-soft)',
-      }}
-    >
-      <div style={{ background: 'var(--paper-card)', padding: '10px 12px', borderBottom: `2px solid ${MEDIA_RED}` }}>
-        <span
-          style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 700,
-            fontSize: 12,
-            color: MEDIA_NAVY,
-            textTransform: 'uppercase',
-            letterSpacing: '0.14em',
-          }}
-        >
-          {title}
-        </span>
-      </div>
-      <div className="ed-rail-card-body" style={{ background: 'var(--paper-card)' }}>
-        {children}
-      </div>
-    </div>
-  )
-}
-
-function DeskRail({
-  stories,
-  episodes,
-  sidebarAd,
-}: {
-  stories: MediaStory[]
-  episodes: Episode[]
-  sidebarAd?: SponsorAd | null
-}) {
-  const popular = popularStories(stories, 5)
-  return (
-    <aside>
-      <RailCard title="On Air">
-        {MEDIA_ON_AIR.map(link => (
-          <Link
-            key={link.href}
-            href={link.href}
-            style={{
-              display: 'block',
-              padding: '10px 12px',
-              borderBottom: '1px solid var(--paper-line-soft)',
-              textDecoration: 'none',
-              fontFamily: '"Barlow Condensed", sans-serif',
-              fontWeight: 700,
-              fontSize: 13,
-              letterSpacing: '0.10em',
-              textTransform: 'uppercase',
-              color: MEDIA_NAVY,
-            }}
-          >
-            {link.label} →
+      <div className="ep-media-featured-grid">
+        {stories.map(story => (
+          <Link key={story.id} href={storyUrl(story)} className="ep-media-feature-card">
+            <StoryThumb story={story} ratio="16 / 9" />
+            <div className="ep-media-feature-copy">
+              <PillarKicker story={story} />
+              <h3 style={titleClamp(2)}>{story.title}</h3>
+              <StoryByline story={story} />
+            </div>
           </Link>
         ))}
-      </RailCard>
+      </div>
+    </section>
+  )
+}
 
-      <MediaLatestPodcast episodes={episodes} />
-
-      {popular.length > 0 && (
-        <RailCard title="Popular">
-          {popular.map(s => (
-            <Link
-              key={s.id}
-              href={storyUrl(s)}
-              style={{
-                display: 'block',
-                padding: '10px 12px',
-                borderBottom: '1px solid var(--paper-line-soft)',
-                textDecoration: 'none',
-              }}
-            >
-              <p
-                style={{
-                  fontSize: 9,
-                  textTransform: 'uppercase',
-                  fontWeight: 700,
-                  fontFamily: '"Barlow Condensed", sans-serif',
-                  color: tagColorForStory(s),
-                  letterSpacing: '0.10em',
-                  margin: '0 0 3px',
-                }}
-              >
-                {tagLabelForStory(s)}
-              </p>
-              <p
-                style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: MEDIA_NAVY,
-                  lineHeight: 1.3,
-                  fontFamily: 'var(--font-body)',
-                  margin: '0 0 3px',
-                  ...titleClamp(2),
-                }}
-              >
-                {s.title}
-              </p>
-              <p suppressHydrationWarning style={{ fontSize: 10, color: MEDIA_TEAL, fontFamily: 'var(--font-body)', margin: 0 }}>
-                {formatDate(s.published_at)} · {readTime(s.body)} read
-              </p>
+function LatestRail({ stories }: { stories: MediaStory[] }) {
+  if (stories.length === 0) return null
+  return (
+    <section className="ep-media-latest" data-media-module="latest-list">
+      <div className="ep-media-module-head">
+        <h2>Latest</h2>
+        <Link href="/media">More from Evolved Pros Media</Link>
+      </div>
+      <ul className="ep-media-latest-list">
+        {stories.map((story, index) => (
+          <li key={story.id}>
+            <Link href={storyUrl(story)} className="ep-media-list-row">
+              <StoryThumb story={story} ratio="3 / 2" />
+              <div>
+                <PillarKicker story={story} />
+                <h3 style={titleClamp(2)}>{story.title}</h3>
+                <StoryByline story={story} />
+              </div>
             </Link>
-          ))}
-        </RailCard>
-      )}
-
-      <RailCard title="Sections">
-        {MEDIA_INDEX_SECTIONS.filter(s => s.pillar).map(section => (
-          <Link
-            key={section.id}
-            href={section.href}
-            style={{
-              display: 'block',
-              padding: '9px 12px',
-              borderBottom: '1px solid var(--paper-line-soft)',
-              textDecoration: 'none',
-              fontFamily: '"Barlow Condensed", sans-serif',
-              fontWeight: 700,
-              fontSize: 12,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              color: MEDIA_NAVY,
-            }}
-          >
-            {moreInLabel(section.label)} →
-          </Link>
+            {index === 1 ? (
+              <MediaPartnerSlot kind="sponsored-row" locationId="media-sponsored-1" />
+            ) : null}
+          </li>
         ))}
-      </RailCard>
-
-      <PollWidget />
-
-      {sidebarAd?.image_url ? (
-        <div
-          data-media-ads="sidebar"
-          className="media-sticky-rail"
-          style={{ marginTop: 16, position: 'sticky', top: 24 }}
-        >
-          <MediaIabSlot ad={sidebarAd} locationId="media-rail" />
-        </div>
-      ) : null}
-    </aside>
+      </ul>
+    </section>
   )
 }
 
-function MediaScrollBanner({ ad }: { ad: SponsorAd }) {
+function OnAirRail() {
   return (
-    <div
-      data-media-ads="scroll-banner"
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        width: '100%',
-        paddingBlock: 'var(--space-ad-lean)',
-      }}
-    >
-      <MediaIabSlot ad={ad} locationId="media-scroll" />
-    </div>
+    <section className="ep-media-rail-card" data-media-module="on-air">
+      <div className="ep-media-rail-head">
+        <h2>On Air</h2>
+      </div>
+      <div className="ep-media-on-air">
+        {MEDIA_ON_AIR.map(link => (
+          <Link key={link.label} href={link.href}>
+            {link.label}
+          </Link>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function MostRead({ stories }: { stories: MediaStory[] }) {
+  const popular = popularStories(stories, 5)
+  if (popular.length === 0) return null
+  return (
+    <section className="ep-media-rail-card" data-media-module="most-read">
+      <div className="ep-media-rail-head">
+        <h2>Most Read</h2>
+      </div>
+      <ol className="ep-media-most-read">
+        {popular.map((story, i) => (
+          <li key={story.id}>
+            <Link href={storyUrl(story)}>
+              <span className="ep-media-most-read-n" aria-hidden="true">
+                {i + 1}
+              </span>
+              <span>
+                <span className="ep-media-kicker">{tagLabelForStory(story)}</span>
+                <span className="ep-media-most-read-title" style={titleClamp(2)}>
+                  {story.title}
+                </span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
+function BriefCta() {
+  return (
+    <section className="ep-media-brief-cta" data-media-module="brief-cta">
+      <p>One read every weekday from Evolved Pros Media.</p>
+      <Link href="/podcast">Get the brief</Link>
+    </section>
+  )
+}
+
+function PodcastModule({ episodes }: { episodes: Episode[] }) {
+  if (episodes.length === 0) return null
+  return (
+    <section className="ep-media-podcast" data-media-module="podcast" data-media-podcast-rail>
+      <div className="ep-media-module-head">
+        <h2>The Podcast</h2>
+        <Link href="/podcast">All episodes</Link>
+      </div>
+      <div className="ep-media-podcast-grid">
+        {episodes.slice(0, 5).map(ep => {
+          const href = episodeWatchHref(ep)
+          const external = episodeWatchIsExternal(href)
+          const still = episodeRailStill(ep)
+          const duration = formatRailDuration(ep.duration_seconds)
+          return (
+            <a
+              key={ep.id}
+              href={href}
+              target={external ? '_blank' : undefined}
+              rel={external ? 'noopener noreferrer' : undefined}
+              data-media-podcast-row
+              className="ep-media-podcast-card"
+            >
+              <div className="ep-media-podcast-still">
+                {still ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={still}
+                    alt=""
+                    width={320}
+                    height={180}
+                    loading="lazy"
+                    decoding="async"
+                    style={{ objectPosition: '50% 12%' }}
+                  />
+                ) : null}
+              </div>
+              <p className="ep-media-kicker">Episode {ep.episode_number}</p>
+              <h3>{ep.title}</h3>
+              {duration ? <p className="ep-media-meta">{duration}</p> : null}
+            </a>
+          )
+        })}
+      </div>
+    </section>
   )
 }
 
@@ -649,133 +344,65 @@ export function MediaPortalClient({
   sidebarAd = null,
   inFeedAds = [],
 }: MediaPortalClientProps) {
-  const [activeCategory, setActiveCategory] = useState<string>(ALL_LABEL)
-  const pillarFilters = useMemo(() => mediaFilterCategories(stories), [stories])
-  const heroAd = inFeedAds[0] ?? null
-
-  const filteredStories = useMemo(() => {
-    if (activeCategory === ALL_LABEL) return stories
-    const slug = categoryToPillar(activeCategory)
-    return slug ? stories.filter(s => s.pillar === slug) : stories
-  }, [stories, activeCategory])
-
-  const desk = useMemo(() => splitHubDesk(filteredStories), [filteredStories])
-  const filteredRemainder = filteredStories.slice(1 + desk.latestList.length)
-  const filteredFeed = useMemo(
-    () => layoutMediaFeed(filteredRemainder, heroAd ? inFeedAds.slice(1) : inFeedAds),
-    [filteredRemainder, heroAd, inFeedAds],
-  )
+  const desk = useMemo(() => splitHubDesk(stories), [stories])
+  const leaderboardAd = inFeedAds[0] ?? null
+  const midFluidAd = inFeedAds[1] ?? null
 
   return (
-    <>
-      <CategoryPills
-        initialActive={activeCategory}
-        onSelect={setActiveCategory}
-        categories={pillarFilters}
-      />
+    <div className="ep-media-home">
+      <div className="ep-media-home-inner">
+        <div className="ep-media-leaderboard">
+          <MediaPartnerSlot kind="leaderboard" ad={leaderboardAd} locationId="media-leaderboard" />
+        </div>
 
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 0' }}>
-        <div
-          className="media-hero-grid"
-          style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24 }}
-        >
-          <div>
-            {desk.featured ? (
-              <FeaturedCard story={desk.featured} />
-            ) : (
-              <div
-                style={{
-                  aspectRatio: '16/9',
-                  border: '1px dashed var(--paper-line-soft)',
-                  borderRadius: 4,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--media-ink-soft)',
-                  fontSize: 13,
-                  fontFamily: 'var(--font-body)',
-                  background: 'var(--paper-card)',
-                }}
+        <div className="ep-media-home-grid">
+          <div className="ep-media-home-main">
+            <DualHero lede={desk.featured} secondary={desk.secondary} />
+            <FeaturedGrid stories={desk.featuredGrid} />
+            <LatestRail stories={desk.latestList} />
+            <div className="ep-media-mid-fluid">
+              <MediaPartnerSlot kind="mid-fluid" ad={midFluidAd} locationId="media-mid-fluid" />
+            </div>
+            {desk.sections.map(section => (
+              <section
+                key={section.id}
+                data-media-section={section.id}
+                className="ep-media-more-section"
               >
-                No published stories in this category yet.
-              </div>
-            )}
-            <LatestListModule stories={desk.latestList} />
+                <div className="ep-media-module-head">
+                  <h2>{section.label}</h2>
+                  <Link href={section.href}>{moreInLabel(section.label)}</Link>
+                </div>
+                <ul className="ep-media-latest-list">
+                  {section.stories.map(story => (
+                    <li key={`${section.id}-${story.id}`}>
+                      <Link href={storyUrl(story)} className="ep-media-list-row">
+                        <StoryThumb story={story} ratio="3 / 2" />
+                        <div>
+                          <PillarKicker story={story} />
+                          <h3 style={titleClamp(2)}>{story.title}</h3>
+                          <StoryByline story={story} />
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
           </div>
 
-          <DeskRail stories={stories} episodes={episodes} sidebarAd={sidebarAd} />
+          <aside className="ep-media-home-rail">
+            <OnAirRail />
+            <MostRead stories={stories} />
+            <BriefCta />
+            <div className="ep-media-rail-slot media-sticky-rail">
+              <MediaPartnerSlot kind="rail-half" ad={sidebarAd} locationId="media-rail" />
+            </div>
+          </aside>
         </div>
+
+        <PodcastModule episodes={episodes} />
       </div>
-
-      {heroAd?.image_url ? (
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px 0' }}>
-          <MediaScrollBanner ad={heroAd} />
-        </div>
-      ) : null}
-
-      {activeCategory === ALL_LABEL ? (
-        desk.sections.map(section => (
-          <div key={section.id} data-media-section={section.id} style={{ maxWidth: 1280, margin: '0 auto', padding: '28px 24px 0' }}>
-            <SectionHead label={section.label} href={section.href} />
-            <div className="media-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {section.stories.map(s => (
-                <ArticleCard key={`${section.id}-${s.id}`} story={s} />
-              ))}
-            </div>
-          </div>
-        ))
-      ) : (
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '28px 24px 0' }}>
-          <SectionHead label={activeCategory} href={`/media/${categoryToPillar(activeCategory) ?? ''}`} />
-          {filteredFeed.chunks.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-              {filteredFeed.chunks.map((chunk, idx) =>
-                chunk.kind === 'ad' ? (
-                  <MediaScrollBanner key={`${chunk.ad.id}-${idx}`} ad={chunk.ad} />
-                ) : (
-                  <div
-                    key={chunk.items.map(s => s.id).join('-') || `row-${idx}`}
-                    className="media-card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-                  >
-                    {chunk.items.map(s => (
-                      <ArticleCard key={s.id} story={s} />
-                    ))}
-                  </div>
-                ),
-              )}
-            </div>
-          ) : (
-            <div style={{ padding: '24px 0', textAlign: 'center' }}>
-              <span style={{ fontSize: 13, color: 'var(--media-ink-soft)', fontFamily: 'var(--font-body)' }}>
-                {filteredStories.length === 0
-                  ? 'No published stories in this category yet.'
-                  : 'That is the only story in this category right now.'}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div style={{ height: 56 }} />
-
-      <style>{`
-        .media-card { transform: translateZ(0); }
-        .media-card:hover {
-          transform: scale(1.02);
-          box-shadow: 0 14px 30px rgba(27,42,74,0.12);
-        }
-        @media (max-width: 767px) {
-          .media-hero-grid { grid-template-columns: 1fr !important; }
-        }
-        @media (max-width: 639px) {
-          .ed-featured-meta { padding: 14px 16px 16px !important; gap: 8px !important; grid-template-columns: 1fr !important; }
-          .ed-featured-meta-byline { text-align: left !important; white-space: normal !important; }
-          .ed-rail-card { width: 100%; max-width: 100%; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .media-card:hover { transform: none; }
-        }
-      `}</style>
-    </>
+    </div>
   )
 }

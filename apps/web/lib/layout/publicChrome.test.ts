@@ -15,7 +15,6 @@ const CHROME_FILES = [
   'components/layout/PublicChromeHeader.tsx',
   'components/layout/TopNav.tsx',
   'components/home/ConversionHome.tsx',
-  'components/media/Masthead.tsx',
   'components/fit/FitMasthead.tsx',
 ]
 
@@ -30,6 +29,14 @@ describe('public chrome wordmark', () => {
       expect(text, file).not.toMatch(/EVOLVED\s*<span[\s\S]*?·[\s\S]*?PROS/)
       expect(text, file).not.toContain('EVOLVED·PROS')
     }
+  })
+
+  it('lets Media home compose EVOLVED·PROS plus the Media lockup', () => {
+    const masthead = src('components/media/Masthead.tsx')
+    expect(masthead).toContain('EpWordmarkMark')
+    expect(masthead).toContain('MEDIA_MEGAPHONE_DISC')
+    expect(masthead).toContain('ep-media-masthead-media')
+    expect(masthead).not.toMatch(/Abril Fatface|Playfair Display|font-abril/)
   })
 
   it('keeps podcast, pricing, and welcome on the shared chrome header', () => {

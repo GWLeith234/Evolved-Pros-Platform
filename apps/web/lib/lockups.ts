@@ -5,9 +5,11 @@
  * Media: EVOLVED + megaphone disc + MEDIA (no Pros).
  * Podcast LogoMark is unchanged. Type is Bebas Neue Regular.
  *
- * Live marks swap the full lockup PNGs the same way FooterLogo / the loader
- * do (CSS --on-dark / --on-light). Do not compose a third HTML+disc pattern.
- * Do not type the family wordmark in chrome.
+ * Live Fit marks swap the full lockup PNGs the same way FooterLogo / the loader
+ * do (CSS --on-dark / --on-light). Media home chrome is EVOLVED·PROS (red ·)
+ * plus the Media lockup (Bebas MEDIA + red megaphone disc). Surface name is
+ * Evolved Pros Media. Fit still uses the PNG pair. Do not type a period
+ * in place of ·.
  *
  * File names follow the chrome they sit on, not George letter-color slang:
  *   *-dark.png  = white letters for dark --bg-nav
@@ -26,7 +28,7 @@ export const MEDIA_LOCKUP_LIGHT = '/brand/masthead/media-lockup-light.png' as co
 export const FIT_LOCKUP_DARK = '/brand/masthead/fit-lockup-dark.png' as const
 export const FIT_LOCKUP_LIGHT = '/brand/masthead/fit-lockup-light.png' as const
 
-export const MEDIA_LOCKUP_LABEL = 'Evolved Media'
+export const MEDIA_LOCKUP_LABEL = 'Evolved Pros Media'
 export const FIT_LOCKUP_LABEL = 'Evolved Pros Fit'
 
 export const MASTHEAD_LOCKUP_ASSETS = [
