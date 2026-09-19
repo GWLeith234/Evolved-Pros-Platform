@@ -70,6 +70,8 @@ describe('Phase 1 EPM←TT newspaper home', () => {
     expect(portal).toContain('kind="mid-fluid"')
     expect(portal).toContain('kind="rail-half"')
     expect(portal).toContain('kind="sponsored-row"')
+    expect(slot).toContain('mid-rect')
+    expect(portal).toContain('MediaScrollRect')
     expect(portal).not.toMatch(/googletag|doubleclick|gpt\.js/)
     expect(slot).not.toMatch(/googletag|doubleclick|gpt\.js/)
   })

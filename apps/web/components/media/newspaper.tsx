@@ -5,7 +5,10 @@
  */
 import type { CSSProperties } from 'react'
 import Link from 'next/link'
-import { MediaPartnerSlot } from '@/components/media/MediaPartnerSlot'
+import { MediaPartnerSlot, MediaScrollRect } from '@/components/media/MediaPartnerSlot'
+import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import { layoutArticleBody, splitHtmlBlocks, type ArticleChunk } from '@/lib/ads/rhythm'
+import { articleMidRectBreaks } from '@/lib/media/scrollInventory'
 import { getPillarLabel } from '@/lib/pillars'
 import { MEDIA_ON_AIR, moreInLabel, popularStories } from '@/lib/media/desk'
 import { mediaStoryHref } from '@/lib/media/paths'
@@ -214,12 +217,16 @@ export function NewspaperLatestRail({
   moreHref,
   moreLabel,
   insertSponsoredAt,
+  midRectAt,
+  midRectAds,
 }: {
   stories: NewspaperStory[]
   title?: string
   moreHref?: string
   moreLabel?: string
   insertSponsoredAt?: number
+  midRectAt?: readonly number[]
+  midRectAds?: ReadonlyArray<SponsorAd | null | undefined>
 }) {
   if (stories.length === 0) return null
   return (
@@ -242,10 +249,64 @@ export function NewspaperLatestRail({
             {insertSponsoredAt != null && index === insertSponsoredAt ? (
               <MediaPartnerSlot kind="sponsored-row" locationId="media-sponsored-1" />
             ) : null}
+            {midRectAt?.includes(index) ? (
+              <MediaScrollRect
+                ad={midRectAds?.[midRectAt.indexOf(index)] ?? null}
+                locationId={`media-latest-rect-${index}`}
+              />
+            ) : null}
           </li>
         ))}
       </ul>
     </section>
+  )
+}
+
+function mergeHtmlChunks<A>(chunks: ArticleChunk<A>[]): ArticleChunk<A>[] {
+  const out: ArticleChunk<A>[] = []
+  for (const chunk of chunks) {
+    const last = out[out.length - 1]
+    if (chunk.kind === 'html' && last?.kind === 'html') {
+      last.html += chunk.html
+    } else {
+      out.push(chunk.kind === 'html' ? { kind: 'html', html: chunk.html } : chunk)
+    }
+  }
+  return out
+}
+
+export function newspaperArticleChunks<A>(
+  html: string,
+  ads: ReadonlyArray<A | null | undefined>,
+): ArticleChunk<A | null>[] {
+  const blocks = splitHtmlBlocks(html)
+  const breaks = articleMidRectBreaks(blocks.length)
+  const padded = breaks.map((_, i) => ads[i] ?? null)
+  return mergeHtmlChunks(layoutArticleBody(blocks, padded, breaks))
+}
+
+export function NewspaperArticleBody({
+  html,
+  ads,
+}: {
+  html: string
+  ads: ReadonlyArray<SponsorAd | null | undefined>
+}) {
+  const chunks = newspaperArticleChunks(html, ads)
+  return (
+    <div className="media-prose" data-media-article-body>
+      {chunks.map((chunk, i) =>
+        chunk.kind === 'html' ? (
+          <div key={`html-${i}`} dangerouslySetInnerHTML={{ __html: chunk.html }} />
+        ) : (
+          <MediaScrollRect
+            key={`rect-${i}`}
+            ad={chunk.ad}
+            locationId={`media-article-mid-${i}`}
+          />
+        ),
+      )}
+    </div>
   )
 }
 

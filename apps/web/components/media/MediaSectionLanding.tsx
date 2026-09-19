@@ -1,4 +1,4 @@
-import { MediaPartnerSlot } from '@/components/media/MediaPartnerSlot'
+import { MediaPartnerSlot, MediaScrollRect } from '@/components/media/MediaPartnerSlot'
 import {
   NewspaperBriefCta,
   NewspaperDualHero,
@@ -9,6 +9,11 @@ import {
   type NewspaperStory,
 } from '@/components/media/newspaper'
 import { splitSectionDesk } from '@/lib/media/desk'
+import {
+  SECTION_LATEST_LIST,
+  latestMidRectIndexes,
+  sectionHasFeaturedRect,
+} from '@/lib/media/scrollInventory'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { pickMediaFeedAds } from '@/lib/sponsors/partners'
 import { adMatchesSurface } from '@/lib/ads/iab'
@@ -34,9 +39,15 @@ export async function MediaSectionLanding({
     // Ads must not blank the section when the catalog is unreachable.
   }
 
-  const desk = splitSectionDesk(articles)
+  const desk = splitSectionDesk(articles, { latestList: SECTION_LATEST_LIST })
   const leaderboardAd = mediaAds.inFeed[0] ?? null
   const midFluidAd = mediaAds.inFeed[1] ?? null
+  const showFeaturedRect = sectionHasFeaturedRect(desk.featuredGrid.length)
+  const latestRectAt = latestMidRectIndexes(desk.latestList.length, { skipTrailing: true })
+  let nextRect = 2
+  const takeRect = () => mediaAds.inFeed[nextRect++] ?? null
+  const featuredRectAd = showFeaturedRect ? takeRect() : null
+  const latestRectAds = latestRectAt.map(() => takeRect())
 
   return (
     <div className="ep-media-home" data-media-surface="section" data-media-section={sectionId}>
@@ -54,10 +65,15 @@ export async function MediaSectionLanding({
           <div className="ep-media-home-main">
             <NewspaperDualHero lede={desk.featured} secondary={desk.secondary} mini />
             <NewspaperFeaturedGrid stories={desk.featuredGrid} />
+            {showFeaturedRect ? (
+              <MediaScrollRect ad={featuredRectAd} locationId="media-section-rect-featured" />
+            ) : null}
             <NewspaperLatestRail
               stories={desk.latestList}
               title="Latest"
               insertSponsoredAt={1}
+              midRectAt={latestRectAt}
+              midRectAds={latestRectAds}
             />
             <div className="ep-media-mid-fluid">
               <MediaPartnerSlot kind="mid-fluid" ad={midFluidAd} locationId="media-section-mid-fluid" />
