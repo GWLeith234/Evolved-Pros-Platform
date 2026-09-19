@@ -360,7 +360,7 @@ export function UnifiedCommunityPage({
               className="w-full py-2.5 rounded font-condensed font-semibold uppercase tracking-wide text-sm text-white transition-opacity hover:opacity-90"
               style={{ backgroundColor: '#68a2b9' }}
             >
-              ↑ {queuedCount} new {queuedCount === 1 ? 'post' : 'posts'} — click to load
+              ↑ {queuedCount} new {queuedCount === 1 ? 'post' : 'posts'}. Click to load
             </button>
           )}
 
@@ -368,9 +368,11 @@ export function UnifiedCommunityPage({
           {filtered.length === 0 ? (
             <div className="py-16 text-center">
               <p className="font-condensed text-xs tracking-widest" style={{ color: 'var(--text-tertiary)' }}>
-                {activeKind === 'all' && activePillars.length === 0
-                  ? 'No posts yet — be the first to share.'
-                  : 'No posts match the current filters.'}
+                {activeKind === 'poll'
+                  ? 'No polls yet.'
+                  : activeKind === 'all' && activePillars.length === 0
+                    ? 'No posts yet. Be the first to share.'
+                    : 'No posts match the current filters.'}
               </p>
             </div>
           ) : (

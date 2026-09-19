@@ -8,6 +8,7 @@ import { PublicFooter } from '@/components/layout/PublicFooter'
 import { ProfileCompletePrompt } from '@/components/home/ProfileCompletePrompt'
 import { type GoalForCard } from '@/components/home/GoalCard'
 import { HomeBannerBand, type HomeWinChip } from '@/components/home/HomeBannerBand'
+import { HomeNextActionBand } from '@/components/home/HomeNextActionBand'
 import { HomeAccountabilityBand } from '@/components/home/HomeAccountabilityBand'
 import { HomeFuelBand, academyFuelFromProgress } from '@/components/home/HomeFuelBand'
 import { HomeEpisodeCard } from '@/components/home/HomeEpisodeCard'
@@ -31,6 +32,7 @@ import {
   isEventHappeningNow,
   isVisibleWin,
   pickFuelLiveEvent,
+  pickMemberHomeNextAction,
 } from '@/lib/home/bands'
 import { pickUpcomingLockedEvent, withoutConquerLocal } from '@/lib/events/nextEvent'
 
@@ -666,6 +668,18 @@ export default async function MemberHomePage() {
     .filter((ad): ad is SponsorAd => Boolean(ad))
     .find(ad => !isAcademyAd(ad)) ?? null
 
+  const firstIncompleteMeasure =
+    dailyHabits.find(h => !h.completedToday)?.name
+    ?? weekCommitments.find(c => !c.is_completed)?.commitment
+    ?? null
+
+  const nextAction = pickMemberHomeNextAction({
+    firstIncompleteMeasure,
+    hasWig: Boolean(wig),
+    academyTitle: fuelAcademy?.title ?? null,
+    academyHref: fuelAcademy?.href ?? null,
+  })
+
   // On-open: reuse Home's already-fetched session to enqueue WIG / evening
   // daily nudges into the existing notifications table. Fire-and-forget so
   // the RSC is not blocked on the insert. NotifBell in TopNav stays the UI.
@@ -674,6 +688,8 @@ export default async function MemberHomePage() {
   return (
     <>
       <div className="ep-page-gutter ep-surface-mobile ep-stack pb-6">
+        <HomeNextActionBand action={nextAction} />
+
         <HomeBannerBand
           wig={wig}
           pillars={pillars}
@@ -693,34 +709,36 @@ export default async function MemberHomePage() {
           live={fuelLive}
         />
 
-        <HomeFitTeaseBand viewerTier={profile.tier} />
+        <div id="home-below-fold" className="ep-stack">
+          <HomeFitTeaseBand viewerTier={profile.tier} />
 
-        {latestEpisodesResult.episodes.length > 0 ? (
-          <HomeContentAdGrid
-            title="Latest episodes"
-            href="/podcast"
-            linkLabel="All episodes"
-            ad={foldAd && !isAcademyAd(foldAd) ? foldAd : null}
-          >
-            {latestEpisodesResult.episodes.map(ep => (
-              <HomeEpisodeCard
-                key={ep.id}
-                href={`/podcast/${ep.slug}`}
-                title={ep.title}
-                guestName={ep.guestName}
-                episodeNumber={ep.episodeNumber}
-                guestImageUrl={ep.guestImageUrl}
-              />
-            ))}
-          </HomeContentAdGrid>
-        ) : null}
+          {latestEpisodesResult.episodes.length > 0 ? (
+            <HomeContentAdGrid
+              title="Latest episodes"
+              href="/podcast"
+              linkLabel="All episodes"
+              ad={foldAd && !isAcademyAd(foldAd) ? foldAd : null}
+            >
+              {latestEpisodesResult.episodes.map(ep => (
+                <HomeEpisodeCard
+                  key={ep.id}
+                  href={`/podcast/${ep.slug}`}
+                  title={ep.title}
+                  guestName={ep.guestName}
+                  episodeNumber={ep.episodeNumber}
+                  guestImageUrl={ep.guestImageUrl}
+                />
+              ))}
+            </HomeContentAdGrid>
+          ) : null}
 
-        <ProfileCompletePrompt
-          hasAvatar={Boolean(profile.avatar_url)}
-          hasBio={Boolean(profile.bio)}
-          hasTitle={Boolean(profile.role_title)}
-          hasName={Boolean(profile.display_name || profile.full_name)}
-        />
+          <ProfileCompletePrompt
+            hasAvatar={Boolean(profile.avatar_url)}
+            hasBio={Boolean(profile.bio)}
+            hasTitle={Boolean(profile.role_title)}
+            hasName={Boolean(profile.display_name || profile.full_name)}
+          />
+        </div>
       </div>
       <PublicFooter />
     </>

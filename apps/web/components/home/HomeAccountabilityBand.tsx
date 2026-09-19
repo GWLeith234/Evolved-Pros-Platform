@@ -71,6 +71,7 @@ export function HomeAccountabilityBand({
 
   return (
     <section
+      id="home-leading-measures"
       aria-label="Leading measures"
       className="ep-surface-card overflow-hidden"
       style={{
