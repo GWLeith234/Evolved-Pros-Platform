@@ -89,3 +89,25 @@ export function popularStories<T extends DeskStory>(stories: readonly T[], limit
 export function moreInLabel(category: string): string {
   return `More in ${category}`
 }
+
+/**
+ * Section landing split: mini-hero (lede + optional half-column), Featured
+ * 2-up, then a bordered Latest rail. All stories are already scoped to one
+ * section by the caller. Same module grammar as the hub, no category bands.
+ */
+export function splitSectionDesk<T extends DeskStory>(
+  stories: readonly T[],
+  opts?: { featuredGrid?: number; latestList?: number },
+): Pick<DeskLayout<T>, 'featured' | 'secondary' | 'featuredGrid' | 'latestList'> {
+  const desk = splitHubDesk(stories, {
+    featuredGrid: opts?.featuredGrid ?? 2,
+    latestList: opts?.latestList ?? 8,
+    sectionSize: 0,
+  })
+  return {
+    featured: desk.featured,
+    secondary: desk.secondary,
+    featuredGrid: desk.featuredGrid,
+    latestList: desk.latestList,
+  }
+}

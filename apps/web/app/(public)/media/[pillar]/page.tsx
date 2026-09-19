@@ -3,9 +3,9 @@ import type { Metadata } from 'next'
 import { adminClient } from '@/lib/supabase/admin'
 import { mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
-import { MediaSectionMagazine, type MediaSectionArticle } from '@/components/media/MediaSectionMagazine'
+import { MediaSectionLanding } from '@/components/media/MediaSectionLanding'
+import type { NewspaperStory } from '@/components/media/newspaper'
 import { PILLAR_CONFIG, getPillarLabel } from '@/lib/pillars'
-import { moreInLabel } from '@/lib/media/desk'
 import { listPublicMediaStories } from '@/lib/media/sitemap'
 
 export const revalidate = 120
@@ -32,10 +32,10 @@ export async function generateMetadata(
   })
 }
 
-async function fetchArticles(pillar: string): Promise<MediaSectionArticle[]> {
+async function fetchArticles(pillar: string): Promise<NewspaperStory[]> {
   const query = adminClient
     .from('media_stories')
-    .select('id, title, slug, featured_image_url, pillar, published_at, body, author, excerpt, is_published')
+    .select('id, title, slug, featured_image_url, pillar, published_at, body, author, excerpt, is_published, views, story_type')
     .eq('is_published', true)
     .order('published_at', { ascending: false })
     .limit(24)
@@ -44,7 +44,7 @@ async function fetchArticles(pillar: string): Promise<MediaSectionArticle[]> {
     ? await query.is('pillar', null)
     : await query.eq('pillar', pillar)
 
-  return listPublicMediaStories((data ?? []) as Array<MediaSectionArticle & { is_published?: boolean | null }>)
+  return listPublicMediaStories((data ?? []) as Array<NewspaperStory & { is_published?: boolean | null }>)
 }
 
 export default async function MediaPillarPage({
@@ -56,9 +56,9 @@ export default async function MediaPillarPage({
   const articles = await fetchArticles(params.pillar)
   const label = params.pillar === 'general' ? 'Original' : getPillarLabel(params.pillar)
   return (
-    <MediaSectionMagazine
+    <MediaSectionLanding
+      sectionId={params.pillar}
       title={label}
-      dividerLabel={moreInLabel(label)}
       articles={articles}
     />
   )

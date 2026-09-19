@@ -3785,6 +3785,255 @@ html.light-mode .ep-media-brief-cta {
   font-size: 13px;
 }
 
+.ep-media-section-hero {
+  margin: 0 0 16px;
+}
+.ep-media-section-eyebrow {
+  margin: 0 0 4px;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.ep-media-section-title {
+  margin: 0;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: clamp(28px, 4vw, 40px);
+  line-height: 1.1;
+}
+.ep-media-dual-hero--mini .ep-media-lede-title {
+  font-size: clamp(22px, 2.8vw, 32px);
+}
+
+.ep-media-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 18px;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.ep-media-breadcrumb a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+.ep-media-breadcrumb a:hover,
+.ep-media-breadcrumb a:focus-visible {
+  color: var(--text-primary);
+}
+
+.ep-media-article-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  margin-bottom: 28px;
+}
+@media (min-width: 992px) {
+  .ep-media-article-grid {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+  }
+}
+.ep-media-article-title {
+  margin: 10px 0 8px;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: clamp(28px, 4.2vw, 48px);
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+.ep-media-article-byline {
+  margin: 0 0 14px;
+  font-size: 13px;
+}
+.ep-media-article-art {
+  margin: 18px 0 8px;
+}
+.ep-media-article-art img {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+.ep-media-article-source,
+.ep-media-must-cite {
+  margin: 16px 0 20px;
+  padding: 12px 14px;
+  border: 1px solid var(--media-line);
+  background: var(--media-card);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.ep-media-article-source a {
+  color: var(--brand-red-hot);
+}
+.ep-media-article-slot {
+  display: flex;
+  justify-content: center;
+  margin: 28px 0 8px;
+}
+.ep-media-share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 3px solid var(--media-rule);
+  border-bottom: 1px solid var(--media-line);
+}
+.ep-media-share-label {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-right: 4px;
+}
+.ep-media-share-btn {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 0;
+  background: var(--navy);
+  color: var(--white);
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+html.light-mode .ep-media-share-btn {
+  background: var(--navy);
+}
+.ep-media-share-btn--ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--media-line);
+}
+.ep-media-soft-cta {
+  margin: 28px 0 8px;
+  padding: 20px;
+  border: 1px solid var(--media-line);
+  background: var(--media-card);
+}
+.ep-media-soft-cta-kicker {
+  margin: 0 0 6px;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brand-red-hot);
+}
+.ep-media-soft-cta h2 {
+  margin: 0 0 8px;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.2;
+}
+.ep-media-soft-cta p {
+  margin: 0 0 14px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.ep-media-soft-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.ep-media-soft-cta-row a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  background: var(--brand-red-hot);
+  color: var(--white);
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.ep-media-soft-cta-row a.ep-media-soft-cta-ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--media-line);
+}
+.ep-media-article .media-prose {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.85;
+  color: var(--text-primary);
+  margin-top: 20px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.ep-media-article .media-prose h2 {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+  margin: 28px 0 10px;
+  line-height: 1.2;
+}
+.ep-media-article .media-prose h2.ep-media-bottom-line,
+.ep-media-article .media-prose h2:last-of-type {
+  margin-top: 36px;
+  padding-top: 16px;
+  border-top: 3px solid var(--media-rule);
+}
+.ep-media-article .media-prose h3 {
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 20px 0 8px;
+}
+.ep-media-article .media-prose p {
+  margin-bottom: 18px;
+}
+.ep-media-article .media-prose blockquote {
+  border-left: 4px solid var(--brand-red-hot);
+  padding: 12px 16px;
+  background: var(--media-card);
+  font-style: italic;
+  margin: 20px 0;
+}
+.ep-media-article .media-prose a {
+  color: var(--brand-red-hot);
+}
+.ep-media-article .media-prose img,
+.ep-media-article .media-prose iframe,
+.ep-media-article .media-prose table {
+  max-width: 100%;
+  height: auto;
+}
+.ep-media-podcast-grid--article {
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .ep-media-podcast-grid--article {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 639px) {
+  .ep-media-article-title { font-size: 26px; }
+}
+
 /* /media story stills. The grok-bot typed still keeps Meet the staff. in
    frame, so no zoom crop. Media-only. */
 .ed-story-art {

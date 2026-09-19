@@ -30,7 +30,20 @@ export function featuredHeroByline(story: {
   if (story.slug === GROK_BOT_SLUG || hasBakedProsWordmark(story.featured_image_url)) {
     return GROK_BOT_BYLINE
   }
-  return story.author ?? 'George Leith'
+  const locked = story.author?.trim()
+  return locked || 'George Leith'
+}
+
+/**
+ * Article / card byline. George Leith or a CMS-locked guest. Never invent a
+ * staff name in render.
+ */
+export function lockedArticleByline(story: {
+  slug?: string | null
+  featured_image_url?: string | null
+  author?: string | null
+}): string {
+  return featuredHeroByline(story)
 }
 
 /** Class for <img> / next/Image fill covers on the desk. */

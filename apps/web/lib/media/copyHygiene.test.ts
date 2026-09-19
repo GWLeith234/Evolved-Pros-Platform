@@ -12,7 +12,12 @@ const USER_FACING = [
   resolve(here, '../../components/media/Masthead.tsx'),
   resolve(here, '../../components/media/MediaMastheadRail.tsx'),
   resolve(here, '../../components/media/MediaPartnerSlot.tsx'),
+  resolve(here, '../../components/media/newspaper.tsx'),
+  resolve(here, '../../components/media/MediaSectionLanding.tsx'),
   resolve(here, '../../app/(public)/media/MediaPortalClient.tsx'),
+  resolve(here, '../../app/(public)/media/[pillar]/page.tsx'),
+  resolve(here, '../../app/(public)/media/[pillar]/[slug]/page.tsx'),
+  resolve(here, '../../app/(public)/media/[pillar]/[slug]/ArticleShareBar.tsx'),
   resolve(here, './brand.ts'),
   resolve(here, './desk.ts'),
 ]

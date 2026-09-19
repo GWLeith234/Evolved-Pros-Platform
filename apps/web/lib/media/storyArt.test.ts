@@ -10,6 +10,7 @@ import {
   GROK_BOT_SLUG,
   GROK_BOT_STILL_PLAIN,
   featuredHeroByline,
+  lockedArticleByline,
   hasBakedProsWordmark,
   resolveStoryArtUrl,
   storyArtHeroBackground,
@@ -68,7 +69,10 @@ describe('Media story art typed byline', () => {
     ).toBe(GROK_BOT_BYLINE)
     expect(featuredHeroByline({ slug: 'other', featured_image_url: BAKED })).toBe(GROK_BOT_BYLINE)
     expect(featuredHeroByline({ slug: 'other', author: 'Pat' })).toBe('Pat')
+    expect(featuredHeroByline({ slug: 'other', author: '  ' })).toBe('George Leith')
     expect(featuredHeroByline({})).toBe('George Leith')
+    expect(lockedArticleByline({ author: 'Dana Whitfield' })).toBe('Dana Whitfield')
+    expect(lockedArticleByline({})).toBe('George Leith')
   })
 
   it('does not crop the typed still and keeps cover centering', () => {
@@ -111,9 +115,8 @@ describe('Media story art typed byline', () => {
     expect(portal).not.toMatch(/logo_horizontal/)
     expect(portal).not.toMatch(/MEDIA_LOCKUP_/)
     expect(article).toContain('resolveStoryArtUrl')
-    expect(article).toContain('storyArtHeroClass')
-    expect(article).toContain('storyArtHeroBackground')
     expect(article).toContain('storyArtImgClass')
+    expect(article).toContain('lockedArticleByline')
     expect(magazine).toContain('resolveStoryArtUrl')
     expect(magazine).toContain('storyArtImgClass')
   })
