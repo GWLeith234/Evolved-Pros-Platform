@@ -17,10 +17,12 @@ describe('Phase 1 EPM←TT newspaper home', () => {
   const slot = read('../../components/media/MediaPartnerSlot.tsx')
   const page = read('../../app/(public)/media/page.tsx')
 
-  it('names the surface Evolved Pros Media and keeps the red-dot wordmark', () => {
+  it('names the surface Evolved Pros Media and uses the lockup PNG pair', () => {
     expect(MEDIA_LOCKUP_LABEL).toBe('Evolved Pros Media')
-    expect(masthead).toContain('EpWordmarkMark')
-    expect(masthead).toContain('MEDIA')
+    expect(masthead).toContain('MEDIA_LOCKUP_DARK')
+    expect(masthead).toContain('MEDIA_LOCKUP_LIGHT')
+    expect(masthead).toContain('MEDIA_LOCKUP_LABEL')
+    expect(masthead).not.toContain('EpWordmarkMark')
     expect(masthead).not.toContain('Evolved Media')
     expect(portal).toContain('Evolved Pros Media')
     expect(portal).not.toContain('Evolved Media')

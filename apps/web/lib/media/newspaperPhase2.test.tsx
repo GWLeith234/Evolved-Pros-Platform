@@ -31,8 +31,10 @@ describe('Phase 2 EPM←TT article + section landings', () => {
 
   it('keeps Phase 1 masthead / chips / Evolved Pros Media naming', () => {
     expect(MEDIA_LOCKUP_LABEL).toBe('Evolved Pros Media')
-    expect(masthead).toContain('EpWordmarkMark')
-    expect(masthead).toContain('MEDIA')
+    expect(masthead).toContain('MEDIA_LOCKUP_DARK')
+    expect(masthead).toContain('MEDIA_LOCKUP_LIGHT')
+    expect(masthead).toContain('MEDIA_LOCKUP_LABEL')
+    expect(masthead).not.toContain('EpWordmarkMark')
     expect(rail).toContain('MEDIA_INDEX_SECTIONS')
     expect(MEDIA_INDEX_SECTIONS.map(s => s.label)).toEqual([
       'Strategy',
