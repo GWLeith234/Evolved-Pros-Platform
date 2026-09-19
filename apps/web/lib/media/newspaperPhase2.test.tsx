@@ -2,9 +2,15 @@ import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { MEDIA_INDEX_SECTIONS, splitSectionDesk } from './desk'
 import { lockedArticleByline } from './storyArt'
 import { MEDIA_LOCKUP_LABEL } from '../lockups'
+import {
+  NewspaperDualHero,
+  NewspaperMoreInSection,
+  type NewspaperStory,
+} from '@/components/media/newspaper'
 
 const here = dirname(fileURLToPath(import.meta.url))
 
@@ -109,6 +115,44 @@ describe('Phase 2 EPM←TT article + section landings', () => {
     expect(landing).not.toMatch(/googletag|doubleclick|gpt\.js|DFP/)
     expect(modules).not.toMatch(/googletag|doubleclick|gpt\.js|DFP/)
     expect(share).not.toMatch(/googletag|doubleclick|gpt\.js|DFP/)
+  })
+
+  it('click-path hrefs run home chips to section, then article, then More in section', () => {
+    expect(rail).toContain('href={section.href}')
+    expect(MEDIA_INDEX_SECTIONS[0]).toMatchObject({
+      label: 'Strategy',
+      href: '/media/strategy',
+    })
+    const story: NewspaperStory = {
+      id: 's1',
+      title: 'Tokens are materials',
+      slug: 'ai-tokens-materials-line',
+      excerpt: 'A desk lede.',
+      pillar: 'strategy',
+      featured_image_url: null,
+      author: 'George Leith',
+      published_at: '2026-09-01T00:00:00.000Z',
+      body: 'word '.repeat(400),
+    }
+    const hero = renderToStaticMarkup(
+      <NewspaperDualHero lede={story} secondary={null} mini />,
+    )
+    expect(hero).toContain('/media/strategy/ai-tokens-materials-line')
+    expect(hero).toContain('Tokens are materials')
+    const more = renderToStaticMarkup(
+      <NewspaperMoreInSection
+        label="Strategy"
+        href="/media/strategy"
+        stories={[
+          { ...story, id: 's2', slug: 'walk-away-criteria-before-the-discount' },
+        ]}
+      />,
+    )
+    expect(more).toContain('More in Strategy')
+    expect(more).toContain('/media/strategy')
+    expect(more).toContain('/media/strategy/walk-away-criteria-before-the-discount')
+    expect(article).toContain('NewspaperMoreInSection')
+    expect(article).toContain('sectionHref')
   })
 
   it('does not invent a Media theme toggle', () => {
