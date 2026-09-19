@@ -49,7 +49,12 @@ export default async function MediaPage() {
     // episodes table may not exist yet
   }
 
-  const mediaAds = pickMediaFeedAds((await getActivePlatformAds()) as SponsorAd[])
+  let mediaAds: ReturnType<typeof pickMediaFeedAds> = { sidebar: null, inFeed: [] }
+  try {
+    mediaAds = pickMediaFeedAds((await getActivePlatformAds()) as SponsorAd[])
+  } catch {
+    // Ads must not blank the desk when the catalog is unreachable.
+  }
 
   return (
     <>
