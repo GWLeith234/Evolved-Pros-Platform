@@ -4,7 +4,9 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { MediaMastheadLockup } from '@/components/media/Masthead'
-import { MEDIA_LOCKUP_LABEL, MEDIA_MEGAPHONE_DISC } from '@/lib/lockups'
+import { MEDIA_LOCKUP_DARK, MEDIA_LOCKUP_LABEL, MEDIA_LOCKUP_LIGHT } from '@/lib/lockups'
+
+const MEDIA_MEGAPHONE_DISC = '/brand/masthead/megaphone-disc.png'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const src = readFileSync(resolve(here, '../../components/media/Masthead.tsx'), 'utf8')
@@ -21,12 +23,16 @@ describe('Media masthead chrome', () => {
     expect(src).not.toMatch(/George.?s Desk/)
   })
 
-  it('names the surface Evolved Pros Media and composes EVOLVED·PROS plus the Media lockup', () => {
+  it('names the surface Evolved Pros Media and uses the theme-swapped lockup PNG pair', () => {
     expect(MEDIA_LOCKUP_LABEL).toBe('Evolved Pros Media')
     expect(src).toContain('MEDIA_LOCKUP_LABEL')
-    expect(src).toContain('EpWordmarkMark')
-    expect(src).toContain('MEDIA_MEGAPHONE_DISC')
-    expect(src).toContain('ep-media-masthead-media')
+    expect(src).toContain('MEDIA_LOCKUP_DARK')
+    expect(src).toContain('MEDIA_LOCKUP_LIGHT')
+    expect(src).toContain('ep-media-masthead-logo--on-dark')
+    expect(src).toContain('ep-media-masthead-logo--on-light')
+    expect(src).not.toContain('EpWordmarkMark')
+    expect(src).not.toContain('MEDIA_MEGAPHONE_DISC')
+    expect(src).not.toContain('ep-media-masthead-media')
     expect(src).not.toMatch(/Abril Fatface|Playfair Display|font-abril/)
     expect(src).not.toMatch(/MEDIA_DESK_TAGLINE/)
     expect(src).not.toMatch(/Promoting evolution/)
@@ -34,13 +40,15 @@ describe('Media masthead chrome', () => {
     expect(src).not.toMatch(/Arial Black/)
   })
 
-  it('renders the wordmark, red megaphone, and Bebas MEDIA label', () => {
+  it('renders both theme lockup PNGs with the Media label and no composed text', () => {
     const html = renderToStaticMarkup(<MediaMastheadLockup />)
     expect(html).toContain(`aria-label="${MEDIA_LOCKUP_LABEL}"`)
-    expect(html).toContain('EVOLVED')
-    expect(html).toContain('PROS')
-    expect(html).toContain('MEDIA')
-    expect(html).toContain(MEDIA_MEGAPHONE_DISC)
+    expect(html).toContain(MEDIA_LOCKUP_DARK)
+    expect(html).toContain(MEDIA_LOCKUP_LIGHT)
+    expect(html.indexOf(MEDIA_LOCKUP_DARK)).toBeLessThan(html.indexOf(MEDIA_LOCKUP_LIGHT))
+    expect(html).not.toContain('EVOLVED')
+    expect(html).not.toContain('>MEDIA<')
+    expect(html).not.toContain(MEDIA_MEGAPHONE_DISC)
     expect(html).not.toContain('<svg')
     expect(html).not.toContain('#60A5FA')
     expect(html).not.toContain('Evolved Media')
@@ -86,6 +94,11 @@ describe('Media masthead chrome', () => {
     expect(css).not.toMatch(/\.ep-media-masthead[\s\S]{0,1800}#60A5FA/)
     expect(css).not.toMatch(/\.ep-media-masthead[\s\S]{0,1800}--brand-blue/)
     expect(css).not.toMatch(/\.ep-media-masthead-mark \{[\s\S]*background: var\(--brand-red\)/)
+    expect(css).toMatch(/\.ep-media-masthead-logo,[\s\S]*background: transparent/)
+    expect(css).not.toMatch(/\.ep-media-masthead-lockup/)
+    expect(css).not.toMatch(/\.ep-media-masthead-pros/)
+    expect(css).not.toMatch(/\.ep-media-masthead-disc/)
+    expect(css).not.toMatch(/\.ep-media-masthead-media \{/)
   })
 
   it('does not host-branch /media chrome and keeps utility links on theme tokens', () => {

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -8,6 +9,7 @@ import {
   FIT_BARBELL_DISC,
   FIT_LOCKUP_DARK,
   FIT_LOCKUP_LIGHT,
+  GOLD_MEDIA_LOCKUP_SHA256,
   MASTHEAD_LOCKUP_ASSETS,
   MEDIA_LOCKUP_DARK,
   MEDIA_LOCKUP_LIGHT,
@@ -27,6 +29,18 @@ describe('Media + Fit lockup assets', () => {
       const abs = publicFile(asset)
       expect(existsSync(abs), abs).toBe(true)
       expect(readFileSync(abs).byteLength, abs).toBeGreaterThan(8)
+    }
+  })
+
+  it('ferries file-exact gold Media v5 lockup PNGs (SHA-256 MATCH)', () => {
+    const dests = [
+      ['media-lockup-dark.png', MEDIA_LOCKUP_DARK],
+      ['media-lockup-light.png', MEDIA_LOCKUP_LIGHT],
+    ] as const
+    for (const [name, urlPath] of dests) {
+      const abs = publicFile(urlPath)
+      const sha = createHash('sha256').update(readFileSync(abs)).digest('hex')
+      expect(sha, `${name} must be the gold v5 file`).toBe(GOLD_MEDIA_LOCKUP_SHA256[name])
     }
   })
 

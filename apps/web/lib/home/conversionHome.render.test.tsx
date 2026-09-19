@@ -12,7 +12,7 @@ import {
 import { EVENTS_LOGIN_HEADLINE, EVENTS_LOGIN_BODY, gatedIntentFor } from '@/lib/auth/gatedIntent'
 import { GatedIntentWall } from '@/components/auth/GatedIntentWall'
 import { MediaMastheadLockup } from '@/components/media/Masthead'
-import { MEDIA_LOCKUP_LABEL, MEDIA_MEGAPHONE_DISC } from '@/lib/lockups'
+import { MEDIA_LOCKUP_DARK, MEDIA_LOCKUP_LABEL, MEDIA_LOCKUP_LIGHT } from '@/lib/lockups'
 
 function foldCtasHtml(html: string): string {
   const start = html.indexOf('ep-home-fold-ctas')
@@ -90,12 +90,12 @@ describe('events login banner', () => {
 })
 
 describe('media parchment lockup', () => {
-  it('ships EVOLVED·PROS plus the Media lockup without an em dash', () => {
+  it('ships the theme-swapped lockup PNG pair without an em dash', () => {
     const html = renderToStaticMarkup(<MediaMastheadLockup />)
-    expect(html).toContain(MEDIA_MEGAPHONE_DISC)
-    expect(html).toContain('EVOLVED')
-    expect(html).toContain('MEDIA')
+    expect(html).toContain(MEDIA_LOCKUP_DARK)
+    expect(html).toContain(MEDIA_LOCKUP_LIGHT)
     expect(html).toContain(`aria-label="${MEDIA_LOCKUP_LABEL}"`)
+    expect(html).not.toContain('EVOLVED')
     expect(html).not.toContain('\u2014')
   })
 })

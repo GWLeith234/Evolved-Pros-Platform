@@ -1,30 +1,42 @@
-// Media masthead for /media. Phase 1 home: official wordmark (red interpunct)
-// plus Media lockup (Bebas MEDIA + red megaphone disc). Surface name is
-// Evolved Pros Media. Theme tokens carry light + dark. No host branch.
+// Media masthead for /media. Theme-swapped gold lockup PNG
+// (EVOLVED PR [megaphone disc] S MEDIA). Same FooterLogo / Fit CSS pair.
+// Not a composed HTML wordmark + disc + MEDIA label. No plate / navy island.
 
 import Link from 'next/link'
-import { EpWordmarkMark } from '@/components/brand/EpWordmark'
-import { MEDIA_LOCKUP_LABEL, MEDIA_MEGAPHONE_DISC } from '@/lib/lockups'
+import {
+  LOCKUP_INTRINSIC_HEIGHT,
+  LOCKUP_INTRINSIC_WIDTH,
+  MEDIA_LOCKUP_DARK,
+  MEDIA_LOCKUP_LABEL,
+  MEDIA_LOCKUP_LIGHT,
+} from '@/lib/lockups'
 import { MediaMastheadRail } from '@/components/media/MediaMastheadRail'
 
 export function MediaMastheadLockup() {
   return (
     <h1 className="ep-media-masthead-wordmark">
-      <Link href="/media" aria-label={MEDIA_LOCKUP_LABEL} className="ep-media-masthead-lockup">
-        <span className="ep-media-masthead-pros" data-testid="ep-wordmark">
-          <EpWordmarkMark />
-        </span>
+      <Link href="/media" aria-label={MEDIA_LOCKUP_LABEL}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          className="ep-media-masthead-disc"
-          src={MEDIA_MEGAPHONE_DISC}
+          data-media-lockup-dark
+          className="ep-media-masthead-logo ep-media-masthead-logo--on-dark"
+          src={MEDIA_LOCKUP_DARK}
           alt=""
-          width={56}
-          height={56}
+          width={LOCKUP_INTRINSIC_WIDTH}
+          height={LOCKUP_INTRINSIC_HEIGHT}
           decoding="sync"
           {...{ fetchpriority: 'high' }}
         />
-        <span className="ep-media-masthead-media">MEDIA</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          data-media-lockup-light
+          className="ep-media-masthead-logo ep-media-masthead-logo--on-light"
+          src={MEDIA_LOCKUP_LIGHT}
+          alt=""
+          width={LOCKUP_INTRINSIC_WIDTH}
+          height={LOCKUP_INTRINSIC_HEIGHT}
+          decoding="sync"
+        />
       </Link>
     </h1>
   )

@@ -31,11 +31,13 @@ describe('public chrome wordmark', () => {
     }
   })
 
-  it('lets Media home compose EVOLVED·PROS plus the Media lockup', () => {
+  it('lets Media home use the theme-swapped lockup PNG pair', () => {
     const masthead = src('components/media/Masthead.tsx')
-    expect(masthead).toContain('EpWordmarkMark')
-    expect(masthead).toContain('MEDIA_MEGAPHONE_DISC')
-    expect(masthead).toContain('ep-media-masthead-media')
+    expect(masthead).toContain('MEDIA_LOCKUP_DARK')
+    expect(masthead).toContain('MEDIA_LOCKUP_LIGHT')
+    expect(masthead).toContain('ep-media-masthead-logo--on-dark')
+    expect(masthead).not.toContain('EpWordmarkMark')
+    expect(masthead).not.toContain('MEDIA_MEGAPHONE_DISC')
     expect(masthead).not.toMatch(/Abril Fatface|Playfair Display|font-abril/)
   })
 
