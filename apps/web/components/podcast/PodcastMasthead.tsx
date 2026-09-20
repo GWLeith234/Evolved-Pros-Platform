@@ -1,10 +1,49 @@
+// Podcast lockup: theme-swapped podcast-lockup PNG
+// (EVOLVED PR[mic disc]S PODCAST). Same FooterLogo / loader CSS pair
+// as Fit/Media. Never type the family wordmark.
+
+import Link from 'next/link'
+import {
+  LOCKUP_INTRINSIC_HEIGHT,
+  LOCKUP_INTRINSIC_WIDTH,
+  PODCAST_LOCKUP_DARK,
+  PODCAST_LOCKUP_LABEL,
+  PODCAST_LOCKUP_LIGHT,
+} from '@/lib/lockups'
+
 const FB = 'var(--font-barlow)'
-const FBC = 'var(--font-barlow-condensed)'
-const FBN = 'var(--font-bebas)'
+
+export function PodcastMastheadLockup() {
+  return (
+    <h1 className="ep-podcast-masthead-wordmark">
+      <Link href="/podcast" aria-label={PODCAST_LOCKUP_LABEL}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          data-podcast-lockup-dark
+          className="ep-podcast-masthead-logo ep-podcast-masthead-logo--on-dark"
+          src={PODCAST_LOCKUP_DARK}
+          alt=""
+          width={LOCKUP_INTRINSIC_WIDTH}
+          height={LOCKUP_INTRINSIC_HEIGHT}
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          data-podcast-lockup-light
+          className="ep-podcast-masthead-logo ep-podcast-masthead-logo--on-light"
+          src={PODCAST_LOCKUP_LIGHT}
+          alt=""
+          width={LOCKUP_INTRINSIC_WIDTH}
+          height={LOCKUP_INTRINSIC_HEIGHT}
+        />
+      </Link>
+    </h1>
+  )
+}
 
 export function PodcastMasthead() {
   return (
     <header
+      className="ep-podcast-masthead"
       style={{
         position: 'relative',
         zIndex: 1,
@@ -15,35 +54,10 @@ export function PodcastMasthead() {
         fontFamily: FB,
       }}
     >
+      <PodcastMastheadLockup />
       <p
         style={{
-          margin: 0,
-          fontFamily: FBC,
-          fontWeight: 700,
-          fontSize: 12,
-          letterSpacing: '0.42em',
-          textTransform: 'uppercase',
-          color: 'rgba(201,168,76,0.85)',
-        }}
-      >
-        The Evolved Pros
-      </p>
-      <h1
-        style={{
-          margin: '6px 0 8px',
-          fontFamily: FBN,
-          fontSize: 'clamp(40px, 11vw, 64px)',
-          letterSpacing: '0.04em',
-          color: 'var(--podcast-text-strong)',
-          textTransform: 'uppercase',
-          lineHeight: 1,
-        }}
-      >
-        The podcast
-      </h1>
-      <p
-        style={{
-          margin: 0,
+          margin: '12px 0 0',
           fontFamily: FB,
           fontSize: 16,
           lineHeight: 1.5,

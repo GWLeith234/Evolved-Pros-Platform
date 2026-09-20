@@ -38,7 +38,7 @@ describe('Fit masthead lockup', () => {
     expect(html).toContain('Back to platform')
     expect(page).toContain('<FitMasthead')
     expect(page).toContain('bg-page')
-    expect(css).toMatch(/\.ep-fit-masthead-logo--on-dark \{[\s\S]*display: block/)
+    expect(css).toMatch(/\.ep-fit-masthead-logo--on-dark[\s\S]*display: block/)
     expect(css).toMatch(/html\.light-mode \.ep-fit-masthead-logo--on-light[\s\S]*display: block/)
   })
 })

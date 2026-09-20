@@ -2618,6 +2618,40 @@ html.light-mode .ep-media-masthead-join:hover,
 html.light-mode .ep-media-masthead-join:focus-visible {
   color: var(--navy);
 }
+.ep-podcast-masthead-wordmark,
+.ep-academy-masthead-wordmark {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  font-size: inherit;
+  font-weight: inherit;
+}
+.ep-podcast-masthead-wordmark a,
+.ep-academy-masthead-wordmark a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  max-width: 100%;
+  text-decoration: none;
+  line-height: 0;
+}
+.ep-podcast-masthead-logo,
+.ep-academy-masthead-logo {
+  height: clamp(56px, 12vw, 96px);
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  background: transparent;
+}
+.ep-podcast-masthead-logo--on-dark,
+.ep-academy-masthead-logo--on-dark { display: block; }
+.ep-podcast-masthead-logo--on-light,
+.ep-academy-masthead-logo--on-light { display: none; }
+html.light-mode .ep-podcast-masthead-logo--on-dark,
+html.light-mode .ep-academy-masthead-logo--on-dark { display: none; }
+html.light-mode .ep-podcast-masthead-logo--on-light,
+html.light-mode .ep-academy-masthead-logo--on-light { display: block; }
 .ep-fit-masthead-inner {
   padding-bottom: var(--space-6);
 }
