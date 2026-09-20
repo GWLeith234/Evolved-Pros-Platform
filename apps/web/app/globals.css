@@ -3655,10 +3655,10 @@ html.light-mode .ep-media-home {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: color-mix(in srgb, var(--navy) 22%, var(--bg-surface));
+  background: color-mix(in srgb, var(--navy) 38%, var(--bg-elevated));
 }
 html.light-mode .ep-media-thumb-fallback {
-  background: color-mix(in srgb, var(--navy) 12%, var(--paper));
+  background: color-mix(in srgb, var(--navy) 10%, var(--paper));
 }
 .ep-media-thumb-fallback-mark {
   font-family: var(--font-bebas), "Bebas Neue", sans-serif;

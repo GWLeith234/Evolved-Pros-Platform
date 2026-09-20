@@ -88,7 +88,7 @@ describe('EPM Media card-art presentation', () => {
     expect(filled).toContain('ed-story-art')
     expect(filled).not.toContain('ep-media-thumb-fallback')
 
-    expect(css).toMatch(/\.ep-media-thumb-fallback \{[\s\S]*var\(--navy\)[\s\S]*var\(--bg-surface\)/)
+    expect(css).toMatch(/\.ep-media-thumb-fallback \{[\s\S]*var\(--navy\)[\s\S]*var\(--bg-elevated\)/)
     expect(css).toMatch(/html\.light-mode \.ep-media-thumb-fallback \{[\s\S]*var\(--paper\)/)
     expect(css).not.toMatch(/\.ep-media-thumb-fallback \{[\s\S]{0,180}black/)
     expect(css).not.toMatch(/\.ep-media-podcast-still \{[\s\S]{0,120}--navy-dark/)
