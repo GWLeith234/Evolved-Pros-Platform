@@ -46,6 +46,17 @@ export function lockedArticleByline(story: {
   return featuredHeroByline(story)
 }
 
+/**
+ * Soo/TT large-thumb crop. Hero, featured 2-up, list rails, and article
+ * stills share 3:2 so Unsplash and Supabase Branding uploads fill the same
+ * frame. Video podcast stills stay 16:9 elsewhere.
+ */
+export const MEDIA_STORY_THUMB_RATIO = '3 / 2' as const
+
+export function storyThumbIntrinsic(priority = false): { width: number; height: number } {
+  return priority ? { width: 1200, height: 800 } : { width: 480, height: 320 }
+}
+
 /** Class for <img> / next/Image fill covers on the desk. */
 export function storyArtImgClass(_url?: string | null): string {
   return 'ed-story-art'

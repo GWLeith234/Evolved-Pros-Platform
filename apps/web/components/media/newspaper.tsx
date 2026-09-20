@@ -20,7 +20,13 @@ import {
   formatRailDuration,
   type MediaRailEpisode,
 } from '@/lib/media/podcastRail'
-import { featuredHeroByline, resolveStoryArtUrl, storyArtImgClass } from '@/lib/media/storyArt'
+import {
+  featuredHeroByline,
+  MEDIA_STORY_THUMB_RATIO,
+  resolveStoryArtUrl,
+  storyArtImgClass,
+  storyThumbIntrinsic,
+} from '@/lib/media/storyArt'
 
 export type NewspaperStory = {
   id: string
@@ -81,30 +87,37 @@ function titleClamp(lines: 2 | 3): CSSProperties {
 
 export function NewspaperThumb({
   story,
-  ratio,
+  ratio = MEDIA_STORY_THUMB_RATIO,
   priority = false,
 }: {
-  story: NewspaperStory
-  ratio: string
+  story: Pick<NewspaperStory, 'featured_image_url'>
+  ratio?: string
   priority?: boolean
 }) {
   const src = resolveStoryArtUrl(story.featured_image_url)
+  const size = storyThumbIntrinsic(priority)
   return (
-    <div className="ep-media-thumb" style={{ aspectRatio: ratio }}>
+    <div
+      className="ep-media-thumb"
+      data-media-thumb={src ? 'art' : 'empty'}
+      style={{ aspectRatio: ratio }}
+    >
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={src}
           alt=""
-          width={priority ? 1280 : 320}
-          height={priority ? 720 : 214}
+          width={size.width}
+          height={size.height}
           decoding="async"
           loading={priority ? undefined : 'lazy'}
           {...(priority ? { fetchpriority: 'high' } : {})}
           className={storyArtImgClass(story.featured_image_url)}
         />
       ) : (
-        <div className="ep-media-thumb-fallback" />
+        <div className="ep-media-thumb-fallback" aria-hidden="true">
+          <span className="ep-media-thumb-fallback-mark">EP</span>
+        </div>
       )}
     </div>
   )
@@ -162,7 +175,7 @@ export function NewspaperDualHero({
     >
       {lede ? (
         <Link href={newspaperStoryHref(lede)} className="ep-media-lede">
-          <NewspaperThumb story={lede} ratio="3 / 2" priority />
+          <NewspaperThumb story={lede} priority />
           <div className="ep-media-lede-copy ed-featured-meta">
             <NewspaperKicker story={lede} />
             <h2 className="ep-media-lede-title">{lede.title}</h2>
@@ -175,7 +188,7 @@ export function NewspaperDualHero({
       )}
       {secondary ? (
         <Link href={newspaperStoryHref(secondary)} className="ep-media-secondary">
-          <NewspaperThumb story={secondary} ratio="3 / 2" />
+          <NewspaperThumb story={secondary} />
           <div className="ep-media-secondary-copy">
             <NewspaperKicker story={secondary} />
             <h3 className="ep-media-secondary-title" style={titleClamp(3)}>
@@ -199,7 +212,7 @@ export function NewspaperFeaturedGrid({ stories }: { stories: NewspaperStory[] }
       <div className="ep-media-featured-grid">
         {stories.map(story => (
           <Link key={story.id} href={newspaperStoryHref(story)} className="ep-media-feature-card">
-            <NewspaperThumb story={story} ratio="16 / 9" />
+            <NewspaperThumb story={story} />
             <div className="ep-media-feature-copy">
               <NewspaperKicker story={story} />
               <h3 style={titleClamp(2)}>{story.title}</h3>
@@ -240,7 +253,7 @@ export function NewspaperLatestRail({
         {stories.map((story, index) => (
           <li key={story.id}>
             <Link href={newspaperStoryHref(story)} className="ep-media-list-row">
-              <NewspaperThumb story={story} ratio="3 / 2" />
+              <NewspaperThumb story={story} />
               <div>
                 <NewspaperKicker story={story} />
                 <h3 style={titleClamp(2)}>{story.title}</h3>
@@ -402,7 +415,7 @@ export function NewspaperPodcast({
               data-media-podcast-row
               className="ep-media-podcast-card"
             >
-              <div className="ep-media-podcast-still">
+              <div className="ep-media-podcast-still" data-media-thumb={still ? 'art' : 'empty'}>
                 {still ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -414,7 +427,11 @@ export function NewspaperPodcast({
                     decoding="async"
                     style={{ objectPosition: '50% 12%' }}
                   />
-                ) : null}
+                ) : (
+                  <div className="ep-media-thumb-fallback" aria-hidden="true">
+                    <span className="ep-media-thumb-fallback-mark">EP</span>
+                  </div>
+                )}
               </div>
               <p className="ep-media-kicker">Episode {ep.episode_number}</p>
               <h3>{ep.title}</h3>
@@ -447,7 +464,7 @@ export function NewspaperMoreInSection({
         {stories.slice(0, 6).map(story => (
           <li key={story.id}>
             <Link href={newspaperStoryHref(story)} className="ep-media-list-row">
-              <NewspaperThumb story={story} ratio="3 / 2" />
+              <NewspaperThumb story={story} />
               <div>
                 <NewspaperKicker story={story} />
                 <h3 style={titleClamp(2)}>{story.title}</h3>
