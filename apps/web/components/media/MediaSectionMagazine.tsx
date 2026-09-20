@@ -59,7 +59,7 @@ export async function MediaSectionMagazine({
   const feed = layoutMediaFeed(grid, gridAds)
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 24px 40px' }}>
+    <div className="ep-media-home" style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 24px 40px' }}>
       <div style={{ marginBottom: 20 }}>
         <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 10, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>
           {MEDIA_BRAND}
@@ -76,19 +76,29 @@ export async function MediaSectionMagazine({
 
       {featured && (
         <Link href={storyHref(featured)} style={{ textDecoration: 'none', display: 'block', marginBottom: 20 }}>
-          <div style={{ position: 'relative', aspectRatio: '21/9', borderRadius: 4, overflow: 'hidden', backgroundColor: '#2B3A5A' }}>
+          <div className="ep-media-thumb" style={{ position: 'relative', aspectRatio: '3 / 2', borderRadius: 4, overflow: 'hidden' }}>
             {featured.featured_image_url ? (
               <Image src={resolveStoryArtUrl(featured.featured_image_url) ?? featured.featured_image_url} alt="" fill priority sizes="(max-width: 1100px) 100vw, 1100px" className={storyArtImgClass(featured.featured_image_url)} />
             ) : (
-              <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1a2540)' }} />
+              <div className="ep-media-thumb-fallback" aria-hidden="true" />
             )}
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '40px 20px 16px', background: 'linear-gradient(transparent, rgba(0,0,0,0.7))' }}>
-              <h2 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 24, color: '#fff', lineHeight: 1.15, margin: '0 0 6px', maxWidth: 600, display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden' }}>{featured.title}</h2>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', fontFamily: 'var(--font-body)' }}>
+            {featured.featured_image_url ? (
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '40px 20px 16px', background: 'linear-gradient(transparent, rgba(0,0,0,0.7))' }}>
+                <h2 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 24, color: '#fff', lineHeight: 1.15, margin: '0 0 6px', maxWidth: 600, display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden' }}>{featured.title}</h2>
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', fontFamily: 'var(--font-body)' }}>
+                  {featured.author ?? 'George Leith'} · {fmtDate(featured.published_at)} · {readTime(featured.body)} read
+                </span>
+              </div>
+            ) : null}
+          </div>
+          {!featured.featured_image_url ? (
+            <div style={{ padding: '12px 0 0' }}>
+              <h2 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 24, color: MEDIA_NAVY, lineHeight: 1.15, margin: '0 0 6px', maxWidth: 600, display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden' }}>{featured.title}</h2>
+              <span style={{ fontSize: 11, color: 'rgba(43,58,90,0.55)', fontFamily: 'var(--font-body)' }}>
                 {featured.author ?? 'George Leith'} · {fmtDate(featured.published_at)} · {readTime(featured.body)} read
               </span>
             </div>
-          </div>
+          ) : null}
         </Link>
       )}
 
@@ -119,11 +129,11 @@ export async function MediaSectionMagazine({
                     href={storyHref(a)}
                     style={{ textDecoration: 'none', display: 'block', backgroundColor: '#fff', border: '0.5px solid rgba(43,58,90,0.1)', borderRadius: 2, overflow: 'hidden' }}
                   >
-                    <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: '#2B3A5A', overflow: 'hidden' }}>
+                    <div className="ep-media-thumb" style={{ position: 'relative', aspectRatio: '3 / 2', overflow: 'hidden' }}>
                       {a.featured_image_url ? (
                         <Image src={resolveStoryArtUrl(a.featured_image_url) ?? a.featured_image_url} alt="" fill sizes="(max-width: 767px) 100vw, 360px" className={storyArtImgClass(a.featured_image_url)} />
                       ) : (
-                        <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #2B3A5A, #1a2540)' }} />
+                        <div className="ep-media-thumb-fallback" aria-hidden="true" />
                       )}
                     </div>
                     <div style={{ padding: '10px 12px 12px' }}>

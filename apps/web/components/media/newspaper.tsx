@@ -19,7 +19,10 @@ import {
   formatRailDuration,
   type MediaRailEpisode,
 } from '@/lib/media/podcastRail'
-import { featuredHeroByline, resolveStoryArtUrl, storyArtImgClass } from '@/lib/media/storyArt'
+import { featuredHeroByline } from '@/lib/media/storyArt'
+import { NewspaperThumb } from '@/components/media/NewspaperThumb'
+
+export { NewspaperThumb } from '@/components/media/NewspaperThumb'
 
 export type NewspaperStory = {
   id: string
@@ -78,37 +81,6 @@ function titleClamp(lines: 2 | 3): CSSProperties {
   }
 }
 
-export function NewspaperThumb({
-  story,
-  ratio,
-  priority = false,
-}: {
-  story: NewspaperStory
-  ratio: string
-  priority?: boolean
-}) {
-  const src = resolveStoryArtUrl(story.featured_image_url)
-  return (
-    <div className="ep-media-thumb" style={{ aspectRatio: ratio }}>
-      {src ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={src}
-          alt=""
-          width={priority ? 1280 : 320}
-          height={priority ? 720 : 214}
-          decoding="async"
-          loading={priority ? undefined : 'lazy'}
-          {...(priority ? { fetchpriority: 'high' } : {})}
-          className={storyArtImgClass(story.featured_image_url)}
-        />
-      ) : (
-        <div className="ep-media-thumb-fallback" />
-      )}
-    </div>
-  )
-}
-
 export function NewspaperKicker({ story }: { story: NewspaperStory }) {
   return <span className="ep-media-kicker">{tagLabelForStory(story)}</span>
 }
@@ -161,7 +133,7 @@ export function NewspaperDualHero({
     >
       {lede ? (
         <Link href={newspaperStoryHref(lede)} className="ep-media-lede">
-          <NewspaperThumb story={lede} ratio="3 / 2" priority />
+          <NewspaperThumb story={lede} ratio="3 / 2" variant="hero" priority />
           <div className="ep-media-lede-copy ed-featured-meta">
             <NewspaperKicker story={lede} />
             <h2 className="ep-media-lede-title">{lede.title}</h2>
@@ -174,7 +146,7 @@ export function NewspaperDualHero({
       )}
       {secondary ? (
         <Link href={newspaperStoryHref(secondary)} className="ep-media-secondary">
-          <NewspaperThumb story={secondary} ratio="3 / 2" />
+          <NewspaperThumb story={secondary} ratio="3 / 2" variant="feature" />
           <div className="ep-media-secondary-copy">
             <NewspaperKicker story={secondary} />
             <h3 className="ep-media-secondary-title" style={titleClamp(3)}>
@@ -198,7 +170,7 @@ export function NewspaperFeaturedGrid({ stories }: { stories: NewspaperStory[] }
       <div className="ep-media-featured-grid">
         {stories.map(story => (
           <Link key={story.id} href={newspaperStoryHref(story)} className="ep-media-feature-card">
-            <NewspaperThumb story={story} ratio="16 / 9" />
+            <NewspaperThumb story={story} ratio="3 / 2" variant="feature" />
             <div className="ep-media-feature-copy">
               <NewspaperKicker story={story} />
               <h3 style={titleClamp(2)}>{story.title}</h3>
@@ -239,7 +211,7 @@ export function NewspaperLatestRail({
         {stories.map((story, index) => (
           <li key={story.id}>
             <Link href={newspaperStoryHref(story)} className="ep-media-list-row">
-              <NewspaperThumb story={story} ratio="3 / 2" />
+              <NewspaperThumb story={story} ratio="3 / 2" variant="list" />
               <div>
                 <NewspaperKicker story={story} />
                 <h3 style={titleClamp(2)}>{story.title}</h3>
@@ -461,7 +433,7 @@ export function NewspaperMoreInSection({
         {stories.slice(0, 6).map(story => (
           <li key={story.id}>
             <Link href={newspaperStoryHref(story)} className="ep-media-list-row">
-              <NewspaperThumb story={story} ratio="3 / 2" />
+              <NewspaperThumb story={story} ratio="3 / 2" variant="list" />
               <div>
                 <NewspaperKicker story={story} />
                 <h3 style={titleClamp(2)}>{story.title}</h3>

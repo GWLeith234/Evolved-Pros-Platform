@@ -208,19 +208,25 @@ export default async function StoryPage({
 
             <ArticleShareBar articleUrl={articleUrl} articleTitle={story.title} />
 
-            {artSrc ? (
-              <figure className="ep-media-article-art">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+            <figure
+              className="ep-media-article-art"
+              data-media-thumb={artSrc ? 'hero' : 'empty'}
+              {...(artSrc ? {} : { 'data-media-thumb-empty': 'true' })}
+            >
+              {artSrc ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={artSrc}
                   alt=""
                   width={1280}
-                  height={720}
+                  height={853}
                   decoding="async"
                   className={storyArtImgClass(story.featured_image_url)}
                 />
-              </figure>
-            ) : null}
+              ) : (
+                <div className="ep-media-thumb-fallback" aria-hidden="true" />
+              )}
+            </figure>
 
             {story.story_type === 'pioneer_spin' && story.source_name ? (
               <p className="ep-media-article-source">
