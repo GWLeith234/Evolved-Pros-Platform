@@ -4360,7 +4360,7 @@ html.light-mode .ep-media-brief {
    container. See components/ads/AdPlane.tsx for the full rule.
 
    DIRECTION is the rule, not these exact values:
-     light  page #F5F0E8 -> plane #DED7CA   (plane is DARKER, 1.26:1)
+     light  page #F5F0E8 -> plane #D8D0C1   (plane is DARKER, 1.35:1)
      dark   page #0A0F18 -> plane #354656   (plane is LIGHTER, 1.98:1)
             dark  #112535 -> plane #354656   (plane is LIGHTER, 1.61:1)
 
@@ -4373,9 +4373,9 @@ html.light-mode .ep-media-brief {
   --ad-plane-label: #D3DAE1; /* 6.89:1 on --ad-plane-bg */
 }
 html.light-mode {
-  --ad-plane-bg:    #DED7CA;
+  --ad-plane-bg:    #D8D0C1;
   --ad-plane-line:  #9A9284;
-  --ad-plane-label: #3F3B36; /* 7.77:1 on --ad-plane-bg */
+  --ad-plane-label: #3F3B36; /* 7.25:1 on --ad-plane-bg */
 }
 /* Fixed-dark shells (/live, the /login footer) keep the DARK plane even while
    the rest of the document is in light mode - otherwise the plane would step

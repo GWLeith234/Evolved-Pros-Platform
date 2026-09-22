@@ -24,6 +24,14 @@ const partnerSlot = read('../../components/media/MediaPartnerSlot.tsx')
 
 /** The page planes the ad plane has to step away from. */
 const PAGE_LIGHT = '#F5F0E8'
+
+/**
+ * The approved floor from the ad design standard: a plane must clear 1.3:1
+ * against the page it sits on. Sprint M shipped light mode at 1.26:1 while
+ * this test only asked for 1.15, so the gate passed and the standard did not.
+ * One named constant now, so the gate and the standard cannot drift again.
+ */
+const SEPARATION_FLOOR = 1.3
 const PAGE_DARK = '#0A0F18'
 const PAGE_DARK_NAVY = '#112535'
 
@@ -79,15 +87,15 @@ describe('ad separation standard: the plane steps away from the page', () => {
   it('is DARKER than the page in light mode', () => {
     expect(luminance(lightPlane)).toBeLessThan(luminance(PAGE_LIGHT))
     // Visible, not merely different: a step this size survives a phone screen
-    // at an angle. Under ~1.15 the border is doing all the work.
-    expect(contrast(lightPlane, PAGE_LIGHT)).toBeGreaterThan(1.15)
+    // at an angle. Below the floor the border is doing all the work.
+    expect(contrast(lightPlane, PAGE_LIGHT)).toBeGreaterThanOrEqual(SEPARATION_FLOOR)
   })
 
   it('is LIGHTER than the page in dark mode, on both dark page values', () => {
     expect(luminance(darkPlane)).toBeGreaterThan(luminance(PAGE_DARK))
     expect(luminance(darkPlane)).toBeGreaterThan(luminance(PAGE_DARK_NAVY))
-    expect(contrast(darkPlane, PAGE_DARK)).toBeGreaterThan(1.15)
-    expect(contrast(darkPlane, PAGE_DARK_NAVY)).toBeGreaterThan(1.15)
+    expect(contrast(darkPlane, PAGE_DARK)).toBeGreaterThanOrEqual(SEPARATION_FLOOR)
+    expect(contrast(darkPlane, PAGE_DARK_NAVY)).toBeGreaterThanOrEqual(SEPARATION_FLOOR)
   })
 
   it('keeps the dark plane inside fixed-dark shells, so it never steps the wrong way', () => {
