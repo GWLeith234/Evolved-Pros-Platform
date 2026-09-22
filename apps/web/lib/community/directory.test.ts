@@ -6,8 +6,10 @@ import {
   DIRECTORY_DM_LOCKED_COPY,
   DIRECTORY_FULL_COLUMNS,
   DIRECTORY_PUBLIC_COLUMNS,
+  directorySearchTerm,
   directorySelect,
   firstNameOf,
+  shapeProfileForViewer,
   seatsFilledLine,
   shapeDirectory,
   toFullMember,
@@ -212,6 +214,44 @@ describe('the DM gate is server-side, not just a disabled button', () => {
     expect(route).toContain('403')
     // Both the read and the write, since opening a conversation is a POST.
     expect(route.match(/refuseWithoutNetwork\(\)/g)?.length).toBeGreaterThanOrEqual(3)
+  })
+
+  it('refuses the thread API too, which is where a message is actually sent', () => {
+    const thread = read('../../app/api/conversations/[id]/messages/route.ts')
+    expect(thread).toContain('canAccessNetwork')
+    expect(thread.match(/requireNetworkMember\(\)/g)?.length).toBeGreaterThanOrEqual(3)
+    const unread = read('../../app/api/conversations/unread-count/route.ts')
+    expect(unread).toContain('canAccessNetwork')
+  })
+
+  it('redacts the profile page the directory links to', () => {
+    const page = read('../../app/(member)/profile/[userId]/page.tsx')
+    expect(page).toContain('shapeProfileForViewer')
+    expect(page).toContain('directoryDetail')
+  })
+
+  it('strips PostgREST syntax out of directory search', () => {
+    expect(directorySearchTerm('Dana')).toBe('Dana')
+    expect(directorySearchTerm('a%,id.eq.b')).toBe('a id eq b')
+    expect(directorySearchTerm('%%%')).toBeNull()
+    const route = read('../../app/api/members/route.ts')
+    expect(route).toContain('directorySearchTerm')
+    expect(route).not.toContain('${search}')
+  })
+
+  it('withholds bio, surname and socials on a public profile view', () => {
+    const shaped = shapeProfileForViewer(ROW, { detail: 'public', isSelf: false })
+    const payload = JSON.stringify(shaped)
+    expect(shaped.display_name).toBe('Dana')
+    expect(payload).not.toContain('Whitfield')
+    expect(payload).not.toContain('Twenty years carrying a number.')
+    expect(payload).not.toContain('Northwind')
+    expect(payload).not.toContain('linkedin.com')
+    expect(payload).not.toContain('Close the Kestrel')
+    const self = shapeProfileForViewer(ROW, { detail: 'public', isSelf: true })
+    expect(self.bio).toContain('Twenty years')
+    const full = shapeProfileForViewer(ROW, { detail: 'full', isSelf: false })
+    expect(full.company).toBe('Northwind Logistics')
   })
 
   it('shows an upgrade state at /messages, never a 404', () => {

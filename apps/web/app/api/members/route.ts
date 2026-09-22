@@ -17,7 +17,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { directoryDetail } from '@/lib/entitlements'
-import { directorySelect, shapeDirectory, type DirectoryRow } from '@/lib/community/directory'
+import { directorySearchTerm, directorySelect, shapeDirectory, type DirectoryRow } from '@/lib/community/directory'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,11 +46,13 @@ export async function GET(request: Request) {
     .order('points', { ascending: false })
     .limit(limit + 1)
 
-  if (search) {
+  const term = directorySearchTerm(search)
+  if (term) {
     // Search spans display_name / full_name / role_title for everyone: a
     // community viewer may FIND somebody by surname without being SHOWN it.
+    // The term is stripped of PostgREST filter syntax before interpolation.
     query = query.or(
-      `display_name.ilike.%${search}%,full_name.ilike.%${search}%,role_title.ilike.%${search}%`,
+      `display_name.ilike.%${term}%,full_name.ilike.%${term}%,role_title.ilike.%${term}%`,
     )
   }
 

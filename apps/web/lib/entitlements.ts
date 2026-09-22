@@ -247,11 +247,15 @@ export function canPlayLesson(
     tier: string | null | undefined
     tierStatus?: string | null
     courseSlug: string | null | undefined
+    /** courses.pillar_number. Pillar 1 is Foundation even if its slug differs. */
+    pillarNumber?: number | null
     sortOrder: number | null | undefined
   },
 ): boolean {
   if (canAccessAcademy(opts.tier, opts.tierStatus)) return true
-  if (opts.courseSlug !== ACADEMY_TEASER_COURSE_SLUG) return false
+  const teaserCourse =
+    opts.pillarNumber === 1 || opts.courseSlug === ACADEMY_TEASER_COURSE_SLUG
+  if (!teaserCourse) return false
   return typeof opts.sortOrder === 'number' && opts.sortOrder <= ACADEMY_TEASER_LESSON_COUNT
 }
 
@@ -280,4 +284,28 @@ export function meetsRowRequirement(
   tierStatus?: string | null,
 ): boolean {
   return hasTierAccess(effectiveTier(tier, tierStatus), requiredTier)
+}
+
+/**
+ * Whether this member may open this lesson.
+ *
+ * The course row still wins when the viewer already clears it. The free-tier
+ * teaser is the only exception below that row, and only for someone who does
+ * not already have the Academy: a VIP who fails a pro-gated row stays out.
+ *
+ * Migration 095 set every pillar, including Foundation, to vip. The lesson
+ * page and the Mux signer kept checking that column alone, so Foundation
+ * lesson 1 was specified here and never reachable.
+ */
+export function canOpenLesson(opts: {
+  tier: string | null | undefined
+  tierStatus?: string | null
+  requiredTier: string | null | undefined
+  courseSlug: string | null | undefined
+  pillarNumber?: number | null
+  sortOrder: number | null | undefined
+}): boolean {
+  if (meetsRowRequirement(opts.tier, opts.requiredTier, opts.tierStatus)) return true
+  if (canAccessAcademy(opts.tier, opts.tierStatus)) return false
+  return canPlayLesson(opts)
 }

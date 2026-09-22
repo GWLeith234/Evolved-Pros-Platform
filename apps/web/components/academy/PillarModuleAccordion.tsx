@@ -15,6 +15,7 @@ interface LessonItem {
   completedAt: string | null
   durationSeconds: number | null
   thumbnailUrl: string | null
+  isLocked?: boolean
 }
 
 interface ModuleGroup {
@@ -28,6 +29,8 @@ interface Props {
   pillarColor: string
   /** One centered IAB after every three lesson cards, across the whole pillar. */
   ads?: SponsorAd[]
+  /** Where a locked lesson goes. The player route also refuses it. */
+  lockedHref?: string
 }
 
 function formatDur(s: number | null): string {
@@ -69,7 +72,7 @@ function ThreadAd({ ad }: { ad: SponsorAd }) {
   )
 }
 
-export function PillarModuleAccordion({ modules, courseSlug, pillarColor, ads = [] }: Props) {
+export function PillarModuleAccordion({ modules, courseSlug, pillarColor, ads = [], lockedHref }: Props) {
   const defaultOpen = modules.find(m => m.lessons.some(l => !l.completedAt))?.moduleNumber
     ?? modules[0]?.moduleNumber
     ?? 1
@@ -164,13 +167,14 @@ export function PillarModuleAccordion({ modules, courseSlug, pillarColor, ads = 
                   return (
                   <div key={lesson.id}>
                   <Link
-                    href={`/academy/${courseSlug}/${lesson.slug}`}
+                    href={lesson.isLocked && lockedHref ? lockedHref : `/academy/${courseSlug}/${lesson.slug}`}
                     style={{
                       display: 'flex', alignItems: 'center', gap: '14px',
                       padding: '14px 20px',
                       borderBottom: idx < lessons.length - 1 || insertAd ? '1px solid rgba(255,255,255,0.04)' : 'none',
                       textDecoration: 'none',
                       backgroundColor: 'transparent',
+                      opacity: lesson.isLocked ? 0.55 : 1,
                       transition: 'background-color 0.15s',
                     }}
                     onMouseEnter={e => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)')}

@@ -1,6 +1,6 @@
 import 'server-only'
 import { adminClient } from '@/lib/supabase/admin'
-import { TIERS, type TierKey, type TierPrice } from '@/lib/pricing'
+import { resolveDisplayedAnnual, TIERS, type TierKey, type TierPrice } from '@/lib/pricing'
 
 // ---------------------------------------------------------------------------
 // Commerce catalogue — SPRINT I Phase 2.
@@ -168,8 +168,11 @@ export async function getMembershipPricing(): Promise<MembershipPricing> {
     const yearCents = product?.prices.find(pr => pr.interval === 'year' && pr.active)?.unit_amount
     if (typeof monthCents === 'number') tiers[key].monthly = monthCents / 100
     else usedFallback = true
-    if (typeof yearCents === 'number') tiers[key].annual = yearCents / 100
-    else usedFallback = true
+    // Annual stays null while TIERS says it is not offered, even if the
+    // catalogue still has an archived yearly price. Checkout refuses annual
+    // from the same constant; showing it here would quote a price we will not sell.
+    if (TIERS[key].annual != null && typeof yearCents !== 'number') usedFallback = true
+    tiers[key].annual = resolveDisplayedAnnual(TIERS[key].annual, yearCents)
   }
 
   return { tiers, usedFallback }

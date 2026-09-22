@@ -13,7 +13,7 @@ import {
   fetchCoursesWithProgress,
   fetchUserProfile,
 } from '@/lib/academy/fetchers'
-import { hasTierAccess } from '@/lib/tier'
+import { canOpenLesson } from '@/lib/entitlements'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { asTranscriptSegments } from '@/lib/academy/transcript'
 import { asKeyTakeaways } from '@/lib/academy/takeaways'
@@ -64,15 +64,22 @@ export default async function LessonPage({ params }: Props) {
 
   if (!course || !lessonRow) notFound()
 
-  // SPRINT TIER-1 — server-side gate, ahead of every content fetch below
-  // (lesson body, transcript, takeaways, and the signed Mux token). A member
-  // below course.required_tier never reaches the render, so the lesson is
-  // unobtainable rather than merely hidden.
+  // Server-side gate, ahead of every content fetch below (lesson body,
+  // transcript, takeaways, and the signed Mux token). The course row is the
+  // rank check; canOpenLesson also opens the free-tier teaser (Foundation
+  // lesson 1) after migration 095 raised that course to vip.
   //
-  // Bounces to the pillar page rather than /academy: that page now renders the
+  // Bounces to the pillar page rather than /academy: that page renders the
   // upgrade panel for THIS pillar, so the member lands on the thing they asked
   // for with the price of admission on it.
-  if (!hasTierAccess(profile?.tier, course.required_tier)) {
+  if (!canOpenLesson({
+    tier: profile?.tier,
+    tierStatus: profile?.tier_status,
+    requiredTier: course.required_tier,
+    courseSlug: course.slug,
+    pillarNumber: course.pillar_number,
+    sortOrder: lessonRow.sort_order,
+  })) {
     redirect(`/academy/${params.pillarSlug}`)
   }
 

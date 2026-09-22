@@ -5,6 +5,9 @@ import { adminClient } from '@/lib/supabase/admin'
 import { ProfileView } from '@/components/profile/ProfileView'
 import { ProfileEditForm } from '@/components/profile/ProfileEditForm'
 import { countUserPosts } from '@/lib/community/postCount'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { directoryDetail } from '@/lib/entitlements'
+import { firstNameOf, shapeProfileForViewer } from '@/lib/community/directory'
 
 export async function generateMetadata({ params }: { params: { userId: string } }): Promise<Metadata> {
   const { data } = await adminClient
@@ -12,7 +15,15 @@ export async function generateMetadata({ params }: { params: { userId: string } 
     .select('display_name, full_name')
     .eq('id', params.userId)
     .maybeSingle()
-  const name = data?.display_name ?? data?.full_name ?? 'Profile'
+  const viewer = await resolveCurrentUser()
+  const detail = directoryDetail(
+    viewer?.tier,
+    viewer?.tier_status,
+  )
+  const isSelf = viewer?.id != null && viewer.id === params.userId
+  const name = isSelf || detail === 'full'
+    ? (data?.display_name ?? data?.full_name ?? 'Profile')
+    : firstNameOf(data?.display_name, data?.full_name)
   return { title: `${name} — Evolved Pros` }
 }
 
@@ -125,5 +136,16 @@ export default async function MemberProfilePage({
     )
   }
 
-  return <ProfileView profile={profile} stats={stats} isSelf={isSelf} />
+  const viewer = await resolveCurrentUser()
+  const detail = directoryDetail(viewer?.tier, viewer?.tier_status)
+  const visible = shapeProfileForViewer(profile, { detail, isSelf })
+
+  return (
+    <ProfileView
+      profile={visible}
+      stats={stats}
+      isSelf={isSelf}
+      canMessage={!isSelf && detail === 'full'}
+    />
+  )
 }

@@ -149,6 +149,58 @@ export function shapeDirectory(
 /** Copy for the inert Message button. One place, so it cannot drift. */
 export const DIRECTORY_DM_LOCKED_COPY = 'Members of The 99 can reach each other directly.'
 
+/**
+ * Search text safe to interpolate into a PostgREST `.or()` filter.
+ *
+ * Commas, parentheses and wildcards are filter syntax. A community viewer
+ * who can type them must not be able to reshape the query the service role
+ * runs. Returns null when nothing searchable remains.
+ */
+export function directorySearchTerm(raw: string): string | null {
+  const term = raw
+    .replace(/[%_,().\\]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 80)
+  return term.length > 0 ? term : null
+}
+
+export interface ProfilePrivacyInput {
+  display_name?: string | null
+  full_name?: string | null
+  bio?: string | null
+  company?: string | null
+  goal_90day?: string | null
+  linkedin_url?: string | null
+  twitter_handle?: string | null
+  website_url?: string | null
+  phone?: string | null
+}
+
+/**
+ * Profile pages are the directory's other door. A public viewer (and a VIP,
+ * who also gets the public payload) sees a first name and nothing that the
+ * directory SELECT withholds. The member always sees their own row.
+ */
+export function shapeProfileForViewer<T extends ProfilePrivacyInput>(
+  row: T,
+  opts: { detail: 'public' | 'full'; isSelf: boolean },
+): T {
+  if (opts.isSelf || opts.detail === 'full') return row
+  return {
+    ...row,
+    display_name: firstNameOf(row.display_name, row.full_name),
+    full_name: null,
+    bio: null,
+    company: null,
+    goal_90day: null,
+    linkedin_url: null,
+    twitter_handle: null,
+    website_url: null,
+    phone: null,
+  }
+}
+
 /** "<n> of 99 seats filled". Scarcity where people are looking at the room. */
 export function seatsFilledLine(taken: number, cap: number): string {
   return `${taken} of ${cap} seats filled`

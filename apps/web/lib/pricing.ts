@@ -1,10 +1,11 @@
 /**
  * Pricing — single source of truth for membership tier prices.
  *
- * There is no products/prices table and no platform_settings price keys; prices
- * used to live hardcoded (and inconsistently) across the pricing page, admin
- * products, admin revenue, and the admin dashboard MRR calc. Everything now
- * reads from here.
+ * Display fallback and the annual switch live here. The products/prices
+ * catalogue is the live monthly amount when a row exists (see
+ * getMembershipPricing). These constants are what a surface shows when the
+ * catalogue has no active monthly price, and they are the switch that keeps
+ * annual off until a yearly price is actually offered.
  *
  * Canonical (from George, repriced 2026-09-21):
  *   Community           — Free
@@ -51,6 +52,22 @@ export function annualBillingAvailable(
   tiers: Record<TierKey, TierPrice> = TIERS,
 ): boolean {
   return Object.values(tiers).some(t => typeof t.annual === 'number' && t.annual > 0)
+}
+
+/**
+ * Annual amount to render.
+ *
+ * A null canonical annual means yearly billing is not offered. A stale
+ * catalogue row (the archived $490 / $2,490 prices) must not put a toggle
+ * back on the page while /api/stripe/checkout refuses the plan.
+ */
+export function resolveDisplayedAnnual(
+  canonicalAnnual: number | null,
+  catalogueCents: number | null | undefined,
+): number | null {
+  if (canonicalAnnual == null) return null
+  if (typeof catalogueCents === 'number') return catalogueCents / 100
+  return canonicalAnnual
 }
 
 export type PaidPlanKey = 'vip_monthly' | 'vip_annual' | 'pro_monthly' | 'pro_annual'

@@ -1,5 +1,6 @@
 import { ProfileStats } from './ProfileStats'
 import { SendMessageButton } from './SendMessageButton'
+import { DIRECTORY_DM_LOCKED_COPY } from '@/lib/community/directory'
 
 interface ProfileViewData {
   id: string
@@ -31,6 +32,8 @@ interface ProfileViewProps {
   profile: ProfileViewData
   stats: ProfileViewStats
   isSelf: boolean
+  /** False for community and VIP. The button is not the gate; the API is. */
+  canMessage?: boolean
 }
 
 const DEFAULT_BANNER =
@@ -43,7 +46,7 @@ function getInitials(profile: ProfileViewData): string {
   return parts.map(p => p[0]!).slice(0, 2).join('').toUpperCase()
 }
 
-export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
+export function ProfileView({ profile, stats, isSelf, canMessage = false }: ProfileViewProps) {
   const displayName = profile.display_name ?? profile.full_name ?? 'Member'
   const banner = profile.banner_url ?? DEFAULT_BANNER
   const tierColor = tierBadgeColor(profile.tier)
@@ -193,8 +196,23 @@ export function ProfileView({ profile, stats, isSelf }: ProfileViewProps) {
               >
                 Edit profile →
               </a>
-            ) : (
+            ) : canMessage ? (
               <SendMessageButton recipientId={profile.id} />
+            ) : (
+              <p
+                style={{
+                  margin: 0,
+                  maxWidth: 220,
+                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontWeight: 600,
+                  fontSize: '12px',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  color: 'var(--text-tertiary)',
+                }}
+              >
+                {DIRECTORY_DM_LOCKED_COPY}
+              </p>
             )}
           </div>
         </div>

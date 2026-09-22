@@ -1,6 +1,7 @@
 import 'server-only'
 import { adminClient } from '@/lib/supabase/admin'
-import { getStripe, stripeConfigured } from '@/lib/stripe/config'
+import { getStripe, PLAN_CATALOG, priceIdForPlan, stripeConfigured, type PlanKey } from '@/lib/stripe/config'
+import { unionSeatPriceIds } from '@/lib/commerce/seatPriceIds'
 import { MRR_STATUSES } from '@/lib/stripe/mrr'
 import type { MembershipTier } from '@/lib/commerce/catalogue'
 
@@ -137,7 +138,16 @@ export async function seatStatusForTier(tier: MembershipTier): Promise<SeatStatu
   }
   if (product.seat_cap === null) return uncappedSeats()
 
-  const taken = await countLiveSubscriptions(product.stripePriceIds)
+  // Catalogue ids (including archived prices, so a seated member still counts)
+  // plus the env price checkout falls back to. Empty means we cannot tell a
+  // full room from an empty one, so this fails closed.
+  const priceIds = unionSeatPriceIds(product.stripePriceIds, envPriceIdsForTier(tier))
+  if (priceIds.length === 0) {
+    console.warn('[Seats] capped product has no Stripe price ids', tier)
+    return unknownSeats(product.seat_cap)
+  }
+
+  const taken = await countLiveSubscriptions(priceIds)
   if (taken === null) return unknownSeats(product.seat_cap)
 
   const remaining = Math.max(0, product.seat_cap - taken)
@@ -148,6 +158,17 @@ export async function seatStatusForTier(tier: MembershipTier): Promise<SeatStatu
     remaining,
     soldOut: remaining <= 0,
   }
+}
+
+function envPriceIdsForTier(tier: MembershipTier): string[] {
+  if (tier === 'community') return []
+  const ids: string[] = []
+  for (const plan of Object.keys(PLAN_CATALOG) as PlanKey[]) {
+    if (PLAN_CATALOG[plan].tier !== tier) continue
+    const id = priceIdForPlan(plan)
+    if (id) ids.push(id)
+  }
+  return ids
 }
 
 /** Seat status for every capped membership product, for the admin surface. */

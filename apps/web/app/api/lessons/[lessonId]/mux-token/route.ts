@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { generateMuxToken } from '@/lib/mux/client'
-import { hasTierAccess } from '@/lib/tier'
+import { canOpenLesson } from '@/lib/entitlements'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { NextResponse } from 'next/server'
 
@@ -23,7 +23,7 @@ export async function GET(
   // only AFTER auth, and still fail-closed on tier below.
   const { data: lesson } = await adminClient
     .from('lessons')
-    .select('mux_playback_id, is_published, course:courses(required_tier)')
+    .select('mux_playback_id, is_published, sort_order, course:courses(slug, pillar_number, required_tier)')
     .eq('id', params.lessonId)
     .maybeSingle()
 
@@ -39,16 +39,28 @@ export async function GET(
   //
   // The embedded select returns an object for a to-one relation, but the
   // generated types widen it to an array shape; normalise before reading.
-  const courseRel = (lesson as { course?: { required_tier?: string } | { required_tier?: string }[] | null }).course
-  const requiredTier = Array.isArray(courseRel)
-    ? courseRel[0]?.required_tier
-    : courseRel?.required_tier
+  const courseRel = (lesson as {
+    course?:
+      | { required_tier?: string; slug?: string; pillar_number?: number | null }
+      | { required_tier?: string; slug?: string; pillar_number?: number | null }[]
+      | null
+  }).course
+  const courseRow = Array.isArray(courseRel) ? courseRel[0] : courseRel
+  const requiredTier = courseRow?.required_tier
+  const courseSlug = courseRow?.slug ?? null
 
-  // Fail CLOSED when the course can't be resolved: hasTierAccess treats a null
-  // requirement as "open to everyone", which is right for events (most have no
-  // tier) and wrong for a lesson video. Fall back to 'pro' — the same
-  // fail-closed posture as the courses.required_tier column default in 078.
-  if (!hasTierAccess(profile.tier, requiredTier ?? 'pro')) {
+  // Fail CLOSED when the course can't be resolved: a null requirement would
+  // otherwise read as open. Fall back to 'pro' — the same posture as the
+  // courses.required_tier column default in 078. The teaser exception still
+  // applies, so Foundation lesson 1 can sign a token for the free tier.
+  if (!canOpenLesson({
+    tier: profile.tier,
+    tierStatus: profile.tier_status,
+    requiredTier: requiredTier ?? 'pro',
+    courseSlug,
+    pillarNumber: courseRow?.pillar_number,
+    sortOrder: (lesson as { sort_order?: number | null }).sort_order,
+  })) {
     return NextResponse.json({ error: 'Upgrade required' }, { status: 403 })
   }
 
