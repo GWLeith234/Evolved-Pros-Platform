@@ -134,7 +134,7 @@ describe('EPM Media card-art presentation', () => {
     expect(portal).toContain('MediaScrollRect')
     expect(landing).toContain('MediaScrollRect')
     expect(slot).toContain("'mid-rect'")
-    expect(slot).toContain('w: 300, h: 250')
+    expect(slot).toContain('data-media-scroll-rect="300x250"')
     expect(css).toContain('.ep-media-mid-rect')
     expect(css).toContain('.ep-media-partner-mid-fluid')
     expect(portal).not.toMatch(/googletag|doubleclick|gpt\.js/)
