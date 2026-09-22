@@ -12,10 +12,12 @@ import {
   featuredHeroByline,
   lockedArticleByline,
   hasBakedProsWordmark,
+  MEDIA_STORY_THUMB_RATIO,
   resolveStoryArtUrl,
   storyArtHeroBackground,
   storyArtHeroClass,
   storyArtImgClass,
+  storyThumbIntrinsic,
 } from './storyArt'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -29,6 +31,10 @@ const article = readFileSync(
 )
 const magazine = readFileSync(
   resolve(here, '../../components/media/MediaSectionMagazine.tsx'),
+  'utf8',
+)
+const newspaper = readFileSync(
+  resolve(here, '../../components/media/newspaper.tsx'),
   'utf8',
 )
 const css = readFileSync(resolve(here, '../../app/globals.css'), 'utf8')
@@ -108,12 +114,17 @@ describe('Media story art typed byline', () => {
   })
 
   it('wires resolve + plain byline on hub, article, and section surfaces', () => {
-    expect(portal).toContain('resolveStoryArtUrl')
+    expect(MEDIA_STORY_THUMB_RATIO).toBe('3 / 2')
+    expect(storyThumbIntrinsic(true)).toEqual({ width: 1200, height: 800 })
+    expect(storyThumbIntrinsic(false)).toEqual({ width: 480, height: 320 })
+    expect(portal).toContain('NewspaperThumb')
     expect(portal).toContain('featuredHeroByline')
     expect(portal).toContain('ed-featured-meta-byline')
     expect(portal).toContain('data-featured-byline="plain"')
     expect(portal).not.toMatch(/logo_horizontal/)
     expect(portal).not.toMatch(/MEDIA_LOCKUP_/)
+    expect(newspaper).toContain('resolveStoryArtUrl')
+    expect(newspaper).toContain('NewspaperThumb')
     expect(article).toContain('resolveStoryArtUrl')
     expect(article).toContain('storyArtImgClass')
     expect(article).toContain('lockedArticleByline')

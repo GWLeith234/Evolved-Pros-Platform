@@ -3627,21 +3627,47 @@ html.light-mode .ep-media-home {
   font-size: 11px;
   color: var(--text-tertiary);
 }
-.ep-media-thumb {
+.ep-media-thumb,
+.ep-media-podcast-still {
+  position: relative;
   overflow: hidden;
+  width: 100%;
   background: var(--media-slot-thumb);
+}
+.ep-media-thumb {
+  aspect-ratio: 3 / 2;
+}
+.ep-media-thumb img,
+.ep-media-podcast-still img,
+.ep-media-thumb-fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 .ep-media-thumb img,
 .ep-media-podcast-still img {
-  width: 100%;
-  height: 100%;
   object-fit: cover;
-  display: block;
+  object-position: center;
 }
 .ep-media-thumb-fallback {
-  width: 100%;
-  height: 100%;
-  background: color-mix(in srgb, var(--navy) 70%, black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--navy) 38%, var(--bg-elevated));
+}
+html.light-mode .ep-media-thumb-fallback {
+  background: color-mix(in srgb, var(--navy) 10%, var(--paper));
+}
+.ep-media-thumb-fallback-mark {
+  font-family: var(--font-bebas), "Bebas Neue", sans-serif;
+  font-size: clamp(28px, 5vw, 52px);
+  letter-spacing: 0.08em;
+  line-height: 1;
+  color: var(--brand-red-hot);
+  opacity: 0.28;
+  user-select: none;
 }
 .ep-media-module-head,
 .ep-media-rail-head {
@@ -3698,10 +3724,15 @@ html.light-mode .ep-media-home {
 .ep-media-latest-list > li:last-child { border-bottom: 0; }
 .ep-media-list-row {
   display: grid;
-  grid-template-columns: 100px minmax(0, 1fr);
+  grid-template-columns: 148px minmax(0, 1fr);
   gap: 12px;
   padding: 10px 12px;
-  align-items: center;
+  align-items: start;
+}
+@media (max-width: 639px) {
+  .ep-media-list-row {
+    grid-template-columns: 120px minmax(0, 1fr);
+  }
 }
 .ep-media-rail-card {
   margin-bottom: 16px;
@@ -3790,8 +3821,6 @@ html.light-mode .ep-media-brief-cta {
 }
 .ep-media-podcast-still {
   aspect-ratio: 16 / 9;
-  overflow: hidden;
-  background: var(--navy-dark);
   margin-bottom: 8px;
 }
 .ep-media-empty {
@@ -3875,7 +3904,10 @@ html.light-mode .ep-media-brief-cta {
   font-size: 13px;
 }
 .ep-media-article-art {
+  position: relative;
   margin: 18px 0 8px;
+  overflow: hidden;
+  background: var(--media-slot-thumb);
 }
 .ep-media-article-art img {
   width: 100%;
@@ -3883,6 +3915,7 @@ html.light-mode .ep-media-brief-cta {
   display: block;
   aspect-ratio: 3 / 2;
   object-fit: cover;
+  object-position: center;
 }
 .ep-media-article-source,
 .ep-media-must-cite {
@@ -4060,6 +4093,7 @@ html.light-mode .ep-media-share-btn {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 
