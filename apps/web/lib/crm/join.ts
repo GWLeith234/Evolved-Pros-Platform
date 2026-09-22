@@ -118,19 +118,42 @@ export async function notifyJoinAdmins(
   return notifyIntakeAdmins(db, joinNotificationCopy(input.email, full_name))
 }
 
-/** Backstop only: skip the bell when the join tag was already on the row. */
+/** Skip the bell when the join tag was already on the row. */
 export function shouldNotifyJoinBackstop(outcome: IntakeUpsertOutcome): boolean {
   return outcome.kind !== 'error' && outcome.addedTags.includes(JOIN_TAG)
 }
 
+/** Admin bell only when this write newly applied the join tag. */
+export async function notifyJoinIfNew(
+  db: IntakeDb,
+  input: JoinWrite,
+  outcome: IntakeUpsertOutcome,
+): Promise<NotifyOutcome> {
+  if (!shouldNotifyJoinBackstop(outcome)) return { notified: 0 }
+  return notifyJoinAdmins(db, input)
+}
+
+/** Cap so a slow CRM write cannot hold the signup redirect open. */
+export const JOIN_PROVISION_TIMEOUT_MS = 4000
+
+/**
+ * Best-effort CRM hook. keepalive lets the POST finish if the page navigates.
+ * Callers should await this before a hard redirect so the request is not aborted.
+ */
 export async function requestJoinProvision(email: string): Promise<void> {
+  const ctrl = new AbortController()
+  const timer = setTimeout(() => ctrl.abort(), JOIN_PROVISION_TIMEOUT_MS)
   try {
     await fetch('/api/auth/provision', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
+      keepalive: true,
+      signal: ctrl.signal,
     })
   } catch {
     // Best-effort. Signup must not fail because CRM is down.
+  } finally {
+    clearTimeout(timer)
   }
 }

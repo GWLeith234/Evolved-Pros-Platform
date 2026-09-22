@@ -3,7 +3,6 @@ import {
   COMP_TAG,
   FRIEND_OF_GEORGE_TAG,
   JOIN_TAG,
-  LIVE_INQUIRE_TAG,
   PAID_TAG,
   PG_UNIQUE_VIOLATION,
   PODCAST_GUEST_TAG,
@@ -30,19 +29,14 @@ function mockDb(overrides: Partial<IntakeDb> = {}): IntakeDb {
   }
 }
 
-describe('locked Phase B tags', () => {
-  it('keeps the exact George-YES strings (lowercase, spaces intact)', () => {
-    expect(LIVE_INQUIRE_TAG).toBe('live inquire')
+describe('intake tags already written by their paths', () => {
+  it('keeps the lowercase strings those writers apply', () => {
     expect(JOIN_TAG).toBe('join')
     expect(PODCAST_GUEST_TAG).toBe('podcast guest')
     expect(FRIEND_OF_GEORGE_TAG).toBe('friend of george')
     expect(COMP_TAG).toBe('comp')
     expect(PAID_TAG).toBe('paid')
-    expect(mergeTags([], [LIVE_INQUIRE_TAG, JOIN_TAG, PODCAST_GUEST_TAG])).toEqual([
-      'live inquire',
-      'join',
-      'podcast guest',
-    ])
+    expect(mergeTags([], [JOIN_TAG, PODCAST_GUEST_TAG])).toEqual(['join', 'podcast guest'])
     expect(mergeTags([], [FRIEND_OF_GEORGE_TAG, COMP_TAG, PAID_TAG])).toEqual([
       'friend of george',
       'comp',
@@ -53,10 +47,10 @@ describe('locked Phase B tags', () => {
 
 describe('mergeTags / tagsNewlyAdded', () => {
   it('dedupes and lowercases without reordering existing tags', () => {
-    expect(mergeTags(['keynote', 'VIP'], ['live inquire', 'Keynote'])).toEqual([
+    expect(mergeTags(['keynote', 'VIP'], ['book preorder', 'Keynote'])).toEqual([
       'keynote',
       'vip',
-      'live inquire',
+      'book preorder',
     ])
   })
 
@@ -159,6 +153,29 @@ describe('upsertIntakeProspect', () => {
       NOW,
     )
     expect(vi.mocked(db.updateProspect).mock.calls[0][1]).not.toHaveProperty('stage')
+  })
+
+  it('does not rewrite existing tags when the caller supplies none', async () => {
+    const db = mockDb({
+      insertProspect: vi.fn(async () => ({ error: { code: PG_UNIQUE_VIOLATION } })),
+      findProspectByEmail: vi.fn(async () => ({
+        data: { id: 'p-1', notes: null, tags: ['keynote'], stage: 'lead' },
+        error: null,
+      })),
+    })
+    const out = await upsertIntakeProspect(
+      db,
+      {
+        email: 'dana@northgate.example',
+        full_name: 'Dana Whitfield',
+        source: 'keynote-inquiry',
+        tags: [],
+        notesBlock: 'NEW',
+      },
+      NOW,
+    )
+    expect(out).toEqual({ kind: 'updated', addedTags: [] })
+    expect(vi.mocked(db.updateProspect).mock.calls[0][1]).not.toHaveProperty('tags')
   })
 })
 

@@ -4,8 +4,7 @@ import { NextResponse } from 'next/server'
 import { supabaseIntakeDb } from '@/lib/crm/intakeDb'
 import {
   displayNameFromEmail,
-  notifyJoinAdmins,
-  shouldNotifyJoinBackstop,
+  notifyJoinIfNew,
   upsertJoinProspect,
 } from '@/lib/crm/join'
 
@@ -70,8 +69,8 @@ export async function PATCH() {
     const crm = await upsertJoinProspect(supabaseIntakeDb, joinWrite)
     if (crm.kind === 'error') {
       console.error('[onboarding/complete] join crm failed', crm.code ?? 'unknown')
-    } else if (shouldNotifyJoinBackstop(crm)) {
-      const notified = await notifyJoinAdmins(supabaseIntakeDb, joinWrite)
+    } else {
+      const notified = await notifyJoinIfNew(supabaseIntakeDb, joinWrite, crm)
       if (notified.code) {
         console.error('[onboarding/complete] join notify failed', notified.code)
       }

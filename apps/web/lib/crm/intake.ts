@@ -18,8 +18,13 @@ export const PG_UNIQUE_VIOLATION = '23505'
 export const CRM_INTAKE_ACTION_URL = '/admin/crm' as const
 export const CRM_INTAKE_NOTIF_TYPE = 'system_general' as const
 
-/** Locked Phase B tags (George YES via CoS). All lowercase; survive normalizeTags. */
-export const LIVE_INQUIRE_TAG = 'live inquire' as const
+/**
+ * Tags these writers already apply. Lowercase so normalizeTags keeps them.
+ *
+ * LIVE Inquire is intentionally not here. No George-locked exact string is
+ * documented (audit candidates were "live inquire" or "keynote"). Do not
+ * add either until that YES. See upsertKeynoteProspect.
+ */
 export const JOIN_TAG = 'join' as const
 export const BOOK_PREORDER_TAG = 'book preorder' as const
 export const PODCAST_GUEST_TAG = 'podcast guest' as const
@@ -139,7 +144,9 @@ export interface IntakeWrite {
  * Known contact→ the insert hits the 076 unique index on lower(email); we then
  *                fetch and PATCH. Stage, status, consent_basis and source are
  *                left alone unless promoteStage is a genuine promotion.
- *                Tags are merged. Notes are prepended.
+ *                Tags are merged when the caller supplies any. An empty tag
+ *                list does not rewrite tags already on the row.
+ *                Notes are prepended.
  */
 export async function upsertIntakeProspect(
   db: IntakeDb,
@@ -176,16 +183,17 @@ export async function upsertIntakeProspect(
   if (findErr) return { kind: 'error', code: findErr.code }
   if (!existing) return { kind: 'error', code: 'not_found_after_conflict' }
 
-  const mergedTags = mergeTags(existing.tags, write.tags)
-  const addedTags = tagsNewlyAdded(existing.tags, mergedTags)
+  const applyingTags = write.tags.length > 0
+  const mergedTags = applyingTags ? mergeTags(existing.tags, write.tags) : null
+  const addedTags = mergedTags ? tagsNewlyAdded(existing.tags, mergedTags) : []
 
   const patch: Record<string, unknown> = {
-    tags: mergedTags,
     notes: prependNotes(existing.notes, write.notesBlock),
     last_contacted_at: iso,
     updated_at: iso,
     ...write.updateExtras,
   }
+  if (mergedTags) patch.tags = mergedTags
   if (write.phone) patch.phone = write.phone
   if (write.company) patch.company = write.company
   if (write.user_id) patch.user_id = write.user_id

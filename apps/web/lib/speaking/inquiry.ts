@@ -12,8 +12,6 @@
 
 import {
   LIVE_INQUIRE_SOURCE,
-  LIVE_INQUIRE_TAG,
-  mergeTags,
   notifyIntakeAdmins,
   prependNotes as prependIntakeNotes,
   upsertIntakeProspect,
@@ -22,7 +20,7 @@ import {
   type IntakeUpsertOutcome,
 } from '@/lib/crm/intake'
 
-export { LIVE_INQUIRE_SOURCE, LIVE_INQUIRE_TAG }
+export { LIVE_INQUIRE_SOURCE }
 
 const NAME_MAX = 200
 const FIELD_MAX = 200
@@ -181,11 +179,6 @@ export function buildNotesBlock(inq: CleanInquiry, now: Date): string {
 /** Newest block first, so the latest inquiry is visible without scrolling. */
 export const prependNotes = prependIntakeNotes
 
-/** Merge `live inquire` onto an existing tag list without dupes or reordering. */
-export function withLiveInquireTag(existing: unknown): string[] {
-  return mergeTags(existing, [LIVE_INQUIRE_TAG])
-}
-
 // ── DB port ────────────────────────────────────────────────────────────────
 
 export type ProspectRow = IntakeProspectRow
@@ -216,14 +209,18 @@ function toUpsertOutcome(out: IntakeUpsertOutcome): UpsertOutcome {
  * Record the inquiry against crm_prospects.
  *
  * New contact  → insert as a keynote-interested lead with express consent
- *                (they initiated contact, which is what express means here)
- *                and tag `live inquire`.
+ *                (they initiated contact, which is what express means here).
+ *                Tags stay empty.
  * Known contact→ the insert hits the 076 unique index on lower(email); we then
- *                fetch and PATCH. Stage, status and consent_basis are left
- *                exactly as they were — an inbound inquiry must not demote a
- *                Professional member back to 'lead', nor silently upgrade a
- *                consent record that was established some other way. The tag
- *                is merged.
+ *                fetch and PATCH. Stage, status, consent_basis, and existing
+ *                tags are left exactly as they were. An inbound inquiry must
+ *                not demote a Professional member back to 'lead', nor silently
+ *                upgrade a consent record that was established some other way.
+ *
+ * TODO(George YES): do not write a LIVE Inquire tag until the exact string
+ * is locked. Audit candidates, not a lock: "live inquire" or "keynote".
+ * The CRM tags placeholder that examples "keynote" is not that YES.
+ * keynote_interest is not a substitute for the tag.
  */
 export async function upsertKeynoteProspect(
   db: InquiryDb,
@@ -240,7 +237,7 @@ export async function upsertKeynoteProspect(
         company: inq.company,
         title: null,
         source: LIVE_INQUIRE_SOURCE,
-        tags: [LIVE_INQUIRE_TAG],
+        tags: [],
         notesBlock: buildNotesBlock(inq, now),
         stage: 'lead',
         consent_basis: 'express',
