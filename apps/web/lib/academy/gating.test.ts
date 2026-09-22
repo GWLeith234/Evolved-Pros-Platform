@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { hasTierAccess } from '@/lib/tier'
+import { canPlayLesson } from '@/lib/entitlements'
 import {
   PILLAR_REQUIRED_TIER,
   buildUpgradeHref,
@@ -21,10 +22,14 @@ import {
 
 const VIEWER_TIERS = ['community', 'vip', 'pro', null] as const
 
+// SPRINT L - the canonical model re-tiered every pillar to VIP. The tiers
+// separate on the room, not the coursework. The free tier keeps a teaser
+// (overview + Foundation lesson 1), which is lesson-level and therefore lives
+// in lib/entitlements.ts, not in this course-level table.
 const EXPECTED: Record<string, Record<number, boolean>> = {
   //          P1     P2     P3     P4     P5     P6
-  community: { 1: true,  2: false, 3: false, 4: false, 5: false, 6: false },
-  vip:       { 1: true,  2: true,  3: true,  4: false, 5: false, 6: false },
+  community: { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false },
+  vip:       { 1: true,  2: true,  3: true,  4: true,  5: true,  6: true  },
   pro:       { 1: true,  2: true,  3: true,  4: true,  5: true,  6: true  },
   null:      { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false },
 }
@@ -41,11 +46,27 @@ describe('academy gating matrix — hasTierAccess(userTier, course.required_tier
     }
   }
 
-  it('shipped model is 1 community / 2 vip / 3 pro', () => {
+  it('shipped model is all six pillars at vip', () => {
     const values = Object.values(PILLAR_REQUIRED_TIER)
-    expect(values.filter(t => t === 'community')).toHaveLength(1)
-    expect(values.filter(t => t === 'vip')).toHaveLength(2)
-    expect(values.filter(t => t === 'pro')).toHaveLength(3)
+    expect(values).toHaveLength(6)
+    expect(values.every(t => t === 'vip')).toBe(true)
+  })
+
+  // The teaser is the free tier's whole Academy entitlement, and it is one
+  // lesson - not one pillar, which is what the pricing page used to claim.
+  it('opens exactly one lesson to the free tier, in Foundation', () => {
+    const free = { tier: 'community', courseSlug: 'foundation' }
+    expect(canPlayLesson({ ...free, sortOrder: 1 })).toBe(true)
+    expect(canPlayLesson({ ...free, sortOrder: 2 })).toBe(false)
+    expect(canPlayLesson({ tier: 'community', courseSlug: 'identity', sortOrder: 1 })).toBe(false)
+    // An unordered lesson is not the teaser: fails closed.
+    expect(canPlayLesson({ ...free, sortOrder: null })).toBe(false)
+  })
+
+  it('opens every lesson to VIP and to The 99', () => {
+    for (const tier of ['vip', 'pro']) {
+      expect(canPlayLesson({ tier, courseSlug: 'execution', sortOrder: 12 }), tier).toBe(true)
+    }
   })
 
   it('documents that an unrecognised required_tier ranks 0 and so reads as open', () => {
@@ -108,43 +129,36 @@ describe('buildUpgradeHref', () => {
 })
 
 describe('locked-card links for the shipped six pillars', () => {
-  // The exact hrefs CourseCard / AcademyMobileProgress / PillarLockPanel emit
-  // for a community-tier viewer looking at the grid: 1 open, 2 VIP, 3 PRO.
-  const lockedForFreeTier = [2, 3, 4, 5, 6]
+  // SPRINT L - a free viewer now sees all six gated, every one at VIP.
+  const lockedForFreeTier = [1, 2, 3, 4, 5, 6]
 
   it('every gated pillar links to its own pricing context', () => {
     const links = lockedForFreeTier.map(n =>
       buildUpgradeHref({ from: 'academy', tier: PILLAR_REQUIRED_TIER[n], pillar: n }),
     )
     expect(links).toEqual([
+      '/pricing?from=academy&pillar=1&tier=vip',
       '/pricing?from=academy&pillar=2&tier=vip',
       '/pricing?from=academy&pillar=3&tier=vip',
-      '/pricing?from=academy&pillar=4&tier=pro',
-      '/pricing?from=academy&pillar=5&tier=pro',
-      '/pricing?from=academy&pillar=6&tier=pro',
+      '/pricing?from=academy&pillar=4&tier=vip',
+      '/pricing?from=academy&pillar=5&tier=vip',
+      '/pricing?from=academy&pillar=6&tier=vip',
     ])
   })
 
-  it('pillar 1 is open to the free tier, so it never renders a locked link', () => {
-    expect(hasTierAccess('community', PILLAR_REQUIRED_TIER[1])).toBe(true)
-  })
-
-  it('badges the grid 2×VIP / 3×PRO for a free member', () => {
+  it('badges the whole grid VIP for a free member', () => {
     const badges = lockedForFreeTier.map(n => tierBadgeLabel(PILLAR_REQUIRED_TIER[n]))
-    expect(badges.filter(b => b === 'VIP')).toHaveLength(2)
-    expect(badges.filter(b => b === 'PRO')).toHaveLength(3)
+    expect(badges).toEqual(['VIP', 'VIP', 'VIP', 'VIP', 'VIP', 'VIP'])
   })
 
-  it('badges the grid 3×PRO for a VIP member', () => {
+  it('locks nothing for a VIP member - the curriculum is theirs in full', () => {
     const lockedForVip = [1, 2, 3, 4, 5, 6].filter(
       n => !hasTierAccess('vip', PILLAR_REQUIRED_TIER[n]),
     )
-    expect(lockedForVip).toEqual([4, 5, 6])
-    expect(lockedForVip.map(n => tierBadgeLabel(PILLAR_REQUIRED_TIER[n])))
-      .toEqual(['PRO', 'PRO', 'PRO'])
+    expect(lockedForVip).toEqual([])
   })
 
-  it('locks nothing for a Pro member', () => {
+  it('locks nothing for a member of The 99', () => {
     const locked = [1, 2, 3, 4, 5, 6].filter(n => !hasTierAccess('pro', PILLAR_REQUIRED_TIER[n]))
     expect(locked).toEqual([])
   })
@@ -158,9 +172,10 @@ describe('tier labels', () => {
     expect(tierBadgeLabel(null)).toBeNull()
   })
 
-  it('names the plan that opens a gate', () => {
+  it('names the plan that opens a gate, using the live product name', () => {
     expect(tierPlanName('vip')).toBe('VIP')
-    expect(tierPlanName('pro')).toBe('Professional')
+    // SPRINT L - the key is still 'pro'; the product is The Evolved Pros 99.
+    expect(tierPlanName('pro')).toBe('The Evolved Pros 99')
     expect(tierPlanName('community')).toBe('Community')
   })
 })

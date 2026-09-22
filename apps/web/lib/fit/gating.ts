@@ -1,16 +1,18 @@
 /**
- * Fit is VIP $99. Community sees the tease and upgrade only.
- * Professional inherits VIP (hasTierAccess rank).
+ * Fit access. SPRINT L - the decision now comes from the entitlement matrix
+ * rather than a rank compare done here, so "what does VIP include" is answered
+ * in exactly one file. The 99 inherits it by being in the matrix, not by
+ * outranking VIP.
  */
 
 import { buildUpgradeHref } from '@/lib/academy/gating'
-import { hasTierAccess } from '@/lib/tier'
+import { canAccessFit, requiredTierFor } from '@/lib/entitlements'
 
-export const FIT_REQUIRED_TIER = 'vip' as const
-export const FIT_UPGRADE_HREF = '/pricing?from=fit&tier=vip'
+export const FIT_REQUIRED_TIER = requiredTierFor('fit')
+export const FIT_UPGRADE_HREF = `/pricing?from=fit&tier=${FIT_REQUIRED_TIER}`
 
 export function canAccessFitLibrary(userTier: string | null | undefined): boolean {
-  return hasTierAccess(userTier, FIT_REQUIRED_TIER)
+  return canAccessFit(userTier)
 }
 
 export function fitUpgradeHref(): string {

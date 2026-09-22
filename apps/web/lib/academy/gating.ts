@@ -11,10 +11,19 @@
  * decision: which badge does a locked card wear, and where does it link.
  */
 
+import { tierLabel } from '@/lib/entitlements'
+
 export type Tier = 'community' | 'vip' | 'pro'
 
 /**
- * The approved tier model, mirroring supabase/migrations/078.
+ * The approved tier model, mirroring supabase/migrations/095.
+ *
+ * SPRINT L re-tiered every pillar to VIP. The tiers separate on the ROOM -
+ * mastermind cadence, the member network, the LIVE discount - not on the
+ * coursework, so there is no longer an inner-game / outer-game split here.
+ * The free tier gets a teaser (the overview of all six, plus Foundation
+ * lesson 1), which is lesson-level and therefore lives in lib/entitlements.ts
+ * rather than in this course-level table.
  *
  * DOCUMENTATION + TEST FIXTURE ONLY. The runtime source of truth is the
  * courses.required_tier column: this constant is not consulted by any page or
@@ -23,12 +32,12 @@ export type Tier = 'community' | 'vip' | 'pro'
  * model, and so a reader can see it without opening psql.
  */
 export const PILLAR_REQUIRED_TIER: Readonly<Record<number, Tier>> = {
-  1: 'community', // Foundation
-  2: 'vip',       // Identity          ┐ the inner game
-  3: 'vip',       // Mental Toughness  ┘
-  4: 'pro',       // Strategy          ┐
-  5: 'pro',       // Accountability    ├ the outer game
-  6: 'pro',       // Execution         ┘
+  1: 'vip', // Foundation
+  2: 'vip', // Identity
+  3: 'vip', // Mental Toughness
+  4: 'vip', // Strategy
+  5: 'vip', // Accountability
+  6: 'vip', // Execution
 }
 
 /** Uppercase chip text for a gate. 'community' is never a gate, so null. */
@@ -41,10 +50,9 @@ export function tierBadgeLabel(requiredTier: string | null | undefined): 'VIP' |
 
 /** Human sentence-case name of the plan that opens a gate. */
 export function tierPlanName(requiredTier: string | null | undefined): string {
-  const t = (requiredTier ?? '').toLowerCase()
-  if (t === 'vip') return 'VIP'
-  if (t === 'pro') return 'Professional'
-  return 'Community'
+  // SPRINT L - the display name comes from the entitlement matrix, which is
+  // the only place that knows 'pro' renders as "The Evolved Pros 99".
+  return tierLabel(requiredTier)
 }
 
 export type UpgradeSource = 'academy' | 'events' | 'assessment' | 'fit'

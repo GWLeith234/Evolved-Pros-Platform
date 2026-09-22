@@ -72,13 +72,18 @@ export function PricingTierCards({
       badge: 'Community',
       badgeColor: '#60A5FA',
       tagline: 'Everything but the curriculum',
+      // SPRINT L - the free card used to claim "Pillar 1: Foundation -
+      // complete". The free tier is a TEASER: the overview of all six pillars
+      // and the first Foundation lesson. Claiming a whole pillar was a
+      // promise the gate did not keep.
       features: [
         { text: 'Full community feed' },
         { text: 'Events, podcast & media' },
         { text: 'Habits & Own the Day' },
-        { text: 'Academy Pillar 1: Foundation — complete' },
+        { text: 'Academy preview: all six pillars, first lesson playable' },
         { text: 'The Pillar Assessment, all six scores' },
-        { text: 'Academy Pillars 2–6', locked: true },
+        { text: 'The full Academy curriculum', locked: true },
+        { text: 'Fit programming', locked: true },
       ],
       cta: 'Join free',
       ctaHref: '/login?mode=signup',
@@ -89,15 +94,17 @@ export function PricingTierCards({
       priceKey: 'vip',
       badge: 'VIP',
       badgeColor: '#C9A84C',
-      tagline: 'Master the inner game',
+      tagline: 'The whole curriculum',
+      // SPRINT L - VIP now carries ALL SIX pillars and the Fit library. The
+      // tiers separate on the room, not on the coursework.
       features: [
         { text: 'Everything in Community' },
-        { text: 'Pillar 1: Foundation' },
-        { text: 'Pillar 2: Identity' },
-        { text: 'Pillar 3: Mental Toughness' },
-        { text: 'Monthly mastermind' },
+        { text: 'The full Academy, all six pillars' },
+        { text: 'The full Fit library' },
+        { text: 'Monthly 45-minute mastermind' },
         { text: 'Full assessment breakdown + pillar plan' },
-        { text: 'Academy Pillars 4–6', locked: true },
+        { text: '10% off LIVE events' },
+        { text: 'The member network', locked: true },
       ],
       cta: 'Start VIP',
       ctaPlanBase: 'vip',
@@ -116,12 +123,12 @@ export function PricingTierCards({
       tagline: '99 seats. One room.',
       features: [
         { text: 'Everything in VIP' },
-        { text: 'All 6 pillars — Strategy, Accountability, Execution' },
         { text: 'Bi-weekly 90-minute mastermind with George' },
+        { text: 'The member network: directory, profiles, direct messages' },
         { text: 'One of only 99 seats' },
-        { text: '10% off LIVE events' },
+        { text: '20% off LIVE events' },
       ],
-      callout: 'A bi-weekly 90-minute mastermind with George, capped at 99 seats. The inner game and the outer game, end to end.',
+      callout: 'A bi-weekly 90-minute mastermind with George, capped at 99 seats. The room is the product.',
       cta: 'Take a seat',
       ctaPlanBase: 'pro',
       tierKey: 'pro',

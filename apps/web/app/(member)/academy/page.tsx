@@ -14,7 +14,7 @@ import {
   fetchCoursesWithProgress,
   fetchUserProfile,
 } from '@/lib/academy/fetchers'
-import { hasTierAccess } from '@/lib/tier'
+import { canAccessAcademy } from '@/lib/entitlements'
 import { ACADEMY_UPGRADE_AD, pickAcademySponsors, pickScrollBanners } from '@/lib/sponsors/partners'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { adMatchesSurface, isIabImageStill } from '@/lib/ads/iab'
@@ -63,7 +63,9 @@ export default async function AcademyPage() {
   const totalLessons = courses.reduce((s, c) => s + (c.totalLessons ?? 0), 0)
   const completedLessons = courses.reduce((s, c) => s + c.completedLessons, 0)
   const overallPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
-  const showUpgrade = !hasTierAccess(profile?.tier, 'pro')
+  // SPRINT L - the Academy is VIP and up. This asked for 'pro', which showed
+  // the upgrade card to paying VIP members who already have the curriculum.
+  const showUpgrade = !canAccessAcademy(profile?.tier)
   const catalog = (await getActivePlatformAds()) as SponsorAd[]
   const academyPool = catalog.filter(a => adMatchesSurface(a, 'academy'))
   const pool = academyPool.length ? academyPool : catalog

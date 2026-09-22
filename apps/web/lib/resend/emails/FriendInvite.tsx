@@ -25,7 +25,7 @@ export function FriendInviteEmail({ inviteUrl }: FriendInviteEmailProps) {
   return (
     <Html>
       <Head />
-      <Preview>George invited you to Evolved Pros — Professional access, on the house.</Preview>
+      <Preview>George invited you to Evolved Pros. Full Academy access, on the house.</Preview>
       <Body style={bodyStyle}>
         <Section style={headerStyle}>
           <Text style={logoStyle}>
@@ -37,10 +37,19 @@ export function FriendInviteEmail({ inviteUrl }: FriendInviteEmailProps) {
           <Text style={labelStyle}>Friends of George</Text>
           <Text style={headingStyle}>You&rsquo;re in.</Text>
 
+          {/*
+            SPRINT L - this paragraph was a live bug. It promised
+            "Professional" (a tier that no longer exists) and the bi-weekly
+            mastermind, which is The Evolved Pros 99's $849 entitlement and is
+            capped at 99 seats. Comped accounts do not consume a Stripe seat,
+            so an invite promising that seat could seat an unlimited number of
+            people in a room that sells 99. The comp is the Academy and the
+            accountability system; the mastermind is not ours to give away.
+          */}
           <Text style={bodyTextStyle}>
             George Leith invited you to Evolved Pros with full{' '}
-            <strong style={{ color: '#faf9f7' }}>Professional</strong> access — the complete
-            6-Pillar Academy, the accountability system, and the bi-weekly mastermind, on the house.
+            <strong style={{ color: '#faf9f7' }}>Academy</strong> access: all six
+            pillars and the accountability system, on the house.
           </Text>
           <Text style={bodyTextStyle}>
             Click below to claim your access. No card, no catch.

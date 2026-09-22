@@ -26,6 +26,7 @@ import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { getStripe, isPlanKey, priceIdForPlan, PLAN_CATALOG, stripeConfigured } from '@/lib/stripe/config'
 import { alreadyEntitledTo } from '@/lib/stripe/purchaseGuard'
 import { resolveStripePriceId } from '@/lib/commerce/catalogue'
+import { joinSeatWaitlist, seatStatusForTier } from '@/lib/commerce/seats'
 import { annualBillingAvailable } from '@/lib/pricing'
 import { getAppUrl } from '@/lib/urls'
 
@@ -83,9 +84,43 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'You already have this plan.' }, { status: 409 })
   }
 
+  const { tier, interval } = PLAN_CATALOG[plan]
+
+  // 4b. SPRINT L - seat cap. The Evolved Pros 99 sells 99 seats, and Stripe
+  //     will bill an unlimited number of subscriptions against one price if
+  //     nobody stops it. This is the door check; the webhook reconciles the
+  //     race two simultaneous buyers of seat 99 would win (see its handler).
+  //
+  //     Fails CLOSED: seatStatusForTier returns soldOut when it cannot count.
+  //     Somebody retrying in a minute is a much smaller problem than somebody
+  //     paying $849 for a room that is already full.
+  const seats = await seatStatusForTier(tier)
+  if (seats.soldOut) {
+    // A buyer who reached this point is the best-qualified lead the platform
+    // will ever have. Refusing them without taking a name is the actual bug.
+    const waitlisted = profile.email
+      ? await joinSeatWaitlist({
+          tier,
+          userId: profile.id,
+          email: profile.email,
+          fullName: profile.full_name ?? null,
+          source: 'checkout',
+        })
+      : 'failed'
+    return NextResponse.json(
+      {
+        error: seats.known
+          ? 'Every seat is taken right now.'
+          : 'We could not confirm a seat. Try again in a moment.',
+        soldOut: seats.known,
+        waitlisted: waitlisted !== 'failed',
+      },
+      { status: 409 },
+    )
+  }
+
   // Source of truth is our catalogue (prices.stripe_price_id); env vars are a
   // backward-compat fallback until every price is mirrored to Stripe.
-  const { tier, interval } = PLAN_CATALOG[plan]
   const priceId = (await resolveStripePriceId(tier, interval)) ?? priceIdForPlan(plan)
   if (!priceId) {
     console.warn('[Stripe Checkout] no Stripe price for plan (catalogue + env empty)', plan)

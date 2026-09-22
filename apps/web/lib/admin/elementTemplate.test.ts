@@ -94,9 +94,23 @@ describe('admin element template (George 2026-09-12)', () => {
     expect(crm).toContain('AdminPageHeader')
   })
 
-  it('keeps M3 empty-state copy on Revenue, Speaking, and Careers', () => {
-    expect(src('app/(admin)/admin/revenue/page.tsx')).toContain('No billing events yet')
-    expect(src('app/(admin)/admin/revenue/page.tsx')).toContain('M3 KEEP AS BAR')
+  it('keeps M3 empty-state copy on Speaking and Careers', () => {
+    // Revenue no longer has an empty state to keep. SPRINT K wired the page to
+    // live Stripe subscriptions, so "No billing events yet" and its M3 KEEP AS
+    // BAR marker describe a page that no longer exists. The M3 rule was "do not
+    // redesign this empty"; the empty is gone because the data arrived.
+    //
+    // What replaced it still honours the rule the empty state existed to
+    // protect: nothing on Revenue is estimated from member count or list price,
+    // and an unreachable Stripe reads n/a rather than $0.
+    const revenue = src('app/(admin)/admin/revenue/page.tsx')
+    expect(revenue).not.toContain('No billing events yet')
+    expect(revenue).toContain('estimated from member count or list price')
+    expect(revenue).toContain('Could not reach Stripe')
+    expect(revenue).toContain('getRevenueSnapshot')
+    // Seats keep their own empty states, which ARE still empties.
+    expect(revenue).toContain('No capped products')
+    expect(revenue).toContain('Nobody waiting')
     expect(src('app/(admin)/admin/speaking/page.tsx')).toContain(
       'No speaking dates yet. Add a confirmed or hold date when a stage is locked.',
     )

@@ -24,6 +24,7 @@ import type Stripe from 'stripe'
 import { adminClient } from '@/lib/supabase/admin'
 import { getStripe, tierForPriceId, type Tier } from '@/lib/stripe/config'
 import { tierForStripePriceId } from '@/lib/commerce/catalogue'
+import { joinSeatWaitlist, seatStatusForTier } from '@/lib/commerce/seats'
 import {
   bestEffortConversion,
   notifyPaidAdmins,
@@ -101,6 +102,88 @@ function currentPeriodEndIso(sub: Stripe.Subscription): string | null {
   return tsToIso((sub as unknown as { current_period_end?: number }).current_period_end)
 }
 
+/**
+ * True when this subscription pushed a capped product past its cap.
+ *
+ * FAILS OPEN, unlike the checkout guard, and deliberately: the member has
+ * already paid. Cancelling a real subscription because Stripe was briefly
+ * unreachable takes money and access from somebody who did nothing wrong.
+ * Over-seating by one is recoverable by hand; a wrongful cancellation is not.
+ */
+async function seatOverflow(tier: Tier, subscriptionId: string): Promise<boolean> {
+  if (tier === 'community') return false
+  const seats = await seatStatusForTier(tier)
+  if (!seats.known || seats.cap === null) return false
+  const over = seats.taken > seats.cap
+  if (over) {
+    console.warn(
+      `[Stripe Webhook] seat cap exceeded: tier=${tier} taken=${seats.taken} cap=${seats.cap} sub=${subscriptionId}`,
+    )
+  }
+  return over
+}
+
+/**
+ * Undo an overflow purchase: cancel the subscription, refund what was charged,
+ * and record the buyer at the front of the waitlist. The member is NOT granted
+ * the tier - handleCheckoutCompleted returns before its users update.
+ */
+async function handleSeatOverflow(opts: {
+  tier: Tier
+  subscriptionId: string
+  userId: string
+  session: Stripe.Checkout.Session
+}): Promise<void> {
+  const stripe = getStripe()
+  try {
+    await stripe.subscriptions.cancel(opts.subscriptionId, {
+      prorate: false,
+      invoice_now: false,
+    })
+  } catch (err) {
+    const code = (err as { code?: string }).code ?? 'unknown'
+    console.error('[Stripe Webhook] overflow cancel failed', code)
+  }
+
+  // Refund the invoice this checkout paid. Best effort: a failed refund must
+  // not prevent the waitlist row, and an unrefunded charge is visible in
+  // Stripe where a human can finish it.
+  try {
+    const invoiceId =
+      typeof (opts.session as { invoice?: unknown }).invoice === 'string'
+        ? (opts.session as { invoice: string }).invoice
+        : null
+    if (invoiceId) {
+      const invoice = await stripe.invoices.retrieve(invoiceId)
+      const paymentIntent = (invoice as unknown as { payment_intent?: unknown }).payment_intent
+      if (typeof paymentIntent === 'string') {
+        await stripe.refunds.create({ payment_intent: paymentIntent })
+      }
+    }
+  } catch (err) {
+    const code = (err as { code?: string }).code ?? 'unknown'
+    console.error('[Stripe Webhook] overflow refund failed', code)
+  }
+
+  const existing = await (adminClient as any)
+    .from('users')
+    .select('id, email, full_name')
+    .eq('id', opts.userId)
+    .maybeSingle()
+  const row = existing.data as { email?: string | null; full_name?: string | null } | null
+  const email = (row?.email || opts.session.customer_details?.email || '').trim().toLowerCase()
+  if (email && opts.tier !== 'community') {
+    await joinSeatWaitlist({
+      tier: opts.tier,
+      userId: opts.userId,
+      email,
+      fullName: row?.full_name ?? null,
+      source: 'webhook',
+      notes: `Overflow on ${opts.subscriptionId}; subscription cancelled and refunded.`,
+    })
+  }
+}
+
 // --- event handlers -------------------------------------------------------
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
@@ -125,6 +208,22 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   const tier = (await tierFromSubscription(sub)) ?? (session.metadata?.tier as Tier | undefined) ?? null
   if (!tier) {
     console.error('[Stripe Webhook] could not resolve tier for subscription', subscriptionId)
+    return
+  }
+
+  // SPRINT L - SEAT CAP RECONCILIATION.
+  //
+  // The checkout guard reads the seat count before creating a session, which
+  // cannot stop two people buying seat 99 at the same time: both read 98 taken,
+  // both are let through, both pay. Stripe is the only place that knows how
+  // many subscriptions actually exist, so this is where the truth is settled.
+  //
+  // The count INCLUDES the subscription this event is about, so a legitimate
+  // final seat reads exactly at the cap. Over the cap means this purchase is
+  // the overflow: cancel it, refund it, and put the buyer at the front of the
+  // waitlist rather than seating 100 people in a room that sells 99.
+  if (await seatOverflow(tier, subscriptionId)) {
+    await handleSeatOverflow({ tier, subscriptionId, userId, session })
     return
   }
 
