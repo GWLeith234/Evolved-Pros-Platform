@@ -1,3 +1,6 @@
+import { PILLARS } from '@/lib/pillars'
+import { mediaFilterCategories } from '@/lib/media/filters'
+
 /**
  * Media hub desk layout: newspaper module grammar, Evolved Pros brand.
  * Density is the SooToday / Toronto Today lesson, not the palette.
@@ -8,7 +11,8 @@ export const MEDIA_RED = '#EF0E30'
 export const MEDIA_TEAL = '#68A2B9'
 export const MEDIA_PAPER = '#F5F0E8'
 
-export type DeskSectionId = 'strategy' | 'execution' | 'identity' | 'foundation'
+/** A pillar slug. Not a closed union - the pillar list is the source of truth. */
+export type DeskSectionId = string
 
 export type DeskSectionDef = {
   id: DeskSectionId
@@ -17,18 +21,41 @@ export type DeskSectionDef = {
   href: string
 }
 
-/** Section chips on Media chrome. Strategy / Execution / Identity / Foundation only. */
-export const MEDIA_INDEX_SECTIONS: readonly DeskSectionDef[] = [
-  { id: 'strategy', label: 'Strategy', pillar: 'strategy', href: '/media/strategy' },
-  { id: 'execution', label: 'Execution', pillar: 'execution', href: '/media/execution' },
-  { id: 'identity', label: 'Identity', pillar: 'identity', href: '/media/identity' },
-  { id: 'foundation', label: 'Foundation', pillar: 'foundation', href: '/media/foundation' },
-]
+/**
+ * SPRINT M - section chips are DERIVED, never hardcoded.
+ *
+ * The old constant pinned the rail to Strategy / Execution / Identity /
+ * Foundation, which stranded every published story under /media/accountability
+ * and /media/mental-toughness: 11 articles with no door in the nav and no
+ * section block on the hub. Deriving from the stories we were handed means a
+ * pillar appears the moment it has a published story and disappears when it
+ * does not, with no constant to keep in sync.
+ */
+export function mediaIndexSections(
+  stories: ReadonlyArray<{ pillar: string | null | undefined }>,
+): DeskSectionDef[] {
+  return mediaFilterCategories(stories).map(category => ({
+    id: category.slug,
+    label: category.label,
+    pillar: category.slug,
+    href: `/media/${category.slug}`,
+  }))
+}
+
+/**
+ * Every pillar, in canonical program order. Degraded-mode fallback for chrome
+ * that renders before (or without) a story list - never the primary source.
+ */
+export const ALL_MEDIA_SECTIONS: readonly DeskSectionDef[] = PILLARS.map(pillar => ({
+  id: pillar.slug,
+  label: pillar.name,
+  pillar: pillar.slug,
+  href: `/media/${pillar.slug}`,
+}))
 
 export const MEDIA_ON_AIR: ReadonlyArray<{ label: string; href: string }> = [
   { label: 'LIVE', href: '/live' },
   { label: 'Podcast', href: '/podcast' },
-  { label: 'Email brief', href: '/podcast' },
 ]
 
 export type DeskStory = {
@@ -68,7 +95,7 @@ export function splitHubDesk<T extends DeskStory>(
       .map(s => s.id),
   )
 
-  const sections = MEDIA_INDEX_SECTIONS.map(section => ({
+  const sections = mediaIndexSections(stories).map(section => ({
     ...section,
     stories: stories.filter(story => story.pillar === section.pillar && !used.has(story.id)).slice(0, sectionSize),
   })).filter(section => section.stories.length > 0)

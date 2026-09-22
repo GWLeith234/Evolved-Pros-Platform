@@ -2,19 +2,29 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { MEDIA_INDEX_SECTIONS } from '@/lib/media/desk'
+import { ALL_MEDIA_SECTIONS, type DeskSectionDef } from '@/lib/media/desk'
 
 function isCurrent(pathname: string, href: string): boolean {
   if (href === '/media') return pathname === '/media'
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
-export function MediaMastheadRail() {
+/**
+ * SPRINT M - sections come in as data, computed server-side from the pillars
+ * that actually have published stories (see getMediaIndexSections). The rail
+ * used to import a four-entry constant, which is how Accountability and
+ * Mental Toughness ended up with published articles and no door.
+ */
+export function MediaMastheadRail({
+  sections = ALL_MEDIA_SECTIONS,
+}: {
+  sections?: readonly DeskSectionDef[]
+}) {
   const pathname = usePathname()
 
   return (
     <nav aria-label="Media sections" className="ep-media-masthead-rail">
-      {MEDIA_INDEX_SECTIONS.map(section => {
+      {sections.map(section => {
         const current = isCurrent(pathname, section.href)
         return (
           <Link

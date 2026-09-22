@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, type CSSProperties, type RefObject } from 'react'
 import { isAcademyAd } from '@/lib/sponsors/partners'
+import { AdPlane } from '@/components/ads/AdPlane'
 import { iabClickHref, iabSlotPx, type IabAdIdentity } from '@/lib/ads/iab'
 import { recordHouseAdFromUnit } from '@/lib/ads/track'
 
@@ -13,7 +14,11 @@ type IabImageAdProps = {
 }
 
 type IabAdvertisementSlotProps = IabImageAdProps & {
-  /** Media articles sit on paper; member surfaces are ink/dark. */
+  /**
+   * @deprecated SPRINT M - ignored. The ad plane steps away from whatever page
+   * it sits on, in both themes, so the caller no longer picks a tone. Kept in
+   * the type so the existing call sites compile; delete it when they are swept.
+   */
   tone?: 'paper' | 'ink'
 }
 
@@ -114,51 +119,43 @@ export function IabImageAd({ ad, locationId, className, style }: IabImageAdProps
 }
 
 /**
- * Media article layout — the source of truth for Platform too.
- * ADVERTISEMENT label + clickable IAB still. No Partner chip, no
- * duplicate sponsor name, no extra LEARN MORE.
+ * The one container every ad on this platform goes through - Media, Home,
+ * Academy, Community, Podcast, Profile all render through here.
+ *
+ * SPRINT M: the chrome is now <AdPlane>, which carries the separation standard
+ * (stepped background, four-sided hairline, a real 11px label). It used to be a
+ * bare div with a 10px label at 35% opacity - present in the DOM, invisible on
+ * the page, and sitting on the same background as the article around it.
+ *
+ * House Academy units get the plane too, labelled "Sponsored". A promo for our
+ * own product placed in an ad slot is still an ad slot; leaving it unmarked is
+ * exactly the confusion the standard exists to prevent.
  */
 export function IabAdvertisementSlot({
   ad,
   locationId,
   className,
   style,
-  tone = 'ink',
+  tone,
 }: IabAdvertisementSlotProps) {
   const { w, h } = iabSlotPx(ad)
-  const labelColor = tone === 'paper' ? 'rgba(10,15,24,0.35)' : 'var(--text-secondary, rgba(255,255,255,0.45))'
+  // `tone` is now decided by the theme tokens, not the caller. Kept in the
+  // signature so the ~10 existing call sites keep compiling.
+  void tone
   return (
-    <div
+    <AdPlane
+      label={isAcademyAd(ad) ? 'Sponsored' : 'Advertisement'}
+      width={w}
       className={className}
-      style={{
-        width: `min(100%, ${w}px)`,
-        minHeight: h + 22,
-        marginInline: 'auto',
-        ...style,
+      style={style}
+      data={{
+        'data-ad-layout': 'iab-media',
+        'data-ad-rhythm': 'unit',
+        'data-iab-slot': `${w}x${h}`,
+        'data-ad-reserved': `${h}`,
       }}
-      data-ad-layout="iab-media"
-      data-ad-rhythm="unit"
-      data-iab-slot={`${w}x${h}`}
-      data-ad-reserved={`${h}`}
     >
-      <div
-        data-ad-unit="centered"
-        style={{ width: '100%' }}
-      >
-        <p
-          style={{
-            fontFamily: 'sans-serif',
-            fontSize: '10px',
-            color: labelColor,
-            textTransform: 'uppercase',
-            letterSpacing: '0.10em',
-            margin: '0 0 8px',
-          }}
-        >
-          Advertisement
-        </p>
-        <IabImageAd ad={ad} locationId={locationId} />
-      </div>
-    </div>
+      <IabImageAd ad={ad} locationId={locationId} />
+    </AdPlane>
   )
 }

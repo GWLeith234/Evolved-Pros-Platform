@@ -46,8 +46,11 @@ describe('Phase 3a EPM denser 300x250 scroll avails', () => {
 
   it('extends MediaPartnerSlot with a 300x250 mid-rect and no open ad network', () => {
     expect(slot).toContain("'mid-rect'")
-    expect(slot).toContain('w: 300, h: 250')
     expect(slot).toContain('MediaScrollRect')
+    // SPRINT M - the slot no longer draws its own 300x250 empty-state box.
+    // A filled unit gets its geometry from the IAB slot size; an unfilled one
+    // renders nothing at all.
+    expect(slot).toContain('if (!ad?.image_url) return null')
     expect(slot).toMatch(/Never loads an open ad network/)
     expect(slot).not.toMatch(/googletag|doubleclick|gpt\.js|DFP/)
     expect(portal).not.toMatch(/googletag|doubleclick|gpt\.js|DFP/)
@@ -73,13 +76,22 @@ describe('Phase 3a EPM denser 300x250 scroll avails', () => {
     expect(css).toContain('.ep-media-partner-mid-fluid')
   })
 
-  it('renders two distinct 300x250 units down a long Latest rail and a long article', () => {
+  it('renders two distinct 300x250 units down a long Latest rail when they are filled', () => {
     const rows = Array.from({ length: 8 }, (_, i) => story(String(i)))
+    // SPRINT M - the avails only render when a partner actually fills them.
+    const filled = (id: string) => ({
+      id,
+      image_url: `https://cdn.example.com/${id}-300x250.png`,
+      ad_type: 'image',
+      zone: 'A',
+    })
     const latest = renderToStaticMarkup(
       <NewspaperLatestRail
         stories={rows}
         insertSponsoredAt={1}
         midRectAt={[3, 7]}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        midRectAds={[filled('one'), filled('two')] as any}
       />,
     )
     expect(latest.match(/data-media-scroll-rect="300x250"/g)?.length).toBe(2)
@@ -87,8 +99,9 @@ describe('Phase 3a EPM denser 300x250 scroll avails', () => {
 
     const html = Array.from({ length: 16 }, (_, i) => `<p>Block ${i + 1}</p>`).join('')
     const body = renderToStaticMarkup(<NewspaperArticleBody html={html} ads={[]} />)
-    expect(body.match(/data-media-scroll-rect="300x250"/g)?.length).toBeGreaterThanOrEqual(2)
     expect(body).toContain('data-media-article-body')
+    // No ads handed in, so no avails render at all.
+    expect(body).not.toContain('data-media-scroll-rect')
   })
 
   it('locks long-page placement counts at two or more 300x250 scroll units', () => {

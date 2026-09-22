@@ -3,6 +3,7 @@
 // Gold header: lockup + VIP $49 pill. Never type the family wordmark.
 
 import Link from 'next/link'
+import { PublicGlobalNav } from '@/components/layout/PublicGlobalNav'
 import { FIT_VIP_PILL } from '@/lib/fit/copy'
 import { fitUpgradeHref } from '@/lib/fit/gating'
 import {
@@ -54,18 +55,22 @@ export function FitVipPill({ href = fitUpgradeHref() }: { href?: string }) {
   )
 }
 
+/** SPRINT M - global nav rides above the section chrome so /fit is not a cul-de-sac. */
 export function FitMasthead() {
   return (
-    <header className="ep-fit-masthead">
-      <div className="ep-fit-masthead-inner">
-        <div className="ep-fit-masthead-utility">
-          <Link href="/home" className="ep-fit-masthead-back">
-            Back to platform
-          </Link>
-          <FitVipPill />
+    <>
+      <PublicGlobalNav current="/fit" />
+      <header className="ep-fit-masthead">
+        <div className="ep-fit-masthead-inner">
+          <div className="ep-fit-masthead-utility">
+            <Link href="/home" className="ep-fit-masthead-back">
+              Back to platform
+            </Link>
+            <FitVipPill />
+          </div>
+          <FitMastheadLockup />
         </div>
-        <FitMastheadLockup />
-      </div>
-    </header>
+      </header>
+    </>
   )
 }

@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
-  MEDIA_INDEX_SECTIONS,
+  ALL_MEDIA_SECTIONS,
   MEDIA_NAVY,
   MEDIA_ON_AIR,
   MEDIA_RED,
   MEDIA_TEAL,
+  mediaIndexSections,
   moreInLabel,
   popularStories,
   splitHubDesk,
@@ -45,19 +46,14 @@ describe('splitHubDesk', () => {
 
   it('builds named category sections without reusing hero or Featured stories', () => {
     const desk = splitHubDesk(stories, { sectionSize: 2, latestList: 2 })
-    expect(MEDIA_INDEX_SECTIONS.map(s => s.label)).toEqual([
-      'Strategy',
-      'Execution',
-      'Identity',
-      'Foundation',
-    ])
+    // Derived from the stories, in canonical pillar order — not a constant.
     expect(desk.sections.map(s => s.label)).toEqual([
+      'Foundation',
+      'Identity',
       'Strategy',
       'Execution',
-      'Identity',
-      'Foundation',
     ])
-    expect(desk.sections[0]?.href).toBe('/media/strategy')
+    expect(desk.sections.find(s => s.label === 'Strategy')?.href).toBe('/media/strategy')
     const used = new Set(
       [desk.featured, desk.secondary, ...desk.featuredGrid, ...desk.latestList]
         .filter(Boolean)
@@ -69,6 +65,58 @@ describe('splitHubDesk', () => {
       }
     }
     expect(moreInLabel('Strategy')).toBe('More in Strategy')
+  })
+
+  // SPRINT M — the bug this replaced: MEDIA_INDEX_SECTIONS was hardcoded to
+  // strategy/execution/identity/foundation, so published stories under
+  // accountability and mental-toughness got no section block and no nav door.
+  it('gives every pillar with a published story a section, including the two that were stranded', () => {
+    const withStranded = [
+      ...stories,
+      story('k', 'accountability', 5),
+      story('l', 'accountability', 4),
+      story('m', 'mental-toughness', 6),
+      story('n', 'mental-toughness', 5),
+    ]
+    const labels = splitHubDesk(withStranded, { sectionSize: 2, latestList: 2 })
+      .sections.map(s => s.label)
+    expect(labels).toContain('Accountability')
+    expect(labels).toContain('Mental Toughness')
+  })
+})
+
+describe('mediaIndexSections', () => {
+  it('lists only pillars that have a published story, in canonical order', () => {
+    expect(
+      mediaIndexSections([
+        { pillar: 'execution' },
+        { pillar: 'accountability' },
+        { pillar: 'foundation' },
+        { pillar: 'foundation' },
+      ]).map(s => s.id),
+    ).toEqual(['foundation', 'accountability', 'execution'])
+  })
+
+  it('drops nulls and slugs that are not pillars, and never invents a section', () => {
+    expect(mediaIndexSections([{ pillar: null }, { pillar: 'revenue' }])).toEqual([])
+    expect(mediaIndexSections([])).toEqual([])
+  })
+
+  it('points each section at its own /media route', () => {
+    expect(mediaIndexSections([{ pillar: 'mental-toughness' }])).toEqual([
+      {
+        id: 'mental-toughness',
+        label: 'Mental Toughness',
+        pillar: 'mental-toughness',
+        href: '/media/mental-toughness',
+      },
+    ])
+  })
+
+  it('keeps all six pillars available as the degraded-mode fallback', () => {
+    expect(ALL_MEDIA_SECTIONS).toHaveLength(6)
+    expect(ALL_MEDIA_SECTIONS.map(s => s.href)).toContain('/media/accountability')
+    expect(ALL_MEDIA_SECTIONS.map(s => s.href)).toContain('/media/mental-toughness')
   })
 })
 
@@ -102,8 +150,11 @@ describe('desk chrome locks', () => {
     expect(MEDIA_NAVY).toBe('#1B3C5A')
     expect(MEDIA_RED).toBe('#EF0E30')
     expect(MEDIA_TEAL).toBe('#68A2B9')
-    expect(MEDIA_ON_AIR.map(l => l.href)).toEqual(['/live', '/podcast', '/podcast'])
-    expect(MEDIA_ON_AIR.map(l => l.label)).toEqual(['LIVE', 'Podcast', 'Email brief'])
+    expect(MEDIA_ON_AIR.map(l => l.href)).toEqual(['/live', '/podcast'])
+    expect(MEDIA_ON_AIR.map(l => l.label)).toEqual(['LIVE', 'Podcast'])
     expect(MEDIA_ON_AIR.some(l => l.label === 'Events' || l.href === '/events')).toBe(false)
+    // SPRINT M — "Email brief" used to sit here pointing at /podcast. The
+    // brief is a real capture form now; it is not a nav link to a podcast.
+    expect(MEDIA_ON_AIR.some(l => /brief/i.test(l.label))).toBe(false)
   })
 })

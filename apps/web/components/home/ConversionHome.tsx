@@ -157,7 +157,7 @@ export function ConversionHome({
           to the upper band so THE EVOLVED ARCHITECTURE is an HTML label
           above the H1 instead of baked-in type colliding at 390-400px.
           Open the platform is the primary red CTA. Join free always sits
-          beside it in .ep-home-fold-ctas-lead (not gated on signedIn — a
+          beside it in .ep-home-fold-ctas-lead (not gated on signedIn: a
           session cookie is the only way the third hero button vanished on
           a "cold" prove). See pricing stays tertiary. No public theme toggle.
         */}

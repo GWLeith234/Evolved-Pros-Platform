@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { MEDIA_INDEX_SECTIONS, MEDIA_ON_AIR, splitHubDesk } from './desk'
+import { ALL_MEDIA_SECTIONS, MEDIA_ON_AIR, mediaIndexSections, splitHubDesk } from './desk'
 import { MEDIA_LOCKUP_LABEL } from '../lockups'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -28,15 +28,25 @@ describe('Phase 1 EPM←TT newspaper home', () => {
     expect(portal).not.toContain('Evolved Media')
   })
 
-  it('rails only Strategy, Execution, Identity, and Foundation', () => {
-    expect(MEDIA_INDEX_SECTIONS.map(s => s.label)).toEqual([
-      'Strategy',
-      'Execution',
-      'Identity',
+  it('rails every pillar that has published stories, and nothing else', () => {
+    // SPRINT M — was a hardcoded four. Accountability and Mental Toughness had
+    // 11 published articles between them and no door in the nav.
+    expect(ALL_MEDIA_SECTIONS.map(s => s.label)).toEqual([
       'Foundation',
+      'Identity',
+      'Mental Toughness',
+      'Strategy',
+      'Accountability',
+      'Execution',
     ])
-    expect(MEDIA_INDEX_SECTIONS.some(s => s.label === 'Latest')).toBe(false)
-    expect(MEDIA_INDEX_SECTIONS.some(s => /Education|Events/i.test(s.label))).toBe(false)
+    expect(ALL_MEDIA_SECTIONS.some(s => s.label === 'Latest')).toBe(false)
+    expect(ALL_MEDIA_SECTIONS.some(s => /Education|Events/i.test(s.label))).toBe(false)
+    // The rail takes sections as data; it must not reach for a constant.
+    expect(read('../../app/(public)/media/layout.tsx')).toContain('getMediaIndexSections')
+    expect(masthead).toContain('sections={sections}')
+    expect(mediaIndexSections([{ pillar: 'accountability' }]).map(s => s.href)).toEqual([
+      '/media/accountability',
+    ])
   })
 
   it('ships dual hero, Featured 2-up, Latest thumbs, and a labeled Podcast module', () => {
@@ -62,7 +72,6 @@ describe('Phase 1 EPM←TT newspaper home', () => {
   })
 
   it('reserves Soo/TT partner geometry without an open ad network', () => {
-    expect(slot).toContain("kind === 'sponsored-row'")
     expect(slot).toContain('leaderboard')
     expect(slot).toContain('mid-fluid')
     expect(slot).toContain('rail-half')
@@ -79,10 +88,33 @@ describe('Phase 1 EPM←TT newspaper home', () => {
   })
 
   it('keeps On Air on real platform destinations and drops Events', () => {
-    expect(MEDIA_ON_AIR.map(l => l.label)).toEqual(['LIVE', 'Podcast', 'Email brief'])
+    expect(MEDIA_ON_AIR.map(l => l.label)).toEqual(['LIVE', 'Podcast'])
     expect(MEDIA_ON_AIR.every(l => l.href === '/live' || l.href === '/podcast')).toBe(true)
     expect(portal).toContain('MEDIA_ON_AIR')
     expect(portal).toContain('href={link.href}')
     expect(portal).not.toContain("href=\"/events\"")
+  })
+
+  // SPRINT M — an unfilled slot renders nothing. It used to draw a dashed box
+  // reading "PARTNER STORY — Evolved Pros Media partner inventory" over a blank
+  // thumbnail: a rate card printed on the reader's page.
+  it('renders nothing at all when a partner slot is unfilled', () => {
+    expect(slot).toContain('if (!ad?.image_url) return null')
+    expect(slot).not.toContain('Evolved Pros Media partner inventory')
+    expect(slot).not.toContain('data-media-partner-empty')
+    expect(slot).not.toContain('1px dashed')
+    expect(slot).not.toContain('media-slot-thumb')
+  })
+
+  // SPRINT M — the brief is a form that stores an address, not a link to the
+  // podcast page. Both surfaces mount the same component.
+  it('captures the email brief instead of routing it to /podcast', () => {
+    const brief = read('../../components/media/BriefSignup.tsx')
+    expect(portal).toContain('<BriefSignup variant="rail" />')
+    expect(portal).not.toContain('Get the brief</Link>')
+    expect(brief).toContain("'/api/media/brief'")
+    expect(brief).toContain('type="email"')
+    expect(brief).toContain('name="email"')
+    expect(brief).toContain('<form')
   })
 })

@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, type CSSProperties } from 'react'
-import { gradients } from '@evolved-pros/ui'
 import { stripTrailingArrow } from '@/lib/brand'
 import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
+import { AdPlane } from '@/components/ads/AdPlane'
 import { isIabImageStill } from '@/lib/ads/iab'
 
 type SponsorAd = {
@@ -28,9 +28,20 @@ interface SponsorCardProps {
   variant: 'academy' | 'community' | 'events'
 }
 
-const RED = '#C9302A'
-
-/** Evolution Partner card — uniform shell + Sprint 1 button chrome (Sprint 2). */
+/**
+ * Native partner unit - the copy-carrying card, for rows that are not a plain
+ * IAB still (those short-circuit to IabAdvertisementSlot below).
+ *
+ * SPRINT M - RESERVED COLOURS ARE GONE FROM THIS CARD.
+ *
+ * It used to wear #C9302A on a badge and a left accent bar, and its CTA was
+ * `gradients.primary` - literally #ef0e30, the platform's own action colour, on
+ * a button inside an ad. A reader had no way to tell that button from a real
+ * Evolved Pros control. Every one of those is now an --ad-plane-* neutral, and
+ * the whole card sits inside <AdPlane> like every other unit.
+ *
+ * Hover is a border and a lift only. Nothing borrows brand colour.
+ */
 export function SponsorCard({ ad, variant }: SponsorCardProps) {
   const [hover, setHover] = useState(false)
 
@@ -40,103 +51,52 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
 
   const ctaText = stripTrailingArrow(ad.cta_text || 'Learn More')
 
-  const badge = (
+  const offer = ad.special_offer ? (
     <span
+      className="inline-block font-condensed font-bold uppercase mt-2"
       style={{
-        fontFamily: '"Barlow Condensed", sans-serif',
-        fontWeight: 800,
-        fontSize: 9,
-        letterSpacing: '0.22em',
-        textTransform: 'uppercase',
-        color: RED,
-        background: hover ? 'rgba(201,48,42,0.14)' : 'rgba(201,48,42,0.08)',
-        border: `1px solid ${hover ? 'rgba(201,48,42,0.45)' : 'rgba(201,48,42,0.28)'}`,
-        padding: '2px 7px',
-        transition: 'background 160ms ease, border-color 160ms ease',
+        fontSize: 12,
+        color: 'var(--ad-plane-label)',
+        border: '1px solid var(--ad-plane-line)',
+        borderRadius: 0,
+        padding: '2px 8px',
       }}
     >
-      Evolution Partner
+      {ad.special_offer}
     </span>
-  )
+  ) : null
 
-  const accentBar = (
-    <div
-      aria-hidden
-      style={{
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        bottom: 0,
-        width: 3,
-        backgroundColor: RED,
-      }}
-    />
-  )
-
-  const hoverLine = (
-    <span
-      aria-hidden
-      style={{
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        width: hover ? 80 : 0,
-        height: 2,
-        background: `linear-gradient(90deg, transparent, ${RED})`,
-        transition: 'width 220ms ease',
-      }}
-    />
-  )
-
-  const shellStyle = (extra?: CSSProperties): CSSProperties => ({
+  const shellStyle: CSSProperties = {
     position: 'relative',
     overflow: 'hidden',
-    padding: 16,
-    paddingLeft: 18,
-    border: `1px solid ${hover ? `${RED}55` : 'var(--border-color)'}`,
-    background: 'var(--bg-surface)',
-    boxShadow: hover ? 'var(--shadow-glow-red)' : 'var(--shadow-sm)',
+    width: '100%',
+    padding: 14,
+    border: `1px solid var(--ad-plane-line)`,
+    background: 'transparent',
     transform: hover ? 'translateY(-1px)' : 'none',
-    transition: 'border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease',
+    transition: 'border-color 160ms ease, transform 160ms ease',
     borderRadius: 0,
-    ...extra,
-  })
+  }
 
   const content = (
     <div className="flex gap-3">
       <div className="flex-1 min-w-0">
-        <div style={{ marginBottom: 8 }}>{badge}</div>
         {ad.tool_name && (
           <p
             className="font-condensed font-bold"
-            style={{ color: 'var(--text-primary)', fontSize: variant === 'events' ? 16 : 14 }}
+            style={{ color: 'var(--ad-plane-label)', fontSize: variant === 'events' ? 16 : 14 }}
           >
             {ad.tool_name}
           </p>
         )}
         {ad.endorsement_quote && (
-          <p className="font-body italic mt-1" style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
+          <p className="font-body italic mt-1" style={{ color: 'var(--ad-plane-label)', fontSize: 12 }}>
             &ldquo;{ad.endorsement_quote}&rdquo;
           </p>
         )}
-        {ad.special_offer && (
-          <span
-            className="inline-block font-condensed font-bold uppercase mt-2"
-            style={{
-              fontSize: 12,
-              color: RED,
-              backgroundColor: 'rgba(201,48,42,0.10)',
-              border: '1px solid rgba(201,48,42,0.35)',
-              borderRadius: 0,
-              padding: '2px 8px',
-            }}
-          >
-            {ad.special_offer}
-          </span>
-        )}
+        {offer}
         <div className="mt-3">
           <span
-            className="ep-btn ep-btn--primary"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -147,12 +107,12 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
               fontSize: 11,
               letterSpacing: '0.14em',
               textTransform: 'uppercase',
-              background: hover ? 'var(--gradient-primary-hover)' : (gradients?.primary ?? 'linear-gradient(135deg, #ef0e30 0%, #c50a26 100%)'),
-              color: '#FFFFFF',
-              border: '1px solid transparent',
+              // Neutral, never the platform's red. An ad's CTA must not be
+              // mistakable for an Evolved Pros action.
+              background: 'transparent',
+              color: 'var(--ad-plane-label)',
+              border: '1px solid var(--ad-plane-line)',
               borderRadius: 0,
-              transition: 'filter 160ms ease',
-              filter: hover ? 'brightness(1.05)' : undefined,
             }}
           >
             {ctaText}
@@ -176,27 +136,27 @@ export function SponsorCard({ ad, variant }: SponsorCardProps) {
     </div>
   )
 
-  void variant
-
-  const inner = (
+  const card = (
     <div
-      style={shellStyle()}
+      style={shellStyle}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
-      {accentBar}
-      {hoverLine}
       {content}
     </div>
   )
 
-  if (ad.link_url) {
-    return (
-      <a href={ad.link_url} target="_blank" rel="noopener noreferrer sponsored" className="block">
-        {inner}
-      </a>
-    )
-  }
+  const inner = ad.link_url ? (
+    <a href={ad.link_url} target="_blank" rel="noopener noreferrer sponsored" className="block w-full">
+      {card}
+    </a>
+  ) : (
+    card
+  )
 
-  return <div>{inner}</div>
+  return (
+    <AdPlane label="Sponsored" data={{ 'data-ad-card': variant }}>
+      {inner}
+    </AdPlane>
+  )
 }

@@ -4,7 +4,15 @@ import type { CSSProperties } from 'react'
 import { IabAdvertisementSlot } from '@/components/ads/IabImageAd'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
-/** Centered paper IAB used between story / job / event rows. */
+/**
+ * SPRINT M - these two used to pass tone="paper" so the label could be tinted
+ * to match the cream article page. That is exactly backwards: matching the page
+ * is what made the unit disappear into it. The AdPlane inside
+ * IabAdvertisementSlot now steps away from whatever page it sits on, in both
+ * themes, so there is no tone to pass.
+ */
+
+/** Centered IAB used between story / job / event rows. */
 export function MediaCenteredAd({
   ad,
   locationId,
@@ -28,7 +36,7 @@ export function MediaCenteredAd({
   )
 }
 
-/** Paper-tone IAB unit for the Media magazine feed. Label sits on the unit. */
+/** IAB unit for the Media magazine feed. The plane carries the label. */
 export function MediaIabSlot({
   ad,
   locationId,
@@ -43,7 +51,6 @@ export function MediaIabSlot({
     <IabAdvertisementSlot
       ad={{ ...ad, image_url: ad.image_url }}
       locationId={locationId}
-      tone="paper"
       style={style}
     />
   )

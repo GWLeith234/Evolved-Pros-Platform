@@ -65,7 +65,12 @@ describe('Media masthead chrome', () => {
     expect(src).not.toMatch(/#F5F0E8/)
     expect(src).not.toMatch(/fontStyle: 'italic'/)
     expect(src).not.toMatch(/Community/)
-    expect(rail).toMatch(/MEDIA_INDEX_SECTIONS/)
+    // SPRINT M — the rail takes sections as data (all six pillars that have
+    // published stories), not a hardcoded four-entry constant.
+    expect(rail).not.toMatch(/MEDIA_INDEX_SECTIONS/)
+    expect(rail).toMatch(/sections\.map/)
+    expect(layout).toMatch(/getMediaIndexSections/)
+    expect(src).toMatch(/sections=\{sections\}/)
     expect(rail).not.toMatch(/\/community/)
     expect(rail).not.toMatch(/\/events/)
     expect(rail).not.toMatch(/\/podcast/)

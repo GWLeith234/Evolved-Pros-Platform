@@ -7,6 +7,7 @@ import { adMatchesSurface, filterLiveAds, isIabImageStill } from '@/lib/ads/iab'
 import { isAcademyAd } from '@/lib/sponsors/partners'
 import { IAB_ZONE_TO_SLOT, inferHouseAdSlot } from '@/lib/ads/house'
 import { HouseAdTracker } from '@/components/ads/HouseAdTracker'
+import { AdPlane } from '@/components/ads/AdPlane'
 
 type Zone = 'A' | 'B' | 'C' | 'D' | 'E'
 
@@ -79,43 +80,34 @@ export function MediaAdZone({ zone }: MediaAdZoneProps) {
   const slot = IAB_ZONE_TO_SLOT[zone] ?? inferHouseAdSlot({ ...ad, zone })
   const size = IAB_PX[zone]
 
-  const inner = (
-    <>
-      {!house && (
-        <p
-          style={{
-            fontFamily: 'sans-serif',
-            fontSize: '10px',
-            color: 'rgba(10,15,24,0.35)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.10em',
-            marginBottom: '6px',
-          }}
-        >
-          Advertisement
-        </p>
-      )}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={ad.image_url}
-        alt={ad.headline ?? ad.sponsor_name ?? 'Ad'}
-        width={size?.w}
-        height={size?.h}
-        style={{
-          width: size ? size.w : '100%',
-          maxWidth: '100%',
-          height: 'auto',
-          aspectRatio: size ? `${size.w} / ${size.h}` : undefined,
-          objectFit: 'contain',
-          display: 'block',
-        }}
-      />
-    </>
+  // SPRINT M - the label is no longer drawn here. It belongs to the AdPlane
+  // below, at 11px with real contrast, above the unit and outside the creative.
+  // The house branch used to skip it entirely; it no longer can.
+  const creative = (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={ad.image_url}
+      alt={ad.headline ?? ad.sponsor_name ?? 'Ad'}
+      width={size?.w}
+      height={size?.h}
+      style={{
+        width: size ? size.w : '100%',
+        maxWidth: '100%',
+        height: 'auto',
+        aspectRatio: size ? `${size.w} / ${size.h}` : undefined,
+        objectFit: 'contain',
+        display: 'block',
+      }}
+    />
   )
 
-  if (house) {
-    return (
-      <div data-ad-zone={zone} style={{ marginBottom: '14px' }}>
+  const plane = (
+    <AdPlane
+      label={house ? 'Sponsored' : 'Advertisement'}
+      width={size?.w}
+      data={{ 'data-ad-zone': zone }}
+    >
+      {house ? (
         <HouseAdTracker
           ad={ad}
           slot={slot}
@@ -123,25 +115,22 @@ export function MediaAdZone({ zone }: MediaAdZoneProps) {
           style={{ textDecoration: 'none', display: 'block' }}
           ariaLabel={`${ad.headline ?? 'Evolved Pros Academy'} | Evolved Pros Academy`}
         >
-          {inner}
+          {creative}
         </HouseAdTracker>
-      </div>
-    )
-  }
-
-  if (ad.click_url) {
-    return (
-      <div data-ad-zone={zone} style={{ marginBottom: '14px' }}>
-        <a href={ad.click_url} target="_blank" rel="noopener noreferrer sponsored" style={{ textDecoration: 'none' }}>
-          {inner}
+      ) : ad.click_url ? (
+        <a
+          href={ad.click_url}
+          target="_blank"
+          rel="noopener noreferrer sponsored"
+          style={{ textDecoration: 'none', display: 'block' }}
+        >
+          {creative}
         </a>
-      </div>
-    )
-  }
-
-  return (
-    <div data-ad-zone={zone} style={{ marginBottom: '14px' }}>
-      {inner}
-    </div>
+      ) : (
+        creative
+      )}
+    </AdPlane>
   )
+
+  return <div style={{ marginBottom: '14px' }}>{plane}</div>
 }

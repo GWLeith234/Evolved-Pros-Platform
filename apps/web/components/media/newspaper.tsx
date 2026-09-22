@@ -11,6 +11,7 @@ import { layoutArticleBody, splitHtmlBlocks, type ArticleChunk } from '@/lib/ads
 import { articleMidRectBreaks } from '@/lib/media/scrollInventory'
 import { getPillarLabel } from '@/lib/pillars'
 import { MEDIA_ON_AIR, moreInLabel, popularStories } from '@/lib/media/desk'
+import { BriefSignup } from '@/components/media/BriefSignup'
 import { mediaStoryHref } from '@/lib/media/paths'
 import {
   episodeRailStill,
@@ -356,33 +357,18 @@ export function NewspaperMostRead({ stories }: { stories: NewspaperStory[] }) {
   )
 }
 
+/**
+ * SPRINT M - the rail brief module. Kept as a named export so existing call
+ * sites keep working; the body is now a real capture form, not a /podcast link.
+ */
 export function NewspaperBriefCta() {
-  return (
-    <section className="ep-media-brief-cta" data-media-module="brief-cta">
-      <p>One read every weekday from Evolved Pros Media.</p>
-      <Link href="/podcast">Get the brief</Link>
-    </section>
-  )
+  return <BriefSignup variant="rail" />
 }
 
-export function NewspaperSoftVipCta() {
-  return (
-    <section className="ep-media-soft-cta" data-media-module="soft-vip-cta">
-      <p className="ep-media-soft-cta-kicker">Community</p>
-      <h2>Start free. VIP is there when you want more.</h2>
-      <p>
-        Join the Community with no card. VIP is $49 when you want Fit and Academy
-        depth. Media stays open.
-      </p>
-      <div className="ep-media-soft-cta-row">
-        <Link href="/community">Join Community</Link>
-        <Link href="/pricing" className="ep-media-soft-cta-ghost">
-          See VIP
-        </Link>
-      </div>
-    </section>
-  )
-}
+// NewspaperSoftVipCta is gone (SPRINT M). It was a static "Join Community /
+// See VIP" block shown to everyone, including people who already pay. Its
+// replacement is <ArticleEndCta />, which asks who is reading first and keeps
+// the .ep-media-soft-cta chrome.
 
 export function NewspaperPodcast({
   episodes,

@@ -3,6 +3,7 @@
 import { useMemo, type CSSProperties } from 'react'
 import Link from 'next/link'
 import { MediaPartnerSlot, MediaScrollRect } from '@/components/media/MediaPartnerSlot'
+import { BriefSignup } from '@/components/media/BriefSignup'
 import { homeMidRectBands, latestMidRectIndexes } from '@/lib/media/scrollInventory'
 import { getPillarLabel } from '@/lib/pillars'
 import {
@@ -296,15 +297,6 @@ function MostRead({ stories }: { stories: MediaStory[] }) {
   )
 }
 
-function BriefCta() {
-  return (
-    <section className="ep-media-brief-cta" data-media-module="brief-cta">
-      <p>One read every weekday from Evolved Pros Media.</p>
-      <Link href="/podcast">Get the brief</Link>
-    </section>
-  )
-}
-
 function PodcastModule({ episodes }: { episodes: Episode[] }) {
   if (episodes.length === 0) return null
   return (
@@ -431,7 +423,7 @@ export function MediaPortalClient({
           <aside className="ep-media-home-rail">
             <OnAirRail />
             <MostRead stories={stories} />
-            <BriefCta />
+            <BriefSignup variant="rail" />
             <div className="ep-media-rail-slot media-sticky-rail">
               <MediaPartnerSlot kind="rail-half" ad={sidebarAd} locationId="media-rail" />
             </div>

@@ -4172,3 +4172,258 @@ html.light-mode .live-force-dark .ep-public-footer-logo--on-light {
 .ep-pricing-billing:has(#ep-pricing-annual:checked) .ep-cta-annual {
   display: block;
 }
+
+/* ── SPRINT M - persistent global nav on the public sections ──────────────
+   /media, /fit and /live drop the member shell by design. This slim rail
+   rides above each section's own masthead so none of them is a dead end.
+   Colour is semantic tokens only, so it inverts with the theme and follows
+   .ep-force-dark inside the always-dark /live shell.                       */
+.ep-global-nav {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.ep-global-nav-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+.ep-global-nav-list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.ep-global-nav-list::-webkit-scrollbar { display: none; }
+.ep-global-nav-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 10px;
+  color: var(--text-secondary);
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+}
+.ep-global-nav-list a:hover,
+.ep-global-nav-list a:focus-visible {
+  color: var(--text-primary);
+}
+.ep-global-nav-list a[aria-current="page"] {
+  color: var(--text-primary);
+  border-bottom-color: var(--brand-red);
+}
+.ep-global-nav-cta {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 4px;
+  background: var(--brand-red);
+  color: var(--white);
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+}
+@media (max-width: 639px) {
+  /* The CTA leaves the rail on phones - /pricing is one tap away in the
+     footer, and 44px targets matter more than a second red button here. */
+  .ep-global-nav-cta { display: none; }
+  .ep-global-nav-inner { padding: 0 12px; }
+}
+
+/* ── SPRINT M - email brief capture ──────────────────────────────────────
+   A real form, replacing the two "Get the brief" links that pointed at
+   /podcast. Platform chrome deliberately wears platform colour (navy block,
+   red submit): a reader should read this as an Evolved Pros action, which is
+   exactly what the ad plane below must NOT look like.                      */
+.ep-media-brief {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: var(--navy-dark);
+  color: var(--white);
+}
+html.light-mode .ep-media-brief {
+  background: var(--navy);
+}
+.ep-media-brief--inline {
+  margin: 28px 0 8px;
+  padding: 20px;
+}
+.ep-media-brief-kicker {
+  margin: 0 0 6px;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--white);
+  opacity: 0.72;
+}
+.ep-media-brief-pitch {
+  margin: 0 0 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.ep-media-brief-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: stretch;
+}
+.ep-media-brief-input {
+  flex: 1 1 180px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 15px; /* 16px-ish: anything smaller zooms the page on iOS focus */
+}
+.ep-media-brief-input::placeholder { color: rgba(255, 255, 255, 0.55); }
+.ep-media-brief-input:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: 1px;
+}
+.ep-media-brief-input[aria-invalid='true'] {
+  border-color: var(--brand-red-hot);
+}
+/* Honeypot: out of flow, out of the a11y tree, still fillable by a bot. */
+.ep-media-brief-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.ep-media-brief-submit {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: var(--brand-red-hot);
+  color: var(--white);
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.ep-media-brief-submit:disabled { opacity: 0.6; cursor: default; }
+.ep-media-brief-msg {
+  flex: 1 0 100%;
+  margin: 4px 0 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--white);
+}
+.ep-media-brief-fine {
+  margin: 10px 0 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+/* ── SPRINT M - AD SEPARATION STANDARD ───────────────────────────────────
+   Advertiser creative is outside our control, so separation lives in the
+   container. See components/ads/AdPlane.tsx for the full rule.
+
+   DIRECTION is the rule, not these exact values:
+     light  page #F5F0E8 -> plane #DED7CA   (plane is DARKER, 1.26:1)
+     dark   page #0A0F18 -> plane #354656   (plane is LIGHTER, 1.98:1)
+            dark  #112535 -> plane #354656   (plane is LIGHTER, 1.61:1)
+
+   RESERVED, and absent from every value below: #112535 navy, #ef0e30 red,
+   #F5F0E8 cream, and the six pillar colours #FFA538 #A78BFA #F87171 #60A5FA
+   #C9A84C #0ABFA3. An ad must never be able to borrow platform colour.      */
+:root {
+  --ad-plane-bg:    #354656;
+  --ad-plane-line:  #71808F;
+  --ad-plane-label: #D3DAE1; /* 6.89:1 on --ad-plane-bg */
+}
+html.light-mode {
+  --ad-plane-bg:    #DED7CA;
+  --ad-plane-line:  #9A9284;
+  --ad-plane-label: #3F3B36; /* 7.77:1 on --ad-plane-bg */
+}
+/* Fixed-dark shells (/live, the /login footer) keep the DARK plane even while
+   the rest of the document is in light mode - otherwise the plane would step
+   the wrong way and vanish into the shell. Same escape hatch as FOOTER-1. */
+html.light-mode .live-force-dark,
+html.light-mode .ep-force-dark {
+  --ad-plane-bg:    #354656;
+  --ad-plane-line:  #71808F;
+  --ad-plane-label: #D3DAE1;
+}
+
+.ep-ad-plane {
+  box-sizing: border-box;
+  width: 100%;
+  margin-inline: auto;
+  padding: 10px;
+  background: var(--ad-plane-bg);
+  border: 1px solid var(--ad-plane-line);
+  border-radius: 0;
+}
+.ep-ad-plane-label {
+  margin: 0 0 8px;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-size: 11px; /* floor, never smaller */
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ad-plane-label);
+  opacity: 1; /* the label is real: never faded, never decorative */
+}
+.ep-ad-plane-creative {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+.ep-ad-plane-creative > * { max-width: 100%; }
+
+/* Unfilled slots render nothing at all now (SPRINT M rule 8), so the geometry
+   wrappers must not keep reserving margin around an empty child. */
+.ep-media-leaderboard:empty,
+.ep-media-mid-fluid:empty,
+.ep-media-mid-rect:empty,
+.ep-media-rail-slot:empty,
+.ep-media-article-slot:empty {
+  display: none;
+  margin: 0;
+  padding: 0;
+}

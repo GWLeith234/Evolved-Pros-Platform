@@ -7,13 +7,14 @@ import { adminClient } from '@/lib/supabase/admin'
 import { getPillarLabel } from '@/lib/pillars'
 import { ArticleShareBar } from './ArticleShareBar'
 import { MediaPartnerSlot } from '@/components/media/MediaPartnerSlot'
+import { BriefSignup } from '@/components/media/BriefSignup'
+import { ArticleEndCta } from '@/components/media/ArticleEndCta'
 import {
   NewspaperArticleBody,
   NewspaperLatestRail,
   NewspaperMoreInSection,
   NewspaperMostRead,
   NewspaperPodcast,
-  NewspaperSoftVipCta,
   newspaperFormatLongDate,
   newspaperReadMinutes,
   type NewspaperStory,
@@ -251,7 +252,10 @@ export default async function StoryPage({
               />
             </div>
 
-            <NewspaperSoftVipCta />
+            {/* SPRINT M - the two exits an article owes a reader: leave an
+                address, or come into the platform. */}
+            <BriefSignup variant="inline" source="media-article" />
+            <ArticleEndCta />
           </article>
 
           <aside className="ep-media-home-rail">

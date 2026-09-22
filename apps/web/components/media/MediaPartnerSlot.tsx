@@ -1,8 +1,20 @@
 /**
- * SooToday / Toronto Today slot geometry with EP / partner empty-states.
+ * SooToday / Toronto Today slot geometry, EP / partner inventory only.
  * Never loads an open ad network. Creative is EP or partner inventory only.
+ *
+ * SPRINT M - AN UNFILLED SLOT RENDERS NOTHING.
+ *
+ * This file used to draw a dashed box reading "PARTNER STORY - Evolved Pros
+ * Media partner inventory" over a blank grey thumbnail whenever no partner had
+ * bought the placement. That is a rate card printed on a reader's page: it
+ * tells them nothing, it occupies the space a story could have had, and at a
+ * glance it reads like a broken article card. Held geometry is worth having
+ * when a slot is about to fill on the same paint; it is not worth having when
+ * the slot is empty for a week.
+ *
+ * The filled path goes through MediaIabSlot -> IabAdvertisementSlot -> AdPlane,
+ * so every partner unit that does render inherits the separation standard.
  */
-import type { CSSProperties } from 'react'
 import { MediaIabSlot } from '@/components/media/MediaIabSlot'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
@@ -15,26 +27,6 @@ export type PartnerSlotKind =
   | 'sponsored-row'
   | 'article-inline'
 
-const SLOT_PX: Record<PartnerSlotKind, { w: number; h: number }> = {
-  leaderboard: { w: 728, h: 90 },
-  'mid-fluid': { w: 970, h: 250 },
-  'mid-rect': { w: 300, h: 250 },
-  rail: { w: 300, h: 250 },
-  'rail-half': { w: 300, h: 600 },
-  'sponsored-row': { w: 100, h: 67 },
-  'article-inline': { w: 300, h: 250 },
-}
-
-const SLOT_LABEL: Record<PartnerSlotKind, string> = {
-  leaderboard: 'Partner leaderboard',
-  'mid-fluid': 'Partner placement',
-  'mid-rect': 'Sponsored',
-  rail: 'Partner rail',
-  'rail-half': 'Partner half-page',
-  'sponsored-row': 'Partner story',
-  'article-inline': 'Sponsored',
-}
-
 export function MediaPartnerSlot({
   kind,
   ad,
@@ -44,80 +36,23 @@ export function MediaPartnerSlot({
   ad?: SponsorAd | null
   locationId: string
 }) {
-  if (ad?.image_url) {
-    return (
-      <div data-media-partner-slot={kind} data-media-partner-filled="true">
-        <MediaIabSlot ad={ad} locationId={locationId} />
-      </div>
-    )
-  }
-
-  const px = SLOT_PX[kind]
-  const isRow = kind === 'sponsored-row'
-  const frame: CSSProperties = {
-    width: '100%',
-    maxWidth: isRow ? '100%' : px.w,
-    minHeight: px.h,
-    aspectRatio: isRow ? undefined : `${px.w} / ${px.h}`,
-    marginInline: isRow ? 0 : 'auto',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: isRow ? 'flex-start' : 'center',
-    gap: isRow ? 12 : 8,
-    padding: isRow ? '10px 12px' : 12,
-    background: 'var(--media-slot-bg)',
-    border: '1px dashed var(--media-slot-line)',
-    color: 'var(--media-slot-ink)',
-    boxSizing: 'border-box',
-  }
+  // No partner, no unit. The geometry wrappers collapse via the :empty rules
+  // in globals.css, so the surrounding rhythm closes up rather than leaving a
+  // hole where the empty-state box used to be.
+  if (!ad?.image_url) return null
 
   return (
     <div
       className={kind === 'mid-fluid' ? 'ep-media-partner-mid-fluid' : undefined}
       data-media-partner-slot={kind}
-      data-media-partner-empty="true"
-      aria-label={SLOT_LABEL[kind]}
-      style={frame}
+      data-media-partner-filled="true"
     >
-      {isRow ? (
-        <div
-          aria-hidden="true"
-          style={{
-            width: px.w,
-            height: px.h,
-            flexShrink: 0,
-            background: 'var(--media-slot-thumb)',
-          }}
-        />
-      ) : null}
-      <div>
-        <p
-          style={{
-            margin: 0,
-            fontFamily: 'var(--font-barlow-condensed), "Barlow Condensed", sans-serif',
-            fontWeight: 700,
-            fontSize: isRow ? 10 : 11,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-          }}
-        >
-          {SLOT_LABEL[kind]}
-        </p>
-        <p
-          style={{
-            margin: isRow ? '2px 0 0' : '4px 0 0',
-            fontFamily: 'var(--font-body)',
-            fontSize: isRow ? 12 : 13,
-          }}
-        >
-          Evolved Pros Media partner inventory
-        </p>
-      </div>
+      <MediaIabSlot ad={ad} locationId={locationId} />
     </div>
   )
 }
 
-/** Centered 300x250 scroll avail. Empty-state or house/partner creative only. */
+/** Centered 300x250 scroll avail. House/partner creative only, or nothing. */
 export function MediaScrollRect({
   ad,
   locationId,
@@ -125,6 +60,7 @@ export function MediaScrollRect({
   ad?: SponsorAd | null
   locationId: string
 }) {
+  if (!ad?.image_url) return null
   return (
     <div className="ep-media-mid-rect" data-media-scroll-rect="300x250">
       <MediaPartnerSlot kind="mid-rect" ad={ad} locationId={locationId} />

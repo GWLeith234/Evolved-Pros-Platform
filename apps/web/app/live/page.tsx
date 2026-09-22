@@ -27,6 +27,7 @@ import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
 import { adMatchesSurface, filterLiveAds, isLeaderboardStill } from '@/lib/ads/iab'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 import { PublicFooter } from '@/components/layout/PublicFooter'
+import { PublicGlobalNav } from '@/components/layout/PublicGlobalNav'
 
 const LivePhotoRotator = dynamic(
   () => import('@/components/live/LivePhotoRotator').then(m => m.LivePhotoRotator),
@@ -78,6 +79,9 @@ export default async function LivePage() {
            can raise it without an inline style fight. */
       }}
     >
+      {/* SPRINT M - persistent global nav; /live keeps its own dark shell. */}
+      <PublicGlobalNav current="/live" tone="dark" />
+
       {user && (
         <Link
           href="/home"

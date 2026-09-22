@@ -3,7 +3,7 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { MEDIA_INDEX_SECTIONS, splitSectionDesk } from './desk'
+import { ALL_MEDIA_SECTIONS, mediaIndexSections, splitSectionDesk } from './desk'
 import { lockedArticleByline } from './storyArt'
 import { MEDIA_LOCKUP_LABEL } from '../lockups'
 import {
@@ -35,15 +35,21 @@ describe('Phase 2 EPM←TT article + section landings', () => {
     expect(masthead).toContain('MEDIA_LOCKUP_LIGHT')
     expect(masthead).toContain('MEDIA_LOCKUP_LABEL')
     expect(masthead).not.toContain('EpWordmarkMark')
-    expect(rail).toContain('MEDIA_INDEX_SECTIONS')
-    expect(MEDIA_INDEX_SECTIONS.map(s => s.label)).toEqual([
-      'Strategy',
-      'Execution',
-      'Identity',
+    // SPRINT M — sections arrive as data, computed from published stories.
+    expect(rail).toContain('sections')
+    expect(rail).not.toContain('MEDIA_INDEX_SECTIONS')
+    expect(ALL_MEDIA_SECTIONS.map(s => s.label)).toEqual([
       'Foundation',
+      'Identity',
+      'Mental Toughness',
+      'Strategy',
+      'Accountability',
+      'Execution',
     ])
     expect(landing).toContain('MEDIA_BRAND')
-    expect(modules).toContain('Evolved Pros Media')
+    // The brief copy that used to carry this string moved to lib/media/brief.
+    expect(read('../../lib/media/brief.ts')).toContain('Evolved Pros Media')
+    expect(modules).not.toContain('Evolved Media')
     expect(article).not.toContain('Evolved Media')
     expect(landing).not.toContain('Evolved Media')
     expect(home).toContain('data-media-module="dual-hero"')
@@ -63,12 +69,11 @@ describe('Phase 2 EPM←TT article + section landings', () => {
     expect(article).toContain('NewspaperMoreInSection')
     expect(article).toContain('Latest on Media')
     expect(article).toContain('From the Podcast')
-    expect(article).toContain('NewspaperSoftVipCta')
+    // SPRINT M — the static "Join Community / See VIP" block (shown to
+    // everyone, paying members included) is now an auth-aware CTA.
+    expect(article).toContain('ArticleEndCta')
+    expect(article).not.toContain('NewspaperSoftVipCta')
     expect(modules).toContain('data-media-module="more-in-section"')
-    expect(modules).toContain('data-media-module="soft-vip-cta"')
-    expect(modules).toContain('Join Community')
-    expect(modules).toContain('See VIP')
-    expect(modules).toContain('href="/community"')
     expect(modules).not.toMatch(/paywall|Subscribe to continue/i)
     expect(share).toContain('Email')
     expect(share).toContain('Facebook')
@@ -122,9 +127,25 @@ describe('Phase 2 EPM←TT article + section landings', () => {
     expect(share).not.toMatch(/googletag|doubleclick|gpt\.js|DFP/)
   })
 
+  // ── SPRINT M ──────────────────────────────────────────────────────────
+  it('ends an article with both exits: leave an address, or come inside', () => {
+    expect(article).toContain('<BriefSignup variant="inline" source="media-article" />')
+    expect(article).toContain('<ArticleEndCta />')
+  })
+
+  it('resolves the end-of-article CTA server-side and keeps no tier logic in the component', () => {
+    const cta = read('../../components/media/ArticleEndCta.tsx')
+    const route = read('../../app/api/media/viewer/route.ts')
+    expect(cta).toContain("'/api/media/viewer'")
+    // Sprint L owns lib/entitlements.ts. This component must not grow a matrix.
+    expect(cta).not.toMatch(/hasTierAccess|effectiveTier|'vip'|'pro'|'community'|\.tier\b/)
+    expect(route).toContain('hasTierAccess')
+    expect(route).toContain('resolveCurrentUser')
+  })
+
   it('click-path hrefs run home chips to section, then article, then More in section', () => {
     expect(rail).toContain('href={section.href}')
-    expect(MEDIA_INDEX_SECTIONS[0]).toMatchObject({
+    expect(mediaIndexSections([{ pillar: 'strategy' }])[0]).toMatchObject({
       label: 'Strategy',
       href: '/media/strategy',
     })
