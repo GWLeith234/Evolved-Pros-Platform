@@ -73,7 +73,11 @@ describe('admin chrome copy locks', () => {
 
   it('strips developer TODO and AI writer chrome without renaming AI George data', () => {
     expect(src('app/(admin)/admin/page.tsx')).not.toContain('TODO VENDASTA')
-    expect(src('app/(admin)/admin/page.tsx')).toContain('Billing not connected')
+    // SPRINT K — billing IS connected now. The dashboard reads MRR from
+    // Stripe, and only says n/a when Stripe itself could not be reached.
+    expect(src('app/(admin)/admin/page.tsx')).not.toContain('Billing not connected')
+    expect(src('app/(admin)/admin/page.tsx')).toContain('getRevenueSnapshot')
+    expect(src('app/(admin)/admin/page.tsx')).toContain('Could not reach Stripe')
     expect(src('app/(admin)/admin/page.tsx')).not.toMatch(/label:\s*'Pipeline'/)
     expect(src('app/(admin)/admin/episodes/EpisodeForm.tsx')).not.toContain('Write with AI')
     expect(src('app/(admin)/admin/episodes/EpisodeForm.tsx')).not.toContain('AI image prompt')
@@ -86,12 +90,17 @@ describe('admin chrome copy locks', () => {
     expect(src('components/admin/crm/CrmCard.tsx')).not.toContain('Ask George')
   })
 
-  it('keeps dashboard to four tiles and Members / CRM / Revenue quick links', () => {
+  it('keeps dashboard tiles tight and Members / CRM / Revenue quick links', () => {
     const page = src('app/(admin)/admin/page.tsx')
     expect(page).toContain("label: 'Active members'")
     expect(page).toContain("label: 'MRR'")
     expect(page).toContain("label: 'Retention rate'")
-    expect(page).toContain("label: 'Pro members'")
+    // SPRINT K — "Pro members" read as revenue while MRR said n/a; the roster
+    // it counted was comps and manual grants. Split into what Stripe bills
+    // and what was given away.
+    expect(page).not.toContain("label: 'Pro members'")
+    expect(page).toContain("label: 'Paid members'")
+    expect(page).toContain("label: 'Comped & granted'")
     expect(page).not.toContain("label: 'Total posts'")
     expect(page).not.toContain("label: 'Published episodes'")
     expect(page).toContain("href: '/admin/members'")

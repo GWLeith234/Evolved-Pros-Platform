@@ -39,7 +39,7 @@ describe('QA sweep P0 /pricing TBT', () => {
     expect(cards).not.toMatch(/useState/)
     expect(cards).toContain('Join free')
     expect(cards).toContain('Start VIP')
-    expect(cards).toContain('Go Professional')
+    expect(cards).toContain('Take a seat')  // SPRINT K: was 'Go Professional'
     expect(cards).toContain('Book George')
     expect(page).toMatch(/next\/dynamic/)
     expect(page).toMatch(/nextDynamic/)

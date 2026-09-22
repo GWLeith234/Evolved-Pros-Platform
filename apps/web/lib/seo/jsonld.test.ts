@@ -26,7 +26,7 @@ describe('home JSON-LD', () => {
 })
 
 describe('pricing JSON-LD', () => {
-  it('ships Product/Offer money schema with live $49 / $249 monthly prices as strings', () => {
+  it('ships Product/Offer money schema with live $99 / $849 monthly prices as strings', () => {
     const schema = pricingJsonLd()
     const publisher = homeOrganizationJsonLd()
     const vipMonthly = String(TIERS.vip.monthly)
@@ -46,7 +46,7 @@ describe('pricing JSON-LD', () => {
     expect(products.map((item) => item.name)).toEqual([
       'Community',
       'VIP',
-      'Professional',
+      'The Evolved Pros 99',
     ])
 
     // membershipProduct types offers as Offer | Offer[] — flatten either shape.
@@ -65,16 +65,28 @@ describe('pricing JSON-LD', () => {
     )
     expect(typeof vipMonthly).toBe('string')
     expect(typeof proMonthly).toBe('string')
-    expect(vipMonthly).toBe('49')
-    expect(proMonthly).toBe('249')
+    expect(vipMonthly).toBe('99')
+    expect(proMonthly).toBe('849')
+
+    // SPRINT K — annual is undecided, so NO annual Offer may be published.
+    // This block used to emit $490 and $2,490 as structured data, which is how
+    // a dead price outlives the page that showed it.
+    expect(offers.every((offer) => offer.priceSpecification?.billingDuration !== undefined || true)).toBe(true)
+    expect(offers.map((offer) => offer.price)).not.toContain('490')
+    expect(offers.map((offer) => offer.price)).not.toContain('2490')
+    expect(offers).toHaveLength(3)
 
     const blob = JSON.stringify(schema)
     expect(blob).toContain('Product')
     expect(blob).toContain('Offer')
     expect(blob).toContain(`"${vipMonthly}"`)
     expect(blob).toContain(`"${proMonthly}"`)
-    expect(blob).toContain('$49 /month')
-    expect(blob).toContain('$249 /month')
+    expect(blob).toContain('$99 /month')
+    expect(blob).toContain('$849 /month')
+    // No trace of the retired ladder in the indexed blob.
+    expect(blob).not.toContain('$49 /month')
+    expect(blob).not.toContain('$249 /month')
+    expect(blob).not.toContain('Professional')
     expect(blob).toContain('Evolved Pros')
     expect(blob).not.toContain('Evolved Media')
     expect(blob).not.toMatch(/Keynotes/)

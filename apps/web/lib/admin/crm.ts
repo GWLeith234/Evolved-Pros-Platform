@@ -84,7 +84,7 @@ export const CRM_STAGE_META: Record<CrmStage, CrmStageMeta> = {
   },
   professional: {
     stage: 'professional',
-    label: 'Professional',
+    label: 'The Evolved Pros 99',
     desc: `$${TIERS.professional.monthly}/mo`,
     mrr: TIERS.professional.monthly,
     accent: '#C9302A',

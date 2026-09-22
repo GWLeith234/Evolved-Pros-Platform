@@ -93,13 +93,14 @@ export const HOME_LADDER: readonly HomeLadderCard[] = [
     tone: 'ghost',
     featured: false,
   },
+  // SPRINT K — Professional retired; The Evolved Pros 99 takes this rung.
   {
     step: '03',
-    name: 'Professional',
+    name: 'The Evolved Pros 99',
     price: `$${TIERS.professional.monthly} / mo`,
-    tagline: 'The weekly mastermind.',
-    body: 'Every week you bring a live deal and the room pressure-tests it. All six pillars come with it.',
-    cta: 'Join the weekly mastermind',
+    tagline: 'Ninety-nine seats.',
+    body: 'Every second week you bring a live deal and the room pressure-tests it for ninety minutes. All six pillars come with it. The room stops at 99.',
+    cta: 'Take a seat',
     href: SEE_PRICING_HREF,
     tone: 'ghost',
     featured: false,

@@ -106,12 +106,19 @@ describe('conversion homepage locks', () => {
     }
   })
 
-  it('keeps the $49 / $249 sequence and does not feature Professional', () => {
-    expect(TIERS.vip.monthly).toBe(49)
-    expect(TIERS.professional.monthly).toBe(249)
-    expect(HOME_LADDER.map(c => c.name)).toEqual(['Community', 'VIP', 'Professional'])
-    expect(HOME_LADDER[1]?.price).toBe('$49 / mo')
-    expect(HOME_LADDER[2]?.price).toBe('$249 / mo')
+  // SPRINT K — repriced 2026-09-21. Professional is retired; The Evolved
+  // Pros 99 takes rung 03. The free door still leads.
+  it('keeps the $99 / $849 sequence and does not feature the paid rungs', () => {
+    expect(TIERS.vip.monthly).toBe(99)
+    expect(TIERS.professional.monthly).toBe(849)
+    expect(HOME_LADDER.map(c => c.name)).toEqual([
+      'Community',
+      'VIP',
+      'The Evolved Pros 99',
+    ])
+    expect(HOME_LADDER.some(c => c.name === 'Professional')).toBe(false)
+    expect(HOME_LADDER[1]?.price).toBe('$99 / mo')
+    expect(HOME_LADDER[2]?.price).toBe('$849 / mo')
     expect(HOME_LADDER[0]?.featured).toBe(true)
     expect(HOME_LADDER[1]?.featured).toBe(false)
     expect(HOME_LADDER[2]?.featured).toBe(false)

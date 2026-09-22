@@ -98,8 +98,8 @@ export default function TermsPage() {
         <LegalList
           items={[
             'Free — community, podcast, media, events, the Pillar Assessment, and Academy Pillar 1.',
-            'VIP — $49 per month.',
-            'Professional — $249 per month.',
+            'VIP — $99 per month.',
+            'The Evolved Pros 99 — $849 per month.',
             'Keynotes — inquire.',
           ]}
         />

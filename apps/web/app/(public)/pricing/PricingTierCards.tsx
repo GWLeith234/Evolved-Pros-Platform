@@ -2,6 +2,7 @@ import { ANNUAL_BILLING_TOOLTIP } from '@/lib/live/s4-cta'
 import { PricingCtaButton } from './PricingCtaButton'
 import {
   ANNUAL_FREE_MONTHS,
+  annualBillingAvailable,
   pricingLadderState,
   type LadderTier,
   type TierKey,
@@ -102,23 +103,26 @@ export function PricingTierCards({
       ctaPlanBase: 'vip',
       tierKey: 'vip',
     },
+    // SPRINT K — Professional is retired. The Evolved Pros 99 takes its rung:
+    // 99 seats, bi-weekly 90-minute mastermind. The catalogue key stays
+    // `professional` and the DB tier stays `pro` (Sprint L owns renaming).
     {
-      name: 'Professional',
+      name: 'The Evolved Pros 99',
       priceKey: 'professional',
-      badge: 'Professional',
+      badge: 'The 99',
       badgeColor: '#C9302A',
       featured: true,
       popular: true,
-      tagline: 'Master the results',
+      tagline: '99 seats. One room.',
       features: [
         { text: 'Everything in VIP' },
         { text: 'All 6 pillars — Strategy, Accountability, Execution' },
-        { text: 'Weekly mastermind' },
-        { text: '1:1 time with George' },
+        { text: 'Bi-weekly 90-minute mastermind with George' },
+        { text: 'One of only 99 seats' },
         { text: '10% off LIVE events' },
       ],
-      callout: 'Weekly mastermind with George, plus 1:1 time. The inner game and the outer game, end to end.',
-      cta: 'Go Professional',
+      callout: 'A bi-weekly 90-minute mastermind with George, capped at 99 seats. The inner game and the outer game, end to end.',
+      cta: 'Take a seat',
       ctaPlanBase: 'pro',
       tierKey: 'pro',
     },
@@ -153,12 +157,18 @@ export function PricingTierCards({
     return pricingLadderState(currentTier, t.tierKey, hasTierAccess)
   }
 
-  function cataloguePrice(t: TierDef): { monthly: string; annual: string } | null {
+  // SPRINT K — annual pricing is undecided, so `annual` is null and the whole
+  // annual half of this component stands down: no toggle, no /yr amount, no
+  // annual CTA. Rendering it would have quoted the dead $490 / $2,490 that
+  // getMembershipPricing falls back to when the catalogue has no annual row.
+  const showAnnual = annualBillingAvailable(pricing)
+
+  function cataloguePrice(t: TierDef): { monthly: string; annual: string | null } | null {
     if (t.fixedPrice || !t.priceKey) return null
     const p = pricing[t.priceKey]
     return {
       monthly: `$${p.monthly.toLocaleString('en-US')}`,
-      annual: `$${p.annual.toLocaleString('en-US')}`,
+      annual: typeof p.annual === 'number' ? `$${p.annual.toLocaleString('en-US')}` : null,
     }
   }
 
@@ -179,6 +189,7 @@ export function PricingTierCards({
       />
 
       {/* Monthly / Annual toggle — CSS :has() flips amounts. No card hydrate. */}
+      {showAnnual ? (
       <div className="flex items-center justify-center gap-2 mb-10" role="radiogroup" aria-label="Billing period">
         <label
           htmlFor="ep-pricing-monthly"
@@ -204,6 +215,7 @@ export function PricingTierCards({
           </span>
         </label>
       </div>
+      ) : null}
 
       {/* Tier cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-20">
@@ -270,34 +282,38 @@ export function PricingTierCards({
                   </>
                 ) : (
                   <>
-                    <div className="ep-price-monthly">
+                    <div className={showAnnual ? 'ep-price-monthly' : undefined}>
                       <span className="font-display font-bold text-3xl" style={{ color: '#F5F0E8' }}>
                         {catalogue!.monthly}
                       </span>
                       <span className="font-body text-sm ml-1" style={{ color: 'rgba(245,240,232,0.4)' }}>
                         /month
                       </span>
-                      <p
-                        className="font-condensed uppercase tracking-[0.1em] text-[11px] mt-1.5"
-                        style={{ color: '#0ABFA3' }}
-                      >
-                        {catalogue!.annual}/yr · {ANNUAL_FREE_MONTHS} months free
-                      </p>
+                      {showAnnual && catalogue!.annual ? (
+                        <p
+                          className="font-condensed uppercase tracking-[0.1em] text-[11px] mt-1.5"
+                          style={{ color: '#0ABFA3' }}
+                        >
+                          {catalogue!.annual}/yr · {ANNUAL_FREE_MONTHS} months free
+                        </p>
+                      ) : null}
                     </div>
-                    <div className="ep-price-annual">
-                      <span className="font-display font-bold text-3xl" style={{ color: '#F5F0E8' }}>
-                        {catalogue!.annual}
-                      </span>
-                      <span className="font-body text-sm ml-1" style={{ color: 'rgba(245,240,232,0.4)' }}>
-                        /year
-                      </span>
-                      <p
-                        className="font-condensed uppercase tracking-[0.1em] text-[11px] mt-1.5"
-                        style={{ color: '#0ABFA3' }}
-                      >
-                        {catalogue!.monthly}/mo billed monthly
-                      </p>
-                    </div>
+                    {showAnnual && catalogue!.annual ? (
+                      <div className="ep-price-annual">
+                        <span className="font-display font-bold text-3xl" style={{ color: '#F5F0E8' }}>
+                          {catalogue!.annual}
+                        </span>
+                        <span className="font-body text-sm ml-1" style={{ color: 'rgba(245,240,232,0.4)' }}>
+                          /year
+                        </span>
+                        <p
+                          className="font-condensed uppercase tracking-[0.1em] text-[11px] mt-1.5"
+                          style={{ color: '#0ABFA3' }}
+                        >
+                          {catalogue!.monthly}/mo billed monthly
+                        </p>
+                      </div>
+                    ) : null}
                   </>
                 )}
               </div>
@@ -364,20 +380,22 @@ export function PricingTierCards({
                 </div>
               ) : tier.ctaPlanBase ? (
                 <>
-                  <div className="ep-cta-monthly">
+                  <div className={showAnnual ? 'ep-cta-monthly' : undefined}>
                     <PricingCtaButton
                       label={tier.cta}
                       plan={`${tier.ctaPlanBase}_monthly` as const}
                       featured={!!tier.featured}
                     />
                   </div>
-                  <div className="ep-cta-annual">
-                    <PricingCtaButton
-                      label={tier.cta}
-                      plan={`${tier.ctaPlanBase}_annual` as const}
-                      featured={!!tier.featured}
-                    />
-                  </div>
+                  {showAnnual ? (
+                    <div className="ep-cta-annual">
+                      <PricingCtaButton
+                        label={tier.cta}
+                        plan={`${tier.ctaPlanBase}_annual` as const}
+                        featured={!!tier.featured}
+                      />
+                    </div>
+                  ) : null}
                 </>
               ) : (
                 <PricingCtaButton

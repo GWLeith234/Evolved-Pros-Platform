@@ -2,15 +2,16 @@ import 'server-only'
 import Stripe from 'stripe'
 
 // ---------------------------------------------------------------------------
-// Stripe integration — SPRINT I Phase 1 (TEST MODE)
+// Stripe integration — LIVE MODE.
 //
-// Stripe Checkout is the payment path. Live keys / real charges are George's —
-// the code only ever reads STRIPE_* env vars.
+// SPRINT K corrected this header. It read "SPRINT I Phase 1 (TEST MODE)" while
+// STRIPE_SECRET_KEY in Railway production has been sk_live_ for months: four
+// cs_live_ checkout sessions exist, created by this code. Nothing about the
+// integration is test mode; only the comment was.
 //
-// Price *amounts* deliberately live in the Stripe dashboard (test mode), NOT
-// in this file. We reference prices by env-configured price id only, so the
-// commerce catalogue stays out of the codebase (and off the pricing-copy
-// inconsistency Design owns).
+// Price *amounts* deliberately live in Stripe, NOT in this file. We reference
+// prices by id — from the products/prices catalogue first, these env vars as
+// the fallback — so the commerce catalogue stays out of the codebase.
 // ---------------------------------------------------------------------------
 
 // Lazy singleton — instantiated on first use so a build / type-check without
@@ -41,7 +42,7 @@ interface PlanDef {
 }
 
 // Plan key → { tier, interval, price env var }. One env var per plan; the
-// value is a Stripe (test-mode) price id.
+// value is a LIVE Stripe price id.
 export const PLAN_CATALOG: Record<PlanKey, PlanDef> = {
   vip_monthly: { tier: 'vip', interval: 'month', priceEnvVar: 'STRIPE_PRICE_VIP_MONTHLY' },
   vip_annual:  { tier: 'vip', interval: 'year',  priceEnvVar: 'STRIPE_PRICE_VIP_ANNUAL' },

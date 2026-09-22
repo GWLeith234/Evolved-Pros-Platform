@@ -35,7 +35,7 @@ const COPY: Record<Exclude<ArticleCtaState, 'member'>, ArticleCtaCopy> = {
     kicker: 'Community',
     headline: 'Start free. VIP is there when you want more.',
     body:
-      'Join the Community with no card. VIP is $49 when you want Fit and Academy depth. Media stays open.',
+      'Join the Community with no card. VIP is $99 when you want Fit and Academy depth. Media stays open.',
     primary: { label: 'Join free', href: '/pricing' },
     secondary: { label: 'See VIP', href: '/pricing' },
   },
@@ -43,7 +43,7 @@ const COPY: Record<Exclude<ArticleCtaState, 'member'>, ArticleCtaCopy> = {
     kicker: 'Go deeper',
     headline: 'You are in the Community. VIP is the next room.',
     body:
-      'VIP opens Fit programming and the full Academy, across all six pillars. $49, cancel whenever.',
+      'VIP opens Fit programming and the full Academy, across all six pillars. $99, cancel whenever.',
     primary: { label: 'Upgrade to VIP', href: '/pricing' },
     secondary: { label: 'Back to the platform', href: '/home' },
   },

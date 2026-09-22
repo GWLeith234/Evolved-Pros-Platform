@@ -7,7 +7,7 @@
  */
 
 import { HOME_SUB } from '@/lib/home/conversion'
-import { TIERS } from '@/lib/pricing'
+import { TIERS, TIER_DISPLAY_NAMES } from '@/lib/pricing'
 import { CANONICAL_ORIGIN, SITE_NAME, canonicalUrl } from '@/lib/seo/canonical'
 
 export function homeOrganizationJsonLd() {
@@ -67,17 +67,29 @@ function membershipProduct(
 /**
  * WebPage + Product / Offer catalog for `/pricing`.
  *
- * Amounts are the live membership ladder (Community Free / $0, VIP $49 /month,
- * Professional $249 /month). Keynotes stay off the Offer list: the page says
- * Inquire for fee and we do not invent a dollar price.
+ * Amounts come from the TIERS constants, so this cannot drift from the page:
+ * Community Free / $0, VIP $99 /month, The Evolved Pros 99 $849 /month.
+ *
+ * SPRINT K — annual Offers are emitted ONLY when a tier actually has an annual
+ * price. Annual is undecided, so today none are. This block used to publish
+ * $490 and $2,490 as structured data, which is how dead prices end up in a
+ * search result long after the page stops showing them. Keynotes stay off the
+ * Offer list: the page says Inquire for fee and we do not invent a price.
  */
+/** An annual Offer, or nothing at all when the tier has no annual price. */
+function annualOffers(name: string, annual: number | null) {
+  return typeof annual === 'number' && annual > 0
+    ? [membershipOffer(`${name} annual`, String(annual), 'P1Y')]
+    : []
+}
+
 export function pricingJsonLd() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: `${SITE_NAME} Pricing`,
     url: PRICING_URL,
-    description: 'Community, VIP, Professional, and Keynote tiers for high performers.',
+    description: 'Community, VIP, The Evolved Pros 99, and Keynote tiers for high performers.',
     publisher: homeOrganizationJsonLd(),
     mainEntity: {
       '@type': 'ItemList',
@@ -95,22 +107,22 @@ export function pricingJsonLd() {
           position: 2,
           item: membershipProduct('VIP', `$${TIERS.vip.monthly} /month`, [
             membershipOffer('VIP', String(TIERS.vip.monthly), 'P1M'),
-            membershipOffer('VIP annual', String(TIERS.vip.annual), 'P1Y'),
+            ...annualOffers('VIP', TIERS.vip.annual),
           ]),
         },
         {
           '@type': 'ListItem',
           position: 3,
           item: membershipProduct(
-            'Professional',
+            TIER_DISPLAY_NAMES.professional,
             `$${TIERS.professional.monthly} /month`,
             [
-              membershipOffer('Professional', String(TIERS.professional.monthly), 'P1M'),
               membershipOffer(
-                'Professional annual',
-                String(TIERS.professional.annual),
-                'P1Y',
+                TIER_DISPLAY_NAMES.professional,
+                String(TIERS.professional.monthly),
+                'P1M',
               ),
+              ...annualOffers(TIER_DISPLAY_NAMES.professional, TIERS.professional.annual),
             ],
           ),
         },

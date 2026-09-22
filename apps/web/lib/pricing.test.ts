@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { computeMrr, tierMonthlyPrice, isRevenueMember, pricingLadderState, planAmountCents, TIERS, type LadderTier } from './pricing'
+import { annualBillingAvailable, computeMrr, tierMonthlyPrice, isRevenueMember, pricingLadderState, planAmountCents, TIERS, type LadderTier } from './pricing'
 import { hasTierAccess, effectiveTier } from './tier'
 
 describe('revenue hygiene — guests never count as revenue', () => {
@@ -19,10 +19,10 @@ describe('revenue hygiene — guests never count as revenue', () => {
   })
 
   it('a real paying Pro still counts', () => {
-    expect(tierMonthlyPrice('pro', 'active')).toBe(249)
+    expect(tierMonthlyPrice('pro', 'active')).toBe(849)
     expect(
       computeMrr([{ tier: 'pro', tier_status: 'active', role: 'member' }]),
-    ).toBe(249)
+    ).toBe(849)
     expect(isRevenueMember({ tier: 'pro', tier_status: 'active', role: 'member' })).toBe(true)
   })
 
@@ -44,7 +44,7 @@ describe('revenue hygiene — guests never count as revenue', () => {
       { tier: 'pro', tier_status: 'comp', role: 'guest' },      // 0
       { tier: 'pro', tier_status: 'active', comp_promo_code_id: 'c' }, // 0
     ]
-    expect(computeMrr(roster)).toBe(298)
+    expect(computeMrr(roster)).toBe(948)
   })
 })
 
@@ -91,20 +91,30 @@ describe('pricingLadderState — current-plan marking (SPRINT PRICE-1)', () => {
 })
 
 describe('planAmountCents — checkout amounts match the catalogue', () => {
-  it('uses the canonical $49 / $249 ladder, not the legacy $79 VIP', () => {
-    expect(planAmountCents('vip_monthly')).toBe(4900)
-    expect(planAmountCents('vip_annual')).toBe(49000)
-    expect(planAmountCents('pro_monthly')).toBe(24900)
-    expect(planAmountCents('pro_annual')).toBe(249000)
+  // SPRINT K — the ladder is VIP $99 / The Evolved Pros 99 $849.
+  it('uses the canonical $99 / $849 ladder', () => {
+    expect(planAmountCents('vip_monthly')).toBe(9900)
+    expect(planAmountCents('pro_monthly')).toBe(84900)
   })
 
-  it('honours a catalogue override', () => {
+  // Annual is undecided. Null, never a number — a number here is a dead
+  // price quoted to a real buyer.
+  it('returns null for annual plans while annual pricing is undecided', () => {
+    expect(TIERS.vip.annual).toBeNull()
+    expect(TIERS.professional.annual).toBeNull()
+    expect(planAmountCents('vip_annual')).toBeNull()
+    expect(planAmountCents('pro_annual')).toBeNull()
+    expect(annualBillingAvailable()).toBe(false)
+  })
+
+  it('honours a catalogue override, annual included once it exists', () => {
     const override = {
       ...TIERS,
       vip: { monthly: 59, annual: 590 },
     }
     expect(planAmountCents('vip_monthly', override)).toBe(5900)
     expect(planAmountCents('vip_annual', override)).toBe(59000)
+    expect(annualBillingAvailable(override)).toBe(true)
   })
 })
 

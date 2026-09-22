@@ -1,6 +1,6 @@
 // Fit lockup: theme-swapped fit-lockup PNG (EVOLVED PR[barbell disc]S FIT).
 // Same FooterLogo / loader CSS pair as Media. Disc replaces the O in PROS.
-// Gold header: lockup + VIP $49 pill. Never type the family wordmark.
+// Gold header: lockup + VIP $99 pill. Never type the family wordmark.
 
 import Link from 'next/link'
 import { PublicGlobalNav } from '@/components/layout/PublicGlobalNav'

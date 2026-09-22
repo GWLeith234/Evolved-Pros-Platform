@@ -1,5 +1,5 @@
 /**
- * POST /api/stripe/webhook — SPRINT I Phase 1 (Stripe, TEST MODE)
+ * POST /api/stripe/webhook — LIVE MODE (header corrected in SPRINT K).
  *
  * Stripe → OUR tables. Verifies the signature, then maps subscription events
  * onto users.tier / tier_status / tier_expires_at and writes a tier_change_log

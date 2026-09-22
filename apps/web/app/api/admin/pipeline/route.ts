@@ -129,8 +129,8 @@ export async function GET() {
       lessonsLast30,
       stage,
       stageNote,
-      // Do not invent ARR from list price. Canonical TIERS are VIP $49 /
-      // Professional $249; billing_events are not wired yet.
+      // Do not invent ARR from list price. Canonical TIERS are VIP $99 /
+      // The Evolved Pros 99 $849 (SPRINT K).
       estimatedValue: 0,
       joinedAt:        m.created_at,
       overridden:      !!overrides[m.id],

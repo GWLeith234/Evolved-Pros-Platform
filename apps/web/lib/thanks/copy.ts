@@ -26,8 +26,12 @@ const FORBIDDEN_PITCH = [
   'upgrade',
   'stripe',
   'mastermind',
+  // SPRINT K — both ladders. The old amounts stay listed so an email drafted
+  // against stale copy is still caught.
   '$49',
   '$249',
+  '$99',
+  '$849',
   'paid plan',
 ]
 

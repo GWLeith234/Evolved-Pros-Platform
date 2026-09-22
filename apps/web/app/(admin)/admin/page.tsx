@@ -12,6 +12,8 @@ import {
   AdminTh,
 } from '@/components/admin/template'
 import { InviteMemberButton } from './InviteMemberButton'
+import { getRevenueSnapshot } from '@/lib/stripe/revenue'
+import { formatMoneyCents } from '@/lib/stripe/mrr'
 
 export const metadata: Metadata = { title: 'Admin. Evolved Pros' }
 
@@ -34,13 +36,12 @@ export default async function AdminDashboardPage() {
   const now = new Date()
   const oneWeekAgo   = new Date(now.getTime() - 7  * 24 * 60 * 60 * 1000).toISOString()
   const oneMonthAgo  = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
-  const twoMonthsAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString()
 
   const [
     allUsers,
     newThisWeek,
     recentMembers,
-    proLastMonth,
+    revenue,
   ] = await Promise.all([
     adminClient.from('users').select('id, tier, tier_status, comp_promo_code_id, role').neq('role', 'admin'),
     adminClient.from('users').select('id', { count: 'exact', head: true })
@@ -49,12 +50,12 @@ export default async function AdminDashboardPage() {
       .select('id, full_name, display_name, email, tier, created_at')
       .order('created_at', { ascending: false })
       .limit(5),
-    // Pro members created last month for the delta. Exclude comped guests
-    // (role='guest' / tier_status='comp'): they hold Pro access but are not
-    // revenue, so they must not inflate the paying-Pro baseline.
-    adminClient.from('users').select('id', { count: 'exact', head: true })
-      .eq('tier', 'pro').neq('role', 'guest').neq('tier_status', 'comp')
-      .gte('created_at', twoMonthsAgo).lte('created_at', oneMonthAgo),
+    // SPRINT K — the month-over-month Pro delta is gone with the tile that
+    // showed it. A roster delta was never a revenue delta, and the query it
+    // needed is one round trip the dashboard no longer has to make.
+    // SPRINT K — real money, from Stripe. Never throws; degrades to
+    // available:false so "could not reach Stripe" is not rendered as "$0".
+    getRevenueSnapshot(),
   ])
 
   const users = allUsers.data ?? []
@@ -69,10 +70,10 @@ export default async function AdminDashboardPage() {
   // /admin/members's count and looked like a bug to QA — relabel + sub-label
   // so the filter is explicit on screen.
   const activeMembers = activeUsers.length
-  // MRR stays empty until VENDASTA-4 wires billing_events. Do not invent
-  // it from tier counts × list price (same rule as /admin/revenue).
+  // SPRINT K — MRR is the sum of live Stripe subscriptions. It is NOT tier
+  // counts × list price: of the Pro roster below, some hold comp codes and
+  // some are manual grants, and none of them has ever been charged.
   const proMembers    = proUsers.length
-  const proLastMo     = proLastMonth.count ?? 0
   const totalEver     = activeUsers.length + cancelledUsers.length
   const retention     = totalEver > 0 ? Math.round(activeUsers.length / totalEver * 100) : 100
 
@@ -86,18 +87,32 @@ export default async function AdminDashboardPage() {
     },
     {
       label: 'MRR',
-      value: 'n/a',
-      hint: 'Billing not connected',
+      // "Stripe unavailable" and "$0" are different facts. Only say $0 when
+      // Stripe actually answered and had nothing to bill.
+      value: revenue.available ? formatMoneyCents(revenue.mrrCents) : 'n/a',
+      hint: revenue.available
+        ? `${fmt(revenue.paidCount)} paid subscription${revenue.paidCount === 1 ? '' : 's'}`
+        : 'Could not reach Stripe',
     },
     {
       label: 'Retention rate',
       value: `${retention}%`,
       hint: 'Active vs total ever',
     },
+    // SPRINT K — the old single "Pro members" tile read as revenue while MRR
+    // said n/a. Split: one tile counts people Stripe bills, the other counts
+    // paid-tier access that was granted.
     {
-      label: 'Pro members',
-      value: fmt(proMembers),
-      hint: `${proMembers - proLastMo >= 0 ? '+' : ''}${proMembers - proLastMo} vs last month`,
+      label: 'Paid members',
+      value: revenue.available ? fmt(revenue.paidCount) : 'n/a',
+      hint: revenue.available
+        ? `${fmt(revenue.paidByTier.vip)} VIP · ${fmt(revenue.paidByTier.professional)} The 99`
+        : 'Could not reach Stripe',
+    },
+    {
+      label: 'Comped & granted',
+      value: fmt(revenue.compedCount),
+      hint: `Paid-tier access, $0 billed. ${fmt(proMembers)} on Pro incl. comps.`,
     },
   ]
 

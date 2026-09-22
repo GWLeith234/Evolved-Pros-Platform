@@ -1,5 +1,5 @@
 /**
- * POST /api/stripe/portal — SPRINT I Phase 1 (Stripe, TEST MODE)
+ * POST /api/stripe/portal — LIVE MODE (header corrected in SPRINT K).
  *
  * Creates a Stripe Billing Portal session so a member can manage / cancel /
  * update their subscription and payment method — no custom billing UI. Returns

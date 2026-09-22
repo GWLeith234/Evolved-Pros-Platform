@@ -1,10 +1,16 @@
 /**
- * POST /api/stripe/checkout — SPRINT I Phase 1 (Stripe, TEST MODE)
+ * POST /api/stripe/checkout — LIVE MODE.
  *
- * Server-side Stripe Checkout Session flow for the Community → VIP → Pro
- * upgrade. Hosted Checkout (no card data touches us). Runs alongside the
- * legacy Vendasta /api/checkout until the round-trip is proven; the client
- * only routes here when NEXT_PUBLIC_PAYMENTS_PROVIDER === 'stripe'.
+ * Server-side Stripe Checkout Session flow for the Community → VIP → The 99
+ * upgrade. Hosted Checkout (no card data touches us).
+ *
+ * SPRINT K — this file used to be headed "SPRINT I Phase 1 (Stripe, TEST
+ * MODE)". It has been running against sk_live_ since at least 2026-09-11:
+ * four cs_live_ sessions exist carrying this route's own metadata shape. The
+ * banner was stale, and a stale "TEST MODE" banner on a route that takes real
+ * money is the kind of comment that gets someone to test a theory in
+ * production. PricingCtaButton posts here unconditionally; there is no
+ * NEXT_PUBLIC_PAYMENTS_PROVIDER branch any more.
  *
  * Body:  { plan: 'vip_monthly' | 'vip_annual' | 'pro_monthly' | 'pro_annual' }
  * Reply: { url }        — Stripe-hosted checkout URL (redirect target)
@@ -20,6 +26,7 @@ import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { getStripe, isPlanKey, priceIdForPlan, PLAN_CATALOG, stripeConfigured } from '@/lib/stripe/config'
 import { alreadyEntitledTo } from '@/lib/stripe/purchaseGuard'
 import { resolveStripePriceId } from '@/lib/commerce/catalogue'
+import { annualBillingAvailable } from '@/lib/pricing'
 import { getAppUrl } from '@/lib/urls'
 
 const APP_URL = getAppUrl()
@@ -48,6 +55,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid plan' }, { status: 422 })
   }
   const plan = body.plan
+
+  // 3b. SPRINT K — annual pricing is undecided, so there is no live annual
+  //     price to sell. /pricing hides the annual toggle, but this route is
+  //     directly reachable, and the archived $490 / $2,490 prices would be
+  //     rejected by Stripe with a 500 rather than a sentence. Refuse here.
+  if (!annualBillingAvailable() && PLAN_CATALOG[plan].interval === 'year') {
+    return NextResponse.json(
+      { error: 'Annual billing is not available yet.' },
+      { status: 503 },
+    )
+  }
 
   // 4. Repurchase guard (SPRINT PRICE-1). THIS is the check that prevents
   //    double billing — the /pricing UI can be bypassed by posting here

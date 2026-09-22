@@ -1,7 +1,7 @@
 /**
  * Evolved Pros Fit copy locks (George go 2026-09-12).
  *
- * VIP $49. Instructional guides. FO55 codes (letter O). HIP MOD chips.
+ * VIP $99. Instructional guides. FO55 codes (letter O). HIP MOD chips.
  * 55+ hip-aware. Phone / iPad / laptop + cast to TV.
  * No em dashes. No typed EVOLVED PROS wordmarks.
  */

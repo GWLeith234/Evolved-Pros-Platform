@@ -6,42 +6,69 @@
  * products, admin revenue, and the admin dashboard MRR calc. Everything now
  * reads from here.
  *
- * Canonical (from George):
- *   Community    — Free
- *   VIP          — $49/mo  ($490/yr)
- *   Professional — $249/mo ($2,490/yr)
- * Annual = 2 months free = monthly × (12 − ANNUAL_FREE_MONTHS).
+ * Canonical (from George, repriced 2026-09-21):
+ *   Community           — Free
+ *   VIP                 — $99/mo
+ *   The Evolved Pros 99 — $849/mo (99 seats, bi-weekly 90-minute mastermind)
+ *
+ * SPRINT K. The old ladder (VIP $49/$490, Professional $249/$2,490) is dead and
+ * all four Stripe prices are archived. Professional is gone as a product; The
+ * Evolved Pros 99 replaces it. The internal key stays `professional` here and
+ * `pro` in the database — renaming either is Sprint L's job, not a price swap's.
+ *
+ * ANNUAL IS UNDECIDED, so it is `null`, not a number. That is load-bearing:
+ * every surface below renders annual only when it exists, so no page, JSON-LD
+ * offer or checkout can quote a yearly price George has not set. A `0` would
+ * have displayed "$0/yr"; the old constants would have displayed dead prices.
  */
 
 export type TierKey = 'community' | 'vip' | 'professional'
 
 export interface TierPrice {
   monthly: number
-  annual: number
+  /** Whole dollars, or null when no annual price is offered for this tier. */
+  annual: number | null
 }
 
 /** Annual billing gives this many months free vs. paying monthly. */
 export const ANNUAL_FREE_MONTHS = 2
 
 export const TIERS: Record<TierKey, TierPrice> = {
-  community:    { monthly: 0,   annual: 0 },
-  vip:          { monthly: 49,  annual: 490 },
-  professional: { monthly: 249, annual: 2490 },
+  community:    { monthly: 0,   annual: null },
+  vip:          { monthly: 99,  annual: null },
+  professional: { monthly: 849, annual: null },
+}
+
+/** Display name per tier key. `professional` is the key; The 99 is the product. */
+export const TIER_DISPLAY_NAMES: Record<TierKey, string> = {
+  community: 'Community',
+  vip: 'VIP',
+  professional: 'The Evolved Pros 99',
+}
+
+/** True when any tier currently offers an annual price. Drives the /pricing toggle. */
+export function annualBillingAvailable(
+  tiers: Record<TierKey, TierPrice> = TIERS,
+): boolean {
+  return Object.values(tiers).some(t => typeof t.annual === 'number' && t.annual > 0)
 }
 
 export type PaidPlanKey = 'vip_monthly' | 'vip_annual' | 'pro_monthly' | 'pro_annual'
 
-/** Cents for any checkout that still takes an amount. */
+/**
+ * Cents for any checkout that still takes an amount. Null when the plan has no
+ * price — today that is both annual plans, until George sets annual pricing.
+ */
 export function planAmountCents(
   plan: PaidPlanKey,
   tiers: Record<TierKey, TierPrice> = TIERS,
-): number {
-  switch (plan) {
-    case 'vip_monthly': return Math.round(tiers.vip.monthly * 100)
-    case 'vip_annual':  return Math.round(tiers.vip.annual * 100)
-    case 'pro_monthly': return Math.round(tiers.professional.monthly * 100)
-    case 'pro_annual':  return Math.round(tiers.professional.annual * 100)
-  }
+): number | null {
+  const dollars =
+    plan === 'vip_monthly' ? tiers.vip.monthly
+    : plan === 'vip_annual' ? tiers.vip.annual
+    : plan === 'pro_monthly' ? tiers.professional.monthly
+    : tiers.professional.annual
+  return typeof dollars === 'number' ? Math.round(dollars * 100) : null
 }
 
 /**

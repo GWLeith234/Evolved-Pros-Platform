@@ -1,5 +1,5 @@
 /**
- * Fit is VIP $49. Community sees the tease and upgrade only.
+ * Fit is VIP $99. Community sees the tease and upgrade only.
  * Professional inherits VIP (hasTierAccess rank).
  */
 
