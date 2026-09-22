@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { annualBillingAvailable, computeMrr, tierMonthlyPrice, isRevenueMember, pricingLadderState, planAmountCents, TIERS, type LadderTier } from './pricing'
+import { annualBillingAvailable, computeMrr, tierMonthlyPrice, isRevenueMember, pricingLadderState, planAmountCents, resolveDisplayedAnnual, TIERS, type LadderTier } from './pricing'
 import { hasTierAccess, effectiveTier } from './tier'
 
 describe('revenue hygiene — guests never count as revenue', () => {
@@ -115,6 +115,12 @@ describe('planAmountCents — checkout amounts match the catalogue', () => {
     expect(planAmountCents('vip_monthly', override)).toBe(5900)
     expect(planAmountCents('vip_annual', override)).toBe(59000)
     expect(annualBillingAvailable(override)).toBe(true)
+  })
+
+  it('keeps a stale catalogue annual price off the page while annual is undecided', () => {
+    expect(resolveDisplayedAnnual(null, 49000)).toBeNull()
+    expect(resolveDisplayedAnnual(null, 249000)).toBeNull()
+    expect(resolveDisplayedAnnual(990, 49000)).toBe(490)
   })
 })
 

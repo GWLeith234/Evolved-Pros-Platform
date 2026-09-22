@@ -2,27 +2,39 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { notifyNewDm } from '@/lib/notifications/create'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { canAccessNetwork } from '@/lib/entitlements'
 
 export const dynamic = 'force-dynamic'
+
+/**
+ * Reading and sending live on this route, not on /api/conversations.
+ * Gating only the create/list route leaves the thread open to anyone who
+ * has, or can learn, a conversation id.
+ */
+async function requireNetworkMember() {
+  const profile = await resolveCurrentUser(createClient())
+  if (!profile) return { error: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
+  if (!canAccessNetwork(profile.tier, profile.tier_status)) {
+    return {
+      error: NextResponse.json(
+        { error: 'Direct messages are part of The Evolved Pros 99.' },
+        { status: 403 },
+      ),
+    }
+  }
+  return { profile }
+}
 
 export async function GET(
   _request: Request,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const gate = await requireNetworkMember()
+  if ('error' in gate) return gate.error
+  const userId = gate.profile.id
 
   const conversationId = params.id
-
-  // RLS-FIX: resolve public.users.id by email — conversations participant ids
-  // and messages.sender_id all FK public.users(id).
-  const { data: profile } = await adminClient
-    .from('users')
-    .select('id')
-    .eq('email', user.email)
-    .single()
-  const userId = profile?.id ?? user.id
 
   // Verify user is a participant
   const { data: conversation } = await adminClient
@@ -65,19 +77,12 @@ export async function POST(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const gate = await requireNetworkMember()
+  if ('error' in gate) return gate.error
+  const profile = gate.profile
+  const senderId = profile.id
 
   const conversationId = params.id
-
-  // RLS-FIX: messages.sender_id FKs public.users(id); resolve by email.
-  const { data: profile } = await adminClient
-    .from('users')
-    .select('id, display_name, full_name')
-    .eq('email', user.email)
-    .single()
-  const senderId = profile?.id ?? user.id
 
   // Verify user is a participant
   const { data: conversation } = await adminClient

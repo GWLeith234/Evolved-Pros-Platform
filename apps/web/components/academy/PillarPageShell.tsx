@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { hasTierAccess } from '@/lib/tier'
+import { buildUpgradeHref } from '@/lib/academy/gating'
 import {
   fetchUserProfile,
   fetchCourseBySlug,
@@ -127,17 +128,14 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
     ? []
     : await fetchLessonsWithProgress(supabase, (course as Record<string, unknown>).slug as string, profile?.id ?? user.id, profile?.tier)
 
-  // ── TIER GATE (SPRINT TIER-1) ─────────────────────────────────────────
-  // Server-side and authoritative: nothing below renders for a member whose
-  // tier doesn't clear courses.required_tier, so lesson titles, module
-  // structure, reflection prompts and audit questions are all unreachable.
-  // fetchLessonsWithProgress has already nulled the playback ids, and the
-  // mux-token route refuses to sign one — this is the page half of that pair.
-  //
-  // Was: redirect('/pricing'), which discarded the pillar the member wanted
-  // and could not be distinguished from an auth bounce. Now the page renders
-  // the storefront panel for THIS pillar (never a 404).
-  if (!hasTierAccess(profile?.tier, requiredTier)) {
+  // ── TIER GATE ─────────────────────────────────────────────────────
+  // A member who clears neither the course row nor the free teaser (Foundation
+  // lesson 1) gets the storefront panel and nothing else. The teaser keeps
+  // the lesson list, with every other lesson pointed at upgrade. Reflection,
+  // the audit, and the capstone stay behind the course row.
+  const courseTierOpen = hasTierAccess(profile?.tier, requiredTier)
+  const teaserOpen = lessons.some(l => !l.isLocked)
+  if (!courseTierOpen && !teaserOpen) {
     return (
       <main style={{ position: 'relative', zIndex: 1, backgroundColor: 'var(--bg-page)', minHeight: '100vh' }}>
         <section className="academy-hero" style={{ position: 'relative', display: 'flex', alignItems: 'flex-end' }}>
@@ -212,6 +210,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
         completedAt: l.completedAt,
         durationSeconds: l.durationSeconds,
         thumbnailUrl: l.thumbnailUrl,
+        isLocked: l.isLocked,
       })),
     }))
 
@@ -421,6 +420,11 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
               courseSlug={courseSlug}
               pillarColor={config.color}
               ads={threadAds}
+              lockedHref={buildUpgradeHref({
+                from: 'academy',
+                tier: requiredTier,
+                pillar: pNum,
+              })}
             />
           </div>
         </section>
@@ -435,7 +439,7 @@ export async function PillarPageShell({ pillarNumber, pillarSlug, showReflection
       )}
 
       {/* ── REFLECTION / AUDIT / CHILDREN SLOT ─────────────── */}
-      {!isCourseLocked && (showReflection || showAudit || children) && (
+      {!isCourseLocked && courseTierOpen && (showReflection || showAudit || children) && (
         <section style={{ backgroundColor: '#0A0F18', padding: '0 clamp(24px, 8vw, 96px) 56px' }}>
           <div style={{ maxWidth: '820px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {showReflection && (

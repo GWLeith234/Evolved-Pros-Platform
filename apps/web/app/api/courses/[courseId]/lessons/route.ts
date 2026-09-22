@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { hasTierAccess } from '@/lib/tier'
+import { canOpenLesson } from '@/lib/entitlements'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const dynamic = 'force-dynamic'
@@ -15,7 +15,7 @@ export async function GET(
 
   const { data: course } = await supabase
     .from('courses')
-    .select('id, required_tier')
+    .select('id, slug, pillar_number, required_tier')
     .eq('id', params.courseId)
     .single()
 
@@ -38,10 +38,17 @@ export async function GET(
     .in('lesson_id', lessonIds)
 
   const progressMap = new Map((progress ?? []).map(p => [p.lesson_id, p]))
-  const isLocked = !hasTierAccess(profile.tier, course.required_tier as 'community' | 'vip' | 'pro')
 
   const result = lessons.map(l => {
     const prog = progressMap.get(l.id)
+    const isLocked = !canOpenLesson({
+      tier: profile.tier,
+      tierStatus: profile.tier_status,
+      requiredTier: course.required_tier,
+      courseSlug: course.slug,
+      pillarNumber: course.pillar_number,
+      sortOrder: l.sort_order,
+    })
     return {
       id: l.id,
       slug: l.slug,

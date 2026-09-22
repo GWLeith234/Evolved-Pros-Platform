@@ -167,8 +167,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: session.url })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Checkout failed'
-    console.error('[Stripe Checkout]', message)
-    return NextResponse.json({ error: message }, { status: 500 })
+    // Code only. A Stripe message can carry request detail, and it was being
+    // returned to the browser.
+    const code = (err as { code?: string; type?: string }).code ?? (err as { type?: string }).type
+    console.error('[Stripe Checkout]', code ?? 'unknown')
+    return NextResponse.json({ error: 'Checkout failed. Try again in a moment.' }, { status: 500 })
   }
 }

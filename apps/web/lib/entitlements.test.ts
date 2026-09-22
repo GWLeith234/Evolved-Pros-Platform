@@ -10,6 +10,7 @@ import {
   canAccessAcademy,
   canAccessFit,
   canAccessNetwork,
+  canOpenLesson,
   canPlayLesson,
   entitlementsFor,
   liveDiscountPct,
@@ -186,6 +187,50 @@ describe('the Academy teaser is one lesson, not one pillar', () => {
     }
   })
 
+  it('opens Foundation lesson 1 on a vip course row, and nothing else', () => {
+    expect(canOpenLesson({
+      tier: 'community',
+      requiredTier: 'vip',
+      courseSlug: 'foundation',
+      sortOrder: 1,
+    })).toBe(true)
+    expect(canOpenLesson({
+      tier: 'community',
+      requiredTier: 'vip',
+      courseSlug: 'foundation',
+      sortOrder: 2,
+    })).toBe(false)
+    expect(canOpenLesson({
+      tier: 'community',
+      requiredTier: 'vip',
+      courseSlug: 'identity',
+      sortOrder: 1,
+    })).toBe(false)
+    // Pillar 1 is Foundation even when the stored slug is not the word.
+    expect(canOpenLesson({
+      tier: 'community',
+      requiredTier: 'vip',
+      courseSlug: 'p1-foundation',
+      pillarNumber: 1,
+      sortOrder: 1,
+    })).toBe(true)
+  })
+
+  it('does not let the teaser override a row the viewer fails while already having the Academy', () => {
+    expect(canOpenLesson({
+      tier: 'vip',
+      requiredTier: 'pro',
+      courseSlug: 'foundation',
+      sortOrder: 1,
+    })).toBe(false)
+    expect(canOpenLesson({
+      tier: 'vip',
+      requiredTier: 'vip',
+      courseSlug: 'execution',
+      sortOrder: 4,
+    })).toBe(true)
+  })
+
   it('fails closed on a missing course slug or sort order', () => {
     expect(canPlayLesson({ tier: 'community', courseSlug: null, sortOrder: 1 })).toBe(false)
     expect(canPlayLesson({ tier: 'community', courseSlug: 'foundation', sortOrder: undefined })).toBe(false)
@@ -200,6 +245,10 @@ describe('no tier logic lives outside the matrix', () => {
 
     const academy = read('../app/(member)/academy/page.tsx')
     expect(academy).toContain('canAccessAcademy')
+    const lesson = read('../app/(member)/academy/[pillarSlug]/[lessonSlug]/page.tsx')
+    const mux = read('../app/api/lessons/[lessonId]/mux-token/route.ts')
+    expect(lesson).toContain('canOpenLesson')
+    expect(mux).toContain('canOpenLesson')
     // This asked for 'pro', which showed the upgrade card to paying VIPs.
     expect(academy).not.toContain("hasTierAccess(profile?.tier, 'pro')")
   })

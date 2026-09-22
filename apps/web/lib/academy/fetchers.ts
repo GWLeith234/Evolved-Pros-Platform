@@ -2,7 +2,8 @@ import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
 import type { CourseWithProgress, LessonWithProgress } from './types'
-import { hasTierAccess, effectiveTier } from '@/lib/tier'
+import { effectiveTier } from '@/lib/tier'
+import { canOpenLesson } from '@/lib/entitlements'
 import { adminClient } from '@/lib/supabase/admin'
 
 type SB = SupabaseClient<Database>
@@ -173,7 +174,16 @@ export async function fetchCoursesWithProgress(
       completedLessons: completed,
       progressPct: pct,
       lastActivityAt: lastActivity,
-      hasAccess: hasTierAccess(profile?.tier, course.required_tier),
+      // sortOrder 1 is the teaser probe: a free member can enter Foundation
+      // even though the course row is vip. Anyone who clears the row is open
+      // regardless of that probe.
+      hasAccess: canOpenLesson({
+        tier: profile?.tier,
+        requiredTier: course.required_tier,
+        courseSlug: course.slug,
+        pillarNumber: course.pillar_number,
+        sortOrder: 1,
+      }),
     }
   })
 }
@@ -203,7 +213,7 @@ export async function fetchLessonsWithProgress(
   // Get course
   const { data: course } = await supabase
     .from('courses')
-    .select('id, required_tier')
+    .select('id, slug, pillar_number, required_tier')
     .eq('slug', pillarSlug)
     .maybeSingle()
 
@@ -233,10 +243,16 @@ export async function fetchLessonsWithProgress(
     .in('lesson_id', lessonIds)
 
   const progressMap = new Map((progress ?? []).map(p => [p.lesson_id, p]))
-  const isLocked = !hasTierAccess(userTier, course.required_tier as 'community' | 'vip' | 'pro')
 
   return lessons.map(lesson => {
     const prog = progressMap.get(lesson.id)
+    const isLocked = !canOpenLesson({
+      tier: userTier,
+      requiredTier: course.required_tier,
+      courseSlug: course.slug ?? pillarSlug,
+      pillarNumber: course.pillar_number,
+      sortOrder: lesson.sort_order,
+    })
     return {
       id: lesson.id,
       courseId: lesson.course_id,

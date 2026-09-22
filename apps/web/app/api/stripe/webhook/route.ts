@@ -25,6 +25,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { getStripe, tierForPriceId, type Tier } from '@/lib/stripe/config'
 import { tierForStripePriceId } from '@/lib/commerce/catalogue'
 import { joinSeatWaitlist, seatStatusForTier } from '@/lib/commerce/seats'
+import { shouldApplySubscriptionUpdate, shouldDowngradeOnDelete } from '@/lib/stripe/subscriptionSync'
 import {
   bestEffortConversion,
   notifyPaidAdmins,
@@ -32,7 +33,15 @@ import {
 } from '@/lib/crm/conversion'
 import { supabaseIntakeDb } from '@/lib/crm/intakeDb'
 
-type UserRow = { id: string; tier: string | null; email?: string | null; full_name?: string | null }
+type UserRow = {
+  id: string
+  tier: string | null
+  email?: string | null
+  full_name?: string | null
+  stripe_subscription_id?: string | null
+  stripe_customer_id?: string | null
+  comp_promo_code_id?: string | null
+}
 
 // --- helpers --------------------------------------------------------------
 
@@ -64,7 +73,7 @@ async function findUserByIds(
   if (subscriptionId) {
     const bySub = await (adminClient as any)
       .from('users')
-      .select('id, tier')
+      .select('id, tier, stripe_subscription_id, stripe_customer_id, comp_promo_code_id')
       .eq('stripe_subscription_id', subscriptionId)
       .maybeSingle()
     if (bySub.data) return bySub.data as UserRow
@@ -72,7 +81,7 @@ async function findUserByIds(
   if (customerId) {
     const byCustomer = await (adminClient as any)
       .from('users')
-      .select('id, tier')
+      .select('id, tier, stripe_subscription_id, stripe_customer_id, comp_promo_code_id')
       .eq('stripe_customer_id', customerId)
       .maybeSingle()
     if (byCustomer.data) return byCustomer.data as UserRow
@@ -167,10 +176,11 @@ async function handleSeatOverflow(opts: {
 
   const existing = await (adminClient as any)
     .from('users')
-    .select('id, email, full_name')
+    .select('id, email, full_name, tier, stripe_subscription_id, stripe_customer_id, comp_promo_code_id')
     .eq('id', opts.userId)
     .maybeSingle()
-  const row = existing.data as { email?: string | null; full_name?: string | null } | null
+  const row = existing.data as UserRow | null
+  await releaseOverflowGrant(row, opts.subscriptionId)
   const email = (row?.email || opts.session.customer_details?.email || '').trim().toLowerCase()
   if (email && opts.tier !== 'community') {
     await joinSeatWaitlist({
@@ -272,6 +282,70 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
   }
 }
 
+/**
+ * If subscription.updated adopted the overflow subscription before this cancel
+ * landed, put the member back on their other live subscription, or onto
+ * community when this was their only one. A comp keeps the grant: clear the
+ * subscription id and leave the tier.
+ */
+async function releaseOverflowGrant(row: UserRow | null, cancelledSubId: string): Promise<void> {
+  if (!row || row.stripe_subscription_id !== cancelledSubId) return
+  if (row.comp_promo_code_id) {
+    const { error } = await (adminClient as any)
+      .from('users')
+      .update({ stripe_subscription_id: null })
+      .eq('id', row.id)
+    if (error) console.error('[Stripe Webhook] overflow comp detach failed', error.code ?? 'unknown')
+    return
+  }
+
+  const customerId = row.stripe_customer_id
+  if (customerId) {
+    try {
+      const subs = await getStripe().subscriptions.list({
+        customer: customerId,
+        status: 'all',
+        limit: 20,
+      })
+      const live = subs.data.find(
+        s => s.id !== cancelledSubId && (s.status === 'active' || s.status === 'trialing'),
+      )
+      if (live) {
+        const tier = await tierFromSubscription(live)
+        if (tier) {
+          const { error } = await (adminClient as any)
+            .from('users')
+            .update({
+              tier,
+              tier_status: 'active',
+              tier_expires_at: currentPeriodEndIso(live),
+              stripe_subscription_id: live.id,
+            })
+            .eq('id', row.id)
+          if (error) console.error('[Stripe Webhook] overflow restore failed', error.code ?? 'unknown')
+          return
+        }
+      }
+    } catch (err) {
+      const code = (err as { code?: string }).code ?? 'unknown'
+      console.error('[Stripe Webhook] overflow restore lookup failed', code)
+      // Leave the row. Failing open beats downgrading a member we could not check.
+      return
+    }
+  }
+
+  const { error } = await (adminClient as any)
+    .from('users')
+    .update({
+      tier: 'community',
+      tier_status: 'cancelled',
+      tier_expires_at: null,
+      stripe_subscription_id: null,
+    })
+    .eq('id', row.id)
+  if (error) console.error('[Stripe Webhook] overflow downgrade failed', error.code ?? 'unknown')
+}
+
 async function handleSubscriptionUpdated(sub: Stripe.Subscription): Promise<void> {
   const user = await findUserBySubscription(sub)
   if (!user) {
@@ -283,6 +357,16 @@ async function handleSubscriptionUpdated(sub: Stripe.Subscription): Promise<void
     console.warn('[Stripe Webhook] subscription.updated with unmapped price', sub.id)
     return
   }
+
+  const action = shouldApplySubscriptionUpdate({
+    storedSubscriptionId: user.stripe_subscription_id,
+    eventSubscriptionId: sub.id,
+    eventStatus: sub.status,
+    storedTier: user.tier,
+  })
+  if (action === 'ignore') return
+  // Adopting seat 100 would grant the room the checkout race just overflowed.
+  if (action === 'adopt' && await seatOverflow(tier, sub.id)) return
 
   // active/trialing → active; a scheduled cancel keeps the tier but flags
   // cancelled; anything else (past_due, unpaid, incomplete) → past_due.
@@ -306,9 +390,14 @@ async function handleSubscriptionUpdated(sub: Stripe.Subscription): Promise<void
 }
 
 async function handleSubscriptionDeleted(sub: Stripe.Subscription): Promise<void> {
-  const user = await findUserBySubscription(sub)
-  if (!user) {
-    console.warn('[Stripe Webhook] subscription.deleted for unknown user', sub.id)
+  // Subscription id only. Customer fallback downgraded whoever shared the
+  // Stripe customer when an overflow cancel — or any other extra subscription —
+  // was deleted.
+  const user = await findUserByIds(sub.id, null)
+  if (!user || !shouldDowngradeOnDelete({
+    storedSubscriptionId: user.stripe_subscription_id,
+    eventSubscriptionId: sub.id,
+  })) {
     return
   }
   // Subscription has fully ended → downgrade to the free Community tier and
