@@ -94,15 +94,18 @@ export function LoginForm() {
           emailRedirectTo,
         },
       })
-      setLoading(false)
       if (err) {
+        setLoading(false)
         setError(humanizeAuthError(err.message, 'signup'))
         return
       }
       const outcome = interpretSignUpResult(data)
+      // Await before any redirect. A fire-and-forget fetch is aborted when
+      // window.location changes, which dropped the CRM write on instant sign-in.
       if (shouldProvisionJoin({ mode, kind: 'password-signup', outcome })) {
-        void requestJoinProvision(emailNorm)
+        await requestJoinProvision(emailNorm)
       }
+      setLoading(false)
       if (outcome === 'signedIn') {
         window.location.href = callbackUrl
         return
@@ -144,21 +147,23 @@ export function LoginForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailNorm, next: nextPath }),
       })
-      setLoading(false)
       if (!res.ok) {
         const data = (await res.json().catch(() => null)) as { error?: string } | null
         setError(data?.error ? humanizeAuthError(data.error, mode) : MAGIC_LINK_SEND_FAILED)
         sendFailed = true
       }
     } catch {
-      setLoading(false)
       setError(MAGIC_LINK_SEND_FAILED)
       sendFailed = true
     }
-    if (sendFailed) return
-    if (shouldProvisionJoin({ mode, kind: 'magic-otp' })) {
-      void requestJoinProvision(emailNorm)
+    if (sendFailed) {
+      setLoading(false)
+      return
     }
+    if (shouldProvisionJoin({ mode, kind: 'magic-otp' })) {
+      await requestJoinProvision(emailNorm)
+    }
+    setLoading(false)
     setSent('magic')
   }
 

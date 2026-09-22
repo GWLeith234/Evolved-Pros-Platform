@@ -3,7 +3,8 @@
  *
  * Called after password signUp or a magic-link send in signup mode. The
  * client cannot write crm_prospects (RLS). PUBLIC: rate-limited, honeypot,
- * email-only. Upserts tag `join` and fans out the admin NotifBell.
+ * email-only. Upserts tag `join` and fans out the admin NotifBell when
+ * that tag is new on the row.
  *
  * PII: error paths log codes only.
  */
@@ -12,7 +13,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { supabaseIntakeDb } from '@/lib/crm/intakeDb'
-import { notifyJoinAdmins, upsertJoinProspect, validateJoinEmail } from '@/lib/crm/join'
+import { notifyJoinIfNew, upsertJoinProspect, validateJoinEmail } from '@/lib/crm/join'
 import { clientIpFrom, createRateLimiter } from '@/lib/speaking/inquiry'
 
 const limiter = createRateLimiter(5, 10 * 60 * 1000)
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const notified = await notifyJoinAdmins(supabaseIntakeDb, { email })
+  const notified = await notifyJoinIfNew(supabaseIntakeDb, { email }, outcome)
   if (notified.code) {
     console.error('[POST /api/auth/provision] admin notify failed', notified.code)
   }

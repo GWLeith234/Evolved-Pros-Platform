@@ -4,6 +4,8 @@ import {
   JOIN_TAG,
   displayNameFromEmail,
   joinNotificationCopy,
+  notifyJoinIfNew,
+  requestJoinProvision,
   shouldNotifyJoinBackstop,
   shouldProvisionJoin,
   upsertJoinProspect,
@@ -99,5 +101,55 @@ describe('upsertJoinProspect', () => {
     const patch = vi.mocked(db.updateProspect).mock.calls[0][1]
     expect(patch.tags).toEqual(['book preorder', 'join'])
     expect(patch.stage).toBe('community')
+  })
+})
+
+describe('notifyJoinIfNew', () => {
+  it('bells admins only when the join tag is new', async () => {
+    const db = mockDb({
+      listAdminIds: vi.fn(async () => ({ data: [{ id: 'a1' }], error: null })),
+    })
+    const fresh = await notifyJoinIfNew(
+      db,
+      { email: 'dana@northgate.example' },
+      { kind: 'created', addedTags: ['join'] },
+    )
+    expect(fresh.notified).toBe(1)
+    const row = vi.mocked(db.insertNotifications).mock.calls[0][0][0]
+    expect(row).toMatchObject({
+      user_id: 'a1',
+      type: 'system_general',
+      action_url: '/admin/crm',
+      is_read: false,
+    })
+    expect(String(row.title)).toContain('Email: dana@northgate.example')
+    expect(String(row.title)).not.toContain('—')
+    expect(String(row.body)).not.toContain('—')
+
+    vi.mocked(db.insertNotifications).mockClear()
+    const again = await notifyJoinIfNew(
+      db,
+      { email: 'dana@northgate.example' },
+      { kind: 'updated', addedTags: [] },
+    )
+    expect(again).toEqual({ notified: 0 })
+    expect(db.insertNotifications).not.toHaveBeenCalled()
+  })
+})
+
+describe('requestJoinProvision', () => {
+  it('posts the email and keeps the request alive across navigation', async () => {
+    const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) => new Response(null, { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+    try {
+      await requestJoinProvision('dana@northgate.example')
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+      const [url, init] = fetchMock.mock.calls[0]
+      expect(url).toBe('/api/auth/provision')
+      expect(init).toMatchObject({ method: 'POST', keepalive: true })
+      expect(JSON.parse(String(init?.body))).toEqual({ email: 'dana@northgate.example' })
+    } finally {
+      vi.unstubAllGlobals()
+    }
   })
 })
