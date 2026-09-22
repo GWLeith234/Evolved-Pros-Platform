@@ -21,11 +21,13 @@
  *   Fit                            teaser    full          full
  *   Academy - all six pillars      teaser    full          full
  *   Mastermind                     -         monthly 45m   bi-weekly 90m
- *   Network (directory/profile/DM) -         -             full
+ *   Network directory              public    public        full
+ *   Network direct messages        -         -             full
  *   LIVE event discount            0%        10%           20%
  *
  * Academy teaser = the overview of all six pillars, plus Foundation lesson 1
- * playable. Fit teaser = the marketing surface, no library.
+ * playable. Fit teaser = the marketing surface, no library. Network teaser =
+ * the directory with a PUBLIC payload (SPRINT Q1) and no direct messages.
  *
  * DEPENDENCY-FREE ON PURPOSE beyond lib/tier: this module must be importable
  * by a client component, a server route and a unit test alike.
@@ -65,7 +67,15 @@ export interface Entitlements {
   academy: AccessLevel
   /** Mastermind cadence, or none. */
   mastermind: MastermindCadence
-  /** Member directory, member profiles and direct messages. */
+  /**
+   * The member network.
+   *   'teaser' - the directory is browsable, but only its public payload,
+   *              and the Message button is inert.
+   *   'full'   - the whole profile plus direct messages.
+   * SPRINT Q1: the roster is the best conversion surface on the platform, so
+   * it stays open. It is also an asset, so a competitor who signs up free in
+   * thirty seconds must not be able to read company, bio, goals or socials.
+   */
   network: AccessLevel
   /** Percentage off a paid LIVE event ticket. Whole percent, 0 to 100. */
   liveDiscountPct: number
@@ -81,7 +91,7 @@ export const ENTITLEMENTS: Readonly<Record<TierKeyName, Entitlements>> = {
     fit: 'teaser',
     academy: 'teaser',
     mastermind: 'none',
-    network: 'none',
+    network: 'teaser',
     liveDiscountPct: 0,
   },
   vip: {
@@ -89,7 +99,7 @@ export const ENTITLEMENTS: Readonly<Record<TierKeyName, Entitlements>> = {
     fit: 'full',
     academy: 'full',
     mastermind: 'monthly-45',
-    network: 'none',
+    network: 'teaser',
     liveDiscountPct: 10,
   },
   pro: {
@@ -160,9 +170,32 @@ export function canAccessAcademy(tier: string | null | undefined, tierStatus?: s
   return entitlementsFor(tier, tierStatus).academy === 'full'
 }
 
-/** Directory, member profiles and DMs. The 99 only. */
+/**
+ * DIRECT MESSAGES. The 99 only.
+ *
+ * Deliberately unchanged by SPRINT Q1: 'full' still means "can reach other
+ * members", and only `pro` has it. Opening the directory did not open the
+ * inbox, and the one function that guards /messages must not start meaning
+ * something looser.
+ */
 export function canAccessNetwork(tier: string | null | undefined, tierStatus?: string | null): boolean {
   return entitlementsFor(tier, tierStatus).network === 'full'
+}
+
+/** Can this member open the directory at all? Everyone signed in can. */
+export function canSeeDirectory(tier: string | null | undefined, tierStatus?: string | null): boolean {
+  return entitlementsFor(tier, tierStatus).network !== 'none'
+}
+
+/**
+ * Which directory payload this member may receive. The route selects columns
+ * from this, so 'public' is a narrower QUERY, not a narrower render.
+ */
+export function directoryDetail(
+  tier: string | null | undefined,
+  tierStatus?: string | null,
+): 'public' | 'full' {
+  return canAccessNetwork(tier, tierStatus) ? 'full' : 'public'
 }
 
 export function mastermindCadence(

@@ -3,6 +3,8 @@ import { adminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { MessagesClient } from './MessagesClient'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { canAccessNetwork } from '@/lib/entitlements'
+import { MessagesUpgradeState } from './MessagesUpgradeState'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,6 +12,14 @@ export default async function MessagesPage() {
   const supabase = createClient()
   const profile = await resolveCurrentUser(supabase)
   if (!profile) redirect('/login')
+
+  // SPRINT Q1 - direct messages are The Evolved Pros 99's entitlement.
+  // An upgrade state, never a 404: somebody who cannot use the inbox should
+  // be told what it costs, not told the page does not exist. Nobody loses
+  // anything today - zero conversations and zero messages exist.
+  if (!canAccessNetwork(profile.tier, (profile as unknown as { tier_status?: string | null }).tier_status)) {
+    return <MessagesUpgradeState />
+  }
 
   // Fetch initial conversation list
   const { data: convRows } = await supabase

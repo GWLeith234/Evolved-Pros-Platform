@@ -1,10 +1,34 @@
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { canAccessNetwork } from '@/lib/entitlements'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * SPRINT Q1 - the authoritative DM gate.
+ *
+ * /messages renders an upgrade state, but this route is directly reachable,
+ * so the server has to refuse independently. Gating only the page would let
+ * anybody with curl open a conversation with any member.
+ */
+async function refuseWithoutNetwork(): Promise<Response | null> {
+  const profile = await resolveCurrentUser(createClient())
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!canAccessNetwork(profile.tier, (profile as unknown as { tier_status?: string | null }).tier_status)) {
+    return NextResponse.json(
+      { error: 'Direct messages are part of The Evolved Pros 99.' },
+      { status: 403 },
+    )
+  }
+  return null
+}
+
 export async function GET() {
+  const refused = await refuseWithoutNetwork()
+  if (refused) return refused
+
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -100,6 +124,10 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  // Opening a conversation is the write this gate exists for.
+  const refused = await refuseWithoutNetwork()
+  if (refused) return refused
+
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

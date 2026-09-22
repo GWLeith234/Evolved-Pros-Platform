@@ -1,13 +1,37 @@
+/**
+ * GET /api/members - the member directory payload (SPRINT Q1).
+ *
+ * Open to every signed-in member, in two shapes. The viewer's tier decides
+ * WHICH COLUMNS ARE SELECTED, not which fields are rendered: a community or
+ * VIP viewer's response never contains company, bio, goal_90day or a social
+ * URL, because those were never fetched. Hiding them in the component would
+ * leave them in this JSON, one devtools tab away.
+ *
+ * Reads `users` rather than the member_directory view: the view drops
+ * tier_status, and the active filter below matters more than the convenience.
+ * The redaction discipline is identical either way, since both are a SELECT.
+ */
+
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { directoryDetail } from '@/lib/entitlements'
+import { directorySelect, shapeDirectory, type DirectoryRow } from '@/lib/community/directory'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // FAILS CLOSED: an unreadable tier resolves to community, which is the
+  // public payload. Guessing generously here would hand the roster away.
+  const detail = directoryDetail(
+    (profile as unknown as { tier?: string | null }).tier,
+    (profile as unknown as { tier_status?: string | null }).tier_status,
+  )
 
   const { searchParams } = new URL(request.url)
   const search = searchParams.get('search') ?? ''
@@ -17,14 +41,16 @@ export async function GET(request: Request) {
 
   let query = adminClient
     .from('users')
-    .select('id, display_name, full_name, avatar_url, role_title, location, tier, points, created_at')
+    .select(directorySelect(detail))
     .eq('tier_status', 'active')
     .order('points', { ascending: false })
     .limit(limit + 1)
 
   if (search) {
+    // Search spans display_name / full_name / role_title for everyone: a
+    // community viewer may FIND somebody by surname without being SHOWN it.
     query = query.or(
-      `display_name.ilike.%${search}%,full_name.ilike.%${search}%,role_title.ilike.%${search}%`
+      `display_name.ilike.%${search}%,full_name.ilike.%${search}%,role_title.ilike.%${search}%`,
     )
   }
 
@@ -33,25 +59,22 @@ export async function GET(request: Request) {
   }
 
   if (cursor) {
-    query = query.lt('points', parseInt(cursor, 10))
+    const parsed = parseInt(cursor, 10)
+    if (Number.isFinite(parsed)) query = query.lt('points', parsed)
   }
 
   const { data, error } = await query
 
-  if (error) return NextResponse.json({ error: 'Failed to fetch members' }, { status: 500 })
+  if (error) {
+    console.error('[GET /api/members]', error.code ?? 'unknown')
+    return NextResponse.json({ error: 'Failed to fetch members' }, { status: 500 })
+  }
 
-  const rows = data ?? []
+  const rows = (data ?? []) as unknown as DirectoryRow[]
   const hasMore = rows.length > limit
-  const members = rows.slice(0, limit).map(u => ({
-    id: u.id,
-    displayName: u.display_name ?? u.full_name ?? 'Member',
-    avatarUrl: u.avatar_url,
-    roleTitle: u.role_title,
-    location: u.location,
-    tier: u.tier,
-    points: u.points,
-    created_at: u.created_at,
-  }))
+  const members = shapeDirectory(rows.slice(0, limit), detail)
 
-  return NextResponse.json({ members, hasMore })
+  // `detail` is echoed so the client knows whether to render a live Message
+  // button, without re-deriving the tier rule in the browser.
+  return NextResponse.json({ members, hasMore, detail })
 }

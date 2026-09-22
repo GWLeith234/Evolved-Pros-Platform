@@ -3,8 +3,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { MemberBadge } from '@/components/ui/MemberBadge'
-import type { MemberSummary } from '@/lib/community/types'
 import { getAvatarColor } from '@/lib/community/types'
+import {
+  DIRECTORY_DM_LOCKED_COPY,
+  type FullDirectoryMember,
+  type PublicDirectoryMember,
+} from '@/lib/community/directory'
+import { DirectoryMessageButton } from './DirectoryMessageButton'
 
 type TierFilter = 'all' | 'pro' | 'community'
 
@@ -21,7 +26,17 @@ function formatJoinDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 }
 
-type MemberWithDate = MemberSummary & { created_at?: string }
+/**
+ * The public payload always arrives; the full one adds fields. Modelled as
+ * "public, plus maybe the rest" so the public fields stay required and the
+ * withheld ones are genuinely optional rather than merely unread.
+ */
+type DirectoryMember = PublicDirectoryMember &
+  Partial<Omit<FullDirectoryMember, keyof PublicDirectoryMember>>
+
+function isFull(m: DirectoryMember): boolean {
+  return 'company' in m || 'bio' in m || 'linkedinUrl' in m
+}
 
 const FILTER_OPTIONS: { key: TierFilter; label: string }[] = [
   { key: 'all', label: 'All Members' },
@@ -29,8 +44,17 @@ const FILTER_OPTIONS: { key: TierFilter; label: string }[] = [
   { key: 'community', label: 'Community' },
 ]
 
-export function MemberDirectoryClient() {
-  const [members, setMembers] = useState<MemberWithDate[]>([])
+/**
+ * SPRINT Q1 - the directory is open to every signed-in member, in two shapes.
+ *
+ * This component does NOT decide what to hide. The server sends the public
+ * payload or the full one, and the withheld fields are simply absent. The
+ * `detail` flag arrives with the payload so the Message button knows whether
+ * to be live, without re-deriving a tier rule in the browser.
+ */
+export function MemberDirectoryClient({ seatsLine }: { seatsLine?: string | null }) {
+  const [members, setMembers] = useState<DirectoryMember[]>([])
+  const [detail, setDetail] = useState<'public' | 'full'>('public')
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [tierFilter, setTierFilter] = useState<TierFilter>('all')
@@ -45,9 +69,14 @@ export function MemberDirectoryClient() {
       if (tier !== 'all') params.set('tier', tier)
       const res = await fetch(`/api/members?${params}`)
       if (!res.ok) return
-      const data = (await res.json()) as { members: MemberWithDate[]; hasMore: boolean }
+      const data = (await res.json()) as {
+        members: DirectoryMember[]
+        hasMore: boolean
+        detail?: 'public' | 'full'
+      }
       setMembers(reset ? data.members : prev => [...prev, ...data.members])
       setHasMore(data.hasMore)
+      if (data.detail) setDetail(data.detail)
     } finally {
       setLoading(false)
     }
@@ -80,6 +109,15 @@ export function MemberDirectoryClient() {
         <p className="font-body text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
           Browse and connect with fellow Evolved Pros members.
         </p>
+        {/* Scarcity belongs where people are looking at the room. */}
+        {seatsLine ? (
+          <p
+            className="font-condensed font-bold uppercase tracking-[0.16em] text-[11px] mt-2"
+            style={{ color: '#C9A84C' }}
+          >
+            {seatsLine}
+          </p>
+        ) : null}
       </div>
 
       {/* Search + filters */}
@@ -170,12 +208,12 @@ export function MemberDirectoryClient() {
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={member.avatarUrl}
-                            alt={member.displayName}
+                            alt={member.firstName}
                             className="w-14 h-14 rounded-full object-cover"
                           />
                         ) : (
                           <span className="font-condensed font-bold text-white text-lg">
-                            {getInitials(member.displayName)}
+                            {getInitials(member.firstName)}
                           </span>
                         )}
                       </div>
@@ -188,8 +226,18 @@ export function MemberDirectoryClient() {
                     <h3
                       className="font-body font-semibold text-white text-[15px] leading-snug mb-0.5 group-hover:text-[#68a2b9] transition-colors"
                     >
-                      {member.displayName}
+                      {isFull(member) && member.fullName ? member.fullName : member.firstName}
                     </h3>
+
+                    {/* Company is The 99's to see. */}
+                    {isFull(member) && member.company ? (
+                      <p
+                        className="font-body text-[12px] mb-1 truncate"
+                        style={{ color: 'rgba(255,255,255,0.6)' }}
+                      >
+                        {member.company}
+                      </p>
+                    ) : null}
 
                     {/* Title */}
                     {member.roleTitle && (
@@ -200,6 +248,17 @@ export function MemberDirectoryClient() {
                         {member.roleTitle}
                       </p>
                     )}
+
+                    {/* Current pillar - public, and the most useful thing a
+                        free member can see about who else is in here. */}
+                    {member.currentPillar ? (
+                      <p
+                        className="font-condensed uppercase tracking-[0.12em] text-[10px] mb-3 truncate"
+                        style={{ color: 'rgba(255,255,255,0.45)' }}
+                      >
+                        Pillar: {member.currentPillar}
+                      </p>
+                    ) : null}
 
                     {/* Stats row */}
                     <div
@@ -229,6 +288,16 @@ export function MemberDirectoryClient() {
                           </p>
                         </div>
                       )}
+                    </div>
+
+                    {/* Live for The 99, inert and explained for everyone else.
+                        Outside the <Link> so a click does not navigate. */}
+                    <div className="mt-3" onClick={e => e.preventDefault()}>
+                      <DirectoryMessageButton
+                        recipientId={member.id}
+                        enabled={detail === 'full'}
+                        lockedCopy={DIRECTORY_DM_LOCKED_COPY}
+                      />
                     </div>
                   </div>
                 </Link>

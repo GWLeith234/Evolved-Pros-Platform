@@ -33,7 +33,9 @@ describe('the canonical matrix', () => {
         fit: 'teaser',
         academy: 'teaser',
         mastermind: 'none',
-        network: 'none',
+        // SPRINT Q1 - the directory is open to everyone, with a public
+        // payload and no direct messages. 'teaser', not 'none'.
+        network: 'teaser',
         liveDiscountPct: 0,
       },
       vip: {
@@ -41,7 +43,7 @@ describe('the canonical matrix', () => {
         fit: 'full',
         academy: 'full',
         mastermind: 'monthly-45',
-        network: 'none',
+        network: 'teaser',
         liveDiscountPct: 10,
       },
       pro: {
@@ -105,7 +107,11 @@ describe('toTierKey fails closed', () => {
 describe('entitlementsFor respects a dead subscription', () => {
   it('collapses an unpaid or cancelled member to the free tier', () => {
     for (const status of ['unpaid', 'canceled', 'cancelled', 'expired']) {
-      expect(entitlementsFor('pro', status).network, status).toBe('none')
+      // The free tier's network is 'teaser' since SPRINT Q1, so a lapsed
+      // member of The 99 keeps the directory and loses the inbox - which is
+      // exactly what collapsing to the free tier now means.
+      expect(entitlementsFor('pro', status).network, status).toBe('teaser')
+      expect(canAccessNetwork('pro', status), status).toBe(false)
       expect(entitlementsFor('vip', status).academy, status).toBe('teaser')
     }
   })
@@ -130,7 +136,9 @@ describe('surface gates', () => {
     expect(requiredTierFor('academy')).toBe('vip')
   })
 
-  it('gates the Network at The 99, and VIP does NOT get it', () => {
+  it('gates direct messages at The 99, and VIP does NOT get them', () => {
+    // SPRINT Q1 opened the directory but NOT the inbox. canAccessNetwork is
+    // unchanged and still means "can reach other members".
     expect(canAccessNetwork('community')).toBe(false)
     expect(canAccessNetwork('vip')).toBe(false)
     expect(canAccessNetwork('pro')).toBe(true)
