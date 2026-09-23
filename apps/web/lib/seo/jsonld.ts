@@ -2,11 +2,12 @@
  * Public JSON-LD builders. Podcast and article routes keep their inline
  * schemas. Home ships WebSite + Organization; /pricing ships the
  * membership Product / Offer catalog; /live ships a WebPage plus a
- * keynote/speaking Service with no price.
+ * keynote/speaking Service with no price; /fit ships one VIP Product / Offer.
  *
  * Brand lock: Evolved Pros. Never Evolved Media.
  */
 
+import { FIT_PAGE_DESCRIPTION, FIT_PAGE_TITLE, FIT_VIP_MONTHLY } from '@/lib/fit/copy'
 import { HOME_SUB } from '@/lib/home/conversion'
 import { TIERS, TIER_DISPLAY_NAMES } from '@/lib/pricing'
 import { CANONICAL_ORIGIN, SITE_NAME, canonicalUrl } from '@/lib/seo/canonical'
@@ -33,6 +34,7 @@ export function homeJsonLd() {
 
 const PRICING_URL = canonicalUrl('/pricing')
 const LIVE_URL = canonicalUrl('/live')
+const FIT_URL = canonicalUrl('/fit')
 
 /**
  * Same sentence as the /live document description. The page CTA is
@@ -159,6 +161,33 @@ export function liveJsonLd() {
       name: `${SITE_NAME} Live keynotes and workshops`,
       url: LIVE_URL,
       brand: { '@type': 'Brand', name: SITE_NAME },
+    },
+  }
+}
+
+/**
+ * WebPage + one Product / Offer for `/fit`.
+ *
+ * The page shows VIP $99 (Upgrade to VIP). The offer price is that VIP
+ * monthly amount. The offer URL is /pricing, where the money lives.
+ * The WebPage and Product URLs stay on /fit. No other tiers. No Keynotes.
+ */
+export function fitJsonLd() {
+  const price = String(FIT_VIP_MONTHLY)
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: FIT_PAGE_TITLE,
+    url: FIT_URL,
+    description: FIT_PAGE_DESCRIPTION,
+    publisher: homeOrganizationJsonLd(),
+    mainEntity: {
+      '@type': 'Product',
+      name: FIT_PAGE_TITLE,
+      description: FIT_PAGE_DESCRIPTION,
+      brand: { '@type': 'Brand', name: SITE_NAME },
+      url: FIT_URL,
+      offers: membershipOffer('VIP', price, 'P1M'),
     },
   }
 }
