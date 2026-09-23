@@ -1,14 +1,16 @@
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { authorizeCronBearer } from '@/lib/cron/authorize'
 import { sendDigestEmail } from '@/lib/resend/emails/digest'
 import type { DigestNotification } from '@/lib/resend/emails/DigestEmail'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const gate = authorizeCronBearer(request.headers.get('authorization'), process.env.CRON_SECRET)
+  if (!gate.ok) {
+    if (gate.status === 500) console.error('[cron/daily-digest] CRON_SECRET is not set')
+    return NextResponse.json({ error: gate.error }, { status: gate.status })
   }
 
   // Find users with community_reply set to 'digest'

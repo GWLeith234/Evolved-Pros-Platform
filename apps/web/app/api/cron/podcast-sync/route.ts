@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { authorizeCronBearer } from '@/lib/cron/authorize'
 import { syncPodcastFromRss } from '@/lib/podcast/syncFromRss'
 
 export const dynamic = 'force-dynamic'
@@ -13,9 +14,10 @@ export const maxDuration = 60
  * 401'd in middleware (no session) before the route could read x-cron-secret.
  */
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const gate = authorizeCronBearer(request.headers.get('authorization'), process.env.CRON_SECRET)
+  if (!gate.ok) {
+    if (gate.status === 500) console.error('[cron/podcast-sync] CRON_SECRET is not set')
+    return NextResponse.json({ error: gate.error }, { status: gate.status })
   }
 
   const result = await syncPodcastFromRss()
