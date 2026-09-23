@@ -4,6 +4,7 @@ import { FitMarketing } from '@/components/fit/FitMarketing'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { FIT_PAGE_DESCRIPTION, FIT_PAGE_TITLE } from '@/lib/fit/copy'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { fitJsonLd } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = publicPageMetadata('/fit', {
   title: FIT_PAGE_TITLE,
@@ -19,9 +20,16 @@ export default async function FitPage() {
     viewerTier = null
   }
   return (
-    <div className="min-h-screen bg-page text-primary ep-no-x-scroll" style={{ maxWidth: '100vw' }}>
-      <FitMasthead />
-      <FitMarketing viewerTier={viewerTier} />
-    </div>
+    <>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(fitJsonLd()) }}
+      />
+      <div className="min-h-screen bg-page text-primary ep-no-x-scroll" style={{ maxWidth: '100vw' }}>
+        <FitMasthead />
+        <FitMarketing viewerTier={viewerTier} />
+      </div>
+    </>
   )
 }
