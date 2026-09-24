@@ -1,7 +1,8 @@
 /**
  * Public JSON-LD builders. Podcast and article routes keep their inline
  * schemas. Home ships WebSite + Organization; /pricing ships the
- * membership Product / Offer catalog.
+ * membership Product / Offer catalog; /live ships a WebPage plus a
+ * keynote/speaking Service with no price.
  *
  * Brand lock: Evolved Pros. Never Evolved Media.
  */
@@ -31,6 +32,14 @@ export function homeJsonLd() {
 }
 
 const PRICING_URL = canonicalUrl('/pricing')
+const LIVE_URL = canonicalUrl('/live')
+
+/**
+ * Same sentence as the /live document description. The page CTA is
+ * "Inquire about booking" and publishes no fee.
+ */
+export const LIVE_PAGE_DESCRIPTION =
+  'High-energy keynotes, workshops, and mastermind formats. Upcoming and past speaking events worldwide — powered by the EVOLVED Architecture™.'
 
 function membershipOffer(name: string, price: string, billingDuration: 'P1M' | 'P1Y') {
   return {
@@ -127,6 +136,29 @@ export function pricingJsonLd() {
           ),
         },
       ],
+    },
+  }
+}
+
+/**
+ * WebPage + Service for `/live`.
+ *
+ * Keynotes sell on this URL. The CTA is "Inquire about booking" and the
+ * page publishes no fee, so this schema has no Offer, price, or priceCurrency.
+ */
+export function liveJsonLd() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: `${SITE_NAME} LIVE`,
+    url: LIVE_URL,
+    description: LIVE_PAGE_DESCRIPTION,
+    publisher: homeOrganizationJsonLd(),
+    mainEntity: {
+      '@type': 'Service',
+      name: `${SITE_NAME} Live keynotes and workshops`,
+      url: LIVE_URL,
+      brand: { '@type': 'Brand', name: SITE_NAME },
     },
   }
 }
