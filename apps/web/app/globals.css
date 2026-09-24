@@ -82,7 +82,7 @@
   --pillar-6: #0ABFA3;
 
   /* SPRINT-S (style lockdown) — fixed structural inks. These do NOT flip with
-     the theme: always-dark heroes (WelcomeBanner), the /media editorial cream
+     the theme: always-dark heroes, the /media editorial cream
      chrome, and fixed-light cards (login) reference them so components carry
      zero raw hex. Themed neutrals live in the semantic tokens above. */
   --white:            #FFFFFF;
@@ -1199,10 +1199,6 @@ html.light-mode .live-force-dark .live-milestones a.live-milestones-row:focus-vi
     padding-left: 16px !important;
     padding-right: 16px !important;
   }
-  .hub-root .hub-overview-grid {
-    gap: 12px !important;
-    padding: 14px 14px !important;
-  }
 }
 
 /* Instant press feedback for primary CTAs (loading feel) */
@@ -1320,18 +1316,6 @@ html.light-mode .ep-adcellerant-card {
 @keyframes events-live-pulse {
   0%, 100% { opacity: 1;   transform: scale(1); }
   50%      { opacity: 0.5; transform: scale(1.18); }
-}
-
-/* WELCOME-BANNER-V3: sparkle dot on earned pillar badges + JustEarned card pulse.
-   Ported verbatim from welcome-banner.jsx (line 497-504) — keep in CSS so SSR
-   doesn't have to inject via document.head at runtime. */
-@keyframes pillarSparkle {
-  0%, 100% { opacity: 0.2; transform: scale(0.8); }
-  50%      { opacity: 1;   transform: scale(1.3); }
-}
-@keyframes earnedPulse {
-  0%, 100% { opacity: 0.85; }
-  50%      { opacity: 1; }
 }
 
 /* UI-HEART: confetti burst when toggling the gold heart reaction on. */
@@ -1511,33 +1495,6 @@ html.light-mode .ep-loader-logo--light { display: block; }
 .ep-sponsor-inline:hover {
   border-color: rgba(201,48,42,0.40);
   box-shadow: var(--shadow-glow-red);
-}
-
-/* HOME-4UP-TILES responsive grid breakpoints. */
-@media (max-width: 1100px) {
-  .home-4up-grid { grid-template-columns: repeat(2, 1fr) !important; }
-}
-@media (max-width: 720px) {
-  .home-4up-grid { grid-template-columns: 1fr !important; }
-}
-
-/* Accountability Hub — daily/weekly progress micro-animations */
-@keyframes hub-flash-in {
-  0%   { opacity: 0; transform: translateY(4px); }
-  15%  { opacity: 1; transform: translateY(0); }
-  85%  { opacity: 1; }
-  100% { opacity: 0; }
-}
-.hub-flash {
-  animation: hub-flash-in 1.8s ease forwards;
-}
-@media (max-width: 720px) {
-  .hub-overview-grid {
-    grid-template-columns: 1fr 1fr !important;
-  }
-  .hub-body-grid {
-    grid-template-columns: 1fr !important;
-  }
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -1855,14 +1812,11 @@ html.cream-mode body {
   40%      { filter: brightness(1.25); }
 }
 
-/* Mobile: denser home metric grid + 4-up stack already handled; tighten spacing */
+/* Mobile: denser home metric grid; tighten spacing */
 @media (max-width: 639px) {
   .ep-page-gutter {
     padding-left: 14px !important;
     padding-right: 14px !important;
-  }
-  .home-4up-grid {
-    gap: var(--space-section) !important;
   }
   .ep-stat-card .ep-stat-value {
     font-size: 1.65rem !important;
@@ -2076,18 +2030,10 @@ html.light-mode .podcast-force-dark {
     padding-right: max(14px, env(safe-area-inset-right, 0px)) !important;
   }
 
-  /* Home: stack metric strip 2×2 already via grid; tighten section rhythm */
+  /* Home: tighten section rhythm */
   .ep-page-gutter > * + * {
     /* children own spacing via space-y; ensure no bleed */
     max-width: 100%;
-  }
-
-  /* Welcome banner scoreboard already has inline media; reinforce no overflow */
-  .welcome-banner-inner,
-  .welcome-banner-scoreboard,
-  .welcome-banner-architecture {
-    max-width: 100%;
-    min-width: 0;
   }
 
   /* Academy index hero copy */
@@ -2143,20 +2089,11 @@ html.light-mode .podcast-force-dark {
     padding-left: max(20px, env(safe-area-inset-left, 0px)) !important;
     padding-right: max(20px, env(safe-area-inset-right, 0px)) !important;
   }
-  .home-4up-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: var(--space-section) !important;
-  }
   .academy-course-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
   .live-pillar-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-  }
-  /* Welcome scoreboard: 4-across on tablet is tight — keep 2×2 */
-  .welcome-banner-scoreboard {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
   }
 }
 
@@ -2243,22 +2180,6 @@ html.light-mode .podcast-force-dark {
   .ep-bottom-tabs a,
   .ep-bottom-tabs button {
     min-height: 44px;
-  }
-}
-
-/* ── SPRINT 4C — Scoreboard micro-interactions ─────────────────────────── */
-@keyframes scoreboard-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0); }
-  40% { box-shadow: 0 0 0 6px rgba(201,168,76,0.18); }
-}
-.scoreboard-hero--pulse {
-  animation: scoreboard-pulse 1.2s ease 1;
-}
-@media (max-width: 639px) {
-  .scoreboard-hero .ep-progress-circle {
-    /* rings stay readable on narrow screens */
-    transform: scale(0.92);
-    transform-origin: center center;
   }
 }
 

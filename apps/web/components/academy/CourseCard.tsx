@@ -14,7 +14,7 @@ interface CourseCardProps {
 
 /**
  * Immersive pillar course card — standardized progress, done state, hover
- * (Sprint 2). Visual language matches InProgressPillarHero + design tokens.
+ * (Sprint 2). Visual language follows the shared design tokens.
  *
  * SPRINT TIER-1 — the grid is a STOREFRONT. A locked card is not a dead,
  * dimmed placeholder: it keeps its title, pillar color, artwork and lesson
