@@ -362,6 +362,12 @@ export function ConversionHome({
           <p className="font-body text-xs text-navy/45">{footerCopyright()}</p>
           <nav aria-label="Legal" className="flex gap-4">
             <Link
+              href="/about"
+              className="font-condensed text-xs font-semibold uppercase tracking-[0.12em] text-teal no-underline"
+            >
+              About
+            </Link>
+            <Link
               href="/privacy"
               className="font-condensed text-xs font-semibold uppercase tracking-[0.12em] text-teal no-underline"
             >

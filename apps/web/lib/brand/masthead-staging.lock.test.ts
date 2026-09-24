@@ -12,6 +12,8 @@ const PRODUCTION_MASTHEAD_LOCKUPS = [
   'fit-lockup-light.png',
   'media-lockup-dark.png',
   'media-lockup-light.png',
+  'media-lockup-dark.v2.png',
+  'media-lockup-light.v2.png',
   'megaphone-disc.png',
 ] as const
 

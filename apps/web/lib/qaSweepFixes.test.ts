@@ -66,8 +66,8 @@ describe('QA sweep P1 /media LCP', () => {
   })
 
   it('keeps the official lockup PNG pair on disk and theme-aware Media chrome', () => {
-    expect(MEDIA_LOCKUP_LIGHT).toBe('/brand/masthead/media-lockup-light.png')
-    expect(MEDIA_LOCKUP_DARK).toBe('/brand/masthead/media-lockup-dark.png')
+    expect(MEDIA_LOCKUP_LIGHT).toBe('/brand/masthead/media-lockup-light.v2.png')
+    expect(MEDIA_LOCKUP_DARK).toBe('/brand/masthead/media-lockup-dark.v2.png')
     expect(css).toMatch(/\.ep-media-masthead-logo \{\n  display: block;\n  width: 100%;\n  max-width: 100%;\n  height: auto;\n\}/)
     expect(css).toMatch(/\.ep-media-masthead \{[\s\S]*background: var\(--bg-page\)/)
     expect(css).toMatch(/html\.light-mode \.ep-media-masthead \{[\s\S]*background: var\(--paper\)/)
