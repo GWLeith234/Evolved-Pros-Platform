@@ -2,14 +2,16 @@ export const dynamic = 'force-dynamic'
 
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { authorizeCronBearer } from '@/lib/cron/authorize'
 import { sendEventReminderEmail } from '@/lib/resend/emails/event-reminder'
 import { notifyEventReminder } from '@/lib/notifications/create'
 import type { EventType } from '@/lib/events/types'
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const gate = authorizeCronBearer(request.headers.get('authorization'), process.env.CRON_SECRET)
+  if (!gate.ok) {
+    if (gate.status === 500) console.error('[cron/event-reminders] CRON_SECRET is not set')
+    return NextResponse.json({ error: gate.error }, { status: gate.status })
   }
 
   // RLS-FIX: cron has no user session, so auth.uid() is NULL and every

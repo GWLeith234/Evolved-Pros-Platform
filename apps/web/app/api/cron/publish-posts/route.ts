@@ -2,14 +2,14 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { authorizeCronBearer } from '@/lib/cron/authorize'
 
 export async function GET(request: Request) {
-  // CRON_SECRET gate — same Bearer pattern as the other 5 cron routes.
-  // CRON-FIX (e5e0956) added /api/cron to PUBLIC_ROUTES so middleware no
-  // longer auth-gates these; each handler must verify the header itself.
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // /api/cron is on middleware PUBLIC_ROUTES, so this handler is the only gate.
+  const gate = authorizeCronBearer(request.headers.get('authorization'), process.env.CRON_SECRET)
+  if (!gate.ok) {
+    if (gate.status === 500) console.error('[cron/publish-posts] CRON_SECRET is not set')
+    return NextResponse.json({ error: gate.error }, { status: gate.status })
   }
 
   const now = new Date().toISOString()
