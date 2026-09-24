@@ -59,7 +59,7 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
     // Architecture pillars stay grey for George.
     adminClient
       .from('lesson_progress')
-      .select('lesson_id, completed_at, updated_at')
+      .select('lesson_id, completed_at')
       .eq('user_id', userId),
   ])
 
@@ -91,41 +91,27 @@ async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, us
     list.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
   }
 
-  const progressByLesson: Record<string, { completed_at: string | null; updated_at: string }> = {}
+  const progressByLesson: Record<string, { completed_at: string | null }> = {}
   for (const p of progress.data ?? []) {
-    progressByLesson[p.lesson_id] = { completed_at: p.completed_at, updated_at: p.updated_at }
+    progressByLesson[p.lesson_id] = { completed_at: p.completed_at }
   }
 
-  // Return ALL published courses with their progress. Caller uses the full
-  // list to derive per-pillar Architecture-column state in the WelcomeBanner
-  // and the Path Forward in-progress / climbing pillars.
+  // Return ALL published courses with their progress. The Home banner
+  // derives per-pillar state from this list; the academy fuel card uses
+  // the next uncompleted lesson.
   return (courses.data ?? []).map(c => {
     const courseLesson = lessonsByCourse[c.id] ?? []
     const total = courseLesson.length
     const completed = courseLesson.filter(l => progressByLesson[l.id]?.completed_at).length
     const pct = total > 0 ? Math.round((completed / total) * 100) : 0
-    const completedAts = courseLesson
-      .map(l => progressByLesson[l.id]?.completed_at)
-      .filter((v): v is string => Boolean(v))
-      .sort()
-    const updatedAts = courseLesson
-      .map(l => progressByLesson[l.id]?.updated_at)
-      .filter((v): v is string => Boolean(v))
-      .sort()
-    const lastActivity     = updatedAts.length > 0 ? updatedAts[updatedAts.length - 1] : null
-    const firstActivity    = updatedAts.length > 0 ? updatedAts[0] : null
-    const lastCompletedAt  = completedAts.length > 0 ? completedAts[completedAts.length - 1] : null
-    // First uncompleted lesson by sort_order — the "Next up" target for the
-    // InProgressPillarHero CTA and the GoalCard's tied-to-path mirror.
+    // First uncompleted lesson by sort_order — the next lesson for the
+    // academy fuel card.
     const nextLesson = courseLesson.find(l => !progressByLesson[l.id]?.completed_at) ?? null
     return {
       ...c,
       total,
       completed,
       pct,
-      lastActivity,
-      firstActivity,
-      lastCompletedAt,
       nextLessonTitle: nextLesson?.title ?? null,
       nextLessonSlug:  nextLesson?.slug  ?? null,
       nextLessonDurationSeconds: nextLesson?.duration_seconds ?? null,
@@ -529,7 +515,7 @@ export default async function MemberHomePage() {
     sponsors,
   ] = await Promise.all([
     fetchCourseProgress(supabase, profile.id),
-    supabase.from('member_badges').select('pillar_number, awarded_at').eq('user_id', profile.id),
+    supabase.from('member_badges').select('pillar_number').eq('user_id', profile.id),
     fetchLatestPulsePosts(1),
     fetchPinnedLiveEvent(profile.id),
     fetchLatestEpisodes(2),
@@ -548,16 +534,12 @@ export default async function MemberHomePage() {
 
   const quarterlyGoals = (quarterlyGoalsResult.data ?? []) as GoalForCard[]
   const dailyHabits = habitsResult.habits
-  const earnedBadges = badgeData.data?.map(b => b.pillar_number) ?? []
-  const awardedAtByPillar = new Map(
-    (badgeData.data ?? []).map(b => [b.pillar_number, b.awarded_at]),
-  )
-  const earnedSet = new Set(earnedBadges)
+  const earnedSet = new Set(badgeData.data?.map(b => b.pillar_number) ?? [])
 
-  // Index courses by pillar_number so the Architecture column can read
-  // per-pillar progress directly. Earned wins over progress (a member
-  // can have a manually-awarded badge before they hit 100%, and a 100%
-  // course should also count as earned even when no badge row exists).
+  // Index courses by pillar_number so the Home banner can read per-pillar
+  // progress directly. Earned wins over progress (a member can have a
+  // manually-awarded badge before they hit 100%, and a 100% course should
+  // also count as earned even when no badge row exists).
   const courseByPillar = new Map<number, typeof courseProgress[number]>()
   for (const c of courseProgress) {
     if (c.pillar_number != null) courseByPillar.set(c.pillar_number, c)
@@ -569,11 +551,7 @@ export default async function MemberHomePage() {
     const isEarnedFromCompletion = cp ? cp.total > 0 && cp.pct === 100 : false
 
     if (earnedSet.has(n) || isEarnedFromCompletion) {
-      // earnedAt: prefer the badge-awarded timestamp; otherwise fall back to
-      // the most recent lesson completed_at within the course. This is what
-      // the WelcomeBanner JustEarned pill gates on (fires when < 7 days old).
-      const earnedAt = awardedAtByPillar.get(n) ?? cp?.lastCompletedAt ?? null
-      return { number: n, name, state: 'earned' as const, earnedAt }
+      return { number: n, name, state: 'earned' as const }
     }
     if (cp && cp.completed > 0) {
       return { number: n, name, state: 'in-progress' as const, progressPct: cp.pct }
@@ -581,10 +559,8 @@ export default async function MemberHomePage() {
     return { number: n, name, state: 'locked' as const }
   })
 
-  // ── Path Forward + Long Game (HOME-2) ───────────────────────────────
-  // Derive the in-progress and "climbing toward" pillars from the same
-  // pillar state the WelcomeBanner uses, then attach the per-course
-  // metadata each card needs (slug, lesson counts, next lesson, etc).
+  // Derive the in-progress pillar for the academy fuel card from the same
+  // pillar state the banner uses, then attach the per-course metadata.
   const PILLAR_NUM_TO_SLUG: Record<number, string> = {
     1: 'foundation',
     2: 'identity',
@@ -598,7 +574,6 @@ export default async function MemberHomePage() {
   const inProgressCourse = inProgressEntry ? courseByPillar.get(inProgressEntry.number) : null
   const inProgressData = inProgressEntry && inProgressCourse
     ? {
-        number: inProgressEntry.number,
         name:   inProgressEntry.name,
         progressPct:      inProgressCourse.pct,
         completedLessons: inProgressCourse.completed,
@@ -606,14 +581,6 @@ export default async function MemberHomePage() {
         courseSlug:       inProgressCourse.slug ?? PILLAR_NUM_TO_SLUG[inProgressEntry.number],
         nextLessonTitle:  inProgressCourse.nextLessonTitle,
         nextLessonSlug:   inProgressCourse.nextLessonSlug,
-        // DAY N OF 21 — earliest progress on this course's lessons. The
-        // schema has updated_at (touched-at proxy); good enough for a
-        // motivational counter, capped at the 21-day program cadence.
-        dayOfTwentyOne: inProgressCourse.firstActivity
-          ? Math.min(21, Math.max(1,
-              Math.ceil((Date.now() - new Date(inProgressCourse.firstActivity).getTime()) / 86_400_000),
-            ))
-          : null,
       }
     : null
 
