@@ -10,8 +10,8 @@ export const metadata: Metadata = publicPageMetadata(ABOUT_PATH, {
 })
 
 /**
- * Public indexable /about. Marketing layout under the (public) shell
- * (footer comes from the layout). Not a LegalPage, not the auth shell.
+ * Public indexable /about. Marketing sections under the (public) shell
+ * (footer comes from the layout). Not the auth shell.
  */
 export default function AboutRoute() {
   return <AboutPage />

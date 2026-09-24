@@ -54,21 +54,23 @@ export function AboutPage() {
           <Link href="/" aria-label="Evolved Pros home" className="ep-about-logo">
             <LogoMark variant="dark" height={28} alt="" />
           </Link>
-          <div className="ep-about-header-end">
-            <nav aria-label="Primary" className="ep-about-nav">
-              {HOME_NAV_LINKS.map(link => (
-                <Link key={link.href} href={link.href}>
-                  {'live' in link && link.live ? (
-                    <span className="ep-about-live-dot" aria-hidden="true">
-                      •
-                    </span>
-                  ) : null}
-                  {link.label}
-                </Link>
-              ))}
-              <span className="ep-about-header-divider" aria-hidden="true" />
-              <Link href={ABOUT_SIGN_IN_HREF}>{ABOUT_SIGN_IN_LABEL}</Link>
-            </nav>
+          <nav aria-label="Primary" className="ep-about-nav">
+            {HOME_NAV_LINKS.map(link => (
+              <Link key={link.href} href={link.href}>
+                {'live' in link && link.live ? (
+                  <span className="ep-about-live-dot" aria-hidden="true">
+                    •
+                  </span>
+                ) : null}
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="ep-about-header-tools">
+            <Link href={ABOUT_SIGN_IN_HREF} className="ep-about-signin">
+              {ABOUT_SIGN_IN_LABEL}
+            </Link>
+            <span className="ep-about-header-divider" aria-hidden="true" />
             <Link href={ABOUT_JOIN_HREF} className="ep-about-btn ep-about-btn-primary ep-about-btn-compact">
               {ABOUT_JOIN_LABEL}
             </Link>
