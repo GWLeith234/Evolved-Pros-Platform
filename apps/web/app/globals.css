@@ -4461,3 +4461,534 @@ html.light-mode .ep-force-dark {
   margin: 0;
   padding: 0;
 }
+
+/* Public About. Paper marketing page on the existing shell tokens
+   (navy / red / teal / ivory, Playfair + Barlow). Mirrors the conversion
+   front door so the approved mock stays ivory in both themes. The global
+   footer stays mounted; on a dark document it inherits the paper tokens
+   so the lockup does not flip white-on-ivory. */
+.ep-about {
+  background: var(--paper);
+  color: var(--navy);
+  overflow-x: clip;
+}
+html:not(.light-mode) .ep-public-shell:has(.ep-about) {
+  background: var(--paper);
+}
+html:not(.light-mode) .ep-public-shell:has(.ep-about) > .ep-public-footer {
+  --bg-surface: var(--paper);
+  --border-color: var(--border);
+  --text-secondary: var(--navy);
+  --text-tertiary: #5C6A7C;
+}
+html:not(.light-mode) .ep-public-shell:has(.ep-about) > .ep-public-footer .ep-public-footer-logo--on-dark {
+  display: none;
+}
+html:not(.light-mode) .ep-public-shell:has(.ep-about) > .ep-public-footer .ep-public-footer-logo--on-light {
+  display: block;
+}
+
+.ep-about-wrap {
+  width: min(1120px, calc(100% - 40px));
+  margin: 0 auto;
+}
+.ep-about-header {
+  border-bottom: 1px solid var(--navy);
+}
+.ep-about-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 28px;
+  min-height: 72px;
+  padding: 12px 0;
+}
+.ep-about-logo {
+  display: flex;
+  flex: 0 0 auto;
+  line-height: 0;
+  text-decoration: none;
+}
+.ep-about-header-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+  min-width: 0;
+  margin-left: auto;
+}
+.ep-about-nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+}
+.ep-about-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--navy);
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.ep-about-nav a:hover {
+  color: var(--brand-red);
+}
+.ep-about-live-dot {
+  margin-right: 6px;
+  color: var(--brand-red);
+}
+.ep-about-header-divider {
+  width: 1px;
+  height: 16px;
+  background: color-mix(in srgb, var(--navy) 35%, transparent);
+}
+.ep-about a:focus-visible {
+  outline: 2px solid var(--brand-teal);
+  outline-offset: 3px;
+}
+.ep-about-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 22px;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.ep-about-btn-compact {
+  min-height: 40px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+.ep-about-btn-primary {
+  background: var(--brand-red);
+  color: var(--white);
+}
+.ep-about-btn-primary:hover {
+  background: var(--brand-red-hover);
+}
+.ep-about-btn-ghost {
+  border: 1px solid var(--navy);
+  color: var(--navy);
+  background: transparent;
+}
+.ep-about-btn-ghost:hover {
+  background: color-mix(in srgb, var(--navy) 6%, transparent);
+}
+.ep-about-kicker {
+  margin: 0;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--brand-red);
+}
+.ep-about-kicker-center {
+  text-align: center;
+}
+.ep-about-kicker-teal {
+  color: color-mix(in srgb, var(--teal) 42%, var(--navy));
+}
+.ep-about-on-navy .ep-about-kicker-teal {
+  color: var(--teal-light);
+}
+.ep-about-h1,
+.ep-about-h2 {
+  margin: 0;
+  font-family: var(--font-display), "Playfair Display", Georgia, serif;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.02em;
+}
+.ep-about-h1 {
+  margin-top: 14px;
+  font-size: clamp(2.5rem, 6.4vw, 5.15rem);
+  line-height: 1.02;
+  text-align: center;
+}
+.ep-about-h2 {
+  margin-top: 12px;
+  font-size: clamp(2rem, 4.4vw, 3.35rem);
+  line-height: 1.12;
+}
+.ep-about-h2-name {
+  font-size: clamp(2.4rem, 4vw, 3.5rem);
+}
+.ep-about-h2-narrow {
+  max-width: 18ch;
+}
+.ep-about-hero,
+.ep-about-george,
+.ep-about-start {
+  padding: 72px 0;
+}
+.ep-about-what,
+.ep-about-who {
+  background: var(--white);
+  padding: 80px 0;
+}
+.ep-about-rule {
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--navy) 22%, transparent);
+  margin: 48px auto 40px;
+  max-width: 100%;
+}
+.ep-about-hero-grid,
+.ep-about-what-grid,
+.ep-about-george-grid {
+  display: grid;
+  gap: 28px;
+}
+.ep-about-byline {
+  margin: 10px 0 0;
+  font-family: var(--font-display), "Playfair Display", Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 1.7rem;
+  line-height: 1.15;
+  color: var(--navy);
+}
+.ep-about-role {
+  margin: 6px 0 0;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--navy) 58%, var(--paper));
+}
+.ep-about-copy {
+  margin: 0 0 1.1em;
+  font-family: var(--font-barlow), Barlow, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--navy);
+}
+.ep-about-prose .ep-about-copy:last-child,
+.ep-about-arch-card .ep-about-copy,
+.ep-about-step .ep-about-copy,
+.ep-about-who-cell .ep-about-copy {
+  margin-bottom: 0;
+}
+.ep-about-hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+.ep-about-nots {
+  display: grid;
+  gap: 12px;
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.ep-about-nots li {
+  margin: 0;
+  padding: 18px 16px 20px;
+  border: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+  background: var(--paper);
+}
+.ep-about-not-kicker {
+  margin: 0;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--navy) 55%, var(--paper));
+}
+.ep-about-not-title {
+  margin: 8px 0 0;
+  font-family: var(--font-display), "Playfair Display", Georgia, serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--navy);
+}
+.ep-about-arch,
+.ep-about-close {
+  background: var(--navy);
+  color: var(--paper);
+  padding: 80px 0;
+}
+.ep-about-on-navy .ep-about-h2 {
+  color: var(--paper);
+}
+.ep-about-arch-grid,
+.ep-about-steps {
+  display: grid;
+  gap: 16px;
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.ep-about-arch-card,
+.ep-about-step {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--paper);
+  color: var(--navy);
+}
+.ep-about-arch-card {
+  border-top: 3px solid var(--brand-red);
+  padding: 22px 22px 24px;
+}
+.ep-about-arch-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ep-about-arch-n,
+.ep-about-step-kicker {
+  margin: 0;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--teal) 42%, var(--navy));
+}
+.ep-about-beta {
+  margin: 0;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--navy) 8%, var(--paper));
+  color: color-mix(in srgb, var(--teal) 42%, var(--navy));
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.ep-about-arch-card h3,
+.ep-about-step h3 {
+  margin: 12px 0 10px;
+  font-family: var(--font-display), "Playfair Display", Georgia, serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--navy);
+}
+.ep-about-arch-card em {
+  font-style: italic;
+}
+.ep-about-arch-link {
+  margin-top: auto;
+  padding-top: 22px;
+  color: var(--brand-red);
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.ep-about-arch-link:hover {
+  color: var(--brand-red-hover);
+}
+.ep-about-portrait {
+  position: relative;
+  margin: 0;
+  min-height: 240px;
+  aspect-ratio: 5 / 4;
+  background-color: color-mix(in srgb, var(--navy) 5%, var(--paper));
+  background-image: repeating-linear-gradient(
+    -45deg,
+    color-mix(in srgb, var(--navy) 9%, var(--paper)),
+    color-mix(in srgb, var(--navy) 9%, var(--paper)) 14px,
+    color-mix(in srgb, var(--navy) 3%, var(--paper)) 14px,
+    color-mix(in srgb, var(--navy) 3%, var(--paper)) 28px
+  );
+  border: 1px solid color-mix(in srgb, var(--navy) 12%, transparent);
+}
+.ep-about-portrait figcaption {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 14px;
+  margin: 0;
+  font-family: var(--font-barlow), Barlow, sans-serif;
+  font-size: 13px;
+  color: color-mix(in srgb, var(--navy) 62%, var(--paper));
+}
+.ep-about-george-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 28px;
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid color-mix(in srgb, var(--navy) 18%, transparent);
+}
+.ep-about-george-links a {
+  color: var(--navy);
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.ep-about-george-links a:hover {
+  color: var(--brand-red);
+}
+.ep-about-who-grid {
+  display: grid;
+  margin-top: 36px;
+  border-top: 1px solid color-mix(in srgb, var(--navy) 18%, transparent);
+}
+.ep-about-who-cell {
+  padding: 26px 0 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--navy) 18%, transparent);
+}
+.ep-about-who-label {
+  margin: 0 0 10px;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--navy);
+}
+.ep-about-who-label-not {
+  color: var(--brand-red);
+}
+.ep-about-step {
+  padding: 26px 22px 28px;
+  border: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+}
+.ep-about-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 28px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--navy);
+  color: var(--navy);
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.ep-about-text-link:hover {
+  color: var(--brand-red);
+  border-bottom-color: var(--brand-red);
+}
+.ep-about-close-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.ep-about-close .ep-about-h2 {
+  max-width: 16ch;
+}
+.ep-about-close-body {
+  max-width: 38rem;
+  margin: 18px 0 28px;
+  font-family: var(--font-barlow), Barlow, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: color-mix(in srgb, var(--paper) 86%, transparent);
+}
+.ep-about-close-secondary {
+  margin-top: 18px;
+  color: var(--paper);
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.ep-about-close-secondary:hover {
+  color: var(--teal-light);
+}
+
+@media (min-width: 700px) {
+  .ep-about-nots,
+  .ep-about-arch-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (min-width: 800px) {
+  .ep-about-hero-grid {
+    grid-template-columns: 190px minmax(0, 1fr);
+    gap: 48px 56px;
+    align-items: start;
+  }
+  .ep-about-what-grid {
+    grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+    gap: 48px 64px;
+    align-items: start;
+  }
+  .ep-about-george-grid {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 56px;
+    align-items: center;
+  }
+  .ep-about-portrait {
+    aspect-ratio: 4 / 5;
+  }
+  .ep-about-who-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ep-about-who-cell {
+    border-bottom: 0;
+    padding-top: 28px;
+  }
+  .ep-about-who-cell:first-child {
+    padding-right: 36px;
+    border-right: 1px solid color-mix(in srgb, var(--navy) 18%, transparent);
+  }
+  .ep-about-who-cell:last-child {
+    padding-left: 36px;
+  }
+}
+@media (min-width: 980px) {
+  .ep-about-arch-grid,
+  .ep-about-steps {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+@media (max-width: 860px) {
+  .ep-about-header-inner {
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .ep-about-header-end {
+    flex: 1 1 auto;
+  }
+  .ep-about-nav {
+    order: 3;
+    flex: 1 1 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .ep-about-hero,
+  .ep-about-george,
+  .ep-about-start,
+  .ep-about-what,
+  .ep-about-who,
+  .ep-about-arch,
+  .ep-about-close {
+    padding: 56px 0;
+  }
+}

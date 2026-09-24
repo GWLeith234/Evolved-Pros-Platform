@@ -32,6 +32,10 @@
  * the same bar the five above have to clear. They are also the only pages the
  * global footer links to that Google could not otherwise discover.
  *
+ * /about is the public About page (app/(public)/about). Same bar as /contact:
+ * static, absent from the middleware matcher, anonymous HTML. Sitemap
+ * frequency and priority match contact (yearly, 0.4). Not a primary-nav item.
+ *
  * /evolved is the EVOLVED book preorder dest for house IAB ads. It lives at
  * app/evolved (outside the public group so it can keep charcoal/gold chrome)
  * and is also absent from the middleware matcher, so an anonymous request
@@ -47,6 +51,7 @@ export const PUBLIC_SITEMAP_PATHS = [
   '/terms',
   '/privacy',
   '/contact',
+  '/about',
   '/evolved',
 ] as const
 

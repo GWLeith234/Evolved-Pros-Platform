@@ -20,6 +20,7 @@ const SITEMAP_FREQ: Record<PublicSitemapPath, Freq> = {
   '/terms':   'yearly',
   '/privacy': 'yearly',
   '/contact': 'yearly',
+  '/about':   'yearly',
   '/evolved': 'monthly',
 }
 
@@ -33,6 +34,7 @@ const SITEMAP_PRIORITY: Record<PublicSitemapPath, number> = {
   '/terms':   0.3,
   '/privacy': 0.3,
   '/contact': 0.4,
+  '/about':   0.4,
   '/evolved': 0.8,
 }
 
