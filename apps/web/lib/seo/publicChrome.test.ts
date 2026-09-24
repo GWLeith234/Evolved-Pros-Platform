@@ -68,4 +68,10 @@ describe('public chrome copy', () => {
     expect(src).toMatch(/pricingJsonLd/)
     expect(src).toMatch(/application\/ld\+json/)
   })
+
+  it('emits one fit Product/Offer JSON-LD script', () => {
+    const src = read('../../app/(public)/fit/page.tsx')
+    expect(src).toMatch(/fitJsonLd/)
+    expect(src.match(/application\/ld\+json/g)).toHaveLength(1)
+  })
 })
