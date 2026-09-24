@@ -68,4 +68,15 @@ describe('public chrome copy', () => {
     expect(src).toMatch(/pricingJsonLd/)
     expect(src).toMatch(/application\/ld\+json/)
   })
+
+  it('emits one live WebPage JSON-LD script and no keynote price', () => {
+    const src = read('../../app/live/page.tsx')
+    expect(src).toMatch(/liveJsonLd/)
+    expect(src).toMatch(/LIVE_PAGE_DESCRIPTION/)
+    expect(src).toMatch(/title: 'LIVE \| Evolved Pros'/)
+    expect(src.match(/application\/ld\+json/g)).toHaveLength(1)
+    expect(src).not.toMatch(/priceCurrency/)
+    expect(src).not.toMatch(/["']price["']\s*:/)
+    expect(src).not.toMatch(/\/keynotes/)
+  })
 })

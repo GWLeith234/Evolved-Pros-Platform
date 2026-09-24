@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { HOME_SUB } from '@/lib/home/conversion'
 import { TIERS } from '@/lib/pricing'
 import { CANONICAL_ORIGIN, SITE_NAME, canonicalUrl } from '@/lib/seo/canonical'
-import { homeJsonLd, homeOrganizationJsonLd, pricingJsonLd } from './jsonld'
+import { LIVE_PAGE_DESCRIPTION, homeJsonLd, homeOrganizationJsonLd, liveJsonLd, pricingJsonLd } from './jsonld'
 
 describe('home JSON-LD', () => {
   it('names Evolved Pros as WebSite and Organization, never Evolved Media', () => {
@@ -22,6 +22,70 @@ describe('home JSON-LD', () => {
     const blob = JSON.stringify(schema)
     expect(blob).toContain('Evolved Pros')
     expect(blob).not.toContain('Evolved Media')
+  })
+})
+
+function schemaKeys(value: unknown, keys = new Set<string>()): Set<string> {
+  if (Array.isArray(value)) {
+    for (const entry of value) schemaKeys(entry, keys)
+    return keys
+  }
+  if (value && typeof value === 'object') {
+    for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+      keys.add(key)
+      schemaKeys(entry, keys)
+    }
+  }
+  return keys
+}
+
+describe('live JSON-LD', () => {
+  it('ships one WebPage Service on www with no keynote price', () => {
+    const schema = liveJsonLd()
+    const publisher = homeOrganizationJsonLd()
+
+    expect(schema['@context']).toBe('https://schema.org')
+    expect(schema['@type']).toBe('WebPage')
+    expect(schema.name).toBe('Evolved Pros LIVE')
+    expect(schema.url).toBe(canonicalUrl('/live'))
+    expect(schema.url).toBe('https://www.evolvedpros.com/live')
+    expect(schema.description).toBe(LIVE_PAGE_DESCRIPTION)
+    expect(schema.description).toBe(
+      'High-energy keynotes, workshops, and mastermind formats. Upcoming and past speaking events worldwide — powered by the EVOLVED Architecture™.',
+    )
+    expect(schema.publisher).toEqual(publisher)
+    expect(publisher['@type']).toBe('Organization')
+    expect(publisher.name).toBe('Evolved Pros')
+    expect(publisher.url).toBe(CANONICAL_ORIGIN)
+
+    const service = schema.mainEntity
+    expect(service['@type']).toBe('Service')
+    expect(service.name).toBe('Evolved Pros Live keynotes and workshops')
+    expect(service.url).toBe('https://www.evolvedpros.com/live')
+    expect(service.brand).toEqual({ '@type': 'Brand', name: 'Evolved Pros' })
+    expect(service).not.toHaveProperty('offers')
+    expect(service).not.toHaveProperty('price')
+    expect(service).not.toHaveProperty('priceCurrency')
+
+    const keys = schemaKeys(schema)
+    expect(keys.has('price')).toBe(false)
+    expect(keys.has('priceCurrency')).toBe(false)
+    expect(keys.has('offers')).toBe(false)
+    expect(keys.has('lowPrice')).toBe(false)
+    expect(keys.has('highPrice')).toBe(false)
+
+    const blob = JSON.stringify(schema)
+    expect(blob).toContain('WebPage')
+    expect(blob).toContain('Service')
+    expect(blob).toContain('Organization')
+    expect(blob).toContain('Evolved Pros')
+    expect(blob).not.toContain('Evolved Media')
+    expect(blob).not.toContain('platform.evolvedpros.com')
+    expect(blob).not.toContain('"Offer"')
+    expect(blob).not.toContain('"price"')
+    expect(blob).not.toContain('priceCurrency')
+    expect(blob).not.toContain('$')
+    expect((blob.match(/"@type":"Service"/g) ?? []).length).toBe(1)
   })
 })
 

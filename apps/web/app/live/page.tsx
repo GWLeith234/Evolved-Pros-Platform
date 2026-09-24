@@ -26,6 +26,7 @@ import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { SPONSOR_AD_COLUMNS } from '@/components/home/HomeSponsorAd'
 import { adMatchesSurface, filterLiveAds, isLeaderboardStill } from '@/lib/ads/iab'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { LIVE_PAGE_DESCRIPTION, liveJsonLd } from '@/lib/seo/jsonld'
 import { PublicFooter } from '@/components/layout/PublicFooter'
 import { PublicGlobalNav } from '@/components/layout/PublicGlobalNav'
 
@@ -36,8 +37,7 @@ const LivePhotoRotator = dynamic(
 
 export const metadata: Metadata = publicPageMetadata('/live', {
   title: 'LIVE | Evolved Pros',
-  description:
-    'High-energy keynotes, workshops, and mastermind formats. Upcoming and past speaking events worldwide — powered by the EVOLVED Architecture™.',
+  description: LIVE_PAGE_DESCRIPTION,
 })
 
 async function fetchLiveSponsors(): Promise<SponsorAd[]> {
@@ -69,6 +69,12 @@ export default async function LivePage() {
   const sponsors = await fetchLiveSponsors()
 
   return (
+    <>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(liveJsonLd()) }}
+      />
     <div
       className="live-force-dark live-page-shell"
       style={{
@@ -164,5 +170,6 @@ export default async function LivePage() {
          flipping to parchment underneath it. */}
       <PublicFooter />
     </div>
+    </>
   )
 }
