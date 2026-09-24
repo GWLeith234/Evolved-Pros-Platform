@@ -36,6 +36,8 @@ export const PUBLIC_FOOTER_LINKS: readonly PublicFooterLink[] = [
   { label: 'Media',     href: '/media' },
   { label: 'Fit',       href: '/fit' },
   { label: 'LIVE',      href: '/live' },
+  // Utility cluster. About is not a primary-nav item.
+  { label: 'About',     href: '/about' },
   { label: 'Contact',   href: '/contact' },
   { label: 'Privacy',   href: '/privacy' },
   { label: 'Terms',     href: '/terms' },

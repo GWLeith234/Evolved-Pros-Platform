@@ -28,6 +28,7 @@ describe('PUBLIC_FOOTER_LINKS', () => {
       ['Media', '/media'],
       ['Fit', '/fit'],
       ['LIVE', '/live'],
+      ['About', '/about'],
       ['Contact', '/contact'],
       ['Privacy', '/privacy'],
       ['Terms', '/terms'],

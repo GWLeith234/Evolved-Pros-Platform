@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
   LOGIN_DOCUMENT_ROBOTS,
@@ -7,17 +9,17 @@ import {
 } from './publicRoutes'
 
 /**
- * GATE-1. This file imports NOTHING but the module under test — deliberately.
- * Pulling in lib/podcast/public.ts (or anything reaching @/lib/supabase/admin)
- * would construct a Supabase client at module scope and throw
- * "supabaseUrl is required" before a single spec ran.
+ * GATE-1. This file imports the module under test plus node:fs to read
+ * sitemap.ts. Pulling in lib/podcast/public.ts (or anything reaching
+ * @/lib/supabase/admin) would construct a Supabase client at module scope
+ * and throw "supabaseUrl is required" before a single spec ran.
  */
 
 /** Every route that bounces an anonymous request — Googlebot included. */
 const GATED_PATHS = ['/community', '/events', '/academy', '/leaderboard']
 
 describe('PUBLIC_SITEMAP_PATHS', () => {
-  it('is exactly the ten anon-reachable paths', () => {
+  it('is exactly the anon-reachable paths', () => {
     expect([...PUBLIC_SITEMAP_PATHS]).toEqual([
       '/',
       '/podcast',
@@ -28,8 +30,15 @@ describe('PUBLIC_SITEMAP_PATHS', () => {
       '/terms',
       '/privacy',
       '/contact',
+      '/about',
       '/evolved',
     ])
+  })
+
+  it('lists /about at contact-class frequency and priority', () => {
+    const sitemap = readFileSync(resolve(__dirname, '../../app/sitemap.ts'), 'utf8')
+    expect(sitemap).toMatch(/'\/about':\s+'yearly'/)
+    expect(sitemap).toMatch(/'\/about':\s+0\.4\b/)
   })
 
   it('advertises the EVOLVED book preorder dest the house IAB ads click to', () => {
