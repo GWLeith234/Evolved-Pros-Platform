@@ -1,8 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cookies, headers } from 'next/headers'
-// SPRINT HYDRATION-FIX-4 — TopNav, BottomTabBar, NextEventBanner historically
-// pulled @supabase/realtime-js into hydration. They now defer client creation.
+// Chrome defers Supabase client creation so realtime-js stays out of hydration.
 import {
   TopNavClient,
   BottomTabBarClient,
