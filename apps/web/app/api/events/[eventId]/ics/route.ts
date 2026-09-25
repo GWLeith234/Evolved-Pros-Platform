@@ -5,7 +5,8 @@ import { generateICS } from '@/lib/events/types'
 import type { EventItem, EventType } from '@/lib/events/types'
 import { hasTierAccess } from '@/lib/tier'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
-import { EVENT_PRIVILEGED_COLUMNS, privilegedEventUrls } from '@/lib/events/privilegedUrls'
+import { eventPrivilegedColumns, privilegedEventSelect } from '@/lib/events/eventColumns'
+import { eventCityFromRow, privilegedEventUrls } from '@/lib/events/privilegedUrls'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,10 +15,11 @@ export async function GET(_req: Request, { params }: { params: { eventId: string
   const profile = await resolveCurrentUser(supabase)
   if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const columns = await eventPrivilegedColumns()
   const [{ data: row }, regResult] = await Promise.all([
     adminClient
       .from('events')
-      .select(EVENT_PRIVILEGED_COLUMNS)
+      .select(privilegedEventSelect(columns))
       .eq('id', params.eventId)
       .single(),
     supabase
@@ -46,6 +48,7 @@ export async function GET(_req: Request, { params }: { params: { eventId: string
     zoomUrl: urls.zoomUrl,
     recordingUrl: urls.recordingUrl,
     imageUrl: row.image_url,
+    city: eventCityFromRow(row),
     requiredTier: row.required_tier as 'community' | 'vip' | 'pro' | null,
     registrationCount: row.registration_count,
     isRegistered,

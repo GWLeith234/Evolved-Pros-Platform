@@ -4,7 +4,8 @@ import { NextResponse } from 'next/server'
 import { hasTierAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
-import { EVENT_PRIVILEGED_COLUMNS, privilegedEventUrls } from '@/lib/events/privilegedUrls'
+import { eventPrivilegedColumns, privilegedEventSelect } from '@/lib/events/eventColumns'
+import { eventCityFromRow, privilegedEventUrls } from '@/lib/events/privilegedUrls'
 import { withoutConquerLocal } from '@/lib/events/nextEvent'
 
 export const dynamic = 'force-dynamic'
@@ -20,9 +21,10 @@ export async function GET(request: Request) {
   const limit = Math.min(parseInt(searchParams.get('limit') ?? '50', 10), 100)
   const cursor = searchParams.get('cursor') ?? ''
 
+  const columns = await eventPrivilegedColumns()
   let query = adminClient
     .from('events')
-    .select(EVENT_PRIVILEGED_COLUMNS)
+    .select(privilegedEventSelect(columns))
     .eq('is_published', true)
     .order('starts_at', { ascending: upcomingOnly })
     .limit(limit + 1)
@@ -78,7 +80,7 @@ export async function GET(request: Request) {
       zoomUrl: urls.zoomUrl,
       recordingUrl: urls.recordingUrl,
       imageUrl: e.image_url,
-      city: e.city ?? null,
+      city: eventCityFromRow(e),
       requiredTier: e.required_tier as 'community' | 'vip' | 'pro' | null,
       registrationCount: e.registration_count,
       isRegistered,

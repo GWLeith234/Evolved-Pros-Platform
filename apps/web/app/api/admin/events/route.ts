@@ -5,14 +5,19 @@ import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { notifyEventPublished } from '@/lib/notifications/fanout'
 import { resolveCityStockWithSearch } from '@/lib/events/cityStockFetch'
+import { eventSelectColumns } from '@/lib/events/eventColumns'
+
+const ADMIN_EVENT_LIST_COLUMNS =
+  'id, title, event_type, starts_at, ends_at, required_tier, tier_access, registration_count, is_published, is_draft, recording_url, zoom_url, description, image_url, city' as const
 
 export async function GET() {
   const auth = await requireAdminApi()
   if (auth instanceof Response) return auth
 
+  const columns = await eventSelectColumns(ADMIN_EVENT_LIST_COLUMNS)
   const { data, error } = await adminClient
     .from('events')
-    .select('id, title, event_type, starts_at, ends_at, required_tier, tier_access, registration_count, is_published, is_draft, recording_url, zoom_url, description, image_url, city')
+    .select(columns as typeof ADMIN_EVENT_LIST_COLUMNS)
     .order('starts_at', { ascending: false })
 
   if (error) {

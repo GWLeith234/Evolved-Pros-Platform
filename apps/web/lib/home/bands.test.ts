@@ -228,7 +228,8 @@ describe('Home surfaces wire guest stills', () => {
     expect(page).toMatch(/kind\.eq\.win,post_type\.eq\.win/)
     expect(page).toMatch(/pickFuelLiveEvent/)
     expect(page).toMatch(/isVisibleWin/)
-    expect(page).toMatch(/image_url, city/)
+    expect(page).toMatch(/eventSelectColumns\(/)
+    expect(page).toMatch(/city: eventCityFromRow\(row\)/)
   })
 
   it('keeps new Home band copy free of em dashes', () => {

@@ -5,6 +5,9 @@ import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { notifyEventPublished } from '@/lib/notifications/fanout'
 import { resolveCityStockWithSearch } from '@/lib/events/cityStockFetch'
+import { eventSelectColumns } from '@/lib/events/eventColumns'
+
+const ADMIN_EVENT_CURRENT_COLUMNS = 'is_published, city, image_url' as const
 
 export async function PATCH(
   request: Request,
@@ -25,8 +28,13 @@ export async function PATCH(
 
   const needsCityResolve = 'city' in update || 'image_url' in update
   const publishing = update.is_published === true
+  const currentSelect = await eventSelectColumns(ADMIN_EVENT_CURRENT_COLUMNS)
   const { data: current } = needsCityResolve || publishing
-    ? await adminClient.from('events').select('is_published, city, image_url').eq('id', params.id).maybeSingle()
+    ? await adminClient
+        .from('events')
+        .select(currentSelect as typeof ADMIN_EVENT_CURRENT_COLUMNS)
+        .eq('id', params.id)
+        .maybeSingle()
     : { data: null }
 
   if (needsCityResolve) {
