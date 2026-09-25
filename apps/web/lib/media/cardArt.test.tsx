@@ -125,8 +125,8 @@ describe('EPM Media card-art presentation', () => {
   it('does not regress gold masthead lockups or Phase 1–3a ad geometry', () => {
     expect(masthead).toContain('MEDIA_LOCKUP_DARK')
     expect(masthead).toContain('MEDIA_LOCKUP_LIGHT')
-    expect(MEDIA_LOCKUP_DARK).toBe('/brand/masthead/media-lockup-dark.png')
-    expect(MEDIA_LOCKUP_LIGHT).toBe('/brand/masthead/media-lockup-light.png')
+    expect(MEDIA_LOCKUP_DARK).toBe('/brand/masthead/media-lockup-dark.v2.png')
+    expect(MEDIA_LOCKUP_LIGHT).toBe('/brand/masthead/media-lockup-light.v2.png')
     expect(portal).toContain('kind="leaderboard"')
     expect(portal).toContain('kind="mid-fluid"')
     expect(portal).toContain('kind="rail-half"')

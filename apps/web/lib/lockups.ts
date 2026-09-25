@@ -22,10 +22,17 @@ export const FIT_BARBELL_DISC = '/brand/masthead/barbell-disc.png' as const
 
 export const PODCAST_LOCKUP_DARK = '/brand/masthead/podcast-lockup-dark.png' as const
 export const PODCAST_LOCKUP_LIGHT = '/brand/masthead/podcast-lockup-light.png' as const
-/** White-letter MEDIA lockup. Pair with --on-dark (default dark chrome). */
-export const MEDIA_LOCKUP_DARK = '/brand/masthead/media-lockup-dark.png' as const
-/** Navy-letter MEDIA lockup. Pair with --on-light (parchment / light chrome). */
-export const MEDIA_LOCKUP_LIGHT = '/brand/masthead/media-lockup-light.png' as const
+/**
+ * White-letter MEDIA lockup. Pair with --on-dark (default dark chrome).
+ * The .v2 filename cache-busts the 1-year immutable /brand cache after the
+ * PR #164 lockup swap. The unversioned PNG stays on disk so old URLs do not 404.
+ */
+export const MEDIA_LOCKUP_DARK = '/brand/masthead/media-lockup-dark.v2.png' as const
+/**
+ * Navy-letter MEDIA lockup. Pair with --on-light (parchment / light chrome).
+ * Same cache-bust as MEDIA_LOCKUP_DARK. Unversioned file stays in place.
+ */
+export const MEDIA_LOCKUP_LIGHT = '/brand/masthead/media-lockup-light.v2.png' as const
 export const FIT_LOCKUP_DARK = '/brand/masthead/fit-lockup-dark.png' as const
 export const FIT_LOCKUP_LIGHT = '/brand/masthead/fit-lockup-light.png' as const
 export const ACADEMY_LOCKUP_DARK = '/brand/masthead/academy-lockup-dark.png' as const
@@ -53,6 +60,11 @@ export const GOLD_LOCKUP_SHA256 = {
   'media-lockup-light.png':
     '091892644837377c4e0a586f3d737f803886ae7cc38b5d32b3935704b2df1bbc',
   'media-lockup-dark.png':
+    '192631d5eb695325b20fdcc074961489a204b2573db89687725b266196ba4757',
+  // Same gold bytes, new URL, so browsers drop the pre-#164 cached PNG.
+  'media-lockup-light.v2.png':
+    '091892644837377c4e0a586f3d737f803886ae7cc38b5d32b3935704b2df1bbc',
+  'media-lockup-dark.v2.png':
     '192631d5eb695325b20fdcc074961489a204b2573db89687725b266196ba4757',
   'academy-lockup-light.png':
     '1ea85389df95b6a414a8baea47ee05f0adfa42b4a0c90aae25752bccf959ee3f',

@@ -78,6 +78,27 @@ describe('conversion home fold CTAs', () => {
   })
 })
 
+describe('home footer', () => {
+  it('links About before Privacy and Terms, in the shared footer order', () => {
+    const html = renderToStaticMarkup(
+      <ConversionHome signedIn={false} episodes={[]} stories={[]} />,
+    )
+    const footerStart = html.lastIndexOf('<footer')
+    expect(footerStart).toBeGreaterThan(-1)
+    const footer = html.slice(footerStart)
+    const about = footer.indexOf('href="/about"')
+    const privacy = footer.indexOf('href="/privacy"')
+    const terms = footer.indexOf('href="/terms"')
+    expect(about).toBeGreaterThan(-1)
+    expect(privacy).toBeGreaterThan(about)
+    expect(terms).toBeGreaterThan(privacy)
+    expect(footer).toContain('>About<')
+    expect(footer).toContain('>Privacy<')
+    expect(footer).toContain('>Terms<')
+    expect(footer).not.toContain('\u2014')
+  })
+})
+
 describe('events login banner', () => {
   it('renders Member event details and does not mention /live', () => {
     const intent = gatedIntentFor('/events')

@@ -119,6 +119,51 @@ describe('Media masthead chrome', () => {
     expect(css).toMatch(/\.ep-media-masthead-back:hover,[\s\S]*color: var\(--text-primary\)/)
   })
 
+  it('shows one media lockup per theme and nothing under the wordmark', () => {
+    expect(MEDIA_LOCKUP_DARK).toBe('/brand/masthead/media-lockup-dark.v2.png')
+    expect(MEDIA_LOCKUP_LIGHT).toBe('/brand/masthead/media-lockup-light.v2.png')
+    expect(css).toMatch(
+      /\.ep-media-masthead-logo--on-dark,\n\.ep-fit-masthead-logo--on-dark \{ display: block; \}/,
+    )
+    expect(css).toMatch(
+      /\.ep-media-masthead-logo--on-light,\n\.ep-fit-masthead-logo--on-light \{ display: none; \}/,
+    )
+    expect(css).toMatch(
+      /html\.light-mode \.ep-media-masthead-logo--on-dark,\nhtml\.light-mode \.ep-fit-masthead-logo--on-dark \{ display: none; \}/,
+    )
+    expect(css).toMatch(
+      /html\.light-mode \.ep-media-masthead-logo--on-light,\nhtml\.light-mode \.ep-fit-masthead-logo--on-light \{ display: block; \}/,
+    )
+
+    const mediaBodies: string[] = []
+    const re = /@media[^{]*\{/g
+    let match: RegExpExecArray | null
+    while ((match = re.exec(css))) {
+      let i = match.index + match[0].length
+      let depth = 1
+      const start = i
+      while (i < css.length && depth > 0) {
+        if (css[i] === '{') depth += 1
+        else if (css[i] === '}') depth -= 1
+        i += 1
+      }
+      mediaBodies.push(css.slice(start, i - 1))
+    }
+    for (const body of mediaBodies) {
+      expect(body).not.toMatch(/ep-media-masthead-logo--on-dark/)
+      expect(body).not.toMatch(/ep-media-masthead-logo--on-light/)
+    }
+
+    const html = renderToStaticMarkup(<MediaMastheadLockup />)
+    expect(html.match(/<img /g)).toHaveLength(2)
+    expect(html.match(/alt=""/g)).toHaveLength(2)
+    expect(html).not.toContain('<figcaption')
+    expect(html).not.toContain('Bebas Neue')
+    expect(html).not.toContain('megaphone')
+    expect(src).not.toContain('<figcaption')
+    expect(src).not.toContain('ep-media-masthead-media')
+  })
+
   it('keeps Fit lockup swap shared and does not crop media story stills', () => {
     expect(css).toMatch(/\.ed-story-art \{[\s\S]*object-fit: cover/)
     expect(css).not.toMatch(/ed-story-art--crop-baked-pros/)
