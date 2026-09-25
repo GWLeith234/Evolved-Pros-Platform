@@ -1,12 +1,12 @@
--- pgTAP for migration 098. The runner loads the 096 fixture, applies 096 and
--- 097, grants the pre-fix anon/authenticated writes, applies 098 twice, then
--- runs this file. Local Postgres only.
+-- pgTAP for migration 100. The runner loads the 096 fixture, applies 096,
+-- 097, and 099, grants the pre-fix anon/authenticated writes, applies 100
+-- twice, then runs this file. Local Postgres only.
 
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
 BEGIN;
 
-SELECT plan(23);
+SELECT plan(30);
 
 SELECT is(
   has_table_privilege('anon', 'public.tier_change_log', 'INSERT'),
@@ -153,6 +153,91 @@ SELECT is(
       AND direction = 'tier'),
   'vip',
   'SECURITY DEFINER audit trigger still writes'
+);
+
+-- Isolate both 099 write paths from service_role's table grant. The function
+-- and private.insert_tier_change_log are SECURITY DEFINER, so they insert as
+-- the function owner after this revoke.
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public.tier_change_log FROM service_role;
+
+INSERT INTO public.users (id, email, display_name, role, tier, tier_status, tier_expires_at)
+VALUES (
+  '00000000-0000-0000-0000-0000000000c1',
+  'expire-trigger@example.com',
+  'Trigger Path',
+  'member',
+  'vip',
+  'active',
+  now() - interval '1 day'
+);
+
+SET LOCAL ROLE service_role;
+SELECT throws_ok(
+  $$INSERT INTO public.tier_change_log (user_id, old_tier, new_tier, direction)
+    VALUES (
+      '00000000-0000-0000-0000-0000000000c1',
+      'vip',
+      'community',
+      'forged'
+    )$$,
+  '42501',
+  'permission denied for table tier_change_log',
+  'service_role table INSERT is revoked for the definer proof'
+);
+SELECT lives_ok(
+  $$SELECT * FROM public.downgrade_expired_paid_members()$$,
+  '099 downgrade runs after 100 while the 097 trigger exists'
+);
+RESET ROLE;
+
+SELECT is(
+  (SELECT count(*)::int
+     FROM public.tier_change_log
+    WHERE user_id = '00000000-0000-0000-0000-0000000000c1'),
+  1,
+  '097 trigger writes one downgrade audit row'
+);
+SELECT is(
+  (SELECT direction || '|' || new_tier || '|' || COALESCE(actor_role, '')
+     FROM public.tier_change_log
+    WHERE user_id = '00000000-0000-0000-0000-0000000000c1'),
+  'tier,tier_status|community|postgres',
+  'downgrade audit row came from the 097 trigger'
+);
+
+DROP TRIGGER users_audit_privilege_change ON public.users;
+
+INSERT INTO public.users (id, email, display_name, role, tier, tier_status, tier_expires_at)
+VALUES (
+  '00000000-0000-0000-0000-0000000000c2',
+  'expire-fallback@example.com',
+  'Fallback Path',
+  'member',
+  'pro',
+  'active',
+  now() - interval '1 day'
+);
+
+SET LOCAL ROLE service_role;
+SELECT lives_ok(
+  $$SELECT * FROM public.downgrade_expired_paid_members()$$,
+  '099 direct insert runs when the 097 trigger is absent'
+);
+RESET ROLE;
+
+SELECT is(
+  (SELECT count(*)::int
+     FROM public.tier_change_log
+    WHERE user_id = '00000000-0000-0000-0000-0000000000c2'),
+  1,
+  '099 writes one audit row when the 097 trigger is absent'
+);
+SELECT is(
+  (SELECT old_tier || '|' || new_tier || '|' || direction || '|' || COALESCE(actor_role, '')
+     FROM public.tier_change_log
+    WHERE user_id = '00000000-0000-0000-0000-0000000000c2'),
+  'pro|community|tier,tier_status|',
+  '099 SECURITY DEFINER insert still writes after the revoke'
 );
 
 SELECT * FROM finish();

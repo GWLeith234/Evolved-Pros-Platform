@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Local proof for migration 098. Creates a throwaway database, shows that anon
+# Local proof for migration 100. Creates a throwaway database, shows that anon
 # can TRUNCATE tier_change_log while the pre-fix grants are in place, applies
-# 098 twice, then runs pgTAP.
+# 097, 099, and 100, then runs pgTAP. A second database reruns the 099 checks
+# after 100.
 # Does not connect to Supabase or any hosted database.
 set -euo pipefail
 
@@ -31,6 +32,7 @@ echo "=== PRE-FIX: anon can TRUNCATE tier_change_log ==="
 "${PSQL[@]}" -d "$DB" -f "$ROOT/supabase/tests/096_users_priv_fixture.sql"
 "${PSQL[@]}" -d "$DB" -f "$ROOT/supabase/migrations/096_users_privileged_column_guard.sql"
 "${PSQL[@]}" -d "$DB" -f "$ROOT/supabase/migrations/097_users_revoke_writes_and_audit.sql"
+"${PSQL[@]}" -d "$DB" -f "$ROOT/supabase/migrations/099_downgrade_expired_paid_members.sql"
 "${PSQL[@]}" -d "$DB" <<'SQL'
 ALTER TABLE public.tier_change_log ENABLE ROW LEVEL SECURITY;
 GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER
@@ -54,13 +56,13 @@ TRUNCATE public.tier_change_log;
 RESET ROLE;
 SQL
 
-echo "=== POST-FIX: apply 098 twice and run pgTAP ==="
-"${PSQL[@]}" -d "$DB" -f "$ROOT/supabase/migrations/098_tier_change_log_revoke_writes.sql"
-"${PSQL[@]}" -d "$DB" -f "$ROOT/supabase/migrations/098_tier_change_log_revoke_writes.sql"
+echo "=== POST-FIX: apply 100 twice and run pgTAP ==="
+"${PSQL[@]}" -d "$DB" -f "$ROOT/supabase/migrations/100_tier_change_log_revoke_writes.sql"
+"${PSQL[@]}" -d "$DB" -f "$ROOT/supabase/migrations/100_tier_change_log_revoke_writes.sql"
 
 TAP_OUT="$(mktemp)"
 set +e
-"${PSQL[@]}" -q -A -t -d "$DB" -f "$ROOT/supabase/tests/098_tier_change_log_revoke_writes_test.sql" | tee "$TAP_OUT"
+"${PSQL[@]}" -q -A -t -d "$DB" -f "$ROOT/supabase/tests/100_tier_change_log_revoke_writes_test.sql" | tee "$TAP_OUT"
 tap_status=${PIPESTATUS[0]}
 set -e
 
@@ -72,11 +74,23 @@ if grep -E '^(not ok |# Looks like you failed)' "$TAP_OUT" >/dev/null; then
   echo "pgTAP reported failures" >&2
   exit 1
 fi
-if ! grep -E '^1\.\.23$' "$TAP_OUT" >/dev/null; then
-  echo "pgTAP plan was not 1..23" >&2
+if ! grep -E '^1\.\.30$' "$TAP_OUT" >/dev/null; then
+  echo "pgTAP plan was not 1..30" >&2
   exit 1
 fi
 
-echo "=== 23 tests passed ==="
+echo "=== 30 tests passed ==="
 rm -f "$TAP_OUT"
 "${PSQL[@]}" -d postgres -c "DROP DATABASE IF EXISTS ${DB};"
+
+echo "=== 099 checks still pass after 100 ==="
+DB099="tier_change_log_revoke_099_test"
+"${PSQL[@]}" -d postgres -c "DROP DATABASE IF EXISTS ${DB099};"
+"${PSQL[@]}" -d postgres -c "CREATE DATABASE ${DB099};"
+"${PSQL[@]}" -d "$DB099" -f "$ROOT/supabase/tests/099_downgrade_fixture.sql"
+"${PSQL[@]}" -d "$DB099" -f "$ROOT/supabase/migrations/097_users_revoke_writes_and_audit.sql"
+"${PSQL[@]}" -d "$DB099" -f "$ROOT/supabase/migrations/099_downgrade_expired_paid_members.sql"
+"${PSQL[@]}" -d "$DB099" -f "$ROOT/supabase/migrations/100_tier_change_log_revoke_writes.sql"
+"${PSQL[@]}" -d "$DB099" -f "$ROOT/supabase/tests/099_downgrade_expired_paid_members_test.sql"
+"${PSQL[@]}" -d postgres -c "DROP DATABASE IF EXISTS ${DB099};"
+echo "=== 099 checks passed after 100 ==="
