@@ -13,11 +13,14 @@ export function YouTubeFacade({
   youtubeId,
   title,
   posterUrl,
+  posterObjectPosition,
 }: {
   youtubeId: string
   title: string
   /** Episode thumbnail_url / guest art — preferred over YouTube CDN. */
   posterUrl?: string | null
+  /** Applied only while the custom poster is showing. YouTube fallbacks stay centered. */
+  posterObjectPosition?: string
 }) {
   const [active, setActive] = useState(false)
   const ytMax = `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg`
@@ -53,6 +56,7 @@ export function YouTubeFacade({
         alt=""
         aria-hidden
         className="absolute inset-0 h-full w-full object-cover transition-opacity duration-200 group-hover:opacity-90"
+        style={{ objectPosition: thumb === posterUrl?.trim() && posterObjectPosition ? posterObjectPosition : undefined }}
         loading="eager"
         decoding="async"
         onError={() => {

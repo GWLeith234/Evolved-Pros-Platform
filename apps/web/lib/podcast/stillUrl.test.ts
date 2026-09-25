@@ -4,9 +4,11 @@ import {
   GUEST_FACE_OBJECT_POSITION,
   JUAN_EP010_SLUG,
   JUAN_EP010_STILL,
+  QUANG_DO_OBJECT_POSITION,
   QUANG_DO_SLUG,
   QUANG_DO_STILL,
   allowedEpisodeStillUrl,
+  guestStillObjectPosition,
   homeGuestStillObjectPosition,
   isBlockedStillHost,
   isJuanEp010,
@@ -62,9 +64,10 @@ describe('allowedEpisodeStillUrl', () => {
     ).toBe(SUPABASE)
   })
 
-  it('pins Juan and Quang faces to the top of aspect-video cards', () => {
+  it('pins Juan to the top and Quang to 50% 20% on aspect-video cards', () => {
     expect(isQuangDo({ slug: QUANG_DO_SLUG, guest_name: 'Quang Do' })).toBe(true)
     expect(QUANG_DO_STILL).toContain('guest-mentorship-generational-gap-quang-do.jpg')
+    expect(QUANG_DO_OBJECT_POSITION).toBe('50% 20%')
     expect(
       homeGuestStillObjectPosition({
         slug: JUAN_EP010_SLUG,
@@ -80,7 +83,7 @@ describe('allowedEpisodeStillUrl', () => {
         episodeNumber: 9,
         stillUrl: QUANG_DO_STILL,
       }),
-    ).toBe(GUEST_FACE_OBJECT_POSITION)
+    ).toBe(QUANG_DO_OBJECT_POSITION)
     expect(
       homeGuestStillObjectPosition({
         slug: 'someone-else',
@@ -88,6 +91,23 @@ describe('allowedEpisodeStillUrl', () => {
         stillUrl: 'https://cdn.example/heather.jpg',
       }),
     ).toBe(DEFAULT_STILL_OBJECT_POSITION)
+  })
+
+  it('resolves a per-guest focal point and leaves every other still on the caller fallback', () => {
+    expect(guestStillObjectPosition({ slug: QUANG_DO_SLUG }, '50% 12%')).toBe('50% 20%')
+    expect(guestStillObjectPosition({ stillUrl: QUANG_DO_STILL }, '50% 12%')).toBe('50% 20%')
+    expect(
+      guestStillObjectPosition(
+        { slug: 'someone-else', stillUrl: 'https://cdn.example/heather.jpg' },
+        '50% 12%',
+      ),
+    ).toBe('50% 12%')
+    expect(
+      guestStillObjectPosition(
+        { slug: JUAN_EP010_SLUG, stillUrl: JUAN_EP010_STILL },
+        '50% 12%',
+      ),
+    ).toBe(GUEST_FACE_OBJECT_POSITION)
   })
 
   it('does not emit CloudFront for an unknown episode', () => {

@@ -28,6 +28,7 @@ import {
   type PublicEpisode,
 } from '@/lib/podcast/public'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { guestStillObjectPosition } from '@/lib/podcast/stillUrl'
 import { interleaveAds } from '@/lib/ads/rhythm'
 
 // Public, server-rendered, indexable. The transcript is real DOM text in the
@@ -177,6 +178,7 @@ export default async function PublicEpisodePage({ params }: Props) {
               youtubeId={ep.youtube_id}
               title={ep.title}
               posterUrl={episodePosterUrl(ep)}
+              posterObjectPosition={guestStillObjectPosition(ep, '50% 50%')}
             />
           </div>
         ) : null}

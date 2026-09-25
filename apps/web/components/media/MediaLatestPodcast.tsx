@@ -5,6 +5,7 @@ import {
   formatRailDuration,
   type MediaRailEpisode,
 } from '@/lib/media/podcastRail'
+import { guestStillObjectPosition } from '@/lib/podcast/stillUrl'
 
 export function MediaLatestPodcast({
   episodes,
@@ -95,7 +96,10 @@ export function MediaLatestPodcast({
                       width: '100%',
                       height: '100%',
                       objectFit: 'cover',
-                      objectPosition: '50% 12%',
+                      objectPosition: guestStillObjectPosition(
+                        { slug: ep.slug, episode_number: ep.episode_number, stillUrl: still },
+                        '50% 12%',
+                      ),
                       borderRadius: 0,
                       display: 'block',
                     }}
