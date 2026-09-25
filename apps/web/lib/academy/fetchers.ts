@@ -2,7 +2,7 @@ import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
 import type { CourseWithProgress, LessonWithProgress } from './types'
-import { effectiveTier } from '@/lib/tier'
+import { applyMemberAccess } from '@/lib/tier'
 import { canOpenLesson } from '@/lib/entitlements'
 import { adminClient } from '@/lib/supabase/admin'
 
@@ -351,13 +351,10 @@ export async function fetchUserProfile(
   userId: string,
 ): Promise<Database['public']['Tables']['users']['Row'] | null> {
   type Row = Database['public']['Tables']['users']['Row']
-  // Member access gate: a dead subscription (tier_status unpaid/canceled/
-  // cancelled) drops the caller to community-tier access, so every academy
-  // hasTierAccess(profile.tier, …) check inherits it. Fails open otherwise.
-  // No extra query — the row is already selected.
+  // Same gate as resolveCurrentUser: lapsed paid access is community, a
+  // cancellation lasts until tier_expires_at, comps and admins stay put.
   const withEffectiveTier = (row: Row): Row => {
-    row.tier = effectiveTier(row.tier, row.tier_status)
-    return row
+    return applyMemberAccess(row)
   }
 
   const { data: byId } = await adminClient
