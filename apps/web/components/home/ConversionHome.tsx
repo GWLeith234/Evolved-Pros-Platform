@@ -80,8 +80,8 @@ export function ConversionHome({
     <div className="ep-conversion-home min-h-dvh bg-paper text-navy">
       <header className="border-b border-navy">
         <div className="mx-auto max-w-6xl px-5 py-3 md:py-4">
-          <div className="flex h-10 items-center justify-between gap-3 md:h-auto">
-            <Link href="/" aria-label={HOME_ARIA} className="shrink-0">
+          <div className="flex min-h-11 items-center justify-between gap-3 md:h-auto">
+            <Link href="/" aria-label={HOME_ARIA} className="inline-flex min-h-11 min-w-11 shrink-0 items-center">
               <LogoMark variant="dark" height={28} />
             </Link>
             <div className="flex min-w-0 items-center justify-end gap-3">
@@ -110,7 +110,7 @@ export function ConversionHome({
               {signedIn ? (
                 <Link
                   href={HOME_OPEN_PLATFORM_HREF}
-                  className="inline-flex min-h-10 items-center bg-red px-4 font-condensed text-[13px] font-bold uppercase tracking-[0.14em] text-white no-underline md:hidden"
+                  className="inline-flex min-h-11 items-center bg-red px-4 font-condensed text-[13px] font-bold uppercase tracking-[0.14em] text-white no-underline md:hidden"
                 >
                   {HOME_OPEN_PLATFORM}
                 </Link>
@@ -118,7 +118,7 @@ export function ConversionHome({
                 <Tooltip content={HOME_JOIN_FREE_TOOLTIP}>
                   <Link
                     href={JOIN_FREE_HREF}
-                    className="inline-flex min-h-10 shrink-0 items-center bg-red px-4 font-condensed text-[13px] font-bold uppercase tracking-[0.14em] text-white no-underline"
+                    className="inline-flex min-h-11 shrink-0 items-center bg-red px-4 font-condensed text-[13px] font-bold uppercase tracking-[0.14em] text-white no-underline"
                   >
                     {HOME_JOIN_FREE}
                   </Link>
@@ -128,7 +128,7 @@ export function ConversionHome({
           </div>
           <nav
             aria-label="Sections"
-            className="mt-1 flex h-9 items-center gap-x-3 overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden"
+            className="mt-1 flex h-11 max-w-full items-center gap-x-3 overflow-x-auto whitespace-nowrap [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:hidden"
           >
             {HOME_NAV_LINKS.map(link => (
               <NavLink
@@ -163,7 +163,7 @@ export function ConversionHome({
         */}
         <section
           aria-label={HERO_IMAGE_ALT}
-          className="ep-home-fold relative flex w-full flex-col overflow-hidden bg-page min-h-[calc(100svh-7rem)] max-h-[calc(100svh-7rem)] md:min-h-[calc(100svh-5.5rem)] md:max-h-[calc(100svh-5.5rem)]"
+          className="ep-home-fold relative flex w-full flex-col overflow-hidden bg-paper min-h-[calc(100svh-7rem)] max-h-[calc(100svh-7rem)] md:min-h-[calc(100svh-5.5rem)] md:max-h-[calc(100svh-5.5rem)]"
         >
           <div className="ep-home-fold-still">
             <Image
@@ -237,7 +237,7 @@ export function ConversionHome({
               </h2>
               <Link
                 href={HOME_MEDIA_HREF}
-                className="font-condensed text-xs font-bold uppercase tracking-[0.14em] text-teal no-underline"
+                className="font-condensed text-xs font-bold uppercase tracking-[0.14em] text-navy no-underline"
               >
                 {HOME_MEDIA_LINK}
               </Link>
@@ -267,7 +267,7 @@ export function ConversionHome({
               </h2>
               <Link
                 href="/podcast"
-                className="font-condensed text-xs font-bold uppercase tracking-[0.14em] text-teal no-underline"
+                className="font-condensed text-xs font-bold uppercase tracking-[0.14em] text-navy no-underline"
               >
                 {HOME_EPISODES_LINK}
               </Link>
@@ -363,19 +363,19 @@ export function ConversionHome({
           <nav aria-label="Legal" className="flex gap-4">
             <Link
               href="/about"
-              className="font-condensed text-xs font-semibold uppercase tracking-[0.12em] text-teal no-underline"
+              className="font-condensed text-xs font-semibold uppercase tracking-[0.12em] text-navy no-underline"
             >
               About
             </Link>
             <Link
               href="/privacy"
-              className="font-condensed text-xs font-semibold uppercase tracking-[0.12em] text-teal no-underline"
+              className="font-condensed text-xs font-semibold uppercase tracking-[0.12em] text-navy no-underline"
             >
               Privacy
             </Link>
             <Link
               href="/terms"
-              className="font-condensed text-xs font-semibold uppercase tracking-[0.12em] text-teal no-underline"
+              className="font-condensed text-xs font-semibold uppercase tracking-[0.12em] text-navy no-underline"
             >
               Terms
             </Link>
@@ -412,7 +412,7 @@ function NavLink({
       href={href}
       className={`inline-flex items-center font-condensed font-bold uppercase text-navy no-underline ${
         compact
-          ? 'h-9 text-[12px] tracking-[0.12em]'
+          ? 'min-h-11 min-w-11 justify-center px-2 text-[12px] tracking-[0.12em]'
           : 'min-h-11 text-[13px] tracking-[0.14em]'
       }`}
     >
