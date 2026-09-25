@@ -69,9 +69,14 @@ describe('must-cite locked copy', () => {
     const home = readFileSync(resolve(here, '../../components/home/ConversionHome.tsx'), 'utf8')
     const pricing = readFileSync(resolve(here, '../../app/(public)/pricing/page.tsx'), 'utf8')
     const story = readFileSync(
+      resolve(here, '../../components/media/MediaStoryDocument.tsx'),
+      'utf8',
+    )
+    const storyRoute = readFileSync(
       resolve(here, '../../app/(public)/media/[pillar]/[slug]/page.tsx'),
       'utf8',
     )
+    expect(storyRoute).toContain('<MediaStoryDocument')
     expect(home).toMatch(/homeWhatEvolvedProsCopy/)
     expect(home).not.toMatch(/MUST_CITE_HOME_OFFICIAL_URL/)
     expect(home).toMatch(/id="what-is-evolved-pros"/)

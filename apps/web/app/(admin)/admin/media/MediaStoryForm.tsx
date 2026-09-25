@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ImagePicker } from '@/components/admin/ImagePicker'
+import { CopyPreviewLinkButton } from '@/components/admin/media/CopyPreviewLinkButton'
 import { CONFIRM } from '@/components/admin/safety/confirmCopy'
 import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
 
@@ -235,6 +236,7 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
       </label>
 
       <div className="flex flex-wrap items-center justify-end gap-3">
+        {isEdit && initial?.id ? <CopyPreviewLinkButton storyId={initial.id} /> : null}
         <button
           type="button"
           onClick={() => router.push('/admin/media')}

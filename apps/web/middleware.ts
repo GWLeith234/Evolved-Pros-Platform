@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 import { RETURN_PATH_HEADER, loginHrefFor, returnPathFromRequest } from '@/lib/auth/gatedIntent'
 import { isPublicBrandAsset } from '@/lib/auth/publicAssets'
+import { applyPreviewResponseHeaders, isMediaPreviewPath } from '@/lib/media/previewHeaders'
 
 const PUBLIC_ROUTES = [
   '/login',
@@ -53,8 +54,58 @@ function returnPathHeaders(request: NextRequest): { returnPath: string; headers:
   return { returnPath, headers }
 }
 
+/**
+ * Draft preview is public at the gate (a signed token is the credential)
+ * and private in the page (admin session or HMAC, else 404).
+ * Session refresh runs so an admin cookie still resolves. Anonymous
+ * visitors are not sent to /login.
+ */
+async function handleMediaPreview(request: NextRequest) {
+  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? ''
+  const requestHeaders = new Headers(request.headers)
+  let response = NextResponse.next({
+    request: { headers: requestHeaders },
+  })
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (url && anon) {
+    try {
+      const supabase = createServerClient(url, anon, {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+            response = NextResponse.next({
+              request: { headers: requestHeaders },
+            })
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options as any)
+            )
+          },
+        },
+      })
+      await supabase.auth.getUser()
+    } catch {
+      // The page decides 404 vs 200. A failed refresh must not bounce to /login.
+    }
+  }
+
+  if (host.startsWith('media.')) {
+    response.headers.set('x-media-standalone', 'true')
+  }
+  applyPreviewResponseHeaders(response.headers)
+  return response
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  if (isMediaPreviewPath(pathname)) {
+    return handleMediaPreview(request)
+  }
+
   const { returnPath, headers: requestHeaders } = returnPathHeaders(request)
 
   // Media subdomain: skip all auth — entire site is public
@@ -247,6 +298,10 @@ export const config = {
     '/events/:path*',
     '/academy',
     '/academy/:path*',
+    // Draft preview: noindex + no-store, admin session or HMAC token, else 404.
+    // Matched on its own so /media stays out of the matcher.
+    '/media/preview',
+    '/media/preview/:path*',
     // NOTE: /podcast is intentionally NOT matched — it is a public SEO section
     // (see PUBLIC_ROUTES). Middleware must not run on it so logged-out visitors
     // and crawlers get the server-rendered page instead of an auth redirect.

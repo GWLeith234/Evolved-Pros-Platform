@@ -19,7 +19,8 @@ function read(rel: string): string {
 }
 
 describe('Phase 2 EPM←TT article + section landings', () => {
-  const article = read('../../app/(public)/media/[pillar]/[slug]/page.tsx')
+  const articlePage = read('../../app/(public)/media/[pillar]/[slug]/page.tsx')
+  const article = read('../../components/media/MediaStoryDocument.tsx')
   const share = read('../../app/(public)/media/[pillar]/[slug]/ArticleShareBar.tsx')
   const pillar = read('../../app/(public)/media/[pillar]/page.tsx')
   const landing = read('../../components/media/MediaSectionLanding.tsx')
@@ -50,6 +51,7 @@ describe('Phase 2 EPM←TT article + section landings', () => {
     // The brief copy that used to carry this string moved to lib/media/brief.
     expect(read('../../lib/media/brief.ts')).toContain('Evolved Pros Media')
     expect(modules).not.toContain('Evolved Media')
+    expect(articlePage).toContain('<MediaStoryDocument')
     expect(article).not.toContain('Evolved Media')
     expect(landing).not.toContain('Evolved Media')
     expect(home).toContain('data-media-module="dual-hero"')
