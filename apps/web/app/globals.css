@@ -15,6 +15,8 @@
   --border:       rgba(27,60,90,0.12);
   --border-light: rgba(255,255,255,0.06);
   --gold:         #c9a84c;
+  /* Gold used as small text. Dark default; light mode darkens it below. */
+  --ep-gold-ink:  #C9A84C;
 
   /* Surface variables — override in light mode below */
   --page-bg:      #0d1c27;
@@ -352,6 +354,7 @@ html.light-mode {
      Settings / profile form labels and helper text use these tokens. */
   --text-secondary: #4A5868;   /* 7.4:1 on #fff — AAA */
   --text-tertiary:  #5C6A7C;   /* 5.0:1 on #fff — AA */
+  --ep-gold-ink:    #765C18;   /* 5.6:1 on cream. Dark keeps #C9A84C. */
 
   /* Admin lock 2026-09-11: same light palette as :root (admin never goes dark). */
   --admin-page:        #f4f6f8;

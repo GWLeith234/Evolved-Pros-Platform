@@ -88,23 +88,23 @@ function EventCard({ ev, isPast }: { ev: EventRow; isPast?: boolean }) {
         <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 14, color: '#2B3A5A', margin: '0 0 3px', lineHeight: 1.25 }}>
           {ev.title}
         </p>
-        <p suppressHydrationWarning style={{ fontSize: 10, color: 'rgba(43,58,90,0.5)', fontFamily: 'var(--font-body)', margin: '0 0 6px' }}>
+        <p suppressHydrationWarning style={{ fontSize: 12, color: 'rgba(43,58,90,0.5)', fontFamily: 'var(--font-body)', margin: '0 0 6px' }}>
           {formatEventDate(ev.starts_at)} · {formatEventTime(ev.starts_at)}
           {virtual ? ' · Virtual' : ' · In-person'}
         </p>
         <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
           {/* Tier pill */}
           {gated ? (
-            <span style={{ fontSize: 8, fontWeight: 700, fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '2px 7px', borderRadius: 2, backgroundColor: 'rgba(201,168,76,0.15)', color: '#AA8C3C' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '2px 7px', borderRadius: 2, backgroundColor: 'rgba(201,168,76,0.15)', color: '#AA8C3C' }}>
               {tierLabel(ev.required_tier)}
             </span>
           ) : (
-            <span style={{ fontSize: 8, fontWeight: 700, fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '2px 7px', borderRadius: 2, backgroundColor: 'rgba(43,58,90,0.06)', color: 'rgba(43,58,90,0.45)' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '2px 7px', borderRadius: 2, backgroundColor: 'rgba(43,58,90,0.06)', color: 'rgba(43,58,90,0.45)' }}>
               {tierLabel(ev.required_tier)}
             </span>
           )}
           {/* Format pill */}
-          <span style={{ fontSize: 8, fontWeight: 700, fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '2px 7px', borderRadius: 2, backgroundColor: 'rgba(43,58,90,0.06)', color: 'rgba(43,58,90,0.45)' }}>
+          <span style={{ fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-condensed)', textTransform: 'uppercase', letterSpacing: '0.06em', padding: '2px 7px', borderRadius: 2, backgroundColor: 'rgba(43,58,90,0.06)', color: 'rgba(43,58,90,0.45)' }}>
             {virtual ? 'Virtual' : 'In-person'}
           </span>
         </div>
@@ -113,15 +113,15 @@ function EventCard({ ev, isPast }: { ev: EventRow; isPast?: boolean }) {
       {/* CTA */}
       <div style={{ flexShrink: 0, alignSelf: 'center' }}>
         {isPast ? (
-          <Link href="/events" style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: '#fff', backgroundColor: '#2B3A5A', padding: '7px 14px', borderRadius: 3, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+          <Link href="/events" style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: '#fff', backgroundColor: '#2B3A5A', display: 'inline-flex', alignItems: 'center', minHeight: 44, padding: '0 16px', borderRadius: 3, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
             Members replay
           </Link>
         ) : gated ? (
-          <Link href="/pricing" style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: '#AA8C3C', backgroundColor: 'rgba(201,168,76,0.12)', padding: '7px 14px', borderRadius: 3, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+          <Link href="/pricing" style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: '#AA8C3C', backgroundColor: 'rgba(201,168,76,0.12)', display: 'inline-flex', alignItems: 'center', minHeight: 44, padding: '0 16px', borderRadius: 3, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
             Members only
           </Link>
         ) : (
-          <Link href="/events" style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: '#fff', backgroundColor: '#2B3A5A', padding: '7px 14px', borderRadius: 3, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+          <Link href="/events" style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 11, color: '#fff', backgroundColor: '#2B3A5A', display: 'inline-flex', alignItems: 'center', minHeight: 44, padding: '0 16px', borderRadius: 3, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
             Register →
           </Link>
         )}
@@ -167,10 +167,10 @@ export default async function MediaEventsPage() {
     <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 24px 40px' }}>
       {/* Section header */}
       <div style={{ marginBottom: 20 }}>
-        <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 10, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>
+        <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 10, color: 'var(--ep-gold-ink)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>
           Evolved Pros Events
         </p>
-        <h1 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 28, color: '#2B3A5A', textTransform: 'uppercase', lineHeight: 1.1, margin: 0 }}>
+        <h1 style={{ fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 28, color: 'var(--text-primary)', textTransform: 'uppercase', lineHeight: 1.1, margin: 0 }}>
           Upcoming Events
         </h1>
       </div>
@@ -187,8 +187,8 @@ export default async function MediaEventsPage() {
           )}
         </div>
       ) : (
-        <div style={{ backgroundColor: '#fff', border: '1px solid #E0D8CC', borderRadius: 4, padding: '40px 20px', textAlign: 'center', marginBottom: 24 }}>
-          <p style={{ fontSize: 13, color: 'rgba(43,58,90,0.4)', fontFamily: 'var(--font-body)' }}>
+        <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-color)', borderRadius: 4, padding: '40px 20px', textAlign: 'center', marginBottom: 24 }}>
+          <p style={{ fontSize: 13, color: 'var(--text-secondary)', fontFamily: 'var(--font-body)' }}>
             No upcoming events right now. Check back soon!
           </p>
         </div>
@@ -198,11 +198,11 @@ export default async function MediaEventsPage() {
       {pastEvents.length > 0 && (
         <>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-            <div style={{ width: 40, height: 2, backgroundColor: '#2B3A5A', flexShrink: 0 }} />
-            <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 13, color: '#2B3A5A', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
+            <div style={{ width: 40, height: 2, backgroundColor: 'var(--text-primary)', flexShrink: 0 }} />
+            <span style={{ fontFamily: 'var(--font-condensed)', fontWeight: 800, fontSize: 13, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
               Past Events
             </span>
-            <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(43,58,90,0.15)' }} />
+            <div style={{ flex: 1, height: 1, backgroundColor: 'color-mix(in srgb, var(--text-primary) 25%, transparent)' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {pastChunks.map((chunk, idx) =>
