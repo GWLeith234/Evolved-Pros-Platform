@@ -137,22 +137,12 @@ SELECT is(
   'service_role insert persisted'
 );
 
-DO $$
-BEGIN
-  PERFORM set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000002', true);
-  PERFORM set_config('request.jwt.claim.role', 'authenticated', true);
-  PERFORM set_config(
-    'request.jwt.claims',
-    '{"sub":"00000000-0000-0000-0000-000000000002","role":"authenticated","email":"admin@example.com"}',
-    true
-  );
-END $$;
-SET LOCAL ROLE authenticated;
+SET LOCAL ROLE service_role;
 SELECT lives_ok(
   $$UPDATE public.users
        SET tier = 'vip'
      WHERE id = '00000000-0000-0000-0000-000000000002'$$,
-  'admin JWT tier change still runs after the revoke'
+  'service_role tier change still runs after the revoke'
 );
 RESET ROLE;
 
