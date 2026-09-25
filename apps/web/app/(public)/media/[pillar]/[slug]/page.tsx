@@ -34,6 +34,7 @@ import { pickArticleAds } from '@/lib/sponsors/partners'
 import { adMatchesSurface } from '@/lib/ads/iab'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { getPublishedMediaStoriesForHub } from '@/lib/media/public'
+import { heroImageCreditForUrl } from '@/lib/media/heroPrompt'
 
 export const revalidate = 3600
 export const dynamicParams = true
@@ -134,6 +135,7 @@ export default async function StoryPage({
   const articleUrl = canonicalUrl(`/media/${params.pillar}/${params.slug}`)
   const cite = mediaMustCite(params.pillar, params.slug)
   const artSrc = resolveStoryArtUrl(story.featured_image_url)
+  const artCredit = heroImageCreditForUrl(story.featured_image_url)
   const sectionHref = `/media/${params.pillar}`
 
   let articleAds: ReturnType<typeof pickArticleAds> = { sidebar: null, inBody: [], related: null }
@@ -220,6 +222,7 @@ export default async function StoryPage({
                   decoding="async"
                   className={storyArtImgClass(story.featured_image_url)}
                 />
+                {artCredit ? <figcaption>{artCredit}</figcaption> : null}
               </figure>
             ) : null}
 

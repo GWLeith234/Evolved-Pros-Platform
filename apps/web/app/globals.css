@@ -3838,6 +3838,14 @@ html.light-mode .ep-media-brief-cta {
   object-fit: cover;
   object-position: center;
 }
+.ep-media-article-art figcaption {
+  margin: 0;
+  padding: 8px 2px 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--media-ink-soft);
+}
 .ep-media-article-source,
 .ep-media-must-cite {
   margin: 16px 0 20px;
