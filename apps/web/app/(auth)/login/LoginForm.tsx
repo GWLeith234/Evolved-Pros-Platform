@@ -238,7 +238,7 @@ export function LoginForm() {
                   style={{
                     fontFamily: '"Barlow Condensed", sans-serif',
                     backgroundColor: tab === 'password' ? 'var(--navy)' : 'transparent',
-                    color: tab === 'password' ? 'var(--white)' : '#5B6B78',
+                    color: tab === 'password' ? 'var(--white)' : 'var(--auth-ink)',
                   }}
                 >
                   PASSWORD
@@ -250,7 +250,7 @@ export function LoginForm() {
                   style={{
                     fontFamily: '"Barlow Condensed", sans-serif',
                     backgroundColor: tab === 'magic' ? 'var(--navy)' : 'transparent',
-                    color: tab === 'magic' ? 'var(--white)' : '#5B6B78',
+                    color: tab === 'magic' ? 'var(--white)' : 'var(--auth-ink)',
                   }}
                 >
                   MAGIC LINK
@@ -353,7 +353,7 @@ export function LoginForm() {
                     disabled={loading}
                     aria-busy={loading}
                     className={`ep-on-accent w-full py-3 rounded font-bold uppercase tracking-wider text-sm text-white transition-all disabled:opacity-50 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: '#D90B2B' }}
+                    style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: 'var(--brand-red-aa)' }}
                   >
                     {loading ? (<><Spinner />{mode === 'signup' ? 'Creating account…' : 'Signing in…'}</>) : copy.submit}
                   </button>
@@ -383,7 +383,7 @@ export function LoginForm() {
                     disabled={loading}
                     aria-busy={loading}
                     className={`ep-on-accent w-full py-3 rounded font-bold uppercase tracking-wider text-sm text-white transition-all disabled:opacity-50 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: '#D90B2B' }}
+                    style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: 'var(--brand-red-aa)' }}
                   >
                     {loading ? (<><Spinner />Sending…</>) : 'Send Login Link →'}
                   </button>
@@ -395,9 +395,9 @@ export function LoginForm() {
           )}
         </div>
         <div className="px-8 py-4 border-t text-center" style={{ borderColor: 'rgba(27,60,90,0.08)', backgroundColor: 'rgba(27,60,90,0.02)' }}>
-          <p className="text-xs" style={{ color: '#5B6B78' }}>
+          <p className="text-xs" style={{ color: 'var(--auth-ink)' }}>
             Access is granted through your Evolved Pros membership.{' '}
-            <a href="/pricing" className="underline hover:text-[color:var(--navy)] transition-colors" style={{ color: '#5B6B78' }}>View pricing</a>
+            <a href="/pricing" className="underline hover:text-[color:var(--navy)] transition-colors" style={{ color: 'var(--auth-ink)' }}>View pricing</a>
           </p>
         </div>
       </div>

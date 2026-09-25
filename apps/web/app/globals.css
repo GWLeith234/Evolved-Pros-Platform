@@ -71,6 +71,10 @@
   --brand-red:       #C9302A;
   --brand-red-hover: #cc0a28;
   --brand-red-hot:   #ef0e30;
+  /* Login submit. Darker than --brand-red-hot so white label text meets AA. */
+  --brand-red-aa:    #D90B2B;
+  /* Muted ink on the light auth card. Do not reuse --muted; that token is lighter. */
+  --auth-ink:        #5B6B78;
   --brand-gold:    #C9A84C;
   --brand-gold-bright: #E7CE86;
   --brand-teal:    #0ABFA3;
