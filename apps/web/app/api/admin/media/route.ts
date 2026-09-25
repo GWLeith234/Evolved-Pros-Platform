@@ -3,6 +3,7 @@ import { requireAdminApi } from '@/lib/admin/helpers'
 import { adminClient } from '@/lib/supabase/admin'
 import type { TablesInsert } from '@evolved-pros/db'
 import { notifyMediaPublished } from '@/lib/notifications/fanout'
+import { publishGuardDecision } from '@/lib/media/heroPublishGuard'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,18 +39,32 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Title and slug are required' }, { status: 422 })
   }
 
+  const featuredImage = typeof featured_image_url === 'string' && featured_image_url.trim()
+    ? featured_image_url.trim()
+    : null
+  const publishing = is_published === true
+  if (publishing) {
+    const decision = publishGuardDecision({
+      isPublished: true,
+      featuredImageUrl: featuredImage,
+    })
+    if (!decision.allow) {
+      return NextResponse.json({ error: decision.error }, { status: 422 })
+    }
+  }
+
   const row = {
     title, slug, excerpt, body: articleBody, pillar, story_type,
     source_url: source_url || null,
     source_name: source_name || null,
-    featured_image_url: featured_image_url || null,
+    featured_image_url: featuredImage,
     author: author || 'George Leith',
     seo_title: seo_title || null,
     seo_description: seo_description || null,
     tags: Array.isArray(tags) ? tags : [],
     is_featured: is_featured ?? false,
-    is_published: is_published ?? false,
-    published_at: is_published ? new Date().toISOString() : null,
+    is_published: publishing,
+    published_at: publishing ? new Date().toISOString() : null,
   }
 
   const { data, error } = await adminClient
@@ -66,5 +81,16 @@ export async function POST(request: Request) {
       pillar: data.pillar,
     })
   }
-  return NextResponse.json(data)
+
+  const hero = !data.is_published && !data.featured_image_url
+    ? (await import('@/lib/media/generateHero')).queueDraftHero({
+        id: data.id,
+        slug: data.slug,
+        title: data.title,
+        excerpt: data.excerpt,
+        dek: data.seo_description,
+      })
+    : undefined
+
+  return NextResponse.json(hero ? { ...data, hero } : data)
 }

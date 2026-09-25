@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { adminClient } from '@/lib/supabase/admin'
 import { notifyMediaPublished } from '@/lib/notifications/fanout'
+import { featuredImageForPublish, publishGuardDecision } from '@/lib/media/heroPublishGuard'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,15 +35,38 @@ export async function PATCH(
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  // If publishing for the first time, set published_at
-  if (body.is_published === true && !body.published_at) {
-    body.published_at = new Date().toISOString()
-  }
-
   const publishing = body.is_published === true
   const { data: current } = publishing
-    ? await adminClient.from('media_stories').select('is_published').eq('id', params.id).maybeSingle()
+    ? await adminClient
+        .from('media_stories')
+        .select('is_published, featured_image_url')
+        .eq('id', params.id)
+        .maybeSingle()
     : { data: null }
+
+  if (publishing) {
+    const featuredImageUrl = featuredImageForPublish({
+      bodyHasImage: Object.prototype.hasOwnProperty.call(body, 'featured_image_url'),
+      bodyImage: body.featured_image_url,
+      currentImage: current?.featured_image_url,
+    })
+    const decision = publishGuardDecision({
+      isPublished: true,
+      featuredImageUrl,
+    })
+    if (!decision.allow) {
+      return NextResponse.json({ error: decision.error }, { status: 422 })
+    }
+  }
+
+  if (typeof body.featured_image_url === 'string') {
+    body.featured_image_url = body.featured_image_url.trim() || null
+  }
+
+  // If publishing for the first time, set published_at
+  if (publishing && !body.published_at) {
+    body.published_at = new Date().toISOString()
+  }
 
   const { data, error } = await adminClient
     .from('media_stories')
@@ -59,7 +83,18 @@ export async function PATCH(
       pillar: data.pillar,
     })
   }
-  return NextResponse.json(data)
+
+  const hero = !data.is_published && !data.featured_image_url
+    ? (await import('@/lib/media/generateHero')).queueDraftHero({
+        id: data.id,
+        slug: data.slug,
+        title: data.title,
+        excerpt: data.excerpt,
+        dek: data.seo_description,
+      })
+    : undefined
+
+  return NextResponse.json(hero ? { ...data, hero } : data)
 }
 
 export async function DELETE(
