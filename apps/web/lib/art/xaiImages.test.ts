@@ -45,7 +45,7 @@ describe('xAI image client', () => {
     const calls: Array<{ url: string; auth: string; body: Record<string, unknown> }> = []
     const png = Buffer.from('png-bytes').toString('base64')
     await requestXaiImages({
-      prompt: 'still life',
+      prompt: 'test image',
       n: 3,
       apiKey: 'xai-test-secret-value',
       fetchImpl: async (url, init) => {
@@ -65,7 +65,7 @@ describe('xAI image client', () => {
     expect(calls[0]?.auth).toBe('Bearer xai-test-secret-value')
     expect(calls[0]?.body).toMatchObject({
       model: 'grok-imagine-image-quality',
-      prompt: 'still life',
+      prompt: 'test image',
       n: 3,
       aspect_ratio: '16:9',
       resolution: '2k',
@@ -79,7 +79,7 @@ describe('xAI image client', () => {
 
     try {
       await requestXaiImages({
-        prompt: 'still life',
+        prompt: 'test image',
         apiKey: 'xai-test-secret-value',
         fetchImpl: async () => new Response('bad key xai-test-secret-value', { status: 401 }),
       })

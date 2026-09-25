@@ -43,7 +43,7 @@ describe('media hero crops', () => {
     )
   })
 
-  it('center-crops every variant to those dimensions and keeps the subject', async () => {
+  it('center-crops every variant to those dimensions and keeps the center', async () => {
     const width = 1920
     const height = 1080
     const base = await sharp({
@@ -63,7 +63,7 @@ describe('media hero crops', () => {
     const right = await sharp({
       create: { width: 200, height, channels: 3, background: { r: 0, g: 40, b: 200 } },
     }).png().toBuffer()
-    const subject = await sharp({
+    const centerMark = await sharp({
       create: { width: 240, height: 240, channels: 3, background: { r: 239, g: 14, b: 48 } },
     }).png().toBuffer()
 
@@ -71,7 +71,7 @@ describe('media hero crops', () => {
       .composite([
         { input: left, left: 0, top: 0 },
         { input: right, left: width - 200, top: 0 },
-        { input: subject, left: Math.floor((width - 240) / 2), top: Math.floor((height - 240) / 2) },
+        { input: centerMark, left: Math.floor((width - 240) / 2), top: Math.floor((height - 240) / 2) },
       ])
       .png()
       .toBuffer()

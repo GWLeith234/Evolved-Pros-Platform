@@ -1,8 +1,8 @@
 import sharp from 'sharp'
 
 /**
- * Output set for one story. Subject stays centered (`cover` + centre) so the
- * 9:16 strip and the OG frame keep the same object.
+ * Output set for one story. Center crop (`cover` + centre) so every frame
+ * keeps the middle of the picture.
  * Files: media-heroes/{slug}/{variant}.png
  */
 export const HERO_CROP_SIZES = {
