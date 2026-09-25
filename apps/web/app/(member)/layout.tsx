@@ -84,17 +84,11 @@ export default async function MemberLayout({ children }: { children: React.React
   profile.tier  = rawTier as typeof profile.tier ?? null
   profile.role  = (profile.role as string)?.toLowerCase() ?? profile.role
 
-  if (profile.tier_status === 'cancelled') {
-    redirect('/membership-expired?reason=cancelled')
-  }
-  if (profile.tier_status === 'expired') {
-    redirect('/membership-expired?reason=expired')
-  }
-
-  // Defense-in-depth: catch expired memberships even before the daily cron runs
-  if (profile.tier_expires_at && new Date(profile.tier_expires_at) < new Date()) {
-    redirect('/membership-expired?reason=expired')
-  }
+  // Lapsed paid members stay in the app on the free tier. resolveCurrentUser
+  // already collapsed their tier to community. The old redirect to
+  // /membership-expired fired on any past tier_expires_at, which locked out
+  // comps and admins, and it cut a cancellation off before the period that
+  // had been paid for. Gates below this layout read profile.tier.
 
   const [{ count: unreadCount }, settings] = await Promise.all([
     supabase
