@@ -1,7 +1,5 @@
-import type { ReactNode } from 'react'
 import Image from 'next/image'
 import {
-  LIVE_TESTIMONIAL_BANDS,
   LIVE_TESTIMONIALS_EYEBROW,
   LIVE_TESTIMONIALS_KICKER,
   LIVE_TESTIMONIALS_TITLE,
@@ -12,32 +10,16 @@ import {
 } from '@/lib/live/testimonials'
 import { LiveSectionHeader } from './LiveSectionHeader'
 
-function badgeLabel(item: LiveTestimonial): string {
-  if (item.existing) return 'Existing'
-  if (item.kind === 'award') return 'New · award'
-  if (item.kind === 'reviews') return 'New · reviews'
-  return 'New · quote'
-}
-
-function LogoSlot({ item }: { item: LiveTestimonial }) {
-  if (!item.logoLabel && !item.logoUrl) return null
+function Logo({ item }: { item: LiveTestimonial }) {
+  if (!item.logoUrl) return null
   return (
-    <div className="live-t-logo" title={item.logoUrl ? undefined : 'Logo placeholder'}>
-      {item.logoUrl ? (
-        <Image src={item.logoUrl} alt={item.logoLabel ?? ''} width={180} height={32} />
-      ) : (
-        <>
-          <span className="live-t-logo-pending">Logo</span>
-          {item.logoLabel ? <span className="live-t-logo-label">{item.logoLabel}</span> : null}
-        </>
-      )}
+    <div className="live-t-logo">
+      <Image src={item.logoUrl} alt="" width={180} height={32} />
     </div>
   )
 }
 
 function Headshot({ item }: { item: LiveTestimonial }) {
-  const personCard = Boolean(item.headshotUrl || item.initials || (item.kind === 'quote' && !item.logoLabel))
-  if (!personCard) return null
   if (item.headshotUrl) {
     const sources = headshotSources(item.headshotUrl)
     return (
@@ -51,9 +33,10 @@ function Headshot({ item }: { item: LiveTestimonial }) {
       </div>
     )
   }
+  if (!item.initials) return null
   return (
     <div className="live-t-avatar" aria-label={`Photo pending for ${item.author}`}>
-      <span className="live-t-initials">{item.initials ?? ''}</span>
+      <span className="live-t-initials">{item.initials}</span>
       <span className="live-t-pending">photo</span>
     </div>
   )
@@ -130,14 +113,17 @@ function ReviewsBody({ item }: { item: LiveTestimonial }) {
   )
 }
 
+function cardClass(item: LiveTestimonial): string {
+  if (item.kind === 'award') return 'live-t-card live-t-card--award'
+  if (item.kind === 'reviews') return 'live-t-card live-t-card--reviews'
+  if (item.featured) return 'live-t-card live-t-card--featured'
+  return 'live-t-card'
+}
+
 function TestimonialCard({ item }: { item: LiveTestimonial }) {
-  const variant =
-    item.kind === 'award' ? 'live-t-card live-t-card--award' : item.kind === 'reviews' ? 'live-t-card live-t-card--reviews' : item.featured ? 'live-t-card live-t-card--featured' : 'live-t-card'
   return (
-    <article className={variant} data-kind={item.kind} data-author={item.author}>
-      <span className={item.existing ? 'live-t-badge live-t-badge--existing' : 'live-t-badge'}>{badgeLabel(item)}</span>
-      {item.eyebrow ? <p className="live-t-eyebrow">{item.eyebrow}</p> : null}
-      <LogoSlot item={item} />
+    <article className={cardClass(item)} data-kind={item.kind} data-author={item.author}>
+      <Logo item={item} />
       {item.kind === 'award' ? <AwardBody item={item} /> : null}
       {item.kind === 'reviews' ? <ReviewsBody item={item} /> : null}
       {item.kind === 'quote' ? <QuoteBody item={item} /> : null}
@@ -148,16 +134,20 @@ function TestimonialCard({ item }: { item: LiveTestimonial }) {
 
 function Band({
   id,
-  children,
+  layout,
+  items,
 }: {
   id: LiveTestimonialBandId
-  children: ReactNode
+  layout: 'featured' | 'full' | 'pair' | 'existing'
+  items: LiveTestimonial[]
 }) {
-  const label = LIVE_TESTIMONIAL_BANDS.find(band => band.id === id)?.label
   return (
     <div className="live-t-band" data-band={id}>
-      {label ? <p className="live-t-row-label">{label}</p> : null}
-      {children}
+      <div className={`live-t-grid live-t-grid--${layout}`}>
+        {items.map(item => (
+          <TestimonialCard key={`${item.kind}-${item.author}-${item.event}`} item={item} />
+        ))}
+      </div>
     </div>
   )
 }
@@ -171,39 +161,11 @@ export function LiveTestimonials() {
         title={LIVE_TESTIMONIALS_TITLE}
         kicker={LIVE_TESTIMONIALS_KICKER}
       />
-      <Band id="featured">
-        <div className="live-t-grid live-t-grid--featured">
-          {groups.featured.map(item => (
-            <TestimonialCard key={`${item.kind}-${item.author}-${item.event}`} item={item} />
-          ))}
-        </div>
-      </Band>
-      <Band id="industry">
-        <div className="live-t-grid live-t-grid--quotes">
-          {groups.industry.map(item => (
-            <TestimonialCard key={`${item.kind}-${item.author}-${item.event}`} item={item} />
-          ))}
-        </div>
-      </Band>
-      <Band id="reviews">
-        {groups.reviews.map(item => (
-          <TestimonialCard key={`${item.kind}-${item.author}-${item.event}`} item={item} />
-        ))}
-      </Band>
-      <Band id="recognition">
-        <div className="live-t-grid live-t-grid--quotes">
-          {groups.recognition.map(item => (
-            <TestimonialCard key={`${item.kind}-${item.author}-${item.event}`} item={item} />
-          ))}
-        </div>
-      </Band>
-      <Band id="existing">
-        <div className="live-t-grid live-t-grid--existing">
-          {groups.existing.map(item => (
-            <TestimonialCard key={`${item.kind}-${item.author}-${item.event}`} item={item} />
-          ))}
-        </div>
-      </Band>
+      <Band id="featured" layout="featured" items={groups.featured} />
+      <Band id="industry" layout="full" items={groups.industry} />
+      <Band id="reviews" layout="full" items={groups.reviews} />
+      <Band id="recognition" layout="pair" items={groups.recognition} />
+      <Band id="existing" layout="existing" items={groups.existing} />
     </section>
   )
 }

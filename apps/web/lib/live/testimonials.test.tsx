@@ -75,10 +75,10 @@ describe('LIVE testimonials REV2', () => {
     expect(amy?.initials).toBe('AA')
     expect(amy?.quote).toContain('George, an incredible leader')
     expect(LIVE_TESTIMONIALS.every(item => item.logoUrl == null)).toBe(true)
-    for (const author of ['IAB Canada', 'HubSpot']) {
+    for (const author of ['IAB Canada', 'HubSpot', 'Apple Podcasts listeners']) {
       const item = LIVE_TESTIMONIALS.find(entry => entry.author === author)
       expect(item?.headshotUrl, author).toBeUndefined()
-      expect(item?.logoLabel, author).toBeTruthy()
+      expect(item?.initials, author).toBeUndefined()
     }
   })
 
@@ -93,10 +93,27 @@ describe('LIVE testimonials REV2', () => {
     }
   })
 
-  it('renders the section in order with headshots, logo slots, and source links', () => {
+  it('renders the section in order with headshots and source links, and no mock chrome', () => {
     const html = renderToStaticMarkup(<LiveTestimonials />)
     const authors = [...html.matchAll(/data-author="([^"]+)"/g)].map(match => match[1])
     expect(authors).toEqual(LIVE_TESTIMONIALS.map(item => item.author))
+    expect(html).toContain('data-band="industry"')
+    expect(html).toMatch(/data-band="industry"[\s\S]*live-t-grid--full[\s\S]*IAB Canada/)
+    expect(html).not.toMatch(/live-t-badge|live-t-row-label|live-t-eyebrow|live-t-logo/)
+    for (const leaked of [
+      'New · quote',
+      'New · award',
+      'New · reviews',
+      'Featured credibility',
+      'logo slot',
+      'Listener proof',
+      'Quote · featured',
+      'Quote · IAB',
+      'optional',
+    ]) {
+      expect(html.toLowerCase()).not.toContain(leaked.toLowerCase())
+    }
+    expect(html).not.toMatch(/>\s*Existing\s*</)
     expect(html).toContain('Top Gun 51')
     expect(html).toContain('5.0')
     expect(html).toContain('109 reviews')
