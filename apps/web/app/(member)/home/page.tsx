@@ -34,6 +34,8 @@ import {
   pickFuelLiveEvent,
   pickMemberHomeNextAction,
 } from '@/lib/home/bands'
+import { eventSelectColumns } from '@/lib/events/eventColumns'
+import { eventCityFromRow } from '@/lib/events/privilegedUrls'
 import { pickUpcomingLockedEvent, withoutConquerLocal } from '@/lib/events/nextEvent'
 
 import { enqueueSessionNudges } from '@/lib/notifications/nudges'
@@ -304,7 +306,9 @@ async function fetchPinnedLiveEvent(userId: string | null): Promise<(PulseEvent 
   city: string | null
 }) | null> {
   const nowIso = new Date().toISOString()
-  const eventSelect = 'id, title, format, event_type, starts_at, ends_at, attending_count, image_url, city'
+  const eventSelect = await eventSelectColumns(
+    'id, title, format, event_type, starts_at, ends_at, attending_count, image_url',
+  )
   // Recent started rows + upcoming. pickUpcomingLockedEvent prefers the
   // CoS/George locks (book / Masterminds) and drops Conquer Local. Live vs
   // stale is then decided in pickFuelLiveEvent so a missing ends_at cannot
@@ -355,7 +359,7 @@ async function fetchPinnedLiveEvent(userId: string | null): Promise<(PulseEvent 
     eventType: row.event_type ?? row.format,
     startsAt: row.starts_at,
     imageUrl: row.image_url ?? null,
-    city: row.city ?? null,
+    city: eventCityFromRow(row),
   }
 }
 

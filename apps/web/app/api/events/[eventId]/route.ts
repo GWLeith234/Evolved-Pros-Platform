@@ -6,7 +6,8 @@ import { NextResponse } from 'next/server'
 import { hasTierAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
-import { EVENT_PRIVILEGED_COLUMNS, privilegedEventUrls } from '@/lib/events/privilegedUrls'
+import { eventPrivilegedColumns, privilegedEventSelect } from '@/lib/events/eventColumns'
+import { eventCityFromRow, privilegedEventUrls } from '@/lib/events/privilegedUrls'
 
 export async function GET(
   _request: Request,
@@ -16,10 +17,11 @@ export async function GET(
   const profile = await resolveCurrentUser(supabase)
   if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const columns = await eventPrivilegedColumns()
   const [eventResult, regResult] = await Promise.all([
     adminClient
       .from('events')
-      .select(EVENT_PRIVILEGED_COLUMNS)
+      .select(privilegedEventSelect(columns))
       .eq('id', params.eventId)
       .single(),
     supabase
@@ -56,7 +58,7 @@ export async function GET(
     zoomUrl: urls.zoomUrl,
     recordingUrl: urls.recordingUrl,
     imageUrl: e.image_url,
-    city: e.city ?? null,
+    city: eventCityFromRow(e),
     requiredTier: e.required_tier as 'community' | 'vip' | 'pro' | null,
     registrationCount: e.registration_count,
     isRegistered,

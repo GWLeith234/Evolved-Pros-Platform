@@ -1,7 +1,11 @@
 import { adminClient } from '@/lib/supabase/admin'
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
+import { eventSelectColumns } from '@/lib/events/eventColumns'
 import { EventForm } from '../../EventForm'
+
+const EDIT_EVENT_COLUMNS =
+  'id, title, description, tagline, cta_text, pillar, event_type, starts_at, ends_at, zoom_url, recording_url, image_url, city, required_tier, tier_access, is_published' as const
 
 interface Props {
   params: { eventId: string }
@@ -17,9 +21,10 @@ export default async function EditEventPage({ params }: Props) {
 
   // RLS-FIX: adminClient — events_select_authenticated filters drafts,
   // causing false 404s when an admin opens an unpublished event.
+  const columns = await eventSelectColumns(EDIT_EVENT_COLUMNS)
   const { data: row } = await adminClient
     .from('events')
-    .select('id, title, description, tagline, cta_text, pillar, event_type, starts_at, ends_at, zoom_url, recording_url, image_url, city, required_tier, tier_access, is_published')
+    .select(columns as typeof EDIT_EVENT_COLUMNS)
     .eq('id', params.eventId)
     .single()
 

@@ -170,7 +170,9 @@ describe('family v5 lockup assets', () => {
       resolve(webRoot, 'app/api/social/[template]/route.tsx'),
       'utf8',
     )
-    expect(socialRoute).toContain("public', 'social-fonts'")
+    const ogFonts = readFileSync(resolve(webRoot, 'lib/social/ogFonts.ts'), 'utf8')
+    expect(socialRoute).toContain('loadSocialFont')
+    expect(ogFonts).toContain("public', 'social-fonts'")
     expect(existsSync(publicFile(BEBAS_NEUE_STATIC))).toBe(true)
   })
 

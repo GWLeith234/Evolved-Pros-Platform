@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
-import { readFileSync } from 'fs'
-import { join } from 'path'
+import { NextResponse } from 'next/server'
+import { loadSocialFont, SOCIAL_FONT_FILES, SOCIAL_FONT_SANS, SOCIAL_FONT_SERIF } from '@/lib/social/ogFonts'
 
 // Podcast social-image generator (LinkedIn / X). Renders server-side via Satori
 // so the real logo / faces / mic (Supabase Storage public URLs) can be fetched
@@ -26,8 +26,8 @@ const FACE = '#1E3448'
 const SUPABASE = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
 const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
 const STORAGE = `${SUPABASE}/storage/v1/object/public/`
-const FONT_SANS = 'Barlow Condensed'
-const FONT_SERIF = 'Playfair Display'
+const FONT_SANS = SOCIAL_FONT_SANS
+const FONT_SERIF = SOCIAL_FONT_SERIF
 
 const ASSET = {
   logo: `${STORAGE}Branding/logo_horizontal_dark.png`,
@@ -86,26 +86,6 @@ async function loadEpisode(slug: string | null): Promise<Episode | null> {
   } catch {
     return null
   }
-}
-
-// Fonts live in public/social-fonts and are read from disk (nodejs runtime).
-// process.cwd() is apps/web under `next start`; fall back to the monorepo path.
-// Return a standalone ArrayBuffer (a Node Buffer's .buffer is a shared pool —
-// passing it to satori makes it read the wrong bytes → "reading '256'").
-function loadFont(file: string): ArrayBuffer {
-  const candidates = [
-    join(process.cwd(), 'public', 'social-fonts', file),
-    join(process.cwd(), 'apps', 'web', 'public', 'social-fonts', file),
-  ]
-  for (const p of candidates) {
-    try {
-      const b = readFileSync(p)
-      return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength)
-    } catch {
-      /* try next */
-    }
-  }
-  throw new Error(`social font not found: ${file}`)
 }
 
 function epLabel(n: number | null | undefined): string {
@@ -430,6 +410,15 @@ function TemplateFaceoff({ w, h, logo, mic, kicker, title, hostSrc, guestSrc, gu
 // ── handler ─────────────────────────────────────────────────────────────────
 
 export async function GET(req: Request, { params }: { params: { template: string } }) {
+  try {
+    return await renderSocialImage(req, params)
+  } catch (err) {
+    console.error('[GET /api/social/[template]] social image failed', err)
+    return NextResponse.json({ error: 'Failed to render social image' }, { status: 500 })
+  }
+}
+
+async function renderSocialImage(req: Request, params: { template: string }) {
   const url = new URL(req.url)
   const q = url.searchParams
   const template = (params.template as Template) || 'text'
@@ -457,9 +446,9 @@ export async function GET(req: Request, { params }: { params: { template: string
     template === 'faceoff' ? fetchImage(ASSET.host) : Promise.resolve(null),
     template === 'text' ? Promise.resolve(null) : fetchImage(ep?.thumbnail_url),
   ])
-  const pf = loadFont('PlayfairDisplay.ttf')
-  const bcSemi = loadFont('BarlowCondensed-SemiBold.ttf')
-  const bcBold = loadFont('BarlowCondensed-Bold.ttf')
+  const pf = loadSocialFont(SOCIAL_FONT_FILES.playfair)
+  const bcSemi = loadSocialFont(SOCIAL_FONT_FILES.barlowSemi)
+  const bcBold = loadSocialFont(SOCIAL_FONT_FILES.barlowBold)
 
   const common = { w: W, h: H, logo, kicker }
   let element: React.ReactElement
@@ -481,14 +470,17 @@ export async function GET(req: Request, { params }: { params: { template: string
     element = <TemplateText {...common} quote={quote} name={name} role={role} />
   }
 
-  return new ImageResponse(element, {
+  const image = new ImageResponse(element, {
     width: W,
     height: H,
     fonts: [
       { name: FONT_SERIF, data: pf, weight: 700, style: 'normal' },
-      { name: FONT_SERIF, data: pf, weight: 900, style: 'normal' },
       { name: FONT_SANS, data: bcSemi, weight: 600, style: 'normal' },
       { name: FONT_SANS, data: bcBold, weight: 700, style: 'normal' },
     ],
   })
+  // Render inside this function so a font parse error becomes a 500 JSON
+  // response from GET, instead of a dropped stream (502).
+  const bytes = await image.arrayBuffer()
+  return new Response(bytes, { status: 200, headers: image.headers })
 }

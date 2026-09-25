@@ -6,7 +6,8 @@ import { hasTierAccess } from '@/lib/tier'
 import type { EventItem, EventType } from '@/lib/events/types'
 import { loginHrefFor } from '@/lib/auth/gatedIntent'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
-import { EVENT_PRIVILEGED_COLUMNS, privilegedEventUrls } from '@/lib/events/privilegedUrls'
+import { eventPrivilegedColumns, privilegedEventSelect } from '@/lib/events/eventColumns'
+import { eventCityFromRow, privilegedEventUrls } from '@/lib/events/privilegedUrls'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,10 +20,11 @@ export default async function EventDetailPage({ params }: Props) {
   const profile = await resolveCurrentUser(supabase)
   if (!profile) redirect(loginHrefFor(`/events/${params.eventId}`))
 
+  const columns = await eventPrivilegedColumns()
   const [{ data: row }, regResult] = await Promise.all([
     adminClient
       .from('events')
-      .select(EVENT_PRIVILEGED_COLUMNS)
+      .select(privilegedEventSelect(columns))
       .eq('id', params.eventId)
       .single(),
     supabase
@@ -52,7 +54,7 @@ export default async function EventDetailPage({ params }: Props) {
     zoomUrl: urls.zoomUrl,
     recordingUrl: urls.recordingUrl,
     imageUrl: row.image_url ?? null,
-    city: row.city ?? null,
+    city: eventCityFromRow(row),
     requiredTier: row.required_tier as 'community' | 'vip' | 'pro' | null,
     registrationCount: row.registration_count,
     isRegistered,

@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { adEventWriteOutcome } from '@/lib/ads/adEvents'
 import {
   HOUSE_PROMOTION_NAME,
   isHouseAdSlot,
@@ -69,9 +70,7 @@ export async function POST(request: Request) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (adminClient as any).from('ad_events').insert(row)
 
-  if (error) {
-    return NextResponse.json({ error: 'Failed to record event' }, { status: 500 })
-  }
-
-  return NextResponse.json({ ok: true }, { status: 201 })
+  const outcome = adEventWriteOutcome(error)
+  if (outcome.status === 204) return new NextResponse(null, { status: 204 })
+  return NextResponse.json(outcome.body, { status: outcome.status })
 }
