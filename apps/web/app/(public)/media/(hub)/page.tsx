@@ -5,6 +5,7 @@ import { MediaStoryCrawlIndex } from '@/lib/media/crawlIndex'
 import { getPublishedMediaStoriesForHub } from '@/lib/media/public'
 import { MEDIA_HUB_DESCRIPTION, MEDIA_HUB_TITLE } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { mediaJsonLd } from '@/lib/seo/jsonld'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { pickMediaFeedAds } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
@@ -58,6 +59,11 @@ export default async function MediaPage() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(mediaJsonLd(stories)) }}
+      />
       <MediaStoryCrawlIndex stories={stories} />
       <MediaPortalClient
         stories={stories}

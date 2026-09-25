@@ -2,12 +2,15 @@
  * Public JSON-LD builders. Podcast and article routes keep their inline
  * schemas. Home ships WebSite + Organization; /pricing ships the
  * membership Product / Offer catalog; /live ships a WebPage plus a
- * keynote/speaking Service with no price.
+ * keynote/speaking Service with no price; /media ships a CollectionPage.
+ * An ItemList is added only from stories the hub page already loaded.
  *
  * Brand lock: Evolved Pros. Never Evolved Media.
  */
 
 import { HOME_SUB } from '@/lib/home/conversion'
+import { MEDIA_BRAND, MEDIA_HUB_DESCRIPTION } from '@/lib/media/brand'
+import { listPublicMediaStories, mediaArticlePath } from '@/lib/media/sitemap'
 import { TIERS, TIER_DISPLAY_NAMES } from '@/lib/pricing'
 import { CANONICAL_ORIGIN, SITE_NAME, canonicalUrl } from '@/lib/seo/canonical'
 
@@ -33,6 +36,7 @@ export function homeJsonLd() {
 
 const PRICING_URL = canonicalUrl('/pricing')
 const LIVE_URL = canonicalUrl('/live')
+const MEDIA_URL = canonicalUrl('/media')
 
 /**
  * Same sentence as the /live document description. The page CTA is
@@ -160,5 +164,49 @@ export function liveJsonLd() {
       url: LIVE_URL,
       brand: { '@type': 'Brand', name: SITE_NAME },
     },
+  }
+}
+
+export type MediaJsonLdStory = {
+  title: string
+  pillar: string | null | undefined
+  slug: string | null | undefined
+  is_published?: boolean | null
+}
+
+/**
+ * CollectionPage for `/media`.
+ *
+ * Description matches the hub document meta (`MEDIA_HUB_DESCRIPTION`).
+ * Pass the stories the hub page already loaded; the same public-path
+ * filter as the crawl index becomes an ItemList. No new fetch. No Offer,
+ * price, or priceCurrency: this URL does not sell a membership.
+ */
+export function mediaJsonLd(stories: MediaJsonLdStory[] = []) {
+  const items = listPublicMediaStories(stories).flatMap(story => {
+    const path = mediaArticlePath(story.pillar, story.slug)
+    return path ? [{ name: story.title, url: canonicalUrl(path) }] : []
+  })
+  return {
+    '@context': 'https://schema.org' as const,
+    '@type': 'CollectionPage' as const,
+    name: MEDIA_BRAND,
+    url: MEDIA_URL,
+    description: MEDIA_HUB_DESCRIPTION,
+    publisher: homeOrganizationJsonLd(),
+    ...(items.length > 0
+      ? {
+          mainEntity: {
+            '@type': 'ItemList' as const,
+            name: MEDIA_BRAND,
+            itemListElement: items.map((item, index) => ({
+              '@type': 'ListItem' as const,
+              position: index + 1,
+              name: item.name,
+              url: item.url,
+            })),
+          },
+        }
+      : {}),
   }
 }

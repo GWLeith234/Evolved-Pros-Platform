@@ -69,6 +69,16 @@ describe('public chrome copy', () => {
     expect(src).toMatch(/application\/ld\+json/)
   })
 
+  it('emits one media CollectionPage JSON-LD script and no prices', () => {
+    const src = read('../../app/(public)/media/(hub)/page.tsx')
+    expect(src).toMatch(/mediaJsonLd/)
+    expect(src.match(/application\/ld\+json/g)).toHaveLength(1)
+    expect(src).not.toMatch(/priceCurrency/)
+    expect(src).not.toMatch(/["']price["']\s*:/)
+    expect(src).not.toMatch(/Evolved Media/)
+    expect(src).not.toMatch(/platform\.evolvedpros\.com/)
+  })
+
   it('emits one live WebPage JSON-LD script and no keynote price', () => {
     const src = read('../../app/live/page.tsx')
     expect(src).toMatch(/liveJsonLd/)
