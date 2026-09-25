@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Local proof for migration 096. Creates a throwaway database, shows the
-# pre-fix member escalation, then applies the migration and runs pgTAP.
+# Local proof for migrations 096 and 097. Creates a throwaway database, shows
+# the pre-fix member escalation, checks that 096 still leaves INSERT, DELETE,
+# TRUNCATE, and TRIGGER in place, then applies 097 and runs pgTAP.
 # Does not connect to Supabase or any hosted database.
 set -euo pipefail
 
@@ -51,11 +52,32 @@ BEGIN
 END $$;
 SQL
 
-echo "=== POST-FIX: apply 096 and run pgTAP ==="
+echo "=== AFTER 096, BEFORE 097: INSERT/DELETE/TRUNCATE/TRIGGER still granted ==="
 "${PSQL[@]}" -d postgres -c "DROP DATABASE IF EXISTS ${DB};"
 "${PSQL[@]}" -d postgres -c "CREATE DATABASE ${DB};"
 "${PSQL[@]}" -d "$DB" -f "$ROOT/supabase/tests/096_users_priv_fixture.sql"
 "${PSQL[@]}" -d "$DB" -f "$ROOT/supabase/migrations/096_users_privileged_column_guard.sql"
+"${PSQL[@]}" -d "$DB" <<'SQL'
+DO $$
+BEGIN
+  IF NOT has_table_privilege('authenticated', 'public.users', 'INSERT')
+     OR NOT has_table_privilege('authenticated', 'public.users', 'DELETE')
+     OR NOT has_table_privilege('authenticated', 'public.users', 'TRUNCATE')
+     OR NOT has_table_privilege('authenticated', 'public.users', 'TRIGGER') THEN
+    RAISE EXCEPTION '096 was expected to leave INSERT, DELETE, TRUNCATE, and TRIGGER in place';
+  END IF;
+END $$;
+SELECT privilege_type
+  FROM information_schema.table_privileges
+ WHERE table_schema = 'public'
+   AND table_name = 'users'
+   AND grantee = 'authenticated'
+   AND privilege_type IN ('INSERT', 'DELETE', 'TRUNCATE', 'TRIGGER')
+ ORDER BY 1;
+SQL
+
+echo "=== POST-FIX: apply 097 and run pgTAP ==="
+"${PSQL[@]}" -d "$DB" -f "$ROOT/supabase/migrations/097_users_revoke_writes_and_audit.sql"
 
 TAP_OUT="$(mktemp)"
 set +e
@@ -71,11 +93,11 @@ if grep -E '^(not ok |# Looks like you failed)' "$TAP_OUT" >/dev/null; then
   echo "pgTAP reported failures" >&2
   exit 1
 fi
-if ! grep -E '^1\.\.22$' "$TAP_OUT" >/dev/null; then
-  echo "pgTAP plan was not 1..22" >&2
+if ! grep -E '^1\.\.45$' "$TAP_OUT" >/dev/null; then
+  echo "pgTAP plan was not 1..45" >&2
   exit 1
 fi
 
-echo "=== 22 tests passed ==="
+echo "=== 45 tests passed ==="
 rm -f "$TAP_OUT"
 "${PSQL[@]}" -d postgres -c "DROP DATABASE IF EXISTS ${DB};"

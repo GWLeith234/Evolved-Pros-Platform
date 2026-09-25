@@ -90,9 +90,21 @@ CREATE POLICY "users_update_own" ON public.users
 
 -- Migration 024 grants table UPDATE to authenticated. service_role keeps ALL,
 -- which is how adminClient writes today.
-GRANT SELECT, UPDATE ON public.users TO authenticated;
+-- Live-audit shape: table UPDATE plus column UPDATE on billing and access
+-- columns, and table INSERT, DELETE, TRUNCATE, TRIGGER. TRUNCATE ignores RLS.
+GRANT SELECT, INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public.users TO authenticated;
+GRANT INSERT, UPDATE, DELETE, TRUNCATE, TRIGGER ON public.users TO anon;
+GRANT UPDATE (
+  role,
+  tier,
+  tier_status,
+  tier_expires_at,
+  access_status,
+  comp_promo_code_id,
+  stripe_customer_id,
+  stripe_subscription_id
+) ON public.users TO anon, authenticated;
 GRANT ALL ON public.users TO service_role;
-REVOKE UPDATE ON public.users FROM anon;
 
 CREATE OR REPLACE FUNCTION private.viewer_is_admin()
 RETURNS boolean
