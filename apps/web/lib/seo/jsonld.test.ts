@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { HOME_SUB } from '@/lib/home/conversion'
+import { MEDIA_BRAND, MEDIA_HUB_DESCRIPTION } from '@/lib/media/brand'
 import { TIERS } from '@/lib/pricing'
 import { CANONICAL_ORIGIN, SITE_NAME, canonicalUrl } from '@/lib/seo/canonical'
-import { LIVE_PAGE_DESCRIPTION, homeJsonLd, homeOrganizationJsonLd, liveJsonLd, pricingJsonLd } from './jsonld'
+import { LIVE_PAGE_DESCRIPTION, homeJsonLd, homeOrganizationJsonLd, liveJsonLd, mediaJsonLd, pricingJsonLd } from './jsonld'
 
 describe('home JSON-LD', () => {
   it('names Evolved Pros as WebSite and Organization, never Evolved Media', () => {
@@ -86,6 +87,91 @@ describe('live JSON-LD', () => {
     expect(blob).not.toContain('priceCurrency')
     expect(blob).not.toContain('$')
     expect((blob.match(/"@type":"Service"/g) ?? []).length).toBe(1)
+  })
+})
+
+describe('media JSON-LD', () => {
+  it('ships one CollectionPage on www with Evolved Pros as publisher and no prices', () => {
+    const schema = mediaJsonLd()
+    const publisher = homeOrganizationJsonLd()
+
+    expect(schema['@context']).toBe('https://schema.org')
+    expect(schema['@type']).toBe('CollectionPage')
+    expect(schema.name).toBe('Evolved Pros Media')
+    expect(schema.name).toBe(MEDIA_BRAND)
+    expect(schema.url).toBe(canonicalUrl('/media'))
+    expect(schema.url).toBe('https://www.evolvedpros.com/media')
+    expect(schema.description).toBe(MEDIA_HUB_DESCRIPTION)
+    expect(schema.description).toBe(
+      'Pioneer stories, leadership insights, and business strategy from the EVOLVED framework.',
+    )
+    expect(schema.publisher).toEqual(publisher)
+    expect(publisher['@type']).toBe('Organization')
+    expect(publisher.name).toBe('Evolved Pros')
+    expect(publisher.url).toBe(CANONICAL_ORIGIN)
+    expect(schema).not.toHaveProperty('mainEntity')
+    expect(schema).not.toHaveProperty('offers')
+    expect(schema).not.toHaveProperty('price')
+    expect(schema).not.toHaveProperty('priceCurrency')
+
+    const keys = schemaKeys(schema)
+    expect(keys.has('price')).toBe(false)
+    expect(keys.has('priceCurrency')).toBe(false)
+    expect(keys.has('offers')).toBe(false)
+    expect(keys.has('lowPrice')).toBe(false)
+    expect(keys.has('highPrice')).toBe(false)
+
+    const blob = JSON.stringify(schema)
+    expect(blob).toContain('CollectionPage')
+    expect(blob).toContain('Organization')
+    expect(blob).toContain('Evolved Pros')
+    expect(blob).toContain('Evolved Pros Media')
+    expect(blob).not.toContain('Evolved Media')
+    expect(blob).not.toContain('platform.evolvedpros.com')
+    expect(blob).not.toContain('"Offer"')
+    expect(blob).not.toContain('"price"')
+    expect(blob).not.toContain('priceCurrency')
+    expect(blob).not.toContain('$')
+    expect((blob.match(/"@type":"CollectionPage"/g) ?? []).length).toBe(1)
+  })
+
+  it('lists stories the hub already loaded, on www, with no invented prices', () => {
+    const schema = mediaJsonLd([
+      {
+        id: 'keep',
+        title: 'Close the Gap',
+        pillar: 'identity',
+        slug: 'close-the-gap',
+        is_published: true,
+      },
+      {
+        id: 'ritual',
+        title: 'Ritual',
+        pillar: 'execution',
+        slug: 'why-elite-sales-teams-swear-by-ritual-not-motivation',
+        is_published: true,
+      },
+    ])
+
+    expect(schema.mainEntity?.['@type']).toBe('ItemList')
+    expect(schema.mainEntity?.name).toBe('Evolved Pros Media')
+    expect(schema.mainEntity?.itemListElement).toEqual([
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Close the Gap',
+        url: 'https://www.evolvedpros.com/media/identity/close-the-gap',
+      },
+    ])
+
+    const blob = JSON.stringify(schema)
+    expect(blob).not.toContain('platform.evolvedpros.com')
+    expect(blob).not.toContain('Evolved Media')
+    expect(blob).not.toContain('"Offer"')
+    expect(blob).not.toContain('"price"')
+    expect(blob).not.toContain('priceCurrency')
+    expect(blob).not.toContain('$')
+    expect(schemaKeys(schema).has('price')).toBe(false)
   })
 })
 
