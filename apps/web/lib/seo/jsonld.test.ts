@@ -138,14 +138,12 @@ describe('media JSON-LD', () => {
   it('lists stories the hub already loaded, on www, with no invented prices', () => {
     const schema = mediaJsonLd([
       {
-        id: 'keep',
         title: 'Close the Gap',
         pillar: 'identity',
         slug: 'close-the-gap',
         is_published: true,
       },
       {
-        id: 'ritual',
         title: 'Ritual',
         pillar: 'execution',
         slug: 'why-elite-sales-teams-swear-by-ritual-not-motivation',
