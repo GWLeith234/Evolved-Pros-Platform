@@ -13,34 +13,40 @@ export const dynamic = 'force-dynamic'
  * module scope: it calls createClient(url!, serviceRoleKey!) on evaluation and
  * supabase-js throws 'supabaseKey is required' on a falsy key. A static import
  * would make this route throw during module evaluation on a deploy missing the
- * service-role key — an opaque 500 from the one endpoint whose job is to report
- * `serviceRole: false`.
+ * service-role key — an opaque 500 instead of a 503 `misconfigured` body.
+ *
+ * The public body never lists which secrets are configured. Deploy proofs
+ * read `startedAt` (frozen at process boot) and `uptimeSec`.
  */
+const startedAt = new Date(Date.now() - process.uptime() * 1000).toISOString()
+
 export async function GET() {
-  const env = {
-    supabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-    supabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    serviceRole: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-    resend: !!process.env.RESEND_API_KEY,
-    mux: !!(process.env.MUX_TOKEN_ID && process.env.MUX_TOKEN_SECRET),
-    // APP_URL is canonical; SITE_URL is the SEO fallback alias.
-    appUrl: !!(process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL),
-  }
+  const supabaseUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const serviceRole = !!process.env.SUPABASE_SERVICE_ROLE_KEY
 
   // serviceRole is critical: without it the admin client cannot be constructed
   // at all, so a deploy missing it is genuinely broken and should fail its
-  // healthcheck loudly via the 503 `misconfigured` response below — which
-  // already reports the full env object, serviceRole: false included.
-  const criticalOk = env.supabaseUrl && env.supabaseKey && env.serviceRole
+  // healthcheck loudly via the 503 `misconfigured` response below. Which
+  // secret is missing stays off this public payload.
+  const criticalOk = supabaseUrl && supabaseKey && serviceRole
 
-  const checks = {
-    status: 'ok' as 'ok' | 'degraded' | 'misconfigured',
+  const checks: {
+    status: 'ok' | 'degraded' | 'misconfigured'
+    ready: boolean
+    timestamp: string
+    startedAt: string
+    version: string
+    uptimeSec: number
+    supabase: string
+  } = {
+    status: 'ok',
     ready: false,
     timestamp: new Date().toISOString(),
+    startedAt,
     version: process.env.npm_package_version ?? '0.1.0',
     uptimeSec: Math.floor(process.uptime()),
-    supabase: 'unknown' as string,
-    env,
+    supabase: 'unknown',
   }
 
   if (!criticalOk) {

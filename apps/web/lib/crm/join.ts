@@ -140,14 +140,14 @@ export const JOIN_PROVISION_TIMEOUT_MS = 4000
  * Best-effort CRM hook. keepalive lets the POST finish if the page navigates.
  * Callers should await this before a hard redirect so the request is not aborted.
  */
-export async function requestJoinProvision(email: string): Promise<void> {
+export async function requestJoinProvision(email: string, website = ''): Promise<void> {
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), JOIN_PROVISION_TIMEOUT_MS)
   try {
     await fetch('/api/auth/provision', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, website }),
       keepalive: true,
       signal: ctrl.signal,
     })

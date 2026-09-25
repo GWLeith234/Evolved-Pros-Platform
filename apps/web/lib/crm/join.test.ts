@@ -147,7 +147,16 @@ describe('requestJoinProvision', () => {
       const [url, init] = fetchMock.mock.calls[0]
       expect(url).toBe('/api/auth/provision')
       expect(init).toMatchObject({ method: 'POST', keepalive: true })
-      expect(JSON.parse(String(init?.body))).toEqual({ email: 'dana@northgate.example' })
+      expect(JSON.parse(String(init?.body))).toEqual({
+        email: 'dana@northgate.example',
+        website: '',
+      })
+      await requestJoinProvision('dana@northgate.example', 'http://spam.example')
+      const honeypot = fetchMock.mock.calls[1]?.[1]
+      expect(JSON.parse(String(honeypot?.body))).toEqual({
+        email: 'dana@northgate.example',
+        website: 'http://spam.example',
+      })
     } finally {
       vi.unstubAllGlobals()
     }

@@ -3897,10 +3897,18 @@ html.light-mode .ep-media-brief-cta {
 }
 html.light-mode .ep-media-share-btn {
   background: var(--navy);
+  color: var(--white);
 }
 .ep-media-share-btn--ghost {
   background: transparent;
   color: var(--text-primary);
+  border: 1px solid var(--media-line);
+}
+/* Beats html.light-mode .ep-media-share-btn, which painted the COPY
+   button navy-on-navy (text stayed --text-primary / navy). */
+html.light-mode .ep-media-share-btn--ghost {
+  background: transparent;
+  color: var(--navy);
   border: 1px solid var(--media-line);
 }
 .ep-media-soft-cta {

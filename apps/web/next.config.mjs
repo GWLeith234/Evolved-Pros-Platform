@@ -7,6 +7,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  // Don't advertise the framework. X-Powered-By: Next.js is not a feature.
+  poweredByHeader: false,
   // Monorepo: trace workspace packages so standalone includes them, and so
   // the emit path is apps/web/.next/standalone/apps/web/server.js (the path
   // railway.toml / scripts/start-standalone.sh boot).
@@ -83,14 +85,33 @@ const nextConfig = {
               // connectivity via www.google.com's long-poll fallback. Without these
               // the reply listener can't connect ("Could not reach Cloud Firestore").
               // Audience analytics (optional, env-gated): GA4 gtag + Clarity.
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.apigateway.co https://*.apigateway.co wss://*.apigateway.co https://stream.mux.com https://*.mux.com https://*.googleapis.com wss://*.googleapis.com https://firestore.googleapis.com https://firebaseinstallations.googleapis.com https://www.google.com https://*.firebaseio.com wss://*.firebaseio.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://www.clarity.ms https://*.clarity.ms",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.apigateway.co https://*.apigateway.co wss://*.apigateway.co https://stream.mux.com https://*.mux.com https://*.googleapis.com wss://*.googleapis.com https://firestore.googleapis.com https://firebaseinstallations.googleapis.com https://www.google.com https://*.firebaseio.com wss://*.firebaseio.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://www.clarity.ms https://*.clarity.ms https://c.bing.com",
               "frame-src 'self' https://cdn.apigateway.co https://*.apigateway.co https://www.youtube.com https://www.youtube-nocookie.com https://*.heygen.com",
-              "img-src 'self' data: blob: https://*.supabase.co https://image.mux.com https://images.unsplash.com https://*.apigateway.co https://www.google.com https://i.ytimg.com https://img.youtube.com https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms https://*.clarity.ms",
+              "img-src 'self' data: blob: https://*.supabase.co https://image.mux.com https://images.unsplash.com https://*.apigateway.co https://www.google.com https://i.ytimg.com https://img.youtube.com https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms https://*.clarity.ms https://c.bing.com",
               "media-src 'self' https://stream.mux.com https://*.mux.com blob:",
               "worker-src 'self' blob:",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.apigateway.co",
               "font-src 'self' https://fonts.gstatic.com https://cdn.apigateway.co",
+              // Same-origin only. Preview cards and in-app frames stay allowed.
+              // YouTube, HeyGen, and Vendasta are framed *by* us (frame-src),
+              // not the other way around, so they do not need to embed this app.
+              "frame-ancestors 'self'",
             ].join('; '),
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains',
+          },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          {
+            // Unused powerful features stay off. payment=(self) keeps a future
+            // first-party Payment Request call working; Stripe Checkout is a
+            // redirect, not an embedded payment frame. Camera/mic stay off so
+            // the Vendasta text widget is unaffected.
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), payment=(self)',
           },
         ],
       },
