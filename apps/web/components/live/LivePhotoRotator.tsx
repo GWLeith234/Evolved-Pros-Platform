@@ -106,7 +106,7 @@ export function LivePhotoRotator() {
               )}
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ display: 'flex', gap: 0 }}>
             {ROTATOR_PHOTOS.map((p, i) => (
               <button
                 key={p.src}
@@ -114,15 +114,27 @@ export function LivePhotoRotator() {
                 aria-label={`Show photo ${i + 1}`}
                 onClick={() => setIdx(i)}
                 style={{
-                  width: i === idx ? 32 : 12,
-                  height: 4,
-                  background: i === idx ? '#C9A84C' : 'rgba(255,255,255,0.4)',
+                  width: 44,
+                  height: 44,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'transparent',
                   border: 'none',
                   padding: 0,
                   cursor: 'pointer',
-                  transition: 'all 240ms ease',
                 }}
-              />
+              >
+                <span
+                  aria-hidden
+                  style={{
+                    width: i === idx ? 32 : 12,
+                    height: 4,
+                    background: i === idx ? '#C9A84C' : 'rgba(255,255,255,0.4)',
+                    transition: 'all 240ms ease',
+                  }}
+                />
+              </button>
             ))}
           </div>
         </div>

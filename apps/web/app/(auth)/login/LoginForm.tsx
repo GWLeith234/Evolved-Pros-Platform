@@ -238,7 +238,7 @@ export function LoginForm() {
                   style={{
                     fontFamily: '"Barlow Condensed", sans-serif',
                     backgroundColor: tab === 'password' ? 'var(--navy)' : 'transparent',
-                    color: tab === 'password' ? 'var(--white)' : 'var(--muted)',
+                    color: tab === 'password' ? 'var(--white)' : '#5B6B78',
                   }}
                 >
                   PASSWORD
@@ -250,7 +250,7 @@ export function LoginForm() {
                   style={{
                     fontFamily: '"Barlow Condensed", sans-serif',
                     backgroundColor: tab === 'magic' ? 'var(--navy)' : 'transparent',
-                    color: tab === 'magic' ? 'var(--white)' : 'var(--muted)',
+                    color: tab === 'magic' ? 'var(--white)' : '#5B6B78',
                   }}
                 >
                   MAGIC LINK
@@ -294,14 +294,14 @@ export function LoginForm() {
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                         required
-                        className="w-full min-h-[44px] border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 pr-10 text-sm text-[color:var(--navy)] focus:outline-none focus:border-teal-legacy"
+                        className="w-full min-h-[44px] border border-[rgba(27,60,90,0.18)] rounded px-3 py-2 pr-12 text-sm text-[color:var(--navy)] focus:outline-none focus:border-teal-legacy"
                         style={{ backgroundColor: '#fff', colorScheme: 'light' }}
                       />
                       <button
                         type="button"
                         tabIndex={-1}
                         onClick={() => setShowPassword(v => !v)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                        className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center transition-colors"
                         style={{ color: 'var(--muted)' }}
                         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--navy)' }}
                         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--muted)' }}
@@ -395,9 +395,9 @@ export function LoginForm() {
           )}
         </div>
         <div className="px-8 py-4 border-t text-center" style={{ borderColor: 'rgba(27,60,90,0.08)', backgroundColor: 'rgba(27,60,90,0.02)' }}>
-          <p className="text-xs text-muted">
+          <p className="text-xs" style={{ color: '#5B6B78' }}>
             Access is granted through your Evolved Pros membership.{' '}
-            <a href="/pricing" className="underline hover:text-[color:var(--navy)] transition-colors">View pricing</a>
+            <a href="/pricing" className="underline hover:text-[color:var(--navy)] transition-colors" style={{ color: '#5B6B78' }}>View pricing</a>
           </p>
         </div>
       </div>

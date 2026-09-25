@@ -118,7 +118,7 @@ export function PricingTierCards({
       name: 'The Evolved Pros 99',
       priceKey: 'professional',
       badge: 'The 99',
-      badgeColor: '#C9302A',
+      badgeColor: '#FF5A4E',
       featured: true,
       popular: true,
       tagline: '99 seats. One room.',
@@ -246,7 +246,7 @@ export function PricingTierCards({
               {/* Badge */}
               <div className="mb-4 flex items-center gap-2">
                 <span
-                  className="font-condensed font-bold uppercase tracking-[0.14em] text-[9px] px-2.5 py-1 rounded"
+                  className={`font-condensed font-bold uppercase tracking-[0.14em] px-2.5 py-1 rounded ${tier.featured ? 'text-[11px]' : 'text-[9px]'}`}
                   style={{
                     backgroundColor: `${tier.badgeColor}18`,
                     color: tier.badgeColor,
@@ -257,8 +257,8 @@ export function PricingTierCards({
                 </span>
                 {tier.popular && (
                   <span
-                    className="font-condensed font-bold uppercase tracking-[0.1em] text-[8px] px-2 py-0.5 rounded"
-                    style={{ backgroundColor: 'rgba(201,48,42,.1)', color: '#C9302A' }}
+                    className="font-condensed font-bold uppercase tracking-[0.1em] text-[11px] px-2 py-0.5 rounded"
+                    style={{ backgroundColor: 'rgba(255,90,78,.12)', color: '#FF5A4E' }}
                   >
                     Most popular
                   </span>
@@ -359,8 +359,8 @@ export function PricingTierCards({
                   }}
                 >
                   <p
-                    className="font-condensed font-bold uppercase tracking-[0.12em] text-[9px] mb-1.5"
-                    style={{ color: '#C9302A' }}
+                    className="font-condensed font-bold uppercase tracking-[0.12em] text-[11px] mb-1.5"
+                    style={{ color: '#FF5A4E' }}
                   >
                     Mastermind
                   </p>

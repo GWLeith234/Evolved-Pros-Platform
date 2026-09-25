@@ -3861,6 +3861,9 @@ html.light-mode .ep-media-thumb-fallback {
   text-transform: uppercase;
   white-space: nowrap;
 }
+html.light-mode .ep-media-module-head a {
+  color: #C00A26;
+}
 .ep-media-featured { margin: 4px 0 18px; }
 .ep-media-featured-grid {
   display: grid;
@@ -4034,6 +4037,9 @@ html.light-mode .ep-media-brief-cta {
   color: var(--text-tertiary);
 }
 .ep-media-breadcrumb a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--text-secondary);
   text-decoration: none;
 }
@@ -4125,7 +4131,8 @@ html.light-mode .ep-media-brief-cta {
   margin-right: 4px;
 }
 .ep-media-share-btn {
-  min-height: 32px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0 12px;
   border: 0;
   background: var(--navy);
@@ -4144,7 +4151,15 @@ html.light-mode .ep-media-share-btn {
 .ep-media-share-btn--ghost {
   background: transparent;
   color: var(--text-primary);
-  border: 1px solid var(--media-line);
+  border: 1px solid color-mix(in srgb, var(--text-primary) 35%, transparent);
+}
+@media (max-width: 480px) {
+  .ep-media-share {
+    gap: 6px;
+  }
+  .ep-media-share-btn {
+    padding: 0 10px;
+  }
 }
 /* Beats html.light-mode .ep-media-share-btn, which painted the COPY
    button navy-on-navy (text stayed --text-primary / navy). */
@@ -4418,6 +4433,8 @@ html.light-mode .live-force-dark .ep-public-footer-logo--on-light {
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 24px), transparent 100%);
 }
 .ep-global-nav-list::-webkit-scrollbar { display: none; }
 .ep-global-nav-list a {
