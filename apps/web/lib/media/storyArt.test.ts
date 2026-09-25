@@ -26,7 +26,7 @@ const portal = readFileSync(
   'utf8',
 )
 const article = readFileSync(
-  resolve(here, '../../app/(public)/media/[pillar]/[slug]/page.tsx'),
+  resolve(here, '../../components/media/MediaStoryDocument.tsx'),
   'utf8',
 )
 const magazine = readFileSync(

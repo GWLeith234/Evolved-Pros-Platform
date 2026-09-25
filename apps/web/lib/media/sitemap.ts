@@ -53,6 +53,7 @@ export function isListedPublicMediaStory(story: {
 }): boolean {
   if (story.is_published === false) return false
   const path = mediaArticlePath(story.pillar, story.slug)
+  if (path === '/media/preview' || path?.startsWith('/media/preview/')) return false
   return Boolean(path && !UNPUBLISHED_MEDIA_PATHS.has(path))
 }
 
@@ -80,6 +81,7 @@ export function toMediaSitemapEntries(
     if (row.is_published !== true) continue
     const path = mediaArticlePath(row.pillar, row.slug)
     if (!path || UNPUBLISHED_MEDIA_PATHS.has(path)) continue
+    if (path === '/media/preview' || path.startsWith('/media/preview/')) continue
     entries.push({
       url: `${base}${path}`,
       lastModified: row.published_at ? new Date(row.published_at) : new Date(),

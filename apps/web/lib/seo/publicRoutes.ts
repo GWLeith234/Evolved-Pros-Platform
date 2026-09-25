@@ -81,6 +81,8 @@ export const ROBOTS_DISALLOW = [
   '/onboarding',
   '/dev-login',
   '/login',
+  // Unpublished story previews. noindex headers are the other half.
+  '/media/preview',
 ] as const
 
 /**

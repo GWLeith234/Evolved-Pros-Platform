@@ -18,6 +18,14 @@ const USER_FACING = [
   resolve(here, '../../app/(public)/media/[pillar]/page.tsx'),
   resolve(here, '../../app/(public)/media/[pillar]/[slug]/page.tsx'),
   resolve(here, '../../app/(public)/media/[pillar]/[slug]/ArticleShareBar.tsx'),
+  resolve(here, '../../app/(public)/media/preview/page.tsx'),
+  resolve(here, '../../app/(public)/media/preview/[slug]/page.tsx'),
+  resolve(here, '../../app/(public)/media/preview/[slug]/card/page.tsx'),
+  resolve(here, '../../components/media/MediaStoryDocument.tsx'),
+  resolve(here, '../../components/media/DraftPreviewRibbon.tsx'),
+  resolve(here, '../../components/media/MediaSocialCard.tsx'),
+  resolve(here, '../../components/media/PreviewIndexFrame.tsx'),
+  resolve(here, '../../components/admin/media/CopyPreviewLinkButton.tsx'),
   resolve(here, './brand.ts'),
   resolve(here, './desk.ts'),
   resolve(here, './scrollInventory.ts'),
@@ -25,12 +33,19 @@ const USER_FACING = [
 
 describe('Media copy hygiene', () => {
   it('strips media OG and podcast titles at the render boundary', () => {
-    const article = readFileSync(
+    const article = readFileSync(resolve(here, './storyMeta.ts'), 'utf8')
+    expect(article).toMatch(/stripEmDashCopy\(story\.seo_title/)
+    expect(article).toMatch(/stripEmDashCopy\(story\.seo_description/)
+    const page = readFileSync(
       resolve(here, '../../app/(public)/media/[pillar]/[slug]/page.tsx'),
       'utf8',
     )
-    expect(article).toMatch(/stripEmDashCopy\(story\.seo_title/)
-    expect(article).toMatch(/stripEmDashCopy\(story\.seo_description/)
+    expect(page).toMatch(/mediaStorySocialMetadata/)
+    const preview = readFileSync(
+      resolve(here, '../../app/(public)/media/preview/[slug]/page.tsx'),
+      'utf8',
+    )
+    expect(preview).toMatch(/mediaStorySocialMetadata/)
     const podcast = readFileSync(resolve(here, '../podcast/public.ts'), 'utf8')
     expect(podcast).toMatch(/stripEmDashCopy\(row\.title/)
     expect(podcast).toMatch(/title: stripEmDashCopy\(String\(chapter\.title/)

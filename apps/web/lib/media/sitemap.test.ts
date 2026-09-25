@@ -78,6 +78,15 @@ describe('toMediaSitemapEntries', () => {
     ])
     expect(entries.map(e => e.url)).toEqual([`${BASE}/media/identity/real-article`])
   })
+
+  it('never emits /media/preview, including a pillar named preview', () => {
+    const entries = toMediaSitemapEntries(BASE, [
+      { pillar: 'preview', slug: 'secret-draft', published_at: null, is_published: true },
+      { pillar: 'foundation', slug: 'real-article', published_at: null, is_published: true },
+    ])
+    expect(entries.map(e => e.url)).toEqual([`${BASE}/media/foundation/real-article`])
+    expect(entries.some(e => e.url.includes('/media/preview'))).toBe(false)
+  })
 })
 
 describe('listPublicMediaStories', () => {
@@ -114,6 +123,9 @@ describe('listPublicMediaStories', () => {
     ).toBe(false)
     expect(
       isListedPublicMediaStory({ pillar: 'strategy', slug: null, is_published: true }),
+    ).toBe(false)
+    expect(
+      isListedPublicMediaStory({ pillar: 'preview', slug: 'secret-draft', is_published: true }),
     ).toBe(false)
   })
 })
