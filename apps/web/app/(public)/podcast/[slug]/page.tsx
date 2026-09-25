@@ -137,6 +137,7 @@ export default async function PublicEpisodePage({ params }: Props) {
   const related = extras?.related ?? buildRelatedEpisodes(ep, all)
   const paragraphs = transcriptParagraphs(ep)
   const segments = ep.transcript_segments
+  const posterPos = guestStillObjectPosition(ep, '50% 50%')
   const showSegments = hasSegments(ep)
 
   return (
@@ -178,7 +179,8 @@ export default async function PublicEpisodePage({ params }: Props) {
               youtubeId={ep.youtube_id}
               title={ep.title}
               posterUrl={episodePosterUrl(ep)}
-              posterObjectPosition={guestStillObjectPosition(ep, '50% 50%')}
+              posterObjectPosition={posterPos}
+              playButtonPlacement={posterPos !== '50% 50%' ? 'corner' : 'center'}
             />
           </div>
         ) : null}
