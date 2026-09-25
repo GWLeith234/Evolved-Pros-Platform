@@ -590,6 +590,14 @@ html.light-mode .text-white {
   color: #1b3c5a !important;
 }
 
+/* Accent buttons keep white text in light mode (QA 2026-09-25 #04). */
+html.light-mode .bg-red.text-white,
+html.light-mode .bg-red-hot.text-white,
+html.light-mode .ep-on-accent,
+html.light-mode .ep-on-accent.text-white {
+  color: #fff !important;
+}
+
 /* Muted text — covers /20, /25, /30 in addition to /40–/70 */
 html.light-mode .text-white\/20,
 html.light-mode .text-white\/25,

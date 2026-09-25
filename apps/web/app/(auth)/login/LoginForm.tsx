@@ -352,8 +352,8 @@ export function LoginForm() {
                     type="submit"
                     disabled={loading}
                     aria-busy={loading}
-                    className={`w-full py-3 rounded font-bold uppercase tracking-wider text-sm text-white transition-all disabled:opacity-50 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: 'var(--brand-red-hot)' }}
+                    className={`ep-on-accent w-full py-3 rounded font-bold uppercase tracking-wider text-sm text-white transition-all disabled:opacity-50 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: '#D90B2B' }}
                   >
                     {loading ? (<><Spinner />{mode === 'signup' ? 'Creating account…' : 'Signing in…'}</>) : copy.submit}
                   </button>
@@ -382,8 +382,8 @@ export function LoginForm() {
                     type="submit"
                     disabled={loading}
                     aria-busy={loading}
-                    className={`w-full py-3 rounded font-bold uppercase tracking-wider text-sm text-white transition-all disabled:opacity-50 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                    style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: 'var(--brand-red-hot)' }}
+                    className={`ep-on-accent w-full py-3 rounded font-bold uppercase tracking-wider text-sm text-white transition-all disabled:opacity-50 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    style={{ fontFamily: '"Barlow Condensed", sans-serif', backgroundColor: '#D90B2B' }}
                   >
                     {loading ? (<><Spinner />Sending…</>) : 'Send Login Link →'}
                   </button>
