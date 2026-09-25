@@ -6,11 +6,9 @@ import { ChannelSidebar } from './ChannelSidebar'
 import { LeaderboardRail } from './LeaderboardRail'
 import type { Channel, Post, LeaderboardEntry, MemberSummary } from '@/lib/community/types'
 
-// SPRINT HYDRATION-FIX-3 — CommunityFeed opens a Supabase Realtime channel
-// inside its useEffect. The realtime-js client carries MessageChannel /
-// MessagePort plumbing that surfaces in React's scheduler stack during
-// hydration of /community/[channelSlug] (#425/#422). Forcing the subtree
-// client-only removes the dual-render entirely.
+// CommunityFeed opens a Supabase Realtime channel in an effect. realtime-js
+// MessagePort plumbing still surfaces while /community/[channelSlug]
+// hydrates (#425/#422), so this subtree stays client-only.
 const CommunityFeed = dynamic(
   () => import('./CommunityFeed').then((m) => m.CommunityFeed),
   { ssr: false },

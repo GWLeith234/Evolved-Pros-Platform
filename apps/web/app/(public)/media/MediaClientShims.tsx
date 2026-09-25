@@ -1,19 +1,12 @@
 'use client'
 
 /**
- * SPRINT HYDRATION-FIX-6 — SSR-skip wrappers for /media client subtrees.
+ * Client-only wrappers for /media subtrees.
  *
- * MediaAdZone and StoryComments both import '@/lib/supabase/client' at
- * module level. Supabase's realtime scheduler instantiates a MessagePort
- * during SSR, which surfaces as React hydration errors #425 / #422 on the
- * /media listing and article detail pages. Deferring these subtrees to
- * client-only via next/dynamic with ssr: false closes the diff — the
- * server emits the surrounding page shell and these components mount
- * fresh on the client.
- *
- * dynamic({ ssr: false }) cannot be invoked from a Server Component in
- * App Router, so this wrapper file lives next to the Server page.tsx
- * files and is imported by them (and by MediaPortalClient).
+ * MediaAdZone and StoryComments import `@/lib/supabase/client` at module
+ * scope. realtime-js constructs a MessagePort during SSR and hydration
+ * fails (#425/#422). `dynamic({ ssr: false })` has to live in a client
+ * file — App Router rejects it from a Server Component.
  */
 
 import dynamic from 'next/dynamic'
