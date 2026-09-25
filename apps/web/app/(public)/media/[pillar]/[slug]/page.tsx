@@ -35,7 +35,7 @@ export async function generateMetadata(
   { params }: { params: { pillar: string; slug: string } },
 ): Promise<Metadata> {
   const story = await fetchStory(params.pillar, params.slug)
-  if (!story) return {}
+  if (!story) notFound()
   return publicPageMetadata(
     `/media/${params.pillar}/${params.slug}`,
     mediaStorySocialMetadata(story),

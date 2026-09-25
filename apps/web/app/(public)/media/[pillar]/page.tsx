@@ -24,7 +24,7 @@ export async function generateStaticParams() {
 export async function generateMetadata(
   { params }: { params: { pillar: string } },
 ): Promise<Metadata> {
-  if (!isKnownPillar(params.pillar)) return {}
+  if (!isKnownPillar(params.pillar)) notFound()
   const label = params.pillar === 'general' ? 'Original' : getPillarLabel(params.pillar)
   return publicPageMetadata(`/media/${params.pillar}`, {
     title: mediaSectionTitle(label),

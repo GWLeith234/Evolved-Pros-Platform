@@ -6,6 +6,9 @@ import { fileURLToPath } from 'node:url'
 import {
   CANONICAL_ORIGIN,
   DEFAULT_OG_IMAGE,
+  DEFAULT_OPEN_GRAPH,
+  DEFAULT_SHARE_IMAGE,
+  DEFAULT_TWITTER,
   SITE_NAME,
   canonicalUrl,
   canonicalizePath,
@@ -167,6 +170,58 @@ describe('publicPageMetadata', () => {
     expect(meta.openGraph?.url).toBe('https://www.evolvedpros.com/pricing')
     const pricedOg = meta.openGraph as { title?: string } | undefined
     expect(pricedOg?.title).toBe('Pricing')
+  })
+
+  it('fills og:image and twitter:image when the page does not set one', () => {
+    const meta = publicPageMetadata('/pricing', {
+      title: 'Pricing',
+      description: 'Plans',
+    })
+    expect(meta.openGraph).toMatchObject({
+      images: [DEFAULT_SHARE_IMAGE],
+    })
+    expect(meta.twitter).toMatchObject({
+      card: 'summary_large_image',
+      images: [DEFAULT_SHARE_IMAGE.url],
+    })
+  })
+
+  it('keeps a caller image and restores the default when images are empty', () => {
+    const custom = publicPageMetadata('/media/strategy/close-the-gap', {
+      openGraph: { images: [{ url: 'https://www.evolvedpros.com/brand/story.png', width: 1200, height: 630 }] },
+      twitter: { images: ['https://www.evolvedpros.com/brand/story.png'] },
+    })
+    expect(custom.openGraph).toMatchObject({
+      images: [{ url: 'https://www.evolvedpros.com/brand/story.png', width: 1200, height: 630 }],
+    })
+    expect(custom.twitter).toMatchObject({
+      images: ['https://www.evolvedpros.com/brand/story.png'],
+    })
+
+    const missing = publicPageMetadata('/about', {
+      openGraph: { images: undefined },
+      twitter: { images: [] },
+    })
+    expect(missing.openGraph).toMatchObject({ images: [DEFAULT_SHARE_IMAGE] })
+    expect(missing.twitter).toMatchObject({ images: [DEFAULT_SHARE_IMAGE.url] })
+  })
+})
+
+describe('DEFAULT_SHARE_IMAGE', () => {
+  it('is the hero still on www, used by both default og and twitter', () => {
+    expect(DEFAULT_SHARE_IMAGE).toEqual({
+      url: 'https://www.evolvedpros.com/brand/hero-evolved-architecture.png',
+      width: 1536,
+      height: 1024,
+    })
+    expect(DEFAULT_OPEN_GRAPH.images).toEqual([DEFAULT_SHARE_IMAGE])
+    expect(DEFAULT_TWITTER.images).toEqual([DEFAULT_SHARE_IMAGE.url])
+    expect(DEFAULT_SHARE_IMAGE.url).not.toContain('platform.evolvedpros.com')
+    expect(DEFAULT_SHARE_IMAGE.url).not.toContain('og-default')
+    expect(DEFAULT_SHARE_IMAGE.url).not.toMatch(/msp-og/i)
+    const here = dirname(fileURLToPath(import.meta.url))
+    const asset = resolve(here, '../../public/brand/hero-evolved-architecture.png')
+    expect(existsSync(asset)).toBe(true)
   })
 })
 

@@ -76,19 +76,39 @@ export const SITE_NAME = 'Evolved Pros'
  */
 export const DEFAULT_OG_IMAGE = '/logo_horizontal_navy.png' as const
 
+/**
+ * Share image for public pages that do not set their own.
+ * 1536×1024 still that ships in `public/brand`. Absolute www URL so a
+ * child `openGraph` object that omits `images` still emits og:image.
+ */
+export const DEFAULT_SHARE_IMAGE = {
+  url: 'https://www.evolvedpros.com/brand/hero-evolved-architecture.png',
+  width: 1536,
+  height: 1024,
+} as const
+
 /** Root-layout OG fields Next.js will drop when a child sets `openGraph`. */
 export const DEFAULT_OPEN_GRAPH = {
   type: 'website' as const,
   siteName: SITE_NAME,
+  images: [DEFAULT_SHARE_IMAGE],
 }
 
 /** Same reason as DEFAULT_OPEN_GRAPH: a child `twitter` object replaces the parent. */
 export const DEFAULT_TWITTER = {
   card: 'summary_large_image' as const,
+  images: [DEFAULT_SHARE_IMAGE.url],
 }
 
 function metadataString(value: unknown): string | undefined {
   return typeof value === 'string' ? value : undefined
+}
+
+/** Keep the default share image when a page does not supply one. */
+function shareImages<T>(fallback: T, provided: unknown): T {
+  if (provided == null) return fallback
+  if (Array.isArray(provided) && provided.length === 0) return fallback
+  return provided as T
 }
 
 /**
@@ -119,6 +139,7 @@ export function publicPageMetadata(
       ...(title ? { title } : {}),
       ...(description ? { description } : {}),
       ...openGraph,
+      images: shareImages(DEFAULT_OPEN_GRAPH.images, openGraph?.images),
       url,
     },
     twitter: {
@@ -126,6 +147,7 @@ export function publicPageMetadata(
       ...(title ? { title } : {}),
       ...(description ? { description } : {}),
       ...twitter,
+      images: shareImages(DEFAULT_TWITTER.images, twitter?.images),
     },
   }
 }

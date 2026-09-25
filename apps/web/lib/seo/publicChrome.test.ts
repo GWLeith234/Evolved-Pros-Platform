@@ -21,14 +21,14 @@ describe('public chrome copy', () => {
   it('LIVE and podcast document titles use a pipe, not an em dash', () => {
     expect(read('../../app/live/page.tsx')).toMatch(/title: 'LIVE \| Evolved Pros'/)
     expect(read('../../app/live/page.tsx')).not.toMatch(/LIVE — Evolved Pros/)
-    expect(read('../../app/(public)/podcast/page.tsx')).toMatch(/\$\{SERIES_NAME\} \| Evolved Pros/)
+    expect(read('../../app/(public)/podcast/(index)/page.tsx')).toMatch(/\$\{SERIES_NAME\} \| Evolved Pros/)
     expect(read('../../app/(public)/podcast/[slug]/page.tsx')).toMatch(
       /\$\{ep\.title\} \| \$\{SERIES_NAME\}/,
     )
   })
 
   it('wires /media document + twitter titles to MEDIA_HUB_TITLE', () => {
-    const src = read('../../app/(public)/media/page.tsx')
+    const src = read('../../app/(public)/media/(hub)/page.tsx')
     expect(src).toMatch(/title: MEDIA_HUB_TITLE/)
     expect(src).toMatch(/twitter:[\s\S]*title: MEDIA_HUB_TITLE/)
     expect(src).not.toMatch(/Evolved Media — Sales/)
@@ -58,7 +58,7 @@ describe('public chrome copy', () => {
   })
 
   it('emits home WebSite JSON-LD', () => {
-    const src = read('../../app/(public)/page.tsx')
+    const src = read('../../app/(public)/(home)/page.tsx')
     expect(src).toMatch(/homeJsonLd/)
     expect(src).toMatch(/application\/ld\+json/)
   })

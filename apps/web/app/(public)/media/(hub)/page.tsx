@@ -8,10 +8,10 @@ import { publicPageMetadata } from '@/lib/seo/canonical'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { pickMediaFeedAds } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
-import type { Episode } from './MediaPortalClient'
+import type { Episode } from '../MediaPortalClient'
 
 const MediaPortalClient = dynamic(
-  () => import('./MediaPortalClient').then(m => m.MediaPortalClient),
+  () => import('../MediaPortalClient').then(m => m.MediaPortalClient),
 )
 
 export const revalidate = 60

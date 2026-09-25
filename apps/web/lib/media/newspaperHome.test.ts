@@ -15,7 +15,7 @@ describe('Phase 1 EPM←TT newspaper home', () => {
   const portal = read('../../app/(public)/media/MediaPortalClient.tsx')
   const masthead = read('../../components/media/Masthead.tsx')
   const slot = read('../../components/media/MediaPartnerSlot.tsx')
-  const page = read('../../app/(public)/media/page.tsx')
+  const page = read('../../app/(public)/media/(hub)/page.tsx')
 
   it('names the surface Evolved Pros Media and uses the lockup PNG pair', () => {
     expect(MEDIA_LOCKUP_LABEL).toBe('Evolved Pros Media')

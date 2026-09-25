@@ -183,7 +183,7 @@ describe('conversion homepage layout contracts', () => {
     'utf8',
   )
   const conversionPageSrc = readFileSync(
-    resolve(root, '../../app/(public)/page.tsx'),
+    resolve(root, '../../app/(public)/(home)/page.tsx'),
     'utf8',
   )
   const globalsSrc = readFileSync(resolve(root, '../../app/globals.css'), 'utf8')

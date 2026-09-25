@@ -29,6 +29,7 @@ import { adMatchesSurface } from '@/lib/ads/iab'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { getPublishedMediaStoriesForHub } from '@/lib/media/public'
 import { heroImageCreditForUrl } from '@/lib/media/heroPrompt'
+import { demoteHtmlH1, stripLeadingTitle } from '@/lib/media/storyBody'
 
 function markBottomLine(html: string): string {
   return html.replace(
@@ -50,8 +51,11 @@ export async function MediaStoryDocument({
   routePillar: string
   routeSlug: string
 }) {
-  const minutes = newspaperReadMinutes(story.body)
-  const rawHtml = story.body ? sanitizeMediaHtml(await marked.parse(story.body)) : ''
+  const body = stripLeadingTitle(story.body ?? '', story.title)
+  const minutes = newspaperReadMinutes(body)
+  const rawHtml = body
+    ? demoteHtmlH1(sanitizeMediaHtml(await marked.parse(body)))
+    : ''
   const html = markBottomLine(rawHtml)
   const byline = lockedArticleByline(story)
   const isOriginal = !story.pillar

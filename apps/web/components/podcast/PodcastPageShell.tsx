@@ -22,7 +22,7 @@ export function PodcastPageShell({ episodes, sponsorAds = [] }: PodcastPageShell
     return (
       <div style={{ background: 'var(--podcast-bg-page)', minHeight: '100vh', color: 'var(--podcast-text-strong)' }}>
         <PodcastThemeBridge theme={podcastTheme} />
-        <PodcastMasthead />
+        <PodcastMasthead heading />
         <section style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 24px 96px' }}>
           <p style={{ color: 'var(--podcast-text-3)' }}>No episodes published yet.</p>
         </section>

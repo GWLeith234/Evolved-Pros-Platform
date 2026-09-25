@@ -26,9 +26,9 @@ export async function generateMetadata({
   const token = firstSearchParam(searchParams.token) ?? ''
   const allowed = isPreviewSlug(params.slug)
     && await authorizeMediaPreview('story', params.slug, token)
-  if (!allowed) return { title: 'Not found', robots: PREVIEW_ROBOTS }
+  if (!allowed) notFound()
   const story = await getMediaStoryBySlug(params.slug)
-  if (!story) return { title: 'Not found', robots: PREVIEW_ROBOTS }
+  if (!story) notFound()
   return mediaStorySocialMetadata(story, { robots: PREVIEW_ROBOTS })
 }
 
