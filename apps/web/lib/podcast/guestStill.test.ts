@@ -38,7 +38,7 @@ describe('Juan Ep 010 public still', () => {
   })
 
   it('homepage Latest episodes uses the allowed still helper, not CloudFront-first', () => {
-    const src = readFileSync(resolve(here, '../../app/(public)/page.tsx'), 'utf8')
+    const src = readFileSync(resolve(here, '../../app/(public)/(home)/page.tsx'), 'utf8')
     expect(src).toMatch(/stillUrl:\s*allowedEpisodeStillUrl\(e\)/)
     expect(src).not.toMatch(/stillUrl:\s*e\.thumbnail_url/)
   })

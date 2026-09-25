@@ -53,3 +53,5 @@ export function BrandedLoading() {
     </div>
   )
 }
+
+export default BrandedLoading

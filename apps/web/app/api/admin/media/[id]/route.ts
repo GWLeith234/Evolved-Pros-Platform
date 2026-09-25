@@ -3,6 +3,7 @@ import { requireAdminApi } from '@/lib/admin/helpers'
 import { adminClient } from '@/lib/supabase/admin'
 import { notifyMediaPublished } from '@/lib/notifications/fanout'
 import { featuredImageForPublish, publishGuardDecision } from '@/lib/media/heroPublishGuard'
+import { stripLeadingTitle } from '@/lib/media/storyBody'
 
 export const dynamic = 'force-dynamic'
 
@@ -61,6 +62,19 @@ export async function PATCH(
 
   if (typeof body.featured_image_url === 'string') {
     body.featured_image_url = body.featured_image_url.trim() || null
+  }
+
+  if (typeof body.body === 'string') {
+    let title = typeof body.title === 'string' ? body.title : ''
+    if (!title) {
+      const { data: existing } = await adminClient
+        .from('media_stories')
+        .select('title')
+        .eq('id', params.id)
+        .maybeSingle()
+      title = existing?.title ?? ''
+    }
+    if (title) body.body = stripLeadingTitle(body.body, title)
   }
 
   // If publishing for the first time, set published_at

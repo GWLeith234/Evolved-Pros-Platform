@@ -4,6 +4,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import type { TablesInsert } from '@evolved-pros/db'
 import { notifyMediaPublished } from '@/lib/notifications/fanout'
 import { publishGuardDecision } from '@/lib/media/heroPublishGuard'
+import { stripLeadingTitle } from '@/lib/media/storyBody'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,8 +54,12 @@ export async function POST(request: Request) {
     }
   }
 
+  const storedBody = typeof articleBody === 'string' && typeof title === 'string'
+    ? stripLeadingTitle(articleBody, title)
+    : articleBody
+
   const row = {
-    title, slug, excerpt, body: articleBody, pillar, story_type,
+    title, slug, excerpt, body: storedBody, pillar, story_type,
     source_url: source_url || null,
     source_name: source_name || null,
     featured_image_url: featuredImage,

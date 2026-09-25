@@ -21,8 +21,10 @@ export function FitMastheadLockup({
   href?: string
   compact?: boolean
 }) {
+  // Compact is the home tease, under the page H1. The /fit page lockup is the H1.
+  const Tag = compact ? 'div' : 'h1'
   return (
-    <h1 className={`ep-fit-masthead-wordmark${compact ? ' ep-fit-masthead-wordmark--compact' : ''}`}>
+    <Tag className={`ep-fit-masthead-wordmark${compact ? ' ep-fit-masthead-wordmark--compact' : ''}`}>
       <Link href={href} aria-label={FIT_LOCKUP_LABEL}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -43,7 +45,7 @@ export function FitMastheadLockup({
           height={LOCKUP_INTRINSIC_HEIGHT}
         />
       </Link>
-    </h1>
+    </Tag>
   )
 }
 

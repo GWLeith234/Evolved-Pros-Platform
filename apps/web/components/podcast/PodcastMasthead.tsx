@@ -13,9 +13,10 @@ import {
 
 const FB = 'var(--font-barlow)'
 
-export function PodcastMastheadLockup() {
+export function PodcastMastheadLockup({ heading = false }: { heading?: boolean } = {}) {
+  const Tag = heading ? 'h1' : 'div'
   return (
-    <h1 className="ep-podcast-masthead-wordmark">
+    <Tag className="ep-podcast-masthead-wordmark">
       <Link href="/podcast" aria-label={PODCAST_LOCKUP_LABEL}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -36,11 +37,11 @@ export function PodcastMastheadLockup() {
           height={LOCKUP_INTRINSIC_HEIGHT}
         />
       </Link>
-    </h1>
+    </Tag>
   )
 }
 
-export function PodcastMasthead() {
+export function PodcastMasthead({ heading = false }: { heading?: boolean } = {}) {
   return (
     <header
       className="ep-podcast-masthead"
@@ -54,7 +55,7 @@ export function PodcastMasthead() {
         fontFamily: FB,
       }}
     >
-      <PodcastMastheadLockup />
+      <PodcastMastheadLockup heading={heading} />
       <p
         style={{
           margin: '12px 0 0',

@@ -12,11 +12,17 @@ import {
 } from '@/lib/lockups'
 import { ALL_MEDIA_SECTIONS, type DeskSectionDef } from '@/lib/media/desk'
 import { MediaMastheadRail } from '@/components/media/MediaMastheadRail'
+import { MediaMastheadWordmark } from '@/components/media/MediaMastheadWordmark'
 import { PublicGlobalNav } from '@/components/layout/PublicGlobalNav'
 
-export function MediaMastheadLockup() {
+/**
+ * Wordmark is an H1 only on the /media home, which has no other page title.
+ * Article, section, and preview pages keep their own single H1.
+ */
+export function MediaMastheadLockup({ heading = false }: { heading?: boolean } = {}) {
+  const Tag = heading ? 'h1' : 'div'
   return (
-    <h1 className="ep-media-masthead-wordmark">
+    <Tag className="ep-media-masthead-wordmark">
       <Link href="/media" aria-label={MEDIA_LOCKUP_LABEL}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -40,7 +46,7 @@ export function MediaMastheadLockup() {
           decoding="sync"
         />
       </Link>
-    </h1>
+    </Tag>
   )
 }
 
@@ -73,7 +79,7 @@ export function Masthead({
             </Link>
           </div>
 
-          <MediaMastheadLockup />
+          <MediaMastheadWordmark />
 
           <MediaMastheadRail sections={sections} />
         </div>
