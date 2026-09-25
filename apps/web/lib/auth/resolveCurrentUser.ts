@@ -4,7 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
-import { effectiveTier } from '@/lib/tier'
+import { applyMemberAccess } from '@/lib/tier'
 
 export type CurrentUserProfile = Database['public']['Tables']['users']['Row']
 
@@ -49,14 +49,12 @@ const resolveCurrentUserCached = cache(async (): Promise<CurrentUserProfile | nu
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  // Member access gate: a dead subscription (tier_status unpaid/canceled/
-  // cancelled) drops the caller to community-tier access. Applied here so the
-  // whole member session sees the effective tier through one resolver — every
-  // downstream hasTierAccess(profile.tier, …) check inherits it, with no extra
-  // query (the row is already selected). Fails open on every other status.
+  // Member access gate. A paid period that has ended drops the caller to
+  // community. A cancellation keeps the paid tier until tier_expires_at.
+  // Comps and admins are left as stored. Applied here so every downstream
+  // hasTierAccess(profile.tier, …) check inherits it, with no extra query.
   const withEffectiveTier = (row: CurrentUserProfile): CurrentUserProfile => {
-    row.tier = effectiveTier(row.tier, row.tier_status)
-    return row
+    return applyMemberAccess(row)
   }
 
   // Try id-match first via adminClient (RLS-bypass). Works for new

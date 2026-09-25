@@ -28,6 +28,7 @@ import { pickArticleAds } from '@/lib/sponsors/partners'
 import { adMatchesSurface } from '@/lib/ads/iab'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { getPublishedMediaStoriesForHub } from '@/lib/media/public'
+import { heroImageCreditForUrl } from '@/lib/media/heroPrompt'
 
 function markBottomLine(html: string): string {
   return html.replace(
@@ -58,6 +59,7 @@ export async function MediaStoryDocument({
   const articleUrl = canonicalUrl(`/media/${routePillar}/${routeSlug}`)
   const cite = mediaMustCite(routePillar, routeSlug)
   const artSrc = resolveStoryArtUrl(story.featured_image_url)
+  const artCredit = heroImageCreditForUrl(story.featured_image_url)
   const sectionHref = `/media/${routePillar}`
 
   let articleAds: ReturnType<typeof pickArticleAds> = { sidebar: null, inBody: [], related: null }
@@ -144,6 +146,7 @@ export async function MediaStoryDocument({
                   decoding="async"
                   className={storyArtImgClass(story.featured_image_url)}
                 />
+                {artCredit ? <figcaption>{artCredit}</figcaption> : null}
               </figure>
             ) : null}
 

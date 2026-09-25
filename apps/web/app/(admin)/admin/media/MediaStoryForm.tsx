@@ -6,6 +6,8 @@ import { ImagePicker } from '@/components/admin/ImagePicker'
 import { CopyPreviewLinkButton } from '@/components/admin/media/CopyPreviewLinkButton'
 import { CONFIRM } from '@/components/admin/safety/confirmCopy'
 import { useConfirmDialog } from '@/components/admin/safety/useConfirmDialog'
+import { HeroArtPanel } from './HeroArtPanel'
+import { PUBLISH_HERO_REQUIRED, isOwnedFeaturedImage } from '@/lib/media/heroPublishGuard'
 
 interface StoryData {
   id?: string
@@ -49,7 +51,15 @@ const inputClass = 'w-full rounded px-3 py-2.5 font-body text-[13px] text-[color
 const inputStyle: React.CSSProperties = { border: '1px solid rgba(27,60,90,0.2)', backgroundColor: 'var(--admin-card)' }
 const labelClass = 'block font-condensed font-bold uppercase tracking-[0.18em] text-[9px] text-[color:var(--admin-text-2)] mb-1.5'
 
-export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryData>; isEdit?: boolean }) {
+export function MediaStoryForm({
+  initial,
+  isEdit,
+  heroStatus,
+}: {
+  initial?: Partial<StoryData>
+  isEdit?: boolean
+  heroStatus?: string | null
+}) {
   const router = useRouter()
   const { confirm, dialog } = useConfirmDialog()
   const [saving, setSaving] = useState(false)
@@ -71,10 +81,15 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
   const [isFeatured, setIsFeatured] = useState(initial?.is_featured ?? false)
 
   const showSource = storyType === 'pioneer_spin' || storyType === 'redirect'
+  const canPublish = isOwnedFeaturedImage(imageUrl)
 
   async function handleSave(publish: boolean) {
     if (!title.trim() || !slug.trim()) {
       setError('Title and slug are required.')
+      return
+    }
+    if (publish && !isOwnedFeaturedImage(imageUrl)) {
+      setError(PUBLISH_HERO_REQUIRED)
       return
     }
     if (publish && !(await confirm(CONFIRM.publishStory()))) return
@@ -106,13 +121,21 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
+      const data = await res.json().catch(() => ({})) as {
+        error?: string
+        id?: string
+        hero?: { status?: string }
+      }
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        setError((data as { error?: string }).error ?? 'Save failed')
+        setError(data.error ?? 'Save failed')
         return
       }
-      // Toast lives on /admin/media — read ?toast=… and render an
-      // aria-live banner. 'published' / 'saved' / 'deleted' are the
+      if (!publish && data.hero?.status && data.id) {
+        router.push(`/admin/media/${data.id}/edit?hero=${data.hero.status}`)
+        router.refresh()
+        return
+      }
+      // Toast lives on /admin/media. 'published' / 'saved' / 'deleted' are the
       // three keys the list page knows about.
       const toast = publish ? 'published' : 'saved'
       router.push(`/admin/media?toast=${toast}`)
@@ -214,6 +237,13 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
         </div>
       </div>
 
+      <HeroArtPanel
+        storyId={initial?.id}
+        imageUrl={imageUrl}
+        heroStatus={heroStatus}
+        onImage={setImageUrl}
+      />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <label className={labelClass}>SEO Title <span className="text-[color:var(--admin-text-2)]">(defaults to title)</span></label>
@@ -235,6 +265,12 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
         <span className="font-condensed font-semibold text-[12px] text-[color:var(--admin-text)]">Featured story</span>
       </label>
 
+      {!canPublish && (
+        <p role="status" className="font-body text-[13px] mb-4" style={{ color: 'var(--admin-red)' }}>
+          {PUBLISH_HERO_REQUIRED}
+        </p>
+      )}
+
       <div className="flex flex-wrap items-center justify-end gap-3">
         {isEdit && initial?.id ? <CopyPreviewLinkButton storyId={initial.id} /> : null}
         <button
@@ -252,7 +288,7 @@ export function MediaStoryForm({ initial, isEdit }: { initial?: Partial<StoryDat
           {saving ? 'Saving...' : 'Save as Draft'}
         </button>
         <button
-          type="button" onClick={() => void handleSave(true)} disabled={saving}
+          type="button" onClick={() => void handleSave(true)} disabled={saving || !canPublish}
           className="ep-admin-el-btn ep-admin-el-btn--primary"
         >
           {saving ? 'Publishing...' : 'Publish Now'}

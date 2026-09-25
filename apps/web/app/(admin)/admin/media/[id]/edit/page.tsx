@@ -7,7 +7,13 @@ import { CrossPostPanel } from '@/components/admin/media/CrossPostPanel'
 
 export const dynamic = 'force-dynamic'
 
-export default async function EditMediaStoryPage({ params }: { params: { id: string } }) {
+export default async function EditMediaStoryPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string }
+  searchParams?: { hero?: string }
+}) {
   // RSC prefetch guard — redirect() during a prefetch yields a 503 because
   // Next can't pack a redirect into the streamed RSC payload. Render
   // nothing on prefetch; the real navigation re-renders with full data.
@@ -32,6 +38,7 @@ export default async function EditMediaStoryPage({ params }: { params: { id: str
       />
       <MediaStoryForm
         isEdit
+        heroStatus={searchParams?.hero ?? null}
         initial={{
           id: story.id,
           title: story.title,
