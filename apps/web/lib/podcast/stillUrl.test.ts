@@ -10,6 +10,7 @@ import {
   allowedEpisodeStillUrl,
   guestStillObjectPosition,
   homeGuestStillObjectPosition,
+  mediaRailStillObjectPosition,
   isBlockedStillHost,
   isJuanEp010,
   isQuangDo,
@@ -108,6 +109,12 @@ describe('allowedEpisodeStillUrl', () => {
         '50% 12%',
       ),
     ).toBe(GUEST_FACE_OBJECT_POSITION)
+  })
+
+  it('keeps the media rail fallback for Juan and everyone except Quang', () => {
+    expect(mediaRailStillObjectPosition({ slug: QUANG_DO_SLUG, stillUrl: QUANG_DO_STILL })).toBe('50% 20%')
+    expect(mediaRailStillObjectPosition({ slug: JUAN_EP010_SLUG, stillUrl: JUAN_EP010_STILL })).toBe('50% 12%')
+    expect(mediaRailStillObjectPosition({ slug: 'someone-else', stillUrl: 'https://cdn.example/heather.jpg' })).toBe('50% 12%')
   })
 
   it('does not emit CloudFront for an unknown episode', () => {

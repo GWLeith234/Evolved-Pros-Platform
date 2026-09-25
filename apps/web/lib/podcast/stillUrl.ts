@@ -91,6 +91,25 @@ export function homeGuestStillObjectPosition(ep: {
   return guestStillObjectPosition(ep, DEFAULT_STILL_OBJECT_POSITION)
 }
 
+/**
+ * Media 16:9 rails. Quang uses his focal point. Every other guest, including
+ * Juan, keeps the rail's existing fallback so those crops do not move.
+ */
+export function mediaRailStillObjectPosition(
+  ep: {
+    stillUrl?: string | null
+    slug?: string | null
+    guestName?: string | null
+    guest_name?: string | null
+    episodeNumber?: number | null
+    episode_number?: number | null
+  },
+  fallback = '50% 12%',
+): string {
+  const focal = guestStillObjectPosition(ep, fallback)
+  return focal === QUANG_DO_OBJECT_POSITION ? focal : fallback
+}
+
 function firstAllowed(url?: string | null): string | null {
   const value = url?.trim()
   if (!value) return null
