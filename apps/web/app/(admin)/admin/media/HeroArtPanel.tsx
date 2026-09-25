@@ -5,6 +5,7 @@ import {
   HERO_KEY_MISSING_MESSAGE,
   isOwnedFeaturedImage,
 } from '@/lib/media/heroPublishGuard'
+import { HERO_IMAGE_CREDIT } from '@/lib/media/heroPrompt'
 
 interface HeroOption {
   id: string
@@ -98,7 +99,7 @@ export function HeroArtPanel({
         House hero art
       </p>
       <p className="font-body text-[13px] text-[color:var(--admin-text)] mb-3">
-        Art direction is pending George's lock. Saving a draft with no image proposes one hero from the current style setting. Regenerate gives you two or three options to accept.
+        Saving a draft with no image proposes one hero. Regenerate gives you two or three options to accept. {HERO_IMAGE_CREDIT}
       </p>
 
       {heroStatus === 'skipped' && !owned && (

@@ -15,7 +15,13 @@ import {
   heroSlug,
   type HeroVariant,
 } from './heroCrops'
-import { buildHeroPrompt, type HeroBrief } from './heroPrompt'
+import {
+  HERO_IMAGE_ASPECT_RATIO,
+  HERO_IMAGE_CREDIT,
+  HERO_IMAGE_RESOLUTION,
+  buildHeroPrompt,
+  type HeroBrief,
+} from './heroPrompt'
 import {
   HERO_KEY_MISSING_MESSAGE,
   brandingObjectPathFromPublicUrl,
@@ -55,14 +61,24 @@ export function queueDraftHero(story: DraftHeroStory): { status: 'queued' | 'ski
   return status
 }
 
-async function uploadPng(path: string, bytes: Buffer): Promise<string> {
+async function uploadBytes(path: string, bytes: Buffer, contentType: string): Promise<string> {
   const { error } = await adminClient.storage.from(HERO_BUCKET).upload(path, bytes, {
-    contentType: 'image/png',
+    contentType,
     upsert: true,
   })
   if (error) throw new Error(`Storage upload failed: ${error.message}`)
   const { data } = adminClient.storage.from(HERO_BUCKET).getPublicUrl(path)
   return data.publicUrl
+}
+
+async function uploadPng(path: string, bytes: Buffer): Promise<string> {
+  return uploadBytes(path, bytes, 'image/png')
+}
+
+async function storeHeroCredit(slug: string, optionId?: string): Promise<void> {
+  const imagePath = heroObjectPath(slug, 'hero-16x9', optionId)
+  const creditPath = imagePath.replace(/hero-16x9\.png$/, 'credit.txt')
+  await uploadBytes(creditPath, Buffer.from(HERO_IMAGE_CREDIT), 'text/plain')
 }
 
 async function storeVariantSet(
@@ -77,6 +93,7 @@ async function storeVariantSet(
     const path = heroObjectPath(slug, variant, optionId)
     variants[variant] = await uploadPng(path, crops[variant])
   }
+  await storeHeroCredit(slug, optionId)
   return { id, url: variants['hero-16x9'], variants }
 }
 
@@ -101,7 +118,12 @@ export async function persistDraftHero(
     throw new Error(HERO_KEY_MISSING_MESSAGE)
   }
   const prompt = buildHeroPrompt(story)
-  const [source] = await requestXaiImages({ prompt, n: 1, aspectRatio: '16:9', resolution: '2k' })
+  const [source] = await requestXaiImages({
+    prompt,
+    n: 1,
+    aspectRatio: HERO_IMAGE_ASPECT_RATIO,
+    resolution: HERO_IMAGE_RESOLUTION,
+  })
   if (!source) throw new Error('xAI returned no image data')
   const stored = await storeVariantSet(story.slug, source)
   await rememberProposedImage(story.id, stored.url, opts?.replace === true)
@@ -119,8 +141,8 @@ export async function generateHeroOptions(
   const sources = await requestXaiImages({
     prompt,
     n: count,
-    aspectRatio: '16:9',
-    resolution: '2k',
+    aspectRatio: HERO_IMAGE_ASPECT_RATIO,
+    resolution: HERO_IMAGE_RESOLUTION,
   })
   const options: HeroOption[] = []
   for (const source of sources.slice(0, count)) {
@@ -172,6 +194,7 @@ export async function acceptHeroOption(
       if (variant === 'hero-16x9') featuredUrl = url
     }
   }
+  await storeHeroCredit(story.slug)
 
   const { error } = await adminClient
     .from('media_stories')
