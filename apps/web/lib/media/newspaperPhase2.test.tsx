@@ -81,6 +81,15 @@ describe('Phase 2 EPM←TT article + section landings', () => {
     expect(share).toContain('Facebook')
     expect(share).toContain('LinkedIn')
     expect(share).toContain('Print')
+    expect(share).toContain('ep-media-share-btn--ghost')
+    expect(share).toContain('Copy')
+    const css = read('../../app/globals.css')
+    const filled = css.indexOf('html.light-mode .ep-media-share-btn {')
+    const ghost = css.indexOf('html.light-mode .ep-media-share-btn--ghost')
+    expect(filled).toBeGreaterThan(-1)
+    expect(ghost).toBeGreaterThan(filled)
+    expect(css.slice(ghost, ghost + 240)).toContain('background: transparent')
+    expect(css.slice(ghost, ghost + 240)).toContain('color: var(--navy)')
   })
 
   it('turns Discussion off and does not invent bylines', () => {

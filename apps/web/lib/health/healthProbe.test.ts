@@ -7,10 +7,11 @@
  * made the probe die during module evaluation on exactly the broken deploy it
  * exists to diagnose — an opaque 500 instead of its own `misconfigured` body.
  *
- * Two invariants: the service-role key is part of the critical-env gate (503,
- * with serviceRole:false in the reported env), and the admin import is lazy and
- * inside the try, so an import-time throw degrades to `unreachable`/200 rather
- * than taking the route down.
+ * Two invariants: the service-role key is part of the critical-env gate (503
+ * `misconfigured`, without naming which secret is missing), and the admin
+ * import is lazy and inside the try, so an import-time throw degrades to
+ * `unreachable`/200 rather than taking the route down. The public body keeps
+ * status, ready, supabase, startedAt, and uptimeSec for deploy proofs.
  *
  * Lives under lib/ because vitest.config.ts only collects `lib/**` specs; the
  * route is imported through the `@/` alias.
@@ -75,7 +76,12 @@ interface HealthBody {
   status: string
   ready: boolean
   supabase: string
-  env: Record<string, boolean>
+  startedAt?: string
+  uptimeSec?: number
+  env?: Record<string, boolean>
+  serviceRole?: boolean
+  resend?: boolean
+  mux?: boolean
 }
 
 async function probe(): Promise<{ status: number; body: HealthBody }> {
@@ -114,10 +120,13 @@ describe('railway health probe — service-role env gate and lazy admin import',
     expect(status).toBe(503)
     expect(body.status).toBe('misconfigured')
     expect(body.ready).toBe(false)
-    expect(body.env.serviceRole).toBe(false)
-    // Env is still fully reported so the broken var is identifiable.
-    expect(body.env.supabaseUrl).toBe(true)
-    expect(body.env.supabaseKey).toBe(true)
+    expect(body.env).toBeUndefined()
+    expect(body.serviceRole).toBeUndefined()
+    expect(body.resend).toBeUndefined()
+    expect(body.mux).toBeUndefined()
+    expect(typeof body.startedAt).toBe('string')
+    expect(Number.isNaN(Date.parse(body.startedAt ?? ''))).toBe(false)
+    expect(typeof body.uptimeSec).toBe('number')
     // The admin module must not have been touched at all.
     expect(adminTables).toEqual([])
   })
@@ -145,6 +154,9 @@ describe('railway health probe — service-role env gate and lazy admin import',
     expect(body.status).toBe('ok')
     expect(body.ready).toBe(true)
     expect(body.supabase).toBe('connected')
+    expect(body.env).toBeUndefined()
+    expect(typeof body.startedAt).toBe('string')
+    expect(typeof body.uptimeSec).toBe('number')
     // Head-only count, no row data — the probe has no business reading rows.
     expect(adminTables).toEqual(['users'])
     expect(adminSelectCalls).toEqual([['id', { head: true, count: 'exact' }]])

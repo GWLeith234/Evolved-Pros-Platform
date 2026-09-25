@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { GlobalNavList } from '@/components/layout/GlobalNavList'
 import { GLOBAL_NAV_CTA, GLOBAL_NAV_LINKS, isGlobalNavCurrent } from '@/lib/layout/globalNav'
 
 /**
@@ -12,6 +13,7 @@ import { GLOBAL_NAV_CTA, GLOBAL_NAV_LINKS, isGlobalNavCurrent } from '@/lib/layo
  * Server component with no session read: see lib/layout/globalNav.ts for why.
  * `current` is passed in rather than read from usePathname so this stays out of
  * the client bundle - the sections are static routes and each knows its own.
+ * GlobalNavList is the client island that scrolls the active tab into view.
  */
 export function PublicGlobalNav({
   /** The section this rail is mounted in, e.g. '/media'. */
@@ -32,7 +34,7 @@ export function PublicGlobalNav({
       data-global-nav={current ?? ''}
     >
       <div className="ep-global-nav-inner">
-        <ul className="ep-global-nav-list">
+        <GlobalNavList>
           {GLOBAL_NAV_LINKS.map(link => {
             const isCurrent = current
               ? isGlobalNavCurrent(link.href, current)
@@ -45,7 +47,7 @@ export function PublicGlobalNav({
               </li>
             )
           })}
-        </ul>
+        </GlobalNavList>
         <Link href={GLOBAL_NAV_CTA.href} className="ep-global-nav-cta">
           {GLOBAL_NAV_CTA.label}
         </Link>

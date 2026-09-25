@@ -75,10 +75,14 @@ export function LoginForm() {
   )
   const [forgotSent, setForgotSent] = useState(false)
   const [forgotError, setForgotError] = useState<string | null>(null)
+  // Honeypot. Bots fill `website`; people never see it. The server treats a
+  // non-empty value as a bot on /api/auth/magic-link and /api/auth/provision.
+  const [website, setWebsite] = useState('')
 
-  async function handlePassword(e: React.FormEvent) {
+  async function handlePassword(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!email.trim() || !password.trim()) return
+    const trap = honeypotFrom(e.currentTarget, website)
     setLoading(true)
     setError(null)
     const supabase = createClient()
@@ -87,6 +91,12 @@ export function LoginForm() {
     // used to call signInWithPassword anyway. Branch here, and never fall
     // through from signUp to signIn (lib/auth/passwordAuth.ts).
     if (passwordAuthMethodFor(mode) === 'signUp') {
+      if (trap.trim() !== '') {
+        await requestJoinProvision(emailNorm, trap)
+        setLoading(false)
+        setSent('confirm')
+        return
+      }
       const { data, error: err } = await supabase.auth.signUp({
         email: emailNorm,
         password,
@@ -103,7 +113,7 @@ export function LoginForm() {
       // Await before any redirect. A fire-and-forget fetch is aborted when
       // window.location changes, which dropped the CRM write on instant sign-in.
       if (shouldProvisionJoin({ mode, kind: 'password-signup', outcome })) {
-        await requestJoinProvision(emailNorm)
+        await requestJoinProvision(emailNorm, trap)
       }
       setLoading(false)
       if (outcome === 'signedIn') {
@@ -134,9 +144,10 @@ export function LoginForm() {
     window.location.href = callbackUrl
   }
 
-  async function handleMagicLink(e: React.FormEvent) {
+  async function handleMagicLink(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!email.trim()) return
+    const trap = honeypotFrom(e.currentTarget, website)
     setLoading(true)
     setError(null)
     const emailNorm = email.trim().toLowerCase()
@@ -145,7 +156,7 @@ export function LoginForm() {
       const res = await fetch('/api/auth/magic-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailNorm, next: nextPath }),
+        body: JSON.stringify({ email: emailNorm, next: nextPath, website: trap }),
       })
       if (!res.ok) {
         const data = (await res.json().catch(() => null)) as { error?: string } | null
@@ -161,7 +172,7 @@ export function LoginForm() {
       return
     }
     if (shouldProvisionJoin({ mode, kind: 'magic-otp' })) {
-      await requestJoinProvision(emailNorm)
+      await requestJoinProvision(emailNorm, trap)
     }
     setLoading(false)
     setSent('magic')
@@ -346,6 +357,7 @@ export function LoginForm() {
                   >
                     {loading ? (<><Spinner />{mode === 'signup' ? 'Creating account…' : 'Signing in…'}</>) : copy.submit}
                   </button>
+                  <LoginHoneypot value={website} onChange={setWebsite} />
                   <AuthModeSwitch mode={mode} redirect={nextPath} />
                 </form>
               ) : (
@@ -375,6 +387,7 @@ export function LoginForm() {
                   >
                     {loading ? (<><Spinner />Sending…</>) : 'Send Login Link →'}
                   </button>
+                  <LoginHoneypot value={website} onChange={setWebsite} />
                   <AuthModeSwitch mode={mode} redirect={nextPath} />
                 </form>
               )}
@@ -389,6 +402,34 @@ export function LoginForm() {
         </div>
       </div>
     </div>
+  )
+}
+
+/** Prefer the live form field so a bot that sets `.value` without React still trips it. */
+function honeypotFrom(form: HTMLFormElement, state: string): string {
+  const raw = new FormData(form).get('website')
+  const fromForm = typeof raw === 'string' ? raw : ''
+  return fromForm.trim() !== '' ? fromForm : state
+}
+
+function LoginHoneypot({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (value: string) => void
+}) {
+  return (
+    <input
+      type="text"
+      name="website"
+      defaultValue={value}
+      onChange={e => onChange(e.target.value)}
+      tabIndex={-1}
+      autoComplete="off"
+      aria-hidden="true"
+      className="ep-media-brief-hp"
+    />
   )
 }
 
