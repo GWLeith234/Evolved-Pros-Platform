@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { adminClient } from '@/lib/supabase/admin'
 import { notifyMediaPublished } from '@/lib/notifications/fanout'
-import { featuredImageForPublish, publishGuardDecision } from '@/lib/media/heroPublishGuard'
+import { featuredImageForPublish } from '@/lib/media/heroPublishGuard'
+import { publishHeroGate } from '@/lib/media/heroReachable'
+import { mediaStoryWriteFailure } from '@/lib/media/mediaStoryWrite'
 import { stripLeadingTitle } from '@/lib/media/storyBody'
 
 export const dynamic = 'force-dynamic'
@@ -51,7 +53,7 @@ export async function PATCH(
       bodyImage: body.featured_image_url,
       currentImage: current?.featured_image_url,
     })
-    const decision = publishGuardDecision({
+    const decision = await publishHeroGate({
       isPublished: true,
       featuredImageUrl,
     })
@@ -89,7 +91,10 @@ export async function PATCH(
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    const failure = mediaStoryWriteFailure(error)
+    return NextResponse.json({ error: failure.error }, { status: failure.status })
+  }
   if (publishing && current && !current.is_published && data.is_published) {
     void notifyMediaPublished({
       title: data.title,

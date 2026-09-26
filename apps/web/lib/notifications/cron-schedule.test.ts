@@ -32,6 +32,16 @@ describe('notification cron schedule lock', () => {
     expect(railway).not.toMatch(/^cronSchedule\s*=/m)
   })
 
+  it('checks published media heroes every 30 minutes, off the :00 and :30 marks', () => {
+    expect(workflow).toContain("cron: '1,31 * * * *'")
+    expect(workflow).not.toContain("cron: '*/30 * * * *'")
+    expect(workflow).toContain('/api/cron/media-image-check')
+    expect(workflow).toContain("github.event.schedule == '1,31 * * * *'")
+    expect(workflow).toContain("github.event.inputs.job == 'media-image-check'")
+    expect(workflow).toContain('curl -sf "$APP_URL/api/cron/media-image-check"')
+    expect(workflow).toContain('| jq .')
+  })
+
   it('queues thank-you Community nudges on the morning tick and never names a send job', () => {
     expect(workflow).toContain('/api/cron/thanks-nudges')
     expect(workflow).toContain("github.event.inputs.job == 'thanks-nudges'")
