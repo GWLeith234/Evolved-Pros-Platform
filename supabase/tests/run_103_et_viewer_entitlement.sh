@@ -48,10 +48,17 @@ ensure_role anon
 ensure_role authenticated
 ensure_role service_role BYPASSRLS
 
+# stdin, not -f: the postgres role cannot read the Actions workspace.
+run_file() {
+  local db="$1"
+  local file="$2"
+  "${PSQL[@]}" -d "$db" < "$file"
+}
+
 cleanup
 "${PSQL[@]}" -d postgres -c "CREATE DATABASE ${DB};"
-"${PSQL[@]}" -d "$DB" -f "$ROOT/supabase/tests/103_et_viewer_fixture.sql"
-"${PSQL[@]}" -d "$DB" -f "$ROOT/supabase/migrations/103_et_viewer_entitlement.sql"
-"${PSQL[@]}" -d "$DB" -f "$ROOT/supabase/tests/103_et_viewer_entitlement_test.sql"
+run_file "$DB" "$ROOT/supabase/tests/103_et_viewer_fixture.sql"
+run_file "$DB" "$ROOT/supabase/migrations/103_et_viewer_entitlement.sql"
+run_file "$DB" "$ROOT/supabase/tests/103_et_viewer_entitlement_test.sql"
 
 echo "=== 103 et viewer entitlement checks passed ==="
