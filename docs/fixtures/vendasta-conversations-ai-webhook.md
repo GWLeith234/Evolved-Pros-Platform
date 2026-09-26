@@ -17,8 +17,8 @@ to these flat keys in the Automations UI.
 
 | Key | Required for upsert | Notes |
 | --- | --- | --- |
-| `name` | Prefer | Full name. Also accepted: `full_name`, `fullName`, `display_name`, `displayName`. |
-| `first_name` / `last_name` | Optional | Joined when `name` is blank. CamelCase aliases accepted. |
+| `first_name` / `last_name` | Prefer | Prospect name. Trimmed and joined with one space; an empty or missing part is skipped. CamelCase aliases (`firstName`, `lastName`) accepted. Vendasta's `name` is often only the first word, so these win when either part is present. |
+| `name` | Fallback | Used when both first and last are empty or missing. Also accepted: `full_name`, `fullName`, `display_name`, `displayName`. |
 | `email` | One of email or phone | Also accepted: `email_address`, `emailAddress`, `contact_email`. |
 | `phone` | One of email or phone | Also accepted: `sms`, `phone_number`, `phoneNumber`, `mobile`. |
 | `company` | Optional | Also accepted: `company_name`, `companyName`, `account_name`. |
@@ -47,10 +47,11 @@ string. Multiple NULLs do not collide on `uq_crm_prospects_email`.
 A payload with neither email nor phone is rejected (`422`). We do not
 invent a placeholder email.
 
-Empty or whitespace-only `name` / `email` / `phone` / `summary` fields are
-treated as missing. The display fallback `AI George lead` is **not**
-identity: a payload that only has that name (or a blank name) and no
-usable email or phone is `422`. No CRM row is created.
+Empty or whitespace-only `name` / `first_name` / `last_name` / `email` /
+`phone` / `summary` fields are treated as missing. The display fallback
+`AI George lead` is **not** identity: a payload that only has that name
+(or a blank name) and no usable email or phone is `422`. No CRM row is
+created.
 
 ## Widget / Automation prompt (locked)
 

@@ -16,6 +16,7 @@ import {
   hasUsableIdentity,
   mapConversationsPayload,
   notifyAdminsOfAiGeorgeLead,
+  resolveConversationsName,
   prependNotes,
   upsertAiGeorgeProspect,
   withAiGeorgeTag,
@@ -144,6 +145,23 @@ describe('mapConversationsPayload — fixture + aliases', () => {
     expect(res.value.full_name).toBe('Ada Lovelace')
   })
 
+  it('prefers first_name + last_name over a truncated name', () => {
+    const res = mapConversationsPayload({
+      name: 'PO',
+      first_name: 'PO',
+      last_name: 'Prove',
+      email: 'po@example.com',
+      phone: '+1 555 0120',
+      company: '120 Re11',
+    })
+    expect(res.kind).toBe('ok')
+    if (res.kind !== 'ok') return
+    expect(res.value.full_name).toBe('PO Prove')
+    expect(res.value.company).toBe('120 Re11')
+    expect(res.value.email).toBe('po@example.com')
+    expect(res.value.sms).toBe('+1 555 0120')
+  })
+
   it('falls back to AI George lead when no name is present', () => {
     const res = mapConversationsPayload({ email: 'ada@example.com' })
     expect(res.kind).toBe('ok')
@@ -196,6 +214,122 @@ describe('mapConversationsPayload — fixture + aliases', () => {
     expect(hasUsableIdentity({ email: null, sms: '+1 555 0100' })).toBe(true)
     const res = mapConversationsPayload({ name: AI_GEORGE_FALLBACK_NAME, email: '   ' })
     expect(res.kind).toBe('invalid')
+  })
+})
+
+describe('resolveConversationsName', () => {
+  it('joins first_name and last_name when both are present', () => {
+    expect(
+      resolveConversationsName({
+        name: 'PO',
+        first_name: 'PO',
+        last_name: 'Prove',
+      }),
+    ).toBe('PO Prove')
+    expect(
+      resolveConversationsName({
+        name: 'PO',
+        firstName: 'PO',
+        lastName: 'Prove',
+      }),
+    ).toBe('PO Prove')
+  })
+
+  it('uses only first_name when last_name is empty or missing', () => {
+    expect(resolveConversationsName({ first_name: 'PO', name: 'PO Prove' })).toBe('PO')
+    expect(resolveConversationsName({ first_name: 'PO', last_name: '' })).toBe('PO')
+    expect(resolveConversationsName({ firstName: 'Ada' })).toBe('Ada')
+  })
+
+  it('uses only last_name when first_name is empty or missing', () => {
+    expect(resolveConversationsName({ last_name: 'Prove', name: 'PO' })).toBe('Prove')
+    expect(resolveConversationsName({ first_name: '', last_name: 'Lovelace' })).toBe('Lovelace')
+    expect(resolveConversationsName({ lastName: 'Cole' })).toBe('Cole')
+  })
+
+  it('falls back to name when first and last are empty or missing', () => {
+    expect(resolveConversationsName({ name: 'PO' })).toBe('PO')
+    expect(
+      resolveConversationsName({ name: 'PO', first_name: '', last_name: '' }),
+    ).toBe('PO')
+    expect(resolveConversationsName({ displayName: 'Pat Cole' })).toBe('Pat Cole')
+    expect(resolveConversationsName({ full_name: 'Alex Rivera' })).toBe('Alex Rivera')
+  })
+
+  it('returns an empty string when every name field is empty', () => {
+    expect(resolveConversationsName({})).toBe('')
+    expect(
+      resolveConversationsName({ name: '', first_name: '', last_name: '' }),
+    ).toBe('')
+    expect(
+      resolveConversationsName({ name: '   ', first_name: '\n', last_name: '\t' }),
+    ).toBe('')
+
+    expect(() => mapConversationsPayload({})).not.toThrow()
+    expect(mapConversationsPayload({})).toEqual({
+      kind: 'invalid',
+      error: 'Email or SMS is required.',
+    })
+
+    const res = mapConversationsPayload({
+      name: '  ',
+      first_name: '',
+      last_name: '   ',
+      email: 'ada@example.com',
+    })
+    expect(res.kind).toBe('ok')
+    if (res.kind !== 'ok') return
+    expect(res.value.full_name).toBe(AI_GEORGE_FALLBACK_NAME)
+  })
+
+  it('trims each part and joins the rest with one space', () => {
+    expect(
+      resolveConversationsName({
+        name: '  PO  ',
+        first_name: '  PO  ',
+        last_name: '\nProve  ',
+      }),
+    ).toBe('PO Prove')
+    expect(
+      resolveConversationsName({
+        first_name: '  Ada ',
+        last_name: '   ',
+      }),
+    ).toBe('Ada')
+    expect(
+      resolveConversationsName({
+        name: '  PO Prove  ',
+        first_name: '   ',
+        last_name: '\t',
+      }),
+    ).toBe('PO Prove')
+  })
+
+  it('uses that resolved name on the prospect, the bell, and the notes', async () => {
+    const res = mapConversationsPayload({
+      name: 'PO',
+      first_name: 'PO',
+      last_name: 'Prove',
+      email: 'po@example.com',
+      phone: '+1 555 0120',
+      company: '120 Re11',
+    })
+    expect(res.kind).toBe('ok')
+    if (res.kind !== 'ok') return
+
+    const db = mockDb()
+    const out = await upsertAiGeorgeProspect(db, res.value, NOW)
+    expect(out).toEqual({ kind: 'created', id: 'p-new' })
+    expect(vi.mocked(db.insertProspect).mock.calls[0][0].full_name).toBe('PO Prove')
+    expect(vi.mocked(db.insertProspect).mock.calls[0][0].source).toBe(AI_GEORGE_SOURCE)
+    expect(vi.mocked(db.insertProspect).mock.calls[0][0].tags).toEqual([AI_GEORGE_TAG])
+
+    expect(aiGeorgeNotificationCopy(res.value, 'p-new')).toEqual({
+      title: AI_GEORGE_NOTIFY_TITLE,
+      body: 'Name: PO Prove\nEmail: po@example.com\nSMS: +1 555 0120\nCompany: 120 Re11',
+      actionUrl: '/admin/crm?prospect=p-new',
+    })
+    expect(buildAiGeorgeNotesBlock(res.value, NOW)).toContain('Name: PO Prove')
   })
 })
 
