@@ -136,7 +136,8 @@ export const ABOUT_GEORGE_LINKS = [
   { label: 'The book', href: BOOK_PREORDER_PATH },
 ] as const
 
-export const ABOUT_PORTRAIT_CAPTION = '[ photo: George Leith, portrait ]'
+/** George picks the final photo. Alternative: /live/george-cloud-broker.jpg */
+export const ABOUT_PORTRAIT_SRC = '/live/george-interview.jpg'
 
 export const ABOUT_WHO_KICKER = 'Who it is for'
 export const ABOUT_WHO_TITLE =
@@ -197,7 +198,6 @@ export function aboutCopyStrings(): string[] {
     ABOUT_GEORGE_NAME,
     ...ABOUT_GEORGE,
     ...ABOUT_GEORGE_LINKS.map(item => item.label),
-    ABOUT_PORTRAIT_CAPTION,
     ABOUT_WHO_KICKER,
     ABOUT_WHO_TITLE,
     ABOUT_WHO_FOR_LABEL,

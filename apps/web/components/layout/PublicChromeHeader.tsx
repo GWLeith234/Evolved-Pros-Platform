@@ -31,7 +31,7 @@ export function PublicChromeHeader({
       {signInHref ? (
         <Link
           href={signInHref}
-          className="rounded px-4 py-2 font-condensed text-[11px] font-bold uppercase tracking-[0.1em] transition-opacity hover:opacity-80"
+          className="inline-flex items-center min-h-11 rounded px-4 py-2 font-condensed text-[11px] font-bold uppercase tracking-[0.1em] transition-opacity hover:opacity-80"
           style={{
             color: 'var(--paper, #F5F0E8)',
             border: '1px solid var(--topnav-border, rgba(245,240,232,0.15))',

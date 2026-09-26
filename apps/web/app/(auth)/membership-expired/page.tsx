@@ -28,7 +28,7 @@ function MembershipExpiredContent() {
     >
       {/* Logo */}
       <p
-        className="font-condensed font-bold text-white tracking-[0.18em] text-base mb-8"
+        className="ep-on-accent font-condensed font-bold text-white tracking-[0.18em] text-base mb-8"
       >
         EVOLVED<span style={{ color: '#ef0e30' }}>·</span>PROS
       </p>
@@ -56,7 +56,7 @@ function MembershipExpiredContent() {
 
       {/* Headline */}
       <h1
-        className="font-display font-bold text-white mb-3"
+        className="ep-on-accent font-display font-bold text-white mb-3"
         style={{ fontSize: '24px' }}
       >
         {headline}
@@ -74,7 +74,7 @@ function MembershipExpiredContent() {
       <div className="space-y-3">
         <Link
           href="/membership"
-          className="block w-full py-3 rounded font-condensed font-semibold uppercase tracking-wide text-sm text-white text-center transition-colors"
+          className="ep-on-accent block w-full py-3 rounded font-condensed font-semibold uppercase tracking-wide text-sm text-white text-center transition-colors"
           style={{ backgroundColor: '#ef0e30' }}
         >
           {isCancelled ? 'Rejoin Evolved Pros →' : 'Renew Membership →'}

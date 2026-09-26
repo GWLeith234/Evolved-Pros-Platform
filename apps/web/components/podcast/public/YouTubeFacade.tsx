@@ -13,16 +13,27 @@ export function YouTubeFacade({
   youtubeId,
   title,
   posterUrl,
+  posterObjectPosition,
+  playButtonPlacement = 'center',
 }: {
   youtubeId: string
   title: string
   /** Episode thumbnail_url / guest art — preferred over YouTube CDN. */
   posterUrl?: string | null
+  /** Applied only while the custom poster is showing. YouTube fallbacks stay centered. */
+  posterObjectPosition?: string
+  /**
+   * `corner` parks a 56px button at the bottom left so it does not cover a
+   * portrait face. Default `center` is the 72px button every other episode uses.
+   * Drop this prop to restore the centered button.
+   */
+  playButtonPlacement?: 'center' | 'corner'
 }) {
   const [active, setActive] = useState(false)
   const ytMax = `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg`
   const ytHq = `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`
   const [thumb, setThumb] = useState(posterUrl?.trim() || ytMax)
+  const corner = playButtonPlacement === 'corner'
 
   if (active) {
     return (
@@ -53,6 +64,7 @@ export function YouTubeFacade({
         alt=""
         aria-hidden
         className="absolute inset-0 h-full w-full object-cover transition-opacity duration-200 group-hover:opacity-90"
+        style={{ objectPosition: thumb === posterUrl?.trim() && posterObjectPosition ? posterObjectPosition : undefined }}
         loading="eager"
         decoding="async"
         onError={() => {
@@ -63,14 +75,21 @@ export function YouTubeFacade({
       />
       <span
         aria-hidden
-        className="absolute inset-0 flex items-center justify-center"
+        className={corner
+          ? 'absolute inset-0 flex items-end justify-start p-3.5'
+          : 'absolute inset-0 flex items-center justify-center'}
         style={{ background: 'linear-gradient(180deg, rgba(10,15,24,0.05), rgba(10,15,24,0.35))' }}
       >
         <span
           className="flex items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-110"
-          style={{ width: 72, height: 72, background: '#ef0e30', boxShadow: '0 8px 30px rgba(239,14,48,0.4)' }}
+          style={{
+            width: corner ? 56 : 72,
+            height: corner ? 56 : 72,
+            background: '#ef0e30',
+            boxShadow: '0 8px 30px rgba(239,14,48,0.4)',
+          }}
         >
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="#fff" aria-hidden>
+          <svg width={corner ? 24 : 30} height={corner ? 24 : 30} viewBox="0 0 24 24" fill="#fff" aria-hidden>
             <path d="M8 5v14l11-7z" />
           </svg>
         </span>

@@ -20,6 +20,7 @@ import {
   formatRailDuration,
   type MediaRailEpisode,
 } from '@/lib/media/podcastRail'
+import { mediaRailStillObjectPosition } from '@/lib/podcast/stillUrl'
 import {
   featuredHeroByline,
   MEDIA_STORY_THUMB_RATIO,
@@ -425,7 +426,7 @@ export function NewspaperPodcast({
                     height={180}
                     loading="lazy"
                     decoding="async"
-                    style={{ objectPosition: '50% 12%' }}
+                    style={{ objectPosition: mediaRailStillObjectPosition({ slug: ep.slug, episode_number: ep.episode_number, stillUrl: still }, '50% 12%') }}
                   />
                 ) : (
                   <div className="ep-media-thumb-fallback" aria-hidden="true">

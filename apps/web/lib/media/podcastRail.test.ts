@@ -84,8 +84,9 @@ describe('MediaLatestPodcast still crop', () => {
     'utf8',
   )
 
-  it('keeps the 16:9 guest still rectangular and anchored to the head', () => {
-    expect(src).toMatch(/objectPosition:\s*'50% 12%'/)
+  it('keeps the 16:9 guest still rectangular and uses the per-guest focal point', () => {
+    expect(src).toMatch(/mediaRailStillObjectPosition/)
+    expect(src).toMatch(/'50% 12%'/)
     expect(src).toMatch(/aspectRatio:\s*'16 \/ 9'/)
     expect(src).not.toMatch(/borderRadius:\s*['"]50%['"]/)
   })

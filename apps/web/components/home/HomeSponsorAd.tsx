@@ -147,7 +147,7 @@ export function SponsorAdCard({ ad, locationId = 'home' }: { ad: SponsorAd; loca
           style={{ borderTop: '1px solid var(--border-color, rgba(255,255,255,0.10))' }}
         >
           <div
-            className="ep-sponsor-cta inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-extrabold uppercase tracking-[0.14em] text-white transition-[background-color,transform] duration-200"
+            className="ep-on-accent ep-sponsor-cta inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-extrabold uppercase tracking-[0.14em] text-white transition-[background-color,transform] duration-200"
             style={{
               backgroundColor: SPONSOR_RED,
               fontFamily: '"Barlow Condensed", sans-serif',

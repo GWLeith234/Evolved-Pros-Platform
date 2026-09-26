@@ -193,7 +193,7 @@ describe('conversion homepage layout contracts', () => {
     expect(conversionHomeSrc).toMatch(/HERO_IMAGE_WIDTH/)
     expect(conversionHomeSrc).toMatch(/JOIN_FREE_HREF/)
     expect(conversionHomeSrc).toMatch(/shrink-0 items-center bg-red/)
-    expect(conversionHomeSrc).toMatch(/flex h-10 items-center justify-between/)
+    expect(conversionHomeSrc).toMatch(/flex min-h-11 items-center justify-between/)
     expect(conversionHomeSrc).not.toMatch(
       /header[\s\S]{0,80}flex max-w-6xl flex-wrap items-center justify-between/,
     )

@@ -95,7 +95,9 @@ describe('about page', () => {
     expect(html).toContain(ABOUT_CLOSE_TITLE)
     expect(html).toContain(ABOUT_CLOSE_BODY)
     expect(html).toContain('Beta')
-    expect(html).toContain('[ photo: George Leith, portrait ]')
+    expect(html).toContain('src="/live/george-interview.jpg"')
+    expect(html).toContain('alt="George Leith"')
+    expect(html).not.toContain('[ photo: George Leith, portrait ]')
 
     for (const banned of BANNED) {
       expect(html).not.toMatch(banned)

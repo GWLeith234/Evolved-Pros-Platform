@@ -18,7 +18,7 @@ import {
   ABOUT_NOTS,
   ABOUT_OPEN_HREF,
   ABOUT_OPEN_LABEL,
-  ABOUT_PORTRAIT_CAPTION,
+  ABOUT_PORTRAIT_SRC,
   ABOUT_PRICING_HREF,
   ABOUT_PRICING_LABEL,
   ABOUT_ROLE,
@@ -170,8 +170,9 @@ export function AboutPage() {
 
         <section className="ep-about-george" aria-labelledby="about-george" data-about-section="george">
           <div className="ep-about-wrap ep-about-george-grid">
-            <figure className="ep-about-portrait">
-              <figcaption>{ABOUT_PORTRAIT_CAPTION}</figcaption>
+            <figure className="ep-about-portrait ep-about-portrait--photo">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={ABOUT_PORTRAIT_SRC} alt="George Leith" width={1000} height={800} loading="lazy" decoding="async" />
             </figure>
             <div>
               <p className="ep-about-kicker">{ABOUT_GEORGE_KICKER}</p>

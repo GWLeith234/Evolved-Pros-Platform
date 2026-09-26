@@ -28,6 +28,7 @@ import {
   type PublicEpisode,
 } from '@/lib/podcast/public'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { guestStillObjectPosition } from '@/lib/podcast/stillUrl'
 import { interleaveAds } from '@/lib/ads/rhythm'
 
 // Public, server-rendered, indexable. The transcript is real DOM text in the
@@ -136,6 +137,7 @@ export default async function PublicEpisodePage({ params }: Props) {
   const related = extras?.related ?? buildRelatedEpisodes(ep, all)
   const paragraphs = transcriptParagraphs(ep)
   const segments = ep.transcript_segments
+  const posterPos = guestStillObjectPosition(ep, '50% 50%')
   const showSegments = hasSegments(ep)
 
   return (
@@ -152,7 +154,7 @@ export default async function PublicEpisodePage({ params }: Props) {
       <div className="mx-auto max-w-3xl px-4 pt-10 sm:px-6">
         {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-6 font-condensed text-[12px] uppercase tracking-[0.14em]" style={{ color: DIMMER }}>
-          <Link href="/podcast" style={{ color: '#ef0e30', textDecoration: 'none' }}>Podcast</Link>
+          <Link href="/podcast" className="inline-flex items-center min-h-11" style={{ color: '#ef0e30', textDecoration: 'none' }}>Podcast</Link>
           <span aria-hidden> / </span>
           <span>{ep.episode_number != null ? `Ep ${String(ep.episode_number).padStart(3, '0')}` : 'Episode'}</span>
         </nav>
@@ -177,6 +179,8 @@ export default async function PublicEpisodePage({ params }: Props) {
               youtubeId={ep.youtube_id}
               title={ep.title}
               posterUrl={episodePosterUrl(ep)}
+              posterObjectPosition={posterPos}
+              playButtonPlacement={posterPos !== '50% 50%' ? 'corner' : 'center'}
             />
           </div>
         ) : null}

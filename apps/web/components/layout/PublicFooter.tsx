@@ -55,8 +55,10 @@ export function PublicFooter({
           aria-label="Evolved Pros home"
           className="ep-public-footer-brand"
           style={{
-            display: 'block',
+            display: 'inline-flex',
+            alignItems: 'center',
             alignSelf: 'flex-start',
+            minHeight: 44,
             lineHeight: 0,
             textDecoration: 'none',
           }}
@@ -85,7 +87,9 @@ export function PublicFooter({
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      minHeight: 38,
+                      justifyContent: 'center',
+                      minHeight: 44,
+                      minWidth: 44,
                       padding: '0 18px',
                       borderRadius: 4,
                       background: 'var(--brand-red)',
@@ -108,7 +112,9 @@ export function PublicFooter({
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      minHeight: 38,
+                      justifyContent: 'center',
+                      minHeight: 44,
+                      minWidth: 44,
                       color: 'var(--text-secondary)',
                       fontFamily: '"Barlow Condensed", sans-serif',
                       fontSize: 13,
