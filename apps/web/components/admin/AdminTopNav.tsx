@@ -12,6 +12,7 @@ interface AdminTopNavProps {
     display_name: string | null
     full_name: string | null
   }
+  weeklyReportsHref?: string | null
 }
 
 function getInitials(name: string | null | undefined): string {
@@ -19,7 +20,7 @@ function getInitials(name: string | null | undefined): string {
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 }
 
-export function AdminTopNav({ profile }: AdminTopNavProps) {
+export function AdminTopNav({ profile, weeklyReportsHref = null }: AdminTopNavProps) {
   const displayName = profile.display_name ?? profile.full_name ?? ''
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { preference, toggleTheme } = useTheme()
@@ -109,7 +110,10 @@ export function AdminTopNav({ profile }: AdminTopNavProps) {
               </button>
             </div>
             <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-              <AdminSidebarNav onSelect={() => setMobileMenuOpen(false)} />
+              <AdminSidebarNav
+                onSelect={() => setMobileMenuOpen(false)}
+                weeklyReportsHref={weeklyReportsHref}
+              />
             </div>
           </aside>
         </div>

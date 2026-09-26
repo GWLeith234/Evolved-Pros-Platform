@@ -1,0 +1,29 @@
+{
+  "name": "EvolveX360 Weekly",
+  "short_name": "EVX Weekly",
+  "description": "EvolveX360 Weekly report for George Leith",
+  "start_url": "/admin/reports/evolvex360/",
+  "scope": "/admin/reports/evolvex360/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#040404",
+  "background_color": "#040404",
+  "icons": [
+    {
+      "src": "/admin/reports/evolvex360/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/admin/reports/evolvex360/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/admin/reports/evolvex360/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

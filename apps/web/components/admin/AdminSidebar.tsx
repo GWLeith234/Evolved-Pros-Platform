@@ -62,7 +62,13 @@ function SidebarSection({
 }
 
 /** Shared nav for the desktop rail and the mobile drawer. */
-export function AdminSidebarNav({ onSelect }: { onSelect?: () => void }) {
+export function AdminSidebarNav({
+  onSelect,
+  weeklyReportsHref = null,
+}: {
+  onSelect?: () => void
+  weeklyReportsHref?: string | null
+}) {
   return (
     <>
       <div className="mb-3">
@@ -71,6 +77,16 @@ export function AdminSidebarNav({ onSelect }: { onSelect?: () => void }) {
       {ADMIN_NAV_SECTIONS.map(section => (
         <SidebarSection key={section.title} section={section} onSelect={onSelect} />
       ))}
+      {weeklyReportsHref ? (
+        <NavLink
+          item={{
+            label: 'Weekly reports',
+            href: weeklyReportsHref,
+            match: /^\/admin\/reports/,
+          }}
+          onSelect={onSelect}
+        />
+      ) : null}
       <div className="mt-auto px-4 pt-4" style={{ borderTop: '1px solid var(--admin-border)' }}>
         <Link
           href="/home"
@@ -85,7 +101,7 @@ export function AdminSidebarNav({ onSelect }: { onSelect?: () => void }) {
   )
 }
 
-export function AdminSidebar() {
+export function AdminSidebar({ weeklyReportsHref = null }: { weeklyReportsHref?: string | null }) {
   return (
     <aside
       className="admin-sidebar hidden md:flex w-[240px] flex-shrink-0 flex-col py-4 overflow-y-auto"
@@ -94,7 +110,7 @@ export function AdminSidebar() {
         borderRight: '1px solid var(--admin-border)',
       }}
     >
-      <AdminSidebarNav />
+      <AdminSidebarNav weeklyReportsHref={weeklyReportsHref} />
     </aside>
   )
 }

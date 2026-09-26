@@ -7,6 +7,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  // PWA scope is `/admin/reports/<slug>/`. Next's built-in slash redirect
+  // would send that URL outside the service worker scope. Middleware restores
+  // the no-slash canonical for every other matched path.
+  skipTrailingSlashRedirect: true,
   // Don't advertise the framework. X-Powered-By: Next.js is not a feature.
   poweredByHeader: false,
   // Monorepo: trace workspace packages so standalone includes them, and so
@@ -23,6 +27,7 @@ const nextConfig = {
     outputFileTracingIncludes: {
       '/api/admin/thanks/send': ['./lib/resend/emails/community-thanks/v12/**/*'],
       '/api/admin/thanks/batch': ['./lib/resend/emails/community-thanks/v12/**/*'],
+      '/admin/reports/[[...asset]]': ['./weekly-reports/**/*'],
     },
   },
 
@@ -67,7 +72,15 @@ const nextConfig = {
     // Host + path redirects live in lib/seo/appRedirects.mjs so they can be
     // unit-tested. Do not re-add a platform.evolvedpros.com → www 308:
     // www is still Bluehost WordPress until George YES on DNS.
-    return appRedirects()
+    return [
+      ...appRedirects(),
+      // Keep the historical no-slash canonical everywhere except PWA scopes.
+      {
+        source: '/:path((?!admin/reports/).+)/',
+        destination: '/:path',
+        permanent: true,
+      },
+    ]
   },
   async headers() {
     return [

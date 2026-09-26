@@ -1,0 +1,170 @@
+{
+  "business": "EXAMPLE",
+  "week": "EXAMPLE",
+  "generatedAt": "EXAMPLE",
+  "lastUpdated": "EXAMPLE",
+  "newestSource": "EXAMPLE",
+  "labels": {
+    "projects": "EXAMPLE",
+    "clients": "EXAMPLE"
+  },
+  "swVersion": "EXAMPLE",
+  "kpis": [
+    {
+      "label": "EXAMPLE",
+      "value": "EXAMPLE",
+      "delta": "EXAMPLE",
+      "source": "EXAMPLE",
+      "asOf": "EXAMPLE",
+      "stale": false
+    },
+    {
+      "label": "EXAMPLE",
+      "value": "EXAMPLE",
+      "delta": "EXAMPLE",
+      "source": "EXAMPLE",
+      "asOf": "EXAMPLE",
+      "stale": false
+    }
+  ],
+  "byProject": [
+    {
+      "name": "EXAMPLE",
+      "items": [
+        {
+          "title": "EXAMPLE",
+          "status": "EXAMPLE",
+          "tone": "EXAMPLE",
+          "body": "EXAMPLE",
+          "source": "EXAMPLE",
+          "asOf": "EXAMPLE",
+          "stale": false
+        },
+        {
+          "title": "EXAMPLE",
+          "status": "EXAMPLE",
+          "tone": "EXAMPLE",
+          "body": "EXAMPLE",
+          "source": "EXAMPLE",
+          "asOf": "EXAMPLE",
+          "stale": false
+        }
+      ]
+    },
+    {
+      "name": "EXAMPLE",
+      "items": [
+        {
+          "title": "EXAMPLE",
+          "status": "EXAMPLE",
+          "tone": "EXAMPLE",
+          "body": "EXAMPLE",
+          "source": "EXAMPLE",
+          "asOf": "EXAMPLE",
+          "stale": false
+        }
+      ]
+    }
+  ],
+  "byClient": [
+    {
+      "name": "EXAMPLE",
+      "items": [
+        {
+          "title": "EXAMPLE",
+          "status": "EXAMPLE",
+          "tone": "EXAMPLE",
+          "body": "EXAMPLE",
+          "source": "EXAMPLE",
+          "asOf": "EXAMPLE",
+          "stale": false
+        },
+        {
+          "title": "EXAMPLE",
+          "status": "EXAMPLE",
+          "tone": "EXAMPLE",
+          "body": "EXAMPLE",
+          "source": "EXAMPLE",
+          "asOf": "EXAMPLE",
+          "stale": false
+        }
+      ]
+    }
+  ],
+  "wins": [
+    {
+      "title": "EXAMPLE",
+      "status": "EXAMPLE",
+      "tone": "EXAMPLE",
+      "body": "EXAMPLE",
+      "source": "EXAMPLE",
+      "asOf": "EXAMPLE",
+      "stale": false
+    },
+    {
+      "title": "EXAMPLE",
+      "status": "EXAMPLE",
+      "tone": "EXAMPLE",
+      "body": "EXAMPLE",
+      "source": "EXAMPLE",
+      "asOf": "EXAMPLE",
+      "stale": false
+    }
+  ],
+  "slips": [
+    {
+      "title": "EXAMPLE",
+      "status": "EXAMPLE",
+      "tone": "EXAMPLE",
+      "body": "EXAMPLE",
+      "source": "EXAMPLE",
+      "asOf": "EXAMPLE",
+      "stale": false
+    },
+    {
+      "title": "EXAMPLE",
+      "status": "EXAMPLE",
+      "tone": "EXAMPLE",
+      "body": "EXAMPLE",
+      "source": "EXAMPLE",
+      "asOf": "EXAMPLE",
+      "stale": false
+    }
+  ],
+  "decisions": [
+    {
+      "title": "EXAMPLE",
+      "status": "EXAMPLE",
+      "tone": "EXAMPLE",
+      "body": "EXAMPLE",
+      "source": "EXAMPLE",
+      "asOf": "EXAMPLE",
+      "stale": false
+    },
+    {
+      "title": "EXAMPLE",
+      "status": "EXAMPLE",
+      "tone": "EXAMPLE",
+      "body": "EXAMPLE",
+      "source": "EXAMPLE",
+      "asOf": "EXAMPLE",
+      "stale": false
+    }
+  ],
+  "nextWeek": [
+    {
+      "title": "EXAMPLE",
+      "status": "EXAMPLE",
+      "tone": "EXAMPLE",
+      "body": "EXAMPLE",
+      "source": "EXAMPLE",
+      "asOf": "EXAMPLE",
+      "stale": false
+    }
+  ],
+  "gaps": [
+    "EXAMPLE",
+    "EXAMPLE"
+  ],
+  "footer": "EXAMPLE"
+}
