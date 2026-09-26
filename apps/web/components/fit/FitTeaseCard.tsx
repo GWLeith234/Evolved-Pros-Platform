@@ -11,9 +11,12 @@ import {
   FIT_TEASE_DEK,
   FIT_UNLOCKS_LINE,
   FIT_UPGRADE_CTA,
+  FIT_VIDEO_PROCESSING,
+  FIT_VIDEO_UNAVAILABLE,
 } from '@/lib/fit/copy'
 import { fitUpgradeHref } from '@/lib/fit/gating'
 import { fitTeaseMeta, type FitMove } from '@/lib/fit/moves'
+import { FitMuxPlayer } from '@/components/fit/FitMuxPlayer'
 
 export function FitTeaseCard({
   move,
@@ -32,6 +35,7 @@ export function FitTeaseCard({
 }) {
   const upgradeHref = fitUpgradeHref()
   const dots = typeof total === 'number' && total > 1 ? total : 0
+  const videoReady = !locked && move.videoStatus === 'ready'
 
   return (
     <article className="ep-fit-tease" aria-label={move.title}>
@@ -42,14 +46,26 @@ export function FitTeaseCard({
           <span>{move.code}</span>
           <span>{move.durationLabel}</span>
         </div>
-        <div className="ep-fit-player-stage" aria-hidden="true">
-          <span className="ep-fit-play" />
-        </div>
+        {videoReady ? (
+          <div className="ep-fit-player-stage ep-fit-player-stage--video">
+            <FitMuxPlayer moveId={move.id} title={move.title} />
+          </div>
+        ) : (
+          <div className="ep-fit-player-stage" aria-hidden="true">
+            <span className="ep-fit-play" />
+          </div>
+        )}
         {locked ? (
           <p className="ep-fit-player-lock">
             <span className="ep-fit-lock-icon" aria-hidden="true" />
             {FIT_LOCKED_BAR}
           </p>
+        ) : null}
+        {!locked && move.videoStatus === 'processing' ? (
+          <p className="ep-fit-player-note">{FIT_VIDEO_PROCESSING}</p>
+        ) : null}
+        {!locked && move.videoStatus === 'errored' ? (
+          <p className="ep-fit-player-note">{FIT_VIDEO_UNAVAILABLE}</p>
         ) : null}
       </div>
 
@@ -63,7 +79,11 @@ export function FitTeaseCard({
         </p>
       ) : null}
 
-      <p className="ep-fit-tease-dek">{FIT_TEASE_DEK}</p>
+      {!locked && move.description ? (
+        <p className="ep-fit-tease-dek">{move.description}</p>
+      ) : (
+        <p className="ep-fit-tease-dek">{FIT_TEASE_DEK}</p>
+      )}
 
       {locked ? (
         <>

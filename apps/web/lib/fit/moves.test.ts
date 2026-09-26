@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { hasEmDash } from '@/lib/home/conversion'
+import { canAccessFit } from '@/lib/entitlements'
 import { canAccessFitLibrary, FIT_REQUIRED_TIER, fitUpgradeHref } from './gating'
 import { fitCopyStrings } from './copy'
 import {
@@ -71,6 +72,17 @@ describe('Fit VIP gate', () => {
     expect(canAccessFitLibrary('pro')).toBe(true)
     expect(fitUpgradeHref()).toBe('/pricing?from=fit&tier=vip')
   })
+
+  it('uses effective tier, so a dead VIP or Pro subscription stays on the teaser', () => {
+    expect(canAccessFit('vip', 'active')).toBe(true)
+    expect(canAccessFit('pro', 'active')).toBe(true)
+    expect(canAccessFit('vip', 'past_due')).toBe(true)
+    expect(canAccessFit('vip', 'expired')).toBe(false)
+    expect(canAccessFit('vip', 'canceled')).toBe(false)
+    expect(canAccessFit('pro', 'unpaid')).toBe(false)
+    expect(canAccessFit('community', 'active')).toBe(false)
+    expect(canAccessFit(null, null)).toBe(false)
+  })
 })
 
 describe('Fit copy hygiene', () => {
@@ -85,6 +97,8 @@ describe('Fit copy hygiene', () => {
       '../../components/fit/FitMasthead.tsx',
       '../../components/fit/FitMarketing.tsx',
       '../../components/fit/FitTeaseCard.tsx',
+      '../../components/fit/FitLibrary.tsx',
+      '../../components/fit/FitMuxPlayer.tsx',
       '../../components/home/HomeFitTeaseBand.tsx',
       '../../components/home/ConversionHome.tsx',
       '../../app/(public)/fit/page.tsx',
