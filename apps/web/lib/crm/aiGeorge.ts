@@ -80,6 +80,21 @@ function firstString(
 }
 
 /**
+ * Prospect display name from a flat Automation body.
+ *
+ * Vendasta's `name` is only the first word of the contact. Prefer
+ * `first_name` + `last_name` (trimmed, one space, skip blanks). When both
+ * parts are empty or missing, fall back to `name` and its aliases.
+ */
+export function resolveConversationsName(body: Record<string, unknown>): string {
+  const first = firstString(body, FIRST_NAME_KEYS, NAME_MAX)
+  const last = firstString(body, LAST_NAME_KEYS, NAME_MAX)
+  const joined = [first, last].filter(Boolean).join(' ')
+  if (joined) return joined
+  return firstString(body, NAME_KEYS, NAME_MAX)
+}
+
+/**
  * Map a flat Automation webhook body to a lead.
  *
  * Field aliases are hypothesized: Vendasta's Send a webhook body is
@@ -92,12 +107,7 @@ export function mapConversationsPayload(body: unknown): MapResult {
   }
   const rec = body as Record<string, unknown>
 
-  const named = firstString(rec, NAME_KEYS, NAME_MAX)
-  const first = firstString(rec, FIRST_NAME_KEYS, NAME_MAX)
-  const last = firstString(rec, LAST_NAME_KEYS, NAME_MAX)
-  const joined = [first, last].filter(Boolean).join(' ')
-  const collectedName = named || joined
-  const full_name = collectedName || AI_GEORGE_FALLBACK_NAME
+  const full_name = resolveConversationsName(rec) || AI_GEORGE_FALLBACK_NAME
 
   const emailRaw = firstString(rec, EMAIL_KEYS, EMAIL_MAX).toLowerCase()
   const email = emailRaw && EMAIL_RE.test(emailRaw) ? emailRaw : null
