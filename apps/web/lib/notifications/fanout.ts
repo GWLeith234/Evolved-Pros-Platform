@@ -87,6 +87,17 @@ export async function notifyEventPublished(params: {
   })
 }
 
+/**
+ * App-side Media fanout. Admin publish routes must not call this.
+ * public.notify_media_published() (migration 106) inserts the same rows
+ * in the publishing transaction, for the audience in
+ * MEMBER_ALERT_TIER_STATUSES / MEMBER_ALERT_EXCLUDED_ROLE.
+ * A later call inserts nothing: the partial unique index
+ * notifications_content_drop_uniq keeps one 'New Media story' row per
+ * user, type, and action_url, including after the 7-day window.
+ * Do not switch this insert to upsert. PostgREST cannot target a partial
+ * unique index. Academy and LIVE stay on the 7-day pre-filter above.
+ */
 export async function notifyMediaPublished(params: {
   title: string
   slug: string

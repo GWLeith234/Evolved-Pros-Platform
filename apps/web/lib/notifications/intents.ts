@@ -6,6 +6,8 @@
  * system_billing / system_general. WIG + daily progress ride system_general;
  * Academy drops reuse course_unlock; LIVE/event drops reuse event_reminder;
  * Media drops ride system_general with a /media action URL.
+ * That Media copy is duplicated in
+ * supabase/migrations/106_media_publish_notify.sql.
  */
 
 export const INTENT_TYPE = {
@@ -24,6 +26,17 @@ export const WIG_STALE_DAYS = 7
 export const WIG_DEDUPE_MS = 7 * 24 * 60 * 60 * 1000
 export const DAILY_DEDUPE_MS = 20 * 60 * 60 * 1000
 export const CONTENT_DEDUPE_MS = 7 * 24 * 60 * 60 * 1000
+
+/**
+ * Who receives member alerts (WIG, daily, Academy, LIVE, and Media).
+ * listActiveMemberIds() is the app query. A Media publish does not call
+ * it: migration 106's notify_media_published() repeats this predicate so
+ * a raw SQL publish alerts the same people. Change both together.
+ * Media dedupe is the partial unique index in that migration (once per
+ * story), not CONTENT_DEDUPE_MS. Academy and LIVE still use the 7-day window.
+ */
+export const MEMBER_ALERT_TIER_STATUSES = ['active', 'trial'] as const
+export const MEMBER_ALERT_EXCLUDED_ROLE = 'admin'
 
 export type WigKind = 'complete' | 'update' | 'weekly' | 'milestone'
 export type ContentKind = 'academy' | 'media' | 'live'
@@ -129,6 +142,8 @@ export function contentCopy(
       body: `**${title}** just published. Open it while it’s fresh.`,
     }
   }
+  // Title, body, and audience are duplicated in notify_media_published()
+  // (migration 106). mediaPublishTrigger.test.ts fails if they diverge.
   if (kind === 'media') {
     return {
       title: 'New Media story',

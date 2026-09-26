@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { adminClient } from '@/lib/supabase/admin'
 import type { TablesInsert } from '@evolved-pros/db'
-import { notifyMediaPublished } from '@/lib/notifications/fanout'
 import { publishHeroGate } from '@/lib/media/heroReachable'
 import { mediaStoryWriteFailure } from '@/lib/media/mediaStoryWrite'
 import { stripLeadingTitle } from '@/lib/media/storyBody'
@@ -83,13 +82,8 @@ export async function POST(request: Request) {
     const failure = mediaStoryWriteFailure(error)
     return NextResponse.json({ error: failure.error }, { status: failure.status })
   }
-  if (data.is_published) {
-    void notifyMediaPublished({
-      title: data.title,
-      slug: data.slug,
-      pillar: data.pillar,
-    })
-  }
+  // Member alerts are inserted by notify_media_published() (migration 106)
+  // in this same write. Do not call notifyMediaPublished here.
 
   const hero = !data.is_published && !data.featured_image_url
     ? (await import('@/lib/media/generateHero')).queueDraftHero({
