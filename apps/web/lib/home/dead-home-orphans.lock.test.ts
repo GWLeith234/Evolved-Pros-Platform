@@ -13,6 +13,7 @@ const ORPHAN_PATHS = [
   'components/home/TodaysEvolution.tsx',
   'components/home/ClimbingTowardCard.tsx',
   'components/home/InProgressPillarHero.tsx',
+  'components/home/DailyPulseCard.tsx',
   'components/home/tiles/PodcastReelTile.tsx',
   'components/home/tiles/TopStoriesTile.tsx',
   'components/scoreboard/ScoreboardHero.tsx',
@@ -29,8 +30,15 @@ describe('pre-band home orphans stay gone', () => {
   it('does not remount those components from the member Home page', () => {
     const page = readFileSync(resolve(webRoot, 'app/(member)/home/page.tsx'), 'utf8')
     expect(page).not.toMatch(
-      /WelcomeBanner|AccountabilityHub|PillarJourneyStrip|HomeMetricsStrip|TodaysEvolution|ClimbingTowardCard|InProgressPillarHero|PodcastReelTile|TopStoriesTile|ScoreboardHero/,
+      /WelcomeBanner|AccountabilityHub|PillarJourneyStrip|HomeMetricsStrip|TodaysEvolution|ClimbingTowardCard|InProgressPillarHero|PodcastReelTile|TopStoriesTile|ScoreboardHero|DailyPulseCard/,
     )
+  })
+
+  it('keeps DailyPulse types in the shared module, not a dead card file', () => {
+    expect(existsSync(resolve(webRoot, 'components/home/dailyPulse.ts'))).toBe(true)
+    const types = readFileSync(resolve(webRoot, 'components/home/dailyPulse.ts'), 'utf8')
+    expect(types).toMatch(/export interface DailyPulseHabit/)
+    expect(types).toMatch(/export interface DailyPulseCommitment/)
   })
 
   it('does not keep CSS that only those components used', () => {
