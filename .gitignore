@@ -43,3 +43,7 @@ apps/web/next-env.d.ts
 
 # Claude Code agent worktrees (ephemeral, auto-cleaned)
 .claude/worktrees/
+
+# Weekly report payloads are private business data. Never commit them.
+apps/web/weekly-reports/*/report.json
+apps/web/weekly-reports/_build/build-log.json

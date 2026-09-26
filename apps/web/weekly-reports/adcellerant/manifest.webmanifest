@@ -1,0 +1,29 @@
+{
+  "name": "AdCellerant Weekly",
+  "short_name": "ADC Weekly",
+  "description": "AdCellerant Weekly report for George Leith",
+  "start_url": "/admin/reports/adcellerant/",
+  "scope": "/admin/reports/adcellerant/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#194766",
+  "background_color": "#F4F6F9",
+  "icons": [
+    {
+      "src": "/admin/reports/adcellerant/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/admin/reports/adcellerant/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/admin/reports/adcellerant/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

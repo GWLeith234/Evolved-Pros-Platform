@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<base href="/admin/reports/__SLUG__/">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>__TITLE__</title>
+<meta name="theme-color" content="__THEME__">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="__SHORT__">
+<link rel="manifest" href="manifest.webmanifest" crossorigin="use-credentials">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{__VARS__}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+body{max-width:560px;margin:0 auto;min-height:100vh;padding-bottom:40px}
+.banner{position:sticky;top:0;z-index:30;background:var(--banner-bg);color:var(--banner-fg);font:700 11px/1 var(--font-ui);letter-spacing:.06em;text-transform:uppercase;text-align:center;padding:8px 10px}
+.banner b{background:var(--real);color:#fff;padding:2px 5px;border-radius:4px;margin-left:2px}
+header{background:var(--head-bg);color:var(--head-fg);padding:16px 18px 18px;position:relative;overflow:hidden}
+header::after{content:"";position:absolute;right:-60px;top:-60px;width:180px;height:180px;border-radius:50%;background:var(--accent);opacity:.18}
+.brandrow{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;z-index:1}
+.logo{display:flex;align-items:center;gap:8px;min-height:28px}
+.logo svg{display:block}
+.week{font:var(--font-display-w) 26px/1.05 var(--font-display);margin-top:14px;letter-spacing:var(--display-ls);position:relative;z-index:1}
+.sub{font:500 12px/1.4 var(--font-ui);opacity:.78;margin-top:4px;position:relative;z-index:1}
+.refresh{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:100px;background:var(--accent);color:var(--accent-fg);font:700 12px/1 var(--font-ui);padding:9px 13px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.refresh svg{width:14px;height:14px}
+.refresh.spin svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.kpis{display:flex;gap:10px;overflow-x:auto;padding:14px 16px 6px;scroll-snap-type:x mandatory;scroll-padding-left:16px;scrollbar-width:none}
+.kpis::-webkit-scrollbar{display:none}
+.kpi{flex:0 0 46%;scroll-snap-align:start;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:11px 12px;position:relative;box-shadow:var(--shadow)}
+.kpi .l{font:600 10.5px/1.25 var(--font-ui);color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding-right:44px;min-height:26px}
+.kpi .v{font:var(--font-display-w) 25px/1.1 var(--font-display);color:var(--heading);margin-top:6px;letter-spacing:var(--display-ls);white-space:nowrap}
+.kpi .d{font:600 11px/1.3 var(--font-ui);margin-top:3px;color:var(--muted)}
+.kpi .chip{position:absolute;top:9px;right:9px}
+.src{font:500 9.5px/1.3 var(--font-ui);color:var(--muted);margin-top:5px;opacity:.9;word-break:break-word}
+.chip{display:inline-block;font:800 9px/1 var(--font-ui);letter-spacing:.08em;padding:3px 6px;border-radius:5px;text-transform:uppercase;vertical-align:middle}
+.chip.sample{background:var(--sample-bg);color:var(--sample-fg);border:1px dashed var(--sample-fg)}
+.chip.stale{background:var(--sample-bg);color:var(--sample-fg);border:1px solid var(--sample-fg)}
+.emptyline{font:500 12.5px/1.4 var(--font-ui);color:var(--muted);padding:10px 12px;border:1px dashed var(--border);border-radius:12px;margin-bottom:8px}
+.gaps{margin:14px 16px 0;padding:10px 12px;border-radius:12px;background:var(--surface);border:1px solid var(--border);font:500 11px/1.45 var(--font-ui);color:var(--muted)}
+.gaps b{color:var(--heading)}
+.tabs{position:sticky;top:0;z-index:20;display:flex;gap:6px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tab{flex:1 0 auto;border:1px solid var(--border);background:var(--surface);color:var(--muted);font:700 12px/1 var(--font-ui);padding:9px 12px;border-radius:100px;cursor:pointer}
+.tab[aria-selected=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.panel{padding:6px 16px 0}
+.sec{margin-top:14px}
+.sech{display:flex;align-items:center;justify-content:space-between;cursor:pointer;list-style:none;padding:4px 2px 8px}
+.sech::-webkit-details-marker{display:none}
+.sech h2{font:800 13px/1 var(--font-head);text-transform:uppercase;letter-spacing:.07em;color:var(--heading);display:flex;align-items:center;gap:8px}
+.sech h2 i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--dot,var(--accent))}
+.sech .n{font:700 11px/1 var(--font-ui);color:var(--muted);display:flex;align-items:center;gap:6px}
+.sech .n::after{content:"";width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin-top:-4px;transition:transform .2s}
+details[open]>.sech .n::after{transform:rotate(-135deg);margin-top:3px}
+.card{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--edge,var(--accent));border-radius:12px;padding:11px 12px;margin-bottom:8px;box-shadow:var(--shadow)}
+.card .t{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.card h3{font:700 14px/1.3 var(--font-head);color:var(--heading)}
+.card p{font:400 13.5px/1.45 var(--font-body);color:var(--text);margin-top:4px}
+.chips{display:flex;gap:5px;flex-shrink:0;align-items:center}
+.status{font:800 9.5px/1 var(--font-ui);letter-spacing:.05em;text-transform:uppercase;padding:4px 7px;border-radius:100px;white-space:nowrap}
+.good{--edge:var(--good)} .bad{--edge:var(--bad)} .warn{--edge:var(--warn)} .neutral{--edge:var(--muted)}
+.status.good{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--good)}
+.status.bad{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
+.status.warn{background:color-mix(in srgb,var(--warn) 22%,transparent);color:var(--warn-text,var(--warn))}
+.status.neutral{background:color-mix(in srgb,var(--muted) 18%,transparent);color:var(--muted)}
+.grp{font:700 11px/1 var(--font-ui);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:14px 2px 8px}
+.foot{font:500 11px/1.5 var(--font-ui);color:var(--muted);padding:18px 18px 0;text-align:center}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,40px);opacity:0;background:var(--heading);color:var(--bg);font:700 12px/1 var(--font-ui);padding:10px 14px;border-radius:100px;transition:.25s;z-index:50}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.ptr{height:0;overflow:hidden;text-align:center;font:600 11px/28px var(--font-ui);color:var(--muted);transition:height .15s}
+.empty{padding:40px 10px;text-align:center;color:var(--muted);font:500 13px var(--font-ui)}
+</style>
+</head>
+<body>
+<div class="ptr" id="ptr">Release to refresh</div>
+<header>
+  <div class="brandrow">
+    <div class="logo">__LOGO__</div>
+    <button class="refresh" id="refresh" aria-label="Refresh report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>Refresh</button>
+  </div>
+  <div class="week" id="week">Loading report</div>
+  <div class="sub" id="updated">&nbsp;</div>
+</header>
+<div class="kpis" id="kpis"></div>
+<nav class="tabs" role="tablist" id="tabs"></nav>
+<main class="panel" id="panel"><div class="empty">Loading report.json</div></main>
+<div class="gaps" id="gaps" style="display:none"></div>
+<div class="foot" id="foot"></div>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+  var state={data:null,tab:'overview',checked:null};
+  var $=function(id){return document.getElementById(id)};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function fmt(iso){try{return new Date(iso).toLocaleString('en-US',{timeZone:'America/Regina',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})+' CST'}catch(e){return iso}}
+  function chip(it){return it.stale?'<span class="chip stale">Stale</span>':''}
+  function src(it){return it.source?'<div class="src">source: '+esc(it.source)+', as of '+esc(it.asOf||'')+'</div>':''}
+  function card(it){
+    return '<div class="card '+esc(it.tone||'neutral')+'"><div class="t"><h3>'+esc(it.title)+'</h3><div class="chips">'+
+      (it.status?'<span class="status '+esc(it.tone||'neutral')+'">'+esc(it.status)+'</span>':'')+chip(it)+'</div></div>'+
+      (it.body?'<p>'+esc(it.body)+'</p>':'')+src(it)+'</div>';
+  }
+  function section(title,items,dot,open){
+    items=items||[];
+    var inner=items.length?items.map(card).join(''):'<div class="emptyline">No sourced items this week</div>';
+    return '<details class="sec"'+(open?' open':'')+' style="--dot:'+dot+'"><summary class="sech"><h2><i></i>'+esc(title)+'</h2><span class="n">'+items.length+'</span></summary>'+inner+'</details>';
+  }
+  function count(list){return (list||[]).reduce(function(n,g){return n+g.items.length},0)}
+  function groups(list){
+    if(!count(list)) return '<div class="sec"><div class="emptyline">No sourced items this week</div></div>';
+    return (list||[]).map(function(g){return '<div class="grp">'+esc(g.name)+'</div>'+g.items.map(card).join('')}).join('');
+  }
+  function render(){
+    var d=state.data; if(!d) return;
+    $('week').textContent=d.week;
+    $('updated').innerHTML='Last updated '+esc(fmt(d.lastUpdated))+(state.checked?' &middot; checked '+esc(new Date(state.checked).toLocaleTimeString('en-US',{timeZone:'America/Regina',hour:'numeric',minute:'2-digit'})):'');
+    $('kpis').innerHTML=d.kpis.map(function(k){return '<div class="kpi">'+chip(k)+'<div class="l">'+esc(k.label)+'</div><div class="v">'+esc(k.value)+'</div>'+(k.delta?'<div class="d">'+esc(k.delta)+'</div>':'')+src(k)+'</div>'}).join('');
+    var tabs=[['overview','Overview'],['projects',d.labels.projects],['clients',d.labels.clients],['next','Next week']].filter(function(t){return t[0]==='projects'?count(d.byProject):t[0]==='clients'?count(d.byClient):true});
+    if(!tabs.some(function(t){return t[0]===state.tab}))state.tab='overview';
+    $('tabs').innerHTML=tabs.map(function(t){return '<button class="tab" role="tab" data-t="'+t[0]+'" aria-selected="'+(state.tab===t[0])+'">'+esc(t[1])+'</button>'}).join('');
+    var h='';
+    if(state.tab==='overview'){
+      h=section('Decisions pending (awaiting George)',d.decisions,'var(--warn)',true)+section('Wins',d.wins,'var(--good)',true)+section('Slips',d.slips,'var(--bad)',true);
+    }else if(state.tab==='projects'){h=groups(d.byProject)}
+    else if(state.tab==='clients'){h=groups(d.byClient)}
+    else{h=section('Next week',d.nextWeek,'var(--accent)',true)}
+    $('panel').innerHTML=h;
+    $('foot').innerHTML=esc(d.footer||'')+'<br>Generated '+esc(fmt(d.generatedAt))+' by _build/refresh.py. Items marked Stale have a source older than 8 days.';
+    var g=$('gaps');g.innerHTML=(d.gaps&&d.gaps.length)?'<b>Source gaps</b><br>'+d.gaps.map(esc).join('<br>'):'';g.style.display=g.innerHTML?'block':'none';
+  }
+  function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(function(){t.classList.remove('show')},1800)}
+  function load(manual){
+    var b=$('refresh');b.classList.add('spin');
+    return fetch('/admin/reports/__SLUG__/report.json?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
+      .then(function(j){var changed=state.data&&state.data.lastUpdated!==j.lastUpdated;state.data=j;state.checked=Date.now();render();if(manual)toast(changed?'Report updated':'Report is current')})
+      .catch(function(e){if(manual)toast('Offline. Showing cached report');console.warn('report fetch failed',e.message)})
+      .then(function(){b.classList.remove('spin')});
+  }
+  $('refresh').addEventListener('click',function(){load(true)});
+  $('tabs').addEventListener('click',function(e){var t=e.target.closest('.tab');if(!t)return;state.tab=t.dataset.t;render();});
+  // simple pull-to-refresh
+  var y0=null,pulled=0,ptr=$('ptr');
+  window.addEventListener('touchstart',function(e){y0=window.scrollY<=0?e.touches[0].clientY:null},{passive:true});
+  window.addEventListener('touchmove',function(e){if(y0==null)return;pulled=Math.max(0,Math.min(60,e.touches[0].clientY-y0));ptr.style.height=(pulled>20?28:0)+'px'},{passive:true});
+  window.addEventListener('touchend',function(){if(pulled>50)load(true);pulled=0;y0=null;ptr.style.height='0'});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)load(false)});
+  load(false);
+  if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/admin/reports/__SLUG__/sw.js',{scope:'/admin/reports/__SLUG__/'}).catch(function(e){console.warn('SW register failed',e)})})}
+})();
+</script>
+</body>
+</html>

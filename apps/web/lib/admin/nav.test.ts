@@ -11,6 +11,12 @@ function src(rel: string) {
 }
 
 describe('admin nav IA (George lock 2026-09-11)', () => {
+  it('does not list weekly reports in the shared nav', () => {
+    expect(flattenAdminNav().map(item => item.href)).not.toContain('/admin/reports')
+    const sidebar = src('components/admin/AdminSidebar.tsx')
+    expect(sidebar).toContain('weeklyReportsHref')
+  })
+
   it('keeps Home at /admin and does not label it Dashboard', () => {
     expect(ADMIN_NAV_HOME.href).toBe('/admin')
     expect(ADMIN_NAV_HOME.label).toBe('Home')

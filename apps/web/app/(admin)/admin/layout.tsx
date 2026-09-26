@@ -5,6 +5,7 @@ import { cookies, headers } from 'next/headers'
 import { AdminTopNav } from '@/components/admin/AdminTopNav'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { ThemeSync } from '@/components/theme/ThemeSync'
+import { weeklyReportsNavHref } from '@/lib/reports/access'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   // RSC prefetch guard: middleware lets prefetch requests through so it can't
@@ -23,13 +24,19 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     const cookieStore = cookies()
     const devSession = cookieStore.get('dev_session')?.value
     if (devSession) {
-      const profile = JSON.parse(devSession) as { role: string; display_name: string; full_name: string }
+      const profile = JSON.parse(devSession) as {
+        id?: string
+        role: string
+        display_name: string
+        full_name: string
+      }
       if (profile.role !== 'admin') redirect('/home')
+      const weeklyReportsHref = await weeklyReportsNavHref([profile.id])
       return (
         <div className="ep-member-shell ep-admin-shell">
-          <AdminTopNav profile={profile} />
+          <AdminTopNav profile={profile} weeklyReportsHref={weeklyReportsHref} />
           <div className="ep-member-body">
-            <AdminSidebar />
+            <AdminSidebar weeklyReportsHref={weeklyReportsHref} />
             <main className="ep-main-scroll bg-[var(--admin-page)]" style={{ paddingBottom: 0 }}>{children}</main>
           </div>
         </div>
@@ -45,19 +52,21 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const { data: profile } = await adminClient
     .from('users')
-    .select('role, display_name, full_name, theme')
+    .select('id, role, display_name, full_name, theme')
     .eq('email', user.email!)
     .maybeSingle()
 
   if (profile?.role !== 'admin') redirect('/home')
 
+  const weeklyReportsHref = await weeklyReportsNavHref([user.id, profile?.id])
+
   return (
     <div className="ep-member-shell ep-admin-shell">
       {/* Stored theme wins over the localStorage hint (see ThemeSync). */}
       <ThemeSync theme={profile.theme} />
-      <AdminTopNav profile={profile} />
+      <AdminTopNav profile={profile} weeklyReportsHref={weeklyReportsHref} />
       <div className="ep-member-body">
-        <AdminSidebar />
+        <AdminSidebar weeklyReportsHref={weeklyReportsHref} />
         <main className="ep-main-scroll bg-[var(--admin-page)]" style={{ paddingBottom: 0 }}>
           {children}
         </main>

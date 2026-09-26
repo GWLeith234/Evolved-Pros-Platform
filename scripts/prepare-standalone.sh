@@ -31,4 +31,10 @@ if [[ -d "$WEB/public" ]]; then
   cp -a "$WEB/public" "$TARGET/public"
 fi
 
+# Private weekly-report shells (no report.json payloads).
+rm -rf "$TARGET/weekly-reports"
+mkdir -p "$TARGET/weekly-reports"
+cp -a "$WEB/weekly-reports/." "$TARGET/weekly-reports/"
+find "$TARGET/weekly-reports" -name 'report.json' -delete
+
 echo "prepare-standalone: assets copied next to $TARGET/server.js"

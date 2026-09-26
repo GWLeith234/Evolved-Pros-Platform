@@ -32,6 +32,13 @@ jobs:
       - name: Hex ratchet
         run: bash scripts/check-hex-ratchet.sh
 
+      # Weekly report payloads must never land in git. Also runs the allowlist
+      # gate tests (logged out, other admin, allowlisted).
+      - name: Weekly report privacy
+        run: |
+          python3 scripts/check-weekly-report-payloads.py
+          pnpm --filter web exec vitest run lib/reports/gate.test.ts
+
       # build: non-blocking — next/font/google may fail to fetch fonts on
       # GitHub runners. The production build on Railway always succeeds.
       - name: Build

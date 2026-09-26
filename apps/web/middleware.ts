@@ -4,6 +4,8 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { RETURN_PATH_HEADER, loginHrefFor, returnPathFromRequest } from '@/lib/auth/gatedIntent'
 import { isPublicBrandAsset } from '@/lib/auth/publicAssets'
 import { applyPreviewResponseHeaders, isMediaPreviewPath } from '@/lib/media/previewHeaders'
+import { anonymousWeeklyReportResponse } from '@/lib/reports/http'
+import { isWeeklyReportPath, stripTrailingSlashTarget } from '@/lib/reports/paths'
 
 const PUBLIC_ROUTES = [
   '/login',
@@ -100,10 +102,23 @@ async function handleMediaPreview(request: NextRequest) {
   return response
 }
 
+function hasAuthCookie(request: NextRequest): boolean {
+  return request.cookies.getAll().some(cookie => cookie.name.startsWith('sb-') || cookie.name.startsWith('sb_'))
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   if (isMediaPreviewPath(pathname)) {
     return handleMediaPreview(request)
+  }
+
+  // skipTrailingSlashRedirect is on so PWA scope URLs can keep their slash.
+  // Every other matched path still canonicalizes to no trailing slash.
+  const stripped = stripTrailingSlashTarget(pathname)
+  if (stripped && stripped !== pathname) {
+    const url = request.nextUrl.clone()
+    url.pathname = stripped
+    return NextResponse.redirect(url, 308)
   }
 
   const { returnPath, headers: requestHeaders } = returnPathHeaders(request)
@@ -136,10 +151,24 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Weekly reports are allowlisted by platform user id, not by the admin role.
+  // A logged-out request with no session cookie never reaches Supabase.
+  if (isWeeklyReportPath(pathname)) {
+    const devSessionEarly =
+      process.env.NODE_ENV === 'development' && request.cookies.get('dev_session')?.value
+    if (!devSessionEarly && !hasAuthCookie(request)) {
+      if (isRsc) return NextResponse.next()
+      return anonymousWeeklyReportResponse(request.url, pathname)
+    }
+  }
+
   // Dev bypass: skip Supabase auth when dev_session cookie is present
   if (process.env.NODE_ENV === 'development') {
     const devSession = request.cookies.get('dev_session')?.value
     if (devSession) {
+      if (isWeeklyReportPath(pathname)) {
+        return NextResponse.next()
+      }
       if (ADMIN_ROUTES.some(r => pathname.startsWith(r))) {
         try {
           const profile = JSON.parse(devSession) as { role?: string }
@@ -212,6 +241,13 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!user) {
+    if (isWeeklyReportPath(pathname)) {
+      const res = anonymousWeeklyReportResponse(request.url, pathname)
+      supabaseResponse.cookies.getAll().forEach(c => {
+        res.cookies.set(c.name, c.value, c)
+      })
+      return res
+    }
     // /api/* paths are programmatic — return JSON 401 instead of a 307 redirect
     // to /login (which would leak HTML to a fetch() caller).
     if (pathname.startsWith('/api/')) {
@@ -233,6 +269,11 @@ export async function middleware(request: NextRequest) {
   // The page itself decides whether to render or redirect to /home.
   // This guard must come before the onboarding-gate check below.
   if (pathname.startsWith('/onboarding')) {
+    return supabaseResponse
+  }
+
+  // Weekly reports skip the admin-role gate. The route allowlist decides.
+  if (isWeeklyReportPath(pathname)) {
     return supabaseResponse
   }
 

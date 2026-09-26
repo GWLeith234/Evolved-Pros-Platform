@@ -1,0 +1,29 @@
+{
+  "name": "Evolved Pros Weekly",
+  "short_name": "EP Weekly",
+  "description": "Evolved Pros Weekly report for George Leith",
+  "start_url": "/admin/reports/evolved-pros/",
+  "scope": "/admin/reports/evolved-pros/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#1B3C5A",
+  "background_color": "#F7F4EC",
+  "icons": [
+    {
+      "src": "/admin/reports/evolved-pros/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/admin/reports/evolved-pros/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/admin/reports/evolved-pros/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
