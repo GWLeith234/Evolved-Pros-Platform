@@ -4,7 +4,7 @@ on:
   push:
     branches: [main, develop, 'claude/init-evolved-pros-platform-**']
   pull_request:
-    branches: [main, 'claude/init-evolved-pros-platform-**']
+    branches: [main, 'claude/init-evolved-pros-platform-**', 'cursor/et-viewer-entitlement-30d7']
 
 jobs:
   check:
