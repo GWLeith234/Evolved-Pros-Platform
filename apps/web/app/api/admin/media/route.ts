@@ -3,7 +3,8 @@ import { requireAdminApi } from '@/lib/admin/helpers'
 import { adminClient } from '@/lib/supabase/admin'
 import type { TablesInsert } from '@evolved-pros/db'
 import { notifyMediaPublished } from '@/lib/notifications/fanout'
-import { publishGuardDecision } from '@/lib/media/heroPublishGuard'
+import { publishHeroGate } from '@/lib/media/heroReachable'
+import { mediaStoryWriteFailure } from '@/lib/media/mediaStoryWrite'
 import { stripLeadingTitle } from '@/lib/media/storyBody'
 
 export const dynamic = 'force-dynamic'
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
     : null
   const publishing = is_published === true
   if (publishing) {
-    const decision = publishGuardDecision({
+    const decision = await publishHeroGate({
       isPublished: true,
       featuredImageUrl: featuredImage,
     })
@@ -78,7 +79,10 @@ export async function POST(request: Request) {
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    const failure = mediaStoryWriteFailure(error)
+    return NextResponse.json({ error: failure.error }, { status: failure.status })
+  }
   if (data.is_published) {
     void notifyMediaPublished({
       title: data.title,
