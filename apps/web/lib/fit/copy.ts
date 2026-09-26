@@ -62,6 +62,8 @@ export const FIT_CLOSING_TITLE = 'Make every rep more informed'
 export const FIT_LIBRARY_TITLE = 'Fit library'
 export const FIT_LIBRARY_DEK = 'Published instructional guides. Hip-aware, 55+ first.'
 export const FIT_LIBRARY_EMPTY = 'No published guides yet.'
+export const FIT_VIDEO_PROCESSING = 'Video is processing.'
+export const FIT_VIDEO_UNAVAILABLE = 'Video is unavailable.'
 
 export const FIT_ADMIN_TITLE = 'Pros Fit'
 export const FIT_ADMIN_DEK = 'Fit library for 55+ hip-aware'
@@ -108,6 +110,8 @@ export function fitCopyStrings(): string[] {
     FIT_LIBRARY_TITLE,
     FIT_LIBRARY_DEK,
     FIT_LIBRARY_EMPTY,
+    FIT_VIDEO_PROCESSING,
+    FIT_VIDEO_UNAVAILABLE,
     FIT_ADMIN_TITLE,
     FIT_ADMIN_DEK,
     FIT_ADMIN_EYEBROW,

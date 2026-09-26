@@ -113,6 +113,27 @@ export async function POST(req: Request) {
         .from('lessons')
         .update({ mux_playback_id: playbackId })
         .eq('mux_asset_id', assetId)
+
+      // Same asset id may belong to a Fit guide. A missing fit_moves
+      // row or an unapplied 102 migration must not fail the lesson write.
+      const { error: fitError } = await adminClient
+        .from('fit_moves')
+        .update({ mux_playback_id: playbackId, video_status: 'ready' })
+        .eq('mux_asset_id', assetId)
+      if (fitError) {
+        console.error('[mux/webhook] fit_moves ready update failed:', fitError.message)
+      }
+    }
+  }
+
+  if (payload.type === 'video.asset.errored') {
+    const assetId = payload.data.id
+    const { error: fitError } = await adminClient
+      .from('fit_moves')
+      .update({ video_status: 'errored' })
+      .eq('mux_asset_id', assetId)
+    if (fitError) {
+      console.error('[mux/webhook] fit_moves errored update failed:', fitError.message)
     }
   }
 
