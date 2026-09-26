@@ -38,8 +38,31 @@ describe('notification cron schedule lock', () => {
     expect(workflow).toContain('/api/cron/media-image-check')
     expect(workflow).toContain("github.event.schedule == '1,31 * * * *'")
     expect(workflow).toContain("github.event.inputs.job == 'media-image-check'")
-    expect(workflow).toContain('curl -sf "$APP_URL/api/cron/media-image-check"')
-    expect(workflow).toContain('| jq .')
+    expect(workflow).toContain('"$APP_URL/api/cron/media-image-check"')
+    expect(workflow).not.toContain('curl -sf "$APP_URL/api/cron/media-image-check"')
+  })
+
+  it('fails the step when a cron response is not 2xx', () => {
+    expect(workflow).toContain('set -euo pipefail')
+    expect(workflow).toContain('bash --noprofile --norc -euo pipefail {0}')
+    expect(workflow).not.toContain('curl -sf')
+    expect(workflow).not.toMatch(/\|\s*jq\b/)
+    const endpoints = [
+      'expire-tiers',
+      'renewal-reminders',
+      'event-reminders',
+      'daily-digest',
+      'thanks-nudges',
+      'member-nudges',
+      'goal-snapshots',
+      'media-image-check',
+    ]
+    expect(workflow.match(/-w '%\{http_code\}'/g)).toHaveLength(endpoints.length)
+    expect(workflow.match(/jq \. body\.json/g)).toHaveLength(endpoints.length)
+    for (const endpoint of endpoints) {
+      expect(workflow).toContain(`"$APP_URL/api/cron/${endpoint}"`)
+      expect(workflow).toContain(`HTTP \${status} from /api/cron/${endpoint}`)
+    }
   })
 
   it('queues thank-you Community nudges on the morning tick and never names a send job', () => {

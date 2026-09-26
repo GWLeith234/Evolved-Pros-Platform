@@ -1,3 +1,9 @@
+# Fail closed. Each cron step runs with `set -euo pipefail`, records the HTTP
+# status, and exits 1 unless the response is 2xx (a 401 from a CRON_SECRET
+# mismatch fails the job). The trimmed body is printed only on failure, and
+# never the secret or the Authorization header. jq runs only after a 2xx, so a
+# parse error fails the step. GitHub's default `bash -e` does not enable
+# pipefail, which is why piping curl into jq used to stay green on a non-2xx response.
 name: Daily Cron Jobs
 
 on:
@@ -29,10 +35,23 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'expire-tiers'))
     steps:
       - name: Expire lapsed memberships
+        shell: bash --noprofile --norc -euo pipefail {0}
         run: |
-          curl -sf -X GET "$APP_URL/api/cron/expire-tiers" \
-            -H "Authorization: Bearer $CRON_SECRET" \
-            | jq .
+          set -euo pipefail
+          status="$(curl -sS -o body.json -w '%{http_code}' -X GET "$APP_URL/api/cron/expire-tiers" \
+            -H "Authorization: Bearer $CRON_SECRET")"
+          if [[ ! "$status" =~ ^2[0-9][0-9]$ ]]; then
+            echo "HTTP ${status} from /api/cron/expire-tiers"
+            # Trimmed body only. Never print CRON_SECRET or the Authorization header.
+            excerpt="$(head -c 500 body.json 2>/dev/null || true)"
+            if [[ -n "${CRON_SECRET}" && "$excerpt" == *"$CRON_SECRET"* ]]; then
+              echo "(response body omitted because it contains the cron secret)"
+            else
+              printf '%s\n' "$excerpt"
+            fi
+            exit 1
+          fi
+          jq . body.json
 
   renewal-reminders:
     runs-on: ubuntu-latest
@@ -44,10 +63,23 @@ jobs:
       )
     steps:
       - name: Tag contacts approaching expiry
+        shell: bash --noprofile --norc -euo pipefail {0}
         run: |
-          curl -sf -X GET "$APP_URL/api/cron/renewal-reminders" \
-            -H "Authorization: Bearer $CRON_SECRET" \
-            | jq .
+          set -euo pipefail
+          status="$(curl -sS -o body.json -w '%{http_code}' -X GET "$APP_URL/api/cron/renewal-reminders" \
+            -H "Authorization: Bearer $CRON_SECRET")"
+          if [[ ! "$status" =~ ^2[0-9][0-9]$ ]]; then
+            echo "HTTP ${status} from /api/cron/renewal-reminders"
+            # Trimmed body only. Never print CRON_SECRET or the Authorization header.
+            excerpt="$(head -c 500 body.json 2>/dev/null || true)"
+            if [[ -n "${CRON_SECRET}" && "$excerpt" == *"$CRON_SECRET"* ]]; then
+              echo "(response body omitted because it contains the cron secret)"
+            else
+              printf '%s\n' "$excerpt"
+            fi
+            exit 1
+          fi
+          jq . body.json
 
   event-reminders:
     runs-on: ubuntu-latest
@@ -56,10 +88,23 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'event-reminders'))
     steps:
       - name: Send event reminders
+        shell: bash --noprofile --norc -euo pipefail {0}
         run: |
-          curl -sf -X GET "$APP_URL/api/cron/event-reminders" \
-            -H "Authorization: Bearer $CRON_SECRET" \
-            | jq .
+          set -euo pipefail
+          status="$(curl -sS -o body.json -w '%{http_code}' -X GET "$APP_URL/api/cron/event-reminders" \
+            -H "Authorization: Bearer $CRON_SECRET")"
+          if [[ ! "$status" =~ ^2[0-9][0-9]$ ]]; then
+            echo "HTTP ${status} from /api/cron/event-reminders"
+            # Trimmed body only. Never print CRON_SECRET or the Authorization header.
+            excerpt="$(head -c 500 body.json 2>/dev/null || true)"
+            if [[ -n "${CRON_SECRET}" && "$excerpt" == *"$CRON_SECRET"* ]]; then
+              echo "(response body omitted because it contains the cron secret)"
+            else
+              printf '%s\n' "$excerpt"
+            fi
+            exit 1
+          fi
+          jq . body.json
 
   daily-digest:
     runs-on: ubuntu-latest
@@ -68,10 +113,23 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'daily-digest'))
     steps:
       - name: Send daily digest emails
+        shell: bash --noprofile --norc -euo pipefail {0}
         run: |
-          curl -sf -X GET "$APP_URL/api/cron/daily-digest" \
-            -H "Authorization: Bearer $CRON_SECRET" \
-            | jq .
+          set -euo pipefail
+          status="$(curl -sS -o body.json -w '%{http_code}' -X GET "$APP_URL/api/cron/daily-digest" \
+            -H "Authorization: Bearer $CRON_SECRET")"
+          if [[ ! "$status" =~ ^2[0-9][0-9]$ ]]; then
+            echo "HTTP ${status} from /api/cron/daily-digest"
+            # Trimmed body only. Never print CRON_SECRET or the Authorization header.
+            excerpt="$(head -c 500 body.json 2>/dev/null || true)"
+            if [[ -n "${CRON_SECRET}" && "$excerpt" == *"$CRON_SECRET"* ]]; then
+              echo "(response body omitted because it contains the cron secret)"
+            else
+              printf '%s\n' "$excerpt"
+            fi
+            exit 1
+          fi
+          jq . body.json
 
   thanks-nudges:
     runs-on: ubuntu-latest
@@ -80,10 +138,23 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'thanks-nudges'))
     steps:
       - name: Queue due thank-you Community nudges (never send)
+        shell: bash --noprofile --norc -euo pipefail {0}
         run: |
-          curl -sf -X GET "$APP_URL/api/cron/thanks-nudges" \
-            -H "Authorization: Bearer $CRON_SECRET" \
-            | jq .
+          set -euo pipefail
+          status="$(curl -sS -o body.json -w '%{http_code}' -X GET "$APP_URL/api/cron/thanks-nudges" \
+            -H "Authorization: Bearer $CRON_SECRET")"
+          if [[ ! "$status" =~ ^2[0-9][0-9]$ ]]; then
+            echo "HTTP ${status} from /api/cron/thanks-nudges"
+            # Trimmed body only. Never print CRON_SECRET or the Authorization header.
+            excerpt="$(head -c 500 body.json 2>/dev/null || true)"
+            if [[ -n "${CRON_SECRET}" && "$excerpt" == *"$CRON_SECRET"* ]]; then
+              echo "(response body omitted because it contains the cron secret)"
+            else
+              printf '%s\n' "$excerpt"
+            fi
+            exit 1
+          fi
+          jq . body.json
 
   member-nudges:
     runs-on: ubuntu-latest
@@ -92,10 +163,23 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'member-nudges'))
     steps:
       - name: Enqueue WIG and daily progress nudges
+        shell: bash --noprofile --norc -euo pipefail {0}
         run: |
-          curl -sf -X GET "$APP_URL/api/cron/member-nudges" \
-            -H "Authorization: Bearer $CRON_SECRET" \
-            | jq .
+          set -euo pipefail
+          status="$(curl -sS -o body.json -w '%{http_code}' -X GET "$APP_URL/api/cron/member-nudges" \
+            -H "Authorization: Bearer $CRON_SECRET")"
+          if [[ ! "$status" =~ ^2[0-9][0-9]$ ]]; then
+            echo "HTTP ${status} from /api/cron/member-nudges"
+            # Trimmed body only. Never print CRON_SECRET or the Authorization header.
+            excerpt="$(head -c 500 body.json 2>/dev/null || true)"
+            if [[ -n "${CRON_SECRET}" && "$excerpt" == *"$CRON_SECRET"* ]]; then
+              echo "(response body omitted because it contains the cron secret)"
+            else
+              printf '%s\n' "$excerpt"
+            fi
+            exit 1
+          fi
+          jq . body.json
 
   goal-snapshots:
     runs-on: ubuntu-latest
@@ -104,10 +188,23 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'goal-snapshots'))
     steps:
       - name: Write weekly goal snapshots and WIG check-ins
+        shell: bash --noprofile --norc -euo pipefail {0}
         run: |
-          curl -sf -X GET "$APP_URL/api/cron/goal-snapshots" \
-            -H "Authorization: Bearer $CRON_SECRET" \
-            | jq .
+          set -euo pipefail
+          status="$(curl -sS -o body.json -w '%{http_code}' -X GET "$APP_URL/api/cron/goal-snapshots" \
+            -H "Authorization: Bearer $CRON_SECRET")"
+          if [[ ! "$status" =~ ^2[0-9][0-9]$ ]]; then
+            echo "HTTP ${status} from /api/cron/goal-snapshots"
+            # Trimmed body only. Never print CRON_SECRET or the Authorization header.
+            excerpt="$(head -c 500 body.json 2>/dev/null || true)"
+            if [[ -n "${CRON_SECRET}" && "$excerpt" == *"$CRON_SECRET"* ]]; then
+              echo "(response body omitted because it contains the cron secret)"
+            else
+              printf '%s\n' "$excerpt"
+            fi
+            exit 1
+          fi
+          jq . body.json
 
   media-image-check:
     runs-on: ubuntu-latest
@@ -116,7 +213,20 @@ jobs:
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'media-image-check'))
     steps:
       - name: Fail if a published story hero or og:image is broken
+        shell: bash --noprofile --norc -euo pipefail {0}
         run: |
-          curl -sf "$APP_URL/api/cron/media-image-check" \
-            -H "Authorization: Bearer $CRON_SECRET" \
-            | jq .
+          set -euo pipefail
+          status="$(curl -sS -o body.json -w '%{http_code}' "$APP_URL/api/cron/media-image-check" \
+            -H "Authorization: Bearer $CRON_SECRET")"
+          if [[ ! "$status" =~ ^2[0-9][0-9]$ ]]; then
+            echo "HTTP ${status} from /api/cron/media-image-check"
+            # Trimmed body only. Never print CRON_SECRET or the Authorization header.
+            excerpt="$(head -c 500 body.json 2>/dev/null || true)"
+            if [[ -n "${CRON_SECRET}" && "$excerpt" == *"$CRON_SECRET"* ]]; then
+              echo "(response body omitted because it contains the cron secret)"
+            else
+              printf '%s\n' "$excerpt"
+            fi
+            exit 1
+          fi
+          jq . body.json
