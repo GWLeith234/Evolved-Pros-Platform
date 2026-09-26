@@ -52,3 +52,15 @@ jobs:
           sudo service postgresql start
       - name: Pro gate tests
         run: bash supabase/tests/run_103_et_viewer_entitlement.sh
+
+  et-member-rls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Postgres
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql
+          sudo service postgresql start
+      - name: Member prefs RLS tests
+        run: bash supabase/tests/run_104_et_member_rls.sh
