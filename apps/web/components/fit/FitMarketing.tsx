@@ -17,7 +17,7 @@ import {
   FIT_WATCH_ANYWHERE_TITLE,
 } from '@/lib/fit/copy'
 import { canAccessFitLibrary, fitUpgradeHref } from '@/lib/fit/gating'
-import { featuredFitMove, publishedFitMoves } from '@/lib/fit/moves'
+import { featuredFitMove, publishedFitMoves, type FitMove } from '@/lib/fit/moves'
 import {
   FIT_LOCKUP_DARK,
   FIT_LOCKUP_LABEL,
@@ -31,12 +31,14 @@ import { FitTeaseRotator } from '@/components/fit/FitTeaseRotator'
 
 export function FitMarketing({
   viewerTier,
+  moves,
 }: {
   viewerTier: string | null
+  moves: readonly FitMove[]
 }) {
   const vip = canAccessFitLibrary(viewerTier)
-  const featured = featuredFitMove()
-  const published = publishedFitMoves()
+  const featured = featuredFitMove(moves)
+  const published = publishedFitMoves(moves)
   const upgradeHref = fitUpgradeHref()
 
   return (
@@ -82,7 +84,7 @@ export function FitMarketing({
         )}
       </section>
 
-      {vip ? <FitLibrary moves={published} /> : null}
+      {vip ? <FitLibrary moves={published} canPlay /> : null}
 
       <section className="ep-fit-how" aria-labelledby="fit-how-title">
         <p className="ep-fit-kicker">Membership</p>

@@ -763,6 +763,84 @@ export type Database = {
         }
         Relationships: []
       }
+      fit_moves: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          duration_label: string
+          duration_minutes: number
+          featured: boolean
+          focus: string
+          hip_mod: boolean
+          hip_mod_note: string | null
+          id: string
+          location: string
+          mux_asset_id: string | null
+          mux_playback_id: string | null
+          published_at: string | null
+          reps: string
+          required_tier: string
+          slug: string
+          sort_order: number
+          status: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          video_status: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          duration_label: string
+          duration_minutes?: number
+          featured?: boolean
+          focus: string
+          hip_mod?: boolean
+          hip_mod_note?: string | null
+          id?: string
+          location: string
+          mux_asset_id?: string | null
+          mux_playback_id?: string | null
+          published_at?: string | null
+          reps: string
+          required_tier?: string
+          slug: string
+          sort_order?: number
+          status?: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          video_status?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          duration_label?: string
+          duration_minutes?: number
+          featured?: boolean
+          focus?: string
+          hip_mod?: boolean
+          hip_mod_note?: string | null
+          id?: string
+          location?: string
+          mux_asset_id?: string | null
+          mux_playback_id?: string | null
+          published_at?: string | null
+          reps?: string
+          required_tier?: string
+          slug?: string
+          sort_order?: number
+          status?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          video_status?: string
+        }
+        Relationships: []
+      }
       goal_snapshots: {
         Row: {
           captured_at: string | null

@@ -1,12 +1,16 @@
 /**
  * Evolved Pros Fit move catalog.
  *
- * Runtime source is this fixture list so /fit, Home, and /admin/fit ship
- * without waiting on a live migration. SQL for a thin fit_moves table is
- * documented in supabase/migrations/092_fit_moves.sql.
+ * /fit prefers published rows from public.fit_moves (092 + 102) and falls
+ * back to this fixture list when that table is empty or the query errors.
+ * Home and /admin/fit still read the fixtures.
  *
  * Codes are FO55-### (letter O). Status: published | pilot | draft.
+ * Playback ids are never part of this shape. videoStatus ready means the
+ * signed token route may be called.
  */
+
+export type FitVideoStatus = 'draft' | 'processing' | 'ready' | 'errored'
 
 export const FO55_CODE_RE = /^FO55-\d{3}$/
 
@@ -28,7 +32,9 @@ export interface FitMove {
   durationLabel: string
   durationMinutes: number
   publishedAt: string | null
-  requiredTier: 'vip'
+  requiredTier: 'vip' | 'pro'
+  description?: string | null
+  videoStatus?: FitVideoStatus
 }
 
 export const FIT_SAMPLE_CODE = 'FO55-035'
@@ -438,5 +444,6 @@ export function fitMoveCopyStrings(moves: readonly FitMove[] = FIT_MOVES): strin
     m.reps,
     m.durationLabel,
     m.hipModNote ?? '',
+    m.description ?? '',
   ])
 }

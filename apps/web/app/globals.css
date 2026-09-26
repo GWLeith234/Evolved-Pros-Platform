@@ -3021,6 +3021,34 @@ html.light-mode .ep-academy-masthead-logo--on-light { display: block; }
   border-width: 10px 0 10px 16px;
   border-color: transparent transparent transparent var(--red);
 }
+.ep-fit-player-stage--video {
+  min-height: 168px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--navy-dark, #112535);
+  --media-accent-color: var(--red);
+}
+.ep-fit-player-stage--video mux-player,
+.ep-fit-library-player mux-player {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  --media-accent-color: var(--red);
+}
+.ep-fit-player-note {
+  margin: 0;
+  padding: 0 14px 14px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.ep-fit-library-player {
+  margin-top: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--navy-dark, #112535);
+  --media-accent-color: var(--red);
+}
 .ep-fit-player-lock {
   margin: 0;
   display: flex;
