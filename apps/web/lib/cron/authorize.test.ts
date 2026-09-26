@@ -15,6 +15,7 @@ const FAIL_OPEN_ROUTES = [
   'app/api/cron/event-reminders/route.ts',
   'app/api/cron/podcast-sync/route.ts',
   'app/api/cron/publish-posts/route.ts',
+  'app/api/cron/media-image-check/route.ts',
 ]
 
 describe('authorizeCronBearer', () => {

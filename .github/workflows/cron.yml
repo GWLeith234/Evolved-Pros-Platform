@@ -8,10 +8,12 @@ on:
     - cron: '0 17 * * *'
     # Weekly WIG snapshots + check-in bells
     - cron: '15 8 * * 1'
+    # Media hero check — every 30 minutes, one minute off :00 and :30
+    - cron: '1,31 * * * *'
   workflow_dispatch:
     inputs:
       job:
-        description: 'Which job to run (all, expire-tiers, renewal-reminders, event-reminders, daily-digest, member-nudges, goal-snapshots, thanks-nudges)'
+        description: 'Which job to run (all, expire-tiers, renewal-reminders, event-reminders, daily-digest, member-nudges, goal-snapshots, thanks-nudges, media-image-check)'
         required: false
         default: 'all'
 
@@ -104,5 +106,17 @@ jobs:
       - name: Write weekly goal snapshots and WIG check-ins
         run: |
           curl -sf -X GET "$APP_URL/api/cron/goal-snapshots" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            | jq .
+
+  media-image-check:
+    runs-on: ubuntu-latest
+    if: >-
+      (github.event_name == 'schedule' && github.event.schedule == '1,31 * * * *') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.job == 'all' || github.event.inputs.job == 'media-image-check'))
+    steps:
+      - name: Fail if a published story hero or og:image is broken
+        run: |
+          curl -sf "$APP_URL/api/cron/media-image-check" \
             -H "Authorization: Bearer $CRON_SECRET" \
             | jq .

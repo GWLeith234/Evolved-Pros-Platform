@@ -1,0 +1,14 @@
+{
+  "name": "Thursday media publish proof",
+  "storiesMust": {
+    "featuredImage": {
+      "method": "HEAD",
+      "status": 200,
+      "contentTypePrefix": "image/"
+    },
+    "ogImage": {
+      "mustNotEqual": "/logo_horizontal_navy.png"
+    },
+    "excludeStoryType": "redirect"
+  }
+}
