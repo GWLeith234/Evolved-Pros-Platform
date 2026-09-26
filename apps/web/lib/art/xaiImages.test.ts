@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -91,21 +91,19 @@ describe('xAI image client', () => {
     }
   })
 
-  it('keeps the admin image routes on the shared model helper', () => {
-    const singular = readFileSync(
-      resolve(here, '../../app/api/admin/image/generate/route.ts'),
-      'utf8',
-    )
+  it('keeps the admin images generate route on the shared model helper', () => {
     const plural = readFileSync(
       resolve(here, '../../app/api/admin/images/generate/route.ts'),
       'utf8',
     )
-    for (const source of [singular, plural]) {
-      expect(source).not.toContain('grok-2-image')
-      expect(source).toContain("from '@/lib/art/xaiImages'")
-      expect(source).toContain('resolveXaiApiKey')
-      expect(source).toContain('requestXaiImages')
-    }
-    expect(singular).toContain('resolveXaiImageModel')
+    expect(plural).not.toContain('grok-2-image')
+    expect(plural).toContain("from '@/lib/art/xaiImages'")
+    expect(plural).toContain('resolveXaiApiKey')
+    expect(plural).toContain('requestXaiImages')
+    expect(plural).toContain('resolveXaiImageModel')
+  })
+
+  it('does not keep the legacy singular /api/admin/image tree', () => {
+    expect(existsSync(resolve(here, '../../app/api/admin/image'))).toBe(false)
   })
 })

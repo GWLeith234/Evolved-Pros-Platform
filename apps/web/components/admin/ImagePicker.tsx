@@ -159,10 +159,41 @@ function StockTab({ onChange }: { onChange: (url: string) => void }) {
     setBusy(true)
     setError(null)
     try {
-      const res = await fetch(`/api/admin/image/unsplash?q=${encodeURIComponent(query.trim())}`)
+      const res = await fetch(
+        `/api/admin/images/unsplash?query=${encodeURIComponent(query.trim())}`,
+      )
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Search failed')
-      setResults(data.results ?? [])
+      // Prefer the nested `results` shape; fall back to flat `photos`.
+      const nested = Array.isArray(data.results) ? data.results : null
+      if (nested) {
+        setResults(nested)
+      } else {
+        const photos = Array.isArray(data.photos) ? data.photos : []
+        setResults(
+          photos.map(
+            (p: {
+              id: string
+              url?: string
+              thumb?: string
+              credit?: string
+              profileUrl?: string | null
+            }) => ({
+              id: p.id,
+              urls: {
+                regular: p.url ?? '',
+                small: p.thumb ?? p.url ?? '',
+                thumb: p.thumb ?? p.url ?? '',
+              },
+              user: {
+                name: p.credit ?? 'Unsplash',
+                username: '',
+                link: p.profileUrl ?? '',
+              },
+            }),
+          ),
+        )
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Search failed')
     } finally {
@@ -251,13 +282,16 @@ function GenerateTab({ onChange }: { onChange: (url: string) => void }) {
     setError(null)
     setGenerated(null)
     try {
-      const res = await fetch('/api/admin/image/generate', {
+      const res = await fetch('/api/admin/images/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: prompt.trim(), style }),
+        body: JSON.stringify({ prompt: prompt.trim(), style, count: 1 }),
       })
       const data = await res.json().catch(() => ({}))
-      if (!res.ok || !data.url) {
+      const url =
+        (typeof data.url === 'string' && data.url) ||
+        (Array.isArray(data.images) ? data.images[0] : null)
+      if (!res.ok || !url) {
         // Route returns 422 + { code: 404 } when xAI rejects the model id —
         // give the user a helpful, specific message instead of a raw stack.
         if (res.status === 422 && data.code === 404) {
@@ -265,7 +299,7 @@ function GenerateTab({ onChange }: { onChange: (url: string) => void }) {
         }
         throw new Error(data.error ?? 'Generation failed')
       }
-      setGenerated(data.url)
+      setGenerated(url)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Generation failed')
     } finally {

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { formatPct } from '@/lib/format'
 import { leadingMeasureStatus, weeklyCommitPulse } from '@/lib/home/bands'
-import type { DailyPulseHabit, DailyPulseCommitment } from './DailyPulseCard'
+import type { DailyPulseHabit, DailyPulseCommitment } from './dailyPulse'
 
 interface HomeAccountabilityBandProps {
   habits: DailyPulseHabit[]

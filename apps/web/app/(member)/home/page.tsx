@@ -15,7 +15,7 @@ import { HomeEpisodeCard } from '@/components/home/HomeEpisodeCard'
 import { type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
 import { HomeContentAdGrid } from '@/components/home/HomeContentAdGrid'
 import { HomeFitTeaseBand } from '@/components/home/HomeFitTeaseBand'
-import { type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/DailyPulseCard'
+import { type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/dailyPulse'
 import { type SponsorAd } from '@/components/home/HomeSponsorAd'
 import {
   isAcademyAd,
