@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { adminClient } from '@/lib/supabase/admin'
-import { notifyMediaPublished } from '@/lib/notifications/fanout'
 import { featuredImageForPublish } from '@/lib/media/heroPublishGuard'
 import { publishHeroGate } from '@/lib/media/heroReachable'
 import { mediaStoryWriteFailure } from '@/lib/media/mediaStoryWrite'
@@ -42,7 +41,7 @@ export async function PATCH(
   const { data: current } = publishing
     ? await adminClient
         .from('media_stories')
-        .select('is_published, featured_image_url')
+        .select('featured_image_url')
         .eq('id', params.id)
         .maybeSingle()
     : { data: null }
@@ -95,13 +94,8 @@ export async function PATCH(
     const failure = mediaStoryWriteFailure(error)
     return NextResponse.json({ error: failure.error }, { status: failure.status })
   }
-  if (publishing && current && !current.is_published && data.is_published) {
-    void notifyMediaPublished({
-      title: data.title,
-      slug: data.slug,
-      pillar: data.pillar,
-    })
-  }
+  // Member alerts are inserted by notify_media_published() (migration 106)
+  // in this same write. Do not call notifyMediaPublished here.
 
   const hero = !data.is_published && !data.featured_image_url
     ? (await import('@/lib/media/generateHero')).queueDraftHero({

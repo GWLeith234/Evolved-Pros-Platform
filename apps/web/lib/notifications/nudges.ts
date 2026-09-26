@@ -10,6 +10,8 @@ import {
   decideWigNudge,
   isEveningUtc,
   isoMondayYmd,
+  MEMBER_ALERT_EXCLUDED_ROLE,
+  MEMBER_ALERT_TIER_STATUSES,
   utcDateYmd,
   wigActionUrl,
   wigCopy,
@@ -22,11 +24,13 @@ type GoalRow = {
 }
 
 export async function listActiveMemberIds(): Promise<string[]> {
+  // Same audience as notify_media_published() in migration 106.
+  // Media publishes do not call this function; the trigger does.
   const { data, error } = await adminClient
     .from('users')
     .select('id')
-    .in('tier_status', ['active', 'trial'])
-    .neq('role', 'admin')
+    .in('tier_status', [...MEMBER_ALERT_TIER_STATUSES])
+    .neq('role', MEMBER_ALERT_EXCLUDED_ROLE)
 
   if (error) {
     console.error('[notifications/nudges] list members', error)
