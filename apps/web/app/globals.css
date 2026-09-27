@@ -3180,6 +3180,18 @@ html.light-mode .ep-academy-masthead-logo--on-light { display: block; }
   display: grid;
   gap: 16px;
 }
+.ep-fit-library-list li {
+  padding: 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+}
+.ep-fit-library-list .ep-fit-unlocks {
+  justify-content: flex-start;
+}
+.ep-fit-library-list .ep-fit-cta {
+  margin-top: 12px;
+}
 .ep-fit-library-list h3 {
   margin: 4px 0;
   font-family: var(--font-display), "Playfair Display", serif;

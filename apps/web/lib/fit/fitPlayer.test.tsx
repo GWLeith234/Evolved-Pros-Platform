@@ -3,9 +3,11 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { FitLibrary } from '@/components/fit/FitLibrary'
+import { FitMarketing } from '@/components/fit/FitMarketing'
 import { FitTeaseCard } from '@/components/fit/FitTeaseCard'
-import { FIT_LOCKED_BAR, FIT_UPGRADE_CTA, FIT_VIDEO_PROCESSING } from '@/lib/fit/copy'
-import { featuredFitMove, type FitMove } from '@/lib/fit/moves'
+import { FIT_JOIN_CTA, FIT_LOCKED_BAR, FIT_UPGRADE_CTA, FIT_VIDEO_PROCESSING } from '@/lib/fit/copy'
+import { fitJoinHref, fitUpgradeHref } from '@/lib/fit/gating'
+import { featuredFitMove, FIT_MOVES, publishedFitMoves, type FitMove } from '@/lib/fit/moves'
 
 function readyMove(): FitMove {
   return { ...featuredFitMove(), videoStatus: 'ready', description: 'Plain guide copy.' }
@@ -46,5 +48,107 @@ describe('Fit player gating in the UI', () => {
     expect(src).toContain('/api/fit/')
     expect(src).toContain('/mux-token')
     expect(src).not.toContain('mux_playback_id')
+  })
+})
+
+function librarySection(html: string): string {
+  const start = html.indexOf('class="ep-fit-library"')
+  const end = html.indexOf('class="ep-fit-how"')
+  return html.slice(start, end === -1 ? undefined : end).replace(/&amp;/g, '&')
+}
+
+function readyGuide(): FitMove {
+  return {
+    ...featuredFitMove(),
+    videoStatus: 'ready',
+    description: 'https://stream.example/secret-playback.m3u8',
+  }
+}
+
+describe('Fit library grid for every visitor', () => {
+  it('renders locked cards with a join CTA for logged-out visitors', () => {
+    const move = readyGuide()
+    const library = librarySection(
+      renderToStaticMarkup(<FitMarketing viewerTier={null} signedIn={false} moves={[move]} />),
+    )
+    expect(library).toContain(move.title)
+    expect(library).toContain(move.focus)
+    expect(library).toContain(move.location)
+    expect(library).toContain('ep-fit-lock-icon')
+    expect(library).toContain(FIT_LOCKED_BAR)
+    expect(library).toContain(FIT_JOIN_CTA)
+    expect(library).toContain(fitJoinHref())
+    expect(library).toContain('data-locked="true"')
+    expect(library).not.toContain(FIT_UPGRADE_CTA)
+    expect(library).not.toContain('ep-fit-library-player')
+    expect(library).not.toContain('ep-fit-play')
+    expect(library).not.toContain('/mux-token')
+    expect(library).not.toContain('/api/fit/')
+    expect(library).not.toContain('secret-playback.m3u8')
+  })
+
+  it('renders locked cards with an upgrade CTA for logged-in non-VIPs', () => {
+    const move = readyGuide()
+    const library = librarySection(
+      renderToStaticMarkup(<FitMarketing viewerTier="community" signedIn moves={[move]} />),
+    )
+    expect(library).toContain(move.title)
+    expect(library).toContain(move.focus)
+    expect(library).toContain(move.location)
+    expect(library).toContain('ep-fit-lock-icon')
+    expect(library).toContain(FIT_UPGRADE_CTA)
+    expect(library).toContain(fitUpgradeHref())
+    expect(library).not.toContain(FIT_JOIN_CTA)
+    expect(library).not.toContain(fitJoinHref())
+    expect(library).not.toContain('ep-fit-library-player')
+    expect(library).not.toContain('ep-fit-play')
+    expect(library).not.toContain('/mux-token')
+    expect(library).not.toContain('secret-playback.m3u8')
+  })
+
+  it('treats a signed-in visitor with no tier as an upgrade, not a join', () => {
+    const library = librarySection(
+      renderToStaticMarkup(
+        <FitMarketing viewerTier={null} signedIn moves={[readyGuide()]} />,
+      ),
+    )
+    expect(library).toContain(FIT_UPGRADE_CTA)
+    expect(library).toContain(fitUpgradeHref())
+    expect(library).not.toContain(fitJoinHref())
+    expect(library).not.toContain('ep-fit-play')
+  })
+
+  it('renders playable cards for VIP and does not lock them', () => {
+    const move = readyGuide()
+    const library = librarySection(
+      renderToStaticMarkup(<FitMarketing viewerTier="vip" signedIn moves={[move]} />),
+    )
+    expect(library).toContain('data-locked="false"')
+    expect(library).toContain('ep-fit-library-player')
+    expect(library).toContain(move.title)
+    expect(library).not.toContain('ep-fit-lock-icon')
+    expect(library).not.toContain(FIT_JOIN_CTA)
+    expect(library).not.toContain(FIT_UPGRADE_CTA)
+    expect(library).not.toContain(FIT_LOCKED_BAR)
+  })
+
+  it('lists every published guide for a logged-out visitor and skips the rest', () => {
+    const library = librarySection(
+      renderToStaticMarkup(<FitMarketing viewerTier={null} signedIn={false} moves={FIT_MOVES} />),
+    )
+    const published = publishedFitMoves()
+    expect(published.length).toBeGreaterThan(0)
+    for (const move of published) {
+      expect(library).toContain(move.title)
+      expect(library).toContain(move.focus)
+      expect(library).toContain(move.location)
+    }
+    for (const move of FIT_MOVES) {
+      if (move.status === 'published') continue
+      expect(library).not.toContain(move.title)
+    }
+    expect(library).toContain('Hotel bench incline chest press')
+    expect(library).not.toContain('ep-fit-library-player')
+    expect(library).not.toContain('/mux-token')
   })
 })

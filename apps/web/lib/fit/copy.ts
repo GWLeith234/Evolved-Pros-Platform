@@ -12,6 +12,7 @@ export const FIT_VIP_MONTHLY = TIERS.vip.monthly
 export const FIT_VIP_PILL = `VIP $${FIT_VIP_MONTHLY}`
 export const FIT_UNLOCKS_LINE = `Unlocks at VIP $${FIT_VIP_MONTHLY}`
 export const FIT_UPGRADE_CTA = 'Upgrade to VIP'
+export const FIT_JOIN_CTA = 'Join free'
 export const FIT_NEXT_LABEL = 'Next'
 
 export const FIT_PAGE_TITLE = 'Evolved Pros Fit'
@@ -87,6 +88,7 @@ export function fitCopyStrings(): string[] {
     FIT_VIP_PILL,
     FIT_UNLOCKS_LINE,
     FIT_UPGRADE_CTA,
+    FIT_JOIN_CTA,
     FIT_NEXT_LABEL,
     FIT_PAGE_TITLE,
     FIT_PAGE_DESCRIPTION,

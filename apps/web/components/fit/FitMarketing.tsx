@@ -10,13 +10,14 @@ import {
   FIT_HIP_MOD_LABEL,
   FIT_HOW_STEPS,
   FIT_HOW_TITLE,
+  FIT_JOIN_CTA,
   FIT_UNLOCKS_LINE,
   FIT_UPGRADE_CTA,
   FIT_VIP_PILL,
   FIT_WATCH_ANYWHERE_DEK,
   FIT_WATCH_ANYWHERE_TITLE,
 } from '@/lib/fit/copy'
-import { canAccessFitLibrary, fitUpgradeHref } from '@/lib/fit/gating'
+import { canAccessFitLibrary, fitJoinHref, fitUpgradeHref } from '@/lib/fit/gating'
 import { featuredFitMove, publishedFitMoves, type FitMove } from '@/lib/fit/moves'
 import {
   FIT_LOCKUP_DARK,
@@ -32,14 +33,24 @@ import { FitTeaseRotator } from '@/components/fit/FitTeaseRotator'
 export function FitMarketing({
   viewerTier,
   moves,
+  signedIn,
 }: {
   viewerTier: string | null
   moves: readonly FitMove[]
+  /** True when a profile is present. A null tier still counts as signed in. */
+  signedIn?: boolean
 }) {
   const vip = canAccessFitLibrary(viewerTier)
+  const member = signedIn ?? viewerTier != null
   const featured = featuredFitMove(moves)
   const published = publishedFitMoves(moves)
   const upgradeHref = fitUpgradeHref()
+  const libraryCta = vip
+    ? undefined
+    : {
+        href: member ? upgradeHref : fitJoinHref(),
+        label: member ? FIT_UPGRADE_CTA : FIT_JOIN_CTA,
+      }
 
   return (
     <div className="ep-fit-page">
@@ -84,7 +95,7 @@ export function FitMarketing({
         )}
       </section>
 
-      {vip ? <FitLibrary moves={published} canPlay /> : null}
+      <FitLibrary moves={published} canPlay={vip} cta={libraryCta} />
 
       <section className="ep-fit-how" aria-labelledby="fit-how-title">
         <p className="ep-fit-kicker">Membership</p>
