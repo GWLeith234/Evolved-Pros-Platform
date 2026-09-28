@@ -19,6 +19,22 @@ describe('Fit player gating in the UI', () => {
     expect(html).not.toContain('ep-fit-player-stage--video')
     expect(html).not.toContain('/mux-token')
     expect(html).not.toContain('Plain guide copy.')
+    expect(html).toContain('class="ep-fit-play"')
+    expect(html).not.toContain('ep-fit-poster')
+  })
+
+  it('replaces the shared play icon with that move poster and no video url', () => {
+    const poster = 'https://image.mux.com/play-locked/thumbnail.jpg?token=thumb-only'
+    const html = renderToStaticMarkup(
+      <FitTeaseCard move={{ ...readyMove(), posterUrl: poster }} locked />,
+    )
+    expect(html).toContain('ep-fit-poster')
+    expect(html).toContain(poster)
+    expect(html).not.toContain('class="ep-fit-play"')
+    expect(html).not.toContain('stream.mux.com')
+    expect(html).not.toContain('.m3u8')
+    expect(html).not.toContain('/mux-token')
+    expect(html).not.toContain('ep-fit-player-stage--video')
   })
 
   it('mounts the player only when the guide is unlocked and ready', () => {

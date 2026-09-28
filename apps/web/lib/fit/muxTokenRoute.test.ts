@@ -11,8 +11,10 @@ const state = vi.hoisted(() => ({
     status: string
     video_status: string
     mux_playback_id: string | null
+    thumbnail_time: number | null
   } | null,
   selects: 0,
+  columns: '',
 }))
 
 vi.mock('@/lib/supabase/server', () => ({
@@ -28,10 +30,11 @@ vi.mock('@/lib/supabase/admin', () => ({
     from: (table: string) => {
       if (table !== 'fit_moves') throw new Error(`unexpected table ${table}`)
       return {
-        select: () => ({
+        select: (columns: string) => ({
           eq: () => ({
             maybeSingle: async () => {
               state.selects += 1
+              state.columns = columns
               return { data: state.move, error: null }
             },
           }),
@@ -51,6 +54,7 @@ function readyMove() {
     status: 'published',
     video_status: 'ready',
     mux_playback_id: 'play-ready',
+    thumbnail_time: null,
   }
 }
 
@@ -75,6 +79,7 @@ describe('Fit mux token route', () => {
     state.profile = null
     state.move = null
     state.selects = 0
+    state.columns = ''
   })
 
   it('signs a 15 minute token for VIP', async () => {
@@ -87,6 +92,15 @@ describe('Fit mux token route', () => {
     const body = await res.json()
     expect(body.playbackId).toBe('play-ready')
     expect(typeof body.token).toBe('string')
+    expect(state.columns).toContain('thumbnail_time')
+    expect(typeof body.thumbnailToken).toBe('string')
+    expect(body.thumbnailToken).not.toBe(body.token)
+    const thumb = JSON.parse(
+      Buffer.from(String(body.thumbnailToken).split('.')[1], 'base64url').toString(),
+    ) as { aud?: string; sub?: string; time?: unknown }
+    expect(thumb.aud).toBe('t')
+    expect(thumb.sub).toBe('play-ready')
+    expect(thumb.time).toBeUndefined()
     const payload = JSON.parse(Buffer.from(String(body.token).split('.')[1], 'base64url').toString()) as {
       aud?: string
       sub?: string
@@ -133,6 +147,45 @@ describe('Fit mux token route', () => {
     expect(res.status).toBe(403)
     expect(await res.json()).toEqual({ error: 'Upgrade required' })
     expect(state.selects).toBe(0)
+  })
+
+  it('signs a thumbnail token at thumbnail_time without changing the video token', async () => {
+    state.profile = { tier: 'vip', tier_status: 'active' }
+    readyMove()
+    state.move = { ...state.move!, thumbnail_time: 3.5 }
+    const res = await call()
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    const video = JSON.parse(Buffer.from(String(body.token).split('.')[1], 'base64url').toString()) as {
+      aud?: string
+      time?: unknown
+    }
+    const thumb = JSON.parse(
+      Buffer.from(String(body.thumbnailToken).split('.')[1], 'base64url').toString(),
+    ) as { aud?: string; time?: unknown; sub?: string }
+    expect(video.aud).toBe('v')
+    expect(video.time).toBeUndefined()
+    expect(thumb.aud).toBe('t')
+    expect(thumb.sub).toBe('play-ready')
+    expect(thumb.time).toBe('3.5')
+  })
+
+  it('returns 404 with no tokens when the guide is missing or not ready', async () => {
+    state.profile = { tier: 'vip', tier_status: 'active' }
+    state.move = null
+    const missing = await call()
+    expect(missing.status).toBe(404)
+    expect(await missing.json()).toEqual({ error: 'No video' })
+
+    readyMove()
+    state.move = { ...state.move!, video_status: 'processing' }
+    const processing = await call()
+    expect(processing.status).toBe(404)
+    const body = await processing.json()
+    expect(body).toEqual({ error: 'No video' })
+    expect(body.token).toBeUndefined()
+    expect(body.thumbnailToken).toBeUndefined()
+    expect(body.playbackId).toBeUndefined()
   })
 
   it('returns 401 with no token when signed out', async () => {
