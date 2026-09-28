@@ -3021,6 +3021,16 @@ html.light-mode .ep-academy-masthead-logo--on-light { display: block; }
   border-width: 10px 0 10px 16px;
   border-color: transparent transparent transparent var(--red);
 }
+.ep-fit-player-stage--poster {
+  display: block;
+  min-height: 0;
+}
+.ep-fit-poster {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+}
 .ep-fit-player-stage--video {
   min-height: 168px;
   display: flex;

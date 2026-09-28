@@ -4,6 +4,7 @@ import { FitMarketing } from '@/components/fit/FitMarketing'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { FIT_PAGE_DESCRIPTION, FIT_PAGE_TITLE } from '@/lib/fit/copy'
 import { loadPublishedFitMoves } from '@/lib/fit/catalog'
+import { fitMovesForViewer } from '@/lib/fit/posters'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 
 export const dynamic = 'force-dynamic'
@@ -21,7 +22,7 @@ export default async function FitPage() {
   } catch {
     viewerTier = null
   }
-  const moves = await loadPublishedFitMoves()
+  const moves = await fitMovesForViewer(await loadPublishedFitMoves(), viewerTier)
   return (
     <div className="min-h-screen bg-page text-primary ep-no-x-scroll" style={{ maxWidth: '100vw' }}>
       <FitMasthead />

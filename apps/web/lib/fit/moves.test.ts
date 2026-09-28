@@ -99,6 +99,7 @@ describe('Fit copy hygiene', () => {
       '../../components/fit/FitTeaseCard.tsx',
       '../../components/fit/FitLibrary.tsx',
       '../../components/fit/FitMuxPlayer.tsx',
+      '../../components/fit/FitLockedPoster.tsx',
       '../../components/home/HomeFitTeaseBand.tsx',
       '../../components/home/ConversionHome.tsx',
       '../../app/(public)/fit/page.tsx',

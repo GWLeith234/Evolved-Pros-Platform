@@ -18,7 +18,11 @@ export function FitMuxPlayer({
   moveId: string
   title: string
 }) {
-  const [playback, setPlayback] = useState<{ token: string; playbackId: string } | null>(null)
+  const [playback, setPlayback] = useState<{
+    token: string
+    thumbnailToken: string | null
+    playbackId: string
+  } | null>(null)
   const [unavailable, setUnavailable] = useState(false)
 
   useEffect(() => {
@@ -26,9 +30,17 @@ export function FitMuxPlayer({
     fetch(`/api/fit/${encodeURIComponent(moveId)}/mux-token`, { signal: ac.signal })
       .then(async (res) => {
         if (!res.ok) throw new Error('token')
-        const body = (await res.json()) as { token?: string; playbackId?: string }
+        const body = (await res.json()) as {
+          token?: string
+          thumbnailToken?: string | null
+          playbackId?: string
+        }
         if (!body.token || !body.playbackId) throw new Error('token')
-        setPlayback({ token: body.token, playbackId: body.playbackId })
+        setPlayback({
+          token: body.token,
+          thumbnailToken: typeof body.thumbnailToken === 'string' ? body.thumbnailToken : null,
+          playbackId: body.playbackId,
+        })
       })
       .catch((err: unknown) => {
         if (err instanceof DOMException && err.name === 'AbortError') return
@@ -45,10 +57,16 @@ export function FitMuxPlayer({
     return <span className="ep-fit-play" aria-hidden="true" />
   }
 
+  // Poster time lives in the thumbnail JWT. Mux Player rejects a separate
+  // time prop when a thumbnail token is already set.
+  const tokens = playback.thumbnailToken
+    ? { playback: playback.token, thumbnail: playback.thumbnailToken }
+    : { playback: playback.token }
+
   return (
     <MuxPlayer
       playbackId={playback.playbackId}
-      tokens={{ playback: playback.token }}
+      tokens={tokens}
       streamType="on-demand"
       metadata={{ video_title: title }}
       style={{ width: '100%', aspectRatio: '16 / 9' }}
