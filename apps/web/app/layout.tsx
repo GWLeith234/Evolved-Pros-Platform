@@ -1,6 +1,6 @@
 // cache-bust: 2026-03-25
 import type { Metadata, Viewport } from 'next'
-import { Playfair_Display, Barlow_Condensed, Barlow, Bebas_Neue, Merriweather, Abril_Fatface } from 'next/font/google'
+import localFont from 'next/font/local'
 import { getDefaultTheme } from '@/lib/cache/shared'
 import { getGscVerification } from '@/lib/analytics/public-ids'
 import { CANONICAL_ORIGIN } from '@/lib/seo/canonical'
@@ -11,42 +11,108 @@ import './globals.css'
 
 const gscVerification = getGscVerification()
 
-const playfair = Playfair_Display({
-  subsets: ['latin'],
+// Self-hosted latin woff2 (same families, weights, styles, and CSS variables).
+// display stays swap. Serif families keep the Times New Roman size-adjusted
+// fallback; the others keep Arial. Files are the latin cuts from Google Fonts.
+const playfair = localFont({
+  src: [
+    {
+      path: '../fonts/playfair-display/playfair-display-latin-700-900-normal.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+    {
+      path: '../fonts/playfair-display/playfair-display-latin-700-900-normal.woff2',
+      weight: '900',
+      style: 'normal',
+    },
+    {
+      path: '../fonts/playfair-display/playfair-display-latin-700-900-italic.woff2',
+      weight: '700',
+      style: 'italic',
+    },
+    {
+      path: '../fonts/playfair-display/playfair-display-latin-700-900-italic.woff2',
+      weight: '900',
+      style: 'italic',
+    },
+  ],
   variable: '--font-display',
-  weight: ['700', '900'],
-  style: ['normal', 'italic'],
+  display: 'swap',
+  adjustFontFallback: 'Times New Roman',
 })
 
-const barlowCondensed = Barlow_Condensed({
-  subsets: ['latin'],
+const barlowCondensed = localFont({
+  src: [
+    { path: '../fonts/barlow-condensed/barlow-condensed-latin-400-normal.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/barlow-condensed/barlow-condensed-latin-500-normal.woff2', weight: '500', style: 'normal' },
+    { path: '../fonts/barlow-condensed/barlow-condensed-latin-600-normal.woff2', weight: '600', style: 'normal' },
+    { path: '../fonts/barlow-condensed/barlow-condensed-latin-700-normal.woff2', weight: '700', style: 'normal' },
+    { path: '../fonts/barlow-condensed/barlow-condensed-latin-800-normal.woff2', weight: '800', style: 'normal' },
+    { path: '../fonts/barlow-condensed/barlow-condensed-latin-900-normal.woff2', weight: '900', style: 'normal' },
+  ],
   variable: '--font-condensed',
-  weight: ['400', '500', '600', '700', '800', '900'],
+  display: 'swap',
+  adjustFontFallback: 'Arial',
 })
 
-const barlow = Barlow({
-  subsets: ['latin'],
+const barlow = localFont({
+  src: [
+    { path: '../fonts/barlow/barlow-latin-300-normal.woff2', weight: '300', style: 'normal' },
+    { path: '../fonts/barlow/barlow-latin-400-normal.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/barlow/barlow-latin-500-normal.woff2', weight: '500', style: 'normal' },
+    { path: '../fonts/barlow/barlow-latin-600-normal.woff2', weight: '600', style: 'normal' },
+    { path: '../fonts/barlow/barlow-latin-700-normal.woff2', weight: '700', style: 'normal' },
+  ],
   variable: '--font-body',
-  weight: ['300', '400', '500', '600', '700'],
+  display: 'swap',
+  adjustFontFallback: 'Arial',
 })
 
-const bebasNeue = Bebas_Neue({
-  subsets: ['latin'],
+const bebasNeue = localFont({
+  src: '../fonts/bebas-neue/bebas-neue-latin-400-normal.woff2',
+  weight: '400',
+  style: 'normal',
   variable: '--font-logo',
-  weight: ['400'],
+  display: 'swap',
+  adjustFontFallback: 'Arial',
 })
 
-const abrilFatface = Abril_Fatface({
-  subsets: ['latin'],
-  weight: ['400'],
+const abrilFatface = localFont({
+  src: '../fonts/abril-fatface/abril-fatface-latin-400-normal.woff2',
+  weight: '400',
+  style: 'normal',
   variable: '--font-abril',
+  display: 'swap',
+  adjustFontFallback: 'Arial',
 })
 
-const merriweather = Merriweather({
-  subsets: ['latin'],
+const merriweather = localFont({
+  src: [
+    {
+      path: '../fonts/merriweather/merriweather-latin-400-700-normal.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../fonts/merriweather/merriweather-latin-400-700-normal.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+    {
+      path: '../fonts/merriweather/merriweather-latin-400-700-italic.woff2',
+      weight: '400',
+      style: 'italic',
+    },
+    {
+      path: '../fonts/merriweather/merriweather-latin-400-700-italic.woff2',
+      weight: '700',
+      style: 'italic',
+    },
+  ],
   variable: '--font-serif',
-  weight: ['400', '700'],
-  style: ['normal', 'italic'],
+  display: 'swap',
+  adjustFontFallback: 'Times New Roman',
 })
 
 const LOGO_CIRCLE_DARK = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Branding/logo_circle_dark.png`
