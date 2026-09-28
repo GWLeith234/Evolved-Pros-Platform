@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { authorizeCronBearer } from '@/lib/cron/authorize'
 import { checkPublishedStoryImages } from '@/lib/media/mediaImageCheck'
+import { getAppUrl } from '@/lib/urls'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,7 +41,7 @@ export async function GET(request: Request) {
       pillar: row.pillar,
       featured_image_url: row.featured_image_url,
     })),
-    origin: new URL(request.url).origin,
+    origin: getAppUrl(),
   })
 
   if (!result.ok) {
