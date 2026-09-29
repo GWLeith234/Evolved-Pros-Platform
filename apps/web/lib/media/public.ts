@@ -11,7 +11,7 @@ import { ALL_MEDIA_SECTIONS, mediaIndexSections, type DeskSectionDef } from './d
 import { listPublicMediaStories } from './sitemap'
 
 export const MEDIA_HUB_STORY_COLUMNS =
-  'id, title, slug, excerpt, pillar, story_type, featured_image_url, author, published_at, body, views, is_published'
+  'id, title, slug, excerpt, pillar, story_type, featured_image_url, author, published_at, updated_at, body, views, is_published'
 
 export type HubMediaStory = {
   id: string
@@ -23,6 +23,7 @@ export type HubMediaStory = {
   featured_image_url: string | null
   author: string | null
   published_at: string | null
+  updated_at?: string | null
   body: string | null
   views: number
   is_published?: boolean | null

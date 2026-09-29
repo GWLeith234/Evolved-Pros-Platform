@@ -61,6 +61,7 @@ describe('getPublishedMediaStoriesForHub', () => {
     expect(state.tables).toEqual(['media_stories'])
     expect(state.eqFilters).toEqual([['is_published', true]])
     expect(MEDIA_HUB_STORY_COLUMNS).toContain('is_published')
+    expect(MEDIA_HUB_STORY_COLUMNS).toContain('updated_at')
     expect(rows).toHaveLength(1)
     expect(rows[0]?.slug).toBe('a-story')
   })

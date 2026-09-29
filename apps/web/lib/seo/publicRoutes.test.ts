@@ -41,6 +41,17 @@ describe('PUBLIC_SITEMAP_PATHS', () => {
     expect(sitemap).toMatch(/'\/about':\s+0\.4\b/)
   })
 
+  it('loads media locs from the hub query and does not stamp request-time lastmod', () => {
+    const sitemap = readFileSync(resolve(__dirname, '../../app/sitemap.ts'), 'utf8')
+    expect(sitemap).toContain('getPublishedMediaStoriesForHub')
+    expect(sitemap).toContain('noStore()')
+    expect(sitemap).toMatch(/export const revalidate = 0/)
+    expect(sitemap).toMatch(/fetchCache = 'force-no-store'/)
+    expect(sitemap).toContain('CANONICAL_ORIGIN')
+    expect(sitemap).not.toContain('platform.evolvedpros.com')
+    expect(sitemap).not.toMatch(/lastModified:\s*new Date\(\)/)
+  })
+
   it('advertises the EVOLVED book preorder dest the house IAB ads click to', () => {
     expect([...PUBLIC_SITEMAP_PATHS]).toContain('/evolved')
     expect([...PUBLIC_SITEMAP_PATHS]).not.toContain('/book')

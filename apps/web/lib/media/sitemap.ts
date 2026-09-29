@@ -11,15 +11,30 @@ export type MediaStorySitemapRow = {
   pillar: string | null
   slug: string | null
   published_at: string | null
+  /** dateModified. Preferred over published_at for sitemap lastmod. */
+  updated_at?: string | null
   is_published?: boolean | null
 }
 
 export type MediaSitemapEntry = {
   url: string
-  lastModified: Date
-  changeFrequency: 'monthly'
+  lastModified?: Date
+  changeFrequency: 'daily' | 'monthly'
   priority: number
 }
+
+/**
+ * Indexable /media/<pillar> hubs. Live, self-canonical, linked from the
+ * media masthead. Program order matches lib/pillars PILLARS.
+ */
+export const MEDIA_CATEGORY_HUB_PATHS = [
+  '/media/foundation',
+  '/media/identity',
+  '/media/mental-toughness',
+  '/media/strategy',
+  '/media/accountability',
+  '/media/execution',
+] as const
 
 /**
  * Unpublished stories that must never appear in the sitemap, even if a
@@ -66,11 +81,34 @@ export function listPublicMediaStories<T extends {
   return stories.filter(isListedPublicMediaStory)
 }
 
+function isSitemapArticle(row: MediaStorySitemapRow): boolean {
+  if (row.is_published !== true) return false
+  const path = mediaArticlePath(row.pillar, row.slug)
+  if (!path || UNPUBLISHED_MEDIA_PATHS.has(path)) return false
+  if (path === '/media/preview' || path.startsWith('/media/preview/')) return false
+  return true
+}
+
+/**
+ * Honest article lastmod: dateModified (`updated_at`) when the row has one,
+ * otherwise datePublished. Missing or unparseable timestamps are omitted —
+ * never substituted with the request clock.
+ */
+export function mediaSitemapLastModified(row: {
+  published_at?: string | null
+  updated_at?: string | null
+}): Date | undefined {
+  const raw = (row.updated_at ?? '').trim() || (row.published_at ?? '').trim()
+  if (!raw) return undefined
+  const date = new Date(raw)
+  return Number.isNaN(date.getTime()) ? undefined : date
+}
+
 /**
  * Map published media_stories rows to sitemap entries.
  * Unpublished rows, the explicit unpublished-slug denylist, and rows
  * missing pillar/slug are dropped.
- * lastmod / changeFrequency / priority match podcast episode entries.
+ * changeFrequency / priority match podcast episode entries.
  */
 export function toMediaSitemapEntries(
   base: string,
@@ -78,16 +116,44 @@ export function toMediaSitemapEntries(
 ): MediaSitemapEntry[] {
   const entries: MediaSitemapEntry[] = []
   for (const row of rows) {
-    if (row.is_published !== true) continue
+    if (!isSitemapArticle(row)) continue
     const path = mediaArticlePath(row.pillar, row.slug)
-    if (!path || UNPUBLISHED_MEDIA_PATHS.has(path)) continue
-    if (path === '/media/preview' || path.startsWith('/media/preview/')) continue
+    if (!path) continue
+    const lastModified = mediaSitemapLastModified(row)
     entries.push({
       url: `${base}${path}`,
-      lastModified: row.published_at ? new Date(row.published_at) : new Date(),
+      ...(lastModified ? { lastModified } : {}),
       changeFrequency: 'monthly',
       priority: 0.7,
     })
   }
   return entries
+}
+
+/**
+ * The six pillar hubs. Always emitted (they are real indexable routes, even
+ * before the first story in that pillar). lastmod is the newest included
+ * story in that pillar, not the request clock.
+ */
+export function toMediaCategoryHubEntries(
+  base: string,
+  rows: MediaStorySitemapRow[],
+): MediaSitemapEntry[] {
+  return MEDIA_CATEGORY_HUB_PATHS.map(path => {
+    let newest: Date | undefined
+    for (const row of rows) {
+      if (!isSitemapArticle(row)) continue
+      const articlePath = mediaArticlePath(row.pillar, row.slug)
+      if (!articlePath?.startsWith(`${path}/`)) continue
+      const lastModified = mediaSitemapLastModified(row)
+      if (!lastModified) continue
+      if (!newest || lastModified.getTime() > newest.getTime()) newest = lastModified
+    }
+    return {
+      url: `${base}${path}`,
+      ...(newest ? { lastModified: newest } : {}),
+      changeFrequency: 'daily' as const,
+      priority: 0.6,
+    }
+  })
 }

@@ -29,10 +29,10 @@ export const metadata: Metadata = publicPageMetadata('/media', {
 export default async function MediaPage() {
   const supabase = createClient()
 
-  // adminClient, same as sitemap.ts and /media/[pillar]/[slug]. The
-  // cookie-scoped request client SSRs an empty list for anonymous
-  // Googlebot (live 2026-08-27: 0 article hrefs, ~50KB shell). Published
-  // filter + unpublished-slug denylist still apply inside the helper.
+  // adminClient, same helper app/sitemap.ts uses, and the same published
+  // filter as /media/[pillar]/[slug]. The cookie-scoped request client SSRs
+  // an empty list for anonymous Googlebot (live 2026-08-27: 0 article hrefs,
+  // ~50KB shell). Unpublished-slug denylist still applies inside the helper.
   const stories = await getPublishedMediaStoriesForHub()
 
   // Fetch 3 most recent published episodes
