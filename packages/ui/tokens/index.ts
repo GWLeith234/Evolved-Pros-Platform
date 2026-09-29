@@ -122,7 +122,7 @@ export const skeleton = {
 export const tiers = {
   community: { label: 'Community', color: '#68a2b9' },
   vip: { label: 'VIP', color: '#C9A84C' },
-  pro: { label: 'Pro', color: '#C9302A' },
+  pro: { label: 'The 99', color: '#C9302A' },
 } as const
 
 export const pillars = [

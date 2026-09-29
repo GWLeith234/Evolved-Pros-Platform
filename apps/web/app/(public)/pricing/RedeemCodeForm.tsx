@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { tierLabel } from '@/lib/entitlements'
 import { useRouter } from 'next/navigation'
 
 /**
@@ -24,10 +25,11 @@ const INK = '#F5F0E8'
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
 function tierDisplayName(tier: string | null | undefined): string {
-  if (tier === 'pro') return 'Professional'
-  if (tier === 'vip') return 'VIP'
-  if (tier === 'community') return 'Community'
-  return tier ? tier.charAt(0).toUpperCase() + tier.slice(1) : 'your new tier'
+  if (!tier) return 'your new tier'
+  if (tier === 'pro' || tier === 'professional' || tier === 'vip' || tier === 'community') {
+    return tierLabel(tier)
+  }
+  return tier.charAt(0).toUpperCase() + tier.slice(1)
 }
 
 export function RedeemCodeForm() {
@@ -70,7 +72,7 @@ export function RedeemCodeForm() {
       setStatus('success')
     } catch {
       setStatus('error')
-      setError('Network error — please try again.')
+      setError('Network error. Please try again.')
     }
   }
 
@@ -92,7 +94,7 @@ export function RedeemCodeForm() {
         </h3>
         <p className="font-body text-[13px] mb-5" style={{ color: 'rgba(245,240,232,0.55)' }}>
           {alreadyRedeemed
-            ? `You've already redeemed this code — your ${tierName} access is active.`
+            ? `You've already redeemed this code. Your ${tierName} access is active.`
             : `Your access is live. Everything in ${tierName} is now open to you.`}
         </p>
         <a

@@ -77,7 +77,7 @@ function membershipProduct(
  * WebPage + Product / Offer catalog for `/pricing`.
  *
  * Amounts come from the TIERS constants, so this cannot drift from the page:
- * Community Free / $0, VIP $99 /month, The Evolved Pros 99 $849 /month.
+ * Community Free / $0, VIP $149 /month, The Evolved Pros 99 $599 /month.
  *
  * SPRINT K — annual Offers are emitted ONLY when a tier actually has an annual
  * price. Annual is undecided, so today none are. This block used to publish

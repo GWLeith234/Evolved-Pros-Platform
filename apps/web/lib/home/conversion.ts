@@ -150,7 +150,7 @@ export const HOME_ACADEMY_TOOLTIP =
 export const HOME_SIGN_IN_TOOLTIP = 'Already a member? Sign in to continue.'
 export const HOME_JOIN_FREE_TOOLTIP = 'Free community access. No card required.'
 export const HOME_SEE_PRICING_TOOLTIP =
-  'Community is free forever. See VIP and Professional when you are ready.'
+  'Community is free forever. See VIP and The Evolved Pros 99 when you are ready.'
 /** Visible Architecture band. Matches the GOLD still lettering. */
 export const HOME_ARCHITECTURE_LABEL = 'THE EVOLVED ARCHITECTURE'
 export const HOME_ARCHITECTURE_TOOLTIP =

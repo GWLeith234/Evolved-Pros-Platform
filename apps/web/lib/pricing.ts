@@ -7,16 +7,16 @@
  * catalogue has no active monthly price, and they are the switch that keeps
  * annual off until a yearly price is actually offered.
  *
- * Canonical (from George, repriced 2026-09-21):
- *   Community           — Free
- *   VIP                 — $99/mo
- *   The Evolved Pros 99 — $849/mo (99 seats, bi-weekly 90-minute mastermind)
+ * Canonical (George pricing reshape):
+ *   Community           : Free
+ *   VIP                 : $149/mo
+ *   The Evolved Pros 99 : $599/mo (99 seats)
  *
- * SPRINT K. The old ladder (VIP $49/$490, Professional $249/$2,490) is dead and
- * all four Stripe prices are archived. Professional is gone as a product; The
- * Evolved Pros 99 replaces it. The internal key stays `professional` here and
- * `pro` in the database — renaming either is Sprint L's job, not a price swap's.
+ * Earlier ladders stay mapped for legacy subscribers and are not sold:
+ * VIP $49/mo and $490/yr, VIP $99/mo, The 99 $249/mo and $2,490/yr, The 99 $849/mo.
+ * The internal key stays `professional` here and `pro` in the database.
  *
+ * TODO(George): annual billing on or remove the toggle. It stays off.
  * ANNUAL IS UNDECIDED, so it is `null`, not a number. That is load-bearing:
  * every surface below renders annual only when it exists, so no page, JSON-LD
  * offer or checkout can quote a yearly price George has not set. A `0` would
@@ -36,9 +36,16 @@ export const ANNUAL_FREE_MONTHS = 2
 
 export const TIERS: Record<TierKey, TierPrice> = {
   community:    { monthly: 0,   annual: null },
-  vip:          { monthly: 99,  annual: null },
-  professional: { monthly: 849, annual: null },
+  vip:          { monthly: 149, annual: null },
+  professional: { monthly: 599, annual: null },
 }
+
+/**
+ * /pricing document description. Trimmed to about 160 characters.
+ * No em dash.
+ */
+export const PRICING_META_DESCRIPTION =
+  'Community is free forever. VIP is $149 a month for the Academy, messages and the EvPros Today brief. The Evolved Pros 99 is $599 a month, 99 seats with George.'
 
 /** Display name per tier key. `professional` is the key; The 99 is the product. */
 export const TIER_DISPLAY_NAMES: Record<TierKey, string> = {

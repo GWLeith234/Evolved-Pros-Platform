@@ -79,9 +79,8 @@ export default async function WelcomePage({
               </h1>
               <p className="font-body text-[15px] leading-relaxed mb-2" style={{ color: 'rgba(245,240,232,0.65)' }}>
                 George Leith invited you to Evolved Pros with full{' '}
-                <span style={{ color: '#F5F0E8', fontWeight: 600 }}>Professional</span> access —
-                the complete 6-Pillar Academy, the accountability system, and the bi-weekly
-                mastermind.
+                <span style={{ color: '#F5F0E8', fontWeight: 600 }}>Academy</span> access:
+                all six pillars and the accountability system, on the house.
               </p>
               <p className="font-body text-[15px] mb-8" style={{ color: 'rgba(245,240,232,0.45)' }}>
                 On the house. No card, no catch.

@@ -23,6 +23,7 @@ export const dynamic = 'force-dynamic'
 import type Stripe from 'stripe'
 import { adminClient } from '@/lib/supabase/admin'
 import { getStripe, tierForPriceId, type Tier } from '@/lib/stripe/config'
+import { isBillableSubscriptionStatus, shouldGrantSubscriptionEvent } from '@/lib/stripe/planChange'
 import { tierForStripePriceId } from '@/lib/commerce/catalogue'
 import { joinSeatWaitlist, seatStatusForTier } from '@/lib/commerce/seats'
 import { shouldApplySubscriptionUpdate, shouldDowngradeOnDelete } from '@/lib/stripe/subscriptionSync'
@@ -239,10 +240,32 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promis
 
   const existing = await (adminClient as any)
     .from('users')
-    .select('id, tier, email, full_name')
+    .select('id, tier, email, full_name, stripe_subscription_id')
     .eq('id', userId)
     .maybeSingle()
   const existingUser = existing.data as UserRow | null
+
+  // A second Checkout Session must not replace the subscription we already
+  // granted. The extra subscription keeps billing in Stripe; we flag it and
+  // leave the member's tier on the first one.
+  const storedSubId = existingUser?.stripe_subscription_id ?? null
+  if (storedSubId && storedSubId !== subscriptionId) {
+    let storedStillBillable = true
+    try {
+      const stored = await getStripe().subscriptions.retrieve(storedSubId)
+      storedStillBillable = isBillableSubscriptionStatus(stored.status)
+    } catch (err) {
+      const code = (err as { code?: string }).code
+      storedStillBillable = code !== 'resource_missing'
+    }
+    if (storedStillBillable) {
+      console.warn(
+        `[Stripe Webhook] duplicate_active_subscriptions user=${userId} stored=${storedSubId} event=${subscriptionId}`,
+      )
+      return
+    }
+  }
+
   const oldTier = existingUser?.tier ?? null
 
   const { error } = await (adminClient as any)
@@ -364,8 +387,32 @@ async function handleSubscriptionUpdated(sub: Stripe.Subscription): Promise<void
     eventStatus: sub.status,
     storedTier: user.tier,
   })
-  if (action === 'ignore') return
+
+  const customerId = subCustomerId(sub)
+  let liveBillableCount = 0
+  if (customerId) {
+    try {
+      const listed = await getStripe().subscriptions.list({
+        customer: customerId,
+        status: 'all',
+        limit: 20,
+      })
+      liveBillableCount = listed.data.filter(item => isBillableSubscriptionStatus(item.status)).length
+    } catch (err) {
+      const code = (err as { code?: string }).code ?? 'unknown'
+      console.error('[Stripe Webhook] duplicate subscription lookup failed', code)
+    }
+  }
+  const decision = shouldGrantSubscriptionEvent({ action, liveBillableCount })
+  if (decision.duplicate) {
+    console.warn(
+      `[Stripe Webhook] duplicate_active_subscriptions customer=${customerId ?? 'none'} count=${liveBillableCount} event_sub=${sub.id} stored_sub=${user.stripe_subscription_id ?? 'none'}`,
+    )
+  }
+  if (!decision.grant) return
   // Adopting seat 100 would grant the room the checkout race just overflowed.
+  // An upgrade changes the existing item only after checkout has already
+  // refused a full room, so this adopt check is the new-subscription race.
   if (action === 'adopt' && await seatOverflow(tier, sub.id)) return
 
   // active/trialing → active; a scheduled cancel keeps the tier but flags

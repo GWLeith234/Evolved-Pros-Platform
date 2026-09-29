@@ -16,18 +16,26 @@
  *
  * The canonical model, superseding every earlier tier table in this repo:
  *
- *                                  Free      VIP $99       The 99 $849
- *   Media/Podcast/Community/LIVE   full      full          full
- *   Fit                            teaser    full          full
- *   Academy - all six pillars      teaser    full          full
- *   Mastermind                     -         monthly 45m   bi-weekly 90m
- *   Network directory              public    public        full
- *   Network direct messages        -         -             full
- *   LIVE event discount            0%        10%           20%
+ *                                  Free         VIP $149      The 99 $599
+ *   Media/Podcast/Community/LIVE   full         full          full
+ *   Fit                            teaser       full          full
+ *   Academy - all six pillars      teaser       full          full
+ *   EvPros Today brief             3 headlines  full          full
+ *   Mastermind                     -            monthly 45m   bi-weekly 90m
+ *   Network directory + messages   public       full          full
+ *   LIVE event discount            0%           10%           20%
+ *   Seats                          unlimited    unlimited     99
  *
  * Academy teaser = the overview of all six pillars, plus Foundation lesson 1
  * playable. Fit teaser = the marketing surface, no library. Network teaser =
- * the directory with a PUBLIC payload (SPRINT Q1) and no direct messages.
+ * the directory with a PUBLIC payload and no direct messages. VIP and The 99
+ * both get the full profile and direct messages.
+ *
+ * TODO(George): mastermind cadence and first dates. Nothing schedules them.
+ * The lines below are what the pricing cards already claim (VIP monthly
+ * 45-minute, The 99 bi-weekly 90-minute with George).
+ * TODO(George): LIVE discounts (10% VIP, 20% The 99) are display-only.
+ * Checkout does not apply them. Keep or drop is undecided.
  *
  * DEPENDENCY-FREE ON PURPOSE beyond lib/tier: this module must be importable
  * by a client component, a server route and a unit test alike.
@@ -58,27 +66,46 @@ export type AccessLevel = 'none' | 'teaser' | 'full'
 
 export type MastermindCadence = 'none' | 'monthly-45' | 'biweekly-90'
 
+/** EvPros Today. `headlines` is the free three-line brief. */
+export type EvprosTodayLevel = 'headlines' | 'full'
+
 export interface Entitlements {
   /** Media, the Podcast, the Community feed and LIVE marketing. */
   media: AccessLevel
+  /** Event discovery and registration. */
+  events: AccessLevel
+  /** Habits and Own the Day. */
+  habits: AccessLevel
+  /** Pillar Assessment scores, all six. */
+  assessmentScores: AccessLevel
   /** The Fit library. `teaser` is the marketing page with no programming. */
   fit: AccessLevel
   /** The Academy curriculum, all six pillars. */
   academy: AccessLevel
-  /** Mastermind cadence, or none. */
+  /**
+   * Mastermind cadence, or none.
+   * TODO(George): cadence and first dates are not scheduled. Render the
+   * claim the cards already make. Do not invent a calendar.
+   */
   mastermind: MastermindCadence
   /**
    * The member network.
    *   'teaser' - the directory is browsable, but only its public payload,
    *              and the Message button is inert.
    *   'full'   - the whole profile plus direct messages.
-   * SPRINT Q1: the roster is the best conversion surface on the platform, so
-   * it stays open. It is also an asset, so a competitor who signs up free in
-   * thirty seconds must not be able to read company, bio, goals or socials.
+   * The roster stays open. A free account must not read company, bio, goals
+   * or socials. VIP and The 99 both hold `full`.
    */
   network: AccessLevel
-  /** Percentage off a paid LIVE event ticket. Whole percent, 0 to 100. */
+  /**
+   * Percentage off a paid LIVE event ticket. Whole percent, 0 to 100.
+   * TODO(George): keep or drop. Not applied in checkout.
+   */
   liveDiscountPct: number
+  /** EvPros Today brief depth. */
+  evprosToday: EvprosTodayLevel
+  /** Concurrent paid seats. null = unlimited. Comps are not seats. */
+  seatCap: number | null
 }
 
 /**
@@ -88,27 +115,42 @@ export interface Entitlements {
 export const ENTITLEMENTS: Readonly<Record<TierKeyName, Entitlements>> = {
   community: {
     media: 'full',
+    events: 'full',
+    habits: 'full',
+    assessmentScores: 'full',
     fit: 'teaser',
     academy: 'teaser',
     mastermind: 'none',
     network: 'teaser',
     liveDiscountPct: 0,
+    evprosToday: 'headlines',
+    seatCap: null,
   },
   vip: {
     media: 'full',
+    events: 'full',
+    habits: 'full',
+    assessmentScores: 'full',
     fit: 'full',
     academy: 'full',
     mastermind: 'monthly-45',
-    network: 'teaser',
+    network: 'full',
     liveDiscountPct: 10,
+    evprosToday: 'full',
+    seatCap: null,
   },
   pro: {
     media: 'full',
+    events: 'full',
+    habits: 'full',
+    assessmentScores: 'full',
     fit: 'full',
     academy: 'full',
     mastermind: 'biweekly-90',
     network: 'full',
     liveDiscountPct: 20,
+    evprosToday: 'full',
+    seatCap: 99,
   },
 } as const
 
@@ -116,7 +158,21 @@ export const ENTITLEMENTS: Readonly<Record<TierKeyName, Entitlements>> = {
 export const MASTERMIND_LABELS: Record<MastermindCadence, string> = {
   none: 'Not included',
   'monthly-45': 'Monthly 45-minute mastermind',
-  'biweekly-90': 'Bi-weekly 90-minute mastermind',
+  'biweekly-90': 'Bi-weekly 90-minute mastermind with George',
+}
+
+export const EVPROS_TODAY_LABELS: Record<EvprosTodayLevel, string> = {
+  headlines: '3 headlines',
+  full: 'Full, personalized',
+}
+
+/**
+ * Card and table phrasing for a cadence.
+ * TODO(George): these sentences are the current card claims. They are not a
+ * schedule. VIP monthly 45-minute, The 99 bi-weekly 90-minute with George.
+ */
+export function mastermindDisplay(cadence: MastermindCadence): string {
+  return MASTERMIND_LABELS[cadence]
 }
 
 /**
@@ -171,15 +227,21 @@ export function canAccessAcademy(tier: string | null | undefined, tierStatus?: s
 }
 
 /**
- * DIRECT MESSAGES. The 99 only.
+ * DIRECT MESSAGES. VIP and The Evolved Pros 99.
  *
- * Deliberately unchanged by SPRINT Q1: 'full' still means "can reach other
- * members", and only `pro` has it. Opening the directory did not open the
- * inbox, and the one function that guards /messages must not start meaning
- * something looser.
+ * `full` means the whole profile plus the inbox. Community stays on the
+ * public directory payload. The conversations routes call this function.
  */
 export function canAccessNetwork(tier: string | null | undefined, tierStatus?: string | null): boolean {
   return entitlementsFor(tier, tierStatus).network === 'full'
+}
+
+/** Full EvPros Today brief. Headlines alone do not count. */
+export function canAccessEvprosTodayBrief(
+  tier: string | null | undefined,
+  tierStatus?: string | null,
+): boolean {
+  return entitlementsFor(tier, tierStatus).evprosToday === 'full'
 }
 
 /** Can this member open the directory at all? Everyone signed in can. */
@@ -308,4 +370,105 @@ export function canOpenLesson(opts: {
   if (meetsRowRequirement(opts.tier, opts.requiredTier, opts.tierStatus)) return true
   if (canAccessAcademy(opts.tier, opts.tierStatus)) return false
   return canPlayLesson(opts)
+}
+
+// ── Pricing surfaces ───────────────────────────────────────────────────────
+// Cards and the comparison table both read these rows. A hand-kept yes/no
+// array on the page cannot drift from the matrix.
+
+export interface PricingComparisonRow {
+  label: string
+  cells: Record<TierKeyName, string>
+}
+
+function levelPhrase(level: AccessLevel, full: string, teaser: string): string {
+  if (level === 'full') return full
+  if (level === 'teaser') return teaser
+  return 'Not included'
+}
+
+function row(
+  label: string,
+  pick: (tier: TierKeyName) => string,
+): PricingComparisonRow {
+  return {
+    label,
+    cells: {
+      community: pick('community'),
+      vip: pick('vip'),
+      pro: pick('pro'),
+    },
+  }
+}
+
+/**
+ * Comparison rows for /pricing. Values come from ENTITLEMENTS.
+ * `monthlyDollars` is whole dollars per tier (0 for Community).
+ */
+export function pricingComparisonRows(
+  monthlyDollars: Record<TierKeyName, number>,
+): PricingComparisonRow[] {
+  return [
+    row('Price', tier => {
+      const dollars = monthlyDollars[tier]
+      return dollars === 0 ? 'Free' : `$${dollars.toLocaleString('en-US')}/mo`
+    }),
+    row('Community feed, Media, Podcast', tier =>
+      levelPhrase(ENTITLEMENTS[tier].media, 'Yes', 'Preview')),
+    row('Events and registration', tier =>
+      levelPhrase(ENTITLEMENTS[tier].events, 'Yes', 'Preview')),
+    row('Habits / Own the Day', tier =>
+      levelPhrase(ENTITLEMENTS[tier].habits, 'Yes', 'Preview')),
+    row('Pillar Assessment scores', tier =>
+      levelPhrase(ENTITLEMENTS[tier].assessmentScores, 'Yes', 'Preview')),
+    row('Academy', tier =>
+      levelPhrase(ENTITLEMENTS[tier].academy, 'All 6 pillars', 'Preview + 1 lesson')),
+    row('Assessment breakdown + pillar plan', tier =>
+      ENTITLEMENTS[tier].academy === 'full' ? 'Yes' : 'Not included'),
+    row('Fit library', tier =>
+      levelPhrase(ENTITLEMENTS[tier].fit, 'Yes', 'Preview')),
+    row('Member directory', tier =>
+      levelPhrase(
+        ENTITLEMENTS[tier].network,
+        'Full profiles + messages',
+        'Public profiles',
+      )),
+    row('EvPros Today brief', tier => EVPROS_TODAY_LABELS[ENTITLEMENTS[tier].evprosToday]),
+    row('Mastermind', tier => mastermindDisplay(ENTITLEMENTS[tier].mastermind)),
+    row('LIVE event discount', tier => {
+      // TODO(George): keep or drop. Not wired into checkout.
+      const pct = ENTITLEMENTS[tier].liveDiscountPct
+      return pct > 0 ? `${pct}% off` : 'None'
+    }),
+    row('Seats', tier => {
+      const cap = ENTITLEMENTS[tier].seatCap
+      return cap === null ? 'Unlimited' : String(cap)
+    }),
+  ]
+}
+
+const LOCKED_CELL = new Set(['Not included', 'None'])
+
+/** Feature lines for one pricing card, same cells as the comparison table. */
+export function tierCardLines(
+  tier: TierKeyName,
+  monthlyDollars: Record<TierKeyName, number>,
+): Array<{ text: string; locked: boolean }> {
+  return pricingComparisonRows(monthlyDollars)
+    .filter(entry => entry.label !== 'Price')
+    .map(entry => ({
+      text: `${entry.label}: ${entry.cells[tier]}`,
+      locked: LOCKED_CELL.has(entry.cells[tier]),
+    }))
+}
+
+/**
+ * The 99 card callout. Built from the matrix so the seat count and the
+ * mastermind sentence cannot diverge from the table.
+ * TODO(George): cadence and first dates. This is the current card claim.
+ */
+export function proRoomCallout(): string {
+  const line = mastermindDisplay(ENTITLEMENTS.pro.mastermind)
+  const seats = ENTITLEMENTS.pro.seatCap ?? 99
+  return `A ${line.charAt(0).toLowerCase()}${line.slice(1)}, capped at ${seats} seats. The room is the product.`
 }

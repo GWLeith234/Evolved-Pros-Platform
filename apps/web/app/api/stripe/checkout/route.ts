@@ -19,18 +19,63 @@
 
 export const dynamic = 'force-dynamic'
 
+import type Stripe from 'stripe'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { getStripe, isPlanKey, priceIdForPlan, PLAN_CATALOG, stripeConfigured } from '@/lib/stripe/config'
 import { alreadyEntitledTo } from '@/lib/stripe/purchaseGuard'
+import {
+  isBillableSubscriptionStatus,
+  planChangeAction,
+  subscriptionPriceUpdateParams,
+} from '@/lib/stripe/planChange'
 import { resolveStripePriceId } from '@/lib/commerce/catalogue'
 import { joinSeatWaitlist, seatStatusForTier } from '@/lib/commerce/seats'
-import { annualBillingAvailable } from '@/lib/pricing'
+import { annualBillingAvailable, planAmountCents } from '@/lib/pricing'
+import { effectiveTier } from '@/lib/tier'
 import { getAppUrl } from '@/lib/urls'
 
 const APP_URL = getAppUrl()
+
+/**
+ * Billable subscriptions on this customer. The stored id is preferred when
+ * it is still active, trialing, or past_due. A missing stored id with exactly
+ * one live subscription is that subscription. Two live subscriptions and no
+ * stored id is a duplicate: the caller must not open a third.
+ */
+async function billableSubscriptions(
+  stripe: Stripe,
+  customerId: string | null,
+  storedId: string | null,
+): Promise<{ primary: Stripe.Subscription | null; count: number }> {
+  const found: Stripe.Subscription[] = []
+  if (storedId) {
+    try {
+      const stored = await stripe.subscriptions.retrieve(storedId)
+      if (isBillableSubscriptionStatus(stored.status)) found.push(stored)
+    } catch (err) {
+      const code = (err as { code?: string }).code
+      if (code !== 'resource_missing') throw err
+    }
+  }
+  if (customerId) {
+    const listed = await stripe.subscriptions.list({
+      customer: customerId,
+      status: 'all',
+      limit: 20,
+    })
+    for (const sub of listed.data) {
+      if (!isBillableSubscriptionStatus(sub.status)) continue
+      if (!found.some(existing => existing.id === sub.id)) found.push(sub)
+    }
+  }
+  const primary = storedId
+    ? found.find(sub => sub.id === storedId) ?? (found.length === 1 ? found[0] : null)
+    : found.length === 1 ? found[0] : null
+  return { primary: primary ?? null, count: found.length }
+}
 
 export async function POST(request: Request) {
   // 1. Auth gate
@@ -68,32 +113,29 @@ export async function POST(request: Request) {
     )
   }
 
-  // 4. Repurchase guard (SPRINT PRICE-1). THIS is the check that prevents
-  //    double billing — the /pricing UI can be bypassed by posting here
-  //    directly, so the server must refuse independently.
+  // 4. Who is buying, and do they already hold this tier?
   //
-  //    Goes through effectiveTier() so a dead subscription (canceled/unpaid)
-  //    correctly does NOT block re-purchasing the same tier, and through
-  //    hasTierAccess() so a Pro blocks a VIP purchase by rank rather than by
-  //    string equality. Same-tier on a different interval is also refused: a
-  //    monthly→annual switch is a plan change and belongs in the billing
-  //    portal, not a second subscription.
+  //    Same tier is a 409. A dead subscription (canceled / unpaid) drops to
+  //    community through effectiveTier(), so a churned member can buy again.
+  //
+  //    A lower tier buying a higher one, or a higher tier moving down, is a
+  //    plan CHANGE when a billable subscription already exists. Opening a
+  //    Checkout Session there created a second subscription while the first
+  //    kept billing. That path updates the existing item instead.
   const profileTier = (profile as unknown as { tier?: string | null }).tier
   const profileTierStatus = (profile as unknown as { tier_status?: string | null }).tier_status
-  if (alreadyEntitledTo(profileTier, profileTierStatus, plan)) {
+  const { tier, interval } = PLAN_CATALOG[plan]
+  const current = effectiveTier(profileTier, profileTierStatus)
+  if (current === tier) {
     return NextResponse.json({ error: 'You already have this plan.' }, { status: 409 })
   }
 
-  const { tier, interval } = PLAN_CATALOG[plan]
-
-  // 4b. SPRINT L - seat cap. The Evolved Pros 99 sells 99 seats, and Stripe
-  //     will bill an unlimited number of subscriptions against one price if
-  //     nobody stops it. This is the door check; the webhook reconciles the
-  //     race two simultaneous buyers of seat 99 would win (see its handler).
+  // 4b. Seat cap. The Evolved Pros 99 sells 99 seats. Checked on a new
+  //     checkout AND on an upgrade from VIP, before any Stripe write.
+  //     Comps do not count: seatStatusForTier counts live Stripe
+  //     subscriptions (migration 094), and a comp has none.
   //
   //     Fails CLOSED: seatStatusForTier returns soldOut when it cannot count.
-  //     Somebody retrying in a minute is a much smaller problem than somebody
-  //     paying $849 for a room that is already full.
   const seats = await seatStatusForTier(tier)
   if (seats.soldOut) {
     // A buyer who reached this point is the best-qualified lead the platform
@@ -119,24 +161,75 @@ export async function POST(request: Request) {
     )
   }
 
-  // Source of truth is our catalogue (prices.stripe_price_id); env vars are a
-  // backward-compat fallback until every price is mirrored to Stripe.
-  const priceId = (await resolveStripePriceId(tier, interval)) ?? priceIdForPlan(plan)
+  // Catalogue only when the active row is the canonical amount. A stale
+  // $99 or $849 price id must not be sold. Env is the new monthly price.
+  const expectedCents = planAmountCents(plan)
+  const priceId =
+    (await resolveStripePriceId(tier, interval, expectedCents ?? undefined))
+    ?? priceIdForPlan(plan)
   if (!priceId) {
     console.warn('[Stripe Checkout] no Stripe price for plan (catalogue + env empty)', plan)
     return NextResponse.json({ error: 'This plan is not available.' }, { status: 503 })
   }
 
   if (!profile.email) {
-    return NextResponse.json({ error: 'Account missing email — contact support.' }, { status: 400 })
+    return NextResponse.json({ error: 'Account missing email. Contact support.' }, { status: 400 })
   }
 
   const stripe = getStripe()
+  const meta = { user_id: profile.id, tier: PLAN_CATALOG[plan].tier, plan }
 
   try {
-    // 4. Reuse or create the Stripe customer, persisted on the user row so
-    //    upgrades / the billing portal reuse the same customer.
     let customerId = (profile as unknown as { stripe_customer_id?: string | null }).stripe_customer_id ?? null
+    const storedSubId = (profile as unknown as { stripe_subscription_id?: string | null }).stripe_subscription_id ?? null
+    const live = await billableSubscriptions(stripe, customerId, storedSubId)
+    const action = planChangeAction({
+      sameTier: false,
+      entitledAtOrAbove: alreadyEntitledTo(profileTier, profileTierStatus, plan),
+      hasBillableSubscription: Boolean(live.primary),
+      liveSubscriptionCount: live.count,
+    })
+
+    if (action === 'already') {
+      return NextResponse.json({ error: 'You already have this plan.' }, { status: 409 })
+    }
+
+    if (action === 'refuse-duplicate') {
+      console.warn(
+        `[Stripe Checkout] duplicate_active_subscriptions user=${profile.id} count=${live.count}`,
+      )
+      return NextResponse.json(
+        { error: 'Your billing account has more than one subscription. Contact support before changing plans.' },
+        { status: 409 },
+      )
+    }
+
+    if (action === 'update') {
+      const sub = live.primary
+      if (!sub) {
+        return NextResponse.json({ error: 'Checkout failed. Try again in a moment.' }, { status: 500 })
+      }
+      if (live.count > 1) {
+        console.warn(
+          `[Stripe Checkout] duplicate_active_subscriptions user=${profile.id} count=${live.count} updating=${sub.id}`,
+        )
+      }
+      const item = sub.items?.data?.[0]
+      const currentPrice = item?.price?.id ?? null
+      if (!item?.id) {
+        return NextResponse.json({ error: 'Checkout failed. Try again in a moment.' }, { status: 500 })
+      }
+      if (currentPrice === priceId) {
+        return NextResponse.json({ error: 'You already have this plan.' }, { status: 409 })
+      }
+      await stripe.subscriptions.update(
+        sub.id,
+        subscriptionPriceUpdateParams({ itemId: item.id, priceId, metadata: meta }),
+      )
+      return NextResponse.json({ url: `${APP_URL}/membership?checkout=success` })
+    }
+
+    // New subscription. Only reached when this customer has no billable one.
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: profile.email,
@@ -150,9 +243,6 @@ export async function POST(request: Request) {
         .eq('id', profile.id)
     }
 
-    // 5. Create the subscription Checkout Session. Tier is carried in metadata
-    //    (belt) and re-derived from the price id in the webhook (braces).
-    const meta = { user_id: profile.id, tier: PLAN_CATALOG[plan].tier, plan }
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer: customerId,

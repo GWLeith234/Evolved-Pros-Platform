@@ -1,6 +1,6 @@
 import 'server-only'
 import { adminClient } from '@/lib/supabase/admin'
-import { getStripe, PLAN_CATALOG, priceIdForPlan, stripeConfigured, type PlanKey } from '@/lib/stripe/config'
+import { configuredPriceIdsForTier, getStripe, stripeConfigured } from '@/lib/stripe/config'
 import { unionSeatPriceIds } from '@/lib/commerce/seatPriceIds'
 import { MRR_STATUSES } from '@/lib/stripe/mrr'
 import type { MembershipTier } from '@/lib/commerce/catalogue'
@@ -15,9 +15,15 @@ import type { MembershipTier } from '@/lib/commerce/catalogue'
  * and a webhook that has not landed yet is exactly when the count matters.
  *
  * FAILS CLOSED. If the cap cannot be established, `soldOut` is true and
- * checkout refuses. Selling seat 100 is a promise the product cannot keep -
- * somebody paid $849 for a room that is full - and is much worse than making a
+ * checkout refuses. Selling seat 100 is a promise the product cannot keep:
+ * somebody paid for a room that is full. That is much worse than making a
  * buyer try again in a minute.
+ *
+ * COMPS DO NOT COUNT. Migration 094 counts live Stripe subscriptions
+ * (active or trialing) on this product's price ids, including archived
+ * prices. A comp or admin grant has no Stripe subscription, so it does not
+ * consume one of the 99. The upgrade path calls seatStatusForTier before it
+ * changes a VIP subscription onto the The 99 price.
  */
 
 export interface SeatStatus {
@@ -161,14 +167,7 @@ export async function seatStatusForTier(tier: MembershipTier): Promise<SeatStatu
 }
 
 function envPriceIdsForTier(tier: MembershipTier): string[] {
-  if (tier === 'community') return []
-  const ids: string[] = []
-  for (const plan of Object.keys(PLAN_CATALOG) as PlanKey[]) {
-    if (PLAN_CATALOG[plan].tier !== tier) continue
-    const id = priceIdForPlan(plan)
-    if (id) ids.push(id)
-  }
-  return ids
+  return configuredPriceIdsForTier(tier)
 }
 
 /** Seat status for every capped membership product, for the admin surface. */

@@ -73,7 +73,7 @@ describe('conversion homepage locks', () => {
     expect(HOME_SIGN_IN_TOOLTIP).toBe('Already a member? Sign in to continue.')
     expect(HOME_JOIN_FREE_TOOLTIP).toBe('Free community access. No card required.')
     expect(HOME_SEE_PRICING_TOOLTIP).toBe(
-      'Community is free forever. See VIP and Professional when you are ready.',
+      'Community is free forever. See VIP and The Evolved Pros 99 when you are ready.',
     )
     expect(HOME_ARCHITECTURE_LABEL).toBe('THE EVOLVED ARCHITECTURE')
     expect(HOME_ARCHITECTURE_TOOLTIP).toBe(
@@ -108,17 +108,17 @@ describe('conversion homepage locks', () => {
 
   // SPRINT K — repriced 2026-09-21. Professional is retired; The Evolved
   // Pros 99 takes rung 03. The free door still leads.
-  it('keeps the $99 / $849 sequence and does not feature the paid rungs', () => {
-    expect(TIERS.vip.monthly).toBe(99)
-    expect(TIERS.professional.monthly).toBe(849)
+  it('keeps the $149 / $599 sequence and does not feature the paid rungs', () => {
+    expect(TIERS.vip.monthly).toBe(149)
+    expect(TIERS.professional.monthly).toBe(599)
     expect(HOME_LADDER.map(c => c.name)).toEqual([
       'Community',
       'VIP',
       'The Evolved Pros 99',
     ])
     expect(HOME_LADDER.some(c => c.name === 'Professional')).toBe(false)
-    expect(HOME_LADDER[1]?.price).toBe('$99 / mo')
-    expect(HOME_LADDER[2]?.price).toBe('$849 / mo')
+    expect(HOME_LADDER[1]?.price).toBe('$149 / mo')
+    expect(HOME_LADDER[2]?.price).toBe('$599 / mo')
     expect(HOME_LADDER[0]?.featured).toBe(true)
     expect(HOME_LADDER[1]?.featured).toBe(false)
     expect(HOME_LADDER[2]?.featured).toBe(false)

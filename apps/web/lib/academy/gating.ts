@@ -41,10 +41,10 @@ export const PILLAR_REQUIRED_TIER: Readonly<Record<number, Tier>> = {
 }
 
 /** Uppercase chip text for a gate. 'community' is never a gate, so null. */
-export function tierBadgeLabel(requiredTier: string | null | undefined): 'VIP' | 'PRO' | null {
+export function tierBadgeLabel(requiredTier: string | null | undefined): 'VIP' | 'The 99' | null {
   const t = (requiredTier ?? '').toLowerCase()
   if (t === 'vip') return 'VIP'
-  if (t === 'pro') return 'PRO'
+  if (t === 'pro' || t === 'professional') return 'The 99'
   return null
 }
 

@@ -17,7 +17,8 @@
  */
 
 /**
- * Columns a community or VIP member may receive.
+ * Columns a community member may receive. VIP and The Evolved Pros 99
+ * receive DIRECTORY_FULL_COLUMNS.
  *
  * `full_name` is NOT here. It is read server-side only to derive a first name
  * when display_name is empty, and the derived first name is what ships.
@@ -35,7 +36,7 @@ export const DIRECTORY_PUBLIC_COLUMNS = [
   'created_at',
 ] as const
 
-/** Everything above, plus what only The 99 may read about each other. */
+/** Everything above, plus what VIP and The Evolved Pros 99 may read. */
 export const DIRECTORY_FULL_COLUMNS = [
   ...DIRECTORY_PUBLIC_COLUMNS,
   'company',
@@ -75,7 +76,7 @@ export interface DirectoryRow {
 
 export interface PublicDirectoryMember {
   id: string
-  /** First name only. A surname is part of what The 99 pays for. */
+  /** First name only. A surname is part of the paid profile. */
   firstName: string
   avatarUrl: string | null
   roleTitle: string | null
@@ -147,7 +148,7 @@ export function shapeDirectory(
 }
 
 /** Copy for the inert Message button. One place, so it cannot drift. */
-export const DIRECTORY_DM_LOCKED_COPY = 'Members of The 99 can reach each other directly.'
+export const DIRECTORY_DM_LOCKED_COPY = 'VIP and The Evolved Pros 99 can message members directly.'
 
 /**
  * Search text safe to interpolate into a PostgREST `.or()` filter.

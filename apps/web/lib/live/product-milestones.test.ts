@@ -51,7 +51,7 @@ describe('PRODUCT_MILESTONES', () => {
 
     expect(mastermind?.detail).toBe(MASTERMIND_EVENT_DETAIL)
     expect(`${mastermind?.title}. ${mastermind?.detail}`).toBe(
-      'AI Masterminds for Senior Execs. Starts Oct 2, every Friday after at 2pm CST (America/Chicago). Professional Tier only.',
+      'AI Masterminds for Senior Execs. Starts Oct 2, every Friday after at 2pm CST (America/Chicago). The Evolved Pros 99 only.',
     )
   })
 
