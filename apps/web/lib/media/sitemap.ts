@@ -7,16 +7,20 @@
  * pillar or slug are skipped so we never emit a 404 path.
  */
 
+import { sitemapLastModified } from '@/lib/seo/sitemapEntries'
+
 export type MediaStorySitemapRow = {
   pillar: string | null
   slug: string | null
   published_at: string | null
+  /** media_stories.updated_at. Same column JSON-LD dateModified uses. */
+  updated_at?: string | null
   is_published?: boolean | null
 }
 
 export type MediaSitemapEntry = {
   url: string
-  lastModified: Date
+  lastModified?: Date
   changeFrequency: 'monthly'
   priority: number
 }
@@ -70,7 +74,8 @@ export function listPublicMediaStories<T extends {
  * Map published media_stories rows to sitemap entries.
  * Unpublished rows, the explicit unpublished-slug denylist, and rows
  * missing pillar/slug are dropped.
- * lastmod / changeFrequency / priority match podcast episode entries.
+ * lastModified is updated_at, then published_at. Omitted when both are missing.
+ * changeFrequency / priority match podcast episode entries.
  */
 export function toMediaSitemapEntries(
   base: string,
@@ -82,9 +87,10 @@ export function toMediaSitemapEntries(
     const path = mediaArticlePath(row.pillar, row.slug)
     if (!path || UNPUBLISHED_MEDIA_PATHS.has(path)) continue
     if (path === '/media/preview' || path.startsWith('/media/preview/')) continue
+    const lastModified = sitemapLastModified(row.updated_at, row.published_at)
     entries.push({
       url: `${base}${path}`,
-      lastModified: row.published_at ? new Date(row.published_at) : new Date(),
+      ...(lastModified ? { lastModified } : {}),
       changeFrequency: 'monthly',
       priority: 0.7,
     })

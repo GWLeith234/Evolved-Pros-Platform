@@ -58,6 +58,23 @@ export const PUBLIC_SITEMAP_PATHS = [
 export type PublicSitemapPath = (typeof PUBLIC_SITEMAP_PATHS)[number]
 
 /**
+ * Pillar hubs served by app/(public)/media/[pillar]/page.tsx.
+ * Slugs match lib/pillars.ts PILLARS, in program order.
+ * /media/preview is not a hub. Other media landings (careers, academy,
+ * and so on) stay out of this list on purpose.
+ */
+export const MEDIA_PILLAR_HUB_PATHS = [
+  '/media/foundation',
+  '/media/identity',
+  '/media/mental-toughness',
+  '/media/strategy',
+  '/media/accountability',
+  '/media/execution',
+] as const
+
+export type MediaPillarHubPath = (typeof MEDIA_PILLAR_HUB_PATHS)[number]
+
+/**
  * Absolute sitemap URL for robots.txt, derived from the canonical site URL.
  *
  * Never hardcode the host. robots.ts used to name platform.evolvedpros.com

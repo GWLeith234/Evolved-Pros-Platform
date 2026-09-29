@@ -8,11 +8,12 @@
  *                          links. Production value:
  *                          https://platform.evolvedpros.com
  *
- *   NEXT_PUBLIC_SITE_URL — brand / SEO origin for canonical, OG, sitemap, RSS.
+ *   NEXT_PUBLIC_SITE_URL — brand / SEO origin for callers that read this env.
  *                          Falls back to APP_URL when unset so a missing
- *                          SITE_URL cannot break callers. Until apex / www
- *                          DNS leaves WordPress, production is the app
- *                          origin: https://platform.evolvedpros.com
+ *                          SITE_URL cannot break callers. The code default
+ *                          remains https://platform.evolvedpros.com. Public
+ *                          sitemap and HTML canonicals use CANONICAL_ORIGIN
+ *                          (https://www.evolvedpros.com) directly.
  *
  * Each helper accepts the other as a fallback alias so existing callers that
  * only set one var keep working. Do not invent a third name.

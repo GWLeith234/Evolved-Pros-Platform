@@ -70,8 +70,8 @@ const nextConfig = {
   },
   async redirects() {
     // Host + path redirects live in lib/seo/appRedirects.mjs so they can be
-    // unit-tested. Do not re-add a platform.evolvedpros.com → www 308:
-    // www is still Bluehost WordPress until George YES on DNS.
+    // unit-tested. Public platform paths 308 to www (2026-09-29). Auth,
+    // member routes, API, preview, and PLATFORM_PUBLIC_HELD stay on platform.
     return [
       ...appRedirects(),
       // Keep the historical no-slash canonical everywhere except PWA scopes.

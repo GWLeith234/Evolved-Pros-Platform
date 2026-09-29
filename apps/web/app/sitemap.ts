@@ -3,10 +3,22 @@ import { adminClient } from '@/lib/supabase/admin'
 import { toMediaSitemapEntries } from '@/lib/media/sitemap'
 import { getPublishedEpisodes } from '@/lib/podcast/public'
 import { CANONICAL_ORIGIN } from '@/lib/seo/canonical'
-import { PUBLIC_SITEMAP_PATHS, type PublicSitemapPath } from '@/lib/seo/publicRoutes'
+import { type PublicSitemapPath } from '@/lib/seo/publicRoutes'
+import {
+  toEpisodeSitemapEntries,
+  toPillarHubSitemapEntries,
+  toStaticSitemapEntries,
+} from '@/lib/seo/sitemapEntries'
 
 // Brand-domain URLs on www. Never platform, never the Railway host.
+//
+// Next 14.2.35 does not treat `dynamic = 'force-dynamic'` as no-store for
+// fetch (vercel/next.js#65170, not shipped in any 14.2 stable). The route
+// module copies this `revalidate` export onto the data cache, and a missing
+// revalidate is stored as CACHE_ONE_YEAR. 60 matches the /media hub, so a
+// story published today is in the sitemap within a minute.
 export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 type Freq = NonNullable<MetadataRoute.Sitemap[number]['changeFrequency']>
 
@@ -49,32 +61,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   //
   // /live, /pricing, and /fit stay because they are in SESSION_OPTIONAL_ROUTES:
   // middleware refreshes the session but never bounces an anonymous visitor.
-  // The single source of truth is PUBLIC_SITEMAP_PATHS, which is unit-tested.
-  const staticRoutes: MetadataRoute.Sitemap = PUBLIC_SITEMAP_PATHS.map(path => ({
-    url: path === '/' ? base : `${base}${path}`,
-    lastModified: new Date(),
-    changeFrequency: SITEMAP_FREQ[path],
-    priority: SITEMAP_PRIORITY[path],
-  }))
+  // The single source of truth for those top-level paths is PUBLIC_SITEMAP_PATHS.
+  // Pillar hubs are MEDIA_PILLAR_HUB_PATHS (not careers, academy, or preview).
+  // Static pages and pillar hubs omit lastModified. A request-time clock
+  // made two fetches a minute apart disagree on every static URL.
+  const staticRoutes: MetadataRoute.Sitemap = [
+    ...toStaticSitemapEntries(base, SITEMAP_FREQ, SITEMAP_PRIORITY),
+    ...toPillarHubSitemapEntries(base),
+  ]
 
   let episodeRoutes: MetadataRoute.Sitemap = []
   try {
     const episodes = await getPublishedEpisodes()
-    episodeRoutes = episodes.map(e => ({
-      url: `${base}/podcast/${e.slug}`,
-      lastModified: e.published_at ? new Date(e.published_at) : new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    }))
+    episodeRoutes = toEpisodeSitemapEntries(base, episodes)
   } catch {
-    // Never let a DB hiccup blank the sitemap — static routes still emit.
+    // Never let a DB hiccup blank the sitemap. Static routes still emit.
   }
 
   let mediaRoutes: MetadataRoute.Sitemap = []
   try {
     const { data } = await adminClient
       .from('media_stories')
-      .select('pillar, slug, published_at, is_published')
+      .select('pillar, slug, published_at, updated_at, is_published')
       .eq('is_published', true)
     mediaRoutes = toMediaSitemapEntries(base, data ?? [])
   } catch {

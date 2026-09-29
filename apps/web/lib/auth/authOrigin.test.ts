@@ -44,7 +44,7 @@ describe('resolveAuthOrigin', () => {
 })
 
 describe('authCallbackUrl', () => {
-  it('is always platform in production and never names www (WordPress)', () => {
+  it('is always platform in production and never names www', () => {
     const url = authCallbackUrl('/home', AUTH_ORIGIN)
     expect(url).toBe('https://platform.evolvedpros.com/auth/callback?next=%2Fhome')
     expect(url).not.toContain('www.evolvedpros.com')
