@@ -49,18 +49,18 @@ export function FitTeaseCard({
         </div>
         {videoReady ? (
           <div className="ep-fit-player-stage ep-fit-player-stage--video">
-            <FitMuxPlayer moveId={move.id} title={move.title} />
+            <FitMuxPlayer moveId={move.id} title={move.title} poster={move.posterUrl} />
           </div>
         ) : (
           <div
             className={
-              locked && move.posterUrl
+              move.posterUrl
                 ? 'ep-fit-player-stage ep-fit-player-stage--poster'
                 : 'ep-fit-player-stage'
             }
             aria-hidden="true"
           >
-            <FitLockedPoster posterUrl={locked ? move.posterUrl : null} />
+            <FitLockedPoster posterUrl={move.posterUrl} />
           </div>
         )}
         {locked ? (

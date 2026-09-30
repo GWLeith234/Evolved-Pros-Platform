@@ -5,13 +5,17 @@
  * The playback id is the path segment Mux requires. The token audience
  * is t, so the URL cannot authorize playback.
  *
- * Callers that can play Fit do not get these URLs. They use the gated
- * mux-token route, which is the only place a video token is signed.
+ * Players also receive this image URL so a poster is on screen before
+ * playback starts. The mux-token route is still the only place a video
+ * token is signed.
  */
 import 'server-only'
-import { canAccessFitLibrary } from '@/lib/fit/gating'
 import { coerceFitThumbnailTime, generateFitMuxThumbnailToken } from '@/lib/mux/client'
 import type { FitMove } from './moves'
+import { fitMediaObjectKey, fitSignedStoragePosterUrl } from './posterUrl'
+
+/** Short-lived read URL for one poster object. Matches the Fit JWT expiry. */
+export const FIT_STORAGE_POSTER_TTL_SECONDS = 15 * 60
 
 const SECRET_KEYS = [
   'mux_playback_id',
@@ -30,6 +34,7 @@ type PosterRow = {
   video_status: string | null
   mux_playback_id: string | null
   thumbnail_time: number | string | null
+  thumbnail_url?: string | null
 }
 
 function jwtPayload(token: string): Record<string, unknown> | null {
@@ -80,16 +85,35 @@ function withoutPlaybackSecrets(move: FitMove, posterUrl: string | null): FitMov
   return next
 }
 
-async function posterForRow(row: PosterRow | undefined): Promise<string | null> {
-  if (!row || row.status !== 'published' || row.video_status !== 'ready' || !row.mux_playback_id) {
+async function signedStoragePoster(thumbnailUrl: string | null | undefined): Promise<string | null> {
+  const key = fitMediaObjectKey(thumbnailUrl)
+  if (!key) return null
+  try {
+    const { adminClient } = await import('@/lib/supabase/admin')
+    const { data, error } = await adminClient.storage
+      .from('fit-media')
+      .createSignedUrl(key, FIT_STORAGE_POSTER_TTL_SECONDS)
+    if (error || !data?.signedUrl) return null
+    return fitSignedStoragePosterUrl(data.signedUrl)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'storage poster failed'
+    console.error('[fit] storage poster failed:', message)
     return null
   }
-  const token = await generateFitMuxThumbnailToken(
-    row.mux_playback_id,
-    coerceFitThumbnailTime(row.thumbnail_time),
-  )
-  if (!token) return null
-  return fitMuxThumbnailUrl(row.mux_playback_id, token)
+}
+
+async function posterForRow(row: PosterRow | undefined): Promise<string | null> {
+  if (!row || row.status !== 'published') return null
+  if (row.video_status === 'ready' && row.mux_playback_id) {
+    const token = await generateFitMuxThumbnailToken(
+      row.mux_playback_id,
+      coerceFitThumbnailTime(row.thumbnail_time),
+    )
+    const muxPoster = token ? fitMuxThumbnailUrl(row.mux_playback_id, token) : null
+    if (muxPoster) return muxPoster
+  }
+  // thumbnail_url is a bucket key. Never hand that relative path to an img.
+  return signedStoragePoster(row.thumbnail_url)
 }
 
 async function loadPosterRows(ids: string[]): Promise<PosterRow[] | null> {
@@ -97,7 +121,7 @@ async function loadPosterRows(ids: string[]): Promise<PosterRow[] | null> {
     const { adminClient } = await import('@/lib/supabase/admin')
     const { data, error } = await adminClient
       .from('fit_moves')
-      .select('id, status, video_status, mux_playback_id, thumbnail_time')
+      .select('id, status, video_status, mux_playback_id, thumbnail_time, thumbnail_url')
       .in('id', ids)
     if (error || !data) {
       if (error) console.error('[fit] poster lookup failed:', error.message)
@@ -127,11 +151,23 @@ export async function attachLockedFitPosters(moves: readonly FitMove[]): Promise
   return next
 }
 
-/** VIP and Pro keep the player path. Everyone else gets thumbnail posters only. */
+/**
+ * Thumbnail posters for every viewer. The URL is an image (Mux aud t, or a
+ * signed storage read). Playback tokens stay on the mux-token route.
+ * viewerTier is unused here; the page still uses it to decide who can play.
+ */
 export async function fitMovesForViewer(
   moves: readonly FitMove[],
   viewerTier: string | null | undefined,
 ): Promise<FitMove[]> {
-  if (canAccessFitLibrary(viewerTier)) return moves.map(move => ({ ...move }))
+  // Playback is decided by the page from viewerTier. Posters stay thumbnail-only.
+  void viewerTier
   return attachLockedFitPosters(moves)
+}
+
+export async function loadViewerFitMoves(
+  viewerTier: string | null | undefined,
+): Promise<FitMove[]> {
+  const { loadPublishedFitMoves } = await import('./catalog')
+  return fitMovesForViewer(await loadPublishedFitMoves(), viewerTier)
 }

@@ -15,6 +15,7 @@ import { HomeEpisodeCard } from '@/components/home/HomeEpisodeCard'
 import { type PulsePost, type PulseEvent } from '@/components/home/tiles/CommunityPulseTile'
 import { HomeContentAdGrid } from '@/components/home/HomeContentAdGrid'
 import { HomeFitTeaseBand } from '@/components/home/HomeFitTeaseBand'
+import { loadViewerFitMoves } from '@/lib/fit/posters'
 import { type DailyPulseHabit, type DailyPulseCommitment } from '@/components/home/DailyPulseCard'
 import { type SponsorAd } from '@/components/home/HomeSponsorAd'
 import {
@@ -517,6 +518,7 @@ export default async function MemberHomePage() {
     weekCommitments,
     weeklyWins,
     sponsors,
+    fitMoves,
   ] = await Promise.all([
     fetchCourseProgress(supabase, profile.id),
     supabase.from('member_badges').select('pillar_number').eq('user_id', profile.id),
@@ -534,6 +536,7 @@ export default async function MemberHomePage() {
     fetchWeekCommitments(profile.id, weekStart),
     fetchWeeklyWins(profile.id),
     fetchHomeSponsors(),
+    loadViewerFitMoves(profile.tier),
   ])
 
   const quarterlyGoals = (quarterlyGoalsResult.data ?? []) as GoalForCard[]
@@ -681,7 +684,7 @@ export default async function MemberHomePage() {
         />
 
         <div id="home-below-fold" className="ep-stack">
-          <HomeFitTeaseBand viewerTier={profile.tier} />
+          <HomeFitTeaseBand viewerTier={profile.tier} moves={fitMoves} />
 
           {latestEpisodesResult.episodes.length > 0 ? (
             <HomeContentAdGrid

@@ -7,6 +7,7 @@ import {
   FIT_VIDEO_UNAVAILABLE,
 } from '@/lib/fit/copy'
 import { fitTeaseMeta, type FitMove } from '@/lib/fit/moves'
+import { FitLockedPoster } from '@/components/fit/FitLockedPoster'
 import { FitMuxPlayer } from '@/components/fit/FitMuxPlayer'
 
 export function FitLibrary({
@@ -34,7 +35,11 @@ export function FitLibrary({
               {move.description ? <p className="ep-fit-tease-dek">{move.description}</p> : null}
               {canPlay && move.videoStatus === 'ready' ? (
                 <div className="ep-fit-library-player">
-                  <FitMuxPlayer moveId={move.id} title={move.title} />
+                  <FitMuxPlayer moveId={move.id} title={move.title} poster={move.posterUrl} />
+                </div>
+              ) : move.posterUrl ? (
+                <div className="ep-fit-library-player">
+                  <FitLockedPoster posterUrl={move.posterUrl} />
                 </div>
               ) : null}
               {canPlay && move.videoStatus === 'processing' ? (
