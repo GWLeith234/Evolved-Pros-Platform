@@ -21,9 +21,9 @@
  *   Fit                            teaser       full          full
  *   Academy - all six pillars      teaser       full          full
  *   EvPros Today brief             3 headlines  full          full
- *   Mastermind                     -            monthly 45m   bi-weekly 90m
+ *   Mastermind                     -            monthly 45m   twice a month
  *   Network directory + messages   public       full          full
- *   LIVE event discount            0%           10%           20%
+ *   LIVE event discount            config       config        config
  *   Seats                          unlimited    unlimited     99
  *
  * Academy teaser = the overview of all six pillars, plus Foundation lesson 1
@@ -31,16 +31,18 @@
  * the directory with a PUBLIC payload and no direct messages. VIP and The 99
  * both get the full profile and direct messages.
  *
- * TODO(George): mastermind cadence and first dates. Nothing schedules them.
- * The lines below are what the pricing cards already claim (VIP monthly
- * 45-minute, The 99 bi-weekly 90-minute with George).
- * TODO(George): LIVE discounts (10% VIP, 20% The 99) are display-only.
- * Checkout does not apply them. Keep or drop is undecided.
+ * TODO(George): VIP mastermind cadence and first dates. Nothing schedules a
+ * VIP mastermind. The VIP line is the current card claim (monthly 45-minute).
+ * Do not invent a new VIP cadence. The 99 is locked: twice a month with
+ * George. No dates.
+ * LIVE ticket percents are PLACEHOLDER values in lib/live/discountConfig.ts.
+ * Checkout applies them. George changes the env vars, not this file.
  *
- * DEPENDENCY-FREE ON PURPOSE beyond lib/tier: this module must be importable
- * by a client component, a server route and a unit test alike.
+ * Importable by a client component, a server route, and a unit test.
+ * LIVE percents come from lib/live/discountConfig.ts (PLACEHOLDER env).
  */
 
+import { discountedTicketCents, liveDiscountPercent } from '@/lib/live/discountConfig'
 import { effectiveTier, hasTierAccess } from '@/lib/tier'
 
 /** The DB enum. Do not add to it without a migration and a webhook review. */
@@ -64,7 +66,7 @@ export const TIER_SHORT_LABELS: Record<TierKeyName, string> = {
 /** How much of a surface a tier gets. `teaser` is a real state, not a denial. */
 export type AccessLevel = 'none' | 'teaser' | 'full'
 
-export type MastermindCadence = 'none' | 'monthly-45' | 'biweekly-90'
+export type MastermindCadence = 'none' | 'monthly-45' | 'twice-month'
 
 /** EvPros Today. `headlines` is the free three-line brief. */
 export type EvprosTodayLevel = 'headlines' | 'full'
@@ -84,8 +86,9 @@ export interface Entitlements {
   academy: AccessLevel
   /**
    * Mastermind cadence, or none.
-   * TODO(George): cadence and first dates are not scheduled. Render the
-   * claim the cards already make. Do not invent a calendar.
+   * The 99 is `twice-month`: "Twice a month with George". No dates.
+   * TODO(George): VIP cadence and first dates. Nothing schedules a VIP
+   * mastermind. Keep the current VIP claim. Do not invent a new one.
    */
   mastermind: MastermindCadence
   /**
@@ -99,7 +102,8 @@ export interface Entitlements {
   network: AccessLevel
   /**
    * Percentage off a paid LIVE event ticket. Whole percent, 0 to 100.
-   * TODO(George): keep or drop. Not applied in checkout.
+   * PLACEHOLDER. The number is liveDiscountPercent() in
+   * lib/live/discountConfig.ts, not a second copy of the rate.
    */
   liveDiscountPct: number
   /** EvPros Today brief depth. */
@@ -122,7 +126,7 @@ export const ENTITLEMENTS: Readonly<Record<TierKeyName, Entitlements>> = {
     academy: 'teaser',
     mastermind: 'none',
     network: 'teaser',
-    liveDiscountPct: 0,
+    liveDiscountPct: liveDiscountPercent('community'),
     evprosToday: 'headlines',
     seatCap: null,
   },
@@ -135,7 +139,7 @@ export const ENTITLEMENTS: Readonly<Record<TierKeyName, Entitlements>> = {
     academy: 'full',
     mastermind: 'monthly-45',
     network: 'full',
-    liveDiscountPct: 10,
+    liveDiscountPct: liveDiscountPercent('vip'),
     evprosToday: 'full',
     seatCap: null,
   },
@@ -146,9 +150,9 @@ export const ENTITLEMENTS: Readonly<Record<TierKeyName, Entitlements>> = {
     assessmentScores: 'full',
     fit: 'full',
     academy: 'full',
-    mastermind: 'biweekly-90',
+    mastermind: 'twice-month',
     network: 'full',
-    liveDiscountPct: 20,
+    liveDiscountPct: liveDiscountPercent('pro'),
     evprosToday: 'full',
     seatCap: 99,
   },
@@ -157,8 +161,9 @@ export const ENTITLEMENTS: Readonly<Record<TierKeyName, Entitlements>> = {
 /** Human phrasing for a cadence. One place, so surfaces cannot disagree. */
 export const MASTERMIND_LABELS: Record<MastermindCadence, string> = {
   none: 'Not included',
+  // TODO(George): VIP cadence and first dates. This is the current claim.
   'monthly-45': 'Monthly 45-minute mastermind',
-  'biweekly-90': 'Bi-weekly 90-minute mastermind with George',
+  'twice-month': 'Twice a month with George',
 }
 
 export const EVPROS_TODAY_LABELS: Record<EvprosTodayLevel, string> = {
@@ -168,8 +173,8 @@ export const EVPROS_TODAY_LABELS: Record<EvprosTodayLevel, string> = {
 
 /**
  * Card and table phrasing for a cadence.
- * TODO(George): these sentences are the current card claims. They are not a
- * schedule. VIP monthly 45-minute, The 99 bi-weekly 90-minute with George.
+ * The 99 label is locked: twice a month with George, with no date.
+ * TODO(George): VIP cadence and first dates. Do not invent a VIP schedule.
  */
 export function mastermindDisplay(cadence: MastermindCadence): string {
   return MASTERMIND_LABELS[cadence]
@@ -271,18 +276,17 @@ export function liveDiscountPct(
   tier: string | null | undefined,
   tierStatus?: string | null,
 ): number {
-  return entitlementsFor(tier, tierStatus).liveDiscountPct
+  if (tier == null || tier === '') return 0
+  return liveDiscountPercent(effectiveTier(tier, tierStatus))
 }
 
-/** Cents off a LIVE ticket for this member. Rounded to a whole cent. */
+/** Cents for a LIVE ticket after this member's PLACEHOLDER percent. */
 export function liveDiscountedCents(
   priceCents: number,
   tier: string | null | undefined,
   tierStatus?: string | null,
 ): number {
-  const pct = liveDiscountPct(tier, tierStatus)
-  if (pct <= 0) return priceCents
-  return Math.round(priceCents * (100 - pct) / 100)
+  return discountedTicketCents(priceCents, liveDiscountPct(tier, tierStatus))
 }
 
 // ── Academy teaser ─────────────────────────────────────────────────────────
@@ -436,8 +440,7 @@ export function pricingComparisonRows(
     row('EvPros Today brief', tier => EVPROS_TODAY_LABELS[ENTITLEMENTS[tier].evprosToday]),
     row('Mastermind', tier => mastermindDisplay(ENTITLEMENTS[tier].mastermind)),
     row('LIVE event discount', tier => {
-      // TODO(George): keep or drop. Not wired into checkout.
-      const pct = ENTITLEMENTS[tier].liveDiscountPct
+      const pct = liveDiscountPercent(tier)
       return pct > 0 ? `${pct}% off` : 'None'
     }),
     row('Seats', tier => {
@@ -464,11 +467,10 @@ export function tierCardLines(
 
 /**
  * The 99 card callout. Built from the matrix so the seat count and the
- * mastermind sentence cannot diverge from the table.
- * TODO(George): cadence and first dates. This is the current card claim.
+ * mastermind sentence cannot diverge from the table. No dates.
  */
 export function proRoomCallout(): string {
   const line = mastermindDisplay(ENTITLEMENTS.pro.mastermind)
   const seats = ENTITLEMENTS.pro.seatCap ?? 99
-  return `A ${line.charAt(0).toLowerCase()}${line.slice(1)}, capped at ${seats} seats. The room is the product.`
+  return `${line}, capped at ${seats} seats. The room is the product.`
 }

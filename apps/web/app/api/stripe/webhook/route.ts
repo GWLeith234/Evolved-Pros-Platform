@@ -198,6 +198,12 @@ async function handleSeatOverflow(opts: {
 // --- event handlers -------------------------------------------------------
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
+  // A LIVE ticket is a one-time payment. It must not grant or replace a
+  // membership tier. The membership path below requires a subscription id.
+  if (session.mode === 'payment' || session.metadata?.kind === 'live_ticket') {
+    return
+  }
+
   const userId =
     session.client_reference_id ??
     (session.metadata?.user_id as string | undefined) ??

@@ -66,7 +66,7 @@ describe('the canonical matrix', () => {
         assessmentScores: 'full',
         fit: 'full',
         academy: 'full',
-        mastermind: 'biweekly-90',
+        mastermind: 'twice-month',
         network: 'full',
         liveDiscountPct: 20,
         evprosToday: 'full',
@@ -168,7 +168,7 @@ describe('surface gates', () => {
   it('gives each tier its mastermind cadence', () => {
     expect(mastermindCadence('community')).toBe('none')
     expect(mastermindCadence('vip')).toBe('monthly-45')
-    expect(mastermindCadence('pro')).toBe('biweekly-90')
+    expect(mastermindCadence('pro')).toBe('twice-month')
   })
 })
 
@@ -308,10 +308,11 @@ describe('no tier logic lives outside the matrix', () => {
     expect(vip).toContain('Full profiles + messages')
     expect(vip).toContain('Full, personalized')
     expect(pro).toContain('20% off')
-    expect(pro).toContain('Bi-weekly 90-minute mastermind with George')
+    expect(pro).toContain('Twice a month with George')
+    expect(pro).not.toContain('Bi-weekly')
     expect(pro).toContain('99')
     expect(proRoomCallout()).toBe(
-      'A bi-weekly 90-minute mastermind with George, capped at 99 seats. The room is the product.',
+      'Twice a month with George, capped at 99 seats. The room is the product.',
     )
     const labels = pricingComparisonRows(dollars).map(row => row.label)
     expect(labels).toEqual([

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { eventTypeBadge } from '@/lib/events/types'
 import { CountdownTimer } from './CountdownTimer'
+import { LiveTicketCheckoutButton } from './LiveTicketCheckoutButton'
 
 // MR2 redesign: full-bleed hero with countdown, badges, host info, price.
 // Public type kept identical to the previous version so existing imports
@@ -525,6 +526,9 @@ export function CinematicHero({ event, initialIsRsvpd = false }: CinematicHeroPr
 
         {/* RSVP CTA */}
         <div className="ch-rsvp-row" style={{ marginTop: 24, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          {typeof event.price_cents === 'number' && event.price_cents > 0 && (
+            <LiveTicketCheckoutButton eventId={event.id} />
+          )}
           <button
             type="button"
             onClick={handleRsvpClick}

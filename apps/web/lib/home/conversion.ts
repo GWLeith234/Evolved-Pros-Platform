@@ -99,7 +99,7 @@ export const HOME_LADDER: readonly HomeLadderCard[] = [
     name: 'The Evolved Pros 99',
     price: `$${TIERS.professional.monthly} / mo`,
     tagline: 'Ninety-nine seats.',
-    body: 'Every second week you bring a live deal and the room pressure-tests it for ninety minutes. The member network comes with it. The room stops at 99.',
+    body: 'The room meets twice a month with George. The member network comes with it. The room stops at 99.',
     cta: 'Take a seat',
     href: SEE_PRICING_HREF,
     tone: 'ghost',

@@ -101,7 +101,7 @@ export function PricingTierCards({
       tierKey: 'vip',
     },
     // SPRINT K — Professional is retired. The Evolved Pros 99 takes its rung:
-    // 99 seats, bi-weekly 90-minute mastermind. The catalogue key stays
+    // 99 seats, twice a month with George. The catalogue key stays
     // `professional` and the DB tier stays `pro` (Sprint L owns renaming).
     {
       name: 'The Evolved Pros 99',
