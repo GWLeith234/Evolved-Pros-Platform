@@ -53,7 +53,7 @@ describe('the canonical matrix', () => {
         assessmentScores: 'full',
         fit: 'full',
         academy: 'full',
-        mastermind: 'monthly-45',
+        mastermind: 'none',
         network: 'full',
         liveDiscountPct: 10,
         evprosToday: 'full',
@@ -167,7 +167,7 @@ describe('surface gates', () => {
 
   it('gives each tier its mastermind cadence', () => {
     expect(mastermindCadence('community')).toBe('none')
-    expect(mastermindCadence('vip')).toBe('monthly-45')
+    expect(mastermindCadence('vip')).toBe('none')
     expect(mastermindCadence('pro')).toBe('twice-month')
   })
 })
@@ -304,7 +304,9 @@ describe('no tier logic lives outside the matrix', () => {
     expect(community).not.toContain('All 6 pillars')
     expect(vip).toContain('All 6 pillars')
     expect(vip).toContain('10% off')
-    expect(vip).toContain('Monthly 45-minute mastermind')
+    expect(vip).toContain('Mastermind: Not included')
+    expect(vip).not.toContain('Monthly 45-minute mastermind')
+    expect(vip).not.toContain('45-minute')
     expect(vip).toContain('Full profiles + messages')
     expect(vip).toContain('Full, personalized')
     expect(pro).toContain('20% off')
@@ -314,7 +316,12 @@ describe('no tier logic lives outside the matrix', () => {
     expect(proRoomCallout()).toBe(
       'Twice a month with George, capped at 99 seats. The room is the product.',
     )
-    const labels = pricingComparisonRows(dollars).map(row => row.label)
+    const rows = pricingComparisonRows(dollars)
+    const mastermind = rows.find(row => row.label === 'Mastermind')
+    expect(mastermind?.cells.community).toBe('Not included')
+    expect(mastermind?.cells.vip).toBe('Not included')
+    expect(mastermind?.cells.pro).toBe('Twice a month with George')
+    const labels = rows.map(row => row.label)
     expect(labels).toEqual([
       'Price',
       'Community feed, Media, Podcast',

@@ -21,7 +21,7 @@
  *   Fit                            teaser       full          full
  *   Academy - all six pillars      teaser       full          full
  *   EvPros Today brief             3 headlines  full          full
- *   Mastermind                     -            monthly 45m   twice a month
+ *   Mastermind                     none         none          twice a month
  *   Network directory + messages   public       full          full
  *   LIVE event discount            config       config        config
  *   Seats                          unlimited    unlimited     99
@@ -31,10 +31,8 @@
  * the directory with a PUBLIC payload and no direct messages. VIP and The 99
  * both get the full profile and direct messages.
  *
- * TODO(George): VIP mastermind cadence and first dates. Nothing schedules a
- * VIP mastermind. The VIP line is the current card claim (monthly 45-minute).
- * Do not invent a new VIP cadence. The 99 is locked: twice a month with
- * George. No dates.
+ * Mastermind is The 99 only: twice a month with George. No dates. VIP does
+ * not include a mastermind.
  * LIVE ticket percents are PLACEHOLDER values in lib/live/discountConfig.ts.
  * Checkout applies them. George changes the env vars, not this file.
  *
@@ -66,7 +64,7 @@ export const TIER_SHORT_LABELS: Record<TierKeyName, string> = {
 /** How much of a surface a tier gets. `teaser` is a real state, not a denial. */
 export type AccessLevel = 'none' | 'teaser' | 'full'
 
-export type MastermindCadence = 'none' | 'monthly-45' | 'twice-month'
+export type MastermindCadence = 'none' | 'twice-month'
 
 /** EvPros Today. `headlines` is the free three-line brief. */
 export type EvprosTodayLevel = 'headlines' | 'full'
@@ -87,8 +85,7 @@ export interface Entitlements {
   /**
    * Mastermind cadence, or none.
    * The 99 is `twice-month`: "Twice a month with George". No dates.
-   * TODO(George): VIP cadence and first dates. Nothing schedules a VIP
-   * mastermind. Keep the current VIP claim. Do not invent a new one.
+   * VIP is `none`.
    */
   mastermind: MastermindCadence
   /**
@@ -137,7 +134,7 @@ export const ENTITLEMENTS: Readonly<Record<TierKeyName, Entitlements>> = {
     assessmentScores: 'full',
     fit: 'full',
     academy: 'full',
-    mastermind: 'monthly-45',
+    mastermind: 'none',
     network: 'full',
     liveDiscountPct: liveDiscountPercent('vip'),
     evprosToday: 'full',
@@ -161,8 +158,6 @@ export const ENTITLEMENTS: Readonly<Record<TierKeyName, Entitlements>> = {
 /** Human phrasing for a cadence. One place, so surfaces cannot disagree. */
 export const MASTERMIND_LABELS: Record<MastermindCadence, string> = {
   none: 'Not included',
-  // TODO(George): VIP cadence and first dates. This is the current claim.
-  'monthly-45': 'Monthly 45-minute mastermind',
   'twice-month': 'Twice a month with George',
 }
 
@@ -174,7 +169,7 @@ export const EVPROS_TODAY_LABELS: Record<EvprosTodayLevel, string> = {
 /**
  * Card and table phrasing for a cadence.
  * The 99 label is locked: twice a month with George, with no date.
- * TODO(George): VIP cadence and first dates. Do not invent a VIP schedule.
+ * `none` reads as "Not included".
  */
 export function mastermindDisplay(cadence: MastermindCadence): string {
   return MASTERMIND_LABELS[cadence]

@@ -109,7 +109,6 @@ export function PricingTierCards({
       badge: 'The 99',
       badgeColor: '#FF5A4E',
       featured: true,
-      // TODO(George): the Most popular badge is unchanged. Confirm or remove it.
       popular: true,
       tagline: '99 seats. One room.',
       features: tierCardLines('pro', monthlyDollars),

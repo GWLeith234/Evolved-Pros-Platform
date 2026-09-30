@@ -87,7 +87,7 @@ export const HOME_LADDER: readonly HomeLadderCard[] = [
     name: 'VIP',
     price: `$${TIERS.vip.monthly} / mo`,
     tagline: 'Take the whole curriculum.',
-    body: 'You are already in the room. This is the step you take on yourself: all six pillars of the Academy, the Fit library, and a monthly 45-minute mastermind.',
+    body: 'You are already in the room. This is the step you take on yourself: all six pillars of the Academy and the Fit library.',
     cta: 'Upgrade',
     href: SEE_PRICING_HREF,
     tone: 'ghost',

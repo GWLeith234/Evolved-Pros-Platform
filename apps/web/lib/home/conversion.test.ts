@@ -124,6 +124,8 @@ describe('conversion homepage locks', () => {
     expect(HOME_LADDER[2]?.featured).toBe(false)
     expect(HOME_LADDER[1]?.href).toBe(SEE_PRICING_HREF)
     expect(HOME_LADDER[2]?.href).toBe(SEE_PRICING_HREF)
+    expect(HOME_LADDER[1]?.body).not.toMatch(/mastermind/i)
+    expect(HOME_LADDER[2]?.body).toContain('twice a month with George')
   })
 
   it('nav is logo doors plus LIVE to /live, with no Book George', () => {
