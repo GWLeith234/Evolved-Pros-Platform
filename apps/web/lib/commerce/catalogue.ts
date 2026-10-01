@@ -89,15 +89,22 @@ export async function getCatalogue(): Promise<CatalogueProduct[]> {
 export async function resolveStripePriceId(
   tier: MembershipTier,
   interval: Extract<PriceInterval, 'month' | 'year'>,
+  expectedUnitAmount?: number,
 ): Promise<string | null> {
-  const { data } = await (adminClient as any)
+  // expectedUnitAmount keeps a stale active row ($99 / $849) from being sold
+  // after the canonical amount moved. Legacy rows stay in the table, inactive
+  // or simply not matching, so the webhook can still map their price ids.
+  let query = (adminClient as any)
     .from('prices')
     .select('stripe_price_id, products!inner(tier)')
     .eq('products.tier', tier)
     .eq('interval', interval)
     .eq('active', true)
     .not('stripe_price_id', 'is', null)
-    .maybeSingle()
+  if (typeof expectedUnitAmount === 'number') {
+    query = query.eq('unit_amount', expectedUnitAmount)
+  }
+  const { data } = await query.maybeSingle()
   return (data?.stripe_price_id as string | undefined) ?? null
 }
 
@@ -136,7 +143,7 @@ export interface MembershipPricing {
 
 /**
  * Single source of truth for the user-facing membership ladder (Community /
- * VIP / Professional), in whole dollars, sourced from the products + prices
+ * VIP / The Evolved Pros 99), in whole dollars, sourced from the products + prices
  * catalogue. Each amount falls back to the canonical lib/pricing constant when
  * the catalogue lacks an active price for that tier+interval, so a display page
  * never blanks. Used by the public /pricing page and the in-app membership view
@@ -166,8 +173,15 @@ export async function getMembershipPricing(): Promise<MembershipPricing> {
     )
     const monthCents = product?.prices.find(pr => pr.interval === 'month' && pr.active)?.unit_amount
     const yearCents = product?.prices.find(pr => pr.interval === 'year' && pr.active)?.unit_amount
-    if (typeof monthCents === 'number') tiers[key].monthly = monthCents / 100
-    else usedFallback = true
+    const canonicalCents = Math.round(TIERS[key].monthly * 100)
+    // A stale active row (the previous $99 / $849) must not put the old
+    // amount back on the page. The canonical TIERS figure stands until the
+    // catalogue monthly price matches it.
+    if (typeof monthCents === 'number' && monthCents === canonicalCents) {
+      tiers[key].monthly = monthCents / 100
+    } else {
+      usedFallback = true
+    }
     // Annual stays null while TIERS says it is not offered, even if the
     // catalogue still has an archived yearly price. Checkout refuses annual
     // from the same constant; showing it here would quote a price we will not sell.

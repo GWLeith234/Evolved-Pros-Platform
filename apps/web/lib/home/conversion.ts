@@ -87,7 +87,7 @@ export const HOME_LADDER: readonly HomeLadderCard[] = [
     name: 'VIP',
     price: `$${TIERS.vip.monthly} / mo`,
     tagline: 'Take the whole curriculum.',
-    body: 'You are already in the room. This is the step you take on yourself: all six pillars of the Academy, the Fit library, and a monthly 45-minute mastermind.',
+    body: 'You are already in the room. This is the step you take on yourself: all six pillars of the Academy and the Fit library.',
     cta: 'Upgrade',
     href: SEE_PRICING_HREF,
     tone: 'ghost',
@@ -99,7 +99,7 @@ export const HOME_LADDER: readonly HomeLadderCard[] = [
     name: 'The Evolved Pros 99',
     price: `$${TIERS.professional.monthly} / mo`,
     tagline: 'Ninety-nine seats.',
-    body: 'Every second week you bring a live deal and the room pressure-tests it for ninety minutes. The member network comes with it. The room stops at 99.',
+    body: 'The room meets twice a month with George. The member network comes with it. The room stops at 99.',
     cta: 'Take a seat',
     href: SEE_PRICING_HREF,
     tone: 'ghost',
@@ -150,7 +150,7 @@ export const HOME_ACADEMY_TOOLTIP =
 export const HOME_SIGN_IN_TOOLTIP = 'Already a member? Sign in to continue.'
 export const HOME_JOIN_FREE_TOOLTIP = 'Free community access. No card required.'
 export const HOME_SEE_PRICING_TOOLTIP =
-  'Community is free forever. See VIP and Professional when you are ready.'
+  'Community is free forever. See VIP and The Evolved Pros 99 when you are ready.'
 /** Visible Architecture band. Matches the GOLD still lettering. */
 export const HOME_ARCHITECTURE_LABEL = 'THE EVOLVED ARCHITECTURE'
 export const HOME_ARCHITECTURE_TOOLTIP =

@@ -22,10 +22,10 @@ describe('George-locked event copy', () => {
     expect(BOOK_EVENT_TITLE).toBe('EVOLVED book launches October 15')
     expect(MASTERMIND_EVENT_TITLE).toBe('AI Masterminds for Senior Execs')
     expect(MASTERMIND_EVENT_DETAIL).toBe(
-      'Starts Oct 2, every Friday after at 2pm CST (America/Chicago). Professional Tier only.',
+      'Starts Oct 2, every Friday after at 2pm CST (America/Chicago). The Evolved Pros 99 only.',
     )
     expect(MASTERMIND_EVENT_LINE).toBe(
-      'AI Masterminds for Senior Execs. Starts Oct 2, every Friday after at 2pm CST (America/Chicago). Professional Tier only.',
+      'AI Masterminds for Senior Execs. Starts Oct 2, every Friday after at 2pm CST (America/Chicago). The Evolved Pros 99 only.',
     )
     expect(isConquerLocalTitle(LAUNCH_EVENT_TITLE)).toBe(false)
     expect(isConquerLocalTitle('Conquer Local Podcast launches')).toBe(true)

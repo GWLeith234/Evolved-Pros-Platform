@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { EmailPrefsForm } from '@/components/notifications/EmailPrefsForm'
+import { tierLabel, tierShortLabel } from '@/lib/entitlements'
 import { useToast } from '@/lib/toast'
 
 type TriOption = 'immediate' | 'digest' | 'off'
@@ -40,9 +41,9 @@ function isTabKey(value: string | null): value is TabKey {
 
 function tierBadge(tier: string | null): { label: string; color: string } {
   const t = tier?.toLowerCase()
-  if (t === 'vip') return { label: 'VIP', color: 'var(--brand-gold)' }
-  if (t === 'pro' || t === 'professional') return { label: 'Pro', color: 'var(--brand-red)' }
-  return { label: 'Member', color: 'var(--muted)' }
+  if (t === 'vip') return { label: tierLabel('vip'), color: 'var(--brand-gold)' }
+  if (t === 'pro' || t === 'professional') return { label: tierShortLabel('pro'), color: 'var(--brand-red)' }
+  return { label: tierLabel('community'), color: 'var(--muted)' }
 }
 
 function formatDate(value: string | null): string {

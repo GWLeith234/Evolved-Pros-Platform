@@ -167,7 +167,7 @@ describe('locked-card links for the shipped six pillars', () => {
 describe('tier labels', () => {
   it('labels the two gates and nothing else', () => {
     expect(tierBadgeLabel('vip')).toBe('VIP')
-    expect(tierBadgeLabel('pro')).toBe('PRO')
+    expect(tierBadgeLabel('pro')).toBe('The 99')
     expect(tierBadgeLabel('community')).toBeNull()
     expect(tierBadgeLabel(null)).toBeNull()
   })

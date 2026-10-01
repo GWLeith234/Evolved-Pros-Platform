@@ -40,7 +40,7 @@ function isFull(m: DirectoryMember): boolean {
 
 const FILTER_OPTIONS: { key: TierFilter; label: string }[] = [
   { key: 'all', label: 'All Members' },
-  { key: 'pro', label: 'Pro' },
+  { key: 'pro', label: 'The 99' },
   { key: 'community', label: 'Community' },
 ]
 

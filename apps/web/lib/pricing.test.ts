@@ -19,10 +19,10 @@ describe('revenue hygiene — guests never count as revenue', () => {
   })
 
   it('a real paying Pro still counts', () => {
-    expect(tierMonthlyPrice('pro', 'active')).toBe(849)
+    expect(tierMonthlyPrice('pro', 'active')).toBe(599)
     expect(
       computeMrr([{ tier: 'pro', tier_status: 'active', role: 'member' }]),
-    ).toBe(849)
+    ).toBe(599)
     expect(isRevenueMember({ tier: 'pro', tier_status: 'active', role: 'member' })).toBe(true)
   })
 
@@ -39,12 +39,12 @@ describe('revenue hygiene — guests never count as revenue', () => {
 
   it('mixed roster sums only real payers', () => {
     const roster = [
-      { tier: 'pro', tier_status: 'active', role: 'member' },   // 249
-      { tier: 'vip', tier_status: 'active', role: 'member' },   // 49
+      { tier: 'pro', tier_status: 'active', role: 'member' },
+      { tier: 'vip', tier_status: 'active', role: 'member' },
       { tier: 'pro', tier_status: 'comp', role: 'guest' },      // 0
       { tier: 'pro', tier_status: 'active', comp_promo_code_id: 'c' }, // 0
     ]
-    expect(computeMrr(roster)).toBe(948)
+    expect(computeMrr(roster)).toBe(748)
   })
 })
 
@@ -91,10 +91,9 @@ describe('pricingLadderState — current-plan marking (SPRINT PRICE-1)', () => {
 })
 
 describe('planAmountCents — checkout amounts match the catalogue', () => {
-  // SPRINT K — the ladder is VIP $99 / The Evolved Pros 99 $849.
-  it('uses the canonical $99 / $849 ladder', () => {
-    expect(planAmountCents('vip_monthly')).toBe(9900)
-    expect(planAmountCents('pro_monthly')).toBe(84900)
+  it('uses the canonical $149 / $599 ladder', () => {
+    expect(planAmountCents('vip_monthly')).toBe(14900)
+    expect(planAmountCents('pro_monthly')).toBe(59900)
   })
 
   // Annual is undecided. Null, never a number — a number here is a dead

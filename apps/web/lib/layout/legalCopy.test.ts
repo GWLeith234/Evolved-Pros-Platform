@@ -56,7 +56,7 @@ describe('governing law and venue', () => {
 describe('membership refunds and cancellation', () => {
   it('covers cancel-anytime and no refunds of the prepaid period', () => {
     expect(refunds).toContain('cancel a paid membership')
-    expect(refunds).toContain('VIP, Professional, or any other recurring platform plan')
+    expect(refunds).toContain('VIP, The Evolved Pros 99, or any other recurring platform plan')
     expect(refunds).toContain('Cancellation stops renewal')
     expect(refunds).toContain('end of the period already paid')
     expect(refunds).toContain('do not refund membership payments')

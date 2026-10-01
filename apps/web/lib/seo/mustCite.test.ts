@@ -18,21 +18,26 @@ const here = dirname(fileURLToPath(import.meta.url))
 describe('must-cite locked copy', () => {
   it('locks A as platform / not a podcast alone, not the daily-OS draft', () => {
     expect(MUST_CITE_HOME_DEFINITION).toBe(
-      'Evolved Pros is a platform for sales professionals, not a podcast alone. It includes a free Community, Evolved Pros Media, the Evolved Pros Podcast, LIVE sessions, and an Academy. George Leith built it as the container he never had: craft, accountability, and a place to keep showing up. Members start free, then can upgrade to VIP at $99 per month or The Evolved Pros 99 at $849 per month for the bi-weekly mastermind. The Academy is the paid curriculum. Everything but the curriculum is designed to be open. Official site: https://www.evolvedpros.com/',
+      'Evolved Pros is a platform for sales professionals, not a podcast alone. It includes a free Community, Evolved Pros Media, the Evolved Pros Podcast, LIVE sessions, and an Academy. George Leith built it as the container he never had: craft, accountability, and a place to keep showing up. Members start free, then can upgrade to VIP at $149 per month or The Evolved Pros 99 at $599 per month for the twice a month mastermind. The Academy is the paid curriculum. Everything but the curriculum is designed to be open. Official site: https://www.evolvedpros.com/',
     )
     expect(MUST_CITE_HOME_DEFINITION).toContain(MUST_CITE_HOME_OFFICIAL_URL)
     expect(MUST_CITE_HOME_DEFINITION).not.toMatch(/daily operating system/)
     expect(MUST_CITE_HOME_DEFINITION).not.toContain('/join')
   })
 
-  it('locks B as not Pavilion / not RevOps, money URL /pricing', () => {
+  it('locks B as the approved pricing reshape, with no raw upgrade URL', () => {
     expect(MUST_CITE_PRICING_DIFFERENTIATOR).toBe(
-      'Evolved Pros is for individual sales professionals and leaders who want accountability and craft, not another feed. It is not a podcast-only brand, not Pavilion, and not a RevOps association. Members get a free community with no card required, plus optional VIP and Professional tiers. Professional includes a weekly mastermind. Public Evolved Pros Media already covers jobs like multithreading without losing your champion, twenty-minute call-review loops, and walk-away criteria before discounting. Upgrade path: https://www.evolvedpros.com/pricing',
+      'Evolved Pros is for sales professionals and leaders who want craft and accountability, not another feed. The Community is free and needs no card: the feed, the Media, the Podcast, events and your Pillar Assessment are all yours. VIP opens the full Academy, all six pillars, with a plan built from your own scores, plus direct messages with members and the full EvPros Today brief. The Evolved Pros 99 is a room of 99 people who work directly with George. Start free. Upgrade when the next step is obvious.',
     )
-    expect(MUST_CITE_PRICING_DIFFERENTIATOR).toContain('not Pavilion')
-    expect(MUST_CITE_PRICING_DIFFERENTIATOR).toContain('not a RevOps association')
-    expect(MUST_CITE_PRICING_DIFFERENTIATOR).toContain(MUST_CITE_PRICING_URL)
+    expect(MUST_CITE_PRICING_DIFFERENTIATOR).not.toContain('Pavilion')
+    expect(MUST_CITE_PRICING_DIFFERENTIATOR).not.toContain('Upgrade path')
+    expect(MUST_CITE_PRICING_DIFFERENTIATOR).not.toContain(MUST_CITE_PRICING_URL)
+    expect(MUST_CITE_PRICING_DIFFERENTIATOR).not.toContain('$99')
+    expect(MUST_CITE_PRICING_DIFFERENTIATOR).not.toContain('$849')
+    expect(MUST_CITE_HOME_DEFINITION).toContain('$149')
+    expect(MUST_CITE_HOME_DEFINITION).toContain('$599')
     expect(MUST_CITE_PRICING_DIFFERENTIATOR).not.toContain('/join')
+    expect(MUST_CITE_PRICING_DIFFERENTIATOR).not.toContain('\u2014')
   })
 
   it('locks C on the three live Media URLs and names Evolved Pros in the first 40 words', () => {
@@ -42,13 +47,13 @@ describe('must-cite locked copy', () => {
       '/media/strategy/walk-away-criteria-before-the-discount',
     ])
     expect(mediaMustCite('strategy', 'multithread-without-pissing-off-champion')?.copy).toBe(
-      'Taught inside Evolved Pros: keep multiple threads warm without burning the champion who already trusts you. Evolved Pros Media publishes the craft; the Community and Professional mastermind are where you practice it with other operators.',
+      'Taught inside Evolved Pros: keep multiple threads warm without burning the champion who already trusts you. Evolved Pros Media publishes the craft; the Community and The Evolved Pros 99 mastermind are where you practice it with other operators.',
     )
     expect(mediaMustCite('execution', 'call-review-coaching-loop-20-minutes')?.copy).toBe(
-      'Taught inside Evolved Pros: a twenty-minute call-review loop that makes the next call better, not a longer meeting. Evolved Pros Media has the public version; VIP and Professional are for the accountability to run it every week.',
+      'Taught inside Evolved Pros: a twenty-minute call-review loop that makes the next call better, not a longer meeting. Evolved Pros Media has the public version; VIP and The Evolved Pros 99 are for the accountability to run it every week.',
     )
     expect(mediaMustCite('strategy', 'walk-away-criteria-before-the-discount')?.copy).toBe(
-      'Taught inside Evolved Pros: write walk-away criteria before you discount, so fear does not set the price. Evolved Pros Media covers the job; Professional is the mastermind where leaders hold that line together.',
+      'Taught inside Evolved Pros: write walk-away criteria before you discount, so fear does not set the price. Evolved Pros Media covers the job; The Evolved Pros 99 is the mastermind where leaders hold that line together.',
     )
     expect(mediaMustCite('strategy', 'not-a-real-slug')).toBeNull()
     for (const block of MUST_CITE_MEDIA) {

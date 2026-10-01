@@ -16,10 +16,14 @@ import {
   liveDiscountPct,
   liveDiscountedCents,
   mastermindCadence,
+  pricingComparisonRows,
+  proRoomCallout,
   requiredTierFor,
+  tierCardLines,
   tierLabel,
   toTierKey,
 } from './entitlements'
+import { TIERS } from './pricing'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const read = (rel: string) => readFileSync(resolve(here, rel), 'utf8')
@@ -31,29 +35,42 @@ describe('the canonical matrix', () => {
     expect(ENTITLEMENTS).toEqual({
       community: {
         media: 'full',
+        events: 'full',
+        habits: 'full',
+        assessmentScores: 'full',
         fit: 'teaser',
         academy: 'teaser',
         mastermind: 'none',
-        // SPRINT Q1 - the directory is open to everyone, with a public
-        // payload and no direct messages. 'teaser', not 'none'.
         network: 'teaser',
         liveDiscountPct: 0,
+        evprosToday: 'headlines',
+        seatCap: null,
       },
       vip: {
         media: 'full',
+        events: 'full',
+        habits: 'full',
+        assessmentScores: 'full',
         fit: 'full',
         academy: 'full',
-        mastermind: 'monthly-45',
-        network: 'teaser',
+        mastermind: 'none',
+        network: 'full',
         liveDiscountPct: 10,
+        evprosToday: 'full',
+        seatCap: null,
       },
       pro: {
         media: 'full',
+        events: 'full',
+        habits: 'full',
+        assessmentScores: 'full',
         fit: 'full',
         academy: 'full',
-        mastermind: 'biweekly-90',
+        mastermind: 'twice-month',
         network: 'full',
         liveDiscountPct: 20,
+        evprosToday: 'full',
+        seatCap: 99,
       },
     })
   })
@@ -69,8 +86,12 @@ describe('the canonical matrix', () => {
     // distinguishes them is access to George and to each other.
     expect(ENTITLEMENTS.vip.academy).toBe(ENTITLEMENTS.pro.academy)
     expect(ENTITLEMENTS.vip.fit).toBe(ENTITLEMENTS.pro.fit)
+    expect(ENTITLEMENTS.vip.network).toBe('full')
+    expect(ENTITLEMENTS.vip.network).toBe(ENTITLEMENTS.pro.network)
+    expect(ENTITLEMENTS.vip.evprosToday).toBe('full')
+    expect(ENTITLEMENTS.community.evprosToday).toBe('headlines')
     expect(ENTITLEMENTS.vip.mastermind).not.toBe(ENTITLEMENTS.pro.mastermind)
-    expect(ENTITLEMENTS.vip.network).not.toBe(ENTITLEMENTS.pro.network)
+    expect(ENTITLEMENTS.pro.seatCap).toBe(99)
     expect(ENTITLEMENTS.vip.liveDiscountPct).toBeLessThan(ENTITLEMENTS.pro.liveDiscountPct)
   })
 })
@@ -137,19 +158,17 @@ describe('surface gates', () => {
     expect(requiredTierFor('academy')).toBe('vip')
   })
 
-  it('gates direct messages at The 99, and VIP does NOT get them', () => {
-    // SPRINT Q1 opened the directory but NOT the inbox. canAccessNetwork is
-    // unchanged and still means "can reach other members".
+  it('gates direct messages at VIP, and Community does not get them', () => {
     expect(canAccessNetwork('community')).toBe(false)
-    expect(canAccessNetwork('vip')).toBe(false)
+    expect(canAccessNetwork('vip')).toBe(true)
     expect(canAccessNetwork('pro')).toBe(true)
-    expect(requiredTierFor('network')).toBe('pro')
+    expect(requiredTierFor('network')).toBe('vip')
   })
 
   it('gives each tier its mastermind cadence', () => {
     expect(mastermindCadence('community')).toBe('none')
-    expect(mastermindCadence('vip')).toBe('monthly-45')
-    expect(mastermindCadence('pro')).toBe('biweekly-90')
+    expect(mastermindCadence('vip')).toBe('none')
+    expect(mastermindCadence('pro')).toBe('twice-month')
   })
 })
 
@@ -265,16 +284,58 @@ describe('no tier logic lives outside the matrix', () => {
   })
 
   it('stops the free pricing card claiming a whole pillar', () => {
-    // Comments stripped: the file records which tier it retired.
     const cards = read('../app/(public)/pricing/PricingTierCards.tsx')
       .replace(/\/\*[\s\S]*?\*\//g, '')
       .replace(/^\s*\/\/.*$/gm, '')
+    expect(cards).toContain('tierCardLines')
     expect(cards).not.toContain('Academy Pillar 1: Foundation')
-    expect(cards).toContain('first lesson playable')
-    // VIP carries the whole curriculum now, and the 99 carries the room.
-    expect(cards).toContain('The full Academy, all six pillars')
-    expect(cards).toContain('10% off LIVE events')
-    expect(cards).toContain('20% off LIVE events')
     expect(cards).not.toContain('Professional')
+    expect(cards).not.toContain('Weekly mastermind')
+    expect(cards).not.toContain('1:1 time with George')
+    const dollars = {
+      community: TIERS.community.monthly,
+      vip: TIERS.vip.monthly,
+      pro: TIERS.professional.monthly,
+    }
+    const community = tierCardLines('community', dollars).map(line => line.text).join('\n')
+    const vip = tierCardLines('vip', dollars).map(line => line.text).join('\n')
+    const pro = tierCardLines('pro', dollars).map(line => line.text).join('\n')
+    expect(community).toContain('Preview + 1 lesson')
+    expect(community).not.toContain('All 6 pillars')
+    expect(vip).toContain('All 6 pillars')
+    expect(vip).toContain('10% off')
+    expect(vip).toContain('Mastermind: Not included')
+    expect(vip).not.toContain('Monthly 45-minute mastermind')
+    expect(vip).not.toContain('45-minute')
+    expect(vip).toContain('Full profiles + messages')
+    expect(vip).toContain('Full, personalized')
+    expect(pro).toContain('20% off')
+    expect(pro).toContain('Twice a month with George')
+    expect(pro).not.toContain('Bi-weekly')
+    expect(pro).toContain('99')
+    expect(proRoomCallout()).toBe(
+      'Twice a month with George, capped at 99 seats. The room is the product.',
+    )
+    const rows = pricingComparisonRows(dollars)
+    const mastermind = rows.find(row => row.label === 'Mastermind')
+    expect(mastermind?.cells.community).toBe('Not included')
+    expect(mastermind?.cells.vip).toBe('Not included')
+    expect(mastermind?.cells.pro).toBe('Twice a month with George')
+    const labels = rows.map(row => row.label)
+    expect(labels).toEqual([
+      'Price',
+      'Community feed, Media, Podcast',
+      'Events and registration',
+      'Habits / Own the Day',
+      'Pillar Assessment scores',
+      'Academy',
+      'Assessment breakdown + pillar plan',
+      'Fit library',
+      'Member directory',
+      'EvPros Today brief',
+      'Mastermind',
+      'LIVE event discount',
+      'Seats',
+    ])
   })
 })

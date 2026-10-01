@@ -26,7 +26,7 @@ export function Badge(props: BadgeProps) {
   if (props.kind === 'tier') {
     return (
       <span className={`${base} ${tierStyles[props.tier]} ${props.className ?? ''}`}>
-        {props.tier === 'pro' ? 'Pro' : 'Community'}
+        {props.tier === 'pro' ? 'The 99' : 'Community'}
       </span>
     )
   }

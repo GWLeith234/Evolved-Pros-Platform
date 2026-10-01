@@ -1,5 +1,6 @@
 import { ANNUAL_BILLING_TOOLTIP } from '@/lib/live/s4-cta'
 import { PricingCtaButton } from './PricingCtaButton'
+import { proRoomCallout, tierCardLines, type TierKeyName } from '@/lib/entitlements'
 import {
   ANNUAL_FREE_MONTHS,
   annualBillingAvailable,
@@ -59,6 +60,11 @@ export function PricingTierCards({
    */
   currentTier?: string | null
 }) {
+  const monthlyDollars: Record<TierKeyName, number> = {
+    community: pricing.community.monthly,
+    vip: pricing.vip.monthly,
+    pro: pricing.professional.monthly,
+  }
   const tiers: TierDef[] = [
     // SPRINT TIER-1 — the approved ladder. Gate the Academy, open everything
     // else: free carries the whole community/events/podcast/media/habits
@@ -76,16 +82,7 @@ export function PricingTierCards({
       // complete". The free tier is a TEASER: the overview of all six pillars
       // and the first Foundation lesson. Claiming a whole pillar was a
       // promise the gate did not keep.
-      features: [
-        { text: 'Full community feed' },
-        { text: 'Events, podcast & media' },
-        { text: 'Habits & Own the Day' },
-        { text: 'Academy preview: all six pillars, first lesson playable' },
-        { text: 'The Pillar Assessment, all six scores' },
-        { text: 'The member directory' },
-        { text: 'The full Academy curriculum', locked: true },
-        { text: 'Fit programming', locked: true },
-      ],
+      features: tierCardLines('community', monthlyDollars),
       cta: 'Join free',
       ctaHref: '/login?mode=signup',
       tierKey: 'community',
@@ -98,21 +95,13 @@ export function PricingTierCards({
       tagline: 'The whole curriculum',
       // SPRINT L - VIP now carries ALL SIX pillars and the Fit library. The
       // tiers separate on the room, not on the coursework.
-      features: [
-        { text: 'Everything in Community' },
-        { text: 'The full Academy, all six pillars' },
-        { text: 'The full Fit library' },
-        { text: 'Monthly 45-minute mastermind' },
-        { text: 'Full assessment breakdown + pillar plan' },
-        { text: '10% off LIVE events' },
-        { text: 'Directory visible to all · direct member access for The 99', locked: true },
-      ],
+      features: tierCardLines('vip', monthlyDollars),
       cta: 'Start VIP',
       ctaPlanBase: 'vip',
       tierKey: 'vip',
     },
     // SPRINT K — Professional is retired. The Evolved Pros 99 takes its rung:
-    // 99 seats, bi-weekly 90-minute mastermind. The catalogue key stays
+    // 99 seats, twice a month with George. The catalogue key stays
     // `professional` and the DB tier stays `pro` (Sprint L owns renaming).
     {
       name: 'The Evolved Pros 99',
@@ -122,14 +111,8 @@ export function PricingTierCards({
       featured: true,
       popular: true,
       tagline: '99 seats. One room.',
-      features: [
-        { text: 'Everything in VIP' },
-        { text: 'Bi-weekly 90-minute mastermind with George' },
-        { text: 'Directory visible to all · direct member access for The 99' },
-        { text: 'One of only 99 seats' },
-        { text: '20% off LIVE events' },
-      ],
-      callout: 'A bi-weekly 90-minute mastermind with George, capped at 99 seats. The room is the product.',
+      features: tierCardLines('pro', monthlyDollars),
+      callout: proRoomCallout(),
       cta: 'Take a seat',
       ctaPlanBase: 'pro',
       tierKey: 'pro',
@@ -165,10 +148,9 @@ export function PricingTierCards({
     return pricingLadderState(currentTier, t.tierKey, hasTierAccess)
   }
 
-  // SPRINT K — annual pricing is undecided, so `annual` is null and the whole
-  // annual half of this component stands down: no toggle, no /yr amount, no
-  // annual CTA. Rendering it would have quoted the dead $490 / $2,490 that
-  // getMembershipPricing falls back to when the catalogue has no annual row.
+  // TODO(George): annual billing on, or remove this toggle for good.
+  // Annual is null today, so the toggle stays hidden and checkout refuses
+  // a yearly plan. Do not quote an annual price that is not for sale.
   const showAnnual = annualBillingAvailable(pricing)
 
   function cataloguePrice(t: TierDef): { monthly: string; annual: string | null } | null {
