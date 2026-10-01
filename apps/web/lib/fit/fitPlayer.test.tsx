@@ -57,10 +57,25 @@ describe('Fit player gating in the UI', () => {
     expect(processing).not.toContain('ep-fit-library-player')
   })
 
+  it('shows a stored poster on a locked library card and does not mount the player', () => {
+    const poster = 'https://image.mux.com/play-locked/thumbnail.jpg?token=thumb-only'
+    const html = renderToStaticMarkup(
+      <FitLibrary moves={[{ ...readyMove(), posterUrl: poster }]} />,
+    )
+    expect(html).toContain('ep-fit-poster')
+    expect(html).toContain(poster)
+    expect(html).not.toContain('/mux-token')
+  })
+
   it('keeps the token URL inside the player component', () => {
     const src = readFileSync(resolve(__dirname, '../../components/fit/FitMuxPlayer.tsx'), 'utf8')
     expect(src).toContain('/api/fit/')
     expect(src).toContain('/mux-token')
     expect(src).not.toContain('mux_playback_id')
+    expect(src).toContain('playsInline')
+    expect(src).toContain('preload="metadata"')
+    expect(src).toContain('fitPreferPlayback')
+    expect(src).not.toContain('muted')
+    expect(src).not.toContain('autoPlay')
   })
 })

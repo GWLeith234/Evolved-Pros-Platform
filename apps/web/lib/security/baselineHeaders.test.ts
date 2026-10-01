@@ -56,5 +56,13 @@ describe('baseline security headers', () => {
     ]) {
       expect(csp).toContain(host)
     }
+    // Rendition playlists and segments are on *.edgemv.mux.com.
+    // A one-label *.mux.com host does not match that name.
+    expect(csp).toMatch(/connect-src[^;]*https:\/\/\*\.edgemv\.mux\.com/)
+    expect(csp).toMatch(/connect-src[^;]*https:\/\/\*\.fastly\.mux\.com/)
+    expect(csp).toMatch(/media-src[^;]*https:\/\/\*\.edgemv\.mux\.com/)
+    expect(csp).toMatch(/media-src[^;]*https:\/\/\*\.fastly\.mux\.com/)
+    expect(csp).toMatch(/img-src[^;]*https:\/\/image\.mux\.com/)
+    expect(csp).toMatch(/img-src[^;]*https:\/\/\*\.supabase\.co/)
   })
 })
