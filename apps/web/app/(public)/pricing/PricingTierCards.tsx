@@ -187,6 +187,7 @@ export function PricingTierCards({
         name="ep-pricing-billing"
         id="ep-pricing-monthly"
         className="sr-only"
+        aria-label="Monthly billing"
         defaultChecked
       />
       <input
@@ -194,6 +195,7 @@ export function PricingTierCards({
         name="ep-pricing-billing"
         id="ep-pricing-annual"
         className="sr-only"
+        aria-label="Annual billing"
       />
 
       {/* Monthly / Annual toggle — CSS :has() flips amounts. No card hydrate. */}

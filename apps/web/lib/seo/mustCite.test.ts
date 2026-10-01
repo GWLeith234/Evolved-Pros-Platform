@@ -3,6 +3,7 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { EM_DASH, hasEmDash } from '@/lib/home/conversion'
+import { TIER_DISPLAY_NAMES, TIERS } from '@/lib/pricing'
 import {
   MUST_CITE_HOME_DEFINITION,
   MUST_CITE_HOME_OFFICIAL_URL,
@@ -16,23 +17,27 @@ import {
 const here = dirname(fileURLToPath(import.meta.url))
 
 describe('must-cite locked copy', () => {
-  it('locks A as platform / not a podcast alone, not the daily-OS draft', () => {
+  it('locks A in first person, with tier prices from TIERS, not the daily-OS draft', () => {
     expect(MUST_CITE_HOME_DEFINITION).toBe(
-      'Evolved Pros is a platform for sales professionals, not a podcast alone. It includes a free Community, Evolved Pros Media, the Evolved Pros Podcast, LIVE sessions, and an Academy. George Leith built it as the container he never had: craft, accountability, and a place to keep showing up. Members start free, then can upgrade to VIP at $99 per month or The Evolved Pros 99 at $849 per month for the bi-weekly mastermind. The Academy is the paid curriculum. Everything but the curriculum is designed to be open. Official site: https://www.evolvedpros.com/',
+      `I built Evolved Pros for sales professionals. It is a platform, not a podcast alone. It includes a free Community, Evolved Pros Media, the Evolved Pros Podcast, LIVE sessions, and an Academy. I wanted the container I never had: craft, accountability, and a place to keep showing up. You start free, then you can step up to VIP at $${TIERS.vip.monthly} per month or ${TIER_DISPLAY_NAMES.professional} at $${TIERS.professional.monthly} per month for the bi-weekly mastermind. The Academy is the paid curriculum. Everything but the curriculum is open. Official site: ${MUST_CITE_HOME_OFFICIAL_URL}`,
     )
     expect(MUST_CITE_HOME_DEFINITION).toContain(MUST_CITE_HOME_OFFICIAL_URL)
+    expect(MUST_CITE_HOME_DEFINITION).toContain('I built Evolved Pros')
     expect(MUST_CITE_HOME_DEFINITION).not.toMatch(/daily operating system/)
     expect(MUST_CITE_HOME_DEFINITION).not.toContain('/join')
+    expect(MUST_CITE_HOME_DEFINITION).not.toContain('Pavilion')
   })
 
-  it('locks B as not Pavilion / not RevOps, money URL /pricing', () => {
+  it('locks B in first person, without Pavilion, RevOps, or a raw pricing URL', () => {
     expect(MUST_CITE_PRICING_DIFFERENTIATOR).toBe(
-      'Evolved Pros is for individual sales professionals and leaders who want accountability and craft, not another feed. It is not a podcast-only brand, not Pavilion, and not a RevOps association. Members get a free community with no card required, plus optional VIP and Professional tiers. Professional includes a weekly mastermind. Public Evolved Pros Media already covers jobs like multithreading without losing your champion, twenty-minute call-review loops, and walk-away criteria before discounting. Upgrade path: https://www.evolvedpros.com/pricing',
+      'I built Evolved Pros for individual sales professionals and leaders who want accountability and craft, not another feed. It is not a podcast-only brand. The Community is free and needs no card. VIP and The Evolved Pros 99 are optional. The Evolved Pros 99 includes the bi-weekly mastermind. Public Evolved Pros Media already covers jobs like multithreading without losing your champion, twenty-minute call-review loops, and walk-away criteria before discounting.',
     )
-    expect(MUST_CITE_PRICING_DIFFERENTIATOR).toContain('not Pavilion')
-    expect(MUST_CITE_PRICING_DIFFERENTIATOR).toContain('not a RevOps association')
-    expect(MUST_CITE_PRICING_DIFFERENTIATOR).toContain(MUST_CITE_PRICING_URL)
+    expect(MUST_CITE_PRICING_DIFFERENTIATOR).not.toContain('Pavilion')
+    expect(MUST_CITE_PRICING_DIFFERENTIATOR).not.toContain('RevOps')
+    expect(MUST_CITE_PRICING_DIFFERENTIATOR).not.toContain('Upgrade path')
+    expect(MUST_CITE_PRICING_DIFFERENTIATOR).not.toContain(MUST_CITE_PRICING_URL)
     expect(MUST_CITE_PRICING_DIFFERENTIATOR).not.toContain('/join')
+    expect(MUST_CITE_PRICING_URL).toBe('https://www.evolvedpros.com/pricing')
   })
 
   it('locks C on the three live Media URLs and names Evolved Pros in the first 40 words', () => {
