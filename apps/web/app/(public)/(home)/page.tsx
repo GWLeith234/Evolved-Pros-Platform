@@ -17,6 +17,7 @@ import { getPublishedMediaStoriesForHub } from '@/lib/media/public'
 import { mediaStoryHref } from '@/lib/media/paths'
 import { getPublishedEpisodes } from '@/lib/podcast/public'
 import { allowedEpisodeStillUrl } from '@/lib/podcast/stillUrl'
+import { loadViewerFitMoves } from '@/lib/fit/posters'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 import { homeJsonLd } from '@/lib/seo/jsonld'
 
@@ -85,6 +86,7 @@ export default async function LandingPage() {
     loadEpisodes(),
     loadStories(),
   ])
+  const fitMoves = await loadViewerFitMoves(profile?.tier ?? null)
   return (
     <>
       <script
@@ -97,6 +99,7 @@ export default async function LandingPage() {
         viewerTier={profile?.tier ?? null}
         episodes={episodes}
         stories={stories}
+        fitMoves={fitMoves}
       />
     </>
   )
