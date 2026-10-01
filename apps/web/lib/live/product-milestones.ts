@@ -56,9 +56,9 @@ export const PRODUCT_MILESTONES: ProductMilestone[] = [
     id: 'book-evolved-2026',
     date: new Date(2026, 9, 15),
     title: BOOK_EVENT_TITLE,
-    detail: 'Hardcover, ebook, and audio. Search Evolved by George Leith.',
-    linkLabel: 'Find on Amazon',
-    linkUrl: AMAZON_BOOK_SEARCH_URL,
+    detail: 'Hardcover, ebook, and audio. On Amazon Oct 15.',
+    linkLabel: 'See the book',
+    linkUrl: '/evolved',
   },
 ]
 

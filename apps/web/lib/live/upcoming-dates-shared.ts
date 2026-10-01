@@ -200,6 +200,11 @@ export function validateStoredRow(
   }
 }
 
+/** Hide the whole /live upcoming block when nothing is still ahead. */
+export function showUpcomingSpeakingBlock(count: number): boolean {
+  return count > 0
+}
+
 export function filterUpcoming(
   rows: UpcomingDateStored[],
   today = todayYmd(),

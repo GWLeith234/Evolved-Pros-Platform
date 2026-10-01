@@ -19,7 +19,7 @@ import {
 } from '@/components/media/newspaper'
 import type { MediaRailEpisode } from '@/lib/media/podcastRail'
 import { MEDIA_BRAND } from '@/lib/media/brand'
-import { lockedArticleByline, resolveStoryArtUrl, storyArtImgClass } from '@/lib/media/storyArt'
+import { absolutePublicArtUrl, lockedArticleByline, resolveStoryArtUrl, storyArtImgClass } from '@/lib/media/storyArt'
 import type { MediaStoryRecord } from '@/lib/media/storyRecord'
 import { CANONICAL_ORIGIN, DEFAULT_OG_IMAGE, canonicalUrl } from '@/lib/seo/canonical'
 import { mediaMustCite } from '@/lib/seo/mustCite'
@@ -100,7 +100,7 @@ export async function MediaStoryDocument({
     author: { '@type': 'Person', name: byline },
     publisher: { '@type': 'Organization', name: 'Evolved Pros', url: CANONICAL_ORIGIN },
     datePublished: story.published_at, dateModified: story.updated_at,
-    url: articleUrl, image: artSrc || DEFAULT_OG_IMAGE,
+    url: articleUrl, image: absolutePublicArtUrl(artSrc, CANONICAL_ORIGIN) || DEFAULT_OG_IMAGE,
   }
   const breadcrumbSchema = {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',

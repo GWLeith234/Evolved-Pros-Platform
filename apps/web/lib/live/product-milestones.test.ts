@@ -67,8 +67,10 @@ describe('PRODUCT_MILESTONES', () => {
     expect(byId['masterminds-execs-2026']?.linkLabel).toBe('See events')
     expect(byId['masterminds-execs-2026']?.linkUrl).toBe('/events')
 
-    expect(byId['book-evolved-2026']?.linkLabel).toBe('Find on Amazon')
-    expect(byId['book-evolved-2026']?.linkUrl).toBe(AMAZON_BOOK_SEARCH_URL)
+    expect(byId['book-evolved-2026']?.linkLabel).toBe('See the book')
+    expect(byId['book-evolved-2026']?.linkUrl).toBe('/evolved')
+    expect(byId['book-evolved-2026']?.linkUrl).not.toContain('amazon')
+    expect(byId['book-evolved-2026']?.detail).toContain('Oct 15')
     expect(AMAZON_BOOK_SEARCH_URL).toBe('https://www.amazon.com/s?k=Evolved+by+George+Leith')
     expect(AMAZON_BOOK_SEARCH_URL).not.toMatch(/\/dp\//)
     expect(new Set(PRODUCT_MILESTONES.map(m => m.id)).size).toBe(PRODUCT_MILESTONES.length)

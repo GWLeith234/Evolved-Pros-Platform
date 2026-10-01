@@ -155,8 +155,9 @@ describe('conversion homepage locks', () => {
 
   it('strips only the Official site line from What Evolved Pros is', () => {
     expect(MUST_CITE_HOME_DEFINITION).toContain(MUST_CITE_HOME_OFFICIAL_URL)
+    expect(homeWhatEvolvedProsCopy()).toContain('I built Evolved Pros')
     expect(homeWhatEvolvedProsCopy()).toContain('not a podcast alone')
-    expect(homeWhatEvolvedProsCopy()).toContain('Everything but the curriculum is designed to be open.')
+    expect(homeWhatEvolvedProsCopy()).toContain('Everything but the curriculum is open.')
     expect(homeWhatEvolvedProsCopy()).not.toContain('Official site:')
     expect(homeWhatEvolvedProsCopy()).not.toContain(MUST_CITE_HOME_OFFICIAL_URL)
   })
@@ -212,15 +213,17 @@ describe('conversion homepage layout contracts', () => {
     expect(conversionHomeSrc).toMatch(/loginHrefFor\('\/academy'\)/)
   })
 
-  it('puts signed-out primary Join free in the first mobile viewport over the GOLD still', () => {
-    expect(conversionHomeSrc).toMatch(/min-h-\[calc\(100svh-7rem\)\]/)
+  it('puts signed-out primary Join free under the GOLD still, without a mobile viewport min-height', () => {
+    expect(conversionHomeSrc).not.toMatch(/min-h-\[calc\(100svh-7rem\)\]/)
+    expect(conversionHomeSrc).not.toMatch(/max-h-\[calc\(100svh-7rem\)\]/)
     expect(conversionHomeSrc).toMatch(/md:min-h-\[calc\(100svh-5\.5rem\)\]/)
-    expect(conversionHomeSrc).toMatch(/max-h-\[calc\(100svh-7rem\)\]/)
     expect(conversionHomeSrc).toMatch(/md:max-h-\[calc\(100svh-5\.5rem\)\]/)
+    expect(conversionHomeSrc).toMatch(/md:justify-end/)
     expect(conversionHomeSrc).toMatch(/ep-home-fold-still/)
     expect(conversionHomeSrc).toMatch(/ep-home-fold-ctas/)
     expect(conversionHomeSrc).toMatch(/ep-home-fold-ctas-lead/)
-    expect(conversionHomeSrc).toMatch(/flex-col items-center justify-end/)
+    expect(conversionHomeSrc).toMatch(/flex-col items-center/)
+    expect(conversionHomeSrc).toMatch(/md:justify-end/)
     expect(conversionHomeSrc).toMatch(/bg-gradient-to-t from-paper/)
     expect(conversionHomeSrc).not.toMatch(/max-md:scale-\[1\.32\]/)
     expect(conversionHomeSrc).not.toMatch(/hidden h-2\/3 bg-gradient-to-t/)
@@ -298,7 +301,8 @@ describe('conversion homepage layout contracts', () => {
     expect(conversionHomeSrc).toMatch(/ep-home-arch-label/)
     expect(conversionHomeSrc).toMatch(/HOME_ARCHITECTURE_LABEL/)
     expect(globalsSrc).toMatch(/\.ep-home-fold-still/)
-    expect(globalsSrc).toMatch(/height: 38%/)
+    expect(globalsSrc).toMatch(/aspect-ratio: 3 \/ 2/)
+    expect(globalsSrc).not.toMatch(/height: 38%/)
     expect(globalsSrc).toMatch(/max-width: 430px/)
   })
 
