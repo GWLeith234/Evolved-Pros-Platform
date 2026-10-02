@@ -6,6 +6,7 @@
  */
 
 import { buildUpgradeHref } from '@/lib/academy/gating'
+import { loginHrefFor } from '@/lib/auth/gatedIntent'
 import { canAccessFit, requiredTierFor } from '@/lib/entitlements'
 
 export const FIT_REQUIRED_TIER = requiredTierFor('fit')
@@ -17,4 +18,9 @@ export function canAccessFitLibrary(userTier: string | null | undefined): boolea
 
 export function fitUpgradeHref(): string {
   return buildUpgradeHref({ from: 'fit', tier: FIT_REQUIRED_TIER })
+}
+
+/** Logged-out library CTA. Signup, then back to /fit. */
+export function fitJoinHref(): string {
+  return loginHrefFor('/fit', 'signup')
 }
