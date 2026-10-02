@@ -13,16 +13,23 @@
  * The full "id.sig" string is stored (unique) in guest_engagements.access_token
  * and is what appears in the URL. The DB lookup remains authoritative; the
  * signature is defense-in-depth. Secret comes from GUEST_TOKEN_SECRET, falling
- * back to SUPABASE_SERVICE_ROLE_KEY (always present server-side) so no new env
- * var is required to ship.
+ * back to SUPABASE_SERVICE_ROLE_KEY so no new env var is required to ship.
+ * A blank value is not a key. Minting throws and verification returns false.
+ * Signing with '' used to make HMAC-SHA256('', id) a credential anyone could
+ * forge, and /guest plus /api/guest would treat that signature as valid.
  */
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 
-function secret(): string {
+/** Blank and whitespace-only values are unset. A real key is kept byte-for-byte. */
+function configuredSecret(value: string | undefined): string | null {
+  if (typeof value !== 'string' || value.trim() === '') return null
+  return value
+}
+
+function secret(): string | null {
   return (
-    process.env.GUEST_TOKEN_SECRET ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    ''
+    configuredSecret(process.env.GUEST_TOKEN_SECRET) ??
+    configuredSecret(process.env.SUPABASE_SERVICE_ROLE_KEY)
   )
 }
 
@@ -30,14 +37,20 @@ function b64url(buf: Buffer): string {
   return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 
-function sign(id: string): string {
-  return b64url(createHmac('sha256', secret()).update(id).digest()).slice(0, 24)
+function sign(id: string): string | null {
+  const key = secret()
+  if (!key) return null
+  return b64url(createHmac('sha256', key).update(id).digest()).slice(0, 24)
 }
 
 /** Mint a fresh signed access token for a new guest engagement. */
 export function mintGuestToken(): string {
   const id = b64url(randomBytes(18))
-  return `${id}.${sign(id)}`
+  const sig = sign(id)
+  if (!sig) {
+    throw new Error('Guest token secret is not set. Refusing to mint guest tokens.')
+  }
+  return `${id}.${sig}`
 }
 
 /**
@@ -51,6 +64,7 @@ export function verifyGuestToken(token: string | null | undefined): boolean {
   const [id, sig] = parts
   if (!id || !sig) return false
   const expected = sign(id)
+  if (!expected) return false
   const a = Buffer.from(sig)
   const b = Buffer.from(expected)
   if (a.length !== b.length) return false
