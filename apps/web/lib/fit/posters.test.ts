@@ -12,10 +12,13 @@ const state = vi.hoisted(() => ({
     video_status: string
     mux_playback_id: string | null
     thumbnail_time: number | null
+    thumbnail_url?: string | null
   }> | null,
   error: null as { message: string } | null,
   selects: 0,
   columns: '',
+  signedUrl: null as string | null,
+  storage: [] as Array<{ bucket: string; key: string; expiresIn: number }>,
 }))
 
 vi.mock('@/lib/supabase/admin', () => ({
@@ -32,10 +35,21 @@ vi.mock('@/lib/supabase/admin', () => ({
         }),
       }
     },
+    storage: {
+      from: (bucket: string) => ({
+        createSignedUrl: async (key: string, expiresIn: number) => {
+          state.storage.push({ bucket, key, expiresIn })
+          return {
+            data: state.signedUrl ? { signedUrl: state.signedUrl } : null,
+            error: state.signedUrl ? null : { message: 'no poster object' },
+          }
+        },
+      }),
+    },
   },
 }))
 
-import { attachLockedFitPosters, fitMovesForViewer, publicFitPosterUrl } from './posters'
+import { attachLockedFitPosters, fitMovesForViewer, FIT_STORAGE_POSTER_TTL_SECONDS, publicFitPosterUrl } from './posters'
 
 const MOVE_ID = '11111111-1111-4111-8111-111111111111'
 
@@ -67,6 +81,8 @@ describe('locked Fit card posters', () => {
     state.error = null
     state.selects = 0
     state.columns = ''
+    state.signedUrl = null
+    state.storage = []
   })
 
   it('locked card data has a thumbnail poster and no playback token or video url', async () => {
@@ -107,10 +123,11 @@ describe('locked Fit card posters', () => {
     expect(claims.sub).toBe('play-locked')
     expect(claims.time).toBe('3.5')
     expect(state.columns).toContain('thumbnail_time')
+    expect(state.columns).toContain('thumbnail_url')
     expect(state.columns).toContain('mux_playback_id')
   })
 
-  it('does not sign posters for viewers who can play', async () => {
+  it('signs thumbnail posters for viewers who can play, still without a video token', async () => {
     state.rows = [{
       id: MOVE_ID,
       status: 'published',
@@ -118,12 +135,19 @@ describe('locked Fit card posters', () => {
       mux_playback_id: 'play-locked',
       thumbnail_time: 3.5,
     }]
+    const videoToken = await generateFitMuxToken('play-locked')
     const vip = await fitMovesForViewer([guide()], 'vip')
     const pro = await fitMovesForViewer([guide()], 'pro')
-    expect(state.selects).toBe(0)
-    expect(vip[0]?.posterUrl).toBeUndefined()
-    expect(pro[0]?.posterUrl).toBeUndefined()
-    expect(JSON.stringify(vip)).not.toContain('play-locked')
+    expect(state.selects).toBe(2)
+    const vipPoster = vip[0]?.posterUrl
+    expect(vipPoster).toMatch(/^https:\/\/image\.mux\.com\/play-locked\/thumbnail\.jpg\?token=/)
+    expect(pro[0]?.posterUrl).toMatch(/^https:\/\/image\.mux\.com\/play-locked\/thumbnail\.jpg\?token=/)
+    const claims = payload(new URL(vipPoster!).searchParams.get('token')!)
+    expect(claims.aud).toBe('t')
+    expect(claims.sub).toBe('play-locked')
+    expect(JSON.stringify(vip)).not.toContain(videoToken)
+    expect(JSON.stringify(vip)).not.toContain('.m3u8')
+    expect(vip[0]).not.toHaveProperty('mux_playback_id')
   })
 
   it('signs thumbnail posters for logged-out and community viewers', async () => {
@@ -165,6 +189,33 @@ describe('locked Fit card posters', () => {
     expect(JSON.stringify(processing)).not.toContain('play-locked')
   })
 
+  it('builds a signed storage URL when Mux signing is unavailable and never returns the relative path', async () => {
+    state.rows = [{
+      id: MOVE_ID,
+      status: 'published',
+      video_status: 'ready',
+      mux_playback_id: null,
+      thumbnail_time: 3.5,
+      thumbnail_url: 'fit-media/FO55-035/poster-1920x1080.png',
+    }]
+    state.signedUrl =
+      'https://abc.supabase.co/storage/v1/object/sign/fit-media/FO55-035/poster-1920x1080.png?token=poster'
+    const [card] = await attachLockedFitPosters([guide()])
+    expect(card?.posterUrl).toBe(state.signedUrl)
+    expect(card?.posterUrl).not.toBe('fit-media/FO55-035/poster-1920x1080.png')
+    expect(state.storage).toEqual([{
+      bucket: 'fit-media',
+      key: 'FO55-035/poster-1920x1080.png',
+      expiresIn: FIT_STORAGE_POSTER_TTL_SECONDS,
+    }])
+    expect(JSON.stringify(card)).not.toContain('.m3u8')
+
+    state.signedUrl = null
+    const [missing] = await attachLockedFitPosters([guide()])
+    expect(missing?.posterUrl).toBeNull()
+    expect(JSON.stringify(missing)).not.toContain('fit-media/FO55-035')
+  })
+
   it('rejects a playback token or a video url as a poster', async () => {
     const videoToken = await generateFitMuxToken('play-locked')
     expect(publicFitPosterUrl(
@@ -201,5 +252,7 @@ describe('Fit poster wiring', () => {
     expect(page).toContain('fitMovesForViewer')
     expect(player).toContain('thumbnail: playback.thumbnailToken')
     expect(player).not.toMatch(/thumbnailTime/)
+    expect(player).toContain('playsInline')
+    expect(player).toContain('fitPreferPlayback')
   })
 })
