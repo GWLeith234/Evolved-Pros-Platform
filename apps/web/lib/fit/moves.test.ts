@@ -3,10 +3,12 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { hasEmDash } from '@/lib/home/conversion'
 import { canAccessFit } from '@/lib/entitlements'
-import { canAccessFitLibrary, FIT_REQUIRED_TIER, fitUpgradeHref } from './gating'
+import { canAccessFitLibrary, FIT_REQUIRED_TIER, fitJoinHref, fitUpgradeHref } from './gating'
 import { fitCopyStrings } from './copy'
 import {
   featuredFitMove,
+  fitMoveByCode,
+  fitMoveBySlug,
   FIT_MOVES,
   FIT_SAMPLE_CODE,
   fitLibraryStats,
@@ -56,6 +58,19 @@ describe('Fit FO55 catalog', () => {
     expect(rotateFitMove(FIT_MOVES, pool.length)?.code).toBe('FO55-035')
   })
 
+  it('labels FO55-041 as the hotel bench incline chest press', () => {
+    const move = fitMoveByCode('FO55-041')
+    expect(move).toMatchObject({
+      code: 'FO55-041',
+      title: 'Hotel bench incline chest press',
+      slug: 'hotel-bench-incline-chest-press',
+      focus: 'Chest, shoulders, arms',
+      reps: '3 reps',
+    })
+    expect(fitMoveBySlug('hotel-bench-incline-chest-press')?.code).toBe('FO55-041')
+    expect(fitMoveBySlug('calf-raise-support')).toBeNull()
+  })
+
   it('formats admin dates without em dashes', () => {
     expect(formatFitAdminDate('2026-09-04')).toBe('4 Sep 2026')
     expect(formatFitAdminDate(null)).toBe('Not published')
@@ -71,6 +86,7 @@ describe('Fit VIP gate', () => {
     expect(canAccessFitLibrary('vip')).toBe(true)
     expect(canAccessFitLibrary('pro')).toBe(true)
     expect(fitUpgradeHref()).toBe('/pricing?from=fit&tier=vip')
+    expect(fitJoinHref()).toBe('/login?mode=signup&redirect=%2Ffit')
   })
 
   it('uses effective tier, so a dead VIP or Pro subscription stays on the teaser', () => {
