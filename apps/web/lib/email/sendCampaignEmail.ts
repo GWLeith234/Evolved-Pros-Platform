@@ -146,7 +146,7 @@ export async function sendCampaignEmail({
     visibleUrl = unsubscribeUrl(prospect.id)
     oneClickUrl = oneClickUnsubscribeUrl(prospect.id)
   } catch {
-    // UNSUBSCRIBE_SECRET missing — we cannot mint a working unsubscribe link,
+    // UNSUBSCRIBE_SECRET missing or blank — we cannot mint a working unsubscribe link,
     // and sending commercial email without one is exactly what CASL forbids.
     console.error('[sendCampaignEmail] cannot mint unsubscribe token')
     await record({
