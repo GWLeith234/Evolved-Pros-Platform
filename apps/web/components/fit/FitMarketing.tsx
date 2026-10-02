@@ -79,12 +79,16 @@ export function FitMarketing({
       <section className="ep-fit-featured" aria-label="Featured instructional guide">
         {vip ? (
           <FitTeaseRotator moves={published} locked={false} />
+        ) : published.some(move => move.posterUrl) ? (
+          <FitTeaseRotator moves={published.filter(move => move.posterUrl)} locked />
         ) : (
           <FitTeaseCard move={featured} locked />
         )}
       </section>
 
-      {vip ? <FitLibrary moves={published} canPlay /> : null}
+      {vip || published.some(move => move.posterUrl) ? (
+        <FitLibrary moves={published} canPlay={vip} />
+      ) : null}
 
       <section className="ep-fit-how" aria-labelledby="fit-how-title">
         <p className="ep-fit-kicker">Membership</p>

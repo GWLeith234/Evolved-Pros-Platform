@@ -5,9 +5,11 @@
  * host-scoped: a PKCE verifier cookie set on www is invisible on platform
  * (and the reverse).
  *
- * LIVE host split: www / apex stay on Bluehost WordPress until George YES
- * on DNS. Auth must stay on platform.evolvedpros.com — a magic link whose
- * redirect_to names www lands on WordPress, not this app.
+ * LIVE host split (2026-09-29, George YES via CoS, sitemap hygiene sprint):
+ * www and platform both serve this Railway app. Auth still stays on
+ * platform.evolvedpros.com because Supabase cookies are host-scoped there.
+ * A magic link whose redirect_to names www would set the session on www,
+ * where member routes are not the auth host.
  *
  * Brand hosts AND the public Railway host canonicalize to platform.
  * localhost is left alone so local `next dev` still works.

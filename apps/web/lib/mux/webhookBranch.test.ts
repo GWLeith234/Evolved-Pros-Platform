@@ -74,6 +74,29 @@ describe('Mux webhook fit vs lesson branching', () => {
     expect(calls).toEqual([])
   })
 
+  it('fails closed when the webhook secret is blank', async () => {
+    process.env.MUX_WEBHOOK_SECRET = ' \n\t '
+    const body = JSON.stringify({
+      type: 'video.asset.ready',
+      data: { id: 'asset-blank', playback_ids: [{ id: 'play-blank', policy: 'signed' }] },
+    })
+    const res = await POST(request(body, signature(body, ' \n\t ')))
+    expect(res.status).toBe(503)
+    expect(calls).toEqual([])
+  })
+
+  it('keeps a real secret byte-for-byte when it contains spaces', async () => {
+    const spaced = 'mux secret with spaces'
+    process.env.MUX_WEBHOOK_SECRET = spaced
+    const body = JSON.stringify({
+      type: 'video.asset.created',
+      data: { id: 'asset-spaced' },
+    })
+    const res = await POST(request(body, signature(body, spaced)))
+    expect(res.status).toBe(200)
+    expect(updates()).toEqual([])
+  })
+
   it('rejects a bad signature before any write', async () => {
     const body = JSON.stringify({
       type: 'video.asset.ready',

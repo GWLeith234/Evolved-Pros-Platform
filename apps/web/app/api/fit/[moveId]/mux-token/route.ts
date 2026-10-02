@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
-import { generateFitMuxToken } from '@/lib/mux/client'
+import { coerceFitThumbnailTime, generateFitMuxThumbnailToken, generateFitMuxToken } from '@/lib/mux/client'
 import { canAccessFit } from '@/lib/entitlements'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { NextResponse } from 'next/server'
@@ -27,7 +27,7 @@ export async function GET(
   // whose video is ready.
   const { data: move } = await adminClient
     .from('fit_moves')
-    .select('id, status, video_status, mux_playback_id')
+    .select('id, status, video_status, mux_playback_id, thumbnail_time')
     .eq('id', params.moveId)
     .maybeSingle()
 
@@ -40,10 +40,20 @@ export async function GET(
     return NextResponse.json({ error: 'No video' }, { status: 404 })
   }
 
-  const token = await generateFitMuxToken(move.mux_playback_id)
+  const [token, thumbnailToken] = await Promise.all([
+    generateFitMuxToken(move.mux_playback_id),
+    generateFitMuxThumbnailToken(
+      move.mux_playback_id,
+      coerceFitThumbnailTime(move.thumbnail_time),
+    ),
+  ])
   if (!token) {
     return NextResponse.json({ error: 'Playback unavailable' }, { status: 503 })
   }
 
-  return NextResponse.json({ token, playbackId: move.mux_playback_id })
+  return NextResponse.json({
+    token,
+    thumbnailToken,
+    playbackId: move.mux_playback_id,
+  })
 }

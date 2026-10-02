@@ -784,6 +784,7 @@ export type Database = {
           slug: string
           sort_order: number
           status: string
+          thumbnail_time: number | null
           thumbnail_url: string | null
           title: string
           updated_at: string
@@ -809,6 +810,7 @@ export type Database = {
           slug: string
           sort_order?: number
           status?: string
+          thumbnail_time?: number | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string
@@ -834,6 +836,7 @@ export type Database = {
           slug?: string
           sort_order?: number
           status?: string
+          thumbnail_time?: number | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string

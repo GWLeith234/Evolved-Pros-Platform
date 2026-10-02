@@ -35,6 +35,7 @@ function ep(over: Partial<PublicEpisode> = {}): PublicEpisode {
     guest_image_url: 'https://cdn.test/dennis.jpg',
     thumbnail_url: null,
     published_at: '2026-01-01T00:00:00.000Z',
+    updated_at: null,
     youtube_id: 'OWpbcxVKoGg',
     spotify_url: null,
     apple_url: null,

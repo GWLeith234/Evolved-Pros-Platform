@@ -16,6 +16,7 @@ import {
 } from '@/lib/fit/copy'
 import { fitUpgradeHref } from '@/lib/fit/gating'
 import { fitTeaseMeta, type FitMove } from '@/lib/fit/moves'
+import { FitLockedPoster } from '@/components/fit/FitLockedPoster'
 import { FitMuxPlayer } from '@/components/fit/FitMuxPlayer'
 
 export function FitTeaseCard({
@@ -48,11 +49,18 @@ export function FitTeaseCard({
         </div>
         {videoReady ? (
           <div className="ep-fit-player-stage ep-fit-player-stage--video">
-            <FitMuxPlayer moveId={move.id} title={move.title} />
+            <FitMuxPlayer moveId={move.id} title={move.title} poster={move.posterUrl} />
           </div>
         ) : (
-          <div className="ep-fit-player-stage" aria-hidden="true">
-            <span className="ep-fit-play" />
+          <div
+            className={
+              move.posterUrl
+                ? 'ep-fit-player-stage ep-fit-player-stage--poster'
+                : 'ep-fit-player-stage'
+            }
+            aria-hidden="true"
+          >
+            <FitLockedPoster posterUrl={move.posterUrl} />
           </div>
         )}
         {locked ? (

@@ -1,14 +1,15 @@
 /**
  * Site-wide public URL helpers.
  *
- * LIVE host split: platform.evolvedpros.com is this Next app. Apex / www
- * stay on Bluehost WordPress until George YES on DNS. HTTP must never 308
- * the platform host to www (see lib/seo/appRedirects.mjs).
+ * LIVE host split (2026-09-29, George YES via CoS, sitemap hygiene sprint):
+ * www.evolvedpros.com and platform.evolvedpros.com both serve this Railway
+ * app. www is the public indexable origin. platform is the member app.
+ * Approved public paths 308 from platform to www (lib/seo/appRedirects.mjs).
+ * Auth stays on platform because Supabase cookies are host-scoped there.
  *
  * HTML rel=canonical / og:url still name www for public indexable pages
- * that already ship that way (media, podcast). resolveCanonicalOrigin
- * gates the conversion host: an env value of platform.evolvedpros.com is
- * kept, not collapsed to www.
+ * (media, podcast). resolveCanonicalOrigin gates the conversion host: an
+ * env value of platform.evolvedpros.com is kept, not collapsed to www.
  *
  * Runtime-dependency-free (type-only `next` import). Same reason as
  * publicRoutes.ts: anything that touches @/lib/supabase/admin throws at

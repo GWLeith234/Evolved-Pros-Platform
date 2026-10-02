@@ -35,6 +35,8 @@ export interface FitMove {
   requiredTier: 'vip' | 'pro'
   description?: string | null
   videoStatus?: FitVideoStatus
+  /** Signed image.mux.com thumbnail. Never a playback token or video URL. */
+  posterUrl?: string | null
 }
 
 export const FIT_SAMPLE_CODE = 'FO55-035'
