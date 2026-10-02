@@ -6,6 +6,7 @@ import { FIT_PAGE_DESCRIPTION, FIT_PAGE_TITLE } from '@/lib/fit/copy'
 import { loadPublishedFitMoves } from '@/lib/fit/catalog'
 import { fitMovesForViewer } from '@/lib/fit/posters'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { fitJsonLd } from '@/lib/seo/jsonld'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,9 +25,16 @@ export default async function FitPage() {
   }
   const moves = await fitMovesForViewer(await loadPublishedFitMoves(), viewerTier)
   return (
-    <div className="min-h-screen bg-page text-primary ep-no-x-scroll" style={{ maxWidth: '100vw' }}>
-      <FitMasthead />
-      <FitMarketing viewerTier={viewerTier} moves={moves} />
-    </div>
+    <>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(fitJsonLd()) }}
+      />
+      <div className="min-h-screen bg-page text-primary ep-no-x-scroll" style={{ maxWidth: '100vw' }}>
+        <FitMasthead />
+        <FitMarketing viewerTier={viewerTier} moves={moves} />
+      </div>
+    </>
   )
 }
