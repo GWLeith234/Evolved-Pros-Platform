@@ -8,9 +8,9 @@ import { buildPermalink } from '@/lib/community/media'
 import { PostMedia } from './PostMedia'
 import type { Post } from '@/lib/community/types'
 
-// Brief naming (UI-facing): fire/hundred/hands/heart/mindblown.
-// Sprint 0 DB CHECK uses fire/hundred/clap/heart/mind — translation lives
-// inside /api/posts/[postId]/react/route.ts and the GET /api/posts handler.
+// UI names: fire/hundred/hands/heart/mindblown.
+// The posts CHECK stores clap/mind; translation lives in
+// /api/posts/[postId]/react and GET /api/posts.
 type Emoji = 'fire' | 'hundred' | 'hands' | 'heart' | 'mindblown'
 
 const EMOJI_ORDER: Emoji[] = ['fire', 'hundred', 'hands', 'heart', 'mindblown']
@@ -23,10 +23,8 @@ const EMOJI_GLYPH: Record<Emoji, string> = {
   mindblown: '🤯',
 }
 
-// UI-HEART: render the heart with an SVG so its colour follows the
-// `currentColor` token (gold #C9A84C when active, muted otherwise).
-// Native ❤️ emoji ignores CSS color and stays red, which is why the
-// button "looked red" even though the active text token is gold.
+// SVG, not the ❤️ emoji: emoji ignores CSS color and stays red, while
+// currentColor follows the active token (gold when selected).
 function HeartGlyph({ active }: { active: boolean }) {
   return (
     <svg
@@ -399,7 +397,6 @@ export function PostCardV2({ post, currentUserId: _currentUserId, onCommentClick
         <PostMedia media={post.media} alt={`Image shared by ${post.author.displayName}`} />
       )}
 
-      {/* Reaction row — uniform chip anatomy (Sprint 2) */}
       <div
         className="ep-reaction-row"
         style={{
