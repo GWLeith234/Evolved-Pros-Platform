@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import {
   isListedPublicMediaStory,
   listPublicMediaStories,
@@ -41,6 +43,62 @@ describe('toMediaSitemapEntries', () => {
       changeFrequency: 'monthly',
       priority: 0.7,
     })
+  })
+
+  it('uses updated_at for lastModified and falls back to published_at', () => {
+    const updatedAt = '2026-09-29T15:04:00.000Z'
+    const publishedAt = '2026-08-01T12:00:00.000Z'
+    const [withUpdate] = toMediaSitemapEntries(BASE, [
+      {
+        pillar: 'strategy',
+        slug: 'what-ai-agents-actually-automate',
+        published_at: publishedAt,
+        updated_at: updatedAt,
+        is_published: true,
+      },
+    ])
+    expect(withUpdate.lastModified).toEqual(new Date(updatedAt))
+    expect(withUpdate.url).toBe(`${BASE}/media/strategy/what-ai-agents-actually-automate`)
+
+    const [fallback] = toMediaSitemapEntries(BASE, [
+      {
+        pillar: 'strategy',
+        slug: 'close-the-gap',
+        published_at: publishedAt,
+        updated_at: null,
+        is_published: true,
+      },
+    ])
+    expect(fallback.lastModified).toEqual(new Date(publishedAt))
+
+    const [neither] = toMediaSitemapEntries(BASE, [
+      {
+        pillar: 'execution',
+        slug: 'ship-it',
+        published_at: null,
+        updated_at: null,
+        is_published: true,
+      },
+    ])
+    expect(neither).not.toHaveProperty('lastModified')
+
+    const once = JSON.stringify(withUpdate)
+    const twice = JSON.stringify(toMediaSitemapEntries(BASE, [
+      {
+        pillar: 'strategy',
+        slug: 'what-ai-agents-actually-automate',
+        published_at: publishedAt,
+        updated_at: updatedAt,
+        is_published: true,
+      },
+    ])[0])
+    expect(once).toBe(twice)
+  })
+
+  it('does not call new Date() for article lastmod', () => {
+    const src = readFileSync(resolve(__dirname, 'sitemap.ts'), 'utf8')
+    expect(src).not.toMatch(/new Date\(\s*\)/)
+    expect(src).toMatch(/updated_at/)
   })
 
   it('excludes unpublished stories and incomplete rows', () => {

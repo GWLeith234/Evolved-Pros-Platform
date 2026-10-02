@@ -41,6 +41,8 @@ export interface PublicEpisode {
   guest_image_url: string | null
   thumbnail_url: string | null
   published_at: string | null
+  /** episodes.updated_at. Sitemap lastmod prefers this over published_at. */
+  updated_at: string | null
   youtube_id: string | null
   spotify_url: string | null
   apple_url: string | null
@@ -60,7 +62,7 @@ export interface PublicEpisode {
 
 const SELECT_COLS =
   'id, slug, episode_number, title, guest_name, guest_bio, guest_title, guest_company, ' +
-  'guest_image_url, thumbnail_url, published_at, ' +
+  'guest_image_url, thumbnail_url, published_at, updated_at, ' +
   'youtube_id, youtube_url, spotify_url, apple_url, duration_seconds, location, ' +
   'summary, description, tags, pillar, pillars, chapters, pull_quotes, transcript_text, transcript, transcript_segments'
 
@@ -113,6 +115,7 @@ function normalize(row: any): PublicEpisode {
     guest_image_url: row.guest_image_url ?? null,
     thumbnail_url: row.thumbnail_url ?? null,
     published_at: row.published_at ?? null,
+    updated_at: row.updated_at ?? null,
     youtube_id: parseYouTubeId(row.youtube_id ?? row.youtube_url),
     spotify_url: row.spotify_url ?? null,
     apple_url: row.apple_url ?? null,
