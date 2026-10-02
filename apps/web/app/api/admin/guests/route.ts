@@ -40,6 +40,22 @@ export async function POST(request: Request) {
     ? body.episode_id.trim()
     : null
 
+  // Mint before any user or engagement write. A blank signing key must not
+  // create a guest row, and must not HMAC with an empty string.
+  let token: string
+  try {
+    token = mintGuestToken()
+  } catch (err) {
+    console.error(
+      '[POST /api/admin/guests]',
+      err instanceof Error ? err.message : 'guest token secret missing',
+    )
+    return NextResponse.json(
+      { error: 'Guest invite tokens are not configured.' },
+      { status: 500 },
+    )
+  }
+
   // 1. Reuse an existing user by email, else create the guest persona row.
   // Cast: stripe_subscription_id is not in the generated Database types yet
   // (added by migration 065), so a typed select would raise SelectQueryError.
@@ -103,8 +119,7 @@ export async function POST(request: Request) {
     userId = created.id
   }
 
-  // 2. Create the engagement with a fresh signed token.
-  const token = mintGuestToken()
+  // 2. Create the engagement with the signed token minted above.
   const { data: engagement, error: engErr } = await (adminClient as any)
     .from('guest_engagements')
     .insert({

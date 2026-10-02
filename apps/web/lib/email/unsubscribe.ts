@@ -13,9 +13,11 @@
  * Unlike lib/guest/token.ts, this one does NOT fall back to the service-role
  * key: an unsubscribe link is printed into email that lives forever in
  * inboxes and archives, so its signing key must be rotatable independently of
- * database credentials. UNSUBSCRIBE_SECRET is required, and its absence throws
- * at call time (not import time) so a misconfigured env fails the send rather
- * than the whole server boot.
+ * database credentials. UNSUBSCRIBE_SECRET is required. A missing or
+ * whitespace-only value throws at call time (not import time) so a
+ * misconfigured env fails the send rather than the whole server boot.
+ * HMAC-SHA256 of a blank key is a credential anyone can forge. A real
+ * secret is kept byte-for-byte, including surrounding spaces.
  */
 import { createHmac, timingSafeEqual } from 'node:crypto'
 
@@ -24,7 +26,7 @@ export const UNSUBSCRIBE_MAX_AGE_MS = 180 * 24 * 60 * 60 * 1000
 
 function secret(): string {
   const s = process.env.UNSUBSCRIBE_SECRET
-  if (!s) {
+  if (typeof s !== 'string' || s.trim() === '') {
     throw new Error('UNSUBSCRIBE_SECRET is not set — refusing to mint or verify unsubscribe tokens.')
   }
   return s

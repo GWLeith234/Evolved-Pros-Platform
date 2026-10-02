@@ -48,6 +48,7 @@ import {
 } from '@/lib/home/conversion'
 import { homeGuestStillObjectPosition } from '@/lib/podcast/stillUrl'
 import { HomeFitTeaseBand } from '@/components/home/HomeFitTeaseBand'
+import type { FitMove } from '@/lib/fit/moves'
 
 export interface ConversionEpisode {
   slug: string
@@ -70,11 +71,13 @@ export function ConversionHome({
   viewerTier = null,
   episodes,
   stories = [],
+  fitMoves,
 }: {
   signedIn: boolean
   viewerTier?: string | null
   episodes: ConversionEpisode[]
   stories?: ConversionStory[]
+  fitMoves?: readonly FitMove[]
 }) {
   return (
     <div className="ep-conversion-home min-h-dvh bg-paper text-navy">
@@ -226,7 +229,7 @@ export function ConversionHome({
         </section>
 
         <div className="mx-auto max-w-6xl border-t border-navy/15 px-5 py-12">
-          <HomeFitTeaseBand viewerTier={viewerTier} />
+          <HomeFitTeaseBand viewerTier={viewerTier} moves={fitMoves} />
         </div>
 
         {stories.length > 0 ? (

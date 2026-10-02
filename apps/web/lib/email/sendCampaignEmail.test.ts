@@ -171,6 +171,13 @@ describe('sendCampaignEmail — sending identity and headers', () => {
     expect(res).toEqual({ status: 'failed', errorCode: 'missing_unsubscribe_secret' })
     expect(sendMock).not.toHaveBeenCalled()
   })
+
+  it('fails closed when the unsubscribe secret is blank', async () => {
+    process.env.UNSUBSCRIBE_SECRET = '   '
+    const res = await sendCampaignEmail(args())
+    expect(res).toEqual({ status: 'failed', errorCode: 'missing_unsubscribe_secret' })
+    expect(sendMock).not.toHaveBeenCalled()
+  })
 })
 
 describe('sendCampaignEmail — footer injection', () => {

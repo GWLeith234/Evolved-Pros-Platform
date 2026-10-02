@@ -139,6 +139,20 @@ describe('unsubscribe token — secret handling', () => {
     delete process.env.UNSUBSCRIBE_SECRET
     expect(() => verifyUnsubscribeToken('a.b', NOW)).toThrow(/UNSUBSCRIBE_SECRET/)
   })
+
+  it('treats a whitespace-only secret as unset', () => {
+    process.env.UNSUBSCRIBE_SECRET = ' \n\t '
+    expect(() => buildUnsubscribeToken(ID, NOW)).toThrow(/UNSUBSCRIBE_SECRET/)
+    expect(() => verifyUnsubscribeToken('a.b', NOW)).toThrow(/UNSUBSCRIBE_SECRET/)
+  })
+
+  it('keeps a real secret byte-for-byte when it has surrounding spaces', () => {
+    process.env.UNSUBSCRIBE_SECRET = '  test-secret-value  '
+    const token = buildUnsubscribeToken(ID, NOW)
+    expect(verifyUnsubscribeToken(token, NOW).ok).toBe(true)
+    process.env.UNSUBSCRIBE_SECRET = 'test-secret-value'
+    expect(verifyUnsubscribeToken(token, NOW).ok).toBe(false)
+  })
 })
 
 describe('unsubscribe URLs', () => {
