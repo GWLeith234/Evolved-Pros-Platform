@@ -61,7 +61,9 @@ export type PublicSitemapPath = (typeof PUBLIC_SITEMAP_PATHS)[number]
  * Pillar hubs served by app/(public)/media/[pillar]/page.tsx.
  * Slugs match lib/pillars.ts PILLARS, in program order.
  * /media/preview is not a hub. Other media landings (careers, academy,
- * and so on) stay out of this list on purpose.
+ * and so on) stay out of this list on purpose. Those routes are
+ * content-gated in lib/seo/mediaCategoryLandings.ts and join the sitemap
+ * only when the landing would render a published story or listing.
  */
 export const MEDIA_PILLAR_HUB_PATHS = [
   '/media/foundation',
