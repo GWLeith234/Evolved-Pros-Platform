@@ -86,6 +86,7 @@ describe('pillar hub sitemap entries', () => {
     const sitemap = readFileSync(resolve(__dirname, '../../app/sitemap.ts'), 'utf8')
     expect(sitemap).toMatch(/'\/media':\s+0\.7\b/)
     expect(sitemap).toContain('toPillarHubSitemapEntries')
+    expect(sitemap).toContain('toMediaCategoryLandingSitemapEntries')
     expect(sitemap).not.toContain('/media/careers')
     expect(sitemap).not.toContain('/media/academy')
     expect(sitemap).not.toContain("'/media/preview'")
@@ -142,6 +143,7 @@ describe('sitemap dates and refresh', () => {
       resolve(__dirname, '../../app/sitemap.ts'),
       resolve(__dirname, '../media/sitemap.ts'),
       resolve(__dirname, 'sitemapEntries.ts'),
+      resolve(__dirname, 'mediaCategoryLandings.ts'),
     ]
     for (const file of files) {
       expect(readFileSync(file, 'utf8'), file).not.toMatch(/new Date\(\s*\)/)
