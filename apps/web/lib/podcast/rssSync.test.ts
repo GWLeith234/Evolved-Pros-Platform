@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
   buildDraftEpisodeRow,
@@ -58,6 +60,22 @@ describe('uniqueSlug', () => {
   it('appends episode number on collision', () => {
     const taken = new Set(['guest-talk'])
     expect(uniqueSlug('Guest Talk', 'abc', 8, taken)).toBe('guest-talk-8')
+  })
+
+  it('falls back to a guid prefix when the title has no slug characters', () => {
+    expect(uniqueSlug('!!!', 'abcdefghij', null, new Set())).toBe('episode-abcdefgh')
+  })
+})
+
+describe('cron sync reuses rssSync helpers', () => {
+  it('does not keep a second copy of the slug, duration, guid, or integer parsers', () => {
+    const src = readFileSync(resolve(__dirname, 'syncFromRss.ts'), 'utf8')
+    expect(src).toMatch(/from '\.\/rssSync'/)
+    expect(src).toMatch(/\buniqueSlug\b/)
+    expect(src).not.toMatch(/function slugify\b/)
+    expect(src).not.toMatch(/function parseDuration\b/)
+    expect(src).not.toMatch(/function pickGuid\b/)
+    expect(src).not.toMatch(/function parseInteger\b/)
   })
 })
 
