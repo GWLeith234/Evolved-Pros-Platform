@@ -15,8 +15,11 @@ export const dynamic = 'force-dynamic'
  * would make this route throw during module evaluation on a deploy missing the
  * service-role key — an opaque 500 instead of a 503 `misconfigured` body.
  *
- * The public body never lists which secrets are configured. Deploy proofs
- * read `startedAt` (frozen at process boot) and `uptimeSec`.
+ * The public body never lists which secrets are configured, and a failed
+ * probe never echoes PostgREST text (message, details, hint, or SQLSTATE).
+ * Those strings can name tables, constraints, and row values. Deploy proofs
+ * read `startedAt` (frozen at process boot) and `uptimeSec`. The PostgREST
+ * code, when present, is logged server-side only.
  */
 const startedAt = new Date(Date.now() - process.uptime() * 1000).toISOString()
 
@@ -73,7 +76,8 @@ export async function GET() {
       .select('id', { head: true, count: 'exact' })
       .limit(1)
     if (error) {
-      checks.supabase = `error: ${error.message}`
+      console.error('[GET /api/health] probe failed', error.code ?? 'unknown')
+      checks.supabase = 'query_failed'
       checks.status = 'degraded'
       checks.ready = false
     } else {

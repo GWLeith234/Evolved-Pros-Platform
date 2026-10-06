@@ -10,8 +10,10 @@
  * Two invariants: the service-role key is part of the critical-env gate (503
  * `misconfigured`, without naming which secret is missing), and the admin
  * import is lazy and inside the try, so an import-time throw degrades to
- * `unreachable`/200 rather than taking the route down. The public body keeps
- * status, ready, supabase, startedAt, and uptimeSec for deploy proofs.
+ * `unreachable`/200 rather than taking the route down. A query error stays
+ * `query_failed`/200 and must not echo PostgREST message, details, hint, or
+ * SQLSTATE. The public body keeps status, ready, supabase, startedAt, and
+ * uptimeSec for deploy proofs.
  *
  * Lives under lib/ because vitest.config.ts only collects `lib/**` specs; the
  * route is imported through the `@/` alias.
@@ -160,5 +162,28 @@ describe('railway health probe — service-role env gate and lazy admin import',
     // Head-only count, no row data — the probe has no business reading rows.
     expect(adminTables).toEqual(['users'])
     expect(adminSelectCalls).toEqual([['id', { head: true, count: 'exact' }]])
+  })
+
+  it('does not echo the database error when the users probe fails', async () => {
+    const leak =
+      'duplicate key value violates unique constraint "users_email_key" (email)=(secret@example.com)'
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    mockAdminClient({
+      error: { message: leak, code: '23505', details: leak, hint: 'See users' },
+    })
+
+    const { status, body } = await probe()
+
+    expect(status).toBe(200)
+    expect(body.status).toBe('degraded')
+    expect(body.ready).toBe(false)
+    expect(body.supabase).toBe('query_failed')
+    const serialized = JSON.stringify(body)
+    expect(serialized).not.toContain('secret@example.com')
+    expect(serialized).not.toContain('users_email_key')
+    expect(serialized).not.toContain('23505')
+    expect(serialized).not.toContain('See users')
+    expect(errorSpy).toHaveBeenCalledWith('[GET /api/health] probe failed', '23505')
+    errorSpy.mockRestore()
   })
 })
