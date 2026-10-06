@@ -2,13 +2,16 @@ import type { Metadata } from 'next'
 import { adminClient } from '@/lib/supabase/admin'
 import { mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { mediaMagazineCollection } from '@/lib/seo/mediaCollectionJsonLd'
 import { MediaSectionMagazine, type MediaSectionArticle } from '@/components/media/MediaSectionMagazine'
+
+const listing = mediaMagazineCollection('/media/leadership')
 
 export const revalidate = 120
 
-export const metadata: Metadata = publicPageMetadata('/media/leadership', {
-  title: mediaSectionTitle('Leadership'),
-  description: 'Leadership insights, management strategy, and executive development.',
+export const metadata: Metadata = publicPageMetadata(listing.path, {
+  title: mediaSectionTitle(listing.name),
+  description: listing.description,
 })
 
 async function fetchArticles(): Promise<MediaSectionArticle[]> {
@@ -37,7 +40,9 @@ export default async function LeadershipPage() {
   const articles = await fetchArticles()
   return (
     <MediaSectionMagazine
-      title="Leadership"
+      path={listing.path}
+      title={listing.name}
+      description={listing.description}
       dividerLabel="Latest in Leadership"
       articles={articles}
     />

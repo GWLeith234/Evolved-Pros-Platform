@@ -7,6 +7,12 @@ import type { PillarTag } from '@/lib/community/types'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { LdJsonGraph } from '@/components/seo/LdJson'
+import {
+  MEDIA_COMMUNITY_COLLECTION,
+  collectionItemsFromNames,
+  mediaSectionCollectionSchemas,
+} from '@/lib/seo/mediaCollectionJsonLd'
 import { MediaCenteredAd } from '@/components/media/MediaIabSlot'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { pickCommunityFeedAds } from '@/lib/sponsors/partners'
@@ -16,9 +22,9 @@ import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 export const revalidate = 120
 
-export const metadata: Metadata = publicPageMetadata('/media/community', {
-  title: mediaSectionTitle('Community'),
-  description: 'See what 10,000 high-performing sales professionals are talking about inside Evolved Pros.',
+export const metadata: Metadata = publicPageMetadata(MEDIA_COMMUNITY_COLLECTION.path, {
+  title: mediaSectionTitle(MEDIA_COMMUNITY_COLLECTION.name),
+  description: MEDIA_COMMUNITY_COLLECTION.description,
 })
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -148,8 +154,16 @@ export default async function MediaCommunityPage() {
   const feedAds = pickCommunityFeedAds(catalog, 6)
   const visibleChunks = interleaveAds(visible, feedAds.slice(0, 2), COMMUNITY_AD_EVERY, { trailing: true })
   const blurredChunks = interleaveAds(blurred, feedAds.slice(2), COMMUNITY_AD_EVERY, { trailing: true })
+  const schemas = mediaSectionCollectionSchemas({
+    path: MEDIA_COMMUNITY_COLLECTION.path,
+    name: MEDIA_COMMUNITY_COLLECTION.name,
+    description: MEDIA_COMMUNITY_COLLECTION.description,
+    items: collectionItemsFromNames(posts.map(post => post.body)),
+  })
 
   return (
+    <>
+    <LdJsonGraph schemas={schemas} />
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 24px 0' }}>
       {/* Section header */}
       <div style={{ marginBottom: 20 }}>
@@ -224,5 +238,6 @@ export default async function MediaCommunityPage() {
         </div>
       )}
     </div>
+    </>
   )
 }
