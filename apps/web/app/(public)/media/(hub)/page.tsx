@@ -5,6 +5,8 @@ import { MediaStoryCrawlIndex } from '@/lib/media/crawlIndex'
 import { getPublishedMediaStoriesForHub } from '@/lib/media/public'
 import { MEDIA_HUB_DESCRIPTION, MEDIA_HUB_TITLE } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { LdJsonGraph } from '@/components/seo/LdJson'
+import { mediaIndexCollectionSchemas } from '@/lib/seo/mediaCollectionJsonLd'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { pickMediaFeedAds } from '@/lib/sponsors/partners'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
@@ -58,6 +60,7 @@ export default async function MediaPage() {
 
   return (
     <>
+      <LdJsonGraph schemas={mediaIndexCollectionSchemas()} />
       <MediaStoryCrawlIndex stories={stories} />
       <MediaPortalClient
         stories={stories}

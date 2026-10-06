@@ -2,13 +2,16 @@ import type { Metadata } from 'next'
 import { adminClient } from '@/lib/supabase/admin'
 import { mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { mediaMagazineCollection } from '@/lib/seo/mediaCollectionJsonLd'
 import { MediaSectionMagazine, type MediaSectionArticle } from '@/components/media/MediaSectionMagazine'
+
+const listing = mediaMagazineCollection('/media/evolved-architecture')
 
 export const revalidate = 120
 
-export const metadata: Metadata = publicPageMetadata('/media/evolved-architecture', {
-  title: mediaSectionTitle('Evolved Architecture'),
-  description: 'All 6 pillars of the EVOLVED Architecture: Foundation, Identity, Mental Toughness, Strategy, Accountability, Execution.',
+export const metadata: Metadata = publicPageMetadata(listing.path, {
+  title: mediaSectionTitle(listing.name),
+  description: listing.description,
 })
 
 async function fetchArticles(): Promise<MediaSectionArticle[]> {
@@ -26,7 +29,9 @@ export default async function EvolvedArchitecturePage() {
   const articles = await fetchArticles()
   return (
     <MediaSectionMagazine
-      title="Evolved Architecture"
+      path={listing.path}
+      title={listing.name}
+      description={listing.description}
       subtitle="Foundation · Identity · Mental Toughness · Strategy · Accountability · Execution"
       dividerLabel="All Pillars"
       articles={articles}

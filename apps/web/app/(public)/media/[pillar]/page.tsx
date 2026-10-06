@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { adminClient } from '@/lib/supabase/admin'
 import { mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { mediaPillarCollectionDescription } from '@/lib/seo/mediaCollectionJsonLd'
 import { MediaSectionLanding } from '@/components/media/MediaSectionLanding'
 import type { NewspaperStory } from '@/components/media/newspaper'
 import { PILLAR_CONFIG, getPillarLabel } from '@/lib/pillars'
@@ -28,7 +29,7 @@ export async function generateMetadata(
   const label = params.pillar === 'general' ? 'Original' : getPillarLabel(params.pillar)
   return publicPageMetadata(`/media/${params.pillar}`, {
     title: mediaSectionTitle(label),
-    description: `${label} stories from the Evolved Pros desk.`,
+    description: mediaPillarCollectionDescription(label),
   })
 }
 

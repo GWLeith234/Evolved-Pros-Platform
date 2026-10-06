@@ -3,6 +3,12 @@ import Link from 'next/link'
 import { adminClient } from '@/lib/supabase/admin'
 import { mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { LdJsonGraph } from '@/components/seo/LdJson'
+import {
+  MEDIA_EVENTS_COLLECTION,
+  collectionItemsFromNames,
+  mediaSectionCollectionSchemas,
+} from '@/lib/seo/mediaCollectionJsonLd'
 import { MediaCenteredAd } from '@/components/media/MediaIabSlot'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { pickCommunityFeedAds } from '@/lib/sponsors/partners'
@@ -13,9 +19,9 @@ import { withoutConquerLocal } from '@/lib/events/nextEvent'
 
 export const revalidate = 120
 
-export const metadata: Metadata = publicPageMetadata('/media/events', {
-  title: mediaSectionTitle('Events'),
-  description: 'Upcoming and past events from Evolved Pros. Workshops, keynotes, and networking for sales professionals.',
+export const metadata: Metadata = publicPageMetadata(MEDIA_EVENTS_COLLECTION.path, {
+  title: mediaSectionTitle(MEDIA_EVENTS_COLLECTION.name),
+  description: MEDIA_EVENTS_COLLECTION.description,
 })
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -162,8 +168,16 @@ export default async function MediaEventsPage() {
     trailing: true,
   })
   const pastChunks = interleaveAds(pastEvents, feedAds.slice(4), COMMUNITY_AD_EVERY, { trailing: true })
+  const schemas = mediaSectionCollectionSchemas({
+    path: MEDIA_EVENTS_COLLECTION.path,
+    name: MEDIA_EVENTS_COLLECTION.name,
+    description: MEDIA_EVENTS_COLLECTION.description,
+    items: collectionItemsFromNames([...upcomingEvents, ...pastEvents].map(event => event.title)),
+  })
 
   return (
+    <>
+    <LdJsonGraph schemas={schemas} />
     <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 24px 40px' }}>
       {/* Section header */}
       <div style={{ marginBottom: 20 }}>
@@ -216,5 +230,6 @@ export default async function MediaEventsPage() {
         </>
       )}
     </div>
+    </>
   )
 }

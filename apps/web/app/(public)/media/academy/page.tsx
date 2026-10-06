@@ -4,6 +4,12 @@ import { adminClient } from '@/lib/supabase/admin'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { LdJsonGraph } from '@/components/seo/LdJson'
+import {
+  MEDIA_ACADEMY_COLLECTION,
+  collectionItemsFromNames,
+  mediaSectionCollectionSchemas,
+} from '@/lib/seo/mediaCollectionJsonLd'
 import { MediaCenteredAd } from '@/components/media/MediaIabSlot'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { pickAcademySponsors } from '@/lib/sponsors/partners'
@@ -13,9 +19,9 @@ import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 
 export const revalidate = 300
 
-export const metadata: Metadata = publicPageMetadata('/media/academy', {
-  title: mediaSectionTitle('Academy'),
-  description: 'Preview the Evolved Pros Academy. Free weekly lesson teasers plus the full 6-pillar course catalog.',
+export const metadata: Metadata = publicPageMetadata(MEDIA_ACADEMY_COLLECTION.path, {
+  title: mediaSectionTitle(MEDIA_ACADEMY_COLLECTION.name),
+  description: MEDIA_ACADEMY_COLLECTION.description,
 })
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -113,8 +119,19 @@ export default async function MediaAcademyPage() {
   const courseTitle = featured?.courses?.title ?? 'Course'
   const rawPreview = featured?.description ? stripMarkdown(featured.description).slice(0, 400) : ''
   const previewText = rawPreview || (featured ? `This lesson covers key concepts in the ${pillarName(coursePillar)} pillar of the EVOLVED Architecture\u2122.` : '')
+  const schemas = mediaSectionCollectionSchemas({
+    path: MEDIA_ACADEMY_COLLECTION.path,
+    name: MEDIA_ACADEMY_COLLECTION.name,
+    description: MEDIA_ACADEMY_COLLECTION.description,
+    items: collectionItemsFromNames([
+      ...(featured ? [featured.title] : []),
+      ...allCourses.map(course => course.title),
+    ]),
+  })
 
   return (
+    <>
+    <LdJsonGraph schemas={schemas} />
     <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 24px 0' }}>
       {/* Section header */}
       <div style={{ marginBottom: 16 }}>
@@ -248,5 +265,6 @@ export default async function MediaAcademyPage() {
         }
       `}</style>
     </div>
+    </>
   )
 }

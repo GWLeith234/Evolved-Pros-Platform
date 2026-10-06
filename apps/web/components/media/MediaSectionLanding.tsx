@@ -19,6 +19,12 @@ import { pickMediaFeedAds } from '@/lib/sponsors/partners'
 import { adMatchesSurface } from '@/lib/ads/iab'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { MEDIA_BRAND } from '@/lib/media/brand'
+import { LdJsonGraph } from '@/components/seo/LdJson'
+import {
+  mediaPillarCollectionDescription,
+  mediaSectionCollectionSchemas,
+  sectionLandingStoryItems,
+} from '@/lib/seo/mediaCollectionJsonLd'
 
 export async function MediaSectionLanding({
   sectionId,
@@ -48,8 +54,16 @@ export async function MediaSectionLanding({
   const takeRect = () => mediaAds.inFeed[nextRect++] ?? null
   const featuredRectAd = showFeaturedRect ? takeRect() : null
   const latestRectAds = latestRectAt.map(() => takeRect())
+  const schemas = mediaSectionCollectionSchemas({
+    path: `/media/${sectionId}`,
+    name: title,
+    description: mediaPillarCollectionDescription(title),
+    items: sectionLandingStoryItems(articles),
+  })
 
   return (
+    <>
+    <LdJsonGraph schemas={schemas} />
     <div className="ep-media-home" data-media-surface="section" data-media-section={sectionId}>
       <div className="ep-media-home-inner">
         <header className="ep-media-section-hero">
@@ -91,5 +105,6 @@ export async function MediaSectionLanding({
         </div>
       </div>
     </div>
+    </>
   )
 }
