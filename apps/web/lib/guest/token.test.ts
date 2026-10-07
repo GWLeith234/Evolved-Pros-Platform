@@ -2,7 +2,7 @@ import { createHmac } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { afterEach, beforeEach, describe, it, expect, beforeAll } from 'vitest'
-import { mintGuestToken, verifyGuestToken } from './token'
+import { GUEST_TOKEN_MAX_LENGTH, mintGuestToken, verifyGuestToken } from './token'
 
 beforeAll(() => {
   process.env.GUEST_TOKEN_SECRET = 'test-secret-for-guest-tokens'
@@ -40,6 +40,14 @@ describe('guest token signing', () => {
     expect(verifyGuestToken(null)).toBe(false)
     expect(verifyGuestToken('not-a-token')).toBe(false)
     expect(verifyGuestToken('a.b.c')).toBe(false)
+  })
+
+  it('rejects oversized tokens before hashing them', () => {
+    const token = mintGuestToken()
+    expect(token.length).toBe(GUEST_TOKEN_MAX_LENGTH)
+    expect(verifyGuestToken(token)).toBe(true)
+    expect(verifyGuestToken(`${token}x`)).toBe(false)
+    expect(verifyGuestToken('a'.repeat(10_000))).toBe(false)
   })
 
   it('mints unique tokens', () => {

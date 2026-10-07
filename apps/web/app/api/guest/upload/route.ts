@@ -17,6 +17,7 @@ export const runtime = 'nodejs'
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { resolveGuestEngagement } from '@/lib/guest/engagement'
+import { parseGuestToken } from '@/lib/guest/intakePayload'
 
 // POST /api/guest/upload — a guest uploads their headshot during intake.
 // multipart/form-data: { token, file }. Token-gated (the signed token is the
@@ -33,7 +34,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid form data' }, { status: 400 })
   }
 
-  const token = String(formData.get('token') ?? '').trim()
+  const rawToken = formData.get('token')
+  const token = typeof rawToken === 'string' ? parseGuestToken(rawToken) : ''
+  if (token === null) {
+    return NextResponse.json({ error: 'Invalid request.' }, { status: 400 })
+  }
   const resolved = await resolveGuestEngagement(token)
   if (!resolved.ok) {
     const status = resolved.reason === 'expired' ? 410 : resolved.reason === 'invalid' ? 401 : 404
