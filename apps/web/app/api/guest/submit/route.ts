@@ -6,6 +6,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { resolveGuestEngagement, ensureGuestPersona } from '@/lib/guest/engagement'
 import { supabaseIntakeDb } from '@/lib/crm/intakeDb'
 import { guestWriteFromSubmit, notifyGuestAdmins, upsertGuestProspect } from '@/lib/crm/guestIntake'
+import { parseGuestLinks, parseGuestToken, parseGuestTopics } from '@/lib/guest/intakePayload'
 
 // POST /api/guest/submit — an invited guest submits their intake.
 // Body: { token, one_liner, short_bio, headshot_url, topics[], links[],
@@ -17,27 +18,6 @@ import { guestWriteFromSubmit, notifyGuestAdmins, upsertGuestProspect } from '@/
 //   1. guest_engagements — the submission payload + status='submitted'
 //   2. users            — durable identity profile fields
 //   3. episodes.guest_* — optional sync when the engagement is booked to an episode
-function toStringArray(v: unknown): string[] {
-  if (!Array.isArray(v)) return []
-  return v.map(x => (typeof x === 'string' ? x.trim() : '')).filter(Boolean).slice(0, 25)
-}
-
-// Links: accept ["https://..."] or [{ label, url }]. Normalize to {label,url}.
-function toLinkArray(v: unknown): { label: string; url: string }[] {
-  if (!Array.isArray(v)) return []
-  const out: { label: string; url: string }[] = []
-  for (const item of v) {
-    if (typeof item === 'string' && item.trim()) {
-      out.push({ label: '', url: item.trim() })
-    } else if (item && typeof item === 'object') {
-      const url = String((item as any).url ?? '').trim()
-      if (url) out.push({ label: String((item as any).label ?? '').trim(), url })
-    }
-    if (out.length >= 15) break
-  }
-  return out
-}
-
 function str(v: unknown, max = 2000): string | null {
   if (typeof v !== 'string') return null
   const t = v.trim()
@@ -52,7 +32,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid request.' }, { status: 400 })
   }
 
-  const token = typeof body.token === 'string' ? body.token.trim() : ''
+  const token = parseGuestToken(body.token)
+  const topics = parseGuestTopics(body.topics)
+  const links = parseGuestLinks(body.links)
+  if (token === null || topics === null || links === null) {
+    return NextResponse.json({ error: 'Invalid request.' }, { status: 400 })
+  }
+
   const resolved = await resolveGuestEngagement(token)
   if (!resolved.ok) {
     const status = resolved.reason === 'expired' ? 410 : resolved.reason === 'invalid' ? 401 : 404
@@ -73,8 +59,6 @@ export async function POST(request: Request) {
   const headshot   = str(body.headshot_url, 1000)
   const avNotes    = str(body.av_notes, 2000)
   const teeSize    = str(body.tee_size, 12)
-  const topics     = toStringArray(body.topics)
-  const links      = toLinkArray(body.links)
   const firstName  = str(body.first_name, 120)
   const lastName   = str(body.last_name, 120)
   const company    = str(body.company, 200)

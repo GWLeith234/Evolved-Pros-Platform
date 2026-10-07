@@ -37,6 +37,9 @@ function b64url(buf: Buffer): string {
   return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 
+/** id is 24 chars, sig is 24 chars, plus the dot. Longer input is not a token. */
+export const GUEST_TOKEN_MAX_LENGTH = 24 + 1 + 24
+
 function sign(id: string): string | null {
   const key = secret()
   if (!key) return null
@@ -59,6 +62,8 @@ export function mintGuestToken(): string {
  */
 export function verifyGuestToken(token: string | null | undefined): boolean {
   if (!token || typeof token !== 'string') return false
+  // Reject before HMAC so a multi-megabyte body cannot force a hash of it.
+  if (token.length > GUEST_TOKEN_MAX_LENGTH) return false
   const parts = token.split('.')
   if (parts.length !== 2) return false
   const [id, sig] = parts
