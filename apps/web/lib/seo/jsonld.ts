@@ -3,6 +3,7 @@
  * schemas. Home ships WebSite + Organization; /pricing ships the
  * membership Product / Offer catalog; /live ships a WebPage plus a
  * keynote/speaking Service with no price; /fit ships one VIP Product / Offer.
+ * Media listing pages use mediaCollectionJsonLd.ts (CollectionPage).
  *
  * Brand lock: Evolved Pros. Never Evolved Media.
  */
@@ -190,4 +191,13 @@ export function fitJsonLd() {
       offers: membershipOffer('VIP', price, 'P1M'),
     },
   }
+}
+
+/**
+ * JSON-LD script body. Same JSON.stringify the article, home, pricing,
+ * live, and fit routes use, with `<` escaped so a title cannot close the
+ * script tag (`</script>` becomes `\u003c/script>`).
+ */
+export function jsonLdScriptHtml(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, '\\u003c')
 }

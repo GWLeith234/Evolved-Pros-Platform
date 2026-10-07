@@ -10,6 +10,12 @@ import { layoutMediaFeed } from '@/lib/media/feedAds'
 import { pickMediaFeedAds } from '@/lib/sponsors/partners'
 import { adMatchesSurface } from '@/lib/ads/iab'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import { LdJsonGraph } from '@/components/seo/LdJson'
+import {
+  magazineStoryItems,
+  magazineStoryPath,
+  mediaSectionCollectionSchemas,
+} from '@/lib/seo/mediaCollectionJsonLd'
 
 export type MediaSectionArticle = {
   id: string
@@ -34,16 +40,20 @@ function readTime(body: string | null): string {
 }
 
 function storyHref(article: MediaSectionArticle): string {
-  return `/media/${article.pillar ?? 'general'}/${article.slug}`
+  return magazineStoryPath(article)
 }
 
 export async function MediaSectionMagazine({
+  path,
   title,
+  description,
   subtitle,
   dividerLabel,
   articles,
 }: {
+  path: string
   title: string
+  description: string
   subtitle?: string
   dividerLabel: string
   articles: MediaSectionArticle[]
@@ -57,8 +67,16 @@ export async function MediaSectionMagazine({
   const heroAd = mediaAds.inFeed[0] ?? null
   const gridAds = heroAd ? mediaAds.inFeed.slice(1) : mediaAds.inFeed
   const feed = layoutMediaFeed(grid, gridAds)
+  const schemas = mediaSectionCollectionSchemas({
+    path,
+    name: title,
+    description,
+    items: magazineStoryItems(articles),
+  })
 
   return (
+    <>
+    <LdJsonGraph schemas={schemas} />
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 24px 40px' }}>
       <div style={{ marginBottom: 20 }}>
         <p style={{ fontFamily: 'var(--font-condensed)', fontWeight: 700, fontSize: 10, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 4 }}>
@@ -160,5 +178,6 @@ export async function MediaSectionMagazine({
         }
       `}</style>
     </div>
+    </>
   )
 }

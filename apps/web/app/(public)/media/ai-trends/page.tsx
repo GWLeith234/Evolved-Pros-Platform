@@ -2,13 +2,16 @@ import type { Metadata } from 'next'
 import { adminClient } from '@/lib/supabase/admin'
 import { mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { mediaMagazineCollection } from '@/lib/seo/mediaCollectionJsonLd'
 import { MediaSectionMagazine, type MediaSectionArticle } from '@/components/media/MediaSectionMagazine'
+
+const listing = mediaMagazineCollection('/media/ai-trends')
 
 export const revalidate = 120
 
-export const metadata: Metadata = publicPageMetadata('/media/ai-trends', {
-  title: mediaSectionTitle('AI Trends'),
-  description: 'Artificial intelligence trends shaping sales, marketing, and business strategy.',
+export const metadata: Metadata = publicPageMetadata(listing.path, {
+  title: mediaSectionTitle(listing.name),
+  description: listing.description,
 })
 
 async function fetchArticles(): Promise<MediaSectionArticle[]> {
@@ -37,7 +40,9 @@ export default async function AiTrendsPage() {
   const articles = await fetchArticles()
   return (
     <MediaSectionMagazine
-      title="AI Trends"
+      path={listing.path}
+      title={listing.name}
+      description={listing.description}
       dividerLabel="Latest in AI Trends"
       articles={articles}
     />
