@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { clientSafeError } from '@/lib/http/clientError'
 
 const ALLOWED_FIELDS = ['avatar_url', 'display_name', 'company', 'bio', 'location', 'role_title', 'focus_pillar'] as const
 type AllowedField = typeof ALLOWED_FIELDS[number]
@@ -32,6 +33,11 @@ export async function PATCH(req: Request) {
     .update(update)
     .eq('email', user.email)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    return NextResponse.json(
+      { error: clientSafeError('[PATCH /api/onboarding/profile]', error, 'Could not save your profile.') },
+      { status: 500 },
+    )
+  }
   return NextResponse.json({ ok: true })
 }
