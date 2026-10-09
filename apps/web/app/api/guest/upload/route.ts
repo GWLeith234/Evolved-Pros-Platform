@@ -18,6 +18,7 @@ import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { resolveGuestEngagement } from '@/lib/guest/engagement'
 import { parseGuestToken } from '@/lib/guest/intakePayload'
+import { clientSafeError } from '@/lib/http/clientError'
 
 // POST /api/guest/upload — a guest uploads their headshot during intake.
 // multipart/form-data: { token, file }. Token-gated (the signed token is the
@@ -69,7 +70,10 @@ export async function POST(request: Request) {
     .from('Branding')
     .upload(path, buffer, { contentType, upsert: true })
   if (uploadError) {
-    return NextResponse.json({ error: `Upload failed: ${uploadError.message}` }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/guest/upload]', uploadError, 'Upload failed.') },
+      { status: 500 },
+    )
   }
 
   const { data: { publicUrl } } = adminClient.storage.from('Branding').getPublicUrl(path)
