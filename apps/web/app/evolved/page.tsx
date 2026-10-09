@@ -14,9 +14,18 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { BookPreorderForm, type BookPreorderUtm } from '@/components/book/BookPreorderForm'
+import { LdJson } from '@/components/seo/LdJson'
 import { BOOK_COVER_SRC, BOOK_PREORDER_PATH } from '@/lib/book/preorder'
 import { footerCopyright } from '@/lib/layout/publicFooter'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import {
+  EVOLVED_AUTHOR_NAME,
+  EVOLVED_BOOK_NAME,
+  EVOLVED_COVER_ALT,
+  EVOLVED_PAGE_DESCRIPTION,
+  EVOLVED_PAGE_TITLE,
+  evolvedPageJsonLd,
+} from '@/lib/seo/evolvedLegalJsonLd'
 
 const CHARCOAL = '#28282B'
 const CHARCOAL_DEEP = '#1a1a1d'
@@ -29,10 +38,10 @@ const FBC = 'Barlow Condensed, sans-serif'
 const FM = 'var(--font-evolved-book), Montserrat, Barlow, sans-serif'
 
 export const metadata: Metadata = publicPageMetadata(BOOK_PREORDER_PATH, {
-  title: 'EVOLVED — George Leith',
-  description: 'Get the book. Leave your name for the EVOLVED preorder list. No charge, no membership.',
+  title: EVOLVED_PAGE_TITLE,
+  description: EVOLVED_PAGE_DESCRIPTION,
   openGraph: {
-    images: [{ url: BOOK_COVER_SRC, width: 3334, height: 5334, alt: 'EVOLVED by George Leith' }],
+    images: [{ url: BOOK_COVER_SRC, width: 3334, height: 5334, alt: EVOLVED_COVER_ALT }],
   },
   twitter: {
     card: 'summary_large_image',
@@ -74,6 +83,7 @@ export default function EvolvedBookPage({
         flexDirection: 'column',
       }}
     >
+      <LdJson data={evolvedPageJsonLd()} />
       <main
         style={{
           flex: 1,
@@ -90,7 +100,7 @@ export default function EvolvedBookPage({
         <div style={{ justifySelf: 'center', width: '100%', maxWidth: 280, margin: '0 auto' }}>
           <Image
             src={BOOK_COVER_SRC}
-            alt="EVOLVED by George Leith"
+            alt={EVOLVED_COVER_ALT}
             width={600}
             height={960}
             priority
@@ -132,7 +142,7 @@ export default function EvolvedBookPage({
               color: 'transparent',
             }}
           >
-            EVOLVED
+            {EVOLVED_BOOK_NAME}
           </h1>
           <p
             style={{
@@ -145,7 +155,7 @@ export default function EvolvedBookPage({
               color: MUTED,
             }}
           >
-            George Leith
+            {EVOLVED_AUTHOR_NAME}
           </p>
           <p
             style={{
