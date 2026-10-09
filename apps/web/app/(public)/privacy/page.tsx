@@ -1,5 +1,12 @@
 import type { Metadata } from 'next'
+import { LdJson } from '@/components/seo/LdJson'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import {
+  PRIVACY_PAGE_DESCRIPTION,
+  PRIVACY_PAGE_NAME,
+  PRIVACY_PAGE_TITLE,
+  privacyPageJsonLd,
+} from '@/lib/seo/evolvedLegalJsonLd'
 import { SUPPORT_EMAIL } from '@/lib/layout/publicFooter'
 import { REGISTERED_OFFICE_LINES } from '@/lib/layout/legalCopy'
 import {
@@ -13,9 +20,8 @@ import {
 
 // Unique title on purpose — this page must NOT inherit the homepage meta.
 export const metadata: Metadata = publicPageMetadata('/privacy', {
-  title: 'Privacy Policy — Evolved Pros',
-  description:
-    'What Evolved Pros collects, how it is used, who processes it, and how to reach us about your data.',
+  title: PRIVACY_PAGE_TITLE,
+  description: PRIVACY_PAGE_DESCRIPTION,
 })
 
 /**
@@ -33,16 +39,18 @@ export const metadata: Metadata = publicPageMetadata('/privacy', {
  */
 export default function PrivacyPage() {
   return (
-    <LegalPage
-      eyebrow="Legal"
-      title="Privacy Policy"
-      intro={
+    <>
+      <LdJson data={privacyPageJsonLd()} />
+      <LegalPage
+        eyebrow="Legal"
+        title={PRIVACY_PAGE_NAME}
+        intro={
         <p style={{ margin: 0 }}>
           This policy explains what we collect when you use Evolved Pros, why we collect
           it, who processes it on our behalf, and how to reach us about it.
         </p>
-      }
-    >
+        }
+      >
       <LegalSection title="Who we are">
         <LegalP>Evolved Pros is operated by GWLeith Revenue Growth Solutions.</LegalP>
         <LegalP>
@@ -131,5 +139,6 @@ export default function PrivacyPage() {
         </LegalP>
       </LegalSection>
     </LegalPage>
+    </>
   )
 }
