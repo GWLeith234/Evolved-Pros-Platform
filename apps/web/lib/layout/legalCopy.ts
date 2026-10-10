@@ -45,14 +45,14 @@ export const GOVERNING_VENUE_SENTENCE = 'Venue: courts of Saskatchewan.'
 export const GOVERNING_LAW_AND_VENUE = `${GOVERNING_LAW_SENTENCE} ${GOVERNING_VENUE_SENTENCE}`
 
 /**
- * Paid membership (VIP, Professional, any other recurring platform plan).
+ * Paid membership (VIP, The Evolved Pros 99, any other recurring platform plan).
  * 2026-09-02 lock: cancel anytime; cancellation stops renewal; keep access
  * through the prepaid period; no refunds and no prorate. No 7-day first-charge
  * refund. Keynotes and LIVE events are named only to put them out of scope —
  * do not invent a ticket or deposit policy here.
  */
 export const MEMBERSHIP_REFUND_PARAS = [
-  'You may cancel a paid membership (VIP, Professional, or any other recurring platform plan) at any time. Cancellation stops renewal. You keep access until the end of the period already paid. We do not refund membership payments, including the current period.',
+  'You may cancel a paid membership (VIP, The Evolved Pros 99, or any other recurring platform plan) at any time. Cancellation stops renewal. You keep access until the end of the period already paid. We do not refund membership payments, including the current period.',
   'Nothing in these terms takes away rights that Saskatchewan law does not let a supplier waive.',
   'To cancel, write to support@evolvedpros.com. Payments are processed by Stripe.',
   'Keynotes and LIVE events have their own terms, provided at booking.',

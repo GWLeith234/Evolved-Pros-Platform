@@ -41,13 +41,43 @@ interface PlanDef {
   priceEnvVar: string
 }
 
-// Plan key → { tier, interval, price env var }. One env var per plan; the
-// value is a LIVE Stripe price id.
+// Plan key → { tier, interval, price env var }. Checkout sells the monthly
+// prices George creates for this reshape. Annual env vars stay, and annual
+// checkout stays refused while TIERS.*.annual is null.
+// TODO(George): annual billing on, or remove the toggle. Leave it off.
 export const PLAN_CATALOG: Record<PlanKey, PlanDef> = {
-  vip_monthly: { tier: 'vip', interval: 'month', priceEnvVar: 'STRIPE_PRICE_VIP_MONTHLY' },
+  vip_monthly: { tier: 'vip', interval: 'month', priceEnvVar: 'STRIPE_PRICE_VIP_MONTHLY_149' },
   vip_annual:  { tier: 'vip', interval: 'year',  priceEnvVar: 'STRIPE_PRICE_VIP_ANNUAL' },
-  pro_monthly: { tier: 'pro', interval: 'month', priceEnvVar: 'STRIPE_PRICE_PRO_MONTHLY' },
+  pro_monthly: { tier: 'pro', interval: 'month', priceEnvVar: 'STRIPE_PRICE_PRO_MONTHLY_599' },
   pro_annual:  { tier: 'pro', interval: 'year',  priceEnvVar: 'STRIPE_PRICE_PRO_ANNUAL' },
+}
+
+/**
+ * Legacy Stripe price env vars. Webhook resolution only.
+ * Never delete these. Existing subscribers stay on the old price ids.
+ *
+ *   STRIPE_PRICE_VIP_MONTHLY       VIP $99/mo (the previous live price)
+ *   STRIPE_PRICE_VIP_MONTHLY_99    alias for that $99 price, if set separately
+ *   STRIPE_PRICE_VIP_MONTHLY_49    archived VIP $49/mo
+ *   STRIPE_PRICE_VIP_ANNUAL        archived VIP $490/yr (also the unsold annual plan)
+ *   STRIPE_PRICE_VIP_ANNUAL_490    alias for the archived annual
+ *   STRIPE_PRICE_PRO_MONTHLY       The 99 $849/mo (the previous live price)
+ *   STRIPE_PRICE_PRO_MONTHLY_849   alias for that $849 price
+ *   STRIPE_PRICE_PRO_MONTHLY_249   archived The 99 $249/mo
+ *   STRIPE_PRICE_PRO_ANNUAL        archived The 99 $2,490/yr
+ *   STRIPE_PRICE_PRO_ANNUAL_2490   alias for the archived annual
+ */
+export const LEGACY_PRICE_ENV: Record<string, Exclude<Tier, 'community'>> = {
+  STRIPE_PRICE_VIP_MONTHLY: 'vip',
+  STRIPE_PRICE_VIP_MONTHLY_99: 'vip',
+  STRIPE_PRICE_VIP_MONTHLY_49: 'vip',
+  STRIPE_PRICE_VIP_ANNUAL: 'vip',
+  STRIPE_PRICE_VIP_ANNUAL_490: 'vip',
+  STRIPE_PRICE_PRO_MONTHLY: 'pro',
+  STRIPE_PRICE_PRO_MONTHLY_849: 'pro',
+  STRIPE_PRICE_PRO_MONTHLY_249: 'pro',
+  STRIPE_PRICE_PRO_ANNUAL: 'pro',
+  STRIPE_PRICE_PRO_ANNUAL_2490: 'pro',
 }
 
 export function isPlanKey(v: unknown): v is PlanKey {
@@ -59,10 +89,37 @@ export function priceIdForPlan(plan: PlanKey): string | null {
   return process.env[PLAN_CATALOG[plan].priceEnvVar] ?? null
 }
 
+/**
+ * Every configured price id that draws on a tier: the price checkout sells
+ * and every legacy price still on a subscriber. Seat counting must include
+ * both, or a member on $849 would not count toward the 99.
+ */
+export function configuredPriceIdsForTier(tier: Tier): string[] {
+  if (tier === 'community') return []
+  const names = new Set<string>()
+  for (const def of Object.values(PLAN_CATALOG)) {
+    if (def.tier === tier) names.add(def.priceEnvVar)
+  }
+  for (const [name, mapped] of Object.entries(LEGACY_PRICE_ENV)) {
+    if (mapped === tier) names.add(name)
+  }
+  const ids: string[] = []
+  for (const name of names) {
+    const id = process.env[name]?.trim()
+    if (id) ids.push(id)
+  }
+  return ids
+}
+
 /** Reverse map for the webhook: Stripe price id → tier (null if unknown). */
 export function tierForPriceId(priceId: string): Tier | null {
+  const needle = priceId.trim()
+  if (!needle) return null
   for (const def of Object.values(PLAN_CATALOG)) {
-    if (process.env[def.priceEnvVar] === priceId) return def.tier
+    if (process.env[def.priceEnvVar]?.trim() === needle) return def.tier
+  }
+  for (const [name, tier] of Object.entries(LEGACY_PRICE_ENV)) {
+    if (process.env[name]?.trim() === needle) return tier
   }
   return null
 }

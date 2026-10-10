@@ -44,7 +44,7 @@ export function PostCard({ post }: PostCardProps) {
           <View style={styles.metaRow}>
             <Text style={styles.author}>{displayName}</Text>
             {tier === 'pro' && (
-              <Badge label="Pro" variant="gold" style={styles.tierBadge} />
+              <Badge label="The 99" variant="gold" style={styles.tierBadge} />
             )}
           </View>
           <Text style={styles.time}>{timeAgo(post.created_at)}</Text>

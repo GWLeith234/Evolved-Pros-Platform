@@ -53,15 +53,15 @@ describe('the directory is open, the detail is not', () => {
     }
   })
 
-  it('still reserves direct messages for The 99', () => {
+  it('opens direct messages to VIP and The 99', () => {
     expect(canAccessNetwork('community')).toBe(false)
-    expect(canAccessNetwork('vip')).toBe(false)
+    expect(canAccessNetwork('vip')).toBe(true)
     expect(canAccessNetwork('pro')).toBe(true)
   })
 
-  it('hands community and VIP the public payload, The 99 the full one', () => {
+  it('hands community the public payload, and VIP and The 99 the full one', () => {
     expect(directoryDetail('community')).toBe('public')
-    expect(directoryDetail('vip')).toBe('public')
+    expect(directoryDetail('vip')).toBe('full')
     expect(directoryDetail('pro')).toBe('full')
   })
 
@@ -202,7 +202,7 @@ describe('seats line and DM copy', () => {
   })
 
   it('keeps one string for the locked Message button', () => {
-    expect(DIRECTORY_DM_LOCKED_COPY).toBe('Members of The 99 can reach each other directly.')
+    expect(DIRECTORY_DM_LOCKED_COPY).toBe('VIP and The Evolved Pros 99 can message members directly.')
     expect(DIRECTORY_DM_LOCKED_COPY).not.toContain('—')
   })
 })

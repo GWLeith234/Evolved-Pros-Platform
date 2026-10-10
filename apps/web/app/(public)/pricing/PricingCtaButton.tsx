@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
  * SPRINT V-CHECKOUT — client CTA for the public /pricing tier cards.
  *
  * For free tier and Keynotes (non-checkout destinations) we just navigate.
- * For VIP / Professional we POST to Stripe Checkout and redirect the
+ * For VIP and The Evolved Pros 99 we POST to checkout and redirect the
  * member to the hosted payment URL on success.
  *
  * If the user isn't logged in yet, checkout returns 401 — we route
@@ -70,13 +70,13 @@ export function PricingCtaButton({ label, href, plan, featured }: PricingCtaButt
       }
       const redirectUrl = data.url
       if (!res.ok || !redirectUrl) {
-        setError(data.error ?? 'Checkout failed — please try again')
+        setError(data.error ?? 'Checkout failed. Please try again')
         setLoading(false)
         return
       }
       window.location.href = redirectUrl
     } catch {
-      setError('Network error — please try again')
+      setError('Network error. Please try again')
       setLoading(false)
     }
   }

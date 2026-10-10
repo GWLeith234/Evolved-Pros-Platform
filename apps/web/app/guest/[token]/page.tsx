@@ -109,8 +109,8 @@ export default async function GuestGuidePage({ params }: Props) {
         </p>
         <p className="font-body text-[14px] mb-10" style={{ color: dim(0.45) }}>
           As our guest you also get complimentary{' '}
-          <span style={{ color: CREAM, fontWeight: 600 }}>Professional</span> access to the
-          Evolved Pros platform — the full 6-Pillar Academy and community, on us.
+          <span style={{ color: CREAM, fontWeight: 600 }}>Academy</span> access to the
+          Evolved Pros platform: the full 6-pillar Academy and community, on us.
         </p>
 
         {/* Guide sections */}

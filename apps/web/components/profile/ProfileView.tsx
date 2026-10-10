@@ -1,6 +1,7 @@
 import { ProfileStats } from './ProfileStats'
 import { SendMessageButton } from './SendMessageButton'
 import { DIRECTORY_DM_LOCKED_COPY } from '@/lib/community/directory'
+import { tierShortLabel } from '@/lib/entitlements'
 
 interface ProfileViewData {
   id: string
@@ -151,7 +152,7 @@ export function ProfileView({ profile, stats, isSelf, canMessage = false }: Prof
                     letterSpacing: '0.16em',
                   }}
                 >
-                  {profile.tier!.toLowerCase() === 'vip' ? 'VIP' : 'Pro'}
+                  {tierShortLabel(profile.tier)}
                 </span>
               )}
             </div>

@@ -185,7 +185,7 @@ describe('fit JSON-LD', () => {
 })
 
 describe('pricing JSON-LD', () => {
-  it('ships Product/Offer money schema with live $99 / $849 monthly prices as strings', () => {
+  it('ships Product/Offer money schema with live $149 / $599 monthly prices as strings', () => {
     const schema = pricingJsonLd()
     const publisher = homeOrganizationJsonLd()
     const vipMonthly = String(TIERS.vip.monthly)
@@ -224,8 +224,8 @@ describe('pricing JSON-LD', () => {
     )
     expect(typeof vipMonthly).toBe('string')
     expect(typeof proMonthly).toBe('string')
-    expect(vipMonthly).toBe('99')
-    expect(proMonthly).toBe('849')
+    expect(vipMonthly).toBe('149')
+    expect(proMonthly).toBe('599')
 
     // SPRINT K — annual is undecided, so NO annual Offer may be published.
     // This block used to emit $490 and $2,490 as structured data, which is how
@@ -240,8 +240,8 @@ describe('pricing JSON-LD', () => {
     expect(blob).toContain('Offer')
     expect(blob).toContain(`"${vipMonthly}"`)
     expect(blob).toContain(`"${proMonthly}"`)
-    expect(blob).toContain('$99 /month')
-    expect(blob).toContain('$849 /month')
+    expect(blob).toContain('$149 /month')
+    expect(blob).toContain('$599 /month')
     // No trace of the retired ladder in the indexed blob.
     expect(blob).not.toContain('$49 /month')
     expect(blob).not.toContain('$249 /month')

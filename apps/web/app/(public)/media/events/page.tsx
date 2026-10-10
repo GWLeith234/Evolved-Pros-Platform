@@ -64,7 +64,7 @@ function isVirtual(ev: EventRow): boolean {
 function tierLabel(tier: string | null): string {
   if (!tier || tier === 'community') return 'All members'
   if (tier === 'vip') return 'VIP+'
-  if (tier === 'pro') return 'Pro'
+  if (tier === 'pro') return 'The 99'
   return tier
 }
 

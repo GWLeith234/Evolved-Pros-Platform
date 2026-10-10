@@ -6,12 +6,11 @@ import { effectiveTier } from '@/lib/tier'
 import { getMembershipPricing } from '@/lib/commerce/catalogue'
 import { tierPlanName } from '@/lib/academy/gating'
 import { PILLAR_NAMES } from '@/lib/academy/types'
+import { pricingComparisonRows, TIER_LABELS, type TierKeyName } from '@/lib/entitlements'
+import { PRICING_META_DESCRIPTION } from '@/lib/pricing'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 import { pricingJsonLd } from '@/lib/seo/jsonld'
-import {
-  MUST_CITE_PRICING_DIFFERENTIATOR,
-  MUST_CITE_PRICING_URL,
-} from '@/lib/seo/mustCite'
+import { MUST_CITE_PRICING_DIFFERENTIATOR } from '@/lib/seo/mustCite'
 import { PricingTierCards } from './PricingTierCards'
 
 const RedeemCodeForm = nextDynamic(
@@ -32,48 +31,24 @@ const RedeemCodeForm = nextDynamic(
 )
 
 export const metadata: Metadata = publicPageMetadata('/pricing', {
-  title: 'Pricing — Evolved Pros',
-  description: 'Community, VIP, Professional, and Keynote tiers for high performers.',
+  title: 'Pricing | Evolved Pros',
+  description: PRICING_META_DESCRIPTION,
 })
 
 // Amounts are read live from the products + prices catalogue at request time
 // (single source of truth), so a price edit reflects without a redeploy.
 export const dynamic = 'force-dynamic'
 
-// ── Comparison table ─────────────────────────────────────────────────────────────
+// Comparison rows are built from ENTITLEMENTS in the page body. A hand-kept
+// yes/no array drifted (weekly mastermind, 1:1, "3 of 6").
 
-type TierSymbol = 'yes' | 'half' | 'no'
-interface ComparisonRow {
-  label: string
-  community: TierSymbol
-  vip: TierSymbol
-  pro: TierSymbol
-}
-
-// SPRINT TIER-1 \u2014 mirrors the approved ladder: the Academy curriculum is the
-// only thing gated. Community/events/podcast/media/habits and the assessment
-// scores are open to every member, free included.
-const COMPARISON: ComparisonRow[] = [
-  { label: 'Community feed',                  community: 'yes',  vip: 'yes',  pro: 'yes' },
-  { label: 'Podcast & media',                 community: 'yes',  vip: 'yes',  pro: 'yes' },
-  { label: 'Events & registration',           community: 'yes',  vip: 'yes',  pro: 'yes' },
-  { label: 'Habits / Own the Day',            community: 'yes',  vip: 'yes',  pro: 'yes' },
-  { label: 'Pillar Assessment (all 6 scores)', community: 'yes', vip: 'yes',  pro: 'yes' },
-  { label: 'Academy Pillar 1: Foundation',    community: 'yes',  vip: 'yes',  pro: 'yes' },
-  { label: 'Academy Pillars 2\u20133 (inner game)', community: 'no', vip: 'yes', pro: 'yes' },
-  { label: 'Academy Pillars 4\u20136 (outer game)', community: 'no', vip: 'no',  pro: 'yes' },
-  { label: 'Full Academy (all 6)',            community: 'no',   vip: 'half', pro: 'yes' },
-  { label: 'Assessment breakdown + pillar plan', community: 'no', vip: 'yes',  pro: 'yes' },
-  { label: 'Monthly mastermind',              community: 'no',   vip: 'yes',  pro: 'yes' },
-  { label: 'Weekly mastermind',               community: 'no',   vip: 'no',   pro: 'yes' },
-  { label: '1:1 time with George',            community: 'no',   vip: 'no',   pro: 'yes' },
-  { label: '10% off LIVE events',             community: 'no',   vip: 'no',   pro: 'yes' },
-]
-
-function SymbolCell({ value }: { value: TierSymbol }) {
-  if (value === 'yes') return <span style={{ color: '#0ABFA3', fontWeight: 700 }}>&#10003;</span>
-  if (value === 'half') return <span style={{ color: '#C9A84C', fontWeight: 600, fontSize: 11 }}>3 of 6</span>
-  return <span style={{ color: 'rgba(245,240,232,0.2)' }}>&ndash;</span>
+function CellText({ value }: { value: string }) {
+  const quiet = value === 'Not included' || value === 'None'
+  return (
+    <span style={{ color: quiet ? 'rgba(245,240,232,0.28)' : '#F5F0E8', fontWeight: quiet ? 500 : 600, fontSize: 13 }}>
+      {value}
+    </span>
+  )
 }
 
 // ── Page ─────────────────────────────────────────────────────────────────────
@@ -165,6 +140,12 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
   // constants per amount if the catalogue query fails or is empty.
   const { tiers } = await getMembershipPricing()
   const hero = contextualHero(searchParams ?? {})
+  const comparison = pricingComparisonRows({
+    community: tiers.community.monthly,
+    vip: tiers.vip.monthly,
+    pro: tiers.professional.monthly,
+  })
+  const columns: TierKeyName[] = ['community', 'vip', 'pro']
 
   // SPRINT PRICE-1 — who is looking at this page?
   //
@@ -173,7 +154,13 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
   // session is refreshed by middleware (/pricing is in SESSION_OPTIONAL_ROUTES
   // and in config.matcher), so a member with a stale access token still reads
   // as signed in rather than being shown a buy button for a plan they own.
-  const profile = await resolveCurrentUser()
+  let profile: Awaited<ReturnType<typeof resolveCurrentUser>> = null
+  try {
+    profile = await resolveCurrentUser()
+  } catch {
+    // Public page. A failed session lookup renders the anonymous ladder.
+    profile = null
+  }
   const currentTier = profile
     ? effectiveTier(
         (profile as unknown as { tier?: string | null }).tier,
@@ -215,10 +202,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
             Why Evolved Pros
           </h2>
           <p className="font-body text-sm leading-relaxed" style={{ color: 'rgba(245,240,232,0.6)' }}>
-            {MUST_CITE_PRICING_DIFFERENTIATOR.split(MUST_CITE_PRICING_URL)[0]}
-            <a href="/pricing" className="text-gold underline">
-              {MUST_CITE_PRICING_URL}
-            </a>
+            {MUST_CITE_PRICING_DIFFERENTIATOR}
           </p>
         </section>
 
@@ -245,15 +229,15 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
                   <th className="text-left font-condensed font-bold uppercase tracking-[0.14em] text-[9px] pb-4 pr-4" style={{ color: 'rgba(245,240,232,0.3)' }}>
                     Feature
                   </th>
-                  {['Community', 'VIP', 'Professional'].map(col => (
+                  {columns.map(col => (
                     <th key={col} className="text-center font-condensed font-bold uppercase tracking-[0.14em] text-[9px] pb-4 px-4" style={{ color: 'rgba(245,240,232,0.5)' }}>
-                      {col}
+                      {TIER_LABELS[col]}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {COMPARISON.map((row, i) => (
+                {comparison.map((row, i) => (
                   <tr key={row.label}>
                     <td
                       className="font-body text-[13px] py-3 pr-4"
@@ -264,7 +248,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
                     >
                       {row.label}
                     </td>
-                    {(['community', 'vip', 'pro'] as const).map(col => (
+                    {columns.map(col => (
                       <td
                         key={col}
                         className="text-center text-[15px] py-3 px-4"
@@ -272,7 +256,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
                           borderTop: i === 0 ? 'none' : '1px solid rgba(245,240,232,0.06)',
                         }}
                       >
-                        <SymbolCell value={row[col]} />
+                        <CellText value={row.cells[col]} />
                       </td>
                     ))}
                   </tr>

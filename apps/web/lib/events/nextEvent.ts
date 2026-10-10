@@ -6,6 +6,8 @@
  * No recurrence engine: weekly Masterminds are stored as dated rows.
  */
 
+import { tierLabel } from '@/lib/entitlements'
+
 export const LAUNCH_EVENT_TITLE =
   'Evolved Pros launches April 28 in Las Vegas with special guest Dennis Yu'
 
@@ -14,7 +16,7 @@ export const BOOK_EVENT_TITLE = 'EVOLVED book launches October 15'
 export const MASTERMIND_EVENT_TITLE = 'AI Masterminds for Senior Execs'
 
 export const MASTERMIND_EVENT_DETAIL =
-  'Starts Oct 2, every Friday after at 2pm CST (America/Chicago). Professional Tier only.'
+  `Starts Oct 2, every Friday after at 2pm CST (America/Chicago). ${tierLabel('pro')} only.`
 
 /** Title + detail as one line. Periods only. Never an em dash. */
 export const MASTERMIND_EVENT_LINE = `${MASTERMIND_EVENT_TITLE}. ${MASTERMIND_EVENT_DETAIL}`

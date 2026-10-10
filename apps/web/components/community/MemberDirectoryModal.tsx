@@ -60,7 +60,7 @@ export function MemberDirectoryModal({ onClose }: MemberDirectoryModalProps) {
 
   const FILTER_OPTIONS: { key: TierFilter; label: string }[] = [
     { key: 'all', label: 'All' },
-    { key: 'pro', label: 'Pro' },
+    { key: 'pro', label: 'The 99' },
     { key: 'community', label: 'Community' },
   ]
 
@@ -180,7 +180,7 @@ export function MemberDirectoryModal({ onClose }: MemberDirectoryModalProps) {
                             backgroundColor: `${tierColor}15`,
                           }}
                         >
-                          {member.tier === 'pro' ? 'Pro' : 'Community'}
+                          {member.tier === 'pro' ? 'The 99' : member.tier === 'vip' ? 'VIP' : 'Community'}
                         </span>
                       )}
                     </div>

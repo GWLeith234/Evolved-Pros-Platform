@@ -71,3 +71,15 @@ jobs:
           sudo service postgresql start
       - name: Member prefs RLS tests
         run: bash supabase/tests/run_104_et_member_rls.sh
+
+  et-brief-vip-and-pro:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Postgres
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql
+          sudo service postgresql start
+      - name: EvPros Today brief opens to VIP and The 99
+        run: bash supabase/tests/run_108_et_brief.sh

@@ -40,13 +40,13 @@ const tierAccess: Record<WelcomeTier, { label: string; accent: string; features:
     ],
   },
   pro: {
-    label: 'Pro',
+    label: 'The 99',
     accent: '#c9a84c',
     features: [
       'All VIP access +',
-      'Pillars 5–6: Accountability & Execution',
-      'Exclusive Pro channels and priority Q&A',
-      'All live events including Pro-only sessions',
+      'Pillars 5 and 6: Accountability and Execution',
+      'The Evolved Pros 99 channels and priority Q&A',
+      'All live events, including sessions for The 99',
     ],
   },
 }

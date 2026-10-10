@@ -32,6 +32,8 @@ const FORBIDDEN_PITCH = [
   '$249',
   '$99',
   '$849',
+  '$149',
+  '$599',
   'paid plan',
 ]
 
