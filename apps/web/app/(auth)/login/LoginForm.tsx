@@ -205,6 +205,7 @@ export function LoginForm() {
       <div className="w-full max-w-[400px] bg-white rounded-lg overflow-hidden shadow-2xl">
         <div className="h-1 bg-red-hot" />
         <div className="px-8 py-10">
+          <h1 className="sr-only">{intent?.id === 'events' ? intent.headline : copy.heading}</h1>
           <div className="mb-8 flex justify-center">
             <LogoMark variant="dark" height={56} />
           </div>
@@ -270,11 +271,11 @@ export function LoginForm() {
               {tab === 'password' ? (
                 <form onSubmit={handlePassword} className="space-y-4">
                   <div>
-                    <label className="block text-[color:var(--navy)] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
+                    <label htmlFor="login-email" className="block text-[color:var(--navy)] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
                       EMAIL ADDRESS
                     </label>
                     <input
-                      id="email"
+                      id="login-email"
                       type="email"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
@@ -284,12 +285,12 @@ export function LoginForm() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[color:var(--navy)] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
+                    <label htmlFor="login-password" className="block text-[color:var(--navy)] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
                       PASSWORD
                     </label>
                     <div className="relative">
                       <input
-                        id="password"
+                        id="login-password"
                         type={showPassword ? 'text' : 'password'}
                         value={password}
                         onChange={e => setPassword(e.target.value)}
@@ -366,10 +367,11 @@ export function LoginForm() {
                     We&apos;ll email you a one-click login link. No password needed.
                   </p>
                   <div>
-                    <label className="block text-[color:var(--navy)] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
+                    <label htmlFor="login-magic-email" className="block text-[color:var(--navy)] text-xs font-bold tracking-widest mb-1" style={{ fontFamily: '"Barlow Condensed", sans-serif' }}>
                       EMAIL ADDRESS
                     </label>
                     <input
+                      id="login-magic-email"
                       type="email"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
@@ -428,6 +430,7 @@ function LoginHoneypot({
       tabIndex={-1}
       autoComplete="off"
       aria-hidden="true"
+      aria-label="Website"
       className="ep-media-brief-hp"
     />
   )

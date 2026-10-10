@@ -13,7 +13,10 @@ import {
   lockedArticleByline,
   hasBakedProsWordmark,
   MEDIA_STORY_THUMB_RATIO,
+  LOCAL_UNSPLASH_STILL_IDS,
+  localUnsplashStillPath,
   resolveStoryArtUrl,
+  absolutePublicArtUrl,
   storyArtHeroBackground,
   storyArtHeroClass,
   storyArtImgClass,
@@ -51,6 +54,24 @@ describe('Media story art typed byline', () => {
     expect(hasBakedProsWordmark('https://cdn.example/Branding/uploads/other.png')).toBe(false)
     expect(hasBakedProsWordmark(null)).toBe(false)
     expect(hasBakedProsWordmark('')).toBe(false)
+  })
+
+  it('serves known Unsplash hub stills from the repo, not images.unsplash.com', () => {
+    expect(LOCAL_UNSPLASH_STILL_IDS.length).toBeGreaterThanOrEqual(24)
+    for (const id of LOCAL_UNSPLASH_STILL_IDS) {
+      const remote = `https://images.unsplash.com/${id}?auto=format&fit=crop&w=1080&q=80`
+      const local = localUnsplashStillPath(id)
+      expect(resolveStoryArtUrl(remote)).toBe(local)
+      expect(local.startsWith('/media/stills/')).toBe(true)
+      expect(local).not.toContain('unsplash.com')
+      expect(existsSync(resolve(here, '../../public', local.replace(/^\//, '')))).toBe(true)
+    }
+    expect(resolveStoryArtUrl('https://images.unsplash.com/photo-not-in-the-set')).toBe(
+      'https://images.unsplash.com/photo-not-in-the-set',
+    )
+    expect(absolutePublicArtUrl('/media/stills/photo-x.webp', 'https://www.evolvedpros.com')).toBe(
+      'https://www.evolvedpros.com/media/stills/photo-x.webp',
+    )
   })
 
   it('replaces the CMS lockup still with the typed local asset', () => {

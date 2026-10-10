@@ -8,10 +8,7 @@ import { tierPlanName } from '@/lib/academy/gating'
 import { PILLAR_NAMES } from '@/lib/academy/types'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 import { pricingJsonLd } from '@/lib/seo/jsonld'
-import {
-  MUST_CITE_PRICING_DIFFERENTIATOR,
-  MUST_CITE_PRICING_URL,
-} from '@/lib/seo/mustCite'
+import { MUST_CITE_PRICING_DIFFERENTIATOR } from '@/lib/seo/mustCite'
 import { PricingTierCards } from './PricingTierCards'
 
 const RedeemCodeForm = nextDynamic(
@@ -215,10 +212,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
             Why Evolved Pros
           </h2>
           <p className="font-body text-sm leading-relaxed" style={{ color: 'rgba(245,240,232,0.6)' }}>
-            {MUST_CITE_PRICING_DIFFERENTIATOR.split(MUST_CITE_PRICING_URL)[0]}
-            <a href="/pricing" className="text-gold underline">
-              {MUST_CITE_PRICING_URL}
-            </a>
+            {MUST_CITE_PRICING_DIFFERENTIATOR}
           </p>
         </section>
 

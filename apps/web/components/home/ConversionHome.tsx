@@ -155,10 +155,10 @@ export function ConversionHome({
 
       <main>
         {/*
-          Mobile fold is viewport-tall (100svh minus the two-row header).
-          The GOLD Architecture still stays (same bytes). F1 clips the still
-          to the upper band so THE EVOLVED ARCHITECTURE is an HTML label
-          above the H1 instead of baked-in type colliding at 390-400px.
+          Desktop fold stays viewport-tall. Mobile does not: a min-height
+          plus justify-end left an empty band under the still before the H1.
+          The GOLD Architecture still stays (same bytes). On a phone the
+          still is in normal flow and the headline sits under it.
           Open the platform is the primary red CTA. Join free always sits
           beside it in .ep-home-fold-ctas-lead (not gated on signedIn: a
           session cookie is the only way the third hero button vanished on
@@ -166,7 +166,7 @@ export function ConversionHome({
         */}
         <section
           aria-label={HERO_IMAGE_ALT}
-          className="ep-home-fold relative flex w-full flex-col overflow-hidden bg-paper min-h-[calc(100svh-7rem)] max-h-[calc(100svh-7rem)] md:min-h-[calc(100svh-5.5rem)] md:max-h-[calc(100svh-5.5rem)]"
+          className="ep-home-fold relative flex w-full flex-col overflow-hidden bg-paper md:min-h-[calc(100svh-5.5rem)] md:max-h-[calc(100svh-5.5rem)]"
         >
           <div className="ep-home-fold-still">
             <Image
@@ -181,8 +181,8 @@ export function ConversionHome({
               sizes="(max-width: 768px) 100vw, 1200px"
             />
           </div>
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-paper via-paper/85 to-transparent" />
-          <div className="ep-home-fold-copy relative mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col items-center justify-end px-5 pb-6 pt-12 text-center md:pb-14 md:pt-24">
+          <div className="ep-home-fold-fade pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-paper via-paper/85 to-transparent" />
+          <div className="ep-home-fold-copy relative mx-auto flex w-full max-w-3xl flex-col items-center px-5 pb-6 pt-4 text-center md:min-h-0 md:flex-1 md:justify-end md:pb-14 md:pt-24">
             <Tooltip content={HOME_ARCHITECTURE_TOOLTIP} className="mb-3 md:mb-4">
               <p className="ep-home-arch-label">{HOME_ARCHITECTURE_LABEL}</p>
             </Tooltip>

@@ -1,0 +1,6 @@
+These stills used to load from images.unsplash.com on /media.
+They are stored in this folder under the Unsplash License:
+https://unsplash.com/license
+
+That license does not require photographer attribution.
+The story records did not store photographer names, so this folder does not invent any.

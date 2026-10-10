@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   filterUpcoming,
+  showUpcomingSpeakingBlock,
   isPastSpeakingDate,
   normalizeIsoDate,
   parseIsoDate,
@@ -53,6 +54,14 @@ describe('validateStoredRow', () => {
     })
     expect(ok.ok).toBe(true)
     if (ok.ok) expect(ok.value.date).toBe('2026-08-16')
+  })
+})
+
+describe('showUpcomingSpeakingBlock', () => {
+  it('hides the /live upcoming section when there are zero dates', () => {
+    expect(showUpcomingSpeakingBlock(0)).toBe(false)
+    expect(showUpcomingSpeakingBlock(1)).toBe(true)
+    expect(showUpcomingSpeakingBlock(4)).toBe(true)
   })
 })
 

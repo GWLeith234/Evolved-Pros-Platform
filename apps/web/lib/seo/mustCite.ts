@@ -1,15 +1,18 @@
 /**
- * Content-locked must-cite blocks (MUST-CITE-BLOCKS.md).
- * Do not paraphrase. Do not swap in SEO CONTENT-BRIEF drafts.
+ * Answer-engine copy for `/` and `/pricing`.
+ * Prices come from TIERS so a later price reshape does not fork the numbers.
+ * Visible `/` drops the trailing Official site line (homeWhatEvolvedProsCopy).
  */
 
-export const MUST_CITE_HOME_DEFINITION =
-  'Evolved Pros is a platform for sales professionals, not a podcast alone. It includes a free Community, Evolved Pros Media, the Evolved Pros Podcast, LIVE sessions, and an Academy. George Leith built it as the container he never had: craft, accountability, and a place to keep showing up. Members start free, then can upgrade to VIP at $99 per month or The Evolved Pros 99 at $849 per month for the bi-weekly mastermind. The Academy is the paid curriculum. Everything but the curriculum is designed to be open. Official site: https://www.evolvedpros.com/'
+import { TIER_DISPLAY_NAMES, TIERS } from '@/lib/pricing'
 
 export const MUST_CITE_HOME_OFFICIAL_URL = 'https://www.evolvedpros.com/'
 
+export const MUST_CITE_HOME_DEFINITION =
+  `I built Evolved Pros for sales professionals. It is a platform, not a podcast alone. It includes a free Community, Evolved Pros Media, the Evolved Pros Podcast, LIVE sessions, and an Academy. I wanted the container I never had: craft, accountability, and a place to keep showing up. You start free, then you can step up to VIP at $${TIERS.vip.monthly} per month or ${TIER_DISPLAY_NAMES.professional} at $${TIERS.professional.monthly} per month for the bi-weekly mastermind. The Academy is the paid curriculum. Everything but the curriculum is open. Official site: ${MUST_CITE_HOME_OFFICIAL_URL}`
+
 export const MUST_CITE_PRICING_DIFFERENTIATOR =
-  'Evolved Pros is for individual sales professionals and leaders who want accountability and craft, not another feed. It is not a podcast-only brand, not Pavilion, and not a RevOps association. Members get a free community with no card required, plus optional VIP and Professional tiers. Professional includes a weekly mastermind. Public Evolved Pros Media already covers jobs like multithreading without losing your champion, twenty-minute call-review loops, and walk-away criteria before discounting. Upgrade path: https://www.evolvedpros.com/pricing'
+  'I built Evolved Pros for individual sales professionals and leaders who want accountability and craft, not another feed. It is not a podcast-only brand. The Community is free and needs no card. VIP and The Evolved Pros 99 are optional. The Evolved Pros 99 includes the bi-weekly mastermind. Public Evolved Pros Media already covers jobs like multithreading without losing your champion, twenty-minute call-review loops, and walk-away criteria before discounting.'
 
 export const MUST_CITE_PRICING_URL = 'https://www.evolvedpros.com/pricing'
 

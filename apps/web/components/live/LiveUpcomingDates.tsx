@@ -4,9 +4,8 @@ import {
   SEE_EVENTS_TOOLTIP,
 } from '@/lib/live/s4-cta'
 import { getUpcomingSpeakingDates, type UpcomingDate } from '@/lib/live/upcoming-dates'
-import { sanitizeSpeakingLinkUrl } from '@/lib/live/upcoming-dates-shared'
+import { sanitizeSpeakingLinkUrl, showUpcomingSpeakingBlock } from '@/lib/live/upcoming-dates-shared'
 import { Tooltip } from '@/components/ui/Tooltip'
-import { InquireBookingButton } from './InquireBookingButton'
 import { LiveSectionHeader } from './LiveSectionHeader'
 
 const FB = 'Barlow, sans-serif'
@@ -158,6 +157,7 @@ function DateList({ rows }: { rows: UpcomingDate[] }) {
  */
 export async function LiveUpcomingDates() {
   const dates = await getUpcomingSpeakingDates()
+  if (!showUpcomingSpeakingBlock(dates.length)) return null
   const confirmed = dates.filter(d => d.tag === 'CONFIRMED')
   const holds = dates.filter(d => d.tag === 'HOLD')
 
@@ -203,68 +203,7 @@ export async function LiveUpcomingDates() {
         </Tooltip>
       </div>
 
-      {dates.length === 0 ? (
-        // M3 KEEP AS BAR: public speaking empty. Do not redesign. See docs/ADMIN-BUTTON-SAFETY-2026-09-06.md.
-        <div
-          style={{
-            marginTop: 24,
-            border: '1px solid var(--border-soft2)',
-            borderLeft: '3px solid var(--brand-gold)',
-            background: 'var(--bg-surface)',
-            padding: '28px 24px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 16,
-            alignItems: 'flex-start',
-          }}
-        >
-          <p
-            style={{
-              margin: 0,
-              fontFamily: FP,
-              fontWeight: 700,
-              fontSize: 22,
-              lineHeight: 1.25,
-              color: 'var(--text-strong)',
-            }}
-          >
-            No confirmed stage dates listed yet.
-          </p>
-          <p
-            style={{
-              margin: 0,
-              fontFamily: FB,
-              fontSize: 15,
-              lineHeight: 1.55,
-              color: 'var(--text-2)',
-              maxWidth: 560,
-            }}
-          >
-            When a keynote, panel, or workshop is locked, it shows up here with the city.
-            Past stages live on the map below — cities only, no long write-ups.
-          </p>
-          <InquireBookingButton
-            className="ep-pressable ep-touch-target"
-            style={{
-              marginTop: 4,
-              padding: '12px 22px',
-              minHeight: 44,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: 'var(--brand-red-hot)',
-              color: 'var(--white)',
-              border: '1px solid var(--brand-red-hot)',
-              fontFamily: FBC,
-              fontWeight: 800,
-              fontSize: 12,
-              letterSpacing: '0.22em',
-              textTransform: 'uppercase',
-            }}
-          />
-        </div>
-      ) : (
-        <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 28 }}>
+      <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 28 }}>
           {confirmed.length > 0 && <DateList rows={confirmed} />}
 
           {confirmed.length === 0 && holds.length > 0 && (
@@ -310,8 +249,7 @@ export async function LiveUpcomingDates() {
               <DateList rows={holds} />
             </div>
           )}
-        </div>
-      )}
+      </div>
     </section>
   )
 }

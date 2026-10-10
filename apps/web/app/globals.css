@@ -2547,17 +2547,23 @@ a.ep-text-link:focus-visible {
   the H1. The readable Architecture label is HTML (tooltip 8).
 */
 .ep-home-fold-still {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 50%;
+  position: relative;
+  height: auto;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
+}
+.ep-home-fold-fade {
+  display: none;
 }
 @media (min-width: 768px) {
   .ep-home-fold-still {
+    position: absolute;
     inset: 0;
     height: auto;
+    aspect-ratio: auto;
+  }
+  .ep-home-fold-fade {
+    display: block;
   }
 }
 /*
@@ -2601,11 +2607,9 @@ a.ep-text-link:focus-visible {
   color: var(--brand-navy);
 }
 @media (max-width: 430px) {
-  /* Clip the baked-in still title so the HTML label is the only readable
-     Architecture line above the H1 at 390-400px. */
-  .ep-home-fold-still {
-    height: 38%;
-  }
+  /* The still is in normal flow. Do not give it a percentage height:
+     that, plus a viewport min-height on the fold, opened an empty band
+     under the photo before the headline. */
   .ep-home-fold-copy {
     padding-top: var(--space-4);
     padding-bottom: var(--space-5);
