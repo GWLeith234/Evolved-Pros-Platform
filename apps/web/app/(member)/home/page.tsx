@@ -243,10 +243,9 @@ async function fetchLatestPulsePosts(limit = 3): Promise<PulsePost[]> {
   const posts = rows ?? []
   const ids = posts.map(p => p.id)
 
-  // SPRINT D — the denormalized posts.like_count / reply_count columns are dead
-  // (the old post_likes counter is no longer maintained, so every post read 0).
-  // Count live rows from post_reactions + replies — the SAME tables Community
-  // reads — so Home pulse counts match Community exactly.
+  // posts.like_count / reply_count are not maintained (they read 0).
+  // Count live post_reactions and replies — the same tables Community
+  // reads — so Home pulse counts match the feed.
   const reactionsByPost = new Map<string, number>()
   const repliesByPost = new Map<string, number>()
   if (ids.length) {

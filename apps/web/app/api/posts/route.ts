@@ -18,7 +18,7 @@ function toPost(
     like_count: number
     reply_count: number
     created_at: string
-    // CM-1 media columns (migration 079) — null on every pre-079 row.
+    // Nullable: rows written before migration 079 have no media.
     media_url?: string | null
     media_kind?: string | null
     media_width?: number | null
@@ -102,11 +102,8 @@ export async function GET(request: Request) {
   const nextCursor = hasMore && page.length > 0 ? page[page.length - 1].created_at : null
 
   const postIds = page.map((p: { id: string }) => p.id)
-  // COMMUNITY-SPRINT-2: source reactions from post_reactions (Sprint 0
-  // table) instead of legacy post_likes. Sprint 0's migration backfilled
-  // post_likes data into post_reactions, so counts stay accurate.
-  // DB stores ('fire','hundred','clap','heart','mind') per Sprint 0 CHECK;
-  // map clap→hands and mind→mindblown for the new UI.
+  // Count live post_reactions rows. posts.like_count is not maintained.
+  // DB CHECK stores clap/mind; the UI calls them hands/mindblown.
   const DB_TO_EMOJI: Record<string, string> = {
     fire: 'fire', hundred: 'hundred', clap: 'hands', heart: 'heart', mind: 'mindblown',
   }
@@ -157,8 +154,8 @@ export async function POST(request: Request) {
     postType?: unknown
     pollId?: unknown
     pollOptions?: unknown
-    kind?: unknown      // COMMUNITY-SPRINT-1: new composer
-    pillar?: unknown    // COMMUNITY-SPRINT-1: integer 1-6 or null
+    kind?: unknown
+    pillar?: unknown    // integer 1-6, or null
   }
   try {
     body = await request.json()
@@ -178,15 +175,14 @@ export async function POST(request: Request) {
         .filter(Boolean)
     : null
 
-  // New (Sprint 1) inputs.
   const rawKind = typeof body.kind === 'string' ? body.kind : null
   const rawPillar =
     typeof body.pillar === 'number' ? body.pillar :
     body.pillar === null ? null :
     undefined
 
-  // Detect call site so legacy callers keep their min-10-char rule and new
-  // composer callers (which gate on non-empty client-side) only need >0.
+  // Legacy callers omit kind and keep the 10-character minimum. Composer
+  // callers send kind and only need a non-empty body.
   const isNewComposer = rawKind !== null
   const minBodyLen = isNewComposer ? 1 : 10
 
@@ -278,7 +274,6 @@ export async function POST(request: Request) {
       // Legacy columns — kept in sync so existing fetchers keep returning posts correctly.
       pillar_tag: pillarText as 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | null,
       post_type: legacyType ?? kind,
-      // New columns (Sprint 0/1).
       kind,
       pillar: pillarInt,
       ...(resolvedPollId ? { poll_id: resolvedPollId } : {}),
