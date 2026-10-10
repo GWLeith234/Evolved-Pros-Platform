@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { isPillarSlug } from '@/lib/pillars'
 
 export async function GET(
   _request: Request,
@@ -50,12 +51,9 @@ export async function PATCH(
   }
 
   // Singular `pillar` is canonical (public /podcast reads it). Validate against
-  // the constraint set and keep the legacy `pillars` array in sync.
+  // the shared slug set and keep the legacy `pillars` array in sync.
   if ('pillar' in body) {
-    const PILLAR_SET = new Set([
-      'foundation', 'identity', 'mental-toughness', 'strategy', 'accountability', 'execution',
-    ])
-    const pillar = typeof body.pillar === 'string' && PILLAR_SET.has(body.pillar) ? body.pillar : null
+    const pillar = isPillarSlug(body.pillar) ? body.pillar : null
     update.pillar = pillar
     update.pillars = pillar ? [pillar] : []
   }

@@ -1,13 +1,8 @@
 import { allowedEpisodeStillUrl } from '@/lib/podcast/stillUrl'
 import { stripEmDashCopy } from '@/lib/home/cardImagery'
+import { isPillarSlug, PILLAR_SLUGS, type PillarSlug } from '@/lib/pillars'
 
-export type PodcastPillar =
-  | 'foundation'
-  | 'identity'
-  | 'mental-toughness'
-  | 'strategy'
-  | 'accountability'
-  | 'execution'
+export type PodcastPillar = PillarSlug
 
 export interface PodcastEpisode {
   id: string
@@ -56,15 +51,6 @@ export interface ProgressRow {
   progress: number
 }
 
-const VALID_PILLARS: ReadonlySet<string> = new Set([
-  'foundation',
-  'identity',
-  'mental-toughness',
-  'strategy',
-  'accountability',
-  'execution',
-])
-
 const NEW_WINDOW_DAYS = 30
 
 export function dbRowToEpisode(row: EpisodeRow, progress?: ProgressRow): PodcastEpisode {
@@ -78,9 +64,7 @@ export function dbRowToEpisode(row: EpisodeRow, progress?: ProgressRow): Podcast
     ? Date.now() - releasedAtDate.getTime() < NEW_WINDOW_DAYS * 86_400_000
     : false
 
-  const pillar: PodcastPillar = row.pillar && VALID_PILLARS.has(row.pillar)
-    ? (row.pillar as PodcastPillar)
-    : 'foundation'
+  const pillar: PodcastPillar = isPillarSlug(row.pillar) ? row.pillar : 'foundation'
 
   const guestRole = [row.guest_title, row.guest_company]
     .filter(s => s && s.trim().length > 0)
@@ -149,9 +133,7 @@ export const PILLAR_META: Record<PodcastPillar, { label: string; color: string }
 }
 
 /** Ordered pillar list — drives the filter rail without re-listing keys. */
-export const PILLAR_ORDER: PodcastPillar[] = [
-  'foundation', 'identity', 'mental-toughness', 'strategy', 'accountability', 'execution',
-]
+export const PILLAR_ORDER: readonly PodcastPillar[] = PILLAR_SLUGS
 
 /**
  * Deterministic catalogue order (PODCAST-CLEANUP S6): newest publish date

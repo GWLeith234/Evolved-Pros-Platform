@@ -47,7 +47,27 @@ export function getPillarFamily(pillar: string | null): PillarFamily {
   return PILLAR_FAMILY[pillar ?? ''] ?? 'cosmic'
 }
 
-export const PILLAR_SLUGS = Object.keys(PILLAR_CONFIG)
+/**
+ * Canonical content-pillar slugs (episodes.pillar, podcast catalogue, media).
+ * Order matches PILLAR_CONFIG insertion order: 1 Foundation → 6 Execution.
+ * API routes should call isPillarSlug instead of re-listing this set.
+ */
+export const PILLAR_SLUGS = [
+  'foundation',
+  'identity',
+  'mental-toughness',
+  'strategy',
+  'accountability',
+  'execution',
+] as const
+
+export type PillarSlug = (typeof PILLAR_SLUGS)[number]
+
+const PILLAR_SLUG_SET: ReadonlySet<string> = new Set(PILLAR_SLUGS)
+
+export function isPillarSlug(value: unknown): value is PillarSlug {
+  return typeof value === 'string' && PILLAR_SLUG_SET.has(value)
+}
 
 // ── Single pillar model (Sprint 3) ───────────────────────────────────────────
 // One canonical array driving every pillar surface (hero "Architecture" strip,
