@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { isPillarSlug } from '@/lib/pillars'
 
 function slugify(title: string): string {
   return title
@@ -13,15 +14,12 @@ function slugify(title: string): string {
     .trim()
 }
 
-// Canonical pillar set — mirrors the episodes_pillar_check / episodes_pillars_check
-// constraints. The public /podcast read path keys on the singular `pillar` column,
-// so admin writes set `pillar` and keep the legacy `pillars` array in sync.
-const PILLAR_SET = new Set([
-  'foundation', 'identity', 'mental-toughness', 'strategy', 'accountability', 'execution',
-])
-
+// Canonical pillar set lives in lib/pillars (PILLAR_SLUGS / isPillarSlug) and
+// mirrors the episodes_pillar_check / episodes_pillars_check constraints.
+// The public /podcast read path keys on the singular `pillar` column, so admin
+// writes set `pillar` and keep the legacy `pillars` array in sync.
 function normalizePillar(value: unknown): string | null {
-  return typeof value === 'string' && PILLAR_SET.has(value) ? value : null
+  return isPillarSlug(value) ? value : null
 }
 
 export async function GET() {

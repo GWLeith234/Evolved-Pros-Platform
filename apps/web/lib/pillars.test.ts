@@ -3,6 +3,7 @@ import {
   PILLARS,
   PILLAR_CONFIG,
   PILLAR_SLUGS,
+  isPillarSlug,
   getPillar,
   getPillarLabel,
   getPillarColor,
@@ -65,7 +66,21 @@ describe('pillar lookups', () => {
     expect(getPillarFamily(null)).toBe('cosmic')
   })
 
-  it('PILLAR_SLUGS covers all six config keys', () => {
-    expect(PILLAR_SLUGS).toHaveLength(6)
+  it('PILLAR_SLUGS is the PILLAR_CONFIG key list, in program order', () => {
+    expect([...PILLAR_SLUGS]).toEqual(Object.keys(PILLAR_CONFIG))
+  })
+})
+
+describe('isPillarSlug', () => {
+  it('accepts each canonical slug and rejects nearby labels', () => {
+    for (const slug of PILLAR_SLUGS) {
+      expect(isPillarSlug(slug)).toBe(true)
+    }
+    expect(isPillarSlug('mental')).toBe(false)
+    expect(isPillarSlug('p1')).toBe(false)
+    expect(isPillarSlug('Foundation')).toBe(false)
+    expect(isPillarSlug('')).toBe(false)
+    expect(isPillarSlug(null)).toBe(false)
+    expect(isPillarSlug(1)).toBe(false)
   })
 })
