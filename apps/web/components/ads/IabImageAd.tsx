@@ -34,6 +34,8 @@ export function IabImageAd({ ad, locationId, className, style }: IabImageAdProps
   const alt = ad.sponsor_name?.trim() || ad.headline?.trim() || 'Advertisement'
   const ref = useRef<HTMLAnchorElement | HTMLDivElement>(null)
   const impressed = useRef(false)
+  const isBanner = w / h >= 4
+  const bannerAttr = isBanner ? 'banner' : undefined
 
   useEffect(() => {
     if (!house) return
@@ -68,6 +70,7 @@ export function IabImageAd({ ad, locationId, className, style }: IabImageAdProps
       height={h}
       loading="lazy"
       decoding="async"
+      data-ad-shape={bannerAttr}
       style={{
         width: '100%',
         maxWidth: w,
@@ -90,9 +93,16 @@ export function IabImageAd({ ad, locationId, className, style }: IabImageAdProps
     ...style,
   }
 
+  const wrapperData = isBanner ? { 'data-ad-shape': 'banner' as const } : {}
   if (!href) {
     return (
-      <div ref={ref as RefObject<HTMLDivElement>} className={className} style={wrapStyle} data-iab-slot={slot}>
+      <div
+        ref={ref as RefObject<HTMLDivElement>}
+        className={className}
+        style={wrapStyle}
+        data-iab-slot={slot}
+        {...wrapperData}
+      >
         {img}
       </div>
     )
@@ -109,6 +119,7 @@ export function IabImageAd({ ad, locationId, className, style }: IabImageAdProps
       aria-label={alt}
       target={external ? '_blank' : undefined}
       rel={external ? 'noopener noreferrer sponsored' : undefined}
+      {...wrapperData}
       onClick={() => {
         if (house) recordHouseAdFromUnit('click', ad, { slot, locationId })
       }}
@@ -142,6 +153,7 @@ export function IabAdvertisementSlot({
   // `tone` is now decided by the theme tokens, not the caller. Kept in the
   // signature so the ~10 existing call sites keep compiling.
   void tone
+  const isBanner = w / h >= 4
   return (
     <AdPlane
       label={isAcademyAd(ad) ? 'Sponsored' : 'Advertisement'}
@@ -153,6 +165,7 @@ export function IabAdvertisementSlot({
         'data-ad-rhythm': 'unit',
         'data-iab-slot': `${w}x${h}`,
         'data-ad-reserved': `${h}`,
+        ...(isBanner ? { 'data-ad-shape': 'banner' } : {}),
       }}
     >
       <IabImageAd ad={ad} locationId={locationId} />

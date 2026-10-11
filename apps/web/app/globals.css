@@ -4689,6 +4689,21 @@ html.light-mode .ep-force-dark {
 }
 .ep-ad-plane-creative > * { max-width: 100%; }
 
+/* Desktop only (>= 1024px): horizontal banners (width/height >= 4, e.g. 728x90)
+   fill their column instead of sitting at the 728px mobile size. The marker is
+   set by IabAdvertisementSlot / IabImageAd. Below 1024px the inline caps still
+   apply, and square / vertical units (300x250, 300x600, rails) never change.
+   !important is needed to beat the inline max-width the components set. */
+@media (min-width: 1024px) {
+  .ep-ad-plane[data-ad-shape='banner'] {
+    width: 100%;
+    max-width: 100% !important;
+  }
+  .ep-ad-plane[data-ad-shape='banner'] [data-ad-shape='banner'] {
+    max-width: 100% !important;
+  }
+}
+
 /* Unfilled slots render nothing at all now (SPRINT M rule 8), so the geometry
    wrappers must not keep reserving margin around an empty child. */
 .ep-media-leaderboard:empty,
