@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { clientSafeError } from '@/lib/http/clientError'
 
 export async function GET(req: NextRequest) {
   const supabase = createClient()
@@ -19,7 +20,12 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await q
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    return NextResponse.json(
+      { error: clientSafeError('[GET /api/review-cadences]', error, 'Could not load review cadences.') },
+      { status: 500 },
+    )
+  }
   return NextResponse.json({ cadences: data ?? [] })
 }
 
@@ -50,6 +56,11 @@ export async function POST(req: NextRequest) {
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/review-cadences]', error, 'Could not save your review cadence.') },
+      { status: 500 },
+    )
+  }
   return NextResponse.json({ cadence: data })
 }

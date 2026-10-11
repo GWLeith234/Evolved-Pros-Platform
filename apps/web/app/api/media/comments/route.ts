@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { clientSafeError } from '@/lib/http/clientError'
 
 // GET /api/media/comments?story_id=...
 export async function GET(request: Request) {
@@ -91,8 +92,10 @@ export async function POST(request: Request) {
     .single()
 
   if (error || !comment) {
-    console.error('[POST /api/media/comments]', error)
-    return NextResponse.json({ error: error?.message ?? 'Failed to post comment' }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/media/comments]', error, 'Failed to post comment') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({

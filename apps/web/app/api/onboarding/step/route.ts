@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { clientSafeError } from '@/lib/http/clientError'
 
 export async function PATCH(req: Request) {
   const supabase = createClient()
@@ -27,7 +28,12 @@ export async function PATCH(req: Request) {
     .from('users')
     .upsert({ id: user.id, email: user.email, onboarding_step: step }, { onConflict: 'email' })
     .select('id')
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    return NextResponse.json(
+      { error: clientSafeError('[PATCH /api/onboarding/step]', error, 'Could not save your progress.') },
+      { status: 500 },
+    )
+  }
   if (!data || data.length === 0) {
     console.error('[onboarding/step] wrote zero rows for email=', user.email)
     return NextResponse.json({ error: 'No user record was written' }, { status: 404 })

@@ -5,6 +5,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { NextResponse } from 'next/server'
 import { isThemePreference, toThemePreference, type ThemePreference } from '@/lib/theme'
+import { clientSafeError } from '@/lib/http/clientError'
 
 /**
  * The signed-in member's theme preference — the source of truth for which
@@ -50,7 +51,12 @@ export async function PATCH(req: Request) {
     .eq('id', profile.id)
     .select('theme')
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    return NextResponse.json(
+      { error: clientSafeError('[PATCH /api/settings/theme]', error, 'Could not save theme.') },
+      { status: 500 },
+    )
+  }
   if (!data || data.length === 0) {
     return NextResponse.json(
       { error: 'Theme not saved — no profile row matched this account.' },
