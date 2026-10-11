@@ -1,8 +1,10 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
+import { cache } from 'react'
 import { adminClient } from '@/lib/supabase/admin'
 import { mediaSectionTitle } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { mediaListingRobots } from '@/lib/seo/mediaListingRobots'
 import { mediaPillarCollectionDescription } from '@/lib/seo/mediaCollectionJsonLd'
 import { MediaSectionLanding } from '@/components/media/MediaSectionLanding'
 import type { NewspaperStory } from '@/components/media/newspaper'
@@ -22,18 +24,7 @@ export async function generateStaticParams() {
   return [...Object.keys(PILLAR_CONFIG), 'general'].map(pillar => ({ pillar }))
 }
 
-export async function generateMetadata(
-  { params }: { params: { pillar: string } },
-): Promise<Metadata> {
-  if (!isKnownPillar(params.pillar)) notFound()
-  const label = params.pillar === 'general' ? 'Original' : getPillarLabel(params.pillar)
-  return publicPageMetadata(`/media/${params.pillar}`, {
-    title: mediaSectionTitle(label),
-    description: mediaPillarCollectionDescription(label),
-  })
-}
-
-async function fetchArticles(pillar: string): Promise<NewspaperStory[]> {
+const fetchArticles = cache(async (pillar: string): Promise<NewspaperStory[]> => {
   const query = adminClient
     .from('media_stories')
     .select('id, title, slug, featured_image_url, pillar, published_at, body, author, excerpt, is_published, views, story_type')
@@ -46,6 +37,19 @@ async function fetchArticles(pillar: string): Promise<NewspaperStory[]> {
     : await query.eq('pillar', pillar)
 
   return listPublicMediaStories((data ?? []) as Array<NewspaperStory & { is_published?: boolean | null }>)
+})
+
+export async function generateMetadata(
+  { params }: { params: { pillar: string } },
+): Promise<Metadata> {
+  if (!isKnownPillar(params.pillar)) notFound()
+  const label = params.pillar === 'general' ? 'Original' : getPillarLabel(params.pillar)
+  const articles = await fetchArticles(params.pillar)
+  return publicPageMetadata(`/media/${params.pillar}`, {
+    title: mediaSectionTitle(label),
+    description: mediaPillarCollectionDescription(label),
+    ...mediaListingRobots(articles.length),
+  })
 }
 
 export default async function MediaPillarPage({

@@ -4,14 +4,36 @@
  * membership Product / Offer catalog; /live ships a WebPage plus a
  * keynote/speaking Service with no price; /fit ships one VIP Product / Offer.
  * Media listing pages use mediaCollectionJsonLd.ts (CollectionPage).
+ * /about ships AboutPage + BreadcrumbList. /contact ships ContactPage +
+ * BreadcrumbList. Both join the homepage publisher by ORGANIZATION_ID.
  *
  * Brand lock: Evolved Pros. Never Evolved Media.
+ *
+ * homeOrganizationJsonLd() stays without @id. Pricing, live, fit, and media
+ * publishers keep that shape so their rendered JSON-LD does not change.
  */
 
+import {
+  ABOUT_DESCRIPTION,
+  ABOUT_GEORGE,
+  ABOUT_GEORGE_NAME,
+  ABOUT_HERO_KICKER,
+  ABOUT_PATH,
+  ABOUT_ROLE,
+  ABOUT_TITLE,
+  ABOUT_WHAT,
+} from '@/lib/about/copy'
 import { FIT_PAGE_DESCRIPTION, FIT_PAGE_TITLE, FIT_VIP_MONTHLY } from '@/lib/fit/copy'
 import { HOME_SUB } from '@/lib/home/conversion'
+import { PUBLIC_FOOTER_LINKS } from '@/lib/layout/publicFooter'
 import { TIERS, TIER_DISPLAY_NAMES } from '@/lib/pricing'
 import { CANONICAL_ORIGIN, SITE_NAME, canonicalUrl } from '@/lib/seo/canonical'
+
+/** Same node the homepage WebSite publisher and /about Organization share. */
+export const ORGANIZATION_ID = `${CANONICAL_ORIGIN}/#organization`
+
+/** George Leith, defined on /about. */
+export const GEORGE_LEITH_ID = `${canonicalUrl(ABOUT_PATH)}#george-leith`
 
 export function homeOrganizationJsonLd() {
   return {
@@ -21,7 +43,21 @@ export function homeOrganizationJsonLd() {
   }
 }
 
-/** WebSite + nested Organization for `/`. Matches article publisher naming. */
+/**
+ * Organization identity with a stable @id. Homepage publisher and /contact
+ * use this. /about adds description and founder on the same @id.
+ */
+export function siteOrganizationJsonLd() {
+  const org = homeOrganizationJsonLd()
+  return {
+    '@type': org['@type'],
+    '@id': ORGANIZATION_ID,
+    name: org.name,
+    url: org.url,
+  }
+}
+
+/** WebSite + nested Organization for `/`. Publisher @id matches /about. */
 export function homeJsonLd() {
   return {
     '@context': 'https://schema.org',
@@ -29,7 +65,7 @@ export function homeJsonLd() {
     name: SITE_NAME,
     url: CANONICAL_ORIGIN,
     description: HOME_SUB,
-    publisher: homeOrganizationJsonLd(),
+    publisher: siteOrganizationJsonLd(),
   }
 }
 
@@ -200,4 +236,94 @@ export function fitJsonLd() {
  */
 export function jsonLdScriptHtml(value: unknown): string {
   return JSON.stringify(value).replace(/</g, '\\u003c')
+}
+
+type BreadcrumbCrumb = {
+  name: string
+  path: string
+}
+
+/**
+ * Home > page. Same ListItem shape media listing pages emit:
+ * position, name, and item as a www canonical URL.
+ */
+export function breadcrumbListJsonLd(crumbs: readonly BreadcrumbCrumb[]) {
+  return {
+    '@context': 'https://schema.org' as const,
+    '@type': 'BreadcrumbList' as const,
+    itemListElement: crumbs.map((crumb, index) => ({
+      '@type': 'ListItem' as const,
+      position: index + 1,
+      name: crumb.name,
+      item: canonicalUrl(crumb.path),
+    })),
+  }
+}
+
+function footerLinkLabel(href: string): string {
+  const label = PUBLIC_FOOTER_LINKS.find(link => link.href === href)?.label
+  if (!label) throw new Error(`No public footer label for ${href}`)
+  return label
+}
+
+/**
+ * George Leith as published on /about: name, Founder, and the bio paragraph.
+ * worksFor points at ORGANIZATION_ID so the person joins that node.
+ */
+function georgeLeithJsonLd() {
+  return {
+    '@type': 'Person' as const,
+    '@id': GEORGE_LEITH_ID,
+    name: ABOUT_GEORGE_NAME,
+    jobTitle: ABOUT_ROLE,
+    description: ABOUT_GEORGE[0],
+    worksFor: { '@id': ORGANIZATION_ID },
+  }
+}
+
+/**
+ * AboutPage whose subject is the Evolved Pros Organization, plus the
+ * founder Person on that same @id. Breadcrumb is Home > About.
+ */
+export function aboutPageSchemas() {
+  const organization = {
+    ...siteOrganizationJsonLd(),
+    description: ABOUT_WHAT[0],
+    founder: georgeLeithJsonLd(),
+  }
+  const page = {
+    '@context': 'https://schema.org' as const,
+    '@type': 'AboutPage' as const,
+    name: ABOUT_TITLE,
+    description: ABOUT_DESCRIPTION,
+    url: canonicalUrl(ABOUT_PATH),
+    mainEntity: organization,
+    about: { '@id': ORGANIZATION_ID },
+  }
+  const breadcrumb = breadcrumbListJsonLd([
+    { name: 'Home', path: '/' },
+    { name: ABOUT_HERO_KICKER, path: ABOUT_PATH },
+  ])
+  return [page, breadcrumb] as const
+}
+
+/**
+ * ContactPage linked to the same Organization @id as the homepage publisher.
+ * No inboxes, phones, or addresses: those stay in the page HTML only.
+ * Breadcrumb is Home > Contact.
+ */
+export function contactPageSchemas() {
+  const page = {
+    '@context': 'https://schema.org' as const,
+    '@type': 'ContactPage' as const,
+    name: footerLinkLabel('/contact'),
+    url: canonicalUrl('/contact'),
+    mainEntity: siteOrganizationJsonLd(),
+    about: { '@id': ORGANIZATION_ID },
+  }
+  const breadcrumb = breadcrumbListJsonLd([
+    { name: 'Home', path: '/' },
+    { name: footerLinkLabel('/contact'), path: '/contact' },
+  ])
+  return [page, breadcrumb] as const
 }

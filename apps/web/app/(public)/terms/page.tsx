@@ -1,6 +1,13 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { LdJson } from '@/components/seo/LdJson'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import {
+  TERMS_PAGE_DESCRIPTION,
+  TERMS_PAGE_NAME,
+  TERMS_PAGE_TITLE,
+  termsPageJsonLd,
+} from '@/lib/seo/evolvedLegalJsonLd'
 import { SPEAKING_EMAIL, SUPPORT_EMAIL } from '@/lib/layout/publicFooter'
 import {
   GOVERNING_LAW_AND_VENUE,
@@ -18,9 +25,8 @@ import {
 
 // Unique title on purpose — this page must NOT inherit the homepage meta.
 export const metadata: Metadata = publicPageMetadata('/terms', {
-  title: 'Terms of Service — Evolved Pros',
-  description:
-    'The terms that govern membership and use of the Evolved Pros platform, operated by GWLeith Revenue Growth Solutions.',
+  title: TERMS_PAGE_TITLE,
+  description: TERMS_PAGE_DESCRIPTION,
 })
 
 /**
@@ -37,17 +43,19 @@ export const metadata: Metadata = publicPageMetadata('/terms', {
  */
 export default function TermsPage() {
   return (
-    <LegalPage
-      eyebrow="Legal"
-      title="Terms of Service"
-      intro={
+    <>
+      <LdJson data={termsPageJsonLd()} />
+      <LegalPage
+        eyebrow="Legal"
+        title={TERMS_PAGE_NAME}
+        intro={
         <p style={{ margin: 0 }}>
           These terms govern your access to and use of the Evolved Pros website and
           membership platform. By creating an account or using the platform, you agree
           to them.
         </p>
-      }
-    >
+        }
+      >
       <LegalSection title="Who we are">
         <LegalP>Evolved Pros is operated by GWLeith Revenue Growth Solutions.</LegalP>
         <LegalP>
@@ -220,5 +228,6 @@ export default function TermsPage() {
         </LegalP>
       </LegalSection>
     </LegalPage>
+    </>
   )
 }

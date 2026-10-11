@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import { AboutPage } from '@/components/about/AboutPage'
+import { LdJsonGraph } from '@/components/seo/LdJson'
 import { ABOUT_DESCRIPTION, ABOUT_PATH, ABOUT_TITLE } from '@/lib/about/copy'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { aboutPageSchemas } from '@/lib/seo/jsonld'
 
 // Unique title on purpose. This page must not inherit the homepage meta.
 export const metadata: Metadata = publicPageMetadata(ABOUT_PATH, {
@@ -14,5 +16,10 @@ export const metadata: Metadata = publicPageMetadata(ABOUT_PATH, {
  * (footer comes from the layout). Not the auth shell.
  */
 export default function AboutRoute() {
-  return <AboutPage />
+  return (
+    <>
+      <LdJsonGraph schemas={aboutPageSchemas()} />
+      <AboutPage />
+    </>
+  )
 }
