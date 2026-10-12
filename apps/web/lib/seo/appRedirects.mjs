@@ -78,18 +78,64 @@ function platformToWww(source, destination) {
   }
 }
 
+/**
+ * WordPress-era paths that still earn Search Console impressions and 404
+ * on this app (sc-domain:evolvedpros.com, 2025-06-01 through 2026-10-11).
+ *
+ * Destinations are absolute www URLs. A relative hop would 308 again on
+ * platform, because /media and /podcast already redirect to www.
+ * /pricing is the exception (held on platform) but the sitemap URL is www.
+ *
+ * The two article slugs have no migrated story under a new slug (no match
+ * in content/media or media_stories). They fall back to the pillar hubs.
+ *
+ * Slash and no-slash are both listed. next.config strips trailing slashes
+ * after this table; without the slash source that strip would be a chain.
+ */
+export const LEGACY_SEARCH_REDIRECTS = [
+  {
+    source: '/the-power-of-constant-evolution-reinvent-yourself-to-stay-ahead-in-2025',
+    destination: '/media/identity',
+  },
+  {
+    source: '/jamie-cohen',
+    destination: '/podcast/leading-digital-evolution-salem-media-jamie-cohen',
+  },
+  {
+    source: '/the-seven-deadly-sins-of-sales-a-wake-up-call-for-revenue-pros',
+    destination: '/media/execution',
+  },
+  { source: '/blog', destination: '/media' },
+  { source: '/subscribe', destination: '/pricing' },
+  { source: '/dennis-yu', destination: '/podcast/dennis-yu-authority-content' },
+]
+
+function legacySearchRedirects() {
+  const rules = []
+  for (const { source, destination } of LEGACY_SEARCH_REDIRECTS) {
+    const absolute = `${WWW_ORIGIN}${destination}`
+    // Slash form first so it wins over the later no-slash catch-all.
+    for (const path of [`${source}/`, source]) {
+      rules.push({ source: path, destination: absolute, permanent: true })
+    }
+  }
+  return rules
+}
+
 export function appRedirects() {
   return [
     // Public Railway hostname still 200s the app and would mint cookies on
     // the wrong host. Send leftover *.up.railway.app page hits to platform.
     // Keep /api on the Railway host so healthchecks and leftover webhook
-    // URLs keep working.
+    // URLs keep working. This stays first so /blog and the other legacy
+    // paths on the Railway host do not jump straight to www.
     {
       source: '/:path((?!api/).*)',
       has: [{ type: 'host', value: RAILWAY_PUBLIC_HOST }],
       destination: `${PLATFORM_ORIGIN}/:path`,
       permanent: true,
     },
+    ...legacySearchRedirects(),
     // /scoreboard was folded into /home (Goals → Home consolidation).
     { source: '/scoreboard', destination: '/home', permanent: true },
 
