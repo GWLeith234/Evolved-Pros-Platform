@@ -13,6 +13,7 @@ export function mediaStoryHead(story: Pick<
     title: mediaStoryTitle(
       stripEmDashCopy(story.title),
       stripEmDashCopy(story.seo_title || ''),
+      story.slug,
     ),
     description: stripEmDashCopy(story.seo_description || story.excerpt || ''),
     image: resolveStoryArtUrl(story.featured_image_url) || DEFAULT_OG_IMAGE,

@@ -22,8 +22,12 @@ export const MEDIA_DESK_TAGLINE =
   'The Evolved Pros desk for sales, identity, and execution stories.'
 
 /** Article <title> only. H1 stays the stored headline. */
-export function mediaStoryTitle(storyTitle: string, seoTitle?: string | null): string {
-  return fitDocumentTitle(storyTitle, seoTitle)
+export function mediaStoryTitle(
+  storyTitle: string,
+  seoTitle?: string | null,
+  slug?: string | null,
+): string {
+  return fitDocumentTitle(storyTitle, seoTitle, slug)
 }
 
 export function mediaSectionTitle(section: string): string {

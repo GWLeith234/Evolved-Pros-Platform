@@ -43,7 +43,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ep = await getEpisodeBySlug(params.slug)
   if (!ep) notFound()
-  const title = fitDocumentTitle(ep.title)
+  const title = fitDocumentTitle(ep.title, null, ep.slug)
   const description = summaryText(ep) || `${ep.title}${ep.guest_name ? ` with ${ep.guest_name}` : ''} on ${SERIES_NAME}.`
   const image = ytThumb(ep.youtube_id, 'max')
   return publicPageMetadata(`/podcast/${ep.slug}`, {
