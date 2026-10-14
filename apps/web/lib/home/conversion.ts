@@ -36,8 +36,9 @@ export const HERO_IMAGE_HEIGHT = 1024
 export const HERO_IMAGE_OBJECT_POSITION = 'center 20%' as const
 export const HOME_ARIA = 'Evolved Pros home' as const
 
+/** Document <title> for /. At most 60 characters. H1 stays HOME_H1. */
 export const HOME_TITLE =
-  'Evolved Pros | The daily operating system for sales professionals'
+  'Evolved Pros | Daily Operating System for Sales Pros'
 export const HOME_H1 = 'The daily operating system for sales professionals.'
 export const HOME_SUB =
   'Everything but the curriculum is free. The Academy is what you upgrade for.'

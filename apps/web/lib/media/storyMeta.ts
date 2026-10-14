@@ -10,7 +10,10 @@ export function mediaStoryHead(story: Pick<
   'title' | 'excerpt' | 'seo_title' | 'seo_description' | 'featured_image_url' | 'author' | 'slug'
 >): { title: string; description: string; image: string; byline: string } {
   return {
-    title: stripEmDashCopy(story.seo_title || mediaStoryTitle(story.title)),
+    title: mediaStoryTitle(
+      stripEmDashCopy(story.title),
+      stripEmDashCopy(story.seo_title || ''),
+    ),
     description: stripEmDashCopy(story.seo_description || story.excerpt || ''),
     image: resolveStoryArtUrl(story.featured_image_url) || DEFAULT_OG_IMAGE,
     byline: lockedArticleByline(story),

@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { MediaStoryCrawlIndex } from '@/lib/media/crawlIndex'
 import { getPublishedMediaStoriesForHub } from '@/lib/media/public'
-import { MEDIA_HUB_DESCRIPTION, MEDIA_HUB_TITLE } from '@/lib/media/brand'
+import { MEDIA_HUB_DESCRIPTION, MEDIA_HUB_DOCUMENT_TITLE } from '@/lib/media/brand'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 import { LdJsonGraph } from '@/components/seo/LdJson'
 import { mediaIndexCollectionSchemas } from '@/lib/seo/mediaCollectionJsonLd'
@@ -19,11 +19,11 @@ const MediaPortalClient = dynamic(
 export const revalidate = 60
 
 export const metadata: Metadata = publicPageMetadata('/media', {
-  title: MEDIA_HUB_TITLE,
+  title: MEDIA_HUB_DOCUMENT_TITLE,
   description: MEDIA_HUB_DESCRIPTION,
   twitter: {
     card: 'summary_large_image',
-    title: MEDIA_HUB_TITLE,
+    title: MEDIA_HUB_DOCUMENT_TITLE,
     description: MEDIA_HUB_DESCRIPTION,
   },
 })
