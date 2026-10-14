@@ -23,7 +23,7 @@ describe('public chrome copy', () => {
     expect(read('../../app/live/page.tsx')).not.toMatch(/LIVE — Evolved Pros/)
     expect(read('../../app/(public)/podcast/(index)/page.tsx')).toMatch(/\$\{SERIES_NAME\} \| Evolved Pros/)
     expect(read('../../app/(public)/podcast/[slug]/page.tsx')).toMatch(
-      /fitDocumentTitle\(ep\.title\)/,
+      /fitDocumentTitle\(ep\.title, null, ep\.slug\)/,
     )
     expect(read('../../app/(public)/podcast/[slug]/page.tsx')).not.toMatch(
       /\$\{ep\.title\} \| \$\{SERIES_NAME\}/,
