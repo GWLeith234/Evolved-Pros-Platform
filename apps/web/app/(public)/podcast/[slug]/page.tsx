@@ -28,6 +28,7 @@ import {
   type PublicEpisode,
 } from '@/lib/podcast/public'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { fitDocumentTitle } from '@/lib/seo/documentTitle'
 import { guestStillObjectPosition } from '@/lib/podcast/stillUrl'
 import { interleaveAds } from '@/lib/ads/rhythm'
 
@@ -42,7 +43,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ep = await getEpisodeBySlug(params.slug)
   if (!ep) notFound()
-  const title = `${ep.title} | ${SERIES_NAME}`
+  const title = fitDocumentTitle(ep.title, null, ep.slug)
   const description = summaryText(ep) || `${ep.title}${ep.guest_name ? ` with ${ep.guest_name}` : ''} on ${SERIES_NAME}.`
   const image = ytThumb(ep.youtube_id, 'max')
   return publicPageMetadata(`/podcast/${ep.slug}`, {

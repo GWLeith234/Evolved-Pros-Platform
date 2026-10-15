@@ -58,8 +58,9 @@ import {
 describe('conversion homepage locks', () => {
   it('uses the locked title, promise, and CTA labels', () => {
     expect(HOME_TITLE).toBe(
-      'Evolved Pros | The daily operating system for sales professionals',
+      'Evolved Pros | Daily Operating System for Sales Pros',
     )
+    expect(HOME_TITLE.length).toBeLessThanOrEqual(60)
     expect(HOME_H1).toBe('The daily operating system for sales professionals.')
     expect(HOME_SUB).toBe(
       'Everything but the curriculum is free. The Academy is what you upgrade for.',
