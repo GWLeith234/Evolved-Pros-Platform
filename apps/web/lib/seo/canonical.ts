@@ -17,6 +17,7 @@
  */
 
 import type { Metadata } from 'next'
+import { metaDescriptionOverride, trimMetaDescription } from '@/lib/seo/metaDescription'
 
 /** Brand origin used by existing public HTML canonical / og:url tags. */
 export const CANONICAL_ORIGIN = 'https://www.evolvedpros.com'
@@ -105,6 +106,19 @@ function metadataString(value: unknown): string | undefined {
   return typeof value === 'string' ? value : undefined
 }
 
+/**
+ * Word-boundary cap so description, og:description, and twitter:description match.
+ * A path in META_DESCRIPTION_OVERRIDES skips the cut and uses that sentence.
+ */
+function boundedDescription(pathname: string, value: unknown): string | undefined {
+  const override = metaDescriptionOverride(pathname)
+  if (override) return override
+  const text = metadataString(value)
+  if (!text?.trim()) return undefined
+  const bounded = trimMetaDescription(text)
+  return bounded || undefined
+}
+
 /** Keep the default share image when a page does not supply one. */
 function shareImages<T>(fallback: T, provided: unknown): T {
   if (provided == null) return fallback
@@ -123,6 +137,12 @@ function shareImages<T>(fallback: T, provided: unknown): T {
  * and copies title / description onto both og and twitter instead of relying
  * on layout inherit. Live /media kept twitter:title as the root "Evolved Pros"
  * after #100 renamed the document title.
+ *
+ * Descriptions longer than 155 characters are cut on a word boundary here,
+ * including a description repeated on openGraph or twitter, so the three
+ * tags stay the same string. Paths whose cut would end mid-sentence use
+ * the hand-written override instead, on all three tags. Titles are not
+ * capped in this helper.
  */
 export function publicPageMetadata(
   pathname: string,
@@ -131,23 +151,26 @@ export function publicPageMetadata(
   const url = canonicalUrl(pathname)
   const { openGraph, alternates, twitter, ...rest } = extra
   const title = metadataString(extra.title)
-  const description = metadataString(extra.description)
+  const description = boundedDescription(pathname, extra.description)
+  const ogDescription = boundedDescription(pathname, openGraph?.description) ?? description
+  const twitterDescription = boundedDescription(pathname, twitter?.description) ?? description
   return {
     ...rest,
+    ...(description ? { description } : {}),
     alternates: { ...alternates, canonical: url },
     openGraph: {
       ...DEFAULT_OPEN_GRAPH,
       ...(title ? { title } : {}),
-      ...(description ? { description } : {}),
       ...openGraph,
+      ...(ogDescription ? { description: ogDescription } : {}),
       images: shareImages(DEFAULT_OPEN_GRAPH.images, openGraph?.images),
       url,
     },
     twitter: {
       ...DEFAULT_TWITTER,
       ...(title ? { title } : {}),
-      ...(description ? { description } : {}),
       ...twitter,
+      ...(twitterDescription ? { description: twitterDescription } : {}),
       images: shareImages(DEFAULT_TWITTER.images, twitter?.images),
     },
   }

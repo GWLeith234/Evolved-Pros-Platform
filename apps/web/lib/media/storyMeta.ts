@@ -3,6 +3,7 @@ import { stripEmDashCopy } from '@/lib/home/cardImagery'
 import { mediaStoryTitle } from '@/lib/media/brand'
 import { lockedArticleByline, resolveStoryArtUrl } from '@/lib/media/storyArt'
 import { DEFAULT_OG_IMAGE } from '@/lib/seo/canonical'
+import { fitMetaDescription, plainTextBlocks } from '@/lib/seo/metaDescription'
 import type { MediaStoryRecord } from '@/lib/media/storyRecord'
 
 export function mediaStoryHead(story: Pick<
@@ -21,19 +22,34 @@ export function mediaStoryHead(story: Pick<
   }
 }
 
+/**
+ * Article meta description. A dek already in range is kept. A short dek
+ * is extended with the excerpt and later body paragraphs. A long dek is
+ * trimmed on a word boundary. Stored seo_description and body are not edited.
+ */
+export function publishedStoryDescription(
+  story: Pick<MediaStoryRecord, 'seo_description' | 'excerpt' | 'body'>,
+): string {
+  const dek = stripEmDashCopy(story.seo_description || story.excerpt || '')
+  const excerpt = story.excerpt ? stripEmDashCopy(story.excerpt) : ''
+  const blocks = plainTextBlocks(story.body).map(block => stripEmDashCopy(block))
+  return fitMetaDescription(dek, [excerpt, ...blocks])
+}
+
 /** OG / Twitter fields for the public article and the draft preview. */
 export function mediaStorySocialMetadata(
   story: MediaStoryRecord,
   extra?: { robots?: Metadata['robots'] },
 ): Metadata {
   const head = mediaStoryHead(story)
+  const description = publishedStoryDescription(story)
   return {
     title: head.title,
-    description: head.description,
+    description,
     ...(extra?.robots ? { robots: extra.robots } : {}),
     openGraph: {
       title: head.title,
-      description: head.description,
+      description,
       type: 'article',
       publishedTime: story.published_at ?? undefined,
       modifiedTime: story.updated_at ?? undefined,
@@ -44,7 +60,7 @@ export function mediaStorySocialMetadata(
     twitter: {
       card: 'summary_large_image',
       title: head.title,
-      description: head.description,
+      description,
       images: [head.image],
     },
   }

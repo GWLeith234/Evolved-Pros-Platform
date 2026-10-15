@@ -13,12 +13,14 @@
  * Canonical origin stays https://www.evolvedpros.com via canonicalUrl.
  */
 
+import { stripEmDashCopy } from '@/lib/home/cardImagery'
 import { popularStories, splitSectionDesk } from '@/lib/media/desk'
 import { mediaStoryHref } from '@/lib/media/paths'
 import { SECTION_LATEST_LIST } from '@/lib/media/scrollInventory'
 import { MEDIA_HUB_DESCRIPTION, MEDIA_HUB_TITLE } from '@/lib/media/brand'
 import { canonicalUrl } from '@/lib/seo/canonical'
 import { homeOrganizationJsonLd } from '@/lib/seo/jsonld'
+import { fitMetaDescription, META_DESCRIPTION_MAX, META_DESCRIPTION_MIN } from '@/lib/seo/metaDescription'
 
 /** First N rendered items. Section desks already stop near this size. */
 export const MEDIA_COLLECTION_ITEM_CAP = 20
@@ -69,11 +71,32 @@ export type MediaCollectionSchemas = readonly [
 ]
 
 /**
- * Same sentence generateMetadata uses for /media/[pillar], including
+ * Description generateMetadata uses for /media/[pillar], including
  * /media/general ("Original").
+ *
+ * With no story titles this stays the desk sentence. With titles, whole
+ * latest titles (newest first) are appended until another one would pass
+ * 155 characters. A single title that cannot fit whole is trimmed on a
+ * word boundary so the hub still clears 70.
  */
-export function mediaPillarCollectionDescription(label: string): string {
-  return `${label} stories from the Evolved Pros desk.`
+export function mediaPillarCollectionDescription(
+  label: string,
+  storyTitles: readonly string[] = [],
+): string {
+  const base = `${label} stories from the Evolved Pros desk.`
+  const titles = storyTitles
+    .map(title => stripEmDashCopy(title).replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+  if (titles.length === 0) return base
+
+  let text = base
+  for (const title of titles) {
+    const candidate = text === base ? `${base} ${title}` : `${text}, ${title}`
+    if (candidate.length > META_DESCRIPTION_MAX) break
+    text = candidate
+  }
+  if (text.length >= META_DESCRIPTION_MIN) return text
+  return fitMetaDescription(base, [titles.join(', ')])
 }
 
 /** Drop blank names, keep order, stop at the cap. */

@@ -172,6 +172,28 @@ describe('publicPageMetadata', () => {
     expect(pricedOg?.title).toBe('Pricing')
   })
 
+  it('trims description, og:description, and twitter:description on one word boundary', () => {
+    const long = 'Channel veteran Juan Fernandez on taking MSPs from managed to modern: outcome-based buying, the hot pan risks of ungoverned AI, betting on humans, and the federal contract collapse that cost him everything.'
+    expect(long.length).toBeGreaterThan(155)
+    const meta = publicPageMetadata('/podcast/word-boundary-example', {
+      title: 'Juan Fernandez | Evolved Pros Podcast',
+      description: long,
+      openGraph: { type: 'article', title: 'Juan Fernandez | Evolved Pros Podcast', description: long },
+      twitter: { card: 'summary_large_image', title: 'Juan Fernandez | Evolved Pros Podcast', description: long },
+    })
+    expect(meta.description).toBe(meta.openGraph?.description)
+    expect(meta.description).toBe(
+      (meta.twitter as { description?: string } | undefined)?.description,
+    )
+    expect(typeof meta.description).toBe('string')
+    const description = String(meta.description)
+    expect(description.length).toBeGreaterThanOrEqual(70)
+    expect(description.length).toBeLessThanOrEqual(155)
+    expect(long.startsWith(description)).toBe(true)
+    expect(description.endsWith('the')).toBe(true)
+    expect(meta.title).toBe('Juan Fernandez | Evolved Pros Podcast')
+  })
+
   it('fills og:image and twitter:image when the page does not set one', () => {
     const meta = publicPageMetadata('/pricing', {
       title: 'Pricing',

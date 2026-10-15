@@ -47,7 +47,7 @@ export async function generateMetadata(
   const articles = await fetchArticles(params.pillar)
   return publicPageMetadata(`/media/${params.pillar}`, {
     title: mediaSectionTitle(label),
-    description: mediaPillarCollectionDescription(label),
+    description: mediaPillarCollectionDescription(label, articles.map(article => article.title)),
     ...mediaListingRobots(articles.length),
   })
 }

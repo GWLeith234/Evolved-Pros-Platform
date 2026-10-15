@@ -7,7 +7,7 @@ import { MediaSocialCard } from '@/components/media/MediaSocialCard'
 import { authorizeMediaPreview, getMediaStoryBySlug } from '@/lib/media/previewStories'
 import { firstSearchParam } from '@/lib/media/previewWeek'
 import { isPreviewSlug } from '@/lib/media/previewToken'
-import { mediaStoryHead, mediaStorySocialMetadata, PREVIEW_ROBOTS } from '@/lib/media/storyMeta'
+import { mediaStoryHead, mediaStorySocialMetadata, PREVIEW_ROBOTS, publishedStoryDescription } from '@/lib/media/storyMeta'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -61,7 +61,7 @@ export default async function MediaStoryCardPreviewPage({
           </p>
           <MediaSocialCard
             title={head.title}
-            description={head.description}
+            description={publishedStoryDescription(story)}
             image={head.image}
             imageAlt={story.title}
           />
