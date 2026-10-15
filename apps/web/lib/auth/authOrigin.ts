@@ -11,8 +11,11 @@
  * A magic link whose redirect_to names www would set the session on www,
  * where member routes are not the auth host.
  *
- * Brand hosts AND the public Railway host canonicalize to platform.
- * localhost is left alone so local `next dev` still works.
+ * Brand hosts and the public Railway host canonicalize to platform.
+ * Loopback (localhost, 127.0.0.1, ::1) is returned as its own origin so
+ * local `next dev` still works. Every other host falls back to platform.
+ * /auth/callback builds Location from X-Forwarded-Host, which the client
+ * can set; echoing an unlisted host is an open redirect.
  */
 
 import { safeRedirectPath } from './safeRedirect'
@@ -24,6 +27,11 @@ const CANONICALIZE_HOSTS = new Set([
   'evolvedpros.com',
   'platform.evolvedpros.com',
 ])
+
+/** Origins safe to echo. Anything else must not become a redirect base. */
+const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]'])
+
+const RAILWAY_PUBLIC_HOST = 'web-production-db912.up.railway.app'
 
 function trimOrigin(value: string | undefined | null): string | undefined {
   const trimmed = value?.trim().replace(/\/+$/, '')
@@ -38,6 +46,7 @@ export function resolveAuthOrigin(
   if (!value) return AUTH_ORIGIN
   try {
     const url = new URL(value.includes('://') ? value : `https://${value}`)
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return AUTH_ORIGIN
     const host = url.hostname.toLowerCase()
     if (
       CANONICALIZE_HOSTS.has(host) ||
@@ -46,10 +55,38 @@ export function resolveAuthOrigin(
     ) {
       return AUTH_ORIGIN
     }
-    return `${url.protocol}//${url.host}`
+    if (LOOPBACK_HOSTS.has(host)) return url.origin
+    return AUTH_ORIGIN
   } catch {
     return AUTH_ORIGIN
   }
+}
+
+function firstHeaderToken(value: string | null): string | undefined {
+  const token = value?.split(',')[0]?.trim()
+  return token ? token : undefined
+}
+
+/**
+ * Base origin for /auth/callback redirects.
+ *
+ * request.url on Railway is the internal address, so the public host comes
+ * from forwarded headers. Only the first value of each header is used, and
+ * the scheme must be http or https. resolveAuthOrigin then refuses any host
+ * that is not a brand host or loopback.
+ */
+export function authRedirectBase(
+  forwardedHost: string | null,
+  forwardedProto: string | null,
+  hostHeader: string | null,
+): string {
+  const host =
+    firstHeaderToken(forwardedHost) ||
+    firstHeaderToken(hostHeader) ||
+    RAILWAY_PUBLIC_HOST
+  const protoToken = firstHeaderToken(forwardedProto)
+  const proto = protoToken === 'http' || protoToken === 'https' ? protoToken : 'https'
+  return resolveAuthOrigin(`${proto}://${host}`)
 }
 
 export function authCallbackUrl(
