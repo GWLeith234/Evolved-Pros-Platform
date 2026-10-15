@@ -1,6 +1,5 @@
-'use client'
-
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import type { CSSProperties, ReactNode } from 'react'
 import type { PodcastEpisode, PodcastPillar } from '@/lib/podcast/transforms'
 import { PILLAR_META, displayEpisodeTitle } from '@/lib/podcast/transforms'
 
@@ -41,9 +40,50 @@ interface PodcastCoverCardProps {
   interactive?: boolean
 }
 
-export function PodcastCoverCard({ episode, interactive = true }: PodcastCoverCardProps) {
-  const router = useRouter()
+const CARD_STYLE: CSSProperties = {
+  position: 'relative',
+  width: '100%',
+  aspectRatio: '9 / 16',
+  background: CREAM,
+  overflow: 'hidden',
+  display: 'flex',
+  flexDirection: 'column',
+  textDecoration: 'none',
+  color: 'inherit',
+  border: '1px solid var(--podcast-border-soft2)',
+}
 
+function CoverCardFrame({
+  interactive,
+  href,
+  ariaLabel,
+  children,
+}: {
+  interactive: boolean
+  href: string
+  ariaLabel: string
+  children: ReactNode
+}) {
+  const className = interactive
+    ? 'podcast-cover-card podcast-cover-card--interactive'
+    : 'podcast-cover-card'
+  // Crawlable first-party URL. A button + router.push leaves the slug in the
+  // RSC payload only, so Googlebot never sees hub → episode links.
+  if (interactive) {
+    return (
+      <Link href={href} className={className} aria-label={ariaLabel} style={{ ...CARD_STYLE, cursor: 'pointer' }}>
+        {children}
+      </Link>
+    )
+  }
+  return (
+    <article className={className} style={{ ...CARD_STYLE, cursor: 'default' }}>
+      {children}
+    </article>
+  )
+}
+
+export function PodcastCoverCard({ episode, interactive = true }: PodcastCoverCardProps) {
   const guestName = episode.guest.name?.trim() || ''
   const isPilot = !guestName
   // Prefer guest portrait; fall back to episode cover/thumbnail so we never
@@ -64,36 +104,11 @@ export function PodcastCoverCard({ episode, interactive = true }: PodcastCoverCa
   const metaParts = [dateStr, episode.duration > 0 ? `${episode.duration} MIN` : ''].filter(Boolean)
   const metaLine = metaParts.join(' · ')
 
-  const navigate = () => interactive && router.push(`/podcast/${episode.slug}`)
-
   return (
-    <article
-      className={interactive ? 'podcast-cover-card podcast-cover-card--interactive' : 'podcast-cover-card'}
-      role={interactive ? 'button' : undefined}
-      tabIndex={interactive ? 0 : undefined}
-      onClick={interactive ? navigate : undefined}
-      onKeyDown={
-        interactive
-          ? (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                navigate()
-              }
-            }
-          : undefined
-      }
-      aria-label={interactive ? `Watch ${headline}: ${title}` : undefined}
-      style={{
-        position: 'relative',
-        width: '100%',
-        aspectRatio: '9 / 16',
-        background: CREAM,
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        cursor: interactive ? 'pointer' : 'default',
-        border: '1px solid var(--podcast-border-soft2)',
-      }}
+    <CoverCardFrame
+      interactive={interactive}
+      href={`/podcast/${episode.slug}`}
+      ariaLabel={`Watch ${headline}: ${title}`}
     >
       {/* ART — flex-shrinks so the navy plate always keeps its full height */}
       <div
@@ -247,6 +262,6 @@ export function PodcastCoverCard({ episode, interactive = true }: PodcastCoverCa
           }
         }
       `}</style>
-    </article>
+    </CoverCardFrame>
   )
 }
