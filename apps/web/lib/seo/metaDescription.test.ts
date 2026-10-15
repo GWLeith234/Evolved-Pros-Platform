@@ -3,12 +3,16 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { publishedStoryDescription } from '@/lib/media/storyMeta'
+import { publicPageMetadata } from '@/lib/seo/canonical'
 import { PRICING_PAGE_DESCRIPTION } from '@/lib/seo/jsonld'
 import { mediaPillarCollectionDescription } from '@/lib/seo/mediaCollectionJsonLd'
 import {
   META_DESCRIPTION_MAX,
   META_DESCRIPTION_MIN,
+  META_DESCRIPTION_OVERRIDES,
   fitMetaDescription,
+  metaDescriptionNeedsMidSentenceCut,
+  metaDescriptionOverride,
   plainTextBlocks,
   trimMetaDescription,
 } from './metaDescription'
@@ -181,6 +185,113 @@ describe('pricing description', () => {
     assertInRange(PRICING_PAGE_DESCRIPTION)
     const page = readFileSync(resolve(here, '../../app/(public)/pricing/page.tsx'), 'utf8')
     expect(page).toContain('description: PRICING_PAGE_DESCRIPTION')
+  })
+})
+
+/**
+ * Every sitemap URL whose stored description is over 155 characters.
+ * Text is what the helper trims, after the em-dash sanitizer the page already runs.
+ * Lengths are the 2026-10-15 crawl.
+ */
+const SITEMAP_DESCRIPTIONS_OVER_MAX: ReadonlyArray<{ path: string; source: string }> = [
+  {
+    path: '/podcast/evolved-pros-podcast-ep-010-juan-fernandez',
+    source: 'Channel veteran Juan Fernandez on taking MSPs from managed to modern: outcome-based buying, the hot pan risks of ungoverned AI, betting on humans, and the federal contract collapse that cost him everything.',
+  },
+  {
+    path: '/podcast/trust-credibility-cold-calling-jim-thompson',
+    source: "Journalist-turned-storyteller Jim Thompson on selling as service, telling stories with numbers, lessons from Gary Vaynerchuk's team, and why trust. built through story. is what unlocks word of mouth.",
+  },
+  {
+    path: '/podcast/reinvention-partnerships-long-game-martin-scholz',
+    source: 'Berlin advisor Martin Scholz on partnerships as the evolution of go-to-market: why 80% fail, what actually makes them work, and his reinvention from burnout-travel executive to a life that fits.',
+  },
+  {
+    path: '/podcast/fitness-nutrition-evolved-pros-carson-teagarden',
+    source: "Calisthenics coach Carson Teagarden on fitness that lasts: consistency over intensity, two or three goals not fifty, why it's growth not pain, and accountability as the real difference-maker.",
+  },
+  {
+    path: '/podcast/dennis-yu-authority-content',
+    source: "Dennis Yu joins George Leith for the Evolved Pros debut: evolving with AI, taking 'the network view,' hiring by proof, agents as multipliers, and why your value isn't your skill set.",
+  },
+  {
+    path: '/podcast/leading-digital-evolution-salem-media-jamie-cohen',
+    source: 'Salem Media CDO Jamie Cohen on leading digital transformation: anchoring change in purpose, failing fast, and why the pace only accelerates. with George Leith.',
+  },
+  {
+    path: '/media/strategy/what-happened-to-claudes-fable-5',
+    source: 'Anthropic shipped a frontier AI model, then deliberately put walls around it. The restraint is the story. and a lesson for anyone betting their craft on these tools.',
+  },
+  {
+    path: '/media/mental-toughness/the-power-of-resilience-building-mental-toughness-in-sales',
+    source: 'Every book on resilience will tell you to reframe failure. What they will not tell you is the entry fee: you have to stay in the hard situation long enough for the lesson to land.',
+  },
+  {
+    path: '/media/execution/execution-excellence-turning-plans-results',
+    source: 'The sales industry is obsessed with talent. The natural closer. The born communicator. The most consistent performers are almost never the most talented people in the room.',
+  },
+  {
+    path: '/media/strategy/what-ai-agents-actually-automate',
+    source: "Google's Business Home beta and an overnight backlink bot show what AI agents really take off your plate. It's the chores. Deciding what's worth doing is still on you.",
+  },
+  {
+    path: '/media/foundation/cooking-with-tallow-three-recipes',
+    source: "Beef tallow is stable, high-heat, and full of flavour. Here's what it is, an honest word on the saturated-fat question, and three recipes that earn their place.",
+  },
+  {
+    path: '/media/strategy/agentic-buying-proof-gap',
+    source: 'IAB Europe n=50 across 44 markets: 58% expect agentic buying at operational use or scale within a year, while 36 of 47 still have no day-to-day agentic system o',
+  },
+  {
+    path: '/media/strategy/ai-platforms-need-creators',
+    source: 'Social poured money into TV while claiming to replace it. Digiday put the parallel in print on September 16, 2026. AI platforms are chasing creators hard even t',
+  },
+  {
+    path: '/media/strategy/mid-sized-podcast-cpa',
+    source: "Audacy's Fall 2026 State of Audio cites Podscribe: mid-sized podcasts delivered 22% lower CPA than celebrity-scale shows. Fame is not the same as conversion.",
+  },
+  {
+    path: '/media/identity/the-industry-teaches-you-to-stand-out-nobody-teaches-you-to-stand-for-something',
+    source: 'After 30 years in sales leadership, 165+ events across 21 countries, and $100M+ in recurring revenue built, here is what I know about professional identity.',
+  },
+]
+
+describe('sitemap descriptions do not end mid-sentence', () => {
+  it('fails if any sitemap description would need a mid-sentence cut', () => {
+    const unprotected = SITEMAP_DESCRIPTIONS_OVER_MAX.filter(item =>
+      metaDescriptionNeedsMidSentenceCut(item.source) && !metaDescriptionOverride(item.path),
+    )
+    expect(unprotected.map(item => item.path)).toEqual([])
+
+    expect(Object.keys(META_DESCRIPTION_OVERRIDES).sort()).toEqual(
+      SITEMAP_DESCRIPTIONS_OVER_MAX.map(item => item.path).sort(),
+    )
+
+    for (const item of SITEMAP_DESCRIPTIONS_OVER_MAX) {
+      expect(item.source.length).toBeGreaterThan(META_DESCRIPTION_MAX)
+      expect(metaDescriptionNeedsMidSentenceCut(item.source)).toBe(true)
+
+      const override = metaDescriptionOverride(item.path)
+      expect(override).toBeTruthy()
+      const sentence = override ?? ''
+      expect(sentence.length).toBeGreaterThanOrEqual(120)
+      expect(sentence.length).toBeLessThanOrEqual(META_DESCRIPTION_MAX)
+      expect(sentence).toMatch(/[.!?]$/)
+      expect(sentence).not.toMatch(/[\u2013\u2014]/)
+      expect(metaDescriptionNeedsMidSentenceCut(sentence)).toBe(false)
+      expect(sentence).not.toBe(trimMetaDescription(item.source))
+
+      for (const incoming of [item.source, trimMetaDescription(item.source)]) {
+        const meta = publicPageMetadata(item.path, {
+          description: incoming,
+          openGraph: { description: incoming },
+          twitter: { description: incoming },
+        })
+        expect(meta.description).toBe(sentence)
+        expect(meta.openGraph?.description).toBe(sentence)
+        expect((meta.twitter as { description?: string } | undefined)?.description).toBe(sentence)
+      }
+    }
   })
 })
 

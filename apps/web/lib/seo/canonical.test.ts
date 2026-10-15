@@ -175,7 +175,7 @@ describe('publicPageMetadata', () => {
   it('trims description, og:description, and twitter:description on one word boundary', () => {
     const long = 'Channel veteran Juan Fernandez on taking MSPs from managed to modern: outcome-based buying, the hot pan risks of ungoverned AI, betting on humans, and the federal contract collapse that cost him everything.'
     expect(long.length).toBeGreaterThan(155)
-    const meta = publicPageMetadata('/podcast/evolved-pros-podcast-ep-010-juan-fernandez', {
+    const meta = publicPageMetadata('/podcast/word-boundary-example', {
       title: 'Juan Fernandez | Evolved Pros Podcast',
       description: long,
       openGraph: { type: 'article', title: 'Juan Fernandez | Evolved Pros Podcast', description: long },
