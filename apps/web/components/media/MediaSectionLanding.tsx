@@ -57,7 +57,7 @@ export async function MediaSectionLanding({
   const schemas = mediaSectionCollectionSchemas({
     path: `/media/${sectionId}`,
     name: title,
-    description: mediaPillarCollectionDescription(title),
+    description: mediaPillarCollectionDescription(title, articles.map(article => article.title)),
     items: sectionLandingStoryItems(articles),
   })
 

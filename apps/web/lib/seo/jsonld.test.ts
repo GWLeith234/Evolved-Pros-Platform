@@ -26,6 +26,7 @@ import {
   homeJsonLd,
   homeOrganizationJsonLd,
   liveJsonLd,
+  PRICING_PAGE_DESCRIPTION,
   pricingJsonLd,
   siteOrganizationJsonLd,
 } from './jsonld'
@@ -197,6 +198,9 @@ describe('pricing JSON-LD', () => {
     expect(schema.name).toBe('Evolved Pros Pricing')
     expect(schema.url).toBe(canonicalUrl('/pricing'))
     expect(schema.url).toBe('https://www.evolvedpros.com/pricing')
+    expect(schema.description).toBe(PRICING_PAGE_DESCRIPTION)
+    expect(schema.description.length).toBeGreaterThanOrEqual(70)
+    expect(schema.description.length).toBeLessThanOrEqual(155)
     expect(schema.publisher).toEqual(publisher)
     expect(schema.mainEntity['@type']).toBe('ItemList')
 

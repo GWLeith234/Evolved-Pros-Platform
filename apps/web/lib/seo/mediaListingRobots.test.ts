@@ -130,7 +130,7 @@ describe('media listing robots wiring', () => {
     expect(pillar).toContain('const articles = await fetchArticles(params.pillar)')
     expect(pillar).toContain('listPublicMediaStories')
     expect(pillar).toContain('MediaSectionLanding')
-    expect(pillar).toContain('mediaPillarCollectionDescription(label)')
+    expect(pillar).toContain('mediaPillarCollectionDescription(label, articles.map(article => article.title))')
     expect(pillar).not.toContain('noindex')
     expect(pillar).not.toContain("pillar === 'general' ? mediaListingRobots")
   })

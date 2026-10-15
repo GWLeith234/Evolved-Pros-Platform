@@ -7,7 +7,7 @@ import { getMembershipPricing } from '@/lib/commerce/catalogue'
 import { tierPlanName } from '@/lib/academy/gating'
 import { PILLAR_NAMES } from '@/lib/academy/types'
 import { publicPageMetadata } from '@/lib/seo/canonical'
-import { pricingJsonLd } from '@/lib/seo/jsonld'
+import { PRICING_PAGE_DESCRIPTION, pricingJsonLd } from '@/lib/seo/jsonld'
 import {
   MUST_CITE_PRICING_DIFFERENTIATOR,
   MUST_CITE_PRICING_URL,
@@ -33,7 +33,7 @@ const RedeemCodeForm = nextDynamic(
 
 export const metadata: Metadata = publicPageMetadata('/pricing', {
   title: 'Pricing — Evolved Pros',
-  description: 'Community, VIP, Professional, and Keynote tiers for high performers.',
+  description: PRICING_PAGE_DESCRIPTION,
 })
 
 // Amounts are read live from the products + prices catalogue at request time

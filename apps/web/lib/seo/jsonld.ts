@@ -131,13 +131,20 @@ function annualOffers(name: string, annual: number | null) {
     : []
 }
 
+/**
+ * Document description and WebPage JSON-LD for /pricing.
+ * Uses the tier names already on the cards, including The Evolved Pros 99.
+ */
+export const PRICING_PAGE_DESCRIPTION =
+  'Community, VIP, The Evolved Pros 99, and Keynote tiers for high performers.'
+
 export function pricingJsonLd() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: `${SITE_NAME} Pricing`,
     url: PRICING_URL,
-    description: 'Community, VIP, The Evolved Pros 99, and Keynote tiers for high performers.',
+    description: PRICING_PAGE_DESCRIPTION,
     publisher: homeOrganizationJsonLd(),
     mainEntity: {
       '@type': 'ItemList',
