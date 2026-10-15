@@ -7,6 +7,7 @@ import {
   PLATFORM_ORIGIN,
   PLATFORM_PUBLIC_HELD,
   PLATFORM_TO_WWW_EXACT_PATHS,
+  LEGACY_SEARCH_REDIRECTS,
   PLATFORM_TO_WWW_PATTERNS,
   RAILWAY_PUBLIC_HOST,
   WWW_ORIGIN,
@@ -57,9 +58,10 @@ function locationFor(
   host: string,
   pathname: string,
   query: Record<string, string> = {},
+  extraRules: RedirectRule[] = [],
 ) {
   const hostname = host.split(':', 1)[0].toLowerCase()
-  for (const rule of redirects()) {
+  for (const rule of [...redirects(), ...extraRules]) {
     const hostRules = (rule.has ?? []).filter((h) => h.type === 'host')
     if (hostRules.length > 0 && !hostRules.every((h) => new RegExp(`^${h.value}$`, 'i').test(hostname))) {
       continue
@@ -267,5 +269,48 @@ describe('appRedirects host policy', () => {
     const config = readFileSync(resolve(__dirname, '../../next.config.mjs'), 'utf8')
     expect(config).toContain("destination: '/:path'")
     expect(config).not.toMatch(/www is still Bluehost/)
+    const spread = config.indexOf('...appRedirects()')
+    const strip = config.indexOf("source: '/:path((?!admin/reports/).+)/'")
+    expect(spread).toBeGreaterThan(-1)
+    expect(strip).toBeGreaterThan(spread)
+  })
+})
+
+/** Same trailing-slash strip next.config appends after appRedirects(). */
+const TRAILING_SLASH_STRIP: RedirectRule = {
+  source: '/:path((?!admin/reports/).+)/',
+  destination: '/:path',
+  permanent: true,
+}
+
+describe('legacy search redirects', () => {
+  it('308s each WordPress path, with and without a slash, to one www URL', () => {
+    expect(LEGACY_SEARCH_REDIRECTS).toHaveLength(6)
+    for (const { source, destination } of LEGACY_SEARCH_REDIRECTS) {
+      expect(destination.startsWith('/')).toBe(true)
+      expect(destination).not.toBe('/login')
+      expect(destination).not.toBe('/home')
+      for (const path of [`${source}/`, source]) {
+        for (const host of ['www.evolvedpros.com', `${PLATFORM_HOST}:443`]) {
+          const hit = locationFor(host, path, { utm: 'gsc' }, [TRAILING_SLASH_STRIP])
+          expect(hit, `${host} ${path}`).not.toBeNull()
+          expect(hit!.source, `${host} ${path}`).toBe(path)
+          expect(hit!.status, `${host} ${path}`).toBe(308)
+          const url = new URL(hit!.url)
+          expect(url.origin, `${host} ${path}`).toBe(WWW_ORIGIN)
+          expect(url.pathname, `${host} ${path}`).toBe(destination)
+          expect(url.searchParams.get('utm'), `${host} ${path}`).toBe('gsc')
+          expect(hit!.url, `${host} ${path}`).not.toContain('/login')
+        }
+      }
+    }
+  })
+
+  it('keeps a Railway hit on the legacy paths pointed at platform', () => {
+    const hit = locationFor(RAILWAY_PUBLIC_HOST, '/blog', { utm: 'gsc' })
+    expect(hit?.url.startsWith(PLATFORM_ORIGIN)).toBe(true)
+    expect(hit?.url).not.toContain('www.evolvedpros.com')
+    expect(new URL(hit!.url).pathname).toBe('/blog')
+    expect(new URL(hit!.url).searchParams.get('utm')).toBe('gsc')
   })
 })
