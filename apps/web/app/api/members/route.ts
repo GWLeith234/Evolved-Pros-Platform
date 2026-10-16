@@ -7,9 +7,10 @@
  * URL, because those were never fetched. Hiding them in the component would
  * leave them in this JSON, one devtools tab away.
  *
- * Reads `users` rather than the member_directory view: the view drops
- * tier_status, and the active filter below matters more than the convenience.
- * The redaction discipline is identical either way, since both are a SELECT.
+ * Reads `users` rather than the member_directory view. That view is the
+ * public roster only (first name, no bio, company, socials, or goals).
+ * The 99 detail is selected here, after directoryDetail(), and a hidden
+ * goal is dropped in shapeDirectory even for that tier.
  */
 
 import { createClient } from '@/lib/supabase/server'
