@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { UNSPLASH_UNAVAILABLE, unsplashAccessKey } from '@/lib/unsplash/access'
 
 export async function GET(request: Request) {
   const guard = await requireAdminApi()
@@ -11,10 +12,9 @@ export async function GET(request: Request) {
   const query = searchParams.get('query')?.trim()
   if (!query) return NextResponse.json({ error: 'query is required' }, { status: 422 })
 
-  const accessKey = process.env.UNSPLASH_ACCESS_KEY
+  const accessKey = unsplashAccessKey()
   if (!accessKey) {
-    console.warn('[unsplash] UNSPLASH_ACCESS_KEY not set')
-    return NextResponse.json({ photos: [] })
+    return NextResponse.json({ error: UNSPLASH_UNAVAILABLE }, { status: 503 })
   }
 
   try {
