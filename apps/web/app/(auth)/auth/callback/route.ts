@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
-import { resolveAuthOrigin } from '@/lib/auth/authOrigin'
+import { authRedirectBase } from '@/lib/auth/authOrigin'
 import { safeRedirectPath } from '@/lib/auth/safeRedirect'
 
 export const dynamic = 'force-dynamic'
@@ -19,14 +19,15 @@ export async function GET(request: Request) {
   // which browsers normalise to '//evil.com' and resolve off-origin.
   const next       = safeRedirectPath(searchParams.get('next'))
 
-  // Use forwarded headers to get the real public URL (request.url is the
-  // internal Railway address, e.g. http://localhost:8080/...). Brand hosts
-  // (platform / apex / www) collapse to platform so Set-Cookie and Location
-  // stay on the auth host. www also serves this app (2026-09-29); auth does
-  // not move, because Supabase cookies are host-scoped to platform.
-  const host    = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'web-production-db912.up.railway.app'
-  const proto   = request.headers.get('x-forwarded-proto') || 'https'
-  const baseUrl = resolveAuthOrigin(`${proto}://${host}`)
+  // request.url on Railway is the internal address (localhost:8080). The
+  // public host comes from forwarded headers, then an allowlist: brand hosts
+  // collapse to platform, loopback stays local, anything else (a forged
+  // X-Forwarded-Host) falls back to platform so Location cannot leave origin.
+  const baseUrl = authRedirectBase(
+    request.headers.get('x-forwarded-host'),
+    request.headers.get('x-forwarded-proto'),
+    request.headers.get('host'),
+  )
 
   const cookieStore = cookies()
   const allCookies = cookieStore.getAll()
