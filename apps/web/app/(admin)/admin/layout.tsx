@@ -6,16 +6,15 @@ import { AdminTopNav } from '@/components/admin/AdminTopNav'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { ThemeSync } from '@/components/theme/ThemeSync'
 import { weeklyReportsNavHref } from '@/lib/reports/access'
+import { adminLayoutPrefetchOmitsChildren, adminLayoutRedirectTarget } from '@/lib/admin/layoutGate'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  // RSC prefetch guard: middleware lets prefetch requests through so it can't
-  // 503, but redirect() inside this layout would still break RSC payload
-  // parsing. Bypass all auth / profile fetching for prefetch requests and
-  // return bare children — the real navigation will re-render with full auth.
-  const h = headers()
-  const isRsc = h.get('RSC') === '1' || h.get('Next-Router-Prefetch') === '1'
-  if (isRsc) {
-    return <>{children}</>
+  // Middleware returns before its admin role check on RSC and prefetch
+  // flights. Real client navigations also send RSC=1, so that header is not
+  // a skip. Prefetch renders nothing: no session read and no children, so a
+  // page that queries the service role cannot run for a non-admin.
+  if (adminLayoutPrefetchOmitsChildren(headers().get('Next-Router-Prefetch'))) {
+    return null
   }
 
   // dev_session bypass: gated on NODE_ENV === 'development', inert in production builds.
@@ -30,7 +29,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         display_name: string
         full_name: string
       }
-      if (profile.role !== 'admin') redirect('/home')
+      const devTarget = adminLayoutRedirectTarget({ signedIn: true, role: profile.role })
+      if (devTarget) redirect(devTarget)
       const weeklyReportsHref = await weeklyReportsNavHref([profile.id])
       return (
         <div className="ep-member-shell ep-admin-shell">
@@ -48,15 +48,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   // to bypass RLS which can hide the user row and cause a false non-admin redirect
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const { data: profile } = user?.email
+    ? await adminClient
+        .from('users')
+        .select('id, role, display_name, full_name, theme')
+        .eq('email', user.email)
+        .maybeSingle()
+    : { data: null }
 
-  const { data: profile } = await adminClient
-    .from('users')
-    .select('id, role, display_name, full_name, theme')
-    .eq('email', user.email!)
-    .maybeSingle()
-
-  if (profile?.role !== 'admin') redirect('/home')
+  const target = adminLayoutRedirectTarget({ signedIn: Boolean(user), role: profile?.role })
+  if (target) redirect(target)
+  if (!user || !profile) redirect('/login')
 
   const weeklyReportsHref = await weeklyReportsNavHref([user.id, profile?.id])
 
