@@ -39,7 +39,7 @@ type PostRow = {
   like_count: number
   reply_count: number
   created_at: string
-  // CM-1 media columns (migration 079) — null on every pre-079 row.
+  // Nullable: rows written before migration 079 have no media.
   media_url?: string | null
   media_kind?: string | null
   media_width?: number | null
@@ -58,10 +58,8 @@ async function hydratePostMeta(
   const page = rows.slice(0, limit)
   const postIds = page.map(r => r.id)
 
-  // SPRINT D — reactions live in post_reactions and comments in replies; the
-  // old post_likes table and the denormalized posts.like_count/reply_count are
-  // dead (0). Count live rows so Community (and Home, which reads the same
-  // tables) show real numbers.
+  // Count live post_reactions and replies. posts.like_count / reply_count
+  // are not maintained (they read 0). Home reads the same tables.
   const [userLikesRes, bookmarksRes, allLikesRes, repliesRes] = await Promise.all([
     postIds.length > 0
       ? supabase.from('post_reactions').select('post_id, reaction_type').eq('user_id', userId).in('post_id', postIds) as unknown as Promise<{ data: LikeRow[] | null }>
