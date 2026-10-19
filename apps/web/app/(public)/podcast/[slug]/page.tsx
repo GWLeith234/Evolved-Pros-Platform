@@ -9,23 +9,20 @@ import { GuestDossier } from '@/components/podcast/GuestDossier'
 import { RelatedEpisodes } from '@/components/podcast/RelatedEpisodes'
 import { buildEpisodeExtras, buildRelatedEpisodes } from '@/lib/podcast/episodeExtras'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import { episodeJsonLdScript } from '@/lib/podcast/episodeJsonLd'
 import {
-  SITE_URL,
   SERIES_NAME,
   getEpisodeBySlug,
   getPublishedEpisodes,
   getPodcastSponsorPool,
-  episodeUrl,
   ytThumb,
   summaryText,
   transcriptParagraphs,
   hasSegments,
-  isoDuration,
   formatDate,
   formatTimestamp,
   youtubeTimestampUrl,
   episodePosterUrl,
-  type PublicEpisode,
 } from '@/lib/podcast/public'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 import { fitDocumentTitle } from '@/lib/seo/documentTitle'
@@ -66,64 +63,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   })
 }
 
-function jsonLd(ep: PublicEpisode) {
-  const url = episodeUrl(ep.slug)
-  const image = ytThumb(ep.youtube_id, 'max')
-  const description = summaryText(ep)
-  const duration = isoDuration(ep.duration_seconds)
-
-  const podcastEpisode = {
-    '@context': 'https://schema.org',
-    '@type': 'PodcastEpisode',
-    name: ep.title,
-    url,
-    description,
-    datePublished: ep.published_at ?? undefined,
-    episodeNumber: ep.episode_number ?? undefined,
-    duration,
-    partOfSeries: {
-      '@type': 'PodcastSeries',
-      name: SERIES_NAME,
-      url: `${SITE_URL}/podcast`,
-    },
-    ...(ep.youtube_id
-      ? {
-          associatedMedia: {
-            '@type': 'MediaObject',
-            contentUrl: `https://www.youtube.com/watch?v=${ep.youtube_id}`,
-          },
-        }
-      : {}),
-  }
-
-  const video = ep.youtube_id
-    ? {
-        '@context': 'https://schema.org',
-        '@type': 'VideoObject',
-        name: ep.title,
-        description,
-        thumbnailUrl: image ? [image] : undefined,
-        uploadDate: ep.published_at ?? undefined,
-        duration,
-        embedUrl: `https://www.youtube-nocookie.com/embed/${ep.youtube_id}`,
-        contentUrl: `https://www.youtube.com/watch?v=${ep.youtube_id}`,
-        ...(ep.transcript_text && transcriptParagraphs(ep).length ? { transcript: ep.transcript_text } : {}),
-      }
-    : null
-
-  const breadcrumb = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Podcast', item: `${SITE_URL}/podcast` },
-      { '@type': 'ListItem', position: 3, name: ep.title, item: url },
-    ],
-  }
-
-  return [podcastEpisode, video, breadcrumb].filter(Boolean)
-}
-
 const IVORY = '#F5F0E8'
 const DIM = 'rgba(245,240,232,0.55)'
 const DIMMER = 'rgba(245,240,232,0.4)'
@@ -147,7 +86,7 @@ export default async function PublicEpisodePage({ params }: Props) {
       <script
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(ep)) }}
+        dangerouslySetInnerHTML={{ __html: episodeJsonLdScript(ep) }}
       />
 
       {/* Article column — reading measure. pt-10 only; the wider dossier/rail
