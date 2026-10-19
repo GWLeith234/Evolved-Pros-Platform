@@ -285,7 +285,11 @@ const TRAILING_SLASH_STRIP: RedirectRule = {
 
 describe('legacy search redirects', () => {
   it('308s each WordPress path, with and without a slash, to one www URL', () => {
-    expect(LEGACY_SEARCH_REDIRECTS).toHaveLength(6)
+    expect(LEGACY_SEARCH_REDIRECTS).toHaveLength(7)
+    expect(LEGACY_SEARCH_REDIRECTS).toContainEqual({
+      source: '/jim-thompson',
+      destination: '/podcast/trust-credibility-cold-calling-jim-thompson',
+    })
     for (const { source, destination } of LEGACY_SEARCH_REDIRECTS) {
       expect(destination.startsWith('/')).toBe(true)
       expect(destination).not.toBe('/login')
