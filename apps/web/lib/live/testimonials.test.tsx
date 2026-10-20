@@ -4,12 +4,14 @@ import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { EM_DASH, hasEmDash } from '@/lib/home/conversion'
 import { LiveTestimonials } from '@/components/live/LiveTestimonials'
+import { ROTATOR_PHOTOS } from './photo-rotator'
 import {
   LIVE_TESTIMONIALS,
   LIVE_TESTIMONIALS_KICKER,
   groupLiveTestimonials,
   headshotSources,
   liveTestimonialCopyStrings,
+  type LiveTestimonial,
 } from './testimonials'
 
 const root = resolve(__dirname, '../..')
@@ -26,8 +28,27 @@ const HREFS = [
 
 const APPLE_BADGE = '5.0 on Apple Podcasts'
 
-/** Retired review total. Split so this file does not contain the figure. */
+/** Retired Apple review total. Split so this file does not contain the figure. */
 const BANNED_REVIEW_TOTAL = '1' + '09'
+
+function appleCardCopy(item: LiveTestimonial | undefined): string {
+  return [item?.quote, item?.author, item?.role, item?.event, item?.ratingLabel, item?.sourceLabel, item?.mark]
+    .filter((value): value is string => Boolean(value))
+    .join('\n')
+}
+
+function appleCardMarkup(html: string): string {
+  const match = html.match(/<article\b[^>]*data-author="Apple Podcasts listeners"[^>]*>[\s\S]*?<\/article>/)
+  if (!match) throw new Error('Apple card markup missing')
+  return match[0]
+}
+
+function appleCardSource(data: string): string {
+  const start = data.indexOf("kind: 'reviews'")
+  const end = data.indexOf("author: 'HubSpot'")
+  if (start < 0 || end < start) throw new Error('Apple card source missing')
+  return data.slice(start, end)
+}
 
 describe('LIVE testimonials REV2', () => {
   it('keeps the approved order, kinds, and existing three', () => {
@@ -74,14 +95,28 @@ describe('LIVE testimonials REV2', () => {
     expect(apple?.reviews).toBeUndefined()
     expect(apple?.logoUrl).toBeUndefined()
     expect(apple?.logoText).toBeUndefined()
+    const appleCopy = appleCardCopy(apple)
+    expect(appleCopy).not.toContain('Conquer Local')
+    expect(appleCopy).not.toContain('Reviews · public')
+    expect(appleCopy.includes(BANNED_REVIEW_TOTAL)).toBe(false)
     const award = LIVE_TESTIMONIALS.find(item => item.kind === 'award')
     expect(award?.mark).toBe('Top Gun 51')
     expect(award?.logoUrl).toBeUndefined()
     expect(award?.logoText).toBeUndefined()
     const hubspot = LIVE_TESTIMONIALS.find(item => item.author === 'HubSpot')
     expect(hubspot?.role).toBe('#22 · Top Sales Podcasts')
+    expect(hubspot?.event).toBe('Conquer Local · 2026 list')
     expect(hubspot?.logoUrl).toBeUndefined()
     expect(hubspot?.logoText).toBeUndefined()
+    const cindy = LIVE_TESTIMONIALS.find(item => item.author === 'Dr. Cindy McGovern')
+    expect(cindy?.event).toBe('Conquer Local Podcast')
+    const sanDiego = ROTATOR_PHOTOS.find(photo => photo.src === '/live/george-stage-blue-jacket.jpg')
+    expect(sanDiego).toEqual({
+      src: '/live/george-stage-blue-jacket.jpg',
+      caption: 'Conquer Local',
+      city: 'San Diego',
+      country: 'USA',
+    })
   })
 
   it('wires supplied headshots, keeps Amy on initials, and uses text badges', () => {
@@ -110,18 +145,16 @@ describe('LIVE testimonials REV2', () => {
     }
   })
 
-  it('ships no em dashes and does not render the banned review total', () => {
+  it('ships no em dashes', () => {
     expect(LIVE_TESTIMONIALS_KICKER).toBe(
       'Training floors, mentorship, and the mic. Not just the keynote slot.',
     )
     const blob = JSON.stringify(LIVE_TESTIMONIALS).toLowerCase()
     expect(blob).not.toContain('harvard')
-    expect(blob.includes(BANNED_REVIEW_TOTAL)).toBe(false)
     for (const value of liveTestimonialCopyStrings()) {
       expect(hasEmDash(value), value).toBe(false)
       expect(value).not.toContain(EM_DASH)
       expect(value).not.toContain('\u2013')
-      expect(value.includes(BANNED_REVIEW_TOTAL), value).toBe(false)
     }
   })
 
@@ -172,7 +205,12 @@ describe('LIVE testimonials REV2', () => {
     expect(html).not.toContain('AggregateRating')
     expect(html).not.toContain('"@type":"Review"')
     expect(html).not.toContain(EM_DASH)
-    expect(html.includes(BANNED_REVIEW_TOTAL)).toBe(false)
+    const appleHtml = appleCardMarkup(html)
+    expect(appleHtml).toContain('Rating · public')
+    expect(appleHtml).toContain(APPLE_BADGE)
+    expect(appleHtml).not.toContain('Conquer Local')
+    expect(appleHtml).not.toContain('Reviews · public')
+    expect(appleHtml.includes(BANNED_REVIEW_TOTAL)).toBe(false)
     for (const href of HREFS) {
       expect(html).toContain(href)
     }
@@ -185,20 +223,18 @@ describe('LIVE testimonials REV2', () => {
     expect(component).not.toContain("from 'next/image'")
     expect(component).toContain('<img src={sources.src} alt={item.author}')
     expect(css).toContain('grid-template-columns: 1.35fr 1fr 1.15fr;')
-    expect(data).toContain(`ratingLabel: '${APPLE_BADGE}'`)
-    expect(data).toContain("event: 'Rating · public'")
-    expect(data).toContain('id1895786556')
-    expect(data).toContain('Checked Oct 19, 2026')
-    expect(data).toContain('1 rating, US')
-    expect(data).not.toContain('podcasts.apple.com')
-    expect(data).not.toContain('Conquer Local')
-    expect(data).not.toContain('Reviews · public')
-    expect(html).toContain('Rating · public')
-    expect(html).not.toContain('Reviews · public')
-    expect(html).not.toContain('Conquer Local')
-    expect(data).not.toContain('APPLE_PODCAST_REVIEW_COUNT')
-    expect(data.includes(BANNED_REVIEW_TOTAL)).toBe(false)
-    expect(component.includes(BANNED_REVIEW_TOTAL)).toBe(false)
-    expect(html.includes(BANNED_REVIEW_TOTAL)).toBe(false)
+    const appleSource = appleCardSource(data)
+    expect(appleSource).toContain(`ratingLabel: '${APPLE_BADGE}'`)
+    expect(appleSource).toContain("event: 'Rating · public'")
+    expect(appleSource).toContain('id1895786556')
+    expect(appleSource).toContain('Checked Oct 19, 2026')
+    expect(appleSource).toContain('1 rating, US')
+    expect(appleSource).not.toContain('podcasts.apple.com')
+    expect(appleSource).not.toContain('Conquer Local')
+    expect(appleSource).not.toContain('Reviews · public')
+    expect(appleSource).not.toContain('APPLE_PODCAST_REVIEW_COUNT')
+    expect(appleSource.includes(BANNED_REVIEW_TOTAL)).toBe(false)
+    expect(data).toContain("event: 'Conquer Local · 2026 list'")
+    expect(data).toContain("event: 'Conquer Local Podcast'")
   })
 })

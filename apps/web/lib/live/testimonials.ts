@@ -190,7 +190,7 @@ export const LIVE_TESTIMONIALS: LiveTestimonial[] = [
       'If selling to local businesses is your game, this weekly podcast is chock-full of tips and strategies that make it easier.',
     author: 'HubSpot',
     role: '#22 · Top Sales Podcasts',
-    event: '2026 list',
+    event: 'Conquer Local · 2026 list',
     href: HUBSPOT,
     sourceLabel: 'blog.hubspot.com',
   },
@@ -233,6 +233,7 @@ export const LIVE_TESTIMONIALS: LiveTestimonial[] = [
       'It was such a pleasure to be a guest on the podcast. The team is amazing and it was a joy to chat. I loved our conversation and hope we collaborate again.',
     author: 'Dr. Cindy McGovern',
     role: 'CEO, Orange Leaf Consulting',
+    event: 'Conquer Local Podcast',
     headshotUrl: '/images/testimonials/cindy-mcgovern-320.webp',
   },
 ]
