@@ -55,8 +55,8 @@ function CardMeta({ item }: { item: LiveTestimonial }) {
       <Headshot item={item} />
       <div className="live-t-meta-text">
         <p className="live-t-author">{item.author}</p>
-        <p className="live-t-role">{item.role}</p>
-        <p className="live-t-event">{item.event}</p>
+        {item.role ? <p className="live-t-role">{item.role}</p> : null}
+        {item.event ? <p className="live-t-event">{item.event}</p> : null}
         <SourceLine item={item} />
       </div>
     </div>
