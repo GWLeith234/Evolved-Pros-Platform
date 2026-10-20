@@ -5,6 +5,7 @@ import { featuredImageForPublish } from '@/lib/media/heroPublishGuard'
 import { publishHeroGate } from '@/lib/media/heroReachable'
 import { mediaStoryWriteFailure } from '@/lib/media/mediaStoryWrite'
 import { stripLeadingTitle } from '@/lib/media/storyBody'
+import { mediaStoryUpdateFromBody } from '@/lib/media/storyPatch'
 
 export const dynamic = 'force-dynamic'
 
@@ -61,12 +62,10 @@ export async function PATCH(
     }
   }
 
-  if (typeof body.featured_image_url === 'string') {
-    body.featured_image_url = body.featured_image_url.trim() || null
-  }
+  const update = mediaStoryUpdateFromBody(body, new Date().toISOString())
 
-  if (typeof body.body === 'string') {
-    let title = typeof body.title === 'string' ? body.title : ''
+  if (typeof update.body === 'string') {
+    let title = typeof update.title === 'string' ? update.title : ''
     if (!title) {
       const { data: existing } = await adminClient
         .from('media_stories')
@@ -75,17 +74,16 @@ export async function PATCH(
         .maybeSingle()
       title = existing?.title ?? ''
     }
-    if (title) body.body = stripLeadingTitle(body.body, title)
+    if (title) update.body = stripLeadingTitle(update.body, title)
   }
 
-  // If publishing for the first time, set published_at
-  if (publishing && !body.published_at) {
-    body.published_at = new Date().toISOString()
+  if (Object.keys(update).length === 0) {
+    return NextResponse.json({ error: 'No valid fields' }, { status: 422 })
   }
 
   const { data, error } = await adminClient
     .from('media_stories')
-    .update(body)
+    .update(update)
     .eq('id', params.id)
     .select()
     .single()
