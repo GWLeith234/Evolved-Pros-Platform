@@ -82,8 +82,8 @@ describe('LIVE testimonials REV2', () => {
     expect(hubspot?.logoText).toBeUndefined()
   })
 
-  it('wires supplied headshots, keeps Charles and Amy on initials, and uses text badges', () => {
-    const withPhotos = ['Brendan King', 'Mike Giamprini', 'Dr. Cindy McGovern']
+  it('wires supplied headshots, keeps Amy on initials, and uses text badges', () => {
+    const withPhotos = ['Brendan King', 'Charles Laughlin', 'Mike Giamprini', 'Dr. Cindy McGovern']
     for (const author of withPhotos) {
       const item = LIVE_TESTIMONIALS.find(entry => entry.author === author)
       expect(item?.headshotUrl, author).toMatch(/\.webp$/)
@@ -92,10 +92,8 @@ describe('LIVE testimonials REV2', () => {
       expect(existsSync(resolve(publicDir, sources.src.slice(1)))).toBe(true)
     }
     const charles = LIVE_TESTIMONIALS.find(item => item.author === 'Charles Laughlin')
-    expect(charles?.headshotUrl).toBeUndefined()
-    expect(charles?.initials).toBe('CL')
-    expect(existsSync(resolve(publicDir, 'images/testimonials/charles-laughlin-320.webp'))).toBe(true)
-    expect(existsSync(resolve(publicDir, 'images/testimonials/charles-laughlin-320.jpg'))).toBe(true)
+    expect(charles?.headshotUrl).toBe('/images/testimonials/charles-laughlin-320.webp')
+    expect(charles?.initials).toBeUndefined()
     const amy = LIVE_TESTIMONIALS.find(item => item.author === 'Amy Andrew Delardi')
     expect(amy?.headshotUrl).toBeUndefined()
     expect(amy?.initials).toBe('AA')
@@ -159,12 +157,13 @@ describe('LIVE testimonials REV2', () => {
     expect(html).toContain('aria-label="5 stars"')
     expect(html).toContain('brendan-king-320.webp')
     expect(html).toContain('brendan-king-320.jpg')
-    expect(html).not.toContain('charles-laughlin')
-    expect(html).toContain('>CL<')
+    expect(html).toContain('charles-laughlin-320.webp')
+    expect(html).toContain('charles-laughlin-320.jpg')
+    expect(html).not.toContain('>CL<')
     expect(html).toContain('mike-giamprini-320.jpg')
     expect(html).toContain('cindy-mcgovern-320.webp')
     expect(html).toContain('Photo pending for Amy Andrew Delardi')
-    expect(html).toContain('Photo pending for Charles Laughlin')
+    expect(html).not.toContain('Photo pending for Charles Laughlin')
     expect(html).toContain('>AA<')
     expect(html).not.toContain('amy-andrew')
     expect(html.toLowerCase()).not.toContain('harvard')

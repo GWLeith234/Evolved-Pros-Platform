@@ -161,8 +161,7 @@ export const LIVE_TESTIMONIALS: LiveTestimonial[] = [
     author: 'Charles Laughlin',
     role: 'The Craft of Conferencing Podcast',
     event: '2024 · Episode 3',
-    // Photo file stays on disk. Not wired until consent and a clean crop are confirmed.
-    initials: 'CL',
+    headshotUrl: '/images/testimonials/charles-laughlin-320.webp',
     href: CHARLES,
     sourceLabel: 'charleslaughlin.substack.com',
   },
