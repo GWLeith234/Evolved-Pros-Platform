@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { permanentRedirect, redirect } from 'next/navigation'
 import { cookies, headers } from 'next/headers'
 // Chrome defers Supabase client creation so realtime-js stays out of hydration.
 import {
@@ -11,6 +11,7 @@ import { ToastProvider } from '@/lib/toast'
 import { SkipToContent } from '@/components/a11y/SkipToContent'
 import { LiveAnnouncerProvider } from '@/components/a11y/LiveAnnouncer'
 import { RETURN_PATH_HEADER, loginHrefFor } from '@/lib/auth/gatedIntent'
+import { isMemberHomeIndex } from '@/lib/auth/memberHomeGate'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { getPlatformSettingsMap } from '@/lib/cache/shared'
 import { ThemeSync } from '@/components/theme/ThemeSync'
@@ -73,8 +74,13 @@ export default async function MemberLayout({ children }: { children: React.React
   // through adminClient so RLS on public.users can't shadow the read.
   const profile = await resolveCurrentUser(supabase)
   if (!profile) {
-    const returnPath = h.get(RETURN_PATH_HEADER) ?? '/home'
-    redirect(loginHrefFor(returnPath))
+    const returnPath = h.get(RETURN_PATH_HEADER)
+    // Document GETs are redirected in middleware. This is the RSC path:
+    // middleware must not 308 an RSC payload (Next reports 503).
+    if (returnPath && isMemberHomeIndex(returnPath)) {
+      permanentRedirect('/')
+    }
+    redirect(loginHrefFor(returnPath ?? '/home'))
   }
 
   // Normalize tier and role to lowercase so all downstream comparisons work

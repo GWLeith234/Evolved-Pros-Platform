@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
-import { redirect } from 'next/navigation'
+import { permanentRedirect } from 'next/navigation'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { PublicFooter } from '@/components/layout/PublicFooter'
@@ -41,7 +41,10 @@ import { pickUpcomingLockedEvent, withoutConquerLocal } from '@/lib/events/nextE
 
 import { enqueueSessionNudges } from '@/lib/notifications/nudges'
 
-export const metadata: Metadata = { title: 'Home - Evolved Pros' }
+export const metadata: Metadata = {
+  title: 'Home - Evolved Pros',
+  robots: { index: false, follow: false },
+}
 
 async function fetchCourseProgress(supabase: ReturnType<typeof createClient>, userId: string) {
   const [courses, lessonsResult, progress] = await Promise.all([
@@ -502,7 +505,7 @@ async function fetchHomeSponsors(): Promise<HomePageAds> {
 export default async function MemberHomePage() {
   // PERF: shares React.cache() with member layout — one auth+profile per request.
   const profile = await resolveCurrentUser()
-  if (!profile) redirect('/login')
+  if (!profile) permanentRedirect('/')
 
   const weekStart = getCurrentMonday()
   const supabase = createClient()
