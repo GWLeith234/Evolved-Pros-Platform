@@ -1212,17 +1212,14 @@ html.light-mode .live-force-dark .live-milestones a.live-milestones-row:focus-vi
   color: var(--text-3);
   line-height: 1;
 }
-.live-t-logo {
+.live-t-outlet {
   margin: 0 0 14px;
-  max-width: 180px;
-}
-.live-t-logo img {
-  display: block;
-  max-width: 100%;
-  max-height: 32px;
-  width: auto;
-  height: auto;
-  object-fit: contain;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brand-gold);
 }
 .live-t-award-mark {
   margin: 4px 0 12px;
@@ -1259,15 +1256,9 @@ html.light-mode .live-force-dark .live-milestones a.live-milestones-row:focus-vi
   margin: 0;
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 800;
-  font-size: 28px;
+  font-size: 22px;
+  letter-spacing: 0.04em;
   color: var(--text-strong);
-}
-.live-t-rating span {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-3);
-  letter-spacing: 0.12em;
-  margin-left: 6px;
 }
 .live-t-review-lines {
   display: grid;

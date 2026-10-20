@@ -1,8 +1,7 @@
 /**
- * LIVE testimonials on /live. REV2 order matches the approved mock:
- * featured quote, award, featured quote, industry quote, reviews strip,
- * recognition pair, then the existing partner quotes.
- * Harvard Media is not part of this set.
+ * LIVE testimonials on /live. REV2 order: featured quote, award,
+ * featured quote, industry quote, rating strip, recognition pair,
+ * then the existing partner quotes.
  */
 
 export type LiveTestimonialKind = 'quote' | 'award' | 'reviews'
@@ -16,9 +15,10 @@ export interface LiveTestimonial {
   /** Primary quote body. Award cards reuse this for the short blurb under the mark. */
   quote?: string
   author: string
-  role: string
-  /** Short meta line under the role. */
-  event: string
+  /** Omitted when a card has no role line. */
+  role?: string
+  /** Short meta line under the role. Omitted when a card has none. */
+  event?: string
   /** Source link for new cards. */
   href?: string
   /** Visible label for href. */
@@ -29,10 +29,12 @@ export interface LiveTestimonial {
   headshotUrl?: string
   /** Initials when a person card has no headshot yet. */
   initials?: string
-  /** Outlet or award logo. Rendered only when a real file is supplied. */
+  /** Outlet name drawn as a text badge. No logo image files. */
+  logoText?: string
+  /** Unused. Logo images are not rendered. */
   logoUrl?: string
   reviews?: LiveTestimonialReviewLine[]
-  /** e.g. "5.0 · 109 reviews" */
+  /** Rating badge. No review count. */
   ratingLabel?: string
   /** Large award title. */
   mark?: string
@@ -108,6 +110,7 @@ export function liveTestimonialCopyStrings(
       item.ratingLabel,
       item.mark,
       item.initials,
+      item.logoText,
     ]) {
       if (value) out.push(value)
     }
@@ -123,7 +126,6 @@ const CHARLES =
   'https://charleslaughlin.substack.com/p/episode-3-george-leith-evp-and-cro'
 const IAB =
   'https://iabcanada.com/humans-of-digital-george-leith-on-lifelong-learning-and-growth/'
-const APPLE = 'https://podcasts.apple.com/us/podcast/conquer-local-podcast/id1327121811'
 const HUBSPOT = 'https://blog.hubspot.com/sales/top-sales-podcasts'
 const LOCALOGY =
   'https://www.localogy.com/2019/03/new-podcast-glengarry-glen-george-featuring-george-leith/'
@@ -171,24 +173,16 @@ export const LIVE_TESTIMONIALS: LiveTestimonial[] = [
     author: 'IAB Canada',
     role: 'Humans of Digital · 2025 · IAB Canada',
     event: '2025 · Lifelong learning',
+    logoText: 'IAB Canada',
     href: IAB,
     sourceLabel: 'iabcanada.com',
   },
   {
     kind: 'reviews',
     author: 'Apple Podcasts listeners',
-    role: 'Conquer Local Podcast',
-    event: 'Reviews · public',
-    ratingLabel: '5.0 · 109 reviews',
-    reviews: [
-      {
-        text: 'George Leith is THE heavyweight in the world of local digital marketing… Sincere, informative and real',
-      },
-      { text: 'George Leith is a wizard in the industry' },
-      { text: 'George is a Master Salesman, and true leader in his field' },
-    ],
-    href: APPLE,
-    sourceLabel: 'podcasts.apple.com',
+    event: 'Rating · public',
+    // 5.0 (1 rating, US) from the Evolved Pros Apple page (id1895786556). Checked Oct 19, 2026.
+    ratingLabel: '5.0 on Apple Podcasts',
   },
   {
     kind: 'quote',
@@ -207,6 +201,7 @@ export const LIVE_TESTIMONIALS: LiveTestimonial[] = [
     author: 'George Leith',
     role: 'Localogy podcast · Glengarry Glen George',
     event: '2019 · 60/30/10 rule',
+    logoText: 'Localogy',
     href: LOCALOGY,
     sourceLabel: 'localogy.com',
   },
