@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import {
   LIVE_TESTIMONIALS_EYEBROW,
   LIVE_TESTIMONIALS_KICKER,
@@ -22,7 +21,9 @@ function Headshot({ item }: { item: LiveTestimonial }) {
       <div className="live-t-avatar live-t-avatar--photo">
         <picture>
           {sources.webp ? <source srcSet={sources.webp} type="image/webp" /> : null}
-          <Image src={sources.src} alt={item.author} width={52} height={52} />
+          {/* picture needs an img for the jpg fallback beside the webp source */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={sources.src} alt={item.author} width={52} height={52} />
         </picture>
       </div>
     )
@@ -153,7 +154,7 @@ export function LiveTestimonials() {
       <Band id="featured" layout="featured" items={groups.featured} />
       <Band id="industry" layout="full" items={groups.industry} />
       <Band id="reviews" layout="full" items={groups.reviews} />
-      <Band id="recognition" layout="full" items={groups.recognition} />
+      <Band id="recognition" layout="pair" items={groups.recognition} />
       <Band id="existing" layout="existing" items={groups.existing} />
     </section>
   )

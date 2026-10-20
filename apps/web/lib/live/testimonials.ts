@@ -1,7 +1,7 @@
 /**
- * LIVE testimonials on /live. REV2 order matches the approved mock
- * for the cards that remain: featured quotes, industry quote, reviews
- * strip, recognition quote, then the existing partner quotes.
+ * LIVE testimonials on /live. REV2 order: featured quote, award,
+ * featured quote, industry quote, rating strip, recognition pair,
+ * then the existing partner quotes.
  */
 
 export type LiveTestimonialKind = 'quote' | 'award' | 'reviews'
@@ -119,11 +119,13 @@ export function liveTestimonialCopyStrings(
 }
 
 const VENDASTA_CRO = 'https://www.vendasta.com/newsroom/vendasta-promotes-george-leith-to-cro/'
+const VENDASTA_TOP_GUN =
+  'https://www.vendasta.com/newsroom/vendasta-cco-george-leith-named-top-gun-51-channel-partners/'
 const CHARLES =
   'https://charleslaughlin.substack.com/p/episode-3-george-leith-evp-and-cro'
 const IAB =
   'https://iabcanada.com/humans-of-digital-george-leith-on-lifelong-learning-and-growth/'
-const APPLE = 'https://podcasts.apple.com/us/podcast/conquer-local-podcast/id1327121811'
+const HUBSPOT = 'https://blog.hubspot.com/sales/top-sales-podcasts'
 const LOCALOGY =
   'https://www.localogy.com/2019/03/new-podcast-glengarry-glen-george-featuring-george-leith/'
 
@@ -138,6 +140,17 @@ export const LIVE_TESTIMONIALS: LiveTestimonial[] = [
     event: '2017 · CRO promotion',
     headshotUrl: '/images/testimonials/brendan-king-320.webp',
     href: VENDASTA_CRO,
+    sourceLabel: 'vendasta.com/newsroom',
+  },
+  {
+    kind: 'award',
+    mark: 'Top Gun 51',
+    quote:
+      'Named among top indirect IT and telecom channel sales leaders by Channel Partners / Channel Futures editors.',
+    author: 'George Leith',
+    role: 'Then CCO & EVP of Sales, Vendasta',
+    event: 'Channel Partners · 2020',
+    href: VENDASTA_TOP_GUN,
     sourceLabel: 'vendasta.com/newsroom',
   },
   {
@@ -169,17 +182,18 @@ export const LIVE_TESTIMONIALS: LiveTestimonial[] = [
     author: 'Apple Podcasts listeners',
     role: 'Conquer Local Podcast',
     event: 'Reviews · public',
-    // 5.0 checked 2026-10-19 on the Evolved Pros podcast (id1895786556).
+    // 5.0 (1 rating, US) from the Evolved Pros Apple page (id1895786556). Checked Oct 19, 2026.
     ratingLabel: '5.0 on Apple Podcasts',
-    reviews: [
-      {
-        text: 'George Leith is THE heavyweight in the world of local digital marketing… Sincere, informative and real',
-      },
-      { text: 'George Leith is a wizard in the industry' },
-      { text: 'George is a Master Salesman, and true leader in his field' },
-    ],
-    href: APPLE,
-    sourceLabel: 'podcasts.apple.com',
+  },
+  {
+    kind: 'quote',
+    quote:
+      'If selling to local businesses is your game, this weekly podcast is chock-full of tips and strategies that make it easier.',
+    author: 'HubSpot',
+    role: '#22 · Top Sales Podcasts',
+    event: 'Conquer Local · 2026 list',
+    href: HUBSPOT,
+    sourceLabel: 'blog.hubspot.com',
   },
   {
     kind: 'quote',

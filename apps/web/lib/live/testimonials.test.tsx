@@ -17,24 +17,28 @@ const publicDir = resolve(root, 'public')
 
 const HREFS = [
   'https://www.vendasta.com/newsroom/vendasta-promotes-george-leith-to-cro/',
+  'https://www.vendasta.com/newsroom/vendasta-cco-george-leith-named-top-gun-51-channel-partners/',
   'https://charleslaughlin.substack.com/p/episode-3-george-leith-evp-and-cro',
   'https://iabcanada.com/humans-of-digital-george-leith-on-lifelong-learning-and-growth/',
-  'https://podcasts.apple.com/us/podcast/conquer-local-podcast/id1327121811',
+  'https://blog.hubspot.com/sales/top-sales-podcasts',
   'https://www.localogy.com/2019/03/new-podcast-glengarry-glen-george-featuring-george-leith/',
 ]
 
 const APPLE_BADGE = '5.0 on Apple Podcasts'
 
-/** Retired review totals. Split so the source does not contain the figures. */
-const RETIRED_REVIEW_TOTALS = ['1' + '09', '2' + '05']
+/** Retired review total. Split so this file does not contain the figure. */
+const BANNED_REVIEW_TOTAL = '1' + '09'
 
 describe('LIVE testimonials REV2', () => {
   it('keeps the approved order, kinds, and existing three', () => {
+    expect(LIVE_TESTIMONIALS).toHaveLength(10)
     expect(LIVE_TESTIMONIALS.map(item => [item.kind, item.author])).toEqual([
       ['quote', 'Brendan King'],
+      ['award', 'George Leith'],
       ['quote', 'Charles Laughlin'],
       ['quote', 'IAB Canada'],
       ['reviews', 'Apple Podcasts listeners'],
+      ['quote', 'HubSpot'],
       ['quote', 'George Leith'],
       ['quote', 'Mike Giamprini'],
       ['quote', 'Amy Andrew Delardi'],
@@ -50,17 +54,32 @@ describe('LIVE testimonials REV2', () => {
       'Dr. Cindy McGovern',
     ])
     const groups = groupLiveTestimonials()
-    expect(groups.featured).toHaveLength(2)
-    expect(groups.featured.map(item => item.kind)).toEqual(['quote', 'quote'])
+    expect(groups.featured).toHaveLength(3)
+    expect(groups.featured.map(item => item.kind)).toEqual(['quote', 'award', 'quote'])
     expect(groups.industry.map(item => item.author)).toEqual(['IAB Canada'])
     expect(groups.reviews.map(item => item.author)).toEqual(['Apple Podcasts listeners'])
-    expect(groups.recognition.map(item => item.author)).toEqual(['George Leith'])
+    expect(groups.recognition.map(item => item.author)).toEqual(['HubSpot', 'George Leith'])
     expect(groups.existing).toHaveLength(3)
   })
 
-  it('links the new sources and leaves the existing three unlinked', () => {
-    expect(LIVE_TESTIMONIALS.filter(item => !item.existing).map(item => item.href)).toEqual(HREFS)
+  it('links Top Gun, HubSpot, and the other sourced cards, and leaves Apple rating-only', () => {
+    expect(LIVE_TESTIMONIALS.filter(item => item.href).map(item => item.href)).toEqual(HREFS)
     expect(LIVE_TESTIMONIALS.filter(item => item.existing).every(item => item.href == null)).toBe(true)
+    const apple = LIVE_TESTIMONIALS.find(item => item.author === 'Apple Podcasts listeners')
+    expect(apple?.ratingLabel).toBe(APPLE_BADGE)
+    expect(apple?.href).toBeUndefined()
+    expect(apple?.sourceLabel).toBeUndefined()
+    expect(apple?.reviews).toBeUndefined()
+    expect(apple?.logoUrl).toBeUndefined()
+    expect(apple?.logoText).toBeUndefined()
+    const award = LIVE_TESTIMONIALS.find(item => item.kind === 'award')
+    expect(award?.mark).toBe('Top Gun 51')
+    expect(award?.logoUrl).toBeUndefined()
+    expect(award?.logoText).toBeUndefined()
+    const hubspot = LIVE_TESTIMONIALS.find(item => item.author === 'HubSpot')
+    expect(hubspot?.role).toBe('#22 · Top Sales Podcasts')
+    expect(hubspot?.logoUrl).toBeUndefined()
+    expect(hubspot?.logoText).toBeUndefined()
   })
 
   it('wires supplied headshots, keeps Charles and Amy on initials, and uses text badges', () => {
@@ -83,44 +102,40 @@ describe('LIVE testimonials REV2', () => {
     expect(amy?.quote).toContain('George, an incredible leader')
     expect(LIVE_TESTIMONIALS.every(item => item.logoUrl == null)).toBe(true)
     expect(LIVE_TESTIMONIALS.find(item => item.author === 'IAB Canada')?.logoText).toBe('IAB Canada')
-    expect(LIVE_TESTIMONIALS.find(item => item.author === 'George Leith')?.logoText).toBe('Localogy')
-    for (const author of ['IAB Canada', 'Apple Podcasts listeners']) {
+    expect(LIVE_TESTIMONIALS.find(item => item.event === '2019 · 60/30/10 rule')?.logoText).toBe('Localogy')
+    for (const author of ['IAB Canada', 'Apple Podcasts listeners', 'HubSpot']) {
       const item = LIVE_TESTIMONIALS.find(entry => entry.author === author)
       expect(item?.headshotUrl, author).toBeUndefined()
       expect(item?.initials, author).toBeUndefined()
     }
-    const apple = LIVE_TESTIMONIALS.find(item => item.author === 'Apple Podcasts listeners')
-    expect(apple?.ratingLabel).toBe(APPLE_BADGE)
-    expect(apple?.logoText).toBeUndefined()
   })
 
-  it('ships no em dashes and no retired review totals in copy', () => {
+  it('ships no em dashes and does not render the banned review total', () => {
     expect(LIVE_TESTIMONIALS_KICKER).toBe(
       'Training floors, mentorship, and the mic. Not just the keynote slot.',
     )
     const blob = JSON.stringify(LIVE_TESTIMONIALS).toLowerCase()
     expect(blob).not.toContain('harvard')
+    expect(blob.includes(BANNED_REVIEW_TOTAL)).toBe(false)
     for (const value of liveTestimonialCopyStrings()) {
       expect(hasEmDash(value), value).toBe(false)
       expect(value).not.toContain(EM_DASH)
       expect(value).not.toContain('\u2013')
-      for (const total of RETIRED_REVIEW_TOTALS) {
-        expect(value.includes(total), value).toBe(false)
-      }
-    }
-    for (const total of RETIRED_REVIEW_TOTALS) {
-      expect(blob.includes(total)).toBe(false)
+      expect(value.includes(BANNED_REVIEW_TOTAL), value).toBe(false)
     }
   })
 
-  it('renders the section in order with headshots, text badges, and no mock chrome', () => {
+  it('renders ten cards in order with headshots, text badges, and no mock chrome', () => {
     const html = renderToStaticMarkup(<LiveTestimonials />)
     const authors = [...html.matchAll(/data-author="([^"]+)"/g)].map(match => match[1])
     expect(authors).toEqual(LIVE_TESTIMONIALS.map(item => item.author))
+    expect(authors).toHaveLength(10)
     expect(html).toContain('data-band="industry"')
     expect(html).toMatch(/data-band="industry"[\s\S]*live-t-grid--full[\s\S]*IAB Canada/)
     expect(html).toMatch(/data-band="featured"[\s\S]*live-t-grid--featured/)
-    expect(html).toMatch(/data-band="recognition"[\s\S]*live-t-grid--full/)
+    expect(html).toMatch(/data-band="recognition"[\s\S]*live-t-grid--pair/)
+    expect(html).toContain('Top Gun 51')
+    expect(html).toContain('HubSpot')
     expect(html).not.toMatch(/live-t-badge|live-t-row-label|live-t-logo/)
     for (const leaked of [
       'New · quote',
@@ -132,6 +147,10 @@ describe('LIVE testimonials REV2', () => {
       'Quote · featured',
       'optional',
       'KEEP LIVE CROP',
+      'podcasts.apple.com',
+      'heavyweight in the world',
+      'wizard in the industry',
+      'Master Salesman',
     ]) {
       expect(html.toLowerCase()).not.toContain(leaked.toLowerCase())
     }
@@ -152,23 +171,27 @@ describe('LIVE testimonials REV2', () => {
     expect(html).not.toContain('AggregateRating')
     expect(html).not.toContain('"@type":"Review"')
     expect(html).not.toContain(EM_DASH)
-    for (const total of RETIRED_REVIEW_TOTALS) {
-      expect(html.includes(total)).toBe(false)
-    }
+    expect(html.includes(BANNED_REVIEW_TOTAL)).toBe(false)
     for (const href of HREFS) {
       expect(html).toContain(href)
     }
     expect(html).toContain('rel="noopener noreferrer"')
     const component = readFileSync(resolve(root, 'components/live/LiveTestimonials.tsx'), 'utf8')
     const data = readFileSync(resolve(root, 'lib/live/testimonials.ts'), 'utf8')
+    const css = readFileSync(resolve(root, 'app/globals.css'), 'utf8')
     expect(component).not.toMatch(/#[0-9a-fA-F]{6}\b/)
     expect(component).not.toContain('harvard')
-    expect(component).toContain("from 'next/image'")
+    expect(component).not.toContain("from 'next/image'")
+    expect(component).toContain('<img src={sources.src} alt={item.author}')
+    expect(css).toContain('grid-template-columns: 1.35fr 1fr 1.15fr;')
     expect(data).toContain(`ratingLabel: '${APPLE_BADGE}'`)
+    expect(data).toContain('id1895786556')
+    expect(data).toContain('Checked Oct 19, 2026')
+    expect(data).toContain('1 rating, US')
+    expect(data).not.toContain('podcasts.apple.com')
     expect(data).not.toContain('APPLE_PODCAST_REVIEW_COUNT')
-    for (const total of RETIRED_REVIEW_TOTALS) {
-      expect(component.includes(total)).toBe(false)
-      expect(data.includes(total)).toBe(false)
-    }
+    expect(data.includes(BANNED_REVIEW_TOTAL)).toBe(false)
+    expect(component.includes(BANNED_REVIEW_TOTAL)).toBe(false)
+    expect(html.includes(BANNED_REVIEW_TOTAL)).toBe(false)
   })
 })
