@@ -10,13 +10,9 @@ import {
 } from '@/lib/live/testimonials'
 import { LiveSectionHeader } from './LiveSectionHeader'
 
-function Logo({ item }: { item: LiveTestimonial }) {
-  if (!item.logoUrl) return null
-  return (
-    <div className="live-t-logo">
-      <Image src={item.logoUrl} alt="" width={180} height={32} />
-    </div>
-  )
+function OutletBadge({ item }: { item: LiveTestimonial }) {
+  if (!item.logoText) return null
+  return <p className="live-t-outlet">{item.logoText}</p>
 }
 
 function Headshot({ item }: { item: LiveTestimonial }) {
@@ -26,9 +22,7 @@ function Headshot({ item }: { item: LiveTestimonial }) {
       <div className="live-t-avatar live-t-avatar--photo">
         <picture>
           {sources.webp ? <source srcSet={sources.webp} type="image/webp" /> : null}
-          {/* picture needs an img for the jpg fallback beside the webp source */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={sources.src} alt={item.author} width={52} height={52} />
+          <Image src={sources.src} alt={item.author} width={52} height={52} />
         </picture>
       </div>
     )
@@ -89,18 +83,13 @@ function AwardBody({ item }: { item: LiveTestimonial }) {
 }
 
 function ReviewsBody({ item }: { item: LiveTestimonial }) {
-  const [score, count] = (item.ratingLabel ?? '').split(' · ')
-  const stars = Math.round(Number.parseFloat(score || '5')) || 5
   return (
     <>
       <div className="live-t-reviews-head">
-        <p className="live-t-stars" aria-label={`${stars} stars`}>
-          {'★'.repeat(stars)}
+        <p className="live-t-stars" aria-label="5 stars">
+          ★★★★★
         </p>
-        <p className="live-t-rating">
-          {score || item.ratingLabel}
-          {count ? <span>· {count}</span> : null}
-        </p>
+        <p className="live-t-rating">{item.ratingLabel}</p>
       </div>
       <div className="live-t-review-lines">
         {(item.reviews ?? []).map(line => (
@@ -123,7 +112,7 @@ function cardClass(item: LiveTestimonial): string {
 function TestimonialCard({ item }: { item: LiveTestimonial }) {
   return (
     <article className={cardClass(item)} data-kind={item.kind} data-author={item.author}>
-      <Logo item={item} />
+      <OutletBadge item={item} />
       {item.kind === 'award' ? <AwardBody item={item} /> : null}
       {item.kind === 'reviews' ? <ReviewsBody item={item} /> : null}
       {item.kind === 'quote' ? <QuoteBody item={item} /> : null}
@@ -164,7 +153,7 @@ export function LiveTestimonials() {
       <Band id="featured" layout="featured" items={groups.featured} />
       <Band id="industry" layout="full" items={groups.industry} />
       <Band id="reviews" layout="full" items={groups.reviews} />
-      <Band id="recognition" layout="pair" items={groups.recognition} />
+      <Band id="recognition" layout="full" items={groups.recognition} />
       <Band id="existing" layout="existing" items={groups.existing} />
     </section>
   )

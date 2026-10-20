@@ -1,8 +1,7 @@
 /**
- * LIVE testimonials on /live. REV2 order matches the approved mock:
- * featured quote, award, featured quote, industry quote, reviews strip,
- * recognition pair, then the existing partner quotes.
- * Harvard Media is not part of this set.
+ * LIVE testimonials on /live. REV2 order matches the approved mock
+ * for the cards that remain: featured quotes, industry quote, reviews
+ * strip, recognition quote, then the existing partner quotes.
  */
 
 export type LiveTestimonialKind = 'quote' | 'award' | 'reviews'
@@ -29,10 +28,12 @@ export interface LiveTestimonial {
   headshotUrl?: string
   /** Initials when a person card has no headshot yet. */
   initials?: string
-  /** Outlet or award logo. Rendered only when a real file is supplied. */
+  /** Outlet name drawn as a text badge. No logo image files. */
+  logoText?: string
+  /** Unused. Logo images are not rendered. */
   logoUrl?: string
   reviews?: LiveTestimonialReviewLine[]
-  /** e.g. "5.0 · 109 reviews" */
+  /** Rating badge. No review count. */
   ratingLabel?: string
   /** Large award title. */
   mark?: string
@@ -108,6 +109,7 @@ export function liveTestimonialCopyStrings(
       item.ratingLabel,
       item.mark,
       item.initials,
+      item.logoText,
     ]) {
       if (value) out.push(value)
     }
@@ -117,14 +119,11 @@ export function liveTestimonialCopyStrings(
 }
 
 const VENDASTA_CRO = 'https://www.vendasta.com/newsroom/vendasta-promotes-george-leith-to-cro/'
-const VENDASTA_TOP_GUN =
-  'https://www.vendasta.com/newsroom/vendasta-cco-george-leith-named-top-gun-51-channel-partners/'
 const CHARLES =
   'https://charleslaughlin.substack.com/p/episode-3-george-leith-evp-and-cro'
 const IAB =
   'https://iabcanada.com/humans-of-digital-george-leith-on-lifelong-learning-and-growth/'
 const APPLE = 'https://podcasts.apple.com/us/podcast/conquer-local-podcast/id1327121811'
-const HUBSPOT = 'https://blog.hubspot.com/sales/top-sales-podcasts'
 const LOCALOGY =
   'https://www.localogy.com/2019/03/new-podcast-glengarry-glen-george-featuring-george-leith/'
 
@@ -142,17 +141,6 @@ export const LIVE_TESTIMONIALS: LiveTestimonial[] = [
     sourceLabel: 'vendasta.com/newsroom',
   },
   {
-    kind: 'award',
-    mark: 'Top Gun 51',
-    quote:
-      'Named among top indirect IT and telecom channel sales leaders by Channel Partners / Channel Futures editors.',
-    author: 'George Leith',
-    role: 'Then CCO & EVP of Sales, Vendasta',
-    event: 'Channel Partners · 2020',
-    href: VENDASTA_TOP_GUN,
-    sourceLabel: 'vendasta.com/newsroom',
-  },
-  {
     kind: 'quote',
     featured: true,
     quote:
@@ -160,7 +148,8 @@ export const LIVE_TESTIMONIALS: LiveTestimonial[] = [
     author: 'Charles Laughlin',
     role: 'The Craft of Conferencing Podcast',
     event: '2024 · Episode 3',
-    headshotUrl: '/images/testimonials/charles-laughlin-320.webp',
+    // Photo file stays on disk. Not wired until consent and a clean crop are confirmed.
+    initials: 'CL',
     href: CHARLES,
     sourceLabel: 'charleslaughlin.substack.com',
   },
@@ -171,6 +160,7 @@ export const LIVE_TESTIMONIALS: LiveTestimonial[] = [
     author: 'IAB Canada',
     role: 'Humans of Digital · 2025 · IAB Canada',
     event: '2025 · Lifelong learning',
+    logoText: 'IAB Canada',
     href: IAB,
     sourceLabel: 'iabcanada.com',
   },
@@ -179,7 +169,8 @@ export const LIVE_TESTIMONIALS: LiveTestimonial[] = [
     author: 'Apple Podcasts listeners',
     role: 'Conquer Local Podcast',
     event: 'Reviews · public',
-    ratingLabel: '5.0 · 109 reviews',
+    // 5.0 checked 2026-10-19 on the Evolved Pros podcast (id1895786556).
+    ratingLabel: '5.0 on Apple Podcasts',
     reviews: [
       {
         text: 'George Leith is THE heavyweight in the world of local digital marketing… Sincere, informative and real',
@@ -193,20 +184,11 @@ export const LIVE_TESTIMONIALS: LiveTestimonial[] = [
   {
     kind: 'quote',
     quote:
-      'If selling to local businesses is your game, this weekly podcast is chock-full of tips and strategies that make it easier.',
-    author: 'HubSpot',
-    role: '#22 · Top Sales Podcasts',
-    event: 'Conquer Local · 2026 list',
-    href: HUBSPOT,
-    sourceLabel: 'blog.hubspot.com',
-  },
-  {
-    kind: 'quote',
-    quote:
       'A rep should spend 60% of their time talking to customers, 30% of their time building their product knowledge or researching their next appointment, and 10% of their time on admin. A lot of organizations have that formula flipped on its head.',
     author: 'George Leith',
     role: 'Localogy podcast · Glengarry Glen George',
     event: '2019 · 60/30/10 rule',
+    logoText: 'Localogy',
     href: LOCALOGY,
     sourceLabel: 'localogy.com',
   },
