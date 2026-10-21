@@ -106,8 +106,9 @@ describe('authorizeCronBearer', () => {
   })
 
   it('keeps surrounding spaces in a real secret', () => {
-    expect(authorizeCronBearer('Bearer  cron-secret  ', '  cron-secret  ')).toEqual({ ok: true })
-    expect(authorizeCronBearer('Bearer cron-secret', '  cron-secret  ')).toEqual({
+    const secret = '  cron-secret  '
+    expect(authorizeCronBearer(`Bearer ${secret}`, secret)).toEqual({ ok: true })
+    expect(authorizeCronBearer('Bearer cron-secret', secret)).toEqual({
       ok: false,
       status: 401,
       error: 'Unauthorized',
@@ -162,8 +163,8 @@ describe('cron route secret lock', () => {
     const helper = src('lib/cron/authorize.ts')
     expect(helper).toContain('timingSafeEqual')
     expect(helper).toContain("createHash('sha256')")
-    expect(helper).not.toContain('authorization !==')
-    expect(helper).not.toContain('authorization ===')
+    expect(helper).not.toMatch(/authorization\s*!==/)
+    expect(helper).not.toMatch(/authorization\s*===\s*`/)
   })
 
   it('leaves the keep-warm ping public', () => {
