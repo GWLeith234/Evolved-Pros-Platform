@@ -1,25 +1,25 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
+import { authorizeCronBearer } from '@/lib/cron/authorize'
 import { enqueueDueThanksNudges } from '@/lib/thanks/enqueue'
 
 /**
  * Enqueue due thank-you Community cadence steps into pending_approval.
  * NEVER calls Resend. Redeemed and post-E12 invites are skipped / stopped.
  *
- * Auth: Bearer ${CRON_SECRET} OR header x-cron-secret: ${CRON_SECRET}
+ * Auth: Bearer CRON_SECRET OR header x-cron-secret: CRON_SECRET.
+ * Timing-safe, and closed when the secret is missing.
  */
 export async function GET(request: Request) {
-  const expected = process.env.CRON_SECRET
-  if (!expected) {
-    return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 500 })
-  }
-
-  const auth = request.headers.get('authorization') ?? ''
-  const xSecret = request.headers.get('x-cron-secret') ?? ''
-  const ok = auth === `Bearer ${expected}` || xSecret === expected
-  if (!ok) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const gate = authorizeCronBearer(
+    request.headers.get('authorization'),
+    process.env.CRON_SECRET,
+    request.headers.get('x-cron-secret'),
+  )
+  if (!gate.ok) {
+    if (gate.status === 500) console.error('[cron/thanks-nudges] CRON_SECRET is not set')
+    return NextResponse.json({ error: gate.error }, { status: gate.status })
   }
 
   try {
