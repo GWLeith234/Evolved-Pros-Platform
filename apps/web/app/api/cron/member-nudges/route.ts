@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
+import { authorizeCronBearer } from '@/lib/cron/authorize'
 import {
   enqueueDailyProgressNudges,
   enqueueWigNudges,
@@ -9,8 +10,8 @@ import {
 /**
  * Wires the existing notifications table for WIG + daily leading measures.
  *
- * Auth: Bearer ${CRON_SECRET} OR header x-cron-secret: ${CRON_SECRET}
- * — same dual form as /api/cron/goal-snapshots.
+ * Auth: Bearer CRON_SECRET OR header x-cron-secret: CRON_SECRET.
+ * Same dual form as /api/cron/goal-snapshots. Timing-safe, fail closed.
  *
  * Safe to run hourly. Each helper dedupes on (user, type, action_url)
  * so a re-fire does not stack bells. Daily nudges no-op before 17:00 UTC
@@ -20,16 +21,14 @@ import {
  * `.github/workflows/cron.yml` hits this route at 17:00 UTC.
  */
 export async function GET(request: Request) {
-  const expected = process.env.CRON_SECRET
-  if (!expected) {
-    return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 500 })
-  }
-
-  const auth = request.headers.get('authorization') ?? ''
-  const xSecret = request.headers.get('x-cron-secret') ?? ''
-  const ok = auth === `Bearer ${expected}` || xSecret === expected
-  if (!ok) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const gate = authorizeCronBearer(
+    request.headers.get('authorization'),
+    process.env.CRON_SECRET,
+    request.headers.get('x-cron-secret'),
+  )
+  if (!gate.ok) {
+    if (gate.status === 500) console.error('[cron/member-nudges] CRON_SECRET is not set')
+    return NextResponse.json({ error: gate.error }, { status: gate.status })
   }
 
   try {

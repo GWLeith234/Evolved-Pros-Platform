@@ -14,16 +14,13 @@
 export const dynamic = 'force-dynamic'
 
 import { adminClient } from '@/lib/supabase/admin'
+import { authorizeCronBearer } from '@/lib/cron/authorize'
 
 export async function GET(request: Request) {
-  const secret = process.env.CRON_SECRET
-  if (!secret) {
-    console.error('[Cron] CRON_SECRET is not set')
-    return Response.json({ error: 'Server misconfiguration' }, { status: 500 })
-  }
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${secret}`) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  const gate = authorizeCronBearer(request.headers.get('authorization'), process.env.CRON_SECRET)
+  if (!gate.ok) {
+    if (gate.status === 500) console.error('[Cron] CRON_SECRET is not set')
+    return Response.json({ error: gate.error }, { status: gate.status })
   }
 
   const { data, error } = await (adminClient as unknown as {
