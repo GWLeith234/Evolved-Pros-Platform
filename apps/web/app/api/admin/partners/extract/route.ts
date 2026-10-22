@@ -5,96 +5,9 @@ export const maxDuration = 30
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { generateWithVoice, parseJsonResponse } from '@/lib/ai/voice'
+import { scrapeSponsorPage, type SponsorPageMeta } from '@/lib/sponsors/extractPage'
 
 interface ExtractBody { url?: unknown }
-
-interface ScrapedMeta {
-  url: string
-  title: string | null
-  description: string | null
-  image: string | null
-  themeColor: string | null
-  siteName: string | null
-}
-
-const FETCH_TIMEOUT_MS = 5_000
-
-function metaFromAttrs(html: string, key: string, value: string): string | null {
-  // Match either <meta property="..." content="..."> or content first.
-  const re1 = new RegExp(
-    `<meta[^>]+${key}=["']${value}["'][^>]+content=["']([^"']*)["']`,
-    'i',
-  )
-  const re2 = new RegExp(
-    `<meta[^>]+content=["']([^"']*)["'][^>]+${key}=["']${value}["']`,
-    'i',
-  )
-  const m = html.match(re1) ?? html.match(re2)
-  return m ? decodeEntities(m[1].trim()) : null
-}
-
-function decodeEntities(s: string): string {
-  return s
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-}
-
-function extractTitle(html: string): string | null {
-  const m = html.match(/<title[^>]*>([^<]*)<\/title>/i)
-  return m ? decodeEntities(m[1].trim()) : null
-}
-
-function resolveUrl(href: string | null, base: string): string | null {
-  if (!href) return null
-  try { return new URL(href, base).toString() } catch { return null }
-}
-
-async function scrape(rawUrl: string): Promise<ScrapedMeta | null> {
-  let url: URL
-  try { url = new URL(rawUrl) } catch { return null }
-  if (url.protocol !== 'http:' && url.protocol !== 'https:') return null
-
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
-
-  try {
-    const res = await fetch(url.toString(), {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'EvolvedProsBot/1.0 (+sponsor-extract)',
-        Accept: 'text/html,application/xhtml+xml',
-      },
-      redirect: 'follow',
-    })
-    if (!res.ok) return null
-    const html = (await res.text()).slice(0, 200_000)
-
-    const ogTitle       = metaFromAttrs(html, 'property', 'og:title')
-    const ogDesc        = metaFromAttrs(html, 'property', 'og:description')
-    const ogImage       = metaFromAttrs(html, 'property', 'og:image')
-    const ogSiteName    = metaFromAttrs(html, 'property', 'og:site_name')
-    const themeColor    = metaFromAttrs(html, 'name', 'theme-color')
-    const twitterImg    = metaFromAttrs(html, 'name', 'twitter:image')
-    const metaDesc      = metaFromAttrs(html, 'name', 'description')
-    const titleTag      = extractTitle(html)
-
-    return {
-      url: url.toString(),
-      title:       ogTitle ?? titleTag,
-      description: ogDesc ?? metaDesc,
-      image:       resolveUrl(ogImage ?? twitterImg, url.toString()),
-      themeColor,
-      siteName:    ogSiteName,
-    }
-  } catch {
-    return null
-  } finally {
-    clearTimeout(timer)
-  }
-}
 
 interface AIPayload {
   tagline: string
@@ -104,7 +17,7 @@ interface AIPayload {
 
 const AI_SYSTEM_SUFFIX = `You are writing a sponsor card for the Evolved Pros platform — a curated platform for sales pros. Generate a 6-8 word serif tagline, 20-30 word body line ('Why pros use it'), and 4-word CTA. Output JSON: {tagline, body_copy, cta_text}`
 
-async function generateCopy(meta: ScrapedMeta): Promise<AIPayload | null> {
+async function generateCopy(meta: SponsorPageMeta): Promise<AIPayload | null> {
   const prompt = [
     `Brand: ${meta.siteName ?? meta.title ?? meta.url}`,
     meta.title       ? `Page title: ${meta.title}`             : '',
@@ -145,7 +58,7 @@ export async function POST(request: Request) {
   const url = typeof body.url === 'string' ? body.url.trim() : ''
   if (!url) return NextResponse.json({ error: 'url is required' }, { status: 422 })
 
-  const meta = await scrape(url)
+  const meta = await scrapeSponsorPage(url)
   if (!meta) {
     return NextResponse.json(
       { error: 'Could not fetch the URL. Check it loads in a browser.' },
