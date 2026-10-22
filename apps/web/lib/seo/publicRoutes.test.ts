@@ -68,6 +68,11 @@ describe('PUBLIC_SITEMAP_PATHS', () => {
       expect([...PUBLIC_SITEMAP_PATHS]).not.toContain(gated)
     }
   })
+
+  it('does not list the member dashboard /home', () => {
+    expect([...PUBLIC_SITEMAP_PATHS]).not.toContain('/home')
+    expect([...PUBLIC_SITEMAP_PATHS]).not.toContain('/home/')
+  })
 })
 
 describe('pillar hub sitemap entries', () => {
@@ -188,6 +193,10 @@ describe('ROBOTS_DISALLOW', () => {
 
   it('does not hide the public sell page', () => {
     expect([...ROBOTS_DISALLOW]).not.toContain('/pricing')
+  })
+
+  it('leaves /home crawlable so a logged-out 308 can be followed', () => {
+    expect([...ROBOTS_DISALLOW]).not.toContain('/home')
   })
 })
 

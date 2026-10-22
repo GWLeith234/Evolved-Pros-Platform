@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 import { RETURN_PATH_HEADER, loginHrefFor, returnPathFromRequest } from '@/lib/auth/gatedIntent'
+import { isMemberHomeIndex, LOGGED_OUT_MEMBER_HOME_STATUS } from '@/lib/auth/memberHomeGate'
 import { isPublicBrandAsset } from '@/lib/auth/publicAssets'
 import { applyPreviewResponseHeaders, isMediaPreviewPath } from '@/lib/media/previewHeaders'
 import { anonymousWeeklyReportResponse } from '@/lib/reports/http'
@@ -106,10 +107,42 @@ function hasAuthCookie(request: NextRequest): boolean {
   return request.cookies.getAll().some(cookie => cookie.name.startsWith('sb-') || cookie.name.startsWith('sb_'))
 }
 
+/** Cookie hint only. A stale Supabase cookie still fails getUser() later. */
+function requestLooksSignedIn(request: NextRequest): boolean {
+  if (process.env.NODE_ENV === 'development' && request.cookies.get('dev_session')?.value) {
+    return true
+  }
+  return hasAuthCookie(request)
+}
+
+function redirectToPublicHome(request: NextRequest): NextResponse {
+  // Standard URL, not nextUrl.clone(): NextURL keeps the request's trailing
+  // slash on the Location it stringifies, which would turn "/" back into a
+  // slash URL and loop /home/.
+  return NextResponse.redirect(new URL('/', request.url), LOGGED_OUT_MEMBER_HOME_STATUS)
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   if (isMediaPreviewPath(pathname)) {
     return handleMediaPreview(request)
+  }
+
+  // RSC requests (including click navigations, not just hover-prefetch) must
+  // not be redirected here — Next.js cannot parse a redirect as RSC and
+  // reports 503. The member layout permanentRedirects logged-out /home.
+  const isRsc =
+    request.headers.get('RSC') === '1' ||
+    request.headers.get('Next-Router-Prefetch') === '1'
+
+  // Logged-out /home and /home/ go straight to the public homepage. No
+  // session cookie and no dev bypass means we do not need Supabase to know
+  // the visitor is anonymous. The decision reads the session, never the
+  // crawler identity. A cookie still falls through so a real member reaches
+  // the dashboard; getUser() below sends a stale cookie to the same
+  // permanent redirect.
+  if (!isRsc && isMemberHomeIndex(pathname) && !requestLooksSignedIn(request)) {
+    return redirectToPublicHome(request)
   }
 
   // skipTrailingSlashRedirect is on so PWA scope URLs can keep their slash.
@@ -131,14 +164,9 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // RSC requests (including click navigations, not just hover-prefetch) must
-  // not be redirected — Next.js cannot parse a redirect as RSC and reports
-  // 503. Session refresh MUST still run: Server Components cannot set auth
+  // Session refresh MUST still run for RSC: Server Components cannot set auth
   // cookies (createClient swallows that), so skipping refresh here is why
   // /pricing showed SIGN IN to a logged-in member after an in-app navigation.
-  const isRsc =
-    request.headers.get('RSC') === '1' ||
-    request.headers.get('Next-Router-Prefetch') === '1'
 
   // Public /brand stills (svg/png/...). Matcher already omits /brand; this
   // keeps them ungated if someone later adds /brand/:path* to the matcher.
@@ -252,6 +280,15 @@ export async function middleware(request: NextRequest) {
     // to /login (which would leak HTML to a fetch() caller).
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    // Stale Supabase cookie: getUser() said there is no session. /home still
+    // belongs on the public homepage, not on the robots-disallowed login page.
+    if (isMemberHomeIndex(pathname)) {
+      const redirect = redirectToPublicHome(request)
+      supabaseResponse.cookies.getAll().forEach(c => {
+        redirect.cookies.set(c.name, c.value, c)
+      })
+      return redirect
     }
     // Carry forward any cookies Supabase wrote during getUser() (e.g. a partial
     // token-refresh attempt). A bare NextResponse.redirect() drops them, which
