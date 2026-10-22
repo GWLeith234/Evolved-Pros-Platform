@@ -1,29 +1,14 @@
 import 'server-only'
 import { XMLParser } from 'fast-xml-parser'
 import { adminClient } from '@/lib/supabase/admin'
-
-interface RssEnclosure {
-  '@_url'?: string
-  '@_type'?: string
-  '@_length'?: string
-}
-
-interface RssItunesImage {
-  '@_href'?: string
-}
-
-interface RssItem {
-  guid?: string | { '#text'?: string }
-  title?: string
-  description?: string
-  pubDate?: string
-  enclosure?: RssEnclosure
-  'content:encoded'?: string
-  'itunes:duration'?: string | number
-  'itunes:episode'?: string | number
-  'itunes:season'?: string | number
-  'itunes:image'?: RssItunesImage
-}
+import {
+  parseDuration,
+  parseInteger,
+  pickGuid,
+  uniqueSlug,
+  type RssItem,
+  type RssItunesImage,
+} from './rssSync'
 
 interface RssChannel {
   'itunes:image'?: RssItunesImage
@@ -66,46 +51,6 @@ export type PodcastSyncErr = {
 }
 
 export type PodcastSyncResult = PodcastSyncOk | PodcastSyncErr
-
-function pickGuid(guid: RssItem['guid']): string | null {
-  if (!guid) return null
-  if (typeof guid === 'string') return guid.trim() || null
-  if (typeof guid === 'object' && typeof guid['#text'] === 'string') {
-    return guid['#text'].trim() || null
-  }
-  return null
-}
-
-function parseDuration(value: string | number | undefined): number | null {
-  if (value === undefined || value === null) return null
-  if (typeof value === 'number') return Number.isFinite(value) ? value : null
-  const str = String(value).trim()
-  if (!str) return null
-  if (str.includes(':')) {
-    const parts = str.split(':').map(p => parseInt(p, 10))
-    if (parts.some(n => Number.isNaN(n))) return null
-    let seconds = 0
-    for (const part of parts) seconds = seconds * 60 + part
-    return seconds
-  }
-  const n = parseInt(str, 10)
-  return Number.isNaN(n) ? null : n
-}
-
-function parseInteger(value: string | number | undefined): number | null {
-  if (value === undefined || value === null) return null
-  if (typeof value === 'number') return Number.isFinite(value) ? Math.trunc(value) : null
-  const n = parseInt(String(value), 10)
-  return Number.isNaN(n) ? null : n
-}
-
-function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-    .slice(0, 200)
-}
 
 /**
  * Pull the Transistor RSS feed and insert any new episodes.
@@ -178,17 +123,9 @@ export async function syncPodcastFromRss(): Promise<PodcastSyncResult> {
       continue
     }
 
-    let slug = slugify(title)
-    if (!slug) slug = `episode-${guid.slice(0, 8)}`
     const episodeNumber = parseInteger(item['itunes:episode'])
-
-    if (existingSlugs.has(slug) || seenSlugs.has(slug)) {
-      const suffix = episodeNumber !== null ? `-${episodeNumber}` : `-${guid.slice(0, 6)}`
-      slug = `${slug}${suffix}`
-    }
-    if (existingSlugs.has(slug) || seenSlugs.has(slug)) {
-      slug = `${slug}-${Date.now().toString(36).slice(-4)}`
-    }
+    const taken = new Set([...existingSlugs, ...seenSlugs])
+    const slug = uniqueSlug(title, guid, episodeNumber, taken)
     seenSlugs.add(slug)
 
     const description = typeof item.description === 'string' ? item.description : null
