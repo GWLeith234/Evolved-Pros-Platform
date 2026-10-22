@@ -4,10 +4,9 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
-// Brief naming (UI-facing) → DB CHECK-constraint values from Sprint 0 migration.
-// Sprint 0 locked DB values to ('fire','hundred','clap','heart','mind') —
-// COMMUNITY-SPRINT-2 brief renamed clap→hands and mind→mindblown for the UI.
-// Translate at the API boundary so the DB stays consistent.
+// UI names hands/mindblown; the posts CHECK stores clap/mind.
+// Translate at the API boundary so stored values stay stable.
+// Also accept the DB names so older clients keep working.
 const EMOJI_TO_DB: Record<string, string> = {
   fire:      'fire',
   hundred:   'hundred',

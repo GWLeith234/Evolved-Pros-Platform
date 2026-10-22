@@ -74,7 +74,6 @@ export function UnifiedCommunityPage({
   const [queuedCount, setQueuedCount] = useState(0)
   const [queued, setQueued] = useState<Post[]>([])
 
-  // COMMUNITY-SPRINT-2: filter rail state
   const [activeKind, setActiveKind] = useState<KindFilter>('all')
   const [activePillars, setActivePillars] = useState<Pillar[]>([])
   const [sortBy, setSortBy] = useState<SortBy>('newest')
@@ -125,8 +124,8 @@ export function UnifiedCommunityPage({
   // Submit handler for the inline composer inside PostReplyThread. Posts the
   // reply, appends it to the local cache, and bumps the post's replyCount so
   // the icon's number reflects the new state without a refetch.
-  // CM-1: multipart so a comment can carry one image. With no file part this
-  // is the same text-only reply as before, just over form-data.
+  // Multipart so a comment can carry one image. With no file part this is
+  // the same text-only reply, just over form-data.
   const handleReplySubmit = useCallback(async (postId: string, body: string, file: File | null) => {
     const form = new FormData()
     form.append('body', body)
@@ -184,8 +183,8 @@ export function UnifiedCommunityPage({
     return () => { supabase.removeChannel(sub) }
   }, [currentUser.id])
 
-  // LOAD MORE button — explicit, not infinite scroll (anchors the page,
-  // easier on weak connections per Sprint 2 brief).
+  // Explicit Load more, not infinite scroll: it anchors the page and is
+  // easier on weak connections.
   const loadMore = useCallback(async () => {
     if (!hasMore || loadingMore || !cursor) return
     setLoadingMore(true)
@@ -209,8 +208,8 @@ export function UnifiedCommunityPage({
     setPosts(prev => [post, ...prev])
   }
 
-  // New Composer (Sprint 1) doesn't return the created post object —
-  // re-fetch the latest row and prepend so the user sees their own post.
+  // The composer does not return the created post. Re-fetch the latest
+  // row and prepend it so the author sees their own post.
   const handleNewComposerPost = useCallback(async () => {
     try {
       const res = await fetch('/api/posts?limit=1')
@@ -235,8 +234,6 @@ export function UnifiedCommunityPage({
     setVisibleCount(PAGE_SIZE)
   }, [activeKind, activePillars, sortBy])
 
-  // COMMUNITY-SPRINT-2 client-side filter + sort. Filter logic stays
-  // client-side per brief — DO NOT migrate to server in this sprint.
   const filtered = useMemo(() => {
     let list = posts.filter(post => {
       if (activeKind !== 'all') {
@@ -291,7 +288,6 @@ export function UnifiedCommunityPage({
     /* SCROLL-FIX: grow with content; let .ep-main-scroll own vertical scroll.
        Nested height:100% + overflow-y-auto trapped the feed when the shell broke. */
     <div className="flex flex-col w-full" style={{ background: 'var(--community-page-bg)' }}>
-      {/* Editorial header (COMMUNITY-SPRINT-1) */}
       <CommunityPageHeader />
 
       {/* Feed (left) + weekly leaderboard rail (right) */}
@@ -308,7 +304,6 @@ export function UnifiedCommunityPage({
             academyContinue={academyContinue}
           />
 
-          {/* Pinned announcement — theme tokens (Sprint 4A) */}
           {pinnedPost && (
             <div
               className="community-pinned"
@@ -326,8 +321,8 @@ export function UnifiedCommunityPage({
             </div>
           )}
 
-          {/* Compose (COMMUNITY-SPRINT-1) — anchor target for the mobile
-              "Start a post" quick-action (SPRINT E). */}
+          {/* #community-composer is the scroll target for the mobile
+              "Start a post" quick-action. */}
           <div id="community-composer" style={{ scrollMarginTop: 88 }}>
           <Composer
             channelId={defaultChannelId}
@@ -341,9 +336,8 @@ export function UnifiedCommunityPage({
           />
           </div>
 
-          {/* Filter rail — sits inside the main column between composer and
-              feed so the right rail can extend full-height (matches
-              SPRINT-K design). */}
+          {/* Filter rail sits in the main column, between composer and feed,
+              so the right rail can extend full height. */}
           <FilterRail
             activeKind={activeKind}
             activePillars={activePillars}
@@ -364,7 +358,6 @@ export function UnifiedCommunityPage({
             </button>
           )}
 
-          {/* Posts + in-feed ads (COMMUNITY-SPRINT-2: PostCardV2 + visibleCount pagination) */}
           {filtered.length === 0 ? (
             <div className="py-16 text-center">
               <p className="font-condensed text-xs tracking-widest" style={{ color: 'var(--text-tertiary)' }}>
@@ -427,7 +420,6 @@ export function UnifiedCommunityPage({
             </div>
           )}
 
-          {/* LOAD MORE button — explicit, anchors the page (COMMUNITY-SPRINT-2) */}
           {hasMoreVisible && (
             <div className="flex justify-center py-6">
               <button
