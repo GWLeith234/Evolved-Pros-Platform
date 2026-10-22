@@ -108,6 +108,11 @@ export const LEGACY_SEARCH_REDIRECTS = [
   { source: '/blog', destination: '/media' },
   { source: '/subscribe', destination: '/pricing' },
   { source: '/dennis-yu', destination: '/podcast/dennis-yu-authority-content' },
+  // Guest page. GSC 2025-06-01..2026-10-17: 1 impression, 0 clicks, avg position 9.
+  {
+    source: '/jim-thompson',
+    destination: '/podcast/trust-credibility-cold-calling-jim-thompson',
+  },
 ]
 
 function legacySearchRedirects() {
