@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { clientSafeError, logProviderError } from '@/lib/http/clientError'
 import type { Json } from '@evolved-pros/db'
 
 type AssessmentType = 'PIONEER' | 'DRIVER' | 'CONNECTOR' | 'ARCHITECT'
@@ -24,8 +25,10 @@ export async function GET() {
     .maybeSingle()
 
   if (error) {
-    console.error('[GET /api/assessments/pioneer-driver]', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[GET /api/assessments/pioneer-driver]', error, 'Could not load your assessment.') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ assessment: data ?? null })
@@ -63,8 +66,10 @@ export async function POST(request: Request) {
     .single()
 
   if (insertError || !assessment) {
-    console.error('[POST /api/assessments/pioneer-driver] insert', insertError)
-    return NextResponse.json({ error: insertError?.message ?? 'Failed to save assessment' }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/assessments/pioneer-driver] insert', insertError, 'Failed to save assessment') },
+      { status: 500 },
+    )
   }
 
   /* Follow-up users-table update still needs public.users.id (legacy
@@ -78,8 +83,8 @@ export async function POST(request: Request) {
       .eq('id', profile.id)
 
     if (updateError) {
-      console.error('[POST /api/assessments/pioneer-driver] user update', updateError)
-      // Non-fatal — assessment was saved, just log
+      // Non-fatal — assessment was saved. Log a redacted provider error only.
+      logProviderError('[POST /api/assessments/pioneer-driver] user update', updateError)
     }
   }
 

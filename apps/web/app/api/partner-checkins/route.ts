@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { clientSafeError } from '@/lib/http/clientError'
 
 function getCurrentMonday(): string {
   const now  = new Date()
@@ -42,8 +43,10 @@ export async function GET(request: Request) {
     .limit(8)
 
   if (error) {
-    console.error('[GET /api/partner-checkins]', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[GET /api/partner-checkins]', error, 'Could not load check-ins.') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ checkins: checkins ?? [] })
@@ -98,8 +101,10 @@ export async function POST(request: Request) {
     .single()
 
   if (error || !data) {
-    console.error('[POST /api/partner-checkins]', error)
-    return NextResponse.json({ error: error?.message ?? 'Failed to save check-in' }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/partner-checkins]', error, 'Failed to save check-in') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ checkin: data }, { status: 201 })

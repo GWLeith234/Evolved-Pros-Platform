@@ -2,7 +2,8 @@
  * Public guest upload and a handful of member routes used to put PostgREST
  * or Storage `error.message` (and, for avatar, a thrown Error message) on
  * the JSON body. These calls assert the status stays 500, the body is a
- * stable message, and the provider text is only on the server log.
+ * stable message, and the server log keeps the constraint name with the
+ * email redacted.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -104,8 +105,10 @@ function assertHidden(body: Record<string, unknown>, logged: string) {
   expect(serialized).not.toContain('users_email_key')
   expect(serialized).not.toContain('23505')
   expect(serialized).not.toContain('public.users')
-  expect(logged).toContain(SECRET)
+  expect(logged).not.toContain(SECRET)
+  expect(logged).toContain('[redacted-email]')
   expect(logged).toContain('users_email_key')
+  expect(logged).toContain('23505')
 }
 
 describe('routes hide provider error text', () => {

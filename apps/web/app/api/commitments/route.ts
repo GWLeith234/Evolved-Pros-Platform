@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { clientSafeError } from '@/lib/http/clientError'
 
 export async function GET(request: Request) {
   const supabase = createClient()
@@ -22,8 +23,10 @@ export async function GET(request: Request) {
 
   const { data, error } = await query
   if (error) {
-    console.error('[GET /api/commitments]', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[GET /api/commitments]', error, 'Could not load commitments.') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ commitments: data ?? [] })
@@ -64,8 +67,10 @@ export async function POST(request: Request) {
     .select('id, commitment, is_completed, completed_at, week_start')
 
   if (error || !data) {
-    console.error('[POST /api/commitments]', error)
-    return NextResponse.json({ error: error?.message ?? 'Failed to save commitments' }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/commitments]', error, 'Failed to save commitments') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ commitments: data }, { status: 201 })

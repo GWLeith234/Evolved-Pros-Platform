@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { clientSafeError } from '@/lib/http/clientError'
 import type { Json } from '@evolved-pros/db'
 
 export async function GET(request: Request) {
@@ -25,8 +26,10 @@ export async function GET(request: Request) {
 
   const { data, error } = await query
   if (error) {
-    console.error('[GET /api/strategic-plans]', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[GET /api/strategic-plans]', error, 'Could not load plans.') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ plans: data ?? [] })
@@ -68,8 +71,10 @@ export async function POST(request: Request) {
     .single()
 
   if (error || !data) {
-    console.error('[POST /api/strategic-plans]', error)
-    return NextResponse.json({ error: error?.message ?? 'Failed to save plan' }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/strategic-plans]', error, 'Failed to save plan') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ plan: data }, { status: 201 })

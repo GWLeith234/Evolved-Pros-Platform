@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { clientSafeError } from '@/lib/http/clientError'
 
 export async function DELETE(
   _request: Request,
@@ -23,8 +24,10 @@ export async function DELETE(
     .eq('user_id', profile.id)
 
   if (error) {
-    console.error('[DELETE /api/ledger/[id]]', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[DELETE /api/ledger/[id]]', error, 'Could not delete that entry.') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ deleted: id })
