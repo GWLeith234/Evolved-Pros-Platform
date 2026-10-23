@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { clientSafeError } from '@/lib/http/clientError'
 
 export async function GET(request: Request) {
   const supabase = createClient()
@@ -24,8 +25,10 @@ export async function GET(request: Request) {
 
   const { data, error } = await query
   if (error) {
-    console.error('[GET /api/ledger]', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[GET /api/ledger]', error, 'Could not load ledger entries.') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ entries: data ?? [] })
@@ -58,8 +61,10 @@ export async function POST(request: Request) {
     .single()
 
   if (error || !data) {
-    console.error('[POST /api/ledger]', error)
-    return NextResponse.json({ error: error?.message ?? 'Failed to add entry' }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/ledger]', error, 'Failed to add entry') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ entry: data }, { status: 201 })

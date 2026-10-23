@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { clientSafeError } from '@/lib/http/clientError'
 
 export async function PATCH(
   request: Request,
@@ -36,8 +37,10 @@ export async function PATCH(
     .single()
 
   if (error) {
-    console.error('[PATCH /api/commitments/[id]]', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[PATCH /api/commitments/[id]]', error, 'Could not update that commitment.') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ commitment: data })

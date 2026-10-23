@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { clientSafeError } from '@/lib/http/clientError'
 import type { Json } from '@evolved-pros/db'
 
 export async function GET(request: Request) {
@@ -25,8 +26,10 @@ export async function GET(request: Request) {
 
   const { data, error } = await query.maybeSingle()
   if (error) {
-    console.error('[GET /api/checkin-results]', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[GET /api/checkin-results]', error, 'Could not load your check-in.') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ result: data ?? null })
@@ -70,8 +73,10 @@ export async function POST(request: Request) {
     .single()
 
   if (error || !data) {
-    console.error('[POST /api/checkin-results]', error)
-    return NextResponse.json({ error: error?.message ?? 'Failed to save check-in result' }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/checkin-results]', error, 'Failed to save check-in result') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ result: data }, { status: 201 })

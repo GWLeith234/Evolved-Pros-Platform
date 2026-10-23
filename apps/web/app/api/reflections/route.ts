@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { clientSafeError } from '@/lib/http/clientError'
 
 export async function GET(request: Request) {
   const supabase = createClient()
@@ -24,8 +25,10 @@ export async function GET(request: Request) {
 
   const { data, error } = await query
   if (error) {
-    console.error('[GET /api/reflections]', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[GET /api/reflections]', error, 'Could not load reflections.') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ reflections: data ?? [] })
@@ -58,8 +61,10 @@ export async function POST(request: Request) {
     .single()
 
   if (error || !data) {
-    console.error('[POST /api/reflections]', error)
-    return NextResponse.json({ error: error?.message ?? 'Failed to save reflection' }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/reflections]', error, 'Failed to save reflection') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json(data, { status: 201 })
