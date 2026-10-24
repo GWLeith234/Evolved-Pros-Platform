@@ -12,7 +12,7 @@ import { sitemapLastModified } from '@/lib/seo/sitemapEntries'
 export type MediaStorySitemapRow = {
   pillar: string | null
   slug: string | null
-  published_at: string | null
+  published_at?: string | null
   /** media_stories.updated_at. Same column JSON-LD dateModified uses. */
   updated_at?: string | null
   is_published?: boolean | null

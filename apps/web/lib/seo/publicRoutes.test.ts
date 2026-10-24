@@ -4,6 +4,8 @@ import { describe, expect, it } from 'vitest'
 import { PILLARS } from '@/lib/pillars'
 import {
   MEDIA_PILLAR_HUB_SITEMAP_PRIORITY,
+  PILLAR_HUB_SHELL_LAST_MODIFIED,
+  copyLastModified,
   toEpisodeSitemapEntries,
   toPillarHubSitemapEntries,
   toStaticSitemapEntries,
@@ -75,6 +77,12 @@ describe('PUBLIC_SITEMAP_PATHS', () => {
   })
 })
 
+function copyDates() {
+  return Object.fromEntries(
+    PUBLIC_SITEMAP_PATHS.map((path) => [path, copyLastModified(path)]),
+  ) as Record<(typeof PUBLIC_SITEMAP_PATHS)[number], Date>
+}
+
 describe('pillar hub sitemap entries', () => {
   const base = 'https://www.evolvedpros.com'
 
@@ -84,7 +92,7 @@ describe('pillar hub sitemap entries', () => {
     expect(hubs.map((entry) => new URL(entry.url).pathname)).toEqual([...MEDIA_PILLAR_HUB_PATHS])
     expect(hubs.some((entry) => entry.url.includes('/media/preview'))).toBe(false)
     expect(hubs.some((entry) => entry.url.includes('/login'))).toBe(false)
-    expect(hubs.every((entry) => !('lastModified' in entry))).toBe(true)
+    expect(hubs.every((entry) => entry.lastModified.getTime() === new Date(PILLAR_HUB_SHELL_LAST_MODIFIED).getTime())).toBe(true)
     expect(hubs.every((entry) => entry.priority === MEDIA_PILLAR_HUB_SITEMAP_PRIORITY)).toBe(true)
     expect(MEDIA_PILLAR_HUB_SITEMAP_PRIORITY).toBeLessThan(0.7)
 
@@ -102,17 +110,18 @@ describe('pillar hub sitemap entries', () => {
 describe('sitemap dates and refresh', () => {
   const base = 'https://www.evolvedpros.com'
 
-  it('omits lastModified on static entries and is byte-identical across calls', () => {
+  it('stamps lastModified on static entries and is byte-identical across calls', () => {
     const freq = Object.fromEntries(
       PUBLIC_SITEMAP_PATHS.map((path) => [path, 'yearly']),
     ) as Record<(typeof PUBLIC_SITEMAP_PATHS)[number], 'yearly'>
     const priority = Object.fromEntries(
       PUBLIC_SITEMAP_PATHS.map((path) => [path, 0.4]),
     ) as Record<(typeof PUBLIC_SITEMAP_PATHS)[number], number>
-    const first = toStaticSitemapEntries(base, freq, priority)
-    const second = toStaticSitemapEntries(base, freq, priority)
+    const dates = copyDates()
+    const first = toStaticSitemapEntries(base, freq, priority, dates)
+    const second = toStaticSitemapEntries(base, freq, priority, dates)
     expect(JSON.stringify(first)).toBe(JSON.stringify(second))
-    expect(JSON.stringify(first)).not.toContain('lastModified')
+    expect(first.every((entry) => entry.lastModified instanceof Date)).toBe(true)
     expect(first.map((entry) => new URL(entry.url).pathname)).toEqual([...PUBLIC_SITEMAP_PATHS])
     expect(first.some((entry) => entry.url.includes('/login'))).toBe(false)
     expect(first.some((entry) => entry.url.includes('/media/preview'))).toBe(false)
@@ -148,6 +157,7 @@ describe('sitemap dates and refresh', () => {
       resolve(__dirname, '../../app/sitemap.ts'),
       resolve(__dirname, '../media/sitemap.ts'),
       resolve(__dirname, 'sitemapEntries.ts'),
+      resolve(__dirname, 'sitemapListings.ts'),
       resolve(__dirname, 'mediaCategoryLandings.ts'),
     ]
     for (const file of files) {
