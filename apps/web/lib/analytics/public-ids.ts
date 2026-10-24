@@ -45,3 +45,10 @@ export function getClarityId(
   if (!/^[A-Za-z0-9]+$/.test(id)) return undefined
   return id
 }
+
+/** Bing Webmaster Tools HTML-tag verification (msvalidate.01). Unset → no tag. */
+export function getBingVerification(
+  value: string | undefined = process.env.BING_SITE_VERIFICATION,
+): string | undefined {
+  return getGscVerification(value)
+}

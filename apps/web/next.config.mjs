@@ -64,7 +64,14 @@ const nextConfig = {
           destination: '/media/:path*',
         },
       ],
-      afterFiles: [],
+      // IndexNow key file: /<INDEXNOW_KEY>.txt → route handler (404 unless it
+      // matches the env key). afterFiles so real files/routes still win.
+      afterFiles: [
+        {
+          source: '/:key([A-Za-z0-9-]{8,128}).txt',
+          destination: '/api/indexnow-key/:key',
+        },
+      ],
       fallback: [],
     }
   },

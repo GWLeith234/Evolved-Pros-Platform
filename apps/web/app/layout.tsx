@@ -2,7 +2,7 @@
 import type { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import { getDefaultTheme } from '@/lib/cache/shared'
-import { getGscVerification } from '@/lib/analytics/public-ids'
+import { getBingVerification, getGscVerification } from '@/lib/analytics/public-ids'
 import { CANONICAL_ORIGIN } from '@/lib/seo/canonical'
 import { AudienceAnalytics } from '@/components/analytics/AudienceAnalytics'
 import { ThemeInit } from '@/components/ThemeInit'
@@ -10,6 +10,7 @@ import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import './globals.css'
 
 const gscVerification = getGscVerification()
+const bingVerification = getBingVerification()
 
 // Self-hosted latin woff2 (same families, weights, styles, and CSS variables).
 // display stays swap. Serif families keep the Times New Roman size-adjusted
@@ -148,7 +149,15 @@ export const metadata: Metadata = {
     telephone: false,
   },
   // Search Console HTML-tag verification. Omitted when the env var is unset.
-  ...(gscVerification ? { verification: { google: gscVerification } } : {}),
+  // Bing Webmaster Tools adds msvalidate.01 from BING_SITE_VERIFICATION.
+  ...(gscVerification || bingVerification
+    ? {
+        verification: {
+          ...(gscVerification ? { google: gscVerification } : {}),
+          ...(bingVerification ? { other: { 'msvalidate.01': bingVerification } } : {}),
+        },
+      }
+    : {}),
 }
 
 /** iOS/Android web: device-width + safe-area (viewport-fit=cover). */
