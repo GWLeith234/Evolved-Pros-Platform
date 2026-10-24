@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { adminClient } from '@/lib/supabase/admin'
+import { mediaStoryPublicUrl, podcastEpisodePublicUrl, queueIndexNowPing } from '@/lib/seo/indexnow'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { isPillarSlug } from '@/lib/pillars'
@@ -89,6 +90,7 @@ export async function PATCH(
     .single()
 
   if (error || !data) return NextResponse.json({ error: 'Update failed' }, { status: 500 })
+  if (data.is_published && data.slug) queueIndexNowPing([podcastEpisodePublicUrl(data.slug)])
   return NextResponse.json(data)
 }
 

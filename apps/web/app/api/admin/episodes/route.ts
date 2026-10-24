@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { adminClient } from '@/lib/supabase/admin'
+import { mediaStoryPublicUrl, podcastEpisodePublicUrl, queueIndexNowPing } from '@/lib/seo/indexnow'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { isPillarSlug } from '@/lib/pillars'
@@ -94,6 +95,8 @@ export async function POST(request: Request) {
   if (pinned) {
     await adminClient.from('episodes').update({ pinned: false }).neq('id', data.id)
   }
+
+  if (data.is_published && data.slug) queueIndexNowPing([podcastEpisodePublicUrl(data.slug)])
 
   return NextResponse.json(data, { status: 201 })
 }

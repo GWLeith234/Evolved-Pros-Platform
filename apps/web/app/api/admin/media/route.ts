@@ -1,3 +1,4 @@
+import { mediaStoryPublicUrl, podcastEpisodePublicUrl, queueIndexNowPing } from '@/lib/seo/indexnow'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { adminClient } from '@/lib/supabase/admin'
@@ -82,6 +83,9 @@ export async function POST(request: Request) {
     const failure = mediaStoryWriteFailure(error)
     return NextResponse.json({ error: failure.error }, { status: failure.status })
   }
+  // Tell Bing/IndexNow about the public story URL (no-op without INDEXNOW_KEY).
+  if (data.is_published) queueIndexNowPing([mediaStoryPublicUrl(data)])
+
   // Member alerts are inserted by notify_media_published() (migration 106)
   // in this same write. Do not call notifyMediaPublished here.
 
