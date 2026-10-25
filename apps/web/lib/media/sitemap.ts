@@ -34,6 +34,14 @@ export const UNPUBLISHED_MEDIA_PATHS = new Set([
   '/media/strategy/build-repeatable-sales-strategy-framework',
 ])
 
+/**
+ * Published stories kept live (200) but hidden from search: they get
+ * robots noindex and are left out of the sitemap. George YES 2026-10-24.
+ */
+export const NOINDEX_MEDIA_PATHS = new Set([
+  '/media/foundation/cooking-with-tallow-three-recipes',
+])
+
 /** Same path the live article route serves. Null if pillar or slug is missing. */
 export function mediaArticlePath(
   pillar: string | null | undefined,
@@ -85,7 +93,7 @@ export function toMediaSitemapEntries(
   for (const row of rows) {
     if (row.is_published !== true) continue
     const path = mediaArticlePath(row.pillar, row.slug)
-    if (!path || UNPUBLISHED_MEDIA_PATHS.has(path)) continue
+    if (!path || UNPUBLISHED_MEDIA_PATHS.has(path) || NOINDEX_MEDIA_PATHS.has(path)) continue
     if (path === '/media/preview' || path.startsWith('/media/preview/')) continue
     const lastModified = sitemapLastModified(row.updated_at, row.published_at)
     entries.push({
