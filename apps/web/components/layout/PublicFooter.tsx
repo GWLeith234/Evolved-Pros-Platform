@@ -143,6 +143,10 @@ export function PublicFooter({
           }}
         >
           {footerCopyright()}
+          <br />
+          {/* One builder credit for the whole site. This component is the only
+              mount, so the anchor stays a single dofollow link with no rel. */}
+          Website by <a href="https://www.evolvex360.com/">EvolveX360</a>
         </p>
       </div>
     </footer>

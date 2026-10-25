@@ -113,3 +113,20 @@ describe('footer logo lockup', () => {
     expect(footerTsx).toContain("padding: '32px 16px calc(32px + env(safe-area-inset-bottom, 0px))'")
   })
 })
+
+describe('builder credit', () => {
+  const credit = '<a href="https://www.evolvex360.com/">EvolveX360</a>'
+
+  it('places one dofollow branded anchor after the copyright line', () => {
+    const occurrences = footerTsx.split(credit).length - 1
+    expect(occurrences).toBe(1)
+    const copyrightAt = footerTsx.indexOf('{footerCopyright()}')
+    const creditAt = footerTsx.indexOf(credit)
+    expect(copyrightAt).toBeGreaterThan(-1)
+    expect(creditAt).toBeGreaterThan(copyrightAt)
+    expect(footerTsx.slice(copyrightAt, creditAt)).toContain('Website by')
+    const anchor = footerTsx.slice(footerTsx.indexOf('<a href="https://www.evolvex360.com/"'), footerTsx.indexOf('</a>', creditAt) + 4)
+    expect(anchor).toBe(credit)
+    expect(anchor).not.toContain('rel=')
+  })
+})
