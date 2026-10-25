@@ -5,6 +5,7 @@ import { asMediaStoryRecord, type MediaStoryRecord } from '@/lib/media/storyReco
 import { mediaStorySocialMetadata } from '@/lib/media/storyMeta'
 import { MediaStoryDocument } from '@/components/media/MediaStoryDocument'
 import { publicPageMetadata } from '@/lib/seo/canonical'
+import { NOINDEX_MEDIA_PATHS } from '@/lib/media/sitemap'
 
 export const revalidate = 3600
 export const dynamicParams = true
@@ -36,10 +37,11 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const story = await fetchStory(params.pillar, params.slug)
   if (!story) notFound()
-  return publicPageMetadata(
-    `/media/${params.pillar}/${params.slug}`,
-    mediaStorySocialMetadata(story),
-  )
+  const path = `/media/${params.pillar}/${params.slug}`
+  const meta = publicPageMetadata(path, mediaStorySocialMetadata(story))
+  return NOINDEX_MEDIA_PATHS.has(path)
+    ? { ...meta, robots: { index: false, follow: true } }
+    : meta
 }
 
 export default async function StoryPage({

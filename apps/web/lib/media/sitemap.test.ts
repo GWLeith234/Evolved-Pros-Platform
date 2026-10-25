@@ -187,3 +187,14 @@ describe('listPublicMediaStories', () => {
     ).toBe(false)
   })
 })
+
+describe('NOINDEX_MEDIA_PATHS', () => {
+  it('drops the tallow story from the sitemap but keeps other published rows', async () => {
+    const { toMediaSitemapEntries } = await import('./sitemap')
+    const out = toMediaSitemapEntries('https://www.evolvedpros.com', [
+      { pillar: 'foundation', slug: 'cooking-with-tallow-three-recipes', published_at: null, is_published: true },
+      { pillar: 'foundation', slug: 'other', published_at: null, is_published: true },
+    ])
+    expect(out.map(e => e.url)).toEqual(['https://www.evolvedpros.com/media/foundation/other'])
+  })
+})
