@@ -57,3 +57,80 @@ export const SPEAKING_EMAIL = 'speaking@evolvedpros.com'
 export function footerCopyright(year: number = new Date().getFullYear()): string {
   return `© ${year} ${FOOTER_LEGAL_ENTITY}`
 }
+
+export type ListenOnMark = 'apple' | 'spotify' | 'youtube' | 'text'
+
+export interface ListenOnLink {
+  /** Visible label for text links. Badge links keep the platform name for tests. */
+  label: string
+  href: string
+  /** Accessible name. The row label is "Listen on"; each anchor names its platform. */
+  ariaLabel: string
+  /**
+   * apple, spotify, and youtube render official marks. Artwork sources live
+   * next to those images in components/layout/PublicFooter.tsx.
+   * text is a word link (no official badge is used).
+   */
+  mark: ListenOnMark
+}
+
+/**
+ * "Listen on" platforms, in render order.
+ * Podcast Index sits immediately before RSS. No Player.fm, Amazon, or iHeart.
+ */
+export const LISTEN_ON_LINKS: readonly ListenOnLink[] = [
+  {
+    label: 'Apple Podcasts',
+    href: 'https://podcasts.apple.com/us/podcast/evolved-pros-podcast/id1895786556',
+    ariaLabel: 'Listen on Apple Podcasts',
+    mark: 'apple',
+  },
+  {
+    label: 'Spotify',
+    href: 'https://open.spotify.com/show/1KZoT8k38tBfq242pKUdg9',
+    ariaLabel: 'Listen on Spotify',
+    mark: 'spotify',
+  },
+  {
+    label: 'YouTube',
+    href: 'https://www.youtube.com/@evolvedpros/podcasts',
+    ariaLabel: 'Listen on YouTube',
+    mark: 'youtube',
+  },
+  {
+    label: 'Pocket Casts',
+    href: 'https://pocketcasts.com/podcast/evolved-pros-podcast/cc1e4a60-310b-013f-9952-0afff26cbb09',
+    ariaLabel: 'Listen on Pocket Casts',
+    mark: 'text',
+  },
+  {
+    label: 'Castbox',
+    href: 'https://castbox.fm/channel/id7226086',
+    ariaLabel: 'Listen on Castbox',
+    mark: 'text',
+  },
+  {
+    label: 'Podcast Addict',
+    href: 'https://podcastaddict.com/podcast/evolved-pros-podcast/7329000',
+    ariaLabel: 'Listen on Podcast Addict',
+    mark: 'text',
+  },
+  {
+    label: 'Podchaser',
+    href: 'https://www.podchaser.com/podcasts/evolved-pros-podcast-6476083',
+    ariaLabel: 'Listen on Podchaser',
+    mark: 'text',
+  },
+  {
+    label: 'Podcast Index',
+    href: 'https://podcastindex.org/podcast/7854130',
+    ariaLabel: 'Listen on Podcast Index',
+    mark: 'text',
+  },
+  {
+    label: 'RSS',
+    href: 'https://anchor.fm/s/111ea3a3c/podcast/rss',
+    ariaLabel: 'Listen on RSS',
+    mark: 'text',
+  },
+]

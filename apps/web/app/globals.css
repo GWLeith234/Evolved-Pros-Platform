@@ -4409,6 +4409,14 @@ html.light-mode .live-force-dark .ep-public-footer-logo--on-light {
   color: var(--text-primary);
 }
 
+/* Listen-on anchors. Layout is inline on the row; this is the keyboard ring.
+   Mark visibility reuses .ep-public-footer-logo--on-dark / --on-light so light,
+   dark, force-dark shells, and the paper About footer stay in lockstep. */
+.ep-listen-on a:focus-visible {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
 /* /pricing billing toggle — CSS :has() so the ladder is server HTML (TBT). */
 .ep-pricing-billing-btn {
   background-color: transparent;
