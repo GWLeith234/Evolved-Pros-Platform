@@ -1,8 +1,12 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { createElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { PublicFooter } from '@/components/layout/PublicFooter'
 import {
   FOOTER_LEGAL_ENTITY,
+  LISTEN_ON_LINKS,
   PUBLIC_FOOTER_LINKS,
   SPEAKING_EMAIL,
   SUPPORT_EMAIL,
@@ -111,6 +115,76 @@ describe('footer logo lockup', () => {
   it('stacks the footer column on the 16/24/32 rhythm', () => {
     expect(footerTsx).toContain('className="ep-stack"')
     expect(footerTsx).toContain("padding: '32px 16px calc(32px + env(safe-area-inset-bottom, 0px))'")
+  })
+})
+
+describe('LISTEN_ON_LINKS', () => {
+  it('lists the platforms in order, with Podcast Index immediately before RSS', () => {
+    expect(LISTEN_ON_LINKS.map(l => [l.label, l.href, l.mark])).toEqual([
+      ['Apple Podcasts', 'https://podcasts.apple.com/us/podcast/evolved-pros-podcast/id1895786556', 'apple'],
+      ['Spotify', 'https://open.spotify.com/show/1KZoT8k38tBfq242pKUdg9', 'spotify'],
+      ['YouTube', 'https://www.youtube.com/@evolvedpros/podcasts', 'youtube'],
+      ['Pocket Casts', 'https://pocketcasts.com/podcast/evolved-pros-podcast/cc1e4a60-310b-013f-9952-0afff26cbb09', 'text'],
+      ['Castbox', 'https://castbox.fm/channel/id7226086', 'text'],
+      ['Podcast Addict', 'https://podcastaddict.com/podcast/evolved-pros-podcast/7329000', 'text'],
+      ['Podchaser', 'https://www.podchaser.com/podcasts/evolved-pros-podcast-6476083', 'text'],
+      ['Podcast Index', 'https://podcastindex.org/podcast/7854130', 'text'],
+      ['RSS', 'https://anchor.fm/s/111ea3a3c/podcast/rss', 'text'],
+    ])
+    const labels = LISTEN_ON_LINKS.map(l => l.label)
+    expect(labels.indexOf('RSS') - labels.indexOf('Podcast Index')).toBe(1)
+  })
+
+  it('does not add Player.fm, Amazon, or iHeart', () => {
+    const blob = `${JSON.stringify(LISTEN_ON_LINKS)} ${footerTsx}`.toLowerCase()
+    expect(blob).not.toMatch(/player\.fm|amazon|iheart/)
+  })
+
+  it('gives every platform an external listen label with no em dash', () => {
+    for (const link of LISTEN_ON_LINKS) {
+      expect(link.href.startsWith('https://')).toBe(true)
+      expect(link.ariaLabel.startsWith('Listen on ')).toBe(true)
+      expect(link.ariaLabel).toContain(link.label)
+      expect(`${link.label} ${link.ariaLabel}`).not.toMatch(/\u2014|\u2013/)
+    }
+  })
+
+  it('records the source URL of each official asset and renders those files', () => {
+    expect(footerTsx).toContain(
+      'https://www.apple.com/105/media/us/ipoditunes/itunes/2017/e3fd5849_f16b_4256_9188_db2103c3a4ef/badges-podcasts/us.zip',
+    )
+    expect(footerTsx).toContain('https://marketing.services.apple/apple-podcasts-identity-guidelines')
+    expect(footerTsx).toContain('https://developer.spotify.com/documentation/design')
+    expect(footerTsx).toContain(
+      'https://developer.spotify.com/images/guidelines/design/2024-spotify-full-logo.zip',
+    )
+    expect(footerTsx).toContain('https://brand.youtube/youtube-logo')
+    expect(footerTsx).toContain(
+      'https://www.gstatic.com/marketing-cms/52/7d/637fef5a4788a97747e6feabc4aa/youtube-logo.zip',
+    )
+    expect(footerTsx).toContain('/brand/listen/apple-podcasts-listen-badge.svg')
+    expect(footerTsx).toContain('/brand/listen/spotify-logo-black.svg')
+    expect(footerTsx).toContain('/brand/listen/spotify-logo-white.svg')
+    expect(footerTsx).toContain('/brand/listen/youtube-logo-almostblack.png')
+    expect(footerTsx).toContain('/brand/listen/youtube-logo-white.png')
+    expect(footerCss).toContain('.ep-listen-on a:focus-visible')
+  })
+
+  it('opens every listen link in a new tab and wraps the row', () => {
+    const html = renderToStaticMarkup(createElement(PublicFooter))
+    expect(html).toContain('aria-label="Listen on"')
+    expect(html).toContain('Listen on')
+    expect(html).toContain('flex-wrap:wrap')
+    for (const link of LISTEN_ON_LINKS) {
+      expect(html).toContain(`href="${link.href}"`)
+      expect(html).toContain(`aria-label="${link.ariaLabel}"`)
+    }
+    const listenCount = LISTEN_ON_LINKS.length
+    const blank = html.split('target="_blank"').length - 1
+    const rel = html.split('rel="noopener noreferrer"').length - 1
+    expect(blank).toBe(listenCount)
+    expect(rel).toBe(listenCount)
+    expect(html).not.toMatch(/\u2014|\u2013/)
   })
 })
 
