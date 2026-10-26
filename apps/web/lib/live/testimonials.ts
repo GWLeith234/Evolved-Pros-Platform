@@ -236,4 +236,13 @@ export const LIVE_TESTIMONIALS: LiveTestimonial[] = [
     event: 'Conquer Local Podcast',
     headshotUrl: '/images/testimonials/cindy-mcgovern-320.webp',
   },
+  {
+    kind: 'quote',
+    existing: true,
+    quote:
+      'George Leith has a gift for helping you figure out where you are, where you want to go, and what you actually need to do to get there. I’ve known him for years, and his depth of experience across media, advertising, and software has made him an invaluable sounding board. During a major career transition, he helped me focus my strengths, close gaps in my knowledge, and build proposals that helped me land a role with substantially greater opportunity and compensation. His guidance is personal, practical, and grounded in experience. Having George in your corner is an investment I can wholeheartedly recommend.',
+    author: 'Ken Campbell',
+    role: 'Business Development Director, Media & Publishing, Workbooks CRM',
+    event: 'Career Transition',
+  },
 ]
