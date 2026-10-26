@@ -11,6 +11,38 @@
 export const BRIEF_EMAIL_MAX = 254
 
 /**
+ * JSON body cap for POST /api/media/brief. A real signup is an email, a
+ * source, a same-origin path, and an empty honeypot, well under a kilobyte.
+ * 4KB leaves headroom for that shape and rejects a multi-megabyte post before
+ * it is parsed or written.
+ */
+export const BRIEF_BODY_MAX = 4096
+
+/**
+ * True when the declared Content-Length or the buffered body is past the cap.
+ * Pass `raw` as '' to check the header before reading. A missing or
+ * non-numeric header does not count as oversized; the buffered length still does.
+ */
+export function briefPayloadTooLarge(contentLength: string | null, raw: string): boolean {
+  if (contentLength !== null && contentLength.trim() !== '') {
+    const declared = Number(contentLength)
+    if (Number.isFinite(declared) && declared > BRIEF_BODY_MAX) return true
+  }
+  return raw.length > BRIEF_BODY_MAX
+}
+
+/** Object JSON only. Arrays, scalars, and broken JSON are rejected. */
+export function parseBriefJson(raw: string): Record<string, unknown> | null {
+  try {
+    const parsed = JSON.parse(raw) as unknown
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null
+    return parsed as Record<string, unknown>
+  } catch {
+    return null
+  }
+}
+
+/**
  * Deliberately loose: one @, something either side, a dot in the domain, no
  * whitespace. Tighter regexes reject real addresses (plus-tags, new TLDs,
  * unicode locals) and the only thing that actually proves an address works is

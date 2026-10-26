@@ -3,11 +3,14 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import {
+  BRIEF_BODY_MAX,
   BRIEF_COPY,
   BRIEF_EMAIL_MAX,
+  briefPayloadTooLarge,
   normalizeBriefEmail,
   normalizeBriefPath,
   normalizeBriefSource,
+  parseBriefJson,
 } from './brief'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -47,6 +50,38 @@ describe('normalizeBriefEmail', () => {
     const long = `${'a'.repeat(BRIEF_EMAIL_MAX)}@evolvedpros.com`
     expect(normalizeBriefEmail(long)).toBeNull()
     expect(BRIEF_EMAIL_MAX).toBe(254)
+  })
+})
+
+describe('brief body cap', () => {
+  it('rejects a declared or buffered body past 4KB', () => {
+    expect(BRIEF_BODY_MAX).toBe(4096)
+    expect(briefPayloadTooLarge(String(BRIEF_BODY_MAX + 1), '')).toBe(true)
+    expect(briefPayloadTooLarge(null, 'x'.repeat(BRIEF_BODY_MAX + 1))).toBe(true)
+    expect(briefPayloadTooLarge('nope', 'x'.repeat(BRIEF_BODY_MAX + 1))).toBe(true)
+  })
+
+  it('allows a normal signup and a body sitting on the cap', () => {
+    const signup = JSON.stringify({
+      email: 'george@evolvedpros.com',
+      source: 'media-rail',
+      path: '/media',
+      website: '',
+    })
+    expect(briefPayloadTooLarge(String(signup.length), signup)).toBe(false)
+    expect(briefPayloadTooLarge(null, 'x'.repeat(BRIEF_BODY_MAX))).toBe(false)
+    expect(briefPayloadTooLarge('', '')).toBe(false)
+  })
+})
+
+describe('parseBriefJson', () => {
+  it('accepts an object and rejects everything else', () => {
+    expect(parseBriefJson('{"email":"a@b.co"}')).toEqual({ email: 'a@b.co' })
+    expect(parseBriefJson('')).toBeNull()
+    expect(parseBriefJson('{')).toBeNull()
+    expect(parseBriefJson('null')).toBeNull()
+    expect(parseBriefJson('[]')).toBeNull()
+    expect(parseBriefJson('"a@b.co"')).toBeNull()
   })
 })
 
@@ -97,6 +132,19 @@ describe('the brief actually captures', () => {
   it('drops honeypot submissions without telling the bot', () => {
     expect(route).toContain('body.website')
     expect(route).toContain('{ ok: true }')
+  })
+
+  it('caps the body and rate-limits a well-formed signup before the write', () => {
+    expect(route).toContain('briefPayloadTooLarge')
+    expect(route).toContain('payload_too_large')
+    expect(route).toContain('413')
+    expect(route).toContain('createRateLimiter(5, 10 * 60 * 1000)')
+    expect(route).toContain('rate_limited')
+    expect(route).toContain('429')
+    const rateCheck = route.indexOf('limiter.check')
+    const write = route.indexOf(".from('media_brief_subscribers')")
+    expect(rateCheck).toBeGreaterThan(-1)
+    expect(rateCheck).toBeLessThan(write)
   })
 
   it('never logs the address or a provider message', () => {
