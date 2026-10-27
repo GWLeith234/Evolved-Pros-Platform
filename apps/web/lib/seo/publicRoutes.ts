@@ -40,6 +40,9 @@
  * app/evolved (outside the public group so it can keep charcoal/gold chrome)
  * and is also absent from the middleware matcher, so an anonymous request
  * renders the page.
+ *
+ * /extension-privacy is the WIG Tracker browser-extension privacy policy
+ * (app/(public)/extension-privacy). Static, absent from the matcher.
  */
 export const PUBLIC_SITEMAP_PATHS = [
   '/',
@@ -53,6 +56,7 @@ export const PUBLIC_SITEMAP_PATHS = [
   '/contact',
   '/about',
   '/evolved',
+  '/extension-privacy',
 ] as const
 
 export type PublicSitemapPath = (typeof PUBLIC_SITEMAP_PATHS)[number]

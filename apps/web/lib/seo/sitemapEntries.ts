@@ -72,6 +72,8 @@ export const STATIC_SITEMAP_COPY_LAST_MODIFIED: Record<PublicSitemapPath, string
   '/about': '2026-10-09T19:06:50.000Z',
   // app/evolved/page.tsx and lib/seo/evolvedLegalJsonLd.ts.
   '/evolved': '2026-10-09T19:07:13.000Z',
+  // app/(public)/extension-privacy/page.tsx and lib/legal/extensionPrivacy.ts.
+  '/extension-privacy': '2026-10-27T20:30:00.000Z',
 }
 
 /**
