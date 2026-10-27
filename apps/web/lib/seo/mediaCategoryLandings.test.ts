@@ -63,7 +63,7 @@ describe('media category landing sitemap entries', () => {
 
     const entries = toMediaCategoryLandingSitemapEntries(BASE, auditSignals())
     expect(entries.map(entry => entry.url)).toEqual(paths.map(path => `${BASE}${path}`))
-    expect(entries.every(entry => !('lastModified' in entry))).toBe(true)
+    expect(entries.every(entry => entry.lastModified instanceof Date)).toBe(true)
     expect(entries.every(entry => entry.priority === MEDIA_PILLAR_HUB_SITEMAP_PRIORITY)).toBe(true)
     expect(entries.every(entry => entry.changeFrequency === 'weekly')).toBe(true)
     expect(MEDIA_PILLAR_HUB_SITEMAP_PRIORITY).toBe(0.6)
