@@ -7,8 +7,11 @@
  *
  *   - Only an email, a source and a path are read. Nothing else on the body is
  *     looked at, so no caller can smuggle a column in.
+ *   - The JSON body is capped (BRIEF_BODY_MAX) before it is parsed.
  *   - A honeypot field ('website') that a real form leaves empty. Answers 200
  *     without writing, so a bot cannot tell it was caught.
+ *   - Well-formed submissions are rate-limited per IP, same window as the
+ *     other public intake routes. Invalid bodies do not burn the quota.
  *   - Writes through adminClient. The table is service-role only (migration
  *     093) - there is no anon path to it at all.
  *
@@ -22,16 +25,41 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import {
+  briefPayloadTooLarge,
   normalizeBriefEmail,
   normalizeBriefPath,
   normalizeBriefSource,
+  parseBriefJson,
 } from '@/lib/media/brief'
+import { clientIpFrom, createRateLimiter } from '@/lib/speaking/inquiry'
+
+/**
+ * 5 signups per 10 minutes per IP.
+ *
+ * Best-effort only. The window lives in this process, so it RESETS ON EVERY
+ * DEPLOY and is NOT shared between Railway instances. It blunts casual abuse
+ * of a public endpoint; it is not a security control.
+ */
+const limiter = createRateLimiter(5, 10 * 60 * 1000)
 
 export async function POST(request: Request) {
-  let body: Record<string, unknown>
+  const contentLength = request.headers.get('content-length')
+  if (briefPayloadTooLarge(contentLength, '')) {
+    return NextResponse.json({ error: 'payload_too_large' }, { status: 413 })
+  }
+
+  let raw: string
   try {
-    body = (await request.json()) as Record<string, unknown>
+    raw = await request.text()
   } catch {
+    return NextResponse.json({ error: 'invalid_request' }, { status: 400 })
+  }
+  if (briefPayloadTooLarge(contentLength, raw)) {
+    return NextResponse.json({ error: 'payload_too_large' }, { status: 413 })
+  }
+
+  const body = parseBriefJson(raw)
+  if (!body) {
     return NextResponse.json({ error: 'invalid_request' }, { status: 400 })
   }
 
@@ -43,6 +71,12 @@ export async function POST(request: Request) {
   const email = normalizeBriefEmail(body.email)
   if (!email) {
     return NextResponse.json({ error: 'invalid_email' }, { status: 422 })
+  }
+
+  // Rate-limit only well-formed submissions, so a visitor fixing a typo does
+  // not burn their quota on 422s. The honeypot returned above skips it too.
+  if (!limiter.check(clientIpFrom(request.headers))) {
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429 })
   }
 
   const source = normalizeBriefSource(body.source)
