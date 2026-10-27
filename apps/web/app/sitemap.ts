@@ -48,6 +48,7 @@ const SITEMAP_FREQ: Record<PublicSitemapPath, Freq> = {
   '/contact': 'yearly',
   '/about':   'yearly',
   '/evolved': 'monthly',
+  '/extension-privacy': 'yearly',
 }
 
 const SITEMAP_PRIORITY: Record<PublicSitemapPath, number> = {
@@ -62,6 +63,7 @@ const SITEMAP_PRIORITY: Record<PublicSitemapPath, number> = {
   '/contact': 0.4,
   '/about':   0.4,
   '/evolved': 0.8,
+  '/extension-privacy': 0.2,
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

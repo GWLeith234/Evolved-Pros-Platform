@@ -42,6 +42,7 @@ describe('PUBLIC_SITEMAP_PATHS', () => {
       '/contact',
       '/about',
       '/evolved',
+      '/extension-privacy',
     ])
   })
 

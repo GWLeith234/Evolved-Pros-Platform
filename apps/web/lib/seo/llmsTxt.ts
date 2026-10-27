@@ -11,6 +11,7 @@
  */
 
 import { ABOUT_DESCRIPTION, ABOUT_TITLE } from '@/lib/about/copy'
+import { EXTENSION_PRIVACY_DESCRIPTION, EXTENSION_PRIVACY_TITLE } from '@/lib/legal/extensionPrivacy'
 import { FIT_PAGE_DESCRIPTION, FIT_PAGE_TITLE } from '@/lib/fit/copy'
 import { stripEmDashCopy } from '@/lib/home/cardImagery'
 import { HOME_SUB, HOME_TITLE } from '@/lib/home/conversion'
@@ -119,6 +120,10 @@ const STATIC_PAGE_COPY: Record<PublicSitemapPath, { title: string; description: 
   },
   '/about': { title: ABOUT_TITLE, description: ABOUT_DESCRIPTION },
   '/evolved': { title: EVOLVED_PAGE_TITLE, description: EVOLVED_PAGE_DESCRIPTION },
+  '/extension-privacy': {
+    title: EXTENSION_PRIVACY_TITLE,
+    description: EXTENSION_PRIVACY_DESCRIPTION,
+  },
 }
 
 function hubListing(name: string, description: string): { title: string; description: string } {
