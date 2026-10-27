@@ -377,7 +377,7 @@ describe('JSON-LD page wiring', () => {
     }
   })
 
-  it('mounts the schemas on /about and /contact and leaves the other three pages alone', () => {
+  it('mounts about and contact schemas, and book and legal pages use their own graphs', () => {
     const about = read('../../app/(public)/about/page.tsx')
     const contact = read('../../app/(public)/contact/page.tsx')
     expect(about).toContain('aboutPageSchemas()')
@@ -391,14 +391,21 @@ describe('JSON-LD page wiring', () => {
       'Reach Evolved Pros: support@evolvedpros.com for the platform and membership, speaking@evolvedpros.com for keynote inquiries.',
     )
 
-    for (const rel of [
-      '../../app/evolved/page.tsx',
-      '../../app/(public)/privacy/page.tsx',
-      '../../app/(public)/terms/page.tsx',
-    ]) {
+    // #221 publishes one graph each for the book preorder and the two legal
+    // pages. Those pages must call their own builders through <LdJson>, and
+    // must not reuse the about/contact schemas or a raw ld+json script.
+    const dedicated = [
+      ['../../app/evolved/page.tsx', 'evolvedPageJsonLd()'],
+      ['../../app/(public)/privacy/page.tsx', 'privacyPageJsonLd()'],
+      ['../../app/(public)/terms/page.tsx', 'termsPageJsonLd()'],
+    ] as const
+
+    for (const [rel, builder] of dedicated) {
       const src = read(rel)
+      expect(src.match(/<LdJson\b/g)).toHaveLength(1)
+      expect(src).toContain(builder)
+      expect(src).not.toContain('LdJsonGraph')
       expect(src).not.toContain('ld+json')
-      expect(src).not.toContain('LdJson')
       expect(src).not.toContain('aboutPageSchemas')
       expect(src).not.toContain('contactPageSchemas')
     }
