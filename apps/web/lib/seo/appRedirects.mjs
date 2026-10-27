@@ -47,6 +47,9 @@ export const PLATFORM_TO_WWW_EXACT_PATHS = [
   '/privacy',
   '/contact',
   '/sitemap.xml',
+  '/sales-coaching',
+  '/sales-quota',
+  '/sales-burnout',
 ]
 
 /**

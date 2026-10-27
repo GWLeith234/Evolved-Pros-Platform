@@ -74,6 +74,10 @@ export const STATIC_SITEMAP_COPY_LAST_MODIFIED: Record<PublicSitemapPath, string
   '/evolved': '2026-10-09T19:07:13.000Z',
   // app/(public)/extension-privacy/page.tsx and lib/legal/extensionPrivacy.ts.
   '/extension-privacy': '2026-10-27T20:30:00.000Z',
+  // lib/answers/pages.ts — public answer pages, published together.
+  '/sales-coaching': '2026-10-27T22:03:00.000Z',
+  '/sales-quota': '2026-10-27T22:03:00.000Z',
+  '/sales-burnout': '2026-10-27T22:03:00.000Z',
 }
 
 /**

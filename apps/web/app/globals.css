@@ -5481,3 +5481,135 @@ html:not(.light-mode) .ep-public-shell:has(.ep-about) > .ep-public-footer .ep-pu
   font-size: 12px;
   padding: 8px 10px;
 }
+
+/* Public answer pages (/sales-coaching, /sales-quota, /sales-burnout).
+   Same ivory lock as About: navy, red, and teal on paper in both themes.
+   The global footer stays mounted and inherits the paper tokens. */
+.ep-answer {
+  background: var(--paper);
+  color: var(--navy);
+  overflow-x: clip;
+}
+html:not(.light-mode) .ep-public-shell:has(.ep-answer) {
+  background: var(--paper);
+}
+html:not(.light-mode) .ep-public-shell:has(.ep-answer) > .ep-public-footer {
+  --bg-surface: var(--paper);
+  --border-color: var(--border);
+  --text-secondary: var(--navy);
+  --text-tertiary: color-mix(in srgb, var(--navy) 55%, var(--paper));
+}
+html:not(.light-mode) .ep-public-shell:has(.ep-answer) > .ep-public-footer .ep-public-footer-logo--on-dark {
+  display: none;
+}
+html:not(.light-mode) .ep-public-shell:has(.ep-answer) > .ep-public-footer .ep-public-footer-logo--on-light {
+  display: block;
+}
+.ep-answer-wrap {
+  width: min(720px, calc(100% - 40px));
+  margin: 0 auto;
+}
+.ep-answer-header {
+  border-bottom: 1px solid var(--navy);
+}
+.ep-answer-header-inner {
+  display: flex;
+  align-items: center;
+  min-height: 72px;
+}
+.ep-answer-logo {
+  display: flex;
+  line-height: 0;
+  text-decoration: none;
+}
+.ep-answer-body {
+  padding: 48px 0 72px;
+}
+.ep-answer-h1,
+.ep-answer-h2 {
+  margin: 0;
+  font-family: var(--font-display), "Playfair Display", Georgia, serif;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.02em;
+}
+.ep-answer-h1 {
+  font-size: clamp(2rem, 5vw, 3.1rem);
+  line-height: 1.12;
+}
+.ep-answer-h2 {
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  line-height: 1.25;
+}
+.ep-answer-h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-condensed), "Barlow Condensed", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--navy);
+}
+.ep-answer-direct,
+.ep-answer-copy,
+.ep-answer-steps,
+.ep-answer-note {
+  font-family: var(--font-body), "Barlow", sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--navy);
+}
+.ep-answer-direct {
+  margin: 22px 0 0;
+}
+.ep-answer-direct strong {
+  color: var(--brand-red);
+}
+.ep-answer-section {
+  margin-top: 36px;
+}
+.ep-answer-copy {
+  margin: 12px 0 0;
+}
+.ep-answer-steps {
+  margin: 12px 0 0;
+  padding-left: 1.25rem;
+}
+.ep-answer-steps li + li {
+  margin-top: 6px;
+}
+.ep-answer-link {
+  color: color-mix(in srgb, var(--teal) 42%, var(--navy));
+  text-underline-offset: 2px;
+}
+.ep-answer-faq + .ep-answer-faq {
+  margin-top: 18px;
+}
+.ep-answer-note {
+  margin: 22px 0 0;
+  padding-left: 14px;
+  border-left: 3px solid var(--teal);
+}
+.ep-answer-cta-row {
+  margin: 40px 0 0;
+}
+.ep-answer-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 22px;
+  background: var(--brand-red);
+  color: var(--white);
+  font-family: var(--font-condensed), "Barlow Condensed", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+.ep-answer-cta:hover {
+  background: var(--brand-red-hover);
+}
+.ep-answer a:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+}
