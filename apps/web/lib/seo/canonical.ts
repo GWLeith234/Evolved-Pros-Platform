@@ -7,9 +7,10 @@
  * Approved public paths 308 from platform to www (lib/seo/appRedirects.mjs).
  * Auth stays on platform because Supabase cookies are host-scoped there.
  *
- * HTML rel=canonical / og:url still name www for public indexable pages
- * (media, podcast). resolveCanonicalOrigin gates the conversion host: an
- * env value of platform.evolvedpros.com is kept, not collapsed to www.
+ * HTML rel=canonical / og:url and public JSON-LD use www via canonicalUrl
+ * / CANONICAL_ORIGIN. resolveCanonicalOrigin gates the conversion host:
+ * an env value of platform.evolvedpros.com is kept, not collapsed to www.
+ * Do not use it for sitemap, RSS, or JSON-LD.
  *
  * Runtime-dependency-free (type-only `next` import). Same reason as
  * publicRoutes.ts: anything that touches @/lib/supabase/admin throws at

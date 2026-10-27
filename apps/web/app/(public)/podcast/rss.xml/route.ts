@@ -1,5 +1,4 @@
 import {
-  SITE_URL,
   SERIES_NAME,
   getPublishedEpisodes,
   ytThumb,
@@ -8,6 +7,7 @@ import {
   isoDuration,
   type PublicEpisode,
 } from '@/lib/podcast/public'
+import { canonicalUrl } from '@/lib/seo/canonical'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,14 +59,14 @@ ${ep.episode_number != null ? `      <itunes:episode>${ep.episode_number}</itune
 
 export async function GET() {
   const episodes = await getPublishedEpisodes()
-  const feedUrl = `${SITE_URL}/podcast/rss.xml`
+  const feedUrl = canonicalUrl('/podcast/rss.xml')
   const channelImage = ytThumb(episodes.find(e => e.youtube_id)?.youtube_id ?? null, 'max')
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>${esc(SERIES_NAME)}</title>
-    <link>${esc(`${SITE_URL}/podcast`)}</link>
+    <link>${esc(canonicalUrl('/podcast'))}</link>
     <atom:link href="${esc(feedUrl)}" rel="self" type="application/rss+xml"/>
     <description>${esc(SERIES_DESCRIPTION)}</description>
     <language>en-us</language>

@@ -4,7 +4,8 @@ import { adminClient } from '@/lib/supabase/admin'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { dbRowToEpisode, assertMonotonicNumbering, type EpisodeRow, type ProgressRow } from '@/lib/podcast/transforms'
 import { PodcastPageShell } from '@/components/podcast/PodcastPageShell'
-import { SITE_URL, SERIES_NAME, getPodcastSponsorPool } from '@/lib/podcast/public'
+import { podcastSeriesJsonLd } from '@/lib/podcast/episodeJsonLd'
+import { SERIES_NAME, getPodcastSponsorPool } from '@/lib/podcast/public'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 
 // Public + SEO-indexable, but renders the full editorial podcast experience
@@ -57,14 +58,7 @@ export default async function PublicPodcastIndex() {
 
   const sponsorAds = await getPodcastSponsorPool()
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'PodcastSeries',
-    name: SERIES_NAME,
-    url: `${SITE_URL}/podcast`,
-    description: 'Long-form conversations on AI, go-to-market, and the evolution of work with George Leith and guests.',
-    webFeed: `${SITE_URL}/podcast/rss.xml`,
-  }
+  const jsonLd = podcastSeriesJsonLd()
 
   return (
     <>
