@@ -5,8 +5,9 @@ import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('@/lib/supabase/admin', () => ({ adminClient: {} }))
 
-import { episodeJsonLd, episodeJsonLdScript } from './episodeJsonLd'
+import { episodeJsonLd, episodeJsonLdScript, podcastSeriesJsonLd } from './episodeJsonLd'
 import type { PublicEpisode } from './public'
+import { canonicalUrl } from '@/lib/seo/canonical'
 
 const BREAKOUT = '</script><img src=x onerror=alert(1)>'
 
@@ -78,5 +79,77 @@ describe('episodeJsonLdScript', () => {
     )
     expect(page).toContain('episodeJsonLdScript(ep)')
     expect(page).not.toContain('JSON.stringify(jsonLd')
+  })
+})
+
+function platformHits(value: string): number {
+  return value.match(/platform\.evolvedpros\.com/g)?.length ?? 0
+}
+
+describe('podcast JSON-LD host', () => {
+  it('renders /podcast and one episode with zero platform.evolvedpros.com URLs', async () => {
+    const prevSite = process.env.NEXT_PUBLIC_SITE_URL
+    const prevApp = process.env.NEXT_PUBLIC_APP_URL
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://platform.evolvedpros.com'
+    process.env.NEXT_PUBLIC_APP_URL = 'https://platform.evolvedpros.com'
+    vi.resetModules()
+    try {
+      const { podcastSeriesJsonLd: seriesLd, episodeJsonLdScript: episodeScript } = await import('./episodeJsonLd')
+      const series = JSON.stringify(seriesLd())
+      const episode = episodeScript(ep({
+        slug: 'evolved-pros-pilot-episode',
+        title: 'Evolved Pros Pilot Episode',
+      }))
+
+      expect(platformHits(series)).toBe(0)
+      expect(platformHits(episode)).toBe(0)
+      expect(series).toContain(`"url":"${canonicalUrl('/podcast')}"`)
+      expect(series).toContain(`"webFeed":"${canonicalUrl('/podcast/rss.xml')}"`)
+      expect(episode).toContain(canonicalUrl('/podcast/evolved-pros-pilot-episode'))
+      expect(episode).toContain(`"item":"${canonicalUrl('/')}"`)
+      expect(episode).toContain(`"item":"${canonicalUrl('/podcast')}"`)
+
+      const index = readFileSync(
+        resolve(dirname(fileURLToPath(import.meta.url)), '../../app/(public)/podcast/(index)/page.tsx'),
+        'utf8',
+      )
+      expect(index).toContain('podcastSeriesJsonLd()')
+      expect(index).toContain('JSON.stringify(jsonLd)')
+      expect(index).not.toContain('platform.evolvedpros.com')
+      expect(index).not.toContain('NEXT_PUBLIC_SITE_URL')
+
+      const rss = readFileSync(
+        resolve(dirname(fileURLToPath(import.meta.url)), '../../app/(public)/podcast/rss.xml/route.ts'),
+        'utf8',
+      )
+      expect(rss).toContain("canonicalUrl('/podcast/rss.xml')")
+      expect(rss).toContain("canonicalUrl('/podcast')")
+      expect(rss).toContain('episodeUrl(ep.slug)')
+      expect(rss).not.toContain('platform.evolvedpros.com')
+      expect(rss).not.toContain('resolveCanonicalOrigin')
+      expect(rss).not.toContain('NEXT_PUBLIC_SITE_URL')
+
+      const helpers = readFileSync(
+        resolve(dirname(fileURLToPath(import.meta.url)), './public.ts'),
+        'utf8',
+      )
+      expect(helpers).not.toContain('resolveCanonicalOrigin')
+      expect(helpers).not.toContain('NEXT_PUBLIC_SITE_URL')
+      expect(helpers).toContain('return canonicalUrl(`/podcast/${slug}`)')
+    } finally {
+      if (prevSite === undefined) delete process.env.NEXT_PUBLIC_SITE_URL
+      else process.env.NEXT_PUBLIC_SITE_URL = prevSite
+      if (prevApp === undefined) delete process.env.NEXT_PUBLIC_APP_URL
+      else process.env.NEXT_PUBLIC_APP_URL = prevApp
+    }
+  })
+
+  it('static builders match the www canonical host', () => {
+    const series = JSON.stringify(podcastSeriesJsonLd())
+    const episode = episodeJsonLdScript(ep({ slug: 'evolved-pros-pilot-episode' }))
+    expect(platformHits(series)).toBe(0)
+    expect(platformHits(episode)).toBe(0)
+    expect(series).toContain('https://www.evolvedpros.com/podcast')
+    expect(episode).toContain('https://www.evolvedpros.com/podcast/evolved-pros-pilot-episode')
   })
 })

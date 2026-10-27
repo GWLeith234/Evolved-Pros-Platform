@@ -1,14 +1,29 @@
 import {
   SERIES_NAME,
-  SITE_URL,
-  episodeUrl,
   isoDuration,
   summaryText,
   transcriptParagraphs,
   ytThumb,
   type PublicEpisode,
 } from '@/lib/podcast/public'
+import { canonicalUrl } from '@/lib/seo/canonical'
 import { jsonLdScriptHtml } from '@/lib/seo/jsonld'
+
+/** PodcastSeries description for `/podcast`. */
+export const PODCAST_SERIES_DESCRIPTION =
+  'Long-form conversations on AI, go-to-market, and the evolution of work with George Leith and guests.'
+
+/** PodcastSeries for `/podcast`. Absolute URLs use canonicalUrl (www). */
+export function podcastSeriesJsonLd() {
+  return {
+    '@context': 'https://schema.org' as const,
+    '@type': 'PodcastSeries' as const,
+    name: SERIES_NAME,
+    url: canonicalUrl('/podcast'),
+    description: PODCAST_SERIES_DESCRIPTION,
+    webFeed: canonicalUrl('/podcast/rss.xml'),
+  }
+}
 
 /**
  * PodcastEpisode + VideoObject + BreadcrumbList for `/podcast/[slug]`.
@@ -17,7 +32,7 @@ import { jsonLdScriptHtml } from '@/lib/seo/jsonld'
  * in that text cannot close the JSON-LD script tag.
  */
 export function episodeJsonLd(ep: PublicEpisode) {
-  const url = episodeUrl(ep.slug)
+  const url = canonicalUrl(`/podcast/${ep.slug}`)
   const image = ytThumb(ep.youtube_id, 'max')
   const description = summaryText(ep)
   const duration = isoDuration(ep.duration_seconds)
@@ -34,7 +49,7 @@ export function episodeJsonLd(ep: PublicEpisode) {
     partOfSeries: {
       '@type': 'PodcastSeries',
       name: SERIES_NAME,
-      url: `${SITE_URL}/podcast`,
+      url: canonicalUrl('/podcast'),
     },
     ...(ep.youtube_id
       ? {
@@ -65,8 +80,8 @@ export function episodeJsonLd(ep: PublicEpisode) {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'Podcast', item: `${SITE_URL}/podcast` },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: canonicalUrl('/') },
+      { '@type': 'ListItem', position: 2, name: 'Podcast', item: canonicalUrl('/podcast') },
       { '@type': 'ListItem', position: 3, name: ep.title, item: url },
     ],
   }

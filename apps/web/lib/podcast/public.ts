@@ -3,7 +3,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { SPONSOR_AD_COLUMNS, type SponsorAd } from '@/components/home/HomeSponsorAd'
 import { ensurePodcastSponsors } from '@/lib/sponsors/partners'
 import { adMatchesSurface, filterLiveAds } from '@/lib/ads/iab'
-import { resolveCanonicalOrigin } from '@/lib/seo/canonical'
+import { canonicalUrl } from '@/lib/seo/canonical'
 import { allowedEpisodeStillUrl } from '@/lib/podcast/stillUrl'
 import { stripEmDashCopy } from '@/lib/home/cardImagery'
 
@@ -16,10 +16,6 @@ import { stripEmDashCopy } from '@/lib/home/cardImagery'
 // policy is what makes these pages indexable; we still fetch via adminClient
 // server-side (no cookie coupling, works during ISR/build).
 // ---------------------------------------------------------------------------
-
-/** Brand domain for canonical / OG / sitemap / RSS URLs.
- *  platform.evolvedpros.com is kept; apex / preview collapse to www. */
-export const SITE_URL = resolveCanonicalOrigin(process.env.NEXT_PUBLIC_SITE_URL)
 
 export const SERIES_NAME = 'The Evolved Pros Podcast'
 
@@ -170,8 +166,9 @@ export function relatedEpisodes(ep: PublicEpisode, all: PublicEpisode[], limit =
 
 // ── formatting / SEO helpers ───────────────────────────────────────────────
 
+/** Episode permalink. Same www host as rel=canonical (`canonicalUrl`). */
 export function episodeUrl(slug: string): string {
-  return `${SITE_URL}/podcast/${slug}`
+  return canonicalUrl(`/podcast/${slug}`)
 }
 
 export function ytThumb(youtubeId: string | null, quality: 'hq' | 'max' = 'max'): string | null {

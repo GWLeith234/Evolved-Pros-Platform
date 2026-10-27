@@ -71,12 +71,15 @@ function sitemapUrls(catalogue: LlmsCatalogue): string[] {
   const priority = Object.fromEntries(
     PUBLIC_SITEMAP_PATHS.map(path => [path, 0.4]),
   ) as Record<PublicSitemapPath, number>
+  const lastModified = Object.fromEntries(
+    PUBLIC_SITEMAP_PATHS.map(path => [path, new Date('2026-01-01T00:00:00.000Z')]),
+  ) as Record<PublicSitemapPath, Date>
   const signals: MediaCategoryLandingSignals = {
     ...catalogue.signals,
     stories: catalogue.stories,
   }
   return [
-    ...toStaticSitemapEntries(CANONICAL_ORIGIN, freq, priority).map(entry => entry.url),
+    ...toStaticSitemapEntries(CANONICAL_ORIGIN, freq, priority, lastModified).map(entry => entry.url),
     ...toPillarHubSitemapEntries(CANONICAL_ORIGIN).map(entry => entry.url),
     ...toEpisodeSitemapEntries(CANONICAL_ORIGIN, catalogue.episodes.map(episode => ({
       slug: episode.slug,
