@@ -6,6 +6,36 @@ import { canAccessNetwork } from '@/lib/entitlements'
 
 export const dynamic = 'force-dynamic'
 
+/** public.users.id. Filter syntax (commas, parentheses) is not an id. */
+const MEMBER_ID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+const CONVERSATION_COLUMNS =
+  'id, participant_one_id, participant_two_id, last_message_at, created_at'
+
+/**
+ * Both orderings of a pair. Equality filters stay parameterized — the
+ * service role bypasses RLS, so a string .or() built from request input
+ * would be the only thing standing between two members' threads.
+ */
+async function findConversation(senderId: string, otherId: string) {
+  const { data: forward } = await adminClient
+    .from('conversations')
+    .select(CONVERSATION_COLUMNS)
+    .eq('participant_one_id', senderId)
+    .eq('participant_two_id', otherId)
+    .maybeSingle()
+  if (forward) return forward
+
+  const { data: reverse } = await adminClient
+    .from('conversations')
+    .select(CONVERSATION_COLUMNS)
+    .eq('participant_one_id', otherId)
+    .eq('participant_two_id', senderId)
+    .maybeSingle()
+  return reverse
+}
+
 /**
  * SPRINT Q1 - the authoritative DM gate.
  *
@@ -139,13 +169,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const recipientId = typeof body.recipientId === 'string' ? body.recipientId : null
+  const recipientId = typeof body.recipientId === 'string' ? body.recipientId.trim() : ''
   if (!recipientId) return NextResponse.json({ error: 'recipientId is required' }, { status: 422 })
+  // Commas and parentheses are PostgREST filter syntax. Reject them before
+  // this id is used on the service-role client, which bypasses RLS.
+  if (!MEMBER_ID.test(recipientId)) {
+    return NextResponse.json({ error: 'recipientId must be a member id' }, { status: 422 })
+  }
 
   // RLS-FIX: conversations.participant_one_id / participant_two_id both FK
   // public.users(id). Resolve current user's public.users.id by email.
-  // recipientId is already a public.users.id from the caller (member directory
-  // / profile click), so no lookup needed for that side.
   const { data: profile } = await adminClient
     .from('users')
     .select('id')
@@ -153,42 +186,30 @@ export async function POST(request: Request) {
     .single()
   const senderId = profile?.id ?? user.id
 
-  if (recipientId === senderId) return NextResponse.json({ error: 'Cannot message yourself' }, { status: 422 })
-
-  // Try both orderings since UNIQUE constraint enforces (participant_one_id, participant_two_id)
-  // Check if conversation already exists in either ordering
-  const { data: existing } = await adminClient
-    .from('conversations')
-    .select('id, participant_one_id, participant_two_id, last_message_at, created_at')
-    .or(
-      `and(participant_one_id.eq.${senderId},participant_two_id.eq.${recipientId}),and(participant_one_id.eq.${recipientId},participant_two_id.eq.${senderId})`
-    )
+  const { data: recipient } = await adminClient
+    .from('users')
+    .select('id')
+    .eq('id', recipientId)
     .maybeSingle()
+  if (!recipient) return NextResponse.json({ error: 'Member not found' }, { status: 404 })
+  if (recipient.id === senderId) return NextResponse.json({ error: 'Cannot message yourself' }, { status: 422 })
+  const otherId = recipient.id
 
-  if (existing) {
-    return NextResponse.json(existing)
-  }
+  const existing = await findConversation(senderId, otherId)
+  if (existing) return NextResponse.json(existing)
 
   // Insert new conversation with current user as participant_one
   const { data: created, error } = await adminClient
     .from('conversations')
     .insert({
       participant_one_id: senderId,
-      participant_two_id: recipientId,
+      participant_two_id: otherId,
     } as never)
-    .select('id, participant_one_id, participant_two_id, last_message_at, created_at')
+    .select(CONVERSATION_COLUMNS)
     .single()
 
   if (error || !created) {
-    // Race condition: try to fetch again
-    const { data: retry } = await adminClient
-      .from('conversations')
-      .select('id, participant_one_id, participant_two_id, last_message_at, created_at')
-      .or(
-        `and(participant_one_id.eq.${senderId},participant_two_id.eq.${recipientId}),and(participant_one_id.eq.${recipientId},participant_two_id.eq.${senderId})`
-      )
-      .maybeSingle()
-
+    const retry = await findConversation(senderId, otherId)
     if (retry) return NextResponse.json(retry)
     return NextResponse.json({ error: 'Failed to create conversation' }, { status: 500 })
   }
