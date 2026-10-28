@@ -13,9 +13,9 @@ import {
 } from '@/lib/about/copy'
 import { FIT_PAGE_DESCRIPTION, FIT_VIP_MONTHLY } from '@/lib/fit/copy'
 import { HOME_SUB } from '@/lib/home/conversion'
-import { PUBLIC_FOOTER_LINKS } from '@/lib/layout/publicFooter'
+import { LISTEN_ON_LINKS, PUBLIC_FOOTER_LINKS } from '@/lib/layout/publicFooter'
 import { TIERS } from '@/lib/pricing'
-import { CANONICAL_ORIGIN, SITE_NAME, canonicalUrl } from '@/lib/seo/canonical'
+import { CANONICAL_ORIGIN, DEFAULT_OG_IMAGE, SITE_NAME, canonicalUrl } from '@/lib/seo/canonical'
 import {
   GEORGE_LEITH_ID,
   LIVE_PAGE_DESCRIPTION,
@@ -34,30 +34,101 @@ import {
 describe('home JSON-LD', () => {
   it('names Evolved Pros as WebSite and Organization, never Evolved Media', () => {
     const schema = homeJsonLd()
-    const publisher = homeOrganizationJsonLd()
+    const bare = homeOrganizationJsonLd()
     expect(SITE_NAME).toBe('Evolved Pros')
     expect(schema['@context']).toBe('https://schema.org')
     expect(schema['@type']).toBe('WebSite')
     expect(schema.name).toBe('Evolved Pros')
     expect(schema.url).toBe(CANONICAL_ORIGIN)
     expect(schema.description).toBe(HOME_SUB)
-    expect(publisher).not.toHaveProperty('@id')
-    expect(schema.publisher).toEqual(siteOrganizationJsonLd())
-    expect(schema.publisher).toEqual({
+    expect(bare).not.toHaveProperty('@id')
+    expect(siteOrganizationJsonLd()).toEqual({
       '@type': 'Organization',
       '@id': ORGANIZATION_ID,
       name: 'Evolved Pros',
       url: CANONICAL_ORIGIN,
     })
     expect(schema.publisher['@id']).toBe('https://www.evolvedpros.com/#organization')
-    expect(publisher['@type']).toBe('Organization')
-    expect(publisher.name).toBe('Evolved Pros')
-    expect(publisher.url).toBe(CANONICAL_ORIGIN)
+    expect(schema.publisher['@id']).toBe(siteOrganizationJsonLd()['@id'])
+    expect(bare['@type']).toBe('Organization')
+    expect(bare.name).toBe('Evolved Pros')
+    expect(bare.url).toBe(CANONICAL_ORIGIN)
 
     const blob = JSON.stringify(schema)
     expect(blob).toContain('Evolved Pros')
     expect(blob).not.toContain('Evolved Media')
     expect(blob).toContain('"@id":"https://www.evolvedpros.com/#organization"')
+    expect(blob).not.toContain('platform.evolvedpros.com')
+  })
+
+  it('parses and attaches sameAs, logo, and a founder reference only on the home Organization', () => {
+    const schema = homeJsonLd()
+    const serialized = JSON.stringify(schema)
+    expect(JSON.parse(serialized)).toEqual(schema)
+
+    const listen = Object.fromEntries(LISTEN_ON_LINKS.map(link => [link.label, link.href]))
+    const publisher = schema.publisher
+    expect(publisher).toEqual({
+      ...siteOrganizationJsonLd(),
+      sameAs: [
+        'https://www.youtube.com/@evolvedpros',
+        listen.Spotify,
+        listen['Apple Podcasts'],
+      ],
+      logo: {
+        '@type': 'ImageObject',
+        url: `${CANONICAL_ORIGIN}${DEFAULT_OG_IMAGE}`,
+        width: 800,
+        height: 160,
+      },
+      founder: {
+        '@type': 'Person',
+        '@id': 'https://georgeleith.com/#person',
+        name: 'George Leith',
+        url: 'https://georgeleith.com/',
+      },
+    })
+    expect(publisher.sameAs).toEqual([
+      'https://www.youtube.com/@evolvedpros',
+      'https://open.spotify.com/show/1KZoT8k38tBfq242pKUdg9',
+      'https://podcasts.apple.com/us/podcast/evolved-pros-podcast/id1895786556',
+    ])
+    expect(listen.YouTube).toBe('https://www.youtube.com/@evolvedpros/podcasts')
+    expect(publisher.sameAs).not.toContain(listen.YouTube)
+    for (const link of LISTEN_ON_LINKS) {
+      if (link.label === 'Spotify' || link.label === 'Apple Podcasts') continue
+      expect(publisher.sameAs).not.toContain(link.href)
+    }
+    expect(DEFAULT_OG_IMAGE).toBe('/logo_horizontal_navy.png')
+    expect(publisher.logo.url).toBe('https://www.evolvedpros.com/logo_horizontal_navy.png')
+    expect(publisher.logo.url.startsWith('https://www.evolvedpros.com/')).toBe(true)
+
+    const logoPath = resolve(dirname(fileURLToPath(import.meta.url)), '../../public/logo_horizontal_navy.png')
+    const png = readFileSync(logoPath)
+    expect(png.subarray(0, 8).toString('hex')).toBe('89504e470d0a1a0a')
+    expect(png.readUInt32BE(16)).toBe(publisher.logo.width)
+    expect(png.readUInt32BE(20)).toBe(publisher.logo.height)
+
+    expect(Object.keys(publisher.founder)).toEqual(['@type', '@id', 'name', 'url'])
+    expect(publisher.founder).not.toHaveProperty('jobTitle')
+    expect(publisher.founder).not.toHaveProperty('description')
+    expect(publisher.founder).not.toHaveProperty('sameAs')
+    expect(publisher.founder['@id']).not.toBe(GEORGE_LEITH_ID)
+
+    const elsewhere = [
+      pricingJsonLd(),
+      liveJsonLd(),
+      fitJsonLd(),
+      ...aboutPageSchemas(),
+      ...contactPageSchemas(),
+    ]
+    for (const other of elsewhere) {
+      const blob = JSON.stringify(other)
+      expect(blob).not.toContain('"sameAs"')
+      expect(blob).not.toContain('"logo"')
+      expect(blob).not.toContain('georgeleith.com')
+      expect(blob).not.toContain('youtube.com/@evolvedpros')
+    }
   })
 })
 

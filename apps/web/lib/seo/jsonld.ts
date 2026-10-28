@@ -11,6 +11,9 @@
  *
  * homeOrganizationJsonLd() stays without @id. Pricing, live, fit, and media
  * publishers keep that shape so their rendered JSON-LD does not change.
+ * sameAs, logo, and the georgeleith.com founder reference are added only
+ * on the homepage Organization. /about keeps its own founder bio.
+ * /contact keeps siteOrganizationJsonLd() with no sameAs or logo.
  */
 
 import {
@@ -27,13 +30,30 @@ import { FIT_PAGE_DESCRIPTION, FIT_PAGE_TITLE, FIT_VIP_MONTHLY } from '@/lib/fit
 import { HOME_SUB } from '@/lib/home/conversion'
 import { PUBLIC_FOOTER_LINKS } from '@/lib/layout/publicFooter'
 import { TIERS, TIER_DISPLAY_NAMES } from '@/lib/pricing'
-import { CANONICAL_ORIGIN, SITE_NAME, canonicalUrl } from '@/lib/seo/canonical'
+import { CANONICAL_ORIGIN, DEFAULT_OG_IMAGE, SITE_NAME, canonicalUrl } from '@/lib/seo/canonical'
 
-/** Same node the homepage WebSite publisher and /about Organization share. */
+/** Stable @id shared by the homepage, /about, and /contact Organization nodes. */
 export const ORGANIZATION_ID = `${CANONICAL_ORIGIN}/#organization`
 
 /** George Leith, defined on /about. */
 export const GEORGE_LEITH_ID = `${canonicalUrl(ABOUT_PATH)}#george-leith`
+
+/**
+ * Official Evolved Pros profiles for the homepage Organization.sameAs.
+ *
+ * Apple Podcasts and Spotify match LISTEN_ON_LINKS in lib/layout/publicFooter.ts.
+ * YouTube is the channel. The footer listen link is that channel's /podcasts
+ * tab and is not a second profile. No X or LinkedIn company URL is hard-coded.
+ */
+const ORGANIZATION_SAME_AS = [
+  'https://www.youtube.com/@evolvedpros',
+  'https://open.spotify.com/show/1KZoT8k38tBfq242pKUdg9',
+  'https://podcasts.apple.com/us/podcast/evolved-pros-podcast/id1895786556',
+] as const
+
+/** Pixel size of apps/web/public/logo_horizontal_navy.png (DEFAULT_OG_IMAGE). */
+const ORGANIZATION_LOGO_WIDTH = 800
+const ORGANIZATION_LOGO_HEIGHT = 160
 
 export function homeOrganizationJsonLd() {
   return {
@@ -44,8 +64,9 @@ export function homeOrganizationJsonLd() {
 }
 
 /**
- * Organization identity with a stable @id. Homepage publisher and /contact
- * use this. /about adds description and founder on the same @id.
+ * Organization identity with a stable @id. /contact uses this as-is.
+ * /about adds description and its founder bio on the same @id.
+ * The homepage publisher starts here and adds sameAs, logo, and founder.
  */
 export function siteOrganizationJsonLd() {
   const org = homeOrganizationJsonLd()
@@ -57,7 +78,33 @@ export function siteOrganizationJsonLd() {
   }
 }
 
-/** WebSite + nested Organization for `/`. Publisher @id matches /about. */
+/**
+ * Navy wordmark already served at /logo_horizontal_navy.png.
+ * Absolute www URL. Light-background lockup (Google reads logos on white).
+ */
+function organizationLogoJsonLd() {
+  return {
+    '@type': 'ImageObject' as const,
+    url: `${CANONICAL_ORIGIN}${DEFAULT_OG_IMAGE}`,
+    width: ORGANIZATION_LOGO_WIDTH,
+    height: ORGANIZATION_LOGO_HEIGHT,
+  }
+}
+
+/**
+ * Canonical Person on georgeleith.com. A reference only: no jobTitle,
+ * description, or sameAs. /about keeps its own founder bio.
+ */
+function founderPersonJsonLd() {
+  return {
+    '@type': 'Person' as const,
+    '@id': 'https://georgeleith.com/#person',
+    name: 'George Leith',
+    url: 'https://georgeleith.com/',
+  }
+}
+
+/** WebSite + Organization for `/`. Publisher @id matches /about and /contact. */
 export function homeJsonLd() {
   return {
     '@context': 'https://schema.org',
@@ -65,7 +112,12 @@ export function homeJsonLd() {
     name: SITE_NAME,
     url: CANONICAL_ORIGIN,
     description: HOME_SUB,
-    publisher: siteOrganizationJsonLd(),
+    publisher: {
+      ...siteOrganizationJsonLd(),
+      sameAs: [...ORGANIZATION_SAME_AS],
+      logo: organizationLogoJsonLd(),
+      founder: founderPersonJsonLd(),
+    },
   }
 }
 
