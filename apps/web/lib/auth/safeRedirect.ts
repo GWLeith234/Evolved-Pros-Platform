@@ -33,10 +33,17 @@
  * delegates the decision to that parser, so this cannot drift from real browser
  * behaviour the way a hand-rolled prefix test does.
  *
+ * Origin survival is not enough. Dot-segment removal can leave a pathname of
+ * `//evil.com` (`/foo/..//evil.com`, `/foo/%2e%2e//evil.com`, and the same
+ * shape aimed at the sentinel host) while `url.origin` is still the sentinel.
+ * `/auth/callback` then does `new URL(next, baseUrl)`, and a string that
+ * starts with `//` is a host. Reject that shape, then parse the candidate
+ * again so the string handed to `redirect()` cannot leave the sentinel.
+ *
  * Rejected: absolute URLs ('https://evil.com'), protocol-relative ('//evil.com'),
- * backslash and whitespace variants ('/\evil.com'), scheme payloads
- * ('javascript:…', 'data:…'), non-strings (Next hands searchParams a string[]
- * when a key repeats), and ''.
+ * backslash and whitespace variants ('/\evil.com'), dot-segment hosts
+ * ('/foo/..//evil.com'), scheme payloads ('javascript:…', 'data:…'),
+ * non-strings (Next hands searchParams a string[] when a key repeats), and ''.
  */
 const SENTINEL_ORIGIN = 'https://safe-redirect.invalid'
 
@@ -53,5 +60,17 @@ export function safeRedirectPath(raw: unknown, fallback = '/home'): string {
   // backslash-normalised, or a non-http scheme — is off-origin. Refuse it.
   if (url.origin !== SENTINEL_ORIGIN) return fallback
 
-  return url.pathname + url.search + url.hash
+  const path = url.pathname + url.search + url.hash
+  // `//evil.com` still has the sentinel origin. The next parse treats it as a host.
+  if (!path.startsWith('/') || path.startsWith('//')) return fallback
+
+  let again: URL
+  try {
+    again = new URL(path, SENTINEL_ORIGIN)
+  } catch {
+    return fallback
+  }
+  if (again.origin !== SENTINEL_ORIGIN || again.pathname.startsWith('//')) return fallback
+
+  return again.pathname + again.search + again.hash
 }
