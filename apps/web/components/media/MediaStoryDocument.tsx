@@ -21,7 +21,8 @@ import type { MediaRailEpisode } from '@/lib/media/podcastRail'
 import { MEDIA_BRAND } from '@/lib/media/brand'
 import { lockedArticleByline, resolveStoryArtUrl, storyArtImgClass } from '@/lib/media/storyArt'
 import type { MediaStoryRecord } from '@/lib/media/storyRecord'
-import { CANONICAL_ORIGIN, DEFAULT_OG_IMAGE, canonicalUrl } from '@/lib/seo/canonical'
+import { DEFAULT_OG_IMAGE, canonicalUrl } from '@/lib/seo/canonical'
+import { articleJsonLd } from '@/lib/seo/jsonld'
 import { mediaMustCite } from '@/lib/seo/mustCite'
 import { getActivePlatformAds } from '@/lib/cache/shared'
 import { pickArticleAds } from '@/lib/sponsors/partners'
@@ -94,14 +95,15 @@ export async function MediaStoryDocument({
     // episodes table may not exist yet
   }
 
-  const articleSchema = {
-    '@context': 'https://schema.org', '@type': 'Article',
-    headline: story.title, description: story.excerpt,
-    author: { '@type': 'Person', name: byline },
-    publisher: { '@type': 'Organization', name: 'Evolved Pros', url: CANONICAL_ORIGIN },
-    datePublished: story.published_at, dateModified: story.updated_at,
-    url: articleUrl, image: artSrc || DEFAULT_OG_IMAGE,
-  }
+  const articleSchema = articleJsonLd({
+    headline: story.title,
+    description: story.excerpt,
+    authorName: byline,
+    datePublished: story.published_at,
+    dateModified: story.updated_at,
+    url: articleUrl,
+    image: artSrc || DEFAULT_OG_IMAGE,
+  })
   const breadcrumbSchema = {
     '@context': 'https://schema.org', '@type': 'BreadcrumbList',
     itemListElement: [
