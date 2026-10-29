@@ -10,9 +10,9 @@ import { ConversionFooterGate } from '@/components/layout/ConversionFooterGate'
  * canonical is how /media shipped with og:url pointing at /).
  *
  * SPRINT FOOTER-1 — this is the single mount point for the global public
- * footer, so every route in the tree inherits it except `/`, which owns a
- * legal-only footer. Routes OUTSIDE this group (/live, /login,
- * app/not-found.tsx) mount <PublicFooter /> themselves.
+ * footer, including `/`. `/fit` opts out in ConversionFooterGate. Routes
+ * OUTSIDE this group (/live, /login, app/not-found.tsx) mount
+ * <PublicFooter /> themselves.
  */
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (

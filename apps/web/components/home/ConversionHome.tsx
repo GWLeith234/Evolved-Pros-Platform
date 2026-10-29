@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { loginHrefFor } from '@/lib/auth/gatedIntent'
 import { LogoMark } from '@/components/ui/LogoMark'
 import { Tooltip } from '@/components/ui/Tooltip'
-import { footerCopyright } from '@/lib/layout/publicFooter'
 import {
   HERO_IMAGE_ALT,
   HERO_IMAGE_HEIGHT,
@@ -359,32 +358,6 @@ export function ConversionHome({
           </div>
         </section>
       </main>
-
-      <footer className="border-t border-navy/15">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-6">
-          <p className="font-body text-xs text-navy/45">{footerCopyright()}</p>
-          <nav aria-label="Legal" className="flex gap-4">
-            <Link
-              href="/about"
-              className="font-condensed text-xs font-semibold uppercase tracking-[0.12em] text-navy no-underline"
-            >
-              About
-            </Link>
-            <Link
-              href="/privacy"
-              className="font-condensed text-xs font-semibold uppercase tracking-[0.12em] text-navy no-underline"
-            >
-              Privacy
-            </Link>
-            <Link
-              href="/terms"
-              className="font-condensed text-xs font-semibold uppercase tracking-[0.12em] text-navy no-underline"
-            >
-              Terms
-            </Link>
-          </nav>
-        </div>
-      </footer>
     </div>
   )
 }
