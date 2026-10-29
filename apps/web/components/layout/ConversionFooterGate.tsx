@@ -4,12 +4,11 @@ import { usePathname } from 'next/navigation'
 import { PublicFooter } from '@/components/layout/PublicFooter'
 
 /**
- * `/` owns a legal-only footer. Keep the global public footer off that
- * document so Join free / LIVE / Contact (and the old em-dash aria) never
- * appear in the homepage DOM.
+ * `/` uses the same site footer as the rest of the public shell.
+ * `/fit` keeps its own shell and does not mount this footer.
  */
 export function ConversionFooterGate() {
   const pathname = usePathname()
-  if (pathname === '/' || pathname === '/fit') return null
+  if (pathname === '/fit') return null
   return <PublicFooter />
 }

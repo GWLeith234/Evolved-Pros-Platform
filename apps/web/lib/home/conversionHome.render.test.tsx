@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { ConversionHome } from '@/components/home/ConversionHome'
@@ -79,23 +81,23 @@ describe('conversion home fold CTAs', () => {
 })
 
 describe('home footer', () => {
-  it('links About before Privacy and Terms, in the shared footer order', () => {
+  it('leaves the legal strip off the page so the shared site footer is the only one', () => {
     const html = renderToStaticMarkup(
       <ConversionHome signedIn={false} episodes={[]} stories={[]} />,
     )
-    const footerStart = html.lastIndexOf('<footer')
-    expect(footerStart).toBeGreaterThan(-1)
-    const footer = html.slice(footerStart)
-    const about = footer.indexOf('href="/about"')
-    const privacy = footer.indexOf('href="/privacy"')
-    const terms = footer.indexOf('href="/terms"')
-    expect(about).toBeGreaterThan(-1)
-    expect(privacy).toBeGreaterThan(about)
-    expect(terms).toBeGreaterThan(privacy)
-    expect(footer).toContain('>About<')
-    expect(footer).toContain('>Privacy<')
-    expect(footer).toContain('>Terms<')
-    expect(footer).not.toContain('\u2014')
+    expect(html).not.toContain('<footer')
+    expect(html).not.toContain('aria-label="Legal"')
+    expect(html).not.toContain('\u2014')
+
+    const gate = readFileSync(
+      resolve(__dirname, '../../components/layout/ConversionFooterGate.tsx'),
+      'utf8',
+    )
+    const css = readFileSync(resolve(__dirname, '../../app/globals.css'), 'utf8')
+    expect(gate).toContain("pathname === '/fit'")
+    expect(gate).not.toContain("pathname === '/'")
+    expect(gate).toContain('<PublicFooter />')
+    expect(css).not.toContain('.ep-public-shell:has(.ep-conversion-home) > .ep-public-footer')
   })
 })
 
