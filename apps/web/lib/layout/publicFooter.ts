@@ -1,13 +1,16 @@
 /**
- * Public footer link model (SPRINT FOOTER-1).
+ * Public footer link model.
  *
  * Extracted from components/layout/PublicFooter.tsx for the same reason as
  * lib/seo/publicRoutes.ts: vitest only collects lib/** (see vitest.config.ts),
  * so nothing under app/ or components/ can be covered. The label/href contract
- * is the part worth a regression test — a footer that silently loses /terms or
+ * is the part worth a regression test. A footer that silently loses /terms or
  * /privacy is exactly the hole the Sprint 0 crawl found.
  *
- * DEPENDENCY-FREE ON PURPOSE — imports nothing. No next, no supabase.
+ * DEPENDENCY-FREE ON PURPOSE. Imports nothing. No next, no supabase.
+ *
+ * George-approved layout (2026-10-29): JOIN FREE, then three labelled groups.
+ * Listen marks are white icons in matching circles. RSS is the site feed.
  */
 
 export interface PublicFooterLink {
@@ -15,32 +18,72 @@ export interface PublicFooterLink {
   label: string
   href: string
   /**
-   * The single red CTA. STYLEGUIDE / FOOTER-1: at most ONE red CTA in the
-   * footer — everything else is a ghost link.
+   * The single red control. Everything else in the footer is a text link.
+   * The mockup's 3px top rule uses the same red; it is not a second control.
    */
   cta?: true
 }
 
+export interface FooterLinkGroup {
+  label: string
+  links: readonly PublicFooterLink[]
+}
+
 /**
- * Footer navigation, in render order.
- *
- * Join free used to href /join, which 308s to /login?mode=signup — a thin
+ * Tagline under the wordmark. Approved copy. Do not paraphrase.
+ */
+export const FOOTER_TAGLINE =
+  'Straight talk on revenue, leadership and growth from George Leith.'
+
+/**
+ * Join free used to href /join, which 308s to /login?mode=signup, a thin
  * auth form, not a sell page. The spoken /join URL still 308s (next.config);
- * public chrome now lands on live /pricing instead. The Community card on
- * /pricing keeps /login?mode=signup. Do not point this CTA at /join.
+ * public chrome now lands on live /pricing instead. Do not point this CTA at /join.
+ */
+export const FOOTER_JOIN_FREE: PublicFooterLink = {
+  label: 'JOIN FREE',
+  href: '/pricing',
+  cta: true,
+}
+
+/**
+ * Link groups, in render order. Labels match the approved mockup.
+ * Live is sentence case here. The top nav keeps its own LIVE label.
+ */
+export const FOOTER_LINK_GROUPS: readonly FooterLinkGroup[] = [
+  {
+    label: 'Platform',
+    links: [
+      { label: 'Pricing', href: '/pricing' },
+      { label: 'Podcast', href: '/podcast' },
+      { label: 'Media', href: '/media' },
+      { label: 'Fit', href: '/fit' },
+      { label: 'Live', href: '/live' },
+    ],
+  },
+  {
+    label: 'Company',
+    links: [
+      { label: 'About', href: '/about' },
+      { label: 'Contact', href: '/contact' },
+    ],
+  },
+  {
+    label: 'Legal',
+    links: [
+      { label: 'Privacy', href: '/privacy' },
+      { label: 'Terms', href: '/terms' },
+    ],
+  },
+]
+
+/**
+ * Flat navigation, in render order. JOIN FREE first, then each group.
+ * JSON-LD looks up Contact by href, so that label must stay "Contact".
  */
 export const PUBLIC_FOOTER_LINKS: readonly PublicFooterLink[] = [
-  { label: 'Join free', href: '/pricing', cta: true },
-  { label: 'Pricing',   href: '/pricing' },
-  { label: 'Podcast',   href: '/podcast' },
-  { label: 'Media',     href: '/media' },
-  { label: 'Fit',       href: '/fit' },
-  { label: 'LIVE',      href: '/live' },
-  // Utility cluster. About is not a primary-nav item.
-  { label: 'About',     href: '/about' },
-  { label: 'Contact',   href: '/contact' },
-  { label: 'Privacy',   href: '/privacy' },
-  { label: 'Terms',     href: '/terms' },
+  FOOTER_JOIN_FREE,
+  ...FOOTER_LINK_GROUPS.flatMap(group => group.links),
 ]
 
 /**
@@ -53,25 +96,39 @@ export const FOOTER_LEGAL_ENTITY = 'GWLeith Revenue Growth Solutions'
 export const SUPPORT_EMAIL = 'support@evolvedpros.com'
 export const SPEAKING_EMAIL = 'speaking@evolvedpros.com'
 
-/** `© 2026 GWLeith Revenue Growth Solutions` — year injected so it is testable. */
+/** `© 2026 GWLeith Revenue Growth Solutions`. Year injected so it is testable. */
 export function footerCopyright(year: number = new Date().getFullYear()): string {
   return `© ${year} ${FOOTER_LEGAL_ENTITY}`
 }
 
-export type ListenOnMark = 'apple' | 'spotify' | 'youtube' | 'text'
+/**
+ * Simple Icons filenames under /brand/listen/marks, except podchaser, which
+ * is the official podchaser.com icon geometry with the colors stripped to white.
+ */
+export type ListenOnIcon =
+  | 'applepodcasts'
+  | 'spotify'
+  | 'youtube'
+  | 'pocketcasts'
+  | 'castbox'
+  | 'podcastaddict'
+  | 'podchaser'
+  | 'podcastindex'
+  | 'rss'
 
 export interface ListenOnLink {
-  /** Visible label for text links. Badge links keep the platform name for tests. */
+  /** Visible label under the circle. */
   label: string
   href: string
   /** Accessible name. The row label is "Listen on"; each anchor names its platform. */
   ariaLabel: string
+  /** White mark in public/brand/listen/marks. */
+  icon: ListenOnIcon
   /**
-   * apple, spotify, and youtube render official marks. Artwork sources live
-   * next to those images in components/layout/PublicFooter.tsx.
-   * text is a word link (no official badge is used).
+   * true opens a new tab. RSS is the on-site feed at /podcast/rss.xml
+   * and stays in the same tab.
    */
-  mark: ListenOnMark
+  external: boolean
 }
 
 /**
@@ -83,54 +140,63 @@ export const LISTEN_ON_LINKS: readonly ListenOnLink[] = [
     label: 'Apple Podcasts',
     href: 'https://podcasts.apple.com/us/podcast/evolved-pros-podcast/id1895786556',
     ariaLabel: 'Listen on Apple Podcasts',
-    mark: 'apple',
+    icon: 'applepodcasts',
+    external: true,
   },
   {
     label: 'Spotify',
     href: 'https://open.spotify.com/show/1KZoT8k38tBfq242pKUdg9',
     ariaLabel: 'Listen on Spotify',
-    mark: 'spotify',
+    icon: 'spotify',
+    external: true,
   },
   {
     label: 'YouTube',
     href: 'https://www.youtube.com/@evolvedpros/podcasts',
     ariaLabel: 'Listen on YouTube',
-    mark: 'youtube',
+    icon: 'youtube',
+    external: true,
   },
   {
     label: 'Pocket Casts',
     href: 'https://pocketcasts.com/podcast/evolved-pros-podcast/cc1e4a60-310b-013f-9952-0afff26cbb09',
     ariaLabel: 'Listen on Pocket Casts',
-    mark: 'text',
+    icon: 'pocketcasts',
+    external: true,
   },
   {
     label: 'Castbox',
     href: 'https://castbox.fm/channel/id7226086',
     ariaLabel: 'Listen on Castbox',
-    mark: 'text',
+    icon: 'castbox',
+    external: true,
   },
   {
     label: 'Podcast Addict',
     href: 'https://podcastaddict.com/podcast/evolved-pros-podcast/7329000',
     ariaLabel: 'Listen on Podcast Addict',
-    mark: 'text',
+    icon: 'podcastaddict',
+    external: true,
   },
   {
     label: 'Podchaser',
     href: 'https://www.podchaser.com/podcasts/evolved-pros-podcast-6476083',
     ariaLabel: 'Listen on Podchaser',
-    mark: 'text',
+    icon: 'podchaser',
+    external: true,
   },
   {
     label: 'Podcast Index',
     href: 'https://podcastindex.org/podcast/7854130',
     ariaLabel: 'Listen on Podcast Index',
-    mark: 'text',
+    icon: 'podcastindex',
+    external: true,
   },
   {
     label: 'RSS',
-    href: 'https://anchor.fm/s/111ea3a3c/podcast/rss',
+    href: '/podcast/rss.xml',
     ariaLabel: 'Listen on RSS',
-    mark: 'text',
+    icon: 'rss',
+    external: false,
   },
 ]

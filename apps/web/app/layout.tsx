@@ -88,6 +88,25 @@ const abrilFatface = localFont({
   adjustFontFallback: 'Arial',
 })
 
+const footerSerif = localFont({
+  src: '../fonts/newsreader/newsreader-latin-400-normal.woff2',
+  weight: '400',
+  style: 'normal',
+  variable: '--font-footer-serif',
+  display: 'swap',
+  adjustFontFallback: 'Times New Roman',
+})
+
+const footerSans = localFont({
+  src: [
+    { path: '../fonts/montserrat/montserrat-latin-400-normal.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/montserrat/montserrat-latin-500-normal.woff2', weight: '500', style: 'normal' },
+  ],
+  variable: '--font-footer-sans',
+  display: 'swap',
+  adjustFontFallback: 'Arial',
+})
+
 const merriweather = localFont({
   src: [
     {
@@ -184,7 +203,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${barlowCondensed.variable} ${barlow.variable} ${bebasNeue.variable} ${abrilFatface.variable} ${merriweather.variable}`}
+      className={`${playfair.variable} ${barlowCondensed.variable} ${barlow.variable} ${bebasNeue.variable} ${abrilFatface.variable} ${merriweather.variable} ${footerSerif.variable} ${footerSans.variable}`}
       suppressHydrationWarning
     >
       <head>

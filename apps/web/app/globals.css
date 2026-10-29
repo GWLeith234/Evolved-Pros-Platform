@@ -4325,96 +4325,264 @@ html.light-mode .ep-media-share-btn--ghost {
   display: block;
 }
 
-/* Footer brand lockup: white wordmark on dark, navy wordmark on light.
-   Force-dark shells (/login, /live) keep the white mark even when html is
-   light-mode, matching the token re-declare on .ep-force-dark / .live-force-dark.
-
-   The shipped 800x160 PNGs have ~125px of empty canvas on the left and a
-   red disc that sits high of the wordmark (white-on-dark especially).
-   Crop the same assets into letters / disc / S so the E is flush with the
-   footer column and the disc centers on the 16px cap-height (24px disc). */
+/* George-approved public footer (2026-10-29). Fixed dark band. JOIN FREE is
+   the only red control. The 3px top rule is the same red as the mockup.
+   Mobile reserves 64px for the bottom tab bar plus 32px of clear space.
+   Desktop geometry matches the 1440 mockup from 1320px up. */
+.ep-public-footer {
+  --footer-bg: #0F2438;
+  --footer-tagline: #c9d4de;
+  --footer-link: #e8eef3;
+  --footer-listen-label: #a9b8c6;
+  --footer-legal: #7f93a6;
+  --footer-hairline: rgba(255, 255, 255, 0.1);
+  --footer-icon-border: rgba(255, 255, 255, 0.28);
+  --footer-icon-fill: rgba(255, 255, 255, 0.04);
+  background: var(--footer-bg);
+  border-top: 3px solid var(--brand-red-hot);
+  color: var(--white);
+  max-width: 100%;
+  overflow-x: hidden;
+  font-family: var(--font-footer-sans), Montserrat, sans-serif;
+}
+.ep-public-footer-inner {
+  padding: 36px 24px calc(32px + 64px + env(safe-area-inset-bottom, 0px));
+}
+.ep-public-footer-brand {
+  display: inline-flex;
+  line-height: 0;
+  text-decoration: none;
+}
 .ep-public-footer-logo {
   display: block;
-  line-height: 0;
-}
-.ep-public-footer-logo--on-dark { display: block; }
-.ep-public-footer-logo--on-light { display: none; }
-html.light-mode .ep-public-footer-logo--on-dark { display: none; }
-html.light-mode .ep-public-footer-logo--on-light { display: block; }
-html.light-mode .ep-force-dark .ep-public-footer-logo--on-dark,
-html.light-mode .live-force-dark .ep-public-footer-logo--on-dark {
-  display: block;
-}
-html.light-mode .ep-force-dark .ep-public-footer-logo--on-light,
-html.light-mode .live-force-dark .ep-public-footer-logo--on-light {
-  display: none;
-}
-
-.ep-public-footer-lockup {
-  /* 80px letters / 121px disc in the PNG → 16 / 24 (rhythm). */
-  --s: 0.2;
-  --sheet-w: calc(800px * var(--s));
-  --sheet-h: calc(160px * var(--s));
-  display: inline-flex;
-  align-items: center;
-  height: calc(121px * var(--s));
+  width: 210px;
+  height: auto;
   max-width: 100%;
 }
-.ep-public-footer-lockup__tile {
+.ep-public-footer-tagline {
+  margin: 16px 0 22px;
+  max-width: 34em;
+  font-family: var(--font-footer-serif), "Newsreader", Georgia, serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--footer-tagline);
+}
+.ep-public-footer-cta {
   display: block;
+  text-align: center;
+  background: var(--brand-red-hot);
+  color: var(--white);
+  font-family: var(--font-bebas), "Bebas Neue", sans-serif;
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 13px 30px;
+  border-radius: 4px;
+}
+.ep-public-footer-cta:hover {
+  background: var(--red-dark);
+}
+.ep-public-footer-kicker {
+  margin: 0 0 14px;
+  font-family: var(--font-bebas), "Bebas Neue", sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--teal);
+}
+.ep-public-footer-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px 16px;
+  margin-top: 36px;
+  padding-top: 28px;
+  border-top: 1px solid var(--footer-hairline);
+}
+.ep-public-footer-cols > div:first-child {
+  grid-row: span 2;
+}
+.ep-public-footer-cols ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ep-public-footer-cols a {
+  display: block;
+  padding: 7px 0;
+  color: var(--footer-link);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 1.3;
+  text-decoration: none;
+}
+.ep-public-footer-cols a:hover {
+  color: var(--white);
+}
+.ep-public-footer-listen {
+  margin-top: 32px;
+  padding-top: 28px;
+  border-top: 1px solid var(--footer-hairline);
+}
+.ep-public-footer-listen-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ep-public-footer-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--white);
+  text-decoration: none;
+}
+.ep-public-footer-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1.5px solid var(--footer-icon-border);
+  background: var(--footer-icon-fill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  background-repeat: no-repeat;
-  background-size: var(--sheet-w) var(--sheet-h);
 }
-/* White-on-dark lockup (logo_horizontal_dark.png) */
-.ep-public-footer-logo--on-dark .ep-public-footer-lockup__letters {
-  width: calc(383px * var(--s));
-  height: calc(80px * var(--s));
-  background-position: calc(-130px * var(--s)) calc(-46px * var(--s));
+.ep-public-footer-icon img {
+  display: block;
+  width: 24px;
+  height: 24px;
 }
-.ep-public-footer-logo--on-dark .ep-public-footer-lockup__disc {
-  width: calc(121px * var(--s));
-  height: calc(121px * var(--s));
-  margin-left: calc(1px * var(--s));
-  background-position: calc(-514px * var(--s)) calc(-16px * var(--s));
+.ep-public-footer-tile-label {
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--footer-listen-label);
 }
-.ep-public-footer-logo--on-dark .ep-public-footer-lockup__ess {
-  width: calc(37px * var(--s));
-  height: calc(80px * var(--s));
-  background-position: calc(-635px * var(--s)) calc(-46px * var(--s));
+.ep-public-footer-legal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--footer-hairline);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--footer-legal);
 }
-/* Navy-on-light lockup (logo_horizontal_navy.png) */
-.ep-public-footer-logo--on-light .ep-public-footer-lockup__letters {
-  width: calc(386px * var(--s));
-  height: calc(80px * var(--s));
-  background-position: calc(-126px * var(--s)) calc(-42px * var(--s));
+.ep-public-footer-legal p {
+  margin: 0;
 }
-.ep-public-footer-logo--on-light .ep-public-footer-lockup__disc {
-  width: calc(120px * var(--s));
-  height: calc(120px * var(--s));
-  margin-left: calc(4px * var(--s));
-  background-position: calc(-516px * var(--s)) calc(-23px * var(--s));
+.ep-public-footer-legal a {
+  color: inherit;
+  text-decoration: none;
 }
-.ep-public-footer-logo--on-light .ep-public-footer-lockup__ess {
-  width: calc(36px * var(--s));
-  height: calc(80px * var(--s));
-  margin-left: calc(4px * var(--s));
-  background-position: calc(-640px * var(--s)) calc(-42px * var(--s));
+.ep-public-footer-legal a:hover {
+  text-decoration: underline;
 }
-
-/* Ghost footer links lift to full-strength ink on hover/focus. The single red
-   CTA (Join free) is styled inline in the component. */
-.ep-public-footer-link:hover,
-.ep-public-footer-link:focus-visible {
-  color: var(--text-primary);
-}
-
-/* Listen-on anchors. Layout is inline on the row; this is the keyboard ring.
-   Mark visibility reuses .ep-public-footer-logo--on-dark / --on-light so light,
-   dark, force-dark shells, and the paper About footer stay in lockstep. */
+.ep-public-footer a:focus-visible,
 .ep-listen-on a:focus-visible {
-  outline: 2px solid var(--text-primary);
+  outline: 2px solid var(--white);
   outline-offset: 2px;
+}
+
+@media (min-width: 1024px) {
+  .ep-public-footer-inner {
+    padding: 56px 40px 36px;
+  }
+  .ep-public-footer-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 40px;
+  }
+  .ep-public-footer-brand-block {
+    flex: 1 1 280px;
+    max-width: 400px;
+  }
+  .ep-public-footer-logo {
+    width: min(300px, 100%);
+  }
+  .ep-public-footer-cta {
+    display: inline-block;
+  }
+  .ep-public-footer-cols {
+    grid-template-columns: repeat(3, minmax(120px, 170px));
+    gap: 28px;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+    flex: 0 1 auto;
+  }
+  .ep-public-footer-cols > div:first-child {
+    grid-row: auto;
+  }
+  .ep-public-footer-listen {
+    margin-top: 40px;
+    padding-top: 28px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+  .ep-public-footer-listen .ep-public-footer-kicker {
+    margin: 0;
+    white-space: nowrap;
+  }
+  .ep-public-footer-listen-grid {
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    gap: 14px;
+    flex: 1;
+  }
+  .ep-public-footer-legal {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    margin-top: 32px;
+    padding-top: 22px;
+  }
+}
+
+@media (min-width: 1320px) {
+  .ep-public-footer-inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 64px 120px 36px;
+  }
+  .ep-public-footer-top {
+    gap: 80px;
+  }
+  .ep-public-footer-brand-block {
+    flex: 0 0 400px;
+    max-width: 400px;
+  }
+  .ep-public-footer-logo {
+    width: 300px;
+  }
+  .ep-public-footer-cols {
+    grid-template-columns: repeat(3, 170px);
+    gap: 40px;
+  }
+  .ep-public-footer-listen {
+    margin-top: 52px;
+    padding-top: 36px;
+    gap: 48px;
+  }
+  .ep-public-footer-legal {
+    margin-top: 40px;
+    padding-top: 22px;
+  }
 }
 
 /* /pricing billing toggle — CSS :has() so the ladder is server HTML (TBT). */
@@ -4703,8 +4871,7 @@ html.light-mode .ep-force-dark {
 /* Public About. Paper marketing page on the existing shell tokens
    (navy / red / teal / ivory, Playfair + Barlow). Mirrors the conversion
    front door so the approved mock stays ivory in both themes. The global
-   footer stays mounted; on a dark document it inherits the paper tokens
-   so the lockup does not flip white-on-ivory. */
+   footer stays the dark approved band under that paper page. */
 .ep-about {
   background: var(--paper);
   color: var(--navy);
@@ -4712,18 +4879,6 @@ html.light-mode .ep-force-dark {
 }
 html:not(.light-mode) .ep-public-shell:has(.ep-about) {
   background: var(--paper);
-}
-html:not(.light-mode) .ep-public-shell:has(.ep-about) > .ep-public-footer {
-  --bg-surface: var(--paper);
-  --border-color: var(--border);
-  --text-secondary: var(--navy);
-  --text-tertiary: #5C6A7C;
-}
-html:not(.light-mode) .ep-public-shell:has(.ep-about) > .ep-public-footer .ep-public-footer-logo--on-dark {
-  display: none;
-}
-html:not(.light-mode) .ep-public-shell:has(.ep-about) > .ep-public-footer .ep-public-footer-logo--on-light {
-  display: block;
 }
 
 .ep-about-wrap {
