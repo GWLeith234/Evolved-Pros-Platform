@@ -51,8 +51,8 @@ function appleCardSource(data: string): string {
 }
 
 describe('LIVE testimonials REV2', () => {
-  it('keeps the approved order, kinds, and existing three', () => {
-    expect(LIVE_TESTIMONIALS).toHaveLength(10)
+  it('keeps the approved order, kinds, and existing partner quotes', () => {
+    expect(LIVE_TESTIMONIALS).toHaveLength(11)
     expect(LIVE_TESTIMONIALS.map(item => [item.kind, item.author])).toEqual([
       ['quote', 'Brendan King'],
       ['award', 'George Leith'],
@@ -64,6 +64,7 @@ describe('LIVE testimonials REV2', () => {
       ['quote', 'Mike Giamprini'],
       ['quote', 'Amy Andrew Delardi'],
       ['quote', 'Dr. Cindy McGovern'],
+      ['quote', 'Ken Campbell'],
     ])
     expect(LIVE_TESTIMONIALS.filter(item => item.featured).map(item => item.author)).toEqual([
       'Brendan King',
@@ -73,6 +74,7 @@ describe('LIVE testimonials REV2', () => {
       'Mike Giamprini',
       'Amy Andrew Delardi',
       'Dr. Cindy McGovern',
+      'Ken Campbell',
     ])
     const groups = groupLiveTestimonials()
     expect(groups.featured).toHaveLength(3)
@@ -80,7 +82,7 @@ describe('LIVE testimonials REV2', () => {
     expect(groups.industry.map(item => item.author)).toEqual(['IAB Canada'])
     expect(groups.reviews.map(item => item.author)).toEqual(['Apple Podcasts listeners'])
     expect(groups.recognition.map(item => item.author)).toEqual(['HubSpot', 'George Leith'])
-    expect(groups.existing).toHaveLength(3)
+    expect(groups.existing).toHaveLength(4)
   })
 
   it('links Top Gun, HubSpot, and the other sourced cards, and leaves Apple rating-only', () => {
@@ -158,11 +160,11 @@ describe('LIVE testimonials REV2', () => {
     }
   })
 
-  it('renders ten cards in order with headshots, text badges, and no mock chrome', () => {
+  it('renders eleven cards in order with headshots, text badges, and no mock chrome', () => {
     const html = renderToStaticMarkup(<LiveTestimonials />)
     const authors = [...html.matchAll(/data-author="([^"]+)"/g)].map(match => match[1])
     expect(authors).toEqual(LIVE_TESTIMONIALS.map(item => item.author))
-    expect(authors).toHaveLength(10)
+    expect(authors).toHaveLength(11)
     expect(html).toContain('data-band="industry"')
     expect(html).toMatch(/data-band="industry"[\s\S]*live-t-grid--full[\s\S]*IAB Canada/)
     expect(html).toMatch(/data-band="featured"[\s\S]*live-t-grid--featured/)
