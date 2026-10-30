@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+import { HERO_IMAGE_ALT, HERO_IMAGE_SRC, HOME_META_DESCRIPTION, HOME_SUB, HOME_TITLE } from '@/lib/home/conversion'
 import { publishedStoryDescription } from '@/lib/media/storyMeta'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 import { PRICING_PAGE_DESCRIPTION } from '@/lib/seo/jsonld'
@@ -14,6 +15,7 @@ import {
   metaDescriptionNeedsMidSentenceCut,
   metaDescriptionOverride,
   plainTextBlocks,
+  PRICING_META_DESCRIPTION,
   trimMetaDescription,
 } from './metaDescription'
 
@@ -177,14 +179,82 @@ describe('pillar hub descriptions', () => {
   })
 })
 
-describe('pricing description', () => {
-  it('uses the card tier names and sits inside 70-155', () => {
+describe('home and pricing snippets', () => {
+  it('keeps the home description, og:description, and twitter:description on the new sentence', () => {
+    expect(HOME_META_DESCRIPTION).toBe(
+      'Evolved Pros is the daily operating system for sales pros, founded by George Leith. Community, podcast and media are free; The Academy is the upgrade.',
+    )
+    expect(HOME_META_DESCRIPTION.length).toBe(150)
+    assertInRange(HOME_META_DESCRIPTION)
+    expect(HOME_SUB).toBe(
+      'Everything but the curriculum is free. The Academy is what you upgrade for.',
+    )
+
+    const page = readFileSync(resolve(here, '../../app/(public)/(home)/page.tsx'), 'utf8')
+    expect(page).toContain('description: HOME_META_DESCRIPTION')
+    expect(page).not.toContain('HOME_SUB')
+    expect(page).toContain('title: HOME_TITLE')
+    expect(page).toContain('images: [{ url: HERO_IMAGE_SRC, alt: HERO_IMAGE_ALT }]')
+    expect(page).toContain('images: [HERO_IMAGE_SRC]')
+    expect(page).toContain('homeJsonLd()')
+
+    const meta = publicPageMetadata('/', {
+      title: HOME_TITLE,
+      description: HOME_META_DESCRIPTION,
+      openGraph: {
+        title: HOME_TITLE,
+        description: HOME_META_DESCRIPTION,
+        images: [{ url: HERO_IMAGE_SRC, alt: HERO_IMAGE_ALT }],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: HOME_TITLE,
+        description: HOME_META_DESCRIPTION,
+        images: [HERO_IMAGE_SRC],
+      },
+    })
+    expect(meta.title).toBe(HOME_TITLE)
+    expect(meta.description).toBe(HOME_META_DESCRIPTION)
+    expect(meta.openGraph?.description).toBe(HOME_META_DESCRIPTION)
+    expect(meta.openGraph?.title).toBe(HOME_TITLE)
+    expect(meta.openGraph?.images).toEqual([{ url: HERO_IMAGE_SRC, alt: HERO_IMAGE_ALT }])
+    expect(meta.alternates?.canonical).toBe('https://www.evolvedpros.com')
+    expect(meta.openGraph?.url).toBe('https://www.evolvedpros.com')
+    const twitter = meta.twitter as { title?: string; description?: string; images?: string[] }
+    expect(twitter.description).toBe(HOME_META_DESCRIPTION)
+    expect(twitter.title).toBe(HOME_TITLE)
+    expect(twitter.images).toEqual([HERO_IMAGE_SRC])
+  })
+
+  it('keeps the pricing description and the copied og/twitter descriptions on the new sentence', () => {
+    expect(PRICING_META_DESCRIPTION).toBe(
+      'Compare Evolved Pros plans: Community, VIP, The Evolved Pros 99 and Keynotes. See what each tier includes for sales pros and pick the one that fits you.',
+    )
+    expect(PRICING_META_DESCRIPTION.length).toBe(152)
+    assertInRange(PRICING_META_DESCRIPTION)
     expect(PRICING_PAGE_DESCRIPTION).toBe(
       'Community, VIP, The Evolved Pros 99, and Keynote tiers for high performers.',
     )
-    assertInRange(PRICING_PAGE_DESCRIPTION)
+
     const page = readFileSync(resolve(here, '../../app/(public)/pricing/page.tsx'), 'utf8')
-    expect(page).toContain('description: PRICING_PAGE_DESCRIPTION')
+    expect(page).toContain("title: 'Pricing — Evolved Pros'")
+    expect(page).toContain('description: PRICING_META_DESCRIPTION')
+    expect(page).not.toContain('description: PRICING_PAGE_DESCRIPTION')
+    expect(page).toContain('pricingJsonLd()')
+
+    const meta = publicPageMetadata('/pricing', {
+      title: 'Pricing — Evolved Pros',
+      description: PRICING_META_DESCRIPTION,
+    })
+    expect(meta.title).toBe('Pricing — Evolved Pros')
+    expect(meta.description).toBe(PRICING_META_DESCRIPTION)
+    expect(meta.openGraph?.description).toBe(PRICING_META_DESCRIPTION)
+    expect(meta.openGraph?.title).toBe('Pricing — Evolved Pros')
+    expect(meta.alternates?.canonical).toBe('https://www.evolvedpros.com/pricing')
+    expect(meta.openGraph?.url).toBe('https://www.evolvedpros.com/pricing')
+    const twitter = meta.twitter as { title?: string; description?: string }
+    expect(twitter.description).toBe(PRICING_META_DESCRIPTION)
+    expect(twitter.title).toBe('Pricing — Evolved Pros')
   })
 })
 

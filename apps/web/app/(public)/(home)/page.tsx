@@ -10,7 +10,7 @@ import {
   HERO_IMAGE_ALT,
   HERO_IMAGE_SRC,
   HOME_MEDIA_STORY_COUNT,
-  HOME_SUB,
+  HOME_META_DESCRIPTION,
   HOME_TITLE,
 } from '@/lib/home/conversion'
 import { getPublishedMediaStoriesForHub } from '@/lib/media/public'
@@ -36,16 +36,16 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = publicPageMetadata('/', {
   title: HOME_TITLE,
-  description: HOME_SUB,
+  description: HOME_META_DESCRIPTION,
   openGraph: {
     title: HOME_TITLE,
-    description: HOME_SUB,
+    description: HOME_META_DESCRIPTION,
     images: [{ url: HERO_IMAGE_SRC, alt: HERO_IMAGE_ALT }],
   },
   twitter: {
     card: 'summary_large_image',
     title: HOME_TITLE,
-    description: HOME_SUB,
+    description: HOME_META_DESCRIPTION,
     images: [HERO_IMAGE_SRC],
   },
 })

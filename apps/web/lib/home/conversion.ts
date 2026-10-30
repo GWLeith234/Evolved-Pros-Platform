@@ -42,6 +42,12 @@ export const HOME_TITLE =
 export const HOME_H1 = 'The daily operating system for sales professionals.'
 export const HOME_SUB =
   'Everything but the curriculum is free. The Academy is what you upgrade for.'
+/**
+ * Document, Open Graph, and Twitter description for `/`.
+ * HOME_SUB stays the visible subhead and the WebSite JSON-LD description.
+ */
+export const HOME_META_DESCRIPTION =
+  'Evolved Pros is the daily operating system for sales pros, founded by George Leith. Community, podcast and media are free; The Academy is the upgrade.'
 export const HOME_PRIMARY_CTA = 'Join free. Full community, no card'
 export const HOME_SECONDARY_CTA = 'See pricing'
 export const HOME_LADDER_LINE =
@@ -196,6 +202,7 @@ export function conversionCopyStrings(): string[] {
     HOME_TITLE,
     HOME_H1,
     HOME_SUB,
+    HOME_META_DESCRIPTION,
     HOME_PRIMARY_CTA,
     HOME_SECONDARY_CTA,
     HOME_LADDER_LINE,
