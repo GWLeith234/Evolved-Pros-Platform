@@ -1,19 +1,25 @@
 /**
- * Public JSON-LD builders. Podcast and article routes keep their inline
- * schemas. Home ships WebSite + Organization; /pricing ships the
- * membership Product / Offer catalog; /live ships a WebPage plus a
- * keynote/speaking Service with no price; /fit ships one VIP Product / Offer.
- * Media listing pages use mediaCollectionJsonLd.ts (CollectionPage).
- * /about ships AboutPage + BreadcrumbList. /contact ships ContactPage +
- * BreadcrumbList. Both join the homepage publisher by ORGANIZATION_ID.
+ * Public JSON-LD builders. Podcast routes keep their inline schemas.
+ * Article pages build Article via articleJsonLd and keep BreadcrumbList
+ * inline in MediaStoryDocument. Home ships WebSite + Organization;
+ * /pricing ships the membership Product / Offer catalog; /live ships a
+ * WebPage plus a keynote/speaking Service with no price; /fit ships one
+ * VIP Product / Offer. Media listing pages use mediaCollectionJsonLd.ts
+ * (CollectionPage). /about ships AboutPage + BreadcrumbList. /contact
+ * ships ContactPage + BreadcrumbList. Both join the homepage publisher
+ * by ORGANIZATION_ID.
  *
  * Brand lock: Evolved Pros. Never Evolved Media.
  *
- * homeOrganizationJsonLd() stays without @id. Pricing, live, fit, and media
- * publishers keep that shape so their rendered JSON-LD does not change.
- * sameAs, logo, and the georgeleith.com founder reference are added only
- * on the homepage Organization. /about keeps its own founder bio.
- * /contact keeps siteOrganizationJsonLd() with no sameAs or logo.
+ * homeOrganizationJsonLd() stays without @id. Pricing, live, fit, and
+ * media collection publishers keep that shape. sameAs and the founder
+ * Person node stay on the homepage Organization. /about keeps its own
+ * founder bio. /contact keeps siteOrganizationJsonLd() with no sameAs
+ * or logo.
+ *
+ * articleJsonLd reuses that Organization @id and the homepage logo.
+ * An author named George Leith reuses the homepage founder Person
+ * (@id and url). Any other byline is a name-only Person.
  */
 
 import {
@@ -118,6 +124,56 @@ export function homeJsonLd() {
       logo: organizationLogoJsonLd(),
       founder: founderPersonJsonLd(),
     },
+  }
+}
+
+/**
+ * Article author. George Leith is the homepage founder Person.
+ * Any other byline stays name-only so it does not inherit that @id.
+ */
+export function articleAuthorJsonLd(name: string) {
+  const founder = founderPersonJsonLd()
+  if (name === founder.name) return founder
+  return {
+    '@type': 'Person' as const,
+    name,
+  }
+}
+
+/**
+ * Article publisher. Same Organization @id and logo as the homepage.
+ * sameAs and founder stay on the homepage node.
+ */
+export function articlePublisherJsonLd() {
+  return {
+    ...siteOrganizationJsonLd(),
+    logo: organizationLogoJsonLd(),
+  }
+}
+
+export type ArticleJsonLdInput = {
+  headline: string
+  description: string | null
+  authorName: string
+  datePublished: string | null
+  dateModified: string | null
+  url: string
+  image: string
+}
+
+/** Article node for /media/<category>/<slug>. Breadcrumb stays on the page. */
+export function articleJsonLd(input: ArticleJsonLdInput) {
+  return {
+    '@context': 'https://schema.org' as const,
+    '@type': 'Article' as const,
+    headline: input.headline,
+    description: input.description,
+    author: articleAuthorJsonLd(input.authorName),
+    publisher: articlePublisherJsonLd(),
+    datePublished: input.datePublished,
+    dateModified: input.dateModified,
+    url: input.url,
+    image: input.image,
   }
 }
 

@@ -21,6 +21,7 @@ import {
   LIVE_PAGE_DESCRIPTION,
   ORGANIZATION_ID,
   aboutPageSchemas,
+  articleJsonLd,
   contactPageSchemas,
   fitJsonLd,
   homeJsonLd,
@@ -437,6 +438,68 @@ describe('contact JSON-LD', () => {
   })
 })
 
+const ARTICLE_SAMPLE = {
+  headline: 'Sourced, not cited',
+  description: 'A desk note on sources.',
+  datePublished: '2026-10-01T00:00:00.000Z',
+  dateModified: '2026-10-02T00:00:00.000Z',
+  url: 'https://www.evolvedpros.com/media/strategy/sourced-not-cited',
+  image: 'https://www.evolvedpros.com/logo_horizontal_navy.png',
+} as const
+
+describe('article JSON-LD', () => {
+  it('links George Leith and the publisher to the homepage entities', () => {
+    const schema = articleJsonLd({ ...ARTICLE_SAMPLE, authorName: 'George Leith' })
+    const home = homeJsonLd()
+    const serialized = JSON.stringify(schema)
+
+    expect(JSON.parse(serialized)).toEqual(schema)
+    expect(schema['@context']).toBe('https://schema.org')
+    expect(schema['@type']).toBe('Article')
+    expect(schema.headline).toBe(ARTICLE_SAMPLE.headline)
+    expect(schema.description).toBe(ARTICLE_SAMPLE.description)
+    expect(schema.datePublished).toBe(ARTICLE_SAMPLE.datePublished)
+    expect(schema.dateModified).toBe(ARTICLE_SAMPLE.dateModified)
+    expect(schema.url).toBe(ARTICLE_SAMPLE.url)
+    expect(schema.image).toBe(ARTICLE_SAMPLE.image)
+    expect(schema.author).toEqual(home.publisher.founder)
+    expect(schema.author).toEqual({
+      '@type': 'Person',
+      '@id': 'https://georgeleith.com/#person',
+      name: 'George Leith',
+      url: 'https://georgeleith.com/',
+    })
+    expect(schema.publisher).toEqual({
+      ...siteOrganizationJsonLd(),
+      logo: home.publisher.logo,
+    })
+    expect(schema.publisher['@id']).toBe('https://www.evolvedpros.com/#organization')
+    expect(schema.publisher['@id']).toBe(ORGANIZATION_ID)
+    expect(schema.publisher.name).toBe('Evolved Pros')
+    expect(schema.publisher.url).toBe(CANONICAL_ORIGIN)
+    expect(schema.publisher.logo).toEqual({
+      '@type': 'ImageObject',
+      url: 'https://www.evolvedpros.com/logo_horizontal_navy.png',
+      width: 800,
+      height: 160,
+    })
+    expect(schema.publisher).not.toHaveProperty('sameAs')
+    expect(schema.publisher).not.toHaveProperty('founder')
+    expect(serialized).not.toContain('platform.evolvedpros.com')
+    expect(serialized).not.toContain('Evolved Media')
+  })
+
+  it('does not give other authors the George Leith person id', () => {
+    for (const authorName of ['Dana Whitfield', 'Grok Bots from Evolved Pros', 'george leith']) {
+      const author = articleJsonLd({ ...ARTICLE_SAMPLE, authorName }).author
+      expect(author).toEqual({ '@type': 'Person', name: authorName })
+      expect(author).not.toHaveProperty('@id')
+      expect(author).not.toHaveProperty('url')
+      expect(JSON.stringify(author)).not.toContain('georgeleith.com')
+    }
+  })
+})
+
 describe('JSON-LD page wiring', () => {
   it('leaves pricing, live, and fit publishers without the new id', () => {
     for (const schema of [pricingJsonLd(), liveJsonLd(), fitJsonLd()]) {
@@ -446,6 +509,15 @@ describe('JSON-LD page wiring', () => {
       expect(blob).not.toContain('AboutPage')
       expect(blob).not.toContain('ContactPage')
     }
+  })
+
+  it('builds article JSON-LD through articleJsonLd', () => {
+    const src = read('../../components/media/MediaStoryDocument.tsx')
+    expect(src).toContain('articleJsonLd({')
+    expect(src).toContain('authorName: byline')
+    expect(src).toContain("'@type': 'BreadcrumbList'")
+    expect(src).not.toContain('platform.evolvedpros.com')
+    expect(src).not.toContain("author: { '@type': 'Person', name: byline }")
   })
 
   it('mounts about and contact schemas, and book and legal pages use their own graphs', () => {
