@@ -7,6 +7,7 @@ import { ArticleShareBar } from '@/app/(public)/media/[pillar]/[slug]/ArticleSha
 import { MediaPartnerSlot } from '@/components/media/MediaPartnerSlot'
 import { BriefSignup } from '@/components/media/BriefSignup'
 import { ArticleEndCta } from '@/components/media/ArticleEndCta'
+import { LdJson } from '@/components/seo/LdJson'
 import {
   NewspaperArticleBody,
   NewspaperLatestRail,
@@ -113,8 +114,8 @@ export async function MediaStoryDocument({
 
   return (
     <div className="ep-media-home ep-media-article" data-media-surface="article" data-media-comments="off">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <LdJson data={articleSchema} />
+      <LdJson data={breadcrumbSchema} />
 
       <div className="ep-media-home-inner">
         <nav className="ep-media-breadcrumb" aria-label="Breadcrumb">
