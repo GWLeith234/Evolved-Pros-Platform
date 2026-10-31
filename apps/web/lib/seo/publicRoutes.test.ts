@@ -43,6 +43,9 @@ describe('PUBLIC_SITEMAP_PATHS', () => {
       '/about',
       '/evolved',
       '/extension-privacy',
+      '/sales-coaching',
+      '/sales-quota',
+      '/sales-burnout',
     ])
   })
 

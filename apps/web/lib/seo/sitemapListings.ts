@@ -136,6 +136,9 @@ export function staticSitemapLastModified(input: {
     '/about': copyLastModified('/about'),
     '/evolved': copyLastModified('/evolved'),
     '/extension-privacy': copyLastModified('/extension-privacy'),
+    '/sales-coaching': copyLastModified('/sales-coaching'),
+    '/sales-quota': copyLastModified('/sales-quota'),
+    '/sales-burnout': copyLastModified('/sales-burnout'),
   } satisfies Record<PublicSitemapPath, Date>
 
   return resolved

@@ -43,6 +43,9 @@
  *
  * /extension-privacy is the WIG Tracker browser-extension privacy policy
  * (app/(public)/extension-privacy). Static, absent from the matcher.
+ *
+ * /sales-coaching, /sales-quota, and /sales-burnout are public answer pages
+ * (app/(public)/sales-*). Static, absent from the matcher, indexable.
  */
 export const PUBLIC_SITEMAP_PATHS = [
   '/',
@@ -57,6 +60,9 @@ export const PUBLIC_SITEMAP_PATHS = [
   '/about',
   '/evolved',
   '/extension-privacy',
+  '/sales-coaching',
+  '/sales-quota',
+  '/sales-burnout',
 ] as const
 
 export type PublicSitemapPath = (typeof PUBLIC_SITEMAP_PATHS)[number]
