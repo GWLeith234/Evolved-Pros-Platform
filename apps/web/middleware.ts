@@ -5,6 +5,11 @@ import { RETURN_PATH_HEADER, loginHrefFor, returnPathFromRequest } from '@/lib/a
 import { isMemberHomeIndex, LOGGED_OUT_MEMBER_HOME_STATUS } from '@/lib/auth/memberHomeGate'
 import { isPublicBrandAsset } from '@/lib/auth/publicAssets'
 import { applyPreviewResponseHeaders, isMediaPreviewPath } from '@/lib/media/previewHeaders'
+import {
+  locationForPublishedStory,
+  MEDIA_SLUG_FALLBACK_CACHE,
+  mediaSlugCandidate,
+} from '@/lib/media/slugRedirect'
 import { anonymousWeeklyReportResponse } from '@/lib/reports/http'
 import { isWeeklyReportPath, stripTrailingSlashTarget } from '@/lib/reports/paths'
 
@@ -122,10 +127,68 @@ function redirectToPublicHome(request: NextRequest): NextResponse {
   return NextResponse.redirect(new URL('/', request.url), LOGGED_OUT_MEMBER_HOME_STATUS)
 }
 
+function mediaSlugNotFound(): NextResponse {
+  return new NextResponse(null, {
+    status: 404,
+    headers: { 'Cache-Control': MEDIA_SLUG_FALLBACK_CACHE },
+  })
+}
+
+/**
+ * Published /media/<slug> → 301 /media/<pillar>/<slug> with a Location header.
+ * Missing and unpublished slugs are 404. Neither response is cacheable.
+ * Reserved pillars and static sections return null so their pages stay 200.
+ */
+async function mediaSlugFallback(request: NextRequest): Promise<NextResponse | null> {
+  const segment = mediaSlugCandidate(request.nextUrl.pathname)
+  if (!segment) return null
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !serviceRoleKey) return mediaSlugNotFound()
+
+  try {
+    const admin = createClient(url, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
+    const { data, error } = await admin
+      .from('media_stories')
+      .select('pillar, slug')
+      .eq('slug', segment)
+      .eq('is_published', true)
+      .limit(1)
+      .maybeSingle()
+    if (error || !data?.slug) return mediaSlugNotFound()
+    const pathname = locationForPublishedStory({
+      pillar: data.pillar,
+      slug: data.slug,
+    })
+    if (!pathname) return mediaSlugNotFound()
+
+    // NextURL.clone() keeps the request's trailing slash on Location.
+    // The canonical article path never has one.
+    const destination = new URL(pathname, request.url)
+    destination.search = request.nextUrl.search
+    const response = NextResponse.redirect(destination, 301)
+    response.headers.set('Cache-Control', MEDIA_SLUG_FALLBACK_CACHE)
+    return response
+  } catch {
+    return mediaSlugNotFound()
+  }
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   if (isMediaPreviewPath(pathname)) {
     return handleMediaPreview(request)
+  }
+
+  // Before the media-subdomain and public-route passthroughs, and before the
+  // ISR page. A redirect inside that page is what dropped Location on cache HIT.
+  if (pathname === '/media' || pathname.startsWith('/media/')) {
+    const slugResponse = await mediaSlugFallback(request)
+    if (slugResponse) return slugResponse
+    return NextResponse.next()
   }
 
   // RSC requests (including click navigations, not just hover-prefetch) must
@@ -377,9 +440,13 @@ export const config = {
     '/academy',
     '/academy/:path*',
     // Draft preview: noindex + no-store, admin session or HMAC token, else 404.
-    // Matched on its own so /media stays out of the matcher.
     '/media/preview',
     '/media/preview/:path*',
+    // Bare /media/<slug> 301 (or 404) in middleware, not in the ISR pillar page.
+    // Other /media paths hit the same matcher and return next() immediately,
+    // so pillar hubs, static sections, and /media/<pillar>/<slug> stay 200.
+    '/media',
+    '/media/:path*',
     // NOTE: /podcast is intentionally NOT matched — it is a public SEO section
     // (see PUBLIC_ROUTES). Middleware must not run on it so logged-out visitors
     // and crawlers get the server-rendered page instead of an auth redirect.
