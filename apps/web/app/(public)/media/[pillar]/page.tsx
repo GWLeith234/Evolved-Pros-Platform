@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { cache } from 'react'
 import { adminClient } from '@/lib/supabase/admin'
@@ -24,6 +24,26 @@ export async function generateStaticParams() {
   return [...Object.keys(PILLAR_CONFIG), 'general'].map(pillar => ({ pillar }))
 }
 
+// /media/<slug> fallback: known pillars always win; otherwise treat the segment
+// as a story slug and permanently redirect to its canonical /media/<pillar>/<slug>.
+const findStoryPathBySlug = cache(async (slug: string): Promise<string | null> => {
+  const { data } = await adminClient
+    .from('media_stories')
+    .select('pillar, slug')
+    .eq('slug', slug)
+    .eq('is_published', true)
+    .limit(1)
+    .maybeSingle()
+  if (!data?.slug) return null
+  return `/media/${data.pillar ? String(data.pillar) : 'general'}/${String(data.slug)}`
+})
+
+async function redirectSlugOrNotFound(segment: string): Promise<never> {
+  const path = await findStoryPathBySlug(segment)
+  if (path) permanentRedirect(path)
+  notFound()
+}
+
 const fetchArticles = cache(async (pillar: string): Promise<NewspaperStory[]> => {
   const query = adminClient
     .from('media_stories')
@@ -42,7 +62,7 @@ const fetchArticles = cache(async (pillar: string): Promise<NewspaperStory[]> =>
 export async function generateMetadata(
   { params }: { params: { pillar: string } },
 ): Promise<Metadata> {
-  if (!isKnownPillar(params.pillar)) notFound()
+  if (!isKnownPillar(params.pillar)) return redirectSlugOrNotFound(params.pillar)
   const label = params.pillar === 'general' ? 'Original' : getPillarLabel(params.pillar)
   const articles = await fetchArticles(params.pillar)
   return publicPageMetadata(`/media/${params.pillar}`, {
@@ -57,7 +77,7 @@ export default async function MediaPillarPage({
 }: {
   params: { pillar: string }
 }) {
-  if (!isKnownPillar(params.pillar)) return notFound()
+  if (!isKnownPillar(params.pillar)) return redirectSlugOrNotFound(params.pillar)
   const articles = await fetchArticles(params.pillar)
   const label = params.pillar === 'general' ? 'Original' : getPillarLabel(params.pillar)
   return (
