@@ -15,6 +15,14 @@
 export const META_DESCRIPTION_MIN = 70
 export const META_DESCRIPTION_MAX = 155
 
+/**
+ * Document, Open Graph, and Twitter description for /pricing.
+ * WebPage JSON-LD stays on PRICING_PAGE_DESCRIPTION in jsonld.ts.
+ * Tier name is Keynotes, matching the pricing card.
+ */
+export const PRICING_META_DESCRIPTION =
+  'Compare Evolved Pros plans: Community, VIP, The Evolved Pros 99 and Keynotes. See what each tier includes for sales pros and pick the one that fits you.'
+
 const TRAILING_JOINER = /[\s,;:|/\\–—-]+$/u
 
 function collapse(text: string): string {
