@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { toPostMedia } from '@/lib/community/media'
+import { acceptedPostType, communityPostInsert } from '@/lib/community/postInsert'
 import type { Post } from '@/lib/community/types'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
@@ -210,8 +211,10 @@ export async function POST(request: Request) {
   }
 
   // Resolve canonical kind / pillar — prefer new fields, fall back to legacy.
-  const validPostTypes = ['update', 'question', 'win', 'announce', 'poll']
-  const legacyType = postType && validPostTypes.includes(postType) ? postType : null
+  // 'announce' is not a member post type. The insert uses the service-role
+  // client, which skips posts_guard_pin, so the allowlist has to live here.
+  const isAdmin = profile.role === 'admin'
+  const legacyType = acceptedPostType(postType, isAdmin)
   const kind: 'update' | 'win' | 'question' | 'poll' =
     (rawKind as 'update' | 'win' | 'question' | 'poll' | null) ??
     (legacyType === 'announce' ? 'update' : (legacyType as 'update' | 'win' | 'question' | 'poll' | null)) ??
@@ -269,20 +272,20 @@ export async function POST(request: Request) {
     resolvedPollId = newPollId
   }
 
+  const row = communityPostInsert(body, {
+    authorId,
+    channelId,
+    body: postBody,
+    pillarTag: pillarText,
+    kind,
+    pillar: pillarInt,
+    pollId: resolvedPollId,
+    isAdmin,
+  })
+
   const { data: post, error } = await adminClient
     .from('posts')
-    .insert({
-      author_id: authorId,
-      channel_id: channelId,
-      body: postBody,
-      // Legacy columns — kept in sync so existing fetchers keep returning posts correctly.
-      pillar_tag: pillarText as 'p1' | 'p2' | 'p3' | 'p4' | 'p5' | 'p6' | null,
-      post_type: legacyType ?? kind,
-      // New columns (Sprint 0/1).
-      kind,
-      pillar: pillarInt,
-      ...(resolvedPollId ? { poll_id: resolvedPollId } : {}),
-    } as never)
+    .insert(row as never)
     .select('id, channel_id, body, pillar_tag, post_type, is_pinned, like_count, reply_count, created_at, media_url, media_kind, media_width, media_height, users!posts_author_id_fkey(id, display_name, full_name, avatar_url, tier)')
     .single()
 
