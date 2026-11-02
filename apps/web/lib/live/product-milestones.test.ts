@@ -91,7 +91,9 @@ describe('PRODUCT_MILESTONES', () => {
 
   it('sorts by date so a later append still lands last', () => {
     const shuffled = [PRODUCT_MILESTONES[3], PRODUCT_MILESTONES[1], PRODUCT_MILESTONES[0], PRODUCT_MILESTONES[2]]
-    expect(sortedProductMilestones(shuffled).map(m => m.id)).toEqual([
+    // On the Chicago reveal date the book row is included, so sort order covers all four.
+    const onReveal = new Date('2026-12-13T06:00:00.000Z')
+    expect(sortedProductMilestones(shuffled, onReveal).map(m => m.id)).toEqual([
       'launch-vegas-2026',
       'platform-live-2026',
       'masterminds-execs-2026',
@@ -99,6 +101,45 @@ describe('PRODUCT_MILESTONES', () => {
     ])
     expect(formatMilestoneDate(PRODUCT_MILESTONES[0].date)).toBe('APR 28, 2026')
     expect(milestoneDateTime(PRODUCT_MILESTONES[0].date)).toBe('2026-04-28')
+  })
+})
+
+describe('sortedProductMilestones book visibility', () => {
+  it('hides the EVOLVED book milestone and its Amazon link before 2026-12-13 America/Chicago', () => {
+    // 05:59:59.999Z is still Dec 12 in Chicago (CST, UTC-6).
+    const lastMomentBefore = new Date('2026-12-13T05:59:59.999Z')
+    const hidden = sortedProductMilestones(PRODUCT_MILESTONES, lastMomentBefore)
+
+    expect(hidden.map(m => m.title)).not.toContain('EVOLVED book launches October 15')
+    expect(hidden.some(m => m.id === 'book-evolved-2026')).toBe(false)
+    expect(hidden.some(m => m.linkUrl === AMAZON_BOOK_SEARCH_URL)).toBe(false)
+    expect(hidden.some(m => m.linkLabel === 'Find on Amazon')).toBe(false)
+    expect(hidden.map(m => m.id)).toEqual([
+      'launch-vegas-2026',
+      'platform-live-2026',
+      'masterminds-execs-2026',
+    ])
+  })
+
+  it('shows the EVOLVED book milestone and its Amazon link on and after 2026-12-13 America/Chicago', () => {
+    // 06:00Z is midnight Dec 13 in Chicago; the next instant is Dec 14 midnight Chicago.
+    const onReveal = new Date('2026-12-13T06:00:00.000Z')
+    const afterReveal = new Date('2026-12-14T06:00:00.000Z')
+
+    for (const now of [onReveal, afterReveal]) {
+      const shown = sortedProductMilestones(PRODUCT_MILESTONES, now)
+      const book = shown.find(m => m.title === 'EVOLVED book launches October 15')
+      expect(book?.id).toBe('book-evolved-2026')
+      expect(book?.title).toBe(BOOK_EVENT_TITLE)
+      expect(book?.linkLabel).toBe('Find on Amazon')
+      expect(book?.linkUrl).toBe(AMAZON_BOOK_SEARCH_URL)
+      expect(shown.map(m => m.id)).toEqual([
+        'launch-vegas-2026',
+        'platform-live-2026',
+        'masterminds-execs-2026',
+        'book-evolved-2026',
+      ])
+    }
   })
 })
 

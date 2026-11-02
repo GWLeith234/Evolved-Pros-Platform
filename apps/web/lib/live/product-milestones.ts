@@ -10,6 +10,11 @@ import {
   MASTERMIND_EVENT_DETAIL,
   MASTERMIND_EVENT_TITLE,
 } from '@/lib/events/nextEvent'
+import { todayYmd } from '@/lib/live/upcoming-dates-shared'
+
+/** Chicago calendar day the October 15 book row (and its Amazon link) may appear on /live. */
+const BOOK_MILESTONE_VISIBLE_ON = '2026-12-13'
+const BOOK_MILESTONE_TZ = 'America/Chicago'
 
 export interface ProductMilestone {
   /** Stable key. New rows need a unique id. */
@@ -62,11 +67,18 @@ export const PRODUCT_MILESTONES: ProductMilestone[] = [
   },
 ]
 
-/** Chronological copy of the list so appending a later row still lands last. */
+/**
+ * Chronological copy of the list so appending a later row still lands last.
+ * The EVOLVED book row stays off this list until 2026-12-13 America/Chicago,
+ * Amazon link included.
+ */
 export function sortedProductMilestones(
   list: readonly ProductMilestone[] = PRODUCT_MILESTONES,
+  now: Date = new Date(),
 ): ProductMilestone[] {
-  return [...list].sort((a, b) => a.date.getTime() - b.date.getTime())
+  const showBook = todayYmd(now, BOOK_MILESTONE_TZ) >= BOOK_MILESTONE_VISIBLE_ON
+  const visible = showBook ? list : list.filter(m => m.title !== BOOK_EVENT_TITLE)
+  return [...visible].sort((a, b) => a.date.getTime() - b.date.getTime())
 }
 
 /** GOLD mock date line, e.g. APR 28, 2026. */
