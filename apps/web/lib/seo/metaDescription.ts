@@ -23,6 +23,25 @@ export const META_DESCRIPTION_MAX = 155
 export const PRICING_META_DESCRIPTION =
   'Compare Evolved Pros plans: Community, VIP, The Evolved Pros 99 and Keynotes. See what each tier includes for sales pros and pick the one that fits you.'
 
+/**
+ * Search snippet for /media/execution/better-outbound-digital-solutions.
+ *
+ * The stored seo_description joins "what earns its keep" to "and what
+ * doesn't" with an em dash. The description sanitizer used to publish
+ * that as a period before a lowercase word. This sentence replaces
+ * description, og:description, and twitter:description. It stays inside
+ * the article: a layer-by-layer read of signals, data, sequencing, and
+ * automation, and the verdict on what earns its keep. It does not claim
+ * tech-stack-change or executive-move tracking. Those phrases are not
+ * in the body. Title, canonical, excerpt, JSON-LD, and body stay put.
+ */
+export const OUTBOUND_STACK_META_DESCRIPTION =
+  'A layer-by-layer guide to the outbound sales tech stack: signals, data, sequencing, and automation. What earns its keep, and what is expensive theatre.'
+
+const ARTICLE_SEARCH_SNIPPETS: Readonly<Record<string, string>> = {
+  '/media/execution/better-outbound-digital-solutions': OUTBOUND_STACK_META_DESCRIPTION,
+}
+
 const TRAILING_JOINER = /[\s,;:|/\\–—-]+$/u
 
 function collapse(text: string): string {
@@ -113,6 +132,20 @@ export const META_DESCRIPTION_OVERRIDES: Readonly<Record<string, string>> = {
 /** Sentence written for this sitemap path, when the stored description would be cut mid-sentence. */
 export function metaDescriptionOverride(pathname: string): string | undefined {
   return META_DESCRIPTION_OVERRIDES[descriptionPath(pathname)]
+}
+
+/** Hand-written search snippet for one article path. Wins over the stored dek. */
+export function articleSearchSnippet(pathname: string): string | undefined {
+  return ARTICLE_SEARCH_SNIPPETS[descriptionPath(pathname)]
+}
+
+/**
+ * An em dash before a lowercase word is a clause join ("keep — and"),
+ * not a sentence break. stripEmDashCopy would publish "keep. and".
+ * Dashes before a capital still fall through to that period replacement.
+ */
+export function joinEmDashClause(copy: string): string {
+  return copy.replace(/\s*[\u2014\u2013]\s*(?=[a-z])/gu, ', ')
 }
 
 /**

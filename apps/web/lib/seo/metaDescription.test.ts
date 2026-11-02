@@ -3,15 +3,20 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { HERO_IMAGE_ALT, HERO_IMAGE_SRC, HOME_META_DESCRIPTION, HOME_SUB, HOME_TITLE } from '@/lib/home/conversion'
-import { publishedStoryDescription } from '@/lib/media/storyMeta'
+import { mediaStoryTitle } from '@/lib/media/brand'
+import type { MediaStoryRecord } from '@/lib/media/storyRecord'
+import { mediaStorySocialMetadata, publishedStoryDescription } from '@/lib/media/storyMeta'
 import { publicPageMetadata } from '@/lib/seo/canonical'
-import { PRICING_PAGE_DESCRIPTION } from '@/lib/seo/jsonld'
+import { articleJsonLd, ORGANIZATION_ID, PRICING_PAGE_DESCRIPTION } from '@/lib/seo/jsonld'
 import { mediaPillarCollectionDescription } from '@/lib/seo/mediaCollectionJsonLd'
 import {
   META_DESCRIPTION_MAX,
   META_DESCRIPTION_MIN,
   META_DESCRIPTION_OVERRIDES,
+  OUTBOUND_STACK_META_DESCRIPTION,
+  articleSearchSnippet,
   fitMetaDescription,
+  joinEmDashClause,
   metaDescriptionNeedsMidSentenceCut,
   metaDescriptionOverride,
   plainTextBlocks,
@@ -290,7 +295,7 @@ const SITEMAP_DESCRIPTIONS_OVER_MAX: ReadonlyArray<{ path: string; source: strin
   },
   {
     path: '/media/strategy/what-happened-to-claudes-fable-5',
-    source: 'Anthropic shipped a frontier AI model, then deliberately put walls around it. The restraint is the story. and a lesson for anyone betting their craft on these tools.',
+    source: 'Anthropic shipped a frontier AI model, then deliberately put walls around it. The restraint is the story, and a lesson for anyone betting their craft on these tools.',
   },
   {
     path: '/media/mental-toughness/the-power-of-resilience-building-mental-toughness-in-sales',
@@ -371,5 +376,205 @@ describe('description wiring', () => {
     const landing = readFileSync(resolve(here, '../../components/media/MediaSectionLanding.tsx'), 'utf8')
     expect(pillar).toContain('mediaPillarCollectionDescription(label, articles.map(article => article.title))')
     expect(landing).toContain('mediaPillarCollectionDescription(title, articles.map(article => article.title))')
+  })
+})
+
+const OUTBOUND_PATH = '/media/execution/better-outbound-digital-solutions'
+const OUTBOUND_TITLE = 'Get Better at Outbound: The Digital Stack That Works'
+const OUTBOUND_H1 = 'Get Better at Outbound: The Digital Stack That Actually Works'
+const OUTBOUND_SEO = "The outbound tech market is half genuine leverage and half expensive theatre. Here's the layer-by-layer read on what earns its keep — and what doesn't."
+const OUTBOUND_EXCERPT = "The outbound tech market is half genuine leverage and half expensive theatre. Here's the layer-by-layer read on what earns its keep, and what doesn't."
+const OUTBOUND_BROKEN = "The outbound tech market is half genuine leverage and half expensive theatre. Here's the layer-by-layer read on what earns its keep. and what doesn't."
+
+/**
+ * Published media seo_description values whose em dash sits before a
+ * lowercase word. The old sanitizer published a period there.
+ */
+const EM_DASH_CLAUSE_DESCRIPTIONS: ReadonlyArray<{ path: string; seo: string; rendered: string }> = [
+  {
+    path: '/media/identity/evolved-pros-origin-story-30-years-sales-leadership',
+    seo: 'How 30 years of sales leadership and scaling teams to $100M+ ARR led to founding Evolved Pros — the platform transforming sales professionals worldwide.',
+    rendered: 'How 30 years of sales leadership and scaling teams to $100M+ ARR led to founding Evolved Pros, the platform transforming sales professionals worldwide.',
+  },
+  {
+    path: '/media/identity/why-i-created-evolved-pros',
+    seo: 'George Leith on losing 220 pounds, rebuilding a career, and why he built Evolved Pros — because the problem was never willpower. It was the container.',
+    rendered: 'George Leith on losing 220 pounds, rebuilding a career, and why he built Evolved Pros, because the problem was never willpower. It was the container.',
+  },
+  {
+    path: '/media/identity/why-suitsupply-is-my-favorite-store',
+    seo: "A law student started it in 2000 selling Italian-fabric suits at honest prices. What I buy there isn't the suit — it's the fit, and what the fit does.",
+    rendered: "A law student started it in 2000 selling Italian-fabric suits at honest prices. What I buy there isn't the suit, it's the fit, and what the fit does.",
+  },
+  {
+    path: '/media/mental-toughness/72-hour-water-fast-five-benefits',
+    seo: "A three-day fast does real things to the body — some proven, some oversold. Here's the honest version, including who should never attempt one.",
+    rendered: "A three-day fast does real things to the body, some proven, some oversold. Here's the honest version, including who should never attempt one.",
+  },
+  {
+    path: '/media/mental-toughness/cognitive-bias-best-sales-tool-worst-enemy',
+    seo: 'How cognitive biases destroy sales forecasts and pipeline accuracy — plus a framework to turn self-deception into competitive advantage.',
+    rendered: 'How cognitive biases destroy sales forecasts and pipeline accuracy, plus a framework to turn self-deception into competitive advantage.',
+  },
+  {
+    path: '/media/mental-toughness/sacred-hour-morning-rituals-sales-professionals',
+    seo: "Motivation is unreliable. Elite sales teams build a morning ritual — the Sacred Hour — that guarantees execution regardless of mood. Here's how.",
+    rendered: "Motivation is unreliable. Elite sales teams build a morning ritual, the Sacred Hour, that guarantees execution regardless of mood. Here's how.",
+  },
+  {
+    path: '/media/strategy/fiscal-year-halftime-trends-2026',
+    seo: "We're at the midpoint of the year. Here's what the first half is telling sales leaders — about AI, buyers, and an economy that rewards efficiency.",
+    rendered: "We're at the midpoint of the year. Here's what the first half is telling sales leaders, about AI, buyers, and an economy that rewards efficiency.",
+  },
+  {
+    path: '/media/strategy/fox-roku-acquisition-what-it-means-for-advertisers',
+    seo: "Fox's $22B move for Roku creates a fourth pole in connected TV. For advertisers, the real story isn't reach — it's who now owns the data.",
+    rendered: "Fox's $22B move for Roku creates a fourth pole in connected TV. For advertisers, the real story isn't reach, it's who now owns the data.",
+  },
+]
+
+function outboundStory(): MediaStoryRecord {
+  return {
+    id: 'f9bebc8b-ab8a-4610-82b2-710fd71434de',
+    title: OUTBOUND_H1,
+    slug: 'better-outbound-digital-solutions',
+    excerpt: OUTBOUND_EXCERPT,
+    body: 'Outbound is not dead. Later paragraph that must not lead the snippet.',
+    pillar: 'execution',
+    story_type: 'article',
+    source_url: null,
+    source_name: null,
+    featured_image_url: null,
+    author: 'George Leith',
+    seo_title: OUTBOUND_H1,
+    seo_description: OUTBOUND_SEO,
+    tags: [],
+    is_published: true,
+    published_at: '2026-06-01T00:00:00.000Z',
+    updated_at: '2026-06-01T00:00:00.000Z',
+    created_at: '2026-06-01T00:00:00.000Z',
+  }
+}
+
+describe('outbound stack search snippet', () => {
+  it('joins an em dash before a lowercase word with a comma', () => {
+    expect(joinEmDashClause('keep — and what does not')).toBe('keep, and what does not')
+    expect(joinEmDashClause('GTM 2026 — Pavilion')).toBe('GTM 2026 — Pavilion')
+    expect(publishedStoryDescription({
+      seo_description: OUTBOUND_SEO,
+      excerpt: OUTBOUND_EXCERPT,
+      body: 'A later paragraph that must not be appended.',
+    })).toBe(OUTBOUND_EXCERPT)
+    expect(OUTBOUND_EXCERPT).not.toMatch(/\. [a-z]/)
+    expect(OUTBOUND_BROKEN).toMatch(/\. and /)
+  })
+
+  it('writes the rewritten sentence to description, og:description, and twitter:description', () => {
+    expect(OUTBOUND_STACK_META_DESCRIPTION.length).toBe(151)
+    expect(OUTBOUND_STACK_META_DESCRIPTION.length).toBeGreaterThanOrEqual(140)
+    expect(OUTBOUND_STACK_META_DESCRIPTION.length).toBeLessThanOrEqual(META_DESCRIPTION_MAX)
+    expect(OUTBOUND_STACK_META_DESCRIPTION).not.toMatch(/[\u2013\u2014]/)
+    expect(OUTBOUND_STACK_META_DESCRIPTION).not.toMatch(/\. [a-z]/)
+    expect(OUTBOUND_STACK_META_DESCRIPTION).not.toMatch(/executive|tech-stack change|\$/i)
+    expect(articleSearchSnippet(OUTBOUND_PATH)).toBe(OUTBOUND_STACK_META_DESCRIPTION)
+
+    const social = mediaStorySocialMetadata(outboundStory())
+    expect(social.title).toBe(OUTBOUND_TITLE)
+    expect(social.description).toBe(OUTBOUND_STACK_META_DESCRIPTION)
+    expect(social.openGraph?.description).toBe(OUTBOUND_STACK_META_DESCRIPTION)
+    expect(social.openGraph?.title).toBe(OUTBOUND_TITLE)
+
+    const meta = publicPageMetadata(OUTBOUND_PATH, {
+      ...social,
+      description: OUTBOUND_BROKEN,
+      openGraph: { ...social.openGraph, description: OUTBOUND_BROKEN },
+      twitter: { ...social.twitter, description: OUTBOUND_BROKEN },
+    })
+    expect(meta.title).toBe(OUTBOUND_TITLE)
+    expect(meta.description).toBe(OUTBOUND_STACK_META_DESCRIPTION)
+    expect(meta.openGraph?.title).toBe(OUTBOUND_TITLE)
+    expect(meta.openGraph?.description).toBe(OUTBOUND_STACK_META_DESCRIPTION)
+    expect(meta.alternates?.canonical).toBe(`https://www.evolvedpros.com${OUTBOUND_PATH}`)
+    expect(meta.openGraph?.url).toBe(`https://www.evolvedpros.com${OUTBOUND_PATH}`)
+    const twitter = meta.twitter as { title?: string; description?: string }
+    expect(twitter.title).toBe(OUTBOUND_TITLE)
+    expect(twitter.description).toBe(OUTBOUND_STACK_META_DESCRIPTION)
+  })
+
+  it('keeps the document title, canonical, and JSON-LD author and publisher', () => {
+    expect(mediaStoryTitle(OUTBOUND_H1, OUTBOUND_H1, 'better-outbound-digital-solutions')).toBe(OUTBOUND_TITLE)
+    expect(OUTBOUND_TITLE).toBe('Get Better at Outbound: The Digital Stack That Works')
+
+    const document = readFileSync(resolve(here, '../../components/media/MediaStoryDocument.tsx'), 'utf8')
+    expect(document).toContain('headline: story.title')
+    expect(document).toContain('description: story.excerpt')
+    expect(document).toContain('authorName: byline')
+    expect(document).not.toContain('OUTBOUND_STACK_META_DESCRIPTION')
+
+    const schema = articleJsonLd({
+      headline: OUTBOUND_H1,
+      description: OUTBOUND_EXCERPT,
+      authorName: 'George Leith',
+      datePublished: '2026-06-01T00:00:00.000Z',
+      dateModified: '2026-06-01T00:00:00.000Z',
+      url: `https://www.evolvedpros.com${OUTBOUND_PATH}`,
+      image: 'https://www.evolvedpros.com/logo_horizontal_navy.png',
+    })
+    expect(schema.headline).toBe(OUTBOUND_H1)
+    expect(schema.description).toBe(OUTBOUND_EXCERPT)
+    expect(schema.url).toBe(`https://www.evolvedpros.com${OUTBOUND_PATH}`)
+    expect(schema.author).toEqual({
+      '@type': 'Person',
+      '@id': 'https://georgeleith.com/#person',
+      name: 'George Leith',
+      url: 'https://georgeleith.com/',
+    })
+    expect(schema.publisher).toMatchObject({
+      '@type': 'Organization',
+      '@id': ORGANIZATION_ID,
+      name: 'Evolved Pros',
+      url: 'https://www.evolvedpros.com',
+    })
+    expect(schema.publisher).not.toHaveProperty('sameAs')
+    expect(schema.publisher).not.toHaveProperty('founder')
+  })
+
+  it('fixes the same em-dash clause on the other media descriptions and leaves the fable override', () => {
+    for (const item of EM_DASH_CLAUSE_DESCRIPTIONS) {
+      const rendered = publishedStoryDescription({
+        seo_description: item.seo,
+        excerpt: item.rendered,
+        body: 'A later paragraph that must not be appended.',
+      })
+      expect(rendered).toBe(item.rendered)
+      expect(rendered).not.toMatch(/\. [a-z]/)
+      const meta = publicPageMetadata(item.path, {
+        description: rendered,
+        openGraph: { description: rendered },
+        twitter: { description: rendered },
+      })
+      expect(meta.description).toBe(item.rendered)
+      expect(meta.openGraph?.description).toBe(item.rendered)
+      expect((meta.twitter as { description?: string } | undefined)?.description).toBe(item.rendered)
+      expect(articleSearchSnippet(item.path)).toBeUndefined()
+    }
+
+    const fablePath = '/media/strategy/what-happened-to-claudes-fable-5'
+    const fableSeo = "Anthropic shipped a frontier AI model, then deliberately put walls around it. The restraint is the story — and a lesson for anyone betting their craft on these tools."
+    const fable = publishedStoryDescription({
+      seo_description: fableSeo,
+      excerpt: fableSeo,
+      body: 'A later paragraph that must not be appended.',
+    })
+    expect(fable).not.toMatch(/\. and /)
+    const fableMeta = publicPageMetadata(fablePath, {
+      description: fable,
+      openGraph: { description: fable },
+      twitter: { description: fable },
+    })
+    const fableOverride = META_DESCRIPTION_OVERRIDES[fablePath]
+    expect(fableMeta.description).toBe(fableOverride)
+    expect(fableMeta.openGraph?.description).toBe(fableOverride)
+    expect((fableMeta.twitter as { description?: string } | undefined)?.description).toBe(fableOverride)
   })
 })

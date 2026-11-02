@@ -18,7 +18,7 @@
  */
 
 import type { Metadata } from 'next'
-import { metaDescriptionOverride, trimMetaDescription } from '@/lib/seo/metaDescription'
+import { articleSearchSnippet, metaDescriptionOverride, trimMetaDescription } from '@/lib/seo/metaDescription'
 
 /** Brand origin used by existing public HTML canonical / og:url tags. */
 export const CANONICAL_ORIGIN = 'https://www.evolvedpros.com'
@@ -112,6 +112,8 @@ function metadataString(value: unknown): string | undefined {
  * A path in META_DESCRIPTION_OVERRIDES skips the cut and uses that sentence.
  */
 function boundedDescription(pathname: string, value: unknown): string | undefined {
+  const snippet = articleSearchSnippet(pathname)
+  if (snippet) return snippet
   const override = metaDescriptionOverride(pathname)
   if (override) return override
   const text = metadataString(value)
@@ -142,8 +144,9 @@ function shareImages<T>(fallback: T, provided: unknown): T {
  * Descriptions longer than 155 characters are cut on a word boundary here,
  * including a description repeated on openGraph or twitter, so the three
  * tags stay the same string. Paths whose cut would end mid-sentence use
- * the hand-written override instead, on all three tags. Titles are not
- * capped in this helper.
+ * the hand-written override instead, on all three tags. A path in
+ * articleSearchSnippet uses that sentence on all three tags. Titles are
+ * not capped in this helper.
  */
 export function publicPageMetadata(
   pathname: string,

@@ -3,7 +3,7 @@ import { stripEmDashCopy } from '@/lib/home/cardImagery'
 import { mediaStoryTitle } from '@/lib/media/brand'
 import { lockedArticleByline, resolveStoryArtUrl } from '@/lib/media/storyArt'
 import { DEFAULT_OG_IMAGE } from '@/lib/seo/canonical'
-import { fitMetaDescription, plainTextBlocks } from '@/lib/seo/metaDescription'
+import { articleSearchSnippet, fitMetaDescription, joinEmDashClause, plainTextBlocks } from '@/lib/seo/metaDescription'
 import type { MediaStoryRecord } from '@/lib/media/storyRecord'
 
 export function mediaStoryHead(story: Pick<
@@ -16,7 +16,7 @@ export function mediaStoryHead(story: Pick<
       stripEmDashCopy(story.seo_title || ''),
       story.slug,
     ),
-    description: stripEmDashCopy(story.seo_description || story.excerpt || ''),
+    description: descriptionCopy(story.seo_description || story.excerpt || ''),
     image: resolveStoryArtUrl(story.featured_image_url) || DEFAULT_OG_IMAGE,
     byline: lockedArticleByline(story),
   }
@@ -26,13 +26,26 @@ export function mediaStoryHead(story: Pick<
  * Article meta description. A dek already in range is kept. A short dek
  * is extended with the excerpt and later body paragraphs. A long dek is
  * trimmed on a word boundary. Stored seo_description and body are not edited.
+ *
+ * An em dash before a lowercase word becomes a comma. A dash before a
+ * capital still becomes a period. That stops "keep — and" publishing as
+ * "keep. and".
  */
+function descriptionCopy(copy: string): string {
+  return stripEmDashCopy(joinEmDashClause(copy))
+}
+
+function storySnippetPath(story: Pick<MediaStoryRecord, 'pillar' | 'slug'>): string {
+  const pillar = story.pillar?.trim() || 'general'
+  return `/media/${pillar}/${story.slug}`
+}
+
 export function publishedStoryDescription(
   story: Pick<MediaStoryRecord, 'seo_description' | 'excerpt' | 'body'>,
 ): string {
-  const dek = stripEmDashCopy(story.seo_description || story.excerpt || '')
-  const excerpt = story.excerpt ? stripEmDashCopy(story.excerpt) : ''
-  const blocks = plainTextBlocks(story.body).map(block => stripEmDashCopy(block))
+  const dek = descriptionCopy(story.seo_description || story.excerpt || '')
+  const excerpt = story.excerpt ? descriptionCopy(story.excerpt) : ''
+  const blocks = plainTextBlocks(story.body).map(block => descriptionCopy(block))
   return fitMetaDescription(dek, [excerpt, ...blocks])
 }
 
@@ -42,7 +55,7 @@ export function mediaStorySocialMetadata(
   extra?: { robots?: Metadata['robots'] },
 ): Metadata {
   const head = mediaStoryHead(story)
-  const description = publishedStoryDescription(story)
+  const description = articleSearchSnippet(storySnippetPath(story)) ?? publishedStoryDescription(story)
   return {
     title: head.title,
     description,

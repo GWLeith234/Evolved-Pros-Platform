@@ -35,7 +35,8 @@ describe('Media copy hygiene', () => {
   it('strips media OG and podcast titles at the render boundary', () => {
     const article = readFileSync(resolve(here, './storyMeta.ts'), 'utf8')
     expect(article).toMatch(/stripEmDashCopy\(story\.seo_title/)
-    expect(article).toMatch(/stripEmDashCopy\(story\.seo_description/)
+    expect(article).toMatch(/descriptionCopy\(story\.seo_description/)
+    expect(article).toMatch(/stripEmDashCopy\(joinEmDashClause/)
     const page = readFileSync(
       resolve(here, '../../app/(public)/media/[pillar]/[slug]/page.tsx'),
       'utf8',
