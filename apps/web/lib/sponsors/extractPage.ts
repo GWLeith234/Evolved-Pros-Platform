@@ -4,9 +4,16 @@
  * non-public targets and re-checks every redirect hop.
  */
 
-import { lookup } from 'node:dns/promises'
-import { isIP } from 'node:net'
-import { blockedAddressReason, normalizeHost, publicUrlBlockReason } from '@/lib/http/publicUrl'
+import {
+  defaultPublicLookup,
+  fetchPublicResource,
+  vettedPublicUrl,
+  type HostLookup,
+} from '@/lib/http/publicFetch'
+import { publicUrlBlockReason } from '@/lib/http/publicUrl'
+
+export type { HostLookup }
+export { vettedPublicUrl }
 
 export const SPONSOR_FETCH_TIMEOUT_MS = 5_000
 export const SPONSOR_FETCH_MAX_BYTES = 200_000
@@ -21,39 +28,9 @@ export interface SponsorPageMeta {
   siteName: string | null
 }
 
-export type HostLookup = (hostname: string) => Promise<readonly string[]>
-
 export interface ScrapeDeps {
   fetchImpl?: typeof fetch
   lookup?: HostLookup
-}
-
-async function defaultLookup(hostname: string): Promise<readonly string[]> {
-  const records = await lookup(hostname, { all: true, verbatim: true })
-  return records.map(record => record.address)
-}
-
-/** Resolved URL, or null when the target is not a public http(s) address. */
-export async function vettedPublicUrl(
-  raw: string,
-  resolve: HostLookup = defaultLookup,
-): Promise<URL | null> {
-  if (publicUrlBlockReason(raw)) return null
-  const url = new URL(raw)
-  const host = normalizeHost(url.hostname)
-  if (!isIP(host)) {
-    let addresses: readonly string[]
-    try {
-      addresses = await resolve(host)
-    } catch {
-      return null
-    }
-    if (addresses.length === 0) return null
-    for (const address of addresses) {
-      if (blockedAddressReason(address)) return null
-    }
-  }
-  return url
 }
 
 export async function readResponseText(response: Response, maxBytes: number): Promise<string> {
@@ -119,55 +96,28 @@ function resolveUrl(href: string | null, base: string): string | null {
   }
 }
 
-function isRedirect(status: number): boolean {
-  return status >= 300 && status < 400
-}
-
 async function fetchPublic(
   rawUrl: string,
   deps: Required<Pick<ScrapeDeps, 'fetchImpl' | 'lookup'>>,
 ): Promise<{ url: string; html: string } | null> {
-  let current = rawUrl
-  for (let hop = 0; hop <= SPONSOR_FETCH_MAX_REDIRECTS; hop++) {
-    const url = await vettedPublicUrl(current, deps.lookup)
-    if (!url) return null
-
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), SPONSOR_FETCH_TIMEOUT_MS)
-    let response: Response
-    try {
-      response = await deps.fetchImpl(url.toString(), {
-        signal: controller.signal,
-        headers: {
-          'User-Agent': 'EvolvedProsBot/1.0 (+sponsor-extract)',
-          Accept: 'text/html,application/xhtml+xml',
-        },
-        redirect: 'manual',
-        cache: 'no-store',
-      })
-    } catch {
-      return null
-    } finally {
-      clearTimeout(timer)
-    }
-
-    if (isRedirect(response.status)) {
-      const location = response.headers.get('location')
-      await response.body?.cancel().catch(() => undefined)
-      if (!location || hop === SPONSOR_FETCH_MAX_REDIRECTS) return null
-      try {
-        current = new URL(location, url).toString()
-      } catch {
-        return null
-      }
-      continue
-    }
-
-    if (!response.ok) return null
-    const html = await readResponseText(response, SPONSOR_FETCH_MAX_BYTES)
-    return { url: url.toString(), html }
+  const fetched = await fetchPublicResource(rawUrl, {
+    fetchImpl: deps.fetchImpl,
+    lookup: deps.lookup,
+    timeoutMs: SPONSOR_FETCH_TIMEOUT_MS,
+    maxRedirects: SPONSOR_FETCH_MAX_REDIRECTS,
+    headers: {
+      'User-Agent': 'EvolvedProsBot/1.0 (+sponsor-extract)',
+      Accept: 'text/html,application/xhtml+xml',
+    },
+    cache: 'no-store',
+  })
+  if (!fetched.ok) return null
+  if (!fetched.response.ok) {
+    await fetched.response.body?.cancel().catch(() => undefined)
+    return null
   }
-  return null
+  const html = await readResponseText(fetched.response, SPONSOR_FETCH_MAX_BYTES)
+  return { url: fetched.url, html }
 }
 
 export async function scrapeSponsorPage(
@@ -176,7 +126,7 @@ export async function scrapeSponsorPage(
 ): Promise<SponsorPageMeta | null> {
   const fetched = await fetchPublic(rawUrl, {
     fetchImpl: deps.fetchImpl ?? fetch,
-    lookup: deps.lookup ?? defaultLookup,
+    lookup: deps.lookup ?? defaultPublicLookup,
   })
   if (!fetched) return null
 

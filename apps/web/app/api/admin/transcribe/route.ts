@@ -6,6 +6,7 @@ import OpenAI from 'openai'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { fetchPublicResource } from '@/lib/http/publicFetch'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -34,20 +35,25 @@ export async function POST(request: Request) {
   if (!audioUrl || typeof audioUrl !== 'string') {
     return NextResponse.json({ error: 'audioUrl is required' }, { status: 422 })
   }
+  audioUrl = audioUrl.trim()
 
-  // Fetch the audio file
-  let audioResponse: Response
-  try {
-    audioResponse = await fetch(audioUrl)
-    if (!audioResponse.ok) {
-      return NextResponse.json(
-        { error: `Failed to fetch audio: HTTP ${audioResponse.status}` },
-        { status: 422 }
-      )
-    }
-  } catch (e) {
+  // The URL is request input. Refuse private, link-local, and metadata targets
+  // before the bytes are downloaded or sent to Whisper.
+  const fetched = await fetchPublicResource(audioUrl, {
+    cache: 'no-store',
+    timeoutMs: 30_000,
+  })
+  if (!fetched.ok) {
+    const error = fetched.reason === 'network'
+      ? 'Could not reach audio URL'
+      : 'audioUrl must be a public http(s) URL'
+    return NextResponse.json({ error }, { status: 422 })
+  }
+  const audioResponse = fetched.response
+  if (!audioResponse.ok) {
+    await audioResponse.body?.cancel().catch(() => undefined)
     return NextResponse.json(
-      { error: `Could not reach audio URL: ${e instanceof Error ? e.message : 'fetch failed'}` },
+      { error: `Failed to fetch audio: HTTP ${audioResponse.status}` },
       { status: 422 }
     )
   }
