@@ -1,12 +1,15 @@
 import { Masthead } from '@/components/media/Masthead'
 import { MEDIA_LOCKUP_DARK, MEDIA_LOCKUP_LIGHT } from '@/lib/lockups'
+import { MEDIA_COLLECTION_NAV } from '@/lib/media/desk'
 import { getMediaIndexSections } from '@/lib/media/public'
 
 // SPRINT M - the layout is where the section rail gets its data: one cached
 // query per five minutes for every /media/* response, resolved here so the
-// masthead itself stays a plain presentational component.
+// masthead itself stays a plain presentational component. Community and
+// Events follow the pillar doors so those sitemap URLs are linked from
+// every Media page.
 export default async function MediaLayout({ children }: { children: React.ReactNode }) {
-  const sections = await getMediaIndexSections()
+  const sections = [...(await getMediaIndexSections()), ...MEDIA_COLLECTION_NAV]
   // Theme-aware desk. Light uses cream paper. Dark uses platform page tokens.
   // Overflow is clipped here so every /media/* route inherits the mobile
   // scrollWidth fix. Preload both theme lockup PNGs (no megaphone-disc).

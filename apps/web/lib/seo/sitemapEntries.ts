@@ -26,8 +26,9 @@ export const MEDIA_PILLAR_HUB_CHANGE_FREQUENCY = 'weekly' as const
  * Windows that match the pages. Home takes the first cards of an
  * already-newest-first list (HOME_CONTENT_CARDS / HOME_MEDIA_STORY_COUNT).
  * The podcast index queries `.limit(100)`. The media desk shows five
- * episodes. Pillar and magazine landings query `.limit(24)`. The community
- * landing queries `.limit(8)`.
+ * episodes. Pillar hub lastmod stays on the first 24 newest rows
+ * (MEDIA_SECTION_LISTING_LIMIT). Magazine landings query `.limit(24)`.
+ * The community landing queries `.limit(8)`.
  */
 export const HOME_LISTED_EPISODES = 2
 export const HOME_LISTED_STORIES = 3

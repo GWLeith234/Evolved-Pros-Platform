@@ -8,8 +8,8 @@ import { mediaListingRobots } from '@/lib/seo/mediaListingRobots'
 import { mediaPillarCollectionDescription } from '@/lib/seo/mediaCollectionJsonLd'
 import { MediaSectionLanding } from '@/components/media/MediaSectionLanding'
 import type { NewspaperStory } from '@/components/media/newspaper'
+import { sectionHubLinkPlan } from '@/lib/media/sectionHubLinks'
 import { PILLAR_CONFIG, getPillarLabel } from '@/lib/pillars'
-import { listPublicMediaStories } from '@/lib/media/sitemap'
 
 export const revalidate = 120
 export const dynamicParams = true
@@ -27,19 +27,28 @@ export async function generateStaticParams() {
 // Bare /media/<slug> is answered in middleware (301 Location, or 404), both
 // uncached. This page is ISR; a redirect here is cached without Location.
 
-const fetchArticles = cache(async (pillar: string): Promise<NewspaperStory[]> => {
+const fetchPublishedRows = cache(async (pillar: string) => {
   const query = adminClient
     .from('media_stories')
     .select('id, title, slug, featured_image_url, pillar, published_at, body, author, excerpt, is_published, views, story_type')
     .eq('is_published', true)
     .order('published_at', { ascending: false })
-    .limit(24)
 
   const { data } = pillar === 'general'
     ? await query.is('pillar', null)
     : await query.eq('pillar', pillar)
 
-  return listPublicMediaStories((data ?? []) as Array<NewspaperStory & { is_published?: boolean | null }>)
+  return (data ?? []) as Array<NewspaperStory & { is_published?: boolean | null }>
+})
+
+// Desk, Most Read, meta description, and JSON-LD stay on the first 24 rows.
+// Older published stories are returned separately and appended to Latest.
+const fetchArticles = cache(async (pillar: string): Promise<NewspaperStory[]> => {
+  return sectionHubLinkPlan(await fetchPublishedRows(pillar)).articles
+})
+
+const fetchSectionOverflow = cache(async (pillar: string): Promise<NewspaperStory[]> => {
+  return sectionHubLinkPlan(await fetchPublishedRows(pillar)).overflow
 })
 
 export async function generateMetadata(
@@ -62,12 +71,14 @@ export default async function MediaPillarPage({
 }) {
   if (!isKnownPillar(params.pillar)) return notFound()
   const articles = await fetchArticles(params.pillar)
+  const overflow = await fetchSectionOverflow(params.pillar)
   const label = params.pillar === 'general' ? 'Original' : getPillarLabel(params.pillar)
   return (
     <MediaSectionLanding
       sectionId={params.pillar}
       title={label}
       articles={articles}
+      overflow={overflow}
     />
   )
 }

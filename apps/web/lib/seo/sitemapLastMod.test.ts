@@ -187,7 +187,7 @@ describe('sitemap lastmod', () => {
     ])).toEqual(new Date('2026-05-05T00:00:00.000Z'))
   })
 
-  it('ignores a pillar story outside the 24 the page renders', () => {
+  it('keeps pillar hub lastmod on the first 24 rows', () => {
     const rows = Array.from({ length: 25 }, (_, index) => ({
       pillar: 'foundation',
       slug: `story-${index}`,
@@ -231,7 +231,8 @@ describe('sitemap lastmod', () => {
     const page = (rel: string) => readFileSync(resolve(__dirname, rel), 'utf8')
     expect(page('../../app/(public)/podcast/(index)/page.tsx')).toMatch(/\.limit\(100\)/)
     expect(page('../../app/(public)/media/(hub)/page.tsx')).toMatch(/\.limit\(5\)/)
-    expect(page('../../app/(public)/media/[pillar]/page.tsx')).toMatch(/\.limit\(24\)/)
+    expect(page('../media/sectionHubLinks.ts')).toContain('slice(0, MEDIA_SECTION_LISTING_LIMIT)')
+    expect(page('../../app/(public)/media/[pillar]/page.tsx')).toContain('sectionHubLinkPlan')
     expect(page('../../app/(public)/media/community/page.tsx')).toMatch(/\.limit\(8\)/)
     expect(page('../../app/sitemap.ts')).toContain('COMMUNITY_LISTING_LIMIT')
     expect(page('../../app/sitemap.ts')).not.toMatch(/new Date\(\s*\)/)
