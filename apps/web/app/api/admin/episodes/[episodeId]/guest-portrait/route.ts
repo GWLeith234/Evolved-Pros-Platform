@@ -23,6 +23,7 @@ import sharp from 'sharp'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { GUEST_PORTRAIT_MODEL, GUEST_PORTRAIT_PROMPT } from '@/lib/art/guest-portrait-style'
+import { fetchPublicResource } from '@/lib/http/publicFetch'
 
 const ACCEPTED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const MAX_BYTES = 10 * 1024 * 1024
@@ -201,9 +202,11 @@ export async function POST(
     outBuffer = Buffer.from(item.b64_json, 'base64')
   } else if (item?.url) {
     // Returned URLs are temporary — download server-side immediately.
+    // The host still has to be a public http(s) address.
     try {
-      const dl = await fetch(item.url)
-      if (dl.ok) outBuffer = Buffer.from(await dl.arrayBuffer())
+      const dl = await fetchPublicResource(item.url, { cache: 'no-store', timeoutMs: 20_000 })
+      if (dl.ok && dl.response.ok) outBuffer = Buffer.from(await dl.response.arrayBuffer())
+      else if (dl.ok) await dl.response.body?.cancel().catch(() => undefined)
     } catch {
       /* handled below */
     }

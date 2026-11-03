@@ -10,6 +10,7 @@ import {
   resolveXaiApiKey,
   safeErrorMessage,
 } from '@/lib/art/xaiImages'
+import { fetchPublicResource } from '@/lib/http/publicFetch'
 
 async function generateOne(prompt: string): Promise<Buffer | null> {
   // Grok first. Model id is env-overrideable so a rename or access change
@@ -36,9 +37,12 @@ async function generateOne(prompt: string): Promise<Buffer | null> {
       })
       const url = res.data?.[0]?.url
       if (!url) return null
-      const dl = await fetch(url)
-      if (!dl.ok) return null
-      return Buffer.from(await dl.arrayBuffer())
+      const dl = await fetchPublicResource(url, { cache: 'no-store', timeoutMs: 20_000 })
+      if (!dl.ok || !dl.response.ok) {
+        if (dl.ok) await dl.response.body?.cancel().catch(() => undefined)
+        return null
+      }
+      return Buffer.from(await dl.response.arrayBuffer())
     } catch (err) {
       console.error('[images/generate] DALL-E failed:', safeErrorMessage(err))
     }

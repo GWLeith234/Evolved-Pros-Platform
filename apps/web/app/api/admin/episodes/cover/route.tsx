@@ -19,6 +19,7 @@ import { ImageResponse } from 'next/og'
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { fetchPublicResource } from '@/lib/http/publicFetch'
 import { PILLAR_CONFIG, getPillarFamily } from '@/lib/pillars'
 
 // ---- Geometry (matches the existing 2:3 cover library) -------------------
@@ -74,9 +75,15 @@ async function loadGoogleFont(cssFamily: string, text: string): Promise<ArrayBuf
 }
 
 // Embed the photo as a data URI — more reliable than letting satori fetch it.
+// photoUrl is request input, so the fetch stays on public http(s) hosts.
 async function fetchAsDataUri(url: string): Promise<string> {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`Failed to fetch guest photo (${res.status})`)
+  const fetched = await fetchPublicResource(url, { cache: 'no-store', timeoutMs: 15_000 })
+  if (!fetched.ok) throw new Error('guest photo URL is not a public http(s) address')
+  const res = fetched.response
+  if (!res.ok) {
+    await res.body?.cancel().catch(() => undefined)
+    throw new Error(`Failed to fetch guest photo (${res.status})`)
+  }
   const contentType = res.headers.get('content-type') || 'image/jpeg'
   const buffer = Buffer.from(await res.arrayBuffer())
   return `data:${contentType};base64,${buffer.toString('base64')}`

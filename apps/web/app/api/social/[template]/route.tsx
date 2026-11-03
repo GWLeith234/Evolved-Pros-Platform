@@ -1,5 +1,6 @@
 import { ImageResponse } from 'next/og'
 import { NextResponse } from 'next/server'
+import { fetchPublicResource } from '@/lib/http/publicFetch'
 import { loadSocialFont, SOCIAL_FONT_FILES, SOCIAL_FONT_SANS, SOCIAL_FONT_SERIF } from '@/lib/social/ogFonts'
 
 // Podcast social-image generator (LinkedIn / X). Renders server-side via Satori
@@ -65,9 +66,15 @@ function mimeFor(url: string): string {
 async function fetchImage(url: string | null | undefined): Promise<string | null> {
   if (!url) return null
   try {
-    const r = await fetch(url, { cache: 'force-cache' })
-    if (!r.ok) return null
-    return arrayBufferToDataUri(await r.arrayBuffer(), mimeFor(url))
+    // thumbnail_url is stored content. A private or metadata target must not
+    // be requested when someone renders the card.
+    const fetched = await fetchPublicResource(url, { cache: 'force-cache', timeoutMs: 10_000 })
+    if (!fetched.ok) return null
+    if (!fetched.response.ok) {
+      await fetched.response.body?.cancel().catch(() => undefined)
+      return null
+    }
+    return arrayBufferToDataUri(await fetched.response.arrayBuffer(), mimeFor(fetched.url))
   } catch {
     return null
   }
