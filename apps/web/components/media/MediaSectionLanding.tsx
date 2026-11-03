@@ -30,10 +30,13 @@ export async function MediaSectionLanding({
   sectionId,
   title,
   articles,
+  overflow = [],
 }: {
   sectionId: string
   title: string
   articles: NewspaperStory[]
+  /** Published stories the desk and Most Read do not already link. */
+  overflow?: NewspaperStory[]
 }) {
   let mediaAds: ReturnType<typeof pickMediaFeedAds> = { sidebar: null, inFeed: [] }
   try {
@@ -83,7 +86,7 @@ export async function MediaSectionLanding({
               <MediaScrollRect ad={featuredRectAd} locationId="media-section-rect-featured" />
             ) : null}
             <NewspaperLatestRail
-              stories={desk.latestList}
+              stories={[...desk.latestList, ...overflow]}
               title="Latest"
               insertSponsoredAt={1}
               midRectAt={latestRectAt}

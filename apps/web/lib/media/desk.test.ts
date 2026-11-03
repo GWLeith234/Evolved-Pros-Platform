@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   ALL_MEDIA_SECTIONS,
+  MEDIA_COLLECTION_NAV,
   MEDIA_NAVY,
   MEDIA_ON_AIR,
   MEDIA_RED,
@@ -153,6 +154,9 @@ describe('desk chrome locks', () => {
     expect(MEDIA_ON_AIR.map(l => l.href)).toEqual(['/live', '/podcast'])
     expect(MEDIA_ON_AIR.map(l => l.label)).toEqual(['LIVE', 'Podcast'])
     expect(MEDIA_ON_AIR.some(l => l.label === 'Events' || l.href === '/events')).toBe(false)
+    expect(MEDIA_COLLECTION_NAV.map(l => l.href)).toEqual(['/media/community', '/media/events'])
+    expect(ALL_MEDIA_SECTIONS.map(s => s.href)).not.toContain('/media/community')
+    expect(ALL_MEDIA_SECTIONS.map(s => s.href)).not.toContain('/media/events')
     // SPRINT M — "Email brief" used to sit here pointing at /podcast. The
     // brief is a real capture form now; it is not a nav link to a podcast.
     expect(MEDIA_ON_AIR.some(l => /brief/i.test(l.label))).toBe(false)

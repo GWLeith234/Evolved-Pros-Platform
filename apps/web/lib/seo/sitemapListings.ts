@@ -84,9 +84,10 @@ export function mediaHubListingLastModified(
 }
 
 /**
- * Per pillar: the page loads 24 newest-published rows, then drops anything
- * the public list rejects. An edit outside that window does not change the
- * hub, so it does not move lastmod while the window itself has a stamp.
+ * Per pillar: lastmod is the newest stamp inside the first 24
+ * newest-published rows, after the public list filter. Stories past that
+ * window are linked on the hub for crawling and do not move this date.
+ * Each article URL carries its own sitemap stamp.
  */
 export function pillarHubLastModifiedMap(
   stories: readonly ListingStoryRow[],

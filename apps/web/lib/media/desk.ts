@@ -58,6 +58,15 @@ export const MEDIA_ON_AIR: ReadonlyArray<{ label: string; href: string }> = [
   { label: 'Podcast', href: '/podcast' },
 ]
 
+/**
+ * Community and Events are not pillars. They follow the pillar doors in the
+ * section rail so every /media page links both URLs in server HTML.
+ */
+export const MEDIA_COLLECTION_NAV: readonly DeskSectionDef[] = [
+  { id: 'community', label: 'Community', pillar: 'community', href: '/media/community' },
+  { id: 'events', label: 'Events', pillar: 'events', href: '/media/events' },
+]
+
 export type DeskStory = {
   id: string
   pillar: string | null
