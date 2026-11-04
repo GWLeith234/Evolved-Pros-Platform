@@ -96,4 +96,18 @@ describe('city stock resolver', () => {
     )
     expect(assertNoEmDash(stripEmDashCopy('GTM 2026 — Pavilion Annual Conference'))).toBe(true)
   })
+
+  it('joins an em or en dash before with with a comma', () => {
+    expect(stripEmDashCopy('reinvention — with George Leith.')).toBe(
+      'reinvention, with George Leith.',
+    )
+    expect(stripEmDashCopy('era – with George Leith.')).toBe('era, with George Leith.')
+    expect(stripEmDashCopy('reinvention — with George Leith.')).not.toMatch(/\. with\b/)
+    expect(stripEmDashCopy('podcast — why professionals must reinvent.')).toBe(
+      'podcast. why professionals must reinvent.',
+    )
+    expect(stripEmDashCopy('trust — built through story — is what unlocks word of mouth.')).toBe(
+      'trust. built through story. is what unlocks word of mouth.',
+    )
+  })
 })

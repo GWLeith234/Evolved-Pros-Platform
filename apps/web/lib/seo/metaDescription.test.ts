@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+import { stripEmDashCopy } from '@/lib/home/cardImagery'
 import { HERO_IMAGE_ALT, HERO_IMAGE_SRC, HOME_META_DESCRIPTION, HOME_SUB, HOME_TITLE } from '@/lib/home/conversion'
 import { mediaStoryTitle } from '@/lib/media/brand'
 import type { MediaStoryRecord } from '@/lib/media/storyRecord'
@@ -266,7 +267,8 @@ describe('home and pricing snippets', () => {
 /**
  * Every sitemap URL whose stored description is over 155 characters.
  * Text is what the helper trims, after the em-dash sanitizer the page already runs.
- * Lengths are the 2026-10-15 crawl.
+ * An em dash before "with" is a comma in that sanitizer. Lengths follow the
+ * 2026-10-15 crawl, except the Salem Media row, which lost the stray period.
  */
 const SITEMAP_DESCRIPTIONS_OVER_MAX: ReadonlyArray<{ path: string; source: string }> = [
   {
@@ -291,7 +293,7 @@ const SITEMAP_DESCRIPTIONS_OVER_MAX: ReadonlyArray<{ path: string; source: strin
   },
   {
     path: '/podcast/leading-digital-evolution-salem-media-jamie-cohen',
-    source: 'Salem Media CDO Jamie Cohen on leading digital transformation: anchoring change in purpose, failing fast, and why the pace only accelerates. with George Leith.',
+    source: 'Salem Media CDO Jamie Cohen on leading digital transformation: anchoring change in purpose, failing fast, and why the pace only accelerates, with George Leith.',
   },
   {
     path: '/media/strategy/what-happened-to-claudes-fable-5',
@@ -576,5 +578,97 @@ describe('outbound stack search snippet', () => {
     expect(fableMeta.description).toBe(fableOverride)
     expect(fableMeta.openGraph?.description).toBe(fableOverride)
     expect((fableMeta.twitter as { description?: string } | undefined)?.description).toBe(fableOverride)
+  })
+})
+
+const CARSON_HEADY_STORED =
+  'Microsoft sales leader and author Carson Heady on Moneyball prospecting, serving over selling, gratitude, and relentless reinvention — with George Leith.'
+const CARSON_HEADY_DESCRIPTION =
+  'Microsoft sales leader and author Carson Heady on Moneyball prospecting, serving over selling, gratitude, and relentless reinvention, with George Leith.'
+const GIB_OLANDER_STORED =
+  'Product leader Gib Olander on building with AI agents, the discipline it demands, and why experience beats youth in the AI era — with George Leith.'
+const GIB_OLANDER_DESCRIPTION =
+  'Product leader Gib Olander on building with AI agents, the discipline it demands, and why experience beats youth in the AI era, with George Leith.'
+const JAMIE_COHEN_STORED =
+  'Salem Media CDO Jamie Cohen on leading digital transformation: anchoring change in purpose, failing fast, and why the pace only accelerates — with George Leith.'
+const HEATHER_MONAHAN_DESCRIPTION =
+  'Bestselling author and keynote speaker Heather Monahan on resilience, betting on yourself, and why the only security you ever really have is within you.'
+
+describe('podcast host credit does not publish a period before with', () => {
+  it('keeps Carson Heady and Gib Olander grammatical, named, and under 160', () => {
+    for (const [stored, description, path, title] of [
+      [
+        CARSON_HEADY_STORED,
+        CARSON_HEADY_DESCRIPTION,
+        '/podcast/evolving-inside-software-giant-carson-heady',
+        'Evolving Inside a Software Giant with Carson Heady',
+      ],
+      [
+        GIB_OLANDER_STORED,
+        GIB_OLANDER_DESCRIPTION,
+        '/podcast/seeing-around-corners-gib-olander',
+        'Seeing Around Corners: Product Vision and Where the World Goes Next with Gib Olander',
+      ],
+    ] as const) {
+      expect(stripEmDashCopy(stored)).toBe(description)
+      expect(description).not.toMatch(/\. with\b/)
+      expect(description).not.toMatch(/[\u2013\u2014]/)
+      expect(description).toContain('George Leith')
+      expect(description.length).toBeLessThanOrEqual(160)
+      expect(description.length).toBeLessThanOrEqual(META_DESCRIPTION_MAX)
+      expect(metaDescriptionOverride(path)).toBeUndefined()
+
+      const meta = publicPageMetadata(path, {
+        title,
+        description,
+        openGraph: { title, description },
+        twitter: { title, description },
+      })
+      expect(meta.description).toBe(description)
+      expect(meta.openGraph?.description).toBe(description)
+      expect((meta.twitter as { description?: string } | undefined)?.description).toBe(description)
+      expect(meta.title).toBe(title)
+      expect(meta.openGraph?.title).toBe(title)
+      expect(meta.alternates?.canonical).toBe(`https://www.evolvedpros.com${path}`)
+      expect(meta.openGraph?.url).toBe(`https://www.evolvedpros.com${path}`)
+    }
+
+    expect(CARSON_HEADY_DESCRIPTION).toContain('Carson Heady')
+    expect(CARSON_HEADY_DESCRIPTION).toContain('Moneyball prospecting')
+    expect(GIB_OLANDER_DESCRIPTION).toContain('Gib Olander')
+    expect(GIB_OLANDER_DESCRIPTION).toContain('AI agents')
+    expect(CARSON_HEADY_DESCRIPTION.length).toBe(152)
+    expect(GIB_OLANDER_DESCRIPTION.length).toBe(146)
+  })
+
+  it('leaves Jamie Cohen on the existing override and does not touch other episode copy', () => {
+    const joined = stripEmDashCopy(JAMIE_COHEN_STORED)
+    expect(joined).not.toMatch(/\. with\b/)
+    expect(joined.length).toBe(159)
+    const path = '/podcast/leading-digital-evolution-salem-media-jamie-cohen'
+    const override = metaDescriptionOverride(path)
+    expect(override).toBe(
+      'Salem Media CDO Jamie Cohen on leading digital transformation: anchoring change in purpose, failing fast, and why the pace only accelerates.',
+    )
+    const meta = publicPageMetadata(path, {
+      title: 'Leading a Digital Evolution at Salem Media',
+      description: joined,
+      openGraph: { description: joined },
+      twitter: { description: joined },
+    })
+    expect(meta.description).toBe(override)
+    expect(meta.openGraph?.description).toBe(override)
+    expect((meta.twitter as { description?: string } | undefined)?.description).toBe(override)
+    expect(meta.title).toBe('Leading a Digital Evolution at Salem Media')
+
+    expect(stripEmDashCopy(HEATHER_MONAHAN_DESCRIPTION)).toBe(HEATHER_MONAHAN_DESCRIPTION)
+    expect(stripEmDashCopy(
+      "Dennis Yu joins George Leith for the Evolved Pros debut: evolving with AI, taking 'the network view,' hiring by proof, agents as multipliers, and why your value isn't your skill set.",
+    )).toContain('joins George Leith')
+    expect(stripEmDashCopy(
+      "George Leith launches the Evolved Pros podcast — why professionals must reinvent in the AI era, the story behind his book EVOLVED, and what's coming.",
+    )).toBe(
+      "George Leith launches the Evolved Pros podcast. why professionals must reinvent in the AI era, the story behind his book EVOLVED, and what's coming.",
+    )
   })
 })
