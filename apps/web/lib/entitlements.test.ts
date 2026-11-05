@@ -247,8 +247,10 @@ describe('no tier logic lives outside the matrix', () => {
     expect(academy).toContain('canAccessAcademy')
     const lesson = read('../app/(member)/academy/[pillarSlug]/[lessonSlug]/page.tsx')
     const mux = read('../app/api/lessons/[lessonId]/mux-token/route.ts')
+    const progress = read('../app/api/lessons/[lessonId]/progress/route.ts')
     expect(lesson).toContain('canOpenLesson')
     expect(mux).toContain('canOpenLesson')
+    expect(progress).toContain('canOpenLesson')
     // This asked for 'pro', which showed the upgrade card to paying VIPs.
     expect(academy).not.toContain("hasTierAccess(profile?.tier, 'pro')")
   })

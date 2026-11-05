@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { notifyCourseUnlock } from '@/lib/notifications/create'
+import { canOpenLesson } from '@/lib/entitlements'
+import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,8 +17,10 @@ export async function POST(
   { params }: { params: { lessonId: string } },
 ) {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // Effective tier: a lapsed subscription is community here, same as the
+  // lesson page and the Mux token route.
+  const profile = await resolveCurrentUser(supabase)
+  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   let body: ProgressBody
   try {
@@ -30,25 +34,39 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid watchTimeSeconds' }, { status: 400 })
   }
 
-  // public.users.id equals auth.uid() (every row has public.users.id =
-  // auth.users.id, and the RLS policies on public.users key on auth.uid() = id).
-  // So this lookup and the `?? user.id` fallback resolve to the same uuid; the
-  // fallback simply covers a not-yet-provisioned public.users row.
-  const { data: profile } = await adminClient
-    .from('users')
-    .select('id')
-    .eq('email', user.email)
-    .single()
-  const userId = profile?.id ?? user.id
+  const userId = profile.id
 
-  // Verify lesson exists and fetch course id + title
+  // Service role bypasses RLS, and completion pays points. The lesson id in
+  // the URL is not enough: the caller has to be allowed to open that lesson.
   const { data: lesson } = await adminClient
     .from('lessons')
-    .select('id, course_id, title, is_published')
+    .select('id, course_id, title, is_published, sort_order, course:courses(slug, pillar_number, required_tier)')
     .eq('id', params.lessonId)
     .single()
 
-  if (!lesson) return NextResponse.json({ error: 'Lesson not found' }, { status: 404 })
+  if (!lesson || !lesson.is_published) {
+    return NextResponse.json({ error: 'Lesson not found' }, { status: 404 })
+  }
+
+  const courseRel = (lesson as {
+    course?:
+      | { required_tier?: string | null; slug?: string | null; pillar_number?: number | null }
+      | { required_tier?: string | null; slug?: string | null; pillar_number?: number | null }[]
+      | null
+  }).course
+  const courseRow = Array.isArray(courseRel) ? courseRel[0] : courseRel
+  // Missing course fails closed (required tier 'pro'). Foundation lesson 1
+  // stays open for the free tier via the teaser exception.
+  if (!canOpenLesson({
+    tier: profile.tier,
+    tierStatus: profile.tier_status,
+    requiredTier: courseRow?.required_tier ?? 'pro',
+    courseSlug: courseRow?.slug ?? null,
+    pillarNumber: courseRow?.pillar_number,
+    sortOrder: lesson.sort_order,
+  })) {
+    return NextResponse.json({ error: 'Upgrade required' }, { status: 403 })
+  }
 
   // Fetch existing progress
   const { data: existing } = await adminClient
