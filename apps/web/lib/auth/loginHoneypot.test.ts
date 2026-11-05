@@ -1,6 +1,8 @@
 /**
  * Login honeypot wiring. The server already checks `website` on
- * /api/auth/magic-link and /api/auth/provision; the form has to send it.
+ * /api/auth/magic-link, /api/auth/signup, and /api/auth/provision; the form
+ * has to send it. Password signup must not call supabase.auth.signUp — that
+ * PKCE email returns access_denied in a fresh browser.
  */
 import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
@@ -17,8 +19,11 @@ describe('login honeypot', () => {
     expect(loginForm).toContain('autoComplete="off"')
     expect(loginForm).toContain('aria-hidden="true"')
     expect(loginForm).toContain('website: trap')
+    expect(loginForm).toContain("fetch('/api/auth/signup'")
     expect(loginForm).toContain('requestJoinProvision(emailNorm, trap)')
-    expect(loginForm).toMatch(/trap\.trim\(\) !== ''[\s\S]*signUp/)
-    expect(loginForm.indexOf("trap.trim() !== ''")).toBeLessThan(loginForm.indexOf('supabase.auth.signUp'))
+    expect(loginForm).not.toContain('supabase.auth.signUp')
+    expect(loginForm.indexOf("trap.trim() !== ''")).toBeLessThan(
+      loginForm.indexOf("fetch('/api/auth/signup'"),
+    )
   })
 })

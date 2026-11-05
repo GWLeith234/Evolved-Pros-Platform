@@ -79,7 +79,7 @@ function MembershipExpiredContent() {
         >
           {isCancelled ? 'Rejoin Evolved Pros →' : 'Renew Membership →'}
         </Link>
-        <Link
+        <a
           href="mailto:support@evolvedpros.com"
           className="block w-full py-3 rounded font-condensed font-semibold uppercase tracking-wide text-sm transition-colors"
           style={{
@@ -89,7 +89,7 @@ function MembershipExpiredContent() {
           }}
         >
           Contact Support
-        </Link>
+        </a>
       </div>
     </div>
   )
