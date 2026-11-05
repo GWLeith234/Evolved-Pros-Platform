@@ -17,9 +17,9 @@ import {
   EMAIL_ALREADY_REGISTERED,
   SIGNUP_CONFIRM_EMAIL,
   humanizeAuthError,
-  interpretSignUpResult,
   passwordAuthMethodFor,
 } from '@/lib/auth/passwordAuth'
+import { SIGNUP_SEND_FAILED } from '@/lib/auth/signup'
 import { requestJoinProvision, shouldProvisionJoin } from '@/lib/crm/join'
 import { authCallbackUrl } from '@/lib/auth/authOrigin'
 import { MAGIC_LINK_SEND_FAILED, loginErrorFromQuery } from '@/lib/auth/magicLink'
@@ -89,7 +89,10 @@ export function LoginForm() {
     const emailNorm = email.trim().toLowerCase()
     // QA-FUNNEL-1 — the heading already said "Create account"; the submit
     // used to call signInWithPassword anyway. Branch here, and never fall
-    // through from signUp to signIn (lib/auth/passwordAuth.ts).
+    // through from signup to signIn (lib/auth/passwordAuth.ts).
+    //
+    // Create-account posts to /api/auth/signup. A browser PKCE confirmation
+    // email fails with access_denied when the link is opened in a fresh window.
     if (passwordAuthMethodFor(mode) === 'signUp') {
       if (trap.trim() !== '') {
         await requestJoinProvision(emailNorm, trap)
@@ -97,38 +100,40 @@ export function LoginForm() {
         setSent('confirm')
         return
       }
-      const { data, error: err } = await supabase.auth.signUp({
-        email: emailNorm,
-        password,
-        options: {
-          emailRedirectTo,
-        },
-      })
-      if (err) {
+      let sendFailed = false
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: emailNorm,
+            password,
+            next: nextPath,
+            website: trap,
+          }),
+        })
+        if (!res.ok) {
+          const data = (await res.json().catch(() => null)) as { error?: string } | null
+          if (res.status === 409 || data?.error === 'already_registered') {
+            setError(EMAIL_ALREADY_REGISTERED)
+          } else {
+            setError(data?.error ? humanizeAuthError(data.error, 'signup') : SIGNUP_SEND_FAILED)
+          }
+          sendFailed = true
+        }
+      } catch {
+        setError(SIGNUP_SEND_FAILED)
+        sendFailed = true
+      }
+      if (sendFailed) {
         setLoading(false)
-        setError(humanizeAuthError(err.message, 'signup'))
         return
       }
-      const outcome = interpretSignUpResult(data)
-      // Await before any redirect. A fire-and-forget fetch is aborted when
-      // window.location changes, which dropped the CRM write on instant sign-in.
-      if (shouldProvisionJoin({ mode, kind: 'password-signup', outcome })) {
+      if (shouldProvisionJoin({ mode, kind: 'password-signup', outcome: 'confirmEmail' })) {
         await requestJoinProvision(emailNorm, trap)
       }
       setLoading(false)
-      if (outcome === 'signedIn') {
-        window.location.href = callbackUrl
-        return
-      }
-      if (outcome === 'emailTaken') {
-        setError(EMAIL_ALREADY_REGISTERED)
-        return
-      }
-      if (outcome === 'confirmEmail') {
-        setSent('confirm')
-        return
-      }
-      setError('Could not create that account. Try again or use a magic link.')
+      setSent('confirm')
       return
     }
 

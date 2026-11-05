@@ -14,15 +14,22 @@ import { AUTH_ORIGIN, resolveAuthOrigin } from '@/lib/auth/authOrigin'
 
 interface MagicLinkEmailProps {
   magicLink: string
+  /** signup: password confirm link. login: magic link and invites. */
+  kind?: 'login' | 'signup'
 }
 
 const APP_URL = resolveAuthOrigin() || AUTH_ORIGIN
 
-export function MagicLinkEmail({ magicLink }: MagicLinkEmailProps) {
+export function MagicLinkEmail({ magicLink, kind = 'login' }: MagicLinkEmailProps) {
+  const signup = kind === 'signup'
   return (
     <Html>
       <Head />
-      <Preview>Your Evolved Pros login link — click to sign in.</Preview>
+      <Preview>
+        {signup
+          ? 'Confirm your Evolved Pros account.'
+          : 'Your Evolved Pros login link — click to sign in.'}
+      </Preview>
       <Body style={bodyStyle}>
 
         {/* Header */}
@@ -34,27 +41,29 @@ export function MagicLinkEmail({ magicLink }: MagicLinkEmailProps) {
 
         {/* Content */}
         <Container style={containerStyle}>
-          <Text style={labelStyle}>Secure Login Link</Text>
+          <Text style={labelStyle}>{signup ? 'Confirm your account' : 'Secure Login Link'}</Text>
           <Text style={headingStyle}>
-            One click to get in.
+            {signup ? 'Confirm your email.' : 'One click to get in.'}
           </Text>
 
           <Text style={bodyTextStyle}>
-            Click the button below to log in to your Evolved Pros account.
-            This link expires in 24 hours and can only be used once.
+            {signup
+              ? 'Click the button below to finish creating your Evolved Pros account. This link expires in 24 hours, works in any browser, and can only be used once.'
+              : 'Click the button below to log in to your Evolved Pros account. This link expires in 24 hours and can only be used once.'}
           </Text>
 
           <Section style={{ textAlign: 'center', margin: '36px 0' }}>
             <Button href={magicLink} style={ctaStyle}>
-              Log in to Evolved Pros →
+              {signup ? 'Confirm your account →' : 'Log in to Evolved Pros →'}
             </Button>
           </Section>
 
           <Hr style={dividerStyle} />
 
           <Text style={noteStyle}>
-            If you didn't request this link, you can safely ignore this email.
-            Your account is secure.
+            {signup
+              ? "If you didn't create an Evolved Pros account, you can ignore this email."
+              : "If you didn't request this link, you can safely ignore this email. Your account is secure."}
           </Text>
 
           <Text style={linkFallbackLabel}>Or copy and paste this URL into your browser:</Text>
@@ -67,7 +76,9 @@ export function MagicLinkEmail({ magicLink }: MagicLinkEmailProps) {
             © {new Date().getFullYear()} Evolved Pros · evolvedpros.com
           </Text>
           <Text style={footerTextStyle}>
-            You're receiving this because you're an Evolved Pros member.
+            {signup
+              ? "You're receiving this because you asked to create an Evolved Pros account."
+              : "You're receiving this because you're an Evolved Pros member."}
           </Text>
           <Text style={{ ...footerTextStyle, marginTop: 8 }}>
             <a href={APP_URL} style={{ color: '#68a2b9', textDecoration: 'none' }}>
