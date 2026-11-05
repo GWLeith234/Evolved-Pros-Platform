@@ -62,4 +62,8 @@ export const SHORT_DOCUMENT_TITLES: Readonly<Record<string, string>> = {
     'What Looks Like Chaos Is Usually a Priority Shift',
   'ai-tokens-materials-line':
     'Put AI Tokens on the Materials Line Before the MSA',
+  'sales-quota-unrealistic-what-to-do':
+    "Sales Quota: What It Is, How It's Set, When Unrealistic",
+  'sales-burnout-recover-without-quitting':
+    'Sales Burnout: Signs, Causes, and How to Recover',
 }

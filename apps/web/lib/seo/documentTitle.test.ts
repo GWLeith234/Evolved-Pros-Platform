@@ -124,6 +124,41 @@ describe('fitDocumentTitle', () => {
     expect(fitDocumentTitle(headline, chop)).toBe(cut.title)
   })
 
+  it('finishes the quota and burnout document titles instead of cutting mid-phrase', () => {
+    const quotaHeadline =
+      "Sales Quota: What It Is, How It's Set, and What to Do When It's Unrealistic"
+    const burnoutHeadline =
+      'Sales Burnout: Signs, Causes, and How to Recover Without Quitting Sales'
+    const quotaCut = "Sales Quota: What It Is, How It's Set, and What to Do When"
+    const burnoutCut = 'Sales Burnout: Signs, Causes, and How to Recover Without'
+    const quotaTitle = "Sales Quota: What It Is, How It's Set, When Unrealistic"
+    const burnoutTitle = 'Sales Burnout: Signs, Causes, and How to Recover'
+
+    expect(truncateDocumentTitle(quotaHeadline)).toBe(quotaCut)
+    expect(truncateDocumentTitle(burnoutHeadline)).toBe(burnoutCut)
+    expect(quotaCut.length).toBe(58)
+    expect(burnoutCut.length).toBe(56)
+
+    const quota = resolveDocumentTitle(
+      quotaHeadline,
+      quotaCut,
+      'sales-quota-unrealistic-what-to-do',
+    )
+    const burnout = resolveDocumentTitle(
+      burnoutHeadline,
+      burnoutCut,
+      'sales-burnout-recover-without-quitting',
+    )
+    expect(quota.truncated).toBe(false)
+    expect(burnout.truncated).toBe(false)
+    expect(quota.title).toBe(quotaTitle)
+    expect(burnout.title).toBe(burnoutTitle)
+    expect(quota.title.length).toBe(55)
+    expect(burnout.title.length).toBe(48)
+    expect(quota.title).not.toMatch(/\b(When|Without|And|To|Of|For|With|How|What|Why)$/)
+    expect(burnout.title).not.toMatch(/\b(When|Without|And|To|Of|For|With|How|What|Why)$/)
+  })
+
   it('uses a hand-written short title instead of cutting a known slug', () => {
     const headline = 'Put AI Tokens on the Materials Line Before You Rewrite the MSA'
     const resolved = resolveDocumentTitle(headline, headline.slice(0, 60), 'ai-tokens-materials-line')
