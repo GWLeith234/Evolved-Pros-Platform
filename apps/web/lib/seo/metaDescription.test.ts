@@ -14,14 +14,19 @@ import {
   META_DESCRIPTION_MAX,
   META_DESCRIPTION_MIN,
   META_DESCRIPTION_OVERRIDES,
+  META_DESCRIPTION_SENTENCE_MAX,
+  META_DESCRIPTION_SENTENCE_MIN,
   OUTBOUND_STACK_META_DESCRIPTION,
   articleSearchSnippet,
+  boundPublishedDescription,
+  endsMetaSentence,
   fitMetaDescription,
   joinEmDashClause,
   metaDescriptionNeedsMidSentenceCut,
   metaDescriptionOverride,
   plainTextBlocks,
   PRICING_META_DESCRIPTION,
+  sentenceBoundedMetaDescription,
   trimMetaDescription,
 } from './metaDescription'
 
@@ -341,7 +346,7 @@ describe('sitemap descriptions do not end mid-sentence', () => {
     expect(unprotected.map(item => item.path)).toEqual([])
 
     expect(Object.keys(META_DESCRIPTION_OVERRIDES).sort()).toEqual(
-      SITEMAP_DESCRIPTIONS_OVER_MAX.map(item => item.path).sort(),
+      [...SITEMAP_DESCRIPTIONS_OVER_MAX.map(item => item.path), ...STORED_CUT_META_DESCRIPTIONS.map(item => item.path)].sort(),
     )
 
     for (const item of SITEMAP_DESCRIPTIONS_OVER_MAX) {
@@ -670,5 +675,155 @@ describe('podcast host credit does not publish a period before with', () => {
     )).toBe(
       "George Leith launches the Evolved Pros podcast. why professionals must reinvent in the AI era, the story behind his book EVOLVED, and what's coming.",
     )
+  })
+})
+
+const AGENCY_SEO = 'Agencies are rethinking how AI shows up on the bill. If your AI product is the tool plus a markup, the client can buy the tool. Sell the judgment around'
+const AGENCY_EXCERPT = `${AGENCY_SEO} it.`
+const OVERVIEWS_SEO = "Google now shows an AI answer on most searches, and ChatGPT still sends a sliver of Google's traffic. The work is winning the citation on Google's own"
+const OVERVIEWS_EXCERPT = `${OVERVIEWS_SEO} page.`
+
+/**
+ * Live deks stored already cut off, so trimMetaDescription leaves them
+ * alone. The sentence window cannot finish them from that prefix.
+ * The replacement is stored copy from the same article.
+ */
+const STORED_CUT_META_DESCRIPTIONS: ReadonlyArray<{
+  path: string
+  before: string
+  after: string
+  chars: number
+}> = [
+  {
+    path: '/media/strategy/ai-readable-pages-author-date',
+    before: 'People Inc. is building APIs that hand AI agents clean text plus who wrote it and when it was updated. A local business does not need an API. It needs',
+    after: 'A local business does not need an API. On the five pages that sell, put the main text in the page, name the author or owner, and show a last-updated date.',
+    chars: 154,
+  },
+  {
+    path: '/media/strategy/lush-owned-audience-no-paid-social',
+    before: 'Lush stopped paying the big social platforms in 2021 and put the money into its app, email, creators and events. Revenue still grew. Here is the',
+    after: 'Kimeko McCoy reported in Digiday on Oct 28 that Lush stepped away from Instagram, Facebook, TikTok and Snapchat in 2021, and stopped posting to X by 2023.',
+    chars: 154,
+  },
+  {
+    path: '/media/strategy/october-24-ranking-drop-rank-tracker-bad-data',
+    before: 'Trackers lit up on Oct 24 with no confirmed Google update. One vendor says most of its bad fetches were caught before they were stored. Check Search',
+    after: 'Search Engine Roundtable reported "significant ranking volatility" on Saturday, Oct 24, 2026 across many third-party tracking tools, plus heavy SEO chatter.',
+    chars: 156,
+  },
+  {
+    path: '/media/strategy/pay-for-ai-output-not-usage',
+    before: 'More big companies now tie executive pay to AI goals. If you reward logins and prompt counts, you get logins and prompt counts. Tie the reward to a number',
+    after: 'Not yet in retail. Anna Hensel reported in Modern Retail on Oct 27 that tying AI to pay is "still a mostly unheard-of practice" in the retail industry.',
+    chars: 151,
+  },
+  {
+    path: '/media/execution/pitch-vs-delivery-say-no',
+    before: "WPP sat out Coca-Cola's North American media pitch to deliver the business it had just won. Scale that call down to hours, and decide which pitch your",
+    after: 'For a smaller agency, the same trade is measured in hours. Before you say yes to the next RFP, write down whose hours it takes and which client loses them.',
+    chars: 155,
+  },
+  {
+    path: '/media/strategy/prove-last-slice-google-search-spend',
+    before: 'Buyers told Digiday the top slice of Google search budgets is no longer automatic. Match spend to booked calls and closed jobs before your client does the',
+    after: 'The incremental 10% to 20% is becoming less automatic. Advertisers increasingly want Google to prove that spend is still the best use of those dollars.',
+    chars: 151,
+  },
+  {
+    path: '/media/strategy/whose-goal-platform-ai-agent',
+    before: "Amazon's ad business nears $20 billion a quarter and its new agent plans, buys and optimizes. Before any platform agent gets the budget, keep your own",
+    after: 'Alex Brownstein, founder of AHB Advisors, told Digiday transparency on an agent buy "comes in five layers", data, decisions, pricing, delivery and results.',
+    chars: 155,
+  },
+  {
+    path: '/media/strategy/strategic-planning-q2-sales-targets',
+    before: "Most Q2 plans are built in a room with the wrong people, using last quarter's\nassumptions, and handed down to a team that was never consulted.",
+    after: 'Early in my leadership career, I learned something that took longer to admit than it should have: building strategy in a vacuum is not just inefficient.',
+    chars: 152,
+  },
+]
+
+describe('media descriptions finish on a sentence', () => {
+  it('extends a mid-sentence dek to the stored sentence that ends inside 150-160', () => {
+    for (const [path, seo, excerpt, chars] of [
+      ['/media/strategy/agency-ai-billing-sell-judgment', AGENCY_SEO, AGENCY_EXCERPT, 156],
+      ['/media/strategy/ai-overviews-80-percent-chatgpt-traffic-plan', OVERVIEWS_SEO, OVERVIEWS_EXCERPT, 156],
+    ] as const) {
+      expect(seo.length).toBeLessThanOrEqual(META_DESCRIPTION_MAX)
+      expect(endsMetaSentence(seo)).toBe(false)
+      expect(excerpt.length).toBe(chars)
+      expect(excerpt.length).toBeGreaterThanOrEqual(META_DESCRIPTION_SENTENCE_MIN)
+      expect(excerpt.length).toBeLessThanOrEqual(META_DESCRIPTION_SENTENCE_MAX)
+      expect(sentenceBoundedMetaDescription(excerpt)).toBe(excerpt)
+      expect(metaDescriptionOverride(path)).toBeUndefined()
+
+      const description = publishedStoryDescription({
+        seo_description: seo,
+        excerpt,
+        body: 'A later paragraph that must not be appended.',
+      })
+      expect(description).toBe(excerpt)
+      expect(endsMetaSentence(description)).toBe(true)
+
+      const meta = publicPageMetadata(path, {
+        title: 'Stored title stays',
+        description,
+        openGraph: { description },
+        twitter: { description },
+      })
+      expect(meta.description).toBe(excerpt)
+      expect(meta.openGraph?.description).toBe(excerpt)
+      expect((meta.twitter as { description?: string } | undefined)?.description).toBe(excerpt)
+      expect(meta.title).toBe('Stored title stays')
+      expect(meta.alternates?.canonical).toBe(`https://www.evolvedpros.com${path}`)
+    }
+  })
+
+  it('uses a stored sentence when the dek was already cut off under 155 characters', () => {
+    for (const item of STORED_CUT_META_DESCRIPTIONS) {
+      expect(item.before.length).toBeLessThanOrEqual(META_DESCRIPTION_MAX)
+      expect(endsMetaSentence(item.before.replace(/\s+/g, ' ').trim())).toBe(item.path.endsWith('strategic-planning-q2-sales-targets'))
+      expect(sentenceBoundedMetaDescription(item.before)).toBeUndefined()
+      expect(item.after.length).toBe(item.chars)
+      expect(item.after.length).toBeGreaterThanOrEqual(META_DESCRIPTION_SENTENCE_MIN)
+      expect(item.after.length).toBeLessThanOrEqual(META_DESCRIPTION_SENTENCE_MAX)
+      expect(item.after).toMatch(/[.!?]$/)
+      expect(item.after).not.toMatch(/[\u2013\u2014]/)
+      expect(metaDescriptionOverride(item.path)).toBe(item.after)
+
+      const meta = publicPageMetadata(item.path, {
+        title: 'Stored title stays',
+        description: item.before,
+        openGraph: { description: item.before },
+        twitter: { description: item.before },
+      })
+      expect(meta.description).toBe(item.after)
+      expect(meta.openGraph?.description).toBe(item.after)
+      expect((meta.twitter as { description?: string } | undefined)?.description).toBe(item.after)
+      expect(meta.title).toBe('Stored title stays')
+      expect(meta.alternates?.canonical).toBe(`https://www.evolvedpros.com${item.path}`)
+      expect(meta.openGraph?.url).toBe(`https://www.evolvedpros.com${item.path}`)
+    }
+  })
+
+  it('collapses a newline in an in-range summary and does not cut U.S. as a sentence', () => {
+    const summary = "Most Q2 plans are built in a room with the wrong people, using last quarter's\nassumptions, and handed down to a team that was never consulted."
+    const collapsed = boundPublishedDescription(summary)
+    expect(collapsed).not.toMatch(/[\n\r]/)
+    expect(collapsed).toContain("last quarter's assumptions")
+    expect(endsMetaSentence(collapsed)).toBe(true)
+    expect(fitMetaDescription(summary)).toBe(collapsed)
+
+    const padded = `${'x'.repeat(151)}U.S. publishers continue without another stop`
+    expect(padded.length).toBeGreaterThan(META_DESCRIPTION_SENTENCE_MIN)
+    expect(sentenceBoundedMetaDescription(padded)?.endsWith('U.S.')).not.toBe(true)
+    expect(sentenceBoundedMetaDescription(padded)).toBeUndefined()
+
+    const over = `${'This finished sentence keeps going well past the sentence cap. '.repeat(4)}Done.`
+    expect(over.length).toBeGreaterThan(META_DESCRIPTION_SENTENCE_MAX)
+    expect(endsMetaSentence(over)).toBe(true)
+    expect(boundPublishedDescription(over)).toBe(trimMetaDescription(over))
+    expect(endsMetaSentence(boundPublishedDescription(over))).toBe(false)
   })
 })
