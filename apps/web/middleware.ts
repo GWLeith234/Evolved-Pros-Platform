@@ -450,6 +450,8 @@ export const config = {
     // NOTE: /podcast is intentionally NOT matched — it is a public SEO section
     // (see PUBLIC_ROUTES). Middleware must not run on it so logged-out visitors
     // and crawlers get the server-rendered page instead of an auth redirect.
+    // /sales-coaching, /sales-quota, and /sales-burnout are public answer pages.
+    // They stay out of this matcher so anonymous visitors are not sent to /login.
     '/live',
     '/live/:path*',
     '/fit',

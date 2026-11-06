@@ -103,6 +103,9 @@ const APPROVED_EXACT_SOURCES = [
   '/privacy',
   '/contact',
   '/sitemap.xml',
+  '/sales-coaching',
+  '/sales-quota',
+  '/sales-burnout',
 ]
 
 const APPROVED_PATTERN_SOURCES = [
@@ -188,6 +191,9 @@ describe('appRedirects host policy', () => {
       ['/privacy', '/privacy'],
       ['/contact', '/contact'],
       ['/sitemap.xml', '/sitemap.xml'],
+      ['/sales-coaching', '/sales-coaching'],
+      ['/sales-quota', '/sales-quota'],
+      ['/sales-burnout', '/sales-burnout'],
     ]
     for (const [path, expectedPath] of cases) {
       const hit = locationFor(PLATFORM_HOST, path, { utm: 'newsletter', ref: '1' })
