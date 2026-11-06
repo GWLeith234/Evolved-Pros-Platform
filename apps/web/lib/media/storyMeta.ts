@@ -25,7 +25,9 @@ export function mediaStoryHead(story: Pick<
 /**
  * Article meta description. A dek already in range is kept. A short dek
  * is extended with the excerpt and later body paragraphs. A long dek is
- * trimmed on a word boundary. Stored seo_description and body are not edited.
+ * trimmed on a word boundary. A dek that stops mid-sentence is extended
+ * to the next stored sentence when that sentence ends inside 160
+ * characters. Stored seo_description and body are not edited.
  *
  * An em dash before a lowercase word becomes a comma. A dash before a
  * capital still becomes a period. That stops "keep — and" publishing as
