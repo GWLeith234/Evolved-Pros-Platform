@@ -3,11 +3,12 @@
  *
  * /api/guest/submit and /api/guest/upload are unauthenticated: the signed
  * token is the credential. Scalar text fields on submit are already clipped.
- * Topics, links, and the token were not — a caller could store arbitrarily
- * long JSON strings or force HMAC over a huge token. Oversized or mistyped
- * values fail closed (null) so the route can answer 400.
+ * Topics, links, and the token are bounded. A link URL must be a public
+ * http(s) address. Oversized, mistyped, or non-http values fail closed
+ * (null) so the route can answer 400.
  */
 
+import { outboundHttpUrl } from '@/lib/http/outboundUrl'
 import { GUEST_TOKEN_MAX_LENGTH } from '@/lib/guest/token'
 
 /** Matches the defensive cap already used by the submit route. */
@@ -59,7 +60,9 @@ export function parseGuestLinks(value: unknown): GuestLink[] | null {
       const url = item.trim()
       if (!url) continue
       if (url.length > GUEST_LINK_URL_MAX) return null
-      links.push({ label: '', url })
+      const safe = outboundHttpUrl(url)
+      if (!safe) return null
+      links.push({ label: '', url: safe })
       continue
     }
     if (!item || typeof item !== 'object' || Array.isArray(item)) return null
@@ -69,13 +72,15 @@ export function parseGuestLinks(value: unknown): GuestLink[] | null {
     const url = record.url.trim()
     if (!url) continue
     if (url.length > GUEST_LINK_URL_MAX) return null
+    const safe = outboundHttpUrl(url)
+    if (!safe) return null
     let label = ''
     if (record.label != null && record.label !== '') {
       if (typeof record.label !== 'string') return null
       label = record.label.trim()
       if (label.length > GUEST_LINK_LABEL_MAX) return null
     }
-    links.push({ label, url })
+    links.push({ label, url: safe })
   }
   return links
 }

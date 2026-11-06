@@ -64,6 +64,9 @@ export async function PATCH(
   }
 
   const update = mediaStoryUpdateFromBody(body, new Date().toISOString())
+  if (!update) {
+    return NextResponse.json({ error: 'source_url must be an http(s) URL.' }, { status: 422 })
+  }
 
   if (typeof update.body === 'string') {
     let title = typeof update.title === 'string' ? update.title : ''

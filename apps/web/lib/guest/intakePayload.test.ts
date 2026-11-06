@@ -47,15 +47,24 @@ describe('parseGuestTopics', () => {
 describe('parseGuestLinks', () => {
   it('accepts string urls and {label,url} pairs', () => {
     expect(parseGuestLinks(undefined)).toEqual([])
-    expect(parseGuestLinks(['  https://example.com  ', ''])).toEqual([
-      { label: '', url: 'https://example.com' },
+    expect(parseGuestLinks(['  https://example.com/about  ', ''])).toEqual([
+      { label: '', url: 'https://example.com/about' },
     ])
-    expect(parseGuestLinks([{ label: '  Site  ', url: ' https://example.com ' }])).toEqual([
-      { label: 'Site', url: 'https://example.com' },
+    expect(parseGuestLinks([{ label: '  Site  ', url: ' https://example.com/about ' }])).toEqual([
+      { label: 'Site', url: 'https://example.com/about' },
     ])
-    expect(parseGuestLinks([{ url: 'https://example.com' }])).toEqual([
-      { label: '', url: 'https://example.com' },
+    expect(parseGuestLinks([{ url: 'https://example.com/about' }])).toEqual([
+      { label: '', url: 'https://example.com/about' },
     ])
+  })
+
+  it('rejects javascript, protocol-relative, credentialed, and private link URLs', () => {
+    expect(parseGuestLinks(['javascript:alert(1)'])).toBeNull()
+    expect(parseGuestLinks(['//evil.com'])).toBeNull()
+    expect(parseGuestLinks([{ label: 'Site', url: 'data:text/html,hi' }])).toBeNull()
+    expect(parseGuestLinks([{ label: 'Site', url: 'https://user:pass@example.com' }])).toBeNull()
+    expect(parseGuestLinks(['http://127.0.0.1/secret'])).toBeNull()
+    expect(parseGuestLinks(['http://169.254.169.254/latest/meta-data'])).toBeNull()
   })
 
   it('rejects oversized lists, oversized strings, and non-strings', () => {

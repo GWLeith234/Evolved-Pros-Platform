@@ -6,6 +6,7 @@ import type { TablesInsert } from '@evolved-pros/db'
 import { publishHeroGate } from '@/lib/media/heroReachable'
 import { mediaStoryWriteFailure } from '@/lib/media/mediaStoryWrite'
 import { stripLeadingTitle } from '@/lib/media/storyBody'
+import { storedOutboundUrl } from '@/lib/http/outboundUrl'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,6 +42,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Title and slug are required' }, { status: 422 })
   }
 
+  const source = storedOutboundUrl(source_url)
+  if (source === 'invalid') {
+    return NextResponse.json({ error: 'source_url must be an http(s) URL.' }, { status: 422 })
+  }
+
   const featuredImage = typeof featured_image_url === 'string' && featured_image_url.trim()
     ? featured_image_url.trim()
     : null
@@ -61,7 +67,7 @@ export async function POST(request: Request) {
 
   const row = {
     title, slug, excerpt, body: storedBody, pillar, story_type,
-    source_url: source_url || null,
+    source_url: source,
     source_name: source_name || null,
     featured_image_url: featuredImage,
     author: author || 'George Leith',
