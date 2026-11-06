@@ -1,3 +1,5 @@
+import { storedOutboundUrl } from '@/lib/http/outboundUrl'
+
 /**
  * Columns a media-story editor may change.
  * Matches POST /api/admin/media and the admin story form.
@@ -42,16 +44,21 @@ export const MEDIA_STORY_DENIED_FIELDS = [
   'category_type',
 ] as const
 
+/** null when source_url is present and is not a public http(s) URL. */
 export function mediaStoryUpdateFromBody(
   body: Record<string, unknown>,
   nowIso: string,
-): Record<string, unknown> {
+): Record<string, unknown> | null {
   const update: Record<string, unknown> = {}
   for (const key of MEDIA_STORY_WRITABLE_FIELDS) {
     if (!Object.prototype.hasOwnProperty.call(body, key)) continue
     const value = body[key]
     if (key === 'featured_image_url' && typeof value === 'string') {
       update.featured_image_url = value.trim() || null
+    } else if (key === 'source_url') {
+      const source = storedOutboundUrl(value)
+      if (source === 'invalid') return null
+      update.source_url = source
     } else {
       update[key] = value
     }

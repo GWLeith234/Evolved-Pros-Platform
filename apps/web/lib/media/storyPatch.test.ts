@@ -61,9 +61,9 @@ describe('mediaStoryUpdateFromBody', () => {
       expect(update).not.toHaveProperty(key)
     }
     expect(update).not.toHaveProperty('role')
-    expect(update.views).toBeUndefined()
-    expect(update.status).toBeUndefined()
-    expect(update.published_at).toBe(NOW)
+    expect(update?.views).toBeUndefined()
+    expect(update?.status).toBeUndefined()
+    expect(update?.published_at).toBe(NOW)
   })
 
   it('stamps published_at only when the allowlisted patch publishes', () => {
@@ -87,9 +87,18 @@ describe('mediaStoryUpdateFromBody', () => {
     expect(mediaStoryUpdateFromBody({}, NOW)).toEqual({})
   })
 
+  it('stores a public source URL and refuses a script or protocol-relative one', () => {
+    expect(mediaStoryUpdateFromBody({ source_url: 'https://forbes.com/story' }, NOW)).toEqual({
+      source_url: 'https://forbes.com/story',
+    })
+    expect(mediaStoryUpdateFromBody({ source_url: '  ' }, NOW)).toEqual({ source_url: null })
+    expect(mediaStoryUpdateFromBody({ source_url: 'javascript:alert(1)' }, NOW)).toBeNull()
+    expect(mediaStoryUpdateFromBody({ source_url: '//evil.com' }, NOW)).toBeNull()
+  })
+
   it('stores a blank featured image as null and leaves a null image alone', () => {
-    expect(mediaStoryUpdateFromBody({ featured_image_url: '   ' }, NOW).featured_image_url).toBeNull()
-    expect(mediaStoryUpdateFromBody({ featured_image_url: null }, NOW).featured_image_url).toBeNull()
+    expect(mediaStoryUpdateFromBody({ featured_image_url: '   ' }, NOW)?.featured_image_url).toBeNull()
+    expect(mediaStoryUpdateFromBody({ featured_image_url: null }, NOW)?.featured_image_url).toBeNull()
   })
 
   it('lists every denied column outside the writable set', () => {

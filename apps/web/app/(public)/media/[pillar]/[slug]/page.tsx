@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import type { Metadata } from 'next'
+import { storyRedirectTarget } from '@/lib/http/outboundUrl'
 import { adminClient } from '@/lib/supabase/admin'
 import { asMediaStoryRecord, type MediaStoryRecord } from '@/lib/media/storyRecord'
 import { mediaStorySocialMetadata } from '@/lib/media/storyMeta'
@@ -52,9 +53,8 @@ export default async function StoryPage({
   const story = await fetchStory(params.pillar, params.slug)
   if (!story) return notFound()
 
-  if (story.story_type === 'redirect' && story.source_url) {
-    redirect(story.source_url)
-  }
+  const target = storyRedirectTarget(story.story_type, story.source_url)
+  if (target) redirect(target)
 
   return (
     <MediaStoryDocument

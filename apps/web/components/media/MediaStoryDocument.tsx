@@ -32,6 +32,7 @@ import type { SponsorAd } from '@/components/home/HomeSponsorAd'
 import { getPublishedMediaStoriesForHub } from '@/lib/media/public'
 import { heroImageCreditForUrl } from '@/lib/media/heroPrompt'
 import { demoteHtmlH1, stripLeadingTitle } from '@/lib/media/storyBody'
+import { outboundHttpUrl } from '@/lib/http/outboundUrl'
 
 function markBottomLine(html: string): string {
   return html.replace(
@@ -95,6 +96,8 @@ export async function MediaStoryDocument({
   } catch {
     // episodes table may not exist yet
   }
+
+  const sourceHref = outboundHttpUrl(story.source_url)
 
   const articleSchema = articleJsonLd({
     headline: story.title,
@@ -160,8 +163,8 @@ export async function MediaStoryDocument({
             {story.story_type === 'pioneer_spin' && story.source_name ? (
               <p className="ep-media-article-source">
                 Inspired by{' '}
-                {story.source_url ? (
-                  <a href={story.source_url} target="_blank" rel="noopener noreferrer">
+                {sourceHref ? (
+                  <a href={sourceHref} target="_blank" rel="noopener noreferrer">
                     {story.source_name}
                   </a>
                 ) : (
@@ -170,11 +173,11 @@ export async function MediaStoryDocument({
               </p>
             ) : null}
 
-            {story.story_type === 'redirect' && story.source_url ? (
+            {story.story_type === 'redirect' && sourceHref ? (
               <p className="ep-media-article-source">
                 Live page redirects to{' '}
-                <a href={story.source_url} target="_blank" rel="noopener noreferrer">
-                  {story.source_url}
+                <a href={sourceHref} target="_blank" rel="noopener noreferrer">
+                  {sourceHref}
                 </a>
               </p>
             ) : null}

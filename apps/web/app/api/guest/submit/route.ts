@@ -7,6 +7,7 @@ import { resolveGuestEngagement, ensureGuestPersona } from '@/lib/guest/engageme
 import { supabaseIntakeDb } from '@/lib/crm/intakeDb'
 import { guestWriteFromSubmit, notifyGuestAdmins, upsertGuestProspect } from '@/lib/crm/guestIntake'
 import { parseGuestLinks, parseGuestToken, parseGuestTopics } from '@/lib/guest/intakePayload'
+import { storedOutboundUrl } from '@/lib/http/outboundUrl'
 
 // POST /api/guest/submit — an invited guest submits their intake.
 // Body: { token, one_liner, short_bio, headshot_url, topics[], links[],
@@ -54,18 +55,23 @@ export async function POST(request: Request) {
     )
   }
 
+  const headshot = storedOutboundUrl(body.headshot_url, 1000)
+  const linkedin = storedOutboundUrl(body.linkedin_url, 500)
+  const avatar = storedOutboundUrl(body.avatar_url, 1000)
+  if (headshot === 'invalid' || linkedin === 'invalid' || avatar === 'invalid') {
+    return NextResponse.json({ error: 'Links must be http(s) URLs.' }, { status: 422 })
+  }
+
   const oneLiner   = str(body.one_liner, 280)
   const shortBio   = str(body.short_bio, 2000)
-  const headshot   = str(body.headshot_url, 1000)
   const avNotes    = str(body.av_notes, 2000)
   const teeSize    = str(body.tee_size, 12)
   const firstName  = str(body.first_name, 120)
   const lastName   = str(body.last_name, 120)
   const company    = str(body.company, 200)
   const roleTitle  = str(body.role_title, 200)
-  const linkedin   = str(body.linkedin_url, 500)
   const twitter    = str(body.twitter_handle, 120)
-  const avatarUrl  = str(body.avatar_url, 1000) ?? headshot
+  const avatarUrl  = avatar ?? headshot
 
   const nowIso = new Date().toISOString()
 
