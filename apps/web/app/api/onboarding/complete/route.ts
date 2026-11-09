@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { clientSafeError } from '@/lib/http/clientError'
 import { supabaseIntakeDb } from '@/lib/crm/intakeDb'
 import {
   displayNameFromEmail,
@@ -41,10 +42,15 @@ export async function PATCH() {
     )
     .select('id')
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    return NextResponse.json(
+      { error: clientSafeError('[PATCH /api/onboarding/complete]', error, 'Could not finish onboarding.') },
+      { status: 500 },
+    )
+  }
   if (!data || data.length === 0) {
     // Returning clause reported zero rows — nothing was actually written.
-    console.error('[onboarding/complete] wrote zero rows for email=', user.email)
+    console.error('[onboarding/complete] wrote zero rows', { userId: user.id })
     return NextResponse.json({ error: 'No user record was written' }, { status: 404 })
   }
 

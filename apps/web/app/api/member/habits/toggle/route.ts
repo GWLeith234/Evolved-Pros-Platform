@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { clientSafeError } from '@/lib/http/clientError'
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
@@ -48,8 +49,10 @@ export async function POST(request: Request) {
       .delete()
       .eq('id', existing.id)
     if (error) {
-      console.error('[POST /api/member/habits/toggle] delete', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json(
+        { error: clientSafeError('[POST /api/member/habits/toggle] delete', error, 'Could not update that habit.') },
+        { status: 500 },
+      )
     }
     return NextResponse.json({ completed: false })
   }
@@ -65,8 +68,10 @@ export async function POST(request: Request) {
       completed_on: date,
     })
   if (insertErr) {
-    console.error('[POST /api/member/habits/toggle] insert', insertErr)
-    return NextResponse.json({ error: insertErr.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/member/habits/toggle] insert', insertErr, 'Could not update that habit.') },
+      { status: 500 },
+    )
   }
   return NextResponse.json({ completed: true })
 }

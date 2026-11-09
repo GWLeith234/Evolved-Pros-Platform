@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { logProviderError } from '@/lib/http/clientError'
 
 /**
  * PATCH /api/profile/banner
@@ -43,7 +44,7 @@ export async function PATCH(request: Request) {
     .eq('id', profile.id)
 
   if (error) {
-    console.error('[profile/banner] update failed:', error.message)
+    logProviderError('[profile/banner] update failed', error)
     return NextResponse.json({ error: 'Update failed' }, { status: 500 })
   }
 

@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
-import { clientSafeError } from '@/lib/http/clientError'
+import { clientSafeError, logProviderError } from '@/lib/http/clientError'
 
 // GET /api/media/comments?story_id=...
 export async function GET(request: Request) {
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
 
   if (error) {
     // Graceful fallback if story_comments table doesn't exist yet (migration not run)
-    console.warn('[GET /api/media/comments]', error.message)
+    logProviderError('[GET /api/media/comments]', error)
     return NextResponse.json({ comments: [] })
   }
 

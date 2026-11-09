@@ -6,6 +6,7 @@ import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { adminClient } from '@/lib/supabase/admin'
 import { notifyWigNudge } from '@/lib/notifications/create'
 import { WIG_DEDUPE_MS, crossedMilestones, wigActionUrl, wigCopy } from '@/lib/notifications/intents'
+import { clientSafeError } from '@/lib/http/clientError'
 
 /**
  * PATCH /api/goals/[id]
@@ -50,8 +51,10 @@ export async function PATCH(
     .maybeSingle()
 
   if (fetchErr) {
-    console.error('[PATCH /api/goals/[id]] select', fetchErr)
-    return NextResponse.json({ error: fetchErr.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[PATCH /api/goals/[id]] select', fetchErr, 'Could not load that goal.') },
+      { status: 500 },
+    )
   }
   if (!existing) {
     return NextResponse.json({ error: 'Goal not found' }, { status: 404 })
@@ -74,8 +77,10 @@ export async function PATCH(
     .single()
 
   if (error) {
-    console.error('[PATCH /api/goals/[id]] update', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[PATCH /api/goals/[id]] update', error, 'Could not save goal progress.') },
+      { status: 500 },
+    )
   }
 
   const title = typeof data.title === 'string' ? data.title : 'your WIG'
