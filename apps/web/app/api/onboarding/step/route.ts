@@ -35,7 +35,7 @@ export async function PATCH(req: Request) {
     )
   }
   if (!data || data.length === 0) {
-    console.error('[onboarding/step] wrote zero rows for email=', user.email)
+    console.error('[onboarding/step] wrote zero rows', { userId: user.id })
     return NextResponse.json({ error: 'No user record was written' }, { status: 404 })
   }
 

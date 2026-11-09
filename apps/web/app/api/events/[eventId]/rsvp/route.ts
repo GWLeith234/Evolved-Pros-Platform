@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { clientSafeError } from '@/lib/http/clientError'
 
 async function resolveUserId(email: string): Promise<string | null> {
   const { data } = await adminClient
@@ -47,7 +48,10 @@ export async function POST(
       { onConflict: 'user_id,event_id', ignoreDuplicates: true },
     )
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/events/[eventId]/rsvp]', error, 'Could not save your RSVP.') },
+      { status: 500 },
+    )
   }
 
   const attending_count = await readAttendingCount(params.eventId)
@@ -72,7 +76,10 @@ export async function DELETE(
     .eq('user_id', userId)
     .eq('event_id', params.eventId)
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[DELETE /api/events/[eventId]/rsvp]', error, 'Could not remove your RSVP.') },
+      { status: 500 },
+    )
   }
 
   const attending_count = await readAttendingCount(params.eventId)

@@ -3,6 +3,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { clientSafeError } from '@/lib/http/clientError'
 import type { Database } from '@evolved-pros/db'
 
 export const dynamic = 'force-dynamic'
@@ -115,7 +116,10 @@ export async function POST(request: Request) {
   })
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/notifications]', error, 'Could not send notification.') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ ok: true })

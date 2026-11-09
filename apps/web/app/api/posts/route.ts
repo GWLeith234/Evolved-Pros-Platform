@@ -5,6 +5,7 @@ import { toPostMedia } from '@/lib/community/media'
 import { acceptedPostType, communityPostInsert } from '@/lib/community/postInsert'
 import type { Post } from '@/lib/community/types'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { logProviderError } from '@/lib/http/clientError'
 
 export const dynamic = 'force-dynamic'
 
@@ -254,7 +255,7 @@ export async function POST(request: Request) {
       .single()
 
     if (pollErr || !pollRow) {
-      console.error('[posts] poll insert failed:', pollErr?.message)
+      logProviderError('[posts] poll insert failed', pollErr ?? { message: 'insert returned no row' })
       return NextResponse.json({ error: 'Failed to create poll' }, { status: 500 })
     }
 
@@ -266,7 +267,7 @@ export async function POST(request: Request) {
     }))
     const { error: optsErr } = await adminClient.from('poll_options').insert(optionRows as never)
     if (optsErr) {
-      console.error('[posts] poll_options insert failed:', optsErr.message)
+      logProviderError('[posts] poll_options insert failed', optsErr)
       return NextResponse.json({ error: 'Failed to create poll options' }, { status: 500 })
     }
     resolvedPollId = newPollId
@@ -290,16 +291,16 @@ export async function POST(request: Request) {
     .single()
 
   if (error || !post) {
-    console.error('[posts] insert failed — error:', JSON.stringify(error), '| post is null:', post === null)
+    logProviderError('[posts] insert failed', error ?? { message: 'insert returned no row' })
     return NextResponse.json({ error: 'Failed to create post' }, { status: 500 })
   }
 
   // Award 10 points for posting (fire-and-forget — never block the response)
   try {
     const { error: rpcErr } = await adminClient.rpc('increment_points', { user_id: profile.id, amount: 10 })
-    if (rpcErr) console.warn('[posts] increment_points failed:', rpcErr.message)
+    if (rpcErr) logProviderError('[posts] increment_points failed', rpcErr)
   } catch (err) {
-    console.warn('[posts] increment_points exception:', err)
+    logProviderError('[posts] increment_points exception', err)
   }
 
   const result: Post = toPost(

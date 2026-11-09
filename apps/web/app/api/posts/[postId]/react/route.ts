@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { clientSafeError } from '@/lib/http/clientError'
 
 // Brief naming (UI-facing) → DB CHECK-constraint values from Sprint 0 migration.
 // Sprint 0 locked DB values to ('fire','hundred','clap','heart','mind') —
@@ -86,7 +87,10 @@ export async function POST(
       { onConflict: 'user_id,post_id' } as never,
     )
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/posts/[postId]/react]', error, 'Could not save reaction.') },
+      { status: 500 },
+    )
   }
 
   const counts = await readCounts(params.postId)
@@ -110,7 +114,10 @@ export async function DELETE(
     .eq('user_id', userId)
     .eq('post_id', params.postId)
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[DELETE /api/posts/[postId]/react]', error, 'Could not remove reaction.') },
+      { status: 500 },
+    )
   }
 
   const counts = await readCounts(params.postId)
