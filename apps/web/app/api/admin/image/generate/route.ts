@@ -36,7 +36,7 @@ async function uploadBufferToBranding(buffer: Buffer): Promise<string> {
     .from('Branding')
     .upload(path, buffer, { contentType: 'image/png', upsert: true })
 
-  if (error) throw new Error(`Storage upload failed: ${error.message}`)
+  if (error) throw error
 
   const { data: { publicUrl } } = adminClient.storage.from('Branding').getPublicUrl(path)
   return publicUrl
