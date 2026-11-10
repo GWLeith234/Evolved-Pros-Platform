@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError } from '@/lib/http/clientError'
 import { Resend } from 'resend'
 import { MagicLinkEmail } from '@/lib/resend/emails/MagicLink'
 import { authCallbackUrl, magicLinkCallbackUrl } from '@/lib/auth/authOrigin'
@@ -54,8 +55,11 @@ export async function POST(request: Request) {
   })
 
   if (linkError || !linkData) {
-    console.error('[POST /api/admin/invite] generateLink error:', linkError)
-    return Response.json({ error: linkError?.message ?? 'Failed to generate invite link' }, { status: 500 })
+    return Response.json({
+      error: linkError
+        ? clientSafeError('[POST /api/admin/invite] generateLink', linkError, 'Failed to generate invite link')
+        : 'Failed to generate invite link',
+    }, { status: 500 })
   }
 
   // hashed_token, not action_link: the verify URL's implicit fragment is
@@ -76,8 +80,9 @@ export async function POST(request: Request) {
   })
 
   if (emailError) {
-    console.error('[POST /api/admin/invite] Resend error:', emailError)
-    return Response.json({ error: `Failed to send invite email: ${emailError.message}` }, { status: 500 })
+    return Response.json({
+      error: clientSafeError('[POST /api/admin/invite] Resend', emailError, 'Failed to send invite email.'),
+    }, { status: 500 })
   }
 
   // Upsert the user row with tier

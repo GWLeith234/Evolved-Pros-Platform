@@ -22,6 +22,7 @@ import { NextResponse } from 'next/server'
 import sharp from 'sharp'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError } from '@/lib/http/clientError'
 import { GUEST_PORTRAIT_MODEL, GUEST_PORTRAIT_PROMPT } from '@/lib/art/guest-portrait-style'
 import { fetchPublicResource } from '@/lib/http/publicFetch'
 
@@ -104,7 +105,7 @@ export async function POST(
       .upload(referencePath, squareBuffer, { contentType: 'image/jpeg', upsert: true })
     if (refErr) {
       return NextResponse.json(
-        { error: `Reference upload failed: ${refErr.message}` },
+        { error: clientSafeError('[guest-portrait] reference upload', refErr, 'Reference upload failed.') },
         { status: 500 },
       )
     }
@@ -223,7 +224,10 @@ export async function POST(
     .from('Branding')
     .upload(candidatePath, outBuffer, { contentType: 'image/jpeg', upsert: true })
   if (upErr) {
-    return NextResponse.json({ error: `Candidate upload failed: ${upErr.message}` }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[guest-portrait] candidate upload', upErr, 'Candidate upload failed.') },
+      { status: 500 },
+    )
   }
   const {
     data: { publicUrl },

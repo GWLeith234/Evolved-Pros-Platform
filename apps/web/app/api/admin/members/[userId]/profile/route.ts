@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError } from '@/lib/http/clientError'
 import {
   FOG_PROMO_CODE,
   friendsOfGeorgeToCompPromoCodeId,
@@ -87,7 +88,12 @@ export async function PATCH(
     .update({ ...update, updated_at: new Date().toISOString() })
     .eq('id', params.userId)
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) {
+    return Response.json(
+      { error: clientSafeError('[PATCH /api/admin/members/[userId]/profile]', error, 'Could not update that member.') },
+      { status: 500 },
+    )
+  }
 
   return Response.json({ ok: true })
 }

@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError, logProviderError } from '@/lib/http/clientError'
 import { notifyEventPublished } from '@/lib/notifications/fanout'
 import { resolveCityStockWithSearch } from '@/lib/events/cityStockFetch'
 import { eventSelectColumns } from '@/lib/events/eventColumns'
@@ -21,7 +22,7 @@ export async function GET() {
     .order('starts_at', { ascending: false })
 
   if (error) {
-    console.error('[GET /api/admin/events]', error)
+    logProviderError('[GET /api/admin/events]', error)
     return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 })
   }
   return NextResponse.json({ events: data ?? [] })
@@ -83,8 +84,11 @@ export async function POST(request: Request) {
     .single()
 
   if (error || !data) {
-    console.error('[POST /api/admin/events]', error)
-    return NextResponse.json({ error: error?.message ?? 'Failed to create event' }, { status: 500 })
+    return NextResponse.json({
+      error: error
+        ? clientSafeError('[POST /api/admin/events]', error, 'Failed to create event')
+        : 'Failed to create event',
+    }, { status: 500 })
   }
   if (data.is_published) {
     void notifyEventPublished({

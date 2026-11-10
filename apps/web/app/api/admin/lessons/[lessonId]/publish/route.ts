@@ -1,6 +1,7 @@
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError } from '@/lib/http/clientError'
 import { notifyLessonPublished } from '@/lib/notifications/fanout'
 
 export const dynamic = 'force-dynamic'
@@ -28,7 +29,12 @@ export async function PATCH(
     .select('id, is_published')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    return NextResponse.json(
+      { error: clientSafeError('[PATCH /api/admin/lessons/[lessonId]/publish]', error, 'Could not update publish status.') },
+      { status: 500 },
+    )
+  }
   if (!current.is_published && data.is_published) {
     void notifyLessonPublished(params.lessonId)
   }

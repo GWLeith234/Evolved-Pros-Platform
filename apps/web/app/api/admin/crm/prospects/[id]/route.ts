@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError, logProviderError } from '@/lib/http/clientError'
 import {
   CRM_SELECT_COLS,
   CRM_STAGE_META,
@@ -168,8 +169,7 @@ export async function PATCH(request: Request, { params }: RouteCtx) {
     .maybeSingle()
 
   if (error) {
-    // Code only — a unique-violation message embeds the conflicting email.
-    console.error('[PATCH /api/admin/crm/prospects/[id]]', error.code ?? 'unknown')
+    logProviderError('[PATCH /api/admin/crm/prospects/[id]]', error)
     // uq_crm_prospects_email (076) — email collides with another prospect.
     if (error.code === PG_UNIQUE_VIOLATION) {
       return NextResponse.json(
@@ -177,14 +177,15 @@ export async function PATCH(request: Request, { params }: RouteCtx) {
         { status: 409 },
       )
     }
-    // Graceful message if migration 061 not applied yet
+    // Stable message if migration 061 is not applied yet. The column name
+    // is checked here and is not returned.
     if (error.message?.includes('value_monthly') || error.message?.includes('next_follow_up')) {
       return NextResponse.json(
         { error: 'Run migration 061_crm_prospects_value_followup.sql then retry.' },
         { status: 500 },
       )
     }
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Could not update that prospect.' }, { status: 500 })
   }
   if (!data) {
     return NextResponse.json({ error: 'Prospect not found' }, { status: 404 })
@@ -205,8 +206,10 @@ export async function DELETE(_request: Request, { params }: RouteCtx) {
   const { error } = await (adminClient as any).from('crm_prospects').delete().eq('id', id)
 
   if (error) {
-    console.error('[DELETE /api/admin/crm/prospects/[id]]', error.code ?? 'unknown')
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[DELETE /api/admin/crm/prospects/[id]]', error, 'Could not delete that prospect.') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ ok: true })

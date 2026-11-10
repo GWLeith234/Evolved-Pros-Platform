@@ -1,4 +1,5 @@
 import 'server-only'
+import { logProviderError } from '@/lib/http/clientError'
 import { adminClient } from '@/lib/supabase/admin'
 
 /**
@@ -26,8 +27,8 @@ export async function captureWeeklySnapshots(): Promise<number> {
     .gte('target_date', todayStr)
 
   if (goalsErr) {
-    console.error('[goals/snapshot] select goals failed:', goalsErr.message)
-    throw new Error(`select goals failed: ${goalsErr.message}`)
+    logProviderError('[goals/snapshot] select goals failed', goalsErr)
+    throw new Error('select goals failed')
   }
 
   const rows = (goals ?? []) as Array<{ id: string; progress_pct: number | null }>
@@ -48,8 +49,8 @@ export async function captureWeeklySnapshots(): Promise<number> {
     .select('id')
 
   if (insertErr) {
-    console.error('[goals/snapshot] insert snapshots failed:', insertErr.message)
-    throw new Error(`insert snapshots failed: ${insertErr.message}`)
+    logProviderError('[goals/snapshot] insert snapshots failed', insertErr)
+    throw new Error('insert snapshots failed')
   }
 
   return (inserted ?? []).length

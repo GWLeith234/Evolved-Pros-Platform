@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError } from '@/lib/http/clientError'
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -23,7 +24,10 @@ export async function GET(request: NextRequest) {
   const { count, error } = await query
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[GET /api/admin/broadcast/count]', error, 'Could not count that audience.') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ count: count ?? 0 })

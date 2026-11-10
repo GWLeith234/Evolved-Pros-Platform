@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError, logProviderError } from '@/lib/http/clientError'
 import { notifyEventPublished } from '@/lib/notifications/fanout'
 import { resolveCityStockWithSearch } from '@/lib/events/cityStockFetch'
 import { eventSelectColumns } from '@/lib/events/eventColumns'
@@ -63,8 +64,11 @@ export async function PATCH(
     .single()
 
   if (error || !data) {
-    console.error('[PATCH /api/admin/events/[id]]', error)
-    return NextResponse.json({ error: error?.message ?? 'Update failed' }, { status: 500 })
+    return NextResponse.json({
+      error: error
+        ? clientSafeError('[PATCH /api/admin/events/[id]]', error, 'Update failed')
+        : 'Update failed',
+    }, { status: 500 })
   }
   if (publishing && current && !current.is_published && data.is_published) {
     void notifyEventPublished({
@@ -85,7 +89,7 @@ export async function DELETE(
 
   const { error } = await adminClient.from('events').delete().eq('id', params.id)
   if (error) {
-    console.error('[DELETE /api/admin/events/[id]]', error)
+    logProviderError('[DELETE /api/admin/events/[id]]', error)
     return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
   }
   return new NextResponse(null, { status: 204 })

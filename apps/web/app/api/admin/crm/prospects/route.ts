@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError, logProviderError } from '@/lib/http/clientError'
 import {
   CRM_SELECT_COLS,
   CRM_SELECT_COLS_WITHOUT_SUMMARY,
@@ -56,10 +57,10 @@ export async function GET(request: Request) {
       const retry = await fallback
       if (!retry.error) return NextResponse.json({ prospects: retry.data ?? [] })
     }
-    // Code only — Postgres error messages can embed row values (a
-    // unique-violation names the conflicting email address).
-    console.error('[GET /api/admin/crm/prospects]', error.code ?? 'unknown')
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[GET /api/admin/crm/prospects]', error, 'Could not load prospects.') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ prospects: data ?? [] })
@@ -166,7 +167,7 @@ export async function POST(request: Request) {
     .single()
 
   if (error) {
-    console.error('[POST /api/admin/crm/prospects]', error.code ?? 'unknown')
+    logProviderError('[POST /api/admin/crm/prospects]', error)
     // uq_crm_prospects_email (076) — one prospect per email, case-insensitive.
     if (error.code === PG_UNIQUE_VIOLATION) {
       return NextResponse.json(
@@ -174,7 +175,7 @@ export async function POST(request: Request) {
         { status: 409 },
       )
     }
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Could not save that prospect.' }, { status: 500 })
   }
 
   return NextResponse.json({ prospect: data }, { status: 201 })

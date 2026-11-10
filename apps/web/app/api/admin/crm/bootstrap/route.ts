@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { Client } from 'pg'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError, logProviderError } from '@/lib/http/clientError'
 import { adminClient } from '@/lib/supabase/admin'
 import { readFileSync } from 'fs'
 import { join } from 'path'
@@ -33,13 +34,14 @@ export async function GET() {
     })
   }
 
+  logProviderError('[GET /api/admin/crm/bootstrap]', error)
   const msg = String(error.message ?? '')
   if (msg.includes('value_monthly') || msg.includes('next_follow_up')) {
     return NextResponse.json({
       status: 'partial',
       table: 'crm_prospects',
       columns061: false,
-      error: msg,
+      error: 'CRM follow-up columns are missing.',
       hint: 'Run supabase/migrations/061_crm_prospects_value_followup.sql',
     })
   }
@@ -48,7 +50,7 @@ export async function GET() {
     status: 'missing',
     table: 'crm_prospects',
     columns061: false,
-    error: msg,
+    error: 'CRM prospects table is missing.',
     hint: 'Run supabase/migrations/060_crm_prospects.sql then 061_…',
   })
 }
@@ -122,11 +124,10 @@ export async function POST() {
 
     return NextResponse.json({ applied: true, migrations: ['060', '061'] })
   } catch (err) {
-    console.error('[POST /api/admin/crm/bootstrap]', err)
     return NextResponse.json(
       {
         applied: false,
-        error: err instanceof Error ? err.message : String(err),
+        error: clientSafeError('[POST /api/admin/crm/bootstrap]', err, 'Could not apply CRM migrations.'),
         instructions:
           'Apply supabase/migrations/060_crm_prospects.sql and 061_crm_prospects_value_followup.sql in the Supabase SQL Editor.',
       },

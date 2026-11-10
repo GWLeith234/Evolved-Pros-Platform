@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { adminClient } from '@/lib/supabase/admin'
 import { CACHE_TAGS } from '@/lib/cache/shared'
+import { logProviderError } from '@/lib/http/clientError'
 import {
   LIVE_UPCOMING_SETTING_KEY,
   loadUpcomingSpeakingStored,
@@ -19,7 +20,10 @@ async function saveRows(rows: UpcomingDateStored[]) {
     value: JSON.stringify(sorted),
     updated_at: new Date().toISOString(),
   })
-  if (error) throw new Error(error.message)
+  if (error) {
+    logProviderError('[admin/speaking] save', error)
+    throw new Error('Failed to save speaking dates')
+  }
   revalidateTag(CACHE_TAGS.platformSettings)
 }
 

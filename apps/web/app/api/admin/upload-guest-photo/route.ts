@@ -17,6 +17,7 @@ export const runtime = 'nodejs'
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError } from '@/lib/http/clientError'
 
 export async function POST(request: Request) {
   try {
@@ -68,15 +69,18 @@ export async function POST(request: Request) {
       })
 
     if (uploadError) {
-      console.error('[upload-guest-photo] Storage failed:', uploadError.message)
-      return NextResponse.json({ error: `Storage upload failed: ${uploadError.message}` }, { status: 500 })
+      return NextResponse.json(
+        { error: clientSafeError('[upload-guest-photo] Storage failed', uploadError, 'Upload failed.') },
+        { status: 500 },
+      )
     }
 
     const { data: { publicUrl } } = adminClient.storage.from('Branding').getPublicUrl(path)
     return NextResponse.json({ url: publicUrl })
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err)
-    console.error('[upload-guest-photo] Unhandled error:', message)
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[upload-guest-photo] Unhandled error', err, 'Upload failed.') },
+      { status: 500 },
+    )
   }
 }

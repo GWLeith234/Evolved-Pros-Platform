@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { adminClient } from '@/lib/supabase/admin'
 import { CACHE_TAGS } from '@/lib/cache/shared'
+import { logProviderError } from '@/lib/http/clientError'
 import {
   LIVE_SPEAKING_PINS_EXTRA_KEY,
   loadSpeakingPinsExtra,
@@ -18,7 +19,10 @@ async function savePins(pins: SpeakingPinStored[]) {
     value: JSON.stringify(pins),
     updated_at: new Date().toISOString(),
   })
-  if (error) throw new Error(error.message)
+  if (error) {
+    logProviderError('[admin/speaking/pins] save', error)
+    throw new Error('Failed to save pins')
+  }
   revalidateTag(CACHE_TAGS.platformSettings)
 }
 

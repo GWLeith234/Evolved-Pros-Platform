@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { authorizeCronBearer } from '@/lib/cron/authorize'
+import { clientSafeError } from '@/lib/http/clientError'
 
 export async function GET(request: Request) {
   // /api/cron is on middleware PUBLIC_ROUTES, so this handler is the only gate.
@@ -23,8 +24,10 @@ export async function GET(request: Request) {
     .select('id')
 
   if (error) {
-    console.error('[cron/publish-posts]', error.message)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[cron/publish-posts]', error, 'Could not publish scheduled posts.') },
+      { status: 500 },
+    )
   }
 
   const count = (data ?? []).length

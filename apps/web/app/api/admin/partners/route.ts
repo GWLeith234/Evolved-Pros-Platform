@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError, logProviderError } from '@/lib/http/clientError'
 
 const VALID_TYPES = ['sponsor', 'affiliate'] as const
 const VALID_STATUS = ['active', 'paused', 'expired'] as const
@@ -95,8 +96,11 @@ export async function POST(request: Request) {
     .single()
 
   if (error || !row) {
-    console.error('[partners] insert failed:', error?.message)
-    return NextResponse.json({ error: error?.message ?? 'Insert failed' }, { status: 500 })
+    return NextResponse.json({
+      error: error
+        ? clientSafeError('[POST /api/admin/partners]', error, 'Insert failed')
+        : 'Insert failed',
+    }, { status: 500 })
   }
 
   if (surfaces.length > 0) {
@@ -108,7 +112,7 @@ export async function POST(request: Request) {
     }))
     const { error: pErr } = await adminClient.from('sponsor_placements').insert(placementRows as never)
     if (pErr) {
-      console.error('[partners] placement insert failed:', pErr.message)
+      logProviderError('[partners] placement insert failed', pErr)
       // Don't fail the whole create — placements can be added later from the edit page.
     }
   }
