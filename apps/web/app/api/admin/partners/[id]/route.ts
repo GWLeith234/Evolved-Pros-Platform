@@ -110,7 +110,7 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
 
   if (error) {
     return NextResponse.json(
-      { error: clientSafeError('[DELETE /api/admin/partners/[id]]', error, 'Could not update that partner.') },
+      { error: clientSafeError('[DELETE /api/admin/partners/[id]]', error, 'Could not delete that partner.') },
       { status: 500 },
     )
   }

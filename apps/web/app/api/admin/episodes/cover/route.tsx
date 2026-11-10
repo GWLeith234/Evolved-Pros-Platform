@@ -19,6 +19,7 @@ import { ImageResponse } from 'next/og'
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError } from '@/lib/http/clientError'
 import { fetchPublicResource } from '@/lib/http/publicFetch'
 import { PILLAR_CONFIG, getPillarFamily } from '@/lib/pillars'
 
@@ -172,9 +173,10 @@ export async function POST(request: Request) {
       loadGoogleFont('Barlow:wght@500', (guestTitle || ' ') + SAFETY),
     ])
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to load cover assets'
-    console.error('[episodes/cover] asset load error:', message)
-    return NextResponse.json({ error: message }, { status: 502 })
+    return NextResponse.json(
+      { error: clientSafeError('[episodes/cover] asset load', err, 'Failed to load cover assets') },
+      { status: 502 },
+    )
   }
 
   // ---- Render -------------------------------------------------------------
@@ -358,15 +360,21 @@ export async function POST(request: Request) {
       .from('Branding')
       .upload(path, pngBuffer, { contentType: 'image/png', upsert: true })
 
-    if (uploadError) throw new Error(`Storage upload failed: ${uploadError.message}`)
+    if (uploadError) {
+      return NextResponse.json(
+        { error: clientSafeError('[episodes/cover] Storage upload failed', uploadError, 'Failed to save cover') },
+        { status: 500 },
+      )
+    }
 
     const { data: { publicUrl: url } } = adminClient.storage.from('Branding').getPublicUrl(path)
     // Cache-bust so a re-render of the same path shows the new art immediately.
     publicUrl = `${url}?v=${Date.now()}`
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to save cover'
-    console.error('[episodes/cover] render/upload error:', message)
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[episodes/cover] render/upload error', err, 'Failed to save cover') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ url: publicUrl })

@@ -348,7 +348,7 @@ describe('admin and cron routes hide provider error text', () => {
           { params: { id: 'partner-1' } },
         ),
         status: 500,
-        error: 'Could not update that partner.',
+        error: 'Could not delete that partner.',
       },
     ]
 
@@ -598,6 +598,10 @@ describe('admin and cron routes hide provider error text', () => {
   })
 
   it('route sources no longer return a provider message', () => {
+    // guest-portrait, image/generate, and images/generate intentionally return
+    // xAI and sharp text (a local `msg`, `rawBody`, or safeErrorMessage). That
+    // text is not a provider `.message` interpolation. Storage failures on
+    // those routes still have to stay client-safe, so they stay in this scan.
     const files = [
       'app/api/admin/ads/route.ts',
       'app/api/admin/broadcast/count/route.ts',
@@ -606,8 +610,12 @@ describe('admin and cron routes hide provider error text', () => {
       'app/api/admin/crm/prospects/[id]/route.ts',
       'app/api/admin/episodes/route.ts',
       'app/api/admin/episodes/[episodeId]/guest-portrait/publish/route.ts',
+      'app/api/admin/episodes/[episodeId]/guest-portrait/route.ts',
+      'app/api/admin/episodes/cover/route.tsx',
       'app/api/admin/events/route.ts',
       'app/api/admin/events/[id]/route.ts',
+      'app/api/admin/image/generate/route.ts',
+      'app/api/admin/images/generate/route.ts',
       'app/api/admin/images/upload/route.ts',
       'app/api/admin/invite/route.ts',
       'app/api/admin/lessons/route.ts',
