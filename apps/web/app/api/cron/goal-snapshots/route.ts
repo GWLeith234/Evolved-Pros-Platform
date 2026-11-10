@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { authorizeCronBearer } from '@/lib/cron/authorize'
+import { clientSafeError } from '@/lib/http/clientError'
 import { captureWeeklySnapshots } from '@/lib/goals/snapshot'
 import { enqueueWeeklyWigNudges } from '@/lib/notifications/nudges'
 
@@ -35,8 +36,9 @@ export async function GET(request: Request) {
     const weeklyWigNudges = await enqueueWeeklyWigNudges()
     return NextResponse.json({ ok: true, snapshotsWritten, weeklyWigNudges })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Snapshot run failed'
-    console.error('[cron/goal-snapshots] error:', message)
-    return NextResponse.json({ ok: false, error: message }, { status: 500 })
+    return NextResponse.json(
+      { ok: false, error: clientSafeError('[cron/goal-snapshots]', err, 'Snapshot run failed') },
+      { status: 500 },
+    )
   }
 }

@@ -4,6 +4,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { mediaStoryPublicUrl, podcastEpisodePublicUrl, queueIndexNowPing } from '@/lib/seo/indexnow'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError } from '@/lib/http/clientError'
 import { isPillarSlug } from '@/lib/pillars'
 
 function slugify(title: string): string {
@@ -89,7 +90,13 @@ export async function POST(request: Request) {
     .select()
     .single()
 
-  if (error || !data) return NextResponse.json({ error: error?.message ?? 'Failed to create episode' }, { status: 500 })
+  if (error || !data) {
+    return NextResponse.json({
+      error: error
+        ? clientSafeError('[POST /api/admin/episodes]', error, 'Failed to create episode')
+        : 'Failed to create episode',
+    }, { status: 500 })
+  }
 
   // Pinned is single-occupancy: clear every other row in the same write.
   if (pinned) {

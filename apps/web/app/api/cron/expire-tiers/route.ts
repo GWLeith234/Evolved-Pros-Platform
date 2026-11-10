@@ -15,6 +15,7 @@ export const dynamic = 'force-dynamic'
 
 import { adminClient } from '@/lib/supabase/admin'
 import { authorizeCronBearer } from '@/lib/cron/authorize'
+import { clientSafeError } from '@/lib/http/clientError'
 
 export async function GET(request: Request) {
   const gate = authorizeCronBearer(request.headers.get('authorization'), process.env.CRON_SECRET)
@@ -28,8 +29,10 @@ export async function GET(request: Request) {
   }).rpc('downgrade_expired_paid_members')
 
   if (error) {
-    console.error('[Cron] expire-tiers failed:', error.message)
-    return Response.json({ error: error.message }, { status: 500 })
+    return Response.json(
+      { error: clientSafeError('[Cron] expire-tiers failed', error, 'Could not expire tiers.') },
+      { status: 500 },
+    )
   }
 
   const expired = data?.length ?? 0

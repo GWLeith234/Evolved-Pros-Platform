@@ -1,6 +1,7 @@
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError } from '@/lib/http/clientError'
 import { asTranscriptSegments } from '@/lib/academy/transcript'
 import { asKeyTakeaways } from '@/lib/academy/takeaways'
 import { notifyLessonPublished } from '@/lib/notifications/fanout'
@@ -80,7 +81,12 @@ export async function POST(req: Request) {
     .select('*')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/admin/lessons]', error, 'Could not create that lesson.') },
+      { status: 500 },
+    )
+  }
   if (data.is_published) {
     void notifyLessonPublished(data.id)
   }

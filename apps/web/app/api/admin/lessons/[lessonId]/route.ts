@@ -2,6 +2,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { mux } from '@/lib/mux/client'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError } from '@/lib/http/clientError'
 import { asTranscriptSegments } from '@/lib/academy/transcript'
 import { asKeyTakeaways } from '@/lib/academy/takeaways'
 import { notifyLessonPublished } from '@/lib/notifications/fanout'
@@ -95,7 +96,12 @@ export async function PATCH(
     .select('*')
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    return NextResponse.json(
+      { error: clientSafeError('[PATCH /api/admin/lessons/[lessonId]]', error, 'Could not update that lesson.') },
+      { status: 500 },
+    )
+  }
   if (publishing && current && !current.is_published && data.is_published) {
     void notifyLessonPublished(params.lessonId)
   }
@@ -114,6 +120,11 @@ export async function DELETE(
     .delete()
     .eq('id', params.lessonId)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    return NextResponse.json(
+      { error: clientSafeError('[DELETE /api/admin/lessons/[lessonId]]', error, 'Could not delete that lesson.') },
+      { status: 500 },
+    )
+  }
   return NextResponse.json({ deleted: true })
 }

@@ -3,6 +3,7 @@ export const maxDuration = 60
 
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { logProviderError } from '@/lib/http/clientError'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import OpenAI from 'openai'
 import {
@@ -59,7 +60,7 @@ async function persistToStorage(image: Buffer, index: number): Promise<string | 
       .upload(path, image, { contentType: 'image/png', upsert: true })
 
     if (error) {
-      console.error('[images/generate] Storage upload failed:', error.message)
+      logProviderError('[images/generate] Storage upload failed', error)
       return null
     }
 

@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { authorizeCronBearer } from '@/lib/cron/authorize'
+import { clientSafeError } from '@/lib/http/clientError'
 import {
   enqueueDailyProgressNudges,
   enqueueWigNudges,
@@ -38,8 +39,9 @@ export async function GET(request: Request) {
     ])
     return NextResponse.json({ ok: true, wig, daily })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Nudge run failed'
-    console.error('[cron/member-nudges] error:', message)
-    return NextResponse.json({ ok: false, error: message }, { status: 500 })
+    return NextResponse.json(
+      { ok: false, error: clientSafeError('[cron/member-nudges]', err, 'Nudge run failed') },
+      { status: 500 },
+    )
   }
 }

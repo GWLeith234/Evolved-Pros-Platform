@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError, logProviderError } from '@/lib/http/clientError'
 
 const VALID_TYPES = ['sponsor', 'affiliate'] as const
 const VALID_STATUS = ['active', 'paused', 'expired'] as const
@@ -65,8 +66,10 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       .update(update as never)
       .eq('id', params.id)
     if (error) {
-      console.error('[partners] update failed:', error.message)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json(
+        { error: clientSafeError('[PATCH /api/admin/partners/[id]]', error, 'Could not update that partner.') },
+        { status: 500 },
+      )
     }
   }
 
@@ -88,7 +91,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
         weight: 1,
       }))
       const { error: pErr } = await adminClient.from('sponsor_placements').insert(rows as never)
-      if (pErr) console.error('[partners] placement replace failed:', pErr.message)
+      if (pErr) logProviderError('[partners] placement replace failed', pErr)
     }
   }
 
@@ -106,8 +109,10 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
     .eq('id', params.id)
 
   if (error) {
-    console.error('[partners] soft-delete failed:', error.message)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[DELETE /api/admin/partners/[id]]', error, 'Could not update that partner.') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ ok: true })

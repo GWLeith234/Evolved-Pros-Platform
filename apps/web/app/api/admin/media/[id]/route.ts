@@ -1,3 +1,4 @@
+import { clientSafeError } from '@/lib/http/clientError'
 import { mediaStoryPublicUrl, podcastEpisodePublicUrl, queueIndexNowPing } from '@/lib/seo/indexnow'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
@@ -23,7 +24,12 @@ export async function GET(
     .eq('id', params.id)
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 404 })
+  if (error) {
+    return NextResponse.json(
+      { error: clientSafeError('[GET /api/admin/media/[id]]', error, 'Not found') },
+      { status: 404 },
+    )
+  }
   return NextResponse.json(data)
 }
 
@@ -127,6 +133,11 @@ export async function DELETE(
     .delete()
     .eq('id', params.id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    return NextResponse.json(
+      { error: clientSafeError('[DELETE /api/admin/media/[id]]', error, 'Could not delete that story.') },
+      { status: 500 },
+    )
+  }
   return NextResponse.json({ ok: true })
 }

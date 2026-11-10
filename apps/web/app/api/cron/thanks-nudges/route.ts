@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { authorizeCronBearer } from '@/lib/cron/authorize'
+import { clientSafeError } from '@/lib/http/clientError'
 import { enqueueDueThanksNudges } from '@/lib/thanks/enqueue'
 
 /**
@@ -26,8 +27,9 @@ export async function GET(request: Request) {
     const sweep = await enqueueDueThanksNudges()
     return NextResponse.json({ ok: true, ...sweep, sent: 0, autoSend: false })
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Thanks nudge sweep failed'
-    console.error('[cron/thanks-nudges] error:', message)
-    return NextResponse.json({ ok: false, error: message, sent: 0 }, { status: 500 })
+    return NextResponse.json(
+      { ok: false, error: clientSafeError('[cron/thanks-nudges]', err, 'Thanks nudge sweep failed'), sent: 0 },
+      { status: 500 },
+    )
   }
 }

@@ -1,3 +1,4 @@
+import { clientSafeError } from '@/lib/http/clientError'
 import { mediaStoryPublicUrl, podcastEpisodePublicUrl, queueIndexNowPing } from '@/lib/seo/indexnow'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
@@ -19,7 +20,12 @@ export async function GET() {
     .select('id, title, slug, pillar, story_type, is_published, is_featured, published_at, created_at')
     .order('created_at', { ascending: false })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    return NextResponse.json(
+      { error: clientSafeError('[GET /api/admin/media]', error, 'Could not load stories.') },
+      { status: 500 },
+    )
+  }
   return NextResponse.json(data ?? [])
 }
 

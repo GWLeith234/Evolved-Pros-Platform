@@ -12,6 +12,7 @@ import {
   resolveXaiImageModel,
   safeErrorMessage,
 } from '@/lib/art/xaiImages'
+import { clientSafeError } from '@/lib/http/clientError'
 
 type Style = 'photorealistic' | 'cinematic' | 'dark editorial'
 
@@ -86,9 +87,10 @@ export async function POST(request: Request) {
   try {
     publicUrl = await uploadBufferToBranding(image)
   } catch (err) {
-    const message = safeErrorMessage(err)
-    console.error('[image/generate] storage error:', message)
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[image/generate] storage', err, 'Upload failed.') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ url: publicUrl })

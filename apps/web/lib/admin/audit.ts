@@ -1,5 +1,6 @@
 import { adminClient } from '@/lib/supabase/admin'
 import type { Json } from '@evolved-pros/db'
+import { logProviderError } from '@/lib/http/clientError'
 
 /**
  * Log an admin action to the audit trail.
@@ -20,6 +21,6 @@ export function logAdminAction(opts: {
       details:        (opts.details ?? null) as Json,
     })
     .then(({ error }) => {
-      if (error) console.error('[AuditLog] Failed to write:', error.message)
+      if (error) logProviderError('[AuditLog] Failed to write', error)
     })
 }

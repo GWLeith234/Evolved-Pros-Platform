@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError } from '@/lib/http/clientError'
 
 export async function GET() {
   const auth = await requireAdminApi()
@@ -58,7 +59,13 @@ export async function POST(request: Request) {
       .select()
       .single()
 
-    if (error || !data) return NextResponse.json({ error: error?.message ?? 'Failed to create ad' }, { status: 500 })
+    if (error || !data) {
+      return NextResponse.json({
+        error: error
+          ? clientSafeError('[POST /api/admin/ads]', error, 'Failed to create ad')
+          : 'Failed to create ad',
+      }, { status: 500 })
+    }
     const { revalidateTag } = await import('next/cache')
     const { CACHE_TAGS } = await import('@/lib/cache/shared')
     revalidateTag(CACHE_TAGS.platformAds)

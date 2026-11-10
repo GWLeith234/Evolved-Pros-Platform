@@ -1,4 +1,5 @@
 import 'server-only'
+import { logProviderError } from '@/lib/http/clientError'
 import { adminClient } from '@/lib/supabase/admin'
 import { notifyDailyProgress, notifyWigNudge } from '@/lib/notifications/create'
 import {
@@ -33,7 +34,7 @@ export async function listActiveMemberIds(): Promise<string[]> {
     .neq('role', MEMBER_ALERT_EXCLUDED_ROLE)
 
   if (error) {
-    console.error('[notifications/nudges] list members', error)
+    logProviderError('[notifications/nudges] list members', error)
     return []
   }
   return (data ?? []).map(u => u.id)
@@ -50,7 +51,7 @@ async function loadGoalForUser(userId: string): Promise<GoalRow | null> {
     .limit(5)
 
   if (error) {
-    console.error('[notifications/nudges] load goal', error)
+    logProviderError('[notifications/nudges] load goal', error)
     return null
   }
   const live = (data ?? []).filter(row => {
@@ -70,7 +71,7 @@ async function loadActiveGoalsByUser(): Promise<Map<string, GoalRow>> {
     .eq('is_active', true)
 
   if (error) {
-    console.error('[notifications/nudges] load goals', error)
+    logProviderError('[notifications/nudges] load goals', error)
     return new Map()
   }
 
@@ -227,6 +228,6 @@ export async function enqueueSessionNudges(userId: string, now: Date = new Date(
       maybeNudgeDailyForUser(userId, now),
     ])
   } catch (err) {
-    console.error('[notifications/nudges] session', err)
+    logProviderError('[notifications/nudges] session', err)
   }
 }

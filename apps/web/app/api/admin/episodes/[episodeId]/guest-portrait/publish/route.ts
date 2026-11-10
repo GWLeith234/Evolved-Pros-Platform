@@ -17,6 +17,7 @@ export const runtime = 'nodejs'
 import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
+import { clientSafeError } from '@/lib/http/clientError'
 
 // POST /api/admin/episodes/[episodeId]/guest-portrait/publish
 // Copies the chosen candidate to the canonical Branding/ep<NN>-<slug>.jpg,
@@ -73,7 +74,10 @@ export async function POST(
     .from('Branding')
     .upload(finalPath, buffer, { contentType: 'image/jpeg', upsert: true })
   if (upErr) {
-    return NextResponse.json({ error: `Publish upload failed: ${upErr.message}` }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[guest-portrait/publish] upload', upErr, 'Publish upload failed.') },
+      { status: 500 },
+    )
   }
   const {
     data: { publicUrl },
@@ -89,7 +93,7 @@ export async function POST(
     .eq('id', episodeId)
   if (updErr) {
     return NextResponse.json(
-      { error: `Could not set guest_image_url: ${updErr.message}` },
+      { error: clientSafeError('[guest-portrait/publish] episode update', updErr, 'Could not set guest image.') },
       { status: 500 },
     )
   }
