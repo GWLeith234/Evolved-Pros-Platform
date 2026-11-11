@@ -15,6 +15,7 @@ import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { clientSafeError } from '@/lib/http/clientError'
+import { ADMIN_IMAGE_MAX_BYTES, validateAdminImageUpload } from '@/lib/storage/adminImageUpload'
 
 export async function POST(request: Request) {
   try {
@@ -31,26 +32,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'file is required' }, { status: 422 })
     }
 
-    const bucket = typeof formData.get('bucket') === 'string'
-      ? (formData.get('bucket') as string)
-      : 'Branding'
-
     const blob = file as Blob
-    const fileName = 'name' in blob && typeof (blob as Record<string, unknown>).name === 'string'
-      ? (blob as Record<string, unknown>).name as string
-      : 'upload.jpg'
-    const ext = fileName.split('.').pop()?.toLowerCase() || 'jpg'
-    const folder = typeof formData.get('folder') === 'string'
-      ? (formData.get('folder') as string)
-      : 'uploads'
-    const path = `${folder}/${Date.now()}.${ext}`
+    const bucketField = formData.get('bucket')
+    const folderField = formData.get('folder')
+    const withinCap = blob.size > 0 && blob.size <= ADMIN_IMAGE_MAX_BYTES
+    const bytes = withinCap ? Buffer.from(await blob.arrayBuffer()) : null
 
-    const arrayBuffer = await blob.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
+    const decision = validateAdminImageUpload({
+      bucket: typeof bucketField === 'string' ? bucketField : null,
+      folder: typeof folderField === 'string' ? folderField : null,
+      declaredType: blob.type,
+      byteLength: bytes ? bytes.length : blob.size,
+      bytes,
+    })
+    if (!decision.ok || !bytes) {
+      return NextResponse.json(
+        { error: decision.ok ? 'Unsupported image type.' : decision.error },
+        { status: decision.ok ? 415 : decision.status },
+      )
+    }
 
     const { error: uploadError } = await adminClient.storage
-      .from(bucket)
-      .upload(path, buffer, { contentType: blob.type || 'image/jpeg', upsert: true })
+      .from(decision.bucket)
+      .upload(decision.path, bytes, {
+        contentType: decision.contentType,
+        upsert: false,
+      })
 
     if (uploadError) {
       return NextResponse.json(
@@ -59,7 +66,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const { data: { publicUrl } } = adminClient.storage.from(bucket).getPublicUrl(path)
+    const { data: { publicUrl } } = adminClient.storage.from(decision.bucket).getPublicUrl(decision.path)
     return NextResponse.json({ url: publicUrl })
   } catch (err) {
     return NextResponse.json(
