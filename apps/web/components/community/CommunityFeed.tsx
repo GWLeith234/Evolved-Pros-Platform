@@ -21,6 +21,7 @@ interface CommunityFeedProps {
     id: string
     displayName: string | null
     avatarUrl: string | null
+    isAdmin?: boolean
   }
 }
 

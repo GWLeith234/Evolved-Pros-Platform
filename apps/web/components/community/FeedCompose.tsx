@@ -40,7 +40,7 @@ const POST_TABS: { type: PostType; icon: string; label: string; placeholder: str
   { type: 'update',   icon: '✏️', label: 'Update',   placeholder: "Share what you're working on or applying..." },
   { type: 'question', icon: '❓', label: 'Question',  placeholder: 'Ask the community something...' },
   { type: 'win',      icon: '🏆', label: 'Win',       placeholder: 'Share a win — closed a deal, hit a target, had a breakthrough...' },
-  { type: 'poll',     icon: '📊', label: 'Poll',      placeholder: 'Ask a poll question...' },
+  { type: 'poll',     icon: '📊', label: 'Poll',      placeholder: 'Ask a poll question...', adminOnly: true },
   { type: 'announce', icon: '📣', label: 'Announce',  placeholder: 'Post an announcement to the community...', adminOnly: true },
 ]
 
@@ -74,12 +74,12 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
     { isEmpty: isDraftEmpty },
   )
 
-  const isPoll = activePostType === 'poll'
+  const visibleTabs = POST_TABS.filter(t => !t.adminOnly || currentUser.isAdmin)
+  const activeType = visibleTabs.some(tab => tab.type === activePostType) ? activePostType : 'update'
+  const isPoll = activeType === 'poll'
   const hasContent = isPoll ? body.trim().length > 0 && pollOptions.filter(o => o.trim()).length >= 2 : body.trim().length > 0
   const avatarBg = getAvatarColor(currentUser.id)
-  const activePlaceholder = POST_TABS.find(t => t.type === activePostType)?.placeholder ?? "What's on your mind?"
-
-  const visibleTabs = POST_TABS.filter(t => !t.adminOnly || currentUser.isAdmin)
+  const activePlaceholder = visibleTabs.find(t => t.type === activeType)?.placeholder ?? "What's on your mind?"
 
   async function handleSubmit() {
     const trimmed = body.trim()
@@ -126,7 +126,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
           channelId,
           body: trimmed,
           pillarTag: selectedTag,
-          postType: activePostType,
+          postType: activeType,
           ...(pollId ? { pollId } : {}),
         }),
       })
