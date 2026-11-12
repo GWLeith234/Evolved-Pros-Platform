@@ -28,6 +28,7 @@ interface CommunityLayoutProps {
     id: string
     displayName: string | null
     avatarUrl: string | null
+    isAdmin?: boolean
   }
   unreadCounts: Record<string, number>
 }

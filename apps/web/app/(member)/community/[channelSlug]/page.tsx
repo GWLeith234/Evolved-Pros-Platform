@@ -119,6 +119,7 @@ export default async function ChannelPage({
         id: user.id,
         displayName: profile?.display_name ?? profile?.full_name ?? null,
         avatarUrl: profile?.avatar_url ?? null,
+        isAdmin: profile?.role === 'admin',
       }}
       unreadCounts={{}}
     />

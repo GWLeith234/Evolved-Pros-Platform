@@ -34,9 +34,11 @@ const IMAGE = { name: 'shot.png', type: 'image/png', size: 1024 } as unknown as 
 const REJECTION = 'That image is 10.6 MB. Images must be 10.0 MB or smaller.'
 
 describe('composer type sheet', () => {
-  it('offers Update, Question, Win, and Poll after Post', () => {
+  it('offers Update, Question, Win, and Poll after Post, with Poll admin-only', () => {
     expect(COMPOSER_TYPES.map(t => t.kind)).toEqual(['update', 'question', 'win', 'poll'])
     expect(COMPOSER_TYPES.map(t => t.label)).toEqual(['Update', 'Question', 'Win', 'Poll'])
+    expect(COMPOSER_TYPES.find(t => t.kind === 'poll')?.adminOnly).toBe(true)
+    expect(COMPOSER_TYPES.filter(t => t.kind !== 'poll').every(t => !t.adminOnly)).toBe(true)
   })
 
   it('keeps placeholders free of em dashes', () => {

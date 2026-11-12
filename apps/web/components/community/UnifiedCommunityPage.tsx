@@ -331,6 +331,7 @@ export function UnifiedCommunityPage({
           <div id="community-composer" style={{ scrollMarginTop: 88 }}>
           <Composer
             channelId={defaultChannelId}
+            isAdmin={currentUser.isAdmin}
             currentUser={{
               displayName: currentUser.displayName ?? '',
               initials: getInitials(currentUser.displayName),

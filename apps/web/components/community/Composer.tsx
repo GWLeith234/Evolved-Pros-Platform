@@ -5,7 +5,7 @@ import { PILLAR_CONFIG } from '@/lib/pillar-colors'
 import { MediaAttachControl } from './MediaAttachControl'
 import {
   canSubmitPost,
-  COMPOSER_TYPES,
+  visibleComposerTypes,
   type ComposerKind,
   type ComposerPhase,
 } from '@/lib/community/composer'
@@ -30,6 +30,8 @@ interface ComposerProps {
   /** Test / deep-link hook. Shipped /community starts on the Post CTA. */
   initialPhase?: ComposerPhase
   initialKind?: ComposerKind
+  /** From the server profile role. Missing means not an admin. */
+  isAdmin?: boolean
 }
 
 // AI returns canonical pillar slugs ('mental') — map to the composer's
@@ -57,9 +59,13 @@ export function Composer({
   onPostCreated,
   initialPhase = 'cta',
   initialKind = 'update',
+  isAdmin = false,
 }: ComposerProps) {
+  const visibleTypes = visibleComposerTypes(isAdmin)
   const [phase, setPhase] = useState<ComposerPhase>(initialPhase)
-  const [activeKind, setActiveKind] = useState<ComposerKind>(initialKind)
+  const [activeKind, setActiveKind] = useState<ComposerKind>(
+    visibleTypes.some(type => type.kind === initialKind) ? initialKind : 'update',
+  )
   const [body, setBody] = useState('')
   const [selectedPillar, setSelectedPillar] = useState<Pillar | null>(null)
   const [pollOptions, setPollOptions] = useState<string[]>(['', ''])
@@ -121,7 +127,7 @@ export function Composer({
     }
   }
 
-  const activeTab = COMPOSER_TYPES.find(t => t.kind === activeKind) ?? COMPOSER_TYPES[0]
+  const activeTab = visibleTypes.find(t => t.kind === activeKind) ?? visibleTypes[0]
   const validPollOptionCount = pollOptions.filter(o => o.trim().length > 0).length
   // An image on its own is a valid post on the non-poll tabs; a standing
   // media rejection blocks the submit rather than silently posting text-only.
@@ -273,7 +279,7 @@ export function Composer({
               gap: 8,
             }}
           >
-            {COMPOSER_TYPES.map(type => (
+            {visibleTypes.map(type => (
               <button
                 key={type.kind}
                 type="button"

@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { getAvatarColor } from '@/lib/community/types'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
-import { clearDraft, loadDraft, useDraftAutosave } from '@/hooks/useDraft'
+import { clearDraft, loadDraft, saveDraft, useDraftAutosave } from '@/hooks/useDraft'
 import type { Post, PillarTag, PostType } from '@/lib/community/types'
 
 interface ComposeDraft {
@@ -40,7 +40,7 @@ const POST_TABS: { type: PostType; icon: string; label: string; placeholder: str
   { type: 'update',   icon: '✏️', label: 'Update',   placeholder: "Share what you're working on or applying..." },
   { type: 'question', icon: '❓', label: 'Question',  placeholder: 'Ask the community something...' },
   { type: 'win',      icon: '🏆', label: 'Win',       placeholder: 'Share a win — closed a deal, hit a target, had a breakthrough...' },
-  { type: 'poll',     icon: '📊', label: 'Poll',      placeholder: 'Ask a poll question...' },
+  { type: 'poll',     icon: '📊', label: 'Poll',      placeholder: 'Ask a poll question...', adminOnly: true },
   { type: 'announce', icon: '📣', label: 'Announce',  placeholder: 'Post an announcement to the community...', adminOnly: true },
 ]
 
@@ -50,6 +50,19 @@ const PILLAR_TAGS = Object.entries(PILLAR_CONFIG).map(([num, config]) => ({
   color: config.color,
 }))
 
+function settleStoredDraft(key: string, isAdmin: boolean): ComposeDraft | null {
+  const loaded = loadDraft<ComposeDraft>(key)
+  if (!loaded || isAdmin || loaded.activePostType !== 'poll') return loaded
+  const settled: ComposeDraft = {
+    ...loaded,
+    activePostType: 'update',
+    pollOptions: ['', ''],
+    pollClosesAt: '',
+  }
+  saveDraft(key, settled)
+  return settled
+}
+
 function getInitials(name: string | null | undefined): string {
   if (!name) return '?'
   return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
@@ -57,7 +70,10 @@ function getInitials(name: string | null | undefined): string {
 
 export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedComposeProps) {
   const draftKey = `community:compose:${channelId}`
-  const initial = useMemo(() => loadDraft<ComposeDraft>(draftKey), [draftKey])
+  const initial = useMemo(
+    () => settleStoredDraft(draftKey, Boolean(currentUser.isAdmin)),
+    [draftKey, currentUser.isAdmin],
+  )
   const [body, setBody] = useState<string>(initial?.body ?? '')
   const [selectedTag, setSelectedTag] = useState<PillarTag | null>(initial?.selectedTag ?? null)
   const [activePostType, setActivePostType] = useState<PostType>(initial?.activePostType ?? 'update')
@@ -74,12 +90,12 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
     { isEmpty: isDraftEmpty },
   )
 
-  const isPoll = activePostType === 'poll'
+  const visibleTabs = POST_TABS.filter(t => !t.adminOnly || currentUser.isAdmin)
+  const activeType = visibleTabs.some(tab => tab.type === activePostType) ? activePostType : 'update'
+  const isPoll = activeType === 'poll'
   const hasContent = isPoll ? body.trim().length > 0 && pollOptions.filter(o => o.trim()).length >= 2 : body.trim().length > 0
   const avatarBg = getAvatarColor(currentUser.id)
-  const activePlaceholder = POST_TABS.find(t => t.type === activePostType)?.placeholder ?? "What's on your mind?"
-
-  const visibleTabs = POST_TABS.filter(t => !t.adminOnly || currentUser.isAdmin)
+  const activePlaceholder = visibleTabs.find(t => t.type === activeType)?.placeholder ?? "What's on your mind?"
 
   async function handleSubmit() {
     const trimmed = body.trim()
@@ -126,7 +142,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
           channelId,
           body: trimmed,
           pillarTag: selectedTag,
-          postType: activePostType,
+          postType: activeType,
           ...(pollId ? { pollId } : {}),
         }),
       })
@@ -163,7 +179,7 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
       {/* Post type tabs */}
       <div className="flex flex-wrap gap-1 mb-3 pr-4 sm:flex-nowrap sm:pr-0">
         {visibleTabs.map(tab => {
-          const active = activePostType === tab.type
+          const active = activeType === tab.type
           return (
             <button
               key={tab.type}
