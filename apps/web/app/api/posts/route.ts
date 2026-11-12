@@ -3,6 +3,7 @@ import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { toPostMedia } from '@/lib/community/media'
 import { acceptedPostType, communityPostInsert } from '@/lib/community/postInsert'
+import { acceptedCallerPoll, postPollInsert, postPollOptionRows } from '@/lib/community/postPoll'
 import type { Post } from '@/lib/community/types'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { logProviderError } from '@/lib/http/clientError'
@@ -232,11 +233,31 @@ export async function POST(request: Request) {
 
   const authorId = profile.id
 
-  // Poll creation: when kind === 'poll' and the composer sent options,
-  // create the poll + poll_options rows first so we can attach the
-  // resulting poll_id to the post insert below.
-  let resolvedPollId: string | null = pollId
-  if (kind === 'poll' && !resolvedPollId && pollOptions) {
+  // kind=poll creates a polls row through the service-role client. That row
+  // defaults to context "media" and would replace the public sidebar poll.
+  // Members do not get that path. Admins publish an explicit community poll.
+  if (kind === 'poll' && !isAdmin) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  // An attached pollId must be this caller's community poll. A media poll,
+  // or anyone else's poll, is refused before the post is written.
+  let resolvedPollId: string | null = null
+  if (pollId) {
+    const { data: existing, error: lookupErr } = await adminClient
+      .from('polls')
+      .select('id, created_by, context')
+      .eq('id', pollId)
+      .maybeSingle()
+    if (lookupErr) {
+      logProviderError('[posts] poll lookup failed', lookupErr)
+      return NextResponse.json({ error: 'Failed to create post' }, { status: 500 })
+    }
+    if (!acceptedCallerPoll(existing, profile.id)) {
+      return NextResponse.json({ error: 'Invalid poll' }, { status: 422 })
+    }
+    resolvedPollId = pollId
+  } else if (kind === 'poll' && pollOptions) {
     if (pollOptions.length < 2) {
       return NextResponse.json({ error: 'Polls need at least 2 options' }, { status: 422 })
     }
@@ -244,12 +265,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Polls support at most 4 options' }, { status: 422 })
     }
 
+    const poll = postPollInsert(postBody)
     const { data: pollRow, error: pollErr } = await adminClient
       .from('polls')
       .insert({
-        question: postBody.slice(0, 500),
+        question: poll.question,
+        context: poll.context,
         created_by: profile.id,
-        status: 'active',
+        status: poll.status,
       } as never)
       .select('id')
       .single()
@@ -260,12 +283,9 @@ export async function POST(request: Request) {
     }
 
     const newPollId = (pollRow as { id: string }).id
-    const optionRows = pollOptions.map((text, idx) => ({
-      poll_id: newPollId,
-      option_text: text.slice(0, 200),
-      display_order: idx,
-    }))
-    const { error: optsErr } = await adminClient.from('poll_options').insert(optionRows as never)
+    const { error: optsErr } = await adminClient
+      .from('poll_options')
+      .insert(postPollOptionRows(newPollId, pollOptions) as never)
     if (optsErr) {
       logProviderError('[posts] poll_options insert failed', optsErr)
       return NextResponse.json({ error: 'Failed to create poll options' }, { status: 500 })

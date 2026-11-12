@@ -27,9 +27,9 @@ describe('community Post CTA + type sheet', () => {
     expect(html).not.toMatch(/\u2014|\u2013/)
   })
 
-  it('places Update, Question, Win, and Poll on the type sheet after Post', () => {
+  it('places Update, Question, Win, and Poll on the type sheet for an admin', () => {
     const html = renderToStaticMarkup(
-      <Composer currentUser={COMPOSER_USER} channelId="channel-1" initialPhase="sheet" />,
+      <Composer currentUser={COMPOSER_USER} channelId="channel-1" initialPhase="sheet" isAdmin />,
     )
     expect(html).toContain('What are you posting?')
     expect(html).toContain('role="dialog"')
@@ -38,6 +38,16 @@ describe('community Post CTA + type sheet', () => {
     }
     expect(html).not.toContain('role="tablist"')
     expect(html).not.toMatch(/\u2014|\u2013/)
+  })
+
+  it('hides Poll on the type sheet for a non-admin', () => {
+    const html = renderToStaticMarkup(
+      <Composer currentUser={COMPOSER_USER} channelId="channel-1" initialPhase="sheet" />,
+    )
+    expect(html).toContain('>Update<')
+    expect(html).toContain('>Question<')
+    expect(html).toContain('>Win<')
+    expect(html).not.toContain('>Poll<')
   })
 
   it('opens the compose fields after a type is chosen', () => {

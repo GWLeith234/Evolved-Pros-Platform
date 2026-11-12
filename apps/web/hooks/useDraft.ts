@@ -26,6 +26,16 @@ export function clearDraft(key: string): void {
   }
 }
 
+/** Replace a draft immediately. Used when a saved Poll must fall back to Update. */
+export function saveDraft<T>(key: string, value: T): void {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(PREFIX + key, JSON.stringify(value))
+  } catch {
+    /* quota / private-mode — just give up */
+  }
+}
+
 interface UseDraftAutosaveOptions<T> {
   /** When true, the entry is removed from storage instead of written. */
   isEmpty?: (value: T) => boolean

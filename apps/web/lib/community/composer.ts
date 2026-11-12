@@ -27,6 +27,8 @@ export const COMPOSER_TYPES: ReadonlyArray<{
   kind: ComposerKind
   label: string
   placeholder: string
+  /** Poll matches the channel composer: only an admin sees it. */
+  adminOnly?: boolean
 }> = [
   {
     kind: 'update',
@@ -47,8 +49,14 @@ export const COMPOSER_TYPES: ReadonlyArray<{
     kind: 'poll',
     label: 'Poll',
     placeholder: 'Ask a poll question...',
+    adminOnly: true,
   },
 ]
+
+/** Types shown after Post. Poll stays off the sheet unless the viewer is an admin. */
+export function visibleComposerTypes(isAdmin: boolean) {
+  return COMPOSER_TYPES.filter(type => !type.adminOnly || isAdmin)
+}
 
 export interface CanSubmitPostInput {
   body: string
