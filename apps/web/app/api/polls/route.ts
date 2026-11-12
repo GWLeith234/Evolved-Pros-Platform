@@ -2,45 +2,42 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { memberPollWrite } from '@/lib/polls/memberPoll'
 
 export async function POST(request: Request) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  let body: { question?: unknown; options?: unknown; context?: unknown; closes_at?: unknown }
+  let body: Record<string, unknown>
   try {
-    body = await request.json()
+    body = await request.json() as Record<string, unknown>
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const question = typeof body.question === 'string' ? body.question.trim() : ''
-  const options = Array.isArray(body.options) ? body.options.filter((o): o is string => typeof o === 'string' && o.trim().length > 0).map(o => o.trim()) : []
-  const context = typeof body.context === 'string' ? body.context : 'community'
-  const closesAt = typeof body.closes_at === 'string' ? body.closes_at : null
+  const parsed = memberPollWrite(body)
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: parsed.status })
+  }
+  const { poll } = parsed
 
-  if (!question || question.length > 200) return NextResponse.json({ error: 'Question is required (max 200 chars)' }, { status: 422 })
-  if (options.length < 2 || options.length > 6) return NextResponse.json({ error: '2-6 options required' }, { status: 422 })
-
-  // Create poll
-  const { data: poll, error: pollErr } = await supabase
+  const { data, error: pollErr } = await supabase
     .from('polls')
     .insert({
-      question,
-      context,
+      question: poll.question,
+      context: poll.context,
       created_by: user.id,
-      status: 'active',
-      closes_at: closesAt,
+      status: poll.status,
+      closes_at: poll.closesAt,
     })
     .select()
     .single()
 
-  if (pollErr || !poll) return NextResponse.json({ error: 'Failed to create poll' }, { status: 500 })
+  if (pollErr || !data) return NextResponse.json({ error: 'Failed to create poll' }, { status: 500 })
 
-  // Create options
-  const optionRows = options.map((text, i) => ({
-    poll_id: poll.id,
+  const optionRows = poll.options.map((text, i) => ({
+    poll_id: data.id,
     option_text: text,
     display_order: i,
   }))
@@ -51,5 +48,5 @@ export async function POST(request: Request) {
 
   if (optErr) return NextResponse.json({ error: 'Failed to create options' }, { status: 500 })
 
-  return NextResponse.json({ poll }, { status: 201 })
+  return NextResponse.json({ poll: data }, { status: 201 })
 }
