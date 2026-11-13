@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { getAvatarColor } from '@/lib/community/types'
 import { PILLAR_CONFIG } from '@/lib/pillar-colors'
@@ -50,17 +50,22 @@ const PILLAR_TAGS = Object.entries(PILLAR_CONFIG).map(([num, config]) => ({
   color: config.color,
 }))
 
-function settleStoredDraft(key: string, isAdmin: boolean): ComposeDraft | null {
-  const loaded = loadDraft<ComposeDraft>(key)
+function settledComposeDraft(loaded: ComposeDraft | null, isAdmin: boolean): ComposeDraft | null {
   if (!loaded || isAdmin || loaded.activePostType !== 'poll') return loaded
-  const settled: ComposeDraft = {
+  return {
     ...loaded,
     activePostType: 'update',
     pollOptions: ['', ''],
     pollClosesAt: '',
   }
+}
+
+/** Persist a non-admin Poll draft as Update. Called from an effect, not render. */
+export function commitSettledComposeDraft(key: string, isAdmin: boolean): void {
+  const loaded = loadDraft<ComposeDraft>(key)
+  const settled = settledComposeDraft(loaded, isAdmin)
+  if (!settled || settled === loaded) return
   saveDraft(key, settled)
-  return settled
 }
 
 function getInitials(name: string | null | undefined): string {
@@ -70,9 +75,10 @@ function getInitials(name: string | null | undefined): string {
 
 export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedComposeProps) {
   const draftKey = `community:compose:${channelId}`
+  const isAdmin = Boolean(currentUser.isAdmin)
   const initial = useMemo(
-    () => settleStoredDraft(draftKey, Boolean(currentUser.isAdmin)),
-    [draftKey, currentUser.isAdmin],
+    () => settledComposeDraft(loadDraft<ComposeDraft>(draftKey), isAdmin),
+    [draftKey, isAdmin],
   )
   const [body, setBody] = useState<string>(initial?.body ?? '')
   const [selectedTag, setSelectedTag] = useState<PillarTag | null>(initial?.selectedTag ?? null)
@@ -89,6 +95,10 @@ export function FeedCompose({ channelId, currentUser, onPostCreated }: FeedCompo
     { body, selectedTag, activePostType, pollOptions, pollClosesAt },
     { isEmpty: isDraftEmpty },
   )
+
+  useEffect(() => {
+    commitSettledComposeDraft(draftKey, isAdmin)
+  }, [draftKey, isAdmin])
 
   const visibleTabs = POST_TABS.filter(t => !t.adminOnly || currentUser.isAdmin)
   const activeType = visibleTabs.some(tab => tab.type === activePostType) ? activePostType : 'update'

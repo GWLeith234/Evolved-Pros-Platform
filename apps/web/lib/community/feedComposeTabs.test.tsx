@@ -1,6 +1,9 @@
+import { readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it, vi } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { FeedCompose } from '@/components/community/FeedCompose'
+import { FeedCompose, commitSettledComposeDraft } from '@/components/community/FeedCompose'
 
 const CHANNEL_ID = 'channel-1'
 
@@ -71,6 +74,10 @@ describe('FeedCompose post tabs', () => {
       const question = buttonHtml(html, 'Question')
       expect(update).toContain('#1b3c5a')
       expect(question).not.toContain('#1b3c5a')
+      const duringRender = JSON.parse(store.get(key) ?? '{}') as { activePostType: string; pollOptions: string[] }
+      expect(duringRender.activePostType).toBe('poll')
+      expect(duringRender.pollOptions).toEqual(['Morning', 'Evening'])
+      commitSettledComposeDraft('community:compose:channel-1', false)
       const saved = JSON.parse(store.get(key) ?? '{}') as {
         body: string
         activePostType: string
@@ -82,6 +89,9 @@ describe('FeedCompose post tabs', () => {
       expect(saved.pollOptions).toEqual(['', ''])
       expect(saved.pollClosesAt).toBe('')
       expect(JSON.stringify(saved)).not.toContain('Morning')
+      const source = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../../components/community/FeedCompose.tsx'), 'utf8')
+      expect(source).toMatch(/useEffect\(\(\) => \{\s*commitSettledComposeDraft\(draftKey, isAdmin\)/)
+      expect(source).not.toMatch(/useMemo\([\s\S]*saveDraft/)
     } finally {
       vi.unstubAllGlobals()
     }

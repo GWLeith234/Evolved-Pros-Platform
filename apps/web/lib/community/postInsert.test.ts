@@ -102,6 +102,27 @@ describe('communityPostInsert', () => {
     expect(row.pillar).toBe(4)
     expect(row.poll_id).toBe('poll-from-this-request')
   })
+
+  it('does not store post_type poll when the resolved kind is an update', () => {
+    const row = communityPostInsert(
+      { postType: 'poll', poll_id: OTHER },
+      {
+        authorId: MEMBER,
+        channelId: 'channel-1',
+        body: 'A normal update from a member account.',
+        pillarTag: null,
+        kind: 'update',
+        pillar: null,
+        pollId: null,
+        isAdmin: false,
+      },
+    )
+
+    expect(acceptedPostType('poll', false)).toBe('poll')
+    expect(row.post_type).toBe('update')
+    expect(row.kind).toBe('update')
+    expect(row).not.toHaveProperty('poll_id')
+  })
 })
 
 describe('POST /api/posts wiring', () => {

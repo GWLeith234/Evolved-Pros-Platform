@@ -160,8 +160,10 @@ describe('POST /api/posts poll creation', () => {
     ])
     expect(Object.keys((options as Array<Record<string, unknown>>)[0])).toEqual([...POST_POLL_OPTION_KEYS])
 
-    const post = state.inserts.find(entry => entry.table === 'posts')?.row as { poll_id?: string }
+    const post = state.inserts.find(entry => entry.table === 'posts')?.row as { poll_id?: string; post_type?: string; kind?: string }
     expect(post.poll_id).toBe(NEW_POLL)
+    expect(post.kind).toBe('poll')
+    expect(post.post_type).toBe('poll')
   })
 })
 
@@ -217,5 +219,53 @@ describe('POST /api/posts pollId', () => {
     const post = state.inserts.find(entry => entry.table === 'posts')?.row as { poll_id?: string }
     expect(post.poll_id).toBe(OWN_POLL)
     expect(state.inserts.some(entry => entry.table === 'polls')).toBe(false)
+  })
+})
+
+describe('POST /api/posts member update', () => {
+  beforeEach(() => {
+    state.profile = { id: MEMBER, role: 'member' }
+    state.polls = []
+    state.inserts = []
+    state.rpcCalls = 0
+  })
+
+  it('stores a normal update with a non-poll post_type', async () => {
+    const res = await call({
+      channelId: CHANNEL,
+      body: 'Sharing a normal update with the community.',
+      postType: 'update',
+    })
+
+    expect(res.status).toBe(201)
+    const post = state.inserts.find(entry => entry.table === 'posts')?.row as {
+      post_type?: string
+      kind?: string
+      author_id?: string
+      poll_id?: string
+    }
+    expect(post).toMatchObject({
+      author_id: MEMBER,
+      post_type: 'update',
+      kind: 'update',
+    })
+    expect(post.poll_id).toBeUndefined()
+    expect(state.inserts.map(entry => entry.table)).toEqual(['posts'])
+    expect(await res.json()).toMatchObject({ postType: 'update' })
+  })
+
+  it('keeps an update that also sends postType poll stored as update', async () => {
+    const res = await call({
+      channelId: CHANNEL,
+      body: 'This update is not a poll.',
+      kind: 'update',
+      postType: 'poll',
+    })
+
+    expect(res.status).toBe(201)
+    const post = state.inserts.find(entry => entry.table === 'posts')?.row as { post_type?: string; kind?: string }
+    expect(post).toMatchObject({ post_type: 'update', kind: 'update' })
+    expect(state.inserts.some(entry => entry.table === 'polls')).toBe(false)
+    expect(await res.json()).toMatchObject({ postType: 'update' })
   })
 })
