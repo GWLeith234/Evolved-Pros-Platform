@@ -2,18 +2,17 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { logProviderError } from '@/lib/http/clientError'
 import { pollIsOpen } from '@/lib/polls/vote'
 
 export async function POST(request: Request) {
   const supabase = createClient()
-  const profile = await resolveCurrentUser(supabase)
-  if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // The voter is the session profile. increment_poll_vote() writes auth.uid()
-  // itself. A user_id on the body is never read.
-  const userId = profile.id
+  // increment_poll_vote() writes auth.uid(). The existing-vote lookup uses
+  // that same session id. A user_id on the body is never read.
+  const userId = user.id
 
   let body: { poll_id?: unknown; option_id?: unknown }
   try {
