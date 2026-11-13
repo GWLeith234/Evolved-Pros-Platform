@@ -10,6 +10,7 @@
  * formats them.
  */
 
+import { SALES_BURNOUT, SALES_COACHING, SALES_QUOTA } from '@/lib/answers/pages'
 import { ABOUT_DESCRIPTION, ABOUT_TITLE } from '@/lib/about/copy'
 import { EXTENSION_PRIVACY_DESCRIPTION, EXTENSION_PRIVACY_TITLE } from '@/lib/legal/extensionPrivacy'
 import { FIT_PAGE_DESCRIPTION, FIT_PAGE_TITLE } from '@/lib/fit/copy'
@@ -124,6 +125,9 @@ const STATIC_PAGE_COPY: Record<PublicSitemapPath, { title: string; description: 
     title: EXTENSION_PRIVACY_TITLE,
     description: EXTENSION_PRIVACY_DESCRIPTION,
   },
+  '/sales-coaching': { title: SALES_COACHING.title, description: SALES_COACHING.description },
+  '/sales-quota': { title: SALES_QUOTA.title, description: SALES_QUOTA.description },
+  '/sales-burnout': { title: SALES_BURNOUT.title, description: SALES_BURNOUT.description },
 }
 
 function hubListing(name: string, description: string): { title: string; description: string } {
