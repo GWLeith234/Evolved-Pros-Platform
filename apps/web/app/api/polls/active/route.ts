@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic'
 
 import { adminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
-import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
@@ -40,24 +39,21 @@ export async function GET(request: Request) {
   }
   const totalVotes = votes?.length ?? 0
 
-  // Server-side source of truth for "has THIS user voted, and for what".
-  // This page is public (logged-out visitors can view it), so the lookup is
-  // optional: only resolved for an authenticated caller, null otherwise —
-  // the client falls back to localStorage in that case.
+  // Counts above use the service-role client, so they still include every
+  // row after poll_votes SELECT is limited to the caller. "Your vote" is
+  // keyed on the session auth id, the same id increment_poll_vote() writes.
+  // Logged-out visitors get null and the client falls back to localStorage.
   let userVoteOptionId: string | null = null
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (user) {
-    const profile = await resolveCurrentUser(supabase)
-    if (profile) {
-      const { data: myVote } = await adminClient
-        .from('poll_votes')
-        .select('option_id')
-        .eq('poll_id', poll.id)
-        .eq('user_id', profile.id)
-        .maybeSingle()
-      userVoteOptionId = myVote?.option_id ?? null
-    }
+    const { data: myVote } = await adminClient
+      .from('poll_votes')
+      .select('option_id')
+      .eq('poll_id', poll.id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    userVoteOptionId = myVote?.option_id ?? null
   }
 
   return NextResponse.json({ poll, voteCounts, totalVotes, userVoteOptionId })

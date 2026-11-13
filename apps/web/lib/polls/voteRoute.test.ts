@@ -24,6 +24,7 @@ type VoteRow = { poll_id: string; option_id: string; user_id: string }
 type ProviderError = { code: string; message: string; details: string; hint: string }
 
 const state = vi.hoisted(() => ({
+  authUser: null as { id: string } | null,
   profile: null as { id: string } | null,
   poll: null as PollRow | null,
   option: null as OptionRow | null,
@@ -61,6 +62,9 @@ function builder(table: string) {
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: () => ({
+    auth: {
+      getUser: async () => ({ data: { user: state.authUser }, error: null }),
+    },
     from: (table: string) => builder(table),
     rpc: async (name: string, args: Record<string, unknown>) => {
       state.rpc.push({ name, args })
@@ -77,6 +81,10 @@ import { POST } from '@/app/api/polls/vote/route'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const routeSource = readFileSync(resolve(here, '../../app/api/polls/vote/route.ts'), 'utf8')
+const voteWriterSource = readFileSync(
+  resolve(here, '../../../../supabase/migrations/109_lock_down_poll_votes.sql'),
+  'utf8',
+)
 
 function openPoll(over: Partial<PollRow> = {}): PollRow {
   return { id: POLL_ID, status: 'active', closes_at: null, ...over }
@@ -107,7 +115,9 @@ describe('POST /api/polls/vote', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(NOW)
-    state.profile = { id: SESSION_USER }
+    state.authUser = { id: SESSION_USER }
+    // A different public.users.id. The lookup must ignore it.
+    state.profile = { id: OTHER_USER }
     state.poll = openPoll()
     state.option = { id: OPTION_ID, poll_id: POLL_ID }
     state.votes = []
@@ -201,8 +211,44 @@ describe('POST /api/polls/vote', () => {
     expect(state.rpc).toEqual([{ name: 'increment_poll_vote', args: { p_option_id: OPTION_ID } }])
     expect(JSON.stringify(state.rpc)).not.toContain(OTHER_USER)
     expect(routeSource).not.toMatch(/body\.user_id/)
-    expect(routeSource).toContain('const userId = profile.id')
+    expect(routeSource).toContain('const userId = user.id')
+    expect(routeSource).not.toContain('profile.id')
+    expect(routeSource).not.toContain('resolveCurrentUser')
     expect(routeSource).not.toMatch(/\.insert\(/)
+  })
+
+  it('looks up the existing vote with the auth user id increment_poll_vote writes', async () => {
+    state.authUser = { id: SESSION_USER }
+    state.profile = { id: OTHER_USER }
+    state.votes = [
+      { poll_id: POLL_ID, option_id: OTHER_OPTION_ID, user_id: OTHER_USER },
+      { poll_id: POLL_ID, option_id: OPTION_ID, user_id: SESSION_USER },
+    ]
+
+    const same = await call({ poll_id: POLL_ID, option_id: OPTION_ID })
+    expect(same.status).toBe(200)
+    expect(await same.json()).toEqual({ ok: true, optionId: OPTION_ID, status: 'unchanged' })
+    expect(state.rpc).toEqual([])
+    expect(state.filters).toContainEqual({ table: 'poll_votes', column: 'user_id', value: SESSION_USER })
+    expect(state.filters.filter(filter => filter.table === 'poll_votes' && filter.column === 'user_id'))
+      .toEqual([{ table: 'poll_votes', column: 'user_id', value: SESSION_USER }])
+
+    // A row stored under a separate public.users.id is not this caller's vote.
+    state.votes = [{ poll_id: POLL_ID, option_id: OPTION_ID, user_id: OTHER_USER }]
+    state.filters = []
+    state.rpc = []
+    const first = await call({ poll_id: POLL_ID, option_id: OPTION_ID })
+    expect(first.status).toBe(200)
+    expect(await first.json()).toEqual({ ok: true, optionId: OPTION_ID, status: 'voted' })
+    expect(state.rpc).toEqual([{ name: 'increment_poll_vote', args: { p_option_id: OPTION_ID } }])
+    expect(JSON.stringify(state.rpc)).not.toContain(SESSION_USER)
+    expect(JSON.stringify(state.rpc)).not.toContain(OTHER_USER)
+    expect(state.filters).toContainEqual({ table: 'poll_votes', column: 'user_id', value: SESSION_USER })
+
+    expect(routeSource).toContain('supabase.auth.getUser()')
+    expect(routeSource).toContain('const userId = user.id')
+    expect(voteWriterSource).toContain('v_user_id uuid := auth.uid()')
+    expect(voteWriterSource).toContain('values (v_poll_id, p_option_id, v_user_id)')
   })
 
   it('logs provider failures through logProviderError and hides them from the client', async () => {
@@ -248,7 +294,8 @@ describe('POST /api/polls/vote', () => {
   })
 
   it('refuses a caller with no session', async () => {
-    state.profile = null
+    state.authUser = null
+    state.profile = { id: OTHER_USER }
     const res = await call({ poll_id: POLL_ID, option_id: OPTION_ID, user_id: OTHER_USER })
     expect(res.status).toBe(401)
     expect(state.rpc).toEqual([])
