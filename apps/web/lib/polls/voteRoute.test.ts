@@ -21,6 +21,8 @@ type PollRow = { id: string; status: string | null; closes_at: string | null }
 type OptionRow = { id: string; poll_id: string | null }
 type VoteRow = { poll_id: string; option_id: string; user_id: string }
 
+type ProviderError = { code: string; message: string; details: string; hint: string }
+
 const state = vi.hoisted(() => ({
   profile: null as { id: string } | null,
   poll: null as PollRow | null,
@@ -28,6 +30,7 @@ const state = vi.hoisted(() => ({
   votes: [] as VoteRow[],
   filters: [] as Array<{ table: string; column: string; value: unknown }>,
   rpc: [] as Array<{ name: string; args: Record<string, unknown> }>,
+  errors: {} as Record<string, ProviderError | null>,
 }))
 
 function builder(table: string) {
@@ -41,6 +44,8 @@ function builder(table: string) {
     return api
   }
   api.maybeSingle = async () => {
+    const failure = state.errors[table]
+    if (failure) return { data: null, error: failure }
     if (table === 'polls') return { data: state.poll, error: null }
     if (table === 'poll_options') return { data: state.option, error: null }
     if (table === 'poll_votes') {
@@ -59,7 +64,7 @@ vi.mock('@/lib/supabase/server', () => ({
     from: (table: string) => builder(table),
     rpc: async (name: string, args: Record<string, unknown>) => {
       state.rpc.push({ name, args })
-      return { error: null }
+      return { error: state.errors.rpc ?? null }
     },
   }),
 }))
@@ -108,6 +113,7 @@ describe('POST /api/polls/vote', () => {
     state.votes = []
     state.filters = []
     state.rpc = []
+    state.errors = {}
   })
 
   afterEach(() => {
@@ -197,6 +203,48 @@ describe('POST /api/polls/vote', () => {
     expect(routeSource).not.toMatch(/body\.user_id/)
     expect(routeSource).toContain('const userId = profile.id')
     expect(routeSource).not.toMatch(/\.insert\(/)
+  })
+
+  it('logs provider failures through logProviderError and hides them from the client', async () => {
+    const leak: ProviderError = {
+      code: '42501',
+      message: 'permission denied for table poll_votes',
+      details: 'email secret@example.com',
+      hint: 'See public.poll_votes',
+    }
+    const cases = [
+      ['polls', '[POST /api/polls/vote] poll lookup failed'],
+      ['poll_options', '[POST /api/polls/vote] option lookup failed'],
+      ['poll_votes', '[POST /api/polls/vote] existing vote lookup failed'],
+      ['rpc', '[POST /api/polls/vote] increment_poll_vote failed'],
+    ] as const
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      for (const [table, label] of cases) {
+        state.errors = { [table]: leak }
+        state.rpc = []
+        spy.mockClear()
+        const res = await call({ poll_id: POLL_ID, option_id: OPTION_ID })
+        const body = await res.json()
+        expect(res.status).toBe(500)
+        expect(body).toEqual({ error: 'Failed to vote' })
+        expect(JSON.stringify(body)).not.toContain('secret@example.com')
+        expect(JSON.stringify(body)).not.toContain('42501')
+        expect(JSON.stringify(body)).not.toContain('poll_votes')
+        const logged = JSON.stringify(spy.mock.calls)
+        expect(logged).toContain(label)
+        expect(logged).toContain('[redacted-email]')
+        expect(logged).toContain('42501')
+        expect(logged).not.toContain('secret@example.com')
+        if (table === 'rpc') {
+          expect(state.rpc).toEqual([{ name: 'increment_poll_vote', args: { p_option_id: OPTION_ID } }])
+        } else {
+          expect(state.rpc).toEqual([])
+        }
+      }
+    } finally {
+      spy.mockRestore()
+    }
   })
 
   it('refuses a caller with no session', async () => {

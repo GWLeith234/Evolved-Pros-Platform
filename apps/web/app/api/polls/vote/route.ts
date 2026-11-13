@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { logProviderError } from '@/lib/http/clientError'
 import { pollIsOpen } from '@/lib/polls/vote'
 
 export async function POST(request: Request) {
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
     .maybeSingle()
 
   if (pollError) {
-    console.error('[POST /api/polls/vote] poll lookup failed', { pollId, pollError })
+    logProviderError('[POST /api/polls/vote] poll lookup failed', pollError)
     return NextResponse.json({ error: 'Failed to vote' }, { status: 500 })
   }
 
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
     .maybeSingle()
 
   if (optionError) {
-    console.error('[POST /api/polls/vote] option lookup failed', { pollId, optionId, optionError })
+    logProviderError('[POST /api/polls/vote] option lookup failed', optionError)
     return NextResponse.json({ error: 'Failed to vote' }, { status: 500 })
   }
 
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
     .maybeSingle()
 
   if (existingError) {
-    console.error('[POST /api/polls/vote] existing vote lookup failed', { pollId, existingError })
+    logProviderError('[POST /api/polls/vote] existing vote lookup failed', existingError)
     return NextResponse.json({ error: 'Failed to vote' }, { status: 500 })
   }
 
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
   // your vote on a poll work correctly. The session client does not insert.
   const { error: rpcError } = await supabase.rpc('increment_poll_vote', { p_option_id: optionId })
   if (rpcError) {
-    console.error('[POST /api/polls/vote] increment_poll_vote failed', { pollId, optionId, rpcError })
+    logProviderError('[POST /api/polls/vote] increment_poll_vote failed', rpcError)
     return NextResponse.json({ error: 'Failed to vote' }, { status: 500 })
   }
 

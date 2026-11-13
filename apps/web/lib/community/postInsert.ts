@@ -39,7 +39,11 @@ export type CommunityPostInsert = {
   poll_id?: string
 }
 
-/** post_type a caller may set. 'announce' is admin-only. */
+/**
+ * post_type a caller may name. 'announce' is admin-only. 'poll' is accepted
+ * so the route can recognize a poll request, and communityPostInsert stores
+ * it only when the resolved kind is poll.
+ */
 export function acceptedPostType(value: unknown, isAdmin: boolean): string | null {
   if (typeof value !== 'string') return null
   if ((MEMBER_POST_TYPES as readonly string[]).includes(value)) return value
@@ -49,8 +53,8 @@ export function acceptedPostType(value: unknown, isAdmin: boolean): string | nul
 
 /**
  * The exact row written to posts. `raw` is the request JSON; only postType
- * is read from it, and only when it is on the caller's allowlist. Denied
- * columns on `raw` are ignored.
+ * is read from it, and only when it is on the caller's allowlist. post_type
+ * poll is stored only when kind is poll. Denied columns on `raw` are ignored.
  */
 export function communityPostInsert(
   raw: Record<string, unknown>,
@@ -65,13 +69,16 @@ export function communityPostInsert(
     isAdmin: boolean
   },
 ): CommunityPostInsert {
-  const postType = acceptedPostType(raw.postType, ctx.isAdmin)
+  const requested = acceptedPostType(raw.postType, ctx.isAdmin)
+  // An update, win, or question can also send postType 'poll'. kind is
+  // already resolved, so that request must not be stored as a poll.
+  const postType = requested === 'poll' && ctx.kind !== 'poll' ? ctx.kind : (requested ?? ctx.kind)
   const row: CommunityPostInsert = {
     author_id: ctx.authorId,
     channel_id: ctx.channelId,
     body: ctx.body,
     pillar_tag: ctx.pillarTag,
-    post_type: postType ?? ctx.kind,
+    post_type: postType,
     kind: ctx.kind,
     pillar: ctx.pillar,
   }
