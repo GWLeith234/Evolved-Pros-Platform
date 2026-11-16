@@ -2,9 +2,9 @@
 
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { memberOwnedBrandingPath, memberUploadBody } from '@/lib/storage/memberBrandingPath'
 
 interface Props {
-  userId: string
   onContinue: () => void
 }
 
@@ -34,7 +34,7 @@ const labelStyle: React.CSSProperties = {
   marginBottom: '6px',
 }
 
-export function OnboardingProfile({ userId, onContinue }: Props) {
+export function OnboardingProfile({ onContinue }: Props) {
   const [avatarUrl, setAvatarUrl]       = useState<string | null>(null)
   const [uploading, setUploading]       = useState(false)
   const [uploadError, setUploadError]   = useState<string | null>(null)
@@ -56,14 +56,22 @@ export function OnboardingProfile({ userId, onContinue }: Props) {
     setAvatarUrl(preview)
 
     const supabase = createClient()
-    const path = `avatars/${userId}-${Date.now()}.jpg`
-    const { error } = await supabase.storage.from('Branding').upload(path, file, { upsert: true, contentType: file.type })
+    const { data: { user } } = await supabase.auth.getUser()
+    const owned = user
+      ? memberOwnedBrandingPath('avatars', user.id, Date.now(), file.type)
+      : null
+    if (!owned) {
+      setUploadError(user ? 'Use a JPEG, PNG, WebP, or GIF.' : 'Upload failed — you can add a photo in Settings later.')
+      setUploading(false)
+      return
+    }
+    const { error } = await supabase.storage.from('Branding').upload(owned.path, memberUploadBody(file, owned.contentType), { upsert: true, contentType: owned.contentType })
     if (error) {
       setUploadError('Upload failed — you can add a photo in Settings later.')
       setUploading(false)
       return
     }
-    const { data: { publicUrl } } = supabase.storage.from('Branding').getPublicUrl(path)
+    const { data: { publicUrl } } = supabase.storage.from('Branding').getPublicUrl(owned.path)
     setAvatarUrl(publicUrl)
 
     await fetch('/api/onboarding/profile', {

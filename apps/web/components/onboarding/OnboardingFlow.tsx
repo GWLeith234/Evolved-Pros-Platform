@@ -19,7 +19,6 @@ import { ConfettiBlast } from '@/components/ui/ConfettiBlast'
 
 interface Props {
   initialStep: number
-  userId: string
   displayName: string
   company: string
 }
@@ -32,7 +31,7 @@ const STEP_CELEBRATIONS: Record<number, { colors: string[]; message: string }> =
 
 const ALL_PILLAR_COLORS = ['#FFA538', '#A78BFA', '#F87171', '#60A5FA', '#C9A84C', '#0ABFA3']
 
-export function OnboardingFlow({ initialStep, userId, displayName }: Props) {
+export function OnboardingFlow({ initialStep, displayName }: Props) {
   // Map legacy step 5 (old complete) / 4 (old post) onto the new 4-step path
   const normalized = Math.min(Math.max(1, initialStep > 4 ? 4 : initialStep), TOTAL_STEPS)
   const [currentStep, setCurrentStep] = useState(normalized)
@@ -189,7 +188,7 @@ export function OnboardingFlow({ initialStep, userId, displayName }: Props) {
         )}
 
         {currentStep === 1 && <OnboardingWelcome displayName={displayName} onContinue={advance} />}
-        {currentStep === 2 && <OnboardingProfile userId={userId} onContinue={advance} />}
+        {currentStep === 2 && <OnboardingProfile onContinue={advance} />}
         {currentStep === 3 && <OnboardingPillar onContinue={handlePillarContinue} />}
         {currentStep === 4 && <OnboardingComplete displayName={displayName} />}
       </div>

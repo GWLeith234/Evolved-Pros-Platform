@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Modal } from '@/components/ui/Modal'
+import { memberOwnedBrandingPath, memberUploadBody } from '@/lib/storage/memberBrandingPath'
 
 interface Banner {
   id: string
@@ -13,17 +14,17 @@ interface Banner {
 }
 
 interface BannerPickerModalProps {
-  userId: string
   userEmail: string
   currentBannerUrl: string | null
   onSave: (url: string) => void
   onClose: () => void
 }
 
-export function BannerPickerModal({ userId, userEmail: _userEmail, currentBannerUrl, onSave, onClose }: BannerPickerModalProps) {
+export function BannerPickerModal({ userEmail: _userEmail, currentBannerUrl, onSave, onClose }: BannerPickerModalProps) {
   const [banners, setBanners] = useState<Banner[]>([])
   const [selected, setSelected] = useState<string | null>(currentBannerUrl)
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -40,18 +41,27 @@ export function BannerPickerModal({ userId, userEmail: _userEmail, currentBanner
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) return
 
     setUploading(true)
+    setUploadError(null)
     try {
       const supabase = createClient()
-      const path = `banners/${userId}/${Date.now()}.jpg`
+      const { data: { user } } = await supabase.auth.getUser()
+      const owned = user
+        ? memberOwnedBrandingPath('banners', user.id, Date.now(), file.type)
+        : null
+      if (!owned) {
+        setUploadError(user ? 'Use a JPEG, PNG, or WebP.' : 'Upload failed. Sign in and try again.')
+        return
+      }
       const { error } = await supabase.storage
         .from('Branding')
-        .upload(path, file, { upsert: true, contentType: file.type })
+        .upload(owned.path, memberUploadBody(file, owned.contentType), { upsert: true, contentType: owned.contentType })
       if (error) throw error
-      const { data } = supabase.storage.from('Branding').getPublicUrl(path)
+      const { data } = supabase.storage.from('Branding').getPublicUrl(owned.path)
       setSelected(data.publicUrl)
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Upload failed.')
     } finally {
       setUploading(false)
     }
@@ -138,6 +148,9 @@ export function BannerPickerModal({ userId, userEmail: _userEmail, currentBanner
               disabled={uploading}
             />
           </label>
+          {uploadError && (
+            <p className="font-body text-[12px] mt-2 text-red-hot">{uploadError}</p>
+          )}
           {selected && !banners.some(b => b.image_url === selected) && (
             <div className="mt-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
