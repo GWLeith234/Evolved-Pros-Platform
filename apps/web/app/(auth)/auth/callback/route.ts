@@ -3,8 +3,8 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
-import { authRedirectBase } from '@/lib/auth/authOrigin'
-import { safeRedirectPath } from '@/lib/auth/safeRedirect'
+import { authCookieOptions } from '@/lib/auth/authCookies'
+import { authRedirectBase, safeAuthNext } from '@/lib/auth/authOrigin'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,21 +13,23 @@ export async function GET(request: Request) {
   const code       = searchParams.get('code')
   const token_hash = searchParams.get('token_hash')
   const type       = searchParams.get('type') as EmailOtpType | null
-  // Sanitize: only same-origin relative paths survive. Now shares ONE
-  // implementation with the login page's guard. The previous inline prefix
-  // test ("startsWith('/') && !startsWith('//')") let '/\evil.com' through,
-  // which browsers normalise to '//evil.com' and resolve off-origin.
-  const next       = safeRedirectPath(searchParams.get('next'))
+  // Relative paths stay. An absolute next is kept only when its host is
+  // evolvedpros.com (then reduced to a path on the canonical origin).
+  // External hosts, protocol-relative URLs, and script schemes become /home.
+  const next       = safeAuthNext(searchParams.get('next'))
 
   // request.url on Railway is the internal address (localhost:8080). The
-  // public host comes from forwarded headers, then an allowlist: brand hosts
-  // collapse to platform, loopback stays local, anything else (a forged
-  // X-Forwarded-Host) falls back to platform so Location cannot leave origin.
+  // public host comes from forwarded headers. Brand hosts and a forged
+  // X-Forwarded-Host become www. Loopback stays local. A preview host is
+  // used only when it matches the configured app URL.
+  const forwardedHost = request.headers.get('x-forwarded-host')
+  const hostHeader = request.headers.get('host')
   const baseUrl = authRedirectBase(
-    request.headers.get('x-forwarded-host'),
+    forwardedHost,
     request.headers.get('x-forwarded-proto'),
-    request.headers.get('host'),
+    hostHeader,
   )
+  const cookieOptions = authCookieOptions(forwardedHost ?? hostHeader)
 
   const cookieStore = cookies()
   const allCookies = cookieStore.getAll()
@@ -38,12 +40,15 @@ export async function GET(request: Request) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      cookieOptions,
       cookies: {
         getAll() {
           return allCookies
         },
         setAll(toSet) {
-          toSet.forEach(c => cookiesToSet.push(c))
+          toSet.forEach(({ name, value, options }) =>
+            cookiesToSet.push({ name, value, options: { ...options, ...cookieOptions } })
+          )
         },
       },
     }
