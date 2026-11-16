@@ -17,12 +17,12 @@
 -- "Branding admin upload" and "Branding admin update" are not
 -- changed. They allow any key in Branding for public.users.role =
 -- 'admin', which covers banners/preset_* and banners/custom_*.
--- Public SELECT policies are not changed.
---
--- file_size_limit is 10MB (10485760). That matches the avatar route
--- and the admin image helper. The largest live image is 6793415 bytes.
--- Objects already stored are not re-checked. The 14104824-byte PDF is
--- outside the mime list, so this ceiling does not have to cover it.
+-- Public reads of Branding are unchanged, because "Branding read public"
+-- (public) and "Branding ndnh7_0" (anon), both on bucket_id = 'Branding',
+-- are kept. Lines 33-34 drop the two dead lowercase 'branding' policies,
+-- "Anyone can view branding files" (SELECT) and "Users can upload their
+-- own banners" (INSERT), which never matched any bucket.
+-- file_size_limit is 10MB (10485760). Largest live image is 6793415 bytes. Stored objects are not re-checked. The 14104824-byte PDF is outside the mime list.
 
 DROP POLICY IF EXISTS "Members can upload avatars and banners" ON storage.objects;
 DROP POLICY IF EXISTS "Members can update their avatar and banner" ON storage.objects;
