@@ -139,9 +139,8 @@ export function MoreDrawer({ open, onClose, role, unreadCount = 0 }: MoreDrawerP
   }, [open, onClose])
 
   async function handleSignOut() {
-    const { createClient } = await import('@/lib/supabase/client')
-    const supabase = createClient()
-    await supabase.auth.signOut()
+    const { signOutBrowser } = await import('@/lib/auth/signOut')
+    await signOutBrowser()
     router.push('/login')
   }
 

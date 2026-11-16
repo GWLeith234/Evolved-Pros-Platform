@@ -8,9 +8,11 @@
  *   Auth, member routes, API (including Stripe, Mux, and Vendasta webhooks),
  *   /media/preview, and PLATFORM_PUBLIC_HELD stay on platform.
  *
- * Production auth cookies use Domain=.evolvedpros.com and the post-login
- * Location is www. Do not add /pricing, /fit, or /live here until CoS says
- * so. Move a held path into PLATFORM_TO_WWW_EXACT_PATHS to start redirecting it.
+ * /login and /auth/callback are not in this table. Middleware 308s those
+ * two paths from platform to www so the response can expire legacy
+ * host-only auth cookies. Do not add /pricing, /fit, or /live here until
+ * CoS says so. Move a held path into PLATFORM_TO_WWW_EXACT_PATHS to start
+ * redirecting it.
  *
  * Same-host aliases (/join, /signup) stay relative so they do not invent a
  * www Location. Do not use a `/:path*` pattern: it would catch /login,
@@ -25,8 +27,8 @@ export const RAILWAY_PUBLIC_HOST = 'web-production-db912.up.railway.app'
 /**
  * Public paths that stay on platform.evolvedpros.com until a CoS decision.
  *
- * These stay on platform until a CoS decision, even though production auth
- * cookies are now parent-domain and would survive a hop to www:
+ * These stay on platform until a CoS decision. Auth cookies are host-only
+ * on www, so a hop here would not carry the session:
  *   /pricing: PricingCtaButton posts to a relative /api/stripe/checkout.
  *   /fit: reads the viewer tier from the session.
  *   /live: held with them for the same CoS decision.

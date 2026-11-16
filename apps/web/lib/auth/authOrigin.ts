@@ -6,10 +6,9 @@
  * brand host to platform.evolvedpros.com. The emailed link landed there,
  * Set-Cookie was host-only, and www.evolvedpros.com never received the session.
  *
- * www and platform both serve this Railway app. The member who clicks a
- * magic link should finish on https://www.evolvedpros.com. Production
- * cookies use Domain=.evolvedpros.com (lib/auth/authCookies.ts) so a click
- * that still arrives on platform is visible on www after the redirect.
+ * www.evolvedpros.com is the only sign-in host. Auth cookies are host-only.
+ * A click that still arrives on platform.evolvedpros.com is a 308 to the
+ * same path on www. The session is then stored only for www.
  *
  * Brand hosts and the public production Railway host canonicalize to www.
  * Loopback stays itself so `next dev` works. A configured preview origin

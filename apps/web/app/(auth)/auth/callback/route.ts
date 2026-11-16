@@ -3,7 +3,12 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import type { Database } from '@evolved-pros/db'
-import { authCookieOptions } from '@/lib/auth/authCookies'
+import {
+  authCookieOptions,
+  expireStaleAuthCookies,
+  omitCookieDomain,
+  serializeClearedAuthCookie,
+} from '@/lib/auth/authCookies'
 import { authRedirectBase, safeAuthNext } from '@/lib/auth/authOrigin'
 
 export const dynamic = 'force-dynamic'
@@ -47,7 +52,11 @@ export async function GET(request: Request) {
         },
         setAll(toSet) {
           toSet.forEach(({ name, value, options }) =>
-            cookiesToSet.push({ name, value, options: { ...options, ...cookieOptions } })
+            cookiesToSet.push({
+              name,
+              value,
+              options: { ...omitCookieDomain(options), ...cookieOptions },
+            })
           )
         },
       },
@@ -59,9 +68,25 @@ export async function GET(request: Request) {
   function buildRedirect(destination: string | URL) {
     const url = destination instanceof URL ? destination : new URL(destination, baseUrl)
     const res = NextResponse.redirect(url)
-    cookiesToSet.forEach(({ name, value, options }) =>
-      res.cookies.set(name, value, options as Parameters<typeof res.cookies.set>[2])
-    )
+    const freshNames: string[] = []
+    cookiesToSet.forEach(({ name, value, options }) => {
+      const live = omitCookieDomain(options)
+      res.cookies.set(name, value, live as Parameters<typeof res.cookies.set>[2])
+      if (value) freshNames.push(name)
+    })
+    // Host-only stale names go through cookies.set. The stray Domain variant
+    // is a second Set-Cookie appended after that, because the cookie map keeps
+    // one entry per name and would otherwise drop the fresh host-only cookie.
+    const stale = expireStaleAuthCookies({
+      presentNames: allCookies.map((cookie) => cookie.name),
+      freshNames,
+    })
+    stale.hostOnly.forEach((cookie) => {
+      res.cookies.set(cookie.name, '', { path: '/', maxAge: 0, sameSite: 'lax', secure: cookieOptions.secure })
+    })
+    stale.domain.forEach((cookie) => {
+      res.headers.append('set-cookie', serializeClearedAuthCookie(cookie, cookieOptions.secure))
+    })
     return res
   }
 

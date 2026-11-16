@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
-import { authCookieOptions } from '@/lib/auth/authCookies'
+import { authCookieOptions, omitCookieDomain, planPlatformSignInHop } from '@/lib/auth/authCookies'
 import { RETURN_PATH_HEADER, loginHrefFor, returnPathFromRequest } from '@/lib/auth/gatedIntent'
 import { isMemberHomeIndex, LOGGED_OUT_MEMBER_HOME_STATUS } from '@/lib/auth/memberHomeGate'
 import { isPublicBrandAsset } from '@/lib/auth/publicAssets'
@@ -93,7 +93,7 @@ async function handleMediaPreview(request: NextRequest) {
             })
             cookiesToSet.forEach(({ name, value, options }) =>
               response.cookies.set(name, value, {
-                ...options,
+                ...omitCookieDomain(options),
                 ...authCookieOptions(host),
               } as any)
             )
@@ -192,6 +192,30 @@ async function mediaSlugFallback(request: NextRequest): Promise<NextResponse | n
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  // www is the only sign-in host. platform /login and /auth/callback 308
+  // there with the query intact, and the response expires legacy host-only
+  // auth cookies (every chunk). www must not hop again.
+  const hop = planPlatformSignInHop({
+    hostHeader: request.headers.get('host'),
+    forwardedHost: request.headers.get('x-forwarded-host'),
+    pathname,
+    search: request.nextUrl.search,
+    cookieNames: request.cookies.getAll().map((cookie) => cookie.name),
+  })
+  if (hop) {
+    const redirect = NextResponse.redirect(hop.location, hop.status)
+    hop.clear.forEach((cookie) => {
+      redirect.cookies.set(cookie.name, '', {
+        path: '/',
+        maxAge: 0,
+        sameSite: 'lax',
+        secure: true,
+      })
+    })
+    return redirect
+  }
+
   if (isMediaPreviewPath(pathname)) {
     return handleMediaPreview(request)
   }
@@ -317,7 +341,10 @@ export async function middleware(request: NextRequest) {
             request: { headers: requestHeaders },
           })
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, { ...options, ...cookieOptions } as any)
+            supabaseResponse.cookies.set(name, value, {
+              ...omitCookieDomain(options),
+              ...cookieOptions,
+            } as any)
           )
         },
       },
@@ -454,6 +481,9 @@ export const config = {
     // Known app routes that require auth checking.
     // Anything not listed here falls through to Next.js naturally,
     // so unknown URLs render not-found.tsx instead of redirecting to /login.
+    // Sign-in hops off platform before any session refresh. Query is kept.
+    '/login',
+    '/auth/callback',
     '/home',
     '/home/:path*',
     '/community',

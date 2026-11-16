@@ -6,7 +6,7 @@
  * app. www is the public indexable origin. platform is the member app.
  * Approved public paths 308 from platform to www (lib/seo/appRedirects.mjs).
  * Auth emails and /auth/callback Locations use https://www.evolvedpros.com.
- * Production auth cookies use Domain=.evolvedpros.com.
+ * Auth cookies are host-only on that host. They do not set Domain.
  *
  * HTML rel=canonical / og:url and public JSON-LD use www via canonicalUrl
  * / CANONICAL_ORIGIN. resolveCanonicalOrigin gates the conversion host:

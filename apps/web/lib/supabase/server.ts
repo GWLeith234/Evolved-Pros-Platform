@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies, headers } from 'next/headers'
 import type { Database } from '@evolved-pros/db'
-import { authCookieOptions } from '@/lib/auth/authCookies'
+import { authCookieOptions, omitCookieDomain } from '@/lib/auth/authCookies'
 
 function requestHost(): string | null {
   try {
@@ -29,7 +29,7 @@ export function createClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, { ...options, ...cookieOptions })
+              cookieStore.set(name, value, { ...omitCookieDomain(options), ...cookieOptions })
             )
           } catch {
             // Called from a Server Component. Middleware refreshes the session.
