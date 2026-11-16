@@ -18,6 +18,7 @@ import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { clientSafeError } from '@/lib/http/clientError'
+import { ADMIN_IMAGE_MAX_BYTES, safeStorageSegment, validateImageBytes } from '@/lib/storage/adminImageUpload'
 
 export async function POST(request: Request) {
   try {
@@ -35,21 +36,31 @@ export async function POST(request: Request) {
     }
 
     const blob = file as Blob
-    const storyId = formData.get('storyId')
-    const idSegment = typeof storyId === 'string' && storyId.trim() ? storyId.trim() : 'new'
-    const timestamp = Date.now()
-    const fileName = 'name' in blob && typeof (blob as Record<string, unknown>).name === 'string'
-      ? (blob as Record<string, unknown>).name as string
-      : 'image.jpg'
-    const ext = fileName.split('.').pop()?.toLowerCase() || 'jpg'
-    const path = `media/${idSegment}-${timestamp}.${ext}`
+    const withinCap = blob.size > 0 && blob.size <= ADMIN_IMAGE_MAX_BYTES
+    const bytes = withinCap ? Buffer.from(await blob.arrayBuffer()) : null
+    const decision = validateImageBytes({
+      declaredType: blob.type,
+      byteLength: bytes ? bytes.length : blob.size,
+      bytes,
+    })
+    if (!decision.ok || !bytes) {
+      return NextResponse.json(
+        { error: decision.ok ? 'Unsupported image type.' : decision.error },
+        { status: decision.ok ? 415 : decision.status },
+      )
+    }
 
-    const arrayBuffer = await blob.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
+    const storyId = formData.get('storyId')
+    const rawId = typeof storyId === 'string' && storyId.trim() ? storyId : 'new'
+    const idSegment = safeStorageSegment(rawId)
+    if (!idSegment) {
+      return NextResponse.json({ error: 'Invalid upload path.' }, { status: 400 })
+    }
+    const path = `media/${idSegment}-${Date.now()}.${decision.ext}`
 
     const { error: uploadError } = await adminClient.storage
       .from('Branding')
-      .upload(path, buffer, { contentType: blob.type || 'image/jpeg', upsert: true })
+      .upload(path, bytes, { contentType: decision.contentType, upsert: true })
 
     if (uploadError) {
       return NextResponse.json(
@@ -66,7 +77,7 @@ export async function POST(request: Request) {
       await (adminClient as any)
         .from('media_stories')
         .update({ featured_image_url: publicUrl })
-        .eq('id', storyId)
+        .eq('id', idSegment)
     }
 
     return NextResponse.json({ url: publicUrl })

@@ -19,13 +19,13 @@ import { adminClient } from '@/lib/supabase/admin'
 import { resolveGuestEngagement } from '@/lib/guest/engagement'
 import { parseGuestToken } from '@/lib/guest/intakePayload'
 import { clientSafeError } from '@/lib/http/clientError'
+import { safeStorageSegment, validateImageBytes } from '@/lib/storage/adminImageUpload'
 
 // POST /api/guest/upload — a guest uploads their headshot during intake.
 // multipart/form-data: { token, file }. Token-gated (the signed token is the
 // credential); stores under Branding/guests/headshot-{engagementId}.{ext} so
 // re-uploads overwrite in place. Returns the public URL for the intake form.
 const MAX_BYTES = 8 * 1024 * 1024
-const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
 
 export async function POST(request: Request) {
   let formData: FormData
@@ -51,24 +51,31 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'file is required' }, { status: 422 })
   }
   const blob = file as Blob
-  if (blob.size > MAX_BYTES) {
-    return NextResponse.json({ error: 'Image too large (max 8MB).' }, { status: 422 })
-  }
-  const contentType = blob.type || 'image/jpeg'
-  if (!ALLOWED.has(contentType)) {
-    return NextResponse.json({ error: 'Unsupported image type.' }, { status: 422 })
+  const withinCap = blob.size > 0 && blob.size <= MAX_BYTES
+  const bytes = withinCap ? Buffer.from(await blob.arrayBuffer()) : null
+  const decision = validateImageBytes({
+    declaredType: blob.type,
+    byteLength: bytes ? bytes.length : blob.size,
+    bytes,
+    maxBytes: MAX_BYTES,
+    tooLargeError: 'Image too large (max 8MB).',
+  })
+  if (!decision.ok || !bytes) {
+    return NextResponse.json(
+      { error: decision.ok ? 'Unsupported image type.' : decision.error },
+      { status: decision.ok ? 415 : decision.status },
+    )
   }
 
-  const ext = contentType === 'image/png' ? 'png'
-    : contentType === 'image/webp' ? 'webp'
-    : contentType === 'image/gif' ? 'gif'
-    : 'jpg'
-  const path = `guests/headshot-${resolved.engagement.engagement_id}.${ext}`
+  const owner = safeStorageSegment(resolved.engagement.engagement_id)
+  if (!owner) {
+    return NextResponse.json({ error: 'Invalid upload path.' }, { status: 400 })
+  }
+  const path = `guests/headshot-${owner}.${decision.ext}`
 
-  const buffer = Buffer.from(await blob.arrayBuffer())
   const { error: uploadError } = await adminClient.storage
     .from('Branding')
-    .upload(path, buffer, { contentType, upsert: true })
+    .upload(path, bytes, { contentType: decision.contentType, upsert: true })
   if (uploadError) {
     return NextResponse.json(
       { error: clientSafeError('[POST /api/guest/upload]', uploadError, 'Upload failed.') },

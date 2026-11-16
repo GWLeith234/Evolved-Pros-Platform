@@ -18,6 +18,7 @@ import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { clientSafeError } from '@/lib/http/clientError'
+import { ADMIN_IMAGE_MAX_BYTES, safeStorageSegment, validateImageBytes } from '@/lib/storage/adminImageUpload'
 
 export async function POST(request: Request) {
   try {
@@ -42,29 +43,39 @@ export async function POST(request: Request) {
     }
 
     const blob = file as Blob
-    const fileName = 'name' in blob && typeof (blob as Record<string, unknown>).name === 'string'
-      ? (blob as Record<string, unknown>).name as string
-      : 'photo.jpg'
-    const ext = fileName.split('.').pop()?.toLowerCase() || 'jpg'
+    const withinCap = blob.size > 0 && blob.size <= ADMIN_IMAGE_MAX_BYTES
+    const bytes = withinCap ? Buffer.from(await blob.arrayBuffer()) : null
+    const decision = validateImageBytes({
+      declaredType: blob.type,
+      byteLength: bytes ? bytes.length : blob.size,
+      bytes,
+    })
+    if (!decision.ok || !bytes) {
+      return NextResponse.json(
+        { error: decision.ok ? 'Unsupported image type.' : decision.error },
+        { status: decision.ok ? 415 : decision.status },
+      )
+    }
 
-    // Canonical path: Branding/episodes/guest-{slug}.jpg. Slug-keyed (not
-    // timestamped) so re-uploads overwrite in place instead of orphaning files.
-    // Falls back to the episode id, then 'new', when no slug is supplied.
+    // Canonical path: Branding/episodes/guest-{slug}.{ext}. Slug-keyed (not
+    // timestamped) so re-uploads overwrite in place. The slug or episode id
+    // has to be one safe segment; the extension comes from the byte signature.
     const slugVal = formData.get('slug')
     const episodeId = formData.get('episodeId')
-    const segment =
-      typeof slugVal === 'string' && slugVal.trim() ? slugVal.trim()
-      : typeof episodeId === 'string' && episodeId.trim() ? episodeId.trim()
+    const rawSegment =
+      typeof slugVal === 'string' && slugVal.trim() ? slugVal
+      : typeof episodeId === 'string' && episodeId.trim() ? episodeId
       : `new-${Date.now()}`
-    const path = `episodes/guest-${segment}.${ext}`
-
-    const arrayBuffer = await blob.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
+    const segment = safeStorageSegment(rawSegment)
+    if (!segment) {
+      return NextResponse.json({ error: 'Invalid upload path.' }, { status: 400 })
+    }
+    const path = `episodes/guest-${segment}.${decision.ext}`
 
     const { error: uploadError } = await adminClient.storage
       .from('Branding')
-      .upload(path, buffer, {
-        contentType: blob.type || 'image/jpeg',
+      .upload(path, bytes, {
+        contentType: decision.contentType,
         upsert: true,
       })
 

@@ -91,6 +91,46 @@ describe('validateAdminImageUpload', () => {
     }
   })
 
+  it('accepts image/jpg and application/octet-stream when the bytes are a jpeg', () => {
+    for (const declaredType of ['image/jpg', 'image/pjpeg', 'image/jpg; charset=binary', 'application/octet-stream']) {
+      const decision = validateAdminImageUpload({
+        bucket: 'Branding',
+        folder: 'uploads',
+        declaredType,
+        byteLength: JPEG.byteLength,
+        bytes: JPEG,
+        now: 7,
+      })
+      expect(decision, declaredType).toEqual({
+        ok: true,
+        bucket: 'Branding',
+        path: 'uploads/7.jpg',
+        contentType: 'image/jpeg',
+      })
+    }
+  })
+
+  it('still refuses octet-stream and image/jpg when the bytes are not a jpeg', () => {
+    for (const declaredType of ['image/jpg', 'application/octet-stream']) {
+      const decision = validateAdminImageUpload({
+        bucket: 'Branding',
+        folder: 'uploads',
+        declaredType,
+        byteLength: HTML.byteLength,
+        bytes: HTML,
+      })
+      expect(decision, declaredType).toEqual({ ok: false, status: 415, error: 'Unsupported image type.' })
+    }
+    const mismatch = validateAdminImageUpload({
+      bucket: 'Branding',
+      folder: 'uploads',
+      declaredType: 'image/jpg',
+      byteLength: PNG.byteLength,
+      bytes: PNG,
+    })
+    expect(mismatch).toEqual({ ok: false, status: 415, error: 'Unsupported image type.' })
+  })
+
   it('accepts a real jpeg when the client omits Content-Type', () => {
     const decision = validateAdminImageUpload({
       bucket: null,
@@ -211,6 +251,21 @@ describe('POST /api/admin/images/upload', () => {
     expect(state.uploads[0].path).toMatch(/^uploads\/\d+\.jpg$/)
     expect(state.uploads[0].path).not.toContain('..')
     expect(body.url).toBe(`https://cdn.example/${state.uploads[0].path}`)
+  })
+
+  it('stores a jpeg labeled image/jpg or application/octet-stream', async () => {
+    for (const type of ['image/jpg', 'application/octet-stream']) {
+      state.uploads = []
+      const { status, body } = await post(form({
+        file: file(JPEG, 'photo.jpg', type),
+        folder: 'uploads',
+      }))
+      expect(status, type).toBe(200)
+      expect(state.uploads, type).toHaveLength(1)
+      expect(state.uploads[0].contentType).toBe('image/jpeg')
+      expect(state.uploads[0].path).toMatch(/^uploads\/\d+\.jpg$/)
+      expect(body.url).toBe(`https://cdn.example/${state.uploads[0].path}`)
+    }
   })
 
   it('refuses an svg upload with 415 and does not write storage', async () => {
