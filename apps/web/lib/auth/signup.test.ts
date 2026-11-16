@@ -47,7 +47,8 @@ describe('validateSignupRequest', () => {
 describe('signupConfirmUrl', () => {
   it('is a token_hash callback, not a PKCE verify URL', () => {
     const url = new URL(signupConfirmUrl('abc.def', '/onboarding'))
-    expect(url.origin).toBe('https://platform.evolvedpros.com')
+    expect(url.origin).toBe('https://www.evolvedpros.com')
+    expect(url.origin).not.toContain('platform.evolvedpros.com')
     expect(url.pathname).toBe('/auth/callback')
     expect(url.searchParams.get('token_hash')).toBe('abc.def')
     expect(url.searchParams.get('type')).toBe('signup')

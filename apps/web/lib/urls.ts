@@ -3,10 +3,12 @@
  *
  * These two env vars are NOT duplicates:
  *
- *   NEXT_PUBLIC_APP_URL  — canonical app origin (Railway MUST set this).
- *                          Auth callbacks, Stripe return URLs, emails, guest
- *                          links. Production value:
- *                          https://platform.evolvedpros.com
+ *   NEXT_PUBLIC_APP_URL  — app origin other callers still read (Stripe return
+ *                          URLs, emails, guest links). Production is often
+ *                          https://platform.evolvedpros.com. Auth redirects do
+ *                          not use this raw value. lib/auth/authOrigin.ts
+ *                          canonicalizes brand hosts to
+ *                          https://www.evolvedpros.com.
  *
  *   NEXT_PUBLIC_SITE_URL — brand / SEO origin for callers that read this env.
  *                          Falls back to APP_URL when unset so a missing

@@ -8,10 +8,9 @@ import {
   upsertThanksProspect,
 } from '@/lib/crm/conversion'
 import { supabaseIntakeDb } from '@/lib/crm/intakeDb'
+import { authCallbackUrl, magicLinkCallbackUrl } from '@/lib/auth/authOrigin'
 import { THANKS_GRANTS_TIER, THANKS_PROMO_CODE, THANKS_TIER_STATUS } from '@/lib/thanks/constants'
 import { decideThanksGrant, type MemberSnapshot } from '@/lib/thanks/eligibility'
-
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://platform.evolvedpros.com'
 
 type ThanksInvite = {
   invite_id: string
@@ -68,7 +67,7 @@ export async function POST(request: Request) {
   const { data: linkData, error: linkErr } = await adminClient.auth.admin.generateLink({
     type: 'magiclink',
     email,
-    options: { redirectTo: `${APP_URL}/auth/callback?next=%2Fhome` },
+    options: { redirectTo: authCallbackUrl('/home') },
   })
   const hashedToken = linkData?.properties?.hashed_token
   if (linkErr || !linkData?.user || !hashedToken) {
@@ -156,7 +155,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const loginUrl = `${APP_URL}/auth/callback?token_hash=${encodeURIComponent(hashedToken)}&type=magiclink&next=${encodeURIComponent('/home')}`
+  const loginUrl = magicLinkCallbackUrl(hashedToken, 'magiclink', '/home')
   return NextResponse.json({
     ok: true,
     tier: THANKS_GRANTS_TIER,

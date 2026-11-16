@@ -131,10 +131,9 @@ export function TopNav({
   }, [])
 
   async function handleSignOut() {
-    // Dynamic import keeps @supabase/client off the TopNav SSR module graph.
-    const { createClient } = await import('@/lib/supabase/client')
-    const supabase = createClient()
-    await supabase.auth.signOut()
+    // Dynamic import keeps the browser Supabase client off the TopNav SSR graph.
+    const { signOutBrowser } = await import('@/lib/auth/signOut')
+    await signOutBrowser()
     window.location.href = '/login'
   }
 

@@ -9,7 +9,7 @@
  *
  * Scope note — this is the ONE definition of a safe return path in this
  * codebase. Both redirect paths call it, for different reasons:
- *   - (auth)/auth/callback — sanitizes ?next= before new URL(next, baseUrl).
+ *   - (auth)/auth/callback — safeAuthNext calls this before new URL(next, baseUrl).
  *     Every LoginForm path funnels through here, which is why LoginForm itself
  *     passes ?redirect= through untouched: one guard, at the choke point.
  *   - (auth)/login/page — its already-signed-in branch calls next/navigation's

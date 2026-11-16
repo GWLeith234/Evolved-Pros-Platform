@@ -1,65 +1,66 @@
 /**
  * Canonical origin for auth emails and /auth/callback redirects.
  *
- * LoginForm used to pass window.location.origin as emailRedirectTo. That is
- * host-scoped: a PKCE verifier cookie set on www is invisible on platform
- * (and the reverse).
+ * LoginForm used to pass window.location.origin as emailRedirectTo. That
+ * followed whichever host the form was on. The helper then pinned every
+ * brand host to platform.evolvedpros.com. The emailed link landed there,
+ * Set-Cookie was host-only, and www.evolvedpros.com never received the session.
  *
- * LIVE host split (2026-09-29, George YES via CoS, sitemap hygiene sprint):
- * www and platform both serve this Railway app. Auth still stays on
- * platform.evolvedpros.com because Supabase cookies are host-scoped there.
- * A magic link whose redirect_to names www would set the session on www,
- * where member routes are not the auth host.
+ * www.evolvedpros.com is the only sign-in host. Auth cookies are host-only.
+ * A click that still arrives on platform.evolvedpros.com is a 308 to the
+ * same path on www. The session is then stored only for www.
  *
- * Brand hosts and the public Railway host canonicalize to platform.
- * Loopback (localhost, 127.0.0.1, ::1) is returned as its own origin so
- * local `next dev` still works. Every other host falls back to platform.
- * /auth/callback builds Location from X-Forwarded-Host, which the client
- * can set; echoing an unlisted host is an open redirect.
+ * Brand hosts and the public production Railway host canonicalize to www.
+ * Loopback stays itself so `next dev` works. A configured preview origin
+ * (Railway or Vercel) stays itself when it is the app URL, not when a
+ * request header names it. /auth/callback must not echo X-Forwarded-Host:
+ * the client can set that header, and an unlisted host is an open redirect.
  */
 
+import { hostnameFromHostHeader, isLoopbackHost, isPreviewHost } from './authCookies'
 import { safeRedirectPath } from './safeRedirect'
 
-export const AUTH_ORIGIN = 'https://platform.evolvedpros.com'
-
-const CANONICALIZE_HOSTS = new Set([
-  'www.evolvedpros.com',
-  'evolvedpros.com',
-  'platform.evolvedpros.com',
-])
-
-/** Origins safe to echo. Anything else must not become a redirect base. */
-const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]'])
+export const AUTH_ORIGIN = 'https://www.evolvedpros.com'
 
 const RAILWAY_PUBLIC_HOST = 'web-production-db912.up.railway.app'
+
+const SCHEME_PAYLOAD = /^[a-zA-Z][a-zA-Z+.-]*:/
 
 function trimOrigin(value: string | undefined | null): string | undefined {
   const trimmed = value?.trim().replace(/\/+$/, '')
   return trimmed ? trimmed : undefined
 }
 
+function parsedHttpUrl(value: string): URL | null {
+  try {
+    const url = new URL(value.includes('://') ? value : `https://${value}`)
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null
+    if (url.username || url.password) return null
+    return url
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Origin for auth emails and the default callback base.
+ *
+ * Brand hosts and the public production Railway host become www.
+ * Loopback and a configured preview host stay themselves. Anything else,
+ * including a lookalike host, becomes www so it cannot be echoed.
+ */
 export function resolveAuthOrigin(
   raw: string | undefined | null = process.env.NEXT_PUBLIC_APP_URL,
   fallback: string | undefined | null = process.env.NEXT_PUBLIC_SITE_URL,
 ): string {
   const value = trimOrigin(raw) ?? trimOrigin(fallback)
   if (!value) return AUTH_ORIGIN
-  try {
-    const url = new URL(value.includes('://') ? value : `https://${value}`)
-    if (url.protocol !== 'http:' && url.protocol !== 'https:') return AUTH_ORIGIN
-    const host = url.hostname.toLowerCase()
-    if (
-      CANONICALIZE_HOSTS.has(host) ||
-      host.endsWith('.evolvedpros.com') ||
-      host.endsWith('.up.railway.app')
-    ) {
-      return AUTH_ORIGIN
-    }
-    if (LOOPBACK_HOSTS.has(host)) return url.origin
-    return AUTH_ORIGIN
-  } catch {
-    return AUTH_ORIGIN
-  }
+  const url = parsedHttpUrl(value)
+  if (!url) return AUTH_ORIGIN
+  const host = url.hostname.toLowerCase()
+  if (host === RAILWAY_PUBLIC_HOST) return AUTH_ORIGIN
+  if (isLoopbackHost(host) || isPreviewHost(host)) return url.origin
+  return AUTH_ORIGIN
 }
 
 function firstHeaderToken(value: string | null): string | undefined {
@@ -72,13 +73,16 @@ function firstHeaderToken(value: string | null): string | undefined {
  *
  * request.url on Railway is the internal address, so the public host comes
  * from forwarded headers. Only the first value of each header is used, and
- * the scheme must be http or https. resolveAuthOrigin then refuses any host
- * that is not a brand host or loopback.
+ * the scheme must be http or https. Brand hosts, the production Railway
+ * host, and any forged host become www. Loopback is echoed so local dev
+ * stays local. A preview host is echoed only when it is the configured app
+ * URL; a request header alone must not choose the Location.
  */
 export function authRedirectBase(
   forwardedHost: string | null,
   forwardedProto: string | null,
   hostHeader: string | null,
+  configuredAppUrl: string | undefined | null = process.env.NEXT_PUBLIC_APP_URL,
 ): string {
   const host =
     firstHeaderToken(forwardedHost) ||
@@ -86,14 +90,50 @@ export function authRedirectBase(
     RAILWAY_PUBLIC_HOST
   const protoToken = firstHeaderToken(forwardedProto)
   const proto = protoToken === 'http' || protoToken === 'https' ? protoToken : 'https'
-  return resolveAuthOrigin(`${proto}://${host}`)
+  const hostname = hostnameFromHostHeader(host)
+  if (hostname && isLoopbackHost(hostname)) {
+    return resolveAuthOrigin(`${proto}://${host}`, null)
+  }
+  if (hostname && isPreviewHost(hostname) && hostname !== RAILWAY_PUBLIC_HOST) {
+    const configured = resolveAuthOrigin(configuredAppUrl, null)
+    try {
+      if (new URL(configured).hostname.toLowerCase() === hostname) return configured
+    } catch {
+      // Configured value was not a URL. Fall through to www.
+    }
+  }
+  return AUTH_ORIGIN
+}
+
+/**
+ * Next path for an auth redirect. Relative paths stay. An absolute URL is
+ * kept only as a path, and only when its host is evolvedpros.com or a
+ * subdomain. External hosts, protocol-relative URLs, and script schemes
+ * become the fallback. The result is always a same-origin path.
+ */
+export function safeAuthNext(raw: unknown, fallback = '/home'): string {
+  if (typeof raw !== 'string') return fallback
+  const value = raw.trim()
+  if (!value) return fallback
+  if (value.startsWith('//') || value.startsWith('\\') || value.startsWith('/\\')) return fallback
+  if (SCHEME_PAYLOAD.test(value) && !/^https?:/i.test(value)) return fallback
+
+  if (/^https?:\/\//i.test(value)) {
+    const url = parsedHttpUrl(value)
+    if (!url) return fallback
+    const host = url.hostname.toLowerCase()
+    if (host !== 'evolvedpros.com' && !host.endsWith('.evolvedpros.com')) return fallback
+    return safeRedirectPath(`${url.pathname}${url.search}${url.hash}`, fallback)
+  }
+
+  return safeRedirectPath(value, fallback)
 }
 
 export function authCallbackUrl(
   next: unknown = '/home',
   origin: string = resolveAuthOrigin(),
 ): string {
-  const path = safeRedirectPath(next)
+  const path = safeAuthNext(next)
   return `${origin}/auth/callback?next=${encodeURIComponent(path)}`
 }
 
@@ -113,7 +153,7 @@ export function magicLinkCallbackUrl(
   const params = new URLSearchParams({
     token_hash: tokenHash,
     type,
-    next: safeRedirectPath(next),
+    next: safeAuthNext(next),
   })
   return `${origin}/auth/callback?${params.toString()}`
 }

@@ -5,7 +5,8 @@
  * www.evolvedpros.com and platform.evolvedpros.com both serve this Railway
  * app. www is the public indexable origin. platform is the member app.
  * Approved public paths 308 from platform to www (lib/seo/appRedirects.mjs).
- * Auth stays on platform because Supabase cookies are host-scoped there.
+ * Auth emails and /auth/callback Locations use https://www.evolvedpros.com.
+ * Auth cookies are host-only on that host. They do not set Domain.
  *
  * HTML rel=canonical / og:url and public JSON-LD use www via canonicalUrl
  * / CANONICAL_ORIGIN. resolveCanonicalOrigin gates the conversion host:

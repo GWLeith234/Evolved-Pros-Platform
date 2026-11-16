@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
+import { authCookieOptions, omitCookieDomain, planPlatformSignInHop } from '@/lib/auth/authCookies'
 import { RETURN_PATH_HEADER, loginHrefFor, returnPathFromRequest } from '@/lib/auth/gatedIntent'
 import { isMemberHomeIndex, LOGGED_OUT_MEMBER_HOME_STATUS } from '@/lib/auth/memberHomeGate'
 import { isPublicBrandAsset } from '@/lib/auth/publicAssets'
@@ -80,6 +81,7 @@ async function handleMediaPreview(request: NextRequest) {
   if (url && anon) {
     try {
       const supabase = createServerClient(url, anon, {
+        cookieOptions: authCookieOptions(host),
         cookies: {
           getAll() {
             return request.cookies.getAll()
@@ -90,7 +92,10 @@ async function handleMediaPreview(request: NextRequest) {
               request: { headers: requestHeaders },
             })
             cookiesToSet.forEach(({ name, value, options }) =>
-              response.cookies.set(name, value, options as any)
+              response.cookies.set(name, value, {
+                ...omitCookieDomain(options),
+                ...authCookieOptions(host),
+              } as any)
             )
           },
         },
@@ -106,6 +111,14 @@ async function handleMediaPreview(request: NextRequest) {
   }
   applyPreviewResponseHeaders(response.headers)
   return response
+}
+
+/** Copy refreshed Supabase cookies onto a response that is not supabaseResponse. */
+function withSessionCookies(from: NextResponse, to: NextResponse): NextResponse {
+  from.cookies.getAll().forEach((cookie) => {
+    to.cookies.set(cookie.name, cookie.value, cookie)
+  })
+  return to
 }
 
 function hasAuthCookie(request: NextRequest): boolean {
@@ -179,6 +192,30 @@ async function mediaSlugFallback(request: NextRequest): Promise<NextResponse | n
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  // www is the only sign-in host. platform /login and /auth/callback 308
+  // there with the query intact, and the response expires legacy host-only
+  // auth cookies (every chunk). www must not hop again.
+  const hop = planPlatformSignInHop({
+    hostHeader: request.headers.get('host'),
+    forwardedHost: request.headers.get('x-forwarded-host'),
+    pathname,
+    search: request.nextUrl.search,
+    cookieNames: request.cookies.getAll().map((cookie) => cookie.name),
+  })
+  if (hop) {
+    const redirect = NextResponse.redirect(hop.location, hop.status)
+    hop.clear.forEach((cookie) => {
+      redirect.cookies.set(cookie.name, '', {
+        path: '/',
+        maxAge: 0,
+        sameSite: 'lax',
+        secure: true,
+      })
+    })
+    return redirect
+  }
+
   if (isMediaPreviewPath(pathname)) {
     return handleMediaPreview(request)
   }
@@ -285,10 +322,13 @@ export async function middleware(request: NextRequest) {
     request: { headers: requestHeaders },
   })
 
+  const cookieOptions = authCookieOptions(host)
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      cookieOptions,
       cookies: {
         getAll() {
           return request.cookies.getAll()
@@ -301,7 +341,10 @@ export async function middleware(request: NextRequest) {
             request: { headers: requestHeaders },
           })
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options as any)
+            supabaseResponse.cookies.set(name, value, {
+              ...omitCookieDomain(options),
+              ...cookieOptions,
+            } as any)
           )
         },
       },
@@ -333,36 +376,30 @@ export async function middleware(request: NextRequest) {
 
   if (!user) {
     if (isWeeklyReportPath(pathname)) {
-      const res = anonymousWeeklyReportResponse(request.url, pathname)
-      supabaseResponse.cookies.getAll().forEach(c => {
-        res.cookies.set(c.name, c.value, c)
-      })
-      return res
+      return withSessionCookies(
+        supabaseResponse,
+        anonymousWeeklyReportResponse(request.url, pathname),
+      )
     }
-    // /api/* paths are programmatic — return JSON 401 instead of a 307 redirect
-    // to /login (which would leak HTML to a fetch() caller).
+    // /api/* paths are programmatic. Return JSON 401 instead of a 307 redirect
+    // to /login (which would leak HTML to a fetch() caller). Still keep any
+    // cookies getUser() wrote, including a cleared stale session.
     if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return withSessionCookies(
+        supabaseResponse,
+        NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
+      )
     }
     // Stale Supabase cookie: getUser() said there is no session. /home still
     // belongs on the public homepage, not on the robots-disallowed login page.
     if (isMemberHomeIndex(pathname)) {
-      const redirect = redirectToPublicHome(request)
-      supabaseResponse.cookies.getAll().forEach(c => {
-        redirect.cookies.set(c.name, c.value, c)
-      })
-      return redirect
+      return withSessionCookies(supabaseResponse, redirectToPublicHome(request))
     }
-    // Carry forward any cookies Supabase wrote during getUser() (e.g. a partial
-    // token-refresh attempt). A bare NextResponse.redirect() drops them, which
-    // can drop the user's session on the very next request — the symptom QA hit
-    // when /home → /podcast or /home → /live unexpectedly bounced to /login.
+    // Carry forward any cookies Supabase wrote during getUser() (a refresh or
+    // a cleared stale session). A bare NextResponse.redirect() drops them,
+    // which drops the session on the next request.
     const url = new URL(loginHrefFor(returnPath), request.url)
-    const redirect = NextResponse.redirect(url)
-    supabaseResponse.cookies.getAll().forEach(c => {
-      redirect.cookies.set(c.name, c.value, c)
-    })
-    return redirect
+    return withSessionCookies(supabaseResponse, NextResponse.redirect(url))
   }
 
   // Onboarding routes: authenticated user is allowed through unconditionally.
@@ -397,9 +434,15 @@ export async function middleware(request: NextRequest) {
     // Admin route guard — JSON 403 for /api/admin/*, redirect for /admin/*
     if (isAdminRoute && profile?.role !== 'admin') {
       if (pathname.startsWith('/api/')) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        return withSessionCookies(
+          supabaseResponse,
+          NextResponse.json({ error: 'Forbidden' }, { status: 403 }),
+        )
       }
-      return NextResponse.redirect(new URL('/home', request.url))
+      return withSessionCookies(
+        supabaseResponse,
+        NextResponse.redirect(new URL('/home', request.url)),
+      )
     }
 
     // Beta gate (SPRINT Q): pause non-admin, non-comped members during the
@@ -412,12 +455,21 @@ export async function middleware(request: NextRequest) {
       profile?.access_status === 'suspended' &&
       !profile?.comp_promo_code_id
     ) {
-      return NextResponse.redirect(new URL('/beta-paused', request.url))
+      return withSessionCookies(
+        supabaseResponse,
+        NextResponse.redirect(new URL('/beta-paused', request.url)),
+      )
     }
 
-    // Onboarding gate: redirect new members to /onboarding until they complete the flow
+    // Onboarding gate: redirect new members to /onboarding until they complete the flow.
+    // This is the first authenticated navigation for a new member. Dropping the
+    // refreshed cookies here invalidates the refresh token and the reload has
+    // no session.
     if (isMemberRoute && !profile?.onboarding_completed) {
-      return NextResponse.redirect(new URL('/onboarding', request.url))
+      return withSessionCookies(
+        supabaseResponse,
+        NextResponse.redirect(new URL('/onboarding', request.url)),
+      )
     }
   }
 
@@ -429,6 +481,9 @@ export const config = {
     // Known app routes that require auth checking.
     // Anything not listed here falls through to Next.js naturally,
     // so unknown URLs render not-found.tsx instead of redirecting to /login.
+    // Sign-in hops off platform before any session refresh. Query is kept.
+    '/login',
+    '/auth/callback',
     '/home',
     '/home/:path*',
     '/community',
