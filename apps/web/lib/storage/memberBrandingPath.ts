@@ -17,8 +17,15 @@ const AUTH_UID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
 
 export function memberImageMime(type: string | null | undefined): MemberImageMime | null {
   const mime = (type ?? '').toLowerCase().split(';')[0].trim()
+  if (mime === 'image/jpg' || mime === 'image/pjpeg') return 'image/jpeg'
   if (mime in EXT_BY_MIME) return mime as MemberImageMime
   return null
+}
+
+/** Storage sends a Blob's own type. image/jpg and image/pjpeg must go out as image/jpeg. */
+export function memberUploadBody(file: Blob, contentType: MemberImageMime): Blob {
+  if (file.type === contentType) return file
+  return new Blob([file], { type: contentType })
 }
 
 export function memberOwnedBrandingPath(

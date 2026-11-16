@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { memberOwnedBrandingPath } from '@/lib/storage/memberBrandingPath'
+import { memberOwnedBrandingPath, memberUploadBody } from '@/lib/storage/memberBrandingPath'
 
 interface Props {
   onContinue: () => void
@@ -65,14 +65,13 @@ export function OnboardingProfile({ onContinue }: Props) {
       setUploading(false)
       return
     }
-    const path = owned.path
-    const { error } = await supabase.storage.from('Branding').upload(path, file, { upsert: true, contentType: owned.contentType })
+    const { error } = await supabase.storage.from('Branding').upload(owned.path, memberUploadBody(file, owned.contentType), { upsert: true, contentType: owned.contentType })
     if (error) {
       setUploadError('Upload failed — you can add a photo in Settings later.')
       setUploading(false)
       return
     }
-    const { data: { publicUrl } } = supabase.storage.from('Branding').getPublicUrl(path)
+    const { data: { publicUrl } } = supabase.storage.from('Branding').getPublicUrl(owned.path)
     setAvatarUrl(publicUrl)
 
     await fetch('/api/onboarding/profile', {

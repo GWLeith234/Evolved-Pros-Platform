@@ -274,10 +274,6 @@ function applies(policy: StoragePolicy, actor: Actor): boolean {
   return policy.roles.includes(actor.role)
 }
 
-function checkExpr(policy: StoragePolicy): string | null {
-  return policy.withCheck ?? policy.using
-}
-
 function commandAllows(
   policies: StoragePolicy[],
   command: 'INSERT' | 'UPDATE',
@@ -287,9 +283,13 @@ function commandAllows(
   return policies.some(policy => {
     if (policy.command !== command && policy.command !== 'ALL') return false
     if (!applies(policy, actor)) return false
-    const expr = checkExpr(policy)
-    if (!expr) return false
-    return evalExpr(expr, objectName, actor)
+    if (command === 'INSERT') {
+      if (!policy.withCheck) return false
+      return evalExpr(policy.withCheck, objectName, actor)
+    }
+    if (!policy.using || !evalExpr(policy.using, objectName, actor)) return false
+    const check = policy.withCheck ?? policy.using
+    return evalExpr(check, objectName, actor)
   })
 }
 
@@ -360,13 +360,17 @@ describe('111_branding_member_own_folder', () => {
       'ads/1.png',
       'logos/logo_dark.png',
     ]
+    const memberUpdate = effective.find(policy => policy.name === 'Members update own avatar and banner')
+    expect(memberUpdate?.using).toBeTruthy()
     for (const objectName of denied) {
       expect(commandAllows(effective, 'INSERT', objectName, member), objectName).toBe(false)
       expect(commandAllows(effective, 'UPDATE', objectName, member), objectName).toBe(false)
+      expect(evalExpr(memberUpdate?.using ?? '', objectName, member), objectName).toBe(false)
     }
     for (const objectName of [`avatars/${SELF}/1.jpg`, `banners/${SELF}/1.png`]) {
       expect(commandAllows(effective, 'INSERT', objectName, member), objectName).toBe(true)
       expect(commandAllows(effective, 'UPDATE', objectName, member), objectName).toBe(true)
+      expect(evalExpr(memberUpdate?.using ?? '', objectName, member), objectName).toBe(true)
     }
   })
 
@@ -410,12 +414,12 @@ describe('111_branding_member_own_folder', () => {
     }
   })
 
-  it('sets the mime allowlist and does not guess a file size limit', () => {
-    const match = executable.match(/UPDATE storage\.buckets\s+SET allowed_mime_types = ARRAY\[([\s\S]*?)\]\s+WHERE id = 'Branding'/i)
+  it('sets the mime allowlist and a 10MB file size limit', () => {
+    const match = executable.match(/UPDATE storage\.buckets\s+SET allowed_mime_types = ARRAY\[([\s\S]*?)\]\s*,\s*file_size_limit = 10485760\s+WHERE id = 'Branding'/i)
     expect(match).not.toBeNull()
     const mimes = [...(match?.[1] ?? '').matchAll(/'([^']+)'/g)].map(item => item[1])
     expect(mimes).toEqual(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'text/plain'])
-    expect(executable).not.toMatch(/file_size_limit\s*=/)
+    expect(executable).toMatch(/file_size_limit = 10485760/)
     expect(executable).not.toContain("'application/pdf'")
     expect(executable).not.toContain("'image/svg+xml'")
   })

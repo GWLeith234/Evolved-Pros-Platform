@@ -19,9 +19,10 @@
 -- 'admin', which covers banners/preset_* and banners/custom_*.
 -- Public SELECT policies are not changed.
 --
--- file_size_limit is left null. Several browser uploads have no byte
--- cap, hero PNGs are not size-capped, and the live PDF is 14104824
--- bytes. A numeric ceiling would be a guess.
+-- file_size_limit is 10MB (10485760). That matches the avatar route
+-- and the admin image helper. The largest live image is 6793415 bytes.
+-- Objects already stored are not re-checked. The 14104824-byte PDF is
+-- outside the mime list, so this ceiling does not have to cover it.
 
 DROP POLICY IF EXISTS "Members can upload avatars and banners" ON storage.objects;
 DROP POLICY IF EXISTS "Members can update their avatar and banner" ON storage.objects;
@@ -68,5 +69,6 @@ SET allowed_mime_types = ARRAY[
   'image/webp',
   'image/gif',
   'text/plain'
-]
+],
+file_size_limit = 10485760
 WHERE id = 'Branding';
