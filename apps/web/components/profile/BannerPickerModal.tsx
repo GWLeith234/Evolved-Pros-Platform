@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Modal } from '@/components/ui/Modal'
+import { memberOwnedBrandingPath } from '@/lib/storage/memberBrandingPath'
 
 interface Banner {
   id: string
@@ -13,14 +14,13 @@ interface Banner {
 }
 
 interface BannerPickerModalProps {
-  userId: string
   userEmail: string
   currentBannerUrl: string | null
   onSave: (url: string) => void
   onClose: () => void
 }
 
-export function BannerPickerModal({ userId, userEmail: _userEmail, currentBannerUrl, onSave, onClose }: BannerPickerModalProps) {
+export function BannerPickerModal({ userEmail: _userEmail, currentBannerUrl, onSave, onClose }: BannerPickerModalProps) {
   const [banners, setBanners] = useState<Banner[]>([])
   const [selected, setSelected] = useState<string | null>(currentBannerUrl)
   const [uploading, setUploading] = useState(false)
@@ -45,12 +45,16 @@ export function BannerPickerModal({ userId, userEmail: _userEmail, currentBanner
     setUploading(true)
     try {
       const supabase = createClient()
-      const path = `banners/${userId}/${Date.now()}.jpg`
+      const { data: { user } } = await supabase.auth.getUser()
+      const owned = user
+        ? memberOwnedBrandingPath('banners', user.id, Date.now(), file.type)
+        : null
+      if (!owned) return
       const { error } = await supabase.storage
         .from('Branding')
-        .upload(path, file, { upsert: true, contentType: file.type })
+        .upload(owned.path, file, { upsert: true, contentType: owned.contentType })
       if (error) throw error
-      const { data } = supabase.storage.from('Branding').getPublicUrl(path)
+      const { data } = supabase.storage.from('Branding').getPublicUrl(owned.path)
       setSelected(data.publicUrl)
     } finally {
       setUploading(false)

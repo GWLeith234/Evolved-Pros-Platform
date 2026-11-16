@@ -130,7 +130,7 @@ export default async function MemberProfilePage({
               ← Back to profile
             </a>
           </div>
-          <ProfileEditForm userId={profile.id} userEmail={authUser.email} profile={editProfile} />
+          <ProfileEditForm userEmail={authUser.email} profile={editProfile} />
         </div>
       </div>
     )

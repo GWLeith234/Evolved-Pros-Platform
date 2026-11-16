@@ -33,5 +33,5 @@ export default async function OnboardingPage() {
   const displayName  = p?.display_name ?? p?.full_name ?? ''
   const company      = p?.company ?? ''
 
-  return <OnboardingFlow initialStep={initialStep} userId={user.id} displayName={displayName} company={company} />
+  return <OnboardingFlow initialStep={initialStep} displayName={displayName} company={company} />
 }
