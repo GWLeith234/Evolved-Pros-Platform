@@ -2,7 +2,18 @@
 
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { PROFILE_STRING_LIMITS } from '@/lib/onboarding/profilePatch'
 import { memberOwnedBrandingPath, memberUploadBody } from '@/lib/storage/memberBrandingPath'
+
+async function profileErrorMessage(res: Response): Promise<string> {
+  try {
+    const data = await res.json() as { error?: unknown }
+    if (typeof data.error === 'string' && data.error.trim()) return data.error
+  } catch {
+    // The response had no JSON body.
+  }
+  return 'Could not save your profile.'
+}
 
 interface Props {
   onContinue: () => void
@@ -43,6 +54,7 @@ export function OnboardingProfile({ onContinue }: Props) {
   const [roleTitle, setRoleTitle]       = useState('')
   const [location, setLocation]         = useState('')
   const [saving, setSaving]             = useState(false)
+  const [saveError, setSaveError]       = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -74,28 +86,39 @@ export function OnboardingProfile({ onContinue }: Props) {
     const { data: { publicUrl } } = supabase.storage.from('Branding').getPublicUrl(owned.path)
     setAvatarUrl(publicUrl)
 
-    await fetch('/api/onboarding/profile', {
+    const saved = await fetch('/api/onboarding/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ avatar_url: publicUrl }),
     })
+    if (!saved.ok) setUploadError(await profileErrorMessage(saved))
     setUploading(false)
   }
 
   async function handleContinue() {
     setSaving(true)
-    await fetch('/api/onboarding/profile', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...(displayName.trim() && { display_name: displayName.trim() }),
-        ...(company.trim()     && { company: company.trim() }),
-        ...(roleTitle.trim()   && { role_title: roleTitle.trim() }),
-        ...(location.trim()    && { location: location.trim() }),
-      }),
-    })
-    setSaving(false)
-    onContinue()
+    setSaveError(null)
+    try {
+      const res = await fetch('/api/onboarding/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...(displayName.trim() && { display_name: displayName.trim() }),
+          ...(company.trim()     && { company: company.trim() }),
+          ...(roleTitle.trim()   && { role_title: roleTitle.trim() }),
+          ...(location.trim()    && { location: location.trim() }),
+        }),
+      })
+      if (!res.ok) {
+        setSaveError(await profileErrorMessage(res))
+        return
+      }
+      onContinue()
+    } catch {
+      setSaveError('Could not save your profile.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -157,6 +180,7 @@ export function OnboardingProfile({ onContinue }: Props) {
             value={displayName}
             onChange={e => setDisplayName(e.target.value)}
             placeholder="How you appear to other members"
+            maxLength={PROFILE_STRING_LIMITS.display_name}
             style={inputStyle}
           />
         </div>
@@ -167,6 +191,7 @@ export function OnboardingProfile({ onContinue }: Props) {
             value={company}
             onChange={e => setCompany(e.target.value)}
             placeholder="Your current company"
+            maxLength={PROFILE_STRING_LIMITS.company}
             style={inputStyle}
           />
         </div>
@@ -177,6 +202,7 @@ export function OnboardingProfile({ onContinue }: Props) {
             value={roleTitle}
             onChange={e => setRoleTitle(e.target.value)}
             placeholder="e.g. Account Executive"
+            maxLength={PROFILE_STRING_LIMITS.role_title}
             style={inputStyle}
           />
         </div>
@@ -187,10 +213,15 @@ export function OnboardingProfile({ onContinue }: Props) {
             value={location}
             onChange={e => setLocation(e.target.value)}
             placeholder="e.g. Vancouver, BC"
+            maxLength={PROFILE_STRING_LIMITS.location}
             style={inputStyle}
           />
         </div>
       </div>
+
+      {saveError && (
+        <p style={{ fontFamily: 'Barlow, sans-serif', fontSize: '12px', color: '#ef0e30', margin: '0 0 12px', textAlign: 'center' }}>{saveError}</p>
+      )}
 
       {/* CTA */}
       <button
