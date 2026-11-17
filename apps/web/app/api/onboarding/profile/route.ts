@@ -2,35 +2,36 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { clientSafeError } from '@/lib/http/clientError'
-
-const ALLOWED_FIELDS = ['avatar_url', 'display_name', 'company', 'bio', 'location', 'role_title', 'focus_pillar'] as const
-type AllowedField = typeof ALLOWED_FIELDS[number]
+import { profilePatchUpdate } from '@/lib/onboarding/profilePatch'
 
 export async function PATCH(req: Request) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await req.json() as Record<string, unknown>
-
-  // Only pick allowed fields — ignore anything else
-  const update: Record<string, unknown> = {}
-  for (const field of ALLOWED_FIELDS) {
-    if (field in body && body[field] !== undefined) {
-      update[field] = body[field]
-    }
+  let body: unknown
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  if (Object.keys(update).length === 0) {
+  const parsed = profilePatchUpdate(body)
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 })
+  }
+
+  if (Object.keys(parsed.update).length === 0) {
     return NextResponse.json({ ok: true })
   }
 
-  // Use adminClient to bypass RLS on the users table
-  // Use email lookup because auth UUID may differ from public users UUID
+  // Service role bypasses RLS. public.users.id is its own uuid, not
+  // auth.users.id, and guest rows are inserted by email only. Match the
+  // session email. A body email or id is never the filter.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (adminClient as any)
     .from('users')
-    .update(update)
+    .update(parsed.update)
     .eq('email', user.email)
 
   if (error) {
