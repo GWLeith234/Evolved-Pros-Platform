@@ -5,7 +5,7 @@ const writes: unknown[] = []
 const filters: { column: string; value: unknown }[] = []
 
 const state = vi.hoisted(() => ({
-  user: null as { id: string; email: string } | null,
+  user: null as { id: string; email: string | null } | null,
 }))
 
 vi.mock('@/lib/supabase/server', () => ({
@@ -107,6 +107,15 @@ describe('PATCH /api/onboarding/profile', () => {
     expect(writes).toEqual([])
   })
 
+  it('returns 401 when the session has no email and does not write', async () => {
+    state.user = { id: 'auth-1', email: null }
+    const res = await patch(JSON.stringify({ display_name: 'Ada', email: 'member@example.com' }))
+    expect(res.status).toBe(401)
+    expect(await res.json()).toEqual({ error: 'Unauthorized' })
+    expect(writes).toEqual([])
+    expect(filters).toEqual([])
+  })
+
   it('returns 400 for unparsed JSON and does not write', async () => {
     const res = await patch('{')
     expect(res.status).toBe(400)
@@ -205,13 +214,14 @@ describe('PATCH /api/onboarding/profile', () => {
     }])
   })
 
-  it('scopes the write to the session user id and never an id from the body', async () => {
+  it('scopes the write to the session email and never a body value', async () => {
     const res = await patch(JSON.stringify({
       id: 'other-user',
+      email: 'other@example.com',
       display_name: 'Ada',
     }))
     expect(res.status).toBe(200)
     expect(writes).toEqual([{ display_name: 'Ada' }])
-    expect(filters).toEqual([{ column: 'id', value: 'auth-1' }])
+    expect(filters).toEqual([{ column: 'email', value: 'member@example.com' }])
   })
 })

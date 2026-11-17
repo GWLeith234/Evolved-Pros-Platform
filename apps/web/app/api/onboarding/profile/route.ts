@@ -7,7 +7,7 @@ import { profilePatchUpdate } from '@/lib/onboarding/profilePatch'
 export async function PATCH(req: Request) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   let body: unknown
   try {
@@ -25,13 +25,14 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ ok: true })
   }
 
-  // Service role bypasses RLS. The filter is the session user id.
-  // An id on the body is not allowlisted and is never the filter.
+  // Service role bypasses RLS. public.users.id is its own uuid, not
+  // auth.users.id, and guest rows are inserted by email only. Match the
+  // session email. A body email or id is never the filter.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (adminClient as any)
     .from('users')
     .update(parsed.update)
-    .eq('id', user.id)
+    .eq('email', user.email)
 
   if (error) {
     return NextResponse.json(
