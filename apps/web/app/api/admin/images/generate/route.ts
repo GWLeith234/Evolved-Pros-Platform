@@ -5,52 +5,15 @@ import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { logProviderError } from '@/lib/http/clientError'
 import { requireAdminApi } from '@/lib/admin/helpers'
-import OpenAI from 'openai'
 import {
+  XAI_IMAGE_QUALITY_DRAFT,
+  isXaiModelRefusal,
   requestXaiImages,
   resolveXaiApiKey,
+  resolveXaiImageModel,
   safeErrorMessage,
+  xaiModelRefusalMessage,
 } from '@/lib/art/xaiImages'
-import { fetchPublicResource } from '@/lib/http/publicFetch'
-
-async function generateOne(prompt: string): Promise<Buffer | null> {
-  // Grok first. Model id is env-overrideable so a rename or access change
-  // can be patched without a code deploy. Default is grok-imagine-image-quality.
-  if (resolveXaiApiKey()) {
-    try {
-      const images = await requestXaiImages({ prompt, n: 1 })
-      if (images[0]) return images[0]
-    } catch (err) {
-      console.error('[images/generate] Grok failed, trying DALL-E:', safeErrorMessage(err))
-    }
-  }
-
-  const openaiKey = process.env.OPENAI_API_KEY
-  if (openaiKey) {
-    try {
-      const openai = new OpenAI({ apiKey: openaiKey })
-      const res = await openai.images.generate({
-        model: 'dall-e-3',
-        prompt,
-        size: '1792x1024',
-        quality: 'standard',
-        n: 1,
-      })
-      const url = res.data?.[0]?.url
-      if (!url) return null
-      const dl = await fetchPublicResource(url, { cache: 'no-store', timeoutMs: 20_000 })
-      if (!dl.ok || !dl.response.ok) {
-        if (dl.ok) await dl.response.body?.cancel().catch(() => undefined)
-        return null
-      }
-      return Buffer.from(await dl.response.arrayBuffer())
-    } catch (err) {
-      console.error('[images/generate] DALL-E failed:', safeErrorMessage(err))
-    }
-  }
-
-  return null
-}
 
 async function persistToStorage(image: Buffer, index: number): Promise<string | null> {
   try {
@@ -86,20 +49,42 @@ export async function POST(request: Request) {
     const style = typeof body.style === 'string' ? body.style.trim() : 'cinematic'
     if (!prompt) return NextResponse.json({ error: 'prompt is required' }, { status: 422 })
 
-    if (!resolveXaiApiKey() && !process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ error: 'No AI image API keys configured' }, { status: 500 })
+    if (!resolveXaiApiKey()) {
+      return NextResponse.json(
+        { error: 'XAI_API_KEY is not configured on the server' },
+        { status: 500 },
+      )
     }
 
+    const model = resolveXaiImageModel()
     const fullPrompt = `${prompt}. ${style} style, professional quality, no text overlays`
 
-    const rawImages = await Promise.all([
-      generateOne(fullPrompt),
-      generateOne(fullPrompt),
-      generateOne(fullPrompt),
-    ])
+    let rawImages: Buffer[]
+    try {
+      rawImages = await requestXaiImages({
+        prompt: fullPrompt,
+        n: 3,
+        quality: XAI_IMAGE_QUALITY_DRAFT,
+      })
+    } catch (err) {
+      const message = safeErrorMessage(err)
+      console.error('[images/generate] xAI error:', message)
+      if (isXaiModelRefusal(err)) {
+        return NextResponse.json(
+          {
+            error: 'Image generation unavailable',
+            code: 404,
+            detail: xaiModelRefusalMessage(model),
+            images: [],
+          },
+          { status: 422 },
+        )
+      }
+      return NextResponse.json({ error: message, images: [] }, { status: 502 })
+    }
 
     const persistedUrls = await Promise.all(
-      rawImages.map((image, i) => image ? persistToStorage(image, i) : Promise.resolve(null))
+      rawImages.map((image, i) => persistToStorage(image, i))
     )
 
     const images = persistedUrls.filter(Boolean) as string[]

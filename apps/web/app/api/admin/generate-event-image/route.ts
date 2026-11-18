@@ -2,48 +2,58 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { requireAdminApi } from '@/lib/admin/helpers'
-import OpenAI from 'openai'
+import { adminClient } from '@/lib/supabase/admin'
+import { logProviderError } from '@/lib/http/clientError'
+import {
+  XAI_IMAGE_QUALITY_DRAFT,
+  isXaiModelRefusal,
+  requestXaiImages,
+  resolveXaiApiKey,
+  resolveXaiImageModel,
+  safeErrorMessage,
+  xaiModelRefusalMessage,
+} from '@/lib/art/xaiImages'
 
-async function generateDallePrompt(title: string, mood: string): Promise<string> {
-  const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
-  if (!ANTHROPIC_API_KEY) {
-    // Fallback prompt if no Anthropic key
-    return `Professional event banner for "${title}". ${mood} atmosphere, dark navy and gold color palette, cinematic lighting, modern business photography style, 16:9 aspect ratio, no text overlays.`
-  }
+async function generateEventImagePrompt(title: string, mood: string): Promise<string> {
+  const fallback = `Professional event banner for "${title}". ${mood} atmosphere, dark navy and gold color palette, cinematic lighting, modern business photography style, 16:9 aspect ratio, no text overlays.`
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) return fallback
 
   const systemPrompt = `You are a brand designer for Evolved Pros, an elite professional development community.
 The brand uses deep navy (#112535), gold (#C9A84C), red (#ef0e30), and white.
-Create DALL-E 3 image prompts that are cinematic, premium, and aspirational — never stock-photo generic.
+Create image prompts that are cinematic, premium, and aspirational — never stock-photo generic.
 Always produce prompts that result in dark, moody, high-contrast images suitable for event banners.
 Never include text, logos, or watermarks in the prompt.
 Return ONLY the image prompt, nothing else.`
 
   const userPrompt = `Event: "${title}"
 Mood: ${mood}
-Generate a DALL-E 3 prompt for a 16:9 cinematic event banner image. Keep it under 400 characters.`
+Generate a prompt for a 16:9 cinematic event banner image. Keep it under 400 characters.`
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 300,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userPrompt }],
-    }),
-  })
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 300,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
+      }),
+    })
 
-  if (!res.ok) {
-    // Fall back to a basic prompt
-    return `${mood} event banner for "${title}", cinematic dark photography, navy and gold tones, professional atmosphere, no text.`
+    if (!res.ok) return fallback
+    const data = await res.json()
+    const text = data.content?.[0]?.text?.trim()
+    return text || fallback
+  } catch (err) {
+    console.error('[generate-event-image] prompt writer failed:', safeErrorMessage(err))
+    return fallback
   }
-
-  const data = await res.json()
-  return data.content?.[0]?.text?.trim() ?? `${mood} event banner for "${title}", cinematic dark photography.`
 }
 
 export async function POST(request: Request) {
@@ -60,56 +70,62 @@ export async function POST(request: Request) {
 
   if (!title) return NextResponse.json({ error: 'title is required' }, { status: 422 })
 
-  const OPENAI_API_KEY = process.env.OPENAI_API_KEY
-  if (!OPENAI_API_KEY) {
-    return NextResponse.json({ error: 'Image generation is not configured (OPENAI_API_KEY missing)' }, { status: 503 })
+  if (!resolveXaiApiKey()) {
+    return NextResponse.json(
+      { error: 'XAI_API_KEY is not configured on the server' },
+      { status: 500 },
+    )
   }
 
+  const model = resolveXaiImageModel()
+
   try {
-    // Step 1: Generate DALL-E prompt via Anthropic
-    const dallePrompt = await generateDallePrompt(title, mood)
-
-    // Step 2: 3 parallel DALL-E 3 calls (each n:1 — DALL-E 3 requires n=1 per call)
-    const openai = new OpenAI({ apiKey: OPENAI_API_KEY })
-
-    const results = await Promise.allSettled([
-      openai.images.generate({ model: 'dall-e-3', prompt: dallePrompt, n: 1, size: '1792x1024', quality: 'standard' }),
-      openai.images.generate({ model: 'dall-e-3', prompt: dallePrompt, n: 1, size: '1792x1024', quality: 'standard' }),
-      openai.images.generate({ model: 'dall-e-3', prompt: dallePrompt, n: 1, size: '1792x1024', quality: 'standard' }),
-    ])
-
-    results.forEach((r, i) => {
-      if (r.status === 'rejected') {
-        const err = r.reason
-        console.error(`[generate-event-image] DALL-E call ${i + 1} failed — status: ${err?.status} message: ${err?.message}`, err?.error ?? '')
-      }
+    const prompt = await generateEventImagePrompt(title, mood)
+    const buffers = await requestXaiImages({
+      prompt,
+      n: 3,
+      aspectRatio: '16:9',
+      quality: XAI_IMAGE_QUALITY_DRAFT,
     })
 
-    let images: string[] = results
-      .filter((r): r is PromiseFulfilledResult<OpenAI.Images.ImagesResponse> => r.status === 'fulfilled')
-      .map(r => r.value.data?.[0]?.url ?? '')
-      .filter(Boolean)
-
-    // Fallback: if all parallel calls failed, try a single sequential call
-    if (images.length === 0) {
-      try {
-        const fallback = await openai.images.generate({ model: 'dall-e-3', prompt: dallePrompt, n: 1, size: '1024x1024', quality: 'standard' })
-        const url = fallback.data?.[0]?.url
-        if (url) images = [url]
-      } catch (fallbackErr) {
-        console.error('[generate-event-image] fallback call failed:', fallbackErr)
+    const images: string[] = []
+    for (let i = 0; i < buffers.length; i++) {
+      const image = buffers[i]
+      if (!image) continue
+      const path = `ai-generated/event-${Date.now()}-${i}.png`
+      const { error } = await adminClient.storage
+        .from('Branding')
+        .upload(path, image, { contentType: 'image/png', upsert: true })
+      if (error) {
+        logProviderError('[generate-event-image] storage upload failed', error)
+        continue
       }
+      const { data: { publicUrl } } = adminClient.storage.from('Branding').getPublicUrl(path)
+      images.push(publicUrl)
     }
 
     if (images.length === 0) {
-      const firstRejection = results.find(r => r.status === 'rejected') as PromiseRejectedResult | undefined
-      const reason = firstRejection?.reason instanceof Error ? firstRejection.reason.message : 'All image generation calls failed'
-      return NextResponse.json({ error: reason }, { status: 500 })
+      return NextResponse.json(
+        { error: 'Upload failed.', images: [], prompt },
+        { status: 500 },
+      )
     }
 
-    return NextResponse.json({ images, prompt: dallePrompt })
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : 'Image generation failed'
-    return NextResponse.json({ error: msg }, { status: 500 })
+    return NextResponse.json({ images, prompt })
+  } catch (err) {
+    const message = safeErrorMessage(err)
+    console.error('[generate-event-image] xAI error:', message)
+    if (isXaiModelRefusal(err)) {
+      return NextResponse.json(
+        {
+          error: 'Image generation unavailable',
+          code: 404,
+          detail: xaiModelRefusalMessage(model),
+          images: [],
+        },
+        { status: 422 },
+      )
+    }
+    return NextResponse.json({ error: message }, { status: 502 })
   }
 }

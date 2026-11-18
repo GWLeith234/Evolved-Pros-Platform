@@ -148,7 +148,8 @@ describe('untrusted URL fetch call sites', () => {
     expect(portrait).not.toContain('fetch(item.url')
 
     const generated = source('../../app/api/admin/images/generate/route.ts')
-    expect(generated).toContain('fetchPublicResource(url')
+    expect(generated).toContain('requestXaiImages')
+    expect(generated).not.toContain('fetchPublicResource')
     expect(generated).not.toContain('await fetch(')
   })
 })

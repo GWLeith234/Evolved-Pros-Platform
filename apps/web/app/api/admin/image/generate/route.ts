@@ -6,11 +6,14 @@ import { NextResponse } from 'next/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import {
+  XAI_IMAGE_QUALITY_DRAFT,
   XaiImageError,
+  isXaiModelRefusal,
   requestXaiImages,
   resolveXaiApiKey,
   resolveXaiImageModel,
   safeErrorMessage,
+  xaiModelRefusalMessage,
 } from '@/lib/art/xaiImages'
 import { clientSafeError } from '@/lib/http/clientError'
 
@@ -67,16 +70,20 @@ export async function POST(request: Request) {
 
   let image: Buffer
   try {
-    const images = await requestXaiImages({ prompt: fullPrompt, n: 1 })
+    const images = await requestXaiImages({
+      prompt: fullPrompt,
+      n: 1,
+      quality: XAI_IMAGE_QUALITY_DRAFT,
+    })
     const first = images[0]
     if (!first) throw new XaiImageError('xAI returned no image data', 502)
     image = first
   } catch (err) {
     const message = safeErrorMessage(err)
     console.error('[image/generate] xAI error:', message)
-    if (err instanceof XaiImageError && err.status === 404) {
+    if (isXaiModelRefusal(err)) {
       return NextResponse.json(
-        { error: 'Image generation unavailable', code: 404, detail: `Model "${model}" not accessible. Set XAI_IMAGE_MODEL to a model your team has access to.` },
+        { error: 'Image generation unavailable', code: 404, detail: xaiModelRefusalMessage(model) },
         { status: 422 },
       )
     }
