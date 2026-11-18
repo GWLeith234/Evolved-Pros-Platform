@@ -43,6 +43,7 @@ export const PLATFORM_TO_WWW_EXACT_PATHS = [
   '/media',
   '/podcast',
   '/about',
+  '/media-kit',
   '/evolved',
   '/terms',
   '/privacy',

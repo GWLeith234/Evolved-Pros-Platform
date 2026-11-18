@@ -11,6 +11,7 @@
  */
 
 import { ABOUT_DESCRIPTION, ABOUT_TITLE } from '@/lib/about/copy'
+import { MEDIA_KIT_DESCRIPTION, MEDIA_KIT_TITLE } from '@/lib/mediaKit/copy'
 import { EXTENSION_PRIVACY_DESCRIPTION, EXTENSION_PRIVACY_TITLE } from '@/lib/legal/extensionPrivacy'
 import { FIT_PAGE_DESCRIPTION, FIT_PAGE_TITLE } from '@/lib/fit/copy'
 import { stripEmDashCopy } from '@/lib/home/cardImagery'
@@ -124,6 +125,7 @@ const STATIC_PAGE_COPY: Record<PublicSitemapPath, { title: string; description: 
     title: EXTENSION_PRIVACY_TITLE,
     description: EXTENSION_PRIVACY_DESCRIPTION,
   },
+  '/media-kit': { title: MEDIA_KIT_TITLE, description: MEDIA_KIT_DESCRIPTION },
 }
 
 function hubListing(name: string, description: string): { title: string; description: string } {
