@@ -43,6 +43,7 @@ describe('PUBLIC_SITEMAP_PATHS', () => {
       '/about',
       '/evolved',
       '/extension-privacy',
+      '/media-kit',
     ])
   })
 

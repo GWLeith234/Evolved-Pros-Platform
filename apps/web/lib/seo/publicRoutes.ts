@@ -43,6 +43,11 @@
  *
  * /extension-privacy is the WIG Tracker browser-extension privacy policy
  * (app/(public)/extension-privacy). Static, absent from the matcher.
+ *
+ * /media-kit is the public media kit page (app/(public)/media-kit) with the
+ * Light and Dark PDF downloads. Static, absent from the matcher (the matcher
+ * names /media and /media/:path*, which do not match /media-kit), so an
+ * anonymous request renders the page.
  */
 export const PUBLIC_SITEMAP_PATHS = [
   '/',
@@ -57,6 +62,7 @@ export const PUBLIC_SITEMAP_PATHS = [
   '/about',
   '/evolved',
   '/extension-privacy',
+  '/media-kit',
 ] as const
 
 export type PublicSitemapPath = (typeof PUBLIC_SITEMAP_PATHS)[number]

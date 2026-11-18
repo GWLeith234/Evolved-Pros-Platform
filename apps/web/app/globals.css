@@ -4048,6 +4048,152 @@ html.light-mode .ep-media-brief-cta {
   font-size: clamp(28px, 4vw, 40px);
   line-height: 1.1;
 }
+
+/* /media-kit. Same desk tokens as /media. Wordmark is EpWordmark
+   (EVOLVED·PROS, red interpunct), sized up for the masthead. */
+.ep-media-kit-masthead-inner {
+  padding-bottom: var(--space-4);
+}
+.ep-media-kit-wordmark a {
+  line-height: 1;
+}
+.ep-media-kit-wordmark-mark {
+  display: block;
+  white-space: nowrap;
+}
+.ep-media-kit-inner {
+  max-width: 880px;
+}
+.ep-media-kit-bio {
+  margin: 24px 0 0;
+}
+.ep-media-kit-bio-text {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.65;
+}
+.ep-media-kit-summary,
+.ep-media-kit-body {
+  margin: 10px 0 0;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+html.light-mode .ep-media-kit-summary,
+html.light-mode .ep-media-kit-body {
+  color: color-mix(in srgb, var(--navy) 78%, transparent);
+}
+.ep-media-kit-downloads {
+  margin: 28px 0 8px;
+  padding: 20px;
+  background: var(--navy-dark);
+  color: var(--white);
+}
+html.light-mode .ep-media-kit-downloads {
+  background: var(--navy);
+}
+.ep-media-kit-kicker {
+  margin: 0 0 6px;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.ep-media-kit-downloads .ep-media-kit-kicker {
+  color: var(--white);
+  opacity: 0.72;
+}
+.ep-media-kit-h2 {
+  margin: 0 0 14px;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.15;
+}
+.ep-media-kit-download-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ep-media-kit-download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid var(--brand-red-hot);
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.ep-media-kit-download--light {
+  background: var(--brand-red-hot);
+  color: var(--white);
+}
+.ep-media-kit-download--dark {
+  background: transparent;
+  color: var(--white);
+  border-color: color-mix(in srgb, var(--white) 55%, transparent);
+}
+.ep-media-kit-download:hover,
+.ep-media-kit-download:focus-visible {
+  filter: brightness(1.08);
+}
+.ep-media-kit-note {
+  margin: 14px 0 0;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+.ep-media-kit-sections {
+  display: grid;
+  gap: 0;
+  margin-top: 24px;
+}
+.ep-media-kit-section {
+  padding: 20px 0;
+  border-top: 1px solid var(--border-color);
+}
+html.light-mode .ep-media-kit-section {
+  border-top-color: var(--paper-line);
+}
+.ep-media-kit-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: var(--font-barlow-condensed), "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brand-red-hot);
+  text-decoration: none;
+}
+.ep-media-kit-link:hover,
+.ep-media-kit-link:focus-visible {
+  text-decoration: underline;
+}
+.ep-media-kit-contact {
+  margin: 8px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+html.light-mode .ep-media-kit-contact {
+  border-top-color: var(--paper-line);
+}
 .ep-media-dual-hero--mini .ep-media-lede-title {
   font-size: clamp(22px, 2.8vw, 32px);
 }
