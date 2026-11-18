@@ -23,7 +23,8 @@ import sharp from 'sharp'
 import { adminClient } from '@/lib/supabase/admin'
 import { requireAdminApi } from '@/lib/admin/helpers'
 import { clientSafeError } from '@/lib/http/clientError'
-import { GUEST_PORTRAIT_MODEL, GUEST_PORTRAIT_PROMPT } from '@/lib/art/guest-portrait-style'
+import { GUEST_PORTRAIT_MODEL, GUEST_PORTRAIT_PROMPT, GUEST_PORTRAIT_QUALITY } from '@/lib/art/guest-portrait-style'
+import { logXaiImageCost } from '@/lib/art/xaiImages'
 import { fetchPublicResource } from '@/lib/http/publicFetch'
 
 const ACCEPTED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
@@ -136,6 +137,7 @@ export async function POST(
       },
       body: JSON.stringify({
         model: GUEST_PORTRAIT_MODEL,
+        quality: GUEST_PORTRAIT_QUALITY,
         prompt: GUEST_PORTRAIT_PROMPT,
         image: { url: dataUri, type: 'image_url' },
         response_format: 'b64_json',
@@ -196,6 +198,7 @@ export async function POST(
       { status: 502 },
     )
   }
+  logXaiImageCost(parsed)
 
   const item = parsed?.data?.[0]
   let outBuffer: Buffer | null = null
