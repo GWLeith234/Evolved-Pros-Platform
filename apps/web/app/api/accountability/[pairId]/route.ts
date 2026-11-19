@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { clientSafeError } from '@/lib/http/clientError'
 
 // PATCH: cancel (inviter) or decline (partner) — sets status=inactive
 export async function PATCH(
@@ -35,8 +36,10 @@ export async function PATCH(
     .single()
 
   if (updateErr || !updated) {
-    console.error('[PATCH /api/accountability/[pairId]]', updateErr)
-    return NextResponse.json({ error: updateErr?.message ?? 'Failed to update' }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[PATCH /api/accountability/[pairId]]', updateErr, 'Failed to update') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ pair: updated })

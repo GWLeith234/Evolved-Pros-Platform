@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
+import { clientSafeError } from '@/lib/http/clientError'
 
 export async function PATCH(
   _request: Request,
@@ -37,8 +38,10 @@ export async function PATCH(
     .single()
 
   if (updateErr || !updated) {
-    console.error('[PATCH /api/accountability/[pairId]/accept]', updateErr)
-    return NextResponse.json({ error: updateErr?.message ?? 'Failed to accept' }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[PATCH /api/accountability/[pairId]/accept]', updateErr, 'Failed to accept') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({ pair: updated })
