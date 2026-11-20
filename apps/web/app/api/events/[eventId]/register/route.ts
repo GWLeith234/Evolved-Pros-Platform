@@ -130,13 +130,25 @@ export async function DELETE(
 
   if (!event) return NextResponse.json({ error: 'Event not found' }, { status: 404 })
 
-  const { error } = await adminClient
+  // Service role bypasses RLS. A delete that matches nobody else's row
+  // also matches zero rows when this member was never registered. Only a
+  // returned row proves the RSVP was theirs, so the shared counter moves
+  // only then. Repeating DELETE must not walk registration_count to zero.
+  const { data: removed, error } = await adminClient
     .from('event_rsvps')
     .delete()
     .eq('event_id', params.eventId)
     .eq('user_id', userId)
+    .select('event_id')
 
   if (error) return NextResponse.json({ error: 'Unregister failed' }, { status: 500 })
+
+  if (!removed || removed.length === 0) {
+    return NextResponse.json({
+      registered: false,
+      registrationCount: event.registration_count,
+    })
+  }
 
   const newCount = Math.max(0, event.registration_count - 1)
   await adminClient
@@ -144,7 +156,7 @@ export async function DELETE(
     .update({ registration_count: newCount })
     .eq('id', params.eventId)
 
-  // Remove reminder notification
+  // Remove this member's unread reminder. Not another member's.
   await adminClient
     .from('notifications')
     .delete()
