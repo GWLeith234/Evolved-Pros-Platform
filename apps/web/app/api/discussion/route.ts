@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { clientSafeError } from '@/lib/http/clientError'
 
 export async function GET(request: Request) {
   const supabase = createClient()
@@ -26,8 +27,10 @@ export async function GET(request: Request) {
 
   const { data: allPosts, error: postsError } = await query
   if (postsError) {
-    console.error('[GET /api/discussion]', postsError)
-    return NextResponse.json({ error: postsError.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[GET /api/discussion]', postsError, 'Could not load discussion posts.') },
+      { status: 500 },
+    )
   }
 
   if (!allPosts?.length) return NextResponse.json({ posts: [] })
@@ -97,8 +100,10 @@ export async function POST(request: Request) {
     .single()
 
   if (insertError || !inserted) {
-    console.error('[POST /api/discussion]', insertError)
-    return NextResponse.json({ error: insertError?.message ?? 'Failed to post' }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/discussion]', insertError, 'Failed to post') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({

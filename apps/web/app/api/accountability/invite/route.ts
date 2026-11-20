@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { createNotification } from '@/lib/notifications/create'
+import { clientSafeError } from '@/lib/http/clientError'
 
 export async function POST(request: Request) {
   const supabase = createClient()
@@ -32,8 +33,10 @@ export async function POST(request: Request) {
     .maybeSingle()
 
   if (lookupErr) {
-    console.error('[POST /api/accountability/invite] lookup error:', lookupErr)
-    return NextResponse.json({ error: lookupErr.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/accountability/invite] lookup', lookupErr, 'Could not look up that member.') },
+      { status: 500 },
+    )
   }
   if (!partner) {
     return NextResponse.json({ error: 'No member found with that email address' }, { status: 404 })
@@ -64,8 +67,10 @@ export async function POST(request: Request) {
     .single()
 
   if (pairErr || !pair) {
-    console.error('[POST /api/accountability/invite] insert error:', pairErr)
-    return NextResponse.json({ error: pairErr?.message ?? 'Failed to create invite' }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/accountability/invite] insert', pairErr, 'Failed to create invite') },
+      { status: 500 },
+    )
   }
 
   // Notify the partner

@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
+import { clientSafeError } from '@/lib/http/clientError'
 
 export async function GET(request: Request) {
   const supabase = createClient()
@@ -27,8 +28,10 @@ export async function GET(request: Request) {
   const { data: pair, error: pairErr } = await query.maybeSingle()
 
   if (pairErr) {
-    console.error('[GET /api/accountability/status]', pairErr)
-    return NextResponse.json({ error: pairErr.message }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[GET /api/accountability/status]', pairErr, 'Could not load your partner.') },
+      { status: 500 },
+    )
   }
 
   if (!pair) {

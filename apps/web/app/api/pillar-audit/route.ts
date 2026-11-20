@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { clientSafeError } from '@/lib/http/clientError'
 
 export async function POST(request: Request) {
   const supabase = createClient()
@@ -34,8 +35,10 @@ export async function POST(request: Request) {
     .single()
 
   if (error || !data) {
-    console.error('[POST /api/pillar-audit]', error)
-    return NextResponse.json({ error: error?.message ?? 'Failed to save audit' }, { status: 500 })
+    return NextResponse.json(
+      { error: clientSafeError('[POST /api/pillar-audit]', error, 'Failed to save audit') },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json(data, { status: 201 })
