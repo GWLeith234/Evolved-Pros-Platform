@@ -27,6 +27,12 @@ const state = vi.hoisted(() => ({
   hideExisting: false,
   insertConflict: false,
   rpcResult: null as number | null,
+  rpcError: null as {
+    code?: string
+    message?: string
+    details?: string
+    hint?: string
+  } | null,
   eventUpdates: [] as number[],
   rpcCalls: [] as string[],
   rsvpInserts: 0,
@@ -46,6 +52,7 @@ vi.mock('@/lib/supabase/admin', () => ({
   adminClient: {
     rpc: async (fn: string) => {
       state.rpcCalls.push(fn)
+      if (state.rpcError) return { data: null, error: state.rpcError }
       const counted = state.rpcResult ?? Math.max(0, state.rsvpUserIds.length)
       state.registrationCount = Math.max(0, counted)
       return { data: counted, error: null }
@@ -176,6 +183,14 @@ vi.mock('@/lib/resend/emails/event-confirmation', () => ({
 }))
 
 import { DELETE, POST } from '@/app/api/events/[eventId]/register/route'
+import { sendEventConfirmationEmail } from '@/lib/resend/emails/event-confirmation'
+
+const COUNT_SYNC_ERROR = {
+  code: 'PGRST202',
+  message: 'Could not find the function public.set_event_registration_count',
+  details: 'email secret@example.com',
+  hint: 'See public.set_event_registration_count',
+}
 
 function register() {
   return POST(
@@ -207,11 +222,13 @@ describe('POST /api/events/[eventId]/register', () => {
     state.hideExisting = false
     state.insertConflict = false
     state.rpcResult = null
+    state.rpcError = null
     state.eventUpdates = []
     state.rpcCalls = []
     state.rsvpInserts = 0
     state.rsvpFilters = []
     state.notificationFilters = []
+    vi.mocked(sendEventConfirmationEmail).mockClear()
   })
 
   it('returns 401 without a session and does not write', async () => {
@@ -254,6 +271,47 @@ describe('POST /api/events/[eventId]/register', () => {
     expect(state.eventUpdates).toEqual([])
   })
 
+  it('keeps the registration when the count sync fails', async () => {
+    state.rpcError = COUNT_SYNC_ERROR
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const res = await register()
+      expect(res.status).toBe(200)
+      const body = await res.json()
+      expect(body).toEqual({ registered: true, registrationCount: 4 })
+      const serialized = JSON.stringify(body)
+      expect(serialized).not.toContain('PGRST202')
+      expect(serialized).not.toContain('Could not find the function')
+      expect(serialized).not.toContain('secret@example.com')
+      expect(serialized).not.toContain('set_event_registration_count')
+      expect(state.profile?.points).toBe(35)
+      expect(sendEventConfirmationEmail).toHaveBeenCalledTimes(1)
+      expect(sendEventConfirmationEmail).toHaveBeenCalledWith({
+        email: 'member@example.com',
+        displayName: 'Member',
+        event: {
+          id: 'event-1',
+          title: 'Live room',
+          eventType: 'virtual',
+          startsAt: '2099-01-01T00:00:00.000Z',
+          endsAt: '2099-01-01T01:00:00.000Z',
+          zoomUrl: null,
+          description: 'A room',
+        },
+      })
+      expect(state.rsvpUserIds).toEqual(['u2', 'u3', 'u4', 'u5', USER_ID])
+      expect(state.rpcCalls).toEqual(['set_event_registration_count'])
+      expect(state.registrationCount).toBe(4)
+      const logged = JSON.stringify(spy.mock.calls)
+      expect(logged).toContain('[events/register] set_event_registration_count failed')
+      expect(logged).toContain('PGRST202')
+      expect(logged).toContain('[redacted-email]')
+      expect(logged).not.toContain('secret@example.com')
+    } finally {
+      spy.mockRestore()
+    }
+  })
+
   it('unregister after register returns the recomputed count', async () => {
     const joined = await register()
     expect(joined.status).toBe(200)
@@ -293,11 +351,13 @@ describe('DELETE /api/events/[eventId]/register', () => {
     state.hideExisting = false
     state.insertConflict = false
     state.rpcResult = null
+    state.rpcError = null
     state.eventUpdates = []
     state.rpcCalls = []
     state.rsvpInserts = 0
     state.rsvpFilters = []
     state.notificationFilters = []
+    vi.mocked(sendEventConfirmationEmail).mockClear()
   })
 
   it('returns 401 without a session and does not write', async () => {
@@ -343,6 +403,40 @@ describe('DELETE /api/events/[eventId]/register', () => {
     expect(await second.json()).toEqual({ registered: false, registrationCount: 3 })
     expect(state.rpcCalls).toEqual(['set_event_registration_count'])
     expect(state.eventUpdates).toEqual([])
+  })
+
+  it('keeps the unregister when the count sync fails', async () => {
+    state.rsvpUserIds = [USER_ID, 'u2', 'u3', 'u4']
+    state.rpcError = COUNT_SYNC_ERROR
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const res = await unregister()
+      expect(res.status).toBe(200)
+      const body = await res.json()
+      expect(body).toEqual({ registered: false, registrationCount: 4 })
+      const serialized = JSON.stringify(body)
+      expect(serialized).not.toContain('PGRST202')
+      expect(serialized).not.toContain('Could not find the function')
+      expect(serialized).not.toContain('secret@example.com')
+      expect(serialized).not.toContain('set_event_registration_count')
+      expect(state.rsvpUserIds).toEqual(['u2', 'u3', 'u4'])
+      expect(state.rpcCalls).toEqual(['set_event_registration_count'])
+      expect(state.registrationCount).toBe(4)
+      expect(state.notificationFilters).toEqual([
+        { column: 'user_id', value: USER_ID },
+        { column: 'type', value: 'event_reminder' },
+        { column: 'action_url', value: `/events/${EVENT_ID}` },
+        { column: 'is_read', value: false },
+      ])
+      expect(sendEventConfirmationEmail).not.toHaveBeenCalled()
+      const logged = JSON.stringify(spy.mock.calls)
+      expect(logged).toContain('[events/register] set_event_registration_count failed')
+      expect(logged).toContain('PGRST202')
+      expect(logged).toContain('[redacted-email]')
+      expect(logged).not.toContain('secret@example.com')
+    } finally {
+      spy.mockRestore()
+    }
   })
 
   it('does not take registration_count below 0', async () => {
