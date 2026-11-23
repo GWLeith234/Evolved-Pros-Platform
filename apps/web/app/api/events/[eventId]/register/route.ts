@@ -6,6 +6,16 @@ import { NextResponse } from 'next/server'
 import { hasTierAccess } from '@/lib/tier'
 import { sendEventConfirmationEmail } from '@/lib/resend/emails/event-confirmation'
 
+// Count is the number of event_rsvps rows, written under a row lock.
+// Call this only after an insert or delete returned a row. The floor is 0.
+async function syncRegistrationCount(eventId: string): Promise<number | null> {
+  const { data, error } = await adminClient.rpc('set_event_registration_count', {
+    p_event_id: eventId,
+  })
+  if (error || typeof data !== 'number' || !Number.isFinite(data)) return null
+  return Math.max(0, data)
+}
+
 export async function POST(
   _request: Request,
   { params }: { params: { eventId: string } }
@@ -52,18 +62,24 @@ export async function POST(
     return NextResponse.json({ error: 'Already registered' }, { status: 409 })
   }
 
-  // Register
-  const { error: regError } = await adminClient
+  // A conflict returns an error and no row. Do not touch the shared count
+  // unless this insert created the RSVP.
+  const { data: inserted, error: regError } = await adminClient
     .from('event_rsvps')
-    .insert({ event_id: params.eventId, user_id: userId } as never)
+    .insert({ event_id: params.eventId, user_id: userId })
+    .select('event_id')
 
-  if (regError) return NextResponse.json({ error: 'Registration failed' }, { status: 500 })
+  if (regError?.code === '23505') {
+    return NextResponse.json({ error: 'Already registered' }, { status: 409 })
+  }
+  if (regError || !inserted?.length) {
+    return NextResponse.json({ error: 'Registration failed' }, { status: 500 })
+  }
 
-  // Increment registration_count
-  await adminClient
-    .from('events')
-    .update({ registration_count: event.registration_count + 1 })
-    .eq('id', params.eventId)
+  const registrationCount = await syncRegistrationCount(params.eventId)
+  if (registrationCount === null) {
+    return NextResponse.json({ error: 'Registration failed' }, { status: 500 })
+  }
 
   // Award 25 points
   if (profile) {
@@ -103,7 +119,7 @@ export async function POST(
     }).catch(() => { /* non-fatal */ })
   }
 
-  return NextResponse.json({ registered: true, registrationCount: event.registration_count + 1 })
+  return NextResponse.json({ registered: true, registrationCount })
 }
 
 export async function DELETE(
@@ -150,11 +166,10 @@ export async function DELETE(
     })
   }
 
-  const newCount = Math.max(0, event.registration_count - 1)
-  await adminClient
-    .from('events')
-    .update({ registration_count: newCount })
-    .eq('id', params.eventId)
+  const registrationCount = await syncRegistrationCount(params.eventId)
+  if (registrationCount === null) {
+    return NextResponse.json({ error: 'Unregister failed' }, { status: 500 })
+  }
 
   // Remove this member's unread reminder. Not another member's.
   await adminClient
@@ -165,5 +180,5 @@ export async function DELETE(
     .eq('action_url', `/events/${params.eventId}`)
     .eq('is_read', false)
 
-  return NextResponse.json({ registered: false, registrationCount: newCount })
+  return NextResponse.json({ registered: false, registrationCount })
 }

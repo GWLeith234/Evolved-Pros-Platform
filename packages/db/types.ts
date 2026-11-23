@@ -2956,6 +2956,7 @@ export type Database = {
         Returns: undefined
       }
       increment_poll_vote: { Args: { p_option_id: string }; Returns: undefined }
+      set_event_registration_count: { Args: { p_event_id: string }; Returns: number }
     }
     Enums: {
       [_ in never]: never
