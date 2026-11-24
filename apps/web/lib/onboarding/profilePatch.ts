@@ -70,6 +70,16 @@ export function isProfileHttpUrl(value: string): boolean {
   }
 }
 
+export function readProfileImageUrl(
+  value: unknown,
+): { ok: true; url: string } | { ok: false; error: string } {
+  const url = typeof value === 'string' ? value.trim() : ''
+  if (!url) return { ok: false, error: 'url is required' }
+  if (url.length > PROFILE_STRING_LIMITS.avatar_url) return { ok: false, error: 'url too long' }
+  if (!isProfileHttpUrl(url)) return { ok: false, error: 'url must be http(s)' }
+  return { ok: true, url }
+}
+
 function readOptionalString(
   record: Record<string, unknown>,
   field: string,

@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { logProviderError } from '@/lib/http/clientError'
+import { readProfileImageUrl } from '@/lib/onboarding/profilePatch'
 
 // PATCH /api/profile/avatar
 // Body: { url: string } — already-uploaded image URL (e.g. from /api/user/avatar
@@ -27,12 +28,9 @@ export async function PATCH(request: Request) {
     )
   }
 
-  const url = typeof body.url === 'string' ? body.url.trim() : ''
-  if (!url) return NextResponse.json({ error: 'url is required' }, { status: 422 })
-  if (url.length > 2048) return NextResponse.json({ error: 'url too long' }, { status: 422 })
-  if (!/^https?:\/\//i.test(url)) {
-    return NextResponse.json({ error: 'url must be http(s)' }, { status: 422 })
-  }
+  const read = readProfileImageUrl(body.url)
+  if (!read.ok) return NextResponse.json({ error: read.error }, { status: 422 })
+  const url = read.url
 
   const { error } = await adminClient
     .from('users')
