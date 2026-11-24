@@ -115,6 +115,23 @@ export const LEGACY_SEARCH_REDIRECTS = [
     source: '/jim-thompson',
     destination: '/podcast/trust-credibility-cold-calling-jim-thompson',
   },
+  // Published episode (episodes.slug, sitemap crawl 2026-10-13 returned 200).
+  {
+    source: '/heather-monahan',
+    destination: '/podcast/betting-on-yourself-resilience-heather-monahan',
+  },
+  // Published episode. The 055 seed slug was salesman-on-fire-carson-heady;
+  // production slug is the one below (sitemap crawl 2026-10-13 returned 200).
+  {
+    source: '/carson-heady',
+    destination: '/podcast/evolving-inside-software-giant-carson-heady',
+  },
+  // No published episode or media story for Janet Schijns. GSC 2026-10-25..2026-11-21: 7 impressions, avg position 7.4.
+  { source: '/janet-schijns', destination: '/podcast' },
+  // No published episode or media story for Wayne Walton. GSC same window: 1 click, 1 impression, position 3.
+  { source: '/wayne-walton', destination: '/podcast' },
+  // No published episode or media story for Steve Whittington. Still indexed as /steve-w.
+  { source: '/steve-w', destination: '/podcast' },
 ]
 
 function legacySearchRedirects() {
