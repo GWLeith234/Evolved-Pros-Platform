@@ -66,4 +66,6 @@ export const SHORT_DOCUMENT_TITLES: Readonly<Record<string, string>> = {
     "Sales Quota: What It Is, How It's Set, When Unrealistic",
   'sales-burnout-recover-without-quitting':
     'Sales Burnout: Signs, Causes, and How to Recover',
+  'lush-owned-audience-no-paid-social':
+    'Lush Quit Paid Social and Kept Growing: Owned Audience Play',
 }

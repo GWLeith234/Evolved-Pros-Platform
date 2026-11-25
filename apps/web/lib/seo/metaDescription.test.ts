@@ -703,8 +703,8 @@ const STORED_CUT_META_DESCRIPTIONS: ReadonlyArray<{
   {
     path: '/media/strategy/lush-owned-audience-no-paid-social',
     before: 'Lush stopped paying the big social platforms in 2021 and put the money into its app, email, creators and events. Revenue still grew. Here is the',
-    after: 'Kimeko McCoy reported in Digiday on Oct 28 that Lush stepped away from Instagram, Facebook, TikTok and Snapchat in 2021, and stopped posting to X by 2023.',
-    chars: 154,
+    after: 'Lush left Instagram, Facebook, TikTok and Snapchat in 2021, per Digiday. What that says about owned audience versus rented reach, and what to count instead.',
+    chars: 156,
   },
   {
     path: '/media/strategy/october-24-ranking-drop-rank-tracker-bad-data',

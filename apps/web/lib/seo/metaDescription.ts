@@ -188,12 +188,13 @@ export const META_DESCRIPTION_OVERRIDES: Readonly<Record<string, string>> = {
     'After 30 years in sales leadership, 165+ events across 21 countries and $100M+ in recurring revenue built, here is what I know about professional identity.',
   // Stored deks already cut mid-phrase under 155 characters. The last full
   // sentence in that dek ends before 150, so the sentence window cannot
-  // finish them. Each value is stored copy from that article, 150–160
-  // characters, ending on a sentence.
+  // finish them. Each value is 150–160 characters and ends on a sentence.
+  // The Lush row is a hand-written snippet of facts already on that page.
+  // The others are stored copy from the article.
   '/media/strategy/ai-readable-pages-author-date':
     'A local business does not need an API. On the five pages that sell, put the main text in the page, name the author or owner, and show a last-updated date.',
   '/media/strategy/lush-owned-audience-no-paid-social':
-    'Kimeko McCoy reported in Digiday on Oct 28 that Lush stepped away from Instagram, Facebook, TikTok and Snapchat in 2021, and stopped posting to X by 2023.',
+    'Lush left Instagram, Facebook, TikTok and Snapchat in 2021, per Digiday. What that says about owned audience versus rented reach, and what to count instead.',
   '/media/strategy/october-24-ranking-drop-rank-tracker-bad-data':
     'Search Engine Roundtable reported "significant ranking volatility" on Saturday, Oct 24, 2026 across many third-party tracking tools, plus heavy SEO chatter.',
   '/media/strategy/pay-for-ai-output-not-usage':

@@ -167,6 +167,21 @@ describe('fitDocumentTitle', () => {
     expect(resolved.title.endsWith('.')).toBe(false)
   })
 
+  it('rewrites the Lush document title without cutting the stored headline', () => {
+    const headline = 'Lush quit paid social five years ago and kept growing. Count what you own.'
+    const title = 'Lush Quit Paid Social and Kept Growing: Owned Audience Play'
+    expect(headline.length).toBeGreaterThan(DOCUMENT_TITLE_LIMIT)
+    expect(title.length).toBe(59)
+    expect(`${title}${DOCUMENT_TITLE_SUFFIX}`.length).toBeGreaterThan(DOCUMENT_TITLE_LIMIT)
+    const wordCut = truncateDocumentTitle(headline)
+    const resolved = resolveDocumentTitle(headline, wordCut, 'lush-owned-audience-no-paid-social')
+    expect(wordCut).toBe('Lush quit paid social five years ago and kept growing.')
+    expect(resolved.truncated).toBe(false)
+    expect(resolved.title).toBe(title)
+    expect(resolved.title).not.toBe(headline)
+    expect(fitDocumentTitle(headline, null, 'lush-owned-audience-no-paid-social')).toBe(title)
+  })
+
   it('adds the brand suffix to a short title only when the pair fits', () => {
     expect(fitDocumentTitle(
       'From Managed to Modern: Evolving the MSP Channel with Juan Fernandez',
