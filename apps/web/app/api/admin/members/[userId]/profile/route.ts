@@ -8,6 +8,28 @@ import {
   friendsOfGeorgeToCompPromoCodeId,
   shouldApplyFriendsOfGeorge,
 } from '@/lib/admin/fog'
+import { PROFILE_STRING_LIMITS, readProfileImageUrl } from '@/lib/onboarding/profilePatch'
+
+type ProfileImageField = 'avatar_url' | 'banner_url'
+
+// null and blank clear, same as PATCH /api/user/me. Any other value must pass
+// the member avatar/banner reader (http(s), 2048, no CSS/src breakout).
+function readAdminProfileImage(
+  field: ProfileImageField,
+  value: unknown,
+): { ok: true; value: string | null } | { ok: false; error: string } {
+  if (value === null) return { ok: true, value: null }
+  if (typeof value !== 'string') return { ok: false, error: `${field} must be a string` }
+  if (value.trim() === '') return { ok: true, value: null }
+  const read = readProfileImageUrl(value)
+  if (!read.ok) {
+    if (read.error === 'url too long') {
+      return { ok: false, error: `${field} exceeds maximum length of ${PROFILE_STRING_LIMITS.avatar_url}` }
+    }
+    return { ok: false, error: `${field} must be http(s)` }
+  }
+  return { ok: true, value: read.url }
+}
 
 export async function PATCH(
   request: Request,
@@ -21,8 +43,8 @@ export async function PATCH(
     full_name?: string
     tier?: string
     tier_status?: string
-    avatar_url?: string
-    banner_url?: string
+    avatar_url?: unknown
+    banner_url?: unknown
     company?: string
     linkedin_url?: string
     website_url?: string
@@ -43,8 +65,16 @@ export async function PATCH(
   if (body.full_name       !== undefined) update.full_name       = body.full_name
   if (body.tier            !== undefined) update.tier            = body.tier
   if (body.tier_status     !== undefined) update.tier_status     = body.tier_status
-  if (body.avatar_url      !== undefined) update.avatar_url      = body.avatar_url
-  if (body.banner_url      !== undefined) update.banner_url      = body.banner_url
+  if (body.avatar_url !== undefined) {
+    const read = readAdminProfileImage('avatar_url', body.avatar_url)
+    if (!read.ok) return Response.json({ error: read.error }, { status: 422 })
+    update.avatar_url = read.value
+  }
+  if (body.banner_url !== undefined) {
+    const read = readAdminProfileImage('banner_url', body.banner_url)
+    if (!read.ok) return Response.json({ error: read.error }, { status: 422 })
+    update.banner_url = read.value
+  }
   if (body.company         !== undefined) update.company         = body.company
   if (body.linkedin_url    !== undefined) update.linkedin_url    = body.linkedin_url
   if (body.website_url     !== undefined) update.website_url     = body.website_url

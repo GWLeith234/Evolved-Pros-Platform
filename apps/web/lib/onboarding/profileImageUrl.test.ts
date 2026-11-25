@@ -51,6 +51,11 @@ const REJECTED = [
   'https://user:pass@cdn.example.com/a.png',
   'https://cdn.example.com/a.png)',
   'https://cdn.example.com/a.png"',
+  "https://cdn.example.com/a'.png",
+  'https://cdn.example.com/a`.png',
+  'https://cdn.example.com/a\\b.png',
+  'https://cdn.example.com/<a.png',
+  'https://cdn.example.com/a>.png',
   'http://',
   '//cdn.example.com/a.png',
 ]
