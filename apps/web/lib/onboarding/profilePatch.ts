@@ -50,7 +50,7 @@ export type UserMeUpdate = Partial<Record<UserMeStringField, string | null>> & {
   notification_preferences?: Record<string, string>
 }
 
-const UNSAFE_PROFILE_URL = /[\u0000-\u001F\u007F\s"'`()<>\\]/
+const UNSAFE_PROFILE_URL = /[\u0000-\u001F\u007F\s"'`()<>\\`]/
 
 /**
  * http(s) only, and safe to put in an img src or a CSS url().
