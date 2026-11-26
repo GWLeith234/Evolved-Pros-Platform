@@ -1,11 +1,14 @@
 /**
- * Hand-written document titles for podcast episodes and media stories
- * whose stored headline does not fit in 60 characters.
+ * Hand-written document titles for podcast episodes and media stories.
  *
  * Each value is a complete title, 60 characters or less, with no trailing
  * period. fitDocumentTitle adds " | Evolved Pros" when that still fits.
  * An entry longer than 60 is ignored. A word-boundary cut is not a
  * substitute: the sitemap title test fails until a slug has a row here.
+ *
+ * Most rows replace a stored headline that does not fit in 60 characters.
+ * A row may also replace a headline that already fits, so the SERP title
+ * can differ from the H1.
  */
 export const SHORT_DOCUMENT_TITLES: Readonly<Record<string, string>> = {
   'evolved-pros-podcast-ep-010-juan-fernandez':
@@ -68,4 +71,6 @@ export const SHORT_DOCUMENT_TITLES: Readonly<Record<string, string>> = {
     'Sales Burnout: Signs, Causes, and How to Recover',
   'lush-owned-audience-no-paid-social':
     'Lush Quit Paid Social and Kept Growing: Owned Audience Play',
+  'what-ai-agents-actually-automate':
+    'Google Business Home AI Agent: What It Automates & What Not',
 }

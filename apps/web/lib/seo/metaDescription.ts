@@ -151,9 +151,9 @@ function descriptionPath(pathname: string): string {
 /**
  * Hand-written replacements for descriptions trimMetaDescription would cut
  * mid-sentence, and for deks that were stored already cut off. The older
- * sitemap rows are 120–155 characters. The stored-cut media rows are
- * 150–160. Each one ends on a sentence and uses only claims already on
- * the page.
+ * sitemap rows are 120–155 characters. A finished sentence may run to 160.
+ * The stored-cut media rows are 150–160. Each one ends on a sentence and
+ * uses only claims already on the page.
  */
 export const META_DESCRIPTION_OVERRIDES: Readonly<Record<string, string>> = {
   '/podcast/evolved-pros-podcast-ep-010-juan-fernandez':
@@ -175,7 +175,7 @@ export const META_DESCRIPTION_OVERRIDES: Readonly<Record<string, string>> = {
   '/media/execution/execution-excellence-turning-plans-results':
     'The sales industry is obsessed with talent. The natural closer. The most consistent performers are almost never the most talented people in the room.',
   '/media/strategy/what-ai-agents-actually-automate':
-    "Google's Business Home beta and an overnight backlink bot show what AI agents really take off your plate. Deciding what's worth doing is still on you.",
+    "Google's Business Home beta uses Gemini to write posts, answer reviews and update your Business Profile. Here's what AI agents automate and what's still on you.",
   '/media/foundation/cooking-with-tallow-three-recipes':
     "Beef tallow is stable and full of flavour. Here's what it is, an honest word on the saturated-fat question, and three recipes that earn their place.",
   '/media/strategy/agentic-buying-proof-gap':

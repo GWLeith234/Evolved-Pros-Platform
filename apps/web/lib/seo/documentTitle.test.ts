@@ -182,6 +182,24 @@ describe('fitDocumentTitle', () => {
     expect(fitDocumentTitle(headline, null, 'lush-owned-audience-no-paid-social')).toBe(title)
   })
 
+  it('rewrites the AI agents document title while the stored headline still fits', () => {
+    const headline = "What AI Agents Actually Automate (and What They Don't)"
+    const title = 'Google Business Home AI Agent: What It Automates & What Not'
+    const fallback = 'Google Business Home AI: What Agents Really Automate'
+    expect(headline.length).toBe(54)
+    expect(headline.length).toBeLessThanOrEqual(DOCUMENT_TITLE_LIMIT)
+    expect(title.length).toBe(59)
+    expect(`${title}${DOCUMENT_TITLE_SUFFIX}`.length).toBeGreaterThan(DOCUMENT_TITLE_LIMIT)
+    expect(fitDocumentTitle(headline)).toBe(headline)
+    const resolved = resolveDocumentTitle(headline, headline, 'what-ai-agents-actually-automate')
+    expect(resolved.truncated).toBe(false)
+    expect(resolved.title).toBe(title)
+    expect(resolved.title).not.toBe(headline)
+    expect(resolved.title).not.toBe(fallback)
+    expect(fitDocumentTitle(headline, null, 'what-ai-agents-actually-automate')).toBe(title)
+    expect(mediaStoryTitle(headline, headline, 'what-ai-agents-actually-automate')).toBe(title)
+  })
+
   it('adds the brand suffix to a short title only when the pair fits', () => {
     expect(fitDocumentTitle(
       'From Managed to Modern: Evolving the MSP Channel with Juan Fernandez',

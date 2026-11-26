@@ -5,8 +5,11 @@
  * <title> element (and og:title / twitter:title when they share that string).
  * It does not rewrite H1s, JSON-LD names, descriptions, or stored headlines.
  *
- * Headlines that do not fit use SHORT_DOCUMENT_TITLES. A word-boundary cut
- * is only a last resort, and the sitemap title test fails when one is needed.
+ * A hand-written short title for the slug is the document title, including
+ * when the stored headline already fits in 60 characters. That keeps the
+ * H1 and lets the SERP title differ. Headlines without a short title use
+ * " | Evolved Pros" when that fits, then the headline alone. A word-boundary
+ * cut is only a last resort, and the sitemap title test fails when one is needed.
  */
 
 import { SHORT_DOCUMENT_TITLES } from './shortDocumentTitles'
@@ -130,10 +133,10 @@ function withBrandWhenItFits(text: string): string {
 }
 
 /**
- * Headline plus " | Evolved Pros" when that fits in 60 characters.
- * Otherwise the headline alone, then a hand-written short title for the
- * slug (also with the suffix when it fits), then a distinct seo_title
- * that fits, then a word-boundary cut of the headline.
+ * A hand-written short title for the slug wins, with " | Evolved Pros"
+ * when that still fits in 60 characters. Otherwise the headline plus the
+ * suffix when that fits, then the headline alone, then a distinct
+ * seo_title that fits, then a word-boundary cut of the headline.
  */
 export function resolveDocumentTitle(
   headline: string,
@@ -141,17 +144,16 @@ export function resolveDocumentTitle(
   slug?: string | null,
 ): DocumentTitleResolution {
   const head = normalize(headline)
+  const manual = shortTitleForSlug(slug)
   if (!head) {
-    const manual = shortTitleForSlug(slug)
     if (manual) return { title: withBrandWhenItFits(manual), truncated: false }
     const seo = usableSeoTitle(seoTitle, head)
     return { title: seo ?? '', truncated: false }
   }
+  if (manual) return { title: withBrandWhenItFits(manual), truncated: false }
   const withBrand = `${head}${DOCUMENT_TITLE_SUFFIX}`
   if (withBrand.length <= DOCUMENT_TITLE_LIMIT) return { title: withBrand, truncated: false }
   if (head.length <= DOCUMENT_TITLE_LIMIT) return { title: head, truncated: false }
-  const manual = shortTitleForSlug(slug)
-  if (manual) return { title: withBrandWhenItFits(manual), truncated: false }
   const seo = usableSeoTitle(seoTitle, head)
   if (seo) return { title: seo, truncated: false }
   return { title: truncateDocumentTitle(head), truncated: true }
