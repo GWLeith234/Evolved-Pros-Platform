@@ -69,11 +69,15 @@ function httpsUrl(length: number): string {
 }
 
 function patch(body: unknown) {
+  return patchRaw(JSON.stringify(body))
+}
+
+function patchRaw(body: string) {
   return PATCH(
     new Request(`http://localhost/api/admin/members/${USER_ID}/profile`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      body,
     }),
     { params: { userId: USER_ID } },
   )
@@ -92,6 +96,18 @@ describe('PATCH /api/admin/members/[userId]/profile image urls', () => {
     writes.length = 0
     filters.length = 0
     state.admin = true
+  })
+
+  it('returns 400 for invalid JSON, null, and non-object bodies and does not write', async () => {
+    const bodies = ['{', 'null', '[]', '"https://cdn.example.com/a.png"', '1']
+    for (const body of bodies) {
+      const res = await patchRaw(body)
+      expect(res.status, body).toBe(400)
+      const payload = await res.json()
+      expect(payload, body).toEqual({ error: 'Invalid JSON' })
+      expect(JSON.stringify(payload)).not.toMatch(/SyntaxError|Unexpected token|Cannot read properties/)
+    }
+    expect(writes).toEqual([])
   })
 
   it('returns 401 and does not write when the caller is not an admin', async () => {

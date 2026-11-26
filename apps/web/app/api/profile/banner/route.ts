@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { logProviderError } from '@/lib/http/clientError'
-import { readProfileImageUrl } from '@/lib/onboarding/profilePatch'
+import { readJsonObject, readProfileImageUrl } from '@/lib/onboarding/profilePatch'
 
 /**
  * PATCH /api/profile/banner
@@ -22,17 +22,10 @@ export async function PATCH(request: Request) {
   const profile = await resolveCurrentUser(supabase)
   if (!profile) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  let body: { url?: unknown }
-  try {
-    body = await request.json()
-  } catch {
-    return NextResponse.json(
-      { error: 'Content-Type must be application/json' },
-      { status: 415 },
-    )
-  }
+  const parsed = await readJsonObject(request)
+  if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
 
-  const read = readProfileImageUrl(body.url)
+  const read = readProfileImageUrl(parsed.body.url)
   if (!read.ok) return NextResponse.json({ error: read.error }, { status: 422 })
   const url = read.url
 
