@@ -40,7 +40,11 @@ export async function PATCH(request: Request) {
 
   const parsed = userMePatchUpdate(body)
   if (!parsed.ok) {
-    return NextResponse.json({ error: parsed.error }, { status: 400 })
+    const status =
+      parsed.error === 'linkedin_url must be http(s)' || parsed.error === 'website_url must be http(s)'
+        ? 422
+        : 400
+    return NextResponse.json({ error: parsed.error }, { status })
   }
   if (Object.keys(parsed.update).length === 0) {
     return NextResponse.json({ error: 'No valid fields provided' }, { status: 400 })

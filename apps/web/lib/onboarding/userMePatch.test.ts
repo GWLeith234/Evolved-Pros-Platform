@@ -136,6 +136,51 @@ describe('PATCH /api/user/me', () => {
     expect(writes).toEqual([])
   })
 
+  it('returns 422 and does not write a linkedin or website url that is not http(s)', async () => {
+    const rejected = [
+      'javascript:alert(1)',
+      'JAVASCRIPT:alert(1)',
+      '  javascript:alert(1)  ',
+      'vbscript:msgbox(1)',
+      'data:text/html,hello',
+      'ftp://files.example.com/a',
+    ]
+    for (const field of ['linkedin_url', 'website_url'] as const) {
+      for (const url of rejected) {
+        const res = await patch(JSON.stringify({ [field]: url, display_name: 'Ada' }))
+        expect(res.status, `${field} ${JSON.stringify(url)}`).toBe(422)
+        expect(await res.json()).toEqual({ error: `${field} must be http(s)` })
+      }
+    }
+    expect(writes).toEqual([])
+  })
+
+  it('stores a trimmed https link and clears null or blank links', async () => {
+    const saved = await patch(JSON.stringify({
+      linkedin_url: '  https://linkedin.com/in/ada  ',
+      website_url: 'https://ada.example',
+    }))
+    expect(saved.status).toBe(200)
+
+    const cleared = await patch(JSON.stringify({
+      linkedin_url: null,
+      website_url: '',
+    }))
+    expect(cleared.status).toBe(200)
+
+    const blank = await patch(JSON.stringify({ website_url: '   ' }))
+    expect(blank.status).toBe(200)
+
+    expect(writes).toEqual([
+      {
+        linkedin_url: 'https://linkedin.com/in/ada',
+        website_url: 'https://ada.example',
+      },
+      { linkedin_url: null, website_url: null },
+      { website_url: null },
+    ])
+  })
+
   it('returns 400 for avatar and banner urls that are not http(s)', async () => {
     const rejected = [
       'javascript:alert(1)',

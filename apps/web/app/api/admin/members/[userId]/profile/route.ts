@@ -8,7 +8,13 @@ import {
   friendsOfGeorgeToCompPromoCodeId,
   shouldApplyFriendsOfGeorge,
 } from '@/lib/admin/fog'
-import { PROFILE_STRING_LIMITS, readJsonObject, readProfileImageUrl } from '@/lib/onboarding/profilePatch'
+import {
+  PROFILE_STRING_LIMITS,
+  readJsonObject,
+  readProfileImageUrl,
+  readProfileLinkUrl,
+  type ProfileLinkField,
+} from '@/lib/onboarding/profilePatch'
 
 type ProfileImageField = 'avatar_url' | 'banner_url'
 
@@ -49,8 +55,8 @@ export async function PATCH(
     avatar_url?: unknown
     banner_url?: unknown
     company?: string
-    linkedin_url?: string
-    website_url?: string
+    linkedin_url?: unknown
+    website_url?: unknown
     twitter_handle?: string
     phone?: string
     phone_visible?: boolean
@@ -79,8 +85,12 @@ export async function PATCH(
     update.banner_url = read.value
   }
   if (body.company         !== undefined) update.company         = body.company
-  if (body.linkedin_url    !== undefined) update.linkedin_url    = body.linkedin_url
-  if (body.website_url     !== undefined) update.website_url     = body.website_url
+  for (const field of ['linkedin_url', 'website_url'] as const satisfies readonly ProfileLinkField[]) {
+    if (body[field] === undefined) continue
+    const read = readProfileLinkUrl(field, body[field])
+    if (!read.ok) return Response.json({ error: read.error }, { status: 422 })
+    update[field] = read.value
+  }
   if (body.twitter_handle  !== undefined) update.twitter_handle  = body.twitter_handle
   if (body.phone           !== undefined) update.phone           = body.phone
   if (body.phone_visible   !== undefined) update.phone_visible   = body.phone_visible

@@ -25,7 +25,14 @@ export const USER_ME_STRING_LIMITS = {
   goal_90day: 500,
 } as const
 
-const HTTP_URL_FIELDS = new Set<keyof typeof USER_ME_STRING_LIMITS>(['avatar_url', 'banner_url'])
+const HTTP_URL_FIELDS = new Set<keyof typeof USER_ME_STRING_LIMITS>([
+  'avatar_url',
+  'banner_url',
+  'linkedin_url',
+  'website_url',
+])
+
+export type ProfileLinkField = 'linkedin_url' | 'website_url'
 
 const CURRENT_PILLARS = new Set(['p1', 'p2', 'p3', 'p4', 'p5', 'p6'])
 
@@ -116,6 +123,20 @@ function readOptionalString(
     return { ok: false, error: `${field} must be http(s)` }
   }
   return { ok: true, present: true, value: trimmed.length === 0 ? null : trimmed }
+}
+
+export function readProfileLinkUrl(
+  field: ProfileLinkField,
+  value: unknown,
+): { ok: true; value: string | null } | { ok: false; error: string } {
+  const read = readOptionalString(
+    { [field]: value },
+    field,
+    USER_ME_STRING_LIMITS[field],
+    true,
+  )
+  if (!read.ok) return read
+  return { ok: true, value: read.present ? read.value : null }
 }
 
 export function profilePatchUpdate(body: unknown): { ok: true; update: ProfileUpdate } | { ok: false; error: string } {

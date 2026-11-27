@@ -136,7 +136,7 @@ describe('PATCH /api/profile/avatar and /api/profile/banner', () => {
   })
 
   it('returns 400 for invalid JSON, null, and non-object bodies and does not write', async () => {
-    const bodies = ['{', 'null', '[]', '"https://cdn.example.com/a.png"', '1']
+    const bodies = ['', '{', 'null', '[]', 'true', '"https://cdn.example.com/a.png"', '1']
     for (const route of routes) {
       for (const body of bodies) {
         const res = await patch(route.handler, route.path, body)
