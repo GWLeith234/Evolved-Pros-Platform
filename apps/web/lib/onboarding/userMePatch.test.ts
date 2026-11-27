@@ -181,6 +181,101 @@ describe('PATCH /api/user/me', () => {
     ])
   })
 
+  it('normalizes a bare domain on linkedin and website urls and saves https', async () => {
+    const bare = [
+      ['example.com', 'https://example.com'],
+      ['www.example.com/about', 'https://www.example.com/about'],
+      ['linkedin.com/in/member', 'https://linkedin.com/in/member'],
+    ] as const
+
+    const both = await patch(JSON.stringify({
+      linkedin_url: 'linkedin.com/in/member',
+      website_url: 'example.com',
+      display_name: 'Ada',
+    }))
+    expect(both.status).toBe(200)
+
+    for (const field of ['linkedin_url', 'website_url'] as const) {
+      for (const [raw, saved] of bare) {
+        const res = await patch(JSON.stringify({ [field]: raw }))
+        expect(res.status, `${field} ${raw}`).toBe(200)
+        expect(writes.at(-1)).toEqual({ [field]: saved })
+      }
+    }
+
+    const padded = await patch(JSON.stringify({ website_url: '  www.example.com/about  ' }))
+    expect(padded.status).toBe(200)
+
+    expect(writes[0]).toEqual({
+      linkedin_url: 'https://linkedin.com/in/member',
+      website_url: 'https://example.com',
+      display_name: 'Ada',
+    })
+    expect(writes.at(-1)).toEqual({ website_url: 'https://www.example.com/about' })
+  })
+
+  it('returns 422 and does not write a scheme-less link that is not a bare domain', async () => {
+    const rejected = [
+      'not-a-domain',
+      'not-a-url',
+      'localhost',
+      'foo',
+      '//example.com',
+      'example.com/has space',
+      'example.com/a b',
+      'example.com/a"b',
+      'example.com/a<b',
+      'example.com/\u0000x',
+      'https://user:pass@example.com/path',
+      'user:pass@example.com',
+    ]
+    for (const field of ['linkedin_url', 'website_url'] as const) {
+      for (const url of rejected) {
+        const res = await patch(JSON.stringify({ [field]: url, display_name: 'Ada' }))
+        expect(res.status, `${field} ${JSON.stringify(url)}`).toBe(422)
+        expect(await res.json()).toEqual({ error: `${field} must be http(s)` })
+      }
+    }
+    expect(writes).toEqual([])
+  })
+
+  it('returns 400 and does not write a non-string linkedin or website url', async () => {
+    const rejected = [0, 1, true, false, ['https://example.com'], { url: 'https://example.com' }]
+    for (const field of ['linkedin_url', 'website_url'] as const) {
+      for (const value of rejected) {
+        const res = await patch(JSON.stringify({ [field]: value, display_name: 'Ada' }))
+        expect(res.status, `${field} ${JSON.stringify(value)}`).toBe(400)
+        expect(await res.json()).toEqual({ error: `${field} must be a string` })
+      }
+    }
+    expect(writes).toEqual([])
+  })
+
+  it('caps a bare domain after https:// is prepended', async () => {
+    const max = USER_ME_STRING_LIMITS.linkedin_url
+    const room = max - 'https://'.length
+    const exact = `${'a'.repeat(room - 4)}.com`
+    const over = `${'a'.repeat(room - 3)}.com`
+    expect(exact).toHaveLength(room)
+    expect(`https://${exact}`).toHaveLength(max)
+    expect(`https://${over}`).toHaveLength(max + 1)
+
+    for (const field of ['linkedin_url', 'website_url'] as const) {
+      const ok = await patch(JSON.stringify({ [field]: `  ${exact}  ` }))
+      expect(ok.status, field).toBe(200)
+      const tooLong = await patch(JSON.stringify({ [field]: over, display_name: 'Ada' }))
+      expect(tooLong.status, field).toBe(400)
+      expect(await tooLong.json()).toEqual({
+        error: `${field} exceeds maximum length of ${max}`,
+      })
+    }
+
+    expect(writes).toEqual([
+      { linkedin_url: `https://${exact}` },
+      { website_url: `https://${exact}` },
+    ])
+  })
+
   it('returns 400 for avatar and banner urls that are not http(s)', async () => {
     const rejected = [
       'javascript:alert(1)',
@@ -191,6 +286,19 @@ describe('PATCH /api/user/me', () => {
     ]
     for (const url of rejected) {
       const avatar = await patch(JSON.stringify({ avatar_url: url }))
+      expect(avatar.status, url).toBe(400)
+      expect(await avatar.json()).toEqual({ error: 'avatar_url must be http(s)' })
+      const banner = await patch(JSON.stringify({ banner_url: url }))
+      expect(banner.status, url).toBe(400)
+      expect(await banner.json()).toEqual({ error: 'banner_url must be http(s)' })
+    }
+    expect(writes).toEqual([])
+  })
+
+  it('returns 400 for a bare-domain avatar or banner and does not add https://', async () => {
+    const urls = ['example.com', 'cdn.example.com/a.png', 'www.example.com/about']
+    for (const url of urls) {
+      const avatar = await patch(JSON.stringify({ avatar_url: url, display_name: 'Ada' }))
       expect(avatar.status, url).toBe(400)
       expect(await avatar.json()).toEqual({ error: 'avatar_url must be http(s)' })
       const banner = await patch(JSON.stringify({ banner_url: url }))
