@@ -2,6 +2,7 @@
 
 import type { PodcastEpisode } from '@/lib/podcast/transforms'
 import type { SponsorAd } from '@/components/home/HomeSponsorAd'
+import { PODCAST_HUB_H1 } from '@/lib/podcast/hubSeo'
 import { PodcastThemeBridge } from './PodcastThemeBridge'
 import { PodcastLatestStrip } from './PodcastLatestStrip'
 import { PodcastMasthead } from './PodcastMasthead'
@@ -22,7 +23,7 @@ export function PodcastPageShell({ episodes, sponsorAds = [] }: PodcastPageShell
     return (
       <div style={{ background: 'var(--podcast-bg-page)', minHeight: '100vh', color: 'var(--podcast-text-strong)' }}>
         <PodcastThemeBridge theme={podcastTheme} />
-        <PodcastMasthead heading />
+        <PodcastMasthead pageTitle={PODCAST_HUB_H1} />
         <section style={{ maxWidth: 1280, margin: '0 auto', padding: '40px 24px 96px' }}>
           <p style={{ color: 'var(--podcast-text-3)' }}>No episodes published yet.</p>
         </section>
@@ -47,7 +48,7 @@ export function PodcastPageShell({ episodes, sponsorAds = [] }: PodcastPageShell
     <div style={{ background: 'var(--podcast-bg-page)', minHeight: '100vh', color: 'var(--podcast-text-strong)' }}>
       <PodcastThemeBridge theme={podcastTheme} />
       <PodcastLatestStrip episode={mostRecent} />
-      <PodcastMasthead />
+      <PodcastMasthead pageTitle={PODCAST_HUB_H1} />
       <PodcastHero episode={latest} />
       <PodcastGrid episodes={episodes} fallbackEpisode={latest} sponsorAds={sponsorAds} />
     </div>

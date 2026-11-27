@@ -5,6 +5,7 @@ import { resolveCurrentUser } from '@/lib/auth/resolveCurrentUser'
 import { dbRowToEpisode, assertMonotonicNumbering, type EpisodeRow, type ProgressRow } from '@/lib/podcast/transforms'
 import { PodcastPageShell } from '@/components/podcast/PodcastPageShell'
 import { podcastSeriesJsonLd } from '@/lib/podcast/episodeJsonLd'
+import { PODCAST_HUB_DESCRIPTION, PODCAST_HUB_TITLE } from '@/lib/podcast/hubSeo'
 import { SERIES_NAME, getPodcastSponsorPool } from '@/lib/podcast/public'
 import { publicPageMetadata } from '@/lib/seo/canonical'
 
@@ -16,14 +17,17 @@ import { publicPageMetadata } from '@/lib/seo/canonical'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = publicPageMetadata('/podcast', {
-  title: `${SERIES_NAME} | Evolved Pros`,
-  description:
-    'Long-form conversations on AI, go-to-market, and the evolution of work with George Leith and guests. Full transcripts, chapters, and highlights.',
+  title: PODCAST_HUB_TITLE,
+  description: PODCAST_HUB_DESCRIPTION,
   openGraph: {
     type: 'website',
-    title: SERIES_NAME,
-    description: 'Long-form conversations on AI, go-to-market, and the evolution of work with George Leith and guests.',
+    title: PODCAST_HUB_TITLE,
+    description: PODCAST_HUB_DESCRIPTION,
     siteName: SERIES_NAME,
+  },
+  twitter: {
+    title: PODCAST_HUB_TITLE,
+    description: PODCAST_HUB_DESCRIPTION,
   },
 })
 

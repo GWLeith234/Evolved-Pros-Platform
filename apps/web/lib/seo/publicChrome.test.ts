@@ -18,10 +18,13 @@ describe('public chrome copy', () => {
     expect(src).not.toMatch(/>\s*404 —/)
   })
 
-  it('LIVE and podcast document titles use a pipe, not an em dash', () => {
+  it('LIVE uses a pipe, and the podcast hub title does not add a second brand suffix', () => {
     expect(read('../../app/live/page.tsx')).toMatch(/title: 'LIVE \| Evolved Pros'/)
     expect(read('../../app/live/page.tsx')).not.toMatch(/LIVE — Evolved Pros/)
-    expect(read('../../app/(public)/podcast/(index)/page.tsx')).toMatch(/\$\{SERIES_NAME\} \| Evolved Pros/)
+    const podcastHub = read('../../app/(public)/podcast/(index)/page.tsx')
+    expect(podcastHub).toMatch(/title: PODCAST_HUB_TITLE/)
+    expect(podcastHub).not.toMatch(/\$\{SERIES_NAME\} \| Evolved Pros/)
+    expect(podcastHub).not.toMatch(/\| Evolved Pros/)
     expect(read('../../app/(public)/podcast/[slug]/page.tsx')).toMatch(
       /fitDocumentTitle\(ep\.title, null, ep\.slug\)/,
     )

@@ -306,8 +306,8 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
             )}
           </div>
 
-          {/* Title */}
-          <h1
+          {/* Title. Hub H1 is the show name; this featured episode is an h2. */}
+          <h2
             style={{
               margin: 0,
               fontFamily: FB,
@@ -320,7 +320,7 @@ export function PodcastHero({ episode }: PodcastHeroProps) {
             }}
           >
             {episode.title}
-          </h1>
+          </h2>
 
           {/* Blurb */}
           {episode.blurb && (
