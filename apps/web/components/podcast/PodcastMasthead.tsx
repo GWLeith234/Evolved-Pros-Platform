@@ -41,7 +41,14 @@ export function PodcastMastheadLockup({ heading = false }: { heading?: boolean }
   )
 }
 
-export function PodcastMasthead({ heading = false }: { heading?: boolean } = {}) {
+export function PodcastMasthead({
+  heading = false,
+  pageTitle,
+}: {
+  heading?: boolean
+  /** Visible show name. When set, this is the only h1; the lockup stays a div. */
+  pageTitle?: string
+} = {}) {
   return (
     <header
       className="ep-podcast-masthead"
@@ -55,7 +62,23 @@ export function PodcastMasthead({ heading = false }: { heading?: boolean } = {})
         fontFamily: FB,
       }}
     >
-      <PodcastMastheadLockup heading={heading} />
+      {pageTitle ? (
+        <h1
+          style={{
+            margin: '0 0 18px',
+            textAlign: 'center',
+            fontFamily: FB,
+            fontWeight: 700,
+            fontSize: 'clamp(30px, 4vw, 42px)',
+            lineHeight: 1.1,
+            letterSpacing: '-0.015em',
+            color: 'var(--podcast-text-strong)',
+          }}
+        >
+          {pageTitle}
+        </h1>
+      ) : null}
+      <PodcastMastheadLockup heading={heading && !pageTitle} />
       <p
         style={{
           margin: '12px 0 0',

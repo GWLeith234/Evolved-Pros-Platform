@@ -64,4 +64,26 @@ describe('podcast hub crawlable episode links', () => {
     expect(html).toContain('href="https://www.youtube.com/watch?v=juan"')
     expect(html).toContain('Watch on YouTube')
   })
+
+  it('uses one show h1 and keeps the featured episode title as an h2', () => {
+    const html = renderToStaticMarkup(
+      <ThemeProvider>
+        <PodcastPageShell episodes={PUBLISHED} />
+      </ThemeProvider>,
+    )
+    expect(html.match(/<h1\b/g)).toHaveLength(1)
+    expect(html).toContain('>The Evolved Pros Podcast</h1>')
+    expect(html).toContain('>Conversation 10</h2>')
+    expect(html).not.toMatch(/<h1[^>]*>Conversation 10<\/h1>/)
+  })
+
+  it('keeps a single show h1 when the catalogue is empty', () => {
+    const html = renderToStaticMarkup(
+      <ThemeProvider>
+        <PodcastPageShell episodes={[]} />
+      </ThemeProvider>,
+    )
+    expect(html.match(/<h1\b/g)).toHaveLength(1)
+    expect(html).toContain('>The Evolved Pros Podcast</h1>')
+  })
 })

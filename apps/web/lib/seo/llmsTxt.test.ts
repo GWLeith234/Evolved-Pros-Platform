@@ -343,7 +343,11 @@ describe('llms.txt route shares the sitemap query', () => {
     const careers = readFileSync(resolve(__dirname, '../../app/(public)/media/careers/page.tsx'), 'utf8')
     const series = readFileSync(resolve(__dirname, '../podcast/public.ts'), 'utf8')
     expect(series).toContain(`export const SERIES_NAME = '${LLMS_PODCAST_SERIES_NAME}'`)
-    expect(podcast).toContain(LLMS_PODCAST_PAGE_DESCRIPTION)
+    expect(podcast).toContain('PODCAST_HUB_TITLE')
+    expect(podcast).toContain('PODCAST_HUB_DESCRIPTION')
+    expect(LLMS_PODCAST_PAGE_DESCRIPTION).toBe(
+      'Weekly long-form interviews with George Leith and operators on AI, sales leadership and go-to-market. Transcripts, chapters and highlights for every episode.',
+    )
     expect(careers).toContain(LLMS_CAREERS_PAGE_DESCRIPTION)
   })
 })

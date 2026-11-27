@@ -18,6 +18,7 @@ import { stripEmDashCopy } from '@/lib/home/cardImagery'
 import { HOME_SUB, HOME_TITLE } from '@/lib/home/conversion'
 import { MEDIA_HUB_DESCRIPTION, MEDIA_HUB_DOCUMENT_TITLE, mediaSectionTitle } from '@/lib/media/brand'
 import { mediaArticlePath, toMediaSitemapEntries, type MediaStorySitemapRow } from '@/lib/media/sitemap'
+import { PODCAST_HUB_DESCRIPTION, PODCAST_HUB_TITLE } from '@/lib/podcast/hubSeo'
 import { getPillarLabel } from '@/lib/pillars'
 import { CANONICAL_ORIGIN, canonicalUrl } from '@/lib/seo/canonical'
 import {
@@ -54,9 +55,8 @@ import {
  */
 export const LLMS_PODCAST_SERIES_NAME = 'The Evolved Pros Podcast'
 
-/** Same description app/(public)/podcast/(index)/page.tsx sets. */
-export const LLMS_PODCAST_PAGE_DESCRIPTION =
-  'Long-form conversations on AI, go-to-market, and the evolution of work with George Leith and guests. Full transcripts, chapters, and highlights.'
+/** Same description app/(public)/podcast/(index)/page.tsx sets via PODCAST_HUB_DESCRIPTION. */
+export const LLMS_PODCAST_PAGE_DESCRIPTION = PODCAST_HUB_DESCRIPTION
 
 /** Same description app/(public)/media/careers/page.tsx sets. */
 export const LLMS_CAREERS_PAGE_DESCRIPTION =
@@ -105,7 +105,7 @@ Evolved Pros is a platform, not a podcast-only brand. Members start free in Comm
 const STATIC_PAGE_COPY: Record<PublicSitemapPath, { title: string; description: string }> = {
   '/': { title: HOME_TITLE, description: HOME_SUB },
   '/podcast': {
-    title: `${LLMS_PODCAST_SERIES_NAME} | Evolved Pros`,
+    title: PODCAST_HUB_TITLE,
     description: LLMS_PODCAST_PAGE_DESCRIPTION,
   },
   '/live': { title: 'LIVE | Evolved Pros', description: LIVE_PAGE_DESCRIPTION },
