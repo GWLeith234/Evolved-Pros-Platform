@@ -357,10 +357,13 @@ describe('sitemap descriptions do not end mid-sentence', () => {
       expect(override).toBeTruthy()
       const sentence = override ?? ''
       expect(sentence.length).toBeGreaterThanOrEqual(120)
-      expect(sentence.length).toBeLessThanOrEqual(META_DESCRIPTION_MAX)
+      const cap = endsMetaSentence(sentence) ? META_DESCRIPTION_SENTENCE_MAX : META_DESCRIPTION_MAX
+      expect(sentence.length).toBeLessThanOrEqual(cap)
       expect(sentence).toMatch(/[.!?]$/)
       expect(sentence).not.toMatch(/[\u2013\u2014]/)
-      expect(metaDescriptionNeedsMidSentenceCut(sentence)).toBe(false)
+      if (sentence.length <= META_DESCRIPTION_MAX) {
+        expect(metaDescriptionNeedsMidSentenceCut(sentence)).toBe(false)
+      }
       expect(sentence).not.toBe(trimMetaDescription(item.source))
 
       for (const incoming of [item.source, trimMetaDescription(item.source)]) {
@@ -462,6 +465,102 @@ function outboundStory(): MediaStoryRecord {
     created_at: '2026-06-01T00:00:00.000Z',
   }
 }
+
+const AI_AGENTS_PATH = '/media/strategy/what-ai-agents-actually-automate'
+const AI_AGENTS_H1 = "What AI Agents Actually Automate (and What They Don't)"
+const AI_AGENTS_TITLE = 'Google Business Home AI Agent: What It Automates & What Not'
+const AI_AGENTS_DESCRIPTION =
+  "Google's Business Home beta uses Gemini to write posts, answer reviews and update your Business Profile. Here's what AI agents automate and what's still on you."
+const AI_AGENTS_STORED =
+  "Google's Business Home beta and an overnight backlink bot show what AI agents really take off your plate. It's the chores. Deciding what's worth doing is still on you."
+
+function aiAgentsStory(): MediaStoryRecord {
+  return {
+    id: 'b7e1c4a2-6d08-4f3a-9c11-2a8e5d0f14c6',
+    title: AI_AGENTS_H1,
+    slug: 'what-ai-agents-actually-automate',
+    excerpt: AI_AGENTS_STORED,
+    body: 'A later paragraph that must not replace the search snippet.',
+    pillar: 'strategy',
+    story_type: 'article',
+    source_url: null,
+    source_name: null,
+    featured_image_url: null,
+    author: 'George Leith',
+    seo_title: null,
+    seo_description: AI_AGENTS_STORED,
+    tags: [],
+    is_published: true,
+    published_at: '2026-10-01T00:00:00.000Z',
+    updated_at: '2026-10-01T00:00:00.000Z',
+    created_at: '2026-10-01T00:00:00.000Z',
+  }
+}
+
+describe('AI agents search snippet', () => {
+  it('writes the Business Home title and description to the search and social tags', () => {
+    expect(AI_AGENTS_TITLE.length).toBe(59)
+    expect(AI_AGENTS_DESCRIPTION.length).toBe(160)
+    expect(AI_AGENTS_DESCRIPTION.length).toBeLessThanOrEqual(META_DESCRIPTION_SENTENCE_MAX)
+    expect(AI_AGENTS_DESCRIPTION).toMatch(/\.$/)
+    expect(AI_AGENTS_DESCRIPTION).not.toMatch(/[\u2013\u2014\u2018\u2019]/)
+    expect(metaDescriptionOverride(AI_AGENTS_PATH)).toBe(AI_AGENTS_DESCRIPTION)
+    expect(articleSearchSnippet(AI_AGENTS_PATH)).toBeUndefined()
+
+    const story = aiAgentsStory()
+    expect(story.title).toBe(AI_AGENTS_H1)
+    const social = mediaStorySocialMetadata(story)
+    expect(social.title).toBe(AI_AGENTS_TITLE)
+    expect(social.openGraph?.title).toBe(AI_AGENTS_TITLE)
+    expect((social.twitter as { title?: string }).title).toBe(AI_AGENTS_TITLE)
+
+    const meta = publicPageMetadata(AI_AGENTS_PATH, social)
+    expect(meta.title).toBe(AI_AGENTS_TITLE)
+    expect(meta.description).toBe(AI_AGENTS_DESCRIPTION)
+    expect(meta.openGraph?.title).toBe(AI_AGENTS_TITLE)
+    expect(meta.openGraph?.description).toBe(AI_AGENTS_DESCRIPTION)
+    expect(meta.alternates?.canonical).toBe(`https://www.evolvedpros.com${AI_AGENTS_PATH}`)
+    expect(meta.openGraph?.url).toBe(`https://www.evolvedpros.com${AI_AGENTS_PATH}`)
+    const twitter = meta.twitter as { title?: string; description?: string }
+    expect(twitter.title).toBe(AI_AGENTS_TITLE)
+    expect(twitter.description).toBe(AI_AGENTS_DESCRIPTION)
+  })
+
+  it('keeps the H1, canonical, and JSON-LD author and publisher', () => {
+    expect(mediaStoryTitle(AI_AGENTS_H1, null, 'what-ai-agents-actually-automate')).toBe(AI_AGENTS_TITLE)
+    expect(mediaStoryTitle(AI_AGENTS_H1, null, 'what-ai-agents-actually-automate')).not.toBe(AI_AGENTS_H1)
+
+    const document = readFileSync(resolve(here, '../../components/media/MediaStoryDocument.tsx'), 'utf8')
+    expect(document).toContain('<h1 className="ep-media-article-title">{story.title}</h1>')
+    expect(document).toContain('headline: story.title')
+    expect(document).toContain('authorName: byline')
+
+    const schema = articleJsonLd({
+      headline: AI_AGENTS_H1,
+      description: AI_AGENTS_STORED,
+      authorName: 'George Leith',
+      datePublished: '2026-10-01T00:00:00.000Z',
+      dateModified: '2026-10-01T00:00:00.000Z',
+      url: `https://www.evolvedpros.com${AI_AGENTS_PATH}`,
+      image: 'https://www.evolvedpros.com/logo_horizontal_navy.png',
+    })
+    expect(schema.headline).toBe(AI_AGENTS_H1)
+    expect(schema.headline).not.toBe(AI_AGENTS_TITLE)
+    expect(schema.url).toBe(`https://www.evolvedpros.com${AI_AGENTS_PATH}`)
+    expect(schema.author).toEqual({
+      '@type': 'Person',
+      '@id': 'https://georgeleith.com/#person',
+      name: 'George Leith',
+      url: 'https://georgeleith.com/',
+    })
+    expect(schema.publisher).toMatchObject({
+      '@type': 'Organization',
+      '@id': ORGANIZATION_ID,
+      name: 'Evolved Pros',
+      url: 'https://www.evolvedpros.com',
+    })
+  })
+})
 
 describe('outbound stack search snippet', () => {
   it('joins an em dash before a lowercase word with a comma', () => {
