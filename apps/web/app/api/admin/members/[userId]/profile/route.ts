@@ -8,7 +8,7 @@ import {
   friendsOfGeorgeToCompPromoCodeId,
   shouldApplyFriendsOfGeorge,
 } from '@/lib/admin/fog'
-import { PROFILE_STRING_LIMITS, readProfileImageUrl } from '@/lib/onboarding/profilePatch'
+import { PROFILE_STRING_LIMITS, readJsonObject, readProfileImageUrl } from '@/lib/onboarding/profilePatch'
 
 type ProfileImageField = 'avatar_url' | 'banner_url'
 
@@ -38,7 +38,10 @@ export async function PATCH(
   const guard = await requireAdminApi()
   if (guard instanceof Response) return guard
 
-  const body = await request.json() as {
+  const parsed = await readJsonObject(request)
+  if (!parsed.ok) return Response.json({ error: parsed.error }, { status: 400 })
+
+  const body = parsed.body as {
     display_name?: string
     full_name?: string
     tier?: string

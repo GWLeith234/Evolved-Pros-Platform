@@ -135,11 +135,16 @@ describe('PATCH /api/profile/avatar and /api/profile/banner', () => {
     expect(writes).toEqual([])
   })
 
-  it('returns 415 for a body that is not JSON', async () => {
+  it('returns 400 for invalid JSON, null, and non-object bodies and does not write', async () => {
+    const bodies = ['{', 'null', '[]', '"https://cdn.example.com/a.png"', '1']
     for (const route of routes) {
-      const res = await patch(route.handler, route.path, '{')
-      expect(res.status, route.name).toBe(415)
-      expect(await res.json()).toEqual({ error: 'Content-Type must be application/json' })
+      for (const body of bodies) {
+        const res = await patch(route.handler, route.path, body)
+        expect(res.status, `${route.name} ${body}`).toBe(400)
+        const payload = await res.json()
+        expect(payload, `${route.name} ${body}`).toEqual({ error: 'Invalid JSON' })
+        expect(JSON.stringify(payload)).not.toMatch(/SyntaxError|Unexpected token|Cannot read properties/)
+      }
     }
     expect(writes).toEqual([])
   })

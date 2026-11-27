@@ -80,6 +80,22 @@ export function readProfileImageUrl(
   return { ok: true, url }
 }
 
+/** JSON object body. Invalid JSON, null, and non-objects share one client error. */
+export async function readJsonObject(
+  request: Request,
+): Promise<{ ok: true; body: Record<string, unknown> } | { ok: false; error: string }> {
+  let body: unknown
+  try {
+    body = await request.json()
+  } catch {
+    return { ok: false, error: 'Invalid JSON' }
+  }
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+    return { ok: false, error: 'Invalid JSON' }
+  }
+  return { ok: true, body: body as Record<string, unknown> }
+}
+
 function readOptionalString(
   record: Record<string, unknown>,
   field: string,
