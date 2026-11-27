@@ -4,7 +4,34 @@ import { createClient } from '@/lib/supabase/server'
 import { adminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { hasTierAccess } from '@/lib/tier'
+import { logProviderError } from '@/lib/http/clientError'
 import { sendEventConfirmationEmail } from '@/lib/resend/emails/event-confirmation'
+
+// Count is the number of event_rsvps rows, written under a row lock.
+// Call this only after an insert or delete returned a row. The floor is 0.
+// A failure is logged and ignored. The RSVP row is already written or deleted,
+// so the caller keeps the success response and does not see the provider text.
+async function syncRegistrationCount(eventId: string): Promise<number | null> {
+  try {
+    const { data, error } = await adminClient.rpc('set_event_registration_count', {
+      p_event_id: eventId,
+    })
+    if (error) {
+      logProviderError('[events/register] set_event_registration_count failed', error)
+      return null
+    }
+    if (typeof data !== 'number' || !Number.isFinite(data)) {
+      logProviderError('[events/register] set_event_registration_count failed', {
+        message: 'count sync returned no number',
+      })
+      return null
+    }
+    return Math.max(0, data)
+  } catch (err) {
+    logProviderError('[events/register] set_event_registration_count failed', err)
+    return null
+  }
+}
 
 export async function POST(
   _request: Request,
@@ -52,18 +79,24 @@ export async function POST(
     return NextResponse.json({ error: 'Already registered' }, { status: 409 })
   }
 
-  // Register
-  const { error: regError } = await adminClient
+  // A conflict returns an error and no row. Do not touch the shared count
+  // unless this insert created the RSVP.
+  const { data: inserted, error: regError } = await adminClient
     .from('event_rsvps')
-    .insert({ event_id: params.eventId, user_id: userId } as never)
+    .insert({ event_id: params.eventId, user_id: userId })
+    .select('event_id')
 
-  if (regError) return NextResponse.json({ error: 'Registration failed' }, { status: 500 })
+  if (regError?.code === '23505') {
+    return NextResponse.json({ error: 'Already registered' }, { status: 409 })
+  }
+  if (regError || !inserted?.length) {
+    return NextResponse.json({ error: 'Registration failed' }, { status: 500 })
+  }
 
-  // Increment registration_count
-  await adminClient
-    .from('events')
-    .update({ registration_count: event.registration_count + 1 })
-    .eq('id', params.eventId)
+  // The RSVP row is already written. Keep the success path, including points
+  // and the confirmation email, when the count sync cannot run.
+  const syncedCount = await syncRegistrationCount(params.eventId)
+  const registrationCount = syncedCount ?? event.registration_count
 
   // Award 25 points
   if (profile) {
@@ -103,7 +136,7 @@ export async function POST(
     }).catch(() => { /* non-fatal */ })
   }
 
-  return NextResponse.json({ registered: true, registrationCount: event.registration_count + 1 })
+  return NextResponse.json({ registered: true, registrationCount })
 }
 
 export async function DELETE(
@@ -150,11 +183,10 @@ export async function DELETE(
     })
   }
 
-  const newCount = Math.max(0, event.registration_count - 1)
-  await adminClient
-    .from('events')
-    .update({ registration_count: newCount })
-    .eq('id', params.eventId)
+  // The RSVP row is already gone. Keep the success path when the count sync
+  // cannot run, and answer with the count loaded before this delete.
+  const syncedCount = await syncRegistrationCount(params.eventId)
+  const registrationCount = syncedCount ?? event.registration_count
 
   // Remove this member's unread reminder. Not another member's.
   await adminClient
@@ -165,5 +197,5 @@ export async function DELETE(
     .eq('action_url', `/events/${params.eventId}`)
     .eq('is_read', false)
 
-  return NextResponse.json({ registered: false, registrationCount: newCount })
+  return NextResponse.json({ registered: false, registrationCount })
 }
