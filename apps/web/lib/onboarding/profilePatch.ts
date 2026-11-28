@@ -25,7 +25,31 @@ export const USER_ME_STRING_LIMITS = {
   goal_90day: 500,
 } as const
 
-const HTTP_URL_FIELDS = new Set<keyof typeof USER_ME_STRING_LIMITS>(['avatar_url', 'banner_url'])
+const HTTP_URL_FIELDS = new Set<keyof typeof USER_ME_STRING_LIMITS>([
+  'avatar_url',
+  'banner_url',
+])
+
+/** RFC 3986 scheme at the start. A dotted host like `example.com:8080` also matches. */
+const EXPLICIT_URL_SCHEME = /^[a-zA-Z][a-zA-Z0-9+.-]*:/
+
+function isProfileLinkField(field: string): field is ProfileLinkField {
+  return field === 'linkedin_url' || field === 'website_url'
+}
+
+/**
+ * Trimmed linkedin/website text with no scheme and a dotted host gets `https://`.
+ * Explicit schemes (`javascript:`, `ftp:`) and protocol-relative `//` hosts stay
+ * unchanged so `isProfileHttpUrl` still rejects them. Avatar and banner URLs do not use this.
+ */
+export function normalizeProfileLinkUrl(trimmed: string): string {
+  if (EXPLICIT_URL_SCHEME.test(trimmed) || trimmed.startsWith('//')) return trimmed
+  const host = trimmed.split(/[/?#]/, 1)[0] ?? ''
+  if (!host.includes('.')) return trimmed
+  return `https://${trimmed}`
+}
+
+export type ProfileLinkField = 'linkedin_url' | 'website_url'
 
 const CURRENT_PILLARS = new Set(['p1', 'p2', 'p3', 'p4', 'p5', 'p6'])
 
@@ -118,6 +142,27 @@ function readOptionalString(
   return { ok: true, present: true, value: trimmed.length === 0 ? null : trimmed }
 }
 
+export function readProfileLinkUrl(
+  field: ProfileLinkField,
+  value: unknown,
+): { ok: true; value: string | null } | { ok: false; error: string } {
+  if (value === null) return { ok: true, value: null }
+  if (typeof value !== 'string') {
+    return { ok: false, error: `${field} must be a string` }
+  }
+  const trimmed = value.trim()
+  if (trimmed.length === 0) return { ok: true, value: null }
+  const url = normalizeProfileLinkUrl(trimmed)
+  const max = USER_ME_STRING_LIMITS[field]
+  if (url.length > max) {
+    return { ok: false, error: `${field} exceeds maximum length of ${max}` }
+  }
+  if (!isProfileHttpUrl(url)) {
+    return { ok: false, error: `${field} must be http(s)` }
+  }
+  return { ok: true, value: url }
+}
+
 export function profilePatchUpdate(body: unknown): { ok: true; update: ProfileUpdate } | { ok: false; error: string } {
   if (body === null || typeof body !== 'object' || Array.isArray(body)) {
     return { ok: false, error: 'Invalid JSON' }
@@ -177,6 +222,13 @@ export function userMePatchUpdate(body: unknown): { ok: true; update: UserMeUpda
   const update: UserMeUpdate = {}
 
   for (const field of Object.keys(USER_ME_STRING_LIMITS) as UserMeStringField[]) {
+    if (isProfileLinkField(field)) {
+      if (!(field in record)) continue
+      const read = readProfileLinkUrl(field, record[field])
+      if (!read.ok) return read
+      update[field] = read.value
+      continue
+    }
     const read = readOptionalString(
       record,
       field,

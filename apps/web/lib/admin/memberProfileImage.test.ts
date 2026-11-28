@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { PROFILE_STRING_LIMITS } from '@/lib/onboarding/profilePatch'
+import { PROFILE_STRING_LIMITS, USER_ME_STRING_LIMITS } from '@/lib/onboarding/profilePatch'
 
 const writes: Record<string, unknown>[] = []
 const filters: { column: string; value: unknown }[] = []
@@ -99,7 +99,7 @@ describe('PATCH /api/admin/members/[userId]/profile image urls', () => {
   })
 
   it('returns 400 for invalid JSON, null, and non-object bodies and does not write', async () => {
-    const bodies = ['{', 'null', '[]', '"https://cdn.example.com/a.png"', '1']
+    const bodies = ['', '{', 'null', '[]', 'true', '"https://cdn.example.com/a.png"', '1']
     for (const body of bodies) {
       const res = await patchRaw(body)
       expect(res.status, body).toBe(400)
@@ -194,5 +194,197 @@ describe('PATCH /api/admin/members/[userId]/profile image urls', () => {
       expect(await res.json()).toEqual({ error: `${field} must be a string` })
     }
     expect(writes).toEqual([])
+  })
+
+  it('returns 422 for a bare-domain avatar or banner and does not add https://', async () => {
+    const urls = ['example.com', 'cdn.example.com/a.png', 'www.example.com/about']
+    for (const field of FIELDS) {
+      for (const url of urls) {
+        const res = await patch({ [field]: url, display_name: 'Ada' })
+        expect(res.status, `${field} ${url}`).toBe(422)
+        expect(await res.json()).toEqual({ error: `${field} must be http(s)` })
+      }
+    }
+    expect(writes).toEqual([])
+  })
+})
+
+const LINK_FIELDS = ['linkedin_url', 'website_url'] as const
+const LINK_MAX = USER_ME_STRING_LIMITS.linkedin_url
+
+const REJECTED_LINKS = [
+  'javascript:alert(1)',
+  'JAVASCRIPT:alert(1)',
+  '  javascript:alert(1)  ',
+  'vbscript:msgbox(1)',
+  'data:text/html,hello',
+  'ftp://files.example.com/a',
+]
+
+function linkUrl(length: number): string {
+  const prefix = 'https://example.com/'
+  return prefix + 'a'.repeat(length - prefix.length)
+}
+
+describe('PATCH /api/admin/members/[userId]/profile link urls', () => {
+  beforeEach(() => {
+    writes.length = 0
+    filters.length = 0
+    state.admin = true
+  })
+
+  it('stores a trimmed https url and clears null or blank', async () => {
+    const saved = await patch({
+      linkedin_url: '  https://linkedin.com/in/ada  ',
+      website_url: 'https://ada.example',
+      display_name: 'Ada',
+    })
+    expect(saved.status).toBe(200)
+    expect(await saved.json()).toEqual({ ok: true })
+
+    const cleared = await patch({ linkedin_url: null, website_url: '' })
+    expect(cleared.status).toBe(200)
+    const blank = await patch({ website_url: '   ' })
+    expect(blank.status).toBe(200)
+
+    expect(writtenImages()).toEqual([
+      {
+        linkedin_url: 'https://linkedin.com/in/ada',
+        website_url: 'https://ada.example',
+        display_name: 'Ada',
+      },
+      { linkedin_url: null, website_url: null },
+      { website_url: null },
+    ])
+  })
+
+  it('returns 422 and does not write a url that is not http(s)', async () => {
+    for (const field of LINK_FIELDS) {
+      for (const url of REJECTED_LINKS) {
+        const res = await patch({ [field]: url, display_name: 'Ada' })
+        expect(res.status, `${field} ${JSON.stringify(url)}`).toBe(422)
+        expect(await res.json()).toEqual({ error: `${field} must be http(s)` })
+      }
+    }
+    expect(writes).toEqual([])
+  })
+
+  it('accepts an http(s) url of 300 characters and rejects 301', async () => {
+    expect(USER_ME_STRING_LIMITS.website_url).toBe(LINK_MAX)
+    const exact = linkUrl(LINK_MAX)
+    const over = linkUrl(LINK_MAX + 1)
+    expect(exact).toHaveLength(LINK_MAX)
+    expect(over).toHaveLength(LINK_MAX + 1)
+
+    for (const field of LINK_FIELDS) {
+      const ok = await patch({ [field]: exact })
+      expect(ok.status, field).toBe(200)
+      const tooLong = await patch({ [field]: `  ${over}  `, display_name: 'Ada' })
+      expect(tooLong.status, field).toBe(422)
+      expect(await tooLong.json()).toEqual({
+        error: `${field} exceeds maximum length of ${LINK_MAX}`,
+      })
+    }
+
+    expect(writtenImages()).toEqual([
+      { linkedin_url: exact },
+      { website_url: exact },
+    ])
+  })
+
+  it('normalizes a bare domain and saves https', async () => {
+    const bare = [
+      ['example.com', 'https://example.com'],
+      ['www.example.com/about', 'https://www.example.com/about'],
+      ['linkedin.com/in/member', 'https://linkedin.com/in/member'],
+    ] as const
+
+    const both = await patch({
+      linkedin_url: 'linkedin.com/in/member',
+      website_url: 'example.com',
+      display_name: 'Ada',
+    })
+    expect(both.status).toBe(200)
+    expect(await both.json()).toEqual({ ok: true })
+
+    for (const field of LINK_FIELDS) {
+      for (const [raw, saved] of bare) {
+        const res = await patch({ [field]: raw })
+        expect(res.status, `${field} ${raw}`).toBe(200)
+        expect(writtenImages().at(-1)).toEqual({ [field]: saved })
+      }
+    }
+
+    const padded = await patch({ website_url: '  www.example.com/about  ' })
+    expect(padded.status).toBe(200)
+
+    const saved = writtenImages()
+    expect(saved[0]).toEqual({
+      linkedin_url: 'https://linkedin.com/in/member',
+      website_url: 'https://example.com',
+      display_name: 'Ada',
+    })
+    expect(saved.at(-1)).toEqual({ website_url: 'https://www.example.com/about' })
+  })
+
+  it('returns 422 and does not write a scheme-less link that is not a bare domain', async () => {
+    const rejected = [
+      'not-a-domain',
+      'not-a-url',
+      'localhost',
+      'foo',
+      '//example.com',
+      'example.com/has space',
+      'example.com/a b',
+      'example.com/a"b',
+      'example.com/a<b',
+      'example.com/\u0000x',
+      'https://user:pass@example.com/path',
+      'user:pass@example.com',
+    ]
+    for (const field of LINK_FIELDS) {
+      for (const url of rejected) {
+        const res = await patch({ [field]: url, display_name: 'Ada' })
+        expect(res.status, `${field} ${JSON.stringify(url)}`).toBe(422)
+        expect(await res.json()).toEqual({ error: `${field} must be http(s)` })
+      }
+    }
+    expect(writes).toEqual([])
+  })
+
+  it('returns 422 and does not write a non-string link', async () => {
+    const rejected = [0, 1, true, false, ['https://example.com'], { url: 'https://example.com' }]
+    for (const field of LINK_FIELDS) {
+      for (const value of rejected) {
+        const res = await patch({ [field]: value, display_name: 'Ada' })
+        expect(res.status, `${field} ${JSON.stringify(value)}`).toBe(422)
+        expect(await res.json()).toEqual({ error: `${field} must be a string` })
+      }
+    }
+    expect(writes).toEqual([])
+  })
+
+  it('caps a bare domain after https:// is prepended', async () => {
+    const room = LINK_MAX - 'https://'.length
+    const exact = `${'a'.repeat(room - 4)}.com`
+    const over = `${'a'.repeat(room - 3)}.com`
+    expect(exact).toHaveLength(room)
+    expect(`https://${exact}`).toHaveLength(LINK_MAX)
+    expect(`https://${over}`).toHaveLength(LINK_MAX + 1)
+
+    for (const field of LINK_FIELDS) {
+      const ok = await patch({ [field]: `  ${exact}  ` })
+      expect(ok.status, field).toBe(200)
+      const tooLong = await patch({ [field]: over, display_name: 'Ada' })
+      expect(tooLong.status, field).toBe(422)
+      expect(await tooLong.json()).toEqual({
+        error: `${field} exceeds maximum length of ${LINK_MAX}`,
+      })
+    }
+
+    expect(writtenImages()).toEqual([
+      { linkedin_url: `https://${exact}` },
+      { website_url: `https://${exact}` },
+    ])
   })
 })
